@@ -197,7 +197,7 @@ class _ListWheelParentData extends ContainerBoxParentData<RenderBox> { }
 /// at the start of the main axis and ends with the last scrollable item at the
 /// end of the main axis.
 ///
-/// Also, instead of rendering its children on a flat plane, it renders them
+/// Instead of rendering its children on a flat plane, it renders them
 /// as if each child is broken into its own plane and that plane is
 /// perpendicularly fixed onto a cylinder which rotates along the scrolling
 /// axis.
@@ -234,8 +234,8 @@ class _ListWheelParentData extends ContainerBoxParentData<RenderBox> { }
 ///
 /// 3- The **transformed cylindrical space viewport painting coordinates**.
 ///    Paintable children from system 2 get their positions transformed into
-///    a cylindrical projection matrix instead of a cartesian offset wrt to
-///    the scroll offset.
+///    a cylindrical projection matrix instead of its cartesian offset with
+///    respect to the scroll offset.
 ///
 ///    Children in this coordinate system are painted.
 ///
@@ -434,10 +434,10 @@ class RenderListWheelViewport
   /// position in the viewport and the top position in the viewport.
   ///
   /// It's also the distance in the untransformed plane that children's painting
-  /// is offset by wrt to those children's [BoxParentData.offset].
+  /// is offset by with respect to those children's [BoxParentData.offset].
   double get _topScrollMarginExtent {
     assert(hasSize);
-    // Consider adding an alignment configurable.
+    // Consider adding alignment options other than center.
     return _minScrollExtent - size.height / 2.0 + _itemExtent / 2.0;
   }
 
@@ -485,8 +485,7 @@ class RenderListWheelViewport
     RenderBox child = firstChild;
     while (child != null) {
       extent = math.max(extent, childSize(child));
-      final _ListWheelParentData childParentData = child.parentData;
-      child = childParentData.nextSibling;
+      child = childAfter(child);
     }
     return extent;
   }
@@ -542,14 +541,14 @@ class RenderListWheelViewport
           maxHeight: _itemExtent,
           minWidth: 0.0,
         );
-    while(child != null) {
+    while (child != null) {
       child.layout(innerConstraints, parentUsesSize: true);
       final _ListWheelParentData childParentData = child.parentData;
       // Centers the child in the cross axis. Consider making it configurable.
       final double crossPosition = size.width / 2.0 - child.size.width / 2.0;
       childParentData.offset = new Offset(crossPosition, currentOffset);
       currentOffset += _itemExtent;
-      child = childParentData.nextSibling;
+      child = childAfter(child);
     }
 
     offset.applyViewportDimension(_viewportExtent);
@@ -566,16 +565,16 @@ class RenderListWheelViewport
   @override
   void paint(PaintingContext context, Offset offset) {
     if (childCount > 0) {
-     if (_clipToSize && _shouldClipAtCurrentOffset()) {
-       context.pushClipRect(
-         needsCompositing,
-         offset,
-         Offset.zero & size,
-        _paintVisibleChildren,
-       );
-     } else {
+      if (_clipToSize && _shouldClipAtCurrentOffset()) {
+        context.pushClipRect(
+          needsCompositing,
+          offset,
+          Offset.zero & size,
+          _paintVisibleChildren,
+        );
+      } else {
         _paintVisibleChildren(context, offset);
-     }
+      }
     }
   }
 
@@ -589,7 +588,7 @@ class RenderListWheelViewport
 
     while (childParentData != null
         && childParentData.offset.dy <= firstVisibleLayoutOffset) {
-      child = childParentData.nextSibling;
+      child = childAfter(child);
       childParentData = child?.parentData;
     }
 
@@ -607,7 +606,7 @@ class RenderListWheelViewport
     while (childParentData != null
         && childParentData.offset.dy < lastVisibleLayoutOffset) {
       _paintTransformedChild(childToPaint, context, offset, childParentData.offset);
-      childToPaint = childParentData.nextSibling;
+      childToPaint = childAfter(childToPaint);
       childParentData = childToPaint?.parentData;
     }
   }

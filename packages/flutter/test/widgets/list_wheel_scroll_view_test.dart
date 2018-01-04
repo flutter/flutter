@@ -5,6 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart';
 
 void main() {
@@ -236,5 +237,153 @@ void main() {
 
     // Item 0 no longer visible.
     expect(paintedChildren, <int>[1, 2, 3, 4, 5, 6]);
+  });
+
+  testWidgets('Default middle transform', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListWheelScrollView(
+          itemExtent: 100.0,
+          children: <Widget>[
+            new Container(
+              width: 200.0,
+              child: const Center(
+                child: const Text('blah'),
+              ),
+            ),
+          ],
+        ),
+      )
+    );
+
+    final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent;
+    expect(viewport, paints..transform(
+      matrix4: equals(<dynamic>[
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        -1.2 /* origin centering multiplied */, -0.9/* origin centering multiplied*/, 1.0, -0.003 /* inverse of perspective */,
+        moreOrLessEquals(0.0), moreOrLessEquals(0.0), 0.0, moreOrLessEquals(1.0),
+      ]),
+    ));
+  });
+
+  testWidgets('Scrolling, diameterRatio, perspective all changes matrix', (WidgetTester tester) async {
+    final ScrollController controller = new ScrollController(initialScrollOffset: 200.0);
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListWheelScrollView(
+          controller: controller,
+          itemExtent: 100.0,
+          children: <Widget>[
+            new Container(
+              width: 200.0,
+              child: const Center(
+                child: const Text('blah'),
+              ),
+            ),
+          ],
+        ),
+      )
+    );
+
+    final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent;
+    expect(viewport, paints..transform(
+      matrix4: equals(<dynamic>[
+        1.0, 0.0, 0.0, 0.0,
+        -0.41042417199080244, 0.6318744917928065, 0.3420201433256687, -0.0010260604299770061,
+        -1.12763114494309, -1.1877435020329863, 0.9396926207859084, -0.0028190778623577253,
+        166.54856463138663, -62.20844875763376, -138.79047052615562, 1.4163714115784667,
+      ]),
+    ));
+
+    // Increase diameter.
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListWheelScrollView(
+          controller: controller,
+          diameterRatio: 3.0,
+          itemExtent: 100.0,
+          children: <Widget>[
+            new Container(
+              width: 200.0,
+              child: const Center(
+                child: const Text('blah'),
+              ),
+            ),
+          ],
+        ),
+      )
+    );
+
+    expect(viewport, paints..transform(
+      matrix4: equals(<dynamic>[
+        1.0, 0.0, 0.0, 0.0,
+        -0.26954971336161726, 0.7722830529455648, 0.22462476113468105, -0.0006738742834040432,
+        -1.1693344055601331, -1.101625565304781, 0.9744453379667777, -0.002923336013900333,
+        108.46394900436536, -113.14792465797223, -90.38662417030434, 1.2711598725109134,
+      ]),
+    ));
+
+    // Decrease perspective.
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListWheelScrollView(
+          controller: controller,
+          perspective: 0.0001,
+          itemExtent: 100.0,
+          children: <Widget>[
+            new Container(
+              width: 200.0,
+              child: const Center(
+                child: const Text('blah'),
+              ),
+            ),
+          ],
+        ),
+      )
+    );
+
+    expect(viewport, paints..transform(
+      matrix4: equals(<dynamic>[
+        1.0, 0.0, 0.0, 0.0,
+        -0.01368080573302675, 0.9294320164861384, 0.3420201433256687, -0.000034202014332566874,
+        -0.03758770483143634, -0.370210921949246, 0.9396926207859084, -0.00009396926207859085,
+        5.551618821046304, -182.95615811538906, -138.79047052615562, 1.0138790470526158,
+      ]),
+    ));
+
+    // Scroll a bit.
+    controller.jumpTo(300.0);
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListWheelScrollView(
+          controller: controller,
+          itemExtent: 100.0,
+          children: <Widget>[
+            new Container(
+              width: 200.0,
+              child: const Center(
+                child: const Text('blah'),
+              ),
+            ),
+          ],
+        ),
+      )
+    );
+
+    expect(viewport, paints..transform(
+      matrix4: equals(<dynamic>[
+        1.0, 0.0, 0.0, 0.0,
+        -0.6, 0.41602540378443875, moreOrLessEquals(0.5), moreOrLessEquals(-0.0015),
+        -1.0392304845413265, -1.2794228634059948, 0.8660254037844387, -0.0025980762113533163,
+        276.46170927520404, -52.46133917892857, -230.38475772933677, 1.69115427318801,
+      ]),
+    ));
   });
 }

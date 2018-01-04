@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
 import 'dart:ui' as ui show Paragraph, Image;
 
 import 'package:flutter/foundation.dart';
@@ -80,7 +79,9 @@ abstract class PaintPattern {
   /// Calls are skipped until a call to [Canvas.transform] is found. The call's
   /// arguments are compared to those provided here. If any fail to match, or if
   /// no call to [Canvas.transform] is found, then the matcher fails.
-  void transform({ Float64List matrix4 });
+  ///
+  /// Dynamic so matchers can be more easily passed in.
+  void transform({ dynamic matrix4 });
 
   /// Indicates that a translation transform is expected next.
   ///
@@ -566,7 +567,7 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   final List<_PaintPredicate> _predicates = <_PaintPredicate>[];
 
   @override
-  void transform({ Float64List matrix4 }) {
+  void transform({ dynamic matrix4 }) {
     _predicates.add(new _FunctionPaintPredicate(#transform, <dynamic>[matrix4]));
   }
 
