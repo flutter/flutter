@@ -69,6 +69,13 @@ final Map<_Page, List<_CardData>> _allPages = <_Page, List<_CardData>>{
       imageAsset: 'shrine/products/chucks.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
+  ],
+  new _Page(label: 'RIGHT'): <_CardData>[
+    const _CardData(
+      title: 'Beachball',
+      imageAsset: 'shrine/products/beachball.png',
+      imageAssetPackage: _kGalleryAssetsPackage,
+    ),
     const _CardData(
       title: 'Dipped Brush',
       imageAsset: 'shrine/products/brush.png',
@@ -77,13 +84,6 @@ final Map<_Page, List<_CardData>> _allPages = <_Page, List<_CardData>>{
     const _CardData(
       title: 'Perfect Goldfish Bowl',
       imageAsset: 'shrine/products/fish_bowl.png',
-      imageAssetPackage: _kGalleryAssetsPackage,
-    ),
-  ],
-  new _Page(label: 'RIGHT'): <_CardData>[
-    const _CardData(
-      title: 'Beachball',
-      imageAsset: 'shrine/products/beachball.png',
       imageAssetPackage: _kGalleryAssetsPackage,
     ),
   ],
@@ -141,13 +141,16 @@ class TabsDemo extends StatelessWidget {
         body: new NestedScrollView(
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
-              new SliverAppBar(
-                title: const Text('Tabs and scrolling'),
-                pinned: true,
-                expandedHeight: 150.0,
-                forceElevated: innerBoxIsScrolled,
-                bottom: new TabBar(
-                  tabs: _allPages.keys.map((_Page page) => new Tab(text: page.label)).toList(),
+              new SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                child: new SliverAppBar(
+                  title: const Text('Tabs and scrolling'),
+                  pinned: true,
+                  expandedHeight: 150.0,
+                  forceElevated: innerBoxIsScrolled,
+                  bottom: new TabBar(
+                    tabs: _allPages.keys.map((_Page page) => new Tab(text: page.label)).toList(),
+                  ),
                 ),
               ),
             ];
@@ -157,15 +160,33 @@ class TabsDemo extends StatelessWidget {
               return new SafeArea(
                 top: false,
                 bottom: false,
-                child: new ListView(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                  itemExtent: _CardDataItem.height,
-                  children: _allPages[page].map((_CardData data) {
-                    return new Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: new _CardDataItem(page: page, data: data),
+                child: new Builder(
+                  builder: (BuildContext context) {
+                    return new CustomScrollView(
+                      key: new PageStorageKey<_Page>(page),
+                      slivers: <Widget>[
+                        new SliverOverlapInjector(
+                          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                        ),
+                        new SliverPadding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                          sliver: new SliverFixedExtentList(
+                            itemExtent: _CardDataItem.height,
+                            delegate: new SliverChildBuilderDelegate(
+                              (BuildContext context, int index) {
+                                final _CardData data = _allPages[page][index];
+                                return new Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: new _CardDataItem(page: page, data: data),
+                                );
+                              },
+                              childCount: _allPages[page].length,
+                            ),
+                          ),
+                        ),
+                      ],
                     );
-                  }).toList(),
+                  },
                 ),
               );
             }).toList(),

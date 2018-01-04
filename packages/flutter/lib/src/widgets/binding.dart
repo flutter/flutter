@@ -508,7 +508,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
     _deferFirstFrameReportCount -= 1;
   }
 
-    void _handleBuildScheduled() {
+  void _handleBuildScheduled() {
     // If we're in the process of building dirty elements, then changes
     // should not trigger a new frame.
     assert(() {
