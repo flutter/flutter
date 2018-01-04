@@ -1760,6 +1760,9 @@ class SemanticsConfiguration {
   ///
   /// The setter should not be called for objects (like static text) that never
   /// respond to user interactions.
+  ///
+  /// The getter will return null if the owning [RenderObject] doesn't support
+  /// the concept of being enabled/disabled.
   bool get isEnabled => _hasFlag(SemanticsFlags.hasEnabledState) ? _hasFlag(SemanticsFlags.isEnabled) : null;
   set isEnabled(bool value) {
     _setFlag(SemanticsFlags.hasEnabledState, true);
@@ -1771,6 +1774,9 @@ class SemanticsConfiguration {
   ///
   /// Do not call the setter for this field if the owning [RenderObject] doesn't
   /// have checked/unchecked state that can be controlled by the user.
+  ///
+  /// The getter returns null if the owning [RenderObject] does not have
+  /// checked/unchecked state.
   bool get isChecked => _hasFlag(SemanticsFlags.hasCheckedState) ? _hasFlag(SemanticsFlags.isChecked) : null;
   set isChecked(bool value) {
     _setFlag(SemanticsFlags.hasCheckedState, true);
