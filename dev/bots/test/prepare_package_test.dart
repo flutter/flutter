@@ -87,7 +87,9 @@ void main() {
     test('sets PUB_CACHE properly', () async {
       _createVersionFile('1.2.3-dev');
       preparer = new ArchiveCreator(tmpDir, outputDir, starter: starter, subprocessOutput: false);
-      results = new List<MockProcess>.filled(12, new MockProcess('', '', 0), growable: true);
+      results = new List<MockProcess>.filled(
+          Platform.isWindows ? 13 : 12, new MockProcess('', '', 0),
+          growable: true);
       results.add(new MockProcess(tagResults, '', 0));
       _answerWithResults();
       await preparer.createArchive('master');
@@ -111,10 +113,10 @@ void main() {
       results.add(new MockProcess('42\n', '', 0));
       _answerWithResults();
       final String name = await preparer.getArchiveName('master');
-      expect(
-          name,
-          equals(path.join(outputDir.path,
-              'flutter_${Platform.operatingSystem.toLowerCase()}_1.2.3-dev.42.tar.xz')));
+      String expectedName = path.join(outputDir.path,
+        'flutter_${Platform.operatingSystem.toLowerCase()}_1.2.3-dev.42');
+      expectedName += Platform.isWindows ? '.zip' : '.tar.xz';
+      expect(name, equals(expectedName));
     });
 
     test('filename is correct with alpha version.', () async {
@@ -123,10 +125,10 @@ void main() {
       results = <MockProcess>[];
       _answerWithResults();
       final String name = await preparer.getArchiveName('master');
-      expect(
-          name,
-          equals(path.join(outputDir.path,
-              'flutter_${Platform.operatingSystem.toLowerCase()}_1.2.3.alpha.tar.xz')));
+      String expectedName = path.join(outputDir.path,
+        'flutter_${Platform.operatingSystem.toLowerCase()}_1.2.3.alpha');
+      expectedName += Platform.isWindows ? '.zip' : '.tar.xz';
+      expect(name, equals(expectedName));
     });
 
     test('calls the right commands for archive output', () async {
@@ -164,7 +166,7 @@ void main() {
       ]);
       if (Platform.isWindows) {
         commands.add(
-            '$zipExe a -tzip -mx=9 ${path.join(outputDir.path, 'flutter_windows_0.1.2-dev.42.zip')} flutter');
+            '$zipExe a -tzip -mx=9 ${path.join(outputDir.path, 'flutter_windows_1.2.3-dev.42.zip')} flutter');
       } else {
         commands.add(
             '$tarExe cJf ${path.join(outputDir.path, 'flutter_${Platform.operatingSystem.toLowerCase()}_1.2.3-dev.42.tar.xz')} flutter');
