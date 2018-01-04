@@ -268,9 +268,9 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If non-null, indicates that this subtree represents something that can be
   /// in a disabled or enabled state.
   ///
-  /// For example, a button that a user can currently interact with is
-  /// considered enabled. A button that currently does not respond to user
-  /// interactions is disabled.
+  /// For example, a button that a user can currently interact with would set
+  /// this field to true. A button that currently does not respond to user
+  /// interactions would set this field to false.
   final bool enabled;
 
   /// If non-null, indicates that this subtree represents a checkbox
@@ -1767,8 +1767,8 @@ class SemanticsConfiguration {
   /// If this node has Boolean state that can be controlled by the user, whether
   /// that state is on or off, corresponding to true and false, respectively.
   ///
-  /// Do not set this to any value if the owning [RenderObject] doesn't have
-  /// Booleans state that can be controlled by the user.
+  /// Do not call the setter for this field if the owning [RenderObject] doesn't
+  /// have checked/unchecked state that can be controlled by the user.
   bool get isChecked => _hasFlag(SemanticsFlags.hasCheckedState) ? _hasFlag(SemanticsFlags.isChecked) : null;
   set isChecked(bool value) {
     _setFlag(SemanticsFlags.hasCheckedState, true);
