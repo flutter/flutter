@@ -1,4 +1,4 @@
-Signature: 0539612b4ef14aaf6c11fb3a0a0464ea
+Signature: c00cade503f6f9ba40810e023506103e
 
 UNUSED LICENSES:
 
@@ -4658,6 +4658,7 @@ FILE: ../../../third_party/dart/sdk/lib/html/html_common/css_class_set.dart
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/html_common_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/metadata.dart
 FILE: ../../../third_party/dart/sdk/lib/indexed_db/dart2js/indexed_db_dart2js.dart
+FILE: ../../../third_party/dart/sdk/lib/internal/cast.dart
 FILE: ../../../third_party/dart/sdk/lib/internal/internal.dart
 FILE: ../../../third_party/dart/sdk/lib/io/common.dart
 FILE: ../../../third_party/dart/sdk/lib/io/directory.dart
