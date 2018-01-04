@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
 import 'dart:ui' as ui show Paragraph, Image;
 
 import 'package:flutter/foundation.dart';
@@ -74,6 +75,13 @@ typedef void _CanvasPainterFunction(Canvas canvas);
 /// Patterns are subset matches, meaning that any calls not described by the
 /// pattern are ignored. This allows, for instance, transforms to be skipped.
 abstract class PaintPattern {
+  /// Indicates that a transform is expected next.
+  ///
+  /// Calls are skipped until a call to [Canvas.transform] is found. The call's
+  /// arguments are compared to those provided here. If any fail to match, or if
+  /// no call to [Canvas.transform] is found, then the matcher fails.
+  void transform({ Float64List matrix4 });
+
   /// Indicates that a translation transform is expected next.
   ///
   /// Calls are skipped until a call to [Canvas.translate] is found. The call's
@@ -556,6 +564,11 @@ class _TestRecordingCanvasPaintsAssertionMatcher extends Matcher {
 
 class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher implements PaintPattern {
   final List<_PaintPredicate> _predicates = <_PaintPredicate>[];
+
+  @override
+  void transform({ Float64List matrix4 }) {
+    _predicates.add(new _FunctionPaintPredicate(#transform, <dynamic>[matrix4]));
+  }
 
   @override
   void translate({ double x, double y }) {

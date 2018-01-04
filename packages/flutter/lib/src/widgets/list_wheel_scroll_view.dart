@@ -18,12 +18,12 @@ import 'scrollable.dart';
 /// This widget is similar to a [ListView] but with the restriction that all
 /// children must be the same size along the scrolling axis.
 ///
-/// The children starts at the middle instead of at the top of the viewport.
+/// When the list is at the zero scroll offset, the first child is aligned with
+/// the middle of the viewport. When the list is at the final scroll offset,
+/// the last child is aligned with the middle of the viewport
 ///
-/// Scrolling also ends with the last child at the middle instead of at the
-/// bottom of the viewport.
-///
-/// The children are also rendered as if on a wheel instead of on a plane.
+/// The children are rendered as if rotating on a wheel instead of scrolling on
+/// a plane.
 class ListWheelScrollView extends StatelessWidget {
   /// Creates a box in which children are scrolled on a wheel.
   const ListWheelScrollView({
@@ -39,16 +39,16 @@ class ListWheelScrollView extends StatelessWidget {
   }) : assert(diameterRatio != null && diameterRatio > 0.0),
        assert(
          perspective != null && perspective >= 0.0 && perspective < 0.01,
-         'A perspective too high will be clipped in the z axis and'
-         'un-renderable. Choose a value between 0 and 0.01.'
+         'A perspective too high will be clipped in the z-axis and therefore '
+         'not renderable. Value must be between 0 and 0.01.'
        ),
        assert(itemExtent != null && itemExtent > 0.0),
        assert(clipToSize != null),
        assert(renderChildrenOutsideViewport != null),
        assert(
          !renderChildrenOutsideViewport || !clipToSize,
-         'Cannot renderChildrenOutsideViewport and clipToSize since children'
-         'rendered outside will be clipped anyway, leading to gratuitous waste'
+         'Cannot renderChildrenOutsideViewport and clipToSize since children '
+         'rendered outside will be clipped anyway.'
        ),
        super(key: key);
 
@@ -74,21 +74,21 @@ class ListWheelScrollView extends StatelessWidget {
 
   /// {@macro flutter.widgets.wheelList.diameterRatio}
   ///
-  /// Defaults to an arbitrary but aesthetically sane number of 2.0.
+  /// Defaults to an arbitrary but aesthetically reasonable number of 2.0.
   ///
   /// Must not be null and must be positive.
   final double diameterRatio;
 
   /// Perspective of the cylindrical projection.
   ///
-  /// A number between 0.01 and 0 where 0 means looking at the cylinder from
+  /// A number between 0 and 0.01 where 0 means looking at the cylinder from
   /// infinitely far with an infinitely small field of view and 1 means looking
   /// at the cylinder from infinitely close with an infinitely large field of
-  /// view (and also un-renderable).
+  /// view (which cannot be rendered).
   ///
-  /// Defaults to an arbitrary but aesthetically sane number of 0.003. A larger
-  /// number brings the vanishing point closer and a smaller number pushes the
-  /// vanishing point further.
+  /// Defaults to an arbitrary but aesthetically reasonable number of 0.003.
+  /// A larger number brings the vanishing point closer and a smaller number
+  /// pushes the vanishing point further.
   ///
   /// Must not be null.
   final double perspective;
@@ -101,8 +101,8 @@ class ListWheelScrollView extends StatelessWidget {
   ///
   /// Defaults to [true]. Must not be null.
   ///
-  /// If this is false and [renderChildrenOutsideViewport] is true, the
-  /// first and last children may extend outside.
+  /// If this is false and [renderChildrenOutsideViewport] is false, the
+  /// first and last children may be painted partly outside of this scroll view.
   final bool clipToSize;
 
   /// Whether to paint children inside the viewport only.
@@ -111,8 +111,8 @@ class ListWheelScrollView extends StatelessWidget {
   /// the size of the viewport and detects gestures inside only.
   ///
   /// Defaults to [false]. Must not be null. Cannot be true if [clipToSize]
-  /// is also true since children outside the viewport will be clipped, leading
-  /// to gratuitous waste.
+  /// is also true since children outside the viewport will be clipped, and
+  /// therefore cannot render children outside the viewport.
   final bool renderChildrenOutsideViewport;
 
   /// List of children to scroll on top of the cylinder.
