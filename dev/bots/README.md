@@ -119,6 +119,11 @@ Instructions to update the Android Tools version that the bots download by execu
 3. Run upload_android_tools.py -t sdk
    `$ dev/bots/upload_android_tools.py -t sdk`
 
+4. Run `dev/bots/android_tools/sdk/tools/bin/sdkmanager --update`. On Windows, run `sdkmanager.bat` instead. If the
+   process fails with an error saying that it is unable to move files (Windows makes files and directories read-only
+   when another process is holding them open), make a copy of the `dev/bots/android_tools/sdk/tools` directory, run
+   the `sdkmanager.bat` from the copy, and use the `--sdk_root` option pointing at `dev/bots/android_tools/sdk`.
+
 ## How to update Android NDK on Google Cloud Storage
 
 1. Download a new NDK binary (e.g. android-ndk-r10e-linux-x86_64.bin)
