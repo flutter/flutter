@@ -9,8 +9,8 @@ import 'dart:math' as math show pi;
 import 'dart:ui' as ui show Paint, Path, Canvas;
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart';
 
 // This package is split into multiple parts to enable a private API that is
 // testable.
