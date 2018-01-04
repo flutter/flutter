@@ -1756,8 +1756,10 @@ class SemanticsConfiguration {
   ///
   /// A disabled object does not respond to user interactions. Only objects that
   /// usually respond to user interactions, but which currently do not (like a
-  /// disabled button) should be marked as disabled. Objects (like static text)
-  /// that never respond to user interactions should not be marked as disabled.
+  /// disabled button) should be marked as disabled.
+  ///
+  /// The setter should not be called for objects (like static text) that never
+  /// respond to user interactions.
   bool get isEnabled => _hasFlag(SemanticsFlags.hasEnabledState) ? _hasFlag(SemanticsFlags.isEnabled) : null;
   set isEnabled(bool value) {
     _setFlag(SemanticsFlags.hasEnabledState, true);
