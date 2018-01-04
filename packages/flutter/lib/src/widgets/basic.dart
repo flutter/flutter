@@ -642,6 +642,9 @@ class ClipPath extends SingleChildRenderObjectWidget {
 /// Physical layers cast shadows based on an [elevation] which is nominally in
 /// logical pixels, coming vertically out of the rendering surface.
 ///
+/// For shapes that cannot be expressed as a rectangle with rounded corners use
+/// [PhysicalShape].
+///
 /// See also:
 ///
 ///  * [DecoratedBox], which can apply more arbitrary shadow effects.
@@ -717,6 +720,13 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A widget representing a physical layer that clips its children to a shape.
+///
+/// Physical layers cast shadows based on an [elevation] which is nominally in
+/// logical pixels, coming vertically out of the rendering surface.
+///
+/// [PhysicalModel] does the same but only supports shapes that can be expressed
+/// as rectangles with rounded corners.
 class PhysicalShape extends SingleChildRenderObjectWidget {
   /// Creates a physical model with an arbitrary shape clip.
   ///

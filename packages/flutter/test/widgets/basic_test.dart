@@ -67,7 +67,7 @@ void main() {
         )
       );
 
-      RenderPhysicalShape renderPhysicalShape =
+      final RenderPhysicalShape renderPhysicalShape =
         tester.renderObject(find.byType(PhysicalShape));
 
       // The viewport is 800x600, the CircleBorder is centered and fits

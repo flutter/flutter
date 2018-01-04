@@ -963,6 +963,7 @@ class ShapeBorderClipper extends CustomClipper<Path> {
     @required this.shapeBorder
   }) : assert(shapeBorder != null);
 
+  // The shape border whose outer path this clipper clips to.
   final ShapeBorder shapeBorder;
 
   /// Returns the outer path of [shapeBorder] as the clip.
@@ -970,8 +971,9 @@ class ShapeBorderClipper extends CustomClipper<Path> {
   Path getClip(Size size) => shapeBorder.getOuterPath(Offset.zero & size);
 
   @override
-  bool shouldReclip(covariant ShapeBorderClipper oldClipper)
-    => oldClipper.shapeBorder != shapeBorder;
+  bool shouldReclip(covariant ShapeBorderClipper oldClipper) {
+    return oldClipper.shapeBorder != shapeBorder;
+  }
 }
 
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
@@ -1312,6 +1314,78 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   }
 }
 
+/// A physical model layer casts a shadow based on its [elevation].
+///
+/// The concrete implementations [RenderPhysicalModel] and [RenderPhysicalShape]
+/// determine the actual shape of the physical model.
+abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
+  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
+  _RenderPhysicalModelBase({
+    @required RenderBox child,
+    @required double elevation,
+    @required Color color,
+    @required Color shadowColor,
+    CustomClipper<T> clipper,
+  }) : assert(elevation != null),
+       assert(color != null),
+       assert(shadowColor != null),
+       _elevation = elevation,
+       _color = color,
+       _shadowColor = shadowColor,
+       super(child: child, clipper: clipper);
+
+  /// The z-coordinate at which to place this material.
+  double get elevation => _elevation;
+  double _elevation;
+  set elevation(double value) {
+    assert(value != null);
+    if (elevation == value)
+      return;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
+    _elevation = value;
+    if (didNeedCompositing != alwaysNeedsCompositing)
+      markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
+  }
+
+  /// The shadow color.
+  Color get shadowColor => _shadowColor;
+  Color _shadowColor;
+  set shadowColor(Color value) {
+    assert(value != null);
+    if (shadowColor == value)
+      return;
+    _shadowColor = value;
+    markNeedsPaint();
+  }
+
+  /// The background color.
+  Color get color => _color;
+  Color _color;
+  set color(Color value) {
+    assert(value != null);
+    if (color == value)
+      return;
+    _color = value;
+    markNeedsPaint();
+  }
+
+  static final Paint _defaultPaint = new Paint();
+  static final Paint _transparentPaint = new Paint()..color = const Color(0x00000000);
+
+  // On Fuchsia, the system compositor is responsible for drawing shadows
+  // for physical model layers with non-zero elevation.
+  @override
+  bool get alwaysNeedsCompositing => _elevation != 0.0 && defaultTargetPlatform == TargetPlatform.fuchsia;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DiagnosticsProperty<Color>('color', color));
+  }
+}
+
 /// Creates a physical model layer that clips its child to a rounded
 /// rectangle.
 ///
@@ -1385,6 +1459,17 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
     }
     return null;
+  }
+
+  @override
+  bool hitTest(HitTestResult result, { Offset position }) {
+    if (_clipper != null) {
+      _updateClip();
+      assert(_clip != null);
+      if (!_clip.contains(position))
+        return false;
+    }
+    return super.hitTest(result, position: position);
   }
 
   @override
@@ -1499,6 +1584,17 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   Path get _defaultClip => new Path()..addRect(Offset.zero & size);
 
   @override
+  bool hitTest(HitTestResult result, { Offset position }) {
+    if (_clipper != null) {
+      _updateClip();
+      assert(_clip != null);
+      if (!_clip.contains(position))
+        return false;
+    }
+    return super.hitTest(result, position: position);
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
@@ -1513,7 +1609,6 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
         context.pushLayer(physicalShape, super.paint, offset, childPaintBounds: offsetBounds);
       } else {
         final Canvas canvas = context.canvas;
-        print('Clipping $this');
         if (elevation != 0.0) {
           // The drawShadow call doesn't add the region of the shadow to the
           // picture's bounds, so we draw a hardcoded amount of extra space to
@@ -1545,89 +1640,6 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<CustomClipper<Path>>('clipper', clipper));
     description.add(new DiagnosticsProperty<TextDirection>('textDirection', textDirection));
-  }
-}
-
-/// A physical model layer casts a shadow based on its [elevation].
-///
-/// The concrete implementations [RenderPhysicalModel] and [RenderPhysicalShape]
-/// determine the actual shape of the physical model.
-abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
-  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
-  _RenderPhysicalModelBase({
-    @required RenderBox child,
-    @required double elevation,
-    @required Color color,
-    @required Color shadowColor,
-    CustomClipper<T> clipper,
-  }) : assert(elevation != null),
-       assert(color != null),
-       assert(shadowColor != null),
-       _elevation = elevation,
-       _color = color,
-       _shadowColor = shadowColor,
-       super(child: child, clipper: clipper);
-
-  /// The z-coordinate at which to place this material.
-  double get elevation => _elevation;
-  double _elevation;
-  set elevation(double value) {
-    assert(value != null);
-    if (elevation == value)
-      return;
-    final bool didNeedCompositing = alwaysNeedsCompositing;
-    _elevation = value;
-    if (didNeedCompositing != alwaysNeedsCompositing)
-      markNeedsCompositingBitsUpdate();
-    markNeedsPaint();
-  }
-
-  /// The shadow color.
-  Color get shadowColor => _shadowColor;
-  Color _shadowColor;
-  set shadowColor(Color value) {
-    assert(value != null);
-    if (shadowColor == value)
-      return;
-    _shadowColor = value;
-    markNeedsPaint();
-  }
-
-  /// The background color.
-  Color get color => _color;
-  Color _color;
-  set color(Color value) {
-    assert(value != null);
-    if (color == value)
-      return;
-    _color = value;
-    markNeedsPaint();
-  }
-
-  static final Paint _defaultPaint = new Paint();
-  static final Paint _transparentPaint = new Paint()..color = const Color(0x00000000);
-
-  // On Fuchsia, the system compositor is responsible for drawing shadows
-  // for physical model layers with non-zero elevation.
-  @override
-  bool get alwaysNeedsCompositing => _elevation != 0.0 && defaultTargetPlatform == TargetPlatform.fuchsia;
-
-  @override
-  bool hitTest(HitTestResult result, { Offset position }) {
-    if (_clipper != null) {
-      _updateClip();
-      assert(_clip != null);
-      if (!_clip.contains(position))
-        return false;
-    }
-    return super.hitTest(result, position: position);
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('elevation', elevation));
-    description.add(new DiagnosticsProperty<Color>('color', color));
   }
 }
 
