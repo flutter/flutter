@@ -36,6 +36,12 @@ void main() {
         'expectedDaysOfMonth': new List<String>.generate(30, (int i) => '${i + 1}'),
         'expectedMonthYearHeader': 'сентябрь 2017 г.',
       },
+      const Locale('ro', 'RO'): <String, dynamic>{
+        'textDirection': TextDirection.ltr,
+        'expectedDaysOfWeek': <String>['D', 'L', 'M', 'M', 'J', 'V', 'S'],
+        'expectedDaysOfMonth': new List<String>.generate(30, (int i) => '${i + 1}'),
+        'expectedMonthYearHeader': 'septembrie 2017',
+      },
       // Tests RTL.
       const Locale('ar', 'AR'): <String, dynamic>{
         'textDirection': TextDirection.rtl,

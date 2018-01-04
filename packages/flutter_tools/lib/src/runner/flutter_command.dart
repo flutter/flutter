@@ -149,13 +149,23 @@ abstract class FlutterCommand extends Command<Null> {
   }
 
   BuildInfo getBuildInfo() {
+    final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
+        ? argResults['preview-dart-2']
+        : false;
+    final bool strongMode =  argParser.options.containsKey('strong')
+        ? argResults['strong']
+        : false;
+    if (strongMode == true && previewDart2 == false) {
+      throw new UsageException(
+          '--strong is valid only when --preview-dart-2 is specified.', null);
+    }
+
     return new BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
         ? argResults['flavor']
         : null,
-      previewDart2: argParser.options.containsKey('preview-dart-2')
-        ? argResults['preview-dart-2']
-        : false,
+      previewDart2: previewDart2,
+      strongMode: strongMode,
       extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
           ? argResults[FlutterOptions.kExtraFrontEndOptions]
           : null,
@@ -373,6 +383,16 @@ abstract class FlutterCommand extends Command<Null> {
       final String targetPath = targetFile;
       if (!fs.isFileSync(targetPath))
         throw new ToolExit('Target file "$targetPath" not found.');
+    }
+
+    final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
+        ? argResults['preview-dart-2']
+        : false;
+    final bool strongMode =  argParser.options.containsKey('strong')
+        ? argResults['strong']
+        : false;
+    if (strongMode == true && previewDart2 == false) {
+      throw new ToolExit('--strong is valid only with --preview-dart-2 option.');
     }
   }
 

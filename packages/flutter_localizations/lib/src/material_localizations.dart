@@ -49,6 +49,7 @@ import 'widgets_localizations.dart';
 ///   * pl - Polish
 ///   * ps - Pashto
 ///   * pt - Portuguese
+///   * ro - Romanian
 ///   * ru - Russian
 ///   * th - Thai
 ///   * tr - Turkish
@@ -504,6 +505,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'ja',  // Japanese
     'ps',  // Pashto
     'pt',  // Portugese
+    'ro',  // Romanian
     'ru',  // Russian
     'ur',  // Urdu
     'zh',  // Simplified Chinese

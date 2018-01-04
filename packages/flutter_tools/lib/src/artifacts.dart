@@ -21,6 +21,7 @@ enum Artifact {
   vmSnapshotData,
   isolateSnapshotData,
   platformKernelDill,
+  platformKernelStrongDill,
   platformLibrariesJson,
   flutterPatchedSdkPath,
   frontendServerSnapshotForEngineDartSdk,
@@ -47,6 +48,8 @@ String _artifactToFileName(Artifact artifact) {
       return 'isolate_snapshot.bin';
     case Artifact.platformKernelDill:
       return 'platform.dill';
+    case Artifact.platformKernelStrongDill:
+      return 'platform_strong.dill';
     case Artifact.platformLibrariesJson:
       return 'libraries.json';
     case Artifact.flutterPatchedSdkPath:
@@ -168,6 +171,7 @@ class CachedArtifacts extends Artifacts {
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
+      case Artifact.platformKernelStrongDill:
         return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
         return fs.path.join(_getFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
@@ -237,6 +241,7 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.vmSnapshotData:
         return fs.path.join(engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
+      case Artifact.platformKernelStrongDill:
         return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
         return fs.path.join(_getFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
