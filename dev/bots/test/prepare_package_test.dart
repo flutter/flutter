@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
+import 'dart:async';
 import 'dart:io';
 
 import 'package:mockito/mockito.dart';
@@ -16,15 +16,18 @@ void main() {
     ArchiveCreator preparer;
     Directory tmpDir;
     Directory flutterDir;
-    File outputFile;
-    MockProcessRunner runner;
-    List<MockProcessResult> results;
+    Directory outputDir;
+    File versionFile;
+    MockProcessStarter starter;
+    List<MockProcess> results;
     final List<List<String>> args = <List<String>>[];
     final List<Map<Symbol, dynamic>> namedArgs = <Map<Symbol, dynamic>>[];
     final String zipExe = Platform.isWindows ? '7za.exe' : 'zip';
     final String tarExe = Platform.isWindows ? 'tar.exe' : 'tar';
     final String gitExe = Platform.isWindows ? 'git.bat' : 'git';
     String flutterExe;
+    final String tagResults =
+        <String>['2.3.4', '1.2.2', '0.1.2', 'arbitrary_tag', '0.1.1-alpha'].join('\n');
 
     void _verifyCommand(List<dynamic> args, String expected) {
       final List<String> expectedList = expected.split(' ');
@@ -33,100 +36,120 @@ void main() {
       expect(args[1], orderedEquals(expectedList));
     }
 
-    ProcessResult _nextResult(Invocation invocation) {
+    Future<Process> _nextResult(Invocation invocation) async {
       args.add(invocation.positionalArguments);
       namedArgs.add(invocation.namedArguments);
-      return results.isEmpty ? new MockProcessResult('', '', 0) : results.removeAt(0);
+      final Process result = results.isEmpty ? new MockProcess('', '', 0) : results.removeAt(0);
+      return new Future<Process>.value(result);
     }
 
     void _answerWithResults() {
       when(
-        runner.call(
+        starter.call(
           typed(captureAny),
           typed(captureAny),
           environment: typed(captureAny, named: 'environment'),
           workingDirectory: typed(captureAny, named: 'workingDirectory'),
-          includeParentEnvironment: typed(captureAny, named: 'includeParentEnvironment'),
         ),
       ).thenAnswer(_nextResult);
     }
 
+    void _createVersionFile(String version) {
+      versionFile = new File(path.join(flutterDir.path, 'VERSION'));
+      versionFile.writeAsStringSync('''
+      # This is a comment.
+      
+      $version
+      ''');
+    }
+
     setUp(() async {
-      runner = new MockProcessRunner();
+      starter = new MockProcessStarter();
       args.clear();
       namedArgs.clear();
       tmpDir = await Directory.systemTemp.createTemp('flutter_');
+      outputDir = new Directory(path.join(tmpDir.absolute.path, 'output'));
       flutterDir = new Directory(path.join(tmpDir.path, 'flutter'));
+      flutterDir.createSync(recursive: true);
       flutterExe =
           path.join(flutterDir.path, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
     });
 
     tearDown(() async {
-      await tmpDir.delete(recursive: true);
+      // On Windows, the directory is locked and not able to be deleted, because it is a
+      // temporary directory. So we just leave some (very small, because we're not actually
+      // building archives here) trash around to be deleted at the next reboot.
+      if (!Platform.isWindows) {
+        await tmpDir.delete(recursive: true);
+      }
     });
 
     test('sets PUB_CACHE properly', () async {
-      outputFile = new File(path.join(tmpDir.absolute.path, 'flutter_master.tar.xz'));
-      preparer = new ArchiveCreator(tmpDir, outputFile, runner: runner);
+      _createVersionFile('1.2.3-dev');
+      preparer = new ArchiveCreator(tmpDir, outputDir, starter: starter, subprocessOutput: false);
+      results = new List<MockProcess>.filled(12, new MockProcess('', '', 0), growable: true);
+      results.add(new MockProcess(tagResults, '', 0));
       _answerWithResults();
-      results = <MockProcessResult>[new MockProcessResult('deadbeef\n', '', 0)];
-      preparer.checkoutFlutter('master');
-      preparer.prepareArchive();
-      preparer.createArchive();
+      await preparer.createArchive('master');
       expect(
-        verify(runner.call(
+        verify(starter.call(
           captureAny,
           captureAny,
           workingDirectory: captureAny,
           environment: captureAny,
-          includeParentEnvironment: typed(captureAny, named: 'includeParentEnvironment'),
         )).captured[2]['PUB_CACHE'],
         endsWith(path.join('flutter', '.pub-cache')),
       );
     });
 
-    test('calls the right commands for tar output', () async {
-      outputFile = new File(path.join(tmpDir.absolute.path, 'flutter_master.tar.xz'));
-      preparer = new ArchiveCreator(tmpDir, outputFile, runner: runner);
+    test('filename is correct with dev version.', () async {
+      _createVersionFile('1.2.3-dev');
+      preparer = new ArchiveCreator(tmpDir, outputDir, starter: starter, subprocessOutput: false);
+      results = <MockProcess>[];
+      results.add(new MockProcess(tagResults, '', 0));
+      results.add(new MockProcess('deadbeef\n', '', 0));
+      results.add(new MockProcess('42\n', '', 0));
       _answerWithResults();
-      results = <MockProcessResult>[new MockProcessResult('deadbeef\n', '', 0)];
-      preparer.checkoutFlutter('master');
-      preparer.prepareArchive();
-      preparer.createArchive();
-      final List<String> commands = <String>[
-        '$gitExe clone -b master https://chromium.googlesource.com/external/github.com/flutter/flutter',
-        '$gitExe reset --hard master',
-        '$gitExe remote remove origin',
-        '$gitExe remote add origin https://github.com/flutter/flutter.git',
-        '$flutterExe doctor',
-        '$flutterExe update-packages',
-        '$flutterExe precache',
-        '$flutterExe ide-config',
-        '$flutterExe create --template=app ${path.join(tmpDir.path, 'create_app')}',
-        '$flutterExe create --template=package ${path.join(tmpDir.path, 'create_package')}',
-        '$flutterExe create --template=plugin ${path.join(tmpDir.path, 'create_plugin')}',
-        '$gitExe clean -f -X **/.packages',
-        '$tarExe cJf ${path.join(tmpDir.path, 'flutter_master.tar.xz')} flutter',
-      ];
-      int step = 0;
-      for (String command in commands) {
-        _verifyCommand(args[step++], command);
-      }
+      final String name = await preparer.getArchiveName('master');
+      expect(
+          name,
+          equals(path.join(outputDir.path,
+              'flutter_${Platform.operatingSystem.toLowerCase()}_1.2.3-dev.42.tar.xz')));
     });
 
-    test('calls the right commands for zip output', () async {
-      outputFile = new File(path.join(tmpDir.absolute.path, 'flutter_master.zip'));
-      preparer = new ArchiveCreator(tmpDir, outputFile, runner: runner);
+    test('filename is correct with alpha version.', () async {
+      _createVersionFile('1.2.3');
+      preparer = new ArchiveCreator(tmpDir, outputDir, starter: starter, subprocessOutput: false);
+      results = <MockProcess>[];
       _answerWithResults();
-      results = <MockProcessResult>[new MockProcessResult('deadbeef\n', '', 0)];
-      preparer.checkoutFlutter('master');
-      preparer.prepareArchive();
-      preparer.createArchive();
+      final String name = await preparer.getArchiveName('master');
+      expect(
+          name,
+          equals(path.join(outputDir.path,
+              'flutter_${Platform.operatingSystem.toLowerCase()}_1.2.3.alpha.tar.xz')));
+    });
+
+    test('calls the right commands for archive output', () async {
+      _createVersionFile('1.2.3-dev');
+      preparer = new ArchiveCreator(tmpDir, outputDir, starter: starter, subprocessOutput: false);
+      results = new List<MockProcess>.filled(
+          Platform.isWindows ? 13 : 12, new MockProcess('', '', 0),
+          growable: true);
+      results.add(new MockProcess(tagResults, '', 0));
+      results.add(new MockProcess('deadbeef\n', '', 0));
+      results.add(new MockProcess('42\n', '', 0));
+      _answerWithResults();
+      await preparer.createArchive('master');
       final List<String> commands = <String>[
         '$gitExe clone -b master https://chromium.googlesource.com/external/github.com/flutter/flutter',
         '$gitExe reset --hard master',
         '$gitExe remote remove origin',
         '$gitExe remote add origin https://github.com/flutter/flutter.git',
+      ];
+      if (Platform.isWindows) {
+        commands.add('$zipExe x ${path.join(tmpDir.path, 'mingit.zip')}');
+      }
+      commands.addAll(<String>[
         '$flutterExe doctor',
         '$flutterExe update-packages',
         '$flutterExe precache',
@@ -135,13 +158,17 @@ void main() {
         '$flutterExe create --template=package ${path.join(tmpDir.path, 'create_package')}',
         '$flutterExe create --template=plugin ${path.join(tmpDir.path, 'create_plugin')}',
         '$gitExe clean -f -X **/.packages',
-      ];
+        '$gitExe tag -l',
+        '$gitExe tag -l 1.2.2 --format %(objectname)',
+        '$gitExe rev-list --first-parent --count deadbeef..HEAD',
+      ]);
       if (Platform.isWindows) {
-        commands.add('$zipExe a -tzip -mx=9 ${path.join(tmpDir.path, 'flutter_master.zip')} flutter');
+        commands.add(
+            '$zipExe a -tzip -mx=9 ${path.join(outputDir.path, 'flutter_windows_0.1.2-dev.42.zip')} flutter');
       } else {
-        commands.add('$zipExe -r -9 -q ${path.join(tmpDir.path, 'flutter_master.zip')} flutter');
+        commands.add(
+            '$tarExe cJf ${path.join(outputDir.path, 'flutter_${Platform.operatingSystem.toLowerCase()}_1.2.3-dev.42.tar.xz')} flutter');
       }
-
       int step = 0;
       for (String command in commands) {
         _verifyCommand(args[step++], command);
@@ -149,50 +176,43 @@ void main() {
     });
 
     test('throws when a command errors out', () async {
-      outputFile = new File(path.join(tmpDir.absolute.path, 'flutter.tar.xz'));
-      preparer = new ArchiveCreator(
-        tmpDir,
-        outputFile,
-        runner: runner,
-      );
+      preparer = new ArchiveCreator(tmpDir, outputDir, starter: starter, subprocessOutput: false);
 
-      results = <MockProcessResult>[
-        new MockProcessResult('', '', 0),
-        new MockProcessResult('OMG! OMG! an ERROR!\n', '', -1)
+      results = <MockProcess>[
+        new MockProcess('', '', 0),
+        new MockProcess('', "Don't panic.\n", -1)
       ];
       _answerWithResults();
-      expect(() => preparer.checkoutFlutter('master'),
+      expect(expectAsync1<Null, String>(preparer.checkoutFlutter)('master'),
           throwsA(const isInstanceOf<ProcessFailedException>()));
-      expect(args.length, 2);
-      _verifyCommand(args[0],
-          '$gitExe clone -b master https://chromium.googlesource.com/external/github.com/flutter/flutter');
-      _verifyCommand(args[1], '$gitExe reset --hard master');
     });
   });
 }
 
-class MockProcessRunner extends Mock implements Function {
-  ProcessResult call(
-    String executable,
-    List<String> arguments, {
-    String workingDirectory,
-    Map<String, String> environment,
-    bool includeParentEnvironment,
-    bool runInShell,
-    Encoding stdoutEncoding,
-    Encoding stderrEncoding,
-  });
+class MockProcessStarter extends Mock implements Function {
+  Future<Process> call(String executable, List<String> arguments,
+      {String workingDirectory,
+      Map<String, String> environment,
+      bool includeParentEnvironment,
+      bool runInShell,
+      ProcessStartMode mode});
 }
 
-class MockProcessResult extends Mock implements ProcessResult {
-  MockProcessResult(this.stdout, [this.stderr = '', this.exitCode = 0]);
+class MockProcess extends Mock implements Process {
+  MockProcess(this._stdout, [this._stderr, this._exitCode]);
+
+  String _stdout;
+  String _stderr;
+  int _exitCode;
 
   @override
-  dynamic stdout = '';
+  Stream<List<int>> get stdout =>
+      new Stream<List<int>>.fromIterable(<List<int>>[_stdout.codeUnits]);
 
   @override
-  dynamic stderr;
+  Stream<List<int>> get stderr =>
+      new Stream<List<int>>.fromIterable(<List<int>>[_stderr.codeUnits]);
 
   @override
-  int exitCode;
+  Future<int> get exitCode => new Future<int>.value(_exitCode);
 }
