@@ -396,8 +396,12 @@ generate_vm_patched_sdk("flutter_patched_sdk") {
   ]
 }
 
-action("compile_platform") {
+action("compile_non_strong_platform") {
   script = "//third_party/dart/tools/compile_platform.py"
+
+  visibility = [
+    ":kernel_platform_files"
+  ]
 
   sources = [
     "$root_out_dir/flutter_patched_sdk/lib/libraries.json",
@@ -423,8 +427,41 @@ action("compile_platform") {
          rebase_path(outputs, root_build_dir)
 }
 
+action("compile_platform") {
+  script = "//third_party/dart/tools/compile_platform.py"
+
+  visibility = [
+    ":kernel_platform_files"
+  ]
+  
+  sources = [
+    "$root_out_dir/flutter_patched_sdk/lib/libraries.json",
+  ]
+
+  outputs = [
+    "$root_out_dir/flutter_patched_sdk/platform_strong.dill",
+    "$root_out_dir/flutter_patched_sdk/vm_outline_strong.dill",
+  ]
+
+  inputs = []
+
+  deps = [
+    ":flutter_patched_sdk",
+  ]
+
+  depfile = "$root_out_dir/flutter_patched_sdk/platform_strong.dill.d"
+
+  args = [
+            "--target=flutter",
+            "--strong",
+            "dart:core"
+         ] + rebase_path(sources, root_build_dir) +
+         rebase_path(outputs, root_build_dir)
+}
+
 group("kernel_platform_files") {
   public_deps = [
     ":compile_platform",
+    ":compile_non_strong_platform",
   ]
 }

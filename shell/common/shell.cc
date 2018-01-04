@@ -107,6 +107,10 @@ void Shell::InitStandalone(fxl::CommandLine command_line,
   settings.dart_non_checked_mode =
       command_line.HasOption(FlagForSwitch(Switch::DartNonCheckedMode));
 
+  // strong mode setting.
+  settings.dart_strong_mode =
+      command_line.HasOption(FlagForSwitch(Switch::DartStrongMode));
+
   settings.ipv6 = command_line.HasOption(FlagForSwitch(Switch::IPv6));
 
   settings.start_paused =

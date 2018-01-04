@@ -104,6 +104,7 @@ DEF_SWITCH(DartNonCheckedMode,
            "precompiled and checked mode is unsupported. However, this flag "
            "may be specified if the user wishes to run in the debug product "
            "mode (i.e. with JIT or DBC) with checked mode off.")
+DEF_SWITCH(DartStrongMode, "strong", "Enable Dart 2.0 strong mode.")
 DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);
