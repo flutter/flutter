@@ -24,6 +24,7 @@ struct Settings {
   bool enable_dart_profiling = false;
   bool use_test_fonts = false;
   bool dart_non_checked_mode = false;
+  bool dart_strong_mode = false;
   bool enable_software_rendering = false;
   bool using_blink = true;
   std::string aot_shared_library_path;

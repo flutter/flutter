@@ -32,7 +32,7 @@ void _setupHooks() {
     // In debug mode, register the schedule frame extension.
     developer.registerExtension('ext.ui.window.scheduleFrame', _scheduleFrame);
     return true;
-  });
+  }());
 }
 
 void _scheduleMicrotask(void callback()) native "ScheduleMicrotask";
