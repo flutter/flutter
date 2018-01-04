@@ -233,8 +233,8 @@ class Color {
   ///
   /// If either color is null, this function linearly interpolates from a
   /// transparent instance of the other color. This is usually preferable to
-  /// interpolating from [Colors.transparent] (`const Color(0x00000000)`), which
-  /// is specifically transparent _black_.
+  /// interpolating from [material.Colors.transparent] (`const
+  /// Color(0x00000000)`), which is specifically transparent _black_.
   ///
   /// The `t` argument represents position on the timeline, with 0.0 meaning
   /// that the interpolation has not started, returning `a` (or something
@@ -293,13 +293,14 @@ class Color {
 /// (destination) image is the current contents of the canvas onto which the
 /// source is being drawn.
 ///
-/// When using [saveLayer] and [restore], the blend mode of the [Paint] given to
-/// the [saveLayer] will be applied when [restore] is called. Each call to
-/// [saveLayer] introduces a new layer onto which shapes and images are painted;
-/// when [restore] is called, that layer is then _composited_ onto the parent
-/// layer, with the "src" being the most-recently-drawn shapes and images, and
-/// the "dst" being the parent layer. (For the first [saveLayer] call, the
-/// parent layer is the canvas itself.)
+/// When using [Canvas.saveLayer] and [Canvas.restore], the blend mode of the
+/// [Paint] given to the [Canvas.saveLayer] will be applied when
+/// [Canvas.restore] is called. Each call to [Canvas.saveLayer] introduces a new
+/// layer onto which shapes and images are painted; when [Canvas.restore] is
+/// called, that layer is then _composited_ onto the parent layer, with the
+/// "src" being the most-recently-drawn shapes and images, and the "dst" being
+/// the parent layer. (For the first [Canvas.saveLayer] call, the parent layer
+/// is the canvas itself.)
 ///
 /// See also:
 ///
@@ -864,9 +865,9 @@ class Paint {
 
 /// Opaque handle to raw decoded image data (pixels).
 ///
-/// To obtain an Image object, use [decodeImageFromList].
+/// To obtain an [Image] object, use [instantiateImageCodec].
 ///
-/// To draw an Image, use one of the methods on the [Canvas] class, such as
+/// To draw an [Image], use one of the methods on the [Canvas] class, such as
 /// [Canvas.drawImage].
 abstract class Image extends NativeFieldWrapperClass2 {
   /// The number of image pixels along the image's horizontal axis.
@@ -1926,11 +1927,11 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rectangle.
   ///
-  /// If the clip is not axis-aligned with the display device, and [isAntiAlias]
-  /// is true, then the clip will be anti-aliased. If multiple draw commands
-  /// intersect with the clip boundary, this can result in incorrect blending at
-  /// the clip boundary. See [saveLayer] for a discussion of how to address
-  /// that.
+  /// If the clip is not axis-aligned with the display device, and
+  /// [Paint.isAntiAlias] is true, then the clip will be anti-aliased. If
+  /// multiple draw commands intersect with the clip boundary, this can result
+  /// in incorrect blending at the clip boundary. See [saveLayer] for a
+  /// discussion of how to address that.
   ///
   /// Use [ClipOp.difference] to subtract the provided rectangle from the
   /// current clip.
@@ -1948,10 +1949,10 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rounded rectangle.
   ///
-  /// If [isAntiAlias] is true, then the clip will be anti-aliased. If multiple
-  /// draw commands intersect with the clip boundary, this can result in
-  /// incorrect blending at the clip boundary. See [saveLayer] for a discussion
-  /// of how to address that and some examples of using [clipRRect].
+  /// If [Paint.isAntiAlias] is true, then the clip will be anti-aliased. If
+  /// multiple draw commands intersect with the clip boundary, this can result
+  /// in incorrect blending at the clip boundary. See [saveLayer] for a
+  /// discussion of how to address that and some examples of using [clipRRect].
   void clipRRect(RRect rrect) {
     assert(_rrectIsValid(rrect));
     _clipRRect(rrect._value);
@@ -1961,10 +1962,10 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Reduces the clip region to the intersection of the current clip and the
   /// given [Path].
   ///
-  /// If [isAntiAlias] is true, then the clip will be anti-aliased. If multiple
-  /// draw commands intersect with the clip boundary, this can result in
-  /// incorrect blending at the clip boundary. See [saveLayer] for a discussion
-  /// of how to address that.
+  /// If [Paint.isAntiAlias] is true, then the clip will be anti-aliased. If
+  /// multiple draw commands intersect with the clip boundary, this can result
+  /// in incorrect blending at the clip boundary. See [saveLayer] for a
+  /// discussion of how to address that.
   void clipPath(Path path) {
     assert(path != null); // path is checked on the engine side
     _clipPath(path);
