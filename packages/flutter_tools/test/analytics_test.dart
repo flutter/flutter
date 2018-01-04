@@ -134,10 +134,29 @@ void main() {
   });
 
   group('analytics bots', () {
-    Directory temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+    Directory temp;
+    setUp(() {
+        temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+    });
+
     testUsingContext('don\'t send on bots', () async {
       int count = 0;
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+
+      await createTestCommandRunner().run(<String>['--version']);
+      expect(count, 0);
+    }, overrides: <Type, Generator>{
+      Usage: () => new Usage(
+        settingsName: 'flutter_bot_test',
+        versionOverride: 'dev/unknown',
+        configDirOverride: temp.path,
+      ),
+    });
+
+    testUsingContext('don\'t send on bots even when opted in', () async {
+      int count = 0;
+      flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      flutterUsage.enabled = true;
 
       await createTestCommandRunner().run(<String>['--version']);
       expect(count, 0);

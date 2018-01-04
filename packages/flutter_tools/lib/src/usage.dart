@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:usage/usage_io.dart';
 
 import 'base/context.dart';
+import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/utils.dart';
@@ -26,7 +26,8 @@ class Usage {
     final FlutterVersion flutterVersion = FlutterVersion.instance;
     final String version = versionOverride ?? flutterVersion.getVersionString(whitelistBranchName: true);
     _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version,
-        documentDirectory: configDirOverride != null ? new Directory(configDirOverride) : null);
+        // ignore: argument_type_not_assignable
+        documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null);
 
     // Report a more detailed OS version string than package:usage does by default.
     _analytics.setSessionValue('cd1', os.name);
