@@ -66,7 +66,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         IS_BUTTON(1 << 3),
         IS_TEXT_FIELD(1 << 4),
         IS_FOCUSED(1 << 5),
-        IS_DISABLED(1 << 6);
+        HAS_ENABLED_STATE(1 << 6),
+        IS_ENABLED(1 << 7);
 
         Flag(int value) {
             this.value = value;
@@ -158,7 +159,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         }
         result.setBoundsInScreen(bounds);
         result.setVisibleToUser(true);
-        result.setEnabled(!object.hasFlag(Flag.IS_DISABLED));
+        result.setEnabled(!object.hasFlag(Flag.HAS_ENABLED_STATE) ||
+                          object.hasFlag(Flag.IS_ENABLED));
 
         if (object.hasAction(Action.TAP)) {
             result.addAction(AccessibilityNodeInfo.ACTION_CLICK);
