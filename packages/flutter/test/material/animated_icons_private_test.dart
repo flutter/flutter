@@ -14,15 +14,15 @@ import 'dart:ui' show lerpDouble;
 import 'dart:ui' as ui show Paint, Path, Canvas;
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
-part 'package:flutter/src/material_animated_icons/animated_icons.dart';
-part 'package:flutter/src/material_animated_icons/animated_icons_data.dart';
-part 'package:flutter/src/material_animated_icons/data/arrow_menu.g.dart';
-part 'package:flutter/src/material_animated_icons/data/menu_arrow.g.dart';
+part 'package:flutter/src/material/animated_icons/animated_icons.dart';
+part 'package:flutter/src/material/animated_icons/animated_icons_data.dart';
+part 'package:flutter/src/material/animated_icons/data/arrow_menu.g.dart';
+part 'package:flutter/src/material/animated_icons/data/menu_arrow.g.dart';
 
 class MockCanvas extends Mock implements ui.Canvas {}
 class MockPath extends Mock implements ui.Path {}
