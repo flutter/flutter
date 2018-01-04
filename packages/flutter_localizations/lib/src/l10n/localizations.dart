@@ -681,6 +681,48 @@ class _Bundle_pt extends TranslationBundle {
 }
 
 // ignore: camel_case_types
+class _Bundle_ro extends TranslationBundle {
+  const _Bundle_ro() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Deschide meniul de navigare';
+  @override String get backButtonTooltip => r'Înapoi';
+  @override String get closeButtonTooltip => r'Închide';
+  @override String get deleteButtonTooltip => r'Șterge';
+  @override String get nextMonthTooltip => r'Luna următoare';
+  @override String get previousMonthTooltip => r'Luna precedentă';
+  @override String get nextPageTooltip => r'Pagina următoare';
+  @override String get previousPageTooltip => r'Pagina precedentă';
+  @override String get showMenuTooltip => r'Afișează meniul';
+  @override String get aboutListTileTitle => r'Despre $applicationName';
+  @override String get licensesPageTitle => r'Licențe';
+  @override String get pageRowsInfoTitle => r'$firstRow – $lastRow din $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow – $lastRow din aproximativ $rowCount';
+  @override String get rowsPerPageTitle => r'Linii pe pagină:';
+  @override String get tabLabel => r'Tab $tabIndex din $tabCount';
+  @override String get selectedRowCountTitleZero => r'Nu există elemente selectate';
+  @override String get selectedRowCountTitleOne => r'1 element selectat';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount elemente selectate';
+  @override String get cancelButtonLabel => r'ANULEAZĂ';
+  @override String get closeButtonLabel => r'ÎNCHIDE';
+  @override String get continueButtonLabel => r'CONTINUĂ';
+  @override String get copyButtonLabel => r'COPIAZĂ';
+  @override String get cutButtonLabel => r'TAIE';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'LIPEȘTE';
+  @override String get selectAllButtonLabel => r'SELECTEAZĂ TOT';
+  @override String get viewLicensesButtonLabel => r'AFIȘEAZĂ LICENȚELE';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get timePickerHourModeAnnouncement => r'Selectați orele';
+  @override String get timePickerMinuteModeAnnouncement => r'Selectați minutele';
+  @override String get signedInLabel => r'Autentificat';
+  @override String get hideAccountsLabel => r'Ascunde conturile';
+  @override String get showAccountsLabel => r'Afișează conturile';
+  @override String get modalBarrierDismissLabel => r'Ignoră';
+}
+
+// ignore: camel_case_types
 class _Bundle_ru extends TranslationBundle {
   const _Bundle_ru() : super(null);
   @override String get scriptCategory => r'English-like';
@@ -1459,6 +1501,8 @@ TranslationBundle translationBundleForLocale(Locale locale) {
       }
       return const _Bundle_pt();
     }
+    case 'ro':
+      return const _Bundle_ro();
     case 'ru':
       return const _Bundle_ru();
     case 'th':

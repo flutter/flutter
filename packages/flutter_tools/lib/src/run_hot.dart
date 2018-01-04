@@ -40,6 +40,7 @@ class HotRunner extends ResidentRunner {
     this.benchmarkMode: false,
     this.applicationBinary,
     this.previewDart2: false,
+    this.strongMode: false,
     this.hostIsIde: false,
     String projectRootPath,
     String packagesFilePath,
@@ -65,6 +66,7 @@ class HotRunner extends ResidentRunner {
   // The initial launch is from a snapshot.
   bool _runningFromSnapshot = true;
   bool previewDart2 = false;
+  bool strongMode = false;
 
   void _addBenchmarkData(String name, int value) {
     benchmarkData[name] ??= <int>[];

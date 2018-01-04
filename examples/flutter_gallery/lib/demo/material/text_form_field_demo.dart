@@ -184,6 +184,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                         labelText: 'Re-type Password *',
                       ),
                       obscureText: true,
+                      onFieldSubmitted: (String value) { _handleSubmitted(); },
                       validator: _validatePassword,
                     ),
                   ),

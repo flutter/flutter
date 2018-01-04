@@ -255,6 +255,11 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('preview-dart-2')) {
             previewDart2Value = project.property('preview-dart-2')
         }
+	
+        Boolean strongModeValue = false
+        if (project.hasProperty('strong')) {
+            strongModeValue = project.property('strong')
+        }
 
         String extraFrontEndOptionsValue = null
         if (project.hasProperty('extra-front-end-options')) {
@@ -290,6 +295,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
                 previewDart2 previewDart2Value
+                strongMode strongModeValue	
                 preferSharedLibrary preferSharedLibraryValue
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
@@ -304,6 +310,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
                 previewDart2 previewDart2Value
+                strongMode strongModeValue	
                 preferSharedLibrary preferSharedLibraryValue
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
@@ -337,6 +344,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     String targetPath
     @Optional @Input
     Boolean previewDart2
+    @Optional @Input
+    Boolean strongMode
     @Optional @Input
     Boolean preferSharedLibrary
     File sourceDir
@@ -378,6 +387,9 @@ abstract class BaseFlutterTask extends DefaultTask {
                 if (previewDart2) {
                     args "--preview-dart-2"
                 }
+		if (strongMode) {
+                    args "--strong"
+                }
                 if (extraFrontEndOptions != null) {
                     args "--extra-front-end-options", "${extraFrontEndOptions}"
                 }
@@ -404,6 +416,10 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (previewDart2) {
                 args "--preview-dart-2"
             }
+            if (strongMode) {
+                args "--strong"
+            }
+
             args "--output-file", "${intermediateDir}/app.flx"
             if (buildMode != "debug") {
                 args "--precompiled"

@@ -21,6 +21,7 @@ class BuildFlxCommand extends BuildSubCommand {
     argParser.addOption('snapshot', defaultsTo: defaultSnapshotPath);
     argParser.addOption('depfile', defaultsTo: defaultDepfilePath);
     argParser.addFlag('preview-dart-2', negatable: false, hide: !verboseHelp);
+    argParser.addFlag('strong', negatable: false, hide: !verboseHelp);
     argParser.addOption('working-dir', defaultsTo: getAssetBuildDirectory());
     argParser.addFlag('report-licensed-packages', help: 'Whether to report the names of all the packages that are included in the application\'s LICENSE file.', defaultsTo: false);
     usesPubOption();
@@ -50,6 +51,7 @@ class BuildFlxCommand extends BuildSubCommand {
       privateKeyPath: argResults['private-key'],
       workingDirPath: argResults['working-dir'],
       previewDart2: argResults['preview-dart-2'],
+      strongMode: argResults['strong'],
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages']
     );

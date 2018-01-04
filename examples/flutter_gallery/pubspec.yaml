@@ -9,7 +9,7 @@ dependencies:
   string_scanner: 1.0.2
   url_launcher: 1.0.3
   cupertino_icons: 0.1.1
-  video_player: 0.0.6
+  video_player: 0.0.7
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets:
@@ -46,9 +46,9 @@ dev_dependencies:
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
   path: 1.5.1 # TRANSITIVE DEPENDENCY
-  pool: 1.3.3 # TRANSITIVE DEPENDENCY
+  pool: 1.3.4 # TRANSITIVE DEPENDENCY
   pub_semver: 1.3.2 # TRANSITIVE DEPENDENCY
-  quiver: 0.26.2 # TRANSITIVE DEPENDENCY
+  quiver: 0.27.0 # TRANSITIVE DEPENDENCY
   shelf: 0.7.1 # TRANSITIVE DEPENDENCY
   shelf_packages_handler: 1.0.3 # TRANSITIVE DEPENDENCY
   shelf_static: 0.2.6 # TRANSITIVE DEPENDENCY
@@ -57,7 +57,7 @@ dev_dependencies:
   source_maps: 0.10.4 # TRANSITIVE DEPENDENCY
   source_span: 1.4.0 # TRANSITIVE DEPENDENCY
   stack_trace: 1.9.1 # TRANSITIVE DEPENDENCY
-  stream_channel: 1.6.2 # TRANSITIVE DEPENDENCY
+  stream_channel: 1.6.3 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
   test: 0.12.26 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
