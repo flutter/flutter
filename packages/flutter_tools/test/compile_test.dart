@@ -49,7 +49,7 @@ void main() {
         mainPath: '/path/to/main.dart'
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-      expect(logger.traceText, equals('compile debug message: line1\ncompile debug message: line2\n'));
+      expect(logger.errorText, equals('compile debug message: line1\ncompile debug message: line2\n'));
       expect(output, equals('/path/to/main.dart.dill'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -69,7 +69,7 @@ void main() {
         mainPath: '/path/to/main.dart'
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-      expect(logger.traceText, equals('compile debug message: line1\ncompile debug message: line2\n'));
+      expect(logger.errorText, equals('compile debug message: line1\ncompile debug message: line2\n'));
       expect(output, equals(null));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -119,7 +119,7 @@ void main() {
       );
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
       verifyNoMoreInteractions(mockFrontendServerStdIn);
-      expect(logger.traceText, equals('compile debug message: line1\ncompile debug message: line2\n'));
+      expect(logger.errorText, equals('compile debug message: line1\ncompile debug message: line2\n'));
       expect(output, equals('/path/to/main.dart.dill'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -140,7 +140,7 @@ void main() {
 
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-      expect(logger.traceText, equals(
+      expect(logger.errorText, equals(
         'compile debug message: line0\ncompile debug message: line1\n'
         'compile debug message: line1\ncompile debug message: line2\n'
       ));
@@ -167,7 +167,7 @@ void main() {
 
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-      expect(logger.traceText, equals(
+      expect(logger.errorText, equals(
         'compile debug message: line0\ncompile debug message: line1\n'
         'compile debug message: line1\ncompile debug message: line2\n'
         'compile debug message: line2\ncompile debug message: line3\n'
