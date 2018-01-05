@@ -97,7 +97,12 @@ tried, but it's not quite ready.
 
 # Android Tools
 
-Instructions to update the Android Tools version that the bots download by executing `download_android_tools.py`.
+The Android SDK and NDK used by Flutter's Chrome infra bots are stored in Google Cloud. During the build a bot runs the
+`download_android_tools.py` script that downloads the required version of the Android SDK into `dev/bots/android_tools`.
+
+To check which components are currently installed, download the current SDK stored in Google Cloud using the
+`download_android_tools.py` script, then `dev/bots/android_tools/sdk/tools/bin/sdkmanager --list`. If you find that some
+components need to be updated or installed, follow the steps below:
 
 ## How to update Android SDK on Google Cloud Storage
 
@@ -105,19 +110,15 @@ Instructions to update the Android Tools version that the bots download by execu
    `$ dev/bots/android_tools/sdk/tools/android update sdk`
    Use `android.bat` on Windows.
 
-2. Choose/Update packages
-   The following packages are currently installed:
-   * Android SDK Tools
-   * Android SDK platform-tools
-   * Android SDK Build-tools 24.0.3
-   * Android 6.0 (API 23)
-     * SDK Platform 23
-   * Extras
-     * Android Support Repository
-     * Google Play services
+2. Use the UI to choose the packages you want to install and/or update.
 
 3. Run upload_android_tools.py -t sdk
    `$ dev/bots/upload_android_tools.py -t sdk`
+
+4. Run `dev/bots/android_tools/sdk/tools/bin/sdkmanager --update`. On Windows, run `sdkmanager.bat` instead. If the
+   process fails with an error saying that it is unable to move files (Windows makes files and directories read-only
+   when another process is holding them open), make a copy of the `dev/bots/android_tools/sdk/tools` directory, run
+   the `sdkmanager.bat` from the copy, and use the `--sdk_root` option pointing at `dev/bots/android_tools/sdk`.
 
 ## How to update Android NDK on Google Cloud Storage
 
