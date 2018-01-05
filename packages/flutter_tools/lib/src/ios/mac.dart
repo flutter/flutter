@@ -254,14 +254,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
-  final bool hasFlutterPlugins = injectPlugins();
-
-  if (hasFlutterPlugins)
-    await cocoaPods.processPods(
-      appIosDir: appDirectory,
-      iosEngineDir: flutterFrameworkDir(buildInfo.mode),
-      isSwift: app.isSwift,
-    );
+  final InjectPluginsResult injectPluginsResult = injectPlugins();
+  final bool hasFlutterPlugins = injectPluginsResult.hasPlugin;
+  final String previousGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
 
   updateXcodeGeneratedProperties(
     projectPath: fs.currentDirectory.path,
@@ -269,7 +264,19 @@ Future<XcodeBuildResult> buildXcodeProject({
     target: target,
     hasPlugins: hasFlutterPlugins,
     previewDart2: buildInfo.previewDart2,
+    strongMode: buildInfo.strongMode,
   );
+
+  if (hasFlutterPlugins) {
+    final String currentGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
+    await cocoaPods.processPods(
+        appIosDir: appDirectory,
+        iosEngineDir: flutterFrameworkDir(buildInfo.mode),
+        isSwift: app.isSwift,
+        pluginOrFlutterPodChanged: (injectPluginsResult.hasChanged
+            || previousGeneratedXcconfig != currentGeneratedXcconfig),
+    );
+  }
 
   final List<String> commands = <String>[
     '/usr/bin/env',
@@ -355,7 +362,17 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 }
 
-Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp app) async {
+String readGeneratedXcconfig(String appPath) {
+  final String generatedXcconfigPath =
+      fs.path.join(fs.currentDirectory.path, appPath, 'Flutter','Generated.xcconfig');
+  final File generatedXcconfigFile = fs.file(generatedXcconfigPath);
+  if (!generatedXcconfigFile.existsSync())
+    return null;
+  return generatedXcconfigFile.readAsStringSync();
+}
+
+Future<Null> diagnoseXcodeBuildFailure(
+    XcodeBuildResult result, BuildableIOSApp app) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.contains('BCEROR') == true &&
@@ -369,7 +386,8 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp 
       // Make sure the user has specified one of:
       // DEVELOPMENT_TEAM (automatic signing)
       // PROVISIONING_PROFILE (manual signing)
-      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
+      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true
+          || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
@@ -538,7 +556,19 @@ Future<bool> upgradePbxProjWithFlutterAssets(String app) async {
   lines.insert(lines.indexOf(l5) + 1, l6);
   lines.insert(lines.indexOf(l7) + 1, l8);
 
-  // TODO(zarah): Remove lines with 'app.flx' once 'app.flx' is not used anymore.
+  final String l9 = '		9740EEBB1CF902C7004384FC /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9740EEB71CF902C7004384FC /* app.flx */; };';
+  final String l10 = '		9740EEB71CF902C7004384FC /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; name = app.flx; path = Flutter/app.flx; sourceTree = "<group>"; };';
+  final String l11 = '				9740EEB71CF902C7004384FC /* app.flx */,';
+  final String l12 = '				9740EEBB1CF902C7004384FC /* app.flx in Resources */,';
+
+  if (lines.contains(l9)) {
+    printStatus('Removing app.flx from project.pbxproj since it has been '
+        'replaced with flutter_assets.');
+    lines.remove(l9);
+    lines.remove(l10);
+    lines.remove(l11);
+    lines.remove(l12);
+  }
 
   final StringBuffer buffer = new StringBuffer();
   lines.forEach(buffer.writeln);

@@ -86,6 +86,7 @@ Future<GradleProject> _gradleProject() async {
 Future<GradleProject> _readGradleProject() async {
   final String gradle = await _ensureGradle();
   updateLocalProperties();
+  injectPlugins();
   try {
     final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
     final RunResult runResult = await runCheckedAsync(
@@ -223,8 +224,6 @@ Future<Null> buildGradleProject(BuildInfo buildInfo, String target) async {
   // update local.properties, in case we want to use it in the future.
   updateLocalProperties(buildInfo: buildInfo);
 
-  injectPlugins();
-
   final String gradle = await _ensureGradle();
 
   switch (flutterPluginVersion) {
@@ -292,6 +291,8 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   }
   if (buildInfo.previewDart2) {
     command.add('-Ppreview-dart-2=true');
+  if (buildInfo.strongMode)
+    command.add('-Pstrong=true');
   if (buildInfo.extraFrontEndOptions != null)
     command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
   if (buildInfo.extraGenSnapshotOptions != null)

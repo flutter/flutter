@@ -152,7 +152,7 @@ void main() {
       // Let everything else return exit code 0 so process.dart doesn't crash.
       when(
         mockProcessManager.run(any, environment: null, workingDirectory:  null)
-      ).thenReturn(
+      ).thenAnswer((Invocation invocation) =>
         new Future<ProcessResult>.value(new ProcessResult(2, 0, '', ''))
       );
       // Doesn't matter what the device is.
@@ -206,7 +206,7 @@ void main() {
     setUp(() {
       mockProcessManager = new MockProcessManager();
       when(mockProcessManager.start(any, environment: null, workingDirectory: null))
-        .thenReturn(new Future<Process>.value(new MockProcess()));
+        .thenAnswer((Invocation invocation) => new Future<Process>.value(new MockProcess()));
     });
 
     testUsingContext('uses tail on iOS versions prior to iOS 11', () async {
@@ -240,7 +240,7 @@ void main() {
     setUp(() {
       mockProcessManager = new MockProcessManager();
       when(mockProcessManager.start(any, environment: null, workingDirectory: null))
-        .thenReturn(new Future<Process>.value(new MockProcess()));
+        .thenAnswer((Invocation invocation) => new Future<Process>.value(new MockProcess()));
     });
 
     testUsingContext('uses tail on iOS versions prior to iOS 11', () async {

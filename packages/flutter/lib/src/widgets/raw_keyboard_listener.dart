@@ -44,6 +44,8 @@ class RawKeyboardListener extends StatefulWidget {
   final ValueChanged<RawKeyEvent> onKey;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override

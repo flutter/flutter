@@ -1,4 +1,5 @@
 # Miscellaneous
+*.class
 *.lock
 *.log
 *.pyc
@@ -69,6 +70,7 @@ unlinked_spec.ds
 **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/app.flx
 **/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
 **/ios/ServiceDefinitions.json
 
 # Exceptions to above rules.

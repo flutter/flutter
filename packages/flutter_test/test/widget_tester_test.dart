@@ -198,6 +198,66 @@ void main() {
         contains('Actual: ?:<zero widgets with text "bar" that has ancestor(s) with type Column with text "foo"')
       );
     });
+  });
+
+  group('find.ancestor', () {
+    testWidgets('finds one ancestor', (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          new Column(children: fooBarTexts),
+        ],
+      ));
+
+      expect(find.ancestor(
+        of: find.text('bar'),
+        matching: find.widgetWithText(Row, 'foo'),
+      ), findsOneWidget);
+    });
+
+    testWidgets('finds two matching ancestors, one descendant', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Row(
+            children: <Widget>[
+              new Row(children: fooBarTexts),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.ancestor(
+        of: find.text('bar'),
+        matching: find.byType(Row),
+      ), findsNWidgets(2));
+    });
+
+    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          new Column(children: <Text>[const Text('foo', textDirection: TextDirection.ltr)]),
+          const Text('bar', textDirection: TextDirection.ltr),
+        ],
+      ));
+
+      TestFailure failure;
+      try {
+        expect(find.ancestor(
+          of: find.text('bar'),
+          matching: find.widgetWithText(Column, 'foo'),
+        ), findsOneWidget);
+      } catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(
+        failure.message,
+        contains('Actual: ?:<zero widgets with type Column with text "foo" which is an ancestor of text "bar"'),
+      );
+    });
 
     testWidgets('Root not matched by default', (WidgetTester tester) async {
       await tester.pumpWidget(new Row(
@@ -207,9 +267,9 @@ void main() {
         ],
       ));
 
-      expect(find.descendant(
-        of: find.widgetWithText(Row, 'foo'),
-        matching: find.byType(Row),
+      expect(find.ancestor(
+        of: find.byType(Column),
+        matching: find.widgetWithText(Column, 'foo'),
       ), findsNothing);
     });
 
@@ -222,12 +282,11 @@ void main() {
       ));
 
       expect(find.descendant(
-        of: find.widgetWithText(Row, 'foo'),
-        matching: find.byType(Row),
+        of: find.byType(Column),
+        matching: find.widgetWithText(Column, 'foo'),
         matchRoot: true,
       ), findsOneWidget);
     });
-
   });
 
   testWidgets('hasRunningAnimations control test', (WidgetTester tester) async {

@@ -99,6 +99,8 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
   /// The widget directly below this widget in the tree.
   ///
   /// This is not necessarily the widget that dispatched the notification.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Called when a notification of the appropriate type arrives at this

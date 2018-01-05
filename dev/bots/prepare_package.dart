@@ -65,7 +65,7 @@ class ArchiveCreator {
   final ProcessRunner _runner;
   String flutter;
   final String git = Platform.isWindows ? 'git.bat' : 'git';
-  final String zip = Platform.isWindows ? 'zip.exe' : 'zip';
+  final String zip = Platform.isWindows ? '7za.exe' : 'zip';
   final String tar = Platform.isWindows ? 'tar.exe' : 'tar';
   Map<String, String> environment;
 
@@ -154,13 +154,17 @@ class ArchiveCreator {
   }
 
   void createZipArchive(File output, Directory source) {
-    final List<String> args = <String>[
-      '-r',
-      '-9',
-      '-q',
+    final List<String> args = <String>[];
+    if (Platform.isWindows) {
+      // We use 7-Zip on Windows, which has different args.
+      args.addAll(<String>['a', '-tzip', '-mx=9']);
+    } else {
+      args.addAll(<String>['-r', '-9', '-q']);
+    }
+    args.addAll(<String>[
       output.absolute.path,
       path.basename(source.absolute.path),
-    ];
+    ]);
 
     _runProcess(zip, args,
         workingDirectory: new Directory(path.dirname(source.absolute.path)));

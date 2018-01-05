@@ -192,4 +192,90 @@ void main() {
     expect(log, <String>['action: adjust']);
     log.clear();
   });
+
+  testWidgets('PaginatedDataTable text alignment', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: new PaginatedDataTable(
+        header: const Text('HEADER'),
+        source: new TestDataSource(),
+        rowsPerPage: 8,
+        availableRowsPerPage: <int>[
+          8, 9,
+        ],
+        onRowsPerPageChanged: (int rowsPerPage) { },
+        columns: <DataColumn>[
+          const DataColumn(label: const Text('COL1')),
+          const DataColumn(label: const Text('COL2')),
+          const DataColumn(label: const Text('COL3')),
+        ],
+      ),
+    ));
+    expect(find.text('Rows per page:'), findsOneWidget);
+    expect(find.text('8'), findsOneWidget);
+    expect(tester.getTopRight(find.text('8')).dx, tester.getTopRight(find.text('Rows per page:')).dx + 40.0); // per spec
+  });
+
+  testWidgets('PaginatedDataTable with large text', (WidgetTester tester) async {
+    final TestDataSource source = new TestDataSource();
+    await tester.pumpWidget(new MaterialApp(
+      home: new MediaQuery(
+        data: const MediaQueryData(
+          textScaleFactor: 20.0,
+        ),
+        child: new PaginatedDataTable(
+          header: const Text('HEADER'),
+          source: source,
+          rowsPerPage: 501,
+          availableRowsPerPage: <int>[ 501 ],
+          onRowsPerPageChanged: (int rowsPerPage) { },
+          columns: <DataColumn>[
+            const DataColumn(label: const Text('COL1')),
+            const DataColumn(label: const Text('COL2')),
+            const DataColumn(label: const Text('COL3')),
+          ],
+        ),
+      ),
+    ));
+    // the column overflows because we're forcing it to 600 pixels high
+    expect(tester.takeException(), contains('A RenderFlex overflowed by'));
+    expect(find.text('Rows per page:'), findsOneWidget);
+    // Test that we will show some options in the drop down even if the lowest option is bigger than the source:
+    assert(501 > source.rowCount);
+    expect(find.text('501'), findsOneWidget);
+    // Test that it fits:
+    expect(tester.getTopRight(find.text('501')).dx, greaterThanOrEqualTo(tester.getTopRight(find.text('Rows per page:')).dx + 40.0));
+  });
+
+  testWidgets('PaginatedDataTable footer scrolls', (WidgetTester tester) async {
+    final TestDataSource source = new TestDataSource();
+    await tester.pumpWidget(new MaterialApp(
+      home: new Align(
+        alignment: Alignment.topLeft,
+        child: new SizedBox(
+          width: 100.0,
+          child: new PaginatedDataTable(
+            header: const Text('HEADER'),
+            source: source,
+            rowsPerPage: 5,
+            availableRowsPerPage: <int>[ 5 ],
+            onRowsPerPageChanged: (int rowsPerPage) { },
+            columns: <DataColumn>[
+              const DataColumn(label: const Text('COL1')),
+              const DataColumn(label: const Text('COL2')),
+              const DataColumn(label: const Text('COL3')),
+            ],
+          ),
+        ),
+      ),
+    ));
+    expect(find.text('Rows per page:'), findsOneWidget);
+    expect(tester.getTopLeft(find.text('Rows per page:')).dx, lessThan(0.0)); // off screen
+    await tester.dragFrom(
+      new Offset(50.0, tester.getTopLeft(find.text('Rows per page:')).dy),
+      const Offset(1000.0, 0.0),
+    );
+    await tester.pump();
+    expect(find.text('Rows per page:'), findsOneWidget);
+    expect(tester.getTopLeft(find.text('Rows per page:')).dx, 18.0); // 14 padding in the footer row, 4 padding from the card
+  });
 }

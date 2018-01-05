@@ -8,33 +8,40 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap: false }) {
-  return new Directionality(
-    textDirection: TextDirection.ltr,
-    child: new MediaQuery(
-      data: const MediaQueryData(),
-      child: new Scaffold(
-        body: new DefaultTabController(
-          length: 3,
-          child: new CustomScrollView(
-            primary: true,
-            slivers: <Widget>[
-              new SliverAppBar(
-                title: const Text('AppBar Title'),
-                floating: floating,
-                pinned: pinned,
-                expandedHeight: expandedHeight,
-                snap: snap,
-                bottom: new TabBar(
-                  tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
+  return new Localizations(
+    locale: const Locale('en', 'US'),
+    delegates: <LocalizationsDelegate<dynamic>>[
+      DefaultMaterialLocalizations.delegate,
+      DefaultWidgetsLocalizations.delegate,
+    ],
+    child: new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(),
+        child: new Scaffold(
+          body: new DefaultTabController(
+            length: 3,
+            child: new CustomScrollView(
+              primary: true,
+              slivers: <Widget>[
+                new SliverAppBar(
+                  title: const Text('AppBar Title'),
+                  floating: floating,
+                  pinned: pinned,
+                  expandedHeight: expandedHeight,
+                  snap: snap,
+                  bottom: new TabBar(
+                    tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
+                  ),
                 ),
-              ),
-              new SliverToBoxAdapter(
-                child: new Container(
-                  height: 1200.0,
-                  color: Colors.orange[400],
+                new SliverToBoxAdapter(
+                  child: new Container(
+                    height: 1200.0,
+                    color: Colors.orange[400],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

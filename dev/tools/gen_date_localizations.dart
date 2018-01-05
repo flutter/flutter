@@ -125,7 +125,7 @@ String _jsonToMap(dynamic json) {
   if (json is Iterable)
     return 'const <dynamic>[${json.map(_jsonToMap).join(',')}]';
 
-  if (json is Map) {
+  if (json is Map<String, dynamic>) {
     final StringBuffer buffer = new StringBuffer('const <String, dynamic>{');
     json.forEach((String key, dynamic value) {
       buffer.writeln(_jsonToMapEntry(key, value));

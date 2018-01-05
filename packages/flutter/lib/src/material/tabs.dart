@@ -16,6 +16,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'tab_controller.dart';
 import 'theme.dart';
 
@@ -747,6 +748,7 @@ class _TabBarState extends State<TabBar> {
 
   @override
   Widget build(BuildContext context) {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller.length == 0) {
       return new Container(
         height: _kTabHeight + widget.indicatorWeight,
@@ -811,8 +813,7 @@ class _TabBarState extends State<TabBar> {
               wrappedTabs[index],
               new Semantics(
                 selected: index == _currentIndex,
-                // TODO(goderbauer): I10N-ify
-                label: 'Tab ${index + 1} of $tabCount',
+                label: localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
               ),
             ]
           ),

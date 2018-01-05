@@ -244,7 +244,7 @@ abstract class TextInputClient {
   void performAction(TextInputAction action);
 }
 
-/// A interface for interacting with a text input control.
+/// An interface for interacting with a text input control.
 ///
 /// See also:
 ///
