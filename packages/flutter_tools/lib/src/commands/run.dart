@@ -114,6 +114,9 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Turn on strong mode semantics.\n'
               'Valid only when --preview-dart-2 is also specified');
+    argParser.addFlag('track-widget-creation',
+        hide: !verboseHelp,
+        help: 'Track widget creation locations. Requires Dart 2.0 functionality.');
     argParser.addOption('project-root',
         hide: !verboseHelp,
         help: 'Specify the project root directory.');
@@ -297,7 +300,11 @@ class RunCommand extends RunCommandBase {
     }
 
     final List<FlutterDevice> flutterDevices = devices.map((Device device) {
-      return new FlutterDevice(device, previewDart2: argResults['preview-dart-2']);
+      return new FlutterDevice(
+        device,
+        previewDart2: argResults['preview-dart-2'],
+        trackWidgetCreation: argResults['track-widget-creation'],
+      );
     }).toList();
 
     ResidentRunner runner;

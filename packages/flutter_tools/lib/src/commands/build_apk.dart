@@ -16,6 +16,7 @@ class BuildApkCommand extends BuildSubCommand {
 
     argParser
       ..addFlag('preview-dart-2', negatable: false,  hide: !verboseHelp)
+      ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
       ..addFlag('prefer-shared-library', negatable: false,
           help: 'Whether to prefer compiling to a *.so file (android only).')
       ..addOption('target-platform',
