@@ -555,6 +555,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   bool get isDrawerOpen => _drawerKey.currentState?.isOpen ?? false;
 
+  bool get isEndDrawerOpen => _endDrawerKey.currentState?.isOpen ?? false;
+
   /// Opens the [Drawer] (if any).
   ///
   /// If the scaffold has a non-null [Scaffold.drawer], this function will cause
@@ -585,6 +587,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openEndDrawer() {
     _endDrawerKey.currentState?.open();
+  }
+
+  void closeDrawer() {
+    _drawerKey.currentState?.close();
   }
 
   void closeEndDrawer() {
