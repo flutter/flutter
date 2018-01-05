@@ -363,7 +363,7 @@ deps = {
    Var('skia_git') + '/skia.git' + '@' +  Var('skia_revision'),
 
   'src/third_party/libjpeg-turbo':
-   Var('skia_git') + '/third_party/libjpeg-turbo.git' + '@' + 'debddedc75850bcdeb8a57258572f48b802a4bb3',
+   Var('fuchsia_git') + '/third_party/libjpeg-turbo' + '@' + '9587e51cf946f1a1d19bb596bc31ba4e6c9d8893',
 
   'src/third_party/libwebp':
    Var('chromium_git') + '/webm/libwebp.git' + '@' + '0.6.0',
