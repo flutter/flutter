@@ -26,6 +26,8 @@ class Usage {
     final FlutterVersion flutterVersion = FlutterVersion.instance;
     final String version = versionOverride ?? flutterVersion.getVersionString(whitelistBranchName: true);
     _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version,
+        // Analyzer doesn't recognize that [Directory] objects match up due to a
+        // conditional import.
         // ignore: argument_type_not_assignable
         documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null);
 
@@ -41,7 +43,7 @@ class Usage {
 
     // Many CI systems don't do a full git checkout.
     if (version.endsWith('/unknown') || isRunningOnBot) {
-      // If we think we're running on a CI system, default to not sending analytics.
+      // If we think we're running on a CI system, suppress sending analytics.
       suppressAnalytics = true;
     }
   }
