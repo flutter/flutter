@@ -807,9 +807,9 @@ class PhysicalModelLayer extends ContainerLayer {
 /// relative position of lights and other physically modelled objects in the
 /// scene.
 ///
-/// This class class allows layers of arbitrary shapes, prefer using
-/// [PhysicalModelLayer] if the shape can be expressed as a rounded rectangle
-/// (including ovals) as it is better optimized.
+/// This class class allows layers of arbitrary shapes; prefer using
+/// [PhysicalModelLayer] for cases where the shape can be expressed as a rounded
+/// rectangle (including ovals) as it is better optimized.
 class PhysicalShapeLayer extends ContainerLayer {
   /// Creates a composited layer that uses a physical model to produce
   /// lighting effects.

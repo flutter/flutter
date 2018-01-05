@@ -101,7 +101,6 @@ void main() {
       final RenderPhysicalShape root = new RenderPhysicalShape(
         color: const Color(0xffff00ff),
         clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
-        textDirection: TextDirection.ltr,
       );
       layout(root, phase: EnginePhase.composite);
       expect(root.debugNeedsPaint, isFalse);
@@ -115,29 +114,10 @@ void main() {
       expect(root.debugNeedsPaint, isTrue);
     });
 
-    test('text direction change triggers repaint', () {
-      final RenderPhysicalShape root = new RenderPhysicalShape(
-        color: const Color(0xffff00ff),
-        clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
-        textDirection: TextDirection.ltr,
-      );
-      layout(root, phase: EnginePhase.composite);
-      expect(root.debugNeedsPaint, isFalse);
-
-      // Same direction, no repaint.
-      root.textDirection = TextDirection.ltr;
-      expect(root.debugNeedsPaint, isFalse);
-
-      // Different direction triggers repaint.
-      root.textDirection = TextDirection.rtl;
-      expect(root.debugNeedsPaint, isTrue);
-    });
-
     test('compositing on non-Fuchsia', () {
       final RenderPhysicalShape root = new RenderPhysicalShape(
         color: const Color(0xffff00ff),
         clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
-        textDirection: TextDirection.ltr,
       );
       layout(root, phase: EnginePhase.composite);
       expect(root.needsCompositing, isFalse);

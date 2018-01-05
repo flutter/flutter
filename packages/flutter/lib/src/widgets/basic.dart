@@ -720,7 +720,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A widget representing a physical layer that clips its children to a shape.
+/// A widget representing a physical layer that clips its children to a path.
 ///
 /// Physical layers cast shadows based on an [elevation] which is nominally in
 /// logical pixels, coming vertically out of the rendering surface.
@@ -732,7 +732,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   ///
   /// The [color] is required; physical things have a color.
   ///
-  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
+  /// The [clipper], [elevation], [color], and [shadowColor] must not be null.
   const PhysicalShape({
     Key key,
     @required this.clipper,
@@ -740,7 +740,6 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
     @required this.color,
     this.shadowColor: const Color(0xFF000000),
     Widget child,
-    this.textDirection,
   }) : assert(clipper != null),
        assert(elevation != null),
        assert(color != null),
@@ -759,22 +758,13 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   /// The shadow color.
   final Color shadowColor;
 
-  /// The directionality of text.
-  ///
-  /// This affects how [shape]'s outer path is computed.
-  ///
-  /// Defaults to the ambient [Directionality], if any. If there is no ambient
-  /// [Directionality], then this must not be null.
-  final TextDirection textDirection;
-
   @override
   RenderPhysicalShape createRenderObject(BuildContext context) {
     return new RenderPhysicalShape(
       clipper: clipper,
       elevation: elevation,
       color: color,
-      shadowColor: shadowColor,
-      textDirection: textDirection ?? Directionality.of(context),
+      shadowColor: shadowColor
     );
   }
 
@@ -784,8 +774,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
       ..clipper = clipper
       ..elevation = elevation
       ..color = color
-      ..shadowColor = shadowColor
-      ..textDirection = textDirection;
+      ..shadowColor = shadowColor;
   }
 
   @override
@@ -795,7 +784,6 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
     description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
-    description.add(new DiagnosticsProperty<TextDirection>('textDirection', textDirection));
   }
 }
 

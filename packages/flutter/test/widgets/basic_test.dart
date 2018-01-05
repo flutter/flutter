@@ -16,7 +16,6 @@ void main() {
           elevation: 2.0,
           color: const Color(0xFF0000FF),
           shadowColor: const Color(0xFF00FF00),
-          textDirection: TextDirection.ltr,
         )
       );
       final RenderPhysicalShape renderObject = tester.renderObject(find.byType(PhysicalShape));
@@ -24,36 +23,6 @@ void main() {
       expect(renderObject.color, const Color(0xFF0000FF));
       expect(renderObject.shadowColor, const Color(0xFF00FF00));
       expect(renderObject.elevation, 2.0);
-      expect(renderObject.textDirection, TextDirection.ltr);
-    });
-
-    testWidgets('overrides directionality', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.rtl,
-          child: const PhysicalShape(
-            clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
-            color: const Color(0xFF0000FF),
-            textDirection: TextDirection.ltr,
-          ),
-        ),
-      );
-      final RenderPhysicalShape renderObject = tester.renderObject(find.byType(PhysicalShape));
-      expect(renderObject.textDirection, TextDirection.ltr);
-    });
-
-    testWidgets('inherits directionality', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.rtl,
-          child: const PhysicalShape(
-            clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
-            color: const Color(0xFF0000FF),
-          ),
-        ),
-      );
-      final RenderPhysicalShape renderObject = tester.renderObject(find.byType(PhysicalShape));
-      expect(renderObject.textDirection, TextDirection.rtl);
     });
 
     testWidgets('hit test', (WidgetTester tester) async {
@@ -77,10 +46,10 @@ void main() {
       // We test by sampling a few points around the left-most point of the
       // circle (100, 300).
 
-      expect(tester.hitTestOnBinding(const Offset(99.0, 300.0)), doesntHit(renderPhysicalShape));
+      expect(tester.hitTestOnBinding(const Offset(99.0, 300.0)), doesNotHit(renderPhysicalShape));
       expect(tester.hitTestOnBinding(const Offset(100.0, 300.0)), hits(renderPhysicalShape));
-      expect(tester.hitTestOnBinding(const Offset(100.0, 299.0)), doesntHit(renderPhysicalShape));
-      expect(tester.hitTestOnBinding(const Offset(100.0, 301.0)), doesntHit(renderPhysicalShape));
+      expect(tester.hitTestOnBinding(const Offset(100.0, 299.0)), doesNotHit(renderPhysicalShape));
+      expect(tester.hitTestOnBinding(const Offset(100.0, 301.0)), doesNotHit(renderPhysicalShape));
     });
 
   });
@@ -107,10 +76,10 @@ class HitsRenderBox extends Matcher {
   }
 }
 
-DoesntHitRenderBox doesntHit(RenderBox renderBox) => new DoesntHitRenderBox(renderBox);
+DoesNotHitRenderBox doesNotHit(RenderBox renderBox) => new DoesNotHitRenderBox(renderBox);
 
-class DoesntHitRenderBox extends Matcher {
-  const DoesntHitRenderBox(this.renderBox);
+class DoesNotHitRenderBox extends Matcher {
+  const DoesNotHitRenderBox(this.renderBox);
 
   final RenderBox renderBox;
 

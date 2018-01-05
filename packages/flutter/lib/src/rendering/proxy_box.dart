@@ -959,16 +959,29 @@ class ShapeBorderClipper extends CustomClipper<Path> {
   /// Creates a [ShapeBorder] clipper.
   ///
   /// The [shapeBorder] argument must not be null.
+  ///
+  /// The [textDirection] argument must be provided non-null if [shapeBorder]
+  /// has a text direction dependency (for example if it is expressed in terms
+  /// of "start" and "end" instead of "left" and "right"). It may be null if
+  /// the border will not need the text direction to paint itself.
   const ShapeBorderClipper({
-    @required this.shapeBorder
+    @required this.shapeBorder,
+    this.textDirection,
   }) : assert(shapeBorder != null);
 
   // The shape border whose outer path this clipper clips to.
   final ShapeBorder shapeBorder;
 
+  /// The text direction to use for getting the outer path for [shapeBorder].
+  ///
+  /// [ShapeBorder]s can depend on the text direction (e.g having a "dent"
+  /// towards the start of the shape).
+  final TextDirection textDirection;
+
   /// Returns the outer path of [shapeBorder] as the clip.
   @override
-  Path getClip(Size size) => shapeBorder.getOuterPath(Offset.zero & size);
+  Path getClip(Size size)
+    => shapeBorder.getOuterPath(Offset.zero & size, textDirection: textDirection);
 
   @override
   bool shouldReclip(covariant ShapeBorderClipper oldClipper) {
@@ -1532,7 +1545,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   }
 }
 
-/// Creates a physical shape layer that clips its child to a [ShapeBorder].
+/// Creates a physical shape layer that clips its child to a [Path].
 ///
 /// A physical shape layer casts a shadow based on its [elevation].
 ///
@@ -1543,7 +1556,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   /// Creates an arbitrary shape clip.
   ///
-  /// The [color], [shape], and [textDirection] are required.
+  /// The [color] and [shape] parameters are required.
   ///
   /// The [clipper], [elevation], [color] and [shadowColor] must
   /// not be null.
@@ -1553,12 +1566,10 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
     double elevation: 0.0,
     @required Color color,
     Color shadowColor: const Color(0xFF000000),
-    @required TextDirection textDirection,
   }) : assert(clipper != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
-       _textDirection = textDirection,
        super(
          child: child,
          elevation: elevation,
@@ -1566,19 +1577,6 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
          shadowColor: shadowColor,
          clipper: clipper,
        );
-
-  /// The text direction to use for getting the outer path for [shape].
-  ///
-  /// [ShapeBorder]s can depend on the text direction (e.g having a "dent"
-  /// towards the start of the shape).
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
-  set textDirection(TextDirection value) {
-    if (textDirection == value)
-      return;
-    _textDirection = value;
-    _markNeedsClip();
-  }
 
   @override
   Path get _defaultClip => new Path()..addRect(Offset.zero & size);
@@ -1639,7 +1637,6 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<CustomClipper<Path>>('clipper', clipper));
-    description.add(new DiagnosticsProperty<TextDirection>('textDirection', textDirection));
   }
 }
 
