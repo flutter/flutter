@@ -112,13 +112,17 @@ components need to be updated or installed, follow the steps below:
 
 2. Use the UI to choose the packages you want to install and/or update.
 
-3. Run upload_android_tools.py -t sdk
-   `$ dev/bots/upload_android_tools.py -t sdk`
-
-4. Run `dev/bots/android_tools/sdk/tools/bin/sdkmanager --update`. On Windows, run `sdkmanager.bat` instead. If the
+3. Run `dev/bots/android_tools/sdk/tools/bin/sdkmanager --update`. On Windows, run `sdkmanager.bat` instead. If the
    process fails with an error saying that it is unable to move files (Windows makes files and directories read-only
    when another process is holding them open), make a copy of the `dev/bots/android_tools/sdk/tools` directory, run
    the `sdkmanager.bat` from the copy, and use the `--sdk_root` option pointing at `dev/bots/android_tools/sdk`.
+
+4. Run `dev/bots/android_tools/sdk/tools/bin/sdkmanager --licenses` and accept the licenses for the newly installed
+   components. It also helps to run this command a second time and make sure that it prints "All SDK package licenses
+   accepted".
+
+5. Run upload_android_tools.py -t sdk
+   `$ dev/bots/upload_android_tools.py -t sdk`
 
 ## How to update Android NDK on Google Cloud Storage
 
