@@ -784,7 +784,7 @@ class PhysicalModelLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushPhysicalModel(
+    builder.pushPhysicalShape(
       path: clipPath.shift(layerOffset),
       elevation: elevation,
       color: color,
