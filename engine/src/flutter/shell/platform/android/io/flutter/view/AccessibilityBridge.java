@@ -6,6 +6,7 @@ package io.flutter.view;
 
 import android.graphics.Rect;
 import android.opengl.Matrix;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -121,7 +122,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
 
         if (object.hasFlag(Flag.IS_TEXT_FIELD)) {
             result.setClassName("android.widget.EditText");
-            result.setEditable(true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2)
+                result.setEditable(true);
 
             // Cursor movements
             int granularities = 0;
