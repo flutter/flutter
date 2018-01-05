@@ -654,6 +654,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           );
         }
       }
+      assert(!newChildren.any((SemanticsNode node) => node.isMergedIntoParent) || isPartOfNodeMerging);
 
       _debugPreviousSnapshot = new List<SemanticsNode>.from(newChildren);
 

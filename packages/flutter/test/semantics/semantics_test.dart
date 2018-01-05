@@ -49,7 +49,8 @@ void main() {
       tags.add(tag3);
 
       final SemanticsConfiguration config = new SemanticsConfiguration()
-        ..isChecked = true;
+        ..isSemanticBoundary = true
+        ..isMergingSemanticsOfDescendants = true;
 
       node.updateWith(
         config: config,
