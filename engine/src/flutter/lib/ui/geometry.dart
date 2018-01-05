@@ -596,6 +596,16 @@ class Rect {
       ..[3] = math.max(a.dy, b.dy);
   }
 
+  /// Construct the largest finite rectangle.
+  Rect.largest() {
+    const double skScalarMax = 3.402823466e+38; // from Skia's SkScalar.h
+    _value
+      ..[0] = -skScalarMax
+      ..[1] = -skScalarMax
+      ..[2] = skScalarMax
+      ..[3] = skScalarMax;
+  }
+
   static const int _kDataSize = 4;
   final Float32List _value = new Float32List(_kDataSize);
 
