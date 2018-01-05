@@ -78,19 +78,14 @@ class _InputBorderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final InputBorder inputBorder = border.evaluate(borderAnimation);
-    if (inputBorder is OutlineInputBorder) {
-        inputBorder.paint(
-          canvas,
-          Offset.zero & size,
-          gapStart: gap.start,
-          gapExtent: gap.extent,
-          gapPercentage: gapAnimation.value,
-          textDirection: textDirection,
-        );
-    } else {
-        inputBorder.paint(canvas, Offset.zero & size);
-    }
+    border.evaluate(borderAnimation).paint(
+      canvas,
+      Offset.zero & size,
+      gapStart: gap.start,
+      gapExtent: gap.extent,
+      gapPercentage: gapAnimation.value,
+      textDirection: textDirection,
+    );
   }
 
   @override
@@ -773,8 +768,8 @@ class _RenderDecoration extends RenderBox {
     }
 
     // Inline text within an outline border is centered within the container
-    // less 8.0 dps at the top to account for the vertical space occupied
-    // by the floating library.
+    // less 2.0 dps at the top to account for the vertical space occupied
+    // by the floating label.
     final double outlineBaseline = aboveBaseline +
       (containerHeight - (2.0 + aboveBaseline + belowBaseline)) / 2.0;
 
@@ -859,8 +854,7 @@ class _RenderDecoration extends RenderBox {
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    // TODO(hansmuller): layout first? Add input.parentData.offset?
-    assert(false);
+    assert(false, 'not implemented');
     return 0.0;
   }
 
@@ -901,7 +895,7 @@ class _RenderDecoration extends RenderBox {
     final double right = overallWidth - contentPadding.right;
 
     height = layout.containerHeight;
-    baseline = decoration.border is OutlineInputBorder
+    baseline = decoration.border == null || decoration.border.isOutline
       ? layout.outlineBaseline
       : layout.inputBaseline;
 
@@ -910,56 +904,64 @@ class _RenderDecoration extends RenderBox {
       centerLayout(icon, x);
     }
 
-    if (textDirection == TextDirection.rtl) {
-      double start = right - _boxSize(icon).width;
-      double end = left;
-      if (prefixIcon != null)
-        start -= centerLayout(prefixIcon, start - prefixIcon.size.width);
-      if (prefix != null)
-        start -= baselineLayout(prefix, start - prefix.size.width);
-      if (input != null)
-        baselineLayout(input, start - input.size.width);
-      if (hint != null)
-        baselineLayout(hint, start - hint.size.width);
-      if (label != null)
-        centerLayout(label, start - label.size.width);
-      if (suffixIcon != null)
-        end += centerLayout(suffixIcon, end);
-      if (suffix != null)
-        end += baselineLayout(suffix, end);
-    } else {
-      double start = left + _boxSize(icon).width;
-      double end = right;
-      if (prefixIcon != null)
-        start += centerLayout(prefixIcon, start);
-      if (prefix != null)
-        start += baselineLayout(prefix, start);
-      if (input != null)
-        baselineLayout(input, start);
-      if (hint != null)
-        baselineLayout(hint, start);
-      if (label != null)
-        centerLayout(label, start);
-      if (suffixIcon != null)
-        end -= centerLayout(suffixIcon, end - suffixIcon.size.width);
-      if (suffix != null)
-        end -= baselineLayout(suffix, end - suffix.size.width);
+    switch (textDirection) {
+      case TextDirection.rtl: {
+        double start = right - _boxSize(icon).width;
+        double end = left;
+        if (prefixIcon != null)
+          start -= centerLayout(prefixIcon, start - prefixIcon.size.width);
+        if (prefix != null)
+          start -= baselineLayout(prefix, start - prefix.size.width);
+        if (input != null)
+          baselineLayout(input, start - input.size.width);
+        if (hint != null)
+          baselineLayout(hint, start - hint.size.width);
+        if (label != null)
+          centerLayout(label, start - label.size.width);
+        if (suffixIcon != null)
+          end += centerLayout(suffixIcon, end);
+        if (suffix != null)
+          end += baselineLayout(suffix, end);
+        break;
+      }
+      case TextDirection.ltr: {
+        double start = left + _boxSize(icon).width;
+        double end = right;
+        if (prefixIcon != null)
+          start += centerLayout(prefixIcon, start);
+        if (prefix != null)
+          start += baselineLayout(prefix, start);
+        if (input != null)
+          baselineLayout(input, start);
+        if (hint != null)
+          baselineLayout(hint, start);
+        if (label != null)
+          centerLayout(label, start);
+        if (suffixIcon != null)
+          end -= centerLayout(suffixIcon, end - suffixIcon.size.width);
+        if (suffix != null)
+          end -= baselineLayout(suffix, end - suffix.size.width);
+        break;
+      }
     }
 
     if (helperError != null || counter != null) {
       height = layout.subtextHeight;
       baseline = layout.subtextBaseline;
 
-      if (textDirection == TextDirection.rtl) {
-        if (helperError != null)
-          baselineLayout(helperError, right - helperError.size.width - _boxSize(icon).width);
-        if (counter != null)
-          baselineLayout(counter, left);
-      } else {
-        if (helperError != null)
-          baselineLayout(helperError, left + _boxSize(icon).width);
-        if (counter != null)
-          baselineLayout(counter, right - counter.size.width);
+      switch (textDirection) {
+        case TextDirection.rtl:
+          if (helperError != null)
+            baselineLayout(helperError, right - helperError.size.width - _boxSize(icon).width);
+          if (counter != null)
+            baselineLayout(counter, left);
+          break;
+        case TextDirection.ltr:
+          if (helperError != null)
+            baselineLayout(helperError, left + _boxSize(icon).width);
+          if (counter != null)
+            baselineLayout(counter, right - counter.size.width);
+          break;
       }
     }
 
@@ -994,10 +996,9 @@ class _RenderDecoration extends RenderBox {
       final Offset labelOffset = _boxParentData(label).offset;
       final double labelHeight = label.size.height;
       final double t = decoration.floatingLabelProgress;
-      final bool isOutlineBorder = decoration.border is OutlineInputBorder;
       // The center of the outline border label ends up a little below the
       // center of the top border line.
-      final double floatingY = isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
+      final double floatingY = decoration.border.isOutline ? -labelHeight * 0.25 : contentPadding.top;
       final double scale = lerpDouble(1.0, 0.75, t);
       final double dx = textDirection == TextDirection.rtl
         ? labelOffset.dx + label.size.width * (1.0 - scale) // origin is on the right
@@ -1581,7 +1582,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration.isCollapsed) {
       floatingLabelHeight = 0.0;
       contentPadding = decoration.contentPadding ?? EdgeInsets.zero;
-    } else if (decoration.border == null || decoration.border is UnderlineInputBorder) {
+    } else if (decoration.border == null || !decoration.border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = 4.0 + 0.75 * inlineStyle.fontSize;
       contentPadding = decoration.contentPadding ?? (decoration.isDense
