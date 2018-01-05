@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io' show ProcessResult, Process;
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -12,10 +14,11 @@ import 'package:test/test.dart';
 
 import '../src/context.dart';
 
-class MockXcode extends Mock implements Xcode {}
 class MockFile extends Mock implements File {}
-class MockProcessManager extends Mock implements ProcessManager {}
+class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockProcess extends Mock implements Process {}
+class MockProcessManager extends Mock implements ProcessManager {}
+class MockXcode extends Mock implements Xcode {}
 
 void main() {
   FakePlatform osx;
@@ -261,6 +264,48 @@ void main() {
       verifyNever(mockProcessManager.start(any, environment: null, workingDirectory: null));
     },
     overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+  });
+
+  group('log reader', () {
+    MockProcessManager mockProcessManager;
+
+    setUp(() {
+      mockProcessManager = new MockProcessManager();
+    });
+
+    testUsingContext('simulator can output `)`', () async {
+      when(mockProcessManager.start(any, environment: null, workingDirectory: null))
+          .thenAnswer((Invocation invocation) {
+        final Process mockProcess = new MockProcess();
+        when(mockProcess.stdout).thenAnswer((Invocation invocation) =>
+            new Stream<List<int>>.fromIterable(<List<int>>['''
+2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
+2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) ))))))))))
+2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)'''
+                .codeUnits]));
+        when(mockProcess.stderr)
+            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
+        // Delay return of exitCode until after stdout stream data, since it terminates the logger.
+        when(mockProcess.exitCode)
+            .thenAnswer((Invocation invocation) => new Future<int>.delayed(Duration.ZERO, () => 0));
+        return new Future<Process>.value(mockProcess);
+      })
+          .thenThrow(new TestFailure('Should start one process only'));
+
+      final IOSSimulator device = new IOSSimulator('123456', category: 'iOS 11.0');
+      final DeviceLogReader logReader = device.getLogReader(
+        app: new BuildableIOSApp(projectBundleId: 'bundleId'),
+      );
+
+      final List<String> lines = await logReader.logLines.toList();
+      expect(lines, <String>[
+        'Observatory listening on http://127.0.0.1:57701/',
+        '))))))))))',
+        '#0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)',
+      ]);
+    }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
   });
