@@ -2818,6 +2818,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     RenderBox child,
     bool container: false,
     bool explicitChildNodes,
+    bool enabled,
     bool checked,
     bool selected,
     bool button,
@@ -2840,6 +2841,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
+       _enabled = enabled,
        _checked = checked,
        _selected = selected,
        _button = button,
@@ -2908,6 +2910,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (checked == value)
       return;
     _checked = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.hasEnabledState] semantic to true and
+  /// the [SemanticsNode.isEnabled] semantic to the given value.
+  bool get enabled => _enabled;
+  bool _enabled;
+  set enabled(bool value) {
+    if (enabled == value)
+      return;
+    _enabled = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3213,6 +3226,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
 
+    if (enabled != null)
+      config.isEnabled = enabled;
     if (checked != null)
       config.isChecked = checked;
     if (selected != null)

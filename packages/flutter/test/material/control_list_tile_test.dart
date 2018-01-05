@@ -101,7 +101,12 @@ void main() {
           id: 1,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: null,
-          flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+          flags: <SemanticsFlags>[
+            SemanticsFlags.hasCheckedState,
+            SemanticsFlags.isChecked,
+            SemanticsFlags.hasEnabledState,
+            SemanticsFlags.isEnabled
+          ],
           actions: SemanticsAction.tap.index,
           label: 'aaa\nAAA',
         ),
@@ -109,7 +114,12 @@ void main() {
           id: 4,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: new Matrix4.translationValues(0.0, 56.0, 0.0),
-          flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+          flags: <SemanticsFlags>[
+            SemanticsFlags.hasCheckedState,
+            SemanticsFlags.isChecked,
+            SemanticsFlags.hasEnabledState,
+            SemanticsFlags.isEnabled
+          ],
           actions: SemanticsAction.tap.index,
           label: 'bbb\nBBB',
         ),
@@ -117,7 +127,11 @@ void main() {
           id: 7,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: new Matrix4.translationValues(0.0, 112.0, 0.0),
-          flags: SemanticsFlags.hasCheckedState.index,
+          flags: <SemanticsFlags>[
+            SemanticsFlags.hasCheckedState,
+            SemanticsFlags.hasEnabledState,
+            SemanticsFlags.isEnabled
+          ],
           actions: SemanticsAction.tap.index,
           label: 'CCC\nccc',
         ),
