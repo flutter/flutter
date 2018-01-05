@@ -2673,23 +2673,15 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   /// leftwards drag.
   double scrollFactor;
 
-  bool get _hasHandlers {
-    return onTap != null
-        || onLongPress != null
-        || onHorizontalDragUpdate != null
-        || onVerticalDragUpdate != null;
-  }
-
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    config.isSemanticBoundary = _hasHandlers;
+    if (onVerticalDragUpdate != null || onHorizontalDragUpdate != null) {
+      config.isSemanticBoundary = true;
+      config.explicitChildNodes = true;
+    }
 
-    // TODO(goderbauer): this needs to be set even when there is only potential
-    //    for this to become a scroll view.
-    config.explicitChildNodes = onHorizontalDragUpdate != null
-        || onVerticalDragUpdate != null;
 
     if (onTap != null && _isValidAction(SemanticsAction.tap))
       config.onTap = onTap;

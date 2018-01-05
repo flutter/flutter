@@ -2254,7 +2254,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       node._needsSemanticsUpdate = true;
 
       node = node.parent;
-      node._cachedSemanticsConfiguration = null;
       isEffectiveSemanticsBoundary = node._semanticsConfiguration.isSemanticBoundary;
       if (isEffectiveSemanticsBoundary && node._semantics == null) {
         // We have reached a semantics boundary that doesn't own a semantics node.
@@ -2274,10 +2273,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       owner._nodesNeedingSemantics.remove(this);
     }
     if (!node._needsSemanticsUpdate) {
-      if (node != this) {
-        // Reset for `this` happened above already.
-        node._cachedSemanticsConfiguration = null;
-      }
       node._needsSemanticsUpdate = true;
       if (owner != null) {
         assert(node._semanticsConfiguration.isSemanticBoundary || node.parent is! RenderObject);

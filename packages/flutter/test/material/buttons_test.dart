@@ -33,11 +33,17 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            actions: SemanticsAction.tap.index,
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+            ],
             label: 'ABC',
             rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
             transform: new Matrix4.translationValues(356.0, 282.0, 0.0),
-            flags: SemanticsFlag.isButton.index,
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+            ],
           )
         ],
       ),
@@ -67,11 +73,17 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            actions: SemanticsAction.tap.index,
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+            ],
             label: 'ABC',
             rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
             transform: new Matrix4.translationValues(356.0, 282.0, 0.0),
-            flags: SemanticsFlag.isButton.index,
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+            ],
           )
         ]
       ),
