@@ -7,7 +7,7 @@ dependencies:
   intl: 0.15.2
   connectivity: 0.2.0
   string_scanner: 1.0.2
-  url_launcher: 2.0.0
+  url_launcher: 1.0.3
   cupertino_icons: 0.1.1
   video_player: 0.0.7
 
