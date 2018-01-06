@@ -417,6 +417,7 @@ void main() {
           labelText: 'label',
           helperText: 'helper',
           counterText: 'counter',
+          filled: true,
         ),
       ),
     );
@@ -462,6 +463,7 @@ void main() {
           errorText: 'error',
           helperText: 'helper',
           counterText: 'counter',
+          filled: true,
         ),
       ),
     );
@@ -509,6 +511,7 @@ void main() {
           errorText: 'error',
           helperText: 'helper',
           counterText: 'counter',
+          filled: true,
         ),
       ),
     );
@@ -535,6 +538,7 @@ void main() {
           errorText: 'error',
           helperText: 'helper',
           counterText: 'counter',
+          filled: true,
         ),
       ),
     );
@@ -560,6 +564,7 @@ void main() {
         decoration: const InputDecoration(
           prefixText: 'p',
           suffixText: 's',
+          filled: true,
         ),
       ),
     );
@@ -597,6 +602,7 @@ void main() {
           prefixText: 'p',
           suffixText: 's',
           icon: const Icon(Icons.android),
+          filled: true,
         ),
       ),
     );
@@ -636,6 +642,7 @@ void main() {
           labelText: 'label',
           helperText: 'helper',
           counterText: 'counter',
+          filled: true,
         ),
       ),
     );
@@ -670,6 +677,7 @@ void main() {
           helperText: 'helper',
           errorText: 'error',
           counterText: 'counter',
+          filled: true,
         ),
       ),
     );
@@ -688,6 +696,7 @@ void main() {
         decoration: const InputDecoration(
           prefixText: 'p',
           suffixText: 's',
+          filled: true,
         ),
       ),
     );
@@ -720,6 +729,7 @@ void main() {
           isDense: true,
           prefixText: 'p',
           suffixText: 's',
+          filled: true,
         ),
       ),
     );
@@ -861,6 +871,7 @@ void main() {
           hintStyle: const TextStyle(),
           errorStyle: const TextStyle(),
           helperStyle: const TextStyle(),
+          filled: true,
         ),
       ),
     );

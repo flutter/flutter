@@ -1155,6 +1155,7 @@ void main() {
           decoration: const InputDecoration(
             icon: const Icon(Icons.phone),
             labelText: 'label',
+            filled: true,
           ),
         ),
       ),

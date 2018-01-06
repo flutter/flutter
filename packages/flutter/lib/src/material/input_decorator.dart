@@ -910,14 +910,14 @@ class _RenderDecoration extends RenderBox {
         double end = left;
         if (prefixIcon != null)
           start -= centerLayout(prefixIcon, start - prefixIcon.size.width);
+        if (label != null)
+          centerLayout(label, start - label.size.width);
         if (prefix != null)
           start -= baselineLayout(prefix, start - prefix.size.width);
         if (input != null)
           baselineLayout(input, start - input.size.width);
         if (hint != null)
           baselineLayout(hint, start - hint.size.width);
-        if (label != null)
-          centerLayout(label, start - label.size.width);
         if (suffixIcon != null)
           end += centerLayout(suffixIcon, end);
         if (suffix != null)
@@ -929,14 +929,14 @@ class _RenderDecoration extends RenderBox {
         double end = right;
         if (prefixIcon != null)
           start += centerLayout(prefixIcon, start);
+        if (label != null)
+          centerLayout(label, start);
         if (prefix != null)
           start += baselineLayout(prefix, start);
         if (input != null)
           baselineLayout(input, start);
         if (hint != null)
           baselineLayout(hint, start);
-        if (label != null)
-          centerLayout(label, start);
         if (suffixIcon != null)
           end -= centerLayout(suffixIcon, end - suffixIcon.size.width);
         if (suffix != null)
@@ -1585,9 +1585,18 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     } else if (decoration.border == null || !decoration.border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = 4.0 + 0.75 * inlineStyle.fontSize;
-      contentPadding = decoration.contentPadding ?? (decoration.isDense
-        ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-        : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+      if (decoration.filled) {
+        contentPadding = decoration.contentPadding ?? (decoration.isDense
+          ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
+          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+      } else {
+        // Not left or right padding for underline borders that aren't filled
+        // is a small concession to backwards compatibility. This eliminates
+        // the most noticeable layout change introduced by #13734.
+        contentPadding = decoration.contentPadding ?? (decoration.isDense
+          ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
+          : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
+      }
     } else {
       floatingLabelHeight = 0.0;
       contentPadding = decoration.contentPadding ?? (decoration.isDense
