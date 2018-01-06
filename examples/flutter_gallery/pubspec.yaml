@@ -3,9 +3,9 @@ dependencies:
   flutter:
     sdk: flutter
   collection: 1.14.3
-  device_info: 0.1.0
+  device_info: 0.0.5
   intl: 0.15.2
-  connectivity: 0.2.0
+  connectivity: 0.1.1
   string_scanner: 1.0.2
   url_launcher: 1.0.3
   cupertino_icons: 0.1.1
