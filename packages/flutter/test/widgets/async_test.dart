@@ -121,19 +121,28 @@ void main() {
     testWidgets('runs the builder using given initial data', (WidgetTester tester) async {
       final GlobalKey key = new GlobalKey();
       await tester.pumpWidget(new FutureBuilder<String>(
-        key: key, future: null, builder: snapshotText, initialData: 'I'
+        key: key,
+        future: null,
+        builder: snapshotText,
+        initialData: 'I',
       ));
       expect(find.text('AsyncSnapshot(ConnectionState.none, I, null)'), findsOneWidget);
     });
     testWidgets('ignores initialData when reconfiguring', (WidgetTester tester) async {
       final GlobalKey key = new GlobalKey();
       await tester.pumpWidget(new FutureBuilder<String>(
-        key: key, future: null, builder: snapshotText, initialData: 'I'
+        key: key,
+        future: null,
+        builder: snapshotText,
+        initialData: 'I',
       ));
       expect(find.text('AsyncSnapshot(ConnectionState.none, I, null)'), findsOneWidget);
       final Completer<String> completer = new Completer<String>();
       await tester.pumpWidget(new FutureBuilder<String>(
-        key: key, future: completer.future, builder: snapshotText, initialData: 'Ignored'
+        key: key,
+        future: completer.future,
+        builder: snapshotText,
+        initialData: 'Ignored',
       ));
       expect(find.text('AsyncSnapshot(ConnectionState.waiting, I, null)'), findsOneWidget);
     });
@@ -201,18 +210,28 @@ void main() {
     });
     testWidgets('runs the builder using given initial data', (WidgetTester tester) async {
       final StreamController<String> controller = new StreamController<String>();
-      await tester.pumpWidget(new StreamBuilder<String>(stream: controller.stream, builder: snapshotText, initialData: 'I'));
+      await tester.pumpWidget(new StreamBuilder<String>(
+        stream: controller.stream,
+        builder: snapshotText,
+        initialData: 'I',
+      ));
       expect(find.text('AsyncSnapshot(ConnectionState.waiting, I, null)'), findsOneWidget);
     });
     testWidgets('ignores initialData when reconfiguring', (WidgetTester tester) async {
       final GlobalKey key = new GlobalKey();
       await tester.pumpWidget(new StreamBuilder<String>(
-        key: key, stream: null, builder: snapshotText, initialData: 'I'
+        key: key,
+        stream: null,
+        builder: snapshotText,
+        initialData: 'I',
       ));
       expect(find.text('AsyncSnapshot(ConnectionState.none, I, null)'), findsOneWidget);
       final StreamController<String> controller = new StreamController<String>();
       await tester.pumpWidget(new StreamBuilder<String>(
-        key: key, stream: controller.stream, builder: snapshotText, initialData: 'Ignored'
+        key: key,
+        stream: controller.stream,
+        builder: snapshotText,
+        initialData: 'Ignored',
       ));
       expect(find.text('AsyncSnapshot(ConnectionState.waiting, I, null)'), findsOneWidget);
     });
