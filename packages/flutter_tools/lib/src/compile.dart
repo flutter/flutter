@@ -45,7 +45,7 @@ class _StdoutHandler {
         ? string.substring(boundaryKey.length + 1)
         : null);
     else
-      printTrace('compile debug message: $string');
+      printError('compiler message: $string');
   }
 
   // This is needed to get ready to process next compilation result output,
@@ -98,14 +98,14 @@ Future<String> compile(
   final Process server = await processManager
       .start(command)
       .catchError((dynamic error, StackTrace stack) {
-    printTrace('Failed to start frontend server $error, $stack');
+    printError('Failed to start frontend server $error, $stack');
   });
 
   final _StdoutHandler stdoutHandler = new _StdoutHandler();
 
   server.stderr
     .transform(UTF8.decoder)
-    .listen((String s) { printTrace('compile debug message: $s'); });
+    .listen((String s) { printError('compiler message: $s'); });
   server.stdout
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
@@ -171,7 +171,7 @@ class ResidentCompiler {
     _server.stderr
       .transform(UTF8.decoder)
       .transform(const LineSplitter())
-      .listen((String s) { printTrace('compile debug message: $s'); });
+      .listen((String s) { printError('compiler message: $s'); });
 
     _server.stdin.writeln('compile $scriptFilename');
 
