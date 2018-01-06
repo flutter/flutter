@@ -31,6 +31,7 @@ const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
   // TODO(amirh): unpin this.
   'test': '0.12.26',
   // Add pinned packages here.
+  'url_launcher': '1.0.3',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
