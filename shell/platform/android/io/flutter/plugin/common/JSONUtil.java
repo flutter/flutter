@@ -1,13 +1,59 @@
 package io.flutter.plugin.common;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class JSONUtil {
     private JSONUtil() {
+    }
+    
+    /**
+     * Convert the Json java representation to Java objects. Particularly used for converting
+     * JSONArray and JSONObject to Lists and Maps.
+     */
+    public static Object unwrap(Object o) {
+        if (JSONObject.NULL.equals(o) || o == null) {
+            return null;
+        }
+        if (o instanceof Boolean
+            || o instanceof Byte
+            || o instanceof Character
+            || o instanceof Double
+            || o instanceof Float
+            || o instanceof Integer
+            || o instanceof Long
+            || o instanceof Short
+            || o instanceof String) {
+            return o;
+        }
+        try {
+            if (o instanceof JSONArray) {
+                List<Object> list = new ArrayList<>();
+                JSONArray array = (JSONArray) o;
+                for (int i = 0; i < array.length(); i++) {
+                    list.add(unwrap(array.get(i)));
+                }
+                return list;
+            }
+            if (o instanceof JSONObject) {
+                Map<String, Object> map = new HashMap<>();
+                JSONObject jsonObject = (JSONObject) o;
+                Iterator<String> keyIterator = jsonObject.keys();
+                while (keyIterator.hasNext()) {
+                    String key = keyIterator.next();
+                    map.put(key, unwrap(jsonObject.get(key)));
+                }
+                return map;
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
     /**
