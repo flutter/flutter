@@ -30,6 +30,10 @@ const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
   // https://github.com/dart-lang/sdk/issues/31442
   // TODO(amirh): unpin this.
   'test': '0.12.26',
+  // Major version upgrade to next version(2.0.0) breaks flutter build:
+  // https://github.com/flutter/flutter/issues/13953
+  // TODO(aam): unpin this.
+  'url_launcher': '1.0.3',
   // Add pinned packages here.
 };
 
