@@ -48,6 +48,10 @@ abstract class InputBorder extends ShapeBorder {
   InputBorder copyWith({ BorderSide borderSide });
 
   /// True if this border will enclose the [InputDecorator]'s container.
+  ///
+  /// This property affects the alignment of container's contents. For example
+  /// when an input decorator is configured with an [OutlineInputBorder] its
+  /// label is centered with its container.
   bool get isOutline;
 
   /// Paint this input border on [canvas].
@@ -59,7 +63,6 @@ abstract class InputBorder extends ShapeBorder {
   /// animates upwards, to make room for the input child. The [gapStart] and
   /// [gapExtent] parameters define a floating label width interval, and
   /// [gapPercentage] defines the animation's progress (0.0 to 1.0).
-  ///
   @override
   void paint(Canvas canvas, Rect rect, {
       double gapStart,
@@ -406,5 +409,5 @@ class OutlineInputBorder extends InputBorder {
   }
 
   @override
-  int get hashCode => hashValues(borderSide, borderRadius);
+  int get hashCode => hashValues(borderSide, borderRadius, gapPadding);
 }
