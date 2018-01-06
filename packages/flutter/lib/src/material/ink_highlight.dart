@@ -45,11 +45,10 @@ class InkHighlight extends InkFeature {
     VoidCallback onRemoved,
   }) : assert(color != null),
        assert(shape != null),
-       _color = color,
        _shape = shape,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _rectCallback = rectCallback,
-       super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
+       super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     _alphaController = new AnimationController(duration: _kHighlightFadeDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged)
@@ -68,16 +67,6 @@ class InkHighlight extends InkFeature {
 
   Animation<int> _alpha;
   AnimationController _alphaController;
-
-  /// The color of the ink used to emphasize part of the material.
-  Color get color => _color;
-  Color _color;
-  set color(Color value) {
-    if (value == _color)
-      return;
-    _color = value;
-    controller.markNeedsPaint();
-  }
 
   /// Whether this part of the material is being visually emphasized.
   bool get active => _active;

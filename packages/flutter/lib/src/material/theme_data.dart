@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'material.dart' show InkSplashType;
 import 'typography.dart';
 
 /// Describes the contrast needs of a color.
@@ -82,6 +83,7 @@ class ThemeData {
     Color dividerColor,
     Color highlightColor,
     Color splashColor,
+    InkSplashType splashType,
     Color selectedRowColor,
     Color unselectedWidgetColor,
     Color disabledColor,
@@ -118,6 +120,7 @@ class ThemeData {
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
+    splashType ??= InkSplashType.drop;
     selectedRowColor ??= Colors.grey[100];
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
     disabledColor ??= isDark ? Colors.white30 : Colors.black26;
@@ -156,6 +159,7 @@ class ThemeData {
       dividerColor: dividerColor,
       highlightColor: highlightColor,
       splashColor: splashColor,
+      splashType: splashType,
       selectedRowColor: selectedRowColor,
       unselectedWidgetColor: unselectedWidgetColor,
       disabledColor: disabledColor,
@@ -196,6 +200,7 @@ class ThemeData {
     @required this.dividerColor,
     @required this.highlightColor,
     @required this.splashColor,
+    @required this.splashType,
     @required this.selectedRowColor,
     @required this.unselectedWidgetColor,
     @required this.disabledColor,
@@ -226,6 +231,7 @@ class ThemeData {
        assert(dividerColor != null),
        assert(highlightColor != null),
        assert(splashColor != null),
+       assert(splashType != null),
        assert(selectedRowColor != null),
        assert(unselectedWidgetColor != null),
        assert(disabledColor != null),
@@ -317,6 +323,8 @@ class ThemeData {
   /// The color of ink splashes. See [InkWell].
   final Color splashColor;
 
+  final InkSplashType splashType;
+
   /// The color used to highlight selected rows.
   final Color selectedRowColor;
 
@@ -398,6 +406,7 @@ class ThemeData {
     Color dividerColor,
     Color highlightColor,
     Color splashColor,
+    InkSplashType splashType,
     Color selectedRowColor,
     Color unselectedWidgetColor,
     Color disabledColor,
@@ -430,6 +439,7 @@ class ThemeData {
       dividerColor: dividerColor ?? this.dividerColor,
       highlightColor: highlightColor ?? this.highlightColor,
       splashColor: splashColor ?? this.splashColor,
+      splashType: splashType ?? this.splashType,
       selectedRowColor: selectedRowColor ?? this.selectedRowColor,
       unselectedWidgetColor: unselectedWidgetColor ?? this.unselectedWidgetColor,
       disabledColor: disabledColor ?? this.disabledColor,
@@ -545,6 +555,7 @@ class ThemeData {
       dividerColor: Color.lerp(a.dividerColor, b.dividerColor, t),
       highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t),
       splashColor: Color.lerp(a.splashColor, b.splashColor, t),
+      splashType: t < 0.5 ? a.splashType : b.splashType,
       selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t),
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t),
       disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t),
@@ -583,6 +594,7 @@ class ThemeData {
            (otherData.dividerColor == dividerColor) &&
            (otherData.highlightColor == highlightColor) &&
            (otherData.splashColor == splashColor) &&
+           (otherData.splashType == splashType) &&
            (otherData.selectedRowColor == selectedRowColor) &&
            (otherData.unselectedWidgetColor == unselectedWidgetColor) &&
            (otherData.disabledColor == disabledColor) &&
@@ -618,6 +630,7 @@ class ThemeData {
       dividerColor,
       highlightColor,
       splashColor,
+      splashType,
       selectedRowColor,
       unselectedWidgetColor,
       disabledColor,
@@ -627,8 +640,8 @@ class ThemeData {
       textSelectionHandleColor,
       backgroundColor,
       accentColor,
-      accentColorBrightness,
       hashValues( // Too many values.
+        accentColorBrightness,
         indicatorColor,
         dialogBackgroundColor,
         hintColor,

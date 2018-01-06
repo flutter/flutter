@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'debug.dart';
 import 'feedback.dart';
 import 'ink_highlight.dart';
+import 'ink_ripple.dart';
 import 'ink_splash.dart';
 import 'material.dart';
 import 'theme.dart';
@@ -95,6 +96,7 @@ class InkResponse extends StatefulWidget {
     this.borderRadius: BorderRadius.zero,
     this.highlightColor,
     this.splashColor,
+    this.splashType,
     this.enableFeedback: true,
     this.excludeFromSemantics: false,
   }) : assert(enableFeedback != null), super(key: key);
@@ -185,6 +187,8 @@ class InkResponse extends StatefulWidget {
   ///  * [highlightColor], the color of the highlight.
   final Color splashColor;
 
+  final InkSplashType splashType;
+
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
   ///
   /// For example, on Android a tap will produce a clicking sound and a
@@ -255,8 +259,8 @@ class InkResponse extends StatefulWidget {
 }
 
 class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKeepAliveClientMixin {
-  Set<InkSplash> _splashes;
-  InkSplash _currentSplash;
+  Set<InkFeature> _splashes;
+  InkFeature _currentSplash;
   InkHighlight _lastHighlight;
 
   @override
@@ -295,30 +299,60 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     updateKeepAlive();
   }
 
-  void _handleTapDown(TapDownDetails details) {
+  InkFeature _createInkFeature(TapDownDetails details) {
+    final MaterialInkController inkController = Material.of(context);
     final RenderBox referenceBox = context.findRenderObject();
-    final RectCallback rectCallback = widget.getRectCallback(referenceBox);
-    InkSplash splash;
-    splash = new InkSplash(
-      controller: Material.of(context),
-      referenceBox: referenceBox,
-      position: referenceBox.globalToLocal(details.globalPosition),
-      color: widget.splashColor ?? Theme.of(context).splashColor,
-      containedInkWell: widget.containedInkWell,
-      rectCallback: widget.containedInkWell ? rectCallback : null,
-      radius: widget.radius,
-      borderRadius: widget.borderRadius ?? BorderRadius.zero,
-      onRemoved: () {
-        if (_splashes != null) {
-          assert(_splashes.contains(splash));
-          _splashes.remove(splash);
-          if (_currentSplash == splash)
-            _currentSplash = null;
-          updateKeepAlive();
-        } // else we're probably in deactivate()
-      }
-    );
-    _splashes ??= new HashSet<InkSplash>();
+    final Offset position = referenceBox.globalToLocal(details.globalPosition);
+    final Color color = widget.splashColor ?? Theme.of(context).splashColor;
+    final RectCallback rectCallback = widget.containedInkWell ? widget.getRectCallback(referenceBox) : null;
+    final BorderRadius borderRadius = widget.borderRadius ?? BorderRadius.zero;
+
+    InkFeature splash;
+    void onRemoved () {
+      if (_splashes != null) {
+        assert(_splashes.contains(splash));
+        _splashes.remove(splash);
+        if (_currentSplash == splash)
+          _currentSplash = null;
+        updateKeepAlive();
+      } // else we're probably in deactivate()
+    }
+
+    switch(widget.splashType ?? Theme.of(context).splashType) {
+      case InkSplashType.drop:
+        splash = new InkSplash(
+          controller: inkController,
+          referenceBox: referenceBox,
+          position: position,
+          color: color,
+          containedInkWell: widget.containedInkWell,
+          rectCallback: rectCallback,
+          radius: widget.radius,
+          borderRadius: borderRadius,
+          onRemoved: onRemoved,
+        );
+        break;
+      case InkSplashType.ripple:
+        splash = new InkRipple(
+          controller: inkController,
+          referenceBox: referenceBox,
+          position: position,
+          color: color,
+          containedInkWell: widget.containedInkWell,
+          rectCallback: rectCallback,
+          radius: widget.radius,
+          borderRadius: borderRadius,
+          onRemoved: onRemoved,
+        );
+        break;
+    }
+
+    return splash;
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    final InkFeature splash = _createInkFeature(details);
+    _splashes ??= new HashSet<InkFeature>();
     _splashes.add(splash);
     _currentSplash = splash;
     updateKeepAlive();
@@ -362,9 +396,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   @override
   void deactivate() {
     if (_splashes != null) {
-      final Set<InkSplash> splashes = _splashes;
+      final Set<InkFeature> splashes = _splashes;
       _splashes = null;
-      for (InkSplash splash in splashes)
+      for (InkFeature splash in splashes)
         splash.dispose();
       _currentSplash = null;
     }
@@ -436,6 +470,7 @@ class InkWell extends InkResponse {
     ValueChanged<bool> onHighlightChanged,
     Color highlightColor,
     Color splashColor,
+    InkSplashType splashType,
     BorderRadius borderRadius,
     bool enableFeedback: true,
     bool excludeFromSemantics: false,
@@ -450,6 +485,7 @@ class InkWell extends InkResponse {
     highlightShape: BoxShape.rectangle,
     highlightColor: highlightColor,
     splashColor: splashColor,
+    splashType: splashType,
     borderRadius: borderRadius,
     enableFeedback: enableFeedback,
     excludeFromSemantics: excludeFromSemantics,

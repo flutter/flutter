@@ -38,6 +38,26 @@ enum MaterialType {
   transparency
 }
 
+/// Defines the kind of ink splash displayed by [InkResponse] or [InkWell].
+///
+/// See also:
+///
+///   * [ThemeData.splashType], which defines the splash type for a Material
+///     [Theme].
+enum InkSplashType {
+  /// The kind of InkSplash displayed by [InkSplash].
+  ///
+  /// A circular splash whose origin is the input touch point and whose radius
+  /// expands from zero.
+  drop,
+
+  /// The kind of InkSplash displayed by [InkRipple].
+  ///
+  /// A circular splash whose origin starts at the input touch point and whose radius
+  /// expands from 60% of the final radius. The splash's origin animates to the center.
+  ripple,
+}
+
 /// The border radii used by the various kinds of material in material design.
 ///
 /// See also:
@@ -380,9 +400,11 @@ abstract class InkFeature {
   InkFeature({
     @required MaterialInkController controller,
     @required this.referenceBox,
+    Color color,
     this.onRemoved,
   }) : assert(controller != null),
        assert(referenceBox != null),
+       _color = color,
        _controller = controller;
 
   /// The [MaterialInkController] associated with this [InkFeature].
@@ -408,6 +430,28 @@ abstract class InkFeature {
     _controller._removeFeature(this);
     if (onRemoved != null)
       onRemoved();
+  }
+
+  /// Called when the user input that triggered this feature's appearance was confirmed.
+  ///
+  /// Typically causes the ink to propagate faster across the material.
+  void confirm() {
+  }
+
+  /// Called when the user input that triggered this feature's appearance was canceled.
+  ///
+  /// Typically causes the ink to gradually disappear.
+  void cancel() {
+  }
+
+  /// The ink's color.
+  Color get color => _color;
+  Color _color;
+  set color(Color value) {
+    if (value == _color)
+      return;
+    _color = value;
+    controller.markNeedsPaint();
   }
 
   void _paint(Canvas canvas) {
