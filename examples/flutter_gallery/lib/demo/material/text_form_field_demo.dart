@@ -19,6 +19,7 @@ class TextFormFieldDemo extends StatefulWidget {
 class PersonData {
   String name = '';
   String phoneNumber = '';
+  String email = '';
   String password = '';
 }
 
@@ -143,6 +144,15 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   // Fit the validating format.
                   _phoneNumberFormatter,
                 ],
+              ),
+              new TextFormField(
+                decoration: const InputDecoration(
+                  icon: const Icon(Icons.email),
+                  hintText: 'Your email address',
+                  labelText: 'E-mail',
+                ),
+                keyboardType: TextInputType.emailAddress,
+                onSaved: (String value) { person.email = value; },
               ),
               new TextFormField(
                 decoration: const InputDecoration(
