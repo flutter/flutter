@@ -212,9 +212,6 @@ class CreateCommand extends FlutterCommand {
 
     generatedCount += _renderTemplate('create', appPath, templateContext);
     generatedCount += _injectGradleWrapper(appPath);
-    if (appPath != dirPath) {
-      generatedCount += _injectGradleWrapper(dirPath);
-    }
     if (argResults['with-driver-test']) {
       final String testPath = fs.path.join(appPath, 'test_driver');
       generatedCount += _renderTemplate('driver', testPath, templateContext);
