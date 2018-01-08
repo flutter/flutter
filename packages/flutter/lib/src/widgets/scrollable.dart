@@ -568,9 +568,6 @@ class _RenderExcludableScrollSemantics extends RenderProxyBox {
       ..rect = Offset.zero & node.rect.size;
     _annotatedNode = _innerNode;
 
-    print(node);
-    print(_innerNode);
-
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
     final List<SemanticsNode> included = <SemanticsNode>[];
     for (SemanticsNode child in children) {
