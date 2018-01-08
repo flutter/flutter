@@ -2,10 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/dart/dart_package.gni")
+import("//build/dart/dart_library.gni")
 import("//build/dart/dart_tool.gni")
 
-dart_package("flutter_tools") {
+dart_library("flutter_tools") {
   package_name = "flutter_tools"
 
   disable_analysis = true
