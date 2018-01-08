@@ -521,6 +521,20 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 }
 
+/// With [_ExcludableScrollSemantics] certain child [SemanticsNode]s can be
+/// excluded from the scrollable area for semantics purposes.
+///
+/// Nodes, that are to be excluded, have to be tagged with
+/// [RenderViewport.excludeFromScrolling] and the [RenderAbstractViewport] in
+/// use has to add the [RenderViewport.useTwoPaneSemantics] tag to its
+/// [SemanticsConfiguration] by overriding
+/// [RenderObject.describeSemanticsConfiguration].
+///
+/// If the tag [RenderViewport.useTwoPaneSemantics] is present on the viewport,
+/// two semantics nodes will be used to represent the [Scrollable]: The outer
+/// node will contain all children, that are excluded from scrolling. The inner
+/// node, which is annotated with the scrolling actions, will house the
+/// scrollable children.
 class _ExcludableScrollSemantics extends SingleChildRenderObjectWidget {
   const _ExcludableScrollSemantics({ Key key, Widget child }) : super(key: key, child: child);
 
