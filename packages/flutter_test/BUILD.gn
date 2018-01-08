@@ -2,9 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/dart/dart_package.gni")
+import("//build/dart/dart_library.gni")
 
-dart_package("flutter_test") {
+dart_library("flutter_test") {
   package_name = "flutter_test"
 
   disable_analysis = true
