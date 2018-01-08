@@ -175,7 +175,8 @@ class ResidentCompiler {
 
     _server.stdin.writeln('compile $scriptFilename');
 
-    return stdoutHandler.outputFilename.future;
+    final int exitCode = await _server.exitCode;
+    return exitCode == 0 ? stdoutHandler.outputFilename.future : null;
   }
 
 
