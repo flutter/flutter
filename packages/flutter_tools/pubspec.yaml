@@ -16,7 +16,7 @@ dependencies:
   file: 2.3.5
   http: 0.11.3+14
   intl: 0.15.2
-  json_rpc_2: 2.0.4
+  json_rpc_2: 2.0.5
   json_schema: 1.0.7
   linter: 0.1.41
   meta: 1.1.1
@@ -80,7 +80,7 @@ dev_dependencies:
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
   utf: 0.9.0+3 # TRANSITIVE DEPENDENCY
-  watcher: 0.9.7+4 # TRANSITIVE DEPENDENCY
+  watcher: 0.9.7+6 # TRANSITIVE DEPENDENCY
 
 dartdoc:
   # Exclude this package from the hosted API docs.
