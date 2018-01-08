@@ -193,7 +193,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   bool verifyZip(File zipFile) {
     try {
-      new ZipDecoder().decodeBytes(zipFile.readAsBytesSync());
+      new ZipDecoder().decodeBytes(zipFile.readAsBytesSync(), verify: true);
     } catch (ArchiveException) {
       return false;
     }
