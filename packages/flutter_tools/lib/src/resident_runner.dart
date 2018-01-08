@@ -42,7 +42,8 @@ class FlutterDevice {
                 { bool previewDart2 : false, bool strongMode : false }) {
     if (previewDart2)
       generator = new ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        strongMode: strongMode);
   }
 
   String viewFilter;

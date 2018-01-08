@@ -306,7 +306,7 @@ class IOSSimulator extends Device {
       printTrace('Building ${app.name} for $id.');
 
       try {
-        await _setupUpdatedApplicationBundle(app, debuggingOptions.buildInfo.flavor);
+        await _setupUpdatedApplicationBundle(app, debuggingOptions.buildInfo);
       } on ToolExit catch (e) {
         printError(e.message);
         return new LaunchResult.failed();
@@ -379,17 +379,25 @@ class IOSSimulator extends Device {
     return criteria.reduce((bool a, bool b) => a && b);
   }
 
-  Future<Null> _setupUpdatedApplicationBundle(ApplicationPackage app, String flavor) async {
+  Future<Null> _setupUpdatedApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) async {
     await _sideloadUpdatedAssetsForInstalledApplicationBundle(app);
 
     if (!await _applicationIsInstalledAndRunning(app))
-      return _buildAndInstallApplicationBundle(app, flavor);
+      return _buildAndInstallApplicationBundle(app, buildInfo);
   }
 
-  Future<Null> _buildAndInstallApplicationBundle(ApplicationPackage app, String flavor) async {
+  Future<Null> _buildAndInstallApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) async {
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
-    final XcodeBuildResult buildResult = await buildXcodeProject(app: app, buildInfo: new BuildInfo(BuildMode.debug, flavor), buildForDevice: false);
+
+    final BuildInfo debugBuildInfo = new BuildInfo(BuildMode.debug, buildInfo.flavor,
+        previewDart2: buildInfo.previewDart2,
+        strongMode: buildInfo.strongMode,
+        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+        extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
+        preferSharedLibrary: buildInfo.preferSharedLibrary);
+
+    final XcodeBuildResult buildResult = await buildXcodeProject(app: app, buildInfo: debugBuildInfo, buildForDevice: false);
     if (!buildResult.success)
       throwToolExit('Could not build the application for the simulator.');
 
