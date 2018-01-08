@@ -15,7 +15,6 @@ import 'base/io.dart';
 import 'base/process.dart';
 import 'base/process_manager.dart';
 import 'cache.dart';
-import 'common.dart';
 import 'globals.dart';
 
 final Set<String> kKnownBranchNames = new Set<String>.from(<String>[
@@ -82,7 +81,7 @@ class FlutterVersion {
   String _runGit(String command) => runSync(command.split(' '), workingDirectory: Cache.flutterRoot);
 
   String _getSdkVersion() {
-    final File versionFile = fs.directory(getFlutterRoot()).childFile('VERSION');
+    final File versionFile = fs.directory(Cache.flutterRoot).childFile('VERSION');
     final List<String> versionFileContents = versionFile.readAsLinesSync();
     return versionFileContents.last;
   }
