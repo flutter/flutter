@@ -25,6 +25,7 @@ import 'ios/plist_utils.dart';
 import 'version.dart';
 
 Doctor get doctor => context[Doctor];
+bool runOnlyFuchsia = false;
 
 class Doctor {
   List<DoctorValidator> _validators;
@@ -34,14 +35,17 @@ class Doctor {
       _validators = <DoctorValidator>[];
       _validators.add(new _FlutterValidator());
 
-      if (androidWorkflow.appliesToHostPlatform)
-        _validators.add(androidWorkflow);
+      if (!runOnlyFuchsia){
+        if (androidWorkflow.appliesToHostPlatform)
+          _validators.add(androidWorkflow);
 
-      if (iosWorkflow.appliesToHostPlatform)
-        _validators.add(iosWorkflow);
-
+        if (iosWorkflow.appliesToHostPlatform)
+          _validators.add(iosWorkflow);
+      }
+      
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
-      ideValidators.addAll(AndroidStudioValidator.allValidators);
+      if (!runOnlyFuchsia)
+        ideValidators.addAll(AndroidStudioValidator.allValidators);
       ideValidators.addAll(IntelliJValidator.installedValidators);
       if (ideValidators.isNotEmpty)
         _validators.addAll(ideValidators);
@@ -96,7 +100,10 @@ class Doctor {
   }
 
   /// Print verbose information about the state of installed tooling.
-  Future<bool> diagnose({ bool androidLicenses: false }) async {
+  Future<bool> diagnose({ bool androidLicenses: false, bool onlyFuchsia: false }) async {
+    runOnlyFuchsia = onlyFuchsia;
+    
+
     if (androidLicenses)
       return AndroidWorkflow.runLicenseManager();
 
