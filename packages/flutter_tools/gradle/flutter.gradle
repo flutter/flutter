@@ -46,7 +46,7 @@ class FlutterPlugin implements Plugin<Project> {
     private Properties readPropertiesIfExist(File propertiesFile) {
         Properties result = new Properties()
         if (propertiesFile.exists()) {
-            propertiesFile.withInputStream { stream -> result.load(stream) }
+            propertiesFile.withReader('UTF-8') { reader -> result.load(reader) }
         }
         return result
     }
