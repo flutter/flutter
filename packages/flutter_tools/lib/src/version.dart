@@ -44,7 +44,6 @@ class FlutterVersion {
     _frameworkRevision = _runGit('git log -n 1 --pretty=format:%H');
     _frameworkAge = _runGit('git log -n 1 --pretty=format:%ar');
 
-
     _sdkVersion = _getSdkVersion();
   }
 
