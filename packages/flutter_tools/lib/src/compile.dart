@@ -110,8 +110,8 @@ Future<String> compile(
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
     .listen(stdoutHandler.handler);
-  await server.exitCode;
-  return stdoutHandler.outputFilename.future;
+  final int exitCode = await server.exitCode;
+  return exitCode == 0 ? stdoutHandler.outputFilename.future : null;
 }
 
 /// Wrapper around incremental frontend server compiler, that communicates with
