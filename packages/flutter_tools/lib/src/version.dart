@@ -15,6 +15,7 @@ import 'base/io.dart';
 import 'base/process.dart';
 import 'base/process_manager.dart';
 import 'cache.dart';
+import 'common.dart';
 import 'globals.dart';
 
 final Set<String> kKnownBranchNames = new Set<String>.from(<String>[
