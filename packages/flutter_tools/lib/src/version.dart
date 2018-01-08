@@ -81,7 +81,7 @@ class FlutterVersion {
   String _runGit(String command) => runSync(command.split(' '), workingDirectory: Cache.flutterRoot);
 
   String _getSdkVersion() {
-    final File versionFile = fs.file('VERSION');
+    final File versionFile = fs.directory(getFlutterRoot()).childFile('VERSION');
     final List<String> versionFileContents = versionFile.readAsLinesSync();
     return versionFileContents.last;
   }
