@@ -243,6 +243,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// The [container] argument must not be null.
   const SemanticsProperties({
+    this.enabled,
     this.checked,
     this.selected,
     this.button,
@@ -263,6 +264,14 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onMoveCursorForwardByCharacter,
     this.onMoveCursorBackwardByCharacter,
   });
+
+  /// If non-null, indicates that this subtree represents something that can be
+  /// in an enabled or disabled state.
+  ///
+  /// For example, a button that a user can currently interact with would set
+  /// this field to true. A button that currently does not respond to user
+  /// interactions would set this field to false.
+  final bool enabled;
 
   /// If non-null, indicates that this subtree represents a checkbox
   /// or similar widget with a "checked" state, and what its current
@@ -1080,6 +1089,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
+    if (_hasFlag(SemanticsFlags.hasEnabledState))
+      properties.add(new FlagProperty('isEnabled', value: _hasFlag(SemanticsFlags.isEnabled), ifFalse: 'disabled'));
     if (_hasFlag(SemanticsFlags.hasCheckedState))
       properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlags.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
     properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlags.isSelected), ifTrue: 'selected'));
@@ -1741,12 +1752,32 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlags.isSelected, value);
   }
 
+  /// Whether the owning [RenderObject] is currently enabled.
+  ///
+  /// A disabled object does not respond to user interactions. Only objects that
+  /// usually respond to user interactions, but which currently do not (like a
+  /// disabled button) should be marked as disabled.
+  ///
+  /// The setter should not be called for objects (like static text) that never
+  /// respond to user interactions.
+  ///
+  /// The getter will return null if the owning [RenderObject] doesn't support
+  /// the concept of being enabled/disabled.
+  bool get isEnabled => _hasFlag(SemanticsFlags.hasEnabledState) ? _hasFlag(SemanticsFlags.isEnabled) : null;
+  set isEnabled(bool value) {
+    _setFlag(SemanticsFlags.hasEnabledState, true);
+    _setFlag(SemanticsFlags.isEnabled, value);
+  }
+
   /// If this node has Boolean state that can be controlled by the user, whether
   /// that state is on or off, corresponding to true and false, respectively.
   ///
-  /// Do not set this to any value if the owning [RenderObject] doesn't have
-  /// Booleans state that can be controlled by the user.
-  bool get isChecked => _hasFlag(SemanticsFlags.hasCheckedState) && _hasFlag(SemanticsFlags.isChecked);
+  /// Do not call the setter for this field if the owning [RenderObject] doesn't
+  /// have checked/unchecked state that can be controlled by the user.
+  ///
+  /// The getter returns null if the owning [RenderObject] does not have
+  /// checked/unchecked state.
+  bool get isChecked => _hasFlag(SemanticsFlags.hasCheckedState) ? _hasFlag(SemanticsFlags.isChecked) : null;
   set isChecked(bool value) {
     _setFlag(SemanticsFlags.hasCheckedState, true);
     _setFlag(SemanticsFlags.isChecked, value);

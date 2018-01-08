@@ -285,6 +285,7 @@ class _ShapeDecorationPainter extends BoxPainter {
   final ShapeDecoration _decoration;
 
   Rect _lastRect;
+  TextDirection _lastTextDirection;
   Path _outerPath;
   Path _innerPath;
   Paint _interiorPaint;
@@ -292,10 +293,11 @@ class _ShapeDecorationPainter extends BoxPainter {
   List<Path> _shadowPaths;
   List<Paint> _shadowPaints;
 
-  void _precache(Rect rect) {
+  void _precache(Rect rect, TextDirection textDirection) {
     assert(rect != null);
-    if (rect == _lastRect)
+    if (rect == _lastRect && textDirection == _lastTextDirection)
       return;
+
     // We reach here in two cases:
     //  - the very first time we paint, in which case everything except _decoration is null
     //  - subsequent times, if the rect has changed, in which case we only need to update
@@ -328,7 +330,9 @@ class _ShapeDecorationPainter extends BoxPainter {
       _outerPath = _decoration.shape.getOuterPath(rect);
     if (_decoration.image != null)
       _innerPath = _decoration.shape.getInnerPath(rect);
+
     _lastRect = rect;
+    _lastTextDirection = textDirection;
   }
 
   void _paintShadows(Canvas canvas) {
@@ -362,10 +366,11 @@ class _ShapeDecorationPainter extends BoxPainter {
     assert(configuration != null);
     assert(configuration.size != null);
     final Rect rect = offset & configuration.size;
-    _precache(rect);
+    final TextDirection textDirection = configuration.textDirection;
+    _precache(rect, textDirection);
     _paintShadows(canvas);
     _paintInterior(canvas);
     _paintImage(canvas, configuration);
-    _decoration.shape.paint(canvas, rect);
+    _decoration.shape.paint(canvas, rect, textDirection: textDirection);
   }
 }
