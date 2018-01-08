@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:usage/usage_io.dart';
 
 import 'base/context.dart';
+import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/utils.dart';
@@ -19,11 +20,16 @@ const String _kFlutterUA = 'UA-67589403-6';
 Usage get flutterUsage => Usage.instance;
 
 class Usage {
-  /// Create a new Usage instance; [versionOverride] is used for testing.
-  Usage({ String settingsName: 'flutter', String versionOverride }) {
+  /// Create a new Usage instance; [versionOverride] and [configDirOverride] are
+  /// used for testing.
+  Usage({ String settingsName: 'flutter', String versionOverride, String configDirOverride}) {
     final FlutterVersion flutterVersion = FlutterVersion.instance;
     final String version = versionOverride ?? flutterVersion.getVersionString(whitelistBranchName: true);
-    _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version);
+    _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version,
+        // Analyzer doesn't recognize that [Directory] objects match up due to a
+        // conditional import.
+        // ignore: argument_type_not_assignable
+        documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null);
 
     // Report a more detailed OS version string than package:usage does by default.
     _analytics.setSessionValue('cd1', os.name);
@@ -33,19 +39,13 @@ class Usage {
     if (platform.environment.containsKey('FLUTTER_HOST')) {
       _analytics.setSessionValue('aiid', platform.environment['FLUTTER_HOST']);
     }
-
-    bool runningOnCI = false;
+    _analytics.analyticsOpt = AnalyticsOpt.optOut;
 
     // Many CI systems don't do a full git checkout.
-    if (version.endsWith('/unknown'))
-      runningOnCI = true;
-
-    // Check for common CI systems.
-    if (isRunningOnBot)
-      runningOnCI = true;
-
-    // If we think we're running on a CI system, default to not sending analytics.
-    _analytics.analyticsOpt = runningOnCI ? AnalyticsOpt.optIn : AnalyticsOpt.optOut;
+    if (version.endsWith('/unknown') || isRunningOnBot) {
+      // If we think we're running on a CI system, suppress sending analytics.
+      suppressAnalytics = true;
+    }
   }
 
   /// Returns [Usage] active in the current app context.
