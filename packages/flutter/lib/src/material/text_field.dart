@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'feedback.dart';
 import 'input_decorator.dart';
+import 'material.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
