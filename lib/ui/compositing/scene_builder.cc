@@ -32,6 +32,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, pushColorFilter)                  \
   V(SceneBuilder, pushBackdropFilter)               \
   V(SceneBuilder, pushShaderMask)                   \
+  V(SceneBuilder, pushPhysicalModel)                \
   V(SceneBuilder, pushPhysicalShape)                \
   V(SceneBuilder, pop)                              \
   V(SceneBuilder, addPicture)                       \
@@ -100,10 +101,20 @@ void SceneBuilder::pushShaderMask(Shader* shader,
       static_cast<SkBlendMode>(blendMode));
 }
 
+void SceneBuilder::pushPhysicalModel(const RRect& rrect,
+                                     double elevation,
+                                     int color) {
+  layer_builder_->PushPhysicalModel(
+      rrect.sk_rrect,               //
+      elevation,                    //
+      static_cast<SkColor>(color),  //
+      UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio);
+}
+
 void SceneBuilder::pushPhysicalShape(const CanvasPath* path,
                                      double elevation,
                                      int color) {
-  layer_builder_->PushPhysicalShape(
+  layer_builder_->PushPhysicalModel(
       path->path(),                 //
       elevation,                    //
       static_cast<SkColor>(color),  //

@@ -2,24 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/flow/layers/physical_shape_layer.h"
+#include "flutter/flow/layers/physical_model_layer.h"
 
 #include "flutter/flow/paint_utils.h"
 #include "third_party/skia/include/utils/SkShadowUtils.h"
 
 namespace flow {
 
-PhysicalShapeLayer::PhysicalShapeLayer() : isRect_(false) {}
+PhysicalModelLayer::PhysicalModelLayer() = default;
 
-PhysicalShapeLayer::~PhysicalShapeLayer() = default;
+PhysicalModelLayer::~PhysicalModelLayer() = default;
 
-void PhysicalShapeLayer::Preroll(PrerollContext* context,
+void PhysicalModelLayer::Preroll(PrerollContext* context,
                                  const SkMatrix& matrix) {
   SkRect child_paint_bounds;
   PrerollChildren(context, matrix, &child_paint_bounds);
 
   if (elevation_ == 0) {
-    set_paint_bounds(path_.getBounds());
+    set_paint_bounds(shape_->getBounds());
   } else {
 #if defined(OS_FUCHSIA)
     // Let the system compositor draw all shadows for us.
@@ -29,7 +29,7 @@ void PhysicalShapeLayer::Preroll(PrerollContext* context,
     // The margin is hardcoded to an arbitrary maximum for now because Skia
     // doesn't provide a way to calculate it.  We fill this whole region
     // and clip children to it so we don't need to join the child paint bounds.
-    SkRect bounds(path_.getBounds());
+    SkRect bounds(shape_->getBounds());
     bounds.outset(20.0, 20.0);
     set_paint_bounds(bounds);
 #endif  // defined(OS_FUCHSIA)
@@ -38,10 +38,11 @@ void PhysicalShapeLayer::Preroll(PrerollContext* context,
 
 #if defined(OS_FUCHSIA)
 
-void PhysicalShapeLayer::UpdateScene(SceneUpdateContext& context) {
+void PhysicalModelLayer::UpdateScene(SceneUpdateContext& context) {
   FXL_DCHECK(needs_system_composite());
 
-  SceneUpdateContext::Frame frame(context, frameRRect_, color_, elevation_);
+  SceneUpdateContext::Frame frame(context, shape_->getFrameRRect(), color_,
+                                  elevation_);
   for (auto& layer : layers()) {
     if (layer->needs_painting()) {
       frame.AddPaintedLayer(layer.get());
@@ -53,32 +54,34 @@ void PhysicalShapeLayer::UpdateScene(SceneUpdateContext& context) {
 
 #endif  // defined(OS_FUCHSIA)
 
-void PhysicalShapeLayer::Paint(PaintContext& context) const {
-  TRACE_EVENT0("flutter", "PhysicalShapeLayer::Paint");
+void PhysicalModelLayer::Paint(PaintContext& context) const {
+  TRACE_EVENT0("flutter", "PhysicalModelLayer::Paint");
   FXL_DCHECK(needs_painting());
 
+  SkPath path = shape_->getPath();
+
   if (elevation_ != 0) {
-    DrawShadow(&context.canvas, path_, SK_ColorBLACK, elevation_,
+    DrawShadow(&context.canvas, path, SK_ColorBLACK, elevation_,
                SkColorGetA(color_) != 0xff, device_pixel_ratio_);
   }
 
   SkPaint paint;
   paint.setColor(color_);
-  context.canvas.drawPath(path_, paint);
+  context.canvas.drawPath(path, paint);
 
   SkAutoCanvasRestore save(&context.canvas, false);
-  if (isRect_) {
+  if (shape_->isRect()) {
     context.canvas.save();
   } else {
-    context.canvas.saveLayer(path_.getBounds(), nullptr);
+    context.canvas.saveLayer(&shape_->getBounds(), nullptr);
   }
-  context.canvas.clipPath(path_, true);
+  shape_->clipCanvas(context.canvas);
   PaintChildren(context);
-  if (context.checkerboard_offscreen_layers && !isRect_)
-    DrawCheckerboard(&context.canvas, path_.getBounds());
+  if (context.checkerboard_offscreen_layers && !shape_->isRect())
+    DrawCheckerboard(&context.canvas, shape_->getBounds());
 }
 
-void PhysicalShapeLayer::DrawShadow(SkCanvas* canvas,
+void PhysicalModelLayer::DrawShadow(SkCanvas* canvas,
                                     const SkPath& path,
                                     SkColor color,
                                     float elevation,
@@ -93,6 +96,12 @@ void PhysicalShapeLayer::DrawShadow(SkCanvas* canvas,
   SkShadowUtils::DrawShadow(canvas, path, dpr * elevation,
                             SkPoint3::Make(shadow_x, shadow_y, dpr * 600.0f),
                             dpr * 800.0f, 0.039f, 0.25f, color, flags);
+}
+
+SkPath PhysicalLayerRRect::getPath() const {
+  SkPath path;
+  path.addRRect(rrect_);
+  return path;
 }
 
 }  // namespace flow

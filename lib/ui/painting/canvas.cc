@@ -6,7 +6,7 @@
 
 #include <math.h>
 
-#include "flutter/flow/layers/physical_shape_layer.h"
+#include "flutter/flow/layers/physical_model_layer.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -416,7 +416,7 @@ void Canvas::drawShadow(const CanvasPath* path,
         ToDart("Canvas.drawShader called with non-genuine Path."));
   SkScalar dpr =
       UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio;
-  flow::PhysicalShapeLayer::DrawShadow(canvas_, path->path(), color, elevation,
+  flow::PhysicalModelLayer::DrawShadow(canvas_, path->path(), color, elevation,
                                        transparentOccluder, dpr);
 }
 
