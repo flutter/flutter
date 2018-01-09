@@ -8,6 +8,14 @@
 /**
  BREAKING CHANGES:
 
+ January 09, 2018: Deprecated FlutterStandardBigInteger and its use in
+ FlutterStandardMessageCodec and FlutterStandardMethodCodec. Scheduled to
+ be marked as unavailable once the deprecation has been available on the
+ flutter/flutter alpha branch for four weeks. FlutterStandardBigInteger was
+ needed because the Dart 1.0 int type had no size limit. With Dart 2.0, the
+ int type is a fixed-size, 64-bit signed integer. If you need to communicate
+ larger integers, use NSString encoding instead.
+
  December 11, 2017: Deprecated "initWithFLXArchive" and
  "initWithFLXArchiveWithScriptSnapshot" and scheculed the same to be marked as
  unavailable on January 15, 2018. Instead, "initWithFlutterAssets" and
