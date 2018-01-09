@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -101,11 +101,11 @@ void main() {
           id: 1,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: null,
-          flags: <SemanticsFlags>[
-            SemanticsFlags.hasCheckedState,
-            SemanticsFlags.isChecked,
-            SemanticsFlags.hasEnabledState,
-            SemanticsFlags.isEnabled
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasCheckedState,
+            SemanticsFlag.isChecked,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled
           ],
           actions: SemanticsAction.tap.index,
           label: 'aaa\nAAA',
@@ -114,11 +114,11 @@ void main() {
           id: 4,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: new Matrix4.translationValues(0.0, 56.0, 0.0),
-          flags: <SemanticsFlags>[
-            SemanticsFlags.hasCheckedState,
-            SemanticsFlags.isChecked,
-            SemanticsFlags.hasEnabledState,
-            SemanticsFlags.isEnabled
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasCheckedState,
+            SemanticsFlag.isChecked,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled
           ],
           actions: SemanticsAction.tap.index,
           label: 'bbb\nBBB',
@@ -127,10 +127,10 @@ void main() {
           id: 7,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: new Matrix4.translationValues(0.0, 112.0, 0.0),
-          flags: <SemanticsFlags>[
-            SemanticsFlags.hasCheckedState,
-            SemanticsFlags.hasEnabledState,
-            SemanticsFlags.isEnabled
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasCheckedState,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled
           ],
           actions: SemanticsAction.tap.index,
           label: 'CCC\nccc',

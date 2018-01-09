@@ -4,7 +4,7 @@
 
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlags,
+import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag,
        TextDirection;
 
 import 'package:flutter/foundation.dart';
@@ -106,7 +106,7 @@ class SemanticsData extends Diagnosticable {
        assert(increasedValue == '' || textDirection != null, 'A SemanticsData object with increasedValue "$increasedValue" had a null textDirection.'),
        assert(rect != null);
 
-  /// A bit field of [SemanticsFlags] that apply to this node.
+  /// A bit field of [SemanticsFlag]s that apply to this node.
   final int flags;
 
   /// A bit field of [SemanticsAction]s that apply to this node.
@@ -157,7 +157,7 @@ class SemanticsData extends Diagnosticable {
   final Matrix4 transform;
 
   /// Whether [flags] contains the given flag.
-  bool hasFlag(SemanticsFlags flag) => (flags & flag.index) != 0;
+  bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
   /// Whether [actions] contains the given action.
   bool hasAction(SemanticsAction action) => (actions & action.index) != 0;
@@ -178,7 +178,7 @@ class SemanticsData extends Diagnosticable {
     properties.add(new IterableProperty<String>('actions', actionSummary, ifEmpty: null));
 
     final List<String> flagSummary = <String>[];
-    for (SemanticsFlags flag in SemanticsFlags.values.values) {
+    for (SemanticsFlag flag in SemanticsFlag.values.values) {
       if ((flags & flag.index) != 0)
         flagSummary.add(describeEnum(flag));
     }
@@ -856,7 +856,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   int _flags = _kEmptyConfig._flags;
 
-  bool _hasFlag(SemanticsFlags flag) => _flags & flag.index != 0;
+  bool _hasFlag(SemanticsFlag flag) => _flags & flag.index != 0;
 
   /// A textual description of this node.
   ///
@@ -1089,14 +1089,14 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
-    if (_hasFlag(SemanticsFlags.hasEnabledState))
-      properties.add(new FlagProperty('isEnabled', value: _hasFlag(SemanticsFlags.isEnabled), ifFalse: 'disabled'));
-    if (_hasFlag(SemanticsFlags.hasCheckedState))
-      properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlags.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
-    properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlags.isSelected), ifTrue: 'selected'));
-    properties.add(new FlagProperty('isFocused', value: _hasFlag(SemanticsFlags.isFocused), ifTrue: 'focused'));
-    properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlags.isButton), ifTrue: 'button'));
-    properties.add(new FlagProperty('isTextField', value: _hasFlag(SemanticsFlags.isTextField), ifTrue: 'textField'));
+    if (_hasFlag(SemanticsFlag.hasEnabledState))
+      properties.add(new FlagProperty('isEnabled', value: _hasFlag(SemanticsFlag.isEnabled), ifFalse: 'disabled'));
+    if (_hasFlag(SemanticsFlag.hasCheckedState))
+      properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlag.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
+    properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlag.isSelected), ifTrue: 'selected'));
+    properties.add(new FlagProperty('isFocused', value: _hasFlag(SemanticsFlag.isFocused), ifTrue: 'focused'));
+    properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlag.isButton), ifTrue: 'button'));
+    properties.add(new FlagProperty('isTextField', value: _hasFlag(SemanticsFlag.isTextField), ifTrue: 'textField'));
     properties.add(new StringProperty('label', _label, defaultValue: ''));
     properties.add(new StringProperty('value', _value, defaultValue: ''));
     properties.add(new StringProperty('increasedValue', _increasedValue, defaultValue: ''));
@@ -1747,9 +1747,9 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] is selected (true) or not (false).
-  bool get isSelected => _hasFlag(SemanticsFlags.isSelected);
+  bool get isSelected => _hasFlag(SemanticsFlag.isSelected);
   set isSelected(bool value) {
-    _setFlag(SemanticsFlags.isSelected, value);
+    _setFlag(SemanticsFlag.isSelected, value);
   }
 
   /// Whether the owning [RenderObject] is currently enabled.
@@ -1763,10 +1763,10 @@ class SemanticsConfiguration {
   ///
   /// The getter will return null if the owning [RenderObject] doesn't support
   /// the concept of being enabled/disabled.
-  bool get isEnabled => _hasFlag(SemanticsFlags.hasEnabledState) ? _hasFlag(SemanticsFlags.isEnabled) : null;
+  bool get isEnabled => _hasFlag(SemanticsFlag.hasEnabledState) ? _hasFlag(SemanticsFlag.isEnabled) : null;
   set isEnabled(bool value) {
-    _setFlag(SemanticsFlags.hasEnabledState, true);
-    _setFlag(SemanticsFlags.isEnabled, value);
+    _setFlag(SemanticsFlag.hasEnabledState, true);
+    _setFlag(SemanticsFlag.isEnabled, value);
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether
@@ -1777,28 +1777,28 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// checked/unchecked state.
-  bool get isChecked => _hasFlag(SemanticsFlags.hasCheckedState) ? _hasFlag(SemanticsFlags.isChecked) : null;
+  bool get isChecked => _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isChecked) : null;
   set isChecked(bool value) {
-    _setFlag(SemanticsFlags.hasCheckedState, true);
-    _setFlag(SemanticsFlags.isChecked, value);
+    _setFlag(SemanticsFlag.hasCheckedState, true);
+    _setFlag(SemanticsFlag.isChecked, value);
   }
 
   /// Whether the owning [RenderObject] currently holds the user's focus.
-  bool get isFocused => _hasFlag(SemanticsFlags.isFocused);
+  bool get isFocused => _hasFlag(SemanticsFlag.isFocused);
   set isFocused(bool value) {
-    _setFlag(SemanticsFlags.isFocused, value);
+    _setFlag(SemanticsFlag.isFocused, value);
   }
 
   /// Whether the owning [RenderObject] is a button (true) or not (false).
-  bool get isButton => _hasFlag(SemanticsFlags.isButton);
+  bool get isButton => _hasFlag(SemanticsFlag.isButton);
   set isButton(bool value) {
-    _setFlag(SemanticsFlags.isButton, value);
+    _setFlag(SemanticsFlag.isButton, value);
   }
 
   /// Whether the owning [RenderObject] is a text field.
-  bool get isTextField => _hasFlag(SemanticsFlags.isTextField);
+  bool get isTextField => _hasFlag(SemanticsFlag.isTextField);
   set isTextField(bool value) {
-    _setFlag(SemanticsFlags.isTextField, value);
+    _setFlag(SemanticsFlag.isTextField, value);
   }
 
   // TAGS
@@ -1836,7 +1836,7 @@ class SemanticsConfiguration {
   // INTERNAL FLAG MANAGEMENT
 
   int _flags = 0;
-  void _setFlag(SemanticsFlags flag, bool value) {
+  void _setFlag(SemanticsFlag flag, bool value) {
     if (value) {
       _flags |= flag.index;
     } else {
@@ -1845,7 +1845,7 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  bool _hasFlag(SemanticsFlags flag) => (_flags & flag.index) != 0;
+  bool _hasFlag(SemanticsFlag flag) => (_flags & flag.index) != 0;
 
   // CONFIGURATION COMBINATION LOGIC
 
