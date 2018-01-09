@@ -163,6 +163,9 @@ using namespace shell;
 }
 @end
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 @implementation FlutterStandardBigInteger
 + (instancetype)bigIntegerWithHex:(NSString*)hex {
   return [[[FlutterStandardBigInteger alloc] initWithHex:hex] autorelease];
@@ -469,3 +472,4 @@ using namespace shell;
   }
 }
 @end
+#pragma clang diagnostic pop
