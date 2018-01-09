@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' show SemanticsFlag;
 import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
@@ -200,8 +200,8 @@ String _getMessage(SemanticsNode node) {
   final List<String> annotations = <String>[];
 
   bool wantsTap = false;
-  if (data.hasFlag(SemanticsFlags.hasCheckedState)) {
-    annotations.add(data.hasFlag(SemanticsFlags.isChecked) ? 'checked' : 'unchecked');
+  if (data.hasFlag(SemanticsFlag.hasCheckedState)) {
+    annotations.add(data.hasFlag(SemanticsFlag.isChecked) ? 'checked' : 'unchecked');
     wantsTap = true;
   }
 

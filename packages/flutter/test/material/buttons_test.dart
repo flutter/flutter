@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +37,7 @@ void main() {
             label: 'ABC',
             rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
             transform: new Matrix4.translationValues(356.0, 282.0, 0.0),
-            flags: SemanticsFlags.isButton.index,
+            flags: SemanticsFlag.isButton.index,
           )
         ],
       ),
@@ -71,7 +71,7 @@ void main() {
             label: 'ABC',
             rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
             transform: new Matrix4.translationValues(356.0, 282.0, 0.0),
-            flags: SemanticsFlags.isButton.index,
+            flags: SemanticsFlag.isButton.index,
           )
         ]
       ),

@@ -292,7 +292,7 @@ void main() {
         new TestSemantics.rootChild(
           rect: new Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
           actions: <SemanticsAction>[SemanticsAction.tap],
-          flags: <SemanticsFlags>[SemanticsFlags.isButton],
+          flags: <SemanticsFlag>[SemanticsFlag.isButton],
           label: 'link',
         )
       ]

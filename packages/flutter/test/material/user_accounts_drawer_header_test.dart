@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -69,7 +69,7 @@ Future<Null> pumpTestWidget(WidgetTester tester, {
 void main() {
   testWidgets('UserAccountsDrawerHeader test', (WidgetTester tester) async {
     await pumpTestWidget(tester);
-    
+
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
@@ -351,7 +351,7 @@ void main() {
                   textDirection: TextDirection.ltr,
                 ),
                 new TestSemantics(
-                  flags: <SemanticsFlags>[SemanticsFlags.isButton],
+                  flags: <SemanticsFlag>[SemanticsFlag.isButton],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: r'Show accounts',
                   textDirection: TextDirection.ltr,
