@@ -145,8 +145,8 @@ const Matcher hasAGoodToStringDeep = const _HasGoodToStringDeep();
 /// See also:
 ///
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
+///  * [throwsArgumentError], to test if a functions throws an [ArgumentError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
-///  * [isAssertionError], to test if any object is any kind of [AssertionError].
 Matcher throwsFlutterError = throwsA(isFlutterError);
 
 /// A matcher for functions that throw [AssertionError].
@@ -156,7 +156,7 @@ Matcher throwsFlutterError = throwsA(isFlutterError);
 /// See also:
 ///
 ///  * [throwsFlutterError], to test if a function throws a [FlutterError].
-///  * [isFlutterError], to test if any object is a [FlutterError].
+///  * [throwsArgumentError], to test if a functions throws an [ArgumentError].
 ///  * [isAssertionError], to test if any object is any kind of [AssertionError].
 Matcher throwsAssertionError = throwsA(isAssertionError);
 
@@ -167,7 +167,6 @@ Matcher throwsAssertionError = throwsA(isAssertionError);
 /// See also:
 ///
 ///  * [throwsFlutterError], to test if a function throws a [FlutterError].
-///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [isAssertionError], to test if any object is any kind of [AssertionError].
 const Matcher isFlutterError = const isInstanceOf<FlutterError>();
 
@@ -177,7 +176,6 @@ const Matcher isFlutterError = const isInstanceOf<FlutterError>();
 ///
 /// See also:
 ///
-///  * [throwsFlutterError], to test if a function throws a [FlutterError].
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
 const Matcher isAssertionError = const isInstanceOf<AssertionError>();

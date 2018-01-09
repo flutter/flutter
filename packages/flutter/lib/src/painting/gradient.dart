@@ -45,9 +45,58 @@ _ColorsAndStops _interpolateColorsAndStops(List<Color> aColors, List<double> aSt
 ///    encapsulated by this class and its subclasses.
 @immutable
 abstract class Gradient {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const Gradient();
+  /// Initialize the gradient's colors and stops.
+  ///
+  /// The [colors] argument must not be null, and must have at least two colors
+  /// (the length is not verified until the [createShader] method is called).
+  ///
+  /// If specified, the [stops] argument must have the same number of entries as
+  /// [colors] (this is also not verified until the [createShader] method is
+  /// called).
+  const Gradient({
+    @required this.colors,
+    this.stops,
+  }) : assert(colors != null);
+
+  /// The colors the gradient should obtain at each of the stops.
+  ///
+  /// If [stops] is non-null, this list must have the same length as [stops].
+  ///
+  /// This list must have at least two colors in it (otherwise, it's not a
+  /// gradient!).
+  final List<Color> colors;
+
+  /// A list of values from 0.0 to 1.0 that denote fractions along the gradient.
+  ///
+  /// If non-null, this list must have the same length as [colors].
+  ///
+  /// If the first value is not 0.0, then a stop with position 0.0 and a color
+  /// equal to the first color in [colors] is implied.
+  ///
+  /// If the last value is not 1.0, then a stop with position 1.0 and a color
+  /// equal to the last color in [colors] is implied.
+  ///
+  /// The values in the [stops] list must be in ascending order. If a value in
+  /// the [stops] list is less than an earlier value in the list, then its value
+  /// is assumed to equal the previous value.
+  ///
+  /// If stops is null, then a set of uniformly distributed stops is implied,
+  /// with the first stop at 0.0 and the last stop at 1.0.
+  final List<double> stops;
+
+  List<double> _impliedStops() {
+    if (stops != null)
+      return stops;
+    if (colors.length == 2)
+      return null;
+    assert(colors.length >= 2, 'colors list must have at least two colors');
+    final double separation = 1.0 / (colors.length - 1);
+    return new List<double>.generate(
+      colors.length,
+      (int index) => index * separation,
+      growable: false,
+    );
+  }
 
   /// Creates a [Shader] for this gradient to fill the given rect.
   ///
@@ -175,9 +224,10 @@ abstract class Gradient {
 /// ui.Gradient.linear], whose arguments are expressed in logical pixels.)
 ///
 /// The [colors] are described by a list of [Color] objects. There must be at
-/// least two colors. If there are more than two, a [stops] list must be
-/// provided. It must have the same length as [colors], and specifies the
-/// position of each color stop between 0.0 and 1.0.
+/// least two colors. The [stops] list, if specified, must have the same length
+/// as [colors]. It specifies fractions of the vector from start to end, between
+/// 0.0 and 1.0, for each color. If it is null, a uniform distribution is
+/// assumed.
 ///
 /// The region of the canvas before [begin] and after [end] is colored according
 /// to [tileMode].
@@ -217,13 +267,13 @@ class LinearGradient extends Gradient {
   const LinearGradient({
     this.begin: Alignment.centerLeft,
     this.end: Alignment.centerRight,
-    @required this.colors,
-    this.stops,
+    @required List<Color> colors,
+    List<double> stops,
     this.tileMode: TileMode.clamp,
   }) : assert(begin != null),
        assert(end != null),
-       assert(colors != null),
-       assert(tileMode != null);
+       assert(tileMode != null),
+       super(colors: colors, stops: stops);
 
   /// The offset at which stop 0.0 of the gradient is placed.
   ///
@@ -255,32 +305,6 @@ class LinearGradient extends Gradient {
   /// method will need to be given a [TextDirection].
   final AlignmentGeometry end;
 
-  /// The colors the gradient should obtain at each of the stops.
-  ///
-  /// If [stops] is non-null, this list must have the same length as [stops]. If
-  /// [colors] has more than two colors, [stops] must be non-null.
-  ///
-  /// This list must have at least two colors in it (otherwise, it's not a
-  /// gradient!).
-  final List<Color> colors;
-
-  /// A list of values from 0.0 to 1.0 that denote fractions of the vector from
-  /// start to end.
-  ///
-  /// If non-null, this list must have the same length as [colors]. If
-  /// [colors] has more than two colors, [stops] must be non-null.
-  ///
-  /// If the first value is not 0.0, then a stop with position 0.0 and a color
-  /// equal to the first color in [colors] is implied.
-  ///
-  /// If the last value is not 1.0, then a stop with position 1.0 and a color
-  /// equal to the last color in [colors] is implied.
-  ///
-  /// The values in the [stops] list must be in ascending order. If a value in
-  /// the [stops] list is less than an earlier value in the list, then its value
-  /// is assumed to equal the previous value.
-  final List<double> stops;
-
   /// How this gradient should tile the plane beyond in the region before
   /// [begin] and after [end].
   ///
@@ -296,7 +320,7 @@ class LinearGradient extends Gradient {
     return new ui.Gradient.linear(
       begin.resolve(textDirection).withinRect(rect),
       end.resolve(textDirection).withinRect(rect),
-      colors, stops, tileMode,
+      colors, _impliedStops(), tileMode,
     );
   }
 
@@ -421,9 +445,10 @@ class LinearGradient extends Gradient {
 /// pixels.)
 ///
 /// The [colors] are described by a list of [Color] objects. There must be at
-/// least two colors. If there are more than two, a [stops] list must be
-/// provided. It must have the same length as [colors], and specifies the
-/// position of each color stop between 0.0 and 1.0.
+/// least two colors. The [stops] list, if specified, must have the same length
+/// as [colors]. It specifies fractions of the radius between 0.0 and 1.0,
+/// giving concentric rings for each color stop. If it is null, a uniform
+/// distribution is assumed.
 ///
 /// The region of the canvas beyond [radius] from the [center] is colored
 /// according to [tileMode].
@@ -469,13 +494,13 @@ class RadialGradient extends Gradient {
   const RadialGradient({
     this.center: Alignment.center,
     this.radius: 0.5,
-    @required this.colors,
-    this.stops,
+    @required List<Color> colors,
+    List<double> stops,
     this.tileMode: TileMode.clamp,
   }) : assert(center != null),
        assert(radius != null),
-       assert(colors != null),
-       assert(tileMode != null);
+       assert(tileMode != null),
+       super(colors: colors, stops: stops);
 
   /// The center of the gradient, as an offset into the (-1.0, -1.0) x (1.0, 1.0)
   /// square describing the gradient which will be mapped onto the paint box.
@@ -501,34 +526,6 @@ class RadialGradient extends Gradient {
   /// will place the 1.0 stop at 100.0 pixels from the [center].
   final double radius;
 
-  /// The colors the gradient should obtain at each of the stops.
-  ///
-  /// If [stops] is non-null, this list must have the same length as [stops]. If
-  /// [colors] has more than two colors, [stops] must be non-null.
-  ///
-  /// This list must have at least two colors in it (otherwise, it's not a
-  /// gradient!).
-  final List<Color> colors;
-
-  /// A list of values from 0.0 to 1.0 that denote concentric rings.
-  ///
-  /// The rings are centered at [center] and have a radius equal to the value of
-  /// the stop times [radius].
-  ///
-  /// If non-null, this list must have the same length as [colors]. If
-  /// [colors] has more than two colors, [stops] must be non-null.
-  ///
-  /// If the first value is not 0.0, then a stop with position 0.0 and a color
-  /// equal to the first color in [colors] is implied.
-  ///
-  /// If the last value is not 1.0, then a stop with position 1.0 and a color
-  /// equal to the last color in [colors] is implied.
-  ///
-  /// The values in the [stops] list must be in ascending order. If a value in
-  /// the [stops] list is less than an earlier value in the list, then its value
-  /// is assumed to equal the previous value.
-  final List<double> stops;
-
   /// How this gradient should tile the plane beyond the outer ring at [radius]
   /// pixels from the [center].
   ///
@@ -544,7 +541,7 @@ class RadialGradient extends Gradient {
     return new ui.Gradient.radial(
       center.resolve(textDirection).withinRect(rect),
       radius * rect.shortestSide,
-      colors, stops, tileMode,
+      colors, _impliedStops(), tileMode,
     );
   }
 
