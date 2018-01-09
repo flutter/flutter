@@ -536,6 +536,21 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   @protected
   bool debugBuildingDirtyElements = false;
 
+  /// Similar to [scheduleWarmUpFrame] except it locks all incoming events from
+  /// flushing until the frame finished.
+  void lockAndScheduleWarmUpFrame() {
+    developer.Timeline.startSync('Warm-up frame');
+    final Completer<Null> frameCompleter = new Completer<Null>();
+    lockEvents(() => frameCompleter.future);
+
+    scheduleWarmUpFrame();
+
+    endOfFrame.then((_) {
+      frameCompleter.complete();
+      developer.Timeline.finishSync();
+    });
+  }
+
   /// Pump the build and rendering pipeline to generate a frame.
   ///
   /// This method is called by [handleDrawFrame], which itself is called
@@ -688,7 +703,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
 void runApp(Widget app) {
   WidgetsFlutterBinding.ensureInitialized()
     ..attachRootWidget(app)
-    ..scheduleWarmUpFrame();
+    ..lockAndScheduleWarmUpFrame();
 }
 
 /// Print a string representation of the currently running app.
