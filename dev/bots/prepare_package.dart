@@ -8,8 +8,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:args/args.dart';
-import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
 const String CHROMIUM_REPO =
@@ -35,8 +35,11 @@ class ArchiveCreator {
   /// [_tempDir] is the directory to use for creating the archive.  The script
   /// will place several GiB of data there, so it should have available space.
   ///
-  /// The starter argument is used to inject a mock of [Process.start] for
+  /// The processManager argument is used to inject a mock of [ProcessManager] for
   /// testing purposes.
+  ///
+  /// If subprocessOutput is true, then output from processes invoked during
+  /// archive creation is echoed to stderr and stdout.
   ArchiveCreator(this._tempDir, {ProcessManager processManager, bool subprocessOutput: true})
       : _flutterRoot = new Directory(path.join(_tempDir.path, 'flutter')),
         _processManager = processManager ?? const LocalProcessManager(),
@@ -44,7 +47,7 @@ class ArchiveCreator {
     _flutter = path.join(
       _flutterRoot.absolute.path,
       'bin',
-      Platform.isWindows ? 'flutter.bat' : 'flutter',
+      'flutter',
     );
     _environment = new Map<String, String>.from(Platform.environment);
     _environment['PUB_CACHE'] = path.join(_flutterRoot.absolute.path, '.pub-cache');
@@ -55,12 +58,11 @@ class ArchiveCreator {
   final bool _subprocessOutput;
   final ProcessManager _processManager;
   String _flutter;
-  final String _git = Platform.isWindows ? 'git.bat' : 'git';
-  final String _zip = Platform.isWindows ? '7za.exe' : 'zip';
-  final String _tar = Platform.isWindows ? 'tar.exe' : 'tar';
   final Uri _minGitUri = Uri.parse(MINGIT_FOR_WINDOWS_URL);
   Map<String, String> _environment;
 
+  /// Returns a default archive name when given a Git revision.
+  /// Used when an output filename is not given.
   static String defaultArchiveName(String revision) {
     final String os = Platform.operatingSystem.toLowerCase();
     final String id = revision.length > 10 ? revision.substring(0, 10) : revision;
@@ -142,46 +144,49 @@ class ArchiveCreator {
   Future<String> _runFlutter(List<String> args) => _runProcess(<String>[_flutter]..addAll(args));
 
   Future<String> _runGit(List<String> args, {Directory workingDirectory}) {
-    return _runProcess(<String>[_git]..addAll(args), workingDirectory: workingDirectory);
+    return _runProcess(<String>['git']..addAll(args), workingDirectory: workingDirectory);
   }
 
+  /// Unpacks the given zip file into the currentDirectory (if set), or the
+  /// same directory as the archive.
+  ///
+  /// May only be run on Windows (since 7Zip is not available on other platforms).
   Future<String> _unzipArchive(File archive, {Directory currentDirectory}) {
+    assert(Platform.isWindows);  // 7Zip is only available on Windows.
     currentDirectory ??= new Directory(path.dirname(archive.absolute.path));
-    final List<String> commandLine = <String>[];
-    if (_zip == 'zip') {
-      commandLine.add('unzip');
-    } else {
-      commandLine.addAll(<String>[_zip, 'x']);
-    }
-    commandLine.add(archive.absolute.path);
-
+    final List<String> commandLine = <String>['7za', 'x', archive.absolute.path];
     return _runProcess(commandLine, workingDirectory: currentDirectory);
   }
 
+  /// Create a zip archive from the directory source.
+  ///
+  /// May only be run on Windows (since 7Zip is not available on other platforms).
   Future<String> _createZipArchive(File output, Directory source) {
-    final List<String> commandLine = <String>[_zip];
-    if (_zip == 'zip') {
-      commandLine.addAll(<String>['-r', '-9', '-q']);
-    } else {
-      commandLine.addAll(<String>['a', '-tzip', '-mx=9']);
-    }
-    commandLine.addAll(<String>[
+    assert(Platform.isWindows);  // 7Zip is only available on Windows.
+    final List<String> commandLine = <String>[
+      '7za',
+      'a',
+      '-tzip',
+      '-mx=9',
       output.absolute.path,
       path.basename(source.absolute.path),
-    ]);
+    ];
     return _runProcess(commandLine,
         workingDirectory: new Directory(path.dirname(source.absolute.path)));
   }
 
+  /// Create a tar archive from the directory source.
   Future<String> _createTarArchive(File output, Directory source) {
     return _runProcess(<String>[
-      _tar,
+      'tar',
       'cJf',
       output.absolute.path,
       path.basename(source.absolute.path),
     ], workingDirectory: new Directory(path.dirname(source.absolute.path)));
   }
 
+  /// Run the command and arguments in commandLine as a sub-process from
+  /// workingDirectory if set, or the current directory if not.
   Future<String> _runProcess(List<String> commandLine, {Directory workingDirectory}) async {
     workingDirectory ??= _flutterRoot;
     if (_subprocessOutput) {
@@ -226,8 +231,6 @@ class ArchiveCreator {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n${e.toString()}';
       throw new ProcessFailedException(message, -1);
-    } catch (e) {
-      rethrow;
     }
 
     final int exitCode = await allComplete();
@@ -236,7 +239,7 @@ class ArchiveCreator {
           'failed with $exitCode.';
       throw new ProcessFailedException(message, exitCode);
     }
-    return new Future<String>.value(UTF8.decoder.convert(output).trim());
+    return UTF8.decoder.convert(output).trim();
   }
 }
 
@@ -325,8 +328,6 @@ Future<Null> main(List<String> argList) async {
   } on ProcessFailedException catch (e) {
     exitCode = e.exitCode;
     message = e.message;
-  } catch (e) {
-    rethrow;
   } finally {
     if (removeTempDir) {
       tempDir.deleteSync(recursive: true);

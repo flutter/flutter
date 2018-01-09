@@ -22,9 +22,6 @@ void main() {
     List<MockProcess> results = <MockProcess>[];
     final List<List<String>> args = <List<String>>[];
     final List<Map<Symbol, dynamic>> namedArgs = <Map<Symbol, dynamic>>[];
-    final String zipExe = Platform.isWindows ? '7za.exe' : 'zip';
-    final String tarExe = Platform.isWindows ? 'tar.exe' : 'tar';
-    final String gitExe = Platform.isWindows ? 'git.bat' : 'git';
     String flutterExe;
 
     void _verifyCommand(List<dynamic> args, String expected) {
@@ -59,7 +56,7 @@ void main() {
       flutterDir = new Directory(path.join(tmpDir.path, 'flutter'));
       flutterDir.createSync(recursive: true);
       flutterExe =
-          path.join(flutterDir.path, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+          path.join(flutterDir.path, 'bin', 'flutter');
     });
 
     tearDown(() async {
@@ -92,13 +89,13 @@ void main() {
       _answerWithResults();
       await preparer.createArchive('master', outputFile);
       final List<String> commands = <String>[
-        '$gitExe clone -b master https://chromium.googlesource.com/external/github.com/flutter/flutter',
-        '$gitExe reset --hard master',
-        '$gitExe remote remove origin',
-        '$gitExe remote add origin https://github.com/flutter/flutter.git',
+        'git clone -b master https://chromium.googlesource.com/external/github.com/flutter/flutter',
+        'git reset --hard master',
+        'git remote remove origin',
+        'git remote add origin https://github.com/flutter/flutter.git',
       ];
       if (Platform.isWindows) {
-        commands.add('$zipExe x ${path.join(tmpDir.path, 'mingit.zip')}');
+        commands.add('7za x ${path.join(tmpDir.path, 'mingit.zip')}');
       }
       commands.addAll(<String>[
         '$flutterExe doctor',
@@ -108,12 +105,12 @@ void main() {
         '$flutterExe create --template=app ${path.join(tmpDir.path, 'create_app')}',
         '$flutterExe create --template=package ${path.join(tmpDir.path, 'create_package')}',
         '$flutterExe create --template=plugin ${path.join(tmpDir.path, 'create_plugin')}',
-        '$gitExe clean -f -X **/.packages',
+        'git clean -f -X **/.packages',
       ]);
       if (Platform.isWindows) {
-        commands.add('$zipExe a -tzip -mx=9 ${outputFile.absolute.path} flutter');
+        commands.add('7za a -tzip -mx=9 ${outputFile.absolute.path} flutter');
       } else {
-        commands.add('$tarExe cJf ${outputFile.absolute.path} flutter');
+        commands.add('tar cJf ${outputFile.absolute.path} flutter');
       }
       int step = 0;
       for (String command in commands) {
