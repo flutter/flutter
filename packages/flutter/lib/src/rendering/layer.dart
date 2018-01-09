@@ -796,7 +796,6 @@ class PhysicalModelLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Path>('clipPath', clipPath));
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
   }
