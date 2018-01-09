@@ -92,11 +92,13 @@ void main() {
 
   test('2 calls to scheduleWarmUpFrame just schedules it once', () {
     final List<VoidCallback> timerQueueTasks = <VoidCallback>[];
+    bool taskExecuted = false;
     runZoned(
       () {
         // Run it twice without processing the queued tasks.
         scheduler.scheduleWarmUpFrame();
         scheduler.scheduleWarmUpFrame();
+        scheduler.scheduleTask(() { taskExecuted = true; }, Priority.touch);
       },
       zoneSpecification: new ZoneSpecification(
         createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
@@ -107,7 +109,9 @@ void main() {
       ),
     );
 
-    // A single call to scheduleWarmUpFrame queues up 2 Timer tasks.
+    // scheduleWarmUpFrame scheduled 2 Timers, scheduleTask scheduled 0 because
+    // events are locked.
     expect(timerQueueTasks.length, 2);
+    expect(taskExecuted, false);
   });
 }
