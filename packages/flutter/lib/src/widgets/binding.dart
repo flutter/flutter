@@ -688,7 +688,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
 void runApp(Widget app) {
   WidgetsFlutterBinding.ensureInitialized()
     ..attachRootWidget(app)
-    ..lockAndScheduleWarmUpFrame();
+    ..scheduleWarmUpFrame();
 }
 
 /// Print a string representation of the currently running app.

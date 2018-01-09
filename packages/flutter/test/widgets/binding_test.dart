@@ -149,7 +149,7 @@ void main() {
       ),
     ));
 
-    tester.binding.lockAndScheduleWarmUpFrame();
+    tester.binding.scheduleWarmUpFrame();
 
     try {
       await tester.tapAt(const Offset(300.0, 200.0));
