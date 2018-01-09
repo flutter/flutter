@@ -37,10 +37,12 @@ void main() {
 
     await flingDown(tester);
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown]));
+
+    semantics.dispose();
   });
 
   testWidgets('showOnScreen works in scrollable', (WidgetTester tester) async {
-    new SemanticsTester(tester); // enables semantics tree generation
+    final SemanticsTester semantics = new SemanticsTester(tester); // enables semantics tree generation
 
     const double kItemHeight = 40.0;
 
@@ -73,10 +75,12 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
 
     expect(scrollController.offset, 0.0);
+
+    semantics.dispose();
   });
 
   testWidgets('showOnScreen works with pinned app bar and sliver list', (WidgetTester tester) async {
-    new SemanticsTester(tester); // enables semantics tree generation
+    final SemanticsTester semantics = new SemanticsTester(tester); // enables semantics tree generation
 
     const double kItemHeight = 100.0;
     const double kExpandedAppBarHeight = 56.0;
@@ -131,10 +135,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
     expect(tester.getTopLeft(find.byWidget(containers[1])).dy, kExpandedAppBarHeight);
+
+    semantics.dispose();
   });
 
   testWidgets('showOnScreen works with pinned app bar and individual slivers', (WidgetTester tester) async {
-    new SemanticsTester(tester); // enables semantics tree generation
+    final SemanticsTester semanticsTester = new SemanticsTester(tester); // enables semantics tree generation
 
     const double kItemHeight = 100.0;
     const double kExpandedAppBarHeight = 256.0;
@@ -195,6 +201,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
     expect(tester.getTopLeft(find.byWidget(semantics[1])).dy, kToolbarHeight);
+
+    semanticsTester.dispose();
   });
 
   testWidgets('vertical scrolling sends ScrollCompletedSemanticsEvent', (WidgetTester tester) async {
@@ -310,6 +318,42 @@ void main() {
     expect(semantics, includesNodeWith(label: 'Item 1'));
     expect(semantics, includesNodeWith(label: 'Item 2'));
     expect(semantics, includesNodeWith(label: 'Item 3'));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Can toggle semantics on, off, on without crash',  (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          children: new List<Widget>.generate(40, (int i) {
+            return new Container(
+              child: new Text('item $i'),
+              height: 40.0,
+            );
+          }),
+        ),
+      ),
+    );
+
+    // Start with semantics off.
+    expect(tester.binding.pipelineOwner.semanticsOwner, isNull);
+
+    // Semantics on
+    SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpAndSettle();
+    expect(tester.binding.pipelineOwner.semanticsOwner, isNotNull);
+
+    // Semantics off
+    semantics.dispose();
+    await tester.pumpAndSettle();
+    expect(tester.binding.pipelineOwner.semanticsOwner, isNull);
+
+    // Semantics on
+    semantics = new SemanticsTester(tester);
+    await tester.pumpAndSettle();
+    expect(tester.binding.pipelineOwner.semanticsOwner, isNotNull);
 
     semantics.dispose();
   });

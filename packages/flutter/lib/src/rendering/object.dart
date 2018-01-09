@@ -2220,6 +2220,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Removes all semantics from this render object and its descendants.
   ///
   /// Should only be called on objects whose [parent] is not a [RenderObject].
+  ///
+  /// Override this method if you instantiate new [SemanticsNode]s in an
+  /// overridden [assembleSemanticsNode] method to dispose those nodes.
+  @mustCallSuper
   void clearSemantics() {
     _needsSemanticsUpdate = true;
     _semantics = null;
@@ -2399,7 +2403,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// `children` to it.
   ///
   /// Subclasses can override this method to add additional [SemanticsNode]s
-  /// to the tree.
+  /// to the tree. If new [SemanticsNode]s are instantiated in this method
+  /// you'll also have to override [clearSemantics] and dispose those nodes
+  /// there.
   void assembleSemanticsNode(
       SemanticsNode node,
       SemanticsConfiguration config,
