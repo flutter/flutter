@@ -1426,9 +1426,10 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
       _updateClip();
       final RRect offsetClipRRect = _clip.shift(offset);
       final Rect offsetBounds = offsetClipRRect.outerRect;
+      final Path offsetClipPath = new Path()..addRRect(offsetClipRRect);
       if (needsCompositing) {
         final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
-          clipRRect: offsetClipRRect,
+          clipPath: offsetClipPath,
           elevation: elevation,
           color: color,
         );
@@ -1445,7 +1446,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
             _transparentPaint,
           );
           canvas.drawShadow(
-            new Path()..addRRect(offsetClipRRect),
+            offsetClipPath,
             shadowColor,
             elevation,
             color.alpha != 0xFF,
