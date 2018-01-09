@@ -310,10 +310,10 @@ void main() {
     ));
 
     // disabled button
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
-      child: new Material(
-        child: new Center(
+      child: const Material(
+        child: const Center(
           child: const MaterialButton(
             child: const Text('Button'),
             onPressed: null, // button is disabled
