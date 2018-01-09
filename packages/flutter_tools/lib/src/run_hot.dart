@@ -679,6 +679,7 @@ class HotRunner extends ResidentRunner {
       reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,
       reloadMessage,
       hint: unusedElementMessage,
+      hintId: unusedElementMessage != null ? 'restartRecommended' : null,
     );
   }
 
