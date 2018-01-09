@@ -136,4 +136,27 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isFalse);
     expect(frameCount, 1);
   });
+
+  testWidgets('touch events not delivered during warm up frame', (WidgetTester tester) async {
+    bool tapped = false;
+    await tester.pumpWidget(new GestureDetector(
+      onTap: () {
+        tapped = true;
+      },
+      child: new Container(
+        width: 800.0,
+        height: 600.0,
+      ),
+    ));
+
+    tester.binding.lockAndScheduleWarmUpFrame();
+
+    try {
+      await tester.tapAt(const Offset(300.0, 200.0));
+      fail('Assert not locked expected to fail');
+    } on AssertionError {
+      // Expected GestureBinding to still be locked.
+      expect(tapped, false);
+    }
+  });
 }

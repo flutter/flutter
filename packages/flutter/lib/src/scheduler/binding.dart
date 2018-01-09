@@ -702,6 +702,21 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
     });
   }
 
+  /// Similar to [scheduleWarmUpFrame] except it locks all incoming events from
+  /// flushing until the frame finished asynchronously.
+  void lockAndScheduleWarmUpFrame() {
+    Timeline.startSync('Warm-up frame');
+    final Completer<Null> frameCompleter = new Completer<Null>();
+    lockEvents(() => frameCompleter.future);
+
+    scheduleWarmUpFrame();
+
+    endOfFrame.then((_) {
+      frameCompleter.complete();
+      Timeline.finishSync();
+    });
+  }
+
   Duration _firstRawTimeStampInEpoch;
   Duration _epochStart = Duration.ZERO;
   Duration _lastRawTimeStamp = Duration.ZERO;
