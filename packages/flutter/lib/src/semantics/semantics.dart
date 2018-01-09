@@ -106,7 +106,7 @@ class SemanticsData extends Diagnosticable {
        assert(increasedValue == '' || textDirection != null, 'A SemanticsData object with increasedValue "$increasedValue" had a null textDirection.'),
        assert(rect != null);
 
-  /// A bit field of [SemanticsFlag] that apply to this node.
+  /// A bit field of [SemanticsFlag]s that apply to this node.
   final int flags;
 
   /// A bit field of [SemanticsAction]s that apply to this node.

@@ -122,7 +122,7 @@ class TestSemantics {
   /// they are created.
   final int id;
 
-  /// The [SemanticsFlag] set on this node.
+  /// The [SemanticsFlag]s set on this node.
   ///
   /// There are two ways to specify this property: as an `int` that encodes the
   /// flags as a bit field, or as a `List<SemanticsFlag>` that are _on_.
