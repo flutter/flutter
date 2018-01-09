@@ -2565,37 +2565,6 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
        _onVerticalDragUpdate = onVerticalDragUpdate,
        super(child);
 
-  /// When a [SemanticsNode] that is a direct child of this object's
-  /// [SemanticsNode] is tagged with [excludeFromScrolling] it will not be
-  /// part of the scrolling area for semantic purposes.
-  ///
-  /// This behavior is only active if the [SemanticsNode] of this
-  /// [RenderSemanticsGestureHandler] is tagged with [useTwoPaneSemantics].
-  /// Otherwise, the [excludeFromScrolling] tag is ignored.
-  ///
-  /// As an example, a [RenderSliver] that stays on the screen within a
-  /// [Scrollable] even though the user has scrolled past it (e.g. a pinned app
-  /// bar) can tag its [SemanticsNode] with [excludeFromScrolling] to indicate
-  /// that it should no longer be considered for semantic actions related to
-  /// scrolling.
-  static const SemanticsTag excludeFromScrolling = const SemanticsTag('RenderSemanticsGestureHandler.excludeFromScrolling');
-
-  /// If the [SemanticsNode] of this [RenderSemanticsGestureHandler] is tagged
-  /// with [useTwoPaneSemantics], two semantics nodes will be used to represent
-  /// this render object in the semantics tree.
-  ///
-  /// Two semantics nodes are necessary to exclude certain child nodes (via the
-  /// [excludeFromScrolling] tag) from the scrollable area for semantic
-  /// purposes.
-  ///
-  /// If this tag is used, the first "outer" semantics node is the regular node
-  /// of this object. The second "inner" node is introduced as a child to that
-  /// node. All scrollable children become children of the inner node, which has
-  /// the semantic scrolling logic enabled. All children that have been
-  /// excluded from scrolling with [excludeFromScrolling] are turned into
-  /// children of the outer node.
-  static const SemanticsTag useTwoPaneSemantics = const SemanticsTag('RenderSemanticsGestureHandler.twoPane');
-
   /// If non-null, the set of actions to allow. Other actions will be omitted,
   /// even if their callback is provided.
   ///
@@ -2673,23 +2642,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   /// leftwards drag.
   double scrollFactor;
 
-  bool get _hasHandlers {
-    return onTap != null
-        || onLongPress != null
-        || onHorizontalDragUpdate != null
-        || onVerticalDragUpdate != null;
-  }
-
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-
-    config.isSemanticBoundary = _hasHandlers;
-
-    // TODO(goderbauer): this needs to be set even when there is only potential
-    //    for this to become a scroll view.
-    config.explicitChildNodes = onHorizontalDragUpdate != null
-        || onVerticalDragUpdate != null;
 
     if (onTap != null && _isValidAction(SemanticsAction.tap))
       config.onTap = onTap;
@@ -2711,42 +2666,6 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
 
   bool _isValidAction(SemanticsAction action) {
     return validActions == null || validActions.contains(action);
-  }
-
-  SemanticsNode _innerNode;
-  SemanticsNode _annotatedNode;
-
-  /// Sends a [SemanticsEvent] in the context of the [SemanticsNode] that is
-  /// annotated with this object's semantics information.
-  void sendSemanticsEvent(SemanticsEvent event) {
-    _annotatedNode?.sendEvent(event);
-  }
-
-  @override
-  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
-    if (children.isEmpty || !children.first.isTagged(useTwoPaneSemantics)) {
-      _annotatedNode = node;
-      super.assembleSemanticsNode(node, config, children);
-      return;
-    }
-
-    _innerNode ??= new SemanticsNode(showOnScreen: showOnScreen);
-    _innerNode
-      ..isMergedIntoParent = node.isPartOfNodeMerging
-      ..rect = Offset.zero & node.rect.size;
-    _annotatedNode = _innerNode;
-
-    final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
-    final List<SemanticsNode> included = <SemanticsNode>[];
-    for (SemanticsNode child in children) {
-      assert(child.isTagged(useTwoPaneSemantics));
-      if (child.isTagged(excludeFromScrolling))
-        excluded.add(child);
-      else
-        included.add(child);
-    }
-    node.updateWith(config: null, childrenInInversePaintOrder: excluded);
-    _innerNode.updateWith(config: config, childrenInInversePaintOrder: included);
   }
 
   void _performSemanticScrollLeft() {

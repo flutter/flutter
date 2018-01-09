@@ -281,7 +281,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     if (_semanticsScrollEventScheduled)
       return;
     SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-      _gestureDetectorKey.currentState?.sendSemanticsEvent(new ScrollCompletedSemanticsEvent(
+      final _RenderExcludableScrollSemantics render = _excludableScrollSemanticsKey.currentContext?.findRenderObject();
+      render?.sendSemanticsEvent(new ScrollCompletedSemanticsEvent(
         axis: position.axis,
         pixels: position.pixels,
         minScrollExtent: position.minScrollExtent,
@@ -332,7 +333,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
 
-  // SEMANTICS ACTIONS
+  // SEMANTICS
+
+  final GlobalKey _excludableScrollSemanticsKey = new GlobalKey();
 
   @override
   @protected
@@ -487,18 +490,24 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     assert(position != null);
     // TODO(ianh): Having all these global keys is sad.
-    final Widget result = new RawGestureDetector(
-      key: _gestureDetectorKey,
-      gestures: _gestureRecognizers,
-      behavior: HitTestBehavior.opaque,
-      child: new IgnorePointer(
-        key: _ignorePointerKey,
-        ignoring: _shouldIgnorePointer,
-        ignoringSemantics: false,
-        child: new _ScrollableScope(
-          scrollable: this,
-          position: position,
-          child: widget.viewportBuilder(context, position),
+    final Widget result = new _ExcludableScrollSemantics(
+      key: _excludableScrollSemanticsKey,
+      child: new RawGestureDetector(
+        key: _gestureDetectorKey,
+        gestures: _gestureRecognizers,
+        behavior: HitTestBehavior.opaque,
+        child: new Semantics(
+          explicitChildNodes: true,
+          child: new IgnorePointer(
+            key: _ignorePointerKey,
+            ignoring: _shouldIgnorePointer,
+            ignoringSemantics: false,
+            child: new _ScrollableScope(
+              scrollable: this,
+              position: position,
+              child: widget.viewportBuilder(context, position),
+            ),
+          ),
         ),
       ),
     );
@@ -509,5 +518,72 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<ScrollPosition>('position', position));
+  }
+}
+
+/// With [_ExcludableScrollSemantics] certain child [SemanticsNode]s can be
+/// excluded from the scrollable area for semantics purposes.
+///
+/// Nodes, that are to be excluded, have to be tagged with
+/// [RenderViewport.excludeFromScrolling] and the [RenderAbstractViewport] in
+/// use has to add the [RenderViewport.useTwoPaneSemantics] tag to its
+/// [SemanticsConfiguration] by overriding
+/// [RenderObject.describeSemanticsConfiguration].
+///
+/// If the tag [RenderViewport.useTwoPaneSemantics] is present on the viewport,
+/// two semantics nodes will be used to represent the [Scrollable]: The outer
+/// node will contain all children, that are excluded from scrolling. The inner
+/// node, which is annotated with the scrolling actions, will house the
+/// scrollable children.
+class _ExcludableScrollSemantics extends SingleChildRenderObjectWidget {
+  const _ExcludableScrollSemantics({ Key key, Widget child }) : super(key: key, child: child);
+
+  @override
+  _RenderExcludableScrollSemantics createRenderObject(BuildContext context) => new _RenderExcludableScrollSemantics();
+}
+
+class _RenderExcludableScrollSemantics extends RenderProxyBox {
+  _RenderExcludableScrollSemantics({ RenderBox child }) : super(child);
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+  }
+
+  SemanticsNode _innerNode;
+  SemanticsNode _annotatedNode;
+
+  @override
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+    if (children.isEmpty || !children.first.isTagged(RenderViewport.useTwoPaneSemantics)) {
+      _annotatedNode = node;
+      super.assembleSemanticsNode(node, config, children);
+      return;
+    }
+
+    _innerNode ??= new SemanticsNode(showOnScreen: showOnScreen);
+    _innerNode
+      ..isMergedIntoParent = node.isPartOfNodeMerging
+      ..rect = Offset.zero & node.rect.size;
+    _annotatedNode = _innerNode;
+
+    final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
+    final List<SemanticsNode> included = <SemanticsNode>[];
+    for (SemanticsNode child in children) {
+      assert(child.isTagged(RenderViewport.useTwoPaneSemantics));
+      if (child.isTagged(RenderViewport.excludeFromScrolling))
+        excluded.add(child);
+      else
+        included.add(child);
+    }
+    node.updateWith(config: null, childrenInInversePaintOrder: excluded);
+    _innerNode.updateWith(config: config, childrenInInversePaintOrder: included);
+  }
+
+  /// Sends a [SemanticsEvent] in the context of the [SemanticsNode] that is
+  /// annotated with this object's semantics information.
+  void sendSemanticsEvent(SemanticsEvent event) {
+    _annotatedNode?.sendEvent(event);
   }
 }

@@ -48,8 +48,14 @@ void main() {
                 id: 2,
                 label: 'Button',
                 textDirection: TextDirection.ltr,
-                actions: SemanticsAction.tap.index,
-                flags: SemanticsFlag.isButton.index,
+                actions: <SemanticsAction>[
+                  SemanticsAction.tap,
+                ],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isButton,
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isEnabled,
+                ],
               ),
             ],
           ),
