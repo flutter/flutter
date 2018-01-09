@@ -194,7 +194,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   bool verifyZip(File zipFile) {
     try {
       new ZipDecoder().decodeBytes(zipFile.readAsBytesSync(), verify: true);
-    } catch (ArchiveException) {
+    } on ArchiveException catch (_) {
       return false;
     }
     return true;
@@ -212,7 +212,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   bool verifyGzip(File gzipFile) {
     try {
       new GZipDecoder().decodeBytes(gzipFile.readAsBytesSync(), verify: true);
-    } catch (ArchiveException) {
+    } on ArchiveException catch (_) {
       return false;
     }
     return true;
