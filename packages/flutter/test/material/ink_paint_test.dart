@@ -154,8 +154,6 @@ void main() {
       throw '''
         Expected: center == $expectedCenter, radius == $expectedRadius, alpha == 180
         Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
-      return true;
-      throw 'FAILED';
     }));
 
     // After another 150ms the fade-out is complete.

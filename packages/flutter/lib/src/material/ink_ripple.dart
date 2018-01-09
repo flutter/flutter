@@ -49,14 +49,16 @@ double _getRippleRadiusForPositionInSize(Size bounds, Offset position) {
 
 /// A visual reaction on a piece of [Material] to user input.
 ///
-/// A circular in feature whose origin starts at the input touch point and
-/// whose radius expands from 60% of the final radius. The splash's origin
-/// animates to the center.
+/// A circular ink feature whose origin starts at the input touch point and
+/// whose radius expands from 60% of the final radius. The splash origin
+/// animates to the center of its [referenceBox].
 ///
-/// This object is rarely created directly. Instead of creating an ink ripple
-/// directly, consider using an [InkResponse] or [InkWell] widget, which uses
+/// This object is rarely created directly. Instead of creating an ink ripple,
+/// consider using an [InkResponse] or [InkWell] widget, which uses
 /// gestures (such as tap and long-press) to trigger ink splashes. This class
 /// is used when the [Theme]'s [ThemeData.splashType] is [InkSplashType.ripple].
+///
+/// See also:
 ///
 ///  * [InkSplash], which is an ink splash feature that expands less
 ///    aggressively than the ripple.
@@ -68,24 +70,23 @@ double _getRippleRadiusForPositionInSize(Size bounds, Offset position) {
 ///  * [InkHighlight], which is an ink feature that emphasizes a part of a
 ///    [Material].
  class InkRipple extends InkFeature {
-  /// Begin a ripple, centered at position relative to [referenceBox].
+  /// Begin a ripple, centered at [position] relative to [referenceBox].
   ///
   /// The [controller] argument is typically obtained via
   /// `Material.of(context)`.
   ///
-  /// If `containedInkWell` is true, then the ripple will be sized to fit
+  /// If [containedInkWell] is true, then the ripple will be sized to fit
   /// the well rectangle, then clipped to it when drawn. The well
-  /// rectangle is the box returned by `rectCallback`, if provided, or
+  /// rectangle is the box returned by [rectCallback], if provided, or
   /// otherwise is the bounds of the [referenceBox].
   ///
-  /// If `containedInkWell` is false, then `rectCallback` should be null.
+  /// If [containedInkWell] is false, then [rectCallback] should be null.
   /// The ink ripple is clipped only to the edges of the [Material].
   /// This is the default.
   ///
-  /// When the ripple is removed, `onRemoved` will be called.
+  /// When the ripple is removed, [onRemoved] will be called.
   InkRipple({
     @required MaterialInkController controller,
-
     @required RenderBox referenceBox,
     Offset position,
     Color color,
@@ -159,9 +160,6 @@ double _getRippleRadiusForPositionInSize(Size bounds, Offset position) {
   Animation<int> _fadeOut;
   AnimationController _fadeOutController;
 
-  /// The user input is confirmed.
-  ///
-  /// Causes the reaction to propagate faster across the material.
   @override
   void confirm() {
     _radiusController
