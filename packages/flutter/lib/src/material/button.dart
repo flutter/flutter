@@ -332,7 +332,7 @@ class _MaterialButtonState extends State<MaterialButton> {
           child: new Center(
             widthFactor: 1.0,
             heightFactor: 1.0,
-            child: new Semantics(button: true, child: widget.child),
+            child: widget.child,
           )
         )
       )
@@ -352,12 +352,17 @@ class _MaterialButtonState extends State<MaterialButton> {
         child: contents
       );
     }
-    return new ConstrainedBox(
-      constraints: new BoxConstraints(
-        minWidth: widget.minWidth ?? buttonTheme.minWidth,
-        minHeight: height,
+    return new Semantics(
+      container: true,
+      button: true,
+      enabled: widget.enabled,
+      child: new ConstrainedBox(
+        constraints: new BoxConstraints(
+          minWidth: widget.minWidth ?? buttonTheme.minWidth,
+          minHeight: height,
+        ),
+        child: contents
       ),
-      child: contents
     );
   }
 }

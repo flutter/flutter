@@ -110,7 +110,6 @@ void main() {
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
           rect: TestSemantics.fullScreen,
           actions: SemanticsAction.tap.index,
           label: 'Dismiss',
@@ -118,7 +117,7 @@ void main() {
         ),
       ]
     );
-    expect(semantics, hasSemantics(expectedSemantics));
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
     semantics.dispose();
     debugDefaultTargetPlatformOverride = null;
