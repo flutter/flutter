@@ -513,11 +513,14 @@ class _ImageState extends State<Image> {
       _imageStream.removeListener(_handleImageChanged);
 
     _imageStream = newStream;
-    if (_isListeningToStream)
-      _imageStream.addListener(_handleImageChanged);
 
     if (!widget.gaplessPlayback)
       setState(() { _imageInfo = null; });
+
+    // Ordering is important here, as ImageStream.addListener makes a
+    // synchronous callback, if the image is already loaded.
+    if (_isListeningToStream)
+      _imageStream.addListener(_handleImageChanged);
   }
 
   void _listenToStream() {
