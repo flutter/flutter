@@ -4,6 +4,7 @@ description: Scripts which run on bots.
 dependencies:
   path: 1.5.1
   args: 0.13.7
+  process: 2.0.7
 
 dev_dependencies:
   test: 0.12.26
