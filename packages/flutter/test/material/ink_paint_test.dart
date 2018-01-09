@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('Does the ink widget render a border radius', (WidgetTester tester) async {
+  testWidgets('The inkwell widget renders an ink splash', (WidgetTester tester) async {
     final Color highlightColor = const Color(0xAAFF0000);
     final Color splashColor = const Color(0xAA0000FF);
     final BorderRadius borderRadius = new BorderRadius.circular(6.0);
@@ -49,5 +49,129 @@ void main() {
     );
 
     await gesture.up();
+  });
+
+  testWidgets('The inkwell widget renders an ink ripple', (WidgetTester tester) async {
+    final Color highlightColor = const Color(0xAAFF0000);
+    final Color splashColor = const Color(0xB40000FF);
+    final BorderRadius borderRadius = new BorderRadius.circular(6.0);
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Center(
+          child: new Container(
+            width: 100.0,
+            height: 100.0,
+            child: new InkWell(
+              borderRadius: borderRadius,
+              highlightColor: highlightColor,
+              splashColor: splashColor,
+              onTap: () { },
+              radius: 100.0,
+              splashFactory: InkRipple.splashFactory,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset tapDownOffset = tester.getTopLeft(find.byType(InkWell));
+    final Offset inkWellCenter = tester.getCenter(find.byType(InkWell));
+    //final TestGesture gesture = await tester.startGesture(tapDownOffset);
+    await tester.tapAt(tapDownOffset);
+    await tester.pump(); // start gesture
+
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+
+    bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
+    bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
+
+    // Initially the ripple's center is where the tap occurred,
+    expect(box, paints..something((Symbol method, List<dynamic> arguments) {
+      if (method != #drawCircle)
+        return false;
+      final Offset center = arguments[0];
+      final double radius = arguments[1];
+      final Paint paint = arguments[2];
+      if (offsetsAreClose(center, tapDownOffset) && radius == 30.0 && paint.color.alpha == 0)
+        return true;
+      throw '''
+        Expected: center == $tapDownOffset, radius == 30.0, alpha == 0
+        Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
+    }));
+
+    // The ripple fades in for 75ms. During that time its alpha is eased from
+    // 0 to  the splashColor's alpha value and its center moves towards the
+    // center of the ink well.
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(box, paints..something((Symbol method, List<dynamic> arguments) {
+      if (method != #drawCircle)
+        return false;
+      final Offset center = arguments[0];
+      final double radius = arguments[1];
+      final Paint paint = arguments[2];
+      final Offset expectedCenter = tapDownOffset + const Offset(17.0, 17.0);
+      final double expectedRadius = 56.0;
+      if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 120)
+        return true;
+      throw '''
+        Expected: center == $expectedCenter, radius == $expectedRadius, alpha == 120
+        Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
+    }));
+
+    // At 75ms the ripple has fade in: it's alpha matches the splashColor's
+    // alpha and its center has moved closer to the ink well's center.
+    await tester.pump(const Duration(milliseconds: 25));
+    expect(box, paints..something((Symbol method, List<dynamic> arguments) {
+      if (method != #drawCircle)
+        return false;
+      final Offset center = arguments[0];
+      final double radius = arguments[1];
+      final Paint paint = arguments[2];
+      final Offset expectedCenter = tapDownOffset + const Offset(29.0, 29.0);
+      final double expectedRadius = 73.0;
+      if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 180)
+        return true;
+      throw '''
+        Expected: center == $expectedCenter, radius == $expectedRadius, alpha == 180
+        Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
+    }));
+
+    // At this point the splash radius has expanded to its limit: 5 past the
+    // ink well's radius parameter. The splash center has moved to its final
+    // location at the inkwell's center and the fade-out is about to start.
+    await tester.pump(const Duration(milliseconds: 225));
+    expect(box, paints..something((Symbol method, List<dynamic> arguments) {
+      if (method != #drawCircle)
+        return false;
+      final Offset center = arguments[0];
+      final double radius = arguments[1];
+      final Paint paint = arguments[2];
+      final Offset expectedCenter = inkWellCenter;
+      final double expectedRadius = 105.0;
+      if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 180)
+        return true;
+      throw '''
+        Expected: center == $expectedCenter, radius == $expectedRadius, alpha == 180
+        Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
+    }));
+
+    // After another 150ms the fade-out is complete.
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(box, paints..something((Symbol method, List<dynamic> arguments) {
+      if (method != #drawCircle)
+        return false;
+      final Offset center = arguments[0];
+      final double radius = arguments[1];
+      final Paint paint = arguments[2];
+      final Offset expectedCenter = inkWellCenter;
+      final double expectedRadius = 105.0;
+      if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 0)
+        return true;
+      throw '''
+        Expected: center == $expectedCenter, radius == $expectedRadius, alpha == 0
+        Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
+    }));
+
   });
 }
