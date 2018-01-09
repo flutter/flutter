@@ -137,7 +137,7 @@ void main() {
         Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
     }));
 
-    // At this point the splash radius has expanded to its limit: 5 passed the
+    // At this point the splash radius has expanded to its limit: 5 past the
     // ink well's radius parameter. The splash center has moved to its final
     // location at the inkwell's center and the fade-out is about to start.
     await tester.pump(const Duration(milliseconds: 225));

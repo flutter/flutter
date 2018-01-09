@@ -79,9 +79,7 @@ class _InkSplashFactory extends InteractiveInkFeatureFactory {
 ///
 /// This object is rarely created directly. Instead of creating an ink splash
 /// directly, consider using an [InkResponse] or [InkWell] widget, which uses
-/// gestures (such as tap and long-press) to trigger ink splashes. This class
-/// is used when the [Theme]'s [ThemeData.splashType] is [InkSplashType.drop]
-/// (which is the theme's default splash type).
+/// gestures (such as tap and long-press) to trigger ink splashes.
 ///
 /// See also:
 ///

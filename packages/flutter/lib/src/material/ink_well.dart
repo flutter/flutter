@@ -404,7 +404,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     final BorderRadius borderRadius = widget.borderRadius ?? BorderRadius.zero;
 
     InteractiveInkFeature splash;
-    void onRemoved () {
+    void onRemoved() {
       if (_splashes != null) {
         assert(_splashes.contains(splash));
         _splashes.remove(splash);
