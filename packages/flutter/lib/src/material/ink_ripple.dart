@@ -12,11 +12,12 @@ import 'material.dart';
 
 const Duration _kUnconfirmedRippleDuration = const Duration(seconds: 1);
 const Duration _kFadeInDuration = const Duration(milliseconds: 75);
-const Duration _kFadeOutDuration = const Duration(milliseconds: 225);
+const Duration _kRadiusDuration = const Duration(milliseconds: 225);
+const Duration _kFadeOutDuration = const Duration(milliseconds: 450);
 const Duration _kCancelDuration = const Duration(milliseconds: 75);
 
-// The fade out begins 75ms after the _fadeOutController starts.
-const double _kFadeOutIntervalStart = 75.0 / 225.0;
+// The fade out begins 300ms after the _fadeOutController starts. See confirm().
+const double _kFadeOutIntervalStart = 300.0 / 450.0;
 
 const double _kRippleConfirmedVelocity = 1.0; // logical pixels per millisecond
 
@@ -48,7 +49,24 @@ double _getRippleRadiusForPositionInSize(Size bounds, Offset position) {
 
 /// A visual reaction on a piece of [Material] to user input.
 ///
-///  * [Material], which is the widget on which the ink ripple is painted.
+/// A circular in feature whose origin starts at the input touch point and
+/// whose radius expands from 60% of the final radius. The splash's origin
+/// animates to the center.
+///
+/// This object is rarely created directly. Instead of creating an ink ripple
+/// directly, consider using an [InkResponse] or [InkWell] widget, which uses
+/// gestures (such as tap and long-press) to trigger ink splashes. This class
+/// is used when the [Theme]'s [ThemeData.splashType] is [InkSplashType.ripple].
+///
+///  * [InkSplash], which is an ink splash feature that expands less
+///    aggressively than the ripple.
+///  * [InkResponse], which uses gestures to trigger ink highlights and ink
+///    splashes in the parent [Material].
+///  * [InkWell], which is a rectangular [InkResponse] (the most common type of
+///    ink response).
+///  * [Material], which is the widget on which the ink splash is painted.
+///  * [InkHighlight], which is an ink feature that emphasizes a part of a
+///    [Material].
  class InkRipple extends InkFeature {
   /// Begin a ripple, centered at position relative to [referenceBox].
   ///
@@ -84,6 +102,16 @@ double _getRippleRadiusForPositionInSize(Size bounds, Offset position) {
   {
     assert(_borderRadius != null);
 
+    // Immediately begin fading-in the initial splash.
+    _fadeInController = new AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
+      ..addListener(controller.markNeedsPaint)
+      ..forward();
+    _fadeIn = new IntTween(
+      begin: 0,
+      end: color.alpha,
+    ).animate(_fadeInController);
+
+    // Controls the splash radius and its center. Starts upon confirm.
     _radiusController = new AnimationController(duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
@@ -99,14 +127,8 @@ double _getRippleRadiusForPositionInSize(Size bounds, Offset position) {
       )
     );
 
-    _fadeInController = new AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
-      ..addListener(controller.markNeedsPaint)
-      ..forward();
-    _fadeIn = new IntTween(
-      begin: 0,
-      end: color.alpha,
-    ).animate(_fadeInController);
-
+    // Controls the splash radius and its center. Starts upon confirm however its
+    // Interval delays changes until the radius expansion has completed.
     _fadeOutController = new AnimationController(duration: _kFadeOutDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged);
@@ -142,16 +164,15 @@ double _getRippleRadiusForPositionInSize(Size bounds, Offset position) {
   /// Causes the reaction to propagate faster across the material.
   @override
   void confirm() {
-    final int duration = (_targetRadius / _kRippleConfirmedVelocity).floor();
     _radiusController
-      ..duration = new Duration(milliseconds: duration)
+      ..duration = _kRadiusDuration
       ..forward();
-    _fadeInController.value = 1.0;
     _fadeOutController.forward();
   }
 
   @override
   void cancel() {
+    _fadeInController.stop();
     _fadeOutController.animateTo(1.0, duration: _kCancelDuration);
   }
 
@@ -190,7 +211,7 @@ double _getRippleRadiusForPositionInSize(Size bounds, Offset position) {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    final int alpha = _fadeOutController.isAnimating ? _fadeOut.value : _fadeIn.value;
+    final int alpha = _fadeInController.isAnimating ? _fadeIn.value : _fadeOut.value;
     final Paint paint = new Paint()..color = color.withAlpha(alpha);
     // Splash moves to the center of the reference box.
     final Offset center = Offset.lerp(

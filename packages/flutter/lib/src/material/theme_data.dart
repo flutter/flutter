@@ -323,6 +323,7 @@ class ThemeData {
   /// The color of ink splashes. See [InkWell].
   final Color splashColor;
 
+  /// Defines the appearance of ink splashes. See [InkWell].
   final InkSplashType splashType;
 
   /// The color used to highlight selected rows.

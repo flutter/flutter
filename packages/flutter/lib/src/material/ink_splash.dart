@@ -46,10 +46,14 @@ double _getSplashRadiusForPositionInSize(Size bounds, Offset position) {
 ///
 /// This object is rarely created directly. Instead of creating an ink splash
 /// directly, consider using an [InkResponse] or [InkWell] widget, which uses
-/// gestures (such as tap and long-press) to trigger ink splashes.
+/// gestures (such as tap and long-press) to trigger ink splashes. This class
+/// is used when the [Theme]'s [ThemeData.splashType] is [InkSplashType.drop]
+/// (which is the theme's default splash type).
 ///
 /// See also:
 ///
+///  * [InkRipple], which is an ink splash feature that expands more
+///    aggressively than this class does.
 ///  * [InkResponse], which uses gestures to trigger ink highlights and ink
 ///    splashes in the parent [Material].
 ///  * [InkWell], which is a rectangular [InkResponse] (the most common type of

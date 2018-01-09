@@ -38,7 +38,8 @@ enum MaterialType {
   transparency
 }
 
-/// Defines the kind of ink splash displayed by [InkResponse] or [InkWell].
+/// Defines the appearance of an ink splash displayed by [InkResponse] or
+/// [InkWell].
 ///
 /// See also:
 ///
@@ -434,13 +435,15 @@ abstract class InkFeature {
 
   /// Called when the user input that triggered this feature's appearance was confirmed.
   ///
-  /// Typically causes the ink to propagate faster across the material.
+  /// Typically causes the ink to propagate faster across the material. By default this
+  /// method does nothing.
   void confirm() {
   }
 
   /// Called when the user input that triggered this feature's appearance was canceled.
   ///
-  /// Typically causes the ink to gradually disappear.
+  /// Typically causes the ink to gradually disappear. By default this method does
+  /// nothing.
   void cancel() {
   }
 

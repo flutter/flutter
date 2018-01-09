@@ -164,6 +164,7 @@ class InkResponse extends StatefulWidget {
   /// See also:
   ///
   ///  * [splashColor], the color of the splash.
+  ///  * [splashType], which defines the appearance of the splash.
   final double radius;
 
   /// The clipping radius of the containing rect.
@@ -176,6 +177,7 @@ class InkResponse extends StatefulWidget {
   ///
   ///  * [highlightShape], the shape of the highlight.
   ///  * [splashColor], the color of the splash.
+  ///  * [splashType], which defines the appearance of the splash.
   final Color highlightColor;
 
   /// The splash color of the ink response. If this property is null then the
@@ -183,10 +185,20 @@ class InkResponse extends StatefulWidget {
   ///
   /// See also:
   ///
+  ///  * [splashType], which defines the appearance of the splash.
   ///  * [radius], the (maximum) size of the ink splash.
   ///  * [highlightColor], the color of the highlight.
   final Color splashColor;
 
+  /// Defines the appearance of the splash.
+  ///
+  /// Defaults to the value of the theme's splash type: [ThemeData.splashType].
+  ///
+  /// See also:
+  ///
+  ///  * [radius], the (maximum) size of the ink splash.
+  ///  * [splashColor], the color of the splash.
+  ///  * [highlightColor], the color of the highlight.
   final InkSplashType splashType;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -471,6 +483,7 @@ class InkWell extends InkResponse {
     Color highlightColor,
     Color splashColor,
     InkSplashType splashType,
+    double radius,
     BorderRadius borderRadius,
     bool enableFeedback: true,
     bool excludeFromSemantics: false,
@@ -486,6 +499,7 @@ class InkWell extends InkResponse {
     highlightColor: highlightColor,
     splashColor: splashColor,
     splashType: splashType,
+    radius: radius,
     borderRadius: borderRadius,
     enableFeedback: enableFeedback,
     excludeFromSemantics: excludeFromSemantics,
