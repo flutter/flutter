@@ -401,11 +401,9 @@ abstract class InkFeature {
   InkFeature({
     @required MaterialInkController controller,
     @required this.referenceBox,
-    Color color,
     this.onRemoved,
   }) : assert(controller != null),
        assert(referenceBox != null),
-       _color = color,
        _controller = controller;
 
   /// The [MaterialInkController] associated with this [InkFeature].
@@ -431,30 +429,6 @@ abstract class InkFeature {
     _controller._removeFeature(this);
     if (onRemoved != null)
       onRemoved();
-  }
-
-  /// Called when the user input that triggered this feature's appearance was confirmed.
-  ///
-  /// Typically causes the ink to propagate faster across the material. By default this
-  /// method does nothing.
-  void confirm() {
-  }
-
-  /// Called when the user input that triggered this feature's appearance was canceled.
-  ///
-  /// Typically causes the ink to gradually disappear. By default this method does
-  /// nothing.
-  void cancel() {
-  }
-
-  /// The ink's color.
-  Color get color => _color;
-  Color _color;
-  set color(Color value) {
-    if (value == _color)
-      return;
-    _color = value;
-    controller.markNeedsPaint();
   }
 
   void _paint(Canvas canvas) {

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'ink_well.dart' show InteractiveInkFeature;
 import 'material.dart';
 
 const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
@@ -25,7 +26,7 @@ const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
 ///  * [Material], which is the widget on which the ink highlight is painted.
 ///  * [InkSplash], which is an ink feature that shows a reaction to user input
 ///    on a [Material].
-class InkHighlight extends InkFeature {
+class InkHighlight extends InteractiveInkFeature {
   /// Begin a highlight animation.
   ///
   /// The [controller] argument is typically obtained via

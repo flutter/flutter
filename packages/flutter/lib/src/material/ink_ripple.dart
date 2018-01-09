@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'ink_well.dart' show InteractiveInkFeature;
 import 'material.dart';
 
 const Duration _kUnconfirmedRippleDuration = const Duration(seconds: 1);
@@ -69,7 +70,7 @@ double _getRippleRadiusForPositionInSize(Size bounds, Offset position) {
 ///  * [Material], which is the widget on which the ink splash is painted.
 ///  * [InkHighlight], which is an ink feature that emphasizes a part of a
 ///    [Material].
- class InkRipple extends InkFeature {
+class InkRipple extends InteractiveInkFeature {
   /// Begin a ripple, centered at [position] relative to [referenceBox].
   ///
   /// The [controller] argument is typically obtained via
@@ -88,15 +89,17 @@ double _getRippleRadiusForPositionInSize(Size bounds, Offset position) {
   InkRipple({
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
-    Offset position,
-    Color color,
+    @required Offset position,
+    @required Color color,
     bool containedInkWell: false,
     RectCallback rectCallback,
-    BorderRadius borderRadius: BorderRadius.zero,
+    BorderRadius borderRadius,
     double radius,
     VoidCallback onRemoved,
-  }) : _position = position,
-       _borderRadius = borderRadius,
+  }) : assert(color != null),
+       assert(position != null),
+       _position = position,
+       _borderRadius = borderRadius ?? BorderRadius.zero,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved)

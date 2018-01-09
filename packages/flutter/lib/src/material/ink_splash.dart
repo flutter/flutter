@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'ink_well.dart' show InteractiveInkFeature;
 import 'material.dart';
 
 const Duration _kUnconfirmedSplashDuration = const Duration(seconds: 1);
@@ -61,7 +62,7 @@ double _getSplashRadiusForPositionInSize(Size bounds, Offset position) {
 ///  * [Material], which is the widget on which the ink splash is painted.
 ///  * [InkHighlight], which is an ink feature that emphasizes a part of a
 ///    [Material].
-class InkSplash extends InkFeature {
+class InkSplash extends InteractiveInkFeature {
   /// Begin a splash, centered at position relative to [referenceBox].
   ///
   /// The [controller] argument is typically obtained via

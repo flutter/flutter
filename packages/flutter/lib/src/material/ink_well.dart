@@ -17,6 +17,56 @@ import 'ink_splash.dart';
 import 'material.dart';
 import 'theme.dart';
 
+/// An ink feature that displays a [color] "splash" in response to a user
+/// gesture that can be confirmed or canceled.
+///
+/// Subclasses call [confirm] when an input gesture is recognized. For
+/// example a press event might trigger an ink feature that's confirmed
+/// when the corresponding up event is seen.
+///
+/// Subclasses call [cancel] when an input gesture is aborted before it
+/// is recognized. For example a press event might trigger an ink feature
+/// that's cancelled when the pointer is dragged out of the reference
+/// box.
+///
+/// The [InkWell] and [InkResponse] widgets generate instances of this
+/// class.
+abstract class InteractiveInkFeature extends InkFeature {
+  InteractiveInkFeature({
+    @required MaterialInkController controller,
+    @required RenderBox referenceBox,
+    Color color,
+    VoidCallback onRemoved,
+  }) : assert(controller != null),
+       assert(referenceBox != null),
+       _color = color,
+       super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved);
+
+  /// Called when the user input that triggered this feature's appearance was confirmed.
+  ///
+  /// Typically causes the ink to propagate faster across the material. By default this
+  /// method does nothing.
+  void confirm() {
+  }
+
+  /// Called when the user input that triggered this feature's appearance was canceled.
+  ///
+  /// Typically causes the ink to gradually disappear. By default this method does
+  /// nothing.
+  void cancel() {
+  }
+
+  /// The ink's color.
+  Color get color => _color;
+  Color _color;
+  set color(Color value) {
+    if (value == _color)
+      return;
+    _color = value;
+    controller.markNeedsPaint();
+  }
+}
+
 /// An area of a [Material] that responds to touch. Has a configurable shape and
 /// can be configured to clip splashes that extend outside its bounds or not.
 ///
@@ -271,8 +321,8 @@ class InkResponse extends StatefulWidget {
 }
 
 class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKeepAliveClientMixin {
-  Set<InkFeature> _splashes;
-  InkFeature _currentSplash;
+  Set<InteractiveInkFeature> _splashes;
+  InteractiveInkFeature _currentSplash;
   InkHighlight _lastHighlight;
 
   @override
@@ -311,7 +361,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     updateKeepAlive();
   }
 
-  InkFeature _createInkFeature(TapDownDetails details) {
+  InteractiveInkFeature _createInkFeature(TapDownDetails details) {
     final MaterialInkController inkController = Material.of(context);
     final RenderBox referenceBox = context.findRenderObject();
     final Offset position = referenceBox.globalToLocal(details.globalPosition);
@@ -319,7 +369,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     final RectCallback rectCallback = widget.containedInkWell ? widget.getRectCallback(referenceBox) : null;
     final BorderRadius borderRadius = widget.borderRadius ?? BorderRadius.zero;
 
-    InkFeature splash;
+    InteractiveInkFeature splash;
     void onRemoved () {
       if (_splashes != null) {
         assert(_splashes.contains(splash));
@@ -363,8 +413,8 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   }
 
   void _handleTapDown(TapDownDetails details) {
-    final InkFeature splash = _createInkFeature(details);
-    _splashes ??= new HashSet<InkFeature>();
+    final InteractiveInkFeature splash = _createInkFeature(details);
+    _splashes ??= new HashSet<InteractiveInkFeature>();
     _splashes.add(splash);
     _currentSplash = splash;
     updateKeepAlive();
@@ -408,9 +458,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   @override
   void deactivate() {
     if (_splashes != null) {
-      final Set<InkFeature> splashes = _splashes;
+      final Set<InteractiveInkFeature> splashes = _splashes;
       _splashes = null;
-      for (InkFeature splash in splashes)
+      for (InteractiveInkFeature splash in splashes)
         splash.dispose();
       _currentSplash = null;
     }
