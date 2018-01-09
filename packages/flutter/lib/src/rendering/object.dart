@@ -700,8 +700,13 @@ class PipelineOwner {
   ///
   /// See [RendererBinding] for an example of how this function is used.
   void flushLayout() {
-    Timeline.startSync('Layout', arguments: timelineWhitelistArguments);
-    _debugDoingLayout = true;
+    profile(() {
+      Timeline.startSync('Layout', arguments: timelineWhitelistArguments);
+    });
+    assert(() {
+      _debugDoingLayout = true;
+      return true;
+    }());
     try {
       // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themselves
       while (_nodesNeedingLayout.isNotEmpty) {
@@ -713,8 +718,13 @@ class PipelineOwner {
         }
       }
     } finally {
-      _debugDoingLayout = false;
-      Timeline.finishSync();
+      assert(() {
+        _debugDoingLayout = false;
+        return true;
+      }());
+      profile(() {
+        Timeline.finishSync();
+      });
     }
   }
 
@@ -728,12 +738,19 @@ class PipelineOwner {
   // See [RenderObject.invokeLayoutCallback].
   void _enableMutationsToDirtySubtrees(VoidCallback callback) {
     assert(_debugDoingLayout);
-    final bool oldState = _debugAllowMutationsToDirtySubtrees;
-    _debugAllowMutationsToDirtySubtrees = true;
+    bool oldState;
+    assert(() {
+      oldState = _debugAllowMutationsToDirtySubtrees;
+      _debugAllowMutationsToDirtySubtrees = true;
+      return true;
+    }());
     try {
       callback();
     } finally {
-      _debugAllowMutationsToDirtySubtrees = oldState;
+      assert(() {
+        _debugAllowMutationsToDirtySubtrees = oldState;
+        return true;
+      }());
     }
   }
 
@@ -743,14 +760,14 @@ class PipelineOwner {
   /// Called as part of the rendering pipeline after [flushLayout] and before
   /// [flushPaint].
   void flushCompositingBits() {
-    Timeline.startSync('Compositing bits');
+    profile(() { Timeline.startSync('Compositing bits'); });
     _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     for (RenderObject node in _nodesNeedingCompositingBitsUpdate) {
       if (node._needsCompositingBitsUpdate && node.owner == this)
         node._updateCompositingBits();
     }
     _nodesNeedingCompositingBitsUpdate.clear();
-    Timeline.finishSync();
+    profile(() { Timeline.finishSync(); });
   }
 
   List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
@@ -771,8 +788,11 @@ class PipelineOwner {
   ///
   /// See [RendererBinding] for an example of how this function is used.
   void flushPaint() {
-    Timeline.startSync('Paint', arguments: timelineWhitelistArguments);
-    _debugDoingPaint = true;
+    profile(() { Timeline.startSync('Paint', arguments: timelineWhitelistArguments); });
+    assert(() {
+      _debugDoingPaint = true;
+      return true;
+    }());
     try {
       final List<RenderObject> dirtyNodes = _nodesNeedingPaint;
       _nodesNeedingPaint = <RenderObject>[];
@@ -789,8 +809,11 @@ class PipelineOwner {
       }
       assert(_nodesNeedingPaint.isEmpty);
     } finally {
-      _debugDoingPaint = false;
-      Timeline.finishSync();
+      assert(() {
+        _debugDoingPaint = false;
+        return true;
+      }());
+      profile(() { Timeline.finishSync(); });
     }
   }
 
@@ -860,7 +883,7 @@ class PipelineOwner {
   void flushSemantics() {
     if (_semanticsOwner == null)
       return;
-    Timeline.startSync('Semantics');
+    profile(() { Timeline.startSync('Semantics'); });
     assert(_semanticsOwner != null);
     assert(() { _debugDoingSemantics = true; return true; }());
     try {
@@ -875,7 +898,7 @@ class PipelineOwner {
     } finally {
       assert(_nodesNeedingSemantics.isEmpty);
       assert(() { _debugDoingSemantics = false; return true; }());
-      Timeline.finishSync();
+      profile(() { Timeline.finishSync(); });
     }
   }
 }
@@ -2452,16 +2475,21 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     String prefixOtherLines: '',
     DiagnosticLevel minLevel: DiagnosticLevel.debug,
   }) {
-    final RenderObject debugPreviousActiveLayout = _debugActiveLayout;
-    _debugActiveLayout = null;
-
+    RenderObject debugPreviousActiveLayout;
+    assert(() {
+      debugPreviousActiveLayout = _debugActiveLayout;
+      _debugActiveLayout = null;
+      return true;
+    }());
     final String result = super.toStringDeep(
       prefixLineOne: prefixLineOne,
       prefixOtherLines: prefixOtherLines,
       minLevel: minLevel,
     );
-
-    _debugActiveLayout = debugPreviousActiveLayout;
+    assert(() {
+      _debugActiveLayout = debugPreviousActiveLayout;
+      return true;
+    }());
     return result;
   }
 
@@ -2475,10 +2503,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     String joiner: '; ',
     DiagnosticLevel minLevel: DiagnosticLevel.debug,
   }) {
-    final RenderObject debugPreviousActiveLayout = _debugActiveLayout;
-    _debugActiveLayout = null;
+    RenderObject debugPreviousActiveLayout;
+    assert(() {
+      debugPreviousActiveLayout = _debugActiveLayout;
+      _debugActiveLayout = null;
+      return true;
+    }());
     final String result = super.toStringShallow(joiner: joiner, minLevel: minLevel);
-    _debugActiveLayout = debugPreviousActiveLayout;
+    assert(() {
+      _debugActiveLayout = debugPreviousActiveLayout;
+      return true;
+    }());
     return result;
   }
 
