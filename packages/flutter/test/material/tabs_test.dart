@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags, SemanticsAction;
+import 'dart:ui' show SemanticsFlag, SemanticsAction;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -1214,7 +1214,7 @@ void main() {
             new TestSemantics(
               id: 2,
               actions: SemanticsAction.tap.index,
-              flags: SemanticsFlags.isSelected.index,
+              flags: SemanticsFlag.isSelected.index,
               label: 'TAB #0\nTab 1 of 2',
               rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
               transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
@@ -1464,7 +1464,7 @@ void main() {
             new TestSemantics(
               id: 24,
               actions: SemanticsAction.tap.index,
-              flags: SemanticsFlags.isSelected.index,
+              flags: SemanticsFlag.isSelected.index,
               label: 'Semantics override 0\nTab 1 of 2',
               rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
               transform: new Matrix4.translationValues(0.0, 276.0, 0.0),

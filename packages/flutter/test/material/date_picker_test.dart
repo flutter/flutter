@@ -394,7 +394,7 @@ void _tests() {
             textDirection: TextDirection.ltr,
           ),
           new TestSemantics(
-            flags: <SemanticsFlags>[SemanticsFlags.isSelected],
+            flags: <SemanticsFlag>[SemanticsFlag.isSelected],
             actions: <SemanticsAction>[SemanticsAction.tap],
             label: r'Fri, Jan 15',
             textDirection: TextDirection.ltr,
@@ -479,7 +479,7 @@ void _tests() {
                             textDirection: TextDirection.ltr,
                           ),
                           new TestSemantics(
-                            flags: <SemanticsFlags>[SemanticsFlags.isSelected],
+                            flags: <SemanticsFlag>[SemanticsFlag.isSelected],
                             actions: <SemanticsAction>[SemanticsAction.tap],
                             label: r'15, Friday, January 15, 2016',
                             textDirection: TextDirection.ltr,
@@ -573,25 +573,25 @@ void _tests() {
             ],
           ),
           new TestSemantics(
-            flags: <SemanticsFlags>[SemanticsFlags.isButton],
+            flags: <SemanticsFlag>[SemanticsFlag.isButton],
             actions: <SemanticsAction>[SemanticsAction.tap],
             label: r'Previous month December 2015',
             textDirection: TextDirection.ltr,
           ),
           new TestSemantics(
-            flags: <SemanticsFlags>[SemanticsFlags.isButton],
+            flags: <SemanticsFlag>[SemanticsFlag.isButton],
             actions: <SemanticsAction>[SemanticsAction.tap],
             label: r'Next month February 2016',
             textDirection: TextDirection.ltr,
           ),
           new TestSemantics(
-            flags: <SemanticsFlags>[SemanticsFlags.isButton],
+            flags: <SemanticsFlag>[SemanticsFlag.isButton],
             actions: <SemanticsAction>[SemanticsAction.tap],
             label: r'CANCEL',
             textDirection: TextDirection.ltr,
           ),
           new TestSemantics(
-            flags: <SemanticsFlags>[SemanticsFlags.isButton],
+            flags: <SemanticsFlag>[SemanticsFlag.isButton],
             actions: <SemanticsAction>[SemanticsAction.tap],
             label: r'OK',
             textDirection: TextDirection.ltr,
