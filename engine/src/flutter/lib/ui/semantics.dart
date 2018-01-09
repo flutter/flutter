@@ -138,7 +138,7 @@ class SemanticsAction {
 }
 
 /// A Boolean value that can be associated with a semantics node.
-class SemanticsFlags {
+class SemanticsFlag {
   static const int _kHasCheckedStateIndex = 1 << 0;
   static const int _kIsCheckedIndex = 1 << 1;
   static const int _kIsSelectedIndex = 1 << 2;
@@ -148,7 +148,7 @@ class SemanticsFlags {
   static const int _kHasEnabledStateIndex = 1 << 6;
   static const int _kIsEnabledIndex = 1 << 7;
 
-  const SemanticsFlags._(this.index);
+  const SemanticsFlag._(this.index);
 
   /// The numerical value for this flag.
   ///
@@ -158,7 +158,7 @@ class SemanticsFlags {
   /// The semantics node has the quality of either being "checked" or "unchecked".
   ///
   /// For example, a checkbox or a radio button widget has checked state.
-  static const SemanticsFlags hasCheckedState = const SemanticsFlags._(_kHasCheckedStateIndex);
+  static const SemanticsFlag hasCheckedState = const SemanticsFlag._(_kHasCheckedStateIndex);
 
   /// Whether a semantics node that [hasCheckedState] is checked.
   ///
@@ -166,7 +166,7 @@ class SemanticsFlags {
   /// "unchecked".
   ///
   /// For example, if a checkbox has a visible checkmark, [isChecked] is true.
-  static const SemanticsFlags isChecked = const SemanticsFlags._(_kIsCheckedIndex);
+  static const SemanticsFlag isChecked = const SemanticsFlag._(_kIsCheckedIndex);
 
 
   /// Whether a semantics node is selected.
@@ -175,25 +175,25 @@ class SemanticsFlags {
   /// "unselected".
   ///
   /// For example, the active tab in a tab bar has [isSelected] set to true.
-  static const SemanticsFlags isSelected = const SemanticsFlags._(_kIsSelectedIndex);
+  static const SemanticsFlag isSelected = const SemanticsFlag._(_kIsSelectedIndex);
 
   /// Whether the semantic node represents a button.
   ///
   /// Platforms has special handling for buttons, for example Android's TalkBack
   /// and iOS's VoiceOver provides an additional hint when the focused object is
   /// a button.
-  static const SemanticsFlags isButton = const SemanticsFlags._(_kIsButtonIndex);
+  static const SemanticsFlag isButton = const SemanticsFlag._(_kIsButtonIndex);
 
   /// Whether the semantic node represents a text field.
   ///
   /// Text fields are announced as such and allow text input via accessibility
   /// affordances.
-  static const SemanticsFlags isTextField = const SemanticsFlags._(_kIsTextFieldIndex);
+  static const SemanticsFlag isTextField = const SemanticsFlag._(_kIsTextFieldIndex);
 
   /// Whether the semantic node currently holds the user's focus.
   ///
   /// The focused element is usually the current receiver of keyboard inputs.
-  static const SemanticsFlags isFocused = const SemanticsFlags._(_kIsFocusedIndex);
+  static const SemanticsFlag isFocused = const SemanticsFlag._(_kIsFocusedIndex);
 
   /// The semantics node has the quality of either being "enabled" or
   /// "disabled".
@@ -201,19 +201,19 @@ class SemanticsFlags {
   /// For example, a button can be enabled or disabled and therefore has an
   /// "enabled" state. Static text is usually neither enabled nor disabled and
   /// therefore does not have an "enabled" state.
-  static const SemanticsFlags hasEnabledState = const SemanticsFlags._(_kHasEnabledStateIndex);
+  static const SemanticsFlag hasEnabledState = const SemanticsFlag._(_kHasEnabledStateIndex);
 
   /// Whether a semantic node that [hasEnabledState] is currently enabled.
   ///
   /// A disabled element does not respond to user interaction. For example, a
   /// button that currently does not respond to user interaction should be
   /// marked as disabled.
-  static const SemanticsFlags isEnabled = const SemanticsFlags._(_kIsEnabledIndex);
+  static const SemanticsFlag isEnabled = const SemanticsFlag._(_kIsEnabledIndex);
 
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
-  static final Map<int, SemanticsFlags> values = const <int, SemanticsFlags>{
+  static final Map<int, SemanticsFlag> values = const <int, SemanticsFlag>{
     _kHasCheckedStateIndex: hasCheckedState,
     _kIsCheckedIndex: isChecked,
     _kIsSelectedIndex: isSelected,
@@ -228,21 +228,21 @@ class SemanticsFlags {
   String toString() {
     switch (index) {
       case _kHasCheckedStateIndex:
-        return 'SemanticsFlags.hasCheckedState';
+        return 'SemanticsFlag.hasCheckedState';
       case _kIsCheckedIndex:
-        return 'SemanticsFlags.isChecked';
+        return 'SemanticsFlag.isChecked';
       case _kIsSelectedIndex:
-        return 'SemanticsFlags.isSelected';
+        return 'SemanticsFlag.isSelected';
       case _kIsButtonIndex:
-        return 'SemanticsFlags.isButton';
+        return 'SemanticsFlag.isButton';
       case _kIsTextFieldIndex:
-        return 'SemanticsFlags.isTextField';
+        return 'SemanticsFlag.isTextField';
       case _kIsFocusedIndex:
-        return 'SemanticsFlags.isFocused';
+        return 'SemanticsFlag.isFocused';
       case _kHasEnabledStateIndex:
-        return 'SemanticsFlags.hasEnabledState';
+        return 'SemanticsFlag.hasEnabledState';
       case _kIsEnabledIndex:
-        return 'SemanticsFlags.isEnabled';
+        return 'SemanticsFlag.isEnabled';
     }
     return null;
   }
@@ -266,7 +266,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   /// nodes that do not change in the update. If a node is not reachable from
   /// the root after an update, the node will be discarded from the tree.
   ///
-  /// The `flags` are a bit field of [SemanticsFlags] that apply to this node.
+  /// The `flags` are a bit field of [SemanticsFlag]s that apply to this node.
   ///
   /// The `actions` are a bit field of [SemanticsAction]s that can be undertaken
   /// by this node. If the user wishes to undertake one of these actions on this
