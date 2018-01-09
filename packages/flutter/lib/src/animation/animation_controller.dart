@@ -211,6 +211,15 @@ class AnimationController extends Animation<double>
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
+  ///
+  /// See also:
+  ///
+  ///  * [reset], which is equivalent to setting [value] to [lowerBound].
+  ///  * [stop], which aborts the animation without changing its value or status
+  ///    and without dispatching any notifications other than completing or
+  ///    canceling the [TickerFuture].
+  ///  * [forward], [reverse], [animateTo], [animateWith], [fling], and [repeat],
+  ///    which start the animation controller.
   set value(double newValue) {
     assert(newValue != null);
     stop();
@@ -221,6 +230,18 @@ class AnimationController extends Animation<double>
   
   /// Sets the controller's value to [lowerBound], stopping the animation (if
   /// in progress), and resetting to its beginning point, or dismissed state.
+  ///
+  /// The most recently returned [TickerFuture], if any, is marked as having been
+  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
+  /// derivative future completes with a [TickerCanceled] error.
+  ///
+  /// See also:
+  ///
+  ///  * [value], which can be explicitly set to a specific value as desired.
+  ///  * [forward], which starts the animation in the forward direction.
+  ///  * [stop], which aborts the animation without changing its value or status
+  ///    and without dispatching any notifications other than completing or
+  ///    canceling the [TickerFuture].
   void reset() {
     value = lowerBound;
   }
@@ -463,8 +484,15 @@ class AnimationController extends Animation<double>
   /// By default, the most recently returned [TickerFuture] is marked as having
   /// been canceled, meaning the future never completes and its
   /// [TickerFuture.orCancel] derivative future completes with a [TickerCanceled]
-  /// error. By passing the `completed` argument with the value false, this is
+  /// error. By passing the `canceled` argument with the value false, this is
   /// reversed, and the futures complete successfully.
+  ///
+  /// See also:
+  ///
+  ///  * [reset], which stops the animation and resets it to the [lowerBound],
+  ///    and which does send notifications.
+  ///  * [forward], [reverse], [animateTo], [animateWith], [fling], and [repeat],
+  ///    which restart the animation controller.
   void stop({ bool canceled: true }) {
     _simulation = null;
     _lastElapsedDuration = null;
