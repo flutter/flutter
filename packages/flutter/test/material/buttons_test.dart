@@ -299,10 +299,10 @@ void main() {
             actions: <SemanticsAction>[
               SemanticsAction.tap,
             ],
-            flags: <SemanticsFlags>[
-              SemanticsFlags.isButton,
-              SemanticsFlags.hasEnabledState,
-              SemanticsFlags.isEnabled,
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
             ],
           ),
         ],
@@ -330,9 +330,9 @@ void main() {
             rect: expectedButtonSize,
             transform: expectedButtonTransform,
             label: 'Button',
-            flags: <SemanticsFlags>[
-              SemanticsFlags.isButton,
-              SemanticsFlags.hasEnabledState,
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
             ],
           ),
         ],

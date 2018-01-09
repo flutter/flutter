@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -147,8 +147,8 @@ void main() {
           children: <TestSemantics>[
             new TestSemantics.rootChild(
               id: 1,
-              flags: <SemanticsFlags>[
-                SemanticsFlags.isSelected,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isSelected,
               ],
               label: 'test1\ntest2',
             ),
