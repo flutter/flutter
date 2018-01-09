@@ -327,7 +327,7 @@ class ThemeData {
   /// Defines the appearance of ink splashes produces by [InkWell]
   /// and [InkResponse].
   ///
-  /// See Also
+  /// See also:
   ///
   ///  * [InkSplash.splashFactory], which defines the default splash.
   ///  * [InkRipple.splashFactory], which defines a splash that spreads out

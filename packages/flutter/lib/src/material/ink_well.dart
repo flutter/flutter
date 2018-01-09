@@ -31,6 +31,8 @@ import 'theme.dart';
 /// class.
 abstract class InteractiveInkFeature extends InkFeature {
   /// Creates an InteractiveInkFeature.
+  ///
+  /// The [controller] and [referenceBox] arguments must not be null.
   InteractiveInkFeature({
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
