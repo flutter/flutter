@@ -47,13 +47,7 @@ abstract class OperatingSystemUtils {
 
   void unzip(File file, Directory targetDirectory);
 
-  /// Returns true if the ZIP is not corrupt.
-  bool verifyZip(File file);
-
   void unpack(File gzippedTarFile, Directory targetDirectory);
-
-  /// Returns true if the gzip is not corrupt (does not check tar).
-  bool verifyGzip(File gzippedFile);
 
   /// Returns a pretty name string for the current operating system.
   ///
@@ -105,17 +99,11 @@ class _PosixUtils extends OperatingSystemUtils {
     runSync(<String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path]);
   }
 
-  @override
-  bool verifyZip(File zipFile) => exitsHappy(<String>['zip', '-T', zipFile.path]);
-
   // tar -xzf tarball -C dest
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
     runSync(<String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path]);
   }
-
-  @override
-  bool verifyGzip(File gzippedFile) => exitsHappy(<String>['gzip', '-t', gzippedFile.path]);
 
   @override
   File makePipe(String path) {
@@ -191,35 +179,11 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   @override
-  bool verifyZip(File zipFile) {
-    try {
-      new ZipDecoder().decodeBytes(zipFile.readAsBytesSync(), verify: true);
-    } on FileSystemException catch (_) {
-      return false;
-    } on ArchiveException catch (_) {
-      return false;
-    }
-    return true;
-  }
-
-  @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
     final Archive archive = new TarDecoder().decodeBytes(
       new GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
     );
     _unpackArchive(archive, targetDirectory);
-  }
-
-  @override
-  bool verifyGzip(File gzipFile) {
-    try {
-      new GZipDecoder().decodeBytes(gzipFile.readAsBytesSync(), verify: true);
-    } on FileSystemException catch (_) {
-      return false;
-    } on ArchiveException catch (_) {
-      return false;
-    }
-    return true;
   }
 
   void _unpackArchive(Archive archive, Directory targetDirectory) {
