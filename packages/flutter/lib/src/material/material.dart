@@ -38,27 +38,6 @@ enum MaterialType {
   transparency
 }
 
-/// Defines the appearance of an ink splash displayed by [InkResponse] or
-/// [InkWell].
-///
-/// See also:
-///
-///   * [ThemeData.splashType], which defines the splash type for a Material
-///     [Theme].
-enum InkSplashType {
-  /// The kind of InkSplash displayed by [InkSplash].
-  ///
-  /// A circular splash whose origin is the input touch point and whose radius
-  /// expands from zero.
-  drop,
-
-  /// The kind of InkSplash displayed by [InkRipple].
-  ///
-  /// A circular splash whose origin starts at the input touch point and whose radius
-  /// expands from 60% of the final radius. The splash's origin animates to the center.
-  ripple,
-}
-
 /// The border radii used by the various kinds of material in material design.
 ///
 /// See also:

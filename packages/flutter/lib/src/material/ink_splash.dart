@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'ink_well.dart' show InteractiveInkFeature;
+import 'ink_well.dart';
 import 'material.dart';
 
 const Duration _kUnconfirmedSplashDuration = const Duration(seconds: 1);
@@ -43,7 +43,39 @@ double _getSplashRadiusForPositionInSize(Size bounds, Offset position) {
   return math.max(math.max(d1, d2), math.max(d3, d4)).ceilToDouble();
 }
 
+class _InkSplashFactory extends InteractiveInkFeatureFactory {
+  const _InkSplashFactory();
+
+  @override
+  InteractiveInkFeature create({
+    @required MaterialInkController controller,
+    @required RenderBox referenceBox,
+    @required Offset position,
+    @required Color color,
+    bool containedInkWell: false,
+    RectCallback rectCallback,
+    BorderRadius borderRadius,
+    double radius,
+    VoidCallback onRemoved,
+  }) {
+    return new InkSplash(
+      controller: controller,
+      referenceBox: referenceBox,
+      position: position,
+      color: color,
+      containedInkWell: containedInkWell,
+      rectCallback: rectCallback,
+      borderRadius: borderRadius,
+      radius: radius,
+      onRemoved: onRemoved,
+    );
+  }
+}
+
 /// A visual reaction on a piece of [Material] to user input.
+///
+/// A circular ink feature whose origin starts at the input touch point
+/// and whose radius expands from zero.
 ///
 /// This object is rarely created directly. Instead of creating an ink splash
 /// directly, consider using an [InkResponse] or [InkWell] widget, which uses
@@ -63,6 +95,10 @@ double _getSplashRadiusForPositionInSize(Size bounds, Offset position) {
 ///  * [InkHighlight], which is an ink feature that emphasizes a part of a
 ///    [Material].
 class InkSplash extends InteractiveInkFeature {
+  /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
+  /// or material [Theme].
+  static const InteractiveInkFeatureFactory splashFactory = const _InkSplashFactory();
+
   /// Begin a splash, centered at position relative to [referenceBox].
   ///
   /// The [controller] argument is typically obtained via

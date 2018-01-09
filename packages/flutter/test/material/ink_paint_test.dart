@@ -68,7 +68,7 @@ void main() {
               splashColor: splashColor,
               onTap: () { },
               radius: 100.0,
-              splashType: InkSplashType.ripple,
+              splashFactory: InkRipple.splashFactory,
             ),
           ),
         ),

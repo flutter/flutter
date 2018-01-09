@@ -12,8 +12,6 @@ import 'package:flutter/widgets.dart';
 import 'debug.dart';
 import 'feedback.dart';
 import 'ink_highlight.dart';
-import 'ink_ripple.dart';
-import 'ink_splash.dart';
 import 'material.dart';
 import 'theme.dart';
 
@@ -32,6 +30,7 @@ import 'theme.dart';
 /// The [InkWell] and [InkResponse] widgets generate instances of this
 /// class.
 abstract class InteractiveInkFeature extends InkFeature {
+  /// Creates an InteractiveInkFeature.
   InteractiveInkFeature({
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
@@ -65,6 +64,38 @@ abstract class InteractiveInkFeature extends InkFeature {
     _color = value;
     controller.markNeedsPaint();
   }
+}
+
+/// An encapsulation of an [InteractiveInkFeature] constructor used by [InkWell]
+/// [InkResponse] and [ThemeData].
+///
+/// Interactive ink feature implementations should provide a static const
+/// `splashFactory` value that's an instance of this class. The `splashFactory`
+/// can be used to configure an [InkWell], [InkResponse] or [ThemeData].
+///
+/// See also:
+///
+///  * [InkSplash.splashFactory]
+///  * [InkRipple.splashFactory]
+abstract class InteractiveInkFeatureFactory {
+  /// Subclasses should provide a const constructor.
+  const InteractiveInkFeatureFactory();
+
+  /// The factory method.
+  ///
+  /// Subclasses should override this method to return a new instance of an
+  /// [InteractiveInkFeature].
+  InteractiveInkFeature create({
+    @required MaterialInkController controller,
+    @required RenderBox referenceBox,
+    @required Offset position,
+    @required Color color,
+    bool containedInkWell: false,
+    RectCallback rectCallback,
+    BorderRadius borderRadius,
+    double radius,
+    VoidCallback onRemoved,
+  });
 }
 
 /// An area of a [Material] that responds to touch. Has a configurable shape and
@@ -146,7 +177,7 @@ class InkResponse extends StatefulWidget {
     this.borderRadius: BorderRadius.zero,
     this.highlightColor,
     this.splashColor,
-    this.splashType,
+    this.splashFactory,
     this.enableFeedback: true,
     this.excludeFromSemantics: false,
   }) : assert(enableFeedback != null), super(key: key);
@@ -214,7 +245,7 @@ class InkResponse extends StatefulWidget {
   /// See also:
   ///
   ///  * [splashColor], the color of the splash.
-  ///  * [splashType], which defines the appearance of the splash.
+  ///  * [splashFactory], which defines the appearance of the splash.
   final double radius;
 
   /// The clipping radius of the containing rect.
@@ -227,7 +258,7 @@ class InkResponse extends StatefulWidget {
   ///
   ///  * [highlightShape], the shape of the highlight.
   ///  * [splashColor], the color of the splash.
-  ///  * [splashType], which defines the appearance of the splash.
+  ///  * [splashFactory], which defines the appearance of the splash.
   final Color highlightColor;
 
   /// The splash color of the ink response. If this property is null then the
@@ -235,21 +266,24 @@ class InkResponse extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [splashType], which defines the appearance of the splash.
+  ///  * [splashFactory], which defines the appearance of the splash.
   ///  * [radius], the (maximum) size of the ink splash.
   ///  * [highlightColor], the color of the highlight.
   final Color splashColor;
 
   /// Defines the appearance of the splash.
   ///
-  /// Defaults to the value of the theme's splash type: [ThemeData.splashType].
+  /// Defaults to the value of the theme's splash factory: [ThemeData.splashFactory].
   ///
   /// See also:
   ///
   ///  * [radius], the (maximum) size of the ink splash.
   ///  * [splashColor], the color of the splash.
   ///  * [highlightColor], the color of the highlight.
-  final InkSplashType splashType;
+  ///  * [InkSplash.splashFactory], which defines the default splash.
+  ///  * [InkRipple.splashFactory], which defines a splash that spreads out
+  ///    more aggresively than the default.
+  final InteractiveInkFeatureFactory splashFactory;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
   ///
@@ -380,34 +414,17 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       } // else we're probably in deactivate()
     }
 
-    switch(widget.splashType ?? Theme.of(context).splashType) {
-      case InkSplashType.drop:
-        splash = new InkSplash(
-          controller: inkController,
-          referenceBox: referenceBox,
-          position: position,
-          color: color,
-          containedInkWell: widget.containedInkWell,
-          rectCallback: rectCallback,
-          radius: widget.radius,
-          borderRadius: borderRadius,
-          onRemoved: onRemoved,
-        );
-        break;
-      case InkSplashType.ripple:
-        splash = new InkRipple(
-          controller: inkController,
-          referenceBox: referenceBox,
-          position: position,
-          color: color,
-          containedInkWell: widget.containedInkWell,
-          rectCallback: rectCallback,
-          radius: widget.radius,
-          borderRadius: borderRadius,
-          onRemoved: onRemoved,
-        );
-        break;
-    }
+    splash = (widget.splashFactory ?? Theme.of(context).splashFactory).create(
+      controller: inkController,
+      referenceBox: referenceBox,
+      position: position,
+      color: color,
+      containedInkWell: widget.containedInkWell,
+      rectCallback: rectCallback,
+      radius: widget.radius,
+      borderRadius: borderRadius,
+      onRemoved: onRemoved,
+    );
 
     return splash;
   }
@@ -532,7 +549,7 @@ class InkWell extends InkResponse {
     ValueChanged<bool> onHighlightChanged,
     Color highlightColor,
     Color splashColor,
-    InkSplashType splashType,
+    InteractiveInkFeatureFactory splashFactory,
     double radius,
     BorderRadius borderRadius,
     bool enableFeedback: true,
@@ -548,7 +565,7 @@ class InkWell extends InkResponse {
     highlightShape: BoxShape.rectangle,
     highlightColor: highlightColor,
     splashColor: splashColor,
-    splashType: splashType,
+    splashFactory: splashFactory,
     radius: radius,
     borderRadius: borderRadius,
     enableFeedback: enableFeedback,
