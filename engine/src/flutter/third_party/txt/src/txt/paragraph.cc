@@ -955,7 +955,7 @@ std::vector<Paragraph::TextBox> Paragraph::GetRectsForRange(size_t start,
 Paragraph::PositionWithAffinity Paragraph::GetGlyphPositionAtCoordinate(
     double dx,
     double dy) const {
-  if (line_heights_.empty() || dy < 0)
+  if (line_heights_.empty())
     return PositionWithAffinity(0, DOWNSTREAM);
 
   size_t y_index;
