@@ -204,7 +204,7 @@ class _FlutterValidator extends DoctorValidator {
         'Flutter SDK install paths with spaces are not yet supported. (https://github.com/flutter/flutter/issues/6577)\n'
         'Please move the SDK to a path that does not include spaces.'));
     messages.add(new ValidationMessage(
-      'Framework revision ${version.frameworkRevisionShort} '
+      'Framework version ${version.sdkVersion}, revision ${version.frameworkRevisionShort} '
       '(${version.frameworkAge}), ${version.frameworkDate}'
     ));
     messages.add(new ValidationMessage('Engine revision ${version.engineRevisionShort}'));
@@ -221,7 +221,8 @@ class _FlutterValidator extends DoctorValidator {
     }
 
     return new ValidationResult(valid, messages,
-      statusInfo: 'on ${os.name}, locale ${platform.localeName}, channel ${version.channel}');
+      statusInfo: 'on ${os.name}, locale ${platform.localeName}, '
+          'channel ${version.channel}, version ${version.sdkVersion}');
   }
 }
 
