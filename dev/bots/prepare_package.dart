@@ -100,8 +100,7 @@ class ArchiveCreator {
     }
     final Uint8List data = await http.readBytes(_minGitUri);
     final File gitFile = new File(path.join(_tempDir.path, 'mingit.zip'));
-    await gitFile.open(mode: FileMode.WRITE);
-    await gitFile.writeAsBytes(data);
+    await gitFile.writeAsBytes(data, flush: true);
 
     final Directory minGitPath = new Directory(path.join(_flutterRoot.path, 'bin', 'mingit'));
     await minGitPath.create(recursive: true);
