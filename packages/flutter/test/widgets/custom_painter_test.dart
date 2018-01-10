@@ -274,6 +274,48 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
+  testWidgets('Can toggle semantics on, off, on without crash',  (WidgetTester tester) async {
+    await tester.pumpWidget(new CustomPaint(
+      painter: new _PainterWithSemantics(
+        semantics: new CustomPainterSemantics(
+          key: const ValueKey<int>(1),
+          rect: new Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
+          properties: const SemanticsProperties(
+            checked: false,
+            selected: false,
+            button: false,
+            label: 'label-before',
+            value: 'value-before',
+            increasedValue: 'increase-before',
+            decreasedValue: 'decrease-before',
+            hint: 'hint-before',
+            textDirection: TextDirection.rtl,
+          ),
+        ),
+      ),
+    ));
+
+    // Start with semantics off.
+    expect(tester.binding.pipelineOwner.semanticsOwner, isNull);
+
+    // Semantics on
+    SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpAndSettle();
+    expect(tester.binding.pipelineOwner.semanticsOwner, isNotNull);
+
+    // Semantics off
+    semantics.dispose();
+    await tester.pumpAndSettle();
+    expect(tester.binding.pipelineOwner.semanticsOwner, isNull);
+
+    // Semantics on
+    semantics = new SemanticsTester(tester);
+    await tester.pumpAndSettle();
+    expect(tester.binding.pipelineOwner.semanticsOwner, isNotNull);
+
+    semantics.dispose();
+  });
+
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = new SemanticsTester(tester);

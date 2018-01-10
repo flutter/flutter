@@ -627,6 +627,13 @@ class RenderCustomPaint extends RenderProxyBox {
     super.assembleSemanticsNode(node, config, finalChildren);
   }
 
+  @override
+  void clearSemantics() {
+    super.clearSemantics();
+    _backgroundSemanticsNodes = null;
+    _foregroundSemanticsNodes = null;
+  }
+
   /// Updates the nodes of `oldSemantics` using data in `newChildSemantics`, and
   /// returns a new list containing child nodes sorted according to the order
   /// specified by `newChildSemantics`.
