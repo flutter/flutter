@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/cupertino.dart';
@@ -189,7 +189,7 @@ void main() {
           new TestSemantics.rootChild(
             actions: SemanticsAction.tap.index,
             label: 'ABC',
-            flags: SemanticsFlags.isButton.index,
+            flags: SemanticsFlag.isButton.index,
           )
         ],
       ),
