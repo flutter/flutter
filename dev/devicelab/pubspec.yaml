@@ -8,7 +8,7 @@ environment:
   sdk: '>=1.12.0 <2.0.0'
 
 dependencies:
-  args: 0.13.7
+  args: 1.2.0
   file: 2.3.5
   image: 1.1.29
   meta: 1.1.1

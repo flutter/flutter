@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/strings.dart';
@@ -61,6 +62,10 @@ class FlutterOptions {
 }
 
 abstract class FlutterCommand extends Command<Null> {
+  @override
+  ArgParser get argParser => _argParser;
+  final ArgParser _argParser = new ArgParser(allowTrailingOptions: false);
+
   @override
   FlutterCommandRunner get runner => super.runner;
 
