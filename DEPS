@@ -31,11 +31,11 @@ vars = {
   # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS.
   # You can use //tools/dart/create_updated_flutter_deps.py to produce
   # updated revision list of existing dependencies.
-  'dart_revision': 'bd6cbd1ec7e79730ea1fd8ba01139f4e18a02290',
+  'dart_revision': '28757928b47b192efcec082c78258102beb03f78',
 
   'dart_args_tag': '0.13.7',
   'dart_async_tag': '2.0.2',
-  'dart_barback_tag': '0.15.2+13',
+  'dart_barback_tag': '0.15.2+14',
   'dart_bazel_worker_tag': 'v0.1.4',
   'dart_boolean_selector_tag': '1.0.2',
   'dart_boringssl_gen_rev': 'd2b56d1b7657e52eb5a1f075968c773aa3e53614',
@@ -51,7 +51,7 @@ vars = {
   'dart_dartdoc_tag': 'v0.15.0+1',
   'dart_fixnum_tag': '0.10.5',
   'dart_glob_tag': '1.1.5',
-  'dart_html_tag': '0.13.2+1',
+  'dart_html_tag': '0.13.2+2',
   'dart_http_multi_server_tag': '2.0.4',
   'dart_http_parser_tag': '3.1.1',
   'dart_http_retry_tag': '0.1.0',
@@ -75,7 +75,7 @@ vars = {
   'dart_plugin_tag': '0.2.0+2',
   'dart_pool_tag': '1.3.4',
   'dart_protobuf_tag': '0.6.0',
-  'dart_pub_rev': 'cde958f157d3662bf968bcbed05580d5c0355e89',
+  'dart_pub_rev': '667281eef93b4be648cceca400e954e000edba38',
   'dart_pub_semver_tag': '1.3.2',
   'dart_quiver_tag': '0.27.0',
   'dart_resource_rev': 'af5a5bf65511943398146cf146e466e5f0b95cb9',
@@ -165,190 +165,190 @@ deps = {
    'https://boringssl.googlesource.com/boringssl.git' + '@' + Var('dart_boringssl_rev'),
 
   'src/third_party/dart/third_party/observatory_pub_packages':
-   Var('chromium_git') + '/external/github.com/dart-lang/observatory_pub_packages' + '@' + Var('dart_observatory_pub_packages_rev'),
+   Var('dart_git') + '/observatory_pub_packages.git' + '@' + Var('dart_observatory_pub_packages_rev'),
 
   'src/third_party/dart/third_party/pkg/oauth2':
-   Var('chromium_git') + '/external/github.com/dart-lang/oauth2' + '@' + Var('dart_oauth2_tag'),
+   Var('dart_git') + '/oauth2.git' + '@' + Var('dart_oauth2_tag'),
 
   'src/third_party/dart/third_party/pkg/args':
-   Var('chromium_git') + '/external/github.com/dart-lang/args' + '@' + Var('dart_args_tag'),
+   Var('dart_git') + '/args.git' + '@' + Var('dart_args_tag'),
 
   'src/third_party/dart/third_party/pkg/async':
-   Var('chromium_git') + '/external/github.com/dart-lang/async' + '@' +   Var('dart_async_tag'),
+   Var('dart_git') + '/async.git' + '@' +   Var('dart_async_tag'),
 
   'src/third_party/dart/third_party/pkg/barback':
-   Var('chromium_git') + '/external/github.com/dart-lang/barback' + '@' +   Var('dart_barback_tag'),
+   Var('dart_git') + '/barback.git' + '@' +   Var('dart_barback_tag'),
 
   'src/third_party/dart/third_party/pkg/bazel_worker':
-   Var('chromium_git') + '/external/github.com/dart-lang/bazel_worker' + '@' +   Var('dart_bazel_worker_tag'),
+   Var('dart_git') + '/bazel_worker.git' + '@' +   Var('dart_bazel_worker_tag'),
 
   'src/third_party/dart/third_party/pkg/boolean_selector':
-   Var('chromium_git') + '/external/github.com/dart-lang/boolean_selector' + '@' +   Var('dart_boolean_selector_tag'),
+   Var('dart_git') + '/boolean_selector.git' + '@' +   Var('dart_boolean_selector_tag'),
 
   'src/third_party/dart/third_party/pkg/charcode':
-   Var('chromium_git') + '/external/github.com/dart-lang/charcode' + '@' + Var('dart_charcode_tag'),
+   Var('dart_git') + '/charcode.git' + '@' + Var('dart_charcode_tag'),
 
   'src/third_party/dart/third_party/pkg/cli_util':
-   Var('chromium_git') + '/external/github.com/dart-lang/cli_util' + '@' + Var('dart_cli_util_tag'),
+   Var('dart_git') + '/cli_util.git' + '@' + Var('dart_cli_util_tag'),
 
   'src/third_party/dart/third_party/pkg/collection':
-   Var('chromium_git') + '/external/github.com/dart-lang/collection' + '@' + Var('dart_collection_tag'),
+   Var('dart_git') + '/collection.git' + '@' + Var('dart_collection_tag'),
 
   'src/third_party/dart/third_party/pkg/convert':
-   Var('chromium_git') + '/external/github.com/dart-lang/convert' + '@' + Var('dart_convert_tag'),
+   Var('dart_git') + '/convert.git' + '@' + Var('dart_convert_tag'),
 
   'src/third_party/dart/third_party/pkg/crypto':
-   Var('chromium_git') + '/external/github.com/dart-lang/crypto' + '@' + Var('dart_crypto_tag'),
+   Var('dart_git') + '/crypto.git' + '@' + Var('dart_crypto_tag'),
 
   'src/third_party/dart/third_party/pkg/csslib':
-   Var('chromium_git') + '/external/github.com/dart-lang/csslib' + '@' + Var('dart_csslib_tag'),
+   Var('dart_git') + '/csslib.git' + '@' + Var('dart_csslib_tag'),
 
   'src/third_party/dart/third_party/pkg/dart2js_info':
-   Var('chromium_git') + '/external/github.com/dart-lang/dart2js_info' + '@' + Var('dart_dart2js_info_tag'),
+   Var('dart_git') + '/dart2js_info.git' + '@' + Var('dart_dart2js_info_tag'),
 
   'src/third_party/dart/third_party/pkg/dartdoc':
-   Var('chromium_git') + '/external/github.com/dart-lang/dartdoc' + '@' + Var('dart_dartdoc_tag'),
+   Var('dart_git') + '/dartdoc.git' + '@' + Var('dart_dartdoc_tag'),
 
   'src/third_party/dart/third_party/pkg/isolate':
-   Var('chromium_git') + '/external/github.com/dart-lang/isolate' + '@' + Var('dart_isolate_tag'),
+   Var('dart_git') + '/isolate.git' + '@' + Var('dart_isolate_tag'),
 
   'src/third_party/dart/third_party/pkg/json_rpc_2':
-   Var('chromium_git') + '/external/github.com/dart-lang/json_rpc_2' + '@' + Var('dart_json_rpc_2_tag'),
+   Var('dart_git') + '/json_rpc_2.git' + '@' + Var('dart_json_rpc_2_tag'),
 
   'src/third_party/dart/third_party/pkg/intl':
-   Var('chromium_git') + '/external/github.com/dart-lang/intl' + '@' + Var('dart_intl_tag'),
+   Var('dart_git') + '/intl.git' + '@' + Var('dart_intl_tag'),
 
   'src/third_party/dart/third_party/pkg/fixnum':
-   Var('chromium_git') + '/external/github.com/dart-lang/fixnum' + '@' + Var('dart_fixnum_tag'),
+   Var('dart_git') + '/fixnum.git' + '@' + Var('dart_fixnum_tag'),
 
   'src/third_party/dart/third_party/pkg/glob':
-   Var('chromium_git') + '/external/github.com/dart-lang/glob' + '@' + Var('dart_glob_tag'),
+   Var('dart_git') + '/glob.git' + '@' + Var('dart_glob_tag'),
 
   'src/third_party/dart/third_party/pkg/html':
-   Var('chromium_git') + '/external/github.com/dart-lang/html' + '@' + Var('dart_html_tag'),
+   Var('dart_git') + '/html.git' + '@' + Var('dart_html_tag'),
 
   'src/third_party/dart/third_party/pkg/http':
-   Var('chromium_git') + '/external/github.com/dart-lang/http' + '@' + Var('dart_http_tag'),
+   Var('dart_git') + '/http.git' + '@' + Var('dart_http_tag'),
 
   'src/third_party/dart/third_party/pkg/http_parser':
-   Var('chromium_git') + '/external/github.com/dart-lang/http_parser' + '@' + Var('dart_http_parser_tag'),
+   Var('dart_git') + '/http_parser.git' + '@' + Var('dart_http_parser_tag'),
 
   'src/third_party/dart/third_party/pkg/http_retry':
-   Var('chromium_git') + '/external/github.com/dart-lang/http_retry' + '@' + Var('dart_http_retry_tag'),
+   Var('dart_git') + '/http_retry.git' + '@' + Var('dart_http_retry_tag'),
 
   'src/third_party/dart/third_party/pkg/http_throttle':
-   Var('chromium_git') + '/external/github.com/dart-lang/http_throttle' + '@' + Var('dart_http_throttle_tag'),
+   Var('dart_git') + '/http_throttle.git' + '@' + Var('dart_http_throttle_tag'),
 
   'src/third_party/dart/third_party/pkg/http_multi_server':
-   Var('chromium_git') + '/external/github.com/dart-lang/http_multi_server' + '@' + Var('dart_http_multi_server_tag'),
+   Var('dart_git') + '/http_multi_server.git' + '@' + Var('dart_http_multi_server_tag'),
 
   'src/third_party/dart/third_party/pkg/logging':
-   Var('chromium_git') + '/external/github.com/dart-lang/logging' + '@' + Var('dart_logging_tag'),
+   Var('dart_git') + '/logging.git' + '@' + Var('dart_logging_tag'),
 
   'src/third_party/dart/third_party/pkg/linter':
-   Var('chromium_git') + '/external/github.com/dart-lang/linter' + '@' + Var('dart_linter_tag'),
+   Var('dart_git') + '/linter.git' + '@' + Var('dart_linter_tag'),
 
   'src/third_party/dart/third_party/pkg/markdown':
-   Var('chromium_git') + '/external/github.com/dart-lang/markdown' + '@' + Var('dart_markdown_tag'),
+   Var('dart_git') + '/markdown.git' + '@' + Var('dart_markdown_tag'),
 
   'src/third_party/dart/third_party/pkg/matcher':
-   Var('chromium_git') + '/external/github.com/dart-lang/matcher' + '@' + Var('dart_matcher_tag'),
+   Var('dart_git') + '/matcher.git' + '@' + Var('dart_matcher_tag'),
 
   'src/third_party/dart/third_party/pkg/mime':
-   Var('chromium_git') + '/external/github.com/dart-lang/mime' + '@' + Var('dart_mime_tag'),
+   Var('dart_git') + '/mime.git' + '@' + Var('dart_mime_tag'),
 
   'src/third_party/dart/third_party/pkg/mockito':
-   Var('chromium_git') + '/external/github.com/dart-lang/mockito' + '@' + Var('dart_mockito_tag'),
+   Var('dart_git') + '/mockito.git' + '@' + Var('dart_mockito_tag'),
 
   'src/third_party/dart/third_party/pkg/mustache4dart':
    Var('chromium_git') + '/external/github.com/valotas/mustache4dart' + '@' + Var('dart_mustache4dart_tag'),
 
   'src/third_party/dart/third_party/pkg_tested/package_config':
-   Var('chromium_git') + '/external/github.com/dart-lang/package_config' + '@' + Var('dart_package_config_tag'),
+   Var('dart_git') + '/package_config.git' + '@' + Var('dart_package_config_tag'),
 
   'src/third_party/dart/third_party/pkg_tested/package_resolver':
-   Var('chromium_git') + '/external/github.com/dart-lang/package_resolver' + '@' + Var('dart_package_resolver_tag'),
+   Var('dart_git') + '/package_resolver.git' + '@' + Var('dart_package_resolver_tag'),
 
   'src/third_party/dart/third_party/pkg/path':
-   Var('chromium_git') + '/external/github.com/dart-lang/path' + '@' + Var('dart_path_tag'),
+   Var('dart_git') + '/path.git' + '@' + Var('dart_path_tag'),
 
   'src/third_party/dart/third_party/pkg/pool':
-   Var('chromium_git') + '/external/github.com/dart-lang/pool' + '@' + Var('dart_pool_tag'),
+   Var('dart_git') + '/pool.git' + '@' + Var('dart_pool_tag'),
 
   'src/third_party/dart/third_party/pkg/plugin':
-   Var('chromium_git') + '/external/github.com/dart-lang/plugin' + '@' + Var('dart_plugin_tag'),
+   Var('dart_git') + '/plugin.git' + '@' + Var('dart_plugin_tag'),
 
   'src/third_party/dart/third_party/pkg/protobuf':
-   Var('chromium_git') + '/external/github.com/dart-lang/protobuf' + '@' + Var('dart_protobuf_tag'),
+   Var('dart_git') + '/protobuf.git' + '@' + Var('dart_protobuf_tag'),
 
   'src/third_party/dart/third_party/pkg/pub_semver':
-   Var('chromium_git') + '/external/github.com/dart-lang/pub_semver' + '@' + Var('dart_pub_semver_tag'),
+   Var('dart_git') + '/pub_semver.git' + '@' + Var('dart_pub_semver_tag'),
 
   'src/third_party/dart/third_party/pkg/pub':
-   Var('chromium_git') + '/external/github.com/dart-lang/pub' + '@' + Var('dart_pub_rev'),
+   Var('dart_git') + '/pub.git' + '@' + Var('dart_pub_rev'),
 
   'src/third_party/dart/third_party/pkg/quiver':
    Var('chromium_git') + '/external/github.com/google/quiver-dart' + '@' + Var('dart_quiver_tag'),
 
   'src/third_party/dart/third_party/pkg/resource':
-   Var('chromium_git') + '/external/github.com/dart-lang/resource' + '@' + Var('dart_resource_rev'),
+   Var('dart_git') + '/resource.git' + '@' + Var('dart_resource_rev'),
 
   'src/third_party/dart/third_party/pkg/shelf':
-   Var('chromium_git') + '/external/github.com/dart-lang/shelf' + '@' + Var('dart_shelf_tag'),
+   Var('dart_git') + '/shelf.git' + '@' + Var('dart_shelf_tag'),
 
   'src/third_party/dart/third_party/pkg/shelf_packages_handler':
-   Var('chromium_git') + '/external/github.com/dart-lang/shelf_packages_handler' + '@' + Var('dart_shelf_packages_handler_tag'),
+   Var('dart_git') + '/shelf_packages_handler.git' + '@' + Var('dart_shelf_packages_handler_tag'),
 
   'src/third_party/dart/third_party/pkg/shelf_static':
-   Var('chromium_git') + '/external/github.com/dart-lang/shelf_static' + '@' + Var('dart_shelf_static_rev'),
+   Var('dart_git') + '/shelf_static.git' + '@' + Var('dart_shelf_static_rev'),
 
   'src/third_party/dart/third_party/pkg/shelf_web_socket':
-   Var('chromium_git') + '/external/github.com/dart-lang/shelf_web_socket' + '@' + Var('dart_shelf_web_socket_tag'),
+   Var('dart_git') + '/shelf_web_socket.git' + '@' + Var('dart_shelf_web_socket_tag'),
 
   'src/third_party/dart/third_party/pkg/source_span':
-   Var('chromium_git') + '/external/github.com/dart-lang/source_span' + '@' + Var('dart_source_span_tag'),
+   Var('dart_git') + '/source_span.git' + '@' + Var('dart_source_span_tag'),
 
   'src/third_party/dart/third_party/pkg/source_map_stack_trace':
-   Var('chromium_git') + '/external/github.com/dart-lang/source_map_stack_trace' + '@' + Var('dart_source_map_stack_trace_tag'),
+   Var('dart_git') + '/source_map_stack_trace.git' + '@' + Var('dart_source_map_stack_trace_tag'),
 
   'src/third_party/dart/third_party/pkg/source_maps':
-   Var('chromium_git') + '/external/github.com/dart-lang/source_maps' + '@' + Var('dart_source_maps_tag'),
+   Var('dart_git') + '/source_maps.git' + '@' + Var('dart_source_maps_tag'),
 
   'src/third_party/dart/third_party/pkg/string_scanner':
-   Var('chromium_git') + '/external/github.com/dart-lang/string_scanner' + '@' + Var('dart_string_scanner_tag'),
+   Var('dart_git') + '/string_scanner.git' + '@' + Var('dart_string_scanner_tag'),
 
   'src/third_party/dart/third_party/pkg/stream_channel':
-   Var('chromium_git') + '/external/github.com/dart-lang/stream_channel' + '@' + Var('dart_stream_channel_tag'),
+   Var('dart_git') + '/stream_channel.git' + '@' + Var('dart_stream_channel_tag'),
 
   'src/third_party/dart/third_party/pkg/stack_trace':
-   Var('chromium_git') + '/external/github.com/dart-lang/stack_trace' + '@' + Var('dart_stack_trace_tag'),
+   Var('dart_git') + '/stack_trace.git' + '@' + Var('dart_stack_trace_tag'),
 
   'src/third_party/dart/third_party/pkg_tested/dart_style':
-   Var('chromium_git') + '/external/github.com/dart-lang/dart_style' + '@' + Var('dart_dart_style_tag'),
+   Var('dart_git') + '/dart_style.git' + '@' + Var('dart_dart_style_tag'),
 
   'src/third_party/dart/third_party/pkg/typed_data':
-   Var('chromium_git') + '/external/github.com/dart-lang/typed_data' + '@' + Var('dart_typed_data_tag'),
+   Var('dart_git') + '/typed_data.git' + '@' + Var('dart_typed_data_tag'),
 
   'src/third_party/dart/third_party/pkg/test':
-   Var('chromium_git') + '/external/github.com/dart-lang/test' + '@' + Var('dart_test_tag'),
+   Var('dart_git') + '/test.git' + '@' + Var('dart_test_tag'),
 
   'src/third_party/dart/third_party/pkg/tuple':
-   Var('chromium_git') + '/external/github.com/dart-lang/tuple' + '@' + Var('dart_tuple_tag'),
+   Var('dart_git') + '/tuple.git' + '@' + Var('dart_tuple_tag'),
 
   'src/third_party/dart/third_party/pkg/utf':
-   Var('chromium_git') + '/external/github.com/dart-lang/utf' + '@' + Var('dart_utf_tag'),
+   Var('dart_git') + '/utf.git' + '@' + Var('dart_utf_tag'),
 
   'src/third_party/dart/third_party/pkg/usage':
-   Var('chromium_git') + '/external/github.com/dart-lang/usage' + '@' + Var('dart_usage_tag'),
+   Var('dart_git') + '/usage.git' + '@' + Var('dart_usage_tag'),
 
   'src/third_party/dart/third_party/pkg/watcher':
-   Var('chromium_git') + '/external/github.com/dart-lang/watcher' + '@' + Var('dart_watcher_tag'),
+   Var('dart_git') + '/watcher.git' + '@' + Var('dart_watcher_tag'),
 
   'src/third_party/dart/third_party/pkg/web_socket_channel':
-   Var('chromium_git') + '/external/github.com/dart-lang/web_socket_channel' + '@' + Var('dart_web_socket_channel_tag'),
+   Var('dart_git') + '/web_socket_channel.git' + '@' + Var('dart_web_socket_channel_tag'),
 
   'src/third_party/dart/third_party/pkg/yaml':
-   Var('chromium_git') + '/external/github.com/dart-lang/yaml' + '@' + Var('dart_yaml_tag'),
+   Var('dart_git') + '/yaml.git' + '@' + Var('dart_yaml_tag'),
 
   'src/third_party/colorama/src':
    Var('chromium_git') + '/external/colorama.git' + '@' + '799604a1041e9b3bc5d2789ecbd7e8db2e18e6b8',
@@ -357,7 +357,7 @@ deps = {
    Var('fuchsia_git') + '/third_party/freetype2' + '@' + 'e23a030e9b43c648249477fdf7bf5305d2cc8f59',
 
   'src/third_party/root_certificates':
-   Var('chromium_git') + '/external/github.com/dart-lang/root_certificates' + '@' + Var('dart_root_certificates_rev'),
+   Var('dart_git') + '/root_certificates.git' + '@' + Var('dart_root_certificates_rev'),
 
   'src/third_party/skia':
    Var('skia_git') + '/skia.git' + '@' +  Var('skia_revision'),
@@ -376,7 +376,7 @@ deps = {
    Var('github_git') + '/KhronosGroup/Vulkan-Docs.git' + '@' + 'e29c2489e238509c41aeb8c7bce9d669a496344b',
 
   'src/third_party/pkg/when':
-   Var('chromium_git') + '/external/github.com/dart-lang/when' + '@' + '0.2.0',
+   Var('dart_git') + '/when.git' + '@' + '0.2.0',
 }
 
 recursedeps = [
