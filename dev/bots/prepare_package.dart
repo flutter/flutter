@@ -300,7 +300,7 @@ Future<Null> main(List<String> argList) async {
 
   final String output = (args['output'] == null || args['output'].isEmpty)
       ? path.join(path.current, ArchiveCreator.defaultArchiveName(args['revision']))
-      : path.dirname(args['output']);
+      : args['output'];
 
   /// Sanity check the output filename.
   final String outputFilename = path.basename(output);
