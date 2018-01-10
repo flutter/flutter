@@ -42,6 +42,7 @@ void main() {
       final String versionFilePath = mockFileSystem.path.join(Cache.flutterRoot, 'VERSION');
       mockFileSystem.file(versionFilePath).createSync(recursive: true);
       mockFileSystem.file(versionFilePath).writeAsStringSync('Foo\nBar\n0.27.0');
+      mockFileSystem.file(mockFileSystem.path.join(Cache.flutterRoot, 'bin\\cache\\artifacts\\engine\\windows-x64\\dart-sdk\\bin\\dart.exe'));
     });
 
     setUp(() {
