@@ -135,6 +135,10 @@ class Cache {
         // Unknown platform, we can't derive version.
         return null;
       }
+      
+      print(engineDirectory);
+      engineDirectory.listSync(recursive: true).forEach(print);
+
       final File dartSdkBin = engineDirectory.childFile(fs.path.joinAll(dartSdkBinParts));
       final ProcessResult result = processManager.runSync(<String>[dartSdkBin.path, '--version']);
       // https://github.com/dart-lang/sdk/issues/31481
