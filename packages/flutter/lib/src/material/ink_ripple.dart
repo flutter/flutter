@@ -20,8 +20,6 @@ const Duration _kCancelDuration = const Duration(milliseconds: 75);
 // The fade out begins 300ms after the _fadeOutController starts. See confirm().
 const double _kFadeOutIntervalStart = 300.0 / 450.0;
 
-const double _kRippleConfirmedVelocity = 1.0; // logical pixels per millisecond
-
 RectCallback _getClipCallback(RenderBox referenceBox, bool containedInkWell, RectCallback rectCallback) {
   if (rectCallback != null) {
     assert(containedInkWell);

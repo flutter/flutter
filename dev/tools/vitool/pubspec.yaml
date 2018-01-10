@@ -8,7 +8,7 @@ environment:
   sdk: '>=1.20.1 <2.0.0'
 
 dependencies:
-  args: 0.13.7
+  args: 1.2.0
   vector_math: 2.0.5
   xml: 2.6.0
 

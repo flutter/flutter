@@ -20,7 +20,7 @@ dev_dependencies:
     sdk: flutter
   mockito: 2.2.1
 
-  args: 0.13.7 # TRANSITIVE DEPENDENCY
+  args: 1.2.0 # TRANSITIVE DEPENDENCY
   async: 1.13.3 # TRANSITIVE DEPENDENCY
   barback: 0.15.2+14 # TRANSITIVE DEPENDENCY
   boolean_selector: 1.0.2 # TRANSITIVE DEPENDENCY
