@@ -45,12 +45,10 @@ const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
 Future<Null> main(List<String> args) async {
   flutterTestArgs.addAll(args);
 
-  await _runCommand(flutter, <String>['doctor'], workingDirectory: flutterRoot);
-
-  // final String shard = Platform.environment['SHARD'] ?? 'tests';
-  // if (!_kShards.containsKey(shard))
-  //   throw new ArgumentError('Invalid shard: $shard');
-  // await _kShards[shard]();
+  final String shard = Platform.environment['SHARD'] ?? 'tests';
+  if (!_kShards.containsKey(shard))
+    throw new ArgumentError('Invalid shard: $shard');
+  await _kShards[shard]();
 }
 
 Future<Null> _generateDocs() async {

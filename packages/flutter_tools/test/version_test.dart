@@ -44,7 +44,7 @@ void main() {
       mockFileSystem.file(versionFilePath).writeAsStringSync('Foo\nBar\n0.27.0');
     });
 
-    setUp(() async {
+    setUp(() {
       mockProcessManager = new MockProcessManager();
     });
 
