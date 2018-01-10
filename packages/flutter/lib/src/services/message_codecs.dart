@@ -376,8 +376,9 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         result = buffer.getInt64();
         break;
       case _kLargeInt:
-        // Platform APIs to use large ints have been deprecated on 2018-01-09.
-        // TODO(mravn): remove this case once the API has been made unavailable.
+        // Flutter Engine APIs to use large ints have been deprecated on
+        // 2018-01-09 and will be made unavailable.
+        // TODO(mravn): remove this case once the APIs are unavailable.
         final int length = _readSize(buffer);
         final String hex = UTF8.decoder.convert(buffer.getUint8List(length));
         result = int.parse(hex, radix: 16);
