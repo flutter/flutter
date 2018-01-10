@@ -1561,6 +1561,12 @@ class RenderDecoratedBox extends RenderProxyBox {
     _painter?.dispose();
     _painter = null;
     super.detach();
+    // Since we're disposing of our painter, we won't receive change
+    // notifications. We mark ourselves as needing paint so that we will
+    // resubscribe to change notifications. If we didn't do this, then, for
+    // example, animated GIFs would stop animating when a DecoratedBox gets
+    // moved around the tree due to GlobalKey reparenting.
+    markNeedsPaint();
   }
 
   @override

@@ -156,9 +156,6 @@ class ImageStream extends Diagnosticable {
   Object get key => _completer != null ? _completer : this;
 
   @override
-  String toStringShort() => '$runtimeType';
-
-  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new ObjectFlagProperty<ImageStreamCompleter>(
@@ -181,10 +178,10 @@ class ImageStream extends Diagnosticable {
 /// Base class for those that manage the loading of [dart:ui.Image] objects for
 /// [ImageStream]s.
 ///
-/// This class is rarely used directly. Generally, an [ImageProvider] subclass
-/// will return an [ImageStream] and automatically configure it with the right
-/// [ImageStreamCompleter] when possible.
-class ImageStreamCompleter extends Diagnosticable {
+/// [ImageStreamListener] objects are rarely constructed directly. Generally, an
+/// [ImageProvider] subclass will return an [ImageStream] and automatically
+/// configure it with the right [ImageStreamCompleter] when possible.
+abstract class ImageStreamCompleter extends Diagnosticable {
   final List<ImageListener> _listeners = <ImageListener>[];
   ImageInfo _current;
 
@@ -239,9 +236,6 @@ class ImageStreamCompleter extends Diagnosticable {
       context: context
     ));
   }
-
-  @override
-  String toStringShort() => '$runtimeType';
 
   /// Accumulates a list of strings describing the object's state. Subclasses
   /// should override this to have their information included in [toString].
