@@ -16,7 +16,7 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Stack(
-          children: <Widget>[
+          children: const <Widget>[
             const Text('a', textDirection: TextDirection.ltr),
             const Text('b', textDirection: TextDirection.ltr),
             const Text('c', textDirection: TextDirection.ltr),
@@ -31,7 +31,7 @@ void main() {
         child: new WidgetInspector(
           selectButtonBuilder: null,
           child: new Stack(
-            children: <Widget>[
+            children: const <Widget>[
               const Text('a', textDirection: TextDirection.ltr),
               const Text('b', textDirection: TextDirection.ltr),
               const Text('c', textDirection: TextDirection.ltr),
@@ -353,7 +353,7 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Stack(
-          children: <Widget>[
+          children: const <Widget>[
             const Text('a', textDirection: TextDirection.ltr),
             const Text('b', textDirection: TextDirection.ltr),
             const Text('c', textDirection: TextDirection.ltr),
@@ -403,7 +403,7 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Stack(
-          children: <Widget>[
+          children: const <Widget>[
             const Text('a', textDirection: TextDirection.ltr),
             const Text('b', textDirection: TextDirection.ltr),
             const Text('c', textDirection: TextDirection.ltr),
@@ -476,7 +476,7 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new Stack(
-          children: <Widget>[
+          children: const <Widget>[
             const Text('a', textDirection: TextDirection.ltr),
             const Text('b', textDirection: TextDirection.ltr),
             const Text('c', textDirection: TextDirection.ltr),

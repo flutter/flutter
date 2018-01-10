@@ -128,7 +128,7 @@ void main() {
                   key: dropdownMenuButtonKey,
                   onChanged: (String newValue) { },
                   value: 'menuItem',
-                  items: <DropdownMenuItem<String>>[
+                  items: const <DropdownMenuItem<String>>[
                     const DropdownMenuItem<String>(
                       value: 'menuItem',
                       child: const Text('menuItem'),

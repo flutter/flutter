@@ -8,11 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 Shader createShader(Rect bounds) {
-  return new LinearGradient(
+  return const LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
-    stops: <double>[0.1, 0.35]
+    colors: const <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
+    stops: const <double>[0.1, 0.35]
   ).createShader(bounds);
 }
 

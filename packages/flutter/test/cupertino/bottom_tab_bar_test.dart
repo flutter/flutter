@@ -20,7 +20,7 @@ void main() {
   testWidgets('Need at least 2 tabs', (WidgetTester tester) async {
     try {
       await pumpWidgetWithBoilerplate(tester, new CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
+        items: const <BottomNavigationBarItem>[
           const BottomNavigationBarItem(
             icon: const ImageIcon(const TestImageProvider(24, 24)),
             title: const Text('Tab 1'),
@@ -38,7 +38,7 @@ void main() {
     await pumpWidgetWithBoilerplate(tester, new MediaQuery(
       data: const MediaQueryData(),
       child: new CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
+        items: const <BottomNavigationBarItem>[
           const BottomNavigationBarItem(
             icon: const ImageIcon(const TestImageProvider(24, 24)),
             title: const Text('Tab 1'),
@@ -69,7 +69,7 @@ void main() {
 
   testWidgets('Adjusts height to account for bottom padding', (WidgetTester tester) async {
     final CupertinoTabBar tabBar = new CupertinoTabBar(
-      items: <BottomNavigationBarItem>[
+      items: const <BottomNavigationBarItem>[
         const BottomNavigationBarItem(
           icon: const ImageIcon(const TestImageProvider(24, 24)),
           title: const Text('Aka'),
@@ -110,7 +110,7 @@ void main() {
     await pumpWidgetWithBoilerplate(tester, new MediaQuery(
       data: const MediaQueryData(),
       child: new CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
+        items: const <BottomNavigationBarItem>[
           const BottomNavigationBarItem(
             icon: const ImageIcon(const TestImageProvider(24, 24)),
             title: const Text('Tab 1'),
@@ -128,7 +128,7 @@ void main() {
     await pumpWidgetWithBoilerplate(tester, new MediaQuery(
       data: const MediaQueryData(),
       child: new CupertinoTabBar(
-        items: <BottomNavigationBarItem>[
+        items: const <BottomNavigationBarItem>[
           const BottomNavigationBarItem(
             icon: const ImageIcon(const TestImageProvider(24, 24)),
             title: const Text('Tab 1'),
@@ -151,7 +151,7 @@ void main() {
       await pumpWidgetWithBoilerplate(tester, new MediaQuery(
         data: const MediaQueryData(),
         child: new CupertinoTabBar(
-          items: <BottomNavigationBarItem>[
+          items: const <BottomNavigationBarItem>[
             const BottomNavigationBarItem(
               icon: const ImageIcon(const TestImageProvider(24, 24)),
               title: const Text('Tab 1'),
