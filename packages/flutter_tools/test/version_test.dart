@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart' show ListEquality;
+import 'package:file/memory.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/time.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/version.dart';
 
 import 'src/context.dart';
@@ -24,16 +26,25 @@ final DateTime _outOfDateVersion = _testClock.agoBy(FlutterVersion.kVersionAgeCo
 final DateTime _stampUpToDate = _testClock.agoBy(FlutterVersion.kCheckAgeConsideredUpToDate ~/ 2);
 final DateTime _stampOutOfDate = _testClock.agoBy(FlutterVersion.kCheckAgeConsideredUpToDate * 2);
 
+MemoryFileSystem mockFileSystem;
+
 void main() {
+
   group('$FlutterVersion', () {
     ProcessManager mockProcessManager;
 
     setUpAll(() {
       Cache.disableLocking();
       FlutterVersion.kPauseToLetUserReadTheMessage = Duration.ZERO;
+
+      Cache.flutterRoot = '../..';
+      mockFileSystem = new MemoryFileSystem();
+      final String versionFilePath = mockFileSystem.path.join(Cache.flutterRoot, 'VERSION');
+      mockFileSystem.file(versionFilePath).createSync(recursive: true);
+      mockFileSystem.file(versionFilePath).writeAsStringSync('Foo\nBar\n0.27.0');
     });
 
-    setUp(() {
+    setUp(() async {
       mockProcessManager = new MockProcessManager();
     });
 
@@ -271,6 +282,7 @@ void testFlutterVersion(String description, dynamic testMethod()) {
     description,
     testMethod,
     overrides: <Type, Generator>{
+      FileSystem: () => mockFileSystem,
       FlutterVersion: () => new FlutterVersion(_testClock),
     },
   );
