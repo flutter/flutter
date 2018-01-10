@@ -11,8 +11,15 @@ import 'package:flutter/widgets.dart';
 import 'semantics_tester.dart';
 
 void main() {
+  SemanticsTester semantics;
+
+  tearDown(() {
+    semantics?.dispose();
+    semantics = null;
+  });
+
   testWidgets('scrollable exposes the correct semantic actions', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    semantics = new SemanticsTester(tester);
 
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 80; i++)
@@ -37,12 +44,10 @@ void main() {
 
     await flingDown(tester);
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown]));
-
-    semantics.dispose();
   });
 
   testWidgets('showOnScreen works in scrollable', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester); // enables semantics tree generation
+    semantics = new SemanticsTester(tester); // enables semantics tree generation
 
     const double kItemHeight = 40.0;
 
@@ -75,12 +80,10 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
 
     expect(scrollController.offset, 0.0);
-
-    semantics.dispose();
   });
 
   testWidgets('showOnScreen works with pinned app bar and sliver list', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester); // enables semantics tree generation
+    semantics = new SemanticsTester(tester); // enables semantics tree generation
 
     const double kItemHeight = 100.0;
     const double kExpandedAppBarHeight = 56.0;
@@ -135,18 +138,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
     expect(tester.getTopLeft(find.byWidget(containers[1])).dy, kExpandedAppBarHeight);
-
-    semantics.dispose();
   });
 
   testWidgets('showOnScreen works with pinned app bar and individual slivers', (WidgetTester tester) async {
-    final SemanticsTester semanticsTester = new SemanticsTester(tester); // enables semantics tree generation
+    semantics = new SemanticsTester(tester); // enables semantics tree generation
 
     const double kItemHeight = 100.0;
     const double kExpandedAppBarHeight = 256.0;
 
 
-    final List<Widget> semantics = <Widget>[];
+    final List<Widget> children = <Widget>[];
     final List<Widget> slivers = new List<Widget>.generate(30, (int i) {
       final Widget child = new MergeSemantics(
         child: new Container(
@@ -154,7 +155,7 @@ void main() {
           height: 72.0,
         ),
       );
-      semantics.add(child);
+      children.add(child);
       return new SliverToBoxAdapter(
         child: child,
       );
@@ -190,19 +191,17 @@ void main() {
 
     expect(scrollController.offset, kItemHeight / 2);
 
-    final int id0 = tester.renderObject(find.byWidget(semantics[0])).debugSemantics.id;
+    final int id0 = tester.renderObject(find.byWidget(children[0])).debugSemantics.id;
     tester.binding.pipelineOwner.semanticsOwner.performAction(id0, SemanticsAction.showOnScreen);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
-    expect(tester.getTopLeft(find.byWidget(semantics[0])).dy, kToolbarHeight);
+    expect(tester.getTopLeft(find.byWidget(children[0])).dy, kToolbarHeight);
 
-    final int id1 = tester.renderObject(find.byWidget(semantics[1])).debugSemantics.id;
+    final int id1 = tester.renderObject(find.byWidget(children[1])).debugSemantics.id;
     tester.binding.pipelineOwner.semanticsOwner.performAction(id1, SemanticsAction.showOnScreen);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
-    expect(tester.getTopLeft(find.byWidget(semantics[1])).dy, kToolbarHeight);
-
-    semanticsTester.dispose();
+    expect(tester.getTopLeft(find.byWidget(children[1])).dy, kToolbarHeight);
   });
 
   testWidgets('vertical scrolling sends ScrollCompletedSemanticsEvent', (WidgetTester tester) async {
@@ -211,7 +210,7 @@ void main() {
       messages.add(message);
     });
 
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    semantics = new SemanticsTester(tester);
 
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 80; i++)
@@ -243,8 +242,6 @@ void main() {
     expect(message['pixels'], isNonNegative);
     expect(message['minScrollExtent'], 0.0);
     expect(message['maxScrollExtent'], 520.0);
-
-    semantics.dispose();
   });
 
   testWidgets('horizontal scrolling sends ScrollCompletedSemanticsEvent', (WidgetTester tester) async {
@@ -253,7 +250,7 @@ void main() {
       messages.add(message);
     });
 
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    semantics = new SemanticsTester(tester);
 
     final List<Widget> children = <Widget>[];
     for (int i = 0; i < 80; i++)
@@ -291,12 +288,10 @@ void main() {
     expect(message['pixels'], isNonNegative);
     expect(message['minScrollExtent'], 0.0);
     expect(message['maxScrollExtent'], 7200.0);
-
-    semantics.dispose();
   });
 
   testWidgets('Semantics tree is populated mid-scroll', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    semantics = new SemanticsTester(tester);
 
     final List<Widget> children = <Widget>[];
     for (int i = 0; i < 80; i++)
@@ -318,8 +313,6 @@ void main() {
     expect(semantics, includesNodeWith(label: 'Item 1'));
     expect(semantics, includesNodeWith(label: 'Item 2'));
     expect(semantics, includesNodeWith(label: 'Item 3'));
-
-    semantics.dispose();
   });
 
   testWidgets('Can toggle semantics on, off, on without crash',  (WidgetTester tester) async {
@@ -341,7 +334,7 @@ void main() {
     expect(tester.binding.pipelineOwner.semanticsOwner, isNull);
 
     // Semantics on
-    SemanticsTester semantics = new SemanticsTester(tester);
+    semantics = new SemanticsTester(tester);
     await tester.pumpAndSettle();
     expect(tester.binding.pipelineOwner.semanticsOwner, isNotNull);
 
@@ -354,8 +347,6 @@ void main() {
     semantics = new SemanticsTester(tester);
     await tester.pumpAndSettle();
     expect(tester.binding.pipelineOwner.semanticsOwner, isNotNull);
-
-    semantics.dispose();
   });
 }
 
