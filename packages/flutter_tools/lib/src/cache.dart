@@ -135,8 +135,9 @@ class Cache {
         // Unknown platform, we can't derive version.
         return null;
       }
+
       final File dartSdkBin = engineDirectory.childFile(fs.path.joinAll(dartSdkBinParts));
-      final ProcessResult result = processManager.runSync(<String>[dartSdkBin.path, '--version']);
+      final ProcessResult result = processManager.runSync(<String>[dartSdkBin.path.replaceAll('/', '\\'), '--version']);
       // https://github.com/dart-lang/sdk/issues/31481
       // We can use the process utils directly when this is fixed instead of parsing stderr.
       _engineDartVersion = result.stderr.trim().replaceAll('Dart VM version: ', '');
