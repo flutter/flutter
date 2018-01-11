@@ -179,7 +179,7 @@ class JSONMethodCodec implements MethodCodec {
 ///  * null: null
 ///  * [bool]\: `java.lang.Boolean`
 ///  * [int]\: `java.lang.Integer` for values that are representable using 32-bit
-///    two's complement; otherwise, `java.lang.Long`
+///    two's complement; `java.lang.Long` otherwise
 ///  * [double]\: `java.lang.Double`
 ///  * [String]\: `java.lang.String`
 ///  * [Uint8List]\: `byte[]`
@@ -194,7 +194,7 @@ class JSONMethodCodec implements MethodCodec {
 ///  * null: nil
 ///  * [bool]\: `NSNumber numberWithBool:`
 ///  * [int]\: `NSNumber numberWithInt:` for values that are representable using
-///    32-bit two's complement; otherwise, `NSNumber numberWithLong:`.
+///    32-bit two's complement; `NSNumber numberWithLong:` otherwise
 ///  * [double]\: `NSNumber numberWithDouble:`
 ///  * [String]\: `NSString`
 ///  * [Uint8List], [Int32List], [Int64List], [Float64List]\:
