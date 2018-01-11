@@ -10,7 +10,8 @@
 namespace shell {
 
 void PlatformMacMain(std::string icu_data_path,
-                     std::string application_library_path);
+                     std::string application_library_path,
+                     std::string bundle_path);
 
 bool AttemptLaunchFromCommandLineSwitches(Engine* engine);
 

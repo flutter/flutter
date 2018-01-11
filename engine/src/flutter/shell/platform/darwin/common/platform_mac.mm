@@ -31,7 +31,9 @@ static fxl::CommandLine InitializedCommandLine() {
 
 class EmbedderState {
  public:
-  EmbedderState(std::string icu_data_path, std::string application_library_path) {
+  EmbedderState(std::string icu_data_path,
+                std::string application_library_path,
+                std::string bundle_path) {
 #if TARGET_OS_IPHONE
     // This calls crashes on MacOS because we haven't run Dart_Initialize yet.
     // See https://github.com/flutter/flutter/issues/4006
@@ -46,7 +48,8 @@ class EmbedderState {
     // marker that can be used as a reference for startup.
     TRACE_EVENT_INSTANT0("flutter", "main");
 
-    shell::Shell::InitStandalone(std::move(command_line), icu_data_path, application_library_path);
+    shell::Shell::InitStandalone(std::move(command_line), icu_data_path, application_library_path,
+                                 bundle_path);
   }
 
   ~EmbedderState() {}
@@ -55,12 +58,15 @@ class EmbedderState {
   FXL_DISALLOW_COPY_AND_ASSIGN(EmbedderState);
 };
 
-void PlatformMacMain(std::string icu_data_path, std::string application_library_path) {
+void PlatformMacMain(std::string icu_data_path,
+                     std::string application_library_path,
+                     std::string bundle_path) {
   static std::unique_ptr<EmbedderState> g_embedder;
   static std::once_flag once_main;
 
   std::call_once(once_main, [&]() {
-    g_embedder = WTF::MakeUnique<EmbedderState>(icu_data_path, application_library_path);
+    g_embedder =
+        WTF::MakeUnique<EmbedderState>(icu_data_path, application_library_path, bundle_path);
   });
 }
 
