@@ -93,6 +93,7 @@ GOTO :after_subroutine
     )
 
   :do_snapshot
+    IF EXIST "%FLUTTER_ROOT%\version" DEL "%FLUTTER_ROOT%\version"
     ECHO: > "%cache_dir%\.dartignore"
     ECHO Updating flutter tool...
     PUSHD "%flutter_tools_dir%"
