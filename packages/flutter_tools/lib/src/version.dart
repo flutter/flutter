@@ -10,6 +10,7 @@ import 'package:quiver/time.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
+import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process.dart';
 import 'base/process_manager.dart';
@@ -42,6 +43,8 @@ class FlutterVersion {
 
     _frameworkRevision = _runGit('git log -n 1 --pretty=format:%H');
     _frameworkAge = _runGit('git log -n 1 --pretty=format:%ar');
+
+    _sdkVersion = _getSdkVersion();
   }
 
   final Clock _clock;
@@ -52,6 +55,10 @@ class FlutterVersion {
   String _channel;
   /// `master`, `alpha`, `hackathon`, ...
   String get channel => _channel;
+
+  String _sdkVersion;
+  /// The contents of the `VERSION` file.
+  String get sdkVersion => _sdkVersion;
 
   /// The name of the local branch
   String _branch;
@@ -73,9 +80,15 @@ class FlutterVersion {
 
   String _runGit(String command) => runSync(command.split(' '), workingDirectory: Cache.flutterRoot);
 
+  String _getSdkVersion() {
+    final File versionFile = fs.directory(Cache.flutterRoot).childFile('VERSION');
+    final List<String> versionFileContents = versionFile.readAsLinesSync();
+    return versionFileContents.last;
+  }
+
   @override
   String toString() {
-    final String flutterText = 'Flutter • channel $channel • ${repositoryUrl == null ? 'unknown source' : repositoryUrl}';
+    final String flutterText = 'Flutter • channel $channel, version $sdkVersion • ${repositoryUrl == null ? 'unknown source' : repositoryUrl}';
     final String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
     final String engineText = 'Engine • revision $engineRevisionShort';
     final String toolsText = 'Tools • Dart $dartSdkVersion';
