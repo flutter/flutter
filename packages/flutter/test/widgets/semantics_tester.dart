@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -46,7 +46,7 @@ class TestSemantics {
     this.transform,
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
-  }) : assert(flags is int || flags is List<SemanticsFlags>),
+  }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        assert(label != null),
        assert(value != null),
@@ -71,7 +71,7 @@ class TestSemantics {
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
   }) : id = 0,
-       assert(flags is int || flags is List<SemanticsFlags>),
+       assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        assert(label != null),
        assert(increasedValue != null),
@@ -105,7 +105,7 @@ class TestSemantics {
     Matrix4 transform,
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
-  }) : assert(flags is int || flags is List<SemanticsFlags>),
+  }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        assert(label != null),
        assert(value != null),
@@ -122,12 +122,12 @@ class TestSemantics {
   /// they are created.
   final int id;
 
-  /// The [SemanticsFlags] set on this node.
+  /// The [SemanticsFlag]s set on this node.
   ///
   /// There are two ways to specify this property: as an `int` that encodes the
-  /// flags as a bit field, or as a `List<SemanticsFlags>` that are _on_.
+  /// flags as a bit field, or as a `List<SemanticsFlag>` that are _on_.
   ///
-  /// Using `List<SemanticsFlags>` is recommended due to better readability.
+  /// Using `List<SemanticsFlag>` is recommended due to better readability.
   final dynamic flags;
 
   /// The [SemanticsAction]s set on this node.
@@ -223,7 +223,7 @@ class TestSemantics {
 
     final int flagsBitmask = flags is int
       ? flags
-      : flags.fold<int>(0, (int bitmask, SemanticsFlags flag) => bitmask | flag.index);
+      : flags.fold<int>(0, (int bitmask, SemanticsFlag flag) => bitmask | flag.index);
     if (flagsBitmask != nodeData.flags)
       return fail('expected node id $id to have flags $flags but found flags ${nodeData.flags}.');
 
@@ -277,8 +277,8 @@ class TestSemantics {
     buf.writeln('${indent}new $runtimeType(');
     if (id != null)
       buf.writeln('$indent  id: $id,');
-    if (flags is int && flags != 0 || flags is List<SemanticsFlags> && flags.isNotEmpty)
-      buf.writeln('$indent  flags: ${SemanticsTester._flagsToSemanticsFlagsExpression(flags)},');
+    if (flags is int && flags != 0 || flags is List<SemanticsFlag> && flags.isNotEmpty)
+      buf.writeln('$indent  flags: ${SemanticsTester._flagsToSemanticsFlagExpression(flags)},');
     if (actions is int && actions != 0 || actions is List<SemanticsAction> && actions.isNotEmpty)
       buf.writeln('$indent  actions: ${SemanticsTester._actionsToSemanticsActionExpression(actions)},');
     if (label != null && label != '')
@@ -347,7 +347,7 @@ class SemanticsTester {
     String value,
     TextDirection textDirection,
     List<SemanticsAction> actions,
-    List<SemanticsFlags> flags,
+    List<SemanticsFlag> flags,
     SemanticsNode ancestor,
   }) {
     bool checkNode(SemanticsNode node) {
@@ -364,7 +364,7 @@ class SemanticsTester {
           return false;
       }
       if (flags != null) {
-        final int expectedFlags = flags.fold(0, (int value, SemanticsFlags flag) => value | flag.index);
+        final int expectedFlags = flags.fold(0, (int value, SemanticsFlag flag) => value | flag.index);
         final int actualFlags = node.getSemanticsData().flags;
         if (expectedFlags != actualFlags)
           return false;
@@ -440,15 +440,15 @@ class SemanticsTester {
     return _generateSemanticsTestForNode(node, 0);
   }
 
-  static String _flagsToSemanticsFlagsExpression(dynamic flags) {
-    Iterable<SemanticsFlags> list;
+  static String _flagsToSemanticsFlagExpression(dynamic flags) {
+    Iterable<SemanticsFlag> list;
     if (flags is int) {
-      list = SemanticsFlags.values.values
-          .where((SemanticsFlags flag) => (flag.index & flags) != 0);
+      list = SemanticsFlag.values.values
+          .where((SemanticsFlag flag) => (flag.index & flags) != 0);
     } else {
       list = flags;
     }
-    return '<SemanticsFlags>[${list.join(', ')}]';
+    return '<SemanticsFlag>[${list.join(', ')}]';
   }
 
   static String _actionsToSemanticsActionExpression(dynamic actions) {
@@ -470,7 +470,7 @@ class SemanticsTester {
     final SemanticsData nodeData = node.getSemanticsData();
     buf.writeln('new TestSemantics(');
     if (nodeData.flags != 0)
-      buf.writeln('  flags: ${_flagsToSemanticsFlagsExpression(nodeData.flags)},');
+      buf.writeln('  flags: ${_flagsToSemanticsFlagExpression(nodeData.flags)},');
     if (nodeData.actions != 0)
       buf.writeln('  actions: ${_actionsToSemanticsActionExpression(nodeData.actions)},');
     if (node.label != null && node.label.isNotEmpty)
@@ -555,7 +555,7 @@ class _IncludesNodeWith extends Matcher {
   final String value;
   final TextDirection textDirection;
   final List<SemanticsAction> actions;
-  final List<SemanticsFlags> flags;
+  final List<SemanticsFlag> flags;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -603,7 +603,7 @@ Matcher includesNodeWith({
   String value,
   TextDirection textDirection,
   List<SemanticsAction> actions,
-  List<SemanticsFlags> flags,
+  List<SemanticsFlag> flags,
 }) {
   return new _IncludesNodeWith(
     label: label,

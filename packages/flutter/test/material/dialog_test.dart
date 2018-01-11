@@ -71,10 +71,10 @@ void main() {
                   onPressed: () {
                     showDialog<Null>(
                       context: context,
-                      child: new AlertDialog(
+                      child: const AlertDialog(
                         title: const Text('Title'),
                         content: const Text('Y'),
-                        actions: <Widget>[ ],
+                        actions: const <Widget>[ ],
                       ),
                     );
                   },

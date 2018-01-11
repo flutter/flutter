@@ -322,7 +322,7 @@ class IOSSimulator extends Device {
     if (!prebuiltApplication) {
       args.addAll(<String>[
         '--flutter-assets-dir=${fs.path.absolute(getAssetBuildDirectory())}',
-        '--dart-main=${fs.path.absolute(mainPath)}',
+        '--dart-main=${fs.path.absolute(mainPath)}${debuggingOptions.buildInfo.previewDart2?".dill":""}',
         '--packages=${fs.path.absolute('.packages')}',
       ]);
     }
@@ -380,7 +380,7 @@ class IOSSimulator extends Device {
   }
 
   Future<Null> _setupUpdatedApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) async {
-    await _sideloadUpdatedAssetsForInstalledApplicationBundle(app);
+    await _sideloadUpdatedAssetsForInstalledApplicationBundle(app, buildInfo);
 
     if (!await _applicationIsInstalledAndRunning(app))
       return _buildAndInstallApplicationBundle(app, buildInfo);
@@ -412,8 +412,8 @@ class IOSSimulator extends Device {
     await SimControl.instance.install(id, fs.path.absolute(bundle.path));
   }
 
-  Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app) =>
-      flx.build(precompiledSnapshot: true);
+  Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) =>
+      flx.build(precompiledSnapshot: true, previewDart2: buildInfo.previewDart2, strongMode: buildInfo.strongMode);
 
   @override
   Future<bool> stopApp(ApplicationPackage app) async {

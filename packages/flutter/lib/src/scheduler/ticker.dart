@@ -346,7 +346,7 @@ class Ticker {
 /// if the [Ticker] that returned the [TickerFuture] was stopped with `canceled`
 /// set to true, or if it was disposed without being stopped.
 ///
-/// To run a callback when either this future resolves or when the tricker is
+/// To run a callback when either this future resolves or when the ticker is
 /// canceled, use [whenCompleteOrCancel].
 class TickerFuture implements Future<Null> {
   TickerFuture._();
@@ -381,6 +381,10 @@ class TickerFuture implements Future<Null> {
 
   /// Calls `callback` either when this future resolves or when the ticker is
   /// canceled.
+  ///
+  /// Calling this method registers an exception handler for the [orCancel]
+  /// future, so even if the [orCancel] property is accessed, canceling the
+  /// ticker will not cause an uncaught exception in the current zone.
   void whenCompleteOrCancel(VoidCallback callback) {
     Null thunk(dynamic value) {
       callback();
@@ -391,6 +395,12 @@ class TickerFuture implements Future<Null> {
 
   /// A future that resolves when this future resolves or throws when the ticker
   /// is canceled.
+  ///
+  /// If this property is never accessed, then canceling the ticker does not
+  /// throw any exceptions. Once this property is accessed, though, if the
+  /// corresponding ticker is canceled, then the [Future] returned by this
+  /// getter will complete with an error, and if that error is not caught, there
+  /// will be an uncaught exception in the current zone.
   Future<Null> get orCancel {
     if (_secondaryCompleter == null) {
       _secondaryCompleter = new Completer<Null>();
@@ -443,7 +453,7 @@ class TickerCanceled implements Exception {
   /// Reference to the [Ticker] object that was canceled.
   ///
   /// This may be null in the case that the [Future] created for
-  /// [TickerFuture.orCancel] was created after the future was canceled.
+  /// [TickerFuture.orCancel] was created after the ticker was canceled.
   final Ticker ticker;
 
   @override

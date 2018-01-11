@@ -636,7 +636,7 @@ void main() {
         textDirection: TextDirection.rtl,
         child: new Stack(
           alignment: Alignment.center,
-          children: <Widget>[
+          children: const <Widget>[
             const SizedBox(width: 100.0, height: 100.0),
             const Positioned(left: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
             const Positioned(right: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
@@ -665,7 +665,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Stack(
           alignment: Alignment.center,
-          children: <Widget>[
+          children: const <Widget>[
             const SizedBox(width: 100.0, height: 100.0),
             const Positioned(left: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
             const Positioned(right: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
@@ -694,7 +694,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Stack(
           alignment: Alignment.bottomRight,
-          children: <Widget>[
+          children: const <Widget>[
             const SizedBox(width: 100.0, height: 100.0),
             const Positioned(left: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
             const Positioned(right: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
@@ -723,7 +723,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Stack(
           alignment: Alignment.topLeft,
-          children: <Widget>[
+          children: const <Widget>[
             const SizedBox(width: 100.0, height: 100.0),
             const Positioned(left: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
             const Positioned(right: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),

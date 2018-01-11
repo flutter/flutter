@@ -85,8 +85,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -108,8 +108,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -133,8 +133,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -165,8 +165,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('B'),
                   child: const SizedBox(
@@ -202,8 +202,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -233,8 +233,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -269,8 +269,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -310,8 +310,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -342,8 +342,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -386,8 +386,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -418,8 +418,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -460,8 +460,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -499,8 +499,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -543,8 +543,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -575,8 +575,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -615,8 +615,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -654,8 +654,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -688,8 +688,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -720,8 +720,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -776,8 +776,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -823,8 +823,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -864,8 +864,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -900,8 +900,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -956,8 +956,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -1003,8 +1003,8 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
-              children: <MergeableMaterialItem>[
+            child: const MergeableMaterial(
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -1059,9 +1059,9 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
+            child: const MergeableMaterial(
               hasDividers: true,
-              children: <MergeableMaterialItem>[
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(
@@ -1109,9 +1109,9 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           body: new SingleChildScrollView(
-            child: new MergeableMaterial(
+            child: const MergeableMaterial(
               hasDividers: true,
-              children: <MergeableMaterialItem>[
+              children: const <MergeableMaterialItem>[
                 const MaterialSlice(
                   key: const ValueKey<String>('A'),
                   child: const SizedBox(

@@ -237,4 +237,42 @@ void main() {
     expect(Gradient.lerp(testGradient1, testGradient2, 1.0), testGradient2);
     expect(Gradient.lerp(testGradient1, testGradient2, 0.5), testGradient2.scale(0.0));
   });
+
+  test('Gradients can handle missing stops and report mismatched stops', () {
+    final LinearGradient test1a = const LinearGradient(
+      colors: const <Color>[
+        const Color(0x11111111),
+        const Color(0x22222222),
+        const Color(0x33333333),
+      ],
+    );
+    final RadialGradient test1b = const RadialGradient(
+      colors: const <Color>[
+        const Color(0x11111111),
+        const Color(0x22222222),
+        const Color(0x33333333),
+      ],
+    );
+    final LinearGradient test2a = const LinearGradient(
+      colors: const <Color>[
+        const Color(0x11111111),
+        const Color(0x22222222),
+        const Color(0x33333333),
+      ],
+      stops: const <double>[0.0, 1.0],
+    );
+    final RadialGradient test2b = const RadialGradient(
+      colors: const <Color>[
+        const Color(0x11111111),
+        const Color(0x22222222),
+        const Color(0x33333333),
+      ],
+      stops: const <double>[0.0, 1.0],
+    );
+    final Rect rect = new Rect.fromLTWH(1.0, 2.0, 3.0, 4.0);
+    expect(test1a.createShader(rect), isNotNull);
+    expect(test1b.createShader(rect), isNotNull);
+    expect(() { test2a.createShader(rect); }, throwsArgumentError);
+    expect(() { test2b.createShader(rect); }, throwsArgumentError);
+  });
 }

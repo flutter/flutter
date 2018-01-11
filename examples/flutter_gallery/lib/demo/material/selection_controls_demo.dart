@@ -96,7 +96,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
           ),
           new Row(
             mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
+            children: const <Widget>[
               // Disabled checkboxes
               const Checkbox(value: true, onChanged: null),
               const Checkbox(value: false, onChanged: null)
@@ -136,7 +136,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
           // Disabled radio buttons
           new Row(
             mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
+            children: const <Widget>[
               const Radio<int>(
                 value: 0,
                 groupValue: 0,

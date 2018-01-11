@@ -16,7 +16,7 @@ void main() {
             onStepTapped: (int i) {
               index = i;
             },
-            steps: <Step>[
+            steps: const <Step>[
               const Step(
                 title: const Text('Step 1'),
                 content: const SizedBox(
@@ -46,7 +46,7 @@ void main() {
         home: new Center(
           child: new Material(
             child: new Stepper(
-              steps: <Step>[
+              steps: const <Step>[
                 const Step(
                   title: const Text('Step 1'),
                   content: const SizedBox(
@@ -77,7 +77,7 @@ void main() {
           child: new Material(
             child: new Stepper(
               currentStep: 1,
-              steps: <Step>[
+              steps: const <Step>[
                 const Step(
                   title: const Text('Step 1'),
                   content: const SizedBox(
@@ -114,7 +114,7 @@ void main() {
           child: new Material(
             child: new Stepper(
               type: StepperType.horizontal,
-              steps: <Step>[
+              steps: const <Step>[
                 const Step(
                   title: const Text('Step 1'),
                   content: const SizedBox(
@@ -139,7 +139,7 @@ void main() {
         home: new Material(
           child: new Stepper(
             type: StepperType.horizontal,
-            steps: <Step>[
+            steps: const <Step>[
               const Step(
                 title: const Text('Step 1'),
                 content: const Text('A'),
@@ -163,7 +163,7 @@ void main() {
           child: new Stepper(
             currentStep: 1,
             type: StepperType.horizontal,
-            steps: <Step>[
+            steps: const <Step>[
               const Step(
                 title: const Text('Step 1'),
                 content: const Text('A'),
@@ -197,7 +197,7 @@ void main() {
             onStepCancel: () {
               cancelPressed = true;
             },
-            steps: <Step>[
+            steps: const <Step>[
               const Step(
                 title: const Text('Step 1'),
                 content: const SizedBox(
@@ -235,7 +235,7 @@ void main() {
             onStepTapped: (int i) {
               index = i;
             },
-            steps: <Step>[
+            steps: const <Step>[
               const Step(
                 title: const Text('Step 1'),
                 content: const SizedBox(
@@ -266,7 +266,7 @@ void main() {
       new MaterialApp(
         home: new Material(
           child: new Stepper(
-            steps: <Step>[
+            steps: const <Step>[
               const Step(
                 title: const Text('Step 1'),
                 content: const SizedBox(
@@ -303,7 +303,7 @@ void main() {
         home: new Material(
           child: new Stepper(
             currentStep: 2,
-            steps: <Step>[
+            steps: const <Step>[
               const Step(
                 title: const Text('Step 1'),
                 content: const SizedBox(
@@ -341,7 +341,7 @@ void main() {
         home: new Center(
           child: new Material(
             child: new Stepper(
-              steps: <Step>[
+              steps: const <Step>[
                 const Step(
                   title: const Text('A'),
                   state: StepState.complete,
@@ -374,7 +374,7 @@ void main() {
         home: new Center(
           child: new Material(
             child: new Stepper(
-              steps: <Step>[
+              steps: const <Step>[
                 const Step(
                   title: const Text('A'),
                   state: StepState.error,

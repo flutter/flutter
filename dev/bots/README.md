@@ -64,7 +64,7 @@ The typical cycle for editing a recipe is:
 2. Run `build/scripts/slave/recipes.py --use-bootstrap test train` to
    update expected files
 3. Run `build/scripts/tools/run_recipe.py flutter/<repo> slavename=<slavename>
-   mastername=client.flutter buildername=<buildername>` where `<repo>` is one
+   mastername=client.flutter buildername=<buildername> buildnumber=1234` where `<repo>` is one
    of `flutter` or `engine`, and `slavename` and `buildername` can be looked up
    from the *Build Properties* section of a [recent
    build](https://build.chromium.org/p/client.flutter/one_line_per_build).

@@ -14,8 +14,8 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
-import 'proxy_box.dart';
 import 'sliver.dart';
+import 'viewport.dart';
 import 'viewport_offset.dart';
 
 /// A base class for slivers that have a [RenderBox] child which scrolls
@@ -225,7 +225,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     super.describeSemanticsConfiguration(config);
 
     if (_excludeFromSemanticsScrolling)
-      config.addTagForChildren(RenderSemanticsGestureHandler.excludeFromScrolling);
+      config.addTagForChildren(RenderViewport.excludeFromScrolling);
   }
 
   @override

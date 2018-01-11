@@ -12,7 +12,6 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
-import 'proxy_box.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
 
@@ -91,12 +90,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
        _crossAxisDirection = crossAxisDirection,
        _offset = offset;
 
-
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    config.addTagForChildren(RenderSemanticsGestureHandler.useTwoPaneSemantics);
+    config.addTagForChildren(RenderViewport.useTwoPaneSemantics);
   }
 
   @override
@@ -745,6 +743,36 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     if (center == null && firstChild != null)
       _center = firstChild;
   }
+
+  /// If a [RenderAbstractViewport] overrides
+  /// [RenderObject.describeSemanticsConfiguration] to add the [SemanticsTag]
+  /// [useTwoPaneSemantics] to its [SemanticsConfiguration], two semantics nodes
+  /// will be used to represent the viewport with its associated scrolling
+  /// actions in the semantics tree.
+  ///
+  /// Two semantics nodes (an inner and an outer node) are necessary to exclude
+  /// certain child nodes (via the [excludeFromScrolling] tag) from the
+  /// scrollable area for semantic purposes: The [SemanticsNode]s of children
+  /// that should be excluded from scrolling will be attached to the outer node.
+  /// The semantic scrolling actions and the [SemanticsNode]s of scrollable
+  /// children will be attached to the inner node, which itself is a child of
+  /// the outer node.
+  static const SemanticsTag useTwoPaneSemantics = const SemanticsTag('RenderViewport.twoPane');
+
+  /// When a top-level [SemanticsNode] below a [RenderAbstractViewport] is
+  /// tagged with [excludeFromScrolling] it will not be part of the scrolling
+  /// area for semantic purposes.
+  ///
+  /// This behavior is only active if the [RenderAbstractViewport]
+  /// tagged its [SemanticsConfiguration] with [useTwoPaneSemantics].
+  /// Otherwise, the [excludeFromScrolling] tag is ignored.
+  ///
+  /// As an example, a [RenderSliver] that stays on the screen within a
+  /// [Scrollable] even though the user has scrolled past it (e.g. a pinned app
+  /// bar) can tag its [SemanticsNode] with [excludeFromScrolling] to indicate
+  /// that it should no longer be considered for semantic actions related to
+  /// scrolling.
+  static const SemanticsTag excludeFromScrolling = const SemanticsTag('RenderViewport.excludeFromScrolling');
 
   @override
   void setupParentData(RenderObject child) {
