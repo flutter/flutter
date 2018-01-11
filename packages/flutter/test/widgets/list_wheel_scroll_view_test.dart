@@ -577,5 +577,64 @@ void main() {
       expect(selectedItems, <int>[11, 10]);
       expect(controller.selectedItem, 10);
     });
+
+    testWidgets('controller hot swappable', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView(
+            itemExtent: 100.0,
+            children: new List<Widget>.generate(100, (int index) {
+              return const Placeholder();
+            }),
+          ),
+        )
+      );
+
+      // Item 5 is now selected.
+      await tester.drag(find.byType(ListWheelScrollView), const Offset(0.0, -500.0));
+      await tester.pump();
+
+      final ListWheelScrollController newController =
+          new ListWheelScrollController(initialItem: 30);
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView(
+            controller: newController,
+            itemExtent: 100.0,
+            children: new List<Widget>.generate(100, (int index) {
+              return const Placeholder();
+            }),
+          ),
+        )
+      );
+
+      // initialItem doesn't do anything since the scroll position was already
+      // created.
+      expect(newController.selectedItem, 5);
+
+      newController.jumpToItem(50);
+      expect(newController.selectedItem, 50);
+      expect(newController.position.pixels, 5000.0);
+
+      // Now remove the controller
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView(
+            itemExtent: 100.0,
+            children: new List<Widget>.generate(100, (int index) {
+              return const Placeholder();
+            }),
+          ),
+        )
+      );
+
+      // Internally, that same controller is still attached and still at the
+      // same place.
+      expect(newController.selectedItem, 50);
+    });
   });
 }
