@@ -155,7 +155,16 @@ abstract class InteractiveInkFeatureFactory {
 /// ```dart
 /// assert(debugCheckHasMaterial(context));
 /// ```
-/// The parameter [enableFeedback] must not be null.
+///
+/// ## Troubleshooting
+///
+/// ### The ink splashes aren't visible!
+///
+/// If there is an opaque graphic, e.g. painted using a [Container], [Image], or
+/// [DecoratedBox], between the [Material] widget and the [InkResponse] widget,
+/// then the splash won't be visible because it will be under the opaque
+/// graphic. To avoid this problem, consider using an [Ink] widget to draw the
+/// opaque graphic itself on the [Material], under the ink splash.
 ///
 /// See also:
 ///
@@ -166,6 +175,9 @@ class InkResponse extends StatefulWidget {
   /// Creates an area of a [Material] that responds to touch.
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
+  ///
+  /// The [containedInkWell], [highlightShape], [enableFeedback], and
+  /// [excludeFromSemantics] arguments must not be null.
   const InkResponse({
     Key key,
     this.child,
@@ -176,13 +188,17 @@ class InkResponse extends StatefulWidget {
     this.containedInkWell: false,
     this.highlightShape: BoxShape.circle,
     this.radius,
-    this.borderRadius: BorderRadius.zero,
+    this.borderRadius,
     this.highlightColor,
     this.splashColor,
     this.splashFactory,
     this.enableFeedback: true,
     this.excludeFromSemantics: false,
-  }) : assert(enableFeedback != null), super(key: key);
+  }) : assert(containedInkWell != null),
+       assert(highlightShape != null),
+       assert(enableFeedback != null),
+       assert(excludeFromSemantics != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -251,6 +267,8 @@ class InkResponse extends StatefulWidget {
   final double radius;
 
   /// The clipping radius of the containing rect.
+  ///
+  /// If this is null, it is interpreted as [BorderRadius.zero].
   final BorderRadius borderRadius;
 
   /// The highlight color of the ink response. If this property is null then the
@@ -403,7 +421,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     final Offset position = referenceBox.globalToLocal(details.globalPosition);
     final Color color = widget.splashColor ?? Theme.of(context).splashColor;
     final RectCallback rectCallback = widget.containedInkWell ? widget.getRectCallback(referenceBox) : null;
-    final BorderRadius borderRadius = widget.borderRadius ?? BorderRadius.zero;
+    final BorderRadius borderRadius = widget.borderRadius;
 
     InteractiveInkFeature splash;
     void onRemoved() {
@@ -532,6 +550,16 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// assert(debugCheckHasMaterial(context));
 /// ```
 ///
+/// ## Troubleshooting
+///
+/// ### The ink splashes aren't visible!
+///
+/// If there is an opaque graphic, e.g. painted using a [Container], [Image], or
+/// [DecoratedBox], between the [Material] widget and the [InkWell] widget, then
+/// the splash won't be visible because it will be under the opaque graphic. To
+/// avoid this problem, consider using an [Ink] widget to draw the opaque
+/// graphic itself on the [Material], under the ink splash.
+///
 /// See also:
 ///
 ///  * [GestureDetector], for listening for gestures without ink splashes.
@@ -542,6 +570,9 @@ class InkWell extends InkResponse {
   /// Creates an ink well.
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
+  ///
+  /// The [enableFeedback] and [excludeFromSemantics] arguments must not be
+  /// null.
   const InkWell({
     Key key,
     Widget child,

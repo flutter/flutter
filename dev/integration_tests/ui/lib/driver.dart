@@ -66,7 +66,7 @@ class DriverTestAppState extends State<DriverTestApp> {
                       _selectedValue = newValue;
                     });
                   },
-                  items: <DropdownMenuItem<Letter>>[
+                  items: const <DropdownMenuItem<Letter>>[
                     const DropdownMenuItem<Letter>(
                       value: Letter.a,
                       child: const Text('Aaa', key: const ValueKey<String>('a')),

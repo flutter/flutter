@@ -421,4 +421,9 @@ class _BoxDecorationPainter extends BoxPainter {
       textDirection: configuration.textDirection,
     );
   }
+
+  @override
+  String toString() {
+    return 'BoxPainter for $_decoration';
+  }
 }

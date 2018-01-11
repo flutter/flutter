@@ -177,7 +177,7 @@ void main() {
       await tester.pumpWidget(new Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Column(children: <Text>[const Text('foo', textDirection: TextDirection.ltr)]),
+          new Column(children: const <Text>[const Text('foo', textDirection: TextDirection.ltr)]),
           const Text('bar', textDirection: TextDirection.ltr),
         ],
       ));
@@ -237,7 +237,7 @@ void main() {
       await tester.pumpWidget(new Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Column(children: <Text>[const Text('foo', textDirection: TextDirection.ltr)]),
+          new Column(children: const <Text>[const Text('foo', textDirection: TextDirection.ltr)]),
           const Text('bar', textDirection: TextDirection.ltr),
         ],
       ));

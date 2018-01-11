@@ -3165,7 +3165,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Set<InheritedElement> _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
-  bool _debugCheckStateIsActiveForAncestorLoopkup() {
+  bool _debugCheckStateIsActiveForAncestorLookup() {
     assert(() {
       if (_debugLifecycleState != _ElementLifecycle.active) {
         throw new FlutterError(
@@ -3183,7 +3183,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
-    assert(_debugCheckStateIsActiveForAncestorLoopkup());
+    assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
@@ -3198,7 +3198,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType) {
-    assert(_debugCheckStateIsActiveForAncestorLoopkup());
+    assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     return ancestor;
   }
@@ -3210,7 +3210,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   Widget ancestorWidgetOfExactType(Type targetType) {
-    assert(_debugCheckStateIsActiveForAncestorLoopkup());
+    assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
     while (ancestor != null && ancestor.widget.runtimeType != targetType)
       ancestor = ancestor._parent;
@@ -3219,7 +3219,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   State ancestorStateOfType(TypeMatcher matcher) {
-    assert(_debugCheckStateIsActiveForAncestorLoopkup());
+    assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
     while (ancestor != null) {
       if (ancestor is StatefulElement && matcher.check(ancestor.state))
@@ -3232,7 +3232,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   State rootAncestorStateOfType(TypeMatcher matcher) {
-    assert(_debugCheckStateIsActiveForAncestorLoopkup());
+    assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
     StatefulElement statefulAncestor;
     while (ancestor != null) {
@@ -3245,7 +3245,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher) {
-    assert(_debugCheckStateIsActiveForAncestorLoopkup());
+    assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
     while (ancestor != null) {
       if (ancestor is RenderObjectElement && matcher.check(ancestor.renderObject))
@@ -3258,7 +3258,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   void visitAncestorElements(bool visitor(Element element)) {
-    assert(_debugCheckStateIsActiveForAncestorLoopkup());
+    assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
     while (ancestor != null && visitor(ancestor))
       ancestor = ancestor._parent;

@@ -2,13 +2,94 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui show Image;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../painting/image_data.dart';
 import '../rendering/mock_canvas.dart';
 
-void main() {
+class TestImageProvider extends ImageProvider<TestImageProvider> {
+  TestImageProvider(this.future);
+
+  final Future<Null> future;
+
+  static ui.Image image;
+
+  @override
+  Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
+    return new SynchronousFuture<TestImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(TestImageProvider key) {
+    return new OneFrameImageStreamCompleter(
+      future.then<ImageInfo>((Null value) => new ImageInfo(image: image))
+    );
+  }
+}
+
+Future<Null> main() async {
+  TestImageProvider.image = await decodeImageFromList(new Uint8List.fromList(kTransparentImage));
+
+  testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+    final Completer<Null> completer = new Completer<Null>();
+    await tester.pumpWidget(
+      new KeyedSubtree(
+        key: key,
+        child: new DecoratedBox(
+          decoration: new BoxDecoration(
+            image: new DecorationImage(
+              image: new TestImageProvider(completer.future),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    completer.complete();
+    await tester.idle();
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    await tester.pump();
+    expect(tester.binding.hasScheduledFrame, isFalse);
+  });
+
+  testWidgets('Moving a DecoratedBox', (WidgetTester tester) async {
+    final Completer<Null> completer = new Completer<Null>();
+    final Widget subtree = new KeyedSubtree(
+      key: new GlobalKey(),
+      child: new RepaintBoundary(
+        child: new DecoratedBox(
+          decoration: new BoxDecoration(
+            image: new DecorationImage(
+              image: new TestImageProvider(completer.future),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(subtree);
+    await tester.idle();
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    await tester.pumpWidget(new Container(child: subtree));
+    await tester.idle();
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    completer.complete(); // schedules microtask, does not run it
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    await tester.idle(); // runs microtask
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    await tester.pump();
+    await tester.idle();
+    expect(tester.binding.hasScheduledFrame, isFalse);
+  });
+
   testWidgets('Circles can have uniform borders', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Container(

@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('The inkwell widget renders an ink splash', (WidgetTester tester) async {
+  testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
     final Color highlightColor = const Color(0xAAFF0000);
     final Color splashColor = const Color(0xAA0000FF);
     final BorderRadius borderRadius = new BorderRadius.circular(6.0);
@@ -51,7 +51,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('The inkwell widget renders an ink ripple', (WidgetTester tester) async {
+  testWidgets('The InkWell widget renders an ink ripple', (WidgetTester tester) async {
     final Color highlightColor = const Color(0xAAFF0000);
     final Color splashColor = const Color(0xB40000FF);
     final BorderRadius borderRadius = new BorderRadius.circular(6.0);
@@ -172,6 +172,79 @@ void main() {
         Expected: center == $expectedCenter, radius == $expectedRadius, alpha == 0
         Found: center == $center radius == $radius alpha == ${paint.color.alpha}''';
     }));
+  });
 
+  testWidgets('Does the Ink widget render anything', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Material(
+        child: new Center(
+          child: new Ink(
+            color: Colors.blue,
+            width: 200.0,
+            height: 200.0,
+            child: new InkWell(
+              splashColor: Colors.green,
+              onTap: () { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset center = tester.getCenter(find.byType(InkWell));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(); // start gesture
+    await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
+
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    expect(
+      box,
+      paints
+        ..rect(rect: new Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: new Color(Colors.blue.value))
+        ..circle(color: new Color(Colors.green.value))
+    );
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Center(
+          child: new Ink(
+            color: Colors.red,
+            width: 200.0,
+            height: 200.0,
+            child: new InkWell(
+              splashColor: Colors.green,
+              onTap: () { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(Material.of(tester.element(find.byType(InkWell))), same(box));
+
+    expect(
+      box,
+      paints
+        ..rect(rect: new Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: new Color(Colors.red.value))
+        ..circle(color: new Color(Colors.green.value))
+    );
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Center(
+          child: new InkWell( // this is at a different depth in the tree so it's now a new InkWell
+            splashColor: Colors.green,
+            onTap: () { },
+          ),
+        ),
+      ),
+    );
+
+    expect(Material.of(tester.element(find.byType(InkWell))), same(box));
+
+    expect(box, isNot(paints..rect()));
+    expect(box, isNot(paints..circle()));
+
+    await gesture.up();
   });
 }

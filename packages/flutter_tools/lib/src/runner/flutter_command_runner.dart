@@ -123,6 +123,10 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   }
 
   @override
+  ArgParser get argParser => _argParser;
+  final ArgParser _argParser = new ArgParser(allowTrailingOptions: false);
+
+  @override
   String get usageFooter {
     return 'Run "flutter help -v" for verbose help output, including less commonly used options.';
   }

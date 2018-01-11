@@ -581,6 +581,13 @@ class _RenderExcludableScrollSemantics extends RenderProxyBox {
     _innerNode.updateWith(config: config, childrenInInversePaintOrder: included);
   }
 
+  @override
+  void clearSemantics() {
+    super.clearSemantics();
+    _innerNode = null;
+    _annotatedNode = null;
+  }
+
   /// Sends a [SemanticsEvent] in the context of the [SemanticsNode] that is
   /// annotated with this object's semantics information.
   void sendSemanticsEvent(SemanticsEvent event) {

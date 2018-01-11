@@ -249,7 +249,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Viewport(
           offset: new ViewportOffset.fixed(0.0),
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverPadding(padding: const EdgeInsets.all(100.0)),
             const SliverToBoxAdapter(child: const SizedBox(width: 400.0, height: 400.0, child: const Text('x'))),
           ],
@@ -266,7 +266,7 @@ void main() {
         child: new Viewport(
           axisDirection: AxisDirection.left,
           offset: new ViewportOffset.fixed(0.0),
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverPadding(padding: const EdgeInsets.fromLTRB(90.0, 1.0, 110.0, 2.0)),
             const SliverToBoxAdapter(child: const SizedBox(width: 201.0, child: const Text('x'))),
           ],
@@ -280,7 +280,7 @@ void main() {
         child: new Viewport(
           axisDirection: AxisDirection.left,
           offset: new ViewportOffset.fixed(0.0),
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverPadding(padding: const EdgeInsets.fromLTRB(110.0, 1.0, 80.0, 2.0)),
             const SliverToBoxAdapter(child: const SizedBox(width: 201.0, child: const Text('x'))),
           ],
@@ -297,7 +297,7 @@ void main() {
         child: new Viewport(
           axisDirection: AxisDirection.up,
           offset: new ViewportOffset.fixed(0.0),
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
@@ -310,7 +310,7 @@ void main() {
         child: new Viewport(
           axisDirection: AxisDirection.down,
           offset: new ViewportOffset.fixed(0.0),
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
@@ -323,7 +323,7 @@ void main() {
         child: new Viewport(
           axisDirection: AxisDirection.right,
           offset: new ViewportOffset.fixed(0.0),
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
@@ -336,7 +336,7 @@ void main() {
         child: new Viewport(
           axisDirection: AxisDirection.left,
           offset: new ViewportOffset.fixed(0.0),
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
@@ -349,7 +349,7 @@ void main() {
         child: new Viewport(
           axisDirection: AxisDirection.left,
           offset: new ViewportOffset.fixed(99999.9),
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
           ],
         ),
