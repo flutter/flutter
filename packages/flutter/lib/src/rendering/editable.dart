@@ -131,11 +131,13 @@ class RenderEditable extends RenderBox {
     @required ViewportOffset offset,
     this.onSelectionChanged,
     this.onCaretChanged,
+    this.ignorePointer: false,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
        assert(textScaleFactor != null),
        assert(offset != null),
+       assert(ignorePointer != null),
        _textPainter = new TextPainter(
          text: text,
          textAlign: textAlign,
@@ -166,6 +168,13 @@ class RenderEditable extends RenderBox {
 
   /// Called during the paint phase when the caret location changes.
   CaretChangedHandler onCaretChanged;
+
+  /// If true [handleEvent] does nothing and it's assumed that this
+  /// renderer will be notified of input gestures via [handleTapDown],
+  /// [handleTap], [handleTapCancel], and [handleLongPress].
+  ///
+  /// The default value of this property is false.
+  bool ignorePointer;
 
   Rect _lastCaretRect;
 
@@ -550,6 +559,8 @@ class RenderEditable extends RenderBox {
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (ignorePointer)
+      return;
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && onSelectionChanged != null) {
       _tap.addPointer(event);
@@ -559,11 +570,15 @@ class RenderEditable extends RenderBox {
 
   Offset _lastTapDownPosition;
   Offset _longPressPosition;
-  void _handleTapDown(TapDownDetails details) {
+  void handleTapDown(TapDownDetails details) {
     _lastTapDownPosition = details.globalPosition + -_paintOffset;
   }
+  void _handleTapDown(TapDownDetails details) {
+    assert(!ignorePointer);
+    handleTapDown(details);
+  }
 
-  void _handleTap() {
+  void handleTap() {
     _layoutText(constraints.maxWidth);
     assert(_lastTapDownPosition != null);
     final Offset globalPosition = _lastTapDownPosition;
@@ -573,14 +588,22 @@ class RenderEditable extends RenderBox {
       onSelectionChanged(new TextSelection.fromPosition(position), this, SelectionChangedCause.tap);
     }
   }
+  void _handleTap() {
+    assert(!ignorePointer);
+    handleTap();
+  }
 
-  void _handleTapCancel() {
+  void handleTapCancel() {
     // longPress arrives after tapCancel, so remember the tap position.
     _longPressPosition = _lastTapDownPosition;
     _lastTapDownPosition = null;
   }
+  void _handleTapCancel() {
+    assert(!ignorePointer);
+    handleTapCancel();
+  }
 
-  void _handleLongPress() {
+  void handleLongPress() {
     _layoutText(constraints.maxWidth);
     final Offset globalPosition = _longPressPosition;
     _longPressPosition = null;
@@ -588,6 +611,10 @@ class RenderEditable extends RenderBox {
       final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition));
       onSelectionChanged(_selectWordAtOffset(position), this, SelectionChangedCause.longPress);
     }
+  }
+  void _handleLongPress() {
+    assert(!ignorePointer);
+    handleLongPress();
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
