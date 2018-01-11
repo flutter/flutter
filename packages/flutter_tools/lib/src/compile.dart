@@ -110,8 +110,8 @@ Future<String> compile(
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
     .listen(stdoutHandler.handler);
-  await server.exitCode;
-  return stdoutHandler.outputFilename.future;
+  final int exitCode = await server.exitCode;
+  return exitCode == 0 ? stdoutHandler.outputFilename.future : null;
 }
 
 /// Wrapper around incremental frontend server compiler, that communicates with
@@ -173,7 +173,16 @@ class ResidentCompiler {
     _server.stdout
       .transform(UTF8.decoder)
       .transform(const LineSplitter())
-      .listen(stdoutHandler.handler);
+      .listen(
+        stdoutHandler.handler,
+        onDone: () {
+          // when outputFilename future is not completed, but stdout is closed
+          // process has died unexpectedly.
+          if (!stdoutHandler.outputFilename.isCompleted) {
+            stdoutHandler.outputFilename.complete(null);
+          }
+        });
+
     _server.stderr
       .transform(UTF8.decoder)
       .transform(const LineSplitter())
