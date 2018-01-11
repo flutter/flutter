@@ -120,14 +120,16 @@ Future<String> compile(
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
 class ResidentCompiler {
-  ResidentCompiler(this._sdkRoot)
+  ResidentCompiler(this._sdkRoot, {bool strongMode: false})
     : assert(_sdkRoot != null) {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
+    _strongMode = strongMode;
   }
 
   String _sdkRoot;
+  bool _strongMode;
   Process _server;
   final _StdoutHandler stdoutHandler = new _StdoutHandler();
 
@@ -157,13 +159,17 @@ class ResidentCompiler {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
-    _server = await processManager.start(<String>[
+    final List<String> args = <String>[
       _dartExecutable(),
       frontendServer,
       '--sdk-root',
       _sdkRoot,
       '--incremental'
-    ]);
+    ];
+    if (_strongMode) {
+      args.add('--strong');
+    }
+    _server = await processManager.start(args);
     _server.stdout
       .transform(UTF8.decoder)
       .transform(const LineSplitter())
