@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'framework.dart';
 import 'notification_listener.dart';
@@ -215,9 +216,9 @@ class _FixedExtentScrollableState extends ScrollableState {
 /// a plane.
 class ListWheelScrollView extends StatefulWidget {
   /// Creates a box in which children are scrolled on a wheel.
-  ListWheelScrollView({
+  const ListWheelScrollView({
     Key key,
-    ScrollController controller,
+    this.controller,
     this.physics,
     this.diameterRatio: RenderListWheelViewport.defaultDiameterRatio,
     this.perspective: RenderListWheelViewport.defaultPerspective,
@@ -239,7 +240,6 @@ class ListWheelScrollView extends StatefulWidget {
          !renderChildrenOutsideViewport || !clipToSize,
          RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
        ),
-       controller = controller ?? new ListWheelScrollController(),
        super(key: key);
 
   /// Typically a [ListWheelScrollController] used to control the current item.
@@ -295,13 +295,27 @@ class ListWheelScrollView extends StatefulWidget {
 
 class _ListWheelScrollViewState extends State<ListWheelScrollView> {
   int _lastReportedItemIndex = 0;
+  ScrollController scrollController;
 
   @override
   void initState() {
     super.initState();
+    scrollController = widget.controller ?? new ListWheelScrollController();
     if (widget.controller is ListWheelScrollController) {
       final ListWheelScrollController controller = widget.controller;
       _lastReportedItemIndex = controller.initialItem;
+    }
+  }
+
+  @override
+  void didUpdateWidget(ListWheelScrollView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != null && widget.controller != scrollController) {
+      final ScrollController oldScrollController = scrollController;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        oldScrollController.dispose();
+      });
+      scrollController = widget.controller;
     }
   }
 
@@ -323,7 +337,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
         return false;
       },
       child: new _FixedExtentScrollable(
-        controller: widget.controller,
+        controller: scrollController,
         physics: widget.physics,
         itemExtent: widget.itemExtent,
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
