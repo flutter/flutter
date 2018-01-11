@@ -159,7 +159,7 @@ tasks:
     description: >
       Measures the performance of Dart VM hot patching feature under
       --preview-dart-2 option, that enables Dart 2.0 frontend.
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     flaky: true
 
