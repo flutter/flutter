@@ -17,7 +17,7 @@ class TwoLevelListDemo extends StatelessWidget {
           new ExpansionTile(
              title: const Text('Sublist'),
              backgroundColor: Theme.of(context).accentColor.withOpacity(0.025),
-             children: <Widget>[
+             children: const <Widget>[
                const ListTile(title: const Text('One')),
                const ListTile(title: const Text('Two')),
                // https://en.wikipedia.org/wiki/Free_Four

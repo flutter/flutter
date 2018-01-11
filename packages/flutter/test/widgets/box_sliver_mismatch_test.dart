@@ -21,7 +21,7 @@ void main() {
 
     await tester.pumpWidget(
       new Row(
-        children: <Widget>[
+        children: const <Widget>[
           const SliverList(
             delegate: const SliverChildListDelegate(const <Widget>[]),
           ),
@@ -37,7 +37,7 @@ void main() {
       new Viewport(
         crossAxisDirection: AxisDirection.right,
         offset: new ViewportOffset.zero(),
-        slivers: <Widget>[
+        slivers: const <Widget>[
           const SizedBox(),
         ],
       ),
@@ -49,7 +49,7 @@ void main() {
       new Viewport(
         crossAxisDirection: AxisDirection.right,
         offset: new ViewportOffset.zero(),
-        slivers: <Widget>[
+        slivers: const <Widget>[
           const SliverPadding(
             padding: EdgeInsets.zero,
             sliver: const SizedBox(),

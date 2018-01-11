@@ -187,12 +187,12 @@ void main() {
   testWidgets('LinearProgressIndicator causes a repaint when it changes', (WidgetTester tester) async {
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView(children: <Widget>[const LinearProgressIndicator(value: 0.0)]),
+      child: new ListView(children: const <Widget>[const LinearProgressIndicator(value: 0.0)]),
     ));
     final List<Layer> layers1 = tester.layers;
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView(children: <Widget>[const LinearProgressIndicator(value: 0.5)])),
+      child: new ListView(children: const <Widget>[const LinearProgressIndicator(value: 0.5)])),
     );
     final List<Layer> layers2 = tester.layers;
     expect(layers1, isNot(equals(layers2)));

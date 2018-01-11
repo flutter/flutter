@@ -606,7 +606,7 @@ void main() {
         buildContent: (BuildContext context) {
           return new Localizations.override(
             context: context,
-            delegates: <OnlyRTLDefaultWidgetsLocalizationsDelegate>[
+            delegates: const <OnlyRTLDefaultWidgetsLocalizationsDelegate>[
               // Override: no matter what the locale, textDirection is always RTL.
               const OnlyRTLDefaultWidgetsLocalizationsDelegate(),
             ],

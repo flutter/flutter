@@ -19,12 +19,12 @@ void main() {
           ),
           drawer: new Drawer(
             child: new ListView(
-              children: <Widget>[
-                new AboutListTile(
+              children: const <Widget>[
+                const AboutListTile(
                   applicationVersion: '0.1.2',
                   applicationIcon: const FlutterLogo(),
                   applicationLegalese: 'I am the very model of a modern major general.',
-                  aboutBoxChildren: <Widget>[
+                  aboutBoxChildren: const <Widget>[
                     const Text('About box'),
                   ]
                 ),

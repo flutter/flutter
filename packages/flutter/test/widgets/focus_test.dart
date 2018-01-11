@@ -58,7 +58,7 @@ void main() {
   testWidgets('Can have multiple focused children and they update accordingly', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Column(
-        children: <Widget>[
+        children: const <Widget>[
           const TestFocusable(
             no: 'a',
             yes: 'A FOCUSED',
@@ -146,7 +146,7 @@ void main() {
         autofocus: true,
         child: new Row(
           textDirection: TextDirection.ltr,
-          children: <Widget>[
+          children: const <Widget>[
             const TestFocusable(
               no: 'a',
               yes: 'A FOCUSED',
@@ -221,7 +221,7 @@ void main() {
         node: parentFocusScope,
         child: new Row(
           textDirection: TextDirection.ltr,
-          children: <Widget>[
+          children: const <Widget>[
             const TestFocusable(
               no: 'a',
               yes: 'A FOCUSED',

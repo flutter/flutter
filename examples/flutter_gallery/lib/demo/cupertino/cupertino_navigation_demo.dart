@@ -441,7 +441,7 @@ class Tab2Header extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
                   child: new Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
+                    children: const <Widget>[
                       const Text(
                         'SUPPORT TICKET',
                         style: const TextStyle(
@@ -725,10 +725,14 @@ class CupertinoDemoTab3 extends StatelessWidget {
                   child: new SafeArea(
                     top: false,
                     bottom: false,
-                      child: new Row(children: <Widget>[ const Text(
-                      'Sign in',
-                      style: const TextStyle(color: CupertinoColors.activeBlue),
-                    ) ]),
+                    child: new Row(
+                      children: const <Widget>[
+                        const Text(
+                          'Sign in',
+                          style: const TextStyle(color: CupertinoColors.activeBlue),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
