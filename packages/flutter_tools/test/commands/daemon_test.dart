@@ -280,8 +280,8 @@ void main() {
         '{"code":1,"message":"foo"}'
       );
       expect(
-        jsonEncodeObject(new OperationResult(0, 'foo', hint: 'my hint', hintId: 'myId')),
-        '{"code":0,"message":"foo","hint":"my hint","hintId":"myId"}'
+        jsonEncodeObject(new OperationResult(0, 'foo', hintMessage: 'my hint', hintId: 'myId')),
+        '{"code":0,"message":"foo","hintMessage":"my hint","hintId":"myId"}'
       );
     });
   });

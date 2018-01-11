@@ -705,8 +705,8 @@ Map<String, dynamic> _operationResultToMap(OperationResult result) {
     'message': result.message,
   };
 
-  if (result.hint != null)
-    map['hint'] = result.hint;
+  if (result.hintMessage != null)
+    map['hintMessage'] = result.hintMessage;
   if (result.hintId != null)
     map['hintId'] = result.hintId;
 
