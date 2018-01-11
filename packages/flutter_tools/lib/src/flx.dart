@@ -69,7 +69,7 @@ Future<Null> build({
   }
 
   DevFSContent kernelContent;
-  if (previewDart2) {
+  if (!precompiledSnapshot && previewDart2) {
     final String kernelBinaryFilename = await compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       incrementalCompilerByteStorePath: fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
