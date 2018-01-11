@@ -151,10 +151,8 @@ void main() {
     });
 
     testUsingContext('single dart compile abnormally terminates', () async {
-      final BufferLogger logger = context[Logger];
-
       when(mockFrontendServer.stdout)
-          .thenAnswer((Invocation invocation) => new Stream<List<int>>.empty()
+          .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty()
       );
 
       final String output = await generator.recompile(
