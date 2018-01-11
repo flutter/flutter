@@ -101,7 +101,10 @@ Future<Null> precacheImage(ImageProvider provider, BuildContext context, { Size 
 ///
 /// See also:
 ///
-///  * [Icon]
+///  * [Icon], which shows an image from a font.
+///  * [new Ink.image], which is the preferred way to show an image in a
+///    material application (especially if the image is in a [Material] and will
+///    have an [InkWell] on top of it).
 class Image extends StatefulWidget {
   /// Creates a widget that displays an image.
   ///
@@ -110,6 +113,11 @@ class Image extends StatefulWidget {
   ///
   /// The [image], [alignment], [repeat], and [matchTextDirection] arguments
   /// must not be null.
+  ///
+  /// Either the [width] and [height] arguments should be specified, or the
+  /// widget should be placed in a context that sets tight layout constraints.
+  /// Otherwise, the image dimensions will change as the image is loaded, which
+  /// will result in ugly layout changes.
   const Image({
     Key key,
     @required this.image,
@@ -123,7 +131,6 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection: false,
     this.gaplessPlayback: false,
-    this.package,
   }) : assert(image != null),
        assert(alignment != null),
        assert(repeat != null),
@@ -133,9 +140,16 @@ class Image extends StatefulWidget {
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
   /// The [src], [scale], and [repeat] arguments must not be null.
-  /// An optional [headers] argument can be used to use custom HTTP headers.
+  ///
+  /// Either the [width] and [height] arguments should be specified, or the
+  /// widget should be placed in a context that sets tight layout constraints.
+  /// Otherwise, the image dimensions will change as the image is loaded, which
+  /// will result in ugly layout changes.
   ///
   /// All network images are cached regardless of HTTP headers.
+  ///
+  /// An optional [headers] argument can be used to send custom HTTP headers
+  /// with the image request.
   Image.network(String src, {
     Key key,
     double scale: 1.0,
@@ -149,7 +163,6 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection: false,
     this.gaplessPlayback: false,
-    this.package,
     Map<String, String> headers,
   }) : image = new NetworkImage(src, scale: scale, headers: headers),
        assert(alignment != null),
@@ -160,6 +173,11 @@ class Image extends StatefulWidget {
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
   ///
   /// The [file], [scale], and [repeat] arguments must not be null.
+  ///
+  /// Either the [width] and [height] arguments should be specified, or the
+  /// widget should be placed in a context that sets tight layout constraints.
+  /// Otherwise, the image dimensions will change as the image is loaded, which
+  /// will result in ugly layout changes.
   ///
   /// On Android, this may require the
   /// `android.permission.READ_EXTERNAL_STORAGE` permission.
@@ -176,7 +194,6 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection: false,
     this.gaplessPlayback: false,
-    this.package,
   }) : image = new FileImage(file, scale: scale),
        assert(alignment != null),
        assert(repeat != null),
@@ -210,6 +227,11 @@ class Image extends StatefulWidget {
   // ///   during asset resolution as well.
   ///
   /// The [name] and [repeat] arguments must not be null.
+  ///
+  /// Either the [width] and [height] arguments should be specified, or the
+  /// widget should be placed in a context that sets tight layout constraints.
+  /// Otherwise, the image dimensions will change as the image is loaded, which
+  /// will result in ugly layout changes.
   ///
   /// ## Sample code
   ///
@@ -281,8 +303,7 @@ class Image extends StatefulWidget {
   ///    - packages/fancy_backgrounds/backgrounds/background1.png
   /// ```
   ///
-  /// Note that the `lib/` is implied, so it should not be included in the asset
-  /// path.
+  /// The `lib/` is implied, so it should not be included in the asset path.
   ///
   ///
   /// See also:
@@ -307,7 +328,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection: false,
     this.gaplessPlayback: false,
-    this.package,
+    String package,
   }) : image = scale != null
          ? new ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
          : new AssetImage(name, bundle: bundle, package: package),
@@ -319,6 +340,11 @@ class Image extends StatefulWidget {
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
   ///
   /// The [bytes], [scale], and [repeat] arguments must not be null.
+  ///
+  /// Either the [width] and [height] arguments should be specified, or the
+  /// widget should be placed in a context that sets tight layout constraints.
+  /// Otherwise, the image dimensions will change as the image is loaded, which
+  /// will result in ugly layout changes.
   Image.memory(Uint8List bytes, {
     Key key,
     double scale: 1.0,
@@ -332,7 +358,6 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection: false,
     this.gaplessPlayback: false,
-    this.package,
   }) : image = new MemoryImage(bytes, scale: scale),
        assert(alignment != null),
        assert(repeat != null),
@@ -346,12 +371,24 @@ class Image extends StatefulWidget {
   ///
   /// If null, the image will pick a size that best preserves its intrinsic
   /// aspect ratio.
+  ///
+  /// It is strongly recommended that either both the [width] and the [height]
+  /// be specified, or that the widget be placed in a context that sets tight
+  /// layout constraints, so that the image does not change size as it loads.
+  /// Consider using [fit] to adapt the image's rendering to fit the given width
+  /// and height if the exact image dimensions are not known in advance.
   final double width;
 
   /// If non-null, require the image to have this height.
   ///
   /// If null, the image will pick a size that best preserves its intrinsic
   /// aspect ratio.
+  ///
+  /// It is strongly recommended that either both the [width] and the [height]
+  /// be specified, or that the widget be placed in a context that sets tight
+  /// layout constraints, so that the image does not change size as it loads.
+  /// Consider using [fit] to adapt the image's rendering to fit the given width
+  /// and height if the exact image dimensions are not known in advance.
   final double height;
 
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
@@ -432,10 +469,6 @@ class Image extends StatefulWidget {
   /// Whether to continue showing the old image (true), or briefly show nothing
   /// (false), when the image provider changes.
   final bool gaplessPlayback;
-
-  /// The name of the package from which the image is included. See the
-  /// documentation for the [Image.asset] constructor for details.
-  final String package;
 
   @override
   _ImageState createState() => new _ImageState();

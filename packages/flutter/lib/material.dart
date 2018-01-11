@@ -52,6 +52,7 @@ export 'src/material/grid_tile.dart';
 export 'src/material/grid_tile_bar.dart';
 export 'src/material/icon_button.dart';
 export 'src/material/icons.dart';
+export 'src/material/ink_decoration.dart';
 export 'src/material/ink_highlight.dart';
 export 'src/material/ink_ripple.dart';
 export 'src/material/ink_splash.dart';
