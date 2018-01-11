@@ -457,8 +457,8 @@ class HotRunner extends ResidentRunner {
         status.cancel();
         if (result.isOk)
           printStatus('${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-        if (result.hint != null)
-          printStatus('\n${result.hint}');
+        if (result.hintMessage != null)
+          printStatus('\n${result.hintMessage}');
         return result;
       } catch (error) {
         status.cancel();
@@ -678,7 +678,8 @@ class HotRunner extends ResidentRunner {
     return new OperationResult(
       reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,
       reloadMessage,
-      hint: unusedElementMessage,
+      hintMessage: unusedElementMessage,
+      hintId: unusedElementMessage != null ? 'restartRecommended' : null,
     );
   }
 
