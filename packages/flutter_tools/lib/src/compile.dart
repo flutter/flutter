@@ -110,8 +110,8 @@ Future<String> compile(
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
     .listen(stdoutHandler.handler);
-  final int exitCode = await server.exitCode;
-  return exitCode == 0 ? stdoutHandler.outputFilename.future : null;
+  await server.exitCode;
+  return stdoutHandler.outputFilename.future;
 }
 
 /// Wrapper around incremental frontend server compiler, that communicates with
@@ -175,8 +175,7 @@ class ResidentCompiler {
 
     _server.stdin.writeln('compile $scriptFilename');
 
-    final int exitCode = await _server.exitCode;
-    return exitCode == 0 ? stdoutHandler.outputFilename.future : null;
+    return stdoutHandler.outputFilename.future;
   }
 
 
