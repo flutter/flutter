@@ -76,6 +76,9 @@ Future<Null> build({
       mainPath: fs.file(mainPath).absolute.path,
       strongMode: strongMode
     );
+    if (kernelBinaryFilename == null) {
+      throwToolExit('Compiler terminated unexpectedly on $mainPath');
+    }
     kernelContent = new DevFSFileContent(fs.file(kernelBinaryFilename));
   }
 
