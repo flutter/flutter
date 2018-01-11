@@ -16,9 +16,9 @@ dependencies:
   file: 2.3.5
   http: 0.11.3+14
   intl: 0.15.2
-  json_rpc_2: 2.0.5
+  json_rpc_2: 2.0.6
   json_schema: 1.0.7
-  linter: 0.1.41
+  linter: 0.1.42
   meta: 1.1.1
   mustache: 1.0.0
   package_config: 1.0.3
