@@ -341,8 +341,10 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       throwToolExit('No Flutter engine build found at $engineBuildPath.', exitCode: 2);
     }
 
-    final String hostLocalEngine = 'host_' + localEngine.substring(localEngine.indexOf('_') + 1);
-    final String engineHostBuildPath = fs.path.normalize(fs.path.join(enginePath, 'out', hostLocalEngine));
+    final String basename = fs.path.basename(engineBuildPath);
+    final String engineHostBuildPath = fs.path.normalize(fs.path.join(
+        fs.path.dirname(engineBuildPath),
+        'host_' + basename.substring(basename.indexOf('_') + 1)));
 
     return new EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
