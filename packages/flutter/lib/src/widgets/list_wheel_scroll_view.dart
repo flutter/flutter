@@ -124,6 +124,14 @@ class FixedExtentMetrics extends FixedScrollMetrics {
   final int itemIndex;
 }
 
+int _getItemFromOffset(double offset, double itemExtent, ScrollPosition position) {
+  return (_clipOffsetToScrollableRange(offset, position) / itemExtent).round();
+}
+
+double _clipOffsetToScrollableRange(double offset, ScrollPosition position) {
+  return math.min(math.max(offset, position.minScrollExtent), position.maxScrollExtent);
+}
+
 /// A [ScrollPositionWithSingleContext] that can only be created based on
 /// [_FixedExtentScrollable] and can access its `itemExtent` to derive [itemIndex].
 class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext {
@@ -152,13 +160,9 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext {
     return scrollable.itemExtent;
   }
 
-  double _clipToScrollableRange(double offset) {
-    return math.min(math.max(pixels, minScrollExtent), maxScrollExtent);
-  }
-
   double get itemExtent => _getItemExtentFromScrollContext(context);
 
-  int get itemIndex => (_clipToScrollableRange(pixels) / itemExtent).round();
+  int get itemIndex => _getItemFromOffset(pixels, itemExtent, this);
 
   @override
   FixedExtentMetrics cloneMetrics() {
@@ -200,6 +204,60 @@ class _FixedExtentScrollableState extends ScrollableState {
     // Downcast because only _FixedExtentScrollable can make _FixedExtentScrollableState.
     final _FixedExtentScrollable actualWidget = widget;
     return actualWidget.itemExtent;
+  }
+}
+
+/// A snapping physics that always lands in the centers of items instead of
+/// anywhere within the scroll extent.
+///
+/// Behaves similarly to a slot machine wheel except the ballistics simulation
+/// never overshoots and rolls back to the center within a single item if it's
+/// to settle on that item.
+///
+/// Defers back to the parent beyond the scroll extents.
+class FixedExtentScrollPhysics extends ScrollPhysics {
+  const FixedExtentScrollPhysics(this.itemExtent, { ScrollPhysics parent })
+      : super(parent: parent);
+
+  final double itemExtent;
+
+  @override
+  FixedExtentScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return new FixedExtentScrollPhysics(itemExtent, parent: buildParent(ancestor));
+  }
+
+  double _getItem(ScrollPosition position) {
+    return position.pixels / itemExtent;
+  }
+
+  double _getPixels(ScrollPosition position, int item) {
+    return item * itemExtent;
+  }
+
+  double _getTargetPixels(ScrollPosition position, Tolerance tolerance, double velocity) {
+//    print('position ${position.pixels}');
+    double itemIndex = _getItem(position);
+//    print('index $itemIndex');
+    if (velocity < -tolerance.velocity)
+      itemIndex -= 0.5;
+    else if (velocity > tolerance.velocity)
+      itemIndex += 0.5;
+    return _getPixels(position, itemIndex.round());
+  }
+
+  @override
+  Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
+    // If we're out of range and not headed back in range, defer to the parent
+    // ballistics, which should put us back in range at a page boundary.
+    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
+        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
+      return super.createBallisticSimulation(position, velocity);
+    }
+    final Tolerance tolerance = this.tolerance;
+    final double target = _getTargetPixels(position, tolerance, velocity);
+    if (target != position.pixels)
+      return new ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
+    return null;
   }
 }
 
