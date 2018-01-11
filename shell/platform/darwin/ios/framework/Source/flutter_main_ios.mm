@@ -12,7 +12,13 @@ void FlutterMain() {
   NSBundle* bundle = [NSBundle bundleForClass:[FlutterViewController class]];
   NSString* icuDataPath = [bundle pathForResource:@"icudtl" ofType:@"dat"];
   NSString* libraryName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTLibraryPath"];
-  shell::PlatformMacMain(icuDataPath.UTF8String, libraryName != nil ? libraryName.UTF8String : "");
+
+  NSBundle* mainBundle = [NSBundle mainBundle];
+
+  NSString* flutterAssetsPath = [mainBundle pathForResource:@"flutter_assets" ofType:nil];
+
+  shell::PlatformMacMain(icuDataPath.UTF8String, libraryName != nil ? libraryName.UTF8String : "",
+                         flutterAssetsPath.UTF8String);
 }
 
 }  // namespace shell

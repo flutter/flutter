@@ -16,7 +16,7 @@
 int main(int argc, const char* argv[]) {
   [FlutterApplication sharedApplication];
 
-  shell::PlatformMacMain("", "");
+  shell::PlatformMacMain("", "", "");
 
   const auto& command_line = shell::Shell::Shared().GetCommandLine();
 
