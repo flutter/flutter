@@ -346,7 +346,7 @@ void main() {
           onNotification: (OverscrollNotification message) { scrolled = true; return false; },
           child: new ListView(
             primary: true,
-            children: <Widget>[],
+            children: const <Widget>[],
           ),
         ),
       ),
@@ -364,7 +364,7 @@ void main() {
           onNotification: (OverscrollNotification message) { scrolled = true; return false; },
           child: new ListView(
             primary: false,
-            children: <Widget>[],
+            children: const <Widget>[],
           ),
         ),
       ),
@@ -383,7 +383,7 @@ void main() {
           child: new ListView(
             primary: false,
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <Widget>[],
+            children: const <Widget>[],
           ),
         ),
       ),
@@ -402,7 +402,7 @@ void main() {
           child: new ListView(
             primary: true,
             physics: const ScrollPhysics(),
-            children: <Widget>[],
+            children: const <Widget>[],
           ),
         ),
       ),

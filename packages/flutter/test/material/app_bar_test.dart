@@ -109,7 +109,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             title: const Text('X'),
-            actions: <Widget>[
+            actions: const <Widget>[
               const Icon(Icons.thumb_up),
             ],
           ),
@@ -130,7 +130,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             title: const Text('X'),
-            actions: <Widget>[
+            actions: const <Widget>[
               const Icon(Icons.thumb_up),
               const Icon(Icons.thumb_up),
             ],
@@ -458,7 +458,7 @@ void main() {
           child: new AppBar(
             leading: const Text('L'),
             title: const Text('No Scaffold'),
-            actions: <Widget>[const Text('A1'), const Text('A2')],
+            actions: const <Widget>[const Text('A1'), const Text('A2')],
           ),
         ),
       ),
@@ -548,7 +548,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             title: const Text('X'),
-            actions: <Widget> [
+            actions: const <Widget> [
               const IconButton(
                 icon: const Icon(Icons.share),
                 onPressed: null,
@@ -977,7 +977,7 @@ void main() {
           child: new AppBar(
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
-            actions: <Widget>[
+            actions: const <Widget>[
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
@@ -998,7 +998,7 @@ void main() {
           child: new AppBar(
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
-            actions: <Widget>[
+            actions: const <Widget>[
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
@@ -1028,7 +1028,7 @@ void main() {
           child: new AppBar(
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
-            actions: <Widget>[
+            actions: const <Widget>[
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
@@ -1069,7 +1069,7 @@ void main() {
           child: new AppBar(
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
-            actions: <Widget>[
+            actions: const <Widget>[
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),

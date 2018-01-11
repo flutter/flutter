@@ -22,7 +22,7 @@ void main() {
         });
     await tester.pumpWidget(new Image.network(
       'https://www.example.com/images/frame.png',
-      headers: <String, String>{'flutter': 'flutter'},
+      headers: const <String, String>{'flutter': 'flutter'},
     ));
   });
 }

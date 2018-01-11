@@ -195,7 +195,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Viewport(
           offset: new ViewportOffset.zero(),
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverToBoxAdapter(
               child: const SizedBox(height: 400.0, child: const Text('a')),
             ),
@@ -211,7 +211,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Viewport(
           offset: new ViewportOffset.fixed(100.0),
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverToBoxAdapter(
               child: const SizedBox(height: 400.0, child: const Text('a')),
             ),
@@ -227,7 +227,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Viewport(
           offset: new ViewportOffset.fixed(100.0),
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverToBoxAdapter(
               child: const SizedBox(height: 4000.0, child: const Text('a')),
             ),
@@ -243,7 +243,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Viewport(
           offset: new ViewportOffset.zero(),
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverToBoxAdapter(
               child: const SizedBox(height: 4000.0, child: const Text('a')),
             ),

@@ -51,7 +51,7 @@ void main() {
     await tester.pumpWidget(
       new Row(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
+        children: const <Widget>[
           const Flexible(child: const SizedBox(width: 100.0, height: 200.0)),
         ],
       ),
@@ -65,7 +65,7 @@ void main() {
     await tester.pumpWidget(
       new Row(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
+        children: const <Widget>[
           const Expanded(flex: null, child: const Text('one', textDirection: TextDirection.ltr)),
           const Flexible(flex: null, child: const Text('two', textDirection: TextDirection.ltr)),
         ],

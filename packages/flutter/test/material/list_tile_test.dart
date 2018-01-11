@@ -337,7 +337,7 @@ void main() {
           child: new MediaQuery(
             data: const MediaQueryData(),
             child: new Column(
-              children: <Widget>[
+              children: const <Widget>[
                 const ListTile(
                   title: const Text('one'),
                 ),

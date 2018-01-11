@@ -22,7 +22,7 @@ void main() {
                 new ExpansionTile(
                   key: sublistKey,
                   title: const Text('Sublist'),
-                  children: <Widget>[
+                  children: const <Widget>[
                     const ListTile(title: const Text('0')),
                     const ListTile(title: const Text('1'))
                   ]
@@ -81,7 +81,7 @@ void main() {
                   onExpansionChanged: (bool opened) {
                     didChangeOpen = opened;
                   },
-                  children: <Widget>[
+                  children: const <Widget>[
                     const ListTile(title: const Text('0')),
                     const ListTile(title: const Text('1'))
                   ]
@@ -110,11 +110,11 @@ void main() {
         return new Material(
           child: new SingleChildScrollView(
             child: new Column(
-              children: <Widget>[
+              children: const <Widget>[
                 const ListTile(title: const Text('Top')),
-                new ExpansionTile(
+                const ExpansionTile(
                   title: const Text('Sublist'),
-                  children: <Widget>[
+                  children: const <Widget>[
                     const ListTile(title: const Text('0')),
                     const ListTile(title: const Text('1'))
                   ],

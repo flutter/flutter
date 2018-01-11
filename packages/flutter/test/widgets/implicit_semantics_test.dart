@@ -22,7 +22,7 @@ void main() {
           container: true,
           explicitChildNodes: false,
           child: new Column(
-            children: <Widget>[
+            children: const <Widget>[
               const Text('Michael Goderbauer'),
               const Text('goderbauer@google.com'),
             ],
@@ -56,7 +56,7 @@ void main() {
           container: true,
           explicitChildNodes: true,
           child: new Column(
-            children: <Widget>[
+            children: const <Widget>[
               const Text('Michael Goderbauer'),
               const Text('goderbauer@google.com'),
             ],
@@ -103,7 +103,7 @@ void main() {
           child: new Semantics(
             label: 'Signed in as',
             child: new Column(
-              children: <Widget>[
+              children: const <Widget>[
                 const Text('Michael Goderbauer'),
                 const Text('goderbauer@google.com'),
               ],
@@ -146,7 +146,7 @@ void main() {
           child: new Semantics(
             label: 'Signed in as',
             child: new Column(
-              children: <Widget>[
+              children: const <Widget>[
                 const Text('Michael Goderbauer'),
                 const Text('goderbauer@google.com'),
               ],
