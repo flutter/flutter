@@ -1224,7 +1224,7 @@ void main() {
 
     await tester.pumpWidget(new MaterialApp(
       home: new Column(
-        children: <Widget>[
+        children: const <Widget>[
           const Draggable<int>(
             data: 1,
             child: const Text('Source'),

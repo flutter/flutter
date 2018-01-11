@@ -46,7 +46,7 @@ void main() {
               return new CupertinoTabScaffold(
                 tabBar: new CupertinoTabBar(
                   backgroundColor: CupertinoColors.white,
-                  items: <BottomNavigationBarItem>[
+                  items: const <BottomNavigationBarItem>[
                     const BottomNavigationBarItem(
                       icon: const ImageIcon(const TestImageProvider(24, 24)),
                       title: const Text('Tab 1'),
@@ -94,7 +94,7 @@ void main() {
                 ),
                 child: new CupertinoTabScaffold(
                   tabBar: new CupertinoTabBar(
-                    items: <BottomNavigationBarItem>[
+                    items: const <BottomNavigationBarItem>[
                       const BottomNavigationBarItem(
                         icon: const ImageIcon(const TestImageProvider(24, 24)),
                         title: const Text('Tab 1'),
@@ -150,7 +150,7 @@ void main() {
             builder: (BuildContext context) {
               return new CupertinoTabScaffold(
                 tabBar: new CupertinoTabBar(
-                  items: <BottomNavigationBarItem>[
+                  items: const <BottomNavigationBarItem>[
                     const BottomNavigationBarItem(
                       icon: const ImageIcon(const TestImageProvider(24, 24)),
                       title: const Text('Tab 1'),

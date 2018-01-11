@@ -188,7 +188,7 @@ void main() {
             height: 0.0,
             child: new ListView(
               padding: const EdgeInsets.all(8.0),
-              children: <Widget>[
+              children: const <Widget>[
                 const Text('padded', textDirection: TextDirection.ltr),
               ],
             ),

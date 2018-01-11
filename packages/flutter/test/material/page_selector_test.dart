@@ -29,7 +29,7 @@ Widget buildFrame(TabController tabController, { Color color, Color selectedColo
                 new Flexible(
                   child: new TabBarView(
                     controller: tabController,
-                    children: <Widget>[
+                    children: const <Widget>[
                       const Center(child: const Text('0')),
                       const Center(child: const Text('1')),
                       const Center(child: const Text('2')),

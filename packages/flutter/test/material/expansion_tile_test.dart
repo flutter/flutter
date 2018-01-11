@@ -53,7 +53,7 @@ void main() {
               new ExpansionTile(
                 key: defaultKey,
                 title: const Text('Default'),
-                children: <Widget>[
+                children: const <Widget>[
                   const ListTile(title: const Text('0')),
                 ]
               )

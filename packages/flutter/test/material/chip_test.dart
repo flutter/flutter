@@ -274,7 +274,7 @@ void main() {
       new MaterialApp(
         home: new Material(
           child: new Column(
-            children: <Widget>[
+            children: const <Widget>[
               const Chip(
                 avatar: const CircleAvatar(
                     child: const Text('A')
@@ -318,7 +318,7 @@ void main() {
           data: const MediaQueryData(textScaleFactor: 3.0),
           child: new Material(
             child: new Column(
-              children: <Widget>[
+              children: const <Widget>[
                 const Chip(
                   avatar: const CircleAvatar(
                       child: const Text('A')
@@ -352,7 +352,7 @@ void main() {
       new MaterialApp(
         home: new Material(
           child: new Column(
-            children: <Widget>[
+            children: const <Widget>[
               const Chip(
                 avatar: const CircleAvatar(
                   child: const Text('A')

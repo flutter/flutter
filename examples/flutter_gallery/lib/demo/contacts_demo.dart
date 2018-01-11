@@ -193,7 +193,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                           content: const Text('Pretend that this opened your SMS application.')
                         ));
                       },
-                      lines: <String>[
+                      lines: const <String>[
                         '(650) 555-1234',
                         'Mobile',
                       ],
@@ -206,7 +206,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                           content: const Text('In this demo, this button doesn\'t do anything.')
                         ));
                       },
-                      lines: <String>[
+                      lines: const <String>[
                         '(323) 555-6789',
                         'Work',
                       ],
@@ -219,7 +219,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                           content: const Text('Imagine if you will, a messaging application.')
                         ));
                       },
-                      lines: <String>[
+                      lines: const <String>[
                         '(650) 555-6789',
                         'Home',
                       ],
@@ -237,7 +237,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                           content: const Text('Here, your e-mail application would open.')
                         ));
                       },
-                      lines: <String>[
+                      lines: const <String>[
                         'ali_connors@example.com',
                         'Personal',
                       ],
@@ -250,7 +250,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                           content: const Text('This is a demo, so this button does not actually work.')
                         ));
                       },
-                      lines: <String>[
+                      lines: const <String>[
                         'aliconnors@example.com',
                         'Work',
                       ],
@@ -268,7 +268,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                           content: const Text('This would show a map of San Francisco.')
                         ));
                       },
-                      lines: <String>[
+                      lines: const <String>[
                         '2000 Main Street',
                         'San Francisco, CA',
                         'Home',
@@ -282,7 +282,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                           content: const Text('This would show a map of Mountain View.')
                         ));
                       },
-                      lines: <String>[
+                      lines: const <String>[
                         '1600 Amphitheater Parkway',
                         'Mountain View, CA',
                         'Work',
@@ -296,7 +296,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                           content: const Text('This would also show a map, if this was not a demo.')
                         ));
                       },
-                      lines: <String>[
+                      lines: const <String>[
                         '126 Severyns Ave',
                         'Mountain View, CA',
                         'Jet Travel',
@@ -308,25 +308,25 @@ class ContactsDemoState extends State<ContactsDemo> {
                   icon: Icons.today,
                   children: <Widget>[
                     new _ContactItem(
-                      lines: <String>[
+                      lines: const <String>[
                         'Birthday',
                         'January 9th, 1989',
                       ],
                     ),
                     new _ContactItem(
-                      lines: <String>[
+                      lines: const <String>[
                         'Wedding anniversary',
                         'June 21st, 2014',
                       ],
                     ),
                     new _ContactItem(
-                      lines: <String>[
+                      lines: const <String>[
                         'First day in office',
                         'January 20th, 2015',
                       ],
                     ),
                     new _ContactItem(
-                      lines: <String>[
+                      lines: const <String>[
                         'Last day in office',
                         'August 9th, 2015',
                       ],

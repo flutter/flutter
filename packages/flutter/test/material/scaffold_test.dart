@@ -500,9 +500,9 @@ void main() {
     const String drawerLabel = 'I am the reason for this test';
 
     final SemanticsTester semantics = new SemanticsTester(tester);
-    await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+    await tester.pumpWidget(new MaterialApp(home: const Scaffold(
       body: const Text(bodyLabel),
-      persistentFooterButtons: <Widget>[const Text(persistentFooterButtonLabel)],
+      persistentFooterButtons: const <Widget>[const Text(persistentFooterButtonLabel)],
       bottomNavigationBar: const Text(bottomNavigationBarLabel),
       floatingActionButton: const Text(floatingActionButtonLabel),
       drawer: const Drawer(child:const Text(drawerLabel)),
