@@ -6,7 +6,7 @@ homepage: http://flutter.io
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
-  collection: 1.14.3
+  collection: 1.14.5
   http: 0.11.3+14
   meta: 1.1.1
   typed_data: 1.1.4
