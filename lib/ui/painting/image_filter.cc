@@ -50,7 +50,8 @@ void ImageFilter::initPicture(Picture* picture) {
 }
 
 void ImageFilter::initBlur(double sigma_x, double sigma_y) {
-  filter_ = SkBlurImageFilter::Make(sigma_x, sigma_y, nullptr);
+  filter_ = SkBlurImageFilter::Make(sigma_x, sigma_y, nullptr, nullptr,
+                                    SkBlurImageFilter::kClamp_TileMode);
 }
 
 }  // namespace blink
