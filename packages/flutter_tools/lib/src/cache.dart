@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
 
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -262,6 +263,13 @@ abstract class CachedArtifact {
   void _removeDownloadedFiles() {
     for (File f in _downloadedFiles) {
       f.deleteSync();
+      for (Directory d = f.parent; d.absolute.path != cache.getDownloadDir().absolute.path; d = d.parent) {
+        if (d.listSync().isEmpty) {
+          d.deleteSync();
+        } else {
+          break;
+        }
+      }
     }
   }
 
@@ -281,26 +289,30 @@ abstract class CachedArtifact {
 
   Uri _toStorageUri(String path) => Uri.parse('$_storageBaseUrl/$path');
 
-  /// Download a zip archive from the given [url] and unzip it to [location].
-  Future<Null> _downloadZipArchive(Uri url, Directory location) {
-    return _withDownloadFile('${_flattenName(url)}.zip', (File tempFile) async {
-      if (!os.verifyZip(tempFile)) {
-        await _downloadFile(url, tempFile);
+  /// Download an archive from the given [url] and unzip it to [location].
+  Future<Null> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f), void extractor(File f, Directory d)) {
+    return _withDownloadFile('${_flattenNameSubdirs(url)}', (File tempFile) async {
+      if (!verifier(tempFile)) {
+        final Status status = logger.startProgress(message, expectSlowOperation: true);
+        await _downloadFile(url, tempFile).then<Null>((_) {
+          status.stop();
+        }).whenComplete(status.cancel);
+      } else {
+        logger.printStatus('$message(cached)');
       }
       _ensureExists(location);
-      os.unzip(tempFile, location);
+      extractor(tempFile, location);
     });
   }
 
+  /// Download a zip archive from the given [url] and unzip it to [location].
+  Future<Null> _downloadZipArchive(String message, Uri url, Directory location) {
+    return _downloadArchive(message, url, location, os.verifyZip, os.unzip);
+  }
+
   /// Download a gzipped tarball from the given [url] and unpack it to [location].
-  Future<Null> _downloadZippedTarball(Uri url, Directory location) {
-    return _withDownloadFile('${_flattenName(url)}.tgz', (File tempFile) async {
-      if (!os.verifyGzip(tempFile)) {
-        await _downloadFile(url, tempFile);
-      }
-      _ensureExists(location);
-      os.unpack(tempFile, location);
-    });
+  Future<Null> _downloadZippedTarball(String message, Uri url, Directory location) {
+    return _downloadArchive(message, url, location, os.verifyGzip, os.unpack);
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
@@ -331,10 +343,7 @@ class MaterialFonts extends CachedArtifact {
   @override
   Future<Null> updateInner() {
     final Uri archiveUri = _toStorageUri(version);
-    final Status status = logger.startProgress('Downloading Material fonts...', expectSlowOperation: true);
-    return _downloadZipArchive(archiveUri, location).then<Null>((_) {
-      status.stop();
-    }).whenComplete(status.cancel);
+    return _downloadZipArchive('Downloading Material fonts...', archiveUri, location);
   }
 }
 
@@ -436,14 +445,14 @@ class FlutterEngine extends CachedArtifact {
       final Directory dir = fs.directory(pkgPath);
       if (dir.existsSync())
         dir.deleteSync(recursive: true);
-      await _downloadItem('Downloading package $pkgName...', url + pkgName + '.zip', pkgDir);
+      await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
     }
 
     for (List<String> toolsDir in _getBinaryDirs()) {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
       final Directory dir = fs.directory(fs.path.join(location.path, cacheDir));
-      await _downloadItem('Downloading $cacheDir tools...', url + urlPath, dir);
+      await _downloadZipArchive('Downloading $cacheDir tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir);
 
@@ -465,13 +474,6 @@ class FlutterEngine extends CachedArtifact {
       }
     }
   }
-
-  Future<Null> _downloadItem(String message, String url, Directory dest) {
-    final Status status = logger.startProgress(message, expectSlowOperation: true);
-    return _downloadZipArchive(Uri.parse(url), dest).then<Null>((_) {
-      status.stop();
-    }).whenComplete(status.cancel);
-  }
 }
 
 /// A cached artifact containing Gradle Wrapper scripts and binaries.
@@ -481,15 +483,12 @@ class GradleWrapper extends CachedArtifact {
   @override
   Future<Null> updateInner() {
     final Uri archiveUri = _toStorageUri(version);
-    final Status status = logger.startProgress('Downloading Gradle Wrapper...', expectSlowOperation: true);
-
-    return _downloadZippedTarball(archiveUri, location).then<Null>((_) {
+    return _downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location).then<Null>((_) {
       // Delete property file, allowing templates to provide it.
       fs.file(fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
       // Remove NOTICE file. Should not be part of the template.
       fs.file(fs.path.join(location.path, 'NOTICE')).deleteSync();
-      status.stop();
-    }).whenComplete(status.cancel);
+    });
   }
 }
 
@@ -510,13 +509,18 @@ final Map<int, List<int>> _flattenNameSubstitutions = <int, List<int>>{
 
 /// Given a name containing slashes, colons, and backslashes, expand it into
 /// something that doesn't.
-String _flattenName(Uri url) {
-  final String urlName = url.toString();
+String _flattenNameNoSubdirs(String fileName) {
   final List<int> replacedCodeUnits = <int>[];
-  for (int codeUnit in urlName.codeUnits) {
+  for (int codeUnit in fileName.codeUnits) {
     replacedCodeUnits.addAll(_flattenNameSubstitutions[codeUnit] ?? <int>[codeUnit]);
   }
   return new String.fromCharCodes(replacedCodeUnits);
+}
+
+String _flattenNameSubdirs(Uri url) {
+  final List<String> pieces = <String>[url.host]..addAll(url.pathSegments);
+  final List<String> convertedPieces = pieces.map(_flattenNameNoSubdirs);
+  return p.joinAll(convertedPieces);
 }
 
 /// Download a file from the given [url] and write it to [location].
