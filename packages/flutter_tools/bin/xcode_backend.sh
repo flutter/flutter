@@ -93,6 +93,11 @@ BuildApp() {
     preview_dart_2_flag="--preview-dart-2"
   fi
 
+  local strong_flag=""
+  if [[ -n "$STRONG" ]]; then
+    strong_flag="--strong"
+  fi
+
   if [[ "$CURRENT_ARCH" != "x86_64" ]]; then
     local aot_flags=""
     if [[ "$build_mode" == "debug" ]]; then
@@ -107,7 +112,8 @@ BuildApp() {
       --target="${target_path}"                                             \
       ${aot_flags}                                                          \
       ${local_engine_flag}                                                  \
-      ${preview_dart_2_flag}
+      ${preview_dart_2_flag}                                                \
+      ${strong_flag}                                                        \
 
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to build ${project_path}."
@@ -140,6 +146,7 @@ BuildApp() {
     ${precompilation_flag}                                                \
     ${local_engine_flag}                                                  \
     ${preview_dart_2_flag}                                                \
+    ${strong_flag}                                                        \
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package ${project_path}."

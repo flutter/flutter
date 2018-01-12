@@ -342,6 +342,10 @@ Future<String> _buildAotSnapshot(
       aot : true,
       strongMode: strongMode,
     );
+    if (mainPath == null) {
+      printError('Compiler terminated unexpectedly.');
+      return null;
+    }
   }
 
   genSnapshotCmd.add(mainPath);

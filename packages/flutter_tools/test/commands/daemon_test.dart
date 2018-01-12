@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:test/test.dart';
 
 import '../src/context.dart';
@@ -265,6 +266,23 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidWorkflow: () => new MockAndroidWorkflow(),
       IOSWorkflow: () => new MockIOSWorkflow(),
+    });
+  });
+
+  group('daemon serialization', () {
+    test('OperationResult', () {
+      expect(
+        jsonEncodeObject(OperationResult.ok),
+        '{"code":0,"message":""}'
+      );
+      expect(
+        jsonEncodeObject(new OperationResult(1, 'foo')),
+        '{"code":1,"message":"foo"}'
+      );
+      expect(
+        jsonEncodeObject(new OperationResult(0, 'foo', hintMessage: 'my hint', hintId: 'myId')),
+        '{"code":0,"message":"foo","hintMessage":"my hint","hintId":"myId"}'
+      );
     });
   });
 }
