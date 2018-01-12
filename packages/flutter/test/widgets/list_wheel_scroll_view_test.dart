@@ -588,7 +588,7 @@ void main() {
               return const Placeholder();
             }),
           ),
-        )
+        ),
       );
 
       // Item 5 is now selected.
@@ -608,7 +608,7 @@ void main() {
               return const Placeholder();
             }),
           ),
-        )
+        ),
       );
 
       // initialItem doesn't do anything since the scroll position was already
@@ -629,12 +629,112 @@ void main() {
               return const Placeholder();
             }),
           ),
-        )
+        ),
       );
 
       // Internally, that same controller is still attached and still at the
       // same place.
       expect(newController.selectedItem, 50);
+    });
+  });
+
+  group('physics', () {
+    testWidgets('fling velocities too low snaps back to the same item', (WidgetTester tester) async {
+      final ListWheelScrollController controller = new ListWheelScrollController(initialItem: 40);
+      final List<double> scrolledPositions = <double>[];
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification notification) {
+              if (notification is ScrollUpdateNotification) {
+                scrolledPositions.add(notification.metrics.pixels);
+              }
+            },
+            child: new ListWheelScrollView(
+              controller: controller,
+              physics: const FixedExtentScrollPhysics(),
+              itemExtent: 1000.0,
+              children: new List<Widget>.generate(100, (int index) {
+                return const Placeholder();
+              }),
+            ),
+          ),
+        ),
+      );
+
+      await tester.fling(
+        find.byType(ListWheelScrollView),
+        const Offset(0.0, -50.0),
+        800.0,
+      );
+
+      // At this moment, the ballistics is started but 50px is still inside the
+      // initial item.
+      expect(controller.selectedItem, 40);
+      // A tester.fling creates and pumps 50 pointer events.
+      expect(scrolledPositions.length, 50);
+      expect(scrolledPositions.last, moreOrLessEquals(40 * 1000.0 + 50.0, epsilon: 0.2));
+
+      // Let the spring back simulation finish.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // The simulation actually did stuff after start ballistics.
+      expect(scrolledPositions.length, greaterThan(50));
+      // Though it still lands back to the same item with the same scroll offset.
+      expect(controller.selectedItem, 40);
+      expect(scrolledPositions.last, moreOrLessEquals(40 * 1000.0, epsilon: 0.2));
+    });
+
+    testWidgets('high fling velocities lands exactly on items', (WidgetTester tester) async {
+      final ListWheelScrollController controller = new ListWheelScrollController(initialItem: 40);
+      final List<double> scrolledPositions = <double>[];
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification notification) {
+              if (notification is ScrollUpdateNotification) {
+                scrolledPositions.add(notification.metrics.pixels);
+              }
+            },
+            child: new ListWheelScrollView(
+              controller: controller,
+              physics: const FixedExtentScrollPhysics(),
+              itemExtent: 100.0,
+              children: new List<Widget>.generate(100, (int index) {
+                return const Placeholder();
+              }),
+            ),
+          ),
+        ),
+      );
+
+      await tester.fling(
+        find.byType(ListWheelScrollView),
+        // High and random numbers that's unlikely to land on exact multiples of 100.
+        const Offset(0.0, -567.0),
+        678.0,
+      );
+
+      // After the drag, 40 + 567px should be on the 46th item.
+      expect(controller.selectedItem, 46);
+      // A tester.fling creates and pumps 50 pointer events.
+      expect(scrolledPositions.length, 50);
+      expect(scrolledPositions.last, moreOrLessEquals(40 * 100.0 + 567.0, epsilon: 0.2));
+
+      // Let the spring back simulation finish.
+      await tester.pumpAndSettle();
+
+      // The simulation actually did stuff after start ballistics.
+      expect(scrolledPositions.length, greaterThan(50));
+      // Lands on 49.
+      expect(controller.selectedItem, 49);
+      // More importantly, lands tightly on 49.
+      expect(scrolledPositions.last, moreOrLessEquals(49 * 100.0, epsilon: 0.2));
     });
   });
 }
