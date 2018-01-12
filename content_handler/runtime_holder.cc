@@ -23,6 +23,7 @@
 #include "flutter/runtime/runtime_init.h"
 #include "lib/app/cpp/connect.h"
 #include "lib/fsl/vmo/vector.h"
+#include "lib/fxl/files/unique_fd.h"
 #include "lib/fxl/functional/make_copyable.h"
 #include "lib/fxl/logging.h"
 #include "lib/fxl/time/time_delta.h"
@@ -45,6 +46,7 @@ constexpr char kAssetChannel[] = "flutter/assets";
 constexpr char kKeyEventChannel[] = "flutter/keyevent";
 constexpr char kTextInputChannel[] = "flutter/textinput";
 constexpr char kFlutterPlatformChannel[] = "flutter/platform";
+constexpr char kFuchsiaPackageResourceDirectory[] = "pkg/data";
 
 void SetThreadName(fxl::RefPtr<fxl::TaskRunner> runner, std::string name) {
   runner->PostTask([name]() {
@@ -117,6 +119,7 @@ void RuntimeHolder::Init(
 
   context_->ConnectToEnvironmentService(view_manager_.NewRequest());
 
+  // TODO(zarah): remove bundle entirely once flx is removed.
   InitRootBundle(std::move(bundle));
 
   const uint8_t* vm_snapshot_data;
@@ -130,7 +133,7 @@ void RuntimeHolder::Init(
     default_isolate_snapshot_instr = ::kDartIsolateCoreSnapshotInstructions;
   } else {
     std::vector<uint8_t> dylib_blob;
-    if (!asset_store_->GetAsBuffer(kDylibKey, &dylib_blob)) {
+    if (!GetAssetAsBuffer(kDylibKey, &dylib_blob)) {
       FXL_LOG(ERROR) << "Failed to extract app dylib";
       return;
     }
@@ -193,8 +196,8 @@ void RuntimeHolder::CreateView(
   std::vector<uint8_t> kernel;
   std::vector<uint8_t> snapshot;
   if (!Dart_IsPrecompiledRuntime()) {
-    if (!asset_store_->GetAsBuffer(kKernelKey, &kernel) &&
-        !asset_store_->GetAsBuffer(kSnapshotKey, &snapshot)) {
+    if (!GetAssetAsBuffer(kKernelKey, &kernel) &&
+        !GetAssetAsBuffer(kSnapshotKey, &snapshot)) {
       FXL_LOG(ERROR) << "Unable to load kernel or snapshot from root bundle.";
       return;
     }
@@ -387,8 +390,11 @@ void RuntimeHolder::HandlePlatformMessage(
 }
 
 void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
-  if (asset_store_)
+  if (directory_asset_bundle_) {
+    blink::AssetFontSelector::Install(directory_asset_bundle_);
+  } else if (asset_store_) {
     blink::AssetFontSelector::Install(asset_store_);
+  }
   InitDartIoInternal();
   InitFuchsia();
   InitMozartInternal();
@@ -448,9 +454,19 @@ void RuntimeHolder::InitMozartInternal() {
 }
 
 void RuntimeHolder::InitRootBundle(std::vector<char> bundle) {
-  root_bundle_data_ = std::move(bundle);
-  asset_store_ = fxl::MakeRefCounted<blink::ZipAssetStore>(
-      GetUnzipperProviderForRootBundle());
+  if (!bundle.empty()) {
+    root_bundle_data_ = std::move(bundle);
+    asset_store_ = fxl::MakeRefCounted<blink::ZipAssetStore>(
+        GetUnzipperProviderForRootBundle());
+  } else {
+    fxl::UniqueFD root_dir(fdio_ns_opendir(namespc_));
+    if (!root_dir.is_valid()) {
+      FXL_LOG(ERROR) << "Unable to load root dir";
+      return;
+    }
+    directory_asset_bundle_ = fxl::MakeRefCounted<blink::DirectoryAssetBundle>(
+        std::move(root_dir), kFuchsiaPackageResourceDirectory);
+  }
 }
 
 mozart::View* RuntimeHolder::GetMozartView() {
@@ -466,12 +482,19 @@ bool RuntimeHolder::HandleAssetPlatformMessage(
   std::string asset_name(reinterpret_cast<const char*>(data.data()),
                          data.size());
   std::vector<uint8_t> asset_data;
-  if (asset_store_ && asset_store_->GetAsBuffer(asset_name, &asset_data)) {
+  if (GetAssetAsBuffer(asset_name, &asset_data)) {
     response->Complete(std::move(asset_data));
   } else {
     response->CompleteEmpty();
   }
   return true;
+}
+
+bool RuntimeHolder::GetAssetAsBuffer(const std::string& name,
+                                     std::vector<uint8_t>* data) {
+  return (directory_asset_bundle_ &&
+          directory_asset_bundle_->GetAsBuffer(name, data)) ||
+         (asset_store_ && asset_store_->GetAsBuffer(name, data));
 }
 
 bool RuntimeHolder::HandleFlutterPlatformMessage(

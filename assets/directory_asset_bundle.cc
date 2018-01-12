@@ -23,15 +23,49 @@ namespace blink {
 bool DirectoryAssetBundle::GetAsBuffer(const std::string& asset_name,
                                        std::vector<uint8_t>* data) {
   std::string asset_path = GetPathForAsset(asset_name);
+
   if (asset_path.empty())
     return false;
+
+  if (fd_.is_valid()) {
+    fxl::UniqueFD asset_file(openat(fd_.get(), asset_path.c_str(), O_RDONLY));
+    if (!asset_file.is_valid()) {
+      FXL_LOG(ERROR) << "Could not load asset " << asset_name << " from "
+                     << asset_path;
+      return false;
+    }
+
+    constexpr size_t kBufferSize = 1 << 16;
+    size_t offset = 0;
+    ssize_t bytes_read = 0;
+    do {
+      offset += bytes_read;
+      data->resize(offset + kBufferSize);
+      bytes_read = read(asset_file.get(), &(*data)[offset], kBufferSize);
+    } while (bytes_read > 0);
+
+    if (bytes_read < 0) {
+      FXL_LOG(ERROR) << "Reading " << asset_name << " failed";
+      data->clear();
+      return false;
+    }
+
+    data->resize(offset + bytes_read);
+    return true;
+  }
+
   return files::ReadFileToVector(asset_path, data);
 }
 
 DirectoryAssetBundle::~DirectoryAssetBundle() {}
 
 DirectoryAssetBundle::DirectoryAssetBundle(std::string directory)
-    : directory_(std::move(directory)) {}
+    : directory_(std::move(directory)),
+      fd_(fxl::internal::UniqueFDTraits::InvalidValue()) {}
+
+DirectoryAssetBundle::DirectoryAssetBundle(fxl::UniqueFD fd,
+                                           std::string directory)
+    : directory_(std::move(directory)), fd_(std::move(fd)) {}
 
 std::string DirectoryAssetBundle::GetPathForAsset(
     const std::string& asset_name) {
