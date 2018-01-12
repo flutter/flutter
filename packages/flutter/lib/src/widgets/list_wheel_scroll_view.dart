@@ -271,6 +271,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
     }
 
     if (velocity.abs() < tolerance.velocity) {
+      print('velocity $velocity below tolerance ${tolerance.velocity}');
       return null;
     }
 
@@ -283,9 +284,12 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
       maxScrollExtent: metrics.maxScrollExtent,
     );
 
+    print('settling at $settlingItemIndex');
+
     // If we're going to end back at the same item because initial velocity
     // is too low, use a spring simulation to get back.
     if (settlingItemIndex == metrics.itemIndex) {
+      print('making a sprint');
       return new SpringSimulation(
         spring,
         metrics.pixels,
@@ -294,6 +298,8 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
         tolerance: tolerance,
       );
     }
+
+    print('making friction with start ${metrics.pixels} end ${settlingItemIndex * metrics.itemExtent} velocity $velocity to ${tolerance.velocity}');
 
     // Create a new friction simulation except the drag will be tweaked to land
     // exactly on the item closest to the natural stopping point.
