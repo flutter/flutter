@@ -954,6 +954,42 @@ abstract class CustomClipper<T> {
   String toString() => '$runtimeType';
 }
 
+/// A [CustomClipper] that clips to the outer path of a [ShapeBorder].
+class ShapeBorderClipper extends CustomClipper<Path> {
+  /// Creates a [ShapeBorder] clipper.
+  ///
+  /// The [shapeBorder] argument must not be null.
+  ///
+  /// The [textDirection] argument must be provided non-null if [shapeBorder]
+  /// has a text direction dependency (for example if it is expressed in terms
+  /// of "start" and "end" instead of "left" and "right"). It may be null if
+  /// the border will not need the text direction to paint itself.
+  const ShapeBorderClipper({
+    @required this.shapeBorder,
+    this.textDirection,
+  }) : assert(shapeBorder != null);
+
+  // The shape border whose outer path this clipper clips to.
+  final ShapeBorder shapeBorder;
+
+  /// The text direction to use for getting the outer path for [shapeBorder].
+  ///
+  /// [ShapeBorder]s can depend on the text direction (e.g having a "dent"
+  /// towards the start of the shape).
+  final TextDirection textDirection;
+
+  /// Returns the outer path of [shapeBorder] as the clip.
+  @override
+  Path getClip(Size size) {
+    return shapeBorder.getOuterPath(Offset.zero & size, textDirection: textDirection);
+  }
+
+  @override
+  bool shouldReclip(covariant ShapeBorderClipper oldClipper) {
+    return oldClipper.shapeBorder != shapeBorder;
+  }
+}
+
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
@@ -1292,64 +1328,25 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   }
 }
 
-/// Creates a physical model layer that clips its children to a rounded
-/// rectangle.
-///
 /// A physical model layer casts a shadow based on its [elevation].
-class RenderPhysicalModel extends _RenderCustomClip<RRect> {
-  /// Creates a rounded-rectangular clip.
-  ///
-  /// The [color] is required.
-  ///
+///
+/// The concrete implementations [RenderPhysicalModel] and [RenderPhysicalShape]
+/// determine the actual shape of the physical model.
+abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   /// The [shape], [elevation], [color], and [shadowColor] must not be null.
-  RenderPhysicalModel({
-    RenderBox child,
-    BoxShape shape: BoxShape.rectangle,
-    BorderRadius borderRadius,
-    double elevation: 0.0,
+  _RenderPhysicalModelBase({
+    @required RenderBox child,
+    @required double elevation,
     @required Color color,
-    Color shadowColor: const Color(0xFF000000),
-  }) : assert(shape != null),
-       assert(elevation != null),
+    @required Color shadowColor,
+    CustomClipper<T> clipper,
+  }) : assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
-       _shape = shape,
-       _borderRadius = borderRadius,
        _elevation = elevation,
        _color = color,
        _shadowColor = shadowColor,
-       super(child: child);
-
-  /// The shape of the layer.
-  ///
-  /// Defaults to [BoxShape.rectangle]. The [borderRadius] affects the corners
-  /// of the rectangle.
-  BoxShape get shape => _shape;
-  BoxShape _shape;
-  set shape(BoxShape value) {
-    assert(value != null);
-    if (shape == value)
-      return;
-    _shape = value;
-    _markNeedsClip();
-  }
-
-  /// The border radius of the rounded corners.
-  ///
-  /// Values are clamped so that horizontal and vertical radii sums do not
-  /// exceed width/height.
-  ///
-  /// This property is ignored if the [shape] is not [BoxShape.rectangle].
-  ///
-  /// The value null is treated like [BorderRadius.zero].
-  BorderRadius get borderRadius => _borderRadius;
-  BorderRadius _borderRadius;
-  set borderRadius(BorderRadius value) {
-    if (borderRadius == value)
-      return;
-    _borderRadius = value;
-    _markNeedsClip();
-  }
+       super(child: child, clipper: clipper);
 
   /// The z-coordinate at which to place this material.
   double get elevation => _elevation;
@@ -1387,6 +1384,83 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     markNeedsPaint();
   }
 
+  static final Paint _defaultPaint = new Paint();
+  static final Paint _transparentPaint = new Paint()..color = const Color(0x00000000);
+
+  // On Fuchsia, the system compositor is responsible for drawing shadows
+  // for physical model layers with non-zero elevation.
+  @override
+  bool get alwaysNeedsCompositing => _elevation != 0.0 && defaultTargetPlatform == TargetPlatform.fuchsia;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DiagnosticsProperty<Color>('color', color));
+  }
+}
+
+/// Creates a physical model layer that clips its child to a rounded
+/// rectangle.
+///
+/// A physical model layer casts a shadow based on its [elevation].
+class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
+  /// Creates a rounded-rectangular clip.
+  ///
+  /// The [color] is required.
+  ///
+  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
+  RenderPhysicalModel({
+    RenderBox child,
+    BoxShape shape: BoxShape.rectangle,
+    BorderRadius borderRadius,
+    double elevation: 0.0,
+    @required Color color,
+    Color shadowColor: const Color(0xFF000000),
+  }) : assert(shape != null),
+       assert(elevation != null),
+       assert(color != null),
+       assert(shadowColor != null),
+       _shape = shape,
+       _borderRadius = borderRadius,
+       super(
+         child: child,
+         elevation: elevation,
+         color: color,
+         shadowColor: shadowColor
+       );
+
+  /// The shape of the layer.
+  ///
+  /// Defaults to [BoxShape.rectangle]. The [borderRadius] affects the corners
+  /// of the rectangle.
+  BoxShape get shape => _shape;
+  BoxShape _shape;
+  set shape(BoxShape value) {
+    assert(value != null);
+    if (shape == value)
+      return;
+    _shape = value;
+    _markNeedsClip();
+  }
+
+  /// The border radius of the rounded corners.
+  ///
+  /// Values are clamped so that horizontal and vertical radii sums do not
+  /// exceed width/height.
+  ///
+  /// This property is ignored if the [shape] is not [BoxShape.rectangle].
+  ///
+  /// The value null is treated like [BorderRadius.zero].
+  BorderRadius get borderRadius => _borderRadius;
+  BorderRadius _borderRadius;
+  set borderRadius(BorderRadius value) {
+    if (borderRadius == value)
+      return;
+    _borderRadius = value;
+    _markNeedsClip();
+  }
+
   @override
   RRect get _defaultClip {
     assert(hasSize);
@@ -1412,14 +1486,6 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     return super.hitTest(result, position: position);
   }
 
-  static final Paint _defaultPaint = new Paint();
-  static final Paint _transparentPaint = new Paint()..color = const Color(0x00000000);
-
-  // On Fuchsia, the system compositor is responsible for drawing shadows
-  // for physical model layers with non-zero elevation.
-  @override
-  bool get alwaysNeedsCompositing => _elevation != 0.0 && defaultTargetPlatform == TargetPlatform.fuchsia;
-
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
@@ -1443,7 +1509,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
           // TODO(jsimmons): remove this when Skia does it for us.
           canvas.drawRect(
             offsetBounds.inflate(20.0),
-            _transparentPaint,
+            _RenderPhysicalModelBase._transparentPaint,
           );
           canvas.drawShadow(
             offsetClipPath,
@@ -1462,7 +1528,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
         // the side of correctness here.
         // TODO(ianh): Find a better solution.
         if (!offsetClipRRect.isRect)
-          canvas.saveLayer(offsetBounds, _defaultPaint);
+          canvas.saveLayer(offsetBounds, _RenderPhysicalModelBase._defaultPaint);
         super.paint(context, offset);
         if (!offsetClipRRect.isRect)
           canvas.restore();
@@ -1477,8 +1543,101 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<BoxShape>('shape', shape));
     description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
-    description.add(new DoubleProperty('elevation', elevation));
-    description.add(new DiagnosticsProperty<Color>('color', color));
+  }
+}
+
+/// Creates a physical shape layer that clips its child to a [Path].
+///
+/// A physical shape layer casts a shadow based on its [elevation].
+///
+/// See also:
+///
+/// * [RenderPhysicalModel], which is optimized for rounded rectangles and
+///   circles.
+class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
+  /// Creates an arbitrary shape clip.
+  ///
+  /// The [color] and [shape] parameters are required.
+  ///
+  /// The [clipper], [elevation], [color] and [shadowColor] must
+  /// not be null.
+  RenderPhysicalShape({
+    RenderBox child,
+    @required CustomClipper<Path> clipper,
+    double elevation: 0.0,
+    @required Color color,
+    Color shadowColor: const Color(0xFF000000),
+  }) : assert(clipper != null),
+       assert(elevation != null),
+       assert(color != null),
+       assert(shadowColor != null),
+       super(
+         child: child,
+         elevation: elevation,
+         color: color,
+         shadowColor: shadowColor,
+         clipper: clipper,
+       );
+
+  @override
+  Path get _defaultClip => new Path()..addRect(Offset.zero & size);
+
+  @override
+  bool hitTest(HitTestResult result, { Offset position }) {
+    if (_clipper != null) {
+      _updateClip();
+      assert(_clip != null);
+      if (!_clip.contains(position))
+        return false;
+    }
+    return super.hitTest(result, position: position);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      _updateClip();
+      final Rect offsetBounds = offset & size;
+      final Path offsetPath = _clip.shift(offset);
+      if (needsCompositing) {
+        final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
+          clipPath: offsetPath,
+          elevation: elevation,
+          color: color,
+        );
+        context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
+      } else {
+        final Canvas canvas = context.canvas;
+        if (elevation != 0.0) {
+          // The drawShadow call doesn't add the region of the shadow to the
+          // picture's bounds, so we draw a hardcoded amount of extra space to
+          // account for the maximum potential area of the shadow.
+          // TODO(jsimmons): remove this when Skia does it for us.
+          canvas.drawRect(
+            offsetBounds.inflate(20.0),
+            _RenderPhysicalModelBase._transparentPaint,
+          );
+          canvas.drawShadow(
+            offsetPath,
+            shadowColor,
+            elevation,
+            color.alpha != 0xFF,
+          );
+        }
+        canvas.drawPath(offsetPath, new Paint()..color = color..style = PaintingStyle.fill);
+        canvas.saveLayer(offsetBounds, _RenderPhysicalModelBase._defaultPaint);
+        canvas.clipPath(offsetPath);
+        super.paint(context, offset);
+        canvas.restore();
+        assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
+      }
+    }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<CustomClipper<Path>>('clipper', clipper));
   }
 }
 
