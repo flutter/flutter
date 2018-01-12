@@ -44,7 +44,7 @@ dependencies:
   front_end: any
 
 dev_dependencies:
-  collection: 1.14.3
+  collection: 1.14.5
   mockito: 2.2.1
 
   async: 1.13.3 # TRANSITIVE DEPENDENCY

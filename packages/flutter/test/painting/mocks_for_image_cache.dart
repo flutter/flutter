@@ -24,9 +24,10 @@ class TestImageInfo implements ImageInfo {
 }
 
 class TestImageProvider extends ImageProvider<int> {
-  const TestImageProvider(this.key, this.imageValue);
+  const TestImageProvider(this.key, this.imageValue, { this.image });
   final int key;
   final int imageValue;
+  final ui.Image image;
 
   @override
   Future<int> obtainKey(ImageConfiguration configuration) {
@@ -36,7 +37,7 @@ class TestImageProvider extends ImageProvider<int> {
   @override
   ImageStreamCompleter load(int key) {
     return new OneFrameImageStreamCompleter(
-      new SynchronousFuture<ImageInfo>(new TestImageInfo(imageValue))
+      new SynchronousFuture<ImageInfo>(new TestImageInfo(imageValue, image: image))
     );
   }
 
