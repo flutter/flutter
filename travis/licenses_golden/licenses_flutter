@@ -9509,8 +9509,6 @@ FILE: ../../../flutter/lib/ui/painting/gradient.cc
 FILE: ../../../flutter/lib/ui/painting/gradient.h
 FILE: ../../../flutter/lib/ui/painting/image_shader.cc
 FILE: ../../../flutter/lib/ui/painting/image_shader.h
-FILE: ../../../flutter/lib/ui/painting/mask_filter.cc
-FILE: ../../../flutter/lib/ui/painting/mask_filter.h
 FILE: ../../../flutter/lib/ui/painting/matrix.cc
 FILE: ../../../flutter/lib/ui/painting/matrix.h
 FILE: ../../../flutter/lib/ui/painting/paint.cc

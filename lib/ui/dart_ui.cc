@@ -14,7 +14,6 @@
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/image_filter.h"
 #include "flutter/lib/ui/painting/image_shader.h"
-#include "flutter/lib/ui/painting/mask_filter.h"
 #include "flutter/lib/ui/painting/path.h"
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/picture_recorder.h"
@@ -59,7 +58,6 @@ void DartUI::InitForGlobal() {
     FrameInfo::RegisterNatives(g_natives);
     ImageFilter::RegisterNatives(g_natives);
     ImageShader::RegisterNatives(g_natives);
-    MaskFilter::RegisterNatives(g_natives);
     Paragraph::RegisterNatives(g_natives);
     ParagraphBuilder::RegisterNatives(g_natives);
     Picture::RegisterNatives(g_natives);
