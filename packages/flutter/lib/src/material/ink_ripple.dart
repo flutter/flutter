@@ -31,19 +31,10 @@ RectCallback _getClipCallback(RenderBox referenceBox, bool containedInkWell, Rec
 }
 
 double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback rectCallback, Offset position) {
-  if (containedInkWell) {
-    final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
-    return _getRippleRadiusForPositionInSize(size, position);
-  }
-  return Material.defaultSplashRadius;
-}
-
-double _getRippleRadiusForPositionInSize(Size bounds, Offset position) {
-  final double d1 = (position - bounds.topLeft(Offset.zero)).distance;
-  final double d2 = (position - bounds.topRight(Offset.zero)).distance;
-  final double d3 = (position - bounds.bottomLeft(Offset.zero)).distance;
-  final double d4 = (position - bounds.bottomRight(Offset.zero)).distance;
-  return math.max(math.max(d1, d2), math.max(d3, d4)).ceilToDouble();
+  final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
+  final double d1 = size.bottomRight(Offset.zero).distance;
+  final double d2 = (size.topRight(Offset.zero) - size.bottomLeft(Offset.zero)).distance;
+  return math.max(d1, d2) / 2.0;
 }
 
 class _InkRippleFactory extends InteractiveInkFeatureFactory {
