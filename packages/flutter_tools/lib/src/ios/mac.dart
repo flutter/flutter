@@ -356,6 +356,11 @@ Future<XcodeBuildResult> buildXcodeProject({
       // Copy app folder to a place where other tools can find it without knowing
       // the BuildInfo.
       outputDir = actualOutputDir.replaceFirst('/$configuration-', '/');
+      if (fs.isDirectorySync(outputDir)) {
+        // Previous output directory might have incompatible artifacts
+        // (for example, kernel binary files produced from previous `--preview-dart-2` run).
+        fs.directory(outputDir).deleteSync(recursive: true);
+      }
       copyDirectorySync(fs.directory(actualOutputDir), fs.directory(outputDir));
     }
     return new XcodeBuildResult(success: true, output: outputDir);
