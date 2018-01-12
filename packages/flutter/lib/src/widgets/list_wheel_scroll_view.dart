@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -107,29 +108,38 @@ class ListWheelScrollController extends ScrollController {
   }
 }
 
-/// Metrics for a [ListWheelScrollView].
+/// Metrics for a [ScrollPosition] to a scroll view with fixed item sizes.
 ///
-/// The metrics are available on [ScrollNotification]s generated from
-/// [ListWheelScrollView]s with a [ListWheelScrollController] and exposes the
-/// current [itemIndex].
+/// The metrics are available on [ScrollNotification]s generated from a scroll
+/// views such as [ListWheelScrollView]s with a [ListWheelScrollController] and
+/// exposes the current [itemIndex] and the scroll view's [itemExtent].
 class FixedExtentMetrics extends FixedScrollMetrics {
   /// Creates page metrics that add the given information to the `parent`
   /// metrics.
   FixedExtentMetrics({
     ScrollMetrics parent,
-    this.itemIndex,
+    @required this.itemIndex,
   }) : super.clone(parent);
 
-  /// The [ListWheelScrollView]'s currently selected item index.
+  /// The scroll view's currently selected item index.
   final int itemIndex;
 }
 
-int _getItemFromOffset(double offset, double itemExtent, ScrollPosition position) {
-  return (_clipOffsetToScrollableRange(offset, position) / itemExtent).round();
+int _getItemFromOffset({
+  double offset,
+  double itemExtent,
+  double minScrollExtent,
+  double maxScrollExtent,
+}) {
+  return (_clipOffsetToScrollableRange(offset, minScrollExtent, maxScrollExtent) / itemExtent).round();
 }
 
-double _clipOffsetToScrollableRange(double offset, ScrollPosition position) {
-  return math.min(math.max(offset, position.minScrollExtent), position.maxScrollExtent);
+double _clipOffsetToScrollableRange(
+  double offset,
+  double minScrollExtent,
+  double maxScrollExtent
+) {
+  return math.min(math.max(offset, minScrollExtent), maxScrollExtent);
 }
 
 /// A [ScrollPositionWithSingleContext] that can only be created based on
@@ -162,14 +172,18 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext {
 
   double get itemExtent => _getItemExtentFromScrollContext(context);
 
-  int get itemIndex => _getItemFromOffset(pixels, itemExtent, this);
+  int get itemIndex {
+    return _getItemFromOffset(
+      offset: pixels,
+      itemExtent: itemExtent,
+      minScrollExtent: minScrollExtent,
+      maxScrollExtent: maxScrollExtent,
+    );
+  }
 
   @override
   FixedExtentMetrics cloneMetrics() {
-    return new FixedExtentMetrics(
-      parent: this,
-      itemIndex: itemIndex,
-    );
+    return new FixedExtentMetrics(parent: this, itemIndex: itemIndex);
   }
 }
 
@@ -207,57 +221,88 @@ class _FixedExtentScrollableState extends ScrollableState {
   }
 }
 
-/// A snapping physics that always lands in the centers of items instead of
-/// anywhere within the scroll extent.
+/// A snapping physics that always lands directly on items instead of anywhere
+/// within the scroll extent.
 ///
 /// Behaves similarly to a slot machine wheel except the ballistics simulation
-/// never overshoots and rolls back to the center within a single item if it's
-/// to settle on that item.
+/// never overshoots and rolls back within a single item if it's to settle on
+/// that item.
+///
+/// Must be used with a scrollable that uses a [ListWheelScrollController].
 ///
 /// Defers back to the parent beyond the scroll extents.
 class FixedExtentScrollPhysics extends ScrollPhysics {
-  const FixedExtentScrollPhysics(this.itemExtent, { ScrollPhysics parent })
-      : super(parent: parent);
-
-  final double itemExtent;
+  const FixedExtentScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
 
   @override
   FixedExtentScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new FixedExtentScrollPhysics(itemExtent, parent: buildParent(ancestor));
-  }
-
-  double _getItem(ScrollPosition position) {
-    return position.pixels / itemExtent;
-  }
-
-  double _getPixels(ScrollPosition position, int item) {
-    return item * itemExtent;
-  }
-
-  double _getTargetPixels(ScrollPosition position, Tolerance tolerance, double velocity) {
-//    print('position ${position.pixels}');
-    double itemIndex = _getItem(position);
-//    print('index $itemIndex');
-    if (velocity < -tolerance.velocity)
-      itemIndex -= 0.5;
-    else if (velocity > tolerance.velocity)
-      itemIndex += 0.5;
-    return _getPixels(position, itemIndex.round());
+    return new FixedExtentScrollPhysics(parent: buildParent(ancestor));
   }
 
   @override
   Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
+    assert(
+      position is _FixedExtentScrollPosition,
+      'FixedExtentScrollPhysics can only be used with Scrollables that uses '
+      'the ListWheelScrollController'
+    );
+
+    final _FixedExtentScrollPosition metrics = position;
+
     // If we're out of range and not headed back in range, defer to the parent
-    // ballistics, which should put us back in range at a page boundary.
-    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
-        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
-      return super.createBallisticSimulation(position, velocity);
+    // ballistics, which should put us back in range at the scrollable's boundary.
+    if ((velocity <= 0.0 && metrics.pixels <= metrics.minScrollExtent) ||
+        (velocity >= 0.0 && metrics.pixels >= metrics.maxScrollExtent)) {
+      return super.createBallisticSimulation(metrics, velocity);
     }
-    final Tolerance tolerance = this.tolerance;
-    final double target = _getTargetPixels(position, tolerance, velocity);
-    if (target != position.pixels)
-      return new ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
-    return null;
+
+    // Create a test simulation to see where it would have ballistically fallen
+    // naturally without settling onto items.
+    final FrictionSimulation testFrictionSimulation =
+        // 0.135 is an arbitrary number copied from scroll_simulation.
+        new FrictionSimulation(0.135, metrics.pixels, velocity);
+
+    // If it was going to end up past the scroll extent, defer back to the
+    // parent physics' ballistics again which should put us on the scrollable's
+    // boundary.
+    if (testFrictionSimulation.finalX < metrics.minScrollExtent
+        || testFrictionSimulation.finalX > metrics.maxScrollExtent) {
+      return super.createBallisticSimulation(metrics, velocity);
+    }
+
+    if (velocity.abs() < tolerance.velocity) {
+      return null;
+    }
+
+    // From the natural final position, find the nearest item it should have
+    // settled to.
+    final int settlingItemIndex = _getItemFromOffset(
+      offset: testFrictionSimulation.finalX,
+      itemExtent: metrics.itemExtent,
+      minScrollExtent: metrics.minScrollExtent,
+      maxScrollExtent: metrics.maxScrollExtent,
+    );
+
+    // If we're going to end back at the same item because initial velocity
+    // is too low, use a spring simulation to get back.
+    if (settlingItemIndex == metrics.itemIndex) {
+      return new SpringSimulation(
+        spring,
+        metrics.pixels,
+        settlingItemIndex * metrics.itemExtent,
+        velocity,
+        tolerance: tolerance,
+      );
+    }
+
+    // Create a new friction simulation except the drag will be tweaked to land
+    // exactly on the item closest to the natural stopping point.
+    return new FrictionSimulation.through(
+      metrics.pixels,
+      settlingItemIndex * metrics.itemExtent,
+      velocity,
+      tolerance.velocity,
+    );
   }
 }
 
