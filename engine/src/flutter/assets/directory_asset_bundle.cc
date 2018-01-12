@@ -7,16 +7,13 @@
 
 #include <fcntl.h>
 
-#if !defined(OS_WIN)
-#include <unistd.h>
-#endif
-
 #include <utility>
 
 #include "lib/fxl/files/eintr_wrapper.h"
 #include "lib/fxl/files/file.h"
 #include "lib/fxl/files/path.h"
 #include "lib/fxl/files/unique_fd.h"
+#include "lib/fxl/portable_unistd.h"
 
 namespace blink {
 
