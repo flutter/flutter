@@ -855,8 +855,10 @@ public class FlutterView extends SurfaceView
 
     @Override
     public AccessibilityNodeProvider getAccessibilityNodeProvider() {
-        ensureAccessibilityEnabled();
-        return mAccessibilityNodeProvider;
+        if (mAccessibilityEnabled)
+            return mAccessibilityNodeProvider;
+        // TODO(goderbauer): when a11y is off this should return a one-off snapshot of the a11y tree.
+        return null;
     }
 
     private AccessibilityBridge mAccessibilityNodeProvider;
