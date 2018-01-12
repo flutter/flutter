@@ -12,7 +12,6 @@ import 'gesture_detector.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
-const Duration _kDismissDuration = const Duration(milliseconds: 200);
 const Curve _kResizeTimeCurve = const Interval(0.4, 1.0, curve: Curves.ease);
 const double _kMinFlingVelocity = 700.0;
 const double _kMinFlingVelocityDelta = 400.0;
@@ -83,6 +82,8 @@ class Dismissible extends StatefulWidget {
     this.direction: DismissDirection.horizontal,
     this.resizeDuration: const Duration(milliseconds: 300),
     this.dismissThresholds: const <DismissDirection, double>{},
+    this.dismissDuration: const Duration(milliseconds: 300),
+    this.diagonalDisplacement: 0.0,
   }) : assert(key != null),
        assert(secondaryBackground != null ? background != null : true),
        super(key: key);
@@ -134,6 +135,12 @@ class Dismissible extends StatefulWidget {
   /// [direction] property.
   final Map<DismissDirection, double> dismissThresholds;
 
+  final Duration dismissDuration;
+  /// defines the duration for card to dismiss and come to original position
+
+  final double diagonalDisplacement;
+  /// defines the offset displacement along the axis used.
+
   @override
   _DismissibleState createState() => new _DismissibleState();
 }
@@ -183,7 +190,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _moveController = new AnimationController(duration: _kDismissDuration, vsync: this)
+    _moveController = new AnimationController(duration: widget.dismissDuration, vsync: this)
       ..addStatusListener(_handleDismissStatusChanged);
     _updateMoveAnimation();
   }
@@ -317,7 +324,9 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     final double end = _dragExtent.sign;
     _moveAnimation = new Tween<Offset>(
       begin: Offset.zero,
-      end: _directionIsXAxis ? new Offset(end, 0.0) : new Offset(0.0, end),
+      end: _directionIsXAxis
+          ? new Offset(end, widget.diagonalDisplacement)
+          : new Offset(widget.diagonalDisplacement, end),
     ).animate(_moveController);
   }
 
