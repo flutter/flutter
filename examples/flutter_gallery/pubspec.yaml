@@ -2,14 +2,14 @@ name: flutter_gallery
 dependencies:
   flutter:
     sdk: flutter
-  collection: 1.14.3
+  collection: 1.14.5
   device_info: 0.1.0
   intl: 0.15.2
-  connectivity: 0.2.0
+  connectivity: 0.2.1
   string_scanner: 1.0.2
   url_launcher: 2.0.0
   cupertino_icons: 0.1.1
-  video_player: 0.0.7
+  video_player: 0.1.1
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets:
