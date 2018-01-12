@@ -14,11 +14,11 @@ import 'material.dart';
 const Duration _kUnconfirmedRippleDuration = const Duration(seconds: 1);
 const Duration _kFadeInDuration = const Duration(milliseconds: 75);
 const Duration _kRadiusDuration = const Duration(milliseconds: 225);
-const Duration _kFadeOutDuration = const Duration(milliseconds: 450);
+const Duration _kFadeOutDuration = const Duration(milliseconds: 375);
 const Duration _kCancelDuration = const Duration(milliseconds: 75);
 
-// The fade out begins 300ms after the _fadeOutController starts. See confirm().
-const double _kFadeOutIntervalStart = 300.0 / 450.0;
+// The fade out begins 225ms after the _fadeOutController starts. See confirm().
+const double _kFadeOutIntervalStart = 225.0 / 375.0;
 
 RectCallback _getClipCallback(RenderBox referenceBox, bool containedInkWell, RectCallback rectCallback) {
   if (rectCallback != null) {
