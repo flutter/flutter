@@ -162,6 +162,11 @@ abstract class Decoration extends Diagnosticable {
   /// `textDirection` argument should therefore be provided. If it is known that
   /// the decoration is not affected by the text direction, then the argument
   /// may be omitted or set to null.
+  ///
+  /// When a [Decoration] is painted in a [Container] or [DecoratedBox] (which
+  /// is what [Container] uses), the `textDirection` parameter will be populated
+  /// based on the ambient [Directionality] (by way of the [RenderDecoratedBox]
+  /// renderer).
   bool hitTest(Size size, Offset position, { TextDirection textDirection }) => true;
 
   /// Returns a [BoxPainter] that will paint this decoration.
@@ -207,6 +212,10 @@ abstract class BoxPainter {
   /// Implementations should paint their decorations on the canvas in a
   /// rectangle whose top left corner is at the given `offset` and whose size is
   /// given by `configuration.size`.
+  ///
+  /// When a [Decoration] is painted in a [Container] or [DecoratedBox] (which
+  /// is what [Container] uses), the [ImageConfiguration.textDirection] property
+  /// will be populated based on the ambient [Directionality].
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration);
 
   /// Callback that is invoked if an asynchronously-loading resource used by the

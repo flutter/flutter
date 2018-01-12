@@ -323,13 +323,13 @@ class _ShapeDecorationPainter extends BoxPainter {
       }
       for (int index = 0; index < _shadowCount; index += 1) {
         final BoxShadow shadow = _decoration.shadows[index];
-        _shadowPaths[index] = _decoration.shape.getOuterPath(rect.shift(shadow.offset).inflate(shadow.spreadRadius));
+        _shadowPaths[index] = _decoration.shape.getOuterPath(rect.shift(shadow.offset).inflate(shadow.spreadRadius), textDirection: textDirection);
       }
     }
     if (_interiorPaint != null || _shadowCount != null)
-      _outerPath = _decoration.shape.getOuterPath(rect);
+      _outerPath = _decoration.shape.getOuterPath(rect, textDirection: textDirection);
     if (_decoration.image != null)
-      _innerPath = _decoration.shape.getInnerPath(rect);
+      _innerPath = _decoration.shape.getInnerPath(rect, textDirection: textDirection);
 
     _lastRect = rect;
     _lastTextDirection = textDirection;
