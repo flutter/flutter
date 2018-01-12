@@ -29,6 +29,10 @@ SET pub_cache_path=%FLUTTER_ROOT%\.pub-cache
 SET dart=%dart_sdk_path%\bin\dart.exe
 SET pub=%dart_sdk_path%\bin\pub.bat
 
+REM If available, add location of bundled mingit to PATH
+SET mingit_path=%FLUTTER_ROOT%\bin\mingit\cmd
+IF EXIST "%mingit_path%" SET PATH=%PATH%;%mingit_path%
+
 REM Test if Git is available on the Host
 where /q git || ECHO Error: Unable to find git in your PATH. && EXIT /B 1
 REM  Test if the flutter directory is a git clone, otherwise git rev-parse HEAD would fail
@@ -40,7 +44,6 @@ IF NOT EXIST "%flutter_root%\.git" (
 REM Ensure that bin/cache exists.
 IF NOT EXIST "%cache_dir%" MKDIR "%cache_dir%"
 
-SET FLUTTER_TOOL_ARGS=--assert-initializer %FLUTTER_TOOL_ARGS%
 REM To debug the tool, you can uncomment the following lines to enable checked mode and set an observatory port:
 REM SET FLUTTER_TOOL_ARGS="--checked %FLUTTER_TOOL_ARGS%"
 REM SET FLUTTER_TOOL_ARGS="%FLUTTER_TOOL_ARGS% --observe=65432"

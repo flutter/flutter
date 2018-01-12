@@ -13,6 +13,10 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  setUp(() {
+    debugResetSemanticsIdCounter();
+  });
+
   testWidgets('Does FlatButton contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(
@@ -33,11 +37,17 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            actions: SemanticsAction.tap.index,
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+            ],
             label: 'ABC',
             rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
             transform: new Matrix4.translationValues(356.0, 282.0, 0.0),
-            flags: SemanticsFlag.isButton.index,
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+            ],
           )
         ],
       ),
@@ -67,11 +77,17 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            actions: SemanticsAction.tap.index,
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+            ],
             label: 'ABC',
             rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
             transform: new Matrix4.translationValues(356.0, 282.0, 0.0),
-            flags: SemanticsFlag.isButton.index,
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+            ],
           )
         ]
       ),
@@ -246,6 +262,85 @@ void main() {
     );
 
     await gesture.up();
+  });
+
+  testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final Rect expectedButtonSize = new Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
+    // Button is in center of screen
+    final Matrix4 expectedButtonTransform = new Matrix4.identity()
+      ..translate(
+        TestSemantics.fullScreen.width / 2 - expectedButtonSize.width /2,
+        TestSemantics.fullScreen.height / 2 - expectedButtonSize.height /2,
+      );
+
+    // enabled button
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Material(
+        child: new Center(
+          child: new MaterialButton(
+            child: const Text('Button'),
+            onPressed: () { /* to make sure the button is enabled */ },
+          ),
+        ),
+      ),
+    ));
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 1,
+            rect: expectedButtonSize,
+            transform: expectedButtonTransform,
+            label: 'Button',
+            actions: <SemanticsAction>[
+              SemanticsAction.tap,
+            ],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+            ],
+          ),
+        ],
+      ),
+    ));
+
+    // disabled button
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: const Material(
+        child: const Center(
+          child: const MaterialButton(
+            child: const Text('Button'),
+            onPressed: null, // button is disabled
+          ),
+        ),
+      ),
+    ));
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 1,
+            rect: expectedButtonSize,
+            transform: expectedButtonTransform,
+            label: 'Button',
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
+            ],
+          ),
+        ],
+      ),
+    ));
+
+
+    semantics.dispose();
   });
 
 }

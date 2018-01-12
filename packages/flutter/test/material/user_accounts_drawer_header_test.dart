@@ -40,7 +40,7 @@ Future<Null> pumpTestWidget(WidgetTester tester, {
                   child: const Text('A'),
                 ),
               ),
-              otherAccountsPictures: <Widget>[
+              otherAccountsPictures: const <Widget>[
                 const CircleAvatar(
                   child: const Text('B'),
                 ),

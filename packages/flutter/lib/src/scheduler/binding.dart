@@ -666,6 +666,8 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   /// This is used during application startup so that the first frame (which is
   /// likely to be quite expensive) gets a few extra milliseconds to run.
   ///
+  /// Locks events dispatching until the scheduled frame has completed.
+  ///
   /// If a frame has already been scheduled with [scheduleFrame] or
   /// [scheduleForcedFrame], this call may delay that frame.
   ///
@@ -677,8 +679,9 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
     if (_warmUpFrame || schedulerPhase != SchedulerPhase.idle)
       return;
 
-    final bool hadScheduledFrame = _hasScheduledFrame;
     _warmUpFrame = true;
+    Timeline.startSync('Warm-up frame');
+    final bool hadScheduledFrame = _hasScheduledFrame;
     // We use timers here to ensure that microtasks flush in between.
     Timer.run(() {
       assert(_warmUpFrame);
@@ -699,6 +702,13 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
       _warmUpFrame = false;
       if (hadScheduledFrame)
         scheduleFrame();
+    });
+
+    // Lock events so touch events etc don't insert themselves until the
+    // scheduled frame has finished.
+    lockEvents(() async {
+      await endOfFrame;
+      Timeline.finishSync();
     });
   }
 

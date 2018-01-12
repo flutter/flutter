@@ -654,6 +654,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           );
         }
       }
+      assert(!newChildren.any((SemanticsNode node) => node.isMergedIntoParent) || isPartOfNodeMerging);
 
       _debugPreviousSnapshot = new List<SemanticsNode>.from(newChildren);
 
@@ -677,7 +678,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     if (newChildren != null) {
       for (SemanticsNode child in newChildren) {
-        assert(!child.isInvisible, 'Child with id ${child.id} is invisible and should not be added to tree.');
+        assert(!child.isInvisible, '$child is invisible and should not be added as child of $this.');
         child._dead = false;
       }
     }
@@ -1072,7 +1073,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       hideOwner = inDirtyNodes;
     }
     properties.add(new DiagnosticsProperty<SemanticsOwner>('owner', owner, level: hideOwner ? DiagnosticLevel.hidden : DiagnosticLevel.info));
-    properties.add(new FlagProperty('isPartOfNodeMerging', value: isPartOfNodeMerging, ifTrue: 'leaf merge'));
+    properties.add(new FlagProperty('isMergedIntoParent', value: isMergedIntoParent, ifTrue: 'merged up ⬆️'));
+    properties.add(new FlagProperty('mergeAllDescendantsIntoThisNode', value: mergeAllDescendantsIntoThisNode, ifTrue: 'merge boundary ⛔️'));
     final Offset offset = transform != null ? MatrixUtils.getAsTranslation(transform) : null;
     if (offset != null) {
       properties.add(new DiagnosticsProperty<Rect>('rect', rect.shift(offset), showName: false));
@@ -1344,7 +1346,7 @@ class SemanticsConfiguration {
   bool get isSemanticBoundary => _isSemanticBoundary;
   bool _isSemanticBoundary = false;
   set isSemanticBoundary(bool value) {
-    assert(!isMergingDescendantsIntoOneNode || value);
+    assert(!isMergingSemanticsOfDescendants || value);
     _isSemanticBoundary = value;
   }
 
@@ -1379,20 +1381,6 @@ class SemanticsConfiguration {
   /// Paint order as established by [visitChildrenForSemantics] is used to
   /// determine if a node is previous to this one.
   bool isBlockingSemanticsOfPreviouslyPaintedNodes = false;
-
-  /// Whether the semantics information of all descendants should be merged
-  /// into the owning [RenderObject] semantics node.
-  ///
-  /// When this is set to true the [SemanticsNode] of the owning [RenderObject]
-  /// will not have any children.
-  ///
-  /// Setting this to true requires that [isSemanticBoundary] is also true.
-  bool get isMergingDescendantsIntoOneNode => _isMergingDescendantsIntoOneNode;
-  bool _isMergingDescendantsIntoOneNode = false;
-  set isMergingDescendantsIntoOneNode(bool value) {
-    assert(isSemanticBoundary);
-    _isMergingDescendantsIntoOneNode = value;
-  }
 
   // SEMANTIC ANNOTATIONS
   // These will end up on [SemanticNode]s generated from
@@ -1645,9 +1633,12 @@ class SemanticsConfiguration {
   /// If set to true, the descendants of the owning [RenderObject]'s
   /// [SemanticsNode] will merge their semantic information into the
   /// [SemanticsNode] representing the owning [RenderObject].
+  ///
+  /// Setting this to true requires that [isSemanticBoundary] is also true.
   bool get isMergingSemanticsOfDescendants => _isMergingSemanticsOfDescendants;
   bool _isMergingSemanticsOfDescendants = false;
   set isMergingSemanticsOfDescendants(bool value) {
+    assert(isSemanticBoundary);
     _isMergingSemanticsOfDescendants = value;
     _hasBeenAnnotated = true;
   }
@@ -1910,9 +1901,11 @@ class SemanticsConfiguration {
   /// Returns an exact copy of this configuration.
   SemanticsConfiguration copy() {
     return new SemanticsConfiguration()
-      ..isSemanticBoundary = isSemanticBoundary
+      .._isSemanticBoundary = _isSemanticBoundary
       ..explicitChildNodes = explicitChildNodes
+      ..isBlockingSemanticsOfPreviouslyPaintedNodes = isBlockingSemanticsOfPreviouslyPaintedNodes
       .._hasBeenAnnotated = _hasBeenAnnotated
+      .._isMergingSemanticsOfDescendants = _isMergingSemanticsOfDescendants
       .._textDirection = _textDirection
       .._label = _label
       .._increasedValue = _increasedValue
@@ -1920,6 +1913,7 @@ class SemanticsConfiguration {
       .._decreasedValue = _decreasedValue
       .._hint = _hint
       .._flags = _flags
+      .._tagsForChildren = _tagsForChildren
       .._actionsAsBits = _actionsAsBits
       .._actions.addAll(_actions);
   }

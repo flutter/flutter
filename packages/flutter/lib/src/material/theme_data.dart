@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'ink_splash.dart';
+import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'typography.dart';
 
 /// Describes the contrast needs of a color.
@@ -82,6 +84,7 @@ class ThemeData {
     Color dividerColor,
     Color highlightColor,
     Color splashColor,
+    InteractiveInkFeatureFactory splashFactory,
     Color selectedRowColor,
     Color unselectedWidgetColor,
     Color disabledColor,
@@ -118,6 +121,7 @@ class ThemeData {
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
+    splashFactory ??= InkSplash.splashFactory;
     selectedRowColor ??= Colors.grey[100];
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
     disabledColor ??= isDark ? Colors.white30 : Colors.black26;
@@ -156,6 +160,7 @@ class ThemeData {
       dividerColor: dividerColor,
       highlightColor: highlightColor,
       splashColor: splashColor,
+      splashFactory: splashFactory,
       selectedRowColor: selectedRowColor,
       unselectedWidgetColor: unselectedWidgetColor,
       disabledColor: disabledColor,
@@ -196,6 +201,7 @@ class ThemeData {
     @required this.dividerColor,
     @required this.highlightColor,
     @required this.splashColor,
+    @required this.splashFactory,
     @required this.selectedRowColor,
     @required this.unselectedWidgetColor,
     @required this.disabledColor,
@@ -226,6 +232,7 @@ class ThemeData {
        assert(dividerColor != null),
        assert(highlightColor != null),
        assert(splashColor != null),
+       assert(splashFactory != null),
        assert(selectedRowColor != null),
        assert(unselectedWidgetColor != null),
        assert(disabledColor != null),
@@ -317,6 +324,16 @@ class ThemeData {
   /// The color of ink splashes. See [InkWell].
   final Color splashColor;
 
+  /// Defines the appearance of ink splashes produces by [InkWell]
+  /// and [InkResponse].
+  ///
+  /// See also:
+  ///
+  ///  * [InkSplash.splashFactory], which defines the default splash.
+  ///  * [InkRipple.splashFactory], which defines a splash that spreads out
+  ///    more aggresively than the default.
+  final InteractiveInkFeatureFactory splashFactory;
+
   /// The color used to highlight selected rows.
   final Color selectedRowColor;
 
@@ -398,6 +415,7 @@ class ThemeData {
     Color dividerColor,
     Color highlightColor,
     Color splashColor,
+    InteractiveInkFeatureFactory splashFactory,
     Color selectedRowColor,
     Color unselectedWidgetColor,
     Color disabledColor,
@@ -430,6 +448,7 @@ class ThemeData {
       dividerColor: dividerColor ?? this.dividerColor,
       highlightColor: highlightColor ?? this.highlightColor,
       splashColor: splashColor ?? this.splashColor,
+      splashFactory: splashFactory ?? this.splashFactory,
       selectedRowColor: selectedRowColor ?? this.selectedRowColor,
       unselectedWidgetColor: unselectedWidgetColor ?? this.unselectedWidgetColor,
       disabledColor: disabledColor ?? this.disabledColor,
@@ -545,6 +564,7 @@ class ThemeData {
       dividerColor: Color.lerp(a.dividerColor, b.dividerColor, t),
       highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t),
       splashColor: Color.lerp(a.splashColor, b.splashColor, t),
+      splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
       selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t),
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t),
       disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t),
@@ -583,6 +603,7 @@ class ThemeData {
            (otherData.dividerColor == dividerColor) &&
            (otherData.highlightColor == highlightColor) &&
            (otherData.splashColor == splashColor) &&
+           (otherData.splashFactory == splashFactory) &&
            (otherData.selectedRowColor == selectedRowColor) &&
            (otherData.unselectedWidgetColor == unselectedWidgetColor) &&
            (otherData.disabledColor == disabledColor) &&
@@ -618,6 +639,7 @@ class ThemeData {
       dividerColor,
       highlightColor,
       splashColor,
+      splashFactory,
       selectedRowColor,
       unselectedWidgetColor,
       disabledColor,
@@ -627,8 +649,8 @@ class ThemeData {
       textSelectionHandleColor,
       backgroundColor,
       accentColor,
-      accentColorBrightness,
       hashValues( // Too many values.
+        accentColorBrightness,
         indicatorColor,
         dialogBackgroundColor,
         hintColor,

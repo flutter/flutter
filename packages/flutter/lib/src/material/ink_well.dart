@@ -12,9 +12,93 @@ import 'package:flutter/widgets.dart';
 import 'debug.dart';
 import 'feedback.dart';
 import 'ink_highlight.dart';
-import 'ink_splash.dart';
 import 'material.dart';
 import 'theme.dart';
+
+/// An ink feature that displays a [color] "splash" in response to a user
+/// gesture that can be confirmed or canceled.
+///
+/// Subclasses call [confirm] when an input gesture is recognized. For
+/// example a press event might trigger an ink feature that's confirmed
+/// when the corresponding up event is seen.
+///
+/// Subclasses call [cancel] when an input gesture is aborted before it
+/// is recognized. For example a press event might trigger an ink feature
+/// that's cancelled when the pointer is dragged out of the reference
+/// box.
+///
+/// The [InkWell] and [InkResponse] widgets generate instances of this
+/// class.
+abstract class InteractiveInkFeature extends InkFeature {
+  /// Creates an InteractiveInkFeature.
+  ///
+  /// The [controller] and [referenceBox] arguments must not be null.
+  InteractiveInkFeature({
+    @required MaterialInkController controller,
+    @required RenderBox referenceBox,
+    Color color,
+    VoidCallback onRemoved,
+  }) : assert(controller != null),
+       assert(referenceBox != null),
+       _color = color,
+       super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved);
+
+  /// Called when the user input that triggered this feature's appearance was confirmed.
+  ///
+  /// Typically causes the ink to propagate faster across the material. By default this
+  /// method does nothing.
+  void confirm() {
+  }
+
+  /// Called when the user input that triggered this feature's appearance was canceled.
+  ///
+  /// Typically causes the ink to gradually disappear. By default this method does
+  /// nothing.
+  void cancel() {
+  }
+
+  /// The ink's color.
+  Color get color => _color;
+  Color _color;
+  set color(Color value) {
+    if (value == _color)
+      return;
+    _color = value;
+    controller.markNeedsPaint();
+  }
+}
+
+/// An encapsulation of an [InteractiveInkFeature] constructor used by [InkWell]
+/// [InkResponse] and [ThemeData].
+///
+/// Interactive ink feature implementations should provide a static const
+/// `splashFactory` value that's an instance of this class. The `splashFactory`
+/// can be used to configure an [InkWell], [InkResponse] or [ThemeData].
+///
+/// See also:
+///
+///  * [InkSplash.splashFactory]
+///  * [InkRipple.splashFactory]
+abstract class InteractiveInkFeatureFactory {
+  /// Subclasses should provide a const constructor.
+  const InteractiveInkFeatureFactory();
+
+  /// The factory method.
+  ///
+  /// Subclasses should override this method to return a new instance of an
+  /// [InteractiveInkFeature].
+  InteractiveInkFeature create({
+    @required MaterialInkController controller,
+    @required RenderBox referenceBox,
+    @required Offset position,
+    @required Color color,
+    bool containedInkWell: false,
+    RectCallback rectCallback,
+    BorderRadius borderRadius,
+    double radius,
+    VoidCallback onRemoved,
+  });
+}
 
 /// An area of a [Material] that responds to touch. Has a configurable shape and
 /// can be configured to clip splashes that extend outside its bounds or not.
@@ -71,7 +155,16 @@ import 'theme.dart';
 /// ```dart
 /// assert(debugCheckHasMaterial(context));
 /// ```
-/// The parameter [enableFeedback] must not be null.
+///
+/// ## Troubleshooting
+///
+/// ### The ink splashes aren't visible!
+///
+/// If there is an opaque graphic, e.g. painted using a [Container], [Image], or
+/// [DecoratedBox], between the [Material] widget and the [InkResponse] widget,
+/// then the splash won't be visible because it will be under the opaque
+/// graphic. To avoid this problem, consider using an [Ink] widget to draw the
+/// opaque graphic itself on the [Material], under the ink splash.
 ///
 /// See also:
 ///
@@ -82,6 +175,9 @@ class InkResponse extends StatefulWidget {
   /// Creates an area of a [Material] that responds to touch.
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
+  ///
+  /// The [containedInkWell], [highlightShape], [enableFeedback], and
+  /// [excludeFromSemantics] arguments must not be null.
   const InkResponse({
     Key key,
     this.child,
@@ -92,12 +188,17 @@ class InkResponse extends StatefulWidget {
     this.containedInkWell: false,
     this.highlightShape: BoxShape.circle,
     this.radius,
-    this.borderRadius: BorderRadius.zero,
+    this.borderRadius,
     this.highlightColor,
     this.splashColor,
+    this.splashFactory,
     this.enableFeedback: true,
     this.excludeFromSemantics: false,
-  }) : assert(enableFeedback != null), super(key: key);
+  }) : assert(containedInkWell != null),
+       assert(highlightShape != null),
+       assert(enableFeedback != null),
+       assert(excludeFromSemantics != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -162,9 +263,12 @@ class InkResponse extends StatefulWidget {
   /// See also:
   ///
   ///  * [splashColor], the color of the splash.
+  ///  * [splashFactory], which defines the appearance of the splash.
   final double radius;
 
   /// The clipping radius of the containing rect.
+  ///
+  /// If this is null, it is interpreted as [BorderRadius.zero].
   final BorderRadius borderRadius;
 
   /// The highlight color of the ink response. If this property is null then the
@@ -174,6 +278,7 @@ class InkResponse extends StatefulWidget {
   ///
   ///  * [highlightShape], the shape of the highlight.
   ///  * [splashColor], the color of the splash.
+  ///  * [splashFactory], which defines the appearance of the splash.
   final Color highlightColor;
 
   /// The splash color of the ink response. If this property is null then the
@@ -181,9 +286,24 @@ class InkResponse extends StatefulWidget {
   ///
   /// See also:
   ///
+  ///  * [splashFactory], which defines the appearance of the splash.
   ///  * [radius], the (maximum) size of the ink splash.
   ///  * [highlightColor], the color of the highlight.
   final Color splashColor;
+
+  /// Defines the appearance of the splash.
+  ///
+  /// Defaults to the value of the theme's splash factory: [ThemeData.splashFactory].
+  ///
+  /// See also:
+  ///
+  ///  * [radius], the (maximum) size of the ink splash.
+  ///  * [splashColor], the color of the splash.
+  ///  * [highlightColor], the color of the highlight.
+  ///  * [InkSplash.splashFactory], which defines the default splash.
+  ///  * [InkRipple.splashFactory], which defines a splash that spreads out
+  ///    more aggresively than the default.
+  final InteractiveInkFeatureFactory splashFactory;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
   ///
@@ -255,8 +375,8 @@ class InkResponse extends StatefulWidget {
 }
 
 class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKeepAliveClientMixin {
-  Set<InkSplash> _splashes;
-  InkSplash _currentSplash;
+  Set<InteractiveInkFeature> _splashes;
+  InteractiveInkFeature _currentSplash;
   InkHighlight _lastHighlight;
 
   @override
@@ -295,30 +415,43 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     updateKeepAlive();
   }
 
-  void _handleTapDown(TapDownDetails details) {
+  InteractiveInkFeature _createInkFeature(TapDownDetails details) {
+    final MaterialInkController inkController = Material.of(context);
     final RenderBox referenceBox = context.findRenderObject();
-    final RectCallback rectCallback = widget.getRectCallback(referenceBox);
-    InkSplash splash;
-    splash = new InkSplash(
-      controller: Material.of(context),
+    final Offset position = referenceBox.globalToLocal(details.globalPosition);
+    final Color color = widget.splashColor ?? Theme.of(context).splashColor;
+    final RectCallback rectCallback = widget.containedInkWell ? widget.getRectCallback(referenceBox) : null;
+    final BorderRadius borderRadius = widget.borderRadius;
+
+    InteractiveInkFeature splash;
+    void onRemoved() {
+      if (_splashes != null) {
+        assert(_splashes.contains(splash));
+        _splashes.remove(splash);
+        if (_currentSplash == splash)
+          _currentSplash = null;
+        updateKeepAlive();
+      } // else we're probably in deactivate()
+    }
+
+    splash = (widget.splashFactory ?? Theme.of(context).splashFactory).create(
+      controller: inkController,
       referenceBox: referenceBox,
-      position: referenceBox.globalToLocal(details.globalPosition),
-      color: widget.splashColor ?? Theme.of(context).splashColor,
+      position: position,
+      color: color,
       containedInkWell: widget.containedInkWell,
-      rectCallback: widget.containedInkWell ? rectCallback : null,
+      rectCallback: rectCallback,
       radius: widget.radius,
-      borderRadius: widget.borderRadius ?? BorderRadius.zero,
-      onRemoved: () {
-        if (_splashes != null) {
-          assert(_splashes.contains(splash));
-          _splashes.remove(splash);
-          if (_currentSplash == splash)
-            _currentSplash = null;
-          updateKeepAlive();
-        } // else we're probably in deactivate()
-      }
+      borderRadius: borderRadius,
+      onRemoved: onRemoved,
     );
-    _splashes ??= new HashSet<InkSplash>();
+
+    return splash;
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    final InteractiveInkFeature splash = _createInkFeature(details);
+    _splashes ??= new HashSet<InteractiveInkFeature>();
     _splashes.add(splash);
     _currentSplash = splash;
     updateKeepAlive();
@@ -362,9 +495,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   @override
   void deactivate() {
     if (_splashes != null) {
-      final Set<InkSplash> splashes = _splashes;
+      final Set<InteractiveInkFeature> splashes = _splashes;
       _splashes = null;
-      for (InkSplash splash in splashes)
+      for (InteractiveInkFeature splash in splashes)
         splash.dispose();
       _currentSplash = null;
     }
@@ -417,6 +550,16 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// assert(debugCheckHasMaterial(context));
 /// ```
 ///
+/// ## Troubleshooting
+///
+/// ### The ink splashes aren't visible!
+///
+/// If there is an opaque graphic, e.g. painted using a [Container], [Image], or
+/// [DecoratedBox], between the [Material] widget and the [InkWell] widget, then
+/// the splash won't be visible because it will be under the opaque graphic. To
+/// avoid this problem, consider using an [Ink] widget to draw the opaque
+/// graphic itself on the [Material], under the ink splash.
+///
 /// See also:
 ///
 ///  * [GestureDetector], for listening for gestures without ink splashes.
@@ -427,6 +570,9 @@ class InkWell extends InkResponse {
   /// Creates an ink well.
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
+  ///
+  /// The [enableFeedback] and [excludeFromSemantics] arguments must not be
+  /// null.
   const InkWell({
     Key key,
     Widget child,
@@ -436,6 +582,8 @@ class InkWell extends InkResponse {
     ValueChanged<bool> onHighlightChanged,
     Color highlightColor,
     Color splashColor,
+    InteractiveInkFeatureFactory splashFactory,
+    double radius,
     BorderRadius borderRadius,
     bool enableFeedback: true,
     bool excludeFromSemantics: false,
@@ -450,6 +598,8 @@ class InkWell extends InkResponse {
     highlightShape: BoxShape.rectangle,
     highlightColor: highlightColor,
     splashColor: splashColor,
+    splashFactory: splashFactory,
+    radius: radius,
     borderRadius: borderRadius,
     enableFeedback: enableFeedback,
     excludeFromSemantics: excludeFromSemantics,

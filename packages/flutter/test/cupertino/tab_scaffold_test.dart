@@ -123,7 +123,7 @@ void main() {
 
 CupertinoTabBar _buildTabBar() {
   return new CupertinoTabBar(
-    items: <BottomNavigationBarItem>[
+    items: const <BottomNavigationBarItem>[
       const BottomNavigationBarItem(
         icon: const ImageIcon(const TestImageProvider(24, 24)),
         title: const Text('Tab 1'),

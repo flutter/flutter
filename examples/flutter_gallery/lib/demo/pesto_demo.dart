@@ -362,13 +362,13 @@ class _RecipePageState extends State<RecipePage> {
                     ],
                   ),
                 ],
-                flexibleSpace: new FlexibleSpaceBar(
-                  background: new DecoratedBox(
-                    decoration: new BoxDecoration(
-                      gradient: new LinearGradient(
+                flexibleSpace: const FlexibleSpaceBar(
+                  background: const DecoratedBox(
+                    decoration: const BoxDecoration(
+                      gradient: const LinearGradient(
                         begin: const Alignment(0.0, -1.0),
                         end: const Alignment(0.0, -0.2),
-                        colors: <Color>[const Color(0x60000000), const Color(0x00000000)],
+                        colors: const<Color>[const Color(0x60000000), const Color(0x00000000)],
                       ),
                     ),
                   ),
@@ -444,7 +444,7 @@ class RecipeSheet extends StatelessWidget {
         child: new Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
           child: new Table(
-            columnWidths: <int, TableColumnWidth>{
+            columnWidths: const <int, TableColumnWidth>{
               0: const FixedColumnWidth(64.0)
             },
             children: <TableRow>[

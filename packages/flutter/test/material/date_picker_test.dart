@@ -585,13 +585,21 @@ void _tests() {
             textDirection: TextDirection.ltr,
           ),
           new TestSemantics(
-            flags: <SemanticsFlag>[SemanticsFlag.isButton],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+            ],
             actions: <SemanticsAction>[SemanticsAction.tap],
             label: r'CANCEL',
             textDirection: TextDirection.ltr,
           ),
           new TestSemantics(
-            flags: <SemanticsFlag>[SemanticsFlag.isButton],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+            ],
             actions: <SemanticsAction>[SemanticsAction.tap],
             label: r'OK',
             textDirection: TextDirection.ltr,
