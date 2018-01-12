@@ -11,7 +11,6 @@
 #include <unordered_set>
 
 #include "dart-pkg/fuchsia/sdk_ext/fuchsia.h"
-#include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/content_handler/accessibility_bridge.h"
@@ -93,7 +92,6 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void InitRootBundle(std::vector<char> bundle);
   blink::UnzipperProvider GetUnzipperProviderForRootBundle();
   bool HandleAssetPlatformMessage(blink::PlatformMessage* message);
-  bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
   bool HandleTextInputPlatformMessage(blink::PlatformMessage* message);
   bool HandleFlutterPlatformMessage(blink::PlatformMessage* message);
 
@@ -111,9 +109,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   std::unique_ptr<app::ApplicationContext> context_;
   fidl::InterfaceRequest<app::ServiceProvider> outgoing_services_;
   std::vector<char> root_bundle_data_;
-  // TODO(zarah): Remove asset_store_ when flx is completely removed
   fxl::RefPtr<blink::ZipAssetStore> asset_store_;
-  fxl::RefPtr<blink::DirectoryAssetBundle> directory_asset_bundle_;
   void* dylib_handle_ = nullptr;
   std::unique_ptr<Rasterizer> rasterizer_;
   std::unique_ptr<blink::RuntimeController> runtime_;

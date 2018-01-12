@@ -32,11 +32,9 @@ ApplicationControllerImpl::ApplicationControllerImpl(
   }
 
   std::vector<char> bundle;
-  if (application->data) {
-    if (!fsl::VectorFromVmo(std::move(application->data), &bundle)) {
-      FXL_LOG(ERROR) << "Failed to receive bundle.";
-      return;
-    }
+  if (!fsl::VectorFromVmo(std::move(application->data), &bundle)) {
+    FXL_LOG(ERROR) << "Failed to receive bundle.";
+    return;
   }
 
   // TODO(jeffbrown): Decide what to do with command-line arguments and
