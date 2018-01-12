@@ -41,9 +41,11 @@ class TabsFabDemo extends StatefulWidget {
 
 class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
+  
+  FabPosition _fabPosition = FabPosition.endFloat;
   TabController _controller;
   _Page _selectedPage;
+  PersistentBottomSheetController bottomSheetController;
 
   @override
   void initState() {
@@ -66,7 +68,12 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   }
 
   void _showExplanatoryText() {
-    _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
+    if (bottomSheetController != null) {
+      setState(() {
+        _fabPosition = FabPosition.values[(FabPosition.values.indexOf(_fabPosition) + 1) % FabPosition.values.length];
+      });
+    }
+    bottomSheetController ??= _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
       return new Container(
         decoration: new BoxDecoration(
           border: new Border(top: new BorderSide(color: Theme.of(context).dividerColor))
@@ -76,6 +83,8 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
           child: new Text(_explanatoryText, style: Theme.of(context).textTheme.subhead)
         )
       );
+    })..closed.then((Object _) {
+      setState(() {bottomSheetController = null;});
     });
   }
 
@@ -119,6 +128,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
         child: _selectedPage.fabIcon,
         onPressed: _showExplanatoryText
       ),
+      fabPosition: _fabPosition,
       body: new TabBarView(
         controller: _controller,
         children: _allPages.map(buildTabView).toList()

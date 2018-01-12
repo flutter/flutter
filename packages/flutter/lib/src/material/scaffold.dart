@@ -189,7 +189,10 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     return oldDelegate.statusBarHeight != statusBarHeight
         || oldDelegate.bottomViewInset != bottomViewInset
         || oldDelegate.endPadding != endPadding
-        || oldDelegate.textDirection != textDirection;
+        || oldDelegate.textDirection != textDirection
+        || oldDelegate.fabMoveProgress != fabMoveProgress
+        || oldDelegate.previousFabPosition != previousFabPosition
+        || oldDelegate.currentFabPosition != currentFabPosition;
   }
 }
 
@@ -342,6 +345,7 @@ class Scaffold extends StatefulWidget {
     this.appBar,
     this.body,
     this.floatingActionButton,
+    this.fabPosition,
     this.persistentFooterButtons,
     this.drawer,
     this.endDrawer,
@@ -376,6 +380,8 @@ class Scaffold extends StatefulWidget {
   ///
   /// Typically a [FloatingActionButton].
   final Widget floatingActionButton;
+
+  final FabPosition fabPosition;
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
@@ -799,12 +805,33 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // FAB API
   AnimationController _fabMoveController;
-  FabPosition _previousFabPosition = FabPosition.centerFloat;
-  FabPosition _fabPosition = FabPosition.centerFloat;
-  void _moveFab(FabPosition newPosition) {
-    _fabMoveController ??= new AnimationController(vsync: this, );
+  FabPosition _previousFabPosition;
+  FabPosition _fabPosition;
+
+  void _moveFab(final FabPosition newPosition) {
+    void updatePosition() {
+      setState(() {
+        _previousFabPosition = _fabPosition;
+        _fabPosition = newPosition;
+        print(
+          'Moving fab from $_previousFabPosition to $_fabPosition'
+        );
+      });
+      _fabMoveController.forward(from: 0.0);
+    }
+
+    if (_fabMoveController.isAnimating) {
+      new Future<Null>.delayed(_fabMoveController.duration - _fabMoveController.lastElapsedDuration).then((_) {
+        updatePosition();
+      });
+    } else {
+      updatePosition();
+    }
   }
 
+  void _handleFabMotion(AnimationStatus status) {
+
+  }
 
   // iOS FEATURES - status bar tap, back gesture
 
@@ -826,6 +853,27 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
 
   // INTERNALS
+
+  @override
+  void initState() {
+    super.initState();
+    _fabPosition = widget.fabPosition ?? FabPosition.endFloat;
+    _previousFabPosition = _fabPosition;
+    _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 0.0, duration: const Duration(milliseconds: 500));
+    _fabMoveController.addStatusListener(_handleFabMotion);
+    _fabMoveController.addListener(() {
+      print('Fab transition value: ${_fabMoveController.value}');
+    });
+  }
+
+  @override
+  void didUpdateWidget(Scaffold oldWidget) {
+    if (widget.fabPosition != oldWidget.fabPosition) {
+      _moveFab(widget.fabPosition);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
 
   @override
   void dispose() {
@@ -1075,18 +1123,20 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         controller: _primaryScrollController,
         child: new Material(
           color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
-          child: new CustomMultiChildLayout(
-            children: children,
-            delegate: new _ScaffoldLayout(
-              statusBarHeight: mediaQuery.padding.top,
-              bottomViewInset: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
-              endPadding: endPadding,
-              textDirection: textDirection,
-              previousFabPosition: _previousFabPosition,
-              currentFabPosition: _fabPosition,
-              fabMoveProgress: _fabMoveController != null ? new CurveTween(curve: Curves.easeInOut).evaluate(_fabMoveController) : 1.0,
-            ),
-          ),
+          child: new AnimatedBuilder(animation: _fabMoveController, builder: (context, _) {
+            return new CustomMultiChildLayout(
+              children: children,
+              delegate: new _ScaffoldLayout(
+                statusBarHeight: mediaQuery.padding.top,
+                bottomViewInset: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
+                endPadding: endPadding,
+                textDirection: textDirection,
+                previousFabPosition: _previousFabPosition,
+                currentFabPosition: _fabPosition,
+                fabMoveProgress: new CurveTween(curve: Curves.ease).evaluate(_fabMoveController),
+              ),
+            );
+          }),
         ),
       ),
     );
