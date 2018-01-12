@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as p;
 
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -520,7 +519,7 @@ String _flattenNameNoSubdirs(String fileName) {
 String _flattenNameSubdirs(Uri url) {
   final List<String> pieces = <String>[url.host]..addAll(url.pathSegments);
   final List<String> convertedPieces = pieces.map(_flattenNameNoSubdirs);
-  return p.joinAll(convertedPieces);
+  return fs.path.joinAll(convertedPieces);
 }
 
 /// Download a file from the given [url] and write it to [location].
