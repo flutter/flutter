@@ -68,7 +68,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         IS_TEXT_FIELD(1 << 4),
         IS_FOCUSED(1 << 5),
         HAS_ENABLED_STATE(1 << 6),
-        IS_ENABLED(1 << 7);
+        IS_ENABLED(1 << 7),
+        IS_IN_MUTUALLY_EXCLUSIVE_GROUP(1 << 8);
 
         Flag(int value) {
             this.value = value;
@@ -198,8 +199,16 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             }
         }
 
-        result.setCheckable(object.hasFlag(Flag.HAS_CHECKED_STATE));
-        result.setChecked(object.hasFlag(Flag.IS_CHECKED));
+        boolean hasCheckedState = object.hasFlag(Flag.HAS_CHECKED_STATE);
+        result.setCheckable(hasCheckedState);
+        if (hasCheckedState) {
+            result.setChecked(object.hasFlag(Flag.IS_CHECKED));
+            if (object.hasFlag(Flag.IS_IN_MUTUALLY_EXCLUSIVE_GROUP))
+                result.setClassName("android.widget.RadioButton");
+            else
+                result.setClassName("android.widget.CheckBox");
+        }
+
         result.setSelected(object.hasFlag(Flag.IS_SELECTED));
         result.setText(object.getValueLabelHint());
 

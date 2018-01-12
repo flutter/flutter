@@ -147,6 +147,7 @@ class SemanticsFlag {
   static const int _kIsFocusedIndex = 1 << 5;
   static const int _kHasEnabledStateIndex = 1 << 6;
   static const int _kIsEnabledIndex = 1 << 7;
+  static const int _kIsInMutuallyExclusiveGroupIndex = 1 << 8;
 
   const SemanticsFlag._(this.index);
 
@@ -210,6 +211,12 @@ class SemanticsFlag {
   /// marked as disabled.
   static const SemanticsFlag isEnabled = const SemanticsFlag._(_kIsEnabledIndex);
 
+  /// Whether a semantic node is in a mutually exclusive group.
+  ///
+  /// For example, a radio button is in a mutually exclusive group because
+  /// only one radio button in that group can be marked as [isChecked].
+  static const SemanticsFlag isInMutuallyExclusiveGroup = const SemanticsFlag._(_kIsInMutuallyExclusiveGroupIndex);
+
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
@@ -222,6 +229,7 @@ class SemanticsFlag {
     _kIsFocusedIndex: isFocused,
     _kHasEnabledStateIndex: hasEnabledState,
     _kIsEnabledIndex: isEnabled,
+    _kIsInMutuallyExclusiveGroupIndex: isInMutuallyExclusiveGroup,
   };
 
   @override
@@ -243,6 +251,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.hasEnabledState';
       case _kIsEnabledIndex:
         return 'SemanticsFlag.isEnabled';
+      case _kIsInMutuallyExclusiveGroupIndex:
+        return 'SemanticsFlag.isInMutuallyExclusiveGroup';
     }
     return null;
   }
