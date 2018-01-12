@@ -801,66 +801,6 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 }
 
-/// A composited layer that uses a physical model to produce lighting effects.
-///
-/// For example, the layer casts a shadow according to its geometry and the
-/// relative position of lights and other physically modelled objects in the
-/// scene.
-///
-/// This class class allows layers of arbitrary shapes; prefer using
-/// [PhysicalModelLayer] for cases where the shape can be expressed as a rounded
-/// rectangle (including ovals) as it is better optimized.
-class PhysicalShapeLayer extends ContainerLayer {
-  /// Creates a composited layer that uses a physical model to produce
-  /// lighting effects.
-  ///
-  /// The [clipPath], [elevation], and [color] arguments must not be null.
-  PhysicalShapeLayer({
-    @required this.clipPath,
-    @required this.elevation,
-    @required this.color,
-  }) : assert(clipPath != null),
-       assert(elevation != null),
-       assert(color != null);
-
-  /// The path to clip in the parent's coordinate system.
-  ///
-  /// The scene must be explicitly recomposited after this property is changed
-  /// (as described at [Layer]).
-  Path clipPath;
-
-  /// The z-coordinate at which to place this physical object.
-  ///
-  /// The scene must be explicitly recomposited after this property is changed
-  /// (as described at [Layer]).
-  double elevation;
-
-  /// The background color.
-  ///
-  /// The scene must be explicitly recomposited after this property is changed
-  /// (as described at [Layer]).
-  Color color;
-
-  @override
-  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushPhysicalShape(
-      path: clipPath.shift(layerOffset),
-      elevation: elevation,
-      color: color,
-    );
-    addChildrenToScene(builder, layerOffset);
-    builder.pop();
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Path>('clipPath', clipPath));
-    description.add(new DoubleProperty('elevation', elevation));
-    description.add(new DiagnosticsProperty<Color>('color', color));
-  }
-}
-
 /// An object that a [LeaderLayer] can register with.
 ///
 /// An instance of this class should be provided as the [LeaderLayer.link] and

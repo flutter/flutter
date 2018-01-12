@@ -980,8 +980,9 @@ class ShapeBorderClipper extends CustomClipper<Path> {
 
   /// Returns the outer path of [shapeBorder] as the clip.
   @override
-  Path getClip(Size size)
-    => shapeBorder.getOuterPath(Offset.zero & size, textDirection: textDirection);
+  Path getClip(Size size) {
+    return shapeBorder.getOuterPath(Offset.zero & size, textDirection: textDirection);
+  }
 
   @override
   bool shouldReclip(covariant ShapeBorderClipper oldClipper) {
@@ -1599,12 +1600,12 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
       final Rect offsetBounds = offset & size;
       final Path offsetPath = _clip.shift(offset);
       if (needsCompositing) {
-        final PhysicalShapeLayer physicalShape = new PhysicalShapeLayer(
+        final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
           clipPath: offsetPath,
           elevation: elevation,
           color: color,
         );
-        context.pushLayer(physicalShape, super.paint, offset, childPaintBounds: offsetBounds);
+        context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
       } else {
         final Canvas canvas = context.canvas;
         if (elevation != 0.0) {

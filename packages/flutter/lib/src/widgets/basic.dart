@@ -755,7 +755,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   /// The background color.
   final Color color;
 
-  /// The shadow color.
+  /// When elevation is non zero the color to use for the shadow color.
   final Color shadowColor;
 
   @override
