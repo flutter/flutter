@@ -118,7 +118,7 @@ class ImageConfiguration {
     if (devicePixelRatio != null) {
       if (hasArguments)
         result.write(', ');
-      result.write('devicePixelRatio: $devicePixelRatio');
+      result.write('devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}');
       hasArguments = true;
     }
     if (locale != null) {
