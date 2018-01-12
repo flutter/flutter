@@ -413,7 +413,11 @@ class IOSSimulator extends Device {
   }
 
   Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) =>
-      flx.build(precompiledSnapshot: true, previewDart2: buildInfo.previewDart2, strongMode: buildInfo.strongMode);
+      // When running in previewDart2 mode, we still need to run compiler to
+      // produce kernel file for the application.
+      flx.build(precompiledSnapshot: !buildInfo.previewDart2,
+          previewDart2: buildInfo.previewDart2,
+          strongMode: buildInfo.strongMode);
 
   @override
   Future<bool> stopApp(ApplicationPackage app) async {
