@@ -28,8 +28,6 @@ source_set("ui") {
     "painting/image_filter.h",
     "painting/image_shader.cc",
     "painting/image_shader.h",
-    "painting/mask_filter.cc",
-    "painting/mask_filter.h",
     "painting/matrix.cc",
     "painting/matrix.h",
     "painting/paint.cc",
