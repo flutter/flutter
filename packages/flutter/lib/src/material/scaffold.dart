@@ -36,18 +36,29 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
+/// The docking positions that the [FloatingActionButton] can occupy in a [Scaffold].
+enum FabPosition {centerFloat, endFloat}
+
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
     @required this.statusBarHeight,
     @required this.bottomViewInset,
-    @required this.endPadding, // for floating action button
     @required this.textDirection,
-  });
+    // for floating action button
+    @required this.endPadding, 
+    @required this.previousFabPosition,
+    @required this.currentFabPosition,
+    @required this.fabMoveProgress,
+  }) : assert(previousFabPosition != null), assert(currentFabPosition != null);
 
   final double statusBarHeight;
   final double bottomViewInset;
   final double endPadding;
   final TextDirection textDirection;
+
+  final FabPosition previousFabPosition;
+  final FabPosition currentFabPosition;
+  final double fabMoveProgress;
 
   @override
   void performLayout(Size size) {
@@ -124,22 +135,37 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     if (hasChild(_ScaffoldSlot.floatingActionButton)) {
       final Size fabSize = layoutChild(_ScaffoldSlot.floatingActionButton, looseConstraints);
-      double fabX;
-      assert(textDirection != null);
-      switch (textDirection) {
-        case TextDirection.rtl:
-          fabX = _kFloatingActionButtonMargin + endPadding;
-          break;
-        case TextDirection.ltr:
-          fabX = size.width - fabSize.width - _kFloatingActionButtonMargin - endPadding;
-          break;
+      Offset _getOffsetForFabPosition(FabPosition position) {
+        double fabX;
+        double fabY;
+        switch (position) {
+          case FabPosition.centerFloat:
+            fabX = (size.width - fabSize.width) / 2;
+            break;
+          case FabPosition.endFloat:
+            assert(textDirection != null);
+            switch (textDirection) {
+              case TextDirection.rtl:
+                fabX = _kFloatingActionButtonMargin + endPadding;
+                break;
+              case TextDirection.ltr:
+                fabX = size.width - fabSize.width - _kFloatingActionButtonMargin - endPadding;
+              break;
+            }
+            break;
+          default: break;
+        }
+        fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
+        if (snackBarSize.height > 0.0)
+          fabY = math.min(fabY, contentBottom - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
+        if (bottomSheetSize.height > 0.0)
+          fabY = math.min(fabY, contentBottom - bottomSheetSize.height - fabSize.height / 2.0);
+        return new Offset(fabX, fabY);
       }
-      double fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
-      if (snackBarSize.height > 0.0)
-        fabY = math.min(fabY, contentBottom - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
-      if (bottomSheetSize.height > 0.0)
-        fabY = math.min(fabY, contentBottom - bottomSheetSize.height - fabSize.height / 2.0);
-      positionChild(_ScaffoldSlot.floatingActionButton, new Offset(fabX, fabY));
+      final Offset currentFabOffset = _getOffsetForFabPosition(currentFabPosition);
+      final Offset previousFabOffset = _getOffsetForFabPosition(previousFabPosition);
+      final Offset fabOffset = Offset.lerp(previousFabOffset, currentFabOffset, fabMoveProgress);
+      positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
     }
 
     if (hasChild(_ScaffoldSlot.statusBar)) {
@@ -771,6 +797,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     return _currentBottomSheet;
   }
 
+  // FAB API
+  AnimationController _fabMoveController;
+  FabPosition _previousFabPosition = FabPosition.centerFloat;
+  FabPosition _fabPosition = FabPosition.centerFloat;
+  void _moveFab(FabPosition newPosition) {
+    _fabMoveController ??= new AnimationController(vsync: this, );
+  }
+
 
   // iOS FEATURES - status bar tap, back gesture
 
@@ -803,6 +837,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       bottomSheet.animationController.dispose();
     if (_currentBottomSheet != null)
       _currentBottomSheet._widget.animationController.dispose();
+    _fabMoveController?.dispose();
+    _fabMoveController = null;
     super.dispose();
   }
 
@@ -1046,6 +1082,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
               bottomViewInset: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
               endPadding: endPadding,
               textDirection: textDirection,
+              previousFabPosition: _previousFabPosition,
+              currentFabPosition: _fabPosition,
+              fabMoveProgress: _fabMoveController != null ? new CurveTween(curve: Curves.easeInOut).evaluate(_fabMoveController) : 1.0,
             ),
           ),
         ),
