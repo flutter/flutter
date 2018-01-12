@@ -755,20 +755,20 @@ class PhysicalModelLayer extends ContainerLayer {
   /// Creates a composited layer that uses a physical model to producing
   /// lighting effects.
   ///
-  /// The [clipRRect], [elevation], and [color] arguments must not be null.
+  /// The [clipPath], [elevation], and [color] arguments must not be null.
   PhysicalModelLayer({
-    @required this.clipRRect,
+    @required this.clipPath,
     @required this.elevation,
     @required this.color,
-  }) : assert(clipRRect != null),
+  }) : assert(clipPath != null),
        assert(elevation != null),
        assert(color != null);
 
-  /// The rounded-rect to clip in the parent's coordinate system.
+  /// The path to clip in the parent's coordinate system.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  RRect clipRRect;
+  Path clipPath;
 
   /// The z-coordinate at which to place this physical object.
   ///
@@ -784,8 +784,8 @@ class PhysicalModelLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushPhysicalModel(
-      rrect: clipRRect.shift(layerOffset),
+    builder.pushPhysicalShape(
+      path: clipPath.shift(layerOffset),
       elevation: elevation,
       color: color,
     );
@@ -796,7 +796,6 @@ class PhysicalModelLayer extends ContainerLayer {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<RRect>('clipRRect', clipRRect));
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
   }
