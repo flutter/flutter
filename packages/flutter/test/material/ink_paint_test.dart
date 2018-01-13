@@ -140,7 +140,8 @@ void main() {
     // At this point the splash radius has expanded to its limit: 5 past the
     // ink well's radius parameter. The splash center has moved to its final
     // location at the inkwell's center and the fade-out is about to start.
-    await tester.pump(const Duration(milliseconds: 225));
+    // The fade-out begins at 225ms = 50ms + 25ms + 150ms.
+    await tester.pump(const Duration(milliseconds: 150));
     expect(box, paints..something((Symbol method, List<dynamic> arguments) {
       if (method != #drawCircle)
         return false;
