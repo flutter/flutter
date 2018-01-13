@@ -12,11 +12,15 @@ import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<Null> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  final Directory iosDirectory = dir(
-    '${flutterDirectory.path}/examples/flutter_view/ios',
-  );
-  await inDirectory(iosDirectory, () async {
-    await exec('pod', <String>['install']);
+  await task(() async {
+    final Directory iosDirectory = dir(
+      '${flutterDirectory.path}/examples/flutter_view/ios',
+    );
+    await inDirectory(iosDirectory, () async {
+      await exec('pod', <String>['install']);
+    });
+
+    final TaskFunction taskFunction = createFlutterViewStartupTest();
+    return await taskFunction();
   });
-  await task(createFlutterViewStartupTest());
 }
