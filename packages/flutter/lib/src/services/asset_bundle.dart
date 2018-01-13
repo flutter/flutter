@@ -179,10 +179,10 @@ abstract class CachingAssetBundle extends AssetBundle {
     assert(parser != null);
     if (_structuredDataCache.containsKey(key))
       return _structuredDataCache[key];
-    Completer<dynamic> completer;
-    Future<dynamic> result;
+    Completer<T> completer;
+    Future<T> result;
     loadString(key, cache: false).then<T>(parser).then<Null>((T value) {
-      result = new SynchronousFuture<dynamic>(value);
+      result = new SynchronousFuture<T>(value);
       _structuredDataCache[key] = result;
       if (completer != null) {
         // We already returned from the loadStructuredData function, which means
@@ -198,7 +198,7 @@ abstract class CachingAssetBundle extends AssetBundle {
     }
     // The code above hasn't yet run its "then" handler yet. Let's prepare a
     // completer for it to use when it does run.
-    completer = new Completer<dynamic>();
+    completer = new Completer<T>();
     _structuredDataCache[key] = completer.future;
     return completer.future;
   }
