@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   file: 2.3.5
-  json_rpc_2: 2.0.5
+  json_rpc_2: 2.0.6
   meta: 1.1.1
   path: 1.5.1
   web_socket_channel: 1.0.6
