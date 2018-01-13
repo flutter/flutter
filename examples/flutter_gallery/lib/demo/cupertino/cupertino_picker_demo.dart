@@ -42,27 +42,30 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                     context: context,
                     builder: (BuildContext context) {
                       return new SizedBox(
-                        height: 240.0,
+                        height: 216.0,
                         child: new DefaultTextStyle(
                           style: const TextStyle(
                             color: CupertinoColors.black,
                             fontSize: 22.0,
                           ),
-                          child: new CupertinoPicker(
-                            scrollController: scrollController,
-                            itemExtent: 50.0,
-                            diameterRatio: 1.5,
-                            background: CupertinoColors.white,
-                            onSelectedItemChanged: (int index) {
-                              setState(() {
-                                _selectedItemIndex = index;
-                              });
-                            },
-                            children: new List<Widget>.generate(coolColorNames.length, (int index) {
-                              return new Center(child:
-                                new Text(coolColorNames[index]),
-                              );
-                            }),
+                          child: new GestureDetector(
+                            onTap: () {},
+                            child: new CupertinoPicker(
+                              scrollController: scrollController,
+                              itemExtent: 32.0,
+                              diameterRatio: 1.1,
+                              background: CupertinoColors.white,
+                              onSelectedItemChanged: (int index) {
+                                setState(() {
+                                  _selectedItemIndex = index;
+                                });
+                              },
+                              children: new List<Widget>.generate(coolColorNames.length, (int index) {
+                                return new Center(child:
+                                  new Text(coolColorNames[index]),
+                                );
+                              }),
+                            ),
                           ),
                         ),
                       );

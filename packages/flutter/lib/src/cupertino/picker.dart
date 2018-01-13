@@ -6,7 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-const Color _highlighterBorder = const Color(0xFF7F7F7F);
+const Color _kHighlighterBorder = const Color(0xFF7F7F7F);
+const double _kDefaultDiameterRatio = 1.2;
 
 class CupertinoPicker extends StatefulWidget {
   const CupertinoPicker({
@@ -52,7 +53,7 @@ class CupertinoPickerState extends State<CupertinoPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final Color foreground = widget.background.withAlpha(100);
+    final Color foreground = widget.background.withAlpha(180);
     return new DecoratedBox(
       decoration: new BoxDecoration(
         color: widget.background,
@@ -107,8 +108,8 @@ class CupertinoPickerState extends State<CupertinoPicker> {
                 new Container(
                   decoration: new BoxDecoration(
                     border: new Border(
-                      top: const BorderSide(width: 0.0, color: _highlighterBorder),
-                      bottom: const BorderSide(width: 0.0, color: _highlighterBorder),
+                      top: const BorderSide(width: 0.0, color: _kHighlighterBorder),
+                      bottom: const BorderSide(width: 0.0, color: _kHighlighterBorder),
                     )
                   ),
                   constraints: new BoxConstraints.expand(height: widget.itemExtent),

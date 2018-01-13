@@ -270,11 +270,6 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
       return super.createBallisticSimulation(metrics, velocity);
     }
 
-    if (velocity.abs() < tolerance.velocity) {
-      print('velocity $velocity below tolerance ${tolerance.velocity}');
-      return null;
-    }
-
     // From the natural final position, find the nearest item it should have
     // settled to.
     final int settlingItemIndex = _getItemFromOffset(
@@ -284,30 +279,34 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
       maxScrollExtent: metrics.maxScrollExtent,
     );
 
-    print('settling at $settlingItemIndex');
+    final double settlingPixels = settlingItemIndex * metrics.itemExtent;
+
+    // If there's no velocity and we're already at where we intend to land,
+    // do nothing.
+    if (velocity.abs() < tolerance.velocity
+        && (settlingPixels - metrics.pixels).abs() < tolerance.distance) {
+      return null;
+    }
 
     // If we're going to end back at the same item because initial velocity
     // is too low, use a spring simulation to get back.
     if (settlingItemIndex == metrics.itemIndex) {
-      print('making a sprint');
       return new SpringSimulation(
         spring,
         metrics.pixels,
-        settlingItemIndex * metrics.itemExtent,
+        settlingPixels,
         velocity,
         tolerance: tolerance,
       );
     }
 
-    print('making friction with start ${metrics.pixels} end ${settlingItemIndex * metrics.itemExtent} velocity $velocity to ${tolerance.velocity}');
-
     // Create a new friction simulation except the drag will be tweaked to land
     // exactly on the item closest to the natural stopping point.
     return new FrictionSimulation.through(
       metrics.pixels,
-      settlingItemIndex * metrics.itemExtent,
+      settlingPixels,
       velocity,
-      tolerance.velocity,
+      tolerance.velocity * velocity.sign,
     );
   }
 }
