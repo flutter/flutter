@@ -34,23 +34,23 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         child: new SafeArea(
           top: false,
           bottom: false,
-            child: new DefaultTextStyle(
-              style: const TextStyle(
-                letterSpacing: -0.24,
-                fontSize: 17.0,
-                color: CupertinoColors.black,
-              ),
-              child: new Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  const Text('Favorite Color'),
-                  new Text(
-                    coolColorNames[_selectedItemIndex],
-                    style: const TextStyle(color: CupertinoColors.inactiveGray),
-                  ),
-                ],
-              ),
+          child: new DefaultTextStyle(
+            style: const TextStyle(
+              letterSpacing: -0.24,
+              fontSize: 17.0,
+              color: CupertinoColors.black,
             ),
+            child: new Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                const Text('Favorite Color'),
+                new Text(
+                  coolColorNames[_selectedItemIndex],
+                  style: const TextStyle(color: CupertinoColors.inactiveGray),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -68,6 +68,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           fontSize: 22.0,
         ),
         child: new GestureDetector(
+          // Blocks taps from propagating to the modal sheet and popping.
           onTap: () {},
           child: new CupertinoPicker(
             scrollController: scrollController,

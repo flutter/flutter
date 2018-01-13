@@ -45,7 +45,7 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// For more details, see [ListWheelScrollView.diameterRatio].
   ///
-  /// Must not be null and defaults to 1.1 to visually mimic iOS.
+  /// Must not be null and defaults to `1.1` to visually mimic iOS.
   final double diameterRatio;
 
   /// Background color behind the children.
@@ -61,15 +61,16 @@ class CupertinoPicker extends StatefulWidget {
   /// The uniform height of all children.
   ///
   /// All children will be given the [BoxConstraints] to match this exact
-  /// height. Must be positive.
+  /// height. Must not be null and must be positive.
   final double itemExtent;
 
-  /// An option callback when the current centered item changes.
+  /// An option callback when the currently centered item changes.
   ///
-  /// Value changes when the item closest to the center changes. This can be
-  /// called during scrolls and during ballistic flings. To get the value only
-  /// when the scrolling settles, use a [NotificationListener], listen for
-  /// [ScrollEndNotification] and read its [FixedExtentMetrics].
+  /// Value changes when the item closest to the center changes.
+  ///
+  /// This can be called during scrolls and during ballistic flings. To get the
+  /// value only when the scrolling settles, use a [NotificationListener],
+  /// listen for [ScrollEndNotification] and read its [FixedExtentMetrics].
   final ValueChanged<int> onSelectedItemChanged;
 
   /// [Widget]s in the picker's scroll wheel.
