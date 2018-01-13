@@ -486,7 +486,7 @@ void main() {
 
   group('scroll controller', () {
     testWidgets('initialItem', (WidgetTester tester) async {
-      final ListWheelScrollController controller = new ListWheelScrollController(initialItem: 10);
+      final FixedExtentScrollController controller = new FixedExtentScrollController(initialItem: 10);
       final List<int> paintedChildren = <int>[];
 
       await tester.pumpWidget(
@@ -512,7 +512,7 @@ void main() {
     });
 
     testWidgets('controller jump', (WidgetTester tester) async {
-      final ListWheelScrollController controller = new ListWheelScrollController(initialItem: 10);
+      final FixedExtentScrollController controller = new FixedExtentScrollController(initialItem: 10);
       final List<int> paintedChildren = <int>[];
 
       await tester.pumpWidget(
@@ -545,7 +545,7 @@ void main() {
 
     testWidgets('onSelectedItemChanged and controller are in sync', (WidgetTester tester) async {
       final List<int> selectedItems = <int>[];
-      final ListWheelScrollController controller = new ListWheelScrollController(initialItem: 10);
+      final FixedExtentScrollController controller = new FixedExtentScrollController(initialItem: 10);
 
       await tester.pumpWidget(
         new Directionality(
@@ -595,8 +595,8 @@ void main() {
       await tester.drag(find.byType(ListWheelScrollView), const Offset(0.0, -500.0));
       await tester.pump();
 
-      final ListWheelScrollController newController =
-          new ListWheelScrollController(initialItem: 30);
+      final FixedExtentScrollController newController =
+          new FixedExtentScrollController(initialItem: 30);
 
       await tester.pumpWidget(
         new Directionality(
@@ -640,7 +640,7 @@ void main() {
 
   group('physics', () {
     testWidgets('fling velocities too low snaps back to the same item', (WidgetTester tester) async {
-      final ListWheelScrollController controller = new ListWheelScrollController(initialItem: 40);
+      final FixedExtentScrollController controller = new FixedExtentScrollController(initialItem: 40);
       final List<double> scrolledPositions = <double>[];
 
       await tester.pumpWidget(
@@ -689,7 +689,7 @@ void main() {
     });
 
     testWidgets('high fling velocities lands exactly on items', (WidgetTester tester) async {
-      final ListWheelScrollController controller = new ListWheelScrollController(initialItem: 40);
+      final FixedExtentScrollController controller = new FixedExtentScrollController(initialItem: 40);
       final List<double> scrolledPositions = <double>[];
 
       await tester.pumpWidget(

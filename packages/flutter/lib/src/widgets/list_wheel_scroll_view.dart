@@ -21,7 +21,7 @@ import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 import 'scrollable.dart';
 
-/// A controller for [ListWheelScrollView].
+/// A controller for scroll views whose items have the same size.
 ///
 /// Similar to a standard [ScrollController] but with the added convenience
 /// mechanisms to read and go to item indices rather than a raw pixel scroll
@@ -29,48 +29,49 @@ import 'scrollable.dart';
 ///
 /// See also:
 ///
-///  * [ListWheelScrollView], which is the widget this object controls.
+///  * [ListWheelScrollView], a scrollable view widget with fixed size items
+///    that this widget controls.
 ///  * [FixedExtentMetrics], the `metrics` property exposed by
 ///    [ScrollNotification] from [ListWheelScrollView] which can be used
 ///    to listen to the current item index on a push basis rather than polling
-///    the [ListWheelScrollController].
-class ListWheelScrollController extends ScrollController {
-  /// Creates a [ListWheelScrollController].
-  ListWheelScrollController({
+///    the [FixedExtentScrollController].
+class FixedExtentScrollController extends ScrollController {
+  /// Creates a [FixedExtentScrollController].
+  FixedExtentScrollController({
     this.initialItem: 0,
   }) : assert(initialItem != null);
 
-  /// The page to show when first creating the [ListWheelScrollView].
+  /// The page to show when first creating the scroll view.
   ///
   /// Defaults to 0 and must not be null.
   final int initialItem;
 
   /// The currently selected item index that's closest to the center of the viewport.
   ///
-  /// There are circumstances that this [ListWheelScrollController] can't know
+  /// There are circumstances that this [FixedExtentScrollController] can't know
   /// the current item. Reading [selectedItem] will throw an [AssertionError] in
   /// the following cases:
   ///
-  /// 1. No [ListWheelScrollView] is currently using this [ListWheelScrollController].
-  /// 2. More than one [ListWheelScrollView] using the same [ListWheelScrollController].
+  /// 1. No scroll view is currently using this [FixedExtentScrollController].
+  /// 2. More than one scroll views using the same [FixedExtentScrollController].
   ///
-  /// The [hasClients] property can be used to check if a [ListWheelScrollView] is
+  /// The [hasClients] property can be used to check if a scroll view is
   /// attached prior to accessing [selectedItem].
   int get selectedItem {
     assert(
       positions.isNotEmpty,
-      'ListWheelScrollController.selectedItem cannot be accessed before a '
-      'ListWheelScrollView is built with it.',
+      'FixedExtentScrollController.selectedItem cannot be accessed before a '
+      'scroll view is built with it.',
     );
     assert(
       positions.length == 1,
-      'Multiple ListWheelScrollViews cannot be attached to the same ListWheelScrollController.',
+      'Multiple scroll views cannot be attached to the same FixedExtentScrollController.',
     );
     final _FixedExtentScrollPosition position = this.position;
     return position.itemIndex;
   }
 
-  /// Animates the controlled [ListWheelScrollView] to the given item index.
+  /// Animates the controlled scroll view to the given item index.
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
@@ -88,7 +89,7 @@ class ListWheelScrollController extends ScrollController {
     );
   }
 
-  /// Changes which item index is centered in the controlled [ListWheelScrollView].
+  /// Changes which item index is centered in the controlled scroll view.
   ///
   /// Jumps the item index position from its current value to the given value,
   /// without animation, and without checking if the new value is in range.
@@ -111,7 +112,7 @@ class ListWheelScrollController extends ScrollController {
 /// Metrics for a [ScrollPosition] to a scroll view with fixed item sizes.
 ///
 /// The metrics are available on [ScrollNotification]s generated from a scroll
-/// views such as [ListWheelScrollView]s with a [ListWheelScrollController] and
+/// views such as [ListWheelScrollView]s with a [FixedExtentScrollController] and
 /// exposes the current [itemIndex] and the scroll view's [itemExtent].
 class FixedExtentMetrics extends FixedScrollMetrics {
   /// Creates page metrics that add the given information to the `parent`
@@ -154,7 +155,7 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext {
     String debugLabel,
   }) : assert(
          context is _FixedExtentScrollableState,
-         'ListWheelScrollController can only be used with ListWheelScrollViews'
+         'FixedExtentScrollController can only be used with ListWheelScrollViews'
        ),
        super(
          physics: physics,
@@ -188,7 +189,7 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext {
 }
 
 /// A [Scrollable] which must be given its viewport children's item extent
-/// size so it can pass it on ultimately to the [ListWheelScrollController].
+/// size so it can pass it on ultimately to the [FixedExtentScrollController].
 class _FixedExtentScrollable extends Scrollable {
   const _FixedExtentScrollable({
     Key key,
@@ -228,7 +229,7 @@ class _FixedExtentScrollableState extends ScrollableState {
 /// never overshoots and rolls back within a single item if it's to settle on
 /// that item.
 ///
-/// Must be used with a scrollable that uses a [ListWheelScrollController].
+/// Must be used with a scrollable that uses a [FixedExtentScrollController].
 ///
 /// Defers back to the parent beyond the scroll extents.
 class FixedExtentScrollPhysics extends ScrollPhysics {
@@ -244,7 +245,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
     assert(
       position is _FixedExtentScrollPosition,
       'FixedExtentScrollPhysics can only be used with Scrollables that uses '
-      'the ListWheelScrollController'
+      'the FixedExtentScrollController'
     );
 
     final _FixedExtentScrollPosition metrics = position;
@@ -350,15 +351,15 @@ class ListWheelScrollView extends StatefulWidget {
        ),
        super(key: key);
 
-  /// Typically a [ListWheelScrollController] used to control the current item.
+  /// Typically a [FixedExtentScrollController] used to control the current item.
   ///
-  /// A [ListWheelScrollController] can be used to read the currently
+  /// A [FixedExtentScrollController] can be used to read the currently
   /// selected/centered child item and can be used to change the current item.
   ///
-  /// If none is provided, a new [ListWheelScrollController] is implicitly
+  /// If none is provided, a new [FixedExtentScrollController] is implicitly
   /// created.
   ///
-  /// If a [ScrollController] is used instead of [ListWheelScrollController],
+  /// If a [ScrollController] is used instead of [FixedExtentScrollController],
   /// [ScrollNotification.metrics] will no longer provide [FixedExtentMetrics]
   /// to indicate the current item index and [onSelectedItemChanged] will not
   /// work.
@@ -408,9 +409,9 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
   @override
   void initState() {
     super.initState();
-    scrollController = widget.controller ?? new ListWheelScrollController();
-    if (widget.controller is ListWheelScrollController) {
-      final ListWheelScrollController controller = widget.controller;
+    scrollController = widget.controller ?? new FixedExtentScrollController();
+    if (widget.controller is FixedExtentScrollController) {
+      final FixedExtentScrollController controller = widget.controller;
       _lastReportedItemIndex = controller.initialItem;
     }
   }

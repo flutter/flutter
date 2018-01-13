@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 
 import 'cupertino_navigation_demo.dart' show coolColorNames;
 
+const double _kPickerSheetHeight = 216.0;
+const double _kPickerItemHeight = 32.0;
+
 class CupertinoPickerDemo extends StatefulWidget {
   static const String routeName = '/cupertino/picker';
 
@@ -15,6 +18,76 @@ class CupertinoPickerDemo extends StatefulWidget {
 
 class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   int _selectedItemIndex = 0;
+
+  Widget _buildMenu() {
+    return new Container(
+      decoration: const BoxDecoration(
+        color: CupertinoColors.white,
+        border: const Border(
+          top: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
+          bottom: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
+        ),
+      ),
+      height: 44.0,
+      child: new Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: new SafeArea(
+          top: false,
+          bottom: false,
+            child: new DefaultTextStyle(
+              style: const TextStyle(
+                letterSpacing: -0.24,
+                fontSize: 17.0,
+                color: CupertinoColors.black,
+              ),
+              child: new Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  const Text('Favorite Color'),
+                  new Text(
+                    coolColorNames[_selectedItemIndex],
+                    style: const TextStyle(color: CupertinoColors.inactiveGray),
+                  ),
+                ],
+              ),
+            ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomPicker() {
+    final FixedExtentScrollController scrollController =
+        new FixedExtentScrollController(initialItem: _selectedItemIndex);
+
+    return new SizedBox(
+      height: _kPickerSheetHeight,
+      child: new DefaultTextStyle(
+        style: const TextStyle(
+          color: CupertinoColors.black,
+          fontSize: 22.0,
+        ),
+        child: new GestureDetector(
+          onTap: () {},
+          child: new CupertinoPicker(
+            scrollController: scrollController,
+            itemExtent: _kPickerItemHeight,
+            backgroundColor: CupertinoColors.white,
+            onSelectedItemChanged: (int index) {
+              setState(() {
+                _selectedItemIndex = index;
+              });
+            },
+            children: new List<Widget>.generate(coolColorNames.length, (int index) {
+              return new Center(child:
+                new Text(coolColorNames[index]),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,83 +108,14 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               const Padding(padding: const EdgeInsets.only(top: 32.0)),
               new GestureDetector(
                 onTap: () async {
-                  final ListWheelScrollController scrollController =
-                      new ListWheelScrollController(initialItem: _selectedItemIndex);
-
                   await showModalBottomSheet<Null>(
                     context: context,
                     builder: (BuildContext context) {
-                      return new SizedBox(
-                        height: 216.0,
-                        child: new DefaultTextStyle(
-                          style: const TextStyle(
-                            color: CupertinoColors.black,
-                            fontSize: 22.0,
-                          ),
-                          child: new GestureDetector(
-                            onTap: () {},
-                            child: new CupertinoPicker(
-                              scrollController: scrollController,
-                              itemExtent: 32.0,
-                              diameterRatio: 1.1,
-                              background: CupertinoColors.white,
-                              onSelectedItemChanged: (int index) {
-                                setState(() {
-                                  _selectedItemIndex = index;
-                                });
-                              },
-                              children: new List<Widget>.generate(coolColorNames.length, (int index) {
-                                return new Center(child:
-                                  new Text(coolColorNames[index]),
-                                );
-                              }),
-                            ),
-                          ),
-                        ),
-                      );
+                      return _buildBottomPicker();
                     },
                   );
-                  // Navigator.of(context, rootNavigator: true).push(
-                  //   new CupertinoPageRoute<bool>(
-                  //     fullscreenDialog: true,
-                  //     builder: (BuildContext context) => new Tab3Dialog(),
-                  //   ),
-                  // );
                 },
-                child: new Container(
-                  decoration: const BoxDecoration(
-                    color: CupertinoColors.white,
-                    border: const Border(
-                      top: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
-                      bottom: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
-                    ),
-                  ),
-                  height: 44.0,
-                  child: new Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: new SafeArea(
-                      top: false,
-                      bottom: false,
-                        child: new DefaultTextStyle(
-                          style: const TextStyle(
-                            letterSpacing: -0.24,
-                            fontSize: 17.0,
-                            color: CupertinoColors.black,
-                          ),
-                          child: new Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              const Text('Search Engine'),
-                              new Text(
-                                coolColorNames[_selectedItemIndex],
-                                style: const TextStyle(color: CupertinoColors.inactiveGray),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ),
-                  ),
-                ),
+                child: _buildMenu(),
               ),
             ],
           ),

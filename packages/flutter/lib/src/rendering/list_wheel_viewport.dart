@@ -591,9 +591,12 @@ class RenderListWheelViewport
     return result;
   }
 
+  /// This returns the matrices relative to the **untransformed plane's viewport
+  /// painting coordinates** system.
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.translate(0.0, _getUntransformedPaintingCoordinateY(0.0));
+    final _ListWheelParentData parentData = child?.parentData;
+    transform.translate(0.0, _getUntransformedPaintingCoordinateY(parentData.offset.dy));
   }
 
   @override
