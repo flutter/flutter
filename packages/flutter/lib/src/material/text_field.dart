@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'feedback.dart';
+import 'ink_well.dart' show InteractiveInkFeature;
 import 'input_decorator.dart';
 import 'material.dart';
 import 'text_selection.dart';
@@ -275,8 +279,11 @@ class TextField extends StatefulWidget {
   }
 }
 
-class _TextFieldState extends State<TextField> {
+class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixin {
   final GlobalKey<EditableTextState> _editableTextKey = new GlobalKey<EditableTextState>();
+
+  Set<InteractiveInkFeature> _splashes;
+  InteractiveInkFeature _currentSplash;
 
   TextEditingController _controller;
   TextEditingController get _effectiveController => widget.controller ?? _controller;
@@ -332,13 +339,104 @@ class _TextFieldState extends State<TextField> {
     _editableTextKey.currentState?.requestKeyboard();
   }
 
-  void _onSelectionChanged(BuildContext context, SelectionChangedCause cause) {
+  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
     if (cause == SelectionChangedCause.longPress)
       Feedback.forLongPress(context);
   }
 
+  InteractiveInkFeature _createInkFeature(TapDownDetails details) {
+    final MaterialInkController inkController = Material.of(context);
+    final RenderBox referenceBox = InputDecorator.containerOf(_editableTextKey.currentContext);
+    final Offset position = referenceBox.globalToLocal(details.globalPosition);
+    final Color color = Theme.of(context).splashColor;
+
+    InteractiveInkFeature splash;
+    void handleRemoved() {
+      if (_splashes != null) {
+        assert(_splashes.contains(splash));
+        _splashes.remove(splash);
+        if (_currentSplash == splash)
+          _currentSplash = null;
+        updateKeepAlive();
+      } // else we're probably in deactivate()
+    }
+
+    splash = Theme.of(context).splashFactory.create(
+      controller: inkController,
+      referenceBox: referenceBox,
+      position: position,
+      color: color,
+      containedInkWell: true,
+      // TODO(hansmuller): splash clip borderRadius should match the input decorator's border.
+      borderRadius: BorderRadius.zero,
+      onRemoved: handleRemoved,
+    );
+
+    return splash;
+  }
+
+  RenderEditable get _renderEditable => _editableTextKey.currentState.renderEditable;
+
+  void _handleTapDown(TapDownDetails details) {
+    _renderEditable.handleTapDown(details);
+    _startSplash(details);
+  }
+
+  void _handleTap() {
+    _renderEditable.handleTap();
+    _requestKeyboard();
+    _confirmCurrentSplash();
+  }
+
+  void _handleTapCancel() {
+    _renderEditable.handleTapCancel();
+    _cancelCurrentSplash();
+  }
+
+  void _handleLongPress() {
+    _renderEditable.handleLongPress();
+    _confirmCurrentSplash();
+  }
+
+  void _startSplash(TapDownDetails details) {
+    if (_effectiveFocusNode.hasFocus)
+      return;
+    final InteractiveInkFeature splash = _createInkFeature(details);
+    _splashes ??= new HashSet<InteractiveInkFeature>();
+    _splashes.add(splash);
+    _currentSplash = splash;
+    updateKeepAlive();
+  }
+
+  void _confirmCurrentSplash() {
+    _currentSplash?.confirm();
+    _currentSplash = null;
+  }
+
+  void _cancelCurrentSplash() {
+    _currentSplash?.cancel();
+    _currentSplash = null;
+  }
+
+  @override
+  bool get wantKeepAlive => _splashes != null && _splashes.isNotEmpty;
+
+  @override
+  void deactivate() {
+    if (_splashes != null) {
+      final Set<InteractiveInkFeature> splashes = _splashes;
+      _splashes = null;
+      for (InteractiveInkFeature splash in splashes)
+        splash.dispose();
+      _currentSplash = null;
+    }
+    assert(_currentSplash == null);
+    super.deactivate();
+  }
+
   @override
   Widget build(BuildContext context) {
+    super.build(context); // See AutomaticKeepAliveClientMixin.
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;
     final TextEditingController controller = _effectiveController;
@@ -366,8 +464,9 @@ class _TextFieldState extends State<TextField> {
             : materialTextSelectionControls,
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
-        onSelectionChanged: (TextSelection _, SelectionChangedCause cause) => _onSelectionChanged(context, cause),
+        onSelectionChanged: _handleSelectionChanged,
         inputFormatters: formatters,
+        rendererIgnoresPointer: true,
       ),
     );
 
@@ -395,10 +494,13 @@ class _TextFieldState extends State<TextField> {
         _requestKeyboard();
       },
       child: new GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _requestKeyboard,
-        child: child,
+        behavior: HitTestBehavior.translucent,
+        onTapDown: _handleTapDown,
+        onTap: _handleTap,
+        onTapCancel: _handleTapCancel,
+        onLongPress: _handleLongPress,
         excludeFromSemantics: true,
+        child: child,
       ),
     );
   }

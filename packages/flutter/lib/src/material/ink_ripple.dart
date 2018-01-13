@@ -14,11 +14,11 @@ import 'material.dart';
 const Duration _kUnconfirmedRippleDuration = const Duration(seconds: 1);
 const Duration _kFadeInDuration = const Duration(milliseconds: 75);
 const Duration _kRadiusDuration = const Duration(milliseconds: 225);
-const Duration _kFadeOutDuration = const Duration(milliseconds: 450);
+const Duration _kFadeOutDuration = const Duration(milliseconds: 375);
 const Duration _kCancelDuration = const Duration(milliseconds: 75);
 
-// The fade out begins 300ms after the _fadeOutController starts. See confirm().
-const double _kFadeOutIntervalStart = 300.0 / 450.0;
+// The fade out begins 225ms after the _fadeOutController starts. See confirm().
+const double _kFadeOutIntervalStart = 225.0 / 375.0;
 
 RectCallback _getClipCallback(RenderBox referenceBox, bool containedInkWell, RectCallback rectCallback) {
   if (rectCallback != null) {
@@ -31,19 +31,10 @@ RectCallback _getClipCallback(RenderBox referenceBox, bool containedInkWell, Rec
 }
 
 double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback rectCallback, Offset position) {
-  if (containedInkWell) {
-    final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
-    return _getRippleRadiusForPositionInSize(size, position);
-  }
-  return Material.defaultSplashRadius;
-}
-
-double _getRippleRadiusForPositionInSize(Size bounds, Offset position) {
-  final double d1 = (position - bounds.topLeft(Offset.zero)).distance;
-  final double d2 = (position - bounds.topRight(Offset.zero)).distance;
-  final double d3 = (position - bounds.bottomLeft(Offset.zero)).distance;
-  final double d4 = (position - bounds.bottomRight(Offset.zero)).distance;
-  return math.max(math.max(d1, d2), math.max(d3, d4)).ceilToDouble();
+  final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
+  final double d1 = size.bottomRight(Offset.zero).distance;
+  final double d2 = (size.topRight(Offset.zero) - size.bottomLeft(Offset.zero)).distance;
+  return math.max(d1, d2) / 2.0;
 }
 
 class _InkRippleFactory extends InteractiveInkFeatureFactory {
@@ -205,7 +196,9 @@ class InkRipple extends InteractiveInkFeature {
   @override
   void cancel() {
     _fadeInController.stop();
-    _fadeOutController.animateTo(1.0, duration: _kCancelDuration);
+    _fadeOutController
+      ..value = 1.0 - _fadeInController.value
+      ..animateTo(1.0, duration: _kCancelDuration);
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
