@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
+import 'arc.dart';
 import 'bottom_sheet.dart';
 import 'button.dart';
 import 'button_bar.dart';
@@ -37,7 +38,7 @@ enum _ScaffoldSlot {
 }
 
 /// The docking positions that the [FloatingActionButton] can occupy in a [Scaffold].
-enum FabPosition {centerFloat, endFloat}
+enum FabPosition {centerFloat, endFloat, startTopBar}
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
@@ -137,7 +138,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       final Size fabSize = layoutChild(_ScaffoldSlot.floatingActionButton, looseConstraints);
       Offset _getOffsetForFabPosition(FabPosition position) {
         double fabX;
-        double fabY;
+        double fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
+        if (snackBarSize.height > 0.0)
+          fabY = math.min(fabY, contentBottom - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
+        if (bottomSheetSize.height > 0.0)
+          fabY = math.min(fabY, contentBottom - bottomSheetSize.height - fabSize.height / 2.0);
         switch (position) {
           case FabPosition.centerFloat:
             fabX = (size.width - fabSize.width) / 2;
@@ -153,18 +158,25 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
               break;
             }
             break;
+          case FabPosition.startTopBar:
+              switch (textDirection) {
+              case TextDirection.ltr:
+                fabX = _kFloatingActionButtonMargin + endPadding;
+                break;
+              case TextDirection.rtl:
+                fabX = size.width - fabSize.width - _kFloatingActionButtonMargin - endPadding;
+              break;
+            }
+            fabY = contentTop - fabSize.height / 2;
+          break;
           default: break;
         }
-        fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
-        if (snackBarSize.height > 0.0)
-          fabY = math.min(fabY, contentBottom - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
-        if (bottomSheetSize.height > 0.0)
-          fabY = math.min(fabY, contentBottom - bottomSheetSize.height - fabSize.height / 2.0);
+       
         return new Offset(fabX, fabY);
       }
       final Offset currentFabOffset = _getOffsetForFabPosition(currentFabPosition);
       final Offset previousFabOffset = _getOffsetForFabPosition(previousFabPosition);
-      final Offset fabOffset = Offset.lerp(previousFabOffset, currentFabOffset, fabMoveProgress);
+      final Offset fabOffset = new MaterialPointArcTween(begin: previousFabOffset, end: currentFabOffset).lerp(fabMoveProgress);
       positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
     }
 
