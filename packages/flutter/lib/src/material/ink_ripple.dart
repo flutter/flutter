@@ -196,7 +196,9 @@ class InkRipple extends InteractiveInkFeature {
   @override
   void cancel() {
     _fadeInController.stop();
-    _fadeOutController.animateTo(1.0, duration: _kCancelDuration);
+    _fadeOutController
+      ..value = 1.0 - _fadeInController.value
+      ..animateTo(1.0, duration: _kCancelDuration);
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {

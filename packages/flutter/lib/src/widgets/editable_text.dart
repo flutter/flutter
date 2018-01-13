@@ -150,7 +150,7 @@ class EditableText extends StatefulWidget {
   /// default to [TextInputType.multiline].
   ///
   /// The [controller], [focusNode], [style], [cursorColor], [textAlign],
-  /// and [ignoresPointer], arguments must not be null.
+  /// and [rendererIgnoresPointer], arguments must not be null.
   EditableText({
     Key key,
     @required this.controller,

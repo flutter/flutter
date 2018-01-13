@@ -351,7 +351,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     final Color color = Theme.of(context).splashColor;
 
     InteractiveInkFeature splash;
-    void onRemoved() {
+    void handleRemoved() {
       if (_splashes != null) {
         assert(_splashes.contains(splash));
         _splashes.remove(splash);
@@ -367,9 +367,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       position: position,
       color: color,
       containedInkWell: true,
+      // TODO(hansmuller): splash clip borderRadius should match the input decorator's border.
       borderRadius: BorderRadius.zero,
-      // TODO(hansmuller): splash clip border radius show match the input decorator's border.
-      onRemoved: onRemoved,
+      onRemoved: handleRemoved,
     );
 
     return splash;
@@ -380,7 +380,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   void _handleTapDown(TapDownDetails details) {
     _renderEditable.handleTapDown(details);
     _startSplash(details);
-
   }
 
   void _handleTap() {
