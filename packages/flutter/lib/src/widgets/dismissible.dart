@@ -82,13 +82,8 @@ class Dismissible extends StatefulWidget {
     this.direction: DismissDirection.horizontal,
     this.resizeDuration: const Duration(milliseconds: 300),
     this.dismissThresholds: const <DismissDirection, double>{},
-<<<<<<< HEAD
     this.rollbackDuration: const Duration(milliseconds: 300),
     this.crossAxisEndOffset: 0.0,
-=======
-    this.dismissDuration: const Duration(milliseconds: 300),
-    this.diagonalDisplacement: 0.0,
->>>>>>> af3d3ecf92e3e74fc86c1ab2085e6e22f1fa6a14
   }) : assert(key != null),
        assert(secondaryBackground != null ? background != null : true),
        super(key: key);
