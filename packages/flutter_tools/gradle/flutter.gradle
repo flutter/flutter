@@ -318,14 +318,10 @@ class FlutterPlugin implements Plugin<Project> {
                 extraGenSnapshotOptions extraGenSnapshotOptionsValue
             }
 
-            Task deleteOutputDir = project.tasks.create(name: "deleteOutputDirectory${variant.name.capitalize()}", type:Delete) {
-                delete variant.mergeAssets.outputDir
-            }
-
             Task copyFlxTask = project.tasks.create(name: "copyFlutterAssets${variant.name.capitalize()}", type: Copy) {
                 dependsOn flutterTask
                 dependsOn variant.mergeAssets
-                dependsOn deleteOutputDir
+                dependsOn "clean${variant.mergeAssets.name.capitalize()}"
                 into variant.mergeAssets.outputDir
                 with flutterTask.assets
             }
