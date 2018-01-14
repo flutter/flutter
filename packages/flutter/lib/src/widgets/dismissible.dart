@@ -82,8 +82,8 @@ class Dismissible extends StatefulWidget {
     this.direction: DismissDirection.horizontal,
     this.resizeDuration: const Duration(milliseconds: 300),
     this.dismissThresholds: const <DismissDirection, double>{},
-    this.dismissDuration: const Duration(milliseconds: 300),
-    this.diagonalDisplacement: 0.0,
+    this.rollbackDuration: const Duration(milliseconds: 300),
+    this.crossAxisEndOffset: 0.0,
   }) : assert(key != null),
        assert(secondaryBackground != null ? background != null : true),
        super(key: key);
@@ -135,11 +135,12 @@ class Dismissible extends StatefulWidget {
   /// [direction] property.
   final Map<DismissDirection, double> dismissThresholds;
 
-  final Duration dismissDuration;
-  /// defines the duration for card to dismiss and come to original position
+  /// Defines the duration for card to come back to original position if not dismissed.
+  final Duration rollbackDuration;
 
-  final double diagonalDisplacement;
-  /// defines the offset displacement along the axis used.
+  /// Defines the end offset across the main axis after the card is dismissed.
+  /// If non-zero value is given then widget moves in cross direction depending on whether it is positive or negative.
+  final double crossAxisEndOffset;
 
   @override
   _DismissibleState createState() => new _DismissibleState();
@@ -190,7 +191,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _moveController = new AnimationController(duration: widget.dismissDuration, vsync: this)
+    _moveController = new AnimationController(duration: widget.rollbackDuration, vsync: this)
       ..addStatusListener(_handleDismissStatusChanged);
     _updateMoveAnimation();
   }
@@ -325,8 +326,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     _moveAnimation = new Tween<Offset>(
       begin: Offset.zero,
       end: _directionIsXAxis
-          ? new Offset(end, widget.diagonalDisplacement)
-          : new Offset(widget.diagonalDisplacement, end),
+          ? new Offset(end, widget.crossAxisEndOffset)
+          : new Offset(widget.crossAxisEndOffset, end),
     ).animate(_moveController);
   }
 
