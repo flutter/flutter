@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "lib/fxl/files/unique_fd.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/ref_counted.h"
 
@@ -17,6 +18,8 @@ class DirectoryAssetBundle
     : public fxl::RefCountedThreadSafe<DirectoryAssetBundle> {
  public:
   explicit DirectoryAssetBundle(std::string directory);
+  // Expects fd to be valid, otherwise the file descriptor is ignored.
+  explicit DirectoryAssetBundle(fxl::UniqueFD fd);
   ~DirectoryAssetBundle();
 
   bool GetAsBuffer(const std::string& asset_name, std::vector<uint8_t>* data);
@@ -25,6 +28,7 @@ class DirectoryAssetBundle
 
  private:
   const std::string directory_;
+  fxl::UniqueFD fd_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(DirectoryAssetBundle);
 };
