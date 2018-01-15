@@ -513,7 +513,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
     if (widget.future != null) {
       final Object callbackIdentity = new Object();
       _activeCallbackIdentity = callbackIdentity;
-      widget.future.then<Null>((T data) {
+      widget.future.then<void>((T data) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
             _snapshot = new AsyncSnapshot<T>.withData(ConnectionState.done, data);

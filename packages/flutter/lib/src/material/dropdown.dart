@@ -578,7 +578,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     );
 
-    Navigator.push(context, _dropdownRoute).then<Null>((_DropdownRouteResult<T> newValue) {
+    Navigator.push(context, _dropdownRoute).then<void>((_DropdownRouteResult<T> newValue) {
       _dropdownRoute = null;
       if (!mounted || newValue == null)
         return null;
