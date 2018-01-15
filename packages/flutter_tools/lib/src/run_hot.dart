@@ -65,6 +65,7 @@ class HotRunner extends ResidentRunner {
   // The initial launch is from a snapshot.
   bool _runningFromSnapshot = true;
   bool previewDart2 = false;
+  DateTime firstBuildTime;
 
   void _addBenchmarkData(String name, int value) {
     benchmarkData[name] ??= <int>[];
@@ -211,6 +212,8 @@ class HotRunner extends ResidentRunner {
       return 1;
     }
 
+    firstBuildTime = new DateTime.now();
+
     for (FlutterDevice device in flutterDevices) {
       final int result = await device.runHot(
         hotRunner: this,
@@ -274,6 +277,7 @@ class HotRunner extends ResidentRunner {
         mainPath: mainPath,
         target: target,
         bundle: assetBundle,
+        firstBuildTime: firstBuildTime,
         bundleFirstUpload: isFirstUpload,
         bundleDirty: isFirstUpload == false && rebuildBundle,
         fileFilter: _dartDependencies,

@@ -34,6 +34,11 @@ abstract class DevFSContent {
   /// or if the entry has been modified since this method was last called.
   bool get isModified;
 
+  /// Return true if this is the first time this method is called
+  /// or if the entry has been modified after the given time
+  /// or if the given time is null.
+  bool isModifiedAfter(DateTime time);
+
   int get size;
 
   Future<List<int>> contentsAsBytes();
@@ -104,6 +109,13 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
+  bool isModifiedAfter(DateTime time) {
+    final FileStat _oldFileStat = _fileStat;
+    _stat();
+    return _oldFileStat == null || time == null || _fileStat.modified.isAfter(time);
+  }
+
+  @override
   int get size {
     if (_fileStat == null)
       _stat();
@@ -124,12 +136,14 @@ class DevFSByteContent extends DevFSContent {
   List<int> _bytes;
 
   bool _isModified = true;
+  DateTime _modificationTime = new DateTime.now();
 
   List<int> get bytes => _bytes;
 
   set bytes(List<int> value) {
     _bytes = value;
     _isModified = true;
+    _modificationTime = new DateTime.now();
   }
 
   /// Return true only once so that the content is written to the device only once.
@@ -138,6 +152,11 @@ class DevFSByteContent extends DevFSContent {
     final bool modified = _isModified;
     _isModified = false;
     return modified;
+  }
+
+  @override
+  bool isModifiedAfter(DateTime time) {
+    return time == null || _modificationTime.isAfter(time);
   }
 
   @override
@@ -383,6 +402,7 @@ class DevFS {
     String mainPath,
     String target,
     AssetBundle bundle,
+    DateTime firstBuildTime,
     bool bundleFirstUpload: false,
     bool bundleDirty: false,
     Set<String> fileFilter,
@@ -449,7 +469,7 @@ class DevFS {
       if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
         dirtyEntries[deviceUri] = content;
         numBytes += content.size;
-        if (archivePath != null && !bundleFirstUpload)
+        if (archivePath != null && (!bundleFirstUpload || content.isModifiedAfter(firstBuildTime)))
           assetPathsToEvict.add(archivePath);
       }
     });
