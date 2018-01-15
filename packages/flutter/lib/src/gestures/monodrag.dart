@@ -120,7 +120,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _pendingDragOffset = Offset.zero;
       _lastPendingEventTimestamp = event.timeStamp;
       if (onDown != null)
-        invokeCallback<Null>('onDown', () => onDown(new DragDownDetails(globalPosition: _initialPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        invokeCallback<void>('onDown', () => onDown(new DragDownDetails(globalPosition: _initialPosition)));
     } else if (_state == _DragState.accepted) {
       resolve(GestureDisposition.accepted);
     }
@@ -140,7 +140,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       final Offset delta = event.delta;
       if (_state == _DragState.accepted) {
         if (onUpdate != null) {
-          invokeCallback<Null>('onUpdate', () => onUpdate(new DragUpdateDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+          invokeCallback<void>('onUpdate', () => onUpdate(new DragUpdateDetails(
             sourceTimeStamp: event.timeStamp,
             delta: _getDeltaForDetails(delta),
             primaryDelta: _getPrimaryValueFromOffset(delta),
@@ -166,13 +166,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _pendingDragOffset = Offset.zero;
       _lastPendingEventTimestamp = null;
       if (onStart != null) {
-        invokeCallback<Null>('onStart', () => onStart(new DragStartDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        invokeCallback<void>('onStart', () => onStart(new DragStartDetails(
           sourceTimeStamp: timestamp,
           globalPosition: _initialPosition,
         )));
       }
       if (delta != Offset.zero && onUpdate != null) {
-        invokeCallback<Null>('onUpdate', () => onUpdate(new DragUpdateDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        invokeCallback<void>('onUpdate', () => onUpdate(new DragUpdateDetails(
           sourceTimeStamp: timestamp,
           delta: _getDeltaForDetails(delta),
           primaryDelta: _getPrimaryValueFromOffset(delta),
@@ -193,7 +193,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       resolve(GestureDisposition.rejected);
       _state = _DragState.ready;
       if (onCancel != null)
-        invokeCallback<Null>('onCancel', onCancel); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        invokeCallback<void>('onCancel', onCancel);
       return;
     }
     final bool wasAccepted = (_state == _DragState.accepted);
@@ -206,14 +206,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       if (estimate != null && _isFlingGesture(estimate)) {
         final Velocity velocity = new Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
           .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
-        invokeCallback<Null>('onEnd', () => onEnd(new DragEndDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        invokeCallback<void>('onEnd', () => onEnd(new DragEndDetails(
           velocity: velocity,
           primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
         )), debugReport: () {
           return '$estimate; fling at $velocity.';
         });
       } else {
-        invokeCallback<Null>('onEnd', () => onEnd(new DragEndDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        invokeCallback<void>('onEnd', () => onEnd(new DragEndDetails(
           velocity: Velocity.zero,
           primaryVelocity: 0.0,
         )), debugReport: () {
