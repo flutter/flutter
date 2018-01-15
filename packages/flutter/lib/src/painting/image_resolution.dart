@@ -166,7 +166,7 @@ class AssetImage extends AssetBundleImageProvider {
     final AssetBundle chosenBundle = bundle ?? configuration.bundle ?? rootBundle;
     Completer<AssetBundleImageKey> completer;
     Future<AssetBundleImageKey> result;
-    chosenBundle.loadStructuredData<Map<String, List<String>>>(_kAssetManifestFileName, _manifestParser).then<Null>(
+    chosenBundle.loadStructuredData<Map<String, List<String>>>(_kAssetManifestFileName, _manifestParser).then<void>(
       (Map<String, List<String>> manifest) {
         final String chosenName = _chooseVariant(
           keyName,

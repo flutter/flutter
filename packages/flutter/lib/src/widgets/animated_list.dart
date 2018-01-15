@@ -298,7 +298,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
       _itemsCount += 1;
     });
 
-    controller.forward().then<Null>((Null value) {
+    controller.forward().then<void>((Null value) {
       _removeActiveItemAt(_incomingItems, incomingItem.itemIndex).controller.dispose();
     });
   }
@@ -333,7 +333,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
         ..sort();
     });
 
-    controller.reverse().then<Null>((Null value) {
+    controller.reverse().then<void>((Null value) {
       _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex).controller.dispose();
 
       // Decrement the incoming and outgoing item indices to account
