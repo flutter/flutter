@@ -306,7 +306,7 @@ class IOSSimulator extends Device {
       printTrace('Building ${app.name} for $id.');
 
       try {
-        await _setupUpdatedApplicationBundle(app, debuggingOptions.buildInfo.flavor);
+        await _setupUpdatedApplicationBundle(app, debuggingOptions.buildInfo);
       } on ToolExit catch (e) {
         printError(e.message);
         return new LaunchResult.failed();
@@ -322,7 +322,7 @@ class IOSSimulator extends Device {
     if (!prebuiltApplication) {
       args.addAll(<String>[
         '--flutter-assets-dir=${fs.path.absolute(getAssetBuildDirectory())}',
-        '--dart-main=${fs.path.absolute(mainPath)}',
+        '--dart-main=${fs.path.absolute(mainPath)}${debuggingOptions.buildInfo.previewDart2?".dill":""}',
         '--packages=${fs.path.absolute('.packages')}',
       ]);
     }
@@ -379,17 +379,25 @@ class IOSSimulator extends Device {
     return criteria.reduce((bool a, bool b) => a && b);
   }
 
-  Future<Null> _setupUpdatedApplicationBundle(ApplicationPackage app, String flavor) async {
-    await _sideloadUpdatedAssetsForInstalledApplicationBundle(app);
+  Future<Null> _setupUpdatedApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) async {
+    await _sideloadUpdatedAssetsForInstalledApplicationBundle(app, buildInfo);
 
     if (!await _applicationIsInstalledAndRunning(app))
-      return _buildAndInstallApplicationBundle(app, flavor);
+      return _buildAndInstallApplicationBundle(app, buildInfo);
   }
 
-  Future<Null> _buildAndInstallApplicationBundle(ApplicationPackage app, String flavor) async {
+  Future<Null> _buildAndInstallApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) async {
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
-    final XcodeBuildResult buildResult = await buildXcodeProject(app: app, buildInfo: new BuildInfo(BuildMode.debug, flavor), buildForDevice: false);
+
+    final BuildInfo debugBuildInfo = new BuildInfo(BuildMode.debug, buildInfo.flavor,
+        previewDart2: buildInfo.previewDart2,
+        strongMode: buildInfo.strongMode,
+        extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+        extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
+        preferSharedLibrary: buildInfo.preferSharedLibrary);
+
+    final XcodeBuildResult buildResult = await buildXcodeProject(app: app, buildInfo: debugBuildInfo, buildForDevice: false);
     if (!buildResult.success)
       throwToolExit('Could not build the application for the simulator.');
 
@@ -404,8 +412,12 @@ class IOSSimulator extends Device {
     await SimControl.instance.install(id, fs.path.absolute(bundle.path));
   }
 
-  Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app) =>
-      flx.build(precompiledSnapshot: true);
+  Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) =>
+      // When running in previewDart2 mode, we still need to run compiler to
+      // produce kernel file for the application.
+      flx.build(precompiledSnapshot: !buildInfo.previewDart2,
+          previewDart2: buildInfo.previewDart2,
+          strongMode: buildInfo.strongMode);
 
   @override
   Future<bool> stopApp(ApplicationPackage app) async {
@@ -546,7 +558,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   // Match the log prefix (in order to shorten it):
   // * Xcode 8: Sep 13 15:28:51 cbracken-macpro localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
   // * Xcode 9: 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
-  static final RegExp _mapRegex = new RegExp(r'\S+ +\S+ +\S+ +(\S+ +)?(\S+)\[\d+\]\)?: (\(.*\))? *(.*)$');
+  static final RegExp _mapRegex = new RegExp(r'\S+ +\S+ +\S+ +(\S+ +)?(\S+)\[\d+\]\)?: (\(.*?\))? *(.*)$');
 
   // Jan 31 19:23:28 --- last message repeated 1 time ---
   static final RegExp _lastMessageSingleRegex = new RegExp(r'\S+ +\S+ +\S+ --- last message repeated 1 time ---$');

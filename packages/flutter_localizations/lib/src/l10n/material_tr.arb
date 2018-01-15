@@ -15,6 +15,7 @@
   "pageRowsInfoTitle": "$firstRow-$lastRow / $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow-$lastRow / $rowCount",
   "rowsPerPageTitle": "Sayfa başına satır sayısı:",
+  "tabLabel": "$tabIndex, $tabCount içinde",
   "selectedRowCountTitleOne": "1 öğe seçildi",
   "selectedRowCountTitleOther": "$selectedRowCount öğe seçildi",
   "cancelButtonLabel": "İPTAL",
@@ -30,5 +31,8 @@
   "postMeridiemAbbreviation": "ÖS",
   "timePickerHourModeAnnouncement": "Saati seçin",
   "timePickerMinuteModeAnnouncement": "Dakikayı seçin",
+  "signedInLabel": "Yetkili",
+  "hideAccountsLabel": "Hesapları gizle",
+  "showAccountsLabel": "Hesapları göster",
   "modalBarrierDismissLabel": "Reddet"
 }

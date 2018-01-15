@@ -267,7 +267,7 @@ class IconBar extends StatelessWidget {
       padding: const EdgeInsets.only(left: 16.0, right: 16.0),
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
+        children: const <Widget>[
           const IconWithText(Icons.thumb_up, 'Like'),
           const IconWithText(Icons.comment, 'Comment'),
           const IconWithText(Icons.share, 'Share'),
@@ -438,10 +438,10 @@ class ItemImageBox extends StatelessWidget {
                       borderRadius: new BorderRadius.circular(2.0)
                     ),
                     padding: const EdgeInsets.all(4.0),
-                    child: new RichText(
-                      text: new TextSpan(
+                    child: const RichText(
+                      text: const TextSpan(
                         style: const TextStyle(color: Colors.white),
-                        children: <TextSpan>[
+                        children: const <TextSpan>[
                           const TextSpan(
                             text: 'Photo by '
                           ),
@@ -560,7 +560,7 @@ class BottomBar extends StatelessWidget {
       ),
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
+        children: const <Widget>[
           const BottomBarButton(Icons.new_releases, 'News'),
           const BottomBarButton(Icons.people, 'Requests'),
           const BottomBarButton(Icons.chat, 'Messenger'),

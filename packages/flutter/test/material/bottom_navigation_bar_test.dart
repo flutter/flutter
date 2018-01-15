@@ -16,7 +16,7 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           bottomNavigationBar: new BottomNavigationBar(
-            items: <BottomNavigationBarItem>[
+            items: const <BottomNavigationBarItem>[
               const BottomNavigationBarItem(
                 icon: const Icon(Icons.ac_unit),
                 title: const Text('AC')
@@ -44,7 +44,7 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           bottomNavigationBar: new BottomNavigationBar(
-            items: <BottomNavigationBarItem>[
+            items: const <BottomNavigationBarItem>[
               const BottomNavigationBarItem(
                 icon: const Icon(Icons.ac_unit),
                 title: const Text('AC')
@@ -72,7 +72,7 @@ void main() {
           data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 40.0)),
           child: new Scaffold(
             bottomNavigationBar: new BottomNavigationBar(
-              items: <BottomNavigationBarItem>[
+              items: const <BottomNavigationBarItem>[
                 const BottomNavigationBarItem(
                   icon: const Icon(Icons.ac_unit),
                   title: const Text('AC')
@@ -100,7 +100,7 @@ void main() {
         home: new Scaffold(
           bottomNavigationBar: new BottomNavigationBar(
             type: BottomNavigationBarType.shifting,
-            items: <BottomNavigationBarItem>[
+            items: const <BottomNavigationBarItem>[
               const BottomNavigationBarItem(
                 icon: const Icon(Icons.ac_unit),
                 title: const Text('AC')
@@ -126,7 +126,7 @@ void main() {
           bottomNavigationBar: new BottomNavigationBar(
             currentIndex: 1,
             type: BottomNavigationBarType.shifting,
-            items: <BottomNavigationBarItem>[
+            items: const <BottomNavigationBarItem>[
               const BottomNavigationBarItem(
                 icon: const Icon(Icons.ac_unit),
                 title: const Text('AC')
@@ -155,7 +155,7 @@ void main() {
         home: new Scaffold(
           bottomNavigationBar: new BottomNavigationBar(
             type: BottomNavigationBarType.shifting,
-            items: <BottomNavigationBarItem>[
+            items: const <BottomNavigationBarItem>[
               const BottomNavigationBarItem(
                 icon: const Icon(Icons.ac_unit),
                 title: const Text('AC')
@@ -216,7 +216,7 @@ void main() {
           child: new Scaffold(
             bottomNavigationBar: new BottomNavigationBar(
               type: BottomNavigationBarType.shifting,
-              items: <BottomNavigationBarItem>[
+              items: const <BottomNavigationBarItem>[
                 const BottomNavigationBarItem(
                   icon: const Icon(Icons.ac_unit),
                   title: const Text('AC')
@@ -254,7 +254,7 @@ void main() {
           child: new Scaffold(
             bottomNavigationBar: new BottomNavigationBar(
               type: BottomNavigationBarType.fixed,
-              items: <BottomNavigationBarItem>[
+              items: const <BottomNavigationBarItem>[
                 const BottomNavigationBarItem(
                   icon: const Icon(Icons.ac_unit),
                   title: const Text('AC')
@@ -326,7 +326,7 @@ void main() {
         home: new Scaffold(
           bottomNavigationBar: new BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
-            items: <BottomNavigationBarItem>[
+            items: const <BottomNavigationBarItem>[
               const BottomNavigationBarItem(
                 title: const Text('A'),
                 icon: const Icon(Icons.ac_unit),
@@ -349,7 +349,7 @@ void main() {
         home: new Scaffold(
           bottomNavigationBar: new BottomNavigationBar(
             type: BottomNavigationBarType.shifting,
-            items: <BottomNavigationBarItem>[
+            items: const <BottomNavigationBarItem>[
               const BottomNavigationBarItem(
                 title: const Text('A'),
                 icon: const Icon(Icons.ac_unit),
@@ -373,7 +373,7 @@ void main() {
           data: const MediaQueryData(textScaleFactor: 2.0),
           child: new Scaffold(
             bottomNavigationBar: new BottomNavigationBar(
-              items: <BottomNavigationBarItem>[
+              items: const <BottomNavigationBarItem>[
                 const BottomNavigationBarItem(
                   title: const Text('A'),
                   icon: const Icon(Icons.ac_unit),
@@ -430,7 +430,7 @@ void main() {
       boilerplate(
         textDirection: TextDirection.ltr,
         bottomNavigationBar: new BottomNavigationBar(
-          items: <BottomNavigationBarItem>[
+          items: const <BottomNavigationBarItem>[
             const BottomNavigationBarItem(
               title: const Text('A'),
               icon: const Icon(Icons.ac_unit),
@@ -462,7 +462,7 @@ void main() {
       boilerplate(
         textDirection: TextDirection.rtl,
         bottomNavigationBar: new BottomNavigationBar(
-          items: <BottomNavigationBarItem>[
+          items: const <BottomNavigationBarItem>[
             const BottomNavigationBarItem(
               title: const Text('A'),
               icon: const Icon(Icons.ac_unit),

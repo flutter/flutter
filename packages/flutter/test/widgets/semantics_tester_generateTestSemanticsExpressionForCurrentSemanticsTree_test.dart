@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -113,7 +113,7 @@ void _tests() {
                       textDirection: TextDirection.ltr,
                     ),
                     new TestSemantics(
-                      flags: <SemanticsFlags>[SemanticsFlags.hasCheckedState, SemanticsFlags.isChecked, SemanticsFlags.isSelected],
+                      flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.isSelected],
                       actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.decrease],
                       label: r'‪Interactive text‬',
                       value: r'test-value',

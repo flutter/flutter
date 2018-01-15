@@ -677,11 +677,14 @@ Stream<Map<String, dynamic>> get stdinCommandStream => stdin
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {
-  final String encoded = JSON.encode(command, toEncodable: _jsonEncodeObject);
-  stdout.writeln('[$encoded]');
+  stdout.writeln('[${jsonEncodeObject(command)}]');
 }
 
-dynamic _jsonEncodeObject(dynamic object) {
+String jsonEncodeObject(dynamic object) {
+  return JSON.encode(object, toEncodable: _toEncodable);
+}
+
+dynamic _toEncodable(dynamic object) {
   if (object is OperationResult)
     return _operationResultToMap(object);
   return object;
@@ -697,10 +700,17 @@ Future<Map<String, dynamic>> _deviceToMap(Device device) async {
 }
 
 Map<String, dynamic> _operationResultToMap(OperationResult result) {
-  return <String, dynamic>{
+  final Map<String, dynamic> map = <String, dynamic>{
     'code': result.code,
-    'message': result.message
+    'message': result.message,
   };
+
+  if (result.hintMessage != null)
+    map['hintMessage'] = result.hintMessage;
+  if (result.hintId != null)
+    map['hintId'] = result.hintId;
+
+  return map;
 }
 
 dynamic _toJsonable(dynamic obj) {

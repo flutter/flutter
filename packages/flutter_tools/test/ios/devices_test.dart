@@ -74,6 +74,17 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
     });
   });
 
+  group('decodeSyslog', () {
+    test('decodes a syslog-encoded line', () {
+      final String decoded = decodeSyslog(r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog \M-B\M-/\134_(\M-c\M^C\M^D)_/\M-B\M-/ \M-l\M^F\240!');
+      expect(decoded, r'I ❤️ syslog ¯\_(ツ)_/¯ 솠!');
+    });
+
+    test('passes through un-decodeable lines as-is', () {
+      final String decoded = decodeSyslog(r'I \M-b\M^O syslog!');
+      expect(decoded, r'I \M-b\M^O syslog!');
+    });
+  });
   group('logging', () {
     MockIMobileDevice mockIMobileDevice;
 

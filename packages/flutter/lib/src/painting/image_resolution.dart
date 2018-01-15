@@ -214,7 +214,11 @@ class AssetImage extends AssetBundleImageProvider {
     if (json == null)
       return null;
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
-    final Map<String, List<String>> parsedManifest = JSON.decode(json);
+    final Map<String, dynamic> parsedJson = JSON.decode(json);
+    final Iterable<String> keys = parsedJson.keys;
+    final Map<String, List<String>> parsedManifest =
+        new Map<String, List<String>>.fromIterables(keys,
+          keys.map((String key) => new List<String>.from(parsedJson[key])));
     // TODO(ianh): convert that data structure to the right types.
     return new SynchronousFuture<Map<String, List<String>>>(parsedManifest);
   }

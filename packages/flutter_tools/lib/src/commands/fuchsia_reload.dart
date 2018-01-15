@@ -328,7 +328,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     if (!_fileExists(_target))
       throwToolExit('Couldn\'t find application entry point at $_target.');
 
-    final String packagesFileName = '${_projectName}_dart_package.packages';
+    final String packagesFileName = '${_projectName}_dart_library.packages';
     _dotPackagesPath = '$_fuchsiaRoot/out/$_buildType/dartlang/gen/$_projectRoot/$packagesFileName';
     if (!_fileExists(_dotPackagesPath))
       throwToolExit('Couldn\'t find .packages file at $_dotPackagesPath.');

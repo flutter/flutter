@@ -4,7 +4,7 @@
 
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlags,
+import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlag,
        TextDirection;
 
 import 'package:flutter/foundation.dart';
@@ -106,7 +106,7 @@ class SemanticsData extends Diagnosticable {
        assert(increasedValue == '' || textDirection != null, 'A SemanticsData object with increasedValue "$increasedValue" had a null textDirection.'),
        assert(rect != null);
 
-  /// A bit field of [SemanticsFlags] that apply to this node.
+  /// A bit field of [SemanticsFlag]s that apply to this node.
   final int flags;
 
   /// A bit field of [SemanticsAction]s that apply to this node.
@@ -157,7 +157,7 @@ class SemanticsData extends Diagnosticable {
   final Matrix4 transform;
 
   /// Whether [flags] contains the given flag.
-  bool hasFlag(SemanticsFlags flag) => (flags & flag.index) != 0;
+  bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
   /// Whether [actions] contains the given action.
   bool hasAction(SemanticsAction action) => (actions & action.index) != 0;
@@ -178,7 +178,7 @@ class SemanticsData extends Diagnosticable {
     properties.add(new IterableProperty<String>('actions', actionSummary, ifEmpty: null));
 
     final List<String> flagSummary = <String>[];
-    for (SemanticsFlags flag in SemanticsFlags.values.values) {
+    for (SemanticsFlag flag in SemanticsFlag.values.values) {
       if ((flags & flag.index) != 0)
         flagSummary.add(describeEnum(flag));
     }
@@ -243,6 +243,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// The [container] argument must not be null.
   const SemanticsProperties({
+    this.enabled,
     this.checked,
     this.selected,
     this.button,
@@ -263,6 +264,14 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onMoveCursorForwardByCharacter,
     this.onMoveCursorBackwardByCharacter,
   });
+
+  /// If non-null, indicates that this subtree represents something that can be
+  /// in an enabled or disabled state.
+  ///
+  /// For example, a button that a user can currently interact with would set
+  /// this field to true. A button that currently does not respond to user
+  /// interactions would set this field to false.
+  final bool enabled;
 
   /// If non-null, indicates that this subtree represents a checkbox
   /// or similar widget with a "checked" state, and what its current
@@ -645,6 +654,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           );
         }
       }
+      assert(!newChildren.any((SemanticsNode node) => node.isMergedIntoParent) || isPartOfNodeMerging);
 
       _debugPreviousSnapshot = new List<SemanticsNode>.from(newChildren);
 
@@ -668,7 +678,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     if (newChildren != null) {
       for (SemanticsNode child in newChildren) {
-        assert(!child.isInvisible, 'Child with id ${child.id} is invisible and should not be added to tree.');
+        assert(!child.isInvisible, '$child is invisible and should not be added as child of $this.');
         child._dead = false;
       }
     }
@@ -847,7 +857,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   int _flags = _kEmptyConfig._flags;
 
-  bool _hasFlag(SemanticsFlags flag) => _flags & flag.index != 0;
+  bool _hasFlag(SemanticsFlag flag) => _flags & flag.index != 0;
 
   /// A textual description of this node.
   ///
@@ -1063,7 +1073,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       hideOwner = inDirtyNodes;
     }
     properties.add(new DiagnosticsProperty<SemanticsOwner>('owner', owner, level: hideOwner ? DiagnosticLevel.hidden : DiagnosticLevel.info));
-    properties.add(new FlagProperty('isPartOfNodeMerging', value: isPartOfNodeMerging, ifTrue: 'leaf merge'));
+    properties.add(new FlagProperty('isMergedIntoParent', value: isMergedIntoParent, ifTrue: 'merged up ⬆️'));
+    properties.add(new FlagProperty('mergeAllDescendantsIntoThisNode', value: mergeAllDescendantsIntoThisNode, ifTrue: 'merge boundary ⛔️'));
     final Offset offset = transform != null ? MatrixUtils.getAsTranslation(transform) : null;
     if (offset != null) {
       properties.add(new DiagnosticsProperty<Rect>('rect', rect.shift(offset), showName: false));
@@ -1080,12 +1091,14 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
-    if (_hasFlag(SemanticsFlags.hasCheckedState))
-      properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlags.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
-    properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlags.isSelected), ifTrue: 'selected'));
-    properties.add(new FlagProperty('isFocused', value: _hasFlag(SemanticsFlags.isFocused), ifTrue: 'focused'));
-    properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlags.isButton), ifTrue: 'button'));
-    properties.add(new FlagProperty('isTextField', value: _hasFlag(SemanticsFlags.isTextField), ifTrue: 'textField'));
+    if (_hasFlag(SemanticsFlag.hasEnabledState))
+      properties.add(new FlagProperty('isEnabled', value: _hasFlag(SemanticsFlag.isEnabled), ifFalse: 'disabled'));
+    if (_hasFlag(SemanticsFlag.hasCheckedState))
+      properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlag.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
+    properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlag.isSelected), ifTrue: 'selected'));
+    properties.add(new FlagProperty('isFocused', value: _hasFlag(SemanticsFlag.isFocused), ifTrue: 'focused'));
+    properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlag.isButton), ifTrue: 'button'));
+    properties.add(new FlagProperty('isTextField', value: _hasFlag(SemanticsFlag.isTextField), ifTrue: 'textField'));
     properties.add(new StringProperty('label', _label, defaultValue: ''));
     properties.add(new StringProperty('value', _value, defaultValue: ''));
     properties.add(new StringProperty('increasedValue', _increasedValue, defaultValue: ''));
@@ -1333,7 +1346,7 @@ class SemanticsConfiguration {
   bool get isSemanticBoundary => _isSemanticBoundary;
   bool _isSemanticBoundary = false;
   set isSemanticBoundary(bool value) {
-    assert(!isMergingDescendantsIntoOneNode || value);
+    assert(!isMergingSemanticsOfDescendants || value);
     _isSemanticBoundary = value;
   }
 
@@ -1368,20 +1381,6 @@ class SemanticsConfiguration {
   /// Paint order as established by [visitChildrenForSemantics] is used to
   /// determine if a node is previous to this one.
   bool isBlockingSemanticsOfPreviouslyPaintedNodes = false;
-
-  /// Whether the semantics information of all descendants should be merged
-  /// into the owning [RenderObject] semantics node.
-  ///
-  /// When this is set to true the [SemanticsNode] of the owning [RenderObject]
-  /// will not have any children.
-  ///
-  /// Setting this to true requires that [isSemanticBoundary] is also true.
-  bool get isMergingDescendantsIntoOneNode => _isMergingDescendantsIntoOneNode;
-  bool _isMergingDescendantsIntoOneNode = false;
-  set isMergingDescendantsIntoOneNode(bool value) {
-    assert(isSemanticBoundary);
-    _isMergingDescendantsIntoOneNode = value;
-  }
 
   // SEMANTIC ANNOTATIONS
   // These will end up on [SemanticNode]s generated from
@@ -1634,9 +1633,12 @@ class SemanticsConfiguration {
   /// If set to true, the descendants of the owning [RenderObject]'s
   /// [SemanticsNode] will merge their semantic information into the
   /// [SemanticsNode] representing the owning [RenderObject].
+  ///
+  /// Setting this to true requires that [isSemanticBoundary] is also true.
   bool get isMergingSemanticsOfDescendants => _isMergingSemanticsOfDescendants;
   bool _isMergingSemanticsOfDescendants = false;
   set isMergingSemanticsOfDescendants(bool value) {
+    assert(isSemanticBoundary);
     _isMergingSemanticsOfDescendants = value;
     _hasBeenAnnotated = true;
   }
@@ -1736,38 +1738,58 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] is selected (true) or not (false).
-  bool get isSelected => _hasFlag(SemanticsFlags.isSelected);
+  bool get isSelected => _hasFlag(SemanticsFlag.isSelected);
   set isSelected(bool value) {
-    _setFlag(SemanticsFlags.isSelected, value);
+    _setFlag(SemanticsFlag.isSelected, value);
+  }
+
+  /// Whether the owning [RenderObject] is currently enabled.
+  ///
+  /// A disabled object does not respond to user interactions. Only objects that
+  /// usually respond to user interactions, but which currently do not (like a
+  /// disabled button) should be marked as disabled.
+  ///
+  /// The setter should not be called for objects (like static text) that never
+  /// respond to user interactions.
+  ///
+  /// The getter will return null if the owning [RenderObject] doesn't support
+  /// the concept of being enabled/disabled.
+  bool get isEnabled => _hasFlag(SemanticsFlag.hasEnabledState) ? _hasFlag(SemanticsFlag.isEnabled) : null;
+  set isEnabled(bool value) {
+    _setFlag(SemanticsFlag.hasEnabledState, true);
+    _setFlag(SemanticsFlag.isEnabled, value);
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether
   /// that state is on or off, corresponding to true and false, respectively.
   ///
-  /// Do not set this to any value if the owning [RenderObject] doesn't have
-  /// Booleans state that can be controlled by the user.
-  bool get isChecked => _hasFlag(SemanticsFlags.hasCheckedState) && _hasFlag(SemanticsFlags.isChecked);
+  /// Do not call the setter for this field if the owning [RenderObject] doesn't
+  /// have checked/unchecked state that can be controlled by the user.
+  ///
+  /// The getter returns null if the owning [RenderObject] does not have
+  /// checked/unchecked state.
+  bool get isChecked => _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isChecked) : null;
   set isChecked(bool value) {
-    _setFlag(SemanticsFlags.hasCheckedState, true);
-    _setFlag(SemanticsFlags.isChecked, value);
+    _setFlag(SemanticsFlag.hasCheckedState, true);
+    _setFlag(SemanticsFlag.isChecked, value);
   }
 
   /// Whether the owning [RenderObject] currently holds the user's focus.
-  bool get isFocused => _hasFlag(SemanticsFlags.isFocused);
+  bool get isFocused => _hasFlag(SemanticsFlag.isFocused);
   set isFocused(bool value) {
-    _setFlag(SemanticsFlags.isFocused, value);
+    _setFlag(SemanticsFlag.isFocused, value);
   }
 
   /// Whether the owning [RenderObject] is a button (true) or not (false).
-  bool get isButton => _hasFlag(SemanticsFlags.isButton);
+  bool get isButton => _hasFlag(SemanticsFlag.isButton);
   set isButton(bool value) {
-    _setFlag(SemanticsFlags.isButton, value);
+    _setFlag(SemanticsFlag.isButton, value);
   }
 
   /// Whether the owning [RenderObject] is a text field.
-  bool get isTextField => _hasFlag(SemanticsFlags.isTextField);
+  bool get isTextField => _hasFlag(SemanticsFlag.isTextField);
   set isTextField(bool value) {
-    _setFlag(SemanticsFlags.isTextField, value);
+    _setFlag(SemanticsFlag.isTextField, value);
   }
 
   // TAGS
@@ -1805,7 +1827,7 @@ class SemanticsConfiguration {
   // INTERNAL FLAG MANAGEMENT
 
   int _flags = 0;
-  void _setFlag(SemanticsFlags flag, bool value) {
+  void _setFlag(SemanticsFlag flag, bool value) {
     if (value) {
       _flags |= flag.index;
     } else {
@@ -1814,7 +1836,7 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  bool _hasFlag(SemanticsFlags flag) => (_flags & flag.index) != 0;
+  bool _hasFlag(SemanticsFlag flag) => (_flags & flag.index) != 0;
 
   // CONFIGURATION COMBINATION LOGIC
 
@@ -1879,9 +1901,11 @@ class SemanticsConfiguration {
   /// Returns an exact copy of this configuration.
   SemanticsConfiguration copy() {
     return new SemanticsConfiguration()
-      ..isSemanticBoundary = isSemanticBoundary
+      .._isSemanticBoundary = _isSemanticBoundary
       ..explicitChildNodes = explicitChildNodes
+      ..isBlockingSemanticsOfPreviouslyPaintedNodes = isBlockingSemanticsOfPreviouslyPaintedNodes
       .._hasBeenAnnotated = _hasBeenAnnotated
+      .._isMergingSemanticsOfDescendants = _isMergingSemanticsOfDescendants
       .._textDirection = _textDirection
       .._label = _label
       .._increasedValue = _increasedValue
@@ -1889,6 +1913,7 @@ class SemanticsConfiguration {
       .._decreasedValue = _decreasedValue
       .._hint = _hint
       .._flags = _flags
+      .._tagsForChildren = _tagsForChildren
       .._actionsAsBits = _actionsAsBits
       .._actions.addAll(_actions);
   }

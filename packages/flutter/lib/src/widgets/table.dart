@@ -300,11 +300,12 @@ class _TableElement extends RenderObjectElement {
   void update(Table newWidget) {
     assert(!_debugWillReattachChildren);
     assert(() { _debugWillReattachChildren = true; return true; }());
-    final Map<LocalKey, List<Element>> oldKeyedRows = new Map<LocalKey, List<Element>>.fromIterable(
-      _children.where((_TableElementRow row) => row.key != null),
-      key:   (_TableElementRow row) => row.key,
-      value: (_TableElementRow row) => row.children
-    );
+    final Map<LocalKey, List<Element>> oldKeyedRows = <LocalKey, List<Element>>{};
+    for (_TableElementRow row in _children) {
+      if (row.key != null) {
+        oldKeyedRows[row.key] = row.children;
+      }
+    }
     final Iterator<_TableElementRow> oldUnkeyedRows = _children.where((_TableElementRow row) => row.key == null).iterator;
     final List<_TableElementRow> newChildren = <_TableElementRow>[];
     final Set<List<Element>> taken = new Set<List<Element>>();

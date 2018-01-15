@@ -95,8 +95,6 @@ assume you want to check a single package and the flutter repository has several
 Running the tests
 -----------------
 
-_The `flutter test` command is not available on Windows (See [#8516](https://github.com/flutter/flutter/issues/8516))._
-
 To automatically find all files named `_test.dart` inside a package's `test/` subdirectory, and run them inside the flutter shell as a test, use the `flutter test` command, e.g:
 
  * `cd examples/stocks`
@@ -141,7 +139,7 @@ flutter shell. To run the tests, ensure that no devices are connected,
 then navigate to `flutter_tools` and execute:
 
 ```shell
-DART_VM_OPTIONS=--assert-initializer ../../bin/cache/dart-sdk/bin/pub run test
+../../bin/cache/dart-sdk/bin/pub run test
 ```
 
 The pre-built flutter tool runs in release mode with the observatory off by default.

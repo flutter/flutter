@@ -50,7 +50,7 @@ class _StockSymbolView extends StatelessWidget {
             text: new TextSpan(
               style: DefaultTextStyle.of(context).style.merge(const TextStyle(fontSize: 8.0)),
               text: 'Prices may be delayed by ',
-              children: <TextSpan>[
+              children: const <TextSpan>[
                 const TextSpan(text: 'several', style: const TextStyle(fontStyle: FontStyle.italic)),
                 const TextSpan(text: ' years.'),
               ]

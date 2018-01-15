@@ -262,7 +262,11 @@ class DefaultTabController extends StatefulWidget {
   /// Defaults to zero.
   final int initialIndex;
 
-  /// This widget's child. Often a [Scaffold] whose [AppBar] includes a [TabBar].
+  /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Scaffold] whose [AppBar] includes a [TabBar].
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The closest instance of this class that encloses the given context.

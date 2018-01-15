@@ -552,7 +552,8 @@ class Navigator extends StatefulWidget {
   ///
   /// Returns a [Future] that completes to the `result` value passed to [pop]
   /// when the pushed route is popped off the navigator.
-  static Future<dynamic> push(BuildContext context, Route<dynamic> route) {
+  @optionalTypeArgs
+  static Future<T> push<T>(BuildContext context, Route<T> route) {
     return Navigator.of(context).push(route);
   }
 
@@ -913,7 +914,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// Returns a [Future] that completes to the `result` value passed to [pop]
   /// when the pushed route is popped off the navigator.
-  Future<dynamic> push(Route<dynamic> route) {
+  Future<Object> push(Route<Object> route) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; }());
     assert(route != null);

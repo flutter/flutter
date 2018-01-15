@@ -49,6 +49,7 @@ import 'widgets_localizations.dart';
 ///   * pl - Polish
 ///   * ps - Pashto
 ///   * pt - Portuguese
+///   * ro - Romanian
 ///   * ru - Russian
 ///   * th - Thai
 ///   * tr - Turkish
@@ -273,6 +274,16 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get rowsPerPageTitle => _translationBundle.rowsPerPageTitle;
 
   @override
+  String tabLabel({int tabIndex, int tabCount}) {
+    assert(tabIndex >= 1);
+    assert(tabCount >= 1);
+    final String template = _translationBundle.tabLabel;
+    return template
+      .replaceFirst(r'$tabIndex', formatDecimal(tabIndex))
+      .replaceFirst(r'tabCount', formatDecimal(tabCount));
+  }
+
+  @override
   String selectedRowCountTitle(int selectedRowCount) {
     // TODO(hmuller): the rules for mapping from an integer value to
     // "one" or "two" etc. are locale specific and an additional "few" category
@@ -333,6 +344,15 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get modalBarrierDismissLabel => _translationBundle.modalBarrierDismissLabel;
+
+  @override
+  String get signedInLabel => _translationBundle.signedInLabel;
+
+  @override
+  String get hideAccountsLabel => _translationBundle.hideAccountsLabel;
+
+  @override
+  String get showAccountsLabel => _translationBundle.showAccountsLabel;
 
   /// The [TimeOfDayFormat] corresponding to one of the following supported
   /// patterns:
@@ -485,6 +505,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'ja',  // Japanese
     'ps',  // Pashto
     'pt',  // Portugese
+    'ro',  // Romanian
     'ru',  // Russian
     'ur',  // Urdu
     'zh',  // Simplified Chinese

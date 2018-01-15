@@ -21,15 +21,23 @@ import 'transitions.dart';
 ///
 /// With mixed-direction text, both handles may be the same type. Examples:
 ///
-/// * LTR text: 'the <quick brown> fox':
-///   The '<' is drawn with the [left] type, the '>' with the [right]
+/// * LTR text: 'the &lt;quick brown&gt; fox':
 ///
-/// * RTL text: 'xof <nworb kciuq> eht':
+///   The '&lt;' is drawn with the [left] type, the '&gt;' with the [right]
+///
+/// * RTL text: 'XOF &lt;NWORB KCIUQ&gt; EHT':
+///
 ///   Same as above.
 ///
-/// * mixed text: '<the nwor<b quick fox'
-///   Here 'the b' is selected, but 'brown' is RTL. Both are drawn with the
-///   [left] type.
+/// * mixed text: '&lt;the NWOR&lt;B KCIUQ fox'
+///
+///   Here 'the QUICK B' is selected, but 'QUICK BROWN' is RTL. Both are drawn
+///   with the [left] type.
+///
+/// See also:
+///
+///  * [TextDirection], which discusses left-to-right and right-to-left text in
+///    more detail.
 enum TextSelectionHandleType {
   /// The selection handle is to the left of the selection end point.
   left,

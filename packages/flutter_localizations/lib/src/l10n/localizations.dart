@@ -39,6 +39,7 @@ class TranslationBundle {
   String get pageRowsInfoTitle => parent?.pageRowsInfoTitle;
   String get pageRowsInfoTitleApproximate => parent?.pageRowsInfoTitleApproximate;
   String get rowsPerPageTitle => parent?.rowsPerPageTitle;
+  String get tabLabel => parent?.tabLabel;
   String get selectedRowCountTitleOther => parent?.selectedRowCountTitleOther;
   String get cancelButtonLabel => parent?.cancelButtonLabel;
   String get closeButtonLabel => parent?.closeButtonLabel;
@@ -53,6 +54,9 @@ class TranslationBundle {
   String get postMeridiemAbbreviation => parent?.postMeridiemAbbreviation;
   String get timePickerHourModeAnnouncement => parent?.timePickerHourModeAnnouncement;
   String get timePickerMinuteModeAnnouncement => parent?.timePickerMinuteModeAnnouncement;
+  String get signedInLabel => parent?.signedInLabel;
+  String get hideAccountsLabel => parent?.hideAccountsLabel;
+  String get showAccountsLabel => parent?.showAccountsLabel;
   String get modalBarrierDismissLabel => parent?.modalBarrierDismissLabel;
 }
 
@@ -80,6 +84,7 @@ class _Bundle_ar extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'من $firstRow إلى $lastRow من إجمالي $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'من $firstRow إلى $lastRow من إجمالي $rowCount تقريبًا';
   @override String get rowsPerPageTitle => r'عدد الصفوف في الصفحة:';
+  @override String get tabLabel => r'من $tabIndex من إجمالي $tabCount';
   @override String get selectedRowCountTitleOther => r'تم اختيار $selectedRowCount عنصر';
   @override String get cancelButtonLabel => r'إلغاء';
   @override String get closeButtonLabel => r'إغلاق';
@@ -94,6 +99,9 @@ class _Bundle_ar extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'م';
   @override String get timePickerHourModeAnnouncement => r'اختيار الساعات';
   @override String get timePickerMinuteModeAnnouncement => r'اختيار الدقائق';
+  @override String get signedInLabel => r'تم تسجيل الدخول';
+  @override String get hideAccountsLabel => r'إخفاء الحسابات';
+  @override String get showAccountsLabel => r'عرض الحسابات';
   @override String get modalBarrierDismissLabel => r'تجاهل';
 }
 
@@ -116,6 +124,7 @@ class _Bundle_de extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow von $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow von etwa $rowCount';
   @override String get rowsPerPageTitle => r'Zeilen pro Seite:';
+  @override String get tabLabel => r'Tabulator $tabIndex von $tabCount';
   @override String get selectedRowCountTitleZero => r'Keine Objekte ausgewählt';
   @override String get selectedRowCountTitleOne => r'1 Element ausgewählt';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount Elemente ausgewählt';
@@ -132,6 +141,9 @@ class _Bundle_de extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'NACHM.';
   @override String get timePickerHourModeAnnouncement => r'Stunden auswählen';
   @override String get timePickerMinuteModeAnnouncement => r'Minuten auswählen';
+  @override String get signedInLabel => r'Angemeldet';
+  @override String get hideAccountsLabel => r'Konten ausblenden';
+  @override String get showAccountsLabel => r'Konten anzeigen';
   @override String get modalBarrierDismissLabel => r'Schließen';
 }
 
@@ -154,6 +166,7 @@ class _Bundle_en extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow of $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow of about $rowCount';
   @override String get rowsPerPageTitle => r'Rows per page:';
+  @override String get tabLabel => r'Tab $tabIndex of $tabCount';
   @override String get selectedRowCountTitleZero => r'No items selected';
   @override String get selectedRowCountTitleOne => r'1 item selected';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount items selected';
@@ -171,6 +184,9 @@ class _Bundle_en extends TranslationBundle {
   @override String get timePickerHourModeAnnouncement => r'Select hours';
   @override String get timePickerMinuteModeAnnouncement => r'Select minutes';
   @override String get modalBarrierDismissLabel => r'Dismiss';
+  @override String get signedInLabel => r'Signed in';
+  @override String get hideAccountsLabel => r'Hide accounts';
+  @override String get showAccountsLabel => r'Show accounts';
 }
 
 // ignore: camel_case_types
@@ -192,6 +208,7 @@ class _Bundle_es extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow‑$lastRow de $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow‑$lastRow de aproximadamente $rowCount';
   @override String get rowsPerPageTitle => r'Filas por página:';
+  @override String get tabLabel => r'$tabIndex de $tabCount';
   @override String get selectedRowCountTitleZero => r'No se han seleccionado elementos';
   @override String get selectedRowCountTitleOne => r'1 elemento seleccionado';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount elementos seleccionados';
@@ -208,6 +225,9 @@ class _Bundle_es extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'P.M.';
   @override String get timePickerHourModeAnnouncement => r'Seleccionar horas';
   @override String get timePickerMinuteModeAnnouncement => r'Seleccionar minutos';
+  @override String get signedInLabel => r'Registrado';
+  @override String get hideAccountsLabel => r'Ocultar cuentas';
+  @override String get showAccountsLabel => r'Mostrar cuentas';
   @override String get modalBarrierDismissLabel => r'Ignorar';
 }
 
@@ -231,6 +251,7 @@ class _Bundle_fa extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow از $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow از حدود $rowCount';
   @override String get rowsPerPageTitle => r'ردیف در هر صفحه:';
+  @override String get tabLabel => r'$tabIndex از $tabCount';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount مورد انتخاب شدند';
   @override String get cancelButtonLabel => r'لغو';
   @override String get closeButtonLabel => r'بستن';
@@ -245,6 +266,9 @@ class _Bundle_fa extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'ب.ظ.';
   @override String get timePickerHourModeAnnouncement => r'انتخاب ساعت';
   @override String get timePickerMinuteModeAnnouncement => r'انتخاب دقیقه';
+  @override String get signedInLabel => r'وارد شدن';
+  @override String get hideAccountsLabel => r'پنهان کردن حساب ها';
+  @override String get showAccountsLabel => r'نمایش حساب ها';
   @override String get modalBarrierDismissLabel => r'رد کردن';
 }
 
@@ -267,6 +291,7 @@ class _Bundle_fr extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow – $lastRow sur $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow – $lastRow sur environ $rowCount';
   @override String get rowsPerPageTitle => r'Lignes par page :';
+  @override String get tabLabel => r'$tabIndex sur $tabCount';
   @override String get selectedRowCountTitleZero => r'Aucun élément sélectionné';
   @override String get selectedRowCountTitleOne => r'1 élément sélectionné';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount éléments sélectionnés';
@@ -283,6 +308,9 @@ class _Bundle_fr extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'Sélectionner une heure';
   @override String get timePickerMinuteModeAnnouncement => r'Sélectionner des minutes';
+  @override String get signedInLabel => r'Connecté';
+  @override String get hideAccountsLabel => r'Masquer les comptes';
+  @override String get showAccountsLabel => r'Afficher les comptes';
   @override String get modalBarrierDismissLabel => r'Ignorer';
 }
 
@@ -345,6 +373,7 @@ class _Bundle_he extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$lastRow–$firstRow מתוך $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$lastRow–$firstRow מתוך כ-$rowCount';
   @override String get rowsPerPageTitle => r'שורות בכל דף:';
+  @override String get tabLabel => r'$tabIndex מתוך $tabCount';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount פריטים נבחרו';
   @override String get cancelButtonLabel => r'ביטול';
   @override String get closeButtonLabel => r'סגירה';
@@ -359,6 +388,9 @@ class _Bundle_he extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'בחירת שעות';
   @override String get timePickerMinuteModeAnnouncement => r'בחירת דקות';
+  @override String get signedInLabel => r'מחובר';
+  @override String get hideAccountsLabel => r'הסתר חשבונות';
+  @override String get showAccountsLabel => r'הצג חשבונות';
   @override String get modalBarrierDismissLabel => r'סגירה';
 }
 
@@ -382,6 +414,7 @@ class _Bundle_it extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow-$lastRow di $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow-$lastRow di circa $rowCount';
   @override String get rowsPerPageTitle => r'Righe per pagina:';
+  @override String get tabLabel => r'$tabIndex di $tabCount';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount elementi selezionati';
   @override String get cancelButtonLabel => r'ANNULLA';
   @override String get closeButtonLabel => r'CHIUDI';
@@ -396,6 +429,9 @@ class _Bundle_it extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'Seleziona le ore';
   @override String get timePickerMinuteModeAnnouncement => r'Seleziona i minuti';
+  @override String get signedInLabel => r'Registrato';
+  @override String get hideAccountsLabel => r'Nascondi account';
+  @override String get showAccountsLabel => r'Mostra account';
   @override String get modalBarrierDismissLabel => r'Ignora';
 }
 
@@ -419,6 +455,7 @@ class _Bundle_ja extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow - $lastRow 行（合計 $rowCount 行）';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow – $lastRow 行（合計約 $rowCount 行）';
   @override String get rowsPerPageTitle => r'ページあたりの行数:';
+  @override String get tabLabel => r'$tabIndex 行（合計 $tabCount 行）';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount 件のアイテムを選択中';
   @override String get cancelButtonLabel => r'キャンセル';
   @override String get closeButtonLabel => r'閉じる';
@@ -433,6 +470,9 @@ class _Bundle_ja extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'時間を選択';
   @override String get timePickerMinuteModeAnnouncement => r'分を選択';
+  @override String get signedInLabel => r'ログイン中';
+  @override String get hideAccountsLabel => r'アカウントを隠す';
+  @override String get showAccountsLabel => r'アカウントを表示する';
   @override String get modalBarrierDismissLabel => r'閉じる';
 }
 
@@ -455,6 +495,7 @@ class _Bundle_ko extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$rowCount행 중 $firstRow~$lastRow행';
   @override String get pageRowsInfoTitleApproximate => r'약 $rowCount행 중 $firstRow~$lastRow행';
   @override String get rowsPerPageTitle => r'페이지당 행 수:';
+  @override String get tabLabel => r'$tabCount행 중 $tabIndex행';
   @override String get selectedRowCountTitleOne => r'항목 1개 선택됨';
   @override String get selectedRowCountTitleOther => r'항목 $selectedRowCount개 선택됨';
   @override String get cancelButtonLabel => r'취소';
@@ -470,6 +511,9 @@ class _Bundle_ko extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'오후';
   @override String get timePickerHourModeAnnouncement => r'시간 선택';
   @override String get timePickerMinuteModeAnnouncement => r'분 선택';
+  @override String get signedInLabel => r'로그인 함';
+  @override String get hideAccountsLabel => r'계정 숨기기';
+  @override String get showAccountsLabel => r'계정 표시';
   @override String get modalBarrierDismissLabel => r'버리다';
 }
 
@@ -492,6 +536,7 @@ class _Bundle_nl extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow-$lastRow van $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow-$lastRow van ongeveer $rowCount';
   @override String get rowsPerPageTitle => r'Rijen per pagina:';
+  @override String get tabLabel => r'$tabIndex van $tabCount';
   @override String get selectedRowCountTitleOne => r'1 item geselecteerd';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount items geselecteerd';
   @override String get cancelButtonLabel => r'ANNULEREN';
@@ -507,6 +552,9 @@ class _Bundle_nl extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'pm';
   @override String get timePickerHourModeAnnouncement => r'Uren selecteren';
   @override String get timePickerMinuteModeAnnouncement => r'Minuten selecteren';
+  @override String get signedInLabel => r'Ingelogd';
+  @override String get hideAccountsLabel => r'Verberg accounts';
+  @override String get showAccountsLabel => r'Toon accounts';
   @override String get modalBarrierDismissLabel => r'ontslaan';
 }
 
@@ -531,6 +579,7 @@ class _Bundle_pl extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow z $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow z około $rowCount';
   @override String get rowsPerPageTitle => r'Wiersze na stronie:';
+  @override String get tabLabel => r'$tabIndex z $tabCount';
   @override String get selectedRowCountTitleOne => r'1 wybrany element';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount wybranego elementu';
   @override String get cancelButtonLabel => r'ANULUJ';
@@ -546,6 +595,9 @@ class _Bundle_pl extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'Wybierz godziny';
   @override String get timePickerMinuteModeAnnouncement => r'Wybierz minuty';
+  @override String get signedInLabel => r'Zapisany';
+  @override String get hideAccountsLabel => r'Ukryj konta';
+  @override String get showAccountsLabel => r'Pokaż konta';
   @override String get modalBarrierDismissLabel => r'oddalić';
 }
 
@@ -568,6 +620,7 @@ class _Bundle_ps extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow د $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow څخه $rowCount د';
   @override String get rowsPerPageTitle => r'د هرې پاڼې پاڼې:';
+  @override String get tabLabel => r'$tabIndex د $tabCount';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount توکي غوره شوي';
   @override String get cancelButtonLabel => r'لغوه کول';
   @override String get closeButtonLabel => r'تړل';
@@ -580,6 +633,9 @@ class _Bundle_ps extends TranslationBundle {
   @override String get viewLicensesButtonLabel => r'لیدلس وګورئ';
   @override String get timePickerHourModeAnnouncement => r'وختونه وټاکئ';
   @override String get timePickerMinuteModeAnnouncement => r'منې غوره کړئ';
+  @override String get signedInLabel => r'ننوتل';
+  @override String get hideAccountsLabel => r'حسابونه پټ کړئ';
+  @override String get showAccountsLabel => r'حسابونه ښکاره کړئ';
   @override String get modalBarrierDismissLabel => r'رد کړه';
 }
 
@@ -605,6 +661,7 @@ class _Bundle_pt extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow – $lastRow de $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow – $lastRow de aproximadamente $rowCount';
   @override String get rowsPerPageTitle => r'Linhas por página:';
+  @override String get tabLabel => r'$tabIndex de $tabCount';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount itens selecionados';
   @override String get cancelButtonLabel => r'CANCELAR';
   @override String get closeButtonLabel => r'FECHAR';
@@ -617,7 +674,52 @@ class _Bundle_pt extends TranslationBundle {
   @override String get viewLicensesButtonLabel => r'VER LICENÇAS';
   @override String get timePickerHourModeAnnouncement => r'Selecione as horas';
   @override String get timePickerMinuteModeAnnouncement => r'Selecione os minutos';
+  @override String get signedInLabel => r'Assinado';
+  @override String get hideAccountsLabel => r'Ocultar contas';
+  @override String get showAccountsLabel => r'Mostrar contas';
   @override String get modalBarrierDismissLabel => r'Dispensar';
+}
+
+// ignore: camel_case_types
+class _Bundle_ro extends TranslationBundle {
+  const _Bundle_ro() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Deschide meniul de navigare';
+  @override String get backButtonTooltip => r'Înapoi';
+  @override String get closeButtonTooltip => r'Închide';
+  @override String get deleteButtonTooltip => r'Șterge';
+  @override String get nextMonthTooltip => r'Luna următoare';
+  @override String get previousMonthTooltip => r'Luna precedentă';
+  @override String get nextPageTooltip => r'Pagina următoare';
+  @override String get previousPageTooltip => r'Pagina precedentă';
+  @override String get showMenuTooltip => r'Afișează meniul';
+  @override String get aboutListTileTitle => r'Despre $applicationName';
+  @override String get licensesPageTitle => r'Licențe';
+  @override String get pageRowsInfoTitle => r'$firstRow – $lastRow din $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow – $lastRow din aproximativ $rowCount';
+  @override String get rowsPerPageTitle => r'Linii pe pagină:';
+  @override String get tabLabel => r'Tab $tabIndex din $tabCount';
+  @override String get selectedRowCountTitleZero => r'Nu există elemente selectate';
+  @override String get selectedRowCountTitleOne => r'1 element selectat';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount elemente selectate';
+  @override String get cancelButtonLabel => r'ANULEAZĂ';
+  @override String get closeButtonLabel => r'ÎNCHIDE';
+  @override String get continueButtonLabel => r'CONTINUĂ';
+  @override String get copyButtonLabel => r'COPIAZĂ';
+  @override String get cutButtonLabel => r'TAIE';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'LIPEȘTE';
+  @override String get selectAllButtonLabel => r'SELECTEAZĂ TOT';
+  @override String get viewLicensesButtonLabel => r'AFIȘEAZĂ LICENȚELE';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get timePickerHourModeAnnouncement => r'Selectați orele';
+  @override String get timePickerMinuteModeAnnouncement => r'Selectați minutele';
+  @override String get signedInLabel => r'Autentificat';
+  @override String get hideAccountsLabel => r'Ascunde conturile';
+  @override String get showAccountsLabel => r'Afișează conturile';
+  @override String get modalBarrierDismissLabel => r'Ignoră';
 }
 
 // ignore: camel_case_types
@@ -639,6 +741,7 @@ class _Bundle_ru extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow из $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow из примерно $rowCount';
   @override String get rowsPerPageTitle => r'Строк на странице:';
+  @override String get tabLabel => r'Закладка $tabIndex из $tabCount';
   @override String get aboutListTileTitle => r'$applicationName: сведения';
   @override String get licensesPageTitle => r'Лицензии';
   @override String get selectedRowCountTitleZero => r'Строки не выбраны';
@@ -657,6 +760,9 @@ class _Bundle_ru extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'Выберите часы';
   @override String get timePickerMinuteModeAnnouncement => r'Выберите минуты';
+  @override String get signedInLabel => r'Залогинен';
+  @override String get hideAccountsLabel => r'Спрятать аккаунты';
+  @override String get showAccountsLabel => r'Показать аккаунты';
   @override String get modalBarrierDismissLabel => r'Закрыть';
 }
 
@@ -679,6 +785,7 @@ class _Bundle_th extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow-$lastRow จาก $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow จากประมาณ $rowCount';
   @override String get rowsPerPageTitle => r'แถวต่อหน้า:';
+  @override String get tabLabel => r'$tabIndex จาก $tabCount';
   @override String get selectedRowCountTitleOne => r'เลือกแล้ว 1 รายการ';
   @override String get selectedRowCountTitleOther => r'เลือกแล้ว $selectedRowCount รายการ';
   @override String get cancelButtonLabel => r'ยกเลิก';
@@ -694,6 +801,9 @@ class _Bundle_th extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'เลือกชั่วโมง';
   @override String get timePickerMinuteModeAnnouncement => r'เลือกนาที';
+  @override String get signedInLabel => r'ลงทะเบียนเข้า';
+  @override String get hideAccountsLabel => r'ซ่อนบัญชี';
+  @override String get showAccountsLabel => r'แสดงบัญชี';
   @override String get modalBarrierDismissLabel => r'ยกเลิก';
 }
 
@@ -716,6 +826,7 @@ class _Bundle_tr extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow-$lastRow / $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow-$lastRow / $rowCount';
   @override String get rowsPerPageTitle => r'Sayfa başına satır sayısı:';
+  @override String get tabLabel => r'$tabIndex, $tabCount içinde';
   @override String get selectedRowCountTitleOne => r'1 öğe seçildi';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount öğe seçildi';
   @override String get cancelButtonLabel => r'İPTAL';
@@ -731,6 +842,9 @@ class _Bundle_tr extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'ÖS';
   @override String get timePickerHourModeAnnouncement => r'Saati seçin';
   @override String get timePickerMinuteModeAnnouncement => r'Dakikayı seçin';
+  @override String get signedInLabel => r'Yetkili';
+  @override String get hideAccountsLabel => r'Hesapları gizle';
+  @override String get showAccountsLabel => r'Hesapları göster';
   @override String get modalBarrierDismissLabel => r'Reddet';
 }
 
@@ -754,6 +868,7 @@ class _Bundle_ur extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow از $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow $rowCount میں سے تقریباً';
   @override String get rowsPerPageTitle => r'قطاریں فی صفحہ:';
+  @override String get tabLabel => r'$tabIndex از $tabCount';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount آئٹمز منتخب کیے گئے';
   @override String get cancelButtonLabel => r'منسوخ کریں';
   @override String get closeButtonLabel => r'بند کریں';
@@ -768,6 +883,9 @@ class _Bundle_ur extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'گھنٹے منتخب کریں';
   @override String get timePickerMinuteModeAnnouncement => r'منٹ منتخب کریں';
+  @override String get signedInLabel => r'سائن ان';
+  @override String get hideAccountsLabel => r'اکاؤنٹس چھپائیں';
+  @override String get showAccountsLabel => r'اکاؤنٹس دکھائیں';
   @override String get modalBarrierDismissLabel => r'برطرف';
 }
 
@@ -787,6 +905,7 @@ class _Bundle_zh extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'第 $firstRow-$lastRow 行（共 $rowCount 行）';
   @override String get pageRowsInfoTitleApproximate => r'第 $firstRow-$lastRow 行（共约 $rowCount 行）';
   @override String get rowsPerPageTitle => r'每页行数：';
+  @override String get tabLabel => r'第 $tabIndex 行（共 $tabCount 行）';
   @override String get selectedRowCountTitleOther => r'已选择 $selectedRowCount 项内容';
   @override String get cancelButtonLabel => r'取消';
   @override String get continueButtonLabel => r'继续';
@@ -805,6 +924,9 @@ class _Bundle_zh extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'下午';
   @override String get timePickerHourModeAnnouncement => r'选择小时';
   @override String get timePickerMinuteModeAnnouncement => r'选择分钟';
+  @override String get signedInLabel => r'登录';
+  @override String get hideAccountsLabel => r'隐藏帐户';
+  @override String get showAccountsLabel => r'显示帐户';
   @override String get modalBarrierDismissLabel => r'关闭';
 }
 
@@ -1379,6 +1501,8 @@ TranslationBundle translationBundleForLocale(Locale locale) {
       }
       return const _Bundle_pt();
     }
+    case 'ro':
+      return const _Bundle_ro();
     case 'ru':
       return const _Bundle_ru();
     case 'th':

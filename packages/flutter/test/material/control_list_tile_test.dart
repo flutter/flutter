@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -94,35 +94,47 @@ void main() {
         ],
       ),
     ));
+
     // This test verifies that the label and the control get merged.
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 1,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: null,
-          flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasCheckedState,
+            SemanticsFlag.isChecked,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled
+          ],
           actions: SemanticsAction.tap.index,
           label: 'aaa\nAAA',
         ),
         new TestSemantics.rootChild(
-          id: 4,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: new Matrix4.translationValues(0.0, 56.0, 0.0),
-          flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasCheckedState,
+            SemanticsFlag.isChecked,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled
+          ],
           actions: SemanticsAction.tap.index,
           label: 'bbb\nBBB',
         ),
         new TestSemantics.rootChild(
-          id: 7,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: new Matrix4.translationValues(0.0, 112.0, 0.0),
-          flags: SemanticsFlags.hasCheckedState.index,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasCheckedState,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled
+          ],
           actions: SemanticsAction.tap.index,
           label: 'CCC\nccc',
         ),
       ],
-    )));
+    ), ignoreId: true));
   });
 
 }

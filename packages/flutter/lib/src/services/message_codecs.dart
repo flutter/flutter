@@ -179,9 +179,7 @@ class JSONMethodCodec implements MethodCodec {
 ///  * null: null
 ///  * [bool]\: `java.lang.Boolean`
 ///  * [int]\: `java.lang.Integer` for values that are representable using 32-bit
-///    two's complement; otherwise, `java.lang.Long` for values that are
-///    representable using 64-bit two's complement; otherwise,
-///    `java.math.BigInteger`.
+///    two's complement; `java.lang.Long` otherwise
 ///  * [double]\: `java.lang.Double`
 ///  * [String]\: `java.lang.String`
 ///  * [Uint8List]\: `byte[]`
@@ -196,9 +194,7 @@ class JSONMethodCodec implements MethodCodec {
 ///  * null: nil
 ///  * [bool]\: `NSNumber numberWithBool:`
 ///  * [int]\: `NSNumber numberWithInt:` for values that are representable using
-///    32-bit two's complement; otherwise, `NSNumber numberWithLong:` for values
-///    that are representable using 64-bit two's complement; otherwise,
-///    `FlutterStandardBigInteger`.
+///    32-bit two's complement; `NSNumber numberWithLong:` otherwise
 ///  * [double]\: `NSNumber numberWithDouble:`
 ///  * [String]\: `NSString`
 ///  * [Uint8List], [Int32List], [Int64List], [Float64List]\:
@@ -224,11 +220,8 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   //   in the type byte (using _kNull, _kTrue, _kFalse)
   // * Integers representable in 32 bits are encoded using 4 bytes two's
   //   complement representation.
-  // * Larger integers representable in 64 bits are encoded using 8 bytes two's
-  //   complement representation.
-  // * Still larger integers are encoded using their hexadecimal string
-  //   representation. First the length of that is encoded in the expanding
-  //   format, then follows the UTF-8 representation of the hex string.
+  // * Larger integers are encoded using 8 bytes two's complement
+  //   representation.
   // * doubles are encoded using the IEEE 754 64-bit double-precision binary
   //   format.
   // * Strings are encoded using their UTF-8 representation. First the length
@@ -306,14 +299,9 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
       if (-0x7fffffff - 1 <= value && value <= 0x7fffffff) {
         buffer.putUint8(_kInt32);
         buffer.putInt32(value);
-      } else if (-0x7fffffffffffffff - 1 <= value && value <= 0x7fffffffffffffff) {
+      } else {
         buffer.putUint8(_kInt64);
         buffer.putInt64(value);
-      } else {
-        buffer.putUint8(_kLargeInt);
-        final List<int> hex = UTF8.encoder.convert(value.toRadixString(16));
-        _writeSize(buffer, hex.length);
-        buffer.putUint8List(hex);
       }
     } else if (value is double) {
       buffer.putUint8(_kFloat64);
@@ -388,6 +376,9 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         result = buffer.getInt64();
         break;
       case _kLargeInt:
+        // Flutter Engine APIs to use large ints have been deprecated on
+        // 2018-01-09 and will be made unavailable.
+        // TODO(mravn): remove this case once the APIs are unavailable.
         final int length = _readSize(buffer);
         final String hex = UTF8.decoder.convert(buffer.getUint8List(length));
         result = int.parse(hex, radix: 16);
@@ -467,7 +458,6 @@ class StandardMethodCodec implements MethodCodec {
     return buffer.done();
   }
 
-
   @override
   MethodCall decodeMethodCall(ByteData methodCall) {
     final ReadBuffer buffer = new ReadBuffer(methodCall);
@@ -479,7 +469,6 @@ class StandardMethodCodec implements MethodCodec {
       throw const FormatException('Invalid method call');
   }
 
-
   @override
   ByteData encodeSuccessEnvelope(dynamic result) {
     final WriteBuffer buffer = new WriteBuffer();
@@ -487,7 +476,6 @@ class StandardMethodCodec implements MethodCodec {
     StandardMessageCodec._writeValue(buffer, result);
     return buffer.done();
   }
-
 
   @override
   ByteData encodeErrorEnvelope({@required String code, String message, dynamic details}) {

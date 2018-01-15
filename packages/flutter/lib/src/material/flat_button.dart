@@ -36,6 +36,26 @@ import 'theme.dart';
 ///
 /// Flat buttons will expand to fit the child widget, if necessary.
 ///
+/// ## Troubleshooting
+///
+/// ### Why does my button not have splash effects?
+///
+/// If you place a [FlatButton] on top of an [Image], [Container],
+/// [DecoratedBox], or some other widget that draws an opaque background between
+/// the [FlatButton] and its ancestor [Material], the splashes will not be
+/// visible. This is because ink splashes draw in the [Material] itself, as if
+/// the ink was spreading inside the material.
+///
+/// The [Ink] widget can be used as a replacement for [Image], [Container], or
+/// [DecoratedBox] to ensure that the image or decoration also paints in the
+/// [Material] itself, below the ink.
+///
+/// If this is not possible for some reason, e.g. because you are using an
+/// opaque [CustomPaint] widget, alternatively consider using a second
+/// [Material] above the opaque widget but below the [FlatButton] (as an
+/// ancestor to the button). The [MaterialType.transparency] material kind can
+/// be used for this purpose.
+///
 /// See also:
 ///
 ///  * [RaisedButton], which is a button that hovers above the containing

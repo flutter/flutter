@@ -15,6 +15,7 @@
 library material;
 
 export 'src/material/about.dart';
+export 'src/material/animated_icons.dart';
 export 'src/material/app.dart';
 export 'src/material/app_bar.dart';
 export 'src/material/arc.dart';
@@ -51,9 +52,12 @@ export 'src/material/grid_tile.dart';
 export 'src/material/grid_tile_bar.dart';
 export 'src/material/icon_button.dart';
 export 'src/material/icons.dart';
+export 'src/material/ink_decoration.dart';
 export 'src/material/ink_highlight.dart';
+export 'src/material/ink_ripple.dart';
 export 'src/material/ink_splash.dart';
 export 'src/material/ink_well.dart';
+export 'src/material/input_border.dart';
 export 'src/material/input_decorator.dart';
 export 'src/material/list_tile.dart';
 export 'src/material/material.dart';

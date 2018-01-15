@@ -348,6 +348,64 @@ Your Xcode version may be too old for your iOS version.
   }
 }
 
+/// Decodes an encoded syslog string to a UTF-8 representation.
+///
+/// Apple's syslog logs are encoded in 7-bit form. Input bytes are encoded as follows:
+/// 1. 0x00 to 0x19: non-printing range. Some ignored, some encoded as <...>.
+/// 2. 0x20 to 0x7f: as-is, with the exception of 0x5c (backslash).
+/// 3. 0x5c (backslash): octal representation \134.
+/// 4. 0x80 to 0x9f: \M^x (using control-character notation for range 0x00 to 0x40).
+/// 5. 0xa0: octal representation \240.
+/// 6. 0xa1 to 0xf7: \M-x (where x is the input byte stripped of its high-order bit).
+/// 7. 0xf8 to 0xff: unused in 4-byte UTF-8.
+String decodeSyslog(String line) {
+  // UTF-8 values for \, M, -, ^.
+  const int kBackslash = 0x5c;
+  const int kM = 0x4d;
+  const int kDash = 0x2d;
+  const int kCaret = 0x5e;
+
+  // Mask for the UTF-8 digit range.
+  const int kNum = 0x30;
+
+  // Returns true when `byte` is within the UTF-8 7-bit digit range (0x30 to 0x39).
+  bool isDigit(int byte) => (byte & 0xf0) == kNum;
+
+  // Converts a three-digit ASCII (UTF-8) representation of an octal number `xyz` to an integer.
+  int decodeOctal(int x, int y, int z) => (x & 0x3) << 6 | (y & 0x7) << 3 | z & 0x7;
+
+  try {
+    final List<int> bytes = UTF8.encode(line);
+    final List<int> out = <int>[];
+    for (int i = 0; i < bytes.length; ) {
+      if (bytes[i] != kBackslash || i > bytes.length - 4) {
+        // Unmapped byte: copy as-is.
+        out.add(bytes[i++]);
+      } else {
+        // Mapped byte: decode next 4 bytes.
+        if (bytes[i + 1] == kM && bytes[i + 2] == kCaret) {
+          // \M^x form: bytes in range 0x80 to 0x9f.
+          out.add((bytes[i + 3] & 0x7f) + 0x40);
+        } else if (bytes[i + 1] == kM && bytes[i + 2] == kDash) {
+          // \M-x form: bytes in range 0xa0 to 0xf7.
+          out.add(bytes[i + 3] | 0x80);
+        } else if (bytes.getRange(i + 1, i + 3).every(isDigit)) {
+          // \ddd form: octal representation (only used for \134 and \240).
+          out.add(decodeOctal(bytes[i + 1], bytes[i + 2], bytes[i + 3]));
+        } else {
+          // Unknown form: copy as-is.
+          out.addAll(bytes.getRange(0, 4));
+        }
+        i += 4;
+      }
+    }
+    return UTF8.decode(out);
+  } catch (_) {
+    // Unable to decode line: return as-is.
+    return line;
+  }
+}
+
 class _IOSDeviceLogReader extends DeviceLogReader {
   RegExp _lineRegex;
 
@@ -394,7 +452,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     if (match != null) {
       final String logLine = line.substring(match.end);
       // Only display the log line after the initial device and executable information.
-      _linesController.add(logLine);
+      _linesController.add(decodeSyslog(logLine));
     }
   }
 

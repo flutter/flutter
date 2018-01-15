@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags, SemanticsAction;
+import 'dart:ui' show SemanticsFlag, SemanticsAction;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -15,10 +15,17 @@ import '../rendering/recording_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget boilerplate({ Widget child, TextDirection textDirection: TextDirection.ltr }) {
-  return new Directionality(
-    textDirection: textDirection,
-    child: new Material(
-      child: child,
+  return new Localizations(
+    locale: const Locale('en', 'US'),
+    delegates: <LocalizationsDelegate<dynamic>>[
+      DefaultMaterialLocalizations.delegate,
+      DefaultWidgetsLocalizations.delegate,
+    ],
+    child: new Directionality(
+      textDirection: textDirection,
+      child: new Material(
+        child: child,
+      ),
     ),
   );
 }
@@ -115,8 +122,8 @@ Widget buildLeftRightApp({ List<String> tabs, String value }) {
             tabs: tabs.map((String tab) => new Tab(text: tab)).toList(),
           ),
         ),
-        body: new TabBarView(
-          children: <Widget>[
+        body: const TabBarView(
+          children: const <Widget>[
             const Center(child: const Text('LEFT CHILD')),
             const Center(child: const Text('RIGHT CHILD'))
           ]
@@ -158,6 +165,10 @@ class TestScrollPhysics extends ScrollPhysics {
 }
 
 void main() {
+  setUp(() {
+    debugResetSemanticsIdCounter();
+  });
+
   testWidgets('TabBar tap selects tab', (WidgetTester tester) async {
     final List<String> tabs = <String>['A', 'B', 'C'];
 
@@ -527,7 +538,7 @@ void main() {
           ),
           body: new TabBarView(
             controller: controller,
-            children: <Widget>[
+            children: const <Widget>[
               const Center(child: const Text('LEFT CHILD')),
               const Center(child: const Text('RIGHT CHILD'))
             ]
@@ -586,7 +597,7 @@ void main() {
           ),
           body: new TabBarView(
             controller: controller,
-            children: <Widget>[
+            children: const <Widget>[
               const Center(child: const Text('CHILD A')),
               const Center(child: const Text('CHILD B')),
               const Center(child: const Text('CHILD C')),
@@ -679,7 +690,7 @@ void main() {
       boilerplate(
         child: new TabBarView(
           controller: controller,
-          children: <Widget>[ const Text('First'), const Text('Second') ],
+          children: const <Widget>[ const Text('First'), const Text('Second') ],
         ),
       ),
     );
@@ -778,7 +789,7 @@ void main() {
         child: new TabBar(
           key: new UniqueKey(),
           controller: controller,
-          tabs: <Widget>[ const Text('A'), const Text('B') ],
+          tabs: const <Widget>[ const Text('A'), const Text('B') ],
         ),
       );
     }
@@ -811,7 +822,7 @@ void main() {
             height: 400.0,
             child: new TabBarView(
               controller: tabController,
-              children: <Widget>[
+              children: const <Widget>[
                 const Center(child: const Text('0')),
                 const Center(child: const Text('1')),
                 const Center(child: const Text('2')),
@@ -859,7 +870,7 @@ void main() {
             child: new TabBarView(
               controller: tabController,
               physics: const TestScrollPhysics(),
-              children: <Widget>[
+              children: const <Widget>[
                 const Center(child: const Text('0')),
                 const Center(child: const Text('1')),
                 const Center(child: const Text('2')),
@@ -1206,19 +1217,25 @@ void main() {
           children: <TestSemantics>[
             new TestSemantics(
               id: 2,
-              actions: SemanticsAction.tap.index,
-              flags: SemanticsFlags.isSelected.index,
-              label: 'TAB #0\nTab 1 of 2',
-              rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
-              transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
-            ),
-            new TestSemantics(
-              id: 3,
-              actions: SemanticsAction.tap.index,
-              label: 'TAB #1\nTab 2 of 2',
-              rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
-              transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
-            ),
+              rect: TestSemantics.fullScreen,
+              children: <TestSemantics>[
+                new TestSemantics(
+                  id: 3,
+                  actions: SemanticsAction.tap.index,
+                  flags: SemanticsFlag.isSelected.index,
+                  label: 'TAB #0\nTab 1 of 2',
+                  rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
+                  transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
+                ),
+                new TestSemantics(
+                  id: 4,
+                  actions: SemanticsAction.tap.index,
+                  label: 'TAB #1\nTab 2 of 2',
+                  rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
+                  transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
+                ),
+              ]
+            )
           ],
         ),
       ],
@@ -1451,24 +1468,30 @@ void main() {
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 23,
+          id: 1,
           rect: TestSemantics.fullScreen,
           children: <TestSemantics>[
             new TestSemantics(
-              id: 24,
-              actions: SemanticsAction.tap.index,
-              flags: SemanticsFlags.isSelected.index,
-              label: 'Semantics override 0\nTab 1 of 2',
-              rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
-              transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
-            ),
-            new TestSemantics(
-              id: 25,
-              actions: SemanticsAction.tap.index,
-              label: 'Semantics override 1\nTab 2 of 2',
-              rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
-              transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
-            ),
+              id: 2,
+              rect: TestSemantics.fullScreen,
+              children: <TestSemantics>[
+                new TestSemantics(
+                  id: 3,
+                  actions: SemanticsAction.tap.index,
+                  flags: SemanticsFlag.isSelected.index,
+                  label: 'Semantics override 0\nTab 1 of 2',
+                  rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
+                  transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
+                ),
+                new TestSemantics(
+                  id: 4,
+                  actions: SemanticsAction.tap.index,
+                  label: 'Semantics override 1\nTab 2 of 2',
+                  rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
+                  transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
+                ),
+              ]
+            )
           ],
         ),
       ],

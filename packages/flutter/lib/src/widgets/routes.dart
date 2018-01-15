@@ -1114,10 +1114,9 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///   Widget build(BuildContext context) => new Container();
 ///
 /// }
-///
 /// ```
 class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
-  final Map<T, RouteAware> _listeners = <T, RouteAware>{};
+  final Map<T, Set<RouteAware>> _listeners = <T, Set<RouteAware>>{};
 
   /// Subscribe [routeAware] to be informed about changes to [route].
   ///
@@ -1127,37 +1126,63 @@ class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
   void subscribe(RouteAware routeAware, T route) {
     assert(routeAware != null);
     assert(route != null);
-    if (!_listeners.containsKey(route)) {
+    final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => new Set<RouteAware>());
+    if (subscribers.add(routeAware)) {
       routeAware.didPush();
-      _listeners[route] = routeAware;
     }
   }
 
   /// Unsubscribe [routeAware].
   ///
-  /// [routeAware] is no longer informed about changes to its route.
+  /// [routeAware] is no longer informed about changes to its route. If the given argument was
+  /// subscribed to multiple types, this will unregister it (once) from each type.
   void unsubscribe(RouteAware routeAware) {
     assert(routeAware != null);
-    _listeners.remove(routeAware);
+    for (T route in _listeners.keys) {
+      final Set<RouteAware> subscribers = _listeners[route];
+      subscribers?.remove(routeAware);
+    }
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
     if (route is T && previousRoute is T) {
-      _listeners[previousRoute]?.didPopNext();
-      _listeners[route]?.didPop();
+      final List<RouteAware> previousSubscribers = _listeners[previousRoute]?.toList();
+
+      if (previousSubscribers != null) {
+        for (RouteAware routeAware in previousSubscribers) {
+          routeAware.didPopNext();
+        }
+      }
+
+      final List<RouteAware> subscribers = _listeners[route]?.toList();
+
+      if (subscribers != null) {
+        for (RouteAware routeAware in subscribers) {
+          routeAware.didPop();
+        }
+      }
     }
   }
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
     if (route is T && previousRoute is T) {
-      _listeners[previousRoute]?.didPushNext();
+      final Set<RouteAware> previousSubscribers = _listeners[previousRoute];
+
+      if (previousSubscribers != null) {
+        for (RouteAware routeAware in previousSubscribers) {
+          routeAware.didPushNext();
+        }
+      }
     }
   }
 }
 
-/// A interface that is aware of its current Route.
+/// An interface for objects that are aware of their current [Route].
+///
+/// This is used with [RouteObserver] to make a widget aware of changes to the
+/// [Navigator]'s session history.
 abstract class RouteAware {
   /// Called when the top route has been popped off, and the current route
   /// shows up.

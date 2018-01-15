@@ -8,33 +8,40 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap: false }) {
-  return new Directionality(
-    textDirection: TextDirection.ltr,
-    child: new MediaQuery(
-      data: const MediaQueryData(),
-      child: new Scaffold(
-        body: new DefaultTabController(
-          length: 3,
-          child: new CustomScrollView(
-            primary: true,
-            slivers: <Widget>[
-              new SliverAppBar(
-                title: const Text('AppBar Title'),
-                floating: floating,
-                pinned: pinned,
-                expandedHeight: expandedHeight,
-                snap: snap,
-                bottom: new TabBar(
-                  tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
+  return new Localizations(
+    locale: const Locale('en', 'US'),
+    delegates: <LocalizationsDelegate<dynamic>>[
+      DefaultMaterialLocalizations.delegate,
+      DefaultWidgetsLocalizations.delegate,
+    ],
+    child: new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(),
+        child: new Scaffold(
+          body: new DefaultTabController(
+            length: 3,
+            child: new CustomScrollView(
+              primary: true,
+              slivers: <Widget>[
+                new SliverAppBar(
+                  title: const Text('AppBar Title'),
+                  floating: floating,
+                  pinned: pinned,
+                  expandedHeight: expandedHeight,
+                  snap: snap,
+                  bottom: new TabBar(
+                    tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
+                  ),
                 ),
-              ),
-              new SliverToBoxAdapter(
-                child: new Container(
-                  height: 1200.0,
-                  color: Colors.orange[400],
+                new SliverToBoxAdapter(
+                  child: new Container(
+                    height: 1200.0,
+                    color: Colors.orange[400],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -102,7 +109,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             title: const Text('X'),
-            actions: <Widget>[
+            actions: const <Widget>[
               const Icon(Icons.thumb_up),
             ],
           ),
@@ -123,7 +130,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             title: const Text('X'),
-            actions: <Widget>[
+            actions: const <Widget>[
               const Icon(Icons.thumb_up),
               const Icon(Icons.thumb_up),
             ],
@@ -451,7 +458,7 @@ void main() {
           child: new AppBar(
             leading: const Text('L'),
             title: const Text('No Scaffold'),
-            actions: <Widget>[const Text('A1'), const Text('A2')],
+            actions: const <Widget>[const Text('A1'), const Text('A2')],
           ),
         ),
       ),
@@ -541,7 +548,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             title: const Text('X'),
-            actions: <Widget> [
+            actions: const <Widget> [
               const IconButton(
                 icon: const Icon(Icons.share),
                 onPressed: null,
@@ -970,7 +977,7 @@ void main() {
           child: new AppBar(
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
-            actions: <Widget>[
+            actions: const <Widget>[
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
@@ -991,7 +998,7 @@ void main() {
           child: new AppBar(
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
-            actions: <Widget>[
+            actions: const <Widget>[
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
@@ -1021,7 +1028,7 @@ void main() {
           child: new AppBar(
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
-            actions: <Widget>[
+            actions: const <Widget>[
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
@@ -1062,7 +1069,7 @@ void main() {
           child: new AppBar(
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
-            actions: <Widget>[
+            actions: const <Widget>[
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
               const Placeholder(fallbackWidth: 10.0),
