@@ -138,7 +138,7 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
     final Stopwatch initialUpdateDevFSsTimer = new Stopwatch()..start();
-    final bool devfsResult = await _updateDevFS(clearAssetEvictPaths: true);
+    final bool devfsResult = await _updateDevFS();
     _addBenchmarkData('hotReloadInitialDevFSSyncMilliseconds',
         initialUpdateDevFSsTimer.elapsed.inMilliseconds);
     if (!devfsResult)
@@ -255,7 +255,7 @@ class HotRunner extends ResidentRunner {
     return devFSUris;
   }
 
-  Future<bool> _updateDevFS({ bool fullRestart: false, bool clearAssetEvictPaths: false }) async {
+  Future<bool> _updateDevFS({ bool fullRestart: false }) async {
     if (!_refreshDartDependencies()) {
       // Did not update DevFS because of a Dart source error.
       return false;
@@ -277,10 +277,6 @@ class HotRunner extends ResidentRunner {
         fileFilter: _dartDependencies,
         fullRestart: fullRestart
       );
-
-      if (clearAssetEvictPaths)
-        device.devFS.assetPathsToEvict.clear();
-
       if (!result)
         return false;
     }
