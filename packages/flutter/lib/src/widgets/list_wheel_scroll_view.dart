@@ -27,25 +27,24 @@ class ListWheelScrollView extends StatelessWidget {
     Key key,
     this.controller,
     this.physics,
-    this.diameterRatio: 2.0,
-    this.perspective: 0.003,
+    this.diameterRatio: RenderListWheelViewport.defaultDiameterRatio,
+    this.perspective: RenderListWheelViewport.defaultPerspective,
     @required this.itemExtent,
     this.clipToSize: true,
     this.renderChildrenOutsideViewport: false,
     @required this.children,
-  }) : assert(diameterRatio != null && diameterRatio > 0.0),
-       assert(
-         perspective != null && perspective >= 0.0 && perspective < 0.01,
-         'A perspective too high will be clipped in the z-axis and therefore '
-         'not renderable. Value must be between 0 and 0.01.'
-       ),
-       assert(itemExtent != null && itemExtent > 0.0),
+  }) : assert(diameterRatio != null),
+       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(perspective != null),
+       assert(perspective > 0),
+       assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
+       assert(itemExtent != null),
+       assert(itemExtent > 0),
        assert(clipToSize != null),
        assert(renderChildrenOutsideViewport != null),
        assert(
          !renderChildrenOutsideViewport || !clipToSize,
-         'Cannot renderChildrenOutsideViewport and clipToSize since children '
-         'rendered outside will be clipped anyway.'
+         RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
        ),
        super(key: key);
 
@@ -70,36 +69,19 @@ class ListWheelScrollView extends StatelessWidget {
   final ScrollPhysics physics;
 
   /// {@macro flutter.rendering.wheelList.diameterRatio}
-  ///
-  /// Defaults to an arbitrary but aesthetically reasonable number of 2.0.
-  ///
-  /// Must not be null and must be positive.
   final double diameterRatio;
 
   /// {@macro flutter.rendering.wheelList.perspective}
-  ///
-  /// Defaults to an arbitrary but aesthetically reasonable number of 0.003.
-  /// A larger number brings the vanishing point closer and a smaller number
-  /// pushes the vanishing point further.
   final double perspective;
 
-  /// Size of all children in the main axis. Must not be null and must be
+  /// Size of each child in the main axis. Must not be null and must be
   /// positive.
   final double itemExtent;
 
-  /// Whether to clip painted children to the inside of this scroll view.
-  ///
-  /// Defaults to [true]. Must not be null.
-  ///
-  /// If this is false and [renderChildrenOutsideViewport] is false, the
-  /// first and last children may be painted partly outside of this scroll view.
+  /// {@macro flutter.rendering.wheelList.clipToSize}
   final bool clipToSize;
 
-  /// {@macro flutter.rendering.wheelList.diameterRatio}
-  ///
-  /// Defaults to [false]. Must not be null. Cannot be true if [clipToSize]
-  /// is also true since children outside the viewport will be clipped, and
-  /// therefore cannot render children outside the viewport.
+  /// {@macro flutter.rendering.wheelList.renderChildrenOutsideViewport}
   final bool renderChildrenOutsideViewport;
 
   /// List of children to scroll on top of the cylinder.
@@ -140,14 +122,28 @@ class ListWheelScrollView extends StatelessWidget {
 class ListWheelViewport extends MultiChildRenderObjectWidget {
   ListWheelViewport({
     Key key,
-    this.diameterRatio,
-    this.perspective,
-    this.itemExtent,
-    this.clipToSize,
-    this.renderChildrenOutsideViewport,
-    this.offset,
+    this.diameterRatio: RenderListWheelViewport.defaultDiameterRatio,
+    this.perspective: RenderListWheelViewport.defaultPerspective,
+    @required this.itemExtent,
+    this.clipToSize: true,
+    this.renderChildrenOutsideViewport: false,
+    @required this.offset,
     List<Widget> children,
-  }) : super(key: key, children: children);
+  }) : assert(offset != null),
+       assert(diameterRatio != null),
+       assert(diameterRatio > 0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(perspective != null),
+       assert(perspective > 0),
+       assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
+       assert(itemExtent != null),
+       assert(itemExtent > 0),
+       assert(clipToSize != null),
+       assert(renderChildrenOutsideViewport != null),
+       assert(
+         !renderChildrenOutsideViewport || !clipToSize,
+         RenderListWheelViewport.clipToSizeAndRenderChildrenOutsideViewportConflict,
+       ),
+       super(key: key, children: children);
 
   /// {@macro flutter.rendering.wheelList.diameterRatio}
   final double diameterRatio;
@@ -158,10 +154,10 @@ class ListWheelViewport extends MultiChildRenderObjectWidget {
   /// {@macro flutter.rendering.wheelList.itemExtent}
   final double itemExtent;
 
-  /// Whether to clip painted children to the inside of this viewport.
+  /// {@macro flutter.rendering.wheelList.clipToSize}
   final bool clipToSize;
 
-  /// {@macro flutter.rendering.wheelList.diameterRatio}
+  /// {@macro flutter.rendering.wheelList.renderChildrenOutsideViewport}
   final bool renderChildrenOutsideViewport;
 
   /// [ViewportOffset] object describing the content that should be visible

@@ -12,37 +12,27 @@ import '../rendering/rendering_tester.dart';
 void main() {
   testWidgets('ListWheelScrollView needs positive diameter ratio', (WidgetTester tester) async {
     try {
-      await tester.pumpWidget(
-        new Directionality(
-          textDirection: TextDirection.ltr,
-          child: new ListWheelScrollView(
-            diameterRatio: -2.0,
-            itemExtent: 20.0,
-            children: <Widget>[],
-          ),
-        )
+      new ListWheelScrollView(
+        diameterRatio: -2.0,
+        itemExtent: 20.0,
+        children: <Widget>[],
       );
       fail('Expected failure with negative diameterRatio');
-    } on AssertionError {
-      // Exception expected.
+    } on AssertionError catch (exception) {
+      expect(exception.message, contains("You can't set a diameterRatio of 0"));
     }
   });
 
   testWidgets('ListWheelScrollView needs positive item extent', (WidgetTester tester) async {
-    try {
-      await tester.pumpWidget(
-        new Directionality(
-          textDirection: TextDirection.ltr,
-          child: new ListWheelScrollView(
-            itemExtent: null,
-            children: <Widget>[new Container()],
-          ),
-        )
-      );
-      fail('Expected failure with null itemExtent');
-    } on AssertionError {
-      // Exception expected.
-    }
+    expect(
+      () {
+        new ListWheelScrollView(
+          itemExtent: null,
+          children: <Widget>[new Container()],
+        );
+      },
+      throwsAssertionError,
+    );
   });
 
   testWidgets("ListWheelScrollView takes parent's size with small children", (WidgetTester tester) async {
@@ -59,7 +49,7 @@ void main() {
             ),
           ],
         ),
-      )
+      ),
     );
     expect(tester.getTopLeft(find.byType(ListWheelScrollView)), const Offset(0.0, 0.0));
     // Standard test screen size.
@@ -103,7 +93,7 @@ void main() {
             ),
           ],
         ),
-      )
+      ),
     );
     expect(tester.getSize(find.byType(SizedBox)), const Size(200.0, 50.0));
     expect(find.text('blah'), findsOneWidget);
@@ -117,7 +107,7 @@ void main() {
           itemExtent: 50.0,
           children: <Widget>[],
         ),
-      )
+      ),
     );
     expect(tester.getSize(find.byType(ListWheelScrollView)), const Size(800.0, 600.0));
   });
@@ -140,7 +130,7 @@ void main() {
             );
           }),
         ),
-      )
+      ),
     );
 
     // Screen is 600px tall and the first item starts at 250px. The first 4
@@ -182,7 +172,7 @@ void main() {
             );
           }),
         ),
-      )
+      ),
     );
 
     // Screen is 600px tall and the first item starts at 200px. The first 4
@@ -216,7 +206,7 @@ void main() {
             );
           }),
         ),
-      )
+      ),
     );
 
     // The first item is at 0px and the 600px screen is full in the
@@ -255,7 +245,7 @@ void main() {
             ),
           ],
         ),
-      )
+      ),
     );
 
     final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent;
@@ -287,7 +277,7 @@ void main() {
             ),
           ],
         ),
-      )
+      ),
     );
 
     final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent;
@@ -317,7 +307,7 @@ void main() {
             ),
           ],
         ),
-      )
+      ),
     );
 
     expect(viewport, paints..transform(
@@ -346,7 +336,7 @@ void main() {
             ),
           ],
         ),
-      )
+      ),
     );
 
     expect(viewport, paints..transform(

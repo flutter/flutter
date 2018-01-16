@@ -81,6 +81,12 @@ abstract class PaintPattern {
   /// no call to [Canvas.transform] is found, then the matcher fails.
   ///
   /// Dynamic so matchers can be more easily passed in.
+  ///
+  /// The `matrix4` argument is dynamic so it can be either a [Matcher], or a
+  /// [Float64List] of [double]s. If it is a [Float64List] of [double]s then
+  /// each value in the matrix must match in the expected matrix. A deep
+  /// matching [Matcher] such as [equals] can be used to test each value in the
+  /// matrix with utilities such as [moreOrLessEquals].
   void transform({ dynamic matrix4 });
 
   /// Indicates that a translation transform is expected next.
