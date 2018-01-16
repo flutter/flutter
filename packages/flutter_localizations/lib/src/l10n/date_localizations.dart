@@ -4,7 +4,7 @@
 
 // This file has been automatically generated.  Please do not edit it manually.
 // To regenerate run (omit -w to print to console instead of the file):
-// dart dev/tools/gen_date_localizations.dart -w
+// dart -c dev/tools/gen_date_localizations.dart -w
 
 const Map<String, dynamic> dateSymbols = const <String, dynamic>{
   'he': const <String, dynamic>{
