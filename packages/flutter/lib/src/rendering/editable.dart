@@ -155,8 +155,7 @@ class RenderEditable extends RenderBox {
     assert(!_showCursor.value || cursorColor != null);
     _tap = new TapGestureRecognizer(debugOwner: this)
       ..onTapDown = _handleTapDown
-      ..onTap = _handleTap
-      ..onTapCancel = _handleTapCancel;
+      ..onTap = _handleTap;
     _longPress = new LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
   }
@@ -171,7 +170,7 @@ class RenderEditable extends RenderBox {
 
   /// If true [handleEvent] does nothing and it's assumed that this
   /// renderer will be notified of input gestures via [handleTapDown],
-  /// [handleTap], [handleTapCancel], and [handleLongPress].
+  /// [handleTap], and [handleLongPress].
   ///
   /// The default value of this property is false.
   bool ignorePointer;
@@ -569,7 +568,6 @@ class RenderEditable extends RenderBox {
   }
 
   Offset _lastTapDownPosition;
-  Offset _longPressPosition;
 
   /// If [ignorePointer] is false (the default) then this method is called by
   /// the internal gesture recognizer's [TapGestureRecognizer.onTapDown]
@@ -594,32 +592,14 @@ class RenderEditable extends RenderBox {
   void handleTap() {
     _layoutText(constraints.maxWidth);
     assert(_lastTapDownPosition != null);
-    final Offset globalPosition = _lastTapDownPosition;
-    _lastTapDownPosition = null;
     if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition));
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
       onSelectionChanged(new TextSelection.fromPosition(position), this, SelectionChangedCause.tap);
     }
   }
   void _handleTap() {
     assert(!ignorePointer);
     handleTap();
-  }
-
-  /// If [ignorePointer] is false (the default) then this method is called by
-  /// the internal gesture recognizer's [TapGestureRecognizer.onTapCancel]
-  /// callback.
-  ///
-  /// When [ignorePointer] is true, an ancestor widget must respond to tap
-  /// cancel events by calling this method.
-  void handleTapCancel() {
-    // longPress arrives after tapCancel, so remember the tap position.
-    _longPressPosition = _lastTapDownPosition;
-    _lastTapDownPosition = null;
-  }
-  void _handleTapCancel() {
-    assert(!ignorePointer);
-    handleTapCancel();
   }
 
   /// If [ignorePointer] is false (the default) then this method is called by
@@ -630,10 +610,9 @@ class RenderEditable extends RenderBox {
   /// press events by calling this method.
   void handleLongPress() {
     _layoutText(constraints.maxWidth);
-    final Offset globalPosition = _longPressPosition;
-    _longPressPosition = null;
+    assert(_lastTapDownPosition != null);
     if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition));
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
       onSelectionChanged(_selectWordAtOffset(position), this, SelectionChangedCause.longPress);
     }
   }
