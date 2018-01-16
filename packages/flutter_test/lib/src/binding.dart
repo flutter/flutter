@@ -386,8 +386,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           library: 'Flutter test framework'
         );
       } else {
-        _pendingExceptionDetails = details;
         reportExceptionNoticed(details); // mostly this is just a hook for the LiveTestWidgetsFlutterBinding
+        _pendingExceptionDetails = details;
       }
     };
     _currentTestCompleter = new Completer<Null>();
