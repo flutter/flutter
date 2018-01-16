@@ -77,7 +77,7 @@ Future<Null> main(List<String> rawArgs) async {
 
 // This file has been automatically generated.  Please do not edit it manually.
 // To regenerate run (omit -w to print to console instead of the file):
-// dart dev/tools/gen_date_localizations.dart -w
+// dart --enable-asserts dev/tools/gen_date_localizations.dart -w
 
 '''
 );
@@ -88,10 +88,19 @@ Future<Null> main(List<String> rawArgs) async {
   });
   buffer.writeln('};');
 
-  buffer.writeln('const Map<String, dynamic> datePatterns = const <String, dynamic> {');
+  // Note: code that uses datePatterns expects it to contain values of type
+  // Map<String, String> not Map<String, dynamic>.
+  buffer.writeln('const Map<String, Map<String, String>> datePatterns = const <String, Map<String, String>> {');
   patternFiles.forEach((String locale, File data) {
-    if (materialLocales.contains(locale))
-      buffer.writeln(_jsonToMapEntry(locale, JSON.decode(data.readAsStringSync())));
+    if (materialLocales.contains(locale)) {
+      final Map<String, dynamic> patterns = JSON.decode(data.readAsStringSync());
+      buffer.writeln("'$locale': const <String, String>{");
+      patterns.forEach((String key, dynamic value) {
+        assert(value is String);
+        buffer.writeln(_jsonToMapEntry(key, value));
+      });
+      buffer.writeln('},');
+    }
   });
   buffer.writeln('};');
 
@@ -148,13 +157,16 @@ Iterable<String> _materialLocales() sync* {
 }
 
 Map<String, File> _listIntlData(Directory directory) {
-  final Map<String, File> result = <String, File>{};
+  final Map<String, File> localeFiles = <String, File>{};
   for (FileSystemEntity entity in directory.listSync()) {
     final String filePath = entity.path;
     if (FileSystemEntity.isFileSync(filePath) && filePath.endsWith('.json')) {
       final String locale = path.basenameWithoutExtension(filePath);
-      result[locale] = entity;
+      localeFiles[locale] = entity;
     }
   }
-  return result;
+
+  final List<String> locales = localeFiles.keys.toList(growable: false);
+  locales.sort();
+  return new Map<String, File>.fromIterable(locales, value: (dynamic locale) => localeFiles[locale]);
 }
