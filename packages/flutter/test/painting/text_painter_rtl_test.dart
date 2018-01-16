@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -253,6 +255,8 @@ void main() {
     );
   }, skip: skipTestsWithKnownBugs);
 
+  // TODO(bkonyi): Offset's seen below are incorrect on Windows. Skipping on Windows for now.
+  // Issue: https://github.com/flutter/flutter/issues/13658.
   test('TextPainter - forced line-wrapping with bidi', () {
     final TextPainter painter = new TextPainter()
       ..textDirection = TextDirection.ltr;
@@ -317,7 +321,7 @@ void main() {
         const TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
       ],
     );
-  });
+  }, skip: Platform.isWindows);
 
   test('TextPainter - line wrap mid-word', () {
     final TextPainter painter = new TextPainter()

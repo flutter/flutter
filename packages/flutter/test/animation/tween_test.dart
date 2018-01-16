@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
@@ -63,6 +65,9 @@ void main() {
     );
     final Matrix4 c = a.clone()..rotateZ(1.0);
     final Matrix4Tween rotationTween = new Matrix4Tween(begin: a, end: c);
+    // TODO(bkonyi): floating-point comparison causes issues for these next two lines on Windows.
+    // This isn't an issue on other platforms, so skip this test on Windows for now.
+    // Issue: https://github.com/flutter/flutter/issues/13660.
     expect(rotationTween.lerp(0.0), equals(a));
     expect(rotationTween.lerp(1.0), equals(c));
     expect(
@@ -71,5 +76,5 @@ void main() {
       ),
       moreOrLessEquals(0.0)
     );
-  });
+  }, skip: Platform.isWindows);
 }

@@ -329,7 +329,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
     workingDirectory: workingDirectory,
     expectFailure: expectFailure,
     printOutput: printOutput,
-    skip: skip || Platform.isWindows, // TODO(goderbauer): run on Windows when sky_shell is available
+    skip: skip,
   );
 }
 

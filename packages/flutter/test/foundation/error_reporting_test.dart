@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:test/test.dart';
 
+import 'platform_utils.dart';
+
 dynamic getAssertionErrorWithMessage() {
   try {
     assert(false, 'Message goes here.');
@@ -62,7 +64,7 @@ Future<Null> main() async {
         information.writeln('line 2 of extra information\n'); // the double trailing newlines here are intentional
       },
     ));
-    expect(console.join('\n'), matches(new RegExp(
+    expect(sanitizePaths(console.join('\n')), matches(new RegExp(
       '^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
       'The following assertion was thrown testing the error handling logic:\n'
       'Message goes here\\.\n'
@@ -99,7 +101,7 @@ Future<Null> main() async {
     FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
       exception: getAssertionErrorWithLongMessage(),
     ));
-    expect(console.join('\n'), matches(new RegExp(
+    expect(sanitizePaths(console.join('\n')), matches(new RegExp(
       '^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
       'The following assertion was thrown:\n'
       'word word word word word word word word word word word word word word word word word word word word '
@@ -144,7 +146,7 @@ Future<Null> main() async {
         information.writeln('line 2 of extra information\n'); // the double trailing newlines here are intentional
       },
     ));
-    expect(console.join('\n'), matches(new RegExp(
+    expect(sanitizePaths(console.join('\n')), matches(new RegExp(
       '^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
       'The following assertion was thrown testing the error handling logic:\n'
       '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\': Failed assertion: line [0-9]+ pos [0-9]+: \'false\': is not true\\.\n'
@@ -170,7 +172,7 @@ Future<Null> main() async {
     FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
       exception: getAssertionErrorWithoutMessage(),
     ));
-    expect(console.join('\n'), matches('Another exception was thrown: \'[^\']+flutter/test/foundation/error_reporting_test\\.dart\': Failed assertion: line [0-9]+ pos [0-9]+: \'false\': is not true\\.'));
+    expect(sanitizePaths(console.join('\n')), matches('Another exception was thrown: \'[^\']+flutter/test/foundation/error_reporting_test\\.dart\': Failed assertion: line [0-9]+ pos [0-9]+: \'false\': is not true\\.'));
     console.clear();
     FlutterError.resetErrorCount();
   });
