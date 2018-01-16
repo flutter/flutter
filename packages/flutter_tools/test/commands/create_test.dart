@@ -307,7 +307,7 @@ void main() {
           'ios/Classes/FlutterProjectPlugin.h',
         ],
         unexpectedPaths: <String>[
-          'example/android/app/src/main/java/com/example/flutterproject/MainActivity.java',
+          'example/android/app/src/main/java/com/example/flutterprojectexample/MainActivity.java',
           'android/src/main/java/com/example/flutterproject/FlutterProjectPlugin.java',
         ],
       );
