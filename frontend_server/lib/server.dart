@@ -261,17 +261,6 @@ Future<int> starter(
   }
 
   if (options['train']) {
-    final String sdkRoot = options['sdk-root'];
-    options = _argParser.parse(<String>['--incremental', '--sdk-root=$sdkRoot']);
-    compiler ??= new _FrontendCompiler(output, printerFactory: binaryPrinterFactory);
-    await compiler.compile(Platform.script.toFilePath(), options, generator: generator);
-    compiler.acceptLastDelta();
-    await compiler.recompileDelta();
-    compiler.acceptLastDelta();
-    await compiler.recompileDelta();
-    compiler.acceptLastDelta();
-    await compiler.recompileDelta();
-    compiler.acceptLastDelta();
     return 0;
   }
 
