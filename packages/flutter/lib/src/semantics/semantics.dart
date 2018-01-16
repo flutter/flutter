@@ -1445,7 +1445,8 @@ class SemanticsConfiguration {
   /// the focused element. Therefore, to ensure that [onTap] handlers work
   /// properly on Android versions prior to Oreo, a [GestureDetector] with an
   /// onTap handler should always be wrapping an element that defines a
-  /// semantic [onTap] handler.
+  /// semantic [onTap] handler. By default a [GestureDetector] will register its
+  /// own semantic [onTap] handler that follows this principle.
   VoidCallback get onTap => _onTap;
   VoidCallback _onTap;
   set onTap(VoidCallback value) {
