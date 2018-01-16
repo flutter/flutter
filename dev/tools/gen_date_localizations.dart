@@ -77,7 +77,7 @@ Future<Null> main(List<String> rawArgs) async {
 
 // This file has been automatically generated.  Please do not edit it manually.
 // To regenerate run (omit -w to print to console instead of the file):
-// dart -c dev/tools/gen_date_localizations.dart -w
+// dart --enable-asserts dev/tools/gen_date_localizations.dart -w
 
 '''
 );
@@ -157,13 +157,18 @@ Iterable<String> _materialLocales() sync* {
 }
 
 Map<String, File> _listIntlData(Directory directory) {
-  final Map<String, File> result = <String, File>{};
+  final Map<String, File> localeFiles = <String, File>{};
   for (FileSystemEntity entity in directory.listSync()) {
     final String filePath = entity.path;
     if (FileSystemEntity.isFileSync(filePath) && filePath.endsWith('.json')) {
       final String locale = path.basenameWithoutExtension(filePath);
-      result[locale] = entity;
+      localeFiles[locale] = entity;
     }
   }
-  return result;
+
+  final List<String> locales = localeFiles.keys.toList(growable: false);
+  locales.sort();
+  return new Map<String, File>.fromIterable(locales, value: (String locale) {
+    return localeFiles[locale];
+  });
 }
