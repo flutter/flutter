@@ -600,7 +600,7 @@ void Layout::doLayout(const uint16_t* buf,
                       size_t start,
                       size_t count,
                       size_t bufSize,
-                      int bidiFlags,
+                      bool isRtl,
                       const FontStyle& style,
                       const MinikinPaint& paint,
                       const std::shared_ptr<FontCollection>& collection) {
@@ -613,11 +613,9 @@ void Layout::doLayout(const uint16_t* buf,
   reset();
   mAdvances.resize(count, 0);
 
-  for (const BidiText::Iter::RunInfo& runInfo :
-       BidiText(buf, start, count, bufSize, bidiFlags)) {
-    doLayoutRunCached(buf, runInfo.mRunStart, runInfo.mRunLength, bufSize,
-                      runInfo.mIsRtl, &ctx, start, collection, this, NULL);
-  }
+  doLayoutRunCached(buf, start, count, bufSize, isRtl, &ctx, start, collection,
+                    this, NULL);
+
   ctx.clearHbFonts();
 }
 
@@ -625,7 +623,7 @@ float Layout::measureText(const uint16_t* buf,
                           size_t start,
                           size_t count,
                           size_t bufSize,
-                          int bidiFlags,
+                          bool isRtl,
                           const FontStyle& style,
                           const MinikinPaint& paint,
                           const std::shared_ptr<FontCollection>& collection,
@@ -636,15 +634,8 @@ float Layout::measureText(const uint16_t* buf,
   ctx.style = style;
   ctx.paint = paint;
 
-  float advance = 0;
-  for (const BidiText::Iter::RunInfo& runInfo :
-       BidiText(buf, start, count, bufSize, bidiFlags)) {
-    float* advancesForRun =
-        advances ? advances + (runInfo.mRunStart - start) : advances;
-    advance += doLayoutRunCached(buf, runInfo.mRunStart, runInfo.mRunLength,
-                                 bufSize, runInfo.mIsRtl, &ctx, 0, collection,
-                                 NULL, advancesForRun);
-  }
+  float advance = doLayoutRunCached(buf, start, count, bufSize, isRtl, &ctx, 0,
+                                    collection, NULL, advances);
 
   ctx.clearHbFonts();
   return advance;
