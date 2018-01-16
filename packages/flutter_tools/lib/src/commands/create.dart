@@ -22,6 +22,7 @@ import '../flx.dart' as flx;
 import '../globals.dart';
 import '../ios/xcodeproj.dart';
 import '../plugins.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 import '../version.dart';
@@ -65,7 +66,7 @@ class CreateCommand extends FlutterCommand {
     );
     argParser.addOption(
       'org',
-      defaultsTo: 'com.yourcompany',
+      defaultsTo: 'com.example',
       help: 'The organization responsible for your new Flutter project, in reverse domain name notation.\n'
             'This string is used in Java package names and as prefix in the iOS bundle identifier.'
     );
@@ -135,7 +136,18 @@ class CreateCommand extends FlutterCommand {
     // TODO(goderbauer): Work-around for: https://github.com/dart-lang/path/issues/24
     if (fs.path.basename(dirPath) == '.')
       dirPath = fs.path.dirname(dirPath);
-    final String organization = argResults['org'];
+    String organization = argResults['org'];
+    if (!argResults.wasParsed('org')) {
+      final Set<String> existingOrganizations = await new FlutterProject(projectDir).organizationNames();
+      if (existingOrganizations.length == 1) {
+        organization = existingOrganizations.first;
+      } else if (1 < existingOrganizations.length) {
+        throwToolExit(
+          'Ambiguous organization in existing files: $existingOrganizations.\n'
+          'The --org command line argument must be specified to recreate project.'
+        );
+      }
+    }
     final String projectName = fs.path.basename(dirPath);
 
     String error =_validateProjectDir(dirPath, flutterRoot: flutterRoot);
