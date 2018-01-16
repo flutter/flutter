@@ -625,16 +625,6 @@ class Rect {
       ..[3] = math.max(a.dy, b.dy);
   }
 
-  /// Construct the largest finite rectangle.
-  Rect.largest() {
-    const double skScalarMax = 3.402823466e+38; // from Skia's SkScalar.h
-    _value
-      ..[0] = -skScalarMax
-      ..[1] = -skScalarMax
-      ..[2] = skScalarMax
-      ..[3] = skScalarMax;
-  }
-
   static const int _kDataSize = 4;
   final Float32List _value = new Float32List(_kDataSize);
 
@@ -662,6 +652,14 @@ class Rect {
 
   /// A rectangle with left, top, right, and bottom edges all at zero.
   static final Rect zero = new Rect._();
+
+  static const double _skScalarMax = 3.402823466e+38; // from Skia's SkScalar.h
+
+  /// A rectangle that covers the entire coordinate space.
+  ///
+  /// This actually covers the space from about -3e38,-3e38 to about 3e38,3e38.
+  /// This is the space over which graphics operations are valid.
+  static final Rect largest = new Rect.fromLTRB(-_skScalarMax, -_skScalarMax, _skScalarMax, _skScalarMax);
 
   /// Whether any of the coordinates of this rectangle are equal to positive infinity.
   // included for consistency with Offset and Size

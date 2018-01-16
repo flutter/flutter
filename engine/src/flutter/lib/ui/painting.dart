@@ -1771,18 +1771,19 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// given picture recorder.
   ///
   /// Graphical operations that affect pixels entirely outside the given
-  /// cullRect might be discarded by the implementation. However, the
+  /// `cullRect` might be discarded by the implementation. However, the
   /// implementation might draw outside these bounds if, for example, a command
   /// draws partially inside and outside the `cullRect`. To ensure that pixels
-  /// outside a given region are discarded, consider using a [clipRect].
+  /// outside a given region are discarded, consider using a [clipRect]. The
+  /// `cullRect` is optional; by default, all operations are kept.
   ///
   /// To end the recording, call [PictureRecorder.endRecording] on the
   /// given recorder.
-  Canvas(PictureRecorder recorder, Rect cullRect) {
+  Canvas(PictureRecorder recorder, [ Rect cullRect ]) {
     assert(recorder != null);
     if (recorder.isRecording)
       throw new ArgumentError('"recorder" must not already be associated with another Canvas.');
-    assert(cullRect != null);
+    cullRect ??= Rect.largest;
     _constructor(recorder, cullRect.left, cullRect.top, cullRect.right, cullRect.bottom);
   }
   void _constructor(PictureRecorder recorder,
