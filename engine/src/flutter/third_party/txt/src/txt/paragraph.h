@@ -182,6 +182,7 @@ class Paragraph {
   std::shared_ptr<FontCollection> font_collection_;
 
   minikin::LineBreaker breaker_;
+  std::unique_ptr<icu::BreakIterator> grapheme_breaker_;
   mutable std::unique_ptr<icu::BreakIterator> word_breaker_;
 
   struct LineRange {
