@@ -431,7 +431,8 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
       _candidateAvatars.remove(avatar);
       _rejectedAvatars.remove(avatar);
     });
-    widget.onLeave(avatar.data);
+    if (widget.onLeave != null)
+      widget.onLeave(avatar.data);
   }
 
   void didDrop(_DragAvatar<dynamic> avatar) {
