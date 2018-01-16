@@ -199,6 +199,10 @@ class SemanticsData extends Diagnosticable {
     return typedOther.flags == flags
         && typedOther.actions == actions
         && typedOther.label == label
+        && typedOther.value == value
+        && typedOther.increasedValue == increasedValue
+        && typedOther.decreasedValue == decreasedValue
+        && typedOther.hint == hint
         && typedOther.textDirection == textDirection
         && typedOther.rect == rect
         && setEquals(typedOther.tags, tags)
@@ -206,7 +210,7 @@ class SemanticsData extends Diagnosticable {
   }
 
   @override
-  int get hashCode => ui.hashValues(flags, actions, label, textDirection, rect, tags, transform);
+  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, rect, tags, transform);
 }
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
