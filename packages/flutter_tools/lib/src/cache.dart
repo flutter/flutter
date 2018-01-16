@@ -162,6 +162,9 @@ class Cache {
     return dir;
   }
 
+  /// Return the top-level directory for artifact downloads.
+  Directory getDownloadDir() => getCacheDir('downloads');
+
   /// Return the top-level mutable directory in the cache; this is `bin/cache/artifacts`.
   Directory getCacheArtifacts() => getCacheDir('artifacts');
 
@@ -232,6 +235,12 @@ abstract class CachedArtifact {
   Directory get location => cache.getArtifactDirectory(name);
   String get version => cache.getVersionFor(name);
 
+  /// Keep track of the files we've downloaded for this execution so we
+  /// can delete them after completion.  We don't delete them right after
+  /// extraction in case [update] is interrupted, so we can restart without
+  /// starting from scratch.
+  final List<File> _downloadedFiles = <File>[];
+
   bool isUpToDate() {
     if (!location.existsSync())
       return false;
@@ -246,6 +255,21 @@ abstract class CachedArtifact {
     location.createSync(recursive: true);
     await updateInner();
     cache.setStampFor(name, version);
+    _removeDownloadedFiles();
+  }
+
+  /// Clear any zip/gzip files downloaded.
+  void _removeDownloadedFiles() {
+    for (File f in _downloadedFiles) {
+      f.deleteSync();
+      for (Directory d = f.parent; d.absolute.path != cache.getDownloadDir().absolute.path; d = d.parent) {
+        if (d.listSync().isEmpty) {
+          d.deleteSync();
+        } else {
+          break;
+        }
+      }
+    }
   }
 
   /// Hook method for extra checks for being up-to-date.
@@ -263,6 +287,40 @@ abstract class CachedArtifact {
   }
 
   Uri _toStorageUri(String path) => Uri.parse('$_storageBaseUrl/$path');
+
+  /// Download an archive from the given [url] and unzip it to [location].
+  Future<Null> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f), void extractor(File f, Directory d)) {
+    return _withDownloadFile('${_flattenNameSubdirs(url)}', (File tempFile) async {
+      if (!verifier(tempFile)) {
+        final Status status = logger.startProgress(message, expectSlowOperation: true);
+        await _downloadFile(url, tempFile).then<Null>((_) {
+          status.stop();
+        }).whenComplete(status.cancel);
+      } else {
+        logger.printStatus('$message(cached)');
+      }
+      _ensureExists(location);
+      extractor(tempFile, location);
+    });
+  }
+
+  /// Download a zip archive from the given [url] and unzip it to [location].
+  Future<Null> _downloadZipArchive(String message, Uri url, Directory location) {
+    return _downloadArchive(message, url, location, os.verifyZip, os.unzip);
+  }
+
+  /// Download a gzipped tarball from the given [url] and unpack it to [location].
+  Future<Null> _downloadZippedTarball(String message, Uri url, Directory location) {
+    return _downloadArchive(message, url, location, os.verifyGzip, os.unpack);
+  }
+
+  /// Create a temporary file and invoke [onTemporaryFile] with the file as
+  /// argument, then add the temporary file to the [_downloadedFiles].
+  Future<Null> _withDownloadFile(String name, Future<Null> onTemporaryFile(File file)) async {
+    final File tempFile = fs.file(fs.path.join(cache.getDownloadDir().path, name));
+    _downloadedFiles.add(tempFile);
+    await onTemporaryFile(tempFile);
+  }
 }
 
 bool _hasWarnedAboutStorageOverride = false;
@@ -284,10 +342,7 @@ class MaterialFonts extends CachedArtifact {
   @override
   Future<Null> updateInner() {
     final Uri archiveUri = _toStorageUri(version);
-    final Status status = logger.startProgress('Downloading Material fonts...', expectSlowOperation: true);
-    return _downloadZipArchive(archiveUri, location).then<Null>((_) {
-      status.stop();
-    }).whenComplete(status.cancel);
+    return _downloadZipArchive('Downloading Material fonts...', archiveUri, location);
   }
 }
 
@@ -389,14 +444,14 @@ class FlutterEngine extends CachedArtifact {
       final Directory dir = fs.directory(pkgPath);
       if (dir.existsSync())
         dir.deleteSync(recursive: true);
-      await _downloadItem('Downloading package $pkgName...', url + pkgName + '.zip', pkgDir);
+      await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
     }
 
     for (List<String> toolsDir in _getBinaryDirs()) {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
       final Directory dir = fs.directory(fs.path.join(location.path, cacheDir));
-      await _downloadItem('Downloading $cacheDir tools...', url + urlPath, dir);
+      await _downloadZipArchive('Downloading $cacheDir tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir);
 
@@ -418,13 +473,6 @@ class FlutterEngine extends CachedArtifact {
       }
     }
   }
-
-  Future<Null> _downloadItem(String message, String url, Directory dest) {
-    final Status status = logger.startProgress(message, expectSlowOperation: true);
-    return _downloadZipArchive(Uri.parse(url), dest).then<Null>((_) {
-      status.stop();
-    }).whenComplete(status.cancel);
-  }
 }
 
 /// A cached artifact containing Gradle Wrapper scripts and binaries.
@@ -434,16 +482,44 @@ class GradleWrapper extends CachedArtifact {
   @override
   Future<Null> updateInner() {
     final Uri archiveUri = _toStorageUri(version);
-    final Status status = logger.startProgress('Downloading Gradle Wrapper...', expectSlowOperation: true);
-
-    return _downloadZippedTarball(archiveUri, location).then<Null>((_) {
+    return _downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location).then<Null>((_) {
       // Delete property file, allowing templates to provide it.
       fs.file(fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
       // Remove NOTICE file. Should not be part of the template.
       fs.file(fs.path.join(location.path, 'NOTICE')).deleteSync();
-      status.stop();
-    }).whenComplete(status.cancel);
+    });
   }
+}
+
+// Many characters are problematic in filenames, especially on Windows.
+final Map<int, List<int>> _flattenNameSubstitutions = <int, List<int>>{
+  r'@'.codeUnitAt(0): '@@'.codeUnits,
+  r'/'.codeUnitAt(0): '@s@'.codeUnits,
+  r'\'.codeUnitAt(0): '@bs@'.codeUnits,
+  r':'.codeUnitAt(0): '@c@'.codeUnits,
+  r'%'.codeUnitAt(0): '@per@'.codeUnits,
+  r'*'.codeUnitAt(0): '@ast@'.codeUnits,
+  r'<'.codeUnitAt(0): '@lt@'.codeUnits,
+  r'>'.codeUnitAt(0): '@gt@'.codeUnits,
+  r'"'.codeUnitAt(0): '@q@'.codeUnits,
+  r'|'.codeUnitAt(0): '@pip@'.codeUnits,
+  r'?'.codeUnitAt(0): '@ques@'.codeUnits
+};
+
+/// Given a name containing slashes, colons, and backslashes, expand it into
+/// something that doesn't.
+String _flattenNameNoSubdirs(String fileName) {
+  final List<int> replacedCodeUnits = <int>[];
+  for (int codeUnit in fileName.codeUnits) {
+    replacedCodeUnits.addAll(_flattenNameSubstitutions[codeUnit] ?? <int>[codeUnit]);
+  }
+  return new String.fromCharCodes(replacedCodeUnits);
+}
+
+String _flattenNameSubdirs(Uri url) {
+  final List<String> pieces = <String>[url.host]..addAll(url.pathSegments);
+  final List<String> convertedPieces = pieces.map(_flattenNameNoSubdirs);
+  return fs.path.joinAll(convertedPieces);
 }
 
 /// Download a file from the given [url] and write it to [location].
@@ -451,35 +527,6 @@ Future<Null> _downloadFile(Uri url, File location) async {
   _ensureExists(location.parent);
   final List<int> fileBytes = await fetchUrl(url);
   location.writeAsBytesSync(fileBytes, flush: true);
-}
-
-/// Download a zip archive from the given [url] and unzip it to [location].
-Future<Null> _downloadZipArchive(Uri url, Directory location) {
-  return _withTemporaryFile('download.zip', (File tempFile) async {
-    await _downloadFile(url, tempFile);
-    _ensureExists(location);
-    os.unzip(tempFile, location);
-  });
-}
-
-/// Download a gzipped tarball from the given [url] and unpack it to [location].
-Future<Null> _downloadZippedTarball(Uri url, Directory location) {
-  return _withTemporaryFile('download.tgz', (File tempFile) async {
-    await _downloadFile(url, tempFile);
-    _ensureExists(location);
-    os.unpack(tempFile, location);
-  });
-}
-
-/// Create a file with the given name in a new temporary directory, invoke
-/// [onTemporaryFile] with the file as argument, then delete the temporary
-/// directory.
-Future<Null> _withTemporaryFile(String name, Future<Null> onTemporaryFile(File file)) async {
-  final Directory tempDir = fs.systemTempDirectory.createTempSync();
-  final File tempFile = fs.file(fs.path.join(tempDir.path, name));
-  await onTemporaryFile(tempFile).whenComplete(() {
-    tempDir.delete(recursive: true);
-  });
 }
 
 /// Create the given [directory] and parents, as necessary.
