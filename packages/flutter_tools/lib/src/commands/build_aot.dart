@@ -347,10 +347,12 @@ Future<String> _buildAotSnapshot(
       return null;
     }
 
-    genSnapshotCmd.addAll(<String>[
-      '--reify-generic-functions',
-      '--strong',
-    ]);
+    if (strongMode) {
+      genSnapshotCmd.addAll(<String>[
+        '--reify-generic-functions',
+        '--strong',
+      ]);
+    }
   }
 
   genSnapshotCmd.add(mainPath);
