@@ -88,10 +88,18 @@ Future<Null> main(List<String> rawArgs) async {
   });
   buffer.writeln('};');
 
-  buffer.writeln('const Map<String, dynamic> datePatterns = const <String, dynamic> {');
+  // Note: code that uses datePatterns expects it to contain values of type
+  // Map<String, String> not Map<String, dynamic>.
+  buffer.writeln('const Map<String, Map<String, String>> datePatterns = const <String, Map<String, String>> {');
   patternFiles.forEach((String locale, File data) {
-    if (materialLocales.contains(locale))
-      buffer.writeln(_jsonToMapEntry(locale, JSON.decode(data.readAsStringSync())));
+    if (materialLocales.contains(locale)) {
+      final Map<String, dynamic> patterns = JSON.decode(data.readAsStringSync());
+      buffer.writeln("'${locale}': const <String, String>{");
+      patterns.forEach((String key, dynamic value) {
+        buffer.writeln(_jsonToMapEntry(key, value as String));
+      });
+      buffer.writeln("},");
+    }
   });
   buffer.writeln('};');
 
