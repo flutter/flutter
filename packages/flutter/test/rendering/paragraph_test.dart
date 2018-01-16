@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/rendering.dart';
@@ -68,7 +69,7 @@ void main() {
 
     expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
     expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
-  });
+  }, skip: Platform.isWindows); // Ahem-based tests don't yet quite work on Windows
 
   test('getWordBoundary control test', () {
     final RenderParagraph paragraph = new RenderParagraph(
@@ -190,7 +191,7 @@ void main() {
 
     layoutAt(3);
     expect(paragraph.size.height, 30.0);
-  });
+  }, skip: Platform.isWindows); // Ahem-based tests don't yet quite work on Windows
 
   test('changing color does not do layout', () {
     final RenderParagraph paragraph = new RenderParagraph(
