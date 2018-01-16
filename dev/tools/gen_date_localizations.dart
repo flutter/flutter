@@ -168,7 +168,5 @@ Map<String, File> _listIntlData(Directory directory) {
 
   final List<String> locales = localeFiles.keys.toList(growable: false);
   locales.sort();
-  return new Map<String, File>.fromIterable(locales, value: (String locale) {
-    return localeFiles[locale];
-  });
+  return new Map<String, File>.fromIterable(locales, value: (dynamic locale) => localeFiles[locale]);
 }
