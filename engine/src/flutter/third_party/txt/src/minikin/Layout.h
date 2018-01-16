@@ -74,7 +74,7 @@ class Layout {
                 size_t start,
                 size_t count,
                 size_t bufSize,
-                int bidiFlags,
+                bool isRtl,
                 const FontStyle& style,
                 const MinikinPaint& paint,
                 const std::shared_ptr<FontCollection>& collection);
@@ -83,7 +83,7 @@ class Layout {
                            size_t start,
                            size_t count,
                            size_t bufSize,
-                           int bidiFlags,
+                           bool isRtl,
                            const FontStyle& style,
                            const MinikinPaint& paint,
                            const std::shared_ptr<FontCollection>& collection,

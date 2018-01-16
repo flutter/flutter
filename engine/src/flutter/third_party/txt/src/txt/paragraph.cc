@@ -429,9 +429,6 @@ void Paragraph::Layout(double width, bool force) {
       uint16_t* text_ptr = text_.data();
       size_t text_start = run.start;
       size_t text_count = run.end - run.start;
-      int bidiFlags = (paragraph_style_.text_direction == TextDirection::rtl)
-                          ? minikin::kBidi_RTL
-                          : minikin::kBidi_LTR;
 
       // Apply ellipsizing if the run was not completely laid out and this
       // is the last line (or lines are unlimited).
@@ -442,12 +439,12 @@ void Paragraph::Layout(double width, bool force) {
            paragraph_style_.unlimited_lines())) {
         float ellipsis_width = layout.measureText(
             reinterpret_cast<const uint16_t*>(ellipsis.data()), 0,
-            ellipsis.length(), ellipsis.length(), bidiFlags, font,
+            ellipsis.length(), ellipsis.length(), run.is_rtl(), font,
             minikin_paint, minikin_font_collection, nullptr);
 
         std::vector<float> text_advances(text_count);
         float text_width = layout.measureText(
-            text_ptr, text_start, text_count, text_.size(), bidiFlags, font,
+            text_ptr, text_start, text_count, text_.size(), run.is_rtl(), font,
             minikin_paint, minikin_font_collection, text_advances.data());
 
         // Truncate characters from the text until the ellipsis fits.
@@ -477,8 +474,9 @@ void Paragraph::Layout(double width, bool force) {
         }
       }
 
-      layout.doLayout(text_ptr, text_start, text_count, text_.size(), bidiFlags,
-                      font, minikin_paint, minikin_font_collection);
+      layout.doLayout(text_ptr, text_start, text_count, text_.size(),
+                      run.is_rtl(), font, minikin_paint,
+                      minikin_font_collection);
 
       if (layout.nGlyphs() == 0)
         continue;
