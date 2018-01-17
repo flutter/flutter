@@ -26,8 +26,10 @@ class _MockedBinaryPrinter extends Mock implements BinaryPrinter {}
 
 Future<int> main() async {
   group('basic', () {
-    test('train completes', () async {
-      expect(await starter(<String>['--train']), equals(0));
+    final CompilerInterface compiler = new _MockedCompiler();
+
+    test('train with mocked compiler completes', () async {
+      expect(await starter(<String>['--train'], compiler: compiler), equals(0));
     });
   });
 
