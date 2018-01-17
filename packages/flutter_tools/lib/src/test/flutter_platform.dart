@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 
@@ -56,6 +58,7 @@ void installHook({
   bool enableObservatory: false,
   bool machine: false,
   bool startPaused: false,
+  bool previewDart2: false,
   int observatoryPort,
   InternetAddressType serverType: InternetAddressType.IP_V4,
 }) {
@@ -71,6 +74,7 @@ void installHook({
       startPaused: startPaused,
       explicitObservatoryPort: observatoryPort,
       host: _kHosts[serverType],
+      previewDart2: previewDart2,
     ),
   );
 }
@@ -88,6 +92,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.startPaused,
     this.explicitObservatoryPort,
     this.host,
+    this.previewDart2,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -97,6 +102,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool startPaused;
   final int explicitObservatoryPort;
   final InternetAddress host;
+  final bool previewDart2;
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
@@ -191,14 +197,28 @@ class _FlutterPlatform extends PlatformPlugin {
       ));
 
       // Start the engine subprocess.
-      printTrace('test $ourTestCount: starting shell process');
+      printTrace('test $ourTestCount: starting shell process${previewDart2? " in preview-dart-2 mode":""}');
+
+      final String mainDart = previewDart2
+        ? await compile(
+            sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+            incrementalCompilerByteStorePath: '' /* not null is enough */,
+            mainPath: listenerFile.path,
+            packagesPath: PackageMap.globalPackagesPath
+          )
+        : listenerFile.path;
+
+      // bundlePath needs to point to a folder with `platform.dill` file.
+      final String bundlePath = previewDart2 ? artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) : null;
+
       final Process process = await _startProcess(
         shellPath,
-        listenerFile.path,
+        mainDart,
         packages: PackageMap.globalPackagesPath,
         enableObservatory: enableObservatory,
         startPaused: startPaused,
         observatoryPort: explicitObservatoryPort,
+        bundlePath: bundlePath,
       );
       subprocessActive = true;
       finalizers.add(() async {
@@ -466,6 +486,7 @@ void main() {
     String executable,
     String testPath, {
     String packages,
+    String bundlePath,
     bool enableObservatory: false,
     bool startPaused: false,
     int observatoryPort,
@@ -492,6 +513,9 @@ void main() {
     }
     if (host.type == InternetAddressType.IP_V6)
       command.add('--ipv6');
+    if (bundlePath != null) {
+      command.add('--flutter-assets-dir=$bundlePath');
+    }
     command.addAll(<String>[
       '--enable-dart-profiling',
       '--non-interactive',

@@ -28,6 +28,7 @@ Future<int> runTests(
     bool startPaused: false,
     bool ipv6: false,
     bool machine: false,
+    bool previewDart2: false,
     TestWatcher watcher,
     }) async {
   // Compute the command-line arguments for package:test.
@@ -75,6 +76,7 @@ Future<int> runTests(
     machine: machine,
     startPaused: startPaused,
     serverType: serverType,
+    previewDart2: previewDart2,
   );
 
   // Make the global packages path absolute.
