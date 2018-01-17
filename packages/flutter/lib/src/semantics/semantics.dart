@@ -1439,6 +1439,18 @@ class SemanticsConfiguration {
   ///
   /// VoiceOver users on iOS and TalkBack users on Android can trigger this
   /// action by double-tapping the screen while an element is focused.
+  ///
+  /// On Android prior to Android Oreo a double-tap on the screen while an
+  /// element with an [onTap] handler is focused will not call the registered
+  /// handler. Instead, Android will simulate a pointer down and up event at the
+  /// center of the focused element. Those pointer events will get dispatched
+  /// just like a regular tap with TalkBack disabled would: The events will get
+  /// processed by any [GestureDetector] listening for gestures in the center of
+  /// the focused element. Therefore, to ensure that [onTap] handlers work
+  /// properly on Android versions prior to Oreo, a [GestureDetector] with an
+  /// onTap handler should always be wrapping an element that defines a
+  /// semantic [onTap] handler. By default a [GestureDetector] will register its
+  /// own semantic [onTap] handler that follows this principle.
   VoidCallback get onTap => _onTap;
   VoidCallback _onTap;
   set onTap(VoidCallback value) {
