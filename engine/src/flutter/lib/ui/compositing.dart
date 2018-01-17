@@ -20,7 +20,7 @@ class Scene extends NativeFieldWrapperClass2 {
   /// Releases the resources used by this scene.
   ///
   /// After calling this function, the scene is cannot be used further.
-  void dispose() native "Scene_dispose";
+  void dispose() native 'Scene_dispose';
 }
 
 /// Builds a [Scene] containing the given visuals.
@@ -33,7 +33,7 @@ class Scene extends NativeFieldWrapperClass2 {
 class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Creates an empty [SceneBuilder] object.
   SceneBuilder() { _constructor(); }
-  void _constructor() native "SceneBuilder_constructor";
+  void _constructor() native 'SceneBuilder_constructor';
 
   /// Pushes a transform operation onto the operation stack.
   ///
@@ -42,12 +42,12 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// See [pop] for details about the operation stack.
   void pushTransform(Float64List matrix4) {
     if (matrix4 == null)
-      throw new ArgumentError("[matrix4] argument cannot be null");
+      throw new ArgumentError('"matrix4" argument cannot be null');
     if (matrix4.length != 16)
-      throw new ArgumentError("[matrix4] must have 16 entries.");
+      throw new ArgumentError('"matrix4" must have 16 entries.');
     _pushTransform(matrix4);
   }
-  void _pushTransform(Float64List matrix4) native "SceneBuilder_pushTransform";
+  void _pushTransform(Float64List matrix4) native 'SceneBuilder_pushTransform';
 
   /// Pushes a rectangular clip operation onto the operation stack.
   ///
@@ -60,7 +60,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   void _pushClipRect(double left,
                      double right,
                      double top,
-                     double bottom) native "SceneBuilder_pushClipRect";
+                     double bottom) native 'SceneBuilder_pushClipRect';
 
   /// Pushes a rounded-rectangular clip operation onto the operation stack.
   ///
@@ -68,14 +68,14 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   ///
   /// See [pop] for details about the operation stack.
   void pushClipRRect(RRect rrect) => _pushClipRRect(rrect._value);
-  void _pushClipRRect(Float32List rrect) native "SceneBuilder_pushClipRRect";
+  void _pushClipRRect(Float32List rrect) native 'SceneBuilder_pushClipRRect';
 
   /// Pushes a path clip operation onto the operation stack.
   ///
   /// Rasterization outside the given path is discarded.
   ///
   /// See [pop] for details about the operation stack.
-  void pushClipPath(Path path) native "SceneBuilder_pushClipPath";
+  void pushClipPath(Path path) native 'SceneBuilder_pushClipPath';
 
   /// Pushes an opacity operation onto the operation stack.
   ///
@@ -85,7 +85,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// opacity).
   ///
   /// See [pop] for details about the operation stack.
-  void pushOpacity(int alpha) native "SceneBuilder_pushOpacity";
+  void pushOpacity(int alpha) native 'SceneBuilder_pushOpacity';
 
   /// Pushes a color filter operation onto the operation stack.
   ///
@@ -96,7 +96,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   void pushColorFilter(Color color, BlendMode blendMode) {
     _pushColorFilter(color.value, blendMode.index);
   }
-  void _pushColorFilter(int color, int blendMode) native "SceneBuilder_pushColorFilter";
+  void _pushColorFilter(int color, int blendMode) native 'SceneBuilder_pushColorFilter';
 
   /// Pushes a backdrop filter operation onto the operation stack.
   ///
@@ -104,7 +104,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// rasterizing the given objects.
   ///
   /// See [pop] for details about the operation stack.
-  void pushBackdropFilter(ImageFilter filter) native "SceneBuilder_pushBackdropFilter";
+  void pushBackdropFilter(ImageFilter filter) native 'SceneBuilder_pushBackdropFilter';
 
   /// Pushes a shader mask operation onto the operation stack.
   ///
@@ -125,7 +125,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
                        double maskRectRight,
                        double maskRectTop,
                        double maskRectBottom,
-                       int blendMode) native "SceneBuilder_pushShaderMask";
+                       int blendMode) native 'SceneBuilder_pushShaderMask';
 
   /// Pushes a physical layer operation for an arbitrary shape onto the
   /// operation stack.
@@ -137,7 +137,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
     _pushPhysicalShape(path, elevation, color.value);
   }
   void _pushPhysicalShape(Path path, double elevation, int color) native 
-    "SceneBuilder_pushPhysicalShape";
+    'SceneBuilder_pushPhysicalShape';
 
   /// Ends the effect of the most recently pushed operation.
   ///
@@ -145,7 +145,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// operations in the stack applies to each of the objects added to the scene.
   /// Calling this function removes the most recently added operation from the
   /// stack.
-  void pop() native "SceneBuilder_pop";
+  void pop() native 'SceneBuilder_pop';
 
   /// Adds an object to the scene that displays performance statistics.
   ///
@@ -182,7 +182,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
                               double left,
                               double right,
                               double top,
-                              double bottom) native "SceneBuilder_addPerformanceOverlay";
+                              double bottom) native 'SceneBuilder_addPerformanceOverlay';
 
   /// Adds a [Picture] to the scene.
   ///
@@ -195,7 +195,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
       hints |= 2;
     _addPicture(offset.dx, offset.dy, picture, hints);
   }
-  void _addPicture(double dx, double dy, Picture picture, int hints) native "SceneBuilder_addPicture";
+  void _addPicture(double dx, double dy, Picture picture, int hints) native 'SceneBuilder_addPicture';
 
   /// Adds a backend texture to the scene.
   ///
@@ -204,7 +204,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
     assert(offset != null, 'Offset argument was null');
     _addTexture(offset.dx, offset.dy, width, height, textureId);
   }
-  void _addTexture(double dx, double dy, double width, double height, int textureId) native "SceneBuilder_addTexture";
+  void _addTexture(double dx, double dy, double width, double height, int textureId) native 'SceneBuilder_addTexture';
 
   /// (Fuchsia-only) Adds a scene rendered by another application to the scene
   /// for this application.
@@ -227,7 +227,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
                       double width,
                       double height,
                       SceneHost sceneHost,
-                      bool hitTestable) native "SceneBuilder_addChildScene";
+                      bool hitTestable) native 'SceneBuilder_addChildScene';
 
   /// Sets a threshold after which additional debugging information should be recorded.
   ///
@@ -235,7 +235,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// interested in using this feature, please contact [flutter-dev](https://groups.google.com/forum/#!forum/flutter-dev).
   /// We'll hopefully be able to figure out how to make this feature more useful
   /// to you.
-  void setRasterizerTracingThreshold(int frameInterval) native "SceneBuilder_setRasterizerTracingThreshold";
+  void setRasterizerTracingThreshold(int frameInterval) native 'SceneBuilder_setRasterizerTracingThreshold';
 
   /// Sets whether the raster cache should checkerboard cached entries. This is
   /// only useful for debugging purposes.
@@ -252,13 +252,13 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   ///
   /// Currently this interface is difficult to use by end-developers. If you're
   /// interested in using this feature, please contact [flutter-dev](https://groups.google.com/forum/#!forum/flutter-dev).
-  void setCheckerboardRasterCacheImages(bool checkerboard) native "SceneBuilder_setCheckerboardRasterCacheImages";
+  void setCheckerboardRasterCacheImages(bool checkerboard) native 'SceneBuilder_setCheckerboardRasterCacheImages';
 
   /// Sets whether the compositor should checkerboard layers that are rendered
   /// to offscreen bitmaps.
   ///
   /// This is only useful for debugging purposes.
-  void setCheckerboardOffscreenLayers(bool checkerboard) native "SceneBuilder_setCheckerboardOffscreenLayers";
+  void setCheckerboardOffscreenLayers(bool checkerboard) native 'SceneBuilder_setCheckerboardOffscreenLayers';
 
   /// Finishes building the scene.
   ///
@@ -268,7 +268,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   ///
   /// After calling this function, the scene builder object is invalid and
   /// cannot be used further.
-  Scene build() native "SceneBuilder_build";
+  Scene build() native 'SceneBuilder_build';
 }
 
 /// (Fuchsia-only) Hosts content provided by another application.
@@ -285,13 +285,13 @@ class SceneHost extends NativeFieldWrapperClass2 {
   /// //topaz/public/lib/ui/flutter/.
   ///
   /// The scene host takes ownership of the provided export token handle.
-  SceneHost(dynamic export_token_handle) {
-    _constructor(export_token_handle);
+  SceneHost(dynamic exportTokenHandle) {
+    _constructor(exportTokenHandle);
   }
-  void _constructor(dynamic export_token_handle) native "SceneHost_constructor";
+  void _constructor(dynamic exportTokenHandle) native 'SceneHost_constructor';
 
   /// Releases the resources associated with the child scene host.
   ///
   /// After calling this function, the child scene host cannot be used further.
-  void dispose() native "SceneHost_dispose";
+  void dispose() native 'SceneHost_dispose';
 }

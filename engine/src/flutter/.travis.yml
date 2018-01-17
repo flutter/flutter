@@ -1,6 +1,6 @@
 language: dart
 dart:
-  - "dev/release/1.25.0-dev.11.0"
+  - dev
 sudo: false
 before_script:
   - ./travis/setup.sh

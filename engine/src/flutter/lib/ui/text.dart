@@ -54,7 +54,7 @@ class FontWeight {
   static const FontWeight bold = w700;
 
   /// A list of all the font weights.
-  static const List<FontWeight> values = const [
+  static const List<FontWeight> values = const <FontWeight>[
     w100, w200, w300, w400, w500, w600, w700, w800, w900
   ];
 
@@ -83,6 +83,7 @@ class FontWeight {
     return values[lerpDouble(a?.index ?? normal.index, b?.index ?? normal.index, t).round().clamp(0, 8)];
   }
 
+  @override
   String toString() {
     return const <int, String>{
       0: 'FontWeight.w100',
@@ -133,10 +134,10 @@ enum TextAlign {
 
 /// A horizontal line used for aligning text.
 enum TextBaseline {
-  // The horizontal line used to align the bottom of glyphs for alphabetic characters.
+  /// The horizontal line used to align the bottom of glyphs for alphabetic characters.
   alphabetic,
 
-  // The horizontal line used to align ideographic characters.
+  /// The horizontal line used to align ideographic characters.
   ideographic,
 }
 
@@ -186,7 +187,7 @@ class TextDecoration {
   String toString() {
     if (_mask == 0)
       return 'TextDecoration.none';
-    List<String> values = <String>[];
+    final List<String> values = <String>[];
     if (_mask & underline._mask != 0)
       values.add('underline');
     if (_mask & overline._mask != 0)
@@ -242,19 +243,21 @@ enum TextDecorationStyle {
 //
 //  - Element 7: The enum index of the |textBaseline|.
 //
-Int32List _encodeTextStyle(Color color,
-                           TextDecoration decoration,
-                           Color decorationColor,
-                           TextDecorationStyle decorationStyle,
-                           FontWeight fontWeight,
-                           FontStyle fontStyle,
-                           TextBaseline textBaseline,
-                           String fontFamily,
-                           double fontSize,
-                           double letterSpacing,
-                           double wordSpacing,
-                           double height) {
-  Int32List result = new Int32List(8);
+Int32List _encodeTextStyle(
+  Color color,
+  TextDecoration decoration,
+  Color decorationColor,
+  TextDecorationStyle decorationStyle,
+  FontWeight fontWeight,
+  FontStyle fontStyle,
+  TextBaseline textBaseline,
+  String fontFamily,
+  double fontSize,
+  double letterSpacing,
+  double wordSpacing,
+  double height,
+) {
+  final Int32List result = new Int32List(8);
   if (color != null) {
     result[0] |= 1 << 1;
     result[1] = color.value;
@@ -334,19 +337,21 @@ class TextStyle {
     double fontSize,
     double letterSpacing,
     double wordSpacing,
-    double height
-  }) : _encoded = _encodeTextStyle(color,
-                                   decoration,
-                                   decorationColor,
-                                   decorationStyle,
-                                   fontWeight,
-                                   fontStyle,
-                                   textBaseline,
-                                   fontFamily,
-                                   fontSize,
-                                   letterSpacing,
-                                   wordSpacing,
-                                   height),
+    double height,
+  }) : _encoded = _encodeTextStyle(
+         color,
+         decoration,
+         decorationColor,
+         decorationStyle,
+         fontWeight,
+         fontStyle,
+         textBaseline,
+         fontFamily,
+         fontSize,
+         letterSpacing,
+         wordSpacing,
+         height,
+       ),
        _fontFamily = fontFamily ?? '',
        _fontSize = fontSize,
        _letterSpacing = letterSpacing,
@@ -360,6 +365,7 @@ class TextStyle {
   final double _wordSpacing;
   final double _height;
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -379,8 +385,10 @@ class TextStyle {
     return true;
   }
 
+  @override
   int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _letterSpacing, _wordSpacing, _height);
 
+  @override
   String toString() {
     return 'TextStyle('
              'color: ${          _encoded[0] & 0x0002 == 0x0002 ? new Color(_encoded[1])                  : "unspecified"}, '
@@ -416,16 +424,18 @@ class TextStyle {
 //
 //  - Element 4: The value of |maxLines|.
 //
-Int32List _encodeParagraphStyle(TextAlign textAlign,
-                                TextDirection textDirection,
-                                FontWeight fontWeight,
-                                FontStyle fontStyle,
-                                int maxLines,
-                                String fontFamily,
-                                double fontSize,
-                                double lineHeight,
-                                String ellipsis) {
-  Int32List result = new Int32List(6); // also update paragraph_builder.cc
+Int32List _encodeParagraphStyle(
+  TextAlign textAlign,
+  TextDirection textDirection,
+  FontWeight fontWeight,
+  FontStyle fontStyle,
+  int maxLines,
+  String fontFamily,
+  double fontSize,
+  double lineHeight,
+  String ellipsis,
+) {
+  final Int32List result = new Int32List(6); // also update paragraph_builder.cc
   if (textAlign != null) {
     result[0] |= 1 << 1;
     result[1] = textAlign.index;
@@ -521,15 +531,17 @@ class ParagraphStyle {
     double fontSize,
     double lineHeight,
     String ellipsis,
-  }) : _encoded = _encodeParagraphStyle(textAlign,
-                                        textDirection,
-                                        fontWeight,
-                                        fontStyle,
-                                        maxLines,
-                                        fontFamily,
-                                        fontSize,
-                                        lineHeight,
-                                        ellipsis),
+  }) : _encoded = _encodeParagraphStyle(
+         textAlign,
+         textDirection,
+         fontWeight,
+         fontStyle,
+         maxLines,
+         fontFamily,
+         fontSize,
+         lineHeight,
+         ellipsis,
+       ),
        _fontFamily = fontFamily,
        _fontSize = fontSize,
        _lineHeight = lineHeight,
@@ -541,6 +553,7 @@ class ParagraphStyle {
   final double _lineHeight;
   final String _ellipsis;
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -559,8 +572,10 @@ class ParagraphStyle {
     return true;
   }
 
+  @override
   int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _lineHeight, _ellipsis);
 
+  @override
   String toString() {
     return '$runtimeType('
              'textAlign: ${     _encoded[0] & 0x002 == 0x002 ? TextAlign.values[_encoded[1]]     : "unspecified"}, '
@@ -828,9 +843,9 @@ class ParagraphConstraints {
   /// Creates constraints for laying out a pargraph.
   ///
   /// The [width] argument must not be null.
-  ParagraphConstraints({ this.width }) {
-    assert(width != null);
-  }
+  ParagraphConstraints({
+    this.width,
+  }) : assert(width != null);
 
   /// The width the paragraph should use whey computing the positions of glyphs.
   ///
@@ -885,32 +900,32 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
   /// The amount of horizontal space this paragraph occupies.
   ///
   /// Valid only after [layout] has been called.
-  double get width native "Paragraph_width";
+  double get width native 'Paragraph_width';
 
   /// The amount of vertical space this paragraph occupies.
   ///
   /// Valid only after [layout] has been called.
-  double get height native "Paragraph_height";
+  double get height native 'Paragraph_height';
 
   /// The minimum width that this paragraph could be without failing to paint
   /// its contents within itself.
   ///
   /// Valid only after [layout] has been called.
-  double get minIntrinsicWidth native "Paragraph_minIntrinsicWidth";
+  double get minIntrinsicWidth native 'Paragraph_minIntrinsicWidth';
 
   /// Returns the smallest width beyond which increasing the width never
   /// decreases the height.
   ///
   /// Valid only after [layout] has been called.
-  double get maxIntrinsicWidth native "Paragraph_maxIntrinsicWidth";
+  double get maxIntrinsicWidth native 'Paragraph_maxIntrinsicWidth';
 
   /// The distance from the top of the paragraph to the alphabetic
   /// baseline of the first line, in logical pixels.
-  double get alphabeticBaseline native "Paragraph_alphabeticBaseline";
+  double get alphabeticBaseline native 'Paragraph_alphabeticBaseline';
 
   /// The distance from the top of the paragraph to the ideographic
   /// baseline of the first line, in logical pixels.
-  double get ideographicBaseline native "Paragraph_ideographicBaseline";
+  double get ideographicBaseline native 'Paragraph_ideographicBaseline';
 
   /// True if there is more vertical content, but the text was truncated, either
   /// because we reached `maxLines` lines of text or because the `maxLines` was
@@ -919,35 +934,35 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
   ///
   /// See the discussion of the `maxLines` and `ellipsis` arguments at [new
   /// ParagraphStyle].
-  bool get didExceedMaxLines native "Paragraph_didExceedMaxLines";
+  bool get didExceedMaxLines native 'Paragraph_didExceedMaxLines';
 
   /// Computes the size and position of each glyph in the paragraph.
   ///
   /// The [ParagraphConstraints] control how wide the text is allowed to be.
   void layout(ParagraphConstraints constraints) => _layout(constraints.width);
-  void _layout(double width) native "Paragraph_layout";
+  void _layout(double width) native 'Paragraph_layout';
 
   /// Returns a list of text boxes that enclose the given text range.
-  List<TextBox> getBoxesForRange(int start, int end) native "Paragraph_getRectsForRange";
+  List<TextBox> getBoxesForRange(int start, int end) native 'Paragraph_getRectsForRange';
 
   /// Returns the text position closest to the given offset.
   TextPosition getPositionForOffset(Offset offset) {
-    List<int> encoded = _getPositionForOffset(offset.dx, offset.dy);
+    final List<int> encoded = _getPositionForOffset(offset.dx, offset.dy);
     return new TextPosition(offset: encoded[0], affinity: TextAffinity.values[encoded[1]]);
   }
-  List<int> _getPositionForOffset(double dx, double dy) native "Paragraph_getPositionForOffset";
+  List<int> _getPositionForOffset(double dx, double dy) native 'Paragraph_getPositionForOffset';
 
   /// Returns the [start, end] of the word at the given offset. Characters not
   /// part of a word, such as spaces, symbols, and punctuation, have word breaks
   /// on both sides. In such cases, this method will return [offset, offset+1].
   /// Word boundaries are defined more precisely in Unicode Standard Annex #29
   /// http://www.unicode.org/reports/tr29/#Word_Boundaries
-  List<int> getWordBoundary(int offset) native "Paragraph_getWordBoundary";
+  List<int> getWordBoundary(int offset) native 'Paragraph_getWordBoundary';
 
   // Redirecting the paint function in this way solves some dependency problems
   // in the C++ code. If we straighten out the C++ dependencies, we can remove
   // this indirection.
-  void _paint(Canvas canvas, double x, double y) native "Paragraph_paint";
+  void _paint(Canvas canvas, double x, double y) native 'Paragraph_paint';
 }
 
 /// Builds a [Paragraph] containing text with the given styling information.
@@ -968,13 +983,13 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   /// Creates a [ParagraphBuilder] object, which is used to create a
   /// [Paragraph].
   ParagraphBuilder(ParagraphStyle style) { _constructor(style._encoded, style._fontFamily, style._fontSize, style._lineHeight, style._ellipsis); }
-  void _constructor(Int32List encoded, String fontFamily, double fontSize, double lineHeight, String ellipsis) native "ParagraphBuilder_constructor";
+  void _constructor(Int32List encoded, String fontFamily, double fontSize, double lineHeight, String ellipsis) native 'ParagraphBuilder_constructor';
 
   /// Applies the given style to the added text until [pop] is called.
   ///
   /// See [pop] for details.
   void pushStyle(TextStyle style) => _pushStyle(style._encoded, style._fontFamily, style._fontSize, style._letterSpacing, style._wordSpacing, style._height);
-  void _pushStyle(Int32List encoded, String fontFamily, double fontSize, double letterSpacing, double wordSpacing, double height) native "ParagraphBuilder_pushStyle";
+  void _pushStyle(Int32List encoded, String fontFamily, double fontSize, double letterSpacing, double wordSpacing, double height) native 'ParagraphBuilder_pushStyle';
 
   /// Ends the effect of the most recent call to [pushStyle].
   ///
@@ -982,22 +997,22 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   /// added to the paragraph is affected by all the styles in the stack. Calling
   /// [pop] removes the topmost style in the stack, leaving the remaining styles
   /// in effect.
-  void pop() native "ParagraphBuilder_pop";
+  void pop() native 'ParagraphBuilder_pop';
 
   /// Adds the given text to the paragraph.
   ///
   /// The text will be styled according to the current stack of text styles.
   void addText(String text) {
-    String error = _addText(text);
+    final String error = _addText(text);
     if (error != null)
       throw new ArgumentError(error);
   }
-  String _addText(String text) native "ParagraphBuilder_addText";
+  String _addText(String text) native 'ParagraphBuilder_addText';
 
   /// Applies the given paragraph style and returns a [Paragraph] containing the
   /// added text and associated styling.
   ///
   /// After calling this function, the paragraph builder object is invalid and
   /// cannot be used further.
-  Paragraph build() native "ParagraphBuilder_build";
+  Paragraph build() native 'ParagraphBuilder_build';
 }

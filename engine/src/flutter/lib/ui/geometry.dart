@@ -326,6 +326,9 @@ class Offset extends OffsetBase {
   }
 
   @override
+  int get hashCode => hashValues(_dx, _dy);
+
+  @override
   String toString() => 'Offset(${dx?.toStringAsFixed(1)}, ${dy?.toStringAsFixed(1)})';
 }
 
@@ -565,6 +568,9 @@ class Size extends OffsetBase {
     return _dx == typedOther._dx &&
            _dy == typedOther._dy;
   }
+
+  @override
+  int get hashCode => hashValues(_dx, _dy);
 
   @override
   String toString() => 'Size(${width?.toStringAsFixed(1)}, ${height?.toStringAsFixed(1)})';
