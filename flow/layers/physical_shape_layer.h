@@ -23,6 +23,12 @@ class PhysicalShapeLayer : public ContainerLayer {
       frameRRect_ = SkRRect::MakeRect(rect);
     } else if (path.isRRect(&frameRRect_)) {
       isRect_ = frameRRect_.isRect();
+    } else {
+      // Fuchsia's compositor currently only supports rounded rectangle frames.
+      // For shapes that cannot be represented as a rounded rectangle we
+      // default to use the bounding rectangle.
+      // TODO(amirh): fix this once Fuchsia supports arbitrary shaped frames.
+      frameRRect_ = SkRRect::MakeRect(path.getBounds());
     }
   }
 
