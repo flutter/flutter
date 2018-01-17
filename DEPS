@@ -424,6 +424,33 @@ hooks = [
     'action': ['python', 'src/tools/dart/update.py'],
   },
   {
+    'name': 'frontend_server_packages',
+    'pattern': '.',
+    'condition': 'host_os == "linux"',
+    'cwd': 'src/flutter/frontend_server/',
+    'action': [
+      '../../../src/third_party/dart/tools/sdks/linux/dart-sdk/bin/pub', 'get',
+    ],
+  },
+  {
+    'name': 'frontend_server_packages',
+    'pattern': '.',
+    'condition': 'host_os == "mac"',
+    'cwd': 'src/flutter/frontend_server/',
+    'action': [
+      '../../../src/third_party/dart/tools/sdks/mac/dart-sdk/bin/pub', 'get',
+    ],
+  },
+  {
+    'name': 'frontend_server_packages',
+    'pattern': '.',
+    'condition': 'host_os == "windows"',
+    'cwd': 'src/flutter/frontend_server/',
+    'action': [
+      '../../../src/third_party/dart/tools/sdks/win/dart-sdk/bin/pub.bat', 'get',
+    ],
+  },
+  {
     # Ensure that we don't accidentally reference any .pyc files whose
     # corresponding .py files have already been deleted.
     'name': 'remove_stale_pyc_files',
