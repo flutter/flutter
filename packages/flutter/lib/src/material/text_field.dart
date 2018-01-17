@@ -414,7 +414,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   void _cancelCurrentSplash() {
     _currentSplash?.cancel();
-    _currentSplash = null;
   }
 
   @override
