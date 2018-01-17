@@ -130,13 +130,13 @@ class RenderListWheelViewport
   /// An arbitrary but aesthetically reasonable default value for [diameterRatio].
   static const double defaultDiameterRatio = 2.0;
 
-  /// Ar arbitrary but aesthetically reasonable default value for [perspective].
+  /// An arbitrary but aesthetically reasonable default value for [perspective].
   static const double defaultPerspective = 0.003;
 
   /// An error message to show when the provided [diameterRatio] is zero.
   static const String diameterRatioZeroMessage = "You can't set a diameterRatio "
-      'of 0. It would imply a cylinder of 0 in diameter in which case nothing '
-      'will be drawn.';
+      'of 0 or of a negative number. It would imply a cylinder of 0 in diameter '
+      'in which case nothing will be drawn.';
 
   /// An error message to show when the [perspective] value is too high.
   static const String perspectiveTooHighMessage = 'A perspective too high will '
@@ -595,7 +595,7 @@ class RenderListWheelViewport
   /// painting coordinates** system.
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final _ListWheelParentData parentData = child?.parentData;
+    final ListWheelParentData parentData = child?.parentData;
     transform.translate(0.0, _getUntransformedPaintingCoordinateY(parentData.offset.dy));
   }
 

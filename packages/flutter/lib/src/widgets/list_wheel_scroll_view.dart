@@ -36,7 +36,9 @@ import 'scrollable.dart';
 ///    to listen to the current item index on a push basis rather than polling
 ///    the [FixedExtentScrollController].
 class FixedExtentScrollController extends ScrollController {
-  /// Creates a [FixedExtentScrollController].
+  /// Creates a scroll controller for scrollables whose items have the same size.
+  ///
+  /// [initialItem] defaults to 0 and must not be null.
   FixedExtentScrollController({
     this.initialItem: 0,
   }) : assert(initialItem != null);
@@ -65,7 +67,8 @@ class FixedExtentScrollController extends ScrollController {
     );
     assert(
       positions.length == 1,
-      'Multiple scroll views cannot be attached to the same FixedExtentScrollController.',
+      'The selectedItem property cannot be read when multiple scroll views are '
+      'attached to the same FixedExtentScrollController.',
     );
     final _FixedExtentScrollPosition position = this.position;
     return position.itemIndex;
@@ -81,12 +84,19 @@ class FixedExtentScrollController extends ScrollController {
     @required Duration duration,
     @required Curve curve,
   }) {
-    final _FixedExtentScrollPosition position = this.position;
-    return position.animateTo(
-      itemIndex * position.itemExtent,
-      duration: duration,
-      curve: curve,
-    );
+    if (!hasClients) {
+      return new Future<Null>.value();
+    }
+
+    final List<Future<Null>> futures = <Future<Null>>[];
+    for (_FixedExtentScrollPosition position in positions) {
+      futures.add(position.animateTo(
+        itemIndex * position.itemExtent,
+        duration: duration,
+        curve: curve,
+      ));
+    }
+    return Future.wait(futures);
   }
 
   /// Changes which item index is centered in the controlled scroll view.
@@ -94,8 +104,9 @@ class FixedExtentScrollController extends ScrollController {
   /// Jumps the item index position from its current value to the given value,
   /// without animation, and without checking if the new value is in range.
   void jumpToItem(int itemIndex) {
-    final _FixedExtentScrollPosition position = this.position;
-    position.jumpTo(itemIndex * position.itemExtent);
+    for (_FixedExtentScrollPosition position in positions) {
+      position.jumpTo(itemIndex * position.itemExtent);
+    }
   }
 
   @override
@@ -114,9 +125,13 @@ class FixedExtentScrollController extends ScrollController {
 /// The metrics are available on [ScrollNotification]s generated from a scroll
 /// views such as [ListWheelScrollView]s with a [FixedExtentScrollController] and
 /// exposes the current [itemIndex] and the scroll view's [itemExtent].
+///
+/// `FixedExtent` refers to the fact that the scrollable items have the same size.
+/// This is distinct from `Fixed` in the parent class name's [FixedScrollMetric]
+/// which refers to its immutability.
 class FixedExtentMetrics extends FixedScrollMetrics {
-  /// Creates page metrics that add the given information to the `parent`
-  /// metrics.
+  /// Creates fixed extent metrics that add the item index information to the
+  /// `parent` [FixedScrollMetrics].
   FixedExtentMetrics({
     ScrollMetrics parent,
     @required this.itemIndex,
@@ -233,6 +248,7 @@ class _FixedExtentScrollableState extends ScrollableState {
 ///
 /// Defers back to the parent beyond the scroll extents.
 class FixedExtentScrollPhysics extends ScrollPhysics {
+  /// Creates a scroll physics that always lands on items.
   const FixedExtentScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
 
   @override
@@ -250,6 +266,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
 
     final _FixedExtentScrollPosition metrics = position;
 
+    // Scenario 1:
     // If we're out of range and not headed back in range, defer to the parent
     // ballistics, which should put us back in range at the scrollable's boundary.
     if ((velocity <= 0.0 && metrics.pixels <= metrics.minScrollExtent) ||
@@ -263,6 +280,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
         // 0.135 is an arbitrary number copied from scroll_simulation.
         new FrictionSimulation(0.135, metrics.pixels, velocity);
 
+    // Scenario 2:
     // If it was going to end up past the scroll extent, defer back to the
     // parent physics' ballistics again which should put us on the scrollable's
     // boundary.
@@ -282,6 +300,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
 
     final double settlingPixels = settlingItemIndex * metrics.itemExtent;
 
+    // Scenario 3:
     // If there's no velocity and we're already at where we intend to land,
     // do nothing.
     if (velocity.abs() < tolerance.velocity
@@ -289,8 +308,9 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
       return null;
     }
 
+    // Scenario 4:
     // If we're going to end back at the same item because initial velocity
-    // is too low, use a spring simulation to get back.
+    // is too low to break past it, use a spring simulation to get back.
     if (settlingItemIndex == metrics.itemIndex) {
       return new SpringSimulation(
         spring,
@@ -301,6 +321,7 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
       );
     }
 
+    // Scenario 5:
     // Create a new friction simulation except the drag will be tweaked to land
     // exactly on the item closest to the natural stopping point.
     return new FrictionSimulation.through(
@@ -478,6 +499,19 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
 ///  * [RenderListWheelViewport], the render object that renders the children
 ///    on a wheel.
 class ListWheelViewport extends MultiChildRenderObjectWidget {
+  /// Create a viewport where children are rendered onto a wheel.
+  ///
+  /// [diameterRatio] defaults to 2.0 and must not be null.
+  ///
+  /// [perspective] defaults to 0.003 and must not be null.
+  ///
+  /// [itemExtent] in pixels must be provided and must be positive.
+  ///
+  /// [clipToSize] defaults to true and must not be null.
+  ///
+  /// [renderChildrenOutsideViewport] defaults to false and must not be null.
+  ///
+  /// [offset] must be provided and must not be null.
   ListWheelViewport({
     Key key,
     this.diameterRatio: RenderListWheelViewport.defaultDiameterRatio,

@@ -11,8 +11,9 @@ const Color _kHighlighterBorder = const Color(0xFF7F7F7F);
 const Color _kDefaultBackground = const Color(0xFFD2D4DB);
 /// Eyeballed value comparing with a native picker.
 const double _kDefaultDiameterRatio = 1.1;
-/// A 255 based opacity value that hides the wheel above and below the 'magnifier' lens.
-const int _kForegroundScreenOpacity = 180;
+/// Opacity fraction value that hides the wheel above and below the 'magnifier'
+/// lens with the same color as the background.
+const double _kForegroundScreenOpacityFraction = 0.7;
 
 /// An iOS-styled picker.
 ///
@@ -29,15 +30,18 @@ const int _kForegroundScreenOpacity = 180;
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/pickers/>
 class CupertinoPicker extends StatefulWidget {
   const CupertinoPicker({
+    Key key,
     this.diameterRatio: _kDefaultDiameterRatio,
     this.backgroundColor: _kDefaultBackground,
     this.scrollController,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required this.children,
-  }) : assert(diameterRatio != null && diameterRatio > 0.0),
-       assert(backgroundColor != null),
-       assert(itemExtent != null && itemExtent > 0.0);
+  }) : assert(diameterRatio != null),
+       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(itemExtent != null),
+       assert(itemExtent > 0),
+       super(key: key);
 
   /// Relative ratio between this picker's height and the simulated cylinder's diameter.
   ///
@@ -50,12 +54,12 @@ class CupertinoPicker extends StatefulWidget {
 
   /// Background color behind the children.
   ///
-  /// Must not be null.
+  /// Defaults to a gray color in the iOS color palette.
   final Color backgroundColor;
 
   /// A [FixedExtentScrollController] to read and control the current item.
   ///
-  /// If null, an implicit one will be created internall.
+  /// If null, an implicit one will be created internally.
   final FixedExtentScrollController scrollController;
 
   /// The uniform height of all children.
@@ -82,11 +86,6 @@ class CupertinoPicker extends StatefulWidget {
 
 class CupertinoPickerState extends State<CupertinoPicker> {
   int _lastHapticIndex;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   void _handleSelectedItemChanged(int index) {
     if (index != _lastHapticIndex) {
@@ -118,7 +117,7 @@ class CupertinoPickerState extends State<CupertinoPicker> {
                 const Color(0xFFFFFFFF),
               ],
               stops: const <double>[
-                0.0, 0.05, 0.09, 0.18, 0.82, 0.91, 0.95, 1.0,
+                0.0, 0.05, 0.09, 0.22, 0.78, 0.91, 0.95, 1.0,
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -132,7 +131,9 @@ class CupertinoPickerState extends State<CupertinoPicker> {
   /// Makes the magnifier lens look so that the colors are normal through
   /// the lens and partially grayed out around it.
   Widget _buildMagnifierScreen() {
-    final Color foreground = widget.backgroundColor.withAlpha(180);
+    final Color foreground = widget.backgroundColor?.withAlpha(
+      (widget.backgroundColor?.alpha * _kForegroundScreenOpacityFraction).toInt()
+    );
 
     return new IgnorePointer(
       child: new Column(
@@ -143,8 +144,8 @@ class CupertinoPickerState extends State<CupertinoPicker> {
             ),
           ),
           new Container(
-            decoration: new BoxDecoration(
-              border: new Border(
+            decoration: const BoxDecoration(
+              border: const Border(
                 top: const BorderSide(width: 0.0, color: _kHighlighterBorder),
                 bottom: const BorderSide(width: 0.0, color: _kHighlighterBorder),
               )

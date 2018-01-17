@@ -99,7 +99,8 @@ class PageController extends ScrollController {
     );
     assert(
       positions.length == 1,
-      'Multiple PageViews cannot be attached to the same PageController.',
+      'The page property cannot be read when multiple PageViews are attached to '
+      'the same PageController.',
     );
     final _PagePosition position = this.position;
     return position.page;
