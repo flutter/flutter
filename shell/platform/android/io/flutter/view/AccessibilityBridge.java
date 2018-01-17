@@ -403,12 +403,20 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
 
     void updateSemantics(ByteBuffer buffer, String[] strings) {
         ArrayList<Integer> updated = new ArrayList<Integer>();
+        ArrayList<Integer> checkedChanged = new ArrayList<Integer>();
         while (buffer.hasRemaining()) {
             int id = buffer.getInt();
             SemanticsObject object = getOrCreateObject(id);
+            boolean hadCheckedState = object.hasFlag(Flag.HAS_CHECKED_STATE);
+            boolean wasChecked = object.hasFlag(Flag.IS_CHECKED);
             object.updateWith(buffer, strings);
             if (object.hasFlag(Flag.IS_FOCUSED)) {
                 mInputFocusedObject = object;
+            }
+            if (mA11yFocusedObject != null && mA11yFocusedObject.id == id
+                    && hadCheckedState && object.hasFlag(Flag.HAS_CHECKED_STATE)
+                    && wasChecked != object.hasFlag(Flag.IS_CHECKED)) {
+                checkedChanged.add(id);
             }
             updated.add(id);
         }
@@ -433,6 +441,10 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
 
         for (Integer id : updated) {
             sendAccessibilityEvent(id, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        }
+        for (Integer id : checkedChanged) {
+            // Simulate a click so TalkBack announces the change in checked state.
+            sendAccessibilityEvent(id, AccessibilityEvent.TYPE_VIEW_CLICKED);
         }
     }
 
