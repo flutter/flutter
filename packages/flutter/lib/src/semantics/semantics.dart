@@ -1791,7 +1791,8 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isChecked, value);
   }
 
-  /// Whether the owning [RenderObject] is in a mutally exclusive group.
+  /// Whether the owning RenderObject corresponds to UI that allows the user to
+  /// pick one of several mutually exclusive options.
   ///
   /// For example, a [Radio] button is in a mutually exclusive group because
   /// only one radio button in that group can be marked as [isChecked].

@@ -115,7 +115,7 @@ class BannerPainter extends CustomPainter {
   void _prepare() {
     _paintShadow = new Paint()
       ..color = const Color(0x7F000000)
-      ..maskFilter = new MaskFilter.blur(BlurStyle.normal, 4.0);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
     _paintBanner = new Paint()
       ..color = color;
     _textPainter = new TextPainter(
