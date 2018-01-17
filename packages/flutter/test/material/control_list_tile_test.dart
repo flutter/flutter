@@ -99,6 +99,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
+          id: 1,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: null,
           flags: <SemanticsFlag>[
@@ -111,6 +112,7 @@ void main() {
           label: 'aaa\nAAA',
         ),
         new TestSemantics.rootChild(
+          id: 3,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: new Matrix4.translationValues(0.0, 56.0, 0.0),
           flags: <SemanticsFlag>[
@@ -123,18 +125,20 @@ void main() {
           label: 'bbb\nBBB',
         ),
         new TestSemantics.rootChild(
+          id: 5,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: new Matrix4.translationValues(0.0, 112.0, 0.0),
           flags: <SemanticsFlag>[
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isInMutuallyExclusiveGroup,
           ],
           actions: SemanticsAction.tap.index,
           label: 'CCC\nccc',
         ),
       ],
-    ), ignoreId: true));
+    )));
   });
 
 }

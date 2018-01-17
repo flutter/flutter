@@ -1099,6 +1099,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       properties.add(new FlagProperty('isEnabled', value: _hasFlag(SemanticsFlag.isEnabled), ifFalse: 'disabled'));
     if (_hasFlag(SemanticsFlag.hasCheckedState))
       properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlag.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
+    properties.add(new FlagProperty('isInMutuallyExcusiveGroup', value: _hasFlag(SemanticsFlag.isInMutuallyExclusiveGroup), ifTrue: 'mutually-exclusive'));
     properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlag.isSelected), ifTrue: 'selected'));
     properties.add(new FlagProperty('isFocused', value: _hasFlag(SemanticsFlag.isFocused), ifTrue: 'focused'));
     properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlag.isButton), ifTrue: 'button'));
@@ -1788,6 +1789,16 @@ class SemanticsConfiguration {
   set isChecked(bool value) {
     _setFlag(SemanticsFlag.hasCheckedState, true);
     _setFlag(SemanticsFlag.isChecked, value);
+  }
+
+  /// Whether the owning RenderObject corresponds to UI that allows the user to
+  /// pick one of several mutually exclusive options.
+  ///
+  /// For example, a [Radio] button is in a mutually exclusive group because
+  /// only one radio button in that group can be marked as [isChecked].
+  bool get isInMutuallyExclusiveGroup => _hasFlag(SemanticsFlag.isInMutuallyExclusiveGroup);
+  set isInMutuallyExclusiveGroup(bool value) {
+    _setFlag(SemanticsFlag.isInMutuallyExclusiveGroup, value);
   }
 
   /// Whether the owning [RenderObject] currently holds the user's focus.
