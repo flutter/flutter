@@ -389,7 +389,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleTapCancel() {
-    _renderEditable.handleTapCancel();
     _cancelCurrentSplash();
   }
 
