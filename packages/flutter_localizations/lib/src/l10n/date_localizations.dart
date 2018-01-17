@@ -4,7 +4,9 @@
 
 // This file has been automatically generated.  Please do not edit it manually.
 // To regenerate run (omit -w to print to console instead of the file):
-// dart --enable-asserts dev/tools/gen_date_localizations.dart -w
+// dart --enable-asserts dev/tools/gen_date_localizations.dart --overwrite
+
+// ignore_for_file: public_member_api_docs
 
 const Map<String, dynamic> dateSymbols = const <String, dynamic>{
   'ar': const <String, dynamic>{

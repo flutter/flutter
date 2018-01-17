@@ -121,6 +121,8 @@ String generateTranslationBundles() {
 // translationBundleForLocale() function to look up a const TranslationBundle
 // instance for a locale.
 
+// ignore_for_file: public_member_api_docs
+
 import \'dart:ui\' show Locale;
 
 class TranslationBundle {
