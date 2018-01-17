@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart' show kPressTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
@@ -176,7 +177,13 @@ void main() {
 
     // Pointer is dragged below the textfield, splash is canceled.
     final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.text('label1')));
-    await tester.pumpAndSettle();
+
+    // Splashes start on tapDown.
+    // If the timeout is less than kPressTimout the recognizer will just trigger
+    // the onTapCancel callback. If the timeout is greater or equal to kPressTimout
+    // and less than kLongPressTimeout then onTapDown, onCancel will be called.
+    await tester.pump(kPressTimeout);
+
     await gesture1.moveTo(const Offset(400.0, 300.0));
     await gesture1.up();
     expect(confirmCount, 0);
@@ -184,11 +191,10 @@ void main() {
 
     // Pointer is dragged upwards causing a scroll, splash is canceled.
     final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.text('label2')));
-    await tester.pumpAndSettle();
-    await gesture2.moveBy(const Offset(0.0, -200.0), timeStamp: const Duration(milliseconds: 32));
+    await tester.pump(kPressTimeout);
+    await gesture2.moveBy(const Offset(0.0, -200.0));
     await gesture2.up();
     expect(confirmCount, 0);
     expect(cancelCount, 2);
   });
-
 }
