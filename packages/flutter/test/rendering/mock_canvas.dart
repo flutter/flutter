@@ -1188,15 +1188,6 @@ class _DrawImageRectPaintPredicate extends _DrawCommandPaintPredicate {
     if (destination != null)
       description.add('destination $destination');
   }
-
-  @override
-  void match(Iterator<RecordedInvocation> call) {
-    final int actualArgumentCount = call.current.invocation.positionalArguments.length;
-    if (actualArgumentCount != argumentCount)
-      throw 'It called $methodName with $actualArgumentCount argument${actualArgumentCount == 1 ? "" : "s"}; expected $argumentCount.';
-    verifyArguments(call.current.invocation.positionalArguments);
-    call.moveNext();
-  }
 }
 
 class _SomethingPaintPredicate extends _PaintPredicate {
