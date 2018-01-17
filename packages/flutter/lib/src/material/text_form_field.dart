@@ -45,7 +45,7 @@ class TextFormField extends FormField<String> {
     this.controller,
     String initialValue: '',
     FocusNode focusNode,
-    InputDecoration decoration: const InputDecoration(),
+    InputDecoration decoration,
     TextInputType keyboardType: TextInputType.text,
     TextStyle style,
     TextAlign textAlign: TextAlign.start,
