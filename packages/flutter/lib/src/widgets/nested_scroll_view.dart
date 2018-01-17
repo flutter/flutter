@@ -324,7 +324,11 @@ class _NestedScrollViewState extends State<NestedScrollView> {
                 ? widget.physics.applyTo(const ClampingScrollPhysics())
                 : const ClampingScrollPhysics(),
             controller: _coordinator._outerController,
-            slivers: widget._buildSlivers(context, _coordinator._innerController, _coordinator.hasScrolledBody),
+            slivers: widget._buildSlivers(
+              context,
+              _coordinator._innerController,
+              _coordinator.hasScrolledBody,
+            ),
             handle: _absorberHandle,
           );
         },
@@ -1287,7 +1291,7 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
 /// to the [SliverOverlapAbsorberHandle], which is typically passed to a
 /// [RenderSliverOverlapInjector].
 class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChildMixin<RenderSliver> {
-  /// Create a slvire that absorbs overlap and reports it to a
+  /// Create a sliver that absorbs overlap and reports it to a
   /// [SliverOverlapAbsorberHandle].
   ///
   /// The [handle] must not be null.

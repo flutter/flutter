@@ -13,6 +13,8 @@ class _Page {
   _Page({ this.label });
   final String label;
   String get id => label[0];
+  @override
+  String toString() => '$runtimeType("$label")';
 }
 
 class _CardData {
@@ -121,7 +123,10 @@ class _CardDataItem extends StatelessWidget {
               ),
             ),
             new Center(
-              child: new Text(data.title, style: Theme.of(context).textTheme.title),
+              child: new Text(
+                data.title,
+                style: Theme.of(context).textTheme.title,
+              ),
             ),
           ],
         ),
@@ -149,7 +154,9 @@ class TabsDemo extends StatelessWidget {
                   expandedHeight: 150.0,
                   forceElevated: innerBoxIsScrolled,
                   bottom: new TabBar(
-                    tabs: _allPages.keys.map((_Page page) => new Tab(text: page.label)).toList(),
+                    tabs: _allPages.keys.map(
+                      (_Page page) => new Tab(text: page.label),
+                    ).toList(),
                   ),
                 ),
               ),
