@@ -5,11 +5,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process_manager.dart';

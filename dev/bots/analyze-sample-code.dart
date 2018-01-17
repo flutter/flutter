@@ -171,7 +171,7 @@ dependencies:
       errors.removeLast();
     int errorCount = 0;
     for (String error in errors) {
-      const String kBullet = ' • ';
+      final String kBullet = Platform.isWindows ? ' - ' : ' • ';
       const String kColon = ':';
       final RegExp atRegExp = new RegExp(r' at .*main.dart:');
       final int start = error.indexOf(kBullet);
