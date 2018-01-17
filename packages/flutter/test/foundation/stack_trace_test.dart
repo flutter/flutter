@@ -7,6 +7,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:test/test.dart';
 
+import 'platform_helper.dart';
+
 void main() {
   // TODO(8128): These tests and the filtering mechanism should be revisited to account for causal async stack traces.
 
