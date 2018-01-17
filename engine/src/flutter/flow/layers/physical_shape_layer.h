@@ -24,10 +24,12 @@ class PhysicalShapeLayer : public ContainerLayer {
     } else if (path.isRRect(&frameRRect_)) {
       isRect_ = frameRRect_.isRect();
     } else {
-      // Fuchsia's compositor currently only supports rounded rectangle frames.
+      // Scenic currently doesn't provide an easy way to create shapes from
+      // arbitrary paths.
       // For shapes that cannot be represented as a rounded rectangle we
       // default to use the bounding rectangle.
-      // TODO(amirh): fix this once Fuchsia supports arbitrary shaped frames.
+      // TODO(amirh): fix this once we have a way to create a Scenic shape from
+      // an SkPath.
       frameRRect_ = SkRRect::MakeRect(path.getBounds());
     }
   }
