@@ -87,20 +87,10 @@ Future<Match> _firstMatchInFile(File file, RegExp regExp) async {
   if (!await file.exists()) {
     return null;
   }
-  final Completer<Match> completer = new Completer<Match>();
-  final Stream<String> stream = file
+  return file
       .openRead()
       .transform(UTF8.decoder)
-      .transform(const LineSplitter());
-  StreamSubscription<String> subscription;
-  subscription = stream.listen((String line) {
-    final Match match = regExp.firstMatch(line);
-    if (match != null) {
-      completer.complete(match);
-      subscription.cancel();
-    }
-  }, onDone: () {
-    completer.complete(null);
-  });
-  return completer.future;
+      .transform(const LineSplitter())
+      .map(regExp.firstMatch)
+      .firstWhere((Match match) => match != null, defaultValue: () => null);
 }
