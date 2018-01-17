@@ -258,12 +258,10 @@ void main() {
     int tapCancel = 0;
     int longPress = 0;
 
-    Key key = new UniqueKey();
     await tester.pumpWidget(
       new Container(
         alignment: Alignment.topLeft,
         child: new Container(
-          key: key,
           alignment: Alignment.center,
           height: 100.0,
           color: const Color(0xFF00FF00),
