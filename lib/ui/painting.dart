@@ -278,27 +278,51 @@ class Color {
   int get hashCode => value.hashCode;
 
   @override
-  String toString() => "Color(0x${value.toRadixString(16).padLeft(8, '0')})";
+  String toString() => 'Color(0x${value.toRadixString(16).padLeft(8, '0')})';
 }
 
 /// Algorithms to use when painting on the canvas.
 ///
-/// When drawing a shape or image onto a canvas, different algorithms
-/// can be used to blend the pixels. The image below shows the effects
-/// of these modes.
+/// When drawing a shape or image onto a canvas, different algorithms can be
+/// used to blend the pixels. The different values of [BlendMode] specify
+/// different such algorithms.
 ///
-/// [![Open Skia fiddle to view image.](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode.png)](https://fiddle.skia.org/c/864acd0659c7a866ea7296a3184b8bdd)
+/// Each algorithm has two inputs, the _source_, which is the image being drawn,
+/// and the _destination_, which is the image into which the source image is
+/// being composited. The destination is often thought of as the _background_.
+/// The source and destination both have four color channels, the red, green,
+/// blue, and alpha channels. These are typically represented as numbers in the
+/// range 0.0 to 1.0. The output of the algorithm also has these same four
+/// channels, with values computed from the source and destination.
 ///
-/// The "src" (source) image is the shape or image being drawn, the "dst"
-/// (destination) image is the current contents of the canvas onto which the
-/// source is being drawn.
+/// The documentation of each value below describes how the algorithm works. In
+/// each case, an image shows the output of blending a source image with a
+/// destination image. In the images below, the destination is represented by an
+/// image with horizontal lines and an opaque landscape photograph, and the
+/// source is represented by an image with vertical lines (the same lines but
+/// rotated) and a bird clip-art image. The [src] mode shows only the source
+/// image, and the [dst] mode shows only the destination image. In the
+/// documentation below, the transparency is illustrated by a checkerboard
+/// pattern. The [clear] mode drops both the source and destination, resulting
+/// in an output that is entirely transparent (illustrated by a solid
+/// checkerboard pattern).
+///
+/// The horizontal and vertical bars in these images show the red, green, and
+/// blue channels with varying opacity levels, then all three color channels
+/// together with those same varying opacity levels, then all three color
+/// chanels set to zero with those varying opacity levels, then two bars showing
+/// a red/green/blue repeating gradient, the first with full opacity and the
+/// second with partial opacity, and finally a bar with the three color channels
+/// set to zero but the opacity varying in a repeating gradient.
+///
+/// ## Application to the [Canvas] API
 ///
 /// When using [Canvas.saveLayer] and [Canvas.restore], the blend mode of the
 /// [Paint] given to the [Canvas.saveLayer] will be applied when
 /// [Canvas.restore] is called. Each call to [Canvas.saveLayer] introduces a new
 /// layer onto which shapes and images are painted; when [Canvas.restore] is
-/// called, that layer is then _composited_ onto the parent layer, with the
-/// "src" being the most-recently-drawn shapes and images, and the "dst" being
+/// called, that layer is then composited onto the parent layer, with the source
+/// being the most-recently-drawn shapes and images, and the destination being
 /// the parent layer. (For the first [Canvas.saveLayer] call, the parent layer
 /// is the canvas itself.)
 ///
@@ -314,6 +338,8 @@ enum BlendMode {
   /// Drop both the source and destination images, leaving nothing.
   ///
   /// This corresponds to the "clear" Porter-Duff operator.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_clear.png)
   clear,
 
   /// Drop the destination image, only paint the source image.
@@ -322,6 +348,8 @@ enum BlendMode {
   /// painted.
   ///
   /// This corresponds to the "Copy" Porter-Duff operator.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_src.png)
   src,
 
   /// Drop the source image, only paint the destination image.
@@ -330,6 +358,8 @@ enum BlendMode {
   /// untouched.
   ///
   /// This corresponds to the "Destination" Porter-Duff operator.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_dst.png)
   dst,
 
   /// Composite the source image over the destination image.
@@ -340,6 +370,8 @@ enum BlendMode {
   ///
   /// This corresponds to the "Source over Destination" Porter-Duff operator,
   /// also known as the Painter's Algorithm.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_srcOver.png)
   srcOver,
 
   /// Composite the source image under the destination image.
@@ -347,10 +379,17 @@ enum BlendMode {
   /// This is the opposite of [srcOver].
   ///
   /// This corresponds to the "Destination over Source" Porter-Duff operator.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_dstOver.png)
+  ///
+  /// This is useful when the source image should have been painted before the
+  /// destination image, but could not be.
   dstOver,
 
   /// Show the source image, but only where the two images overlap. The
-  /// destination image is not rendered, it is treated merely as a mask.
+  /// destination image is not rendered, it is treated merely as a mask. The
+  /// color channels of the destination are ignored, only the opacity has an
+  /// effect.
   ///
   /// To show the destination image instead, consider [dstIn].
   ///
@@ -359,21 +398,27 @@ enum BlendMode {
   /// [srcOut].
   ///
   /// This corresponds to the "Source in Destination" Porter-Duff operator.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_srcIn.png)
   srcIn,
 
   /// Show the destination image, but only where the two images overlap. The
-  /// source image is not rendered, it is treated merely as a mask.
+  /// source image is not rendered, it is treated merely as a mask. The color
+  /// channels of the source are ignored, only the opacity has an effect.
   ///
   /// To show the source image instead, consider [srcIn].
   ///
   /// To reverse the semantic of the mask (only showing the source where the
-  /// destination is present, rather than where it is absent), consider [srcIn].
+  /// destination is present, rather than where it is absent), consider [dstOut].
   ///
   /// This corresponds to the "Destination in Source" Porter-Duff operator.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_dstIn.png)
   dstIn,
 
   /// Show the source image, but only where the two images do not overlap. The
-  /// destination image is not rendered, it is treated merely as a mask.
+  /// destination image is not rendered, it is treated merely as a mask. The color
+  /// channels of the destination are ignored, only the opacity has an effect.
   ///
   /// To show the destination image instead, consider [dstOut].
   ///
@@ -381,10 +426,13 @@ enum BlendMode {
   /// destination is present, rather than where it is absent), consider [srcIn].
   ///
   /// This corresponds to the "Source out Destination" Porter-Duff operator.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_srcOut.png)
   srcOut,
 
   /// Show the destination image, but only where the two images do not overlap. The
-  /// source image is not rendered, it is treated merely as a mask.
+  /// source image is not rendered, it is treated merely as a mask. The color
+  /// channels of the source are ignored, only the opacity has an effect.
   ///
   /// To show the source image instead, consider [srcOut].
   ///
@@ -392,51 +440,315 @@ enum BlendMode {
   /// source is present, rather than where it is absent), consider [dstIn].
   ///
   /// This corresponds to the "Destination out Source" Porter-Duff operator.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_dstOut.png)
   dstOut,
 
   /// Composite the source image over the destination image, but only where it
   /// overlaps the destination.
   ///
   /// This corresponds to the "Source atop Destination" Porter-Duff operator.
+  ///
+  /// This is essentially the [srcOver] operator, but with the output's opacity
+  /// channel being set to that of the destination image instead of being a
+  /// combination of both image's opacity channels.
+  ///
+  /// For a variant with the destination on top instead of the source, see
+  /// [dstATop].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_srcATop.png)
   srcATop,
 
   /// Composite the destination image over the source image, but only where it
   /// overlaps the source.
   ///
   /// This corresponds to the "Destination atop Source" Porter-Duff operator.
+  ///
+  /// This is essentially the [dstOver] operator, but with the output's opacity
+  /// channel being set to that of the source image instead of being a
+  /// combination of both image's opacity channels.
+  ///
+  /// For a variant with the source on top instead of the destination, see
+  /// [srcATop].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_dstATop.png)
   dstATop,
 
-  /// Composite the source and destination images, leaving transparency where
-  /// they would overlap.
+  /// Apply a bitwise `xor` operator to the source and destination images. This
+  /// leaves transparency where they would overlap.
   ///
   /// This corresponds to the "Source xor Destination" Porter-Duff operator.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_xor.png)
   xor,
 
-  /// Composite the source and destination images by summing their components.
+  /// Sum the components of the source and destination images.
+  ///
+  /// Transparency in a pixel of one of the images reduces the contribution of
+  /// that image to the corresponding output pixel, as if the color of that
+  /// pixel in that image was darker.
   ///
   /// This corresponds to the "Source plus Destination" Porter-Duff operator.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_plus.png)
   plus,
 
+  /// Multiply the color components of the source and destination images.
+  ///
+  /// This can only result in the same or darker colors (multiplying by white,
+  /// 1.0, results in no change; multiplying by black, 0.0, results in black).
+  ///
+  /// When compositing two opaque images, this has similar effect to overlapping
+  /// two transparencies on a projector.
+  ///
+  /// For a variant that also multiplies the alpha channel, consider [multiply].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_modulate.png)
+  ///
+  /// See also:
+  ///
+  ///  * [screen], which does a similar computation but inversed.
+  ///  * [overlay], which combines [modulate] and [screen] to favor the
+  ///    destination image.
+  ///  * [hardLight], which combines [modulate] and [screen] to favor the
+  ///    source image.
   modulate,
 
   // Following blend modes are defined in the CSS Compositing standard.
 
+  /// Multiply the inverse of the components of the source and destination
+  /// images, and inverse the result.
+  ///
+  /// Inversing the components means that a fully saturated channel (opaque
+  /// white) is treated as the value 0.0, and values normally treated as 0.0
+  /// (black, transparent) are treated as 1.0.
+  ///
+  /// This is essentially the same as [modulate] blend mode, but with the values
+  /// of the colors inversed before the multiplication and the result being
+  /// inversed back before rendering.
+  ///
+  /// This can only result in the same or lighter colors (multiplying by black,
+  /// 1.0, results in no change; multiplying by white, 0.0, results in white).
+  /// Similarly, in the alpha channel, it can only result in more opaque colors.
+  ///
+  /// This has similar effect to two projectors displaying their images on the
+  /// same screen simultaneously.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_screen.png)
+  ///
+  /// See also:
+  ///
+  ///  * [modulate], which does a similar computation but without inversing the
+  ///    values.
+  ///  * [overlay], which combines [modulate] and [screen] to favor the
+  ///    destination image.
+  ///  * [hardLight], which combines [modulate] and [screen] to favor the
+  ///    source image.
   screen,  // The last coeff mode.
 
+  /// Multiply the components of the source and destination images after
+  /// adjusting them to favor the destination.
+  ///
+  /// Specifically, if the destination value is smaller, this multiplies it with
+  /// the source value, whereas is the source value is smaller, it multiplies
+  /// the inverse of the source value with the inverse of the destination value,
+  /// then inverses the result.
+  ///
+  /// Inversing the components means that a fully saturated channel (opaque
+  /// white) is treated as the value 0.0, and values normally treated as 0.0
+  /// (black, transparent) are treated as 1.0.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_overlay.png)
+  ///
+  /// See also:
+  ///
+  ///  * [modulate], which always multiplies the values.
+  ///  * [screen], which always multiplies the inverses of the values.
+  ///  * [hardLight], which is similar to [overlay] but favors the source image
+  ///    instead of the destination image.
   overlay,
+
+  /// Composite the source and destination image by choosing the lowest value
+  /// from each color channel.
+  ///
+  /// The opacity of the output image is computed in the same way as for
+  /// [srcOver].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_darken.png)
   darken,
+
+  /// Composite the source and destination image by choosing the highest value
+  /// from each color channel.
+  ///
+  /// The opacity of the output image is computed in the same way as for
+  /// [srcOver].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_lighten.png)
   lighten,
+
+  /// Divide the destination by the inverse of the source.
+  ///
+  /// Inversing the components means that a fully saturated channel (opaque
+  /// white) is treated as the value 0.0, and values normally treated as 0.0
+  /// (black, transparent) are treated as 1.0.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_colorDodge.png)
   colorDodge,
+
+  /// Divide the inverse of the destination by the the source, and inverse the result.
+  ///
+  /// Inversing the components means that a fully saturated channel (opaque
+  /// white) is treated as the value 0.0, and values normally treated as 0.0
+  /// (black, transparent) are treated as 1.0.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_colorBurn.png)
   colorBurn,
+
+  /// Multiply the components of the source and destination images after
+  /// adjusting them to favor the source.
+  ///
+  /// Specifically, if the source value is smaller, this multiplies it with the
+  /// destination value, whereas is the destination value is smaller, it
+  /// multiplies the inverse of the destination value with the inverse of the
+  /// source value, then inverses the result.
+  ///
+  /// Inversing the components means that a fully saturated channel (opaque
+  /// white) is treated as the value 0.0, and values normally treated as 0.0
+  /// (black, transparent) are treated as 1.0.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_hardLight.png)
+  ///
+  /// See also:
+  ///
+  ///  * [modulate], which always multiplies the values.
+  ///  * [screen], which always multiplies the inverses of the values.
+  ///  * [overlay], which is similar to [hardLight] but favors the destination
+  ///    image instead of the source image.
   hardLight,
+
+  /// Use [colorDodge] for source values below 0.5 and [colorBurn] for source
+  /// values above 0.5.
+  ///
+  /// This results in a similal but softer effect than [overlay].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_softLight.png)
+  ///
+  /// See also:
+  ///
+  ///  * [color], which is a more subtle tinting effect.
   softLight,
+
+  /// Subtract the smaller value from the bigger value for each channel.
+  ///
+  /// Compositing black has no effect; compositing white inverses the colors of
+  /// the other image.
+  ///
+  /// The opacity of the output image is computed in the same way as for
+  /// [srcOver].
+  ///
+  /// The effect is similar to [exclusion] but harsher.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_difference.png)
   difference,
+
+  /// Subtract double the product of the two images from the sum of the two
+  /// images.
+  ///
+  /// Compositing black has no effect; compositing white inverses the colors of
+  /// the other image.
+  ///
+  /// The opacity of the output image is computed in the same way as for
+  /// [srcOver].
+  ///
+  /// The effect is similar to [difference] but softer.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_exclusion.png)
   exclusion,
+
+  /// Multiply the components of the source and destination images, including
+  /// the alpha channel.
+  ///
+  /// This can only result in the same or darker colors (multiplying by white,
+  /// 1.0, results in no change; multiplying by black, 0.0, results in black).
+  ///
+  /// Since the alpha channel is also multiplied, a fully-transparent pixel
+  /// (opacity 0.0) in one image results in a fully transparent pixel in the
+  /// output. This is similar to [dstIn], but with the colors combined.
+  ///
+  /// For a variant that multiplies the colors but does not multiply the alpha
+  /// channel, consider [modulate].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_multiply.png)
   multiply,  // The last separable mode.
 
+  /// Take the hue of the source image, and the saturation and luminosity of the
+  /// destination image.
+  ///
+  /// The effect is to tint the destination image with the source image.
+  ///
+  /// The opacity of the output image is computed in the same way as for
+  /// [srcOver]. Regions that are entirely transparent in the source image take
+  /// their hue from the destination.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_hue.png)
+  ///
+  /// See also:
+  ///
+  ///  * [color], which is a similar but stronger effect as it also applies the
+  ///    saturation of the source image.
+  ///  * [HSVColor], which allows colors to be expressed using Hue rather than
+  ///    the red/green/blue channels of [Color].
   hue,
+
+  /// Take the saturation of the source image, and the hue and luminosity of the
+  /// destination image.
+  ///
+  /// The opacity of the output image is computed in the same way as for
+  /// [srcOver]. Regions that are entirely transparent in the source image take
+  /// their saturation from the destination.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_hue.png)
+  ///
+  /// See also:
+  ///
+  ///  * [color], which also applies the hue of the source image.
+  ///  * [luminosity], which applies the luminosity of the source image to the
+  ///    destination.
   saturation,
+
+  /// Take the hue and saturation of the source image, and the luminosity of the
+  /// destination image.
+  ///
+  /// The effect is to tint the destination image with the source image.
+  ///
+  /// The opacity of the output image is computed in the same way as for
+  /// [srcOver]. Regions that are entirely transparent in the source image take
+  /// their hue and saturation from the destination.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_color.png)
+  ///
+  /// See also:
+  ///
+  ///  * [hue], which is a similar but weaker effect.
+  ///  * [softLight], which is a similar tinting effect but also tints white.
+  ///  * [saturation], which only applies the saturation of the source image.
   color,
+
+  /// Take the luminosity of the source image, and the hue and saturation of the
+  /// destination image.
+  ///
+  /// The opacity of the output image is computed in the same way as for
+  /// [srcOver]. Regions that are entirely transparent in the source image take
+  /// their luminosity from the destination.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_luminosity.png)
+  ///
+  /// See also:
+  ///
+  ///  * [saturation], which applies the saturation of the source image to the
+  ///    destination.
+  ///  * [ImageFilter.blur], which can be used with [BackdropFilter] for a
+  ///    related effect.
   luminosity,
 }
 
@@ -831,7 +1143,7 @@ class Paint {
 
   @override
   String toString() {
-    StringBuffer result = new StringBuffer();
+    final StringBuffer result = new StringBuffer();
     String semicolon = '';
     result.write('Paint(');
     if (style == PaintingStyle.stroke) {
@@ -892,14 +1204,14 @@ class Paint {
 /// [Canvas.drawImage].
 abstract class Image extends NativeFieldWrapperClass2 {
   /// The number of image pixels along the image's horizontal axis.
-  int get width native "Image_width";
+  int get width native 'Image_width';
 
   /// The number of image pixels along the image's vertical axis.
-  int get height native "Image_height";
+  int get height native 'Image_height';
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
-  void dispose() native "Image_dispose";
+  void dispose() native 'Image_dispose';
 
   @override
   String toString() => '[$width\u00D7$height]';
@@ -908,29 +1220,29 @@ abstract class Image extends NativeFieldWrapperClass2 {
 /// Callback signature for [decodeImageFromList].
 typedef void ImageDecoderCallback(Image result);
 
-/// Information for a single animation frame.
+/// Information for a single frame of an animation.
 ///
-/// Obtain a FrameInfo with [Codec.getNextFrame].
+/// To obtain an instance of the [FrameInfo] interface, see
+/// [Codec.getNextFrame].
 abstract class FrameInfo extends NativeFieldWrapperClass2 {
-  // The duration this frame should be shown.
+  /// The duration this frame should be shown.
   Duration get duration => new Duration(milliseconds: _durationMillis);
+  int get _durationMillis native 'FrameInfo_durationMillis';
 
-  int get _durationMillis native "FrameInfo_durationMillis";
-
-  // The Image object for this frame.
-  Image get image native "FrameInfo_image";
+  /// The [Image] object for this frame.
+  Image get image native 'FrameInfo_image';
 }
 
 /// A handle to an image codec.
 abstract class Codec extends NativeFieldWrapperClass2 {
   /// Number of frames in this image.
-  int get frameCount native "Codec_frameCount";
+  int get frameCount native 'Codec_frameCount';
 
   /// Number of times to repeat the animation.
   ///
   /// * 0 when the animation should be played once.
   /// * -1 for infinity repetitions.
-  int get repetitionCount native "Codec_repetitionCount";
+  int get repetitionCount native 'Codec_repetitionCount';
 
   /// Fetches the next animation frame.
   ///
@@ -942,11 +1254,11 @@ abstract class Codec extends NativeFieldWrapperClass2 {
   }
 
   /// Returns an error message on failure, null on success.
-  String _getNextFrame(_Callback<FrameInfo> callback) native "Codec_getNextFrame";
+  String _getNextFrame(_Callback<FrameInfo> callback) native 'Codec_getNextFrame';
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
-  void dispose() native "Codec_dispose";
+  void dispose() native 'Codec_dispose';
 }
 
 /// Instantiates an image codec [Codec] object.
@@ -968,7 +1280,7 @@ Future<Codec> instantiateImageCodec(Uint8List list) {
 ///
 /// Returns an error message if the instantiation has failed, null otherwise.
 String _instantiateImageCodec(Uint8List list, _Callback<Codec> callback)
-  native "instantiateImageCodec";
+  native 'instantiateImageCodec';
 
 /// Loads a single image frame from a byte array into an [Image] object.
 ///
@@ -1028,7 +1340,7 @@ enum PathFillType {
 class Path extends NativeFieldWrapperClass2 {
   /// Create a new empty [Path] object.
   Path() { _constructor(); }
-  void _constructor() native "Path_constructor";
+  void _constructor() native 'Path_constructor';
 
   /// Determines how the interior of this path is calculated.
   ///
@@ -1036,51 +1348,51 @@ class Path extends NativeFieldWrapperClass2 {
   PathFillType get fillType => PathFillType.values[_getFillType()];
   set fillType(PathFillType value) => _setFillType(value.index);
 
-  int _getFillType() native "Path_getFillType";
-  void _setFillType(int fillType) native "Path_setFillType";
+  int _getFillType() native 'Path_getFillType';
+  void _setFillType(int fillType) native 'Path_setFillType';
 
   /// Starts a new subpath at the given coordinate.
-  void moveTo(double x, double y) native "Path_moveTo";
+  void moveTo(double x, double y) native 'Path_moveTo';
 
   /// Starts a new subpath at the given offset from the current point.
-  void relativeMoveTo(double dx, double dy) native "Path_relativeMoveTo";
+  void relativeMoveTo(double dx, double dy) native 'Path_relativeMoveTo';
 
   /// Adds a straight line segment from the current point to the given
   /// point.
-  void lineTo(double x, double y) native "Path_lineTo";
+  void lineTo(double x, double y) native 'Path_lineTo';
 
   /// Adds a straight line segment from the current point to the point
   /// at the given offset from the current point.
-  void relativeLineTo(double dx, double dy) native "Path_relativeLineTo";
+  void relativeLineTo(double dx, double dy) native 'Path_relativeLineTo';
 
   /// Adds a quadratic bezier segment that curves from the current
   /// point to the given point (x2,y2), using the control point
   /// (x1,y1).
-  void quadraticBezierTo(double x1, double y1, double x2, double y2) native "Path_quadraticBezierTo";
+  void quadraticBezierTo(double x1, double y1, double x2, double y2) native 'Path_quadraticBezierTo';
 
   /// Adds a quadratic bezier segment that curves from the current
   /// point to the point at the offset (x2,y2) from the current point,
   /// using the control point at the offset (x1,y1) from the current
   /// point.
-  void relativeQuadraticBezierTo(double x1, double y1, double x2, double y2) native "Path_relativeQuadraticBezierTo";
+  void relativeQuadraticBezierTo(double x1, double y1, double x2, double y2) native 'Path_relativeQuadraticBezierTo';
 
   /// Adds a cubic bezier segment that curves from the current point
   /// to the given point (x3,y3), using the control points (x1,y1) and
   /// (x2,y2).
-  void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3) native "Path_cubicTo";
+  void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3) native 'Path_cubicTo';
 
   /// Adds a cubcic bezier segment that curves from the current point
   /// to the point at the offset (x3,y3) from the current point, using
   /// the control points at the offsets (x1,y1) and (x2,y2) from the
   /// current point.
-  void relativeCubicTo(double x1, double y1, double x2, double y2, double x3, double y3) native "Path_relativeCubicTo";
+  void relativeCubicTo(double x1, double y1, double x2, double y2, double x3, double y3) native 'Path_relativeCubicTo';
 
   /// Adds a bezier segment that curves from the current point to the
   /// given point (x2,y2), using the control points (x1,y1) and the
   /// weight w. If the weight is greater than 1, then the curve is a
   /// hyperbola; if the weight equals 1, it's a parabola; and if it is
   /// less than 1, it is an ellipse.
-  void conicTo(double x1, double y1, double x2, double y2, double w) native "Path_conicTo";
+  void conicTo(double x1, double y1, double x2, double y2, double w) native 'Path_conicTo';
 
   /// Adds a bezier segment that curves from the current point to the
   /// point at the offset (x2,y2) from the current point, using the
@@ -1088,7 +1400,7 @@ class Path extends NativeFieldWrapperClass2 {
   /// the weight w. If the weight is greater than 1, then the curve is
   /// a hyperbola; if the weight equals 1, it's a parabola; and if it
   /// is less than 1, it is an ellipse.
-  void relativeConicTo(double x1, double y1, double x2, double y2, double w) native "Path_relativeConicTo";
+  void relativeConicTo(double x1, double y1, double x2, double y2, double w) native 'Path_relativeConicTo';
 
   /// If the `forceMoveTo` argument is false, adds a straight line
   /// segment and an arc segment.
@@ -1111,7 +1423,7 @@ class Path extends NativeFieldWrapperClass2 {
     _arcTo(rect.left, rect.top, rect.right, rect.bottom, startAngle, sweepAngle, forceMoveTo);
   }
   void _arcTo(double left, double top, double right, double bottom,
-              double startAngle, double sweepAngle, bool forceMoveTo) native "Path_arcTo";
+              double startAngle, double sweepAngle, bool forceMoveTo) native 'Path_arcTo';
 
   /// Appends up to four conic curves weighted to describe an oval of `radius`
   /// and rotated by `rotation`.
@@ -1138,7 +1450,7 @@ class Path extends NativeFieldWrapperClass2 {
   }
   void _arcToPoint(double arcEndX, double arcEndY, double radiusX,
                    double radiusY, double rotation, bool largeArc,
-                   bool clockwise) native "Path_arcToPoint";
+                   bool clockwise) native 'Path_arcToPoint';
 
 
   /// Appends up to four conic curves weighted to describe an oval of `radius`
@@ -1169,7 +1481,7 @@ class Path extends NativeFieldWrapperClass2 {
   void _relativeArcToPoint(double arcEndX, double arcEndY, double radiusX,
                            double radiusY, double rotation,
                            bool largeArc, bool clockwise)
-                           native "Path_relativeArcToPoint";
+                           native 'Path_relativeArcToPoint';
 
   /// Adds a new subpath that consists of four lines that outline the
   /// given rectangle.
@@ -1177,7 +1489,7 @@ class Path extends NativeFieldWrapperClass2 {
     assert(_rectIsValid(rect));
     _addRect(rect.left, rect.top, rect.right, rect.bottom);
   }
-  void _addRect(double left, double top, double right, double bottom) native "Path_addRect";
+  void _addRect(double left, double top, double right, double bottom) native 'Path_addRect';
 
   /// Adds a new subpath that consists of a curve that forms the
   /// ellipse that fills the given rectangle.
@@ -1185,7 +1497,7 @@ class Path extends NativeFieldWrapperClass2 {
     assert(_rectIsValid(oval));
     _addOval(oval.left, oval.top, oval.right, oval.bottom);
   }
-  void _addOval(double left, double top, double right, double bottom) native "Path_addOval";
+  void _addOval(double left, double top, double right, double bottom) native 'Path_addOval';
 
   /// Adds a new subpath with one arc segment that consists of the arc
   /// that follows the edge of the oval bounded by the given
@@ -1200,7 +1512,7 @@ class Path extends NativeFieldWrapperClass2 {
     _addArc(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle);
   }
   void _addArc(double left, double top, double right, double bottom,
-               double startAngle, double sweepAngle) native "Path_addArc";
+               double startAngle, double sweepAngle) native 'Path_addArc';
 
   /// Adds a new subpath with a sequence of line segments that connect the given
   /// points.
@@ -1213,7 +1525,7 @@ class Path extends NativeFieldWrapperClass2 {
     assert(points != null);
     _addPolygon(_encodePointList(points), close);
   }
-  void _addPolygon(Float32List points, bool close) native "Path_addPolygon";
+  void _addPolygon(Float32List points, bool close) native 'Path_addPolygon';
 
   /// Adds a new subpath that consists of the straight lines and
   /// curves needed to form the rounded rectangle described by the
@@ -1222,7 +1534,7 @@ class Path extends NativeFieldWrapperClass2 {
     assert(_rrectIsValid(rrect));
     _addRRect(rrect._value);
   }
-  void _addRRect(Float32List rrect) native "Path_addRRect";
+  void _addRRect(Float32List rrect) native 'Path_addRRect';
 
   /// Adds a new subpath that consists of the given path offset by the given
   /// offset.
@@ -1231,7 +1543,7 @@ class Path extends NativeFieldWrapperClass2 {
     assert(_offsetIsValid(offset));
     _addPath(path, offset.dx, offset.dy);
   }
-  void _addPath(Path path, double dx, double dy) native "Path_addPath";
+  void _addPath(Path path, double dx, double dy) native 'Path_addPath';
 
   /// Adds the given path to this path by extending the current segment of this
   /// path with the the first segment of the given path.
@@ -1240,16 +1552,16 @@ class Path extends NativeFieldWrapperClass2 {
     assert(_offsetIsValid(offset));
     _extendWithPath(path, offset.dx, offset.dy);
   }
-  void _extendWithPath(Path path, double dx, double dy) native "Path_extendWithPath";
+  void _extendWithPath(Path path, double dx, double dy) native 'Path_extendWithPath';
 
   /// Closes the last subpath, as if a straight line had been drawn
   /// from the current point to the first point of the subpath.
-  void close() native "Path_close";
+  void close() native 'Path_close';
 
   /// Clears the [Path] object of all subpaths, returning it to the
   /// same state it had when it was created. The _current point_ is
   /// reset to the origin.
-  void reset() native "Path_reset";
+  void reset() native 'Path_reset';
 
   /// Tests to see if the given point is within the path. (That is, whether the
   /// point would be in the visible portion of the path if the path was used
@@ -1262,7 +1574,7 @@ class Path extends NativeFieldWrapperClass2 {
     assert(_offsetIsValid(point));
     return _contains(point.dx, point.dy);
   }
-  bool _contains(double x, double y) native "Path_contains";
+  bool _contains(double x, double y) native 'Path_contains';
 
   /// Returns a copy of the path with all the segments of every
   /// subpath translated by the given offset.
@@ -1270,7 +1582,7 @@ class Path extends NativeFieldWrapperClass2 {
     assert(_offsetIsValid(offset));
     return _shift(offset.dx, offset.dy);
   }
-  Path _shift(double dx, double dy) native "Path_shift";
+  Path _shift(double dx, double dy) native 'Path_shift';
 
   /// Returns a copy of the path with all the segments of every
   /// subpath transformed by the given matrix.
@@ -1280,7 +1592,7 @@ class Path extends NativeFieldWrapperClass2 {
       throw new ArgumentError('"matrix4" must have 16 entries.');
     return _transform(matrix4);
   }
-  Path _transform(Float64List matrix4) native "Path_transform";
+  Path _transform(Float64List matrix4) native 'Path_transform';
 }
 
 /// Styles to use for blurs in [MaskFilter] objects.
@@ -1358,7 +1670,7 @@ class MaskFilter {
   int get hashCode => hashValues(_style, _sigma);
 
   @override
-  String toString() => "MaskFilter.blur($_style, ${_sigma.toStringAsFixed(1)})";
+  String toString() => 'MaskFilter.blur($_style, ${_sigma.toStringAsFixed(1)})';
 }
 
 /// A description of a color filter to apply when drawing a shape or compositing
@@ -1396,35 +1708,39 @@ class ColorFilter {
   int get hashCode => hashValues(_color, _blendMode);
 
   @override
-  String toString() => "ColorFilter($_color, $_blendMode)";
+  String toString() => 'ColorFilter($_color, $_blendMode)';
 }
 
 /// A filter operation to apply to a raster image.
 ///
-/// See [SceneBuilder.pushBackdropFilter].
+/// See also:
+///
+///  * [BackdropFilter], a widget that applies [ImageFilter] to its rendering.
+///  * [SceneBuilder.pushBackdropFilter], which is the low-level API for using
+///    this class.
 class ImageFilter extends NativeFieldWrapperClass2 {
-  void _constructor() native "ImageFilter_constructor";
+  void _constructor() native 'ImageFilter_constructor';
 
   /// A source filter containing an image.
   // ImageFilter.image({ Image image }) {
   //   _constructor();
   //   _initImage(image);
   // }
-  // void _initImage(Image image) native "ImageFilter_initImage";
+  // void _initImage(Image image) native 'ImageFilter_initImage';
 
   /// A source filter containing a picture.
   // ImageFilter.picture({ Picture picture }) {
   //   _constructor();
   //   _initPicture(picture);
   // }
-  // void _initPicture(Picture picture) native "ImageFilter_initPicture";
+  // void _initPicture(Picture picture) native 'ImageFilter_initPicture';
 
   /// Creates an image filter that applies a Gaussian blur.
   ImageFilter.blur({ double sigmaX: 0.0, double sigmaY: 0.0 }) {
     _constructor();
     _initBlur(sigmaX, sigmaY);
   }
-  void _initBlur(double sigmaX, double sigmaY) native "ImageFilter_initBlur";
+  void _initBlur(double sigmaX, double sigmaY) native 'ImageFilter_initBlur';
 }
 
 /// Base class for objects such as [Gradient] and [ImageShader] which
@@ -1457,7 +1773,6 @@ enum TileMode {
   /// The gradient will paint the all the regions outside the inner area with
   /// the color of the point closest to that region.
   ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_linear.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_radial.png)
   clamp,
 
@@ -1527,7 +1842,7 @@ class Gradient extends Shader {
   /// Use the [new Gradient.linear] or [new Gradient.radial] constructors to
   /// obtain a usable [Gradient] object.
   Gradient();
-  void _constructor() native "Gradient_constructor";
+  void _constructor() native 'Gradient_constructor';
 
   /// Creates a linear gradient from `from` to `to`.
   ///
@@ -1550,13 +1865,12 @@ class Gradient extends Shader {
     Offset from,
     Offset to,
     List<Color> colors, [
-    List<double> colorStops = null,
+    List<double> colorStops,
     TileMode tileMode = TileMode.clamp,
-  ]) {
-    assert(_offsetIsValid(from));
-    assert(_offsetIsValid(to));
-    assert(colors != null);
-    assert(tileMode != null);
+  ]) : assert(_offsetIsValid(from)),
+       assert(_offsetIsValid(to)),
+       assert(colors != null),
+       assert(tileMode != null) {
     _validateColorStops(colors, colorStops);
     final Float32List endPointsBuffer = _encodeTwoPoints(from, to);
     final Int32List colorsBuffer = _encodeColorList(colors);
@@ -1564,7 +1878,7 @@ class Gradient extends Shader {
     _constructor();
     _initLinear(endPointsBuffer, colorsBuffer, colorStopsBuffer, tileMode.index);
   }
-  void _initLinear(Float32List endPoints, Int32List colors, Float32List colorStops, int tileMode) native "Gradient_initLinear";
+  void _initLinear(Float32List endPoints, Int32List colors, Float32List colorStops, int tileMode) native 'Gradient_initLinear';
 
   /// Creates a radial gradient centered at `center` that ends at `radius`
   /// distance from the center.
@@ -1584,22 +1898,22 @@ class Gradient extends Shader {
   /// If `center`, `radius`, `colors`, or `tileMode` are null, or if `colors` or
   /// `colorStops` contain null values, this constructor will throw a
   /// [NoSuchMethodError].
-  Gradient.radial(Offset center,
-                  double radius,
-                  List<Color> colors, [
-                  List<double> colorStops = null,
-                  TileMode tileMode = TileMode.clamp,
-  ]) {
-    assert(_offsetIsValid(center));
-    assert(colors != null);
-    assert(tileMode != null);
+  Gradient.radial(
+    Offset center,
+    double radius,
+    List<Color> colors, [
+    List<double> colorStops,
+    TileMode tileMode = TileMode.clamp,
+  ]) : assert(_offsetIsValid(center)),
+       assert(colors != null),
+       assert(tileMode != null) {
     _validateColorStops(colors, colorStops);
     final Int32List colorsBuffer = _encodeColorList(colors);
     final Float32List colorStopsBuffer = colorStops == null ? null : new Float32List.fromList(colorStops);
     _constructor();
     _initRadial(center.dx, center.dy, radius, colorsBuffer, colorStopsBuffer, tileMode.index);
   }
-  void _initRadial(double centerX, double centerY, double radius, Int32List colors, Float32List colorStops, int tileMode) native "Gradient_initRadial";
+  void _initRadial(double centerX, double centerY, double radius, Int32List colors, Float32List colorStops, int tileMode) native 'Gradient_initRadial';
 
   static void _validateColorStops(List<Color> colors, List<double> colorStops) {
     if (colorStops == null) {
@@ -1619,18 +1933,18 @@ class ImageShader extends Shader {
   /// direction and y direction respectively. The fourth argument gives the
   /// matrix to apply to the effect. All the arguments are required and must not
   /// be null.
-  ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4) {
-    assert(image != null); // image is checked on the engine side
-    assert(tmx != null);
-    assert(tmy != null);
-    assert(matrix4 != null);
+  ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4) :
+    assert(image != null), // image is checked on the engine side
+    assert(tmx != null),
+    assert(tmy != null),
+    assert(matrix4 != null) {
     if (matrix4.length != 16)
       throw new ArgumentError('"matrix4" must have 16 entries.');
     _constructor();
     _initWithImage(image, tmx.index, tmy.index, matrix4);
   }
-  void _constructor() native "ImageShader_constructor";
-  void _initWithImage(Image image, int tmx, int tmy, Float64List matrix4) native "ImageShader_initWithImage";
+  void _constructor() native 'ImageShader_constructor';
+  void _initWithImage(Image image, int tmx, int tmy, Float64List matrix4) native 'ImageShader_initWithImage';
 }
 
 /// Defines how a list of points is interpreted when drawing a set of triangles.
@@ -1656,9 +1970,8 @@ class Vertices extends NativeFieldWrapperClass2 {
     List<Offset> textureCoordinates,
     List<Color> colors,
     List<int> indices,
-  }) {
-    assert(mode != null);
-    assert(positions != null);
+  }) : assert(mode != null),
+       assert(positions != null) {
     if (textureCoordinates != null && textureCoordinates.length != positions.length)
       throw new ArgumentError('"positions" and "textureCoordinates" lengths must match.');
     if (colors != null && colors.length != positions.length)
@@ -1666,11 +1979,16 @@ class Vertices extends NativeFieldWrapperClass2 {
     if (indices != null && indices.any((int i) => i < 0 || i >= positions.length))
       throw new ArgumentError('"indices" values must be valid indices in the positions list.');
 
-    Float32List encodedPositions = _encodePointList(positions);
-    Float32List encodedTextureCoordinates = (textureCoordinates != null) ?
-      _encodePointList(textureCoordinates) : null;
-    Int32List encodedColors = colors != null ? _encodeColorList(colors) : null;
-    Int32List encodedIndices = indices != null ? new Int32List.fromList(indices) : null;
+    final Float32List encodedPositions = _encodePointList(positions);
+    final Float32List encodedTextureCoordinates = (textureCoordinates != null)
+      ? _encodePointList(textureCoordinates)
+      : null;
+    final Int32List encodedColors = colors != null
+      ? _encodeColorList(colors)
+      : null;
+    final Int32List encodedIndices = indices != null
+      ? new Int32List.fromList(indices)
+      : null;
 
     _constructor();
     _init(mode.index, encodedPositions, encodedTextureCoordinates, encodedColors, encodedIndices);
@@ -1682,9 +2000,8 @@ class Vertices extends NativeFieldWrapperClass2 {
     Float32List textureCoordinates,
     Int32List colors,
     Int32List indices,
-  }) {
-    assert(mode != null);
-    assert(positions != null);
+  }) : assert(mode != null),
+       assert(positions != null) {
     if (textureCoordinates != null && textureCoordinates.length != positions.length)
       throw new ArgumentError('"positions" and "textureCoordinates" lengths must match.');
     if (colors != null && colors.length * 2 != positions.length)
@@ -1696,13 +2013,13 @@ class Vertices extends NativeFieldWrapperClass2 {
     _init(mode.index, positions, textureCoordinates, colors, indices);
   }
 
-  void _constructor() native "Vertices_constructor";
+  void _constructor() native 'Vertices_constructor';
 
   void _init(int mode,
              Float32List positions,
              Float32List textureCoordinates,
              Int32List colors,
-             Int32List indices) native "Vertices_init";
+             Int32List indices) native 'Vertices_init';
 }
 
 /// Defines how a list of points is interpreted when drawing a set of points.
@@ -1779,8 +2096,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// To end the recording, call [PictureRecorder.endRecording] on the
   /// given recorder.
-  Canvas(PictureRecorder recorder, [ Rect cullRect ]) {
-    assert(recorder != null);
+  Canvas(PictureRecorder recorder, [ Rect cullRect ]) : assert(recorder != null) {
     if (recorder.isRecording)
       throw new ArgumentError('"recorder" must not already be associated with another Canvas.');
     cullRect ??= Rect.largest;
@@ -1790,7 +2106,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                     double left,
                     double top,
                     double right,
-                    double bottom) native "Canvas_constructor";
+                    double bottom) native 'Canvas_constructor';
 
   /// Saves a copy of the current transform and clip on the save stack.
   ///
@@ -1800,7 +2116,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   ///  * [saveLayer], which does the same thing but additionally also groups the
   ///    commands done until the matching [restore].
-  void save() native "Canvas_save";
+  void save() native 'Canvas_save';
 
   /// Saves a copy of the current transform and clip on the save stack, and then
   /// creates a new group which subsequent calls will become a part of. When the
@@ -1922,13 +2238,13 @@ class Canvas extends NativeFieldWrapperClass2 {
     }
   }
   void _saveLayerWithoutBounds(List<dynamic> paintObjects, ByteData paintData)
-      native "Canvas_saveLayerWithoutBounds";
+      native 'Canvas_saveLayerWithoutBounds';
   void _saveLayer(double left,
                   double top,
                   double right,
                   double bottom,
                   List<dynamic> paintObjects,
-                  ByteData paintData) native "Canvas_saveLayer";
+                  ByteData paintData) native 'Canvas_saveLayer';
 
   /// Pops the current save stack, if there is anything to pop.
   /// Otherwise, does nothing.
@@ -1937,7 +2253,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// If the state was pushed with with [saveLayer], then this call will also
   /// cause the new layer to be composited into the previous layer.
-  void restore() native "Canvas_restore";
+  void restore() native 'Canvas_restore';
 
   /// Returns the number of items on the save stack, including the
   /// initial state. This means it returns 1 for a clean canvas, and
@@ -1945,25 +2261,25 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// each matching call to [restore] decrements it.
   ///
   /// This number cannot go below 1.
-  int getSaveCount() native "Canvas_getSaveCount";
+  int getSaveCount() native 'Canvas_getSaveCount';
 
   /// Add a translation to the current transform, shifting the coordinate space
   /// horizontally by the first argument and vertically by the second argument.
-  void translate(double dx, double dy) native "Canvas_translate";
+  void translate(double dx, double dy) native 'Canvas_translate';
 
   /// Add an axis-aligned scale to the current transform, scaling by the first
   /// argument in the horizontal direction and the second in the vertical
   /// direction.
-  void scale(double sx, double sy) native "Canvas_scale";
+  void scale(double sx, double sy) native 'Canvas_scale';
 
   /// Add a rotation to the current transform. The argument is in radians clockwise.
-  void rotate(double radians) native "Canvas_rotate";
+  void rotate(double radians) native 'Canvas_rotate';
 
   /// Add an axis-aligned skew to the current transform, with the first argument
   /// being the horizontal skew in radians clockwise around the origin, and the
   /// second argument being the vertical skew in radians clockwise around the
   /// origin.
-  void skew(double sx, double sy) native "Canvas_skew";
+  void skew(double sx, double sy) native 'Canvas_skew';
 
   /// Multiply the current transform by the specified 4⨉4 transformation matrix
   /// specified as a list of values in column-major order.
@@ -1973,7 +2289,7 @@ class Canvas extends NativeFieldWrapperClass2 {
       throw new ArgumentError('"matrix4" must have 16 entries.');
     _transform(matrix4);
   }
-  void _transform(Float64List matrix4) native "Canvas_transform";
+  void _transform(Float64List matrix4) native 'Canvas_transform';
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rectangle.
@@ -1995,7 +2311,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                  double top,
                  double right,
                  double bottom,
-                 int clipOp) native "Canvas_clipRect";
+                 int clipOp) native 'Canvas_clipRect';
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rounded rectangle.
@@ -2008,7 +2324,7 @@ class Canvas extends NativeFieldWrapperClass2 {
     assert(_rrectIsValid(rrect));
     _clipRRect(rrect._value);
   }
-  void _clipRRect(Float32List rrect) native "Canvas_clipRRect";
+  void _clipRRect(Float32List rrect) native 'Canvas_clipRRect';
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given [Path].
@@ -2021,7 +2337,7 @@ class Canvas extends NativeFieldWrapperClass2 {
     assert(path != null); // path is checked on the engine side
     _clipPath(path);
   }
-  void _clipPath(Path path) native "Canvas_clipPath";
+  void _clipPath(Path path) native 'Canvas_clipPath';
 
   /// Paints the given [Color] onto the canvas, applying the given
   /// [BlendMode], with the given color being the source and the background
@@ -2031,7 +2347,7 @@ class Canvas extends NativeFieldWrapperClass2 {
     assert(blendMode != null);
     _drawColor(color.value, blendMode.index);
   }
-  void _drawColor(int color, int blendMode) native "Canvas_drawColor";
+  void _drawColor(int color, int blendMode) native 'Canvas_drawColor';
 
   /// Draws a line between the given points using the given paint. The line is
   /// stroked, the value of the [Paint.style] is ignored for this call.
@@ -2048,7 +2364,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                  double x2,
                  double y2,
                  List<dynamic> paintObjects,
-                 ByteData paintData) native "Canvas_drawLine";
+                 ByteData paintData) native 'Canvas_drawLine';
 
   /// Fills the canvas with the given [Paint].
   ///
@@ -2058,7 +2374,7 @@ class Canvas extends NativeFieldWrapperClass2 {
     assert(paint != null);
     _drawPaint(paint._objects, paint._data);
   }
-  void _drawPaint(List<dynamic> paintObjects, ByteData paintData) native "Canvas_drawPaint";
+  void _drawPaint(List<dynamic> paintObjects, ByteData paintData) native 'Canvas_drawPaint';
 
   /// Draws a rectangle with the given [Paint]. Whether the rectangle is filled
   /// or stroked (or both) is controlled by [Paint.style].
@@ -2073,7 +2389,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                  double right,
                  double bottom,
                  List<dynamic> paintObjects,
-                 ByteData paintData) native "Canvas_drawRect";
+                 ByteData paintData) native 'Canvas_drawRect';
 
   /// Draws a rounded rectangle with the given [Paint]. Whether the rectangle is
   /// filled or stroked (or both) is controlled by [Paint.style].
@@ -2084,7 +2400,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   }
   void _drawRRect(Float32List rrect,
                   List<dynamic> paintObjects,
-                  ByteData paintData) native "Canvas_drawRRect";
+                  ByteData paintData) native 'Canvas_drawRRect';
 
   /// Draws a shape consisting of the difference between two rounded rectangles
   /// with the given [Paint]. Whether this shape is filled or stroked (or both)
@@ -2100,7 +2416,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   void _drawDRRect(Float32List outer,
                    Float32List inner,
                    List<dynamic> paintObjects,
-                   ByteData paintData) native "Canvas_drawDRRect";
+                   ByteData paintData) native 'Canvas_drawDRRect';
 
   /// Draws an axis-aligned oval that fills the given axis-aligned rectangle
   /// with the given [Paint]. Whether the oval is filled or stroked (or both) is
@@ -2116,7 +2432,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                  double right,
                  double bottom,
                  List<dynamic> paintObjects,
-                 ByteData paintData) native "Canvas_drawOval";
+                 ByteData paintData) native 'Canvas_drawOval';
 
   /// Draws a circle centered at the point given by the first argument and
   /// that has the radius given by the second argument, with the [Paint] given in
@@ -2131,7 +2447,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                    double y,
                    double radius,
                    List<dynamic> paintObjects,
-                   ByteData paintData) native "Canvas_drawCircle";
+                   ByteData paintData) native 'Canvas_drawCircle';
 
   /// Draw an arc scaled to fit inside the given rectangle. It starts from
   /// startAngle radians around the oval up to startAngle + sweepAngle
@@ -2157,7 +2473,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                 double sweepAngle,
                 bool useCenter,
                 List<dynamic> paintObjects,
-                ByteData paintData) native "Canvas_drawArc";
+                ByteData paintData) native 'Canvas_drawArc';
 
   /// Draws the given [Path] with the given [Paint]. Whether this shape is
   /// filled or stroked (or both) is controlled by [Paint.style]. If the path is
@@ -2169,7 +2485,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   }
   void _drawPath(Path path,
                  List<dynamic> paintObjects,
-                 ByteData paintData) native "Canvas_drawPath";
+                 ByteData paintData) native 'Canvas_drawPath';
 
   /// Draws the given [Image] into the canvas with its top-left corner at the
   /// given [Offset]. The image is composited into the canvas using the given [Paint].
@@ -2183,7 +2499,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                   double x,
                   double y,
                   List<dynamic> paintObjects,
-                  ByteData paintData) native "Canvas_drawImage";
+                  ByteData paintData) native 'Canvas_drawImage';
 
   /// Draws the subset of the given image described by the `src` argument into
   /// the canvas in the axis-aligned rectangle given by the `dst` argument.
@@ -2221,7 +2537,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                       double dstRight,
                       double dstBottom,
                       List<dynamic> paintObjects,
-                      ByteData paintData) native "Canvas_drawImageRect";
+                      ByteData paintData) native 'Canvas_drawImageRect';
 
   /// Draws the given [Image] into the canvas using the given [Paint].
   ///
@@ -2263,7 +2579,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                       double dstRight,
                       double dstBottom,
                       List<dynamic> paintObjects,
-                      ByteData paintData) native "Canvas_drawImageNine";
+                      ByteData paintData) native 'Canvas_drawImageNine';
 
   /// Draw the given picture onto the canvas. To create a picture, see
   /// [PictureRecorder].
@@ -2271,7 +2587,7 @@ class Canvas extends NativeFieldWrapperClass2 {
     assert(picture != null); // picture is checked on the engine side
     _drawPicture(picture);
   }
-  void _drawPicture(Picture picture) native "Canvas_drawPicture";
+  void _drawPicture(Picture picture) native 'Canvas_drawPicture';
 
   /// Draws the text in the given [Paragraph] into this canvas at the given
   /// [Offset].
@@ -2335,7 +2651,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   void _drawPoints(List<dynamic> paintObjects,
                    ByteData paintData,
                    int pointMode,
-                   Float32List points) native "Canvas_drawPoints";
+                   Float32List points) native 'Canvas_drawPoints';
 
   void drawVertices(Vertices vertices, BlendMode blendMode, Paint paint) {
     assert(vertices != null); // vertices is checked on the engine side
@@ -2346,7 +2662,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   void _drawVertices(Vertices vertices,
                      int blendMode,
                      List<dynamic> paintObjects,
-                     ByteData paintData) native "Canvas_drawVertices";
+                     ByteData paintData) native 'Canvas_drawVertices';
 
   //
   // See also:
@@ -2453,7 +2769,7 @@ class Canvas extends NativeFieldWrapperClass2 {
                   Float32List rects,
                   Int32List colors,
                   int blendMode,
-                  Float32List cullRect) native "Canvas_drawAtlas";
+                  Float32List cullRect) native 'Canvas_drawAtlas';
 
   /// Draws a shadow for a [Path] representing the given material elevation.
   ///
@@ -2470,7 +2786,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   void _drawShadow(Path path,
                    int color,
                    double elevation,
-                   bool transparentOccluder) native "Canvas_drawShadow";
+                   bool transparentOccluder) native 'Canvas_drawShadow';
 }
 
 /// An object representing a sequence of recorded graphical operations.
@@ -2494,11 +2810,11 @@ abstract class Picture extends NativeFieldWrapperClass2 {
   ///
   /// Although the image is returned synchronously, the picture is actually
   /// rasterized the first time the image is drawn and then cached.
-  Image toImage(int width, int height) native "Picture_toImage";
+  Image toImage(int width, int height) native 'Picture_toImage';
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
-  void dispose() native "Picture_dispose";
+  void dispose() native 'Picture_dispose';
 }
 
 /// Records a [Picture] containing a sequence of graphical operations.
@@ -2510,7 +2826,7 @@ class PictureRecorder extends NativeFieldWrapperClass2 {
   /// [Canvas] and begin recording, pass this [PictureRecorder] to the
   /// [Canvas] constructor.
   PictureRecorder() { _constructor(); }
-  void _constructor() native "PictureRecorder_constructor";
+  void _constructor() native 'PictureRecorder_constructor';
 
   /// Whether this object is currently recording commands.
   ///
@@ -2519,7 +2835,7 @@ class PictureRecorder extends NativeFieldWrapperClass2 {
   /// call to [endRecording], and false if either this
   /// [PictureRecorder] has not yet been associated with a [Canvas],
   /// or the [endRecording] method has already been called.
-  bool get isRecording native "PictureRecorder_isRecording";
+  bool get isRecording native 'PictureRecorder_isRecording';
 
   /// Finishes recording graphical operations.
   ///
@@ -2528,7 +2844,7 @@ class PictureRecorder extends NativeFieldWrapperClass2 {
   /// and the canvas objects are invalid and cannot be used further.
   ///
   /// Returns null if the PictureRecorder is not associated with a canvas.
-  Picture endRecording() native "PictureRecorder_endRecording";
+  Picture endRecording() native 'PictureRecorder_endRecording';
 }
 
 /// Generic callback signature, used by [_futurize].
@@ -2558,7 +2874,7 @@ typedef String _Callbacker<T>(_Callback<T> callback);
 ///
 Future<T> _futurize<T>(_Callbacker<T> callbacker) {
   final Completer<T> completer = new Completer<T>.sync();
-  final String err = callbacker((t) {
+  final String err = callbacker((T t) {
     if (t == null) {
       completer.completeError(new Exception('operation failed'));
     } else {

@@ -265,7 +265,7 @@ class SemanticsFlag {
 class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   /// Creates an empty [SemanticsUpdateBuilder] object.
   SemanticsUpdateBuilder() { _constructor(); }
-  void _constructor() native "SemanticsUpdateBuilder_constructor";
+  void _constructor() native 'SemanticsUpdateBuilder_constructor';
 
   /// Update the information associated with the node with the given `id`.
   ///
@@ -310,25 +310,27 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     String decreasedValue,
     TextDirection textDirection,
     Float64List transform,
-    Int32List children
+    Int32List children,
   }) {
     if (transform.length != 16)
       throw new ArgumentError('transform argument must have 16 entries.');
-    _updateNode(id,
-                flags,
-                actions,
-                rect.left,
-                rect.top,
-                rect.right,
-                rect.bottom,
-                label,
-                hint,
-                value,
-                increasedValue,
-                decreasedValue,
-                textDirection != null ? textDirection.index + 1 : 0,
-                transform,
-                children);
+    _updateNode(
+      id,
+      flags,
+      actions,
+      rect.left,
+      rect.top,
+      rect.right,
+      rect.bottom,
+      label,
+      hint,
+      value,
+      increasedValue,
+      decreasedValue,
+      textDirection != null ? textDirection.index + 1 : 0,
+      transform,
+      children,
+    );
   }
   void _updateNode(
     int id,
@@ -345,15 +347,15 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     String decreasedValue,
     int textDirection,
     Float64List transform,
-    Int32List children
-  ) native "SemanticsUpdateBuilder_updateNode";
+    Int32List children,
+  ) native 'SemanticsUpdateBuilder_updateNode';
 
   /// Creates a [SemanticsUpdate] object that encapsulates the updates recorded
   /// by this object.
   ///
   /// The returned object can be passed to [Window.updateSemantics] to actually
   /// update the semantics retained by the system.
-  SemanticsUpdate build() native "SemanticsUpdateBuilder_build";
+  SemanticsUpdate build() native 'SemanticsUpdateBuilder_build';
 }
 
 /// An opaque object representing a batch of semantics updates.
@@ -373,5 +375,5 @@ class SemanticsUpdate extends NativeFieldWrapperClass2 {
   ///
   /// After calling this function, the semantics update is cannot be used
   /// further.
-  void dispose() native "SemanticsUpdateBuilder_dispose";
+  void dispose() native 'SemanticsUpdateBuilder_dispose';
 }

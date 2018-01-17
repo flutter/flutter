@@ -1259,7 +1259,6 @@ ORIGIN: ../../../LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/DEPS
 FILE: ../../../flutter/content_handler/meta/sandbox
-FILE: ../../../flutter/frontend_server/.packages
 FILE: ../../../flutter/frontend_server/bin/starter.dart
 FILE: ../../../flutter/frontend_server/lib/server.dart
 FILE: ../../../flutter/lib/io/dart_io.cc

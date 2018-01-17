@@ -140,9 +140,9 @@ class _FrontendCompiler implements CompilerInterface {
     IncrementalKernelGenerator generator,
   }) async {
     final Uri filenameUri = Uri.base.resolveUri(new Uri.file(filename));
-    _kernelBinaryFilename = "$filename.dill";
+    _kernelBinaryFilename = '$filename.dill';
     final String boundaryKey = new Uuid().generateV4();
-    _outputStream.writeln("result $boundaryKey");
+    _outputStream.writeln('result $boundaryKey');
     final Uri sdkRoot = _ensureFolderPath(options['sdk-root']);
     final String byteStorePath = options['byte-store'];
     final CompilerOptions compilerOptions = new CompilerOptions()
@@ -182,7 +182,7 @@ class _FrontendCompiler implements CompilerInterface {
       final BinaryPrinter printer = printerFactory.newBinaryPrinter(sink);
       printer.writeProgramFile(program);
       await sink.close();
-      _outputStream.writeln("$boundaryKey $_kernelBinaryFilename");
+      _outputStream.writeln('$boundaryKey $_kernelBinaryFilename');
     } else
       _outputStream.writeln(boundaryKey);
     return null;
@@ -191,13 +191,13 @@ class _FrontendCompiler implements CompilerInterface {
   @override
   Future<Null> recompileDelta() async {
     final String boundaryKey = new Uuid().generateV4();
-    _outputStream.writeln("result $boundaryKey");
+    _outputStream.writeln('result $boundaryKey');
     final DeltaProgram deltaProgram = await _generator.computeDelta();
     final IOSink sink = new File(_kernelBinaryFilename).openWrite();
     final BinaryPrinter printer = printerFactory.newBinaryPrinter(sink);
     printer.writeProgramFile(deltaProgram.newProgram);
     await sink.close();
-    _outputStream.writeln("$boundaryKey $_kernelBinaryFilename");
+    _outputStream.writeln('$boundaryKey $_kernelBinaryFilename');
     return null;
   }
 
@@ -282,7 +282,7 @@ Future<int> starter(
   // Has to be a directory, that won't have any of the compiled application
   // sources, so that no relative paths could show up in the kernel file.
   Directory.current = Directory.systemTemp;
-  final Directory workingDirectory = new Directory("flutter_frontend_server");
+  final Directory workingDirectory = new Directory('flutter_frontend_server');
   workingDirectory.createSync();
   Directory.current = workingDirectory;
 
@@ -295,7 +295,7 @@ Future<int> starter(
   String boundaryKey;
   input
       .transform(UTF8.decoder)
-      .transform(new LineSplitter())
+      .transform(const LineSplitter())
       .listen((String string) async {
     switch (state) {
       case _State.READY_FOR_INSTRUCTION:

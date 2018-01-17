@@ -7,8 +7,8 @@ import 'dart:collection';
 Map<Key, dynamic> _cache = new LinkedHashMap<Key, dynamic>();
 const int _maxSize = 10;
 
-dynamic/*=T*/ cache/*<T>*/(Key key, dynamic/*=T*/ getter()) {
-  dynamic/*=T*/ result = _cache[key];
+T cache<T>(Key key, T getter()) {
+  T result = _cache[key];
   if (result != null) {
     _cache.remove(key);
   } else {

@@ -369,7 +369,7 @@ Future<int> main() async {
       String boundaryKey;
       stdoutStreamController.stream
         .transform(UTF8.decoder)
-        .transform(new LineSplitter())
+        .transform(const LineSplitter())
         .listen((String s) {
           const String RESULT_OUTPUT_SPACE = 'result ';
           if (boundaryKey == null) {
@@ -387,7 +387,7 @@ Future<int> main() async {
       final _MockedIncrementalKernelGenerator generator =
         new _MockedIncrementalKernelGenerator();
       when(generator.computeDelta()).thenReturn(new Future<DeltaProgram>.value(
-        new DeltaProgram("", null /* program stub */)
+        new DeltaProgram('', null /* program stub */)
       ));
       final _MockedBinaryPrinterFactory printerFactory =
         new _MockedBinaryPrinterFactory();

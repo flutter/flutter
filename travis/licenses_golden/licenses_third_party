@@ -1,4 +1,4 @@
-Signature: 73b746018e6b1764c2596c44e2e81e28
+Signature: 5eac0d88d1c8ffe7fc4768fb2eefb1eb
 
 UNUSED LICENSES:
 
@@ -4187,13 +4187,11 @@ FILE: ../../../third_party/dart/client/idea/.idea/inspectionProfiles/Project_Def
 FILE: ../../../third_party/dart/client/idea/.idea/vcs.xml
 FILE: ../../../third_party/dart/runtime/CPPLINT.cfg
 FILE: ../../../third_party/dart/runtime/observatory/.analysis_options
-FILE: ../../../third_party/dart/runtime/observatory/.packages
 FILE: ../../../third_party/dart/runtime/observatory/lib/elements.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/img/chromium_icon.png
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/img/dart_icon.png
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/img/isolate_icon.png
 FILE: ../../../third_party/dart/runtime/observatory/maintainers/pubspec.template
-FILE: ../../../third_party/dart/runtime/observatory/pubspec.lock
 FILE: ../../../third_party/dart/runtime/observatory/web/favicon.ico
 FILE: ../../../third_party/dart/runtime/observatory/web/index.html
 FILE: ../../../third_party/dart/runtime/observatory/web/third_party/trace_viewer_full.html
@@ -4201,7 +4199,6 @@ FILE: ../../../third_party/dart/runtime/observatory/web/timeline.html
 FILE: ../../../third_party/dart/runtime/vm/snapshot_test_in.dat
 FILE: ../../../third_party/dart/samples/build_dart/test.foo
 FILE: ../../../third_party/dart/samples/build_dart_simple/test.foo
-FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/.packages
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/conversions_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/html_common.dart
 FILE: ../../../third_party/dart/sdk/lib/libraries.json
@@ -4717,7 +4714,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/bin/crypto_fuchsia.cc + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/dart/.packages
 FILE: ../../../third_party/dart/runtime/bin/crypto_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/bin/crypto_test.cc
 FILE: ../../../third_party/dart/runtime/bin/directory_fuchsia.cc

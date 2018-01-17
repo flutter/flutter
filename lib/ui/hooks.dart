@@ -39,11 +39,11 @@ void _updateWindowMetrics(double devicePixelRatio,
   _invoke(window.onMetricsChanged, window._onMetricsChangedZone);
 }
 
-typedef String LocaleClosure();
+typedef String _LocaleClosure();
 
 String _localeClosure() => window._locale.toString();
 
-LocaleClosure _getLocaleClosure() => _localeClosure;
+_LocaleClosure _getLocaleClosure() => _localeClosure;
 
 void _updateLocale(String languageCode, String countryCode) {
   window._locale = new Locale(languageCode, countryCode);
@@ -133,7 +133,7 @@ void _invoke1<A>(void callback(A a), Zone zone, A arg) {
   if (identical(zone, Zone.current)) {
     callback(arg);
   } else {
-    zone.runUnaryGuarded<Null, A>(callback, arg);
+    zone.runUnaryGuarded<A>(callback, arg);
   }
 }
 
@@ -147,7 +147,7 @@ void _invoke2<A1, A2>(void callback(A1 a1, A2 a2), Zone zone, A1 arg1, A2 arg2) 
   if (identical(zone, Zone.current)) {
     callback(arg1, arg2);
   } else {
-    zone.runBinaryGuarded<Null, A1, A2>(callback, arg1, arg2);
+    zone.runBinaryGuarded<A1, A2>(callback, arg1, arg2);
   }
 }
 
@@ -178,7 +178,7 @@ PointerDataPacket _unpackPointerDataPacket(ByteData packet) {
   const int kBytesPerPointerData = _kPointerDataFieldCount * kStride;
   final int length = packet.lengthInBytes ~/ kBytesPerPointerData;
   assert(length * kBytesPerPointerData == packet.lengthInBytes);
-  List<PointerData> data = new List<PointerData>(length);
+  final List<PointerData> data = new List<PointerData>(length);
   for (int i = 0; i < length; ++i) {
     int offset = i * _kPointerDataFieldCount;
     data[i] = new PointerData(
