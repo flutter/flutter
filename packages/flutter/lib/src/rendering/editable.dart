@@ -570,6 +570,13 @@ class RenderEditable extends RenderBox {
 
   Offset _lastTapDownPosition;
   Offset _longPressPosition;
+
+  /// If [ignorePointer] is false (the default) then this method is called by
+  /// the internal gesture recognizer's [TapGestureRecognizer.onTapDown]
+  /// callback.
+  ///
+  /// When [ignorePointer] is true, an ancestor widget must respond to tap
+  /// down events by calling this method.
   void handleTapDown(TapDownDetails details) {
     _lastTapDownPosition = details.globalPosition + -_paintOffset;
   }
@@ -578,6 +585,12 @@ class RenderEditable extends RenderBox {
     handleTapDown(details);
   }
 
+  /// If [ignorePointer] is false (the default) then this method is called by
+  /// the internal gesture recognizer's [TapGestureRecognizer.onTap]
+  /// callback.
+  ///
+  /// When [ignorePointer] is true, an ancestor widget must respond to tap
+  /// events by calling this method.
   void handleTap() {
     _layoutText(constraints.maxWidth);
     assert(_lastTapDownPosition != null);
@@ -593,6 +606,12 @@ class RenderEditable extends RenderBox {
     handleTap();
   }
 
+  /// If [ignorePointer] is false (the default) then this method is called by
+  /// the internal gesture recognizer's [TapGestureRecognizer.onTapCancel]
+  /// callback.
+  ///
+  /// When [ignorePointer] is true, an ancestor widget must respond to tap
+  /// cancel events by calling this method.
   void handleTapCancel() {
     // longPress arrives after tapCancel, so remember the tap position.
     _longPressPosition = _lastTapDownPosition;
@@ -603,6 +622,12 @@ class RenderEditable extends RenderBox {
     handleTapCancel();
   }
 
+  /// If [ignorePointer] is false (the default) then this method is called by
+  /// the internal gesture recognizer's [LongPressRecognizer.onLongPress]
+  /// callback.
+  ///
+  /// When [ignorePointer] is true, an ancestor widget must respond to long
+  /// press events by calling this method.
   void handleLongPress() {
     _layoutText(constraints.maxWidth);
     final Offset globalPosition = _longPressPosition;
