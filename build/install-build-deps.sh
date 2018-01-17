@@ -66,12 +66,12 @@ fi
 distro=$(lsb_release --id --short)
 codename=$(lsb_release --codename --short)
 ubuntu_codenames="(precise|trusty|utopic|vivid|xenial)"
-debian_codenames="(stretch)"
+debian_codenames="(stretch|rodete)"
 if [ 0 -eq "${do_unsupported-0}" ] && [ 0 -eq "${do_quick_check-0}" ] ; then
   if [[ ! $codename =~ $ubuntu_codenames && ! $codename =~ $debian_codenames ]]; then
     echo "ERROR: Only Ubuntu 12.04 (precise), 14.04 (trusty), " \
-      "14.10 (utopic), 15.04 (vivid), and 16.04 (xenial), " \
-      "and Debian Testing (stretch) are currently supported" >&2
+      "14.10 (utopic), 15.04 (vivid), and 16.04 (xenial), Debian " \
+      "(rodete and stretch) are currently supported" >&2
     exit 1
   fi
 
@@ -105,10 +105,9 @@ dev_list="bison cdbs curl dpkg-dev elfutils devscripts fakeroot
 lib_list="libatk1.0-0 libc6 libasound2 libcairo2 libcap2 libcups2 libexpat1
           libexif12 libfontconfig1 libfreetype6 libglib2.0-0 libgnome-keyring0
           libgtk2.0-0 libpam0g libpango1.0-0 libpci3 libpcre3 libpixman-1-0
-          libpng12-0 libspeechd2 libstdc++6 libsqlite3-0 libx11-6
-          libxau6 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxdmcp6
-          libxext6 libxfixes3 libxi6 libxinerama1 libxrandr2 libxrender1
-          libxtst6 zlib1g"
+          libspeechd2 libstdc++6 libsqlite3-0 libx11-6 libxau6 libxcb1
+          libxcomposite1 libxcursor1 libxdamage1 libxdmcp6 libxext6 libxfixes3
+          libxi6 libxinerama1 libxrandr2 libxrender1 libxtst6 zlib1g"
 
 # Debugging symbols for all of the run-time libraries
 dbg_list="libatk1.0-dbg libc6-dbg libcairo2-dbg libfontconfig1-dbg
@@ -148,7 +147,7 @@ if [ "x$codename" = "xtrusty" ]; then
 fi
 
 # Find the proper version of libgbm-dev. We can't just install libgbm-dev as
-# it depends on mesa, and only one version of mesa can exists on the system.
+# it depends on mesa, and only one version of mesa can exist on the system.
 # Hence we must match the same version or this entire script will fail.
 mesa_variant=""
 for variant in "-lts-trusty" "-lts-utopic"; do
@@ -185,6 +184,11 @@ else
   dev_list="${dev_list} libbrlapi0.5"
 fi
 
+if package_exists libpng16-16; then
+  lib_list="$lib_list libpng16-16"
+else
+  lib_list="$lib_list libpng12-0"
+fi
 
 # Some packages are only needed if the distribution actually supports
 # installing them.
@@ -195,7 +199,7 @@ fi
 # When cross building for arm/Android on 64-bit systems the host binaries
 # that are part of v8 need to be compiled with -m32 which means
 # that basic multilib support is needed.
-if file /sbin/init | grep -q 'ELF 64-bit'; then
+if [[ "$(uname -m)" == "x86_64" ]]; then
   # gcc-multilib conflicts with the arm cross compiler (at least in trusty) but
   # g++-X.Y-multilib gives us the 32-bit support that we need. Find out the
   # appropriate value of X and Y by seeing what version the current
