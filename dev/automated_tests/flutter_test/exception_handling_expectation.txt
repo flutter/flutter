@@ -1,4 +1,4 @@
-[^═]*(this line contains the test framework's output with the clock and so forth)?
+<<skip until matching line>>
 ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
 The following message was thrown running a test:
 Who lives, who dies, who tells your story\?
