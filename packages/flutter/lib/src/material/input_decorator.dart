@@ -1441,12 +1441,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // then the label appears where the hint would.
   bool get _hasInlineLabel => !isFocused && isEmpty && decoration.labelText != null;
 
-  // The style for the inline label or hint when they're displayed "inline", i.e.
-  // when they appear in place of the empty text field.
-  TextStyle _getInlineLabelStyle(ThemeData themeData) {
+  // The base style for the inline label or hint when they're displayed "inline",
+  // i.e. when they appear in place of the empty text field.
+  TextStyle _getInlineStyle(ThemeData themeData) {
     return themeData.textTheme.subhead.merge(widget.baseStyle)
-      .copyWith(color: themeData.hintColor)
-      .merge(decoration.hintStyle);
+      .copyWith(color: themeData.hintColor);
   }
 
   TextStyle _getFloatingLabelStyle(ThemeData themeData) {
@@ -1482,15 +1481,16 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final TextStyle inlineStyle = _getInlineLabelStyle(themeData);
+    final TextStyle inlineStyle = _getInlineStyle(themeData);
 
+    final TextStyle hintStyle = inlineStyle.merge(decoration.hintStyle);
     final Widget hint = decoration.hintText == null ? null : new AnimatedOpacity(
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
       duration: _kTransitionDuration,
       curve: _kTransitionCurve,
       child: new Text(
         decoration.hintText,
-        style: inlineStyle,
+        style: hintStyle,
         overflow: TextOverflow.ellipsis,
         textAlign: textAlign,
       ),
@@ -1513,6 +1513,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       child: containerFill,
     );
 
+    final TextStyle inlineLabelStyle = inlineStyle.merge(decoration.labelStyle);
     final Widget label = decoration.labelText == null ? null : new _Shaker(
       animation: _shakingLabelController.view,
       child: new AnimatedDefaultTextStyle(
@@ -1520,7 +1521,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         curve: _kTransitionCurve,
         style: widget._labelIsFloating
           ? _getFloatingLabelStyle(themeData)
-          : _getInlineLabelStyle(themeData),
+          : inlineLabelStyle,
         child: new Text(
           decoration.labelText,
           overflow: TextOverflow.ellipsis,
@@ -1536,7 +1537,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         opacity: widget._labelIsFloating ? 1.0 : 0.0,
         child: new Text(
           decoration.prefixText,
-          style: decoration.prefixStyle ?? inlineStyle
+          style: decoration.prefixStyle ?? hintStyle
         ),
       );
 
@@ -1547,7 +1548,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         opacity: widget._labelIsFloating ? 1.0 : 0.0,
         child: new Text(
           decoration.suffixText,
-          style: decoration.suffixStyle ?? inlineStyle
+          style: decoration.suffixStyle ?? hintStyle
         ),
       );
 
@@ -1608,7 +1609,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       contentPadding = decoration.contentPadding ?? EdgeInsets.zero;
     } else if (decoration.border == null || !decoration.border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
-      floatingLabelHeight = 4.0 + 0.75 * inlineStyle.fontSize;
+      floatingLabelHeight = 4.0 + 0.75 * inlineLabelStyle.fontSize;
       if (decoration.filled) {
         contentPadding = decoration.contentPadding ?? (decoration.isDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
@@ -1712,7 +1713,7 @@ class InputDecoration {
     this.hintStyle,
     this.filled: false,
     this.fillColor,
-    this.border: null,
+    this.border,
     this.enabled: true,
   }) : assert(filled != null),
        assert(enabled != null),
