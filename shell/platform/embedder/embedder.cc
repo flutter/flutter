@@ -8,6 +8,7 @@
 
 #include <type_traits>
 #include "flutter/common/threads.h"
+#include "flutter/fml/message_loop.h"
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 #include "lib/fxl/functional/make_copyable.h"
 
@@ -319,5 +320,10 @@ FlutterResult FlutterEngineSendPlatformMessageResponse(
 
   delete handle;
 
+  return kSuccess;
+}
+
+FlutterResult __FlutterEngineFlushPendingTasksNow() {
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
   return kSuccess;
 }

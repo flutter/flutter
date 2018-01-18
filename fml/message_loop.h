@@ -30,6 +30,10 @@ class MessageLoop {
 
   fxl::RefPtr<fxl::TaskRunner> GetTaskRunner() const;
 
+  // Exposed for the embedder shell which allows clients to poll for events
+  // instead of dedicating a thread to the message loop.
+  void RunExpiredTasksNow();
+
   static void EnsureInitializedForCurrentThread();
 
   static bool IsInitializedForCurrentThread();
