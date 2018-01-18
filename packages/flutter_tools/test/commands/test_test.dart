@@ -23,6 +23,11 @@ void main() {
     final String automatedTestsDirectory = fs.path.join('..', '..', 'dev', 'automated_tests');
     final String flutterTestDirectory = fs.path.join(automatedTestsDirectory, 'flutter_test');
 
+    testUsingContext('not have extraneous error messages', () async {
+      Cache.flutterRoot = '../..';
+      return _testFile('trivial_widget', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
+    }, skip: io.Platform.isLinux);  // Flutter on Linux sometimes has problems with font resolution (#7224)
+
     testUsingContext('report nice errors for exceptions thrown within testWidgets()', () async {
       Cache.flutterRoot = '../..';
       return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
@@ -85,7 +90,8 @@ void main() {
   });
 }
 
-Future<Null> _testFile(String testName, String workingDirectory, String testDirectory) async {
+Future<Null> _testFile(String testName, String workingDirectory, String testDirectory, {Matcher exitCode}) async {
+  exitCode ??= isNonZero;
   final String fullTestExpectation = fs.path.join(testDirectory, '${testName}_expectation.txt');
   final File expectationFile = fs.file(fullTestExpectation);
   if (!expectationFile.existsSync())
@@ -96,7 +102,7 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
 
   final ProcessResult exec = await _runFlutterTest(testName, workingDirectory, testDirectory);
 
-  expect(exec.exitCode, isNonZero);
+  expect(exec.exitCode, exitCode);
   final List<String> output = exec.stdout.split('\n');
   if (output.first == 'Waiting for another flutter command to release the startup lock...')
     output.removeAt(0);
