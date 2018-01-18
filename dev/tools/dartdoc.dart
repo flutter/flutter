@@ -8,7 +8,6 @@ import 'dart:io';
 
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
-import 'update_versions.dart';
 
 /// Whether to report all error messages (true) or attempt to filter out some
 /// known false positives (false).
@@ -36,15 +35,18 @@ Future<Null> main(List<String> args) async {
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
 
-  final RawVersion version = new RawVersion('VERSION');
+  final ProcessResult flutter = Process.runSync('flutter', <String>[]);
+  final File versionFile = new File('version');
+  if (flutter.exitCode != 0 || !versionFile.existsSync())
+    throw new Exception('Failed to determine Flutter version.');
+  final String version = versionFile.readAsStringSync();
 
   // Create the pubspec.yaml file.
-  final StringBuffer buf = new StringBuffer('''
-name: Flutter
-homepage: https://flutter.io
-version: $version
-dependencies:
-''');
+  final StringBuffer buf = new StringBuffer();
+  buf.writeln('name: Flutter');
+  buf.writeln('homepage: https://flutter.io');
+  buf.writeln('version: $version');
+  buf.writeln('dependencies:');
   for (String package in findPackageNames()) {
     buf.writeln('  $package:');
     buf.writeln('    sdk: flutter');
@@ -100,7 +102,7 @@ dependencies:
     workingDirectory: 'dev/docs',
     environment: pubEnvironment,
   );
-  print('\n${result.stdout}');
+  print('\n${result.stdout}flutter version: $version\n');
 
   // Generate the documentation.
   final List<String> args = <String>[
@@ -159,7 +161,10 @@ void createFooter(String footerPath) {
   const int kGitRevisionLength = 10;
 
   final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
-  String gitRevision = (gitResult.exitCode == 0) ? gitResult.stdout.trim() : 'unknown';
+  if (gitResult.exitCode != 0)
+    throw 'git exit with non-zero exit code: ${gitResult.exitCode}';
+  String gitRevision = gitResult.stdout.trim();
+
   gitRevision = gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
 
   final String timestamp = new DateFormat('yyyy-MM-dd HH:mm').format(new DateTime.now());

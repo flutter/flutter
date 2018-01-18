@@ -44,7 +44,7 @@ Future<Null> main(List<String> args) async {
   await runner.run(args, <FlutterCommand>[
     new AnalyzeCommand(verboseHelp: verboseHelp),
     new BuildCommand(verboseHelp: verboseHelp),
-    new ChannelCommand(),
+    new ChannelCommand(verboseHelp: verboseHelp),
     new CleanCommand(),
     new InjectPluginsCommand(hidden: !verboseHelp),
     new ConfigCommand(verboseHelp: verboseHelp),

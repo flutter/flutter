@@ -73,6 +73,7 @@ function upgrade_flutter () {
 
   local revision=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
   if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -s "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != "$revision" ] || [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
+    rm -f "$FLUTTER_ROOT/version"
     mkdir -p "$FLUTTER_ROOT/bin/cache"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
