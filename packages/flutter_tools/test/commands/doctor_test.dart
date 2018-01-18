@@ -53,7 +53,7 @@ void main() {
               '    ! Maybe a hint will help the user\n'
               '[✓] Another Passing Validator (with statusInfo)\n'
               '\n'
-              '! Doctor found issues in 2 categories; run \'flutter doctor -v\' for more details.\n'
+              '! Doctor found issues in 2 categories; run \'flutter doctor --verbose\' for more details.\n'
       ));
     });
 
@@ -70,7 +70,7 @@ void main() {
               '    ✗ A error message indicating partial installation\n'
               '    ! Maybe a hint will help the user\n'
               '\n'
-              '! Doctor found issues in 3 categories; run \'flutter doctor -v\' for more details.\n'
+              '! Doctor found issues in 3 categories; run \'flutter doctor --verbose\' for more details.\n'
       ));
     });
 
@@ -95,7 +95,7 @@ void main() {
               '    ! Maybe a hint will help the user\n'
               '    • An extra message with some verbose details\n'
               '\n'
-              '! Doctor found issues in 3 categories; run \'flutter doctor -v\' for more details.\n'
+              '! Doctor found issues in 3 categories; run \'flutter doctor --verbose\' for more details.\n'
       ));
     });
   });

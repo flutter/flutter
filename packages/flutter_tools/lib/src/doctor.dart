@@ -138,7 +138,7 @@ class Doctor {
     if (!verbose)
       printStatus('');
     if (issues > 0) {
-      printStatus("! Doctor found issues in $issues categories; run 'flutter doctor -v' for more details.");
+      printStatus("! Doctor found issues in $issues categories; run 'flutter doctor --verbose' for more details.");
     } else {
       printStatus('• No issues found!');
     }
