@@ -26,28 +26,38 @@ void main() {
     testUsingContext('report nice errors for exceptions thrown within testWidgets()', () async {
       Cache.flutterRoot = '../..';
       return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
-    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
+    // Dart on Windows has trouble with unicode characters in output
+    // Flutter on Linux sometimes has trouble with font resolution (#7224)
+    }, skip: io.Platform.isWindows || io.Platform.isLinux);
 
     testUsingContext('report a nice error when a guarded function was called without await', () async {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_guarded', automatedTestsDirectory, flutterTestDirectory);
-    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
+    // Dart on Windows has trouble with unicode characters in output
+    // Flutter on Linux sometimes has trouble with font resolution (#7224)
+    }, skip: io.Platform.isWindows || io.Platform.isLinux);
 
     testUsingContext('report a nice error when an async function was called without await', () async {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_unguarded', automatedTestsDirectory, flutterTestDirectory);
-    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
+    // Dart on Windows has trouble with unicode characters in output
+    // Flutter on Linux sometimes has trouble with font resolution (#7224)
+    }, skip: io.Platform.isWindows || io.Platform.isLinux);
 
     testUsingContext('report a nice error when a Ticker is left running', () async {
       Cache.flutterRoot = '../..';
       return _testFile('ticker', automatedTestsDirectory, flutterTestDirectory);
-    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
+    // Dart on Windows has trouble with unicode characters in output
+    // Flutter on Linux sometimes has trouble with font resolution (#7224)
+    }, skip: io.Platform.isWindows || io.Platform.isLinux);
 
     testUsingContext('report a nice error when a pubspec.yaml is missing a flutter_test dependency', () async {
       final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
       Cache.flutterRoot = '../..';
       return _testFile('trivial', missingDependencyTests, missingDependencyTests);
-    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
+    // Dart on Windows has trouble with unicode characters in output
+    // Flutter on Linux sometimes has trouble with font resolution (#7224)
+    }, skip: io.Platform.isWindows || io.Platform.isLinux);
 
     testUsingContext('run a test when its name matches a regexp', () async {
       Cache.flutterRoot = '../..';
