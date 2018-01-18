@@ -92,6 +92,8 @@ Future<Null> precacheImage(ImageProvider provider, BuildContext context, { Size 
 ///  * [new Image.file], for obtaining an image from a [File].
 ///  * [new Image.memory], for obtaining an image from a [Uint8List].
 ///
+/// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
+///
 /// To automatically perform pixel-density-aware asset resolution, specify the
 /// image using an [AssetImage] and make sure that a [MaterialApp], [WidgetsApp],
 /// or [MediaQuery] widget exists above the [Image] widget in the widget tree.
