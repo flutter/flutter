@@ -1,7 +1,3 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'package:flutter/foundation.dart';
 
 import 'automatic_keep_alive.dart';
@@ -12,7 +8,6 @@ import 'gesture_detector.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
-const Duration _kDismissDuration = const Duration(milliseconds: 200);
 const Curve _kResizeTimeCurve = const Interval(0.4, 1.0, curve: Curves.ease);
 const double _kMinFlingVelocity = 700.0;
 const double _kMinFlingVelocityDelta = 400.0;
@@ -83,6 +78,8 @@ class Dismissible extends StatefulWidget {
     this.direction: DismissDirection.horizontal,
     this.resizeDuration: const Duration(milliseconds: 300),
     this.dismissThresholds: const <DismissDirection, double>{},
+    this.rollbackDuration: const Duration(milliseconds: 300),
+    this.crossAxisEndOffset: 0.0,
   }) : assert(key != null),
        assert(secondaryBackground != null ? background != null : true),
        super(key: key);
@@ -134,6 +131,13 @@ class Dismissible extends StatefulWidget {
   /// [direction] property.
   final Map<DismissDirection, double> dismissThresholds;
 
+  /// Defines the duration for card to come back to original position if not dismissed.
+  final Duration rollbackDuration;
+
+  /// Defines the end offset across the main axis after the card is dismissed.
+  /// If non-zero value is given then widget moves in cross direction depending on whether it is positive or negative.
+  final double crossAxisEndOffset;
+
   @override
   _DismissibleState createState() => new _DismissibleState();
 }
@@ -183,7 +187,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _moveController = new AnimationController(duration: _kDismissDuration, vsync: this)
+    _moveController = new AnimationController(duration: widget.rollbackDuration, vsync: this)
       ..addStatusListener(_handleDismissStatusChanged);
     _updateMoveAnimation();
   }
@@ -317,7 +321,9 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     final double end = _dragExtent.sign;
     _moveAnimation = new Tween<Offset>(
       begin: Offset.zero,
-      end: _directionIsXAxis ? new Offset(end, 0.0) : new Offset(0.0, end),
+      end: _directionIsXAxis
+          ? new Offset(end, widget.crossAxisEndOffset)
+          : new Offset(widget.crossAxisEndOffset, end),
     ).animate(_moveController);
   }
 
@@ -513,3 +519,4 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     );
   }
 }
+
