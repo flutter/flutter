@@ -852,8 +852,19 @@ void RuntimeHolder::BeginFrame() {
   FXL_DCHECK(!frame_outstanding_);
   frame_scheduled_ = false;
   frame_outstanding_ = true;
+  int64_t dart_frame_start_micros = Dart_TimelineGetMicros();
   last_begin_frame_time_ = fxl::TimePoint::Now();
   runtime_->BeginFrame(last_begin_frame_time_);
+
+  if (frame_scheduled_) {
+    // HACK(rmacnak): This assumes 16ms/frame; it should use the frame deadline
+    // once we have access to it. Compare shell/common/animator.cc.
+    runtime_->NotifyIdle(dart_frame_start_micros + 16000);
+  } else {
+    // We don't have another frame pending, so we're waiting on user input
+    // or I/O. Allow the Dart VM 100 ms.
+    runtime_->NotifyIdle(dart_frame_start_micros + 100000);
+  }
 }
 
 void RuntimeHolder::OnFrameComplete() {
