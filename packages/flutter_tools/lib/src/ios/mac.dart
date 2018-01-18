@@ -393,10 +393,10 @@ Future<Null> diagnoseXcodeBuildFailure(
   }
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      app.id?.contains('com.yourcompany') ?? false) {
+      app.id?.contains('com.example') ?? false) {
     printError('');
     printError('It appears that your application still contains the default signing identifier.');
-    printError("Try replacing 'com.yourcompany' with your signing id in Xcode:");
+    printError("Try replacing 'com.example' with your signing id in Xcode:");
     printError('  open ios/Runner.xcworkspace');
     return;
   }
