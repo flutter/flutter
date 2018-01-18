@@ -290,7 +290,7 @@ abstract class CachedArtifact {
 
   /// Download an archive from the given [url] and unzip it to [location].
   Future<Null> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f), void extractor(File f, Directory d)) {
-    return _withDownloadFile('${_flattenNameSubdirs(url)}', (File tempFile) async {
+    return _withDownloadFile('${flattenNameSubdirs(url)}', (File tempFile) async {
       if (!verifier(tempFile)) {
         final Status status = logger.startProgress(message, expectSlowOperation: true);
         await _downloadFile(url, tempFile).then<Null>((_) {
@@ -516,9 +516,10 @@ String _flattenNameNoSubdirs(String fileName) {
   return new String.fromCharCodes(replacedCodeUnits);
 }
 
-String _flattenNameSubdirs(Uri url) {
+@visibleForTesting
+String flattenNameSubdirs(Uri url) {
   final List<String> pieces = <String>[url.host]..addAll(url.pathSegments);
-  final List<String> convertedPieces = pieces.map(_flattenNameNoSubdirs);
+  final Iterable<String> convertedPieces = pieces.map(_flattenNameNoSubdirs);
   return fs.path.joinAll(convertedPieces);
 }
 

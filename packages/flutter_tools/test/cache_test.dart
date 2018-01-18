@@ -77,6 +77,14 @@ void main() {
       verify(artifact2.update());
     });
   });
+
+  testUsingContext('flattenNameSubdirs', () {
+    expect(flattenNameSubdirs(Uri.parse('http://flutter.io/foo/bar')), 'flutter.io/foo/bar');
+    expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar')), 'docs.flutter.io/foo/bar');
+    expect(flattenNameSubdirs(Uri.parse('https://www.flutter.io')), 'www.flutter.io');
+  },  overrides: <Type, Generator>{
+    FileSystem: () => new MockFileSystem(),
+  });
 }
 
 class MockFileSystem extends MemoryFileSystem {
