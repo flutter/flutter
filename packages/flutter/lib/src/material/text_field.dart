@@ -98,7 +98,7 @@ class TextField extends StatefulWidget {
     Key key,
     this.controller,
     this.focusNode,
-    this.decoration,
+    this.decoration: const InputDecoration(),
     TextInputType keyboardType: TextInputType.text,
     this.style,
     this.textAlign: TextAlign.start,
