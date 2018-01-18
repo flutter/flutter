@@ -130,6 +130,9 @@ class _FrontendCompiler implements CompilerInterface {
   StringSink _outputStream;
   BinaryPrinterFactory printerFactory;
 
+  CompilerOptions _compilerOptions;
+  Uri _entryPoint;
+
   IncrementalKernelGenerator _generator;
   String _kernelBinaryFilename;
 
@@ -156,14 +159,11 @@ class _FrontendCompiler implements CompilerInterface {
 
     Program program;
     if (options['incremental']) {
-      _generator = generator != null
-          ? generator
-          : await IncrementalKernelGenerator.newInstance(
-              compilerOptions, filenameUri,
-              useMinimalGenerator: true);
-      final DeltaProgram deltaProgram =
+      _entryPoint = filenameUri;
+      _compilerOptions = compilerOptions;
+      _generator = generator ?? _createGenerator();
+      program =
           await _runWithPrintRedirection(() => _generator.computeDelta());
-      program = deltaProgram.newProgram;
     } else {
       if (options['link-platform']) {
         // TODO(aam): Remove linkedDependencies once platform is directly embedded
@@ -192,10 +192,10 @@ class _FrontendCompiler implements CompilerInterface {
   Future<Null> recompileDelta() async {
     final String boundaryKey = new Uuid().generateV4();
     _outputStream.writeln('result $boundaryKey');
-    final DeltaProgram deltaProgram = await _generator.computeDelta();
+    final Program deltaProgram = await _generator.computeDelta();
     final IOSink sink = new File(_kernelBinaryFilename).openWrite();
     final BinaryPrinter printer = printerFactory.newBinaryPrinter(sink);
-    printer.writeProgramFile(deltaProgram.newProgram);
+    printer.writeProgramFile(deltaProgram);
     await sink.close();
     _outputStream.writeln('$boundaryKey $_kernelBinaryFilename');
     return null;
@@ -203,12 +203,12 @@ class _FrontendCompiler implements CompilerInterface {
 
   @override
   void acceptLastDelta() {
-    _generator.acceptLastDelta();
+    // TODO(aam): implement this considering new incremental compiler API.
   }
 
   @override
   void rejectLastDelta() {
-    _generator.rejectLastDelta();
+    // TODO(aam): implement this considering new incremental compiler API.
   }
 
   @override
@@ -218,8 +218,11 @@ class _FrontendCompiler implements CompilerInterface {
 
   @override
   void resetIncrementalCompiler() {
-    _generator.reset();
+    _generator = _createGenerator();
   }
+
+  IncrementalKernelGenerator _createGenerator() =>
+    new IncrementalKernelGenerator(_compilerOptions, _entryPoint);
 
   Uri _ensureFolderPath(String path) {
     String uriPath = new Uri.file(path).toString();
@@ -268,6 +271,7 @@ Future<int> starter(
     compiler.acceptLastDelta();
     await compiler.recompileDelta();
     compiler.acceptLastDelta();
+    compiler.resetIncrementalCompiler();
     await compiler.recompileDelta();
     compiler.acceptLastDelta();
     await compiler.recompileDelta();
@@ -311,7 +315,8 @@ Future<int> starter(
         } else if (string == 'accept') {
           compiler.acceptLastDelta();
         } else if (string == 'reject') {
-          compiler.rejectLastDelta();
+          // TODO(aam) implement reject so it won't reset compiler.
+          compiler.resetIncrementalCompiler();
         } else if (string == 'reset') {
           compiler.resetIncrementalCompiler();
         } else if (string == 'quit') {
