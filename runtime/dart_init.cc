@@ -237,6 +237,7 @@ static void ReleaseFetchedBytes(uint8_t* buffer) {
 }
 
 Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
+                                          Dart_IsolateFlags* flags,
                                           char** error) {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
   // No VM-service in release mode.
@@ -246,14 +247,15 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
 
   bool is_running_from_kernel = GetKernelPlatformBinary() != nullptr;
 
+  flags->load_vmservice_library = true;
   Dart_Isolate isolate =
       is_running_from_kernel
           ? Dart_CreateIsolateFromKernel(
-                script_uri, "main", kernel_platform, nullptr /* flags */,
+                script_uri, "main", kernel_platform, flags,
                 static_cast<tonic::DartState*>(dart_state), error)
           : Dart_CreateIsolate(
                 script_uri, "main", g_default_isolate_snapshot_data,
-                g_default_isolate_snapshot_instructions, nullptr,
+                g_default_isolate_snapshot_instructions, flags,
                 static_cast<tonic::DartState*>(dart_state), error);
 
   FXL_CHECK(isolate) << error;
@@ -314,7 +316,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
   TRACE_EVENT0("flutter", __func__);
 
   if (IsServiceIsolateURL(script_uri)) {
-    return ServiceIsolateCreateCallback(script_uri, error);
+    return ServiceIsolateCreateCallback(script_uri, flags, error);
   }
 
   std::string entry_uri = script_uri;
