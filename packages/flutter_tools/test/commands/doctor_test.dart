@@ -42,6 +42,16 @@ void main() {
       ));
     });
 
+    testUsingContext('validate non-verbose output format when only one category fails', () async {
+      expect(await new FakeSinglePassingDoctor().diagnose(verbose: false), isTrue);
+      expect(testLogger.statusText, equals(
+              '[!] Partial Validator with only a Hint\n'
+              '    ! There is a hint here\n'
+              '\n'
+              '! Doctor found issues in 1 category; run \'flutter doctor -v\' for details.\n'
+      ));
+    });
+
     testUsingContext('validate non-verbose output format for a passing run', () async {
       expect(await new FakePassingDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
@@ -53,7 +63,7 @@ void main() {
               '    ! Maybe a hint will help the user\n'
               '[✓] Another Passing Validator (with statusInfo)\n'
               '\n'
-              '! Doctor found issues in 2 categories; run \'flutter doctor --verbose\' for more details.\n'
+              '! Doctor found issues in 2 categories; run \'flutter doctor -v\' for details.\n'
       ));
     });
 
@@ -70,7 +80,7 @@ void main() {
               '    ✗ A error message indicating partial installation\n'
               '    ! Maybe a hint will help the user\n'
               '\n'
-              '! Doctor found issues in 3 categories; run \'flutter doctor --verbose\' for more details.\n'
+              '! Doctor found issues in 3 categories; run \'flutter doctor -v\' for details.\n'
       ));
     });
 
@@ -189,6 +199,20 @@ class FakePassingDoctor extends Doctor {
       _validators.add(new PartialValidatorWithHintsOnly());
       _validators.add(new PartialValidatorWithErrors());
       _validators.add(new PassingValidator('Another Passing Validator'));
+    }
+    return _validators;
+  }
+}
+
+/// A doctor that should pass, but still has 1 issue to test the singular of
+/// categories.
+class FakeSinglePassingDoctor extends Doctor {
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    if (_validators == null) {
+      _validators = <DoctorValidator>[];
+      _validators.add(new PartialValidatorWithHintsOnly());
     }
     return _validators;
   }

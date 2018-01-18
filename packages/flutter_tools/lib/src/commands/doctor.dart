@@ -15,6 +15,7 @@ class DoctorCommand extends FlutterCommand {
       help: 'Run the Android SDK manager tool to accept the SDK\'s licenses.',
     );
     argParser.addFlag('verbose',
+      abbr: 'v',
       defaultsTo: false,
       negatable: false,
       help: 'Display all diagnostics related to Flutter, not just those with problems.',

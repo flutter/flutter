@@ -138,8 +138,8 @@ class Doctor {
     if (!verbose)
       printStatus('');
     if (issues > 0) {
-      final String verboseSuggestion = verbose ? '.' : "; run 'flutter doctor --verbose' for more details.";
-      printStatus('! Doctor found issues in $issues categories$verboseSuggestion');
+      final String verboseSuggestion = verbose ? '.' : "; run 'flutter doctor -v' for details.";
+      printStatus('! Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}$verboseSuggestion');
     } else {
       printStatus('• No issues found!');
     }
@@ -190,12 +190,16 @@ class ValidationResult {
   final List<ValidationMessage> messages;
 
   String get leadingBox {
-    if (type == ValidationType.missing)
-      return '[✗]';
-    else if (type == ValidationType.installed)
-      return '[✓]';
-    else // if (type == ValidationType.partial)
-      return '[!]';
+    switch(type) {
+      case ValidationType.missing:
+        return '[✗]';
+      case ValidationType.installed:
+        return '[✓]';
+      case ValidationType.partial:
+        return '[!]';
+      default:
+        return '[!]';
+    }
   }
 }
 
