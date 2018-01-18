@@ -928,6 +928,7 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(getBorderWeight(tester), 0.0);
     expect(tester.getTopLeft(find.text('label')).dy, 12.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
   });
