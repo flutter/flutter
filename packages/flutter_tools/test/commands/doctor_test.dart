@@ -45,7 +45,7 @@ void main() {
     testUsingContext('validate non-verbose output format for a passing run', () async {
       expect(await new FakePassingDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
-          '[✓] Passing Validator (with statusInfo)\n'
+              '[✓] Passing Validator (with statusInfo)\n'
               '[!] Partial Validator with only a Hint\n'
               '    ! There is a hint here\n'
               '[!] Partial Validator with Errors\n'
@@ -60,7 +60,7 @@ void main() {
     testUsingContext('validate non-verbose output format', () async {
       expect(await new FakeDoctor().diagnose(verbose: false), isFalse);
       expect(testLogger.statusText, equals(
-          '[✓] Passing Validator (with statusInfo)\n'
+              '[✓] Passing Validator (with statusInfo)\n'
               '[✗] Missing Validator\n'
               '    ✗ A useful error message\n'
               '    ! A hint message\n'
@@ -77,7 +77,7 @@ void main() {
     testUsingContext('validate verbose output format', () async {
       expect(await new FakeDoctor().diagnose(verbose: true), isFalse);
       expect(testLogger.statusText, equals(
-          '[✓] Passing Validator (with statusInfo)\n'
+              '[✓] Passing Validator (with statusInfo)\n'
               '    • A helpful message\n'
               '    • A second, somewhat longer helpful message\n'
               '\n'
