@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -212,11 +211,7 @@ void main() {
         }
       }
 
-      // TODO(pq): enable when sky_shell is available
-      if (!io.Platform.isWindows) {
-        // Verify that the sample widget test runs cleanly.
-        await _runFlutterTest(projectDir, target: fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
-      }
+      await _runFlutterTest(projectDir, target: fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
 
       // Generated Xcode settings
       final String xcodeConfigPath = fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
