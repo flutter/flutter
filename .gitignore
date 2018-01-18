@@ -29,6 +29,7 @@
 /dev/docs/lib/
 /dev/docs/pubspec.yaml
 /packages/flutter/coverage/
+version
 
 # Flutter/Dart/Pub related
 **/doc/api/

@@ -247,6 +247,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       flutterUsage.suppressAnalytics = true;
 
     _checkFlutterCopy();
+    await FlutterVersion.instance.ensureVersionFile();
     await FlutterVersion.instance.checkFlutterVersionFreshness();
 
     if (globalResults.wasParsed('packages'))
