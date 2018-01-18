@@ -1,0 +1,2 @@
+[0-9]+:[0-9]+ [+]0: - A trivial widget test
+[0-9]+:[0-9]+ [+]1: All tests passed!
