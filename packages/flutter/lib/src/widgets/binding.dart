@@ -475,6 +475,12 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   bool get _reportFirstFrame => _deferFirstFrameReportCount == 0;
 
   /// Whether the first frame has finished rendering.
+  ///
+  /// Only valid in profile and debug builds, it can't be used in release
+  /// builds.
+  /// It can be deferred using [deferFirstFrameReport] and
+  /// [allowFirstFrameReport].
+  /// The value is set at the end of the call to [drawFrame].
   bool get debugDidSendFirstFrameEvent => !_needToReportFirstFrame;
 
   /// Tell the framework not to report the frame it is building as a "useful"

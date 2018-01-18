@@ -205,7 +205,7 @@ class WidgetInspectorService {
   /// appropriate to display the Widget tree in the inspector.
   bool isWidgetTreeReady([String groupName]) {
     return WidgetsBinding.instance != null &&
-        WidgetsBinding.instance.debugDidSendFirstFrameEvent;
+           WidgetsBinding.instance.debugDidSendFirstFrameEvent;
   }
 
   /// Returns the Dart object associated with a reference id.
@@ -295,7 +295,7 @@ class WidgetInspectorService {
         } else {
           // It isn't safe to trigger the selection change callback if we are in
           // the middle of rendering the frame.
-          WidgetsBinding.instance.scheduleTask(
+          SchedulerBinding.instance.scheduleTask(
             selectionChangedCallback,
             Priority.touch,
           );
@@ -485,24 +485,24 @@ class _WidgetInspectorState extends State<WidgetInspector>
   /// as selecting the edge of the bounding box.
   static const double _kEdgeHitMargin = 2.0;
 
-  InspectorSelectionChangedCallback selectionChangedCallback;
+  InspectorSelectionChangedCallback _selectionChangedCallback;
   @override
   void initState() {
     super.initState();
 
-    selectionChangedCallback = () {
+    _selectionChangedCallback = () {
       setState(() {
         // The [selection] property which the build method depends on has
         // changed.
       });
     };
     assert(WidgetInspectorService.instance.selectionChangedCallback == null);
-    WidgetInspectorService.instance.selectionChangedCallback = selectionChangedCallback;
+    WidgetInspectorService.instance.selectionChangedCallback = _selectionChangedCallback;
   }
 
   @override
   void dispose() {
-    if (WidgetInspectorService.instance.selectionChangedCallback == selectionChangedCallback) {
+    if (WidgetInspectorService.instance.selectionChangedCallback == _selectionChangedCallback) {
       WidgetInspectorService.instance.selectionChangedCallback = null;
     }
     super.dispose();
