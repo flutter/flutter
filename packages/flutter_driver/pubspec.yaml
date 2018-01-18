@@ -8,11 +8,11 @@ environment:
 
 dependencies:
   file: 2.3.5
-  json_rpc_2: 2.0.6
+  json_rpc_2: 2.0.7
   meta: 1.1.1
   path: 1.5.1
   web_socket_channel: 1.0.6
-  vm_service_client: 0.2.3
+  vm_service_client: 0.2.4
   flutter:
     sdk: flutter
   flutter_test:

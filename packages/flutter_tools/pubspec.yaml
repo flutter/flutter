@@ -16,8 +16,8 @@ dependencies:
   file: 2.3.5
   http: 0.11.3+14
   intl: 0.15.2
-  json_rpc_2: 2.0.6
-  json_schema: 1.0.7
+  json_rpc_2: 2.0.7
+  json_schema: 1.0.8
   linter: 0.1.42
   meta: 1.1.1
   mustache: 1.0.0
@@ -29,7 +29,7 @@ dependencies:
   stack_trace: 1.9.1
   stream_channel: 1.6.3
   usage: 3.3.0
-  vm_service_client: 0.2.3
+  vm_service_client: 0.2.4
   web_socket_channel: 1.0.6
   xml: 2.6.0
   yaml: 2.1.13
