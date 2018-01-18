@@ -63,10 +63,13 @@ enum _LicenseEntryWithLineBreaksParserState {
 /// unless they start with the same number of spaces as the previous line, in
 /// which case it's assumed they are a continuation of an indented paragraph.
 ///
+/// ## Sample code
+///
 /// For example, the BSD license in this format could be encoded as follows:
 ///
 /// ```dart
-///   LicenseRegistry.addLicense(() {
+/// void initMyLibrary() {
+///   LicenseRegistry.addLicense(() async* {
 ///     yield new LicenseEntryWithLineBreaks(<String>['my_library'], '''
 /// Copyright 2016 The Sample Authors. All rights reserved.
 ///
@@ -95,7 +98,8 @@ enum _LicenseEntryWithLineBreaksParserState {
 /// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 /// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 /// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.''');
-///   }
+///   });
+/// }
 /// ```
 ///
 /// This would result in a license with six [paragraphs], the third, fourth, and
@@ -283,8 +287,7 @@ class LicenseRegistry {
 
   /// Returns the licenses that have been registered.
   ///
-  /// Because generating the list of licenses is expensive, this function should
-  /// only be called once.
+  /// Generating the list of licenses is expensive.
   static Stream<LicenseEntry> get licenses async* {
     if (_collectors == null)
       return;

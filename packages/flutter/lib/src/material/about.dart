@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'debug.dart';
@@ -364,7 +364,6 @@ class LicensePage extends StatefulWidget {
 }
 
 class _LicensePageState extends State<LicensePage> {
-
   @override
   void initState() {
     super.initState();
@@ -458,7 +457,6 @@ class _LicensePageState extends State<LicensePage> {
           child: new Scrollbar(
             child: new ListView(
               padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-              shrinkWrap: true,
               children: contents,
             ),
           ),
