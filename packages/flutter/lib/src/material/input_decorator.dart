@@ -895,9 +895,13 @@ class _RenderDecoration extends RenderBox {
     final double right = overallWidth - contentPadding.right;
 
     height = layout.containerHeight;
-    baseline = decoration.border == null || decoration.border.isOutline
-      ? layout.outlineBaseline
-      : layout.inputBaseline;
+    if (decoration.border == null && decoration.contentPadding == EdgeInsets.zero) {
+      baseline = layout.inputBaseline; // InputDecoration.collapsed == true
+    } else {
+      baseline = decoration.border == null || decoration.border.isOutline
+        ? layout.outlineBaseline
+        : layout.inputBaseline;
+    }
 
     if (icon != null) {
       final double x = textDirection == TextDirection.rtl ? overallWidth - icon.size.width : 0.0;
@@ -1700,7 +1704,7 @@ class InputDecoration {
 
   /// Defines an [InputDecorator] that is the same size as the input field.
   ///
-  /// This type of input decoration only includes the border.
+  /// This type of input decoration does not include a border by default.
   ///
   /// Sets the [isCollapsed] property to true.
   const InputDecoration.collapsed({
@@ -1708,7 +1712,7 @@ class InputDecoration {
     this.hintStyle,
     this.filled: false,
     this.fillColor,
-    this.border: const UnderlineInputBorder(),
+    this.border: null,
     this.enabled: true,
   }) : assert(filled != null),
        assert(enabled != null),
