@@ -71,4 +71,8 @@ void MessageLoop::RemoveTaskObserver(TaskObserver* observer) {
   loop_->RemoveTaskObserver(observer);
 }
 
+void MessageLoop::RunExpiredTasksNow() {
+  loop_->RunExpiredTasksNow();
+}
+
 }  // namespace fml

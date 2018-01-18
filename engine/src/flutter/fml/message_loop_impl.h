@@ -43,10 +43,12 @@ class MessageLoopImpl : public fxl::RefCountedThreadSafe<MessageLoopImpl> {
 
   void DoTerminate();
 
+  // Exposed for the embedder shell which allows clients to poll for events
+  // instead of dedicating a thread to the message loop.
+  void RunExpiredTasksNow();
+
  protected:
   MessageLoopImpl();
-
-  void RunExpiredTasksNow();
 
  private:
   struct DelayedTask {
