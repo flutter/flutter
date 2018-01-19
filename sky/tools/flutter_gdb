@@ -81,11 +81,11 @@ class GdbClient(object):
         parser.add_argument('--no-pull-libs', action="store_false",
             default=True, dest="pull_libs",
             help="Do not copy system libraries from the device to the host")
-        parser.add_argument('--sysroot', action="store_true", default=False,
-            help='Create a sysroot tree suitable for debugging on Android N')
+        parser.add_argument('--old-sysroot', action="store_true", default=False,
+            help='Create a sysroot tree suitable for debugging on older (pre-N) versions of Android')
         parser.set_defaults(func=self.run)
 
-    def _copy_system_libs(self, adb_path, package, sysroot):
+    def _copy_system_libs(self, adb_path, package, old_sysroot):
         """Copy libraries used by the Flutter process from the device to the host."""
         package_pid = _find_package_pid(adb_path, package)
         if package_pid is None:
@@ -96,14 +96,14 @@ class GdbClient(object):
             [adb_path, 'shell', 'run-as', package, 'cat', '/proc/%d/maps' % package_pid])
         proc_libs = re.findall('(/system/.*\.(?:so|oat))\s*$', proc_maps, re.MULTILINE)
 
-        if sysroot:
+        if old_sysroot:
+            device_libs = set((lib, os.path.basename(lib)) for lib in proc_libs)
+            device_libs.add(('/system/bin/linker', 'linker'))
+        else:
             device_libs = set((lib, lib[1:]) for lib in proc_libs)
             device_libs.add(('/system/bin/linker', 'system/bin/linker'))
             device_libs.add(('/system/bin/app_process32', 'system/bin/app_process32'))
             device_libs.add(('/system/bin/app_process64', 'system/bin/app_process64'))
-        else:
-            device_libs = set((lib, os.path.basename(lib)) for lib in proc_libs)
-            device_libs.add(('/system/bin/linker', 'linker'))
 
         if os.path.isdir(GdbClient.SYSTEM_LIBS_PATH):
             shutil.rmtree(GdbClient.SYSTEM_LIBS_PATH)
@@ -126,7 +126,7 @@ class GdbClient(object):
             adb_path = args.adb
 
         if args.pull_libs:
-            if not self._copy_system_libs(adb_path, args.package, args.sysroot):
+            if not self._copy_system_libs(adb_path, args.package, args.old_sysroot):
                 return 1
 
         subprocess.check_call(
@@ -144,7 +144,7 @@ class GdbClient(object):
             return 1
 
         eval_commands = []
-        if args.sysroot:
+        if not args.old_sysroot:
             eval_commands.append('set sysroot %s' % GdbClient.SYSTEM_LIBS_PATH)
         eval_commands.append('set solib-search-path %s:%s' %
                              (debug_out_path, GdbClient.SYSTEM_LIBS_PATH))
