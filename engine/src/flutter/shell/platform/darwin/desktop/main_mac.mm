@@ -12,13 +12,30 @@
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
 #include "flutter/shell/platform/darwin/desktop/flutter_application.h"
 #include "flutter/shell/testing/testing.h"
+#include "lib/fxl/command_line.h"
+#include "lib/fxl/logging.h"
+
+static fxl::CommandLine InitializedCommandLine() {
+  std::vector<std::string> args_vector;
+
+  for (NSString* arg in [NSProcessInfo processInfo].arguments) {
+    args_vector.emplace_back(arg.UTF8String);
+  }
+
+  return fxl::CommandLineFromIterators(args_vector.begin(), args_vector.end());
+}
 
 int main(int argc, const char* argv[]) {
   [FlutterApplication sharedApplication];
 
-  shell::PlatformMacMain("", "", "");
+  // Can't use shell::Shell::Shared().GetCommandLine() because it is initialized only
+  // in shell::PlatformMacMain call below.
+  auto command_line = InitializedCommandLine();
 
-  const auto& command_line = shell::Shell::Shared().GetCommandLine();
+  std::string bundle_path = "";
+  command_line.GetOptionValue(FlagForSwitch(shell::Switch::FlutterAssetsDir), &bundle_path);
+
+  shell::PlatformMacMain("", "", bundle_path);
 
   // Print help.
   if (command_line.HasOption(shell::FlagForSwitch(shell::Switch::Help))) {
