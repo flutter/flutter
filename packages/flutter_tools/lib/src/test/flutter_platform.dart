@@ -232,7 +232,6 @@ class _FlutterPlatform extends PlatformPlugin {
         }
 
         bundlePath = tempBundleDirectory.path;
-
         strongMode = true;
       }
 
