@@ -1721,26 +1721,25 @@ class ColorFilter {
 class ImageFilter extends NativeFieldWrapperClass2 {
   void _constructor() native 'ImageFilter_constructor';
 
-  /// A source filter containing an image.
-  // ImageFilter.image({ Image image }) {
-  //   _constructor();
-  //   _initImage(image);
-  // }
-  // void _initImage(Image image) native 'ImageFilter_initImage';
-
-  /// A source filter containing a picture.
-  // ImageFilter.picture({ Picture picture }) {
-  //   _constructor();
-  //   _initPicture(picture);
-  // }
-  // void _initPicture(Picture picture) native 'ImageFilter_initPicture';
-
   /// Creates an image filter that applies a Gaussian blur.
   ImageFilter.blur({ double sigmaX: 0.0, double sigmaY: 0.0 }) {
     _constructor();
     _initBlur(sigmaX, sigmaY);
   }
   void _initBlur(double sigmaX, double sigmaY) native 'ImageFilter_initBlur';
+
+  /// Creates an image filter that applies a matrix transformation.
+  ///
+  /// For example, applying a positive scale matrix (see [new Matrix4.diagonal3])
+  /// when used with [BackdropFilter] would magnify the background image.
+  ImageFilter.matrix(Float64List matrix4,
+                     { FilterQuality filterQuality: FilterQuality.low }) {
+    if (matrix4.length != 16)
+      throw new ArgumentError('"matrix4" must have 16 entries.');
+    _constructor();
+    _initMatrix(matrix4, filterQuality.index);
+  }
+  void _initMatrix(Float64List matrix4, int filterQuality) native 'ImageFilter_initMatrix';
 }
 
 /// Base class for objects such as [Gradient] and [ImageShader] which
