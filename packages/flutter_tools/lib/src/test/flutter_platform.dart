@@ -223,7 +223,7 @@ class _FlutterPlatform extends PlatformPlugin {
         // copy 'vm_platform_strong.dill' into 'platform.dill'
         final File vmPlatformStrongDill = fs.file(
             artifacts.getArtifactPath(Artifact.platformKernelStrongDill));
-        final platformDill = vmPlatformStrongDill.copySync(
+        final File platformDill = vmPlatformStrongDill.copySync(
             tempBundleDirectory.childFile('platform.dill').path);
         if (!platformDill.existsSync()) {
           printError('unexpected error copying platform kernel file');
