@@ -33,6 +33,7 @@ void main() {
     testUsingContext('validate non-verbose output format for run without issues', () async {
       expect(await new FakeQuietDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
+              'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
               '[✓] Another Passing Validator (with statusInfo)\n'
               '[✓] Validators are fun (with statusInfo)\n'
@@ -45,16 +46,18 @@ void main() {
     testUsingContext('validate non-verbose output format when only one category fails', () async {
       expect(await new FakeSinglePassingDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
+              'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[!] Partial Validator with only a Hint\n'
               '    ! There is a hint here\n'
               '\n'
-              '! Doctor found issues in 1 category; run \'flutter doctor -v\' for details.\n'
+              '! Doctor found issues in 1 category.\n'
       ));
     });
 
     testUsingContext('validate non-verbose output format for a passing run', () async {
       expect(await new FakePassingDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
+              'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
               '[!] Partial Validator with only a Hint\n'
               '    ! There is a hint here\n'
@@ -63,13 +66,14 @@ void main() {
               '    ! Maybe a hint will help the user\n'
               '[✓] Another Passing Validator (with statusInfo)\n'
               '\n'
-              '! Doctor found issues in 2 categories; run \'flutter doctor -v\' for details.\n'
+              '! Doctor found issues in 2 categories.\n'
       ));
     });
 
     testUsingContext('validate non-verbose output format', () async {
       expect(await new FakeDoctor().diagnose(verbose: false), isFalse);
       expect(testLogger.statusText, equals(
+              'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
               '[✗] Missing Validator\n'
               '    ✗ A useful error message\n'
@@ -80,7 +84,7 @@ void main() {
               '    ✗ A error message indicating partial installation\n'
               '    ! Maybe a hint will help the user\n'
               '\n'
-              '! Doctor found issues in 3 categories; run \'flutter doctor -v\' for details.\n'
+              '! Doctor found issues in 3 categories.\n'
       ));
     });
 

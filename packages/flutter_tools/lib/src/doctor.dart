@@ -100,6 +100,9 @@ class Doctor {
     if (androidLicenses)
       return AndroidWorkflow.runLicenseManager();
 
+    if (!verbose) {
+      printStatus('Doctor summary (to see all details, run flutter doctor -v):');
+    }
     bool doctorResult = true;
     int issues = 0;
 
@@ -138,8 +141,7 @@ class Doctor {
     if (!verbose)
       printStatus('');
     if (issues > 0) {
-      final String verboseSuggestion = verbose ? '.' : "; run 'flutter doctor -v' for details.";
-      printStatus('! Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}$verboseSuggestion');
+      printStatus('! Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.');
     } else {
       printStatus('• No issues found!');
     }
@@ -190,6 +192,7 @@ class ValidationResult {
   final List<ValidationMessage> messages;
 
   String get leadingBox {
+    assert(type != null);
     switch(type) {
       case ValidationType.missing:
         return '[✗]';
@@ -197,9 +200,8 @@ class ValidationResult {
         return '[✓]';
       case ValidationType.partial:
         return '[!]';
-      default:
-        return '[!]';
     }
+    return null;
   }
 }
 
@@ -534,7 +536,7 @@ class DeviceValidator extends DoctorValidator {
       if (diagnostics.isNotEmpty) {
         messages = diagnostics.map((String message) => new ValidationMessage(message)).toList();
       } else {
-        messages = <ValidationMessage>[new ValidationMessage.hint('No devices found')];
+        messages = <ValidationMessage>[new ValidationMessage.hint('No devices available')];
       }
     } else {
       messages = await Device.descriptions(devices)
