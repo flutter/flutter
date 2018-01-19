@@ -2131,14 +2131,14 @@ class InputDecoration {
 
 /// Defines the default appearance of [InputDecorator]s.
 ///
-/// The [TextField], [FormTextField]
-/// widget subtree.
-///
-/// To obtain the current icon theme, use [IconTheme.of]. To convert an icon
-/// theme to a version with all the fields filled in, use [new
-/// IconThemeData.fallback].
+/// This class is used to define the value of [ThemeData.inputDecorationTheme].
+/// The [InputDecorator], [TextField], and [TextFormField] widgets use
+/// the current input decoration theme to initialize null [InputDecoration]
+/// properties.
 @immutable
 class InputDecorationTheme {
+  /// Creates a value for [ThemeData.inputDecorationTheme] that
+  /// defines default values for [InputDecorator].
   const InputDecorationTheme({
     this.labelStyle,
     this.helperStyle,
