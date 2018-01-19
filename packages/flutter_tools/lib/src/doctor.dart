@@ -193,7 +193,7 @@ class ValidationResult {
 
   String get leadingBox {
     assert(type != null);
-    switch(type) {
+    switch (type) {
       case ValidationType.missing:
         return '[✗]';
       case ValidationType.installed:
