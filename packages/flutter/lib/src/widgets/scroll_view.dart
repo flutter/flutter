@@ -182,10 +182,38 @@ abstract class ScrollView extends StatelessWidget {
     return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
   }
 
+  /// Build the list of widgets to place inside the viewport.
+  ///
   /// Subclasses should override this method to build the slivers for the inside
   /// of the viewport.
   @protected
   List<Widget> buildSlivers(BuildContext context);
+
+  /// Build the viewport.
+  ///
+  /// Subclasses may override this method to change how the viewport is built.
+  /// The default implementation uses a [ShrinkWrappingViewport] if [shrinkWrap]
+  /// is true, and a regular [Viewport] otherwise.
+  @protected
+  Widget buildViewport(
+    BuildContext context,
+    ViewportOffset offset,
+    AxisDirection axisDirection,
+    List<Widget> slivers,
+  ) {
+    if (shrinkWrap) {
+      return new ShrinkWrappingViewport(
+        axisDirection: axisDirection,
+        offset: offset,
+        slivers: slivers,
+      );
+    }
+    return new Viewport(
+      axisDirection: axisDirection,
+      offset: offset,
+      slivers: slivers,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -200,20 +228,8 @@ abstract class ScrollView extends StatelessWidget {
       controller: scrollController,
       physics: physics,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
-        if (shrinkWrap) {
-          return new ShrinkWrappingViewport(
-            axisDirection: axisDirection,
-            offset: offset,
-            slivers: slivers,
-          );
-        } else {
-          return new Viewport(
-            axisDirection: axisDirection,
-            offset: offset,
-            slivers: slivers,
-          );
-        }
-      }
+        return buildViewport(context, offset, axisDirection, slivers);
+      },
     );
     return primary && scrollController != null
       ? new PrimaryScrollController.none(child: scrollable)
