@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'basic.dart';
@@ -301,15 +302,15 @@ class SizeTransition extends AnimatedWidget {
 ///
 /// For a widget that automatically animates between the sizes of two children,
 /// fading between them, see [AnimatedCrossFade].
-class FadeTransition extends AnimatedWidget {
+class FadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
   ///
   /// The [opacity] argument must not be null.
   const FadeTransition({
     Key key,
-    @required Animation<double> opacity,
-    this.child,
-  }) : super(key: key, listenable: opacity);
+    @required this.opacity,
+    Widget child,
+  }) : super(key: key, child: child);
 
   /// The animation that controls the opacity of the child.
   ///
@@ -317,16 +318,19 @@ class FadeTransition extends AnimatedWidget {
   /// painted with an opacity of v. For example, if v is 0.5, the child will be
   /// blended 50% with its background. Similarly, if v is 0.0, the child will be
   /// completely transparent.
-  Animation<double> get opacity => listenable;
-
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.child}
-  final Widget child;
+  final Animation<double> opacity;
 
   @override
-  Widget build(BuildContext context) {
-    return new Opacity(opacity: opacity.value, child: child);
+  RenderAnimatedOpacity createRenderObject(BuildContext context) {
+    return new RenderAnimatedOpacity(
+      opacity: opacity,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderAnimatedOpacity renderObject) {
+    renderObject
+      ..opacity = opacity;
   }
 }
 

@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui show ImageFilter, Gradient;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
@@ -776,6 +777,99 @@ class RenderOpacity extends RenderProxyBox {
   }
 }
 
+/// Makes its child partially transparent, driven from an [Animation].
+///
+/// This is a variant of [RenderOpacity] that uses an [Animation<double>] rather
+/// than a [double] to control the opacity.
+class RenderAnimatedOpacity extends RenderProxyBox {
+  /// Creates a partially transparent render object.
+  ///
+  /// The [opacity] argument must not be null.
+  RenderAnimatedOpacity({ @required Animation<double> opacity, RenderBox child }) : super(child) {
+    this.opacity = opacity;
+  }
+
+  int _alpha;
+
+  @override
+  bool get alwaysNeedsCompositing => child != null && _currentlyNeedsCompositing;
+  bool _currentlyNeedsCompositing;
+
+  /// The animation that drives this render object's opacity.
+  ///
+  /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
+  /// (i.e., invisible).
+  ///
+  /// To change the opacity of a child in a static manner, not animated,
+  /// consider [RenderOpacity] instead.
+  Animation<double> get opacity => _opacity;
+  Animation<double> _opacity;
+  set opacity(Animation<double> value) {
+    assert(value != null);
+    if (_opacity == value)
+      return;
+    if (attached && _opacity != null)
+      _opacity.removeListener(_updateOpacity);
+    _opacity = value;
+    if (attached)
+      _opacity.addListener(_updateOpacity);
+    _updateOpacity();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _opacity.addListener(_updateOpacity);
+    _updateOpacity(); // in case it changed while we weren't listening
+ }
+
+  @override
+  void detach() {
+    _opacity.removeListener(_updateOpacity);
+    super.detach();
+  }
+
+  void _updateOpacity() {
+    final int oldAlpha = _alpha;
+    _alpha = _getAlphaFromOpacity(_opacity.value.clamp(0.0, 1.0));
+    if (oldAlpha != _alpha) {
+      final bool didNeedCompositing = _currentlyNeedsCompositing;
+      _currentlyNeedsCompositing = _alpha > 0 || _alpha < 255;
+      if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
+        markNeedsCompositingBitsUpdate();
+      markNeedsPaint();
+      if (oldAlpha == 0 || _alpha == 0)
+        markNeedsSemanticsUpdate();
+    }
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      if (_alpha == 0)
+        return;
+      if (_alpha == 255) {
+        context.paintChild(child, offset);
+        return;
+      }
+      assert(needsCompositing);
+      context.pushOpacity(offset, _alpha, super.paint);
+    }
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (child != null && _alpha != 0)
+      visitor(child);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
+  }
+}
+
 /// Signature for a function that creates a [Shader] for a given [Rect].
 ///
 /// Used by [RenderShaderMask] and the [ShaderMask] widget.
@@ -969,7 +1063,7 @@ class ShapeBorderClipper extends CustomClipper<Path> {
     this.textDirection,
   }) : assert(shapeBorder != null);
 
-  // The shape border whose outer path this clipper clips to.
+  /// The shape border whose outer path this clipper clips to.
   final ShapeBorder shapeBorder;
 
   /// The text direction to use for getting the outer path for [shapeBorder].
