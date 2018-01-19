@@ -10,7 +10,7 @@ dependencies:
     path: ../../../examples/stocks
 
   args: 1.2.0 # TRANSITIVE DEPENDENCY
-  async: 1.13.3 # TRANSITIVE DEPENDENCY
+  async: 2.0.3 # TRANSITIVE DEPENDENCY
   barback: 0.15.2+14 # TRANSITIVE DEPENDENCY
   boolean_selector: 1.0.2 # TRANSITIVE DEPENDENCY
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
@@ -22,7 +22,7 @@ dependencies:
   dart_style: 1.0.9 # TRANSITIVE DEPENDENCY
   glob: 1.1.5 # TRANSITIVE DEPENDENCY
   html: 0.13.2+2 # TRANSITIVE DEPENDENCY
-  http: 0.11.3+14 # TRANSITIVE DEPENDENCY
+  http: 0.11.3+16 # TRANSITIVE DEPENDENCY
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
   intl: 0.15.2 # TRANSITIVE DEPENDENCY
