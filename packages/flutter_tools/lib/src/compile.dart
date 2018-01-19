@@ -62,7 +62,8 @@ Future<String> compile(
     bool aot : false,
     bool strongMode : false,
     List<String> extraFrontEndOptions,
-    String incrementalCompilerByteStorePath}) async {
+    String incrementalCompilerByteStorePath,
+    String packagesPath}) async {
   final String frontendServer = artifacts.getArtifactPath(
     Artifact.frontendServerSnapshotForEngineDartSdk
   );
@@ -85,12 +86,12 @@ Future<String> compile(
     command.add('--strong');
   }
   if (incrementalCompilerByteStorePath != null) {
-    command.addAll(<String>[
-      '--incremental',
-      '--byte-store',
-      incrementalCompilerByteStorePath]);
-    fs.directory(incrementalCompilerByteStorePath).createSync(recursive: true);
+    command.add('--incremental');
   }
+  if (packagesPath != null) {
+    command.addAll(<String>['--packages', packagesPath]);
+  }
+
   if (extraFrontEndOptions != null)
     command.addAll(extraFrontEndOptions);
   command.add(mainPath);
