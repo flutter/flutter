@@ -200,7 +200,7 @@ class _FlutterPlatform extends PlatformPlugin {
       printTrace('test $ourTestCount: starting shell process${previewDart2? " in preview-dart-2 mode":""}');
 
       String mainDart = listenerFile.path;
-      String bundlePath = null;
+      String bundlePath;
       bool strongMode = false;
 
       if (previewDart2) {
