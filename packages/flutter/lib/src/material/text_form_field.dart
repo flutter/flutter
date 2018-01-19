@@ -73,7 +73,7 @@ class TextFormField extends FormField<String> {
     builder: (FormFieldState<String> field) {
       final _TextFormFieldState state = field;
       final InputDecoration effectiveDecoration = Theme.of(field.context).inputDecorationTheme
-        .inputDecoration(defaultDecoration: decoration);
+        .inputDecoration(baseDecoration: decoration);
       return new TextField(
         controller: state._effectiveController,
         focusNode: focusNode,

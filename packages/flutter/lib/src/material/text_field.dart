@@ -297,7 +297,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   InputDecoration _getEffectiveDecoration() {
     final InputDecoration effectiveDecoration = Theme.of(context).inputDecorationTheme
-      .inputDecoration(defaultDecoration: widget?.decoration);
+      .inputDecoration(baseDecoration: widget?.decoration);
 
     if (!needsCounter)
       return effectiveDecoration;

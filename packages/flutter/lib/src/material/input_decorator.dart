@@ -1371,7 +1371,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   InputDecoration _mergedInputDecoration;
   InputDecoration get decoration {
     _mergedInputDecoration ??= Theme.of(context).inputDecorationTheme
-      .inputDecoration(defaultDecoration: widget.decoration);
+      .inputDecoration(baseDecoration: widget.decoration);
     return _mergedInputDecoration;
   }
 
@@ -1415,7 +1415,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getFillColor(ThemeData themeData) {
-    if (!decoration.filled)
+    if (!(decoration.filled ?? false))
       return Colors.transparent;
     if (decoration.fillColor != null)
       return decoration.fillColor;
@@ -1553,7 +1553,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
     final Color activeColor = _getActiveColor(themeData);
-    final double iconSize = decoration.isDense ? 18.0 : 24.0;
+    final bool decorationIsDense = (decoration.isDense ?? false);
+    final double iconSize = decorationIsDense ? 18.0 : 24.0;
     final Color iconColor = isFocused ? activeColor : Colors.black45;
 
     final Widget icon = decoration.icon == null ? null :
@@ -1610,21 +1611,21 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     } else if (decoration.border == null || !decoration.border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = 4.0 + 0.75 * inlineLabelStyle.fontSize;
-      if (decoration.filled) {
-        contentPadding = decoration.contentPadding ?? (decoration.isDense
+      if (decoration.filled ?? false) {
+        contentPadding = decoration.contentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
           : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
       } else {
         // Not left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
         // the most noticeable layout change introduced by #13734.
-        contentPadding = decoration.contentPadding ?? (decoration.isDense
+        contentPadding = decoration.contentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
           : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
       }
     } else {
       floatingLabelHeight = 0.0;
-      contentPadding = decoration.contentPadding ?? (decoration.isDense
+      contentPadding = decoration.contentPadding ?? (decorationIsDense
         ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
         : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
@@ -1652,6 +1653,16 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 }
 
+// Used by InputDecorationTheme.inputDecoration to distinguish
+// between an InputDecoration border that was explicitly set to
+// null and one that was defaulted to UnderlineInputBorder.
+class _DefaultInputBorder extends UnderlineInputBorder {
+  const _DefaultInputBorder();
+
+  @override
+  String toString() => '<default> UnderlineInputBorder()';
+}
+
 /// The border, labels, icons, and styles used to decorate a Material
 /// Design text field.
 ///
@@ -1672,8 +1683,12 @@ class InputDecoration {
   /// Creates a bundle of the border, labels, icons, and styles used to
   /// decorate a Material Design text field.
   ///
-  /// The [isDense], [filled], and [enabled] arguments must not
-  /// be null.
+  /// Unless specified by [ThemeData.inputDecorationTheme],
+  /// [InputDecorator] defaults [isDense] to true, and [filled] to false,
+  /// Similarly, the default border is an instance of [UnderlineInputBorder].
+  /// If a null [border] is specified then no border is drawn.
+  ///
+  /// The [enabled] argument must not be null.
   const InputDecoration({
     this.icon,
     this.labelText,
@@ -1684,7 +1699,7 @@ class InputDecoration {
     this.hintStyle,
     this.errorText,
     this.errorStyle,
-    this.isDense: false,
+    this.isDense,
     this.contentPadding,
     this.prefixIcon,
     this.prefixText,
@@ -1694,14 +1709,11 @@ class InputDecoration {
     this.suffixStyle,
     this.counterText,
     this.counterStyle,
-    this.filled: false,
+    this.filled,
     this.fillColor,
-    this.border: const UnderlineInputBorder(),
+    this.border: const _DefaultInputBorder(),
     this.enabled: true,
-  }) : assert(isDense != null),
-       assert(filled != null),
-       assert(enabled != null),
-       isCollapsed = false;
+  }) : assert(enabled != null), isCollapsed = false;
 
   /// Defines an [InputDecorator] that is the same size as the input field.
   ///
@@ -1715,8 +1727,7 @@ class InputDecoration {
     this.fillColor,
     this.border,
     this.enabled: true,
-  }) : assert(filled != null),
-       assert(enabled != null),
+  }) : assert(enabled != null),
        icon = null,
        labelText = null,
        labelStyle = null,
@@ -2012,7 +2023,7 @@ class InputDecoration {
       counterStyle: counterStyle ?? this.counterStyle,
       filled: filled ?? this.filled,
       fillColor: fillColor ?? this.fillColor,
-      border: border ?? this.border,
+      border: this.border is _DefaultInputBorder ? border : this.border,
       enabled: enabled ?? this.enabled,
     );
   }
@@ -2095,7 +2106,7 @@ class InputDecoration {
       description.add('hintText: "$hintText"');
     if (errorText != null)
       description.add('errorText: "$errorText"');
-    if (isDense)
+    if (isDense ?? false)
       description.add('isDense: $isDense');
     if (contentPadding != null)
       description.add('contentPadding: $contentPadding');
@@ -2117,7 +2128,7 @@ class InputDecoration {
       description.add('counterText: $counterText');
     if (counterStyle != null)
       description.add('counterStyle: $counterStyle');
-    if (filled)
+    if (filled ?? false)
       description.add('filled: true');
     if (fillColor != null)
       description.add('fillColor: $fillColor');
@@ -2152,7 +2163,7 @@ class InputDecorationTheme {
     this.counterStyle,
     this.filled,
     this.fillColor,
-    this.border,
+    this.border : const UnderlineInputBorder(),
   });
 
   /// The style to use for [InputDecoration.labelText] when the label is
@@ -2270,22 +2281,23 @@ class InputDecorationTheme {
   /// Used by widgets like [TextField] and [InputDecorator] to create a new
   /// [InputDecoration] with default values taken from this theme.
   ///
-  /// Only null valued properties from [defaultDecoration] are replaced
+  /// Only null valued properties from [baseDecoration] are replaced
   /// by the corresponding values from this theme.
-  InputDecoration inputDecoration({ InputDecoration defaultDecoration }) {
-    return (defaultDecoration ?? const InputDecoration()).copyWith(
-      labelStyle: labelStyle,
-      helperStyle: helperStyle,
-      hintStyle: hintStyle,
-      errorStyle: errorStyle,
-      isDense: isDense,
-      contentPadding: contentPadding,
-      prefixStyle: prefixStyle,
-      suffixStyle: suffixStyle,
-      counterStyle: counterStyle,
-      filled: filled,
-      fillColor: fillColor,
-      border: border,
+  InputDecoration inputDecoration({ InputDecoration baseDecoration }) {
+    final InputDecoration decoration = baseDecoration ?? const InputDecoration();
+    return decoration.copyWith(
+      labelStyle: decoration.labelStyle ?? labelStyle,
+      helperStyle: decoration.helperStyle ?? helperStyle,
+      hintStyle: decoration.hintStyle ?? hintStyle,
+      errorStyle: decoration.errorStyle ?? errorStyle,
+      isDense: decoration.isDense ?? isDense,
+      contentPadding: decoration.contentPadding ?? contentPadding,
+      prefixStyle: decoration.prefixStyle ?? prefixStyle,
+      suffixStyle: decoration.suffixStyle ?? suffixStyle,
+      counterStyle: decoration.counterStyle ?? counterStyle,
+      filled: decoration.filled ?? filled,
+      fillColor: decoration.fillColor ?? fillColor,
+      border: decoration.border is _DefaultInputBorder ? border : decoration.border,
     );
   }
 }
