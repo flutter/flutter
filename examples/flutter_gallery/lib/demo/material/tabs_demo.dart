@@ -176,15 +176,23 @@ class TabsDemo extends StatelessWidget {
                           handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                         ),
                         new SliverPadding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8.0,
+                            horizontal: 16.0,
+                          ),
                           sliver: new SliverFixedExtentList(
                             itemExtent: _CardDataItem.height,
                             delegate: new SliverChildBuilderDelegate(
                               (BuildContext context, int index) {
                                 final _CardData data = _allPages[page][index];
                                 return new Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: new _CardDataItem(page: page, data: data),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8.0,
+                                  ),
+                                  child: new _CardDataItem(
+                                    page: page,
+                                    data: data,
+                                  ),
                                 );
                               },
                               childCount: _allPages[page].length,
