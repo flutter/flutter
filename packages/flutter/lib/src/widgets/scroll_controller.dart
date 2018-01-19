@@ -26,7 +26,8 @@ import 'scroll_position_with_single_context.dart';
 ///
 /// A [ScrollController] is a [Listenable]. It notifies its listeners whenever
 /// any of the attached [ScrollPosition]s notify _their_ listeners (i.e.
-/// whenever any of them scroll).
+/// whenever any of them scroll). It does not notify its listeners when the list
+/// of attached [ScrollPosition]s changes.
 ///
 /// Typically used with [ListView], [GridView], [CustomScrollView].
 ///

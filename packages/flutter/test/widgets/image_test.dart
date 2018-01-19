@@ -363,6 +363,68 @@ void main() {
     expect(imageStreamCompleter.listeners.length, 0);
   });
 
+  testWidgets('Verify Image shows correct RenderImage when changing to an already completed provider', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+
+    final TestImageProvider imageProvider1 = new TestImageProvider();
+    final TestImageProvider imageProvider2 = new TestImageProvider();
+
+    await tester.pumpWidget(
+        new Container(
+            key: key,
+            child: new Image(
+                image: imageProvider1
+            )
+        ),
+        null,
+        EnginePhase.layout
+    );
+    RenderImage renderImage = key.currentContext.findRenderObject();
+    expect(renderImage.image, isNull);
+
+    imageProvider1.complete();
+    imageProvider2.complete();
+    await tester.idle(); // resolve the future from the image provider
+    await tester.pump(null, EnginePhase.layout);
+
+    renderImage = key.currentContext.findRenderObject();
+    expect(renderImage.image, isNotNull);
+
+    final ui.Image oldImage = renderImage.image;
+
+    await tester.pumpWidget(
+        new Container(
+            key: key,
+            child: new Image(
+                image: imageProvider2
+            )
+        ),
+        null,
+        EnginePhase.layout
+    );
+
+    renderImage = key.currentContext.findRenderObject();
+    expect(renderImage.image, isNotNull);
+    expect(renderImage.image, isNot(equals(oldImage)));
+  });
+
+  testWidgets('Image State can be reconfigured to use another image', (WidgetTester tester) async {
+    final Image image1 = new Image(image: new TestImageProvider()..complete(), width: 10.0);
+    final Image image2 = new Image(image: new TestImageProvider()..complete(), width: 20.0);
+
+    final Column column = new Column(children: <Widget>[image1, image2]);
+    await tester.pumpWidget(column, null, EnginePhase.layout);
+
+    final Column columnSwapped = new Column(children: <Widget>[image2, image1]);
+    await tester.pumpWidget(columnSwapped, null, EnginePhase.layout);
+
+    final List<RenderImage> renderObjects = tester.renderObjectList<RenderImage>(find.byType(Image)).toList();
+    expect(renderObjects, hasLength(2));
+    expect(renderObjects[0].image, isNotNull);
+    expect(renderObjects[0].width, 20.0);
+    expect(renderObjects[1].image, isNotNull);
+    expect(renderObjects[1].width, 10.0);
+  });
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {

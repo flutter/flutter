@@ -596,12 +596,12 @@ class _CompoundBorder extends ShapeBorder {
   Path getInnerPath(Rect rect, { TextDirection textDirection }) {
     for (int index = 0; index < borders.length - 1; index += 1)
       rect = borders[index].dimensions.resolve(textDirection).deflateRect(rect);
-    return borders.last.getInnerPath(rect);
+    return borders.last.getInnerPath(rect, textDirection: textDirection);
   }
 
   @override
   Path getOuterPath(Rect rect, { TextDirection textDirection }) {
-    return borders.first.getOuterPath(rect);
+    return borders.first.getOuterPath(rect, textDirection: textDirection);
   }
 
   @override

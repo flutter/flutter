@@ -342,6 +342,17 @@ Future<String> _buildAotSnapshot(
       aot : true,
       strongMode: strongMode,
     );
+    if (mainPath == null) {
+      printError('Compiler terminated unexpectedly.');
+      return null;
+    }
+
+    if (strongMode) {
+      genSnapshotCmd.addAll(<String>[
+        '--reify-generic-functions',
+        '--strong',
+      ]);
+    }
   }
 
   genSnapshotCmd.add(mainPath);

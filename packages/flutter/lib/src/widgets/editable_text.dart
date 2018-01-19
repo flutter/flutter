@@ -149,8 +149,8 @@ class EditableText extends StatefulWidget {
   /// [TextInputType.text] unless [maxLines] is greater than one, when it will
   /// default to [TextInputType.multiline].
   ///
-  /// The [controller], [focusNode], [style], [cursorColor], and [textAlign]
-  /// arguments must not be null.
+  /// The [controller], [focusNode], [style], [cursorColor], [textAlign],
+  /// and [rendererIgnoresPointer], arguments must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -171,6 +171,7 @@ class EditableText extends StatefulWidget {
     this.onSubmitted,
     this.onSelectionChanged,
     List<TextInputFormatter> inputFormatters,
+    this.rendererIgnoresPointer: false,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -180,6 +181,7 @@ class EditableText extends StatefulWidget {
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
        assert(autofocus != null),
+       assert(rendererIgnoresPointer != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
            ? (
@@ -279,6 +281,12 @@ class EditableText extends StatefulWidget {
   /// in the provided order when the text input changes.
   final List<TextInputFormatter> inputFormatters;
 
+  /// If true, the [RenderEditable] created by this widget will not handle
+  /// pointer events, see [renderEditable] and [RenderEditable.ignorePointer].
+  ///
+  /// This property is false by default.
+  final bool rendererIgnoresPointer;
+
   @override
   EditableTextState createState() => new EditableTextState();
 
@@ -303,6 +311,7 @@ class EditableText extends StatefulWidget {
 class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin implements TextInputClient {
   Timer _cursorTimer;
   final ValueNotifier<bool> _showCursor = new ValueNotifier<bool>(false);
+  final GlobalKey _editableKey = new GlobalKey();
 
   TextInputConnection _textInputConnection;
   TextSelectionOverlay _selectionOverlay;
@@ -628,6 +637,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     return result;
   }
 
+  /// The renderer for this widget's [Editable] descendant.
+  ///
+  /// This property is typically used to notify the renderer of input gestures
+  /// when [ignorePointer] is true. See [RenderEditable.ignorePointer].
+  RenderEditable get renderEditable => _editableKey.currentContext.findRenderObject();
+
   @override
   Widget build(BuildContext context) {
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
@@ -640,6 +655,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         return new CompositedTransformTarget(
           link: _layerLink,
           child: new _Editable(
+            key: _editableKey,
             value: _value,
             style: widget.style,
             cursorColor: widget.cursorColor,
@@ -656,6 +672,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             offset: offset,
             onSelectionChanged: _handleSelectionChanged,
             onCaretChanged: _handleCaretChanged,
+            rendererIgnoresPointer: widget.rendererIgnoresPointer,
           ),
         );
       },
@@ -682,7 +699,9 @@ class _Editable extends LeafRenderObjectWidget {
     this.offset,
     this.onSelectionChanged,
     this.onCaretChanged,
+    this.rendererIgnoresPointer: false,
   }) : assert(textDirection != null),
+       assert(rendererIgnoresPointer != null),
        super(key: key);
 
   final TextEditingValue value;
@@ -701,6 +720,7 @@ class _Editable extends LeafRenderObjectWidget {
   final ViewportOffset offset;
   final SelectionChangedHandler onSelectionChanged;
   final CaretChangedHandler onCaretChanged;
+  final bool rendererIgnoresPointer;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -718,6 +738,7 @@ class _Editable extends LeafRenderObjectWidget {
       offset: offset,
       onSelectionChanged: onSelectionChanged,
       onCaretChanged: onCaretChanged,
+      ignorePointer: rendererIgnoresPointer,
     );
   }
 
@@ -736,7 +757,8 @@ class _Editable extends LeafRenderObjectWidget {
       ..selection = value.selection
       ..offset = offset
       ..onSelectionChanged = onSelectionChanged
-      ..onCaretChanged = onCaretChanged;
+      ..onCaretChanged = onCaretChanged
+      ..ignorePointer = rendererIgnoresPointer;
   }
 
   TextSpan get _styledTextSpan {

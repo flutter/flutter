@@ -89,7 +89,9 @@ class ScreenshotCommand extends FlutterCommand {
     await sink.close();
     await showOutputFileInfo(outputFile);
     if (await outputFile.length() < 1000) {
-      final String content = await outputFile.readAsString();
+      final String content = await outputFile.readAsString(
+        encoding: const AsciiCodec(allowInvalid: true),
+      );
       if (content.startsWith('{"jsonrpc":"2.0", "error"'))
         throwToolExit('\nIt appears the output file contains an error message, not valid skia output.');
     }

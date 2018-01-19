@@ -352,6 +352,18 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _currentTestCompleter.complete(null);
   }
 
+  /// Called when the framework catches an exception, even if that exception is
+  /// being handled by [takeException].
+  ///
+  /// This is called when there is no pending exception; if multiple exceptions
+  /// are thrown and [takeException] isn't used, then subsequent exceptions are
+  /// logged to the console regardless (and the test will fail).
+  @protected
+  void reportExceptionNoticed(FlutterErrorDetails exception) {
+    // By default we do nothing.
+    // The LiveTestWidgetsFlutterBinding overrides this to report the exception to the console.
+  }
+
   Future<Null> _runTest(Future<Null> testBody(), VoidCallback invariantTester, String description) {
     assert(description != null);
     assert(_currentTestDescription == null);
@@ -374,6 +386,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           library: 'Flutter test framework'
         );
       } else {
+        reportExceptionNoticed(details); // mostly this is just a hook for the LiveTestWidgetsFlutterBinding
         _pendingExceptionDetails = details;
       }
     };
@@ -950,6 +963,21 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     _inTest = true;
     renderView._setDescription(description);
     return _runTest(testBody, invariantTester, description);
+  }
+
+  @override
+  void reportExceptionNoticed(FlutterErrorDetails exception) {
+    final DebugPrintCallback testPrint = debugPrint;
+    debugPrint = debugPrintOverride;
+    debugPrint('(The following exception is now available via WidgetTester.takeException:)');
+    FlutterError.dumpErrorToConsole(exception, forceReport: true);
+    debugPrint(
+      '(If WidgetTester.takeException is called, the above exception will be ignored. '
+      'If it is not, then the above exception will be dumped when another exception is '
+      'caught by the framework or when the test ends, whichever happens first, and then '
+      'the test will fail due to having not caught or expected the exception.)'
+    );
+    debugPrint = testPrint;
   }
 
   @override

@@ -276,6 +276,7 @@ tasks:
       iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
+    flaky: true
 
   flutter_gallery_ios__start_up:
     description: >

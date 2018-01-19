@@ -74,6 +74,28 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
+
+    testUsingContext('single dart abnormal compiler termination', () async {
+      when(mockFrontendServer.exitCode).thenReturn(255);
+
+      final BufferLogger logger = context[Logger];
+
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
+          new Future<List<int>>.value(UTF8.encode(
+              'result abc\nline1\nline2\nabc'
+          ))
+      ));
+
+      final String output = await compile(sdkRoot: '/path/to/sdkroot',
+          mainPath: '/path/to/main.dart'
+      );
+      expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
+      expect(logger.errorText, equals('compiler message: line1\ncompiler message: line2\n'));
+      expect(output, equals(null));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
   });
 
   group('incremental compile', () {
@@ -101,7 +123,10 @@ void main() {
       when(mockProcessManager.start(any)).thenAnswer(
           (Invocation invocation) => new Future<Process>.value(mockFrontendServer)
       );
-      when(mockFrontendServer.exitCode).thenReturn(0);
+    });
+
+    tearDown(() {
+      verifyNever(mockFrontendServer.exitCode);
     });
 
     testUsingContext('single dart compile', () async {
@@ -121,6 +146,19 @@ void main() {
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(logger.errorText, equals('compiler message: line1\ncompiler message: line2\n'));
       expect(output, equals('/path/to/main.dart.dill'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('single dart compile abnormally terminates', () async {
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty()
+      );
+
+      final String output = await generator.recompile(
+          '/path/to/main.dart', null /* invalidatedFiles */
+      );
+      expect(output, equals(null));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

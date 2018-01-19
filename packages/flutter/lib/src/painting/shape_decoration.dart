@@ -150,6 +150,20 @@ class ShapeDecoration extends Decoration {
   ///
   /// The [shape] property specifies the outline (border) of the decoration. The
   /// shape must not be null.
+  ///
+  /// ## Directionality-dependent shapes
+  ///
+  /// Some [ShapeBorder] subclasses are sensitive to the [TextDirection]. The
+  /// direction that is provided to the border (e.g. for its [ShapeBorder.paint]
+  /// method) is the one specified in the [ImageConfiguration]
+  /// ([ImageConfiguration.textDirection]) provided to the [BoxPainter] (via its
+  /// [BoxPainter.paint method). The [BoxPainter] is obtained when
+  /// [createBoxPainter] is called.
+  ///
+  /// When a [ShapeDecoration] is used with a [Container] widget or a
+  /// [DecoratedBox] widget (which is what [Container] uses), the
+  /// [TextDirection] specified in the [ImageConfiguration] is obtained from the
+  /// ambient [Directionality], using [createLocalImageConfiguration].
   final ShapeBorder shape;
 
   /// The inset space occupied by the [shape]'s border.
@@ -323,13 +337,13 @@ class _ShapeDecorationPainter extends BoxPainter {
       }
       for (int index = 0; index < _shadowCount; index += 1) {
         final BoxShadow shadow = _decoration.shadows[index];
-        _shadowPaths[index] = _decoration.shape.getOuterPath(rect.shift(shadow.offset).inflate(shadow.spreadRadius));
+        _shadowPaths[index] = _decoration.shape.getOuterPath(rect.shift(shadow.offset).inflate(shadow.spreadRadius), textDirection: textDirection);
       }
     }
     if (_interiorPaint != null || _shadowCount != null)
-      _outerPath = _decoration.shape.getOuterPath(rect);
+      _outerPath = _decoration.shape.getOuterPath(rect, textDirection: textDirection);
     if (_decoration.image != null)
-      _innerPath = _decoration.shape.getInnerPath(rect);
+      _innerPath = _decoration.shape.getInnerPath(rect, textDirection: textDirection);
 
     _lastRect = rect;
     _lastTextDirection = textDirection;

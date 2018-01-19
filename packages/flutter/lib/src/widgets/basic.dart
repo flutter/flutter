@@ -642,6 +642,9 @@ class ClipPath extends SingleChildRenderObjectWidget {
 /// Physical layers cast shadows based on an [elevation] which is nominally in
 /// logical pixels, coming vertically out of the rendering surface.
 ///
+/// For shapes that cannot be expressed as a rectangle with rounded corners use
+/// [PhysicalShape].
+///
 /// See also:
 ///
 ///  * [DecoratedBox], which can apply more arbitrary shadow effects.
@@ -711,6 +714,73 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
     super.debugFillProperties(description);
     description.add(new EnumProperty<BoxShape>('shape', shape));
     description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
+    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DiagnosticsProperty<Color>('color', color));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
+  }
+}
+
+/// A widget representing a physical layer that clips its children to a path.
+///
+/// Physical layers cast shadows based on an [elevation] which is nominally in
+/// logical pixels, coming vertically out of the rendering surface.
+///
+/// [PhysicalModel] does the same but only supports shapes that can be expressed
+/// as rectangles with rounded corners.
+class PhysicalShape extends SingleChildRenderObjectWidget {
+  /// Creates a physical model with an arbitrary shape clip.
+  ///
+  /// The [color] is required; physical things have a color.
+  ///
+  /// The [clipper], [elevation], [color], and [shadowColor] must not be null.
+  const PhysicalShape({
+    Key key,
+    @required this.clipper,
+    this.elevation: 0.0,
+    @required this.color,
+    this.shadowColor: const Color(0xFF000000),
+    Widget child,
+  }) : assert(clipper != null),
+       assert(elevation != null),
+       assert(color != null),
+       assert(shadowColor != null),
+       super(key: key, child: child);
+
+  /// Determines which clip to use.
+  final CustomClipper<Path> clipper;
+
+  /// The z-coordinate at which to place this physical object.
+  final double elevation;
+
+  /// The background color.
+  final Color color;
+
+  /// When elevation is non zero the color to use for the shadow color.
+  final Color shadowColor;
+
+  @override
+  RenderPhysicalShape createRenderObject(BuildContext context) {
+    return new RenderPhysicalShape(
+      clipper: clipper,
+      elevation: elevation,
+      color: color,
+      shadowColor: shadowColor
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderPhysicalShape renderObject) {
+    renderObject
+      ..clipper = clipper
+      ..elevation = elevation
+      ..color = color
+      ..shadowColor = shadowColor;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<CustomClipper<Path>>('clipper', clipper));
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
     description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));

@@ -199,6 +199,10 @@ class SemanticsData extends Diagnosticable {
     return typedOther.flags == flags
         && typedOther.actions == actions
         && typedOther.label == label
+        && typedOther.value == value
+        && typedOther.increasedValue == increasedValue
+        && typedOther.decreasedValue == decreasedValue
+        && typedOther.hint == hint
         && typedOther.textDirection == textDirection
         && typedOther.rect == rect
         && setEquals(typedOther.tags, tags)
@@ -206,7 +210,7 @@ class SemanticsData extends Diagnosticable {
   }
 
   @override
-  int get hashCode => ui.hashValues(flags, actions, label, textDirection, rect, tags, transform);
+  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, rect, tags, transform);
 }
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
@@ -1095,6 +1099,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       properties.add(new FlagProperty('isEnabled', value: _hasFlag(SemanticsFlag.isEnabled), ifFalse: 'disabled'));
     if (_hasFlag(SemanticsFlag.hasCheckedState))
       properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlag.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
+    properties.add(new FlagProperty('isInMutuallyExcusiveGroup', value: _hasFlag(SemanticsFlag.isInMutuallyExclusiveGroup), ifTrue: 'mutually-exclusive'));
     properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlag.isSelected), ifTrue: 'selected'));
     properties.add(new FlagProperty('isFocused', value: _hasFlag(SemanticsFlag.isFocused), ifTrue: 'focused'));
     properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlag.isButton), ifTrue: 'button'));
@@ -1435,6 +1440,18 @@ class SemanticsConfiguration {
   ///
   /// VoiceOver users on iOS and TalkBack users on Android can trigger this
   /// action by double-tapping the screen while an element is focused.
+  ///
+  /// On Android prior to Android Oreo a double-tap on the screen while an
+  /// element with an [onTap] handler is focused will not call the registered
+  /// handler. Instead, Android will simulate a pointer down and up event at the
+  /// center of the focused element. Those pointer events will get dispatched
+  /// just like a regular tap with TalkBack disabled would: The events will get
+  /// processed by any [GestureDetector] listening for gestures in the center of
+  /// the focused element. Therefore, to ensure that [onTap] handlers work
+  /// properly on Android versions prior to Oreo, a [GestureDetector] with an
+  /// onTap handler should always be wrapping an element that defines a
+  /// semantic [onTap] handler. By default a [GestureDetector] will register its
+  /// own semantic [onTap] handler that follows this principle.
   VoidCallback get onTap => _onTap;
   VoidCallback _onTap;
   set onTap(VoidCallback value) {
@@ -1772,6 +1789,16 @@ class SemanticsConfiguration {
   set isChecked(bool value) {
     _setFlag(SemanticsFlag.hasCheckedState, true);
     _setFlag(SemanticsFlag.isChecked, value);
+  }
+
+  /// Whether the owning RenderObject corresponds to UI that allows the user to
+  /// pick one of several mutually exclusive options.
+  ///
+  /// For example, a [Radio] button is in a mutually exclusive group because
+  /// only one radio button in that group can be marked as [isChecked].
+  bool get isInMutuallyExclusiveGroup => _hasFlag(SemanticsFlag.isInMutuallyExclusiveGroup);
+  set isInMutuallyExclusiveGroup(bool value) {
+    _setFlag(SemanticsFlag.isInMutuallyExclusiveGroup, value);
   }
 
   /// Whether the owning [RenderObject] currently holds the user's focus.

@@ -479,7 +479,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// This notifier's value is true if a scroll is underway and false if the scroll
   /// position is idle.
   ///
-  /// Listeners added by stateful widgets should be in the widget's
+  /// Listeners added by stateful widgets should be removed in the widget's
   /// [State.dispose] method.
   final ValueNotifier<bool> isScrollingNotifier = new ValueNotifier<bool>(false);
 

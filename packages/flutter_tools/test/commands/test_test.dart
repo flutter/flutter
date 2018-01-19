@@ -23,31 +23,36 @@ void main() {
     final String automatedTestsDirectory = fs.path.join('..', '..', 'dev', 'automated_tests');
     final String flutterTestDirectory = fs.path.join(automatedTestsDirectory, 'flutter_test');
 
+    testUsingContext('not have extraneous error messages', () async {
+      Cache.flutterRoot = '../..';
+      return _testFile('trivial_widget', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
+    }, skip: io.Platform.isLinux);  // Flutter on Linux sometimes has problems with font resolution (#7224)
+
     testUsingContext('report nice errors for exceptions thrown within testWidgets()', () async {
       Cache.flutterRoot = '../..';
       return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
-    });
+    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
 
     testUsingContext('report a nice error when a guarded function was called without await', () async {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_guarded', automatedTestsDirectory, flutterTestDirectory);
-    });
+    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
 
     testUsingContext('report a nice error when an async function was called without await', () async {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_unguarded', automatedTestsDirectory, flutterTestDirectory);
-    });
+    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
 
     testUsingContext('report a nice error when a Ticker is left running', () async {
       Cache.flutterRoot = '../..';
       return _testFile('ticker', automatedTestsDirectory, flutterTestDirectory);
-    });
+    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
 
     testUsingContext('report a nice error when a pubspec.yaml is missing a flutter_test dependency', () async {
       final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
       Cache.flutterRoot = '../..';
       return _testFile('trivial', missingDependencyTests, missingDependencyTests);
-    });
+    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
 
     testUsingContext('run a test when its name matches a regexp', () async {
       Cache.flutterRoot = '../..';
@@ -82,10 +87,11 @@ void main() {
       expect(result.exitCode, 0);
     });
 
-  }, skip: io.Platform.isWindows); // TODO(goderbauer): enable when sky_shell is available
+  });
 }
 
-Future<Null> _testFile(String testName, String workingDirectory, String testDirectory) async {
+Future<Null> _testFile(String testName, String workingDirectory, String testDirectory, {Matcher exitCode}) async {
+  exitCode ??= isNonZero;
   final String fullTestExpectation = fs.path.join(testDirectory, '${testName}_expectation.txt');
   final File expectationFile = fs.file(fullTestExpectation);
   if (!expectationFile.existsSync())
@@ -96,7 +102,7 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
 
   final ProcessResult exec = await _runFlutterTest(testName, workingDirectory, testDirectory);
 
-  expect(exec.exitCode, isNonZero);
+  expect(exec.exitCode, exitCode);
   final List<String> output = exec.stdout.split('\n');
   if (output.first == 'Waiting for another flutter command to release the startup lock...')
     output.removeAt(0);
