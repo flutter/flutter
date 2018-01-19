@@ -1,0 +1,2 @@
+json_key_file "../../../Google Play Android Developer-f3caf6b3b08a.json" # Path to the json secret file - Follow https://docs.fastlane.tools/actions/supply/#setup to get one
+package_name "io.flutter.demo.gallery" # e.g. com.krausefx.app
