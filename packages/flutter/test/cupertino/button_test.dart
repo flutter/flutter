@@ -142,11 +142,11 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check opacity
-    final Opacity opacity = tester.widget(find.descendant(
+    final FadeTransition opacity = tester.widget(find.descendant(
       of: find.byType(CupertinoButton),
-      matching: find.byType(Opacity),
+      matching: find.byType(FadeTransition),
     ));
-    expect(opacity.opacity, 0.1);
+    expect(opacity.opacity.value, 0.1);
   });
 
   testWidgets('pressedOpacity parameter', (WidgetTester tester) async {
@@ -163,11 +163,11 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check opacity
-    final Opacity opacity = tester.widget(find.descendant(
+    final FadeTransition opacity = tester.widget(find.descendant(
       of: find.byType(CupertinoButton),
-      matching: find.byType(Opacity),
+      matching: find.byType(FadeTransition),
     ));
-    expect(opacity.opacity, pressedOpacity);
+    expect(opacity.opacity.value, pressedOpacity);
   });
 
   testWidgets('Cupertino button is semantically a button', (WidgetTester tester) async {
