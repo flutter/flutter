@@ -1,8 +1,7 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.		
-// Use of this source code is governed by a BSD-style license that can be		
-// found in the LICENSE file.		
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
- 
 import 'package:flutter/foundation.dart';
 
 import 'automatic_keep_alive.dart';
@@ -140,6 +139,7 @@ class Dismissible extends StatefulWidget {
   final Duration rollbackDuration;
 
   /// Defines the end offset across the main axis after the card is dismissed.
+  ///
   /// If non-zero value is given then widget moves in cross direction depending on whether it is positive or negative.
   final double crossAxisEndOffset;
 

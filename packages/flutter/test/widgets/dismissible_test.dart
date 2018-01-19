@@ -13,6 +13,8 @@ DismissDirection dismissDirection = DismissDirection.horizontal;
 DismissDirection reportedDismissDirection;
 List<int> dismissedItems = <int>[];
 Widget background;
+Duration rollbackDuration = const Duration(milliseconds: 500);
+const double crossAxisEndOffset = 0.5;
 
 Widget buildTest({ double startToEndThreshold, TextDirection textDirection: TextDirection.ltr }) {
   return new Directionality(
@@ -37,6 +39,8 @@ Widget buildTest({ double startToEndThreshold, TextDirection textDirection: Text
             dismissThresholds: startToEndThreshold == null
                 ? <DismissDirection, double>{}
                 : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
+            rollbackDuration: rollbackDuration,
+            crossAxisEndOffset: crossAxisEndOffset,
             child: new Container(
               width: itemExtent,
               height: itemExtent,
@@ -141,6 +145,57 @@ Future<Null> dismissItem(WidgetTester tester, int item, {
   await tester.pump(); // first frame of shrinking animation
   await tester.pump(const Duration(seconds: 1)); // finish the shrinking and call the callback...
   await tester.pump(); // rebuild after the callback removes the entry
+}
+
+Future<Null> rollbackElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection }) async {
+  Offset downLocation;
+  Offset upLocation;
+  switch (gestureDirection) {
+    case AxisDirection.left:
+      // getTopRight() returns a point that's just beyond itemWidget's right
+      // edge and outside the Dismissible event listener's bounds.
+      downLocation = tester.getTopRight(finder) + const Offset(-0.1, 0.0);
+      upLocation = tester.getTopRight(finder) + const Offset(-0.2, 0.0);
+      break;
+    case AxisDirection.right:
+      // we do the same thing here to keep the test symmetric
+      downLocation = tester.getTopLeft(finder) + const Offset(0.1, 0.0);
+      upLocation = tester.getTopLeft(finder) + const Offset(0.2, 0.0);
+      break;
+    case AxisDirection.up:
+      // getBottomLeft() returns a point that's just below itemWidget's bottom
+      // edge and outside the Dismissible event listener's bounds.
+      downLocation = tester.getBottomLeft(finder) + const Offset(0.0, -0.1);
+      upLocation = tester.getBottomLeft(finder) + const Offset(0.0, -0.2);
+      break;
+    case AxisDirection.down:
+      // again with doing the same here for symmetry
+      downLocation = tester.getTopLeft(finder) + const Offset(0.0, 0.1);
+      upLocation = tester.getTopLeft(finder) + const Offset(0.0, 0.2);
+      break;
+    default:
+      fail('unsupported gestureDirection');
+  }
+
+  final TestGesture gesture = await tester.startGesture(downLocation);
+  await gesture.moveTo(upLocation);
+  await gesture.up();
+}
+
+Future<Null> rollbackItem(WidgetTester tester, int item, {
+  @required AxisDirection gestureDirection,
+  DismissMethod mechanism: rollbackElement,
+  Duration rollbackDuration
+}) async {
+  assert(gestureDirection != null);
+  final Finder itemFinder = find.text(item.toString());
+  expect(itemFinder, findsWidgets);
+
+  await mechanism(tester, itemFinder, gestureDirection: gestureDirection);
+
+  await tester.pump(); // start the slide
+  await tester.pump(rollbackDuration); // finish the slide and start shrinking...
+  expect(itemFinder, findsWidgets);
 }
 
 class Test1215DismissibleWidget extends StatelessWidget {
@@ -557,5 +612,30 @@ void main() {
     expect(find.text('background'), findsOneWidget); // The other four have been culled.
     final RenderBox backgroundBox = tester.firstRenderObject(find.text('background'));
     expect(backgroundBox.size.height, equals(100.0));
+  });
+
+  testWidgets('Abort horizontal fling', (WidgetTester tester) async {
+    await tester.pumpWidget(buildTest());
+    expect(dismissedItems, isEmpty);
+
+    await rollbackItem(tester, 0, gestureDirection: AxisDirection.left);
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+
+    await rollbackItem(tester, 1, gestureDirection: AxisDirection.right);
+    expect(find.text('1'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+  });
+  testWidgets('Abort vertical fling', (WidgetTester tester) async {
+    await tester.pumpWidget(buildTest());
+    expect(dismissedItems, isEmpty);
+
+    await rollbackItem(tester, 0, gestureDirection: AxisDirection.down);
+    expect(find.text('0'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
+
+    await rollbackItem(tester, 1, gestureDirection: AxisDirection.up);
+    expect(find.text('1'), findsOneWidget);
+    expect(dismissedItems, isEmpty);
   });
 }
