@@ -805,6 +805,7 @@ void main() {
     expect(tester.getTopLeft(find.text('text')).dy, 0.0);
     expect(getHintOpacity(tester), 0.0);
     expect(getBorderWeight(tester), 0.0);
+    expect(findBorderPainter(), findsNothing); // There's really no border
 
     // The hint should appear
     await tester.pumpWidget(
@@ -934,7 +935,6 @@ void main() {
   });
 
   testWidgets('InputDecorationTheme outline border, dense layout', (WidgetTester tester) async {
-    const TextStyle labelStyle = const TextStyle(fontFamily: 'Ahem', fontSize: 16.0, color: const Color(0xFF00FF00));
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true, // label appears, vertically centered
@@ -942,7 +942,6 @@ void main() {
         inputDecorationTheme: const InputDecorationTheme(
           border: const OutlineInputBorder(),
           isDense: true,
-          labelStyle: labelStyle,
         ),
         decoration: const InputDecoration(
           labelText: 'label',
@@ -960,6 +959,79 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 32.0);
     expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 1.0);
+  });
+
+  testWidgets('InputDecorationTheme style overrides', (WidgetTester tester) async {
+    const TextStyle style16 = const TextStyle(fontFamily: 'Ahem', fontSize: 16.0);
+    final TextStyle labelStyle = style16.merge(const TextStyle(color: Colors.red));
+    final TextStyle hintStyle = style16.merge(const TextStyle(color: Colors.green));
+    final TextStyle prefixStyle = style16.merge(const TextStyle(color: Colors.blue));
+    final TextStyle suffixStyle = style16.merge(const TextStyle(color: Colors.purple));
+
+    const TextStyle style12 = const TextStyle(fontFamily: 'Ahem', fontSize: 12.0);
+    final TextStyle helperStyle = style12.merge(const TextStyle(color: Colors.orange));
+    final TextStyle counterStyle = style12.merge(const TextStyle(color: Colors.orange));
+
+    // This test also verifies that the default InputDecorator provides a
+    // "small concession to backwards compatibility" by not padding on
+    // the left and right. If filled is true or an outline border is
+    // provided then the horizontal padding is included.
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true, // label appears, vertically centered
+        // isFocused: false (default)
+        inputDecorationTheme: new InputDecorationTheme(
+          labelStyle: labelStyle,
+          hintStyle: hintStyle,
+          prefixStyle: prefixStyle,
+          suffixStyle: suffixStyle,
+          helperStyle: helperStyle,
+          counterStyle: counterStyle,
+          // filled: false (default) - don't pad by left/right 12dps
+        ),
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+          prefixText: 'prefix',
+          suffixText: 'suffix',
+          helperText: 'helper',
+          counterText: 'counter',
+        ),
+      ),
+    );
+
+    // Overall height for this InputDecorator is 76dps. Layout is:
+    //   12 - top padding
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
+    //    4 - floating label / input text gap
+    //   16 - prefix/hint/input/suffix text (ahem font size 16dps)
+    //   12 - bottom padding
+    //    8 - below the border padding
+    //   12 - help/error/counter text (ahem font size 12dps)
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
+    expect(getBorderBottom(tester), 56.0);
+    expect(getBorderWeight(tester), 1.0);
+    expect(tester.getTopLeft(find.text('helper')), const Offset(0.0, 64.0));
+    expect(tester.getTopRight(find.text('counter')), const Offset(800.0, 64.0));
+
+    // Verify that the styles were passed along
+    expect(tester.widget<Text>(find.text('prefix')).style.color, prefixStyle.color);
+    expect(tester.widget<Text>(find.text('suffix')).style.color, suffixStyle.color);
+    expect(tester.widget<Text>(find.text('helper')).style.color, helperStyle.color);
+    expect(tester.widget<Text>(find.text('counter')).style.color, counterStyle.color);
+
+    TextStyle getLabelStyle() {
+      return tester.firstWidget<AnimatedDefaultTextStyle>(
+        find.ancestor(
+          of: find.text('label'),
+          matching: find.byType(AnimatedDefaultTextStyle)
+        )
+      ).style;
+    }
+    expect(getLabelStyle().color, labelStyle.color);
   });
 
   testWidgets('InputDecorator.toString()', (WidgetTester tester) async {
