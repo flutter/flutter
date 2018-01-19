@@ -8,6 +8,7 @@
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/picture.h"
 #include "lib/tonic/dart_wrappable.h"
+#include "lib/tonic/typed_data/float64_list.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
 
 namespace blink {
@@ -24,6 +25,7 @@ class ImageFilter : public fxl::RefCountedThreadSafe<ImageFilter>,
   void initImage(CanvasImage* image);
   void initPicture(Picture*);
   void initBlur(double sigma_x, double sigma_y);
+  void initMatrix(const tonic::Float64List& matrix4, int filter_quality);
 
   const sk_sp<SkImageFilter>& filter() { return filter_; }
 
