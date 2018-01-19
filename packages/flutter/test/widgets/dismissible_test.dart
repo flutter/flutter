@@ -153,7 +153,8 @@ Future<Null> rollbackElement(WidgetTester tester, Finder finder, { @required Axi
   switch (gestureDirection) {
     case AxisDirection.left:
       // getTopRight() returns a point that's just beyond itemWidget's right
-      // edge and outside the Dismissible event listener's bounds.
+      // edge and outside the Dismissible event listener's bounds. Just nudge
+      // the itemWidget before it's threshold.
       downLocation = tester.getTopRight(finder) + const Offset(-0.1, 0.0);
       upLocation = tester.getTopRight(finder) + const Offset(-0.2, 0.0);
       break;
@@ -193,8 +194,8 @@ Future<Null> rollbackItem(WidgetTester tester, int item, {
 
   await mechanism(tester, itemFinder, gestureDirection: gestureDirection);
 
-  await tester.pump(); // start the slide
-  await tester.pump(rollbackDuration); // finish the slide and start shrinking...
+  await tester.pump(); // start the nudge
+  await tester.pump(rollbackDuration); // to finish the nudge, it takes 'rollbackDuration' time.
   expect(itemFinder, findsWidgets);
 }
 
@@ -614,7 +615,7 @@ void main() {
     expect(backgroundBox.size.height, equals(100.0));
   });
 
-  testWidgets('Abort horizontal fling', (WidgetTester tester) async {
+  testWidgets('Horizontal nudge less than threshold', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
@@ -626,7 +627,7 @@ void main() {
     expect(find.text('1'), findsOneWidget);
     expect(dismissedItems, isEmpty);
   });
-  testWidgets('Abort vertical fling', (WidgetTester tester) async {
+  testWidgets('Vertical nudge less than threshold', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
