@@ -12,6 +12,7 @@ import 'dart:ui' show Offset;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -200,6 +201,13 @@ class WidgetInspectorService {
     return id;
   }
 
+  /// Returns whether the application has rendered its first frame and it is
+  /// appropriate to display the Widget tree in the inspector.
+  bool isWidgetTreeReady([String groupName]) {
+    return WidgetsBinding.instance != null &&
+           WidgetsBinding.instance.debugDidSendFirstFrameEvent;
+  }
+
   /// Returns the Dart object associated with a reference id.
   ///
   /// The `groupName` parameter is not required by is added to regularize the
@@ -210,8 +218,9 @@ class WidgetInspectorService {
       return null;
 
     final _InspectorReferenceData data = _idToReferenceData[id];
-    if (data == null)
-      throw new FlutterError('Id does not exist');
+    if (data == null) {
+      throw new FlutterError('Id does not exist.');
+    }
     return data.object;
   }
 
@@ -281,7 +290,16 @@ class WidgetInspectorService {
         selection.current = object;
       }
       if (selectionChangedCallback != null) {
-        selectionChangedCallback();
+        if (WidgetsBinding.instance.schedulerPhase == SchedulerPhase.idle) {
+          selectionChangedCallback();
+        } else {
+          // It isn't safe to trigger the selection change callback if we are in
+          // the middle of rendering the frame.
+          SchedulerBinding.instance.scheduleTask(
+            selectionChangedCallback,
+            Priority.touch,
+          );
+        }
       }
       return true;
     }
@@ -467,15 +485,27 @@ class _WidgetInspectorState extends State<WidgetInspector>
   /// as selecting the edge of the bounding box.
   static const double _kEdgeHitMargin = 2.0;
 
+  InspectorSelectionChangedCallback _selectionChangedCallback;
   @override
   void initState() {
     super.initState();
-    WidgetInspectorService.instance.selectionChangedCallback = () {
+
+    _selectionChangedCallback = () {
       setState(() {
         // The [selection] property which the build method depends on has
         // changed.
       });
     };
+    assert(WidgetInspectorService.instance.selectionChangedCallback == null);
+    WidgetInspectorService.instance.selectionChangedCallback = _selectionChangedCallback;
+  }
+
+  @override
+  void dispose() {
+    if (WidgetInspectorService.instance.selectionChangedCallback == _selectionChangedCallback) {
+      WidgetInspectorService.instance.selectionChangedCallback = null;
+    }
+    super.dispose();
   }
 
   bool _hitTestHelper(
