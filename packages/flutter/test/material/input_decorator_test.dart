@@ -913,4 +913,23 @@ void main() {
       "InputDecorator-[<'key'>](decoration: InputDecoration(border: UnderlineInputBorder()), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
     );
   });
+
+  testWidgets('InputDecorator with null border and label', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/14165
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          border: null,
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(getBorderWeight(tester), 0.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+  });
 }
