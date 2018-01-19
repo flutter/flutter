@@ -78,29 +78,6 @@ Future<int> main() async {
       expect(capturedArgs.single['strong'], equals(true));
     });
 
-    test('compile from command line with file byte store', () async {
-      final List<String> args = <String>[
-        'server.dart',
-        '--sdk-root',
-        'sdkroot',
-        '--byte-store',
-        'path/to/bytestore'
-      ];
-      final int exitcode = await starter(args, compiler: compiler);
-      expect(exitcode, equals(0));
-      final List<ArgResults> capturedArgs =
-          verify(
-              compiler.compile(
-                argThat(equals('server.dart')),
-                captureAny,
-                generator: any,
-              )
-          ).captured;
-      expect(capturedArgs.single['sdk-root'], equals('sdkroot'));
-      expect(capturedArgs.single['byte-store'], equals('path/to/bytestore'));
-      expect(capturedArgs.single['strong'], equals(false));
-    });
-
     test('compile from command line with link platform', () async {
       final List<String> args = <String>[
         'server.dart',
@@ -124,14 +101,12 @@ Future<int> main() async {
     });
   });
 
-  group('interactive file store compile with mocked compiler', () {
+  group('interactive compile with mocked compiler', () {
     final CompilerInterface compiler = new _MockedCompiler();
 
     final List<String> args = <String>[
       '--sdk-root',
       'sdkroot',
-      '--byte-store',
-      'path/to/bytestore',
     ];
 
     test('compile one file', () async {
@@ -143,8 +118,6 @@ Future<int> main() async {
             expect(invocation.positionalArguments[0], equals('server.dart'));
             expect(invocation.positionalArguments[1]['sdk-root'],
                 equals('sdkroot'));
-            expect(invocation.positionalArguments[1]['byte-store'],
-                equals('path/to/bytestore'));
             expect(invocation.positionalArguments[1]['strong'], equals(false));
             compileCalled.sendPort.send(true);
           }
