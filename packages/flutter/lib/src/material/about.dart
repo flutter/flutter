@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:developer' show Timeline, Flow;
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart' hide Flow;
 
 import 'app_bar.dart';
 import 'debug.dart';
@@ -374,9 +376,19 @@ class _LicensePageState extends State<LicensePage> {
   bool _loaded = false;
 
   Future<Null> _initLicenses() async {
+    final Flow flow = Flow.begin();
+    Timeline.timeSync('_initLicenses()', () { }, flow: flow);
     await for (LicenseEntry license in LicenseRegistry.licenses) {
       if (!mounted)
         return;
+      Timeline.timeSync('_initLicenses()', () { }, flow: Flow.step(flow.id));
+      final List<LicenseParagraph> paragraphs =
+        await SchedulerBinding.instance.scheduleTask<List<LicenseParagraph>>(
+          () => license.paragraphs.toList(),
+          Priority.animation,
+          debugLabel: 'License',
+          flow: flow,
+        );
       setState(() {
         _licenses.add(const Padding(
           padding: const EdgeInsets.symmetric(vertical: 18.0),
@@ -395,7 +407,7 @@ class _LicensePageState extends State<LicensePage> {
             textAlign: TextAlign.center
           )
         ));
-        for (LicenseParagraph paragraph in license.paragraphs) {
+        for (LicenseParagraph paragraph in paragraphs) {
           if (paragraph.indent == LicenseParagraph.centeredIndent) {
             _licenses.add(new Padding(
               padding: const EdgeInsets.only(top: 16.0),
@@ -418,6 +430,7 @@ class _LicensePageState extends State<LicensePage> {
     setState(() {
       _loaded = true;
     });
+    Timeline.timeSync('Build scheduled', () { }, flow: Flow.end(flow.id));
   }
 
   @override

@@ -54,7 +54,7 @@ abstract class LicenseEntry {
 }
 
 enum _LicenseEntryWithLineBreaksParserState {
-  beforeParagraph, inParagraph
+  beforeParagraph, inParagraph,
 }
 
 /// Variant of [LicenseEntry] for licenses that separate paragraphs with blank
@@ -104,6 +104,14 @@ enum _LicenseEntryWithLineBreaksParserState {
 ///
 /// This would result in a license with six [paragraphs], the third, fourth, and
 /// fifth being indented one level.
+///
+/// ## Performance considerations
+///
+/// Computing the paragraphs is relatively expensive. Doing the work for one
+/// license per frame is reasonable; doing more at the same time is ill-advised.
+/// Consider doing all the work at once using [compute] to move the work to
+/// another thread, or spreading the work across multiple frames using
+/// [scheduleTask].
 class LicenseEntryWithLineBreaks extends LicenseEntry {
   /// Create a license entry for a license whose text is hard-wrapped within
   /// paragraphs and has paragraph breaks denoted by blank lines or with
@@ -170,8 +178,9 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               break;
             case '\n':
             case '\f':
-              if (lines.isNotEmpty)
+              if (lines.isNotEmpty) {
                 yield getParagraph();
+              }
               lastLineIndent = 0;
               currentLineIndent = 0;
               currentParagraphIndentation = null;
@@ -231,8 +240,9 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     }
     switch (state) {
       case _LicenseEntryWithLineBreaksParserState.beforeParagraph:
-        if (lines.isNotEmpty)
+        if (lines.isNotEmpty) {
           yield getParagraph();
+        }
         break;
       case _LicenseEntryWithLineBreaksParserState.inParagraph:
         addLine();

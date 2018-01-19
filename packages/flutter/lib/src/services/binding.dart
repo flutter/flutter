@@ -41,7 +41,7 @@ abstract class ServicesBinding extends BindingBase {
 
   Stream<LicenseEntry> _addLicenses() async* {
     final String rawLicenses = await rootBundle.loadString('LICENSE', cache: false);
-    final List<LicenseEntry> licenses = await compute(_parseLicenses, rawLicenses);
+    final List<LicenseEntry> licenses = await compute(_parseLicenses, rawLicenses, debugLabel: 'parseLicenses');
     yield* new Stream<LicenseEntry>.fromIterable(licenses);
   }
 

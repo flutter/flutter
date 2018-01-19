@@ -37,11 +37,16 @@ class Section {
   final List<String> code;
   final String postamble;
   Iterable<String> get strings sync* {
-    if (preamble != null)
+    if (preamble != null) {
+      assert(!preamble.contains('\n'));
       yield preamble;
+    }
+    assert(!code.any((String line) => line.contains('\n')));
     yield* code;
-    if (postamble != null)
+    if (postamble != null) {
+      assert(!postamble.contains('\n'));
       yield postamble;
+    }
   }
   List<Line> get lines {
     final List<Line> result = new List<Line>.generate(code.length, (int index) => start + index);
@@ -61,6 +66,7 @@ Future<Null> main() async {
   final Directory temp = Directory.systemTemp.createTempSync('analyze_sample_code_');
   int exitCode = 1;
   bool keepMain = false;
+  final List<String> buffer = <String>[];
   try {
     final File mainDart = new File(path.join(temp.path, 'main.dart'));
     final File pubSpec = new File(path.join(temp.path, 'pubspec.yaml'));
@@ -128,7 +134,6 @@ Future<Null> main() async {
         }
       }
     }
-    final List<String> buffer = <String>[];
     buffer.add('// generated code');
     buffer.add('import \'dart:async\';');
     buffer.add('import \'dart:math\' as math;');
@@ -146,6 +151,7 @@ Future<Null> main() async {
       buffer.addAll(section.strings);
       lines.addAll(section.lines);
     }
+    assert(buffer.length == lines.length);
     mainDart.writeAsStringSync(buffer.join('\n'));
     pubSpec.writeAsStringSync('''
 name: analyze_sample_code
@@ -180,17 +186,23 @@ dependencies:
         final String message = error.substring(start + kBullet.length, end);
         final String atMatch = atRegExp.firstMatch(error)[0];
         final int colon2 = error.indexOf(kColon, end + atMatch.length);
-        if (colon2 < 0)
+        if (colon2 < 0) {
+          keepMain = true;
           throw 'failed to parse error message: $error';
+        }
         final String line = error.substring(end + atMatch.length, colon2);
         final int bullet2 = error.indexOf(kBullet, colon2);
-        if (bullet2 < 0)
+        if (bullet2 < 0) {
+          keepMain = true;
           throw 'failed to parse error message: $error';
+        }
         final String column = error.substring(colon2 + kColon.length, bullet2);
         final int lineNumber = int.parse(line, radix: 10, onError: (String source) => throw 'failed to parse error message: $error');
         final int columnNumber = int.parse(column, radix: 10, onError: (String source) => throw 'failed to parse error message: $error');
-        if (lineNumber < 0 || lineNumber >= lines.length)
-          throw 'failed to parse error message: $error';
+        if (lineNumber < 1 || lineNumber > lines.length) {
+          keepMain = true;
+          throw 'failed to parse error message (read line number as $lineNumber; total number of lines is ${lines.length}): $error';
+        }
         final Line actualLine = lines[lineNumber - 1];
         final String errorCode = error.substring(bullet2 + kBullet.length);
         if (errorCode == 'unused_element') {
@@ -211,6 +223,7 @@ dependencies:
         }
       } else {
         print('?? $error');
+        keepMain = true;
         errorCount += 1;
       }
     }
@@ -222,6 +235,13 @@ dependencies:
   } finally {
     if (keepMain) {
       print('Kept ${temp.path} because it had errors (see above).');
+      print('-------8<-------');
+      int number = 1;
+      for (String line in buffer) {
+        print('${number.toString().padLeft(6, " ")}: $line');
+        number += 1;
+      }
+      print('-------8<-------');
     } else {
       temp.deleteSync(recursive: true);
     }
