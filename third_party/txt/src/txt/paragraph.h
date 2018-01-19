@@ -200,15 +200,21 @@ class Paragraph {
   std::vector<double> line_baselines_;
   bool did_exceed_max_lines_;
 
-  struct BidiRun {
+  class BidiRun {
+   public:
     BidiRun(size_t s, size_t e, TextDirection d, const TextStyle& st)
-        : start(s), end(e), direction(d), style(st) {}
+        : start_(s), end_(e), direction_(d), style_(&st) {}
 
-    const size_t start, end;
-    const TextDirection direction;
-    const TextStyle& style;
+    size_t start() const { return start_; }
+    size_t end() const { return end_; }
+    TextDirection direction() const { return direction_; }
+    const TextStyle& style() const { return *style_; }
+    bool is_rtl() const { return direction_ == TextDirection::rtl; }
 
-    bool is_rtl() const { return direction == TextDirection::rtl; }
+   private:
+    size_t start_, end_;
+    TextDirection direction_;
+    const TextStyle* style_;
   };
 
   struct GlyphPosition {
