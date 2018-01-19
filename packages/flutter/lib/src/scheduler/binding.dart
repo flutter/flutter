@@ -580,12 +580,27 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   /// Schedules a new frame using [scheduleFrame] if this object is not
   /// currently producing a frame.
   ///
-  /// After this is called, the framework ensures that the end of the
-  /// [handleBeginFrame] function will (eventually) be reached.
+  /// Calling this method ensures that [handleDrawFrame] will eventually be
+  /// called, unless it's already in progress.
+  ///
+  /// This has no effect if [schedulerPhase] is
+  /// [SchedulerPhase.transientCallbacks] or [SchedulerPhase.midFrameMicrotasks]
+  /// (because a frame is already being prepared in that case), or
+  /// [SchedulerPhase.persistentCallbacks] (because a frame is actively being
+  /// rendered in that case). It will schedule a frame if the [schedulerPhase]
+  /// is [SchedulerPhase.idle] (in between frames) or
+  /// [SchedulerPhase.postFrameCallbacks] (after a frame).
   void ensureVisualUpdate() {
-    if (schedulerPhase != SchedulerPhase.idle)
-      return;
-    scheduleFrame();
+    switch (schedulerPhase) {
+      case SchedulerPhase.idle:
+      case SchedulerPhase.postFrameCallbacks:
+        scheduleFrame();
+        return;
+      case SchedulerPhase.transientCallbacks:
+      case SchedulerPhase.midFrameMicrotasks:
+      case SchedulerPhase.persistentCallbacks:
+        return;
+    }
   }
 
   /// If necessary, schedules a new frame by calling
