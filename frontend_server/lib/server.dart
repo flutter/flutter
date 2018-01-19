@@ -46,7 +46,7 @@ ArgParser _argParser = new ArgParser(allowTrailingOptions: true)
       defaultsTo: true)
   ..addOption('packages',
       help: '.packages file to use for compilation',
-      defaultsTo: '.packages');
+      defaultsTo: null);
 
 String _usage = '''
 Usage: server [options] [input.dart]
