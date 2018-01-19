@@ -4,18 +4,17 @@ description: Various repository development tools for flutter.
 dependencies:
   archive: 1.0.33
   args: 1.2.0
-  http: 0.11.3+14
+  http: 0.11.3+16
   intl: 0.15.2
   meta: 1.1.1
   path: 1.5.1
 
-  async: 1.13.3 # TRANSITIVE DEPENDENCY
+  async: 2.0.3 # TRANSITIVE DEPENDENCY
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
   collection: 1.14.5 # TRANSITIVE DEPENDENCY
   convert: 2.0.1 # TRANSITIVE DEPENDENCY
   crypto: 2.0.2+1 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
   source_span: 1.4.0 # TRANSITIVE DEPENDENCY
-  stack_trace: 1.9.1 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
