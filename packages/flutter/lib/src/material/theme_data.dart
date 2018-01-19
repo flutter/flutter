@@ -397,7 +397,7 @@ class ThemeData {
   /// The default input decoration to use for [InputDecorator], [TextField],
   /// and [TextFormField] is based on this value.
   ///
-  /// See [InputDecorationTheme.inputDecoration].
+  /// See [InputDecoration.applyDefaults].
   final InputDecorationTheme inputDecorationTheme;
 
   /// An icon theme that contrasts with the card and canvas colors.

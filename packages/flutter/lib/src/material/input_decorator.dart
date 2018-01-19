@@ -402,6 +402,7 @@ enum _DecorationSlot {
 class _Decoration {
   const _Decoration({
     @required this.contentPadding,
+    @required this.isCollapsed,
     @required this.floatingLabelHeight,
     @required this.floatingLabelProgress,
     this.border,
@@ -418,10 +419,12 @@ class _Decoration {
     this.counter,
     this.container,
   }) : assert(contentPadding != null),
+       assert(isCollapsed != null),
        assert(floatingLabelHeight != null),
        assert(floatingLabelProgress != null);
 
   final EdgeInsets contentPadding;
+  final bool isCollapsed;
   final double floatingLabelHeight;
   final double floatingLabelProgress;
   final InputBorder border;
@@ -895,13 +898,9 @@ class _RenderDecoration extends RenderBox {
     final double right = overallWidth - contentPadding.right;
 
     height = layout.containerHeight;
-    if (decoration.border == null && decoration.contentPadding == EdgeInsets.zero) {
-      baseline = layout.inputBaseline; // InputDecoration.collapsed == true
-    } else {
-      baseline = decoration.border == null || decoration.border.isOutline
-        ? layout.outlineBaseline
-        : layout.inputBaseline;
-    }
+    baseline = decoration.isCollapsed || !decoration.border.isOutline
+      ? layout.inputBaseline
+      : layout.outlineBaseline;
 
     if (icon != null) {
       final double x = textDirection == TextDirection.rtl ? overallWidth - icon.size.width : 0.0;
@@ -1266,7 +1265,7 @@ class InputDecorator extends StatefulWidget {
 
   /// The text and styles to use when decorating the child.
   ///
-  /// If null, `decoration` defaults to the `inputDecoration` value from
+  /// TBD ---- If null, `decoration` defaults to the `inputDecoration` value from
   /// the current [Theme], see [ThemeData.inputDecorationTheme].
   final InputDecoration decoration;
 
@@ -1352,7 +1351,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _mergedInputDecoration = null;
+    _effectiveDecoration = null;
   }
 
   @override
@@ -1368,11 +1367,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     });
   }
 
-  InputDecoration _mergedInputDecoration;
+  InputDecoration _effectiveDecoration;
   InputDecoration get decoration {
-    _mergedInputDecoration ??= Theme.of(context).inputDecorationTheme
-      .inputDecoration(baseDecoration: widget.decoration);
-    return _mergedInputDecoration;
+    _effectiveDecoration ??= widget.decoration.applyDefaults(
+      Theme.of(context).inputDecorationTheme
+    );
+    return _effectiveDecoration;
   }
 
   TextAlign get textAlign => widget.textAlign;
@@ -1383,7 +1383,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   void didUpdateWidget(InputDecorator old) {
     super.didUpdateWidget(old);
     if (widget.decoration != old.decoration)
-      _mergedInputDecoration = null;
+      _effectiveDecoration = null;
 
     if (widget._labelIsFloating != old._labelIsFloating) {
       if (widget._labelIsFloating)
@@ -1415,7 +1415,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getFillColor(ThemeData themeData) {
-    if (!(decoration.filled ?? false))
+    if (decoration.filled != true) // filled == null same as filled == false
       return Colors.transparent;
     if (decoration.fillColor != null)
       return decoration.fillColor;
@@ -1467,7 +1467,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   double get _borderWeight {
-    if (decoration.isCollapsed || decoration.border == null || !decoration.enabled)
+    if (decoration.isCollapsed || decoration.border == InputBorder.none || !decoration.enabled)
       return 0.0;
     return isFocused ? 2.0 : 1.0;
   }
@@ -1496,7 +1496,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ),
     );
 
-    final InputBorder border = decoration.border == null ? null : decoration.border.copyWith(
+    final InputBorder border = decoration.border.copyWith(
       borderSide: new BorderSide(
         color: _getBorderColor(themeData),
         width: _borderWeight,
@@ -1608,10 +1608,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration.isCollapsed) {
       floatingLabelHeight = 0.0;
       contentPadding = decoration.contentPadding ?? EdgeInsets.zero;
-    } else if (decoration.border == null || !decoration.border.isOutline) {
+    } else if (!decoration.border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
       floatingLabelHeight = 4.0 + 0.75 * inlineLabelStyle.fontSize;
-      if (decoration.filled ?? false) {
+      if (decoration.filled == true) { // filled == null same as filled == false
         contentPadding = decoration.contentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
           : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
@@ -1633,6 +1633,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return new _Decorator(
       decoration: new _Decoration(
         contentPadding: contentPadding,
+        isCollapsed: decoration.isCollapsed,
         floatingLabelHeight: floatingLabelHeight,
         floatingLabelProgress: _floatingLabelController.value,
         border: decoration.border,
@@ -1651,16 +1652,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ),
     );
   }
-}
-
-// Used by InputDecorationTheme.inputDecoration to distinguish
-// between an InputDecoration border that was explicitly set to
-// null and one that was defaulted to UnderlineInputBorder.
-class _DefaultInputBorder extends UnderlineInputBorder {
-  const _DefaultInputBorder();
-
-  @override
-  String toString() => '<default> UnderlineInputBorder()';
 }
 
 /// The border, labels, icons, and styles used to decorate a Material
@@ -1686,7 +1677,7 @@ class InputDecoration {
   /// Unless specified by [ThemeData.inputDecorationTheme],
   /// [InputDecorator] defaults [isDense] to true, and [filled] to false,
   /// Similarly, the default border is an instance of [UnderlineInputBorder].
-  /// If a null [border] is specified then no border is drawn.
+  /// If [border] is [InputBorder.none] then no border is drawn.
   ///
   /// The [enabled] argument must not be null.
   const InputDecoration({
@@ -1711,7 +1702,7 @@ class InputDecoration {
     this.counterStyle,
     this.filled,
     this.fillColor,
-    this.border: const _DefaultInputBorder(),
+    this.border,
     this.enabled: true,
   }) : assert(enabled != null), isCollapsed = false;
 
@@ -1725,7 +1716,7 @@ class InputDecoration {
     this.hintStyle,
     this.filled: false,
     this.fillColor,
-    this.border,
+    this.border: InputBorder.none,
     this.enabled: true,
   }) : assert(enabled != null),
        icon = null,
@@ -2023,8 +2014,30 @@ class InputDecoration {
       counterStyle: counterStyle ?? this.counterStyle,
       filled: filled ?? this.filled,
       fillColor: fillColor ?? this.fillColor,
-      border: this.border is _DefaultInputBorder ? border : this.border,
+      border: border ?? this.border,
       enabled: enabled ?? this.enabled,
+    );
+  }
+
+  /// Used by widgets like [TextField] and [InputDecorator] to create a new
+  /// [InputDecoration] with default values taken from the [theme].
+  ///
+  /// Only null valued properties from this [InputDecoration] are replaced
+  /// by the corresponding values from [theme].
+  InputDecoration applyDefaults(InputDecorationTheme theme) {
+    return copyWith(
+      labelStyle: labelStyle ?? theme.labelStyle,
+      helperStyle: helperStyle ?? theme.helperStyle,
+      hintStyle: hintStyle ?? theme.hintStyle,
+      errorStyle: errorStyle ?? theme.errorStyle,
+      isDense: isDense ?? theme.isDense,
+      contentPadding: contentPadding ?? theme.contentPadding,
+      prefixStyle: prefixStyle ?? theme.prefixStyle,
+      suffixStyle: suffixStyle ?? theme.suffixStyle,
+      counterStyle: counterStyle ?? theme.counterStyle,
+      filled: filled ?? theme.filled,
+      fillColor: fillColor ?? theme.fillColor,
+      border: border ?? theme.border,
     );
   }
 
@@ -2128,7 +2141,7 @@ class InputDecoration {
       description.add('counterText: $counterText');
     if (counterStyle != null)
       description.add('counterStyle: $counterStyle');
-    if (filled ?? false)
+    if (filled == true) // filled == null same as filled == false
       description.add('filled: true');
     if (fillColor != null)
       description.add('fillColor: $fillColor');
@@ -2146,25 +2159,34 @@ class InputDecoration {
 /// The [InputDecorator], [TextField], and [TextFormField] widgets use
 /// the current input decoration theme to initialize null [InputDecoration]
 /// properties.
+///
+/// The [InputDecoration.applyDefaults] method is used to combine a input
+/// decoration theme with an [InputDecoration] object.
 @immutable
 class InputDecorationTheme {
   /// Creates a value for [ThemeData.inputDecorationTheme] that
   /// defines default values for [InputDecorator].
+  ///
+  /// The values of [isDense], [isCollapsed], [isFilled], and [border] must
+  /// not be null.
   const InputDecorationTheme({
     this.labelStyle,
     this.helperStyle,
     this.hintStyle,
     this.errorStyle,
-    this.isDense,
+    this.isDense: false,
     this.contentPadding,
-    this.isCollapsed,
+    this.isCollapsed: false,
     this.prefixStyle,
     this.suffixStyle,
     this.counterStyle,
-    this.filled,
+    this.filled: false,
     this.fillColor,
-    this.border : const UnderlineInputBorder(),
-  });
+    this.border: const UnderlineInputBorder(),
+  }) : assert(isDense != null),
+       assert(isCollapsed != null),
+       assert(filled != null),
+       assert(border != null);
 
   /// The style to use for [InputDecoration.labelText] when the label is
   /// above (i.e., vertically adjacent to) the input field.
@@ -2241,11 +2263,9 @@ class InputDecorationTheme {
   /// Typically this field set to true if [border] is
   /// [const UnderlineInputBorder()].
   ///
-  /// The decoration's container is the area which is filled if [isFilled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [InputDecoration.icon] and above the widgets that contain
-  /// [InputDecoration.helperText], [InputDecoration.errorText], and
-  /// [InputDecoration.counterText].
+  /// The decoration's container is the area, defined by the border's
+  /// [InputBorder.getOuterPath], which is filled if [isFilled] is
+  /// true and bordered per the [border].
   ///
   /// This property is false by default.
   final bool filled;
@@ -2254,11 +2274,9 @@ class InputDecorationTheme {
   ///
   /// By default the fillColor is based on the current [Theme].
   ///
-  /// The decoration's container is the area which is filled if [isFilled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [InputDecoration.icon] and above the widgets that contain
-  /// [InputDecoration.helperText], [InputDecoration.errorText], and
-  /// [InputDecoration.counterText].
+  /// The decoration's container is the area, defined by the border's
+  /// [InputBorder.getOuterPath], which is filled if [isFilled] is
+  /// true and bordered per the [border].
   final Color fillColor;
 
   /// The border to draw around the decoration's container.
@@ -2271,33 +2289,14 @@ class InputDecorationTheme {
   ///
   /// The default value of this property is `const UnderlineInputBorder()`.
   ///
+  /// The border's bounds, i.e. the value of `border.getOuterPath()`, defines
+  /// the area to be filled.
+  ///
   /// See also:
+  ///  * [InputBorder.none], which doesn't draw a border.
   ///  * [UnderlineInputBorder], which draws a horizontal line at the
   ///    bottom of the input decorator's container.
   ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
   ///    rounded rectangle around the input decorator's container.
   final InputBorder border;
-
-  /// Used by widgets like [TextField] and [InputDecorator] to create a new
-  /// [InputDecoration] with default values taken from this theme.
-  ///
-  /// Only null valued properties from [baseDecoration] are replaced
-  /// by the corresponding values from this theme.
-  InputDecoration inputDecoration({ InputDecoration baseDecoration }) {
-    final InputDecoration decoration = baseDecoration ?? const InputDecoration();
-    return decoration.copyWith(
-      labelStyle: decoration.labelStyle ?? labelStyle,
-      helperStyle: decoration.helperStyle ?? helperStyle,
-      hintStyle: decoration.hintStyle ?? hintStyle,
-      errorStyle: decoration.errorStyle ?? errorStyle,
-      isDense: decoration.isDense ?? isDense,
-      contentPadding: decoration.contentPadding ?? contentPadding,
-      prefixStyle: decoration.prefixStyle ?? prefixStyle,
-      suffixStyle: decoration.suffixStyle ?? suffixStyle,
-      counterStyle: decoration.counterStyle ?? counterStyle,
-      filled: decoration.filled ?? filled,
-      fillColor: decoration.fillColor ?? fillColor,
-      border: decoration.border is _DefaultInputBorder ? border : decoration.border,
-    );
-  }
 }

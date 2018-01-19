@@ -72,8 +72,8 @@ class TextFormField extends FormField<String> {
     validator: validator,
     builder: (FormFieldState<String> field) {
       final _TextFormFieldState state = field;
-      final InputDecoration effectiveDecoration = Theme.of(field.context).inputDecorationTheme
-        .inputDecoration(baseDecoration: decoration);
+      final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
+        .applyDefaults(Theme.of(field.context).inputDecorationTheme);
       return new TextField(
         controller: state._effectiveController,
         focusNode: focusNode,

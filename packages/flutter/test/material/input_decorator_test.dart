@@ -404,14 +404,14 @@ void main() {
     expect(getBorderWeight(tester), 2.0);
   });
 
-  testWidgets('InputDecorator with null border', (WidgetTester tester) async {
+  testWidgets('InputDecorator with no input border', (WidgetTester tester) async {
     // Label is visible, hint is not (opacity 0.0).
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
-          border: null,
+          border: InputBorder.none,
         ),
       ),
     );
@@ -805,7 +805,6 @@ void main() {
     expect(tester.getTopLeft(find.text('text')).dy, 0.0);
     expect(getHintOpacity(tester), 0.0);
     expect(getBorderWeight(tester), 0.0);
-    expect(findBorderPainter(), findsNothing); // There's really no border
 
     // The hint should appear
     await tester.pumpWidget(
@@ -1046,11 +1045,11 @@ void main() {
     );
     expect(
       child.toString(),
-      "InputDecorator-[<'key'>](decoration: InputDecoration(border: <default> UnderlineInputBorder()), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
+      "InputDecorator-[<'key'>](decoration: InputDecoration(), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
     );
   });
 
-  testWidgets('InputDecorator with null border and label', (WidgetTester tester) async {
+  testWidgets('InputDecorator with empty border and label', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/14165
     await tester.pumpWidget(
       buildInputDecorator(
@@ -1058,7 +1057,7 @@ void main() {
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
-          border: null,
+          border: InputBorder.none,
         ),
       ),
     );
@@ -1074,20 +1073,22 @@ void main() {
     const TextStyle decorationStyle = const TextStyle(color: Colors.blue);
 
     // InputDecorationTheme arguments define InputDecoration properties.
-    InputDecoration decoration = const InputDecorationTheme(
-      labelStyle: themeStyle,
-      helperStyle: themeStyle,
-      hintStyle: themeStyle,
-      errorStyle: themeStyle,
-      isDense: true,
-      contentPadding: const EdgeInsets.all(1.0),
-      prefixStyle: themeStyle,
-      suffixStyle: themeStyle,
-      counterStyle: themeStyle,
-      filled: true,
-      fillColor: Colors.red,
-      border: null,
-    ).inputDecoration(baseDecoration: const InputDecoration());
+    InputDecoration decoration = const InputDecoration().applyDefaults(
+      const InputDecorationTheme(
+        labelStyle: themeStyle,
+        helperStyle: themeStyle,
+        hintStyle: themeStyle,
+        errorStyle: themeStyle,
+        isDense: true,
+        contentPadding: const EdgeInsets.all(1.0),
+        prefixStyle: themeStyle,
+        suffixStyle: themeStyle,
+        counterStyle: themeStyle,
+        filled: true,
+        fillColor: Colors.red,
+        border: InputBorder.none,
+      )
+    );
 
     expect(decoration.labelStyle, themeStyle);
     expect(decoration.helperStyle, themeStyle);
@@ -1100,23 +1101,10 @@ void main() {
     expect(decoration.counterStyle, themeStyle);
     expect(decoration.filled, true);
     expect(decoration.fillColor, Colors.red);
-    expect(decoration.border, null);
+    expect(decoration.border, InputBorder.none);
 
     // InputDecoration (baseDecoration) defines InputDecoration properties
-    decoration = const InputDecorationTheme(
-      labelStyle: themeStyle,
-      helperStyle: themeStyle,
-      hintStyle: themeStyle,
-      errorStyle: themeStyle,
-      isDense: true,
-      contentPadding: const EdgeInsets.all(1.0),
-      prefixStyle: themeStyle,
-      suffixStyle: themeStyle,
-      counterStyle: themeStyle,
-      filled: true,
-      fillColor: Colors.red,
-      border: null,
-    ).inputDecoration(baseDecoration: const InputDecoration(
+    decoration = const InputDecoration(
       labelStyle: decorationStyle,
       helperStyle: decorationStyle,
       hintStyle: decorationStyle,
@@ -1129,7 +1117,22 @@ void main() {
       filled: false,
       fillColor: Colors.blue,
       border: const OutlineInputBorder(),
-    ));
+    ).applyDefaults(
+      const InputDecorationTheme(
+        labelStyle: themeStyle,
+        helperStyle: themeStyle,
+        hintStyle: themeStyle,
+        errorStyle: themeStyle,
+        isDense: true,
+        contentPadding: const EdgeInsets.all(1.0),
+        prefixStyle: themeStyle,
+        suffixStyle: themeStyle,
+        counterStyle: themeStyle,
+        filled: true,
+        fillColor: Colors.red,
+        border: InputBorder.none,
+      ),
+    );
 
     expect(decoration.labelStyle, decorationStyle);
     expect(decoration.helperStyle, decorationStyle);
@@ -1143,14 +1146,5 @@ void main() {
     expect(decoration.filled, false);
     expect(decoration.fillColor, Colors.blue);
     expect(decoration.border, const OutlineInputBorder());
-
-    // InputDecoration (baseDecoration) defines null border
-    decoration = const InputDecorationTheme(
-      border: const UnderlineInputBorder(),
-    ).inputDecoration(baseDecoration: const InputDecoration(
-      border: null,
-    ));
-
-    expect(decoration.border, null);
   });
 }
