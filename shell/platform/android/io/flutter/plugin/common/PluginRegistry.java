@@ -81,6 +81,13 @@ public interface PluginRegistry {
         Context context();
 
         /**
+        * Returns the active {@link Context}.
+        *
+        * @return the current {@link #activity() Activity}, if not null, otherwise the {@link #context() Application}.
+        */
+        Context activeContext();
+
+        /**
          * Returns a {@link BinaryMessenger} which the plugin can use for
          * creating channels for communicating with the Dart side.
          */
