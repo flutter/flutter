@@ -394,8 +394,8 @@ class ThemeData {
   /// A text theme that contrasts with the accent color.
   final TextTheme accentTextTheme;
 
-  /// The default input decoration to use for [InputDecorator], [TextField],
-  /// and [TextFormField] is based on this value.
+  /// The default [InputDecoration] values for [InputDecorator], [TextField],
+  /// and [TextFormField] are based on this theme.
   ///
   /// See [InputDecoration.applyDefaults].
   final InputDecorationTheme inputDecorationTheme;

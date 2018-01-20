@@ -1265,8 +1265,9 @@ class InputDecorator extends StatefulWidget {
 
   /// The text and styles to use when decorating the child.
   ///
-  /// TBD ---- If null, `decoration` defaults to the `inputDecoration` value from
-  /// the current [Theme], see [ThemeData.inputDecorationTheme].
+  /// If null, `const InputDecoration()` is used. Null [InputDecoration]
+  /// properties are initialized with the corresponding values from
+  /// [ThemeData.inputDecorationTheme].
   final InputDecoration decoration;
 
   /// The style on which to base the label, hint, counter, and error styles
@@ -1553,7 +1554,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
     final Color activeColor = _getActiveColor(themeData);
-    final bool decorationIsDense = (decoration.isDense ?? false);
+    final bool decorationIsDense = decoration.isDense == true; // isDense == null, same as false
     final double iconSize = decorationIsDense ? 18.0 : 24.0;
     final Color iconColor = isFocused ? activeColor : Colors.black45;
 
