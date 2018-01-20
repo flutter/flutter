@@ -389,6 +389,10 @@ class DragTarget<T> extends StatefulWidget {
 
   /// Called to determine whether this widget is interested in receiving a given
   /// piece of data being dragged over this drag target.
+  ///
+  /// Called when a piece of data enters the target.  This will be followed by
+  /// either [onAccept], if the data is dropped, or [onLeave], if the drag
+  /// leaves the target.
   final DragTargetWillAccept<T> onWillAccept;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
