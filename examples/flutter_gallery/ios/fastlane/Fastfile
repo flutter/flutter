@@ -1,0 +1,43 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Push a new release to TestFlight"
+  lane :build_and_deploy_testflight do
+    get_certificates
+    get_provisioning_profile
+    # resign(
+    #   ipa: "../build/ios/iphoneos/Runner.app",
+    #   signing_identity: "iPhone Distribution: Store Ladd (S8QB4VV633)",
+    # )
+    disable_automatic_code_signing
+    update_project_provisioning(
+      xcodeproj: "Runner.xcodeproj",
+      target_filter: "Runner",
+      build_configuration: "Release",
+    )
+    build_ios_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "app-store",
+      # codesigning_identity: "iPhone Distribution: Store Ladd (S8QB4VV633)",
+      # export_options: {
+      #   provisioningProfiles: {
+      #     "io.flutter.demo.gallery" => "iPhone Distribution: Store Ladd (S8QB4VV633)",
+      #   }
+      # }
+    )
+    enable_automatic_code_signing
+    upload_to_testflight
+  end
+end
