@@ -44,7 +44,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       done
     fi
 
-    if [ "$TRAVIS_BRANCH" == "alpha" ]; then
+    if [ "$TRAVIS_BRANCH" == "dev" ]; then
       while : ; do
         firebase deploy --project docs-flutter-io && break
         echo Error: Unable to deploy documentation to firebase. Retrying in five seconds...
