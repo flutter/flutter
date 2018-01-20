@@ -111,9 +111,20 @@ void main(List<String> args) {
     exit(0);
   }
 
+  // Publish the archive before pushing the tag so that if something fails in
+  // the publish step, we can clean up.
+  try {
+    new ArchivePublisher(hash, version, 'dev')
+      ..publishArchive();
+  } on Exception catch (e) {
+    print('Archive publishing failed: $e');
+    runGit('tag -d $version', 'remove the tag you did not want to publish');
+    print('The dev roll has been aborted.');
+    exit(0);
+  }
+
   runGit('push upstream $version', 'publish the version');
   runGit('push upstream HEAD:dev', 'land the new version on the "dev" branch');
-  publishArchive(hash, version, 'dev');
   print('Flutter version $version has been rolled to the "dev" channel!');
 }
 
