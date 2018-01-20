@@ -16,7 +16,6 @@ import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
-import 'base/utils.dart' show isRunningOnBot;
 import 'base/version.dart';
 import 'cache.dart';
 import 'device.dart';
@@ -41,15 +40,13 @@ class Doctor {
       if (iosWorkflow.appliesToHostPlatform)
         _validators.add(iosWorkflow);
 
-      if (!isRunningOnBot) {
-        final List<DoctorValidator> ideValidators = <DoctorValidator>[];
-        ideValidators.addAll(AndroidStudioValidator.allValidators);
-        ideValidators.addAll(IntelliJValidator.installedValidators);
-        if (ideValidators.isNotEmpty)
-          _validators.addAll(ideValidators);
-        else
-          _validators.add(new NoIdeValidator());
-      }
+      final List<DoctorValidator> ideValidators = <DoctorValidator>[];
+      ideValidators.addAll(AndroidStudioValidator.allValidators);
+      ideValidators.addAll(IntelliJValidator.installedValidators);
+      if (ideValidators.isNotEmpty)
+        _validators.addAll(ideValidators);
+      else
+        _validators.add(new NoIdeValidator());
 
       if (deviceManager.canListAnything)
         _validators.add(new DeviceValidator());
