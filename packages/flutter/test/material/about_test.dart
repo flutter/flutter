@@ -76,36 +76,36 @@ void main() {
   });
 
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
-    final List<String> log = <String>[];
-
-    Future<Null> licenseFuture;
     LicenseRegistry.addLicense(() {
-      log.add('license1');
-      licenseFuture = tester.pumpWidget(new Container());
-      return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[]);
+      return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        new LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB')
+      ]);
     });
 
     LicenseRegistry.addLicense(() {
-      log.add('license2');
       return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        new LicenseEntryWithLineBreaks(<String>[ 'Another package '], 'Another license')
+        new LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license')
       ]);
     });
 
     await tester.pumpWidget(
       new MaterialApp(
         home: const Center(
-          child: const LicensePage()
+          child: const LicensePage(),
         ),
       ),
     );
 
-    expect(licenseFuture, isNotNull);
-    await licenseFuture;
+    expect(find.text('AAA'), findsNothing);
+    expect(find.text('BBB'), findsNothing);
+    expect(find.text('Another package'), findsNothing);
+    expect(find.text('Another license'), findsNothing);
 
-    // We should not hit an exception here.
-    await tester.idle();
+    await tester.pumpAndSettle();
 
-    expect(log, equals(<String>['license1', 'license2']));
+    expect(find.text('AAA'), findsOneWidget);
+    expect(find.text('BBB'), findsOneWidget);
+    expect(find.text('Another package'), findsOneWidget);
+    expect(find.text('Another license'), findsOneWidget);
   });
 }
