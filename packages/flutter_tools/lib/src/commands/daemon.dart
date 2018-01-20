@@ -354,8 +354,9 @@ class AppDomain extends Domain {
     String projectAssets,
     bool ipv6: false,
   }) async {
-    if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator)
+    if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
       throw '${toTitleCase(options.buildInfo.modeName)} mode is not supported for emulators.';
+    }
 
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = fs.currentDirectory;
