@@ -252,6 +252,14 @@ class NestedScrollView extends StatefulWidget {
   /// the [PrimaryScrollController] provided by the [NestedScrollView].
   final Widget body;
 
+  /// Returns the [SliverOverlapAbsorberHandle] of the nearest ancestor
+  /// [NestedScrollView].
+  ///
+  /// This is necessary to configure the [SliverOverlapAbsorber] and
+  /// [SliverOverlapInjector] widgets.
+  ///
+  /// For sample code showing how to use this method, see the [NestedScrollView]
+  /// documentation.
   static SliverOverlapAbsorberHandle sliverOverlapAbsorberHandleFor(BuildContext context) {
     final _InheritedNestedScrollView target = context.inheritFromWidgetOfExactType(_InheritedNestedScrollView);
     assert(target != null, 'NestedScrollView.sliverOverlapAbsorberHandleFor must be called with a context that contains a NestedScrollView.');
@@ -926,9 +934,11 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   double applyFullDragUpdate(double delta) {
     assert(delta != 0.0);
     final double oldPixels = pixels;
+    // Apply friction:
     final double newPixels = pixels - physics.applyPhysicsToUserOffset(this, delta);
     if (oldPixels == newPixels)
       return 0.0; // delta must have been so small we dropped it during floating point addition
+    // Check for overscroll:
     final double overscroll = physics.applyBoundaryConditions(this, newPixels);
     final double actualNewPixels = newPixels - overscroll;
     if (actualNewPixels != oldPixels) {
@@ -1304,6 +1314,10 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
     this.child = child;
   }
 
+  /// The object in which the absorbed overlap is recorded.
+  ///
+  /// A particular [SliverOverlapAbsorberHandle] can only be assigned to a
+  /// single [RenderSliverOverlapAbsorber] at a time.
   SliverOverlapAbsorberHandle get handle => _handle;
   SliverOverlapAbsorberHandle _handle;
   set handle(SliverOverlapAbsorberHandle value) {

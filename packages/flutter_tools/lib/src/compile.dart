@@ -58,9 +58,9 @@ class _StdoutHandler {
 Future<String> compile(
     {String sdkRoot,
     String mainPath,
-    bool linkPlatformKernelIn : false,
-    bool aot : false,
-    bool strongMode : false,
+    bool linkPlatformKernelIn: false,
+    bool aot: false,
+    bool strongMode: false,
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath,
     String packagesPath}) async {
