@@ -347,9 +347,12 @@ class AppDomain extends Domain {
     Device device, String projectDirectory, String target, String route,
     DebuggingOptions options, bool enableHotReload, {
     String applicationBinary,
+    bool previewDart2: false,
+    bool strongMode: false,
     String projectRootPath,
     String packagesFilePath,
     String projectAssets,
+    bool ipv6: false,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator)
       throw '${toTitleCase(options.buildInfo.modeName)} mode is not supported for emulators.';
@@ -369,9 +372,12 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         usesTerminalUI: false,
         applicationBinary: applicationBinary,
+        previewDart2: previewDart2,
+        strongMode: strongMode,
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
         projectAssets: projectAssets,
+        ipv6: ipv6,
         hostIsIde: true,
       );
     } else {
@@ -381,6 +387,9 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         usesTerminalUI: false,
         applicationBinary: applicationBinary,
+        previewDart2: previewDart2,
+        strongMode: strongMode,
+        ipv6: ipv6,
       );
     }
 
