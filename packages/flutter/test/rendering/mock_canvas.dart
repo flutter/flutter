@@ -74,6 +74,21 @@ typedef void _CanvasPainterFunction(Canvas canvas);
 /// Patterns are subset matches, meaning that any calls not described by the
 /// pattern are ignored. This allows, for instance, transforms to be skipped.
 abstract class PaintPattern {
+  /// Indicates that a transform is expected next.
+  ///
+  /// Calls are skipped until a call to [Canvas.transform] is found. The call's
+  /// arguments are compared to those provided here. If any fail to match, or if
+  /// no call to [Canvas.transform] is found, then the matcher fails.
+  ///
+  /// Dynamic so matchers can be more easily passed in.
+  ///
+  /// The `matrix4` argument is dynamic so it can be either a [Matcher], or a
+  /// [Float64List] of [double]s. If it is a [Float64List] of [double]s then
+  /// each value in the matrix must match in the expected matrix. A deep
+  /// matching [Matcher] such as [equals] can be used to test each value in the
+  /// matrix with utilities such as [moreOrLessEquals].
+  void transform({ dynamic matrix4 });
+
   /// Indicates that a translation transform is expected next.
   ///
   /// Calls are skipped until a call to [Canvas.translate] is found. The call's
@@ -573,6 +588,11 @@ class _TestRecordingCanvasPaintsAssertionMatcher extends Matcher {
 
 class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher implements PaintPattern {
   final List<_PaintPredicate> _predicates = <_PaintPredicate>[];
+
+  @override
+  void transform({ dynamic matrix4 }) {
+    _predicates.add(new _FunctionPaintPredicate(#transform, <dynamic>[matrix4]));
+  }
 
   @override
   void translate({ double x, double y }) {
