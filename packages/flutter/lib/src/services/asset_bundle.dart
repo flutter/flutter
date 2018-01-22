@@ -160,6 +160,15 @@ abstract class CachingAssetBundle extends AssetBundle {
     final ByteData data = await load(key);
     if (data == null)
       throw new FlutterError('Unable to load asset: $key');
+    if (data.lengthInBytes < 10 * 1024) {
+      // 10KB takes about 3ms to parse on a Pixel 2 XL.
+      // See: https://github.com/dart-lang/sdk/issues/31954
+      return UTF8.decode(data.buffer.asUint8List());
+    }
+    return compute(_utf8decode, data, debugLabel: 'UTF8 decode for "$key"');
+  }
+
+  static String _utf8decode(ByteData data) {
     return UTF8.decode(data.buffer.asUint8List());
   }
 
