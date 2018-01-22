@@ -8,6 +8,7 @@ dependencies:
   intl: 0.15.2
   meta: 1.1.1
   path: 1.5.1
+  process: 2.0.7
 
   async: 2.0.3 # TRANSITIVE DEPENDENCY
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
@@ -18,3 +19,7 @@ dependencies:
   source_span: 1.4.0 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
+
+dev_dependencies:
+  test: 0.12.26
+  mockito: 2.2.1

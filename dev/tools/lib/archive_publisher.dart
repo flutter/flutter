@@ -6,20 +6,25 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 
 class ArchivePublisherException implements Exception {
-  ArchivePublisherException(this.message, [this.result]);
+  ArchivePublisherException(this.message, this.result);
 
   final String message;
   final ProcessResult result;
 
   @override
   String toString() {
-    if (message == null) {
-      return 'ArchivePublisherException';
+    String output = 'ArchivePublisherException';
+    if (message != null) {
+      output += ': $message';
     }
-    final String stdout = result?.stdout ?? '';
-    return 'ArchivePublisherException: $message' + (stdout.isNotEmpty ? ':\n$stdout' : '');
+    final String stderr = result?.stderr ?? '';
+    if (stderr.isNotEmpty) {
+      output += ':\n$result.stderr';
+    }
+    return output;
   }
 }
 
@@ -32,11 +37,17 @@ class ArchivePublisherException implements Exception {
 /// "dev" or "beta".
 ///
 class ArchivePublisher {
-  ArchivePublisher(this.revision, this.version, this.channel);
+  ArchivePublisher(
+    this.revision,
+    this.version,
+    this.channel, {
+    this.processManager = const LocalProcessManager(),
+  });
 
   final String revision;
   final String version;
   final String channel;
+  final ProcessManager processManager;
 
   static String gsBase = 'gs://flutter_infra';
   static String releaseFolder = '/releases';
@@ -51,21 +62,28 @@ class ArchivePublisher {
     final List<String> platforms = <String>['linux', 'mac', 'win'];
     final Map<String, String> metadata = <String, String>{};
     for (String platform in platforms) {
-      final String src = builtArchivePath(platform);
-      final String dest = destinationArchivePath(platform);
+      final String src = _builtArchivePath(platform);
+      final String dest = _destinationArchivePath(platform);
       final String srcGsPath = '$gsBase$src';
-      final String destGsPath = '$gsBase$dest';
-      cloudCopy(srcGsPath, destGsPath);
+      final String destGsPath = '$gsBase$releaseFolder$dest';
+      _cloudCopy(srcGsPath, destGsPath);
       metadata['${platform}_archive'] =
-          '$channel/$platform/${dest.substring(releaseFolder.length)}';
+          '$channel/$platform$dest';
     }
     metadata['release_date'] = new DateTime.now().toUtc().toIso8601String();
     metadata['version'] = version;
-    updateMetadata(metadata);
+    _updateMetadata(metadata);
   }
 
-  void updateMetadata(Map<String, String> metadata) {
-    ProcessResult result = runGsUtil(<String>['cat', metadataGsPath]);
+  void checkForGSUtilAccess() {
+    final ProcessResult result = _runGsUtil(<String>['ls', gsBase]);
+    if (result.exitCode != 0) {
+      throw new ArchivePublisherException('GSUtil cannot list $gsBase: ${result.stderr}', result);
+    }
+  }
+
+  void _updateMetadata(Map<String, String> metadata) {
+    ProcessResult result = _runGsUtil(<String>['cat', metadataGsPath]);
     if (result.exitCode != 0) {
       throw new ArchivePublisherException(
           'Unable to get existing metadata at $metadataGsPath', result);
@@ -77,19 +95,20 @@ class ArchivePublisher {
     final Directory tempDir = Directory.systemTemp.createTempSync('flutter_');
     final File tempFile = new File(path.join(tempDir.absolute.path, 'releases.json'));
     tempFile.writeAsStringSync(json.encode(jsonData));
-    result = runGsUtil(<String>['cp', metadataGsPath, '$metadataGsPath.1']);
+    result = _runGsUtil(<String>['cp', metadataGsPath, '$metadataGsPath.1']);
     if (result.exitCode != 0) {
       throw new ArchivePublisherException(
           'Unable to backup existing metadata from $metadataGsPath to $metadataGsPath.1', result);
     }
-    result = runGsUtil(<String>['cp', tempFile.absolute.path, metadataGsPath]);
+    result = _runGsUtil(<String>['cp', tempFile.absolute.path, metadataGsPath]);
+    tempDir.delete(recursive: true);
     if (result.exitCode != 0) {
       throw new ArchivePublisherException(
           'Unable to overwrite existing metadata at $metadataGsPath:\n${result.stderr}', result);
     }
   }
 
-  String getArchiveSuffix(String platform) {
+  String _getArchiveSuffix(String platform) {
     switch (platform) {
       case 'linux':
       case 'mac':
@@ -102,34 +121,27 @@ class ArchivePublisher {
     }
   }
 
-  String builtArchivePath(String platform) {
+  String _builtArchivePath(String platform) {
     final String shortRevision = revision.substring(0, revision.length > 10 ? 10 : revision.length);
     final String archivePathBase = '/flutter/$revision/$archivePrefix';
-    final String suffix = getArchiveSuffix(platform);
+    final String suffix = _getArchiveSuffix(platform);
     return '$archivePathBase${platform}_$shortRevision$suffix';
   }
 
-  String destinationArchivePath(String platform) {
-    final String archivePathBase = '$releaseFolder/$channel/$platform/$archivePrefix';
-    final String suffix = getArchiveSuffix(platform);
+  String _destinationArchivePath(String platform) {
+    final String archivePathBase = '/$channel/$platform/$archivePrefix';
+    final String suffix = _getArchiveSuffix(platform);
     return '$archivePathBase${platform}_$version-$channel$suffix';
   }
 
-  void checkForGSUtilAccess() {
-    final ProcessResult result = runGsUtil(<String>['ls', gsBase]);
-    if (result.exitCode != 0) {
-      throw new ArchivePublisherException('GSUtil cannot access $gsBase: ${result.stderr}');
-    }
+  ProcessResult _runGsUtil(List<String> args) {
+    return processManager.runSync(<String>['gsutil']..addAll(args));
   }
 
-  ProcessResult runGsUtil(List<String> args) {
-    return Process.runSync('gsutil', args);
-  }
-
-  void cloudCopy(String src, String dest) {
-    final ProcessResult result = runGsUtil(<String>['cp', src, dest]);
+  void _cloudCopy(String src, String dest) {
+    final ProcessResult result = _runGsUtil(<String>['cp', src, dest]);
     if (result.exitCode != 0) {
-      throw new ArchivePublisherException('GSUtil copy command failed: ${result.stderr}');
+      throw new ArchivePublisherException('GSUtil copy command failed: ${result.stderr}', result);
     }
   }
 }

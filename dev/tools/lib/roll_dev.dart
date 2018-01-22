@@ -114,10 +114,9 @@ void main(List<String> args) {
   // Publish the archive before pushing the tag so that if something fails in
   // the publish step, we can clean up.
   try {
-    new ArchivePublisher(hash, version, 'dev')
-      ..publishArchive();
-  } on Exception catch (e) {
-    print('Archive publishing failed: $e');
+    new ArchivePublisher(hash, version, 'dev')..publishArchive();
+  } on ArchivePublisherException catch (e) {
+    print('Archive publishing failed.\n$e');
     runGit('tag -d $version', 'remove the tag you did not want to publish');
     print('The dev roll has been aborted.');
     exit(0);
