@@ -1,4 +1,4 @@
-Signature: f0d21e351fa74cadfa67e97d6efe4dbd
+Signature: 30b6bfaed9ad66fee7e27adb83eb3e42
 
 UNUSED LICENSES:
 
@@ -17377,6 +17377,7 @@ FILE: ../../../third_party/skia/debugger/QT/Icons/rewind.png
 FILE: ../../../third_party/skia/debugger/QT/Icons/skia.png
 FILE: ../../../third_party/skia/debugger/QT/SkIcons.qrc
 FILE: ../../../third_party/skia/debugger/QT/qrc_SkIcons.cpp
+FILE: ../../../third_party/skia/docs/SkAutoCanvasRestore_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkBitmap_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkCanvas_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkIPoint16_Reference.bmh
@@ -19531,7 +19532,6 @@ FILE: ../../../third_party/skia/gm/text_scale_skew.cpp
 FILE: ../../../third_party/skia/gm/thinconcavepaths.cpp
 FILE: ../../../third_party/skia/gm/tonalshadows.cpp
 FILE: ../../../third_party/skia/gm/tosrgb_colorfilter.cpp
-FILE: ../../../third_party/skia/gm/xform_image_gen.cpp
 FILE: ../../../third_party/skia/include/android/SkAndroidFrameworkUtils.h
 FILE: ../../../third_party/skia/include/atlastext/SkAtlasTextContext.h
 FILE: ../../../third_party/skia/include/atlastext/SkAtlasTextFont.h
@@ -19591,8 +19591,6 @@ FILE: ../../../third_party/skia/src/core/SkBlitter_RGB565.cpp
 FILE: ../../../third_party/skia/src/core/SkClipStackDevice.cpp
 FILE: ../../../third_party/skia/src/core/SkClipStackDevice.h
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformCanvas.cpp
-FILE: ../../../third_party/skia/src/core/SkColorSpaceXformImageGenerator.cpp
-FILE: ../../../third_party/skia/src/core/SkColorSpaceXformImageGenerator.h
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformer.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformer.h
 FILE: ../../../third_party/skia/src/core/SkColorSpace_New.cpp
@@ -19918,10 +19916,14 @@ ORIGIN: ../../../third_party/skia/experimental/sksg/effects/SkSGMaskEffect.cpp +
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/experimental/sksg/SkSGImage.cpp
 FILE: ../../../third_party/skia/experimental/sksg/SkSGImage.h
+FILE: ../../../third_party/skia/experimental/sksg/SkSGScene.cpp
+FILE: ../../../third_party/skia/experimental/sksg/SkSGScene.h
 FILE: ../../../third_party/skia/experimental/sksg/effects/SkSGMaskEffect.cpp
 FILE: ../../../third_party/skia/experimental/sksg/effects/SkSGMaskEffect.h
 FILE: ../../../third_party/skia/experimental/sksg/effects/SkSGOpacityEffect.cpp
 FILE: ../../../third_party/skia/experimental/sksg/effects/SkSGOpacityEffect.h
+FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGGeometryTransform.cpp
+FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGGeometryTransform.h
 FILE: ../../../third_party/skia/experimental/sksg/paint/SkSGGradient.cpp
 FILE: ../../../third_party/skia/experimental/sksg/paint/SkSGGradient.h
 FILE: ../../../third_party/skia/fuzz/FuzzCommon.h
@@ -19943,6 +19945,7 @@ FILE: ../../../third_party/skia/src/core/SkCubicMap.h
 FILE: ../../../third_party/skia/src/core/SkRectPriv.h
 FILE: ../../../third_party/skia/src/core/SkSafeRange.h
 FILE: ../../../third_party/skia/src/effects/SkShaderMaskFilter.cpp
+FILE: ../../../third_party/skia/src/gpu/GrFPArgs.h
 FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceProviderPriv.h
@@ -20071,7 +20074,6 @@ FILE: ../../../third_party/skia/include/core/SkPathMeasure.h
 FILE: ../../../third_party/skia/include/core/SkPoint.h
 FILE: ../../../third_party/skia/include/core/SkPostConfig.h
 FILE: ../../../third_party/skia/include/core/SkPreConfig.h
-FILE: ../../../third_party/skia/include/core/SkRasterizer.h
 FILE: ../../../third_party/skia/include/core/SkRect.h
 FILE: ../../../third_party/skia/include/core/SkRefCnt.h
 FILE: ../../../third_party/skia/include/core/SkScalar.h
@@ -20088,7 +20090,6 @@ FILE: ../../../third_party/skia/include/effects/SkCornerPathEffect.h
 FILE: ../../../third_party/skia/include/effects/SkDashPathEffect.h
 FILE: ../../../third_party/skia/include/effects/SkDiscretePathEffect.h
 FILE: ../../../third_party/skia/include/effects/SkGradientShader.h
-FILE: ../../../third_party/skia/include/effects/SkLayerRasterizer.h
 FILE: ../../../third_party/skia/include/effects/SkTableMaskFilter.h
 FILE: ../../../third_party/skia/include/private/SkFixed.h
 FILE: ../../../third_party/skia/include/private/SkFloatingPoint.h
@@ -20147,7 +20148,6 @@ FILE: ../../../third_party/skia/src/core/SkPaint.cpp
 FILE: ../../../third_party/skia/src/core/SkPath.cpp
 FILE: ../../../third_party/skia/src/core/SkPathEffect.cpp
 FILE: ../../../third_party/skia/src/core/SkPointPriv.h
-FILE: ../../../third_party/skia/src/core/SkRasterizer.cpp
 FILE: ../../../third_party/skia/src/core/SkRect.cpp
 FILE: ../../../third_party/skia/src/core/SkRegion.cpp
 FILE: ../../../third_party/skia/src/core/SkRegionPriv.h
@@ -20184,7 +20184,6 @@ FILE: ../../../third_party/skia/src/effects/SkEmbossMask.cpp
 FILE: ../../../third_party/skia/src/effects/SkEmbossMask.h
 FILE: ../../../third_party/skia/src/effects/SkEmbossMaskFilter.cpp
 FILE: ../../../third_party/skia/src/effects/SkEmbossMaskFilter.h
-FILE: ../../../third_party/skia/src/effects/SkLayerRasterizer.cpp
 FILE: ../../../third_party/skia/src/images/SkPngEncoder.cpp
 FILE: ../../../third_party/skia/src/ports/SkDebug_android.cpp
 FILE: ../../../third_party/skia/src/ports/SkDebug_stdio.cpp
