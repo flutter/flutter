@@ -118,7 +118,7 @@ class AssetBundle {
     for (String packageName in packageMap.map.keys) {
       final Uri package = packageMap.map[packageName];
       if (package != null && package.scheme == 'file') {
-        final String packageManifestPath = package.resolve('../pubspec.yaml').path;
+        final String packageManifestPath = fs.path.fromUri(package.resolve('../pubspec.yaml'));
         final FlutterManifest packageFlutterManifest = await FlutterManifest.createFromPath(packageManifestPath);
         if (packageFlutterManifest == null)
           continue;
