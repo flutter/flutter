@@ -227,10 +227,9 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
         if (clip == null)
             return null;
 
-        if ((format == null || format.equals(kTextPlainFormat)) &&
-            clip.getDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
+        if (format == null || format.equals(kTextPlainFormat)) {
             JSONObject result = new JSONObject();
-            result.put("text", clip.getItemAt(0).getText().toString());
+            result.put("text", clip.getItemAt(0).coerceToText(mActivity));
             return result;
         }
 
