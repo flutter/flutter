@@ -6,12 +6,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:process/process.dart';
+import 'package:mockito/mockito.dart';
 
-class FakeProcessManager implements ProcessManager {
+class FakeProcessManager extends Mock implements ProcessManager {
   FakeProcessManager(this.results);
 
   final Map<String, List<ProcessResult>> results;
-  List<int> lastStdin = <int>[];
+  String lastStdin = '';
 
   @override
   Future<Process> start(List<dynamic> command,
@@ -22,10 +23,10 @@ class FakeProcessManager implements ProcessManager {
       ProcessStartMode mode: ProcessStartMode.NORMAL}) {
     final ProcessResult nextResult = results[command.join(' ')]?.removeAt(0);
     return new Future<Process>.value(new FakeProcess(
-      nextResult.stdout,
-      desiredStderr: nextResult.stderr,
-      stdinResults: lastStdin,
-      shouldError: nextResult.exitCode != 0,
+      nextResult?.stdout ?? <int>[],
+      desiredStderr: nextResult?.stderr ?? <int>[],
+      stdinResults: (String input) => lastStdin = lastStdin + input,
+      shouldError: (nextResult?.exitCode ?? 0) != 0,
     ));
   }
 
@@ -62,11 +63,30 @@ class FakeProcessManager implements ProcessManager {
   }
 }
 
-class FakeProcess implements Process {
-  FakeProcess(List<int> desiredStdout,
-      {List<int> desiredStderr = const <int>[], List<int> stdinResults, this.shouldError = false})
-      : stdoutStream = new FakeStringStream(desiredStdout, shouldError),
-        stderrStream = new FakeStringStream(desiredStderr, shouldError),
+class MockProcess extends Mock implements Process {
+  MockProcess(this._stdout, [this._stderr, this._exitCode]);
+
+  String _stdout;
+  String _stderr;
+  int _exitCode;
+
+  @override
+  Stream<List<int>> get stdout =>
+    new Stream<List<int>>.fromIterable(<List<int>>[_stdout.codeUnits]);
+
+  @override
+  Stream<List<int>> get stderr =>
+    new Stream<List<int>>.fromIterable(<List<int>>[_stderr.codeUnits]);
+
+  @override
+  Future<int> get exitCode => new Future<int>.value(_exitCode);
+}
+
+class FakeProcess extends Mock implements Process {
+  FakeProcess(String desiredStdout,
+      {String desiredStderr = '', void stdinResults(String input), this.shouldError = false})
+      : stdoutStream = new Stream<List<int>>.fromIterable(<List<int>>[desiredStdout.codeUnits]),
+        stderrStream = new Stream<List<int>>.fromIterable(<List<int>>[desiredStderr.codeUnits]),
         stdinSink = new IOSink(new StringStreamConsumer(stdinResults));
 
   final IOSink stdinSink;
@@ -185,20 +205,22 @@ class FakeStringStream extends Stream<List<int>> {
   }
 }
 
+typedef void StringReceivedCallback(String received);
+
 class StringStreamConsumer implements StreamConsumer<List<int>> {
-  StringStreamConsumer(this.accumulatedData);
+  StringStreamConsumer(this.sendString);
 
   List<Stream<List<int>>> streams = <Stream<List<int>>>[];
   List<StreamSubscription<List<int>>> subscriptions = <StreamSubscription<List<int>>>[];
   List<Completer<dynamic>> completers = <Completer<dynamic>>[];
-  List<int> accumulatedData;
+  StringReceivedCallback sendString;
 
   @override
   Future<dynamic> addStream(Stream<List<int>> value) {
     streams.add(value);
     completers.add(new Completer<dynamic>());
     subscriptions.add(value.listen((List<int> data) {
-      accumulatedData?.addAll(data);
+      sendString(utf8.decode(data));
     }));
     subscriptions.last.onDone(() => completers.last.complete(null));
     return new Future<dynamic>.value(null);
