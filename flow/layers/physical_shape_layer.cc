@@ -13,6 +13,30 @@ PhysicalShapeLayer::PhysicalShapeLayer() : isRect_(false) {}
 
 PhysicalShapeLayer::~PhysicalShapeLayer() = default;
 
+void PhysicalShapeLayer::set_path(const SkPath& path) {
+  path_ = path;
+  isRect_ = false;
+  SkRect rect;
+  if (path.isRect(&rect)) {
+    isRect_ = true;
+    frameRRect_ = SkRRect::MakeRect(rect);
+  } else if (path.isRRect(&frameRRect_)) {
+    isRect_ = frameRRect_.isRect();
+  } else if (path.isOval(&rect)) {
+    // isRRect returns false for ovals, so we need to explicitly check isOval
+    // as well.
+    frameRRect_ = SkRRect::MakeOval(rect);
+  } else {
+    // Scenic currently doesn't provide an easy way to create shapes from
+    // arbitrary paths.
+    // For shapes that cannot be represented as a rounded rectangle we
+    // default to use the bounding rectangle.
+    // TODO(amirh): fix this once we have a way to create a Scenic shape from
+    // an SkPath.
+    frameRRect_ = SkRRect::MakeRect(path.getBounds());
+  }
+}
+
 void PhysicalShapeLayer::Preroll(PrerollContext* context,
                                  const SkMatrix& matrix) {
   SkRect child_paint_bounds;

@@ -14,25 +14,7 @@ class PhysicalShapeLayer : public ContainerLayer {
   PhysicalShapeLayer();
   ~PhysicalShapeLayer() override;
 
-  void set_path(const SkPath& path) {
-    path_ = path;
-    isRect_ = false;
-    SkRect rect;
-    if (path.isRect(&rect)) {
-      isRect_ = true;
-      frameRRect_ = SkRRect::MakeRect(rect);
-    } else if (path.isRRect(&frameRRect_)) {
-      isRect_ = frameRRect_.isRect();
-    } else {
-      // Scenic currently doesn't provide an easy way to create shapes from
-      // arbitrary paths.
-      // For shapes that cannot be represented as a rounded rectangle we
-      // default to use the bounding rectangle.
-      // TODO(amirh): fix this once we have a way to create a Scenic shape from
-      // an SkPath.
-      frameRRect_ = SkRRect::MakeRect(path.getBounds());
-    }
-  }
+  void set_path(const SkPath& path);
 
   void set_elevation(float elevation) { elevation_ = elevation; }
   void set_color(SkColor color) { color_ = color; }
