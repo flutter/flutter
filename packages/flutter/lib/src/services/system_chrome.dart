@@ -157,8 +157,23 @@ class SystemChrome {
   /// system UI styles. For instance, to change the system UI style on a new
   /// page, consider calling when pushing/popping a new [PageRoute].
   ///
+  /// However, the [AppBar] widget automatically sets the system overlay style
+  /// based on its [AppBar.brightness], so configure that instead of calling
+  /// this method directly. Likewise, do the same for [CupertinoNavigationBar]
+  /// via [CupertinoNavigationBar.backgroundColor].
+  ///
   /// If a particular style is not supported on the platform, selecting it will
   /// have no effect.
+  ///
+  /// ## Sample Code
+  ///
+  /// ```dart
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+  ///   return /* ... */;
+  /// }
+  /// ```
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
     assert(style != null);
 
