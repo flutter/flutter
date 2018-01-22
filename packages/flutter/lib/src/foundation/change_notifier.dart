@@ -32,6 +32,16 @@ abstract class Listenable {
   void removeListener(VoidCallback listener);
 }
 
+/// An interface for subclasses of [Listenable] that expose a [value].
+///
+/// This interface is implemented by [ValueNotifier<T>] and [Animation<T>], and
+/// allows other APIs to accept either of those implementations interchangeably.
+abstract class ValueListenable<T> extends Listenable {
+  /// The current value of the object. When the value changes, the callbacks
+  /// registered with [addListener] will be invoked.
+  T get value;
+}
+
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
@@ -169,13 +179,14 @@ class _MergingListenable extends ChangeNotifier {
 /// A [ChangeNotifier] that holds a single value.
 ///
 /// When [value] is replaced, this class notifies its listeners.
-class ValueNotifier<T> extends ChangeNotifier {
+class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value);
 
   /// The current value stored in this notifier.
   ///
   /// When the value is replaced, this class notifies its listeners.
+  @override
   T get value => _value;
   T _value;
   set value(T newValue) {

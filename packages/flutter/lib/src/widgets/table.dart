@@ -340,7 +340,12 @@ class _TableElement extends RenderObjectElement {
     assert(renderObject != null);
     renderObject.setFlatChildren(
       _children.isNotEmpty ? _children[0].children.length : 0,
-      _children.expand((_TableElementRow row) => row.children.map((Element child) => child.renderObject)).toList()
+      _children.expand<RenderBox>((_TableElementRow row) {
+        return row.children.map<RenderBox>((Element child) {
+          final RenderBox box = child.renderObject;
+          return box;
+        });
+      }).toList()
     );
   }
 

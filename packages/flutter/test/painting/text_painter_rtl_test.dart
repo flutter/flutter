@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -317,7 +319,7 @@ void main() {
         const TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
       ],
     );
-  });
+  }, skip: Platform.isWindows); // Ahem-based tests don't yet quite work on Windows
 
   test('TextPainter - line wrap mid-word', () {
     final TextPainter painter = new TextPainter()

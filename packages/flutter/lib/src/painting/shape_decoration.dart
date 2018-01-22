@@ -150,6 +150,20 @@ class ShapeDecoration extends Decoration {
   ///
   /// The [shape] property specifies the outline (border) of the decoration. The
   /// shape must not be null.
+  ///
+  /// ## Directionality-dependent shapes
+  ///
+  /// Some [ShapeBorder] subclasses are sensitive to the [TextDirection]. The
+  /// direction that is provided to the border (e.g. for its [ShapeBorder.paint]
+  /// method) is the one specified in the [ImageConfiguration]
+  /// ([ImageConfiguration.textDirection]) provided to the [BoxPainter] (via its
+  /// [BoxPainter.paint method). The [BoxPainter] is obtained when
+  /// [createBoxPainter] is called.
+  ///
+  /// When a [ShapeDecoration] is used with a [Container] widget or a
+  /// [DecoratedBox] widget (which is what [Container] uses), the
+  /// [TextDirection] specified in the [ImageConfiguration] is obtained from the
+  /// ambient [Directionality], using [createLocalImageConfiguration].
   final ShapeBorder shape;
 
   /// The inset space occupied by the [shape]'s border.

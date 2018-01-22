@@ -257,9 +257,12 @@ class RunCommand extends RunCommandBase {
           devices.first, fs.currentDirectory.path, targetFile, route,
           _createDebuggingOptions(), hotMode,
           applicationBinary: argResults['use-application-binary'],
+          previewDart2: argResults['preview-dart-2'],
+          strongMode: argResults['strong'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: argResults['packages'],
-          projectAssets: argResults['project-assets']
+          projectAssets: argResults['project-assets'],
+          ipv6: ipv6,
         );
       } catch (error) {
         throwToolExit(error.toString());

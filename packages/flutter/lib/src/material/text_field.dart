@@ -296,10 +296,12 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration.counterText == null;
 
   InputDecoration _getEffectiveDecoration() {
-    if (!needsCounter)
-      return widget.decoration;
+    final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
+      .applyDefaults(Theme.of(context).inputDecorationTheme);
 
-    final InputDecoration effectiveDecoration = widget?.decoration ?? const InputDecoration();
+    if (!needsCounter)
+      return effectiveDecoration;
+
     final String counterText = '${_effectiveController.value.text.runes.length} / ${widget.maxLength}';
     if (_effectiveController.value.text.runes.length > widget.maxLength) {
       final ThemeData themeData = Theme.of(context);
@@ -389,7 +391,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleTapCancel() {
-    _renderEditable.handleTapCancel();
     _cancelCurrentSplash();
   }
 
@@ -415,7 +416,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   void _cancelCurrentSplash() {
     _currentSplash?.cancel();
-    _currentSplash = null;
   }
 
   @override

@@ -73,6 +73,7 @@ function upgrade_flutter () {
 
   local revision=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
   if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -s "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != "$revision" ] || [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
+    rm -f "$FLUTTER_ROOT/version"
     mkdir -p "$FLUTTER_ROOT/bin/cache"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
@@ -125,7 +126,7 @@ if ! hash git 2>/dev/null; then
   exit 1
 fi
 # Test if the flutter directory is a git clone (otherwise git rev-parse HEAD would fail)
-if [ ! -d "$FLUTTER_ROOT/.git" ]; then
+if [ ! -e "$FLUTTER_ROOT/.git" ]; then
   echo "Error: The Flutter directory is not a clone of the GitHub project."
   exit 1
 fi

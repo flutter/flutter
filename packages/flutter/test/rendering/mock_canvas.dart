@@ -292,6 +292,23 @@ abstract class PaintPattern {
   /// If no call to [Canvas.drawParagraph] was made, then this results in failure.
   void paragraph({ ui.Paragraph paragraph, dynamic offset });
 
+  /// Indicates that a shadow is expected next.
+  ///
+  /// The next shadow is examined. Any arguments that are passed to this method
+  /// are compared to the actual [Canvas.drawShadow] call's `paint` argument,
+  /// and any mismatches result in failure.
+  ///
+  /// To introspect the Path object (as it stands after the painting has
+  /// completed), the `includes` and `excludes` arguments can be provided to
+  /// specify points that should be considered inside or outside the path
+  /// (respectively).
+  ///
+  /// If no call to [Canvas.drawShadow] was made, then this results in failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.drawShadow] call are ignored.
+  void shadow({ Iterable<Offset> includes, Iterable<Offset> excludes, Color color, double elevation, bool transparentOccluder });
+
   /// Indicates that an image is expected next.
   ///
   /// The next call to [Canvas.drawImage] is examined, and its arguments
@@ -638,6 +655,11 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
+  void shadow({ Iterable<Offset> includes, Iterable<Offset> excludes, Color color, double elevation, bool transparentOccluder }) {
+    _predicates.add(new _ShadowPredicate(includes: includes, excludes: excludes, color: color, elevation: elevation, transparentOccluder: transparentOccluder));
+  }
+
+  @override
   void image({ ui.Image image, double x, double y, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
     _predicates.add(new _DrawImagePaintPredicate(image: image, x: x, y: y, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
@@ -709,6 +731,24 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
 abstract class _PaintPredicate {
   void match(Iterator<RecordedInvocation> call);
 
+  @protected
+  void checkMethod(Iterator<RecordedInvocation> call, Symbol symbol) {
+    int others = 0;
+    final RecordedInvocation firstCall = call.current;
+    while (!call.current.invocation.isMethod || call.current.invocation.memberName != symbol) {
+      others += 1;
+      if (!call.moveNext())
+        throw new _MismatchedCall(
+          'It called $others other method${ others == 1 ? "" : "s" } on the canvas, '
+          'the first of which was $firstCall, but did not '
+          'call ${_symbolName(symbol)}() at the time where $this was expected.',
+          'The first method that was called when the call to ${_symbolName(symbol)}() '
+          'was expected, $firstCall, was called with the following stack:',
+          firstCall,
+        );
+    }
+  }
+
   @override
   String toString() {
     throw new FlutterError('$runtimeType does not implement toString.');
@@ -734,19 +774,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
 
   @override
   void match(Iterator<RecordedInvocation> call) {
-    int others = 0;
-    final RecordedInvocation firstCall = call.current;
-    while (!call.current.invocation.isMethod || call.current.invocation.memberName != symbol) {
-      others += 1;
-      if (!call.moveNext())
-        throw new _MismatchedCall(
-          'It called $others other method${ others == 1 ? "" : "s" } on the canvas, '
-          'the first of which was $firstCall, but did not '
-          'call $methodName at the time where $this was expected.',
-          'The stack for the call to $firstCall was:',
-          firstCall,
-        );
-    }
+    checkMethod(call, symbol);
     final int actualArgumentCount = call.current.invocation.positionalArguments.length;
     if (actualArgumentCount != argumentCount)
       throw 'It called $methodName with $actualArgumentCount argument${actualArgumentCount == 1 ? "" : "s"}; expected $argumentCount.';
@@ -1008,6 +1036,81 @@ class _ArcPaintPredicate extends _DrawCommandPaintPredicate {
   );
 }
 
+class _ShadowPredicate extends _PaintPredicate {
+  _ShadowPredicate({ this.includes, this.excludes, this.color, this.elevation, this.transparentOccluder });
+
+  final Iterable<Offset> includes;
+  final Iterable<Offset> excludes;
+  final Color color;
+  final double elevation;
+  final bool transparentOccluder;
+
+  static const Symbol symbol = #drawShadow;
+  String get methodName => _symbolName(symbol);
+
+  @protected
+  void verifyArguments(List<dynamic> arguments) {
+    if (arguments.length != 4)
+      throw 'It called $methodName with ${arguments.length} arguments; expected 4.';
+    final Path pathArgument = arguments[0];
+    if (includes != null) {
+      for (Offset offset in includes) {
+        if (!pathArgument.contains(offset))
+          throw 'It called $methodName with a path that unexpectedly did not contain $offset.';
+      }
+    }
+    if (excludes != null) {
+      for (Offset offset in excludes) {
+        if (pathArgument.contains(offset))
+          throw 'It called $methodName with a path that unexpectedly contained $offset.';
+      }
+    }
+    final Color actualColor = arguments[1];
+    if (color != null && actualColor != color)
+      throw 'It called $methodName with a color, $actualColor, which was not exactly the expected color ($color).';
+    final double actualElevation = arguments[2];
+    if (elevation != null && actualElevation != elevation)
+      throw 'It called $methodName with an elevation, $actualElevation, which was not exactly the expected value ($elevation).';
+    final bool actualTransparentOccluder = arguments[3];
+    if (transparentOccluder != null && actualTransparentOccluder != transparentOccluder)
+      throw 'It called $methodName with a transparentOccluder value, $actualTransparentOccluder, which was not exactly the expected value ($transparentOccluder).';
+  }
+
+  @override
+  void match(Iterator<RecordedInvocation> call) {
+    checkMethod(call, symbol);
+    verifyArguments(call.current.invocation.positionalArguments);
+    call.moveNext();
+  }
+
+  @protected
+  void debugFillDescription(List<String> description) {
+    if (includes != null && excludes != null) {
+      description.add('that contains $includes and does not contain $excludes');
+    } else if (includes != null) {
+      description.add('that contains $includes');
+    } else if (excludes != null) {
+      description.add('that does not contain $excludes');
+    }
+    if (color != null)
+      description.add('$color');
+    if (elevation != null)
+      description.add('elevation: $elevation');
+    if (transparentOccluder != null)
+      description.add('transparentOccluder: $transparentOccluder');
+  }
+
+  @override
+  String toString() {
+    final List<String> description = <String>[];
+    debugFillDescription(description);
+    String result = methodName;
+    if (description.isNotEmpty)
+      result += ' with ${description.join(", ")}';
+    return result;
+  }
+}
+
 class _DrawImagePaintPredicate extends _DrawCommandPaintPredicate {
   _DrawImagePaintPredicate({ this.image, this.x, this.y, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawImage, 'an image', 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
@@ -1128,20 +1231,7 @@ class _FunctionPaintPredicate extends _PaintPredicate {
 
   @override
   void match(Iterator<RecordedInvocation> call) {
-    int others = 0;
-    final RecordedInvocation firstCall = call.current;
-    while (!call.current.invocation.isMethod || call.current.invocation.memberName != symbol) {
-      others += 1;
-      if (!call.moveNext())
-        throw new _MismatchedCall(
-          'It called $others other method${ others == 1 ? "" : "s" } on the canvas, '
-          'the first of which was $firstCall, but did not '
-          'call ${_symbolName(symbol)}() at the time where $this was expected.',
-          'The first method that was called when the call to ${_symbolName(symbol)}() '
-          'was expected, $firstCall, was called with the following stack:',
-          firstCall,
-        );
-    }
+    checkMethod(call, symbol);
     if (call.current.invocation.positionalArguments.length != arguments.length)
       throw 'It called ${_symbolName(symbol)} with ${call.current.invocation.positionalArguments.length} arguments; expected ${arguments.length}.';
     for (int index = 0; index < arguments.length; index += 1) {
@@ -1169,20 +1259,7 @@ class _FunctionPaintPredicate extends _PaintPredicate {
 class _SaveRestorePairPaintPredicate extends _PaintPredicate {
   @override
   void match(Iterator<RecordedInvocation> call) {
-    int others = 0;
-    final RecordedInvocation firstCall = call.current;
-    while (!call.current.invocation.isMethod || call.current.invocation.memberName != #save) {
-      others += 1;
-      if (!call.moveNext())
-        throw new _MismatchedCall(
-          'It called $others other method${ others == 1 ? "" : "s" } on the canvas, '
-          'the first of which was $firstCall, but did not '
-          'call save() at the time where $this was expected.',
-          'The first method that was called when the call to save() '
-          'was expected, $firstCall, was called with the following stack:',
-          firstCall,
-        );
-    }
+    checkMethod(call, #save);
     int depth = 1;
     while (depth > 0) {
       if (!call.moveNext())

@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/globals.dart';
 import 'package:json_schema/json_schema.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
 import 'cache.dart';
+import 'globals.dart';
 
 /// A wrapper around the `flutter` section in the  `pubspec.yaml` file.
 class FlutterManifest {
