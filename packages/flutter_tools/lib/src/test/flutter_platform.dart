@@ -199,17 +199,39 @@ class _FlutterPlatform extends PlatformPlugin {
       // Start the engine subprocess.
       printTrace('test $ourTestCount: starting shell process${previewDart2? " in preview-dart-2 mode":""}');
 
-      final String mainDart = previewDart2
-        ? await compile(
-            sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-            incrementalCompilerByteStorePath: '' /* not null is enough */,
-            mainPath: listenerFile.path,
-            packagesPath: PackageMap.globalPackagesPath
-          )
-        : listenerFile.path;
+      String mainDart = listenerFile.path;
+      String bundlePath;
+      bool strongMode = false;
 
-      // bundlePath needs to point to a folder with `platform.dill` file.
-      final String bundlePath = previewDart2 ? artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath) : null;
+      if (previewDart2) {
+        mainDart = await compile(
+          sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+          incrementalCompilerByteStorePath: '' /* not null is enough */,
+          mainPath: listenerFile.path,
+          packagesPath: PackageMap.globalPackagesPath,
+          strongMode: true,
+        );
+
+        // bundlePath needs to point to a folder with `platform.dill` file.
+        final Directory tempBundleDirectory = fs.systemTempDirectory
+            .createTempSync('flutter_bundle_directory');
+        finalizers.add(() async {
+          printTrace('test $ourTestCount: deleting temporary bundle directory');
+          temporaryDirectory.deleteSync(recursive: true);
+        });
+
+        // copy 'vm_platform_strong.dill' into 'platform.dill'
+        final File vmPlatformStrongDill = fs.file(
+            artifacts.getArtifactPath(Artifact.platformKernelStrongDill));
+        final File platformDill = vmPlatformStrongDill.copySync(
+            tempBundleDirectory.childFile('platform.dill').path);
+        if (!platformDill.existsSync()) {
+          printError('unexpected error copying platform kernel file');
+        }
+
+        bundlePath = tempBundleDirectory.path;
+        strongMode = true;
+      }
 
       final Process process = await _startProcess(
         shellPath,
@@ -217,8 +239,9 @@ class _FlutterPlatform extends PlatformPlugin {
         packages: PackageMap.globalPackagesPath,
         enableObservatory: enableObservatory,
         startPaused: startPaused,
-        observatoryPort: explicitObservatoryPort,
         bundlePath: bundlePath,
+        strongMode: strongMode,
+        observatoryPort: explicitObservatoryPort,
       );
       subprocessActive = true;
       finalizers.add(() async {
@@ -489,6 +512,7 @@ void main() {
     String bundlePath,
     bool enableObservatory: false,
     bool startPaused: false,
+    bool strongMode: false,
     int observatoryPort,
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
@@ -515,6 +539,9 @@ void main() {
       command.add('--ipv6');
     if (bundlePath != null) {
       command.add('--flutter-assets-dir=$bundlePath');
+    }
+    if (strongMode) {
+      command.add('--strong');
     }
     command.addAll(<String>[
       '--enable-dart-profiling',
