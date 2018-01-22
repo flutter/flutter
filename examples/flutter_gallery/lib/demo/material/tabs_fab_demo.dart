@@ -67,10 +67,12 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
     });
   }
 
+  static const List<FabPosition> _fabValues = const <FabPosition>[FabPosition.endFloat, FabPosition.centerFloat];
+
   void _showExplanatoryText() {
     if (bottomSheetController != null) {
       setState(() {
-        _fabPosition = FabPosition.values[(FabPosition.values.indexOf(_fabPosition) + 1) % FabPosition.values.length];
+        _fabPosition = _fabValues[(_fabValues.indexOf(_fabPosition) + 1) % _fabValues.length];
       });
     }
     bottomSheetController ??= _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
