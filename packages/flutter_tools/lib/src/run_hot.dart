@@ -265,7 +265,7 @@ class HotRunner extends ResidentRunner {
       // Did not update DevFS because of a Dart source error.
       return false;
     }
-    final bool isFirstUpload = assetBundle.wasBuildOnce() == false;
+    final bool isFirstUpload = assetBundle.wasBuiltOnce() == false;
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       printTrace('Updating assets');

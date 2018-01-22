@@ -50,7 +50,7 @@ class AssetBundle {
     }
   }
 
-  bool wasBuildOnce() => _lastBuildTimestamp != null;
+  bool wasBuiltOnce() => _lastBuildTimestamp != null;
 
   bool needsBuild({String manifestPath: defaultManifestPath}) {
     if (_fixed)
