@@ -402,8 +402,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
     }
 
     void updateSemantics(ByteBuffer buffer, String[] strings) {
-        ArrayList<Integer> updated = new ArrayList<Integer>();
-        ArrayList<Integer> checkedChanged = new ArrayList<Integer>();
+        ArrayList<SemanticsObject> updated = new ArrayList<SemanticsObject>();
         while (buffer.hasRemaining()) {
             int id = buffer.getInt();
             SemanticsObject object = getOrCreateObject(id);
@@ -413,12 +412,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             if (object.hasFlag(Flag.IS_FOCUSED)) {
                 mInputFocusedObject = object;
             }
-            if (mA11yFocusedObject != null && mA11yFocusedObject.id == id
-                    && hadCheckedState && object.hasFlag(Flag.HAS_CHECKED_STATE)
-                    && wasChecked != object.hasFlag(Flag.IS_CHECKED)) {
-                checkedChanged.add(id);
-            }
-            updated.add(id);
+            updated.add(object);
         }
 
         Set<SemanticsObject> visitedObjects = new HashSet<SemanticsObject>();
@@ -439,13 +433,63 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             }
         }
 
-        for (Integer id : updated) {
-            sendAccessibilityEvent(id, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+        // Send accessibility events for updated nodes
+        for (SemanticsObject object : updated) {
+            sendAccessibilityEvent(object.id, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+            if (!object.hadPreviousConfig) {
+                continue;
+            }
+
+            if (mA11yFocusedObject != null && mA11yFocusedObject.id == object.id
+                    && object.hadFlag(Flag.HAS_CHECKED_STATE)
+                    && object.hasFlag(Flag.HAS_CHECKED_STATE)
+                    && object.hadFlag(Flag.IS_CHECKED) != object.hasFlag(Flag.IS_CHECKED)) {
+                // Simulate a click so TalkBack announces the change in checked state.
+                sendAccessibilityEvent(object.id, AccessibilityEvent.TYPE_VIEW_CLICKED);
+            }
+            if (mInputFocusedObject != null && mInputFocusedObject.id == object.id
+                    && object.hadFlag(Flag.IS_TEXT_FIELD)
+                    && object.hasFlag(Flag.IS_TEXT_FIELD)) {
+                String oldValue = object.previousValue != null ? object.previousValue : "";
+                String newValue = object.value != null ? object.value : "";
+                AccessibilityEvent event = createTextChangedEvent(object.id, oldValue, newValue);
+                if (event != null) {
+                    sendAccessibilityEvent(event);
+                }
+            }
         }
-        for (Integer id : checkedChanged) {
-            // Simulate a click so TalkBack announces the change in checked state.
-            sendAccessibilityEvent(id, AccessibilityEvent.TYPE_VIEW_CLICKED);
+    }
+
+    private AccessibilityEvent createTextChangedEvent(int id, String oldValue, String newValue) {
+        AccessibilityEvent e = obtainAccessibilityEvent(id, AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
+        e.setBeforeText(oldValue);
+        e.getText().add(newValue);
+
+        int i;
+        for (i = 0; i < oldValue.length() && i < newValue.length(); ++i) {
+            if (oldValue.charAt(i) != newValue.charAt(i)) {
+                break;
+            }
         }
+        if (i >= oldValue.length() && i >= newValue.length()) {
+            return null;  // Text did not change
+        }
+        int firstDifference = i;
+        e.setFromIndex(firstDifference);
+
+        int oldIndex = oldValue.length() - 1;
+        int newIndex = newValue.length() - 1;
+        while (oldIndex >= firstDifference && newIndex >= firstDifference) {
+            if (oldValue.charAt(oldIndex) != newValue.charAt(newIndex)) {
+                break;
+            }
+            --oldIndex;
+            --newIndex;
+        }
+        e.setRemovedCount(oldIndex - firstDifference + 1);
+        e.setAddedCount(newIndex - firstDifference + 1);
+
+        return e;
     }
 
     private AccessibilityEvent obtainAccessibilityEvent(int virtualViewId, int eventType) {
@@ -562,6 +606,10 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         String hint;
         TextDirection textDirection;
 
+        boolean hadPreviousConfig = false;
+        int previousFlags;
+        String previousValue;
+
         private float left;
         private float top;
         private float right;
@@ -586,6 +634,11 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             return (flags & flag.value) != 0;
         }
 
+        boolean hadFlag(Flag flag) {
+            assert hadPreviousConfig;
+            return (previousFlags & flag.value) != 0;
+        }
+
         void log(String indent) {
           Log.i(TAG, indent + "SemanticsObject id=" + id + " label=" + label + " actions=" +  actions + " flags=" + flags + "\n" +
                      indent + "  +-- rect.ltrb=(" + left + ", " + top + ", " + right + ", " + bottom + ")\n" +
@@ -599,6 +652,10 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         }
 
         void updateWith(ByteBuffer buffer, String[] strings) {
+            previousValue = value;
+            previousFlags = flags;
+            hadPreviousConfig = true;
+
             flags = buffer.getInt();
             actions = buffer.getInt();
 
