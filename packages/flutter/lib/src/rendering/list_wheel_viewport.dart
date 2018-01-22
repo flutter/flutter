@@ -80,8 +80,8 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> { }
 ///
 ///    For example, if [diameterRatio] is 2.0 and this [RenderListWheelViewport]
 ///    is 100.0px in the main axis, then the diameter is 200.0. And children
-///    will be evenly laid out between that cylinder's -arcsin(0.5) and
-///    arcsin(0.5) angles.
+///    will be evenly laid out between that cylinder's -arcsin(1/2) and
+///    arcsin(1/2) angles.
 ///
 ///    The cylinder's 0 degree side is always centered in the
 ///    [RenderListWheelViewport]. The transformation from **untransformed
@@ -133,19 +133,29 @@ class RenderListWheelViewport
   /// Ar arbitrary but aesthetically reasonable default value for [perspective].
   static const double defaultPerspective = 0.003;
 
+  /// An error message to show when the provided [diameterRatio] is zero.
   static const String diameterRatioZeroMessage = "You can't set a diameterRatio "
       'of 0. It would imply a cylinder of 0 in diameter in which case nothing '
       'will be drawn.';
 
+  /// An error message to show when the [perspective] value is too high.
   static const String perspectiveTooHighMessage = 'A perspective too high will '
       'be clipped in the z-axis and therefore not renderable. Value must be '
       'between 0 and 0.01.';
 
+  /// An error message to show when [clipToSize] and [renderChildrenOutsideViewport]
+  /// are set to conflicting values.
   static const String clipToSizeAndRenderChildrenOutsideViewportConflict =
       'Cannot renderChildrenOutsideViewport and clipToSize since children '
       'rendered outside will be clipped anyway.';
 
-  /// The associated ViewportOffset object for the viewport.
+  /// The associated ViewportOffset object for the viewport describing the part
+  /// of the content inside that's visible.
+  ///
+  /// The [ViewportOffset.pixels] value determines the scroll offset that the
+  /// viewport uses to select which part of its content to display. As the user
+  /// scrolls the viewport, this value changes, which changes the content that
+  /// is displayed.
   ///
   /// Must not be null.
   ViewportOffset get offset => _offset;
