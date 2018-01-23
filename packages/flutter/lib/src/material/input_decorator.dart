@@ -674,7 +674,7 @@ class _RenderDecoration extends RenderBox {
     final List<DiagnosticsNode> value = <DiagnosticsNode>[];
     void add(RenderBox child, String name) {
       if (child != null)
-        value.add(input.toDiagnosticsNode(name: name));
+        value.add(child.toDiagnosticsNode(name: name));
     }
     add(icon, 'icon');
     add(input, 'input');
