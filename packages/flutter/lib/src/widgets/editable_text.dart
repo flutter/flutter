@@ -648,6 +648,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
     super.build(context); // See AutomaticKeepAliveClientMixin.
     return new Scrollable(
+      excludeFromSemantics: true,
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
       controller: _scrollController,
       physics: const ClampingScrollPhysics(),

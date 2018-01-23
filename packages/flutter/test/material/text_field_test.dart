@@ -164,6 +164,10 @@ void main() {
     return endpoints[0].point + const Offset(0.0, -2.0);
   }
 
+  setUp(() {
+    debugResetSemanticsIdCounter();
+  });
+
   testWidgets('TextField has consistent size', (WidgetTester tester) async {
     final Key textFieldKey = new UniqueKey();
     String textFieldValue;
@@ -491,15 +495,16 @@ void main() {
 
     // Toolbar should fade in. Starting at 0% opacity.
     final Element target = tester.element(find.text('SELECT ALL'));
-    Opacity opacity = target.ancestorWidgetOfExactType(Opacity);
+    final FadeTransition opacity = target.ancestorWidgetOfExactType(FadeTransition);
     expect(opacity, isNotNull);
-    expect(opacity.opacity, equals(0.0));
+    expect(opacity.opacity.value, equals(0.0));
 
     // Still fading in.
     await tester.pump(const Duration(milliseconds: 50));
-    opacity = target.ancestorWidgetOfExactType(Opacity);
-    expect(opacity.opacity, greaterThan(0.0));
-    expect(opacity.opacity, lessThan(1.0));
+    final FadeTransition opacity2 = target.ancestorWidgetOfExactType(FadeTransition);
+    expect(opacity, same(opacity2));
+    expect(opacity.opacity.value, greaterThan(0.0));
+    expect(opacity.opacity.value, lessThan(1.0));
 
     // End the test here to ensure the animation is properly disposed of.
   });
@@ -1744,6 +1749,122 @@ void main() {
     expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 4.0);
     expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 2.0);
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
+  });
+
+  testWidgets('TextField semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    final TextEditingController controller = new TextEditingController();
+    final Key key = new UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: new TextField(
+          key: key,
+          controller: controller,
+        )
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 2,
+          textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    controller.text = 'Guten Tag';
+    await tester.pump();
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 2,
+          textDirection: TextDirection.ltr,
+          value: 'Guten Tag',
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 2,
+          textDirection: TextDirection.ltr,
+          value: 'Guten Tag',
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.moveCursorBackwardByCharacter,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+            SemanticsFlag.isFocused,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    controller.selection = const TextSelection.collapsed(offset: 4);
+    await tester.pump();
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 2,
+          textDirection: TextDirection.ltr,
+          value: 'Guten Tag',
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.moveCursorForwardByCharacter,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+            SemanticsFlag.isFocused,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    controller.text = 'Schönen Feierabend';
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pump();
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 2,
+          textDirection: TextDirection.ltr,
+          value: 'Schönen Feierabend',
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.moveCursorForwardByCharacter,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+            SemanticsFlag.isFocused,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
   });
 
 }

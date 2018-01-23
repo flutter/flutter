@@ -79,8 +79,10 @@ class Scrollable extends StatefulWidget {
     this.controller,
     this.physics,
     @required this.viewportBuilder,
+    this.excludeFromSemantics: false,
   }) : assert(axisDirection != null),
        assert(viewportBuilder != null),
+       assert(excludeFromSemantics != null),
        super (key: key);
 
   /// The direction in which this widget scrolls.
@@ -146,6 +148,19 @@ class Scrollable extends StatefulWidget {
   ///  * [ShrinkWrappingViewport], which is a viewport that displays a list of
   ///    slivers and sizes itself based on the size of the slivers.
   final ViewportBuilder viewportBuilder;
+
+  /// Whether the scroll actions introduced by this [Scrollable] are exposed
+  /// in the semantics tree.
+  ///
+  /// Text fields with an overflow are usually scrollable to make sure that the
+  /// user can get to the beginning/end of the entered text. However, these
+  /// scrolling actions are generally not exposed to the semantics layer.
+  ///
+  /// See also:
+  ///
+  ///  * [GestureDetector.excludeFromSemantics], which is used to accomplish the
+  ///    exclusion.
+  final bool excludeFromSemantics;
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -490,27 +505,33 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     assert(position != null);
     // TODO(ianh): Having all these global keys is sad.
-    final Widget result = new _ExcludableScrollSemantics(
-      key: _excludableScrollSemanticsKey,
-      child: new RawGestureDetector(
-        key: _gestureDetectorKey,
-        gestures: _gestureRecognizers,
-        behavior: HitTestBehavior.opaque,
-        child: new Semantics(
-          explicitChildNodes: true,
-          child: new IgnorePointer(
-            key: _ignorePointerKey,
-            ignoring: _shouldIgnorePointer,
-            ignoringSemantics: false,
-            child: new _ScrollableScope(
-              scrollable: this,
-              position: position,
-              child: widget.viewportBuilder(context, position),
-            ),
+    Widget result =  new RawGestureDetector(
+      key: _gestureDetectorKey,
+      gestures: _gestureRecognizers,
+      behavior: HitTestBehavior.opaque,
+      excludeFromSemantics: widget.excludeFromSemantics,
+      child: new Semantics(
+        explicitChildNodes: !widget.excludeFromSemantics,
+        child: new IgnorePointer(
+          key: _ignorePointerKey,
+          ignoring: _shouldIgnorePointer,
+          ignoringSemantics: false,
+          child: new _ScrollableScope(
+            scrollable: this,
+            position: position,
+            child: widget.viewportBuilder(context, position),
           ),
         ),
       ),
     );
+
+    if (!widget.excludeFromSemantics) {
+      result = new _ExcludableScrollSemantics(
+        key: _excludableScrollSemanticsKey,
+        child: result,
+      );
+    }
+
     return _configuration.buildViewportChrome(context, result, widget.axisDirection);
   }
 

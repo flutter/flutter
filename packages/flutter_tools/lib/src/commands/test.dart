@@ -68,6 +68,9 @@ class TestCommand extends FlutterCommand {
         negatable: false,
         help: 'Handle machine structured JSON command input\n'
             'and provide output and progress in machine friendly format.');
+    argParser.addFlag('preview-dart-2',
+        hide: !verboseHelp,
+        help: 'Preview Dart 2.0 functionality.');
   }
 
   @override
@@ -206,6 +209,7 @@ class TestCommand extends FlutterCommand {
         startPaused: startPaused,
         ipv6: argResults['ipv6'],
         machine: machine,
+        previewDart2: argResults['preview-dart-2'],
         );
 
     if (collector != null) {
