@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:developer';
 import 'dart:ui' as ui show window;
-import 'dart:ui' show AppLifecycleState, VoidCallback;
+import 'dart:ui' show AppLifecycleState;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -33,13 +33,19 @@ set timeDilation(double value) {
   _timeDilation = value;
 }
 
-/// A frame-related callback from the scheduler.
+/// Signature for frame-related callbacks from the scheduler.
 ///
-/// The timeStamp is the number of milliseconds since the beginning of the
+/// The `timeStamp` is the number of milliseconds since the beginning of the
 /// scheduler's epoch. Use timeStamp to determine how far to advance animation
 /// timelines so that all the animations in the system are synchronized to a
 /// common time base.
 typedef void FrameCallback(Duration timeStamp);
+
+/// Signature for [Scheduler.scheduleTask] callbacks.
+///
+/// The type argument `T` is the task's return value. Consider [void] if the
+/// task does not return a value.
+typedef T TaskCallback<T>();
 
 /// Signature for the [SchedulerBinding.schedulingStrategy] callback. Called
 /// whenever the system needs to decide whether a task at a given
@@ -51,17 +57,32 @@ typedef void FrameCallback(Duration timeStamp);
 /// See also [defaultSchedulingStrategy].
 typedef bool SchedulingStrategy({ int priority, SchedulerBinding scheduler });
 
-class _TaskEntry {
-  _TaskEntry(this.task, this.priority) {
+class _TaskEntry<T> {
+  _TaskEntry(this.task, this.priority, this.debugLabel, this.flow) {
+    // ignore: prefer_asserts_in_initializer_lists
     assert(() {
       debugStack = StackTrace.current;
       return true;
     }());
+    completer = new Completer<T>();
   }
-  final VoidCallback task;
+  final TaskCallback<T> task;
   final int priority;
+  final String debugLabel;
+  final Flow flow;
 
   StackTrace debugStack;
+  Completer<T> completer;
+
+  void run() {
+    Timeline.timeSync(
+      debugLabel ?? 'Scheduled Task',
+      () {
+        completer.complete(task());
+      },
+      flow: flow != null ? Flow.step(flow.id) : null,
+    );
+  }
 }
 
 class _FrameCallbackEntry {
@@ -253,23 +274,45 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   /// Defaults to [defaultSchedulingStrategy].
   SchedulingStrategy schedulingStrategy = defaultSchedulingStrategy;
 
-  static int _taskSorter (_TaskEntry e1, _TaskEntry e2) {
+  static int _taskSorter (_TaskEntry<dynamic> e1, _TaskEntry<dynamic> e2) {
     return -e1.priority.compareTo(e2.priority);
   }
-  final PriorityQueue<_TaskEntry> _taskQueue = new HeapPriorityQueue<_TaskEntry>(_taskSorter);
+  final PriorityQueue<_TaskEntry<dynamic>> _taskQueue = new HeapPriorityQueue<_TaskEntry<dynamic>>(_taskSorter);
 
-  /// Schedules the given `task` with the given `priority`.
+  /// Schedules the given `task` with the given `priority` and returns a
+  /// [Future] that completes to the `task`'s eventual return value.
+  ///
+  /// The `debugLabel` and `flow` are used to report the task to the [Timeline],
+  /// for use when profiling.
+  ///
+  /// ## Processing model
   ///
   /// Tasks will be executed between frames, in priority order,
   /// excluding tasks that are skipped by the current
   /// [schedulingStrategy]. Tasks should be short (as in, up to a
   /// millisecond), so as to not cause the regular frame callbacks to
   /// get delayed.
-  void scheduleTask(VoidCallback task, Priority priority) {
+  ///
+  /// If an animation is running, including, for instance, a [ProgressIndicator]
+  /// indicating that there are pending tasks, then tasks with a priority below
+  /// [Priority.animation] won't run (at least, not with the
+  /// [defaultSchedulingStrategy]; this can be configured using
+  /// [schedulingStrategy]).
+  Future<T> scheduleTask<T>(TaskCallback<T> task, Priority priority, {
+    String debugLabel,
+    Flow flow,
+  }) {
     final bool isFirstTask = _taskQueue.isEmpty;
-    _taskQueue.add(new _TaskEntry(task, priority.value));
+    final _TaskEntry<T> entry = new _TaskEntry<T>(
+      task,
+      priority.value,
+      debugLabel,
+      flow,
+    );
+    _taskQueue.add(entry);
     if (isFirstTask && !locked)
       _ensureEventLoopCallback();
+    return entry.completer.future;
   }
 
   @override
@@ -313,10 +356,11 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   bool handleEventLoopCallback() {
     if (_taskQueue.isEmpty || locked)
       return false;
-    final _TaskEntry entry = _taskQueue.first;
+    final _TaskEntry<dynamic> entry = _taskQueue.first;
     if (schedulingStrategy(priority: entry.priority, scheduler: this)) {
       try {
-        (_taskQueue.removeFirst().task)();
+        _taskQueue.removeFirst();
+        entry.run();
       } catch (exception, exceptionStack) {
         StackTrace callbackStack;
         assert(() {

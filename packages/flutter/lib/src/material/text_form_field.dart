@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'input_decorator.dart';
 import 'text_field.dart';
+import 'theme.dart';
 
 /// A [FormField] that contains a [TextField].
 ///
@@ -71,10 +72,12 @@ class TextFormField extends FormField<String> {
     validator: validator,
     builder: (FormFieldState<String> field) {
       final _TextFormFieldState state = field;
+      final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
+        .applyDefaults(Theme.of(field.context).inputDecorationTheme);
       return new TextField(
         controller: state._effectiveController,
         focusNode: focusNode,
-        decoration: decoration.copyWith(errorText: field.errorText),
+        decoration: effectiveDecoration.copyWith(errorText: field.errorText),
         keyboardType: keyboardType,
         style: style,
         textAlign: textAlign,
