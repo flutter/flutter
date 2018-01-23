@@ -1068,11 +1068,9 @@ void main() {
     );
 
     final RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
-    final List<String> nodeNames = renderer.debugDescribeChildren()
-      .map((DiagnosticsNode node) => node.name)
-      .toList();
-    nodeNames.sort();
-    expect(nodeNames, <String>[
+    final Iterable<String> nodeNames = renderer.debugDescribeChildren()
+      .map((DiagnosticsNode node) => node.name);
+    expect(nodeNames, unorderedEquals(<String>[
       'container',
       'counter',
       'helperError',
@@ -1083,8 +1081,8 @@ void main() {
       'prefix',
       'prefixIcon',
       'suffix',
-      'suffixIcon'
-    ]);
+      'suffixIcon',
+    ]));
 
     final Set<Object> nodeValues = new Set<Object>.from(
       renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value)
