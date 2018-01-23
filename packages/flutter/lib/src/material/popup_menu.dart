@@ -685,6 +685,12 @@ Future<T> showMenu<T>({
 /// Used by [PopupMenuButton.onSelected].
 typedef void PopupMenuItemSelected<T>(T value);
 
+/// Signature for the callback invoked when a [PopupMenuButton] is dismissed
+/// without selecting an item.
+///
+/// Used by [PopupMenuButton.onCancelled].
+typedef void PopupMenuCancelled<T>();
+
 /// Signature used by [PopupMenuButton] to lazily construct the items shown when
 /// the button is pressed.
 ///
@@ -750,6 +756,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     @required this.itemBuilder,
     this.initialValue,
     this.onSelected,
+    this.onCancelled,
     this.tooltip,
     this.elevation: 8.0,
     this.padding: const EdgeInsets.all(8.0),
@@ -767,6 +774,9 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   /// Called when the user selects a value from the popup menu created by this button.
   final PopupMenuItemSelected<T> onSelected;
+
+  /// Called when the user dismisses the popup menu without selecting an item.
+  final PopupMenuCancelled<T> onCancelled;
 
   /// Text that describes the action that will occur when the button is pressed.
   ///
@@ -814,8 +824,11 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       position: position,
     )
     .then<Null>((T newValue) {
-      if (!mounted || newValue == null)
-        return null;
+      if (!mounted || newValue == null) {
+        if (widget.onCancelled != null)
+          widget.onCancelled();
+        return;
+      }
       if (widget.onSelected != null)
         widget.onSelected(newValue);
     });
