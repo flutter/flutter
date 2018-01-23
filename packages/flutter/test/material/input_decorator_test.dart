@@ -1049,6 +1049,47 @@ void main() {
     );
   });
 
+  testWidgets('InputDecorator.debugDescribeChildren', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          icon: const Text('icon'),
+          labelText: 'label',
+          hintText: 'hint',
+          prefixText: 'prefix',
+          suffixText: 'suffix',
+          prefixIcon: const Text('prefixIcon'),
+          suffixIcon: const Text('suffixIcon'),
+          helperText: 'helper',
+          counterText: 'counter',
+        ),
+        child: const Text('text'),
+      ),
+    );
+
+    final RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
+    final Iterable<String> nodeNames = renderer.debugDescribeChildren()
+      .map((DiagnosticsNode node) => node.name);
+    expect(nodeNames, unorderedEquals(<String>[
+      'container',
+      'counter',
+      'helperError',
+      'hint',
+      'icon',
+      'input',
+      'label',
+      'prefix',
+      'prefixIcon',
+      'suffix',
+      'suffixIcon',
+    ]));
+
+    final Set<Object> nodeValues = new Set<Object>.from(
+      renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value)
+    );
+    expect(nodeValues.length, 11);
+  });
+
   testWidgets('InputDecorator with empty border and label', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/14165
     await tester.pumpWidget(
