@@ -164,6 +164,10 @@ void main() {
     return endpoints[0].point + const Offset(0.0, -2.0);
   }
 
+  setUp(() {
+    debugResetSemanticsIdCounter();
+  });
+
   testWidgets('TextField has consistent size', (WidgetTester tester) async {
     final Key textFieldKey = new UniqueKey();
     String textFieldValue;
@@ -1764,7 +1768,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 1,
+          id: 2,
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
@@ -1782,7 +1786,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 1,
+          id: 2,
           textDirection: TextDirection.ltr,
           value: 'Guten Tag',
           actions: <SemanticsAction>[
@@ -1801,7 +1805,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 1,
+          id: 2,
           textDirection: TextDirection.ltr,
           value: 'Guten Tag',
           actions: <SemanticsAction>[
@@ -1822,7 +1826,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 1,
+          id: 2,
           textDirection: TextDirection.ltr,
           value: 'Guten Tag',
           actions: <SemanticsAction>[
@@ -1845,7 +1849,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 1,
+          id: 2,
           textDirection: TextDirection.ltr,
           value: 'Schönen Feierabend',
           actions: <SemanticsAction>[
