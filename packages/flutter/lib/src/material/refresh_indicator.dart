@@ -342,7 +342,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                 library: 'material library',
               ));
             return true;
-          });
+          }());
           if (refreshResult == null)
             return;
           refreshResult.whenComplete(() {
