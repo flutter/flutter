@@ -36,7 +36,25 @@ abstract class ScrollMetrics {
   ///
   /// This is useful if this object is mutable, but you want to get a snapshot
   /// of the current state.
-  ScrollMetrics cloneMetrics() => new FixedScrollMetrics.clone(this);
+  ///
+  /// The named arguments allow the values to be adjusted in the process. This
+  /// is useful to examine hypothetical situations, for example "would applying
+  /// this delta unmodified take the position [outOfRange]?".
+  ScrollMetrics copyWith({
+    double minScrollExtent,
+    double maxScrollExtent,
+    double pixels,
+    double viewportDimension,
+    AxisDirection axisDirection,
+  }) {
+    return new FixedScrollMetrics(
+      minScrollExtent: minScrollExtent ?? this.minScrollExtent,
+      maxScrollExtent: maxScrollExtent ?? this.maxScrollExtent,
+      pixels: pixels ?? this.pixels,
+      viewportDimension: viewportDimension ?? this.viewportDimension,
+      axisDirection: axisDirection ?? this.axisDirection,
+    );
+  }
 
   /// The minimum in-range value for [pixels].
   ///
@@ -93,7 +111,6 @@ abstract class ScrollMetrics {
 /// An immutable snapshot of values associated with a [Scrollable] viewport.
 ///
 /// For details, see [ScrollMetrics], which defines this object's interfaces.
-@immutable
 class FixedScrollMetrics extends ScrollMetrics {
   /// Creates an immutable snapshot of values associated with a [Scrollable] viewport.
   FixedScrollMetrics({
@@ -103,14 +120,6 @@ class FixedScrollMetrics extends ScrollMetrics {
     @required this.viewportDimension,
     @required this.axisDirection,
   });
-
-  /// Creates an immutable snapshot of the given metrics.
-  FixedScrollMetrics.clone(ScrollMetrics parent) :
-    minScrollExtent = parent.minScrollExtent,
-    maxScrollExtent = parent.maxScrollExtent,
-    pixels = parent.pixels,
-    viewportDimension = parent.viewportDimension,
-    axisDirection = parent.axisDirection;
 
   @override
   final double minScrollExtent;
