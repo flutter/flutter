@@ -6,6 +6,8 @@
 
 #include <stdlib.h>
 
+#include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkShader.h"
 
 namespace flow {
