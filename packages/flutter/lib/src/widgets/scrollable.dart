@@ -511,7 +511,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       behavior: HitTestBehavior.opaque,
       excludeFromSemantics: widget.excludeFromSemantics,
       child: new Semantics(
-        explicitChildNodes: true,
+        explicitChildNodes: !widget.excludeFromSemantics,
         child: new IgnorePointer(
           key: _ignorePointerKey,
           ignoring: _shouldIgnorePointer,
