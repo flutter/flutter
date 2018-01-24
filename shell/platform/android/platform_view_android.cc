@@ -461,7 +461,7 @@ bool PlatformViewAndroid::ResourceContextMakeCurrent() {
 
 void PlatformViewAndroid::UpdateSemantics(
     std::vector<blink::SemanticsNode> update) {
-  constexpr size_t kBytesPerNode = 30 * sizeof(int32_t);
+  constexpr size_t kBytesPerNode = 32 * sizeof(int32_t);
   constexpr size_t kBytesPerChild = sizeof(int32_t);
 
   JNIEnv* env = fml::jni::AttachCurrentThread();
@@ -488,6 +488,8 @@ void PlatformViewAndroid::UpdateSemantics(
       buffer_int32[position++] = node.id;
       buffer_int32[position++] = node.flags;
       buffer_int32[position++] = node.actions;
+      buffer_int32[position++] = node.textSelectionStart;
+      buffer_int32[position++] = node.textSelectionEnd;
       if (node.label.empty()) {
         buffer_int32[position++] = -1;
       } else {

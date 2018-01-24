@@ -28,6 +28,8 @@ class SemanticsUpdateBuilder
   void updateNode(int id,
                   int flags,
                   int actions,
+                  int textSelectionStart,
+                  int textSelectionEnd,
                   double left,
                   double top,
                   double right,
