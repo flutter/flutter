@@ -81,10 +81,10 @@ class CupertinoPicker extends StatefulWidget {
   final List<Widget> children;
 
   @override
-  State<StatefulWidget> createState() => new CupertinoPickerState();
+  State<StatefulWidget> createState() => new _CupertinoPickerState();
 }
 
-class CupertinoPickerState extends State<CupertinoPicker> {
+class _CupertinoPickerState extends State<CupertinoPicker> {
   int _lastHapticIndex;
 
   void _handleSelectedItemChanged(int index) {

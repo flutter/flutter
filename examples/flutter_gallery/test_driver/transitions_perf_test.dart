@@ -71,6 +71,7 @@ const List<Demo> demos = const <Demo>[
   const Demo('Buttons'),
   const Demo('Dialogs'),
   const Demo('Navigation'),
+  const Demo('Pickers'),
   const Demo('Sliders'),
   const Demo('Switches'),
 

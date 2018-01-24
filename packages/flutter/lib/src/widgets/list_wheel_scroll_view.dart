@@ -276,23 +276,23 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
 
     // Create a test simulation to see where it would have ballistically fallen
     // naturally without settling onto items.
-    final FrictionSimulation testFrictionSimulation =
-        // 0.135 is an arbitrary number copied from scroll_simulation.
-        new FrictionSimulation(0.135, metrics.pixels, velocity);
+    final Simulation testFrictionSimulation =
+        super.createBallisticSimulation(metrics, velocity);
 
     // Scenario 2:
     // If it was going to end up past the scroll extent, defer back to the
     // parent physics' ballistics again which should put us on the scrollable's
     // boundary.
-    if (testFrictionSimulation.finalX < metrics.minScrollExtent
-        || testFrictionSimulation.finalX > metrics.maxScrollExtent) {
+    if (testFrictionSimulation != null
+        && (testFrictionSimulation.x(double.infinity) == metrics.minScrollExtent
+            || testFrictionSimulation.x(double.infinity) == metrics.maxScrollExtent)) {
       return super.createBallisticSimulation(metrics, velocity);
     }
 
     // From the natural final position, find the nearest item it should have
     // settled to.
     final int settlingItemIndex = _getItemFromOffset(
-      offset: testFrictionSimulation.finalX,
+      offset: testFrictionSimulation?.x(double.infinity) ?? metrics.pixels,
       itemExtent: metrics.itemExtent,
       minScrollExtent: metrics.minScrollExtent,
       maxScrollExtent: metrics.maxScrollExtent,
@@ -501,17 +501,18 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
 class ListWheelViewport extends MultiChildRenderObjectWidget {
   /// Create a viewport where children are rendered onto a wheel.
   ///
-  /// [diameterRatio] defaults to 2.0 and must not be null.
+  /// The [diameterRatio] argument defaults to 2.0 and must not be null.
   ///
-  /// [perspective] defaults to 0.003 and must not be null.
+  /// The [perspective] argument defaults to 0.003 and must not be null.
   ///
-  /// [itemExtent] in pixels must be provided and must be positive.
+  /// The [itemExtent] argument in pixels must be provided and must be positive.
   ///
-  /// [clipToSize] defaults to true and must not be null.
+  /// The [clipToSize] argument defaults to true and must not be null.
   ///
-  /// [renderChildrenOutsideViewport] defaults to false and must not be null.
+  /// The [renderChildrenOutsideViewport] argument defaults to false and must
+  /// not be null.
   ///
-  /// [offset] must be provided and must not be null.
+  /// The [offset] argument must be provided and must not be null.
   ListWheelViewport({
     Key key,
     this.diameterRatio: RenderListWheelViewport.defaultDiameterRatio,

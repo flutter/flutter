@@ -35,7 +35,7 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> { }
 ///
 /// This class works in 3 coordinate systems:
 ///
-/// 1- The **scrollable layout coordinates**. This coordinate system is used to
+/// 1. The **scrollable layout coordinates**. This coordinate system is used to
 ///    communicate with [ViewportOffset] and describes its children's abstract
 ///    offset from the beginning of the scrollable list at (0.0, 0.0).
 ///
@@ -44,7 +44,7 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> { }
 ///
 ///    Children's layout coordinates don't change as the viewport scrolls.
 ///
-/// 2- The **untransformed plane's viewport painting coordinates**. Children are
+/// 2. The **untransformed plane's viewport painting coordinates**. Children are
 ///    not painted in this coordinate system. It's an abstract intermediary used
 ///    before transforming into the next cylindrical coordinate system.
 ///
@@ -63,7 +63,7 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> { }
 ///    paint 10-11 visible 10px children if there are enough children in the
 ///    viewport.
 ///
-/// 3- The **transformed cylindrical space viewport painting coordinates**.
+/// 3. The **transformed cylindrical space viewport painting coordinates**.
 ///    Children from system 2 get their positions transformed into a cylindrical
 ///    projection matrix instead of its cartesian offset with respect to the
 ///    scroll offset.
