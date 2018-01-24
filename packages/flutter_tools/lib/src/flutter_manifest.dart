@@ -52,8 +52,8 @@ class FlutterManifest {
    return _flutterDescriptor['fonts'] ?? const <Map<String, dynamic>>[];
   }
 
-  List<String> get assets {
-    return _flutterDescriptor['assets'] ?? const <String>[];
+  List<Uri> get assets {
+    return _flutterDescriptor['assets']?.map(Uri.parse)?.toList() ?? const <Uri>[];
   }
 
   List<Font> _fonts;
@@ -89,7 +89,7 @@ class FlutterManifest {
         }
 
         fontAssets.add(new FontAsset(
-          asset,
+          Uri.parse(asset),
           weight: fontFile['weight'],
           style: fontFile['style'],
         ));
@@ -122,10 +122,10 @@ class Font {
 }
 
 class FontAsset {
-  FontAsset(this.asset, {this.weight, this.style})
-    : assert(asset != null);
+  FontAsset(this.assetUri, {this.weight, this.style})
+    : assert(assetUri != null);
 
-  final String asset;
+  final Uri assetUri;
   final int weight;
   final String style;
 
@@ -137,12 +137,12 @@ class FontAsset {
     if (style != null)
       descriptor['style'] = style;
 
-    descriptor['asset'] = asset;
+    descriptor['asset'] = assetUri.path;
     return descriptor;
   }
 
   @override
-  String toString() => '$runtimeType(asset: $asset, weight; $weight, style: $style)';
+  String toString() => '$runtimeType(asset: ${assetUri.path}, weight; $weight, style: $style)';
 }
 
 Future<dynamic> _loadFlutterManifest(String manifestPath) async {
