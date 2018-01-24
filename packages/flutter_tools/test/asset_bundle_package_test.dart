@@ -95,13 +95,16 @@ $assetsSection
   // These tests do not use a memory file system because we want to ensure that
   // asset bundles work correctly on Windows and Posix systems.
   Directory tempDir;
+  Directory oldCurrentDir;
 
   setUp(() async {
     tempDir = await fs.systemTempDirectory.createTemp('asset_bundle_tests');
+    oldCurrentDir = fs.currentDirectory;
     fs.currentDirectory = tempDir;
   });
 
   tearDown(() {
+    fs.currentDirectory = oldCurrentDir;
     try {
       tempDir?.deleteSync(recursive: true);
       tempDir = null;

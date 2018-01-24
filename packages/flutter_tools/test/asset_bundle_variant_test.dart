@@ -19,13 +19,16 @@ void main()  {
   // These tests do not use a memory file system because we want to ensure that
   // asset bundles work correctly on Windows and Posix systems.
   Directory tempDir;
+  Directory oldCurrentDir;
 
   setUp(() async {
     tempDir = await fs.systemTempDirectory.createTemp('asset_bundle_tests');
+    oldCurrentDir = fs.currentDirectory;
     fs.currentDirectory = tempDir;
   });
 
   tearDown(() {
+    fs.currentDirectory = oldCurrentDir;
     try {
       tempDir?.deleteSync(recursive: true);
       tempDir = null;
@@ -77,13 +80,13 @@ flutter:
         expect(UTF8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
       }
 
-      fs.file('/a/b/c/foo').deleteSync();
+      fs.file('a/b/c/foo').deleteSync();
       bundle = new AssetBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
 
       // Now the main asset file, /a/b/c/foo, does not exist. This is OK because
       // the /a/b/c/*/foo variants do exist.
-      expect(bundle.entries.containsKey('/a/b/c/foo'), false);
+      expect(bundle.entries.containsKey('a/b/c/foo'), false);
       for (String asset in assets.skip(1)) {
         expect(bundle.entries.containsKey(asset), true);
         expect(UTF8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
