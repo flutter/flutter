@@ -754,28 +754,52 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
 
 - (CGFloat)textScaleFactor {
   UIContentSizeCategory category = [UIApplication sharedApplication].preferredContentSizeCategory;
-  // The delta is computed based on the following:
-  // - L (large) is the default 1.0 scale.
-  // - The scale is linear spanning from XS to XXXL.
-  // - XXXL = 1.4 * XS.
+  // The delta is computed by approximating Apple's typography guidelines:
+  // https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
   //
-  // L    = 1.0      = XS + 3 * delta
-  // XXXL = 1.4 * XS = XS + 6 * delta
-  const CGFloat delta = 0.055555;
+  // Specifically:
+  // Non-accessibility sizes for "body" text are:
+  const CGFloat xs = 14;
+  const CGFloat s = 15;
+  const CGFloat m = 16;
+  const CGFloat l = 17;
+  const CGFloat xl = 19;
+  const CGFloat xxl = 21;
+  const CGFloat xxxl = 23;
+
+  // Accessibility sizes for "body" text are:
+  const CGFloat ax1 = 28;
+  const CGFloat ax2 = 33;
+  const CGFloat ax3 = 40;
+  const CGFloat ax4 = 47;
+  const CGFloat ax5 = 53;
+
+  // We compute the scale as relative difference from size L (large, the default size), where
+  // L is assumed to have scale 1.0.
   if ([category isEqualToString:UIContentSizeCategoryExtraSmall])
-    return 1.0 - 3 * delta;
+    return xs / l;
   else if ([category isEqualToString:UIContentSizeCategorySmall])
-    return 1.0 - 2 * delta;
+    return s / l;
   else if ([category isEqualToString:UIContentSizeCategoryMedium])
-    return 1.0 - delta;
+    return m / l;
   else if ([category isEqualToString:UIContentSizeCategoryLarge])
     return 1.0;
   else if ([category isEqualToString:UIContentSizeCategoryExtraLarge])
-    return 1.0 + delta;
+    return xl / l;
   else if ([category isEqualToString:UIContentSizeCategoryExtraExtraLarge])
-    return 1.0 + 2 * delta;
+    return xxl / l;
   else if ([category isEqualToString:UIContentSizeCategoryExtraExtraExtraLarge])
-    return 1.0 + 3 * delta;
+    return xxxl / l;
+  else if ([category isEqualToString:UIContentSizeCategoryAccessibilityMedium])
+    return ax1 / l;
+  else if ([category isEqualToString:UIContentSizeCategoryAccessibilityLarge])
+    return ax2 / l;
+  else if ([category isEqualToString:UIContentSizeCategoryAccessibilityExtraLarge])
+    return ax3 / l;
+  else if ([category isEqualToString:UIContentSizeCategoryAccessibilityExtraExtraLarge])
+    return ax4 / l;
+  else if ([category isEqualToString:UIContentSizeCategoryAccessibilityExtraExtraExtraLarge])
+    return ax5 / l;
   else
     return 1.0;
 }
