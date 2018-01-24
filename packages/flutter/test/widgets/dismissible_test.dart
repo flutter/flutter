@@ -13,7 +13,6 @@ DismissDirection dismissDirection = DismissDirection.horizontal;
 DismissDirection reportedDismissDirection;
 List<int> dismissedItems = <int>[];
 Widget background;
-Duration rollbackDuration = const Duration(milliseconds: 500);
 const double crossAxisEndOffset = 0.5;
 
 Widget buildTest({ double startToEndThreshold, TextDirection textDirection: TextDirection.ltr }) {
@@ -39,7 +38,6 @@ Widget buildTest({ double startToEndThreshold, TextDirection textDirection: Text
             dismissThresholds: startToEndThreshold == null
                 ? <DismissDirection, double>{}
                 : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
-            rollbackDuration: rollbackDuration,
             crossAxisEndOffset: crossAxisEndOffset,
             child: new Container(
               width: itemExtent,
@@ -147,56 +145,51 @@ Future<Null> dismissItem(WidgetTester tester, int item, {
   await tester.pump(); // rebuild after the callback removes the entry
 }
 
-Future<Null> rollbackElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection }) async {
-  Offset downLocation;
-  Offset upLocation;
-  switch (gestureDirection) {
-    case AxisDirection.left:
-      // getTopRight() returns a point that's just beyond itemWidget's right
-      // edge and outside the Dismissible event listener's bounds. Just nudge
-      // the itemWidget before it's threshold.
-      downLocation = tester.getTopRight(finder) + const Offset(-0.1, 0.0);
-      upLocation = tester.getTopRight(finder) + const Offset(-0.2, 0.0);
-      break;
-    case AxisDirection.right:
-      // we do the same thing here to keep the test symmetric
-      downLocation = tester.getTopLeft(finder) + const Offset(0.1, 0.0);
-      upLocation = tester.getTopLeft(finder) + const Offset(0.2, 0.0);
-      break;
-    case AxisDirection.up:
-      // getBottomLeft() returns a point that's just below itemWidget's bottom
-      // edge and outside the Dismissible event listener's bounds.
-      downLocation = tester.getBottomLeft(finder) + const Offset(0.0, -0.1);
-      upLocation = tester.getBottomLeft(finder) + const Offset(0.0, -0.2);
-      break;
-    case AxisDirection.down:
-      // again with doing the same here for symmetry
-      downLocation = tester.getTopLeft(finder) + const Offset(0.0, 0.1);
-      upLocation = tester.getTopLeft(finder) + const Offset(0.0, 0.2);
-      break;
-    default:
-      fail('unsupported gestureDirection');
-  }
-
-  final TestGesture gesture = await tester.startGesture(downLocation);
-  await gesture.moveTo(upLocation);
-  await gesture.up();
-}
-
-Future<Null> rollbackItem(WidgetTester tester, int item, {
+Future<Null> checkFlingItemBeforeMovementEnd(WidgetTester tester, int item, {
   @required AxisDirection gestureDirection,
-  DismissMethod mechanism: rollbackElement,
-  Duration rollbackDuration
+  DismissMethod mechanism: rollbackElement
 }) async {
   assert(gestureDirection != null);
   final Finder itemFinder = find.text(item.toString());
-  expect(itemFinder, findsWidgets);
+  expect(itemFinder, findsOneWidget);
 
   await mechanism(tester, itemFinder, gestureDirection: gestureDirection);
 
-  await tester.pump(); // start the nudge
-  await tester.pump(rollbackDuration); // to finish the nudge, it takes 'rollbackDuration' time.
-  expect(itemFinder, findsWidgets);
+  await tester.pump(); // start the slide
+  await tester.pump(const Duration(milliseconds: 100));
+}
+
+Future<Null> checkFlingItemAfterMovement(WidgetTester tester, int item, {
+  @required AxisDirection gestureDirection,
+  DismissMethod mechanism: rollbackElement
+}) async {
+  assert(gestureDirection != null);
+  final Finder itemFinder = find.text(item.toString());
+  expect(itemFinder, findsOneWidget);
+
+  await mechanism(tester, itemFinder, gestureDirection: gestureDirection);
+
+  await tester.pump(); // start the slide
+  await tester.pump(const Duration(milliseconds: 300));
+}
+
+Future<Null> rollbackElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection, double initialOffsetFactor: 0.0 }) async {
+  Offset delta;
+  switch (gestureDirection) {
+    case AxisDirection.left:
+      delta = const Offset(-30.0, 0.0);
+      break;
+    case AxisDirection.right:
+      delta = const Offset(30.0, 0.0);
+      break;
+    case AxisDirection.up:
+      delta = const Offset(0.0, -30.0);
+      break;
+    case AxisDirection.down:
+      delta = const Offset(0.0, 30.0);
+      break;
+  }
+  await tester.fling(finder, delta, 1000.0, initialOffset: delta * initialOffsetFactor);
 }
 
 class Test1215DismissibleWidget extends StatelessWidget {
@@ -615,27 +608,52 @@ void main() {
     expect(backgroundBox.size.height, equals(100.0));
   });
 
-  testWidgets('Horizontal nudge less than threshold', (WidgetTester tester) async {
+  testWidgets('Checking fling item before movementDuration completes', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
-    await rollbackItem(tester, 0, gestureDirection: AxisDirection.left);
+    await checkFlingItemBeforeMovementEnd(tester, 0, gestureDirection: AxisDirection.left, mechanism: flingElement);
+    expect(find.text('0'), findsOneWidget);
+
+    await checkFlingItemBeforeMovementEnd(tester, 1, gestureDirection: AxisDirection.right, mechanism: flingElement);
+    expect(find.text('1'), findsOneWidget);
+  });
+
+  testWidgets('Checking fling item  after movementDuration', (WidgetTester tester) async {
+    await tester.pumpWidget(buildTest());
+    expect(dismissedItems, isEmpty);
+
+    await checkFlingItemAfterMovement(tester, 1, gestureDirection: AxisDirection.left, mechanism: flingElement);
+    expect(find.text('1'), findsNothing);
+
+    await checkFlingItemAfterMovement(tester, 0, gestureDirection: AxisDirection.right, mechanism: flingElement);
+    expect(find.text('0'), findsNothing);
+  });
+
+  testWidgets('Horizontal fling less than threshold', (WidgetTester tester) async {
+    scrollDirection = Axis.horizontal;
+    await tester.pumpWidget(buildTest());
+    expect(dismissedItems, isEmpty);
+
+    await checkFlingItemAfterMovement(tester, 0, gestureDirection: AxisDirection.left, mechanism: rollbackElement);
     expect(find.text('0'), findsOneWidget);
     expect(dismissedItems, isEmpty);
 
-    await rollbackItem(tester, 1, gestureDirection: AxisDirection.right);
+    await checkFlingItemAfterMovement(tester, 1, gestureDirection: AxisDirection.right, mechanism: rollbackElement);
     expect(find.text('1'), findsOneWidget);
     expect(dismissedItems, isEmpty);
   });
-  testWidgets('Vertical nudge less than threshold', (WidgetTester tester) async {
+
+  testWidgets('Vertical fling less than threshold', (WidgetTester tester) async {
+    scrollDirection = Axis.vertical;
     await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
-    await rollbackItem(tester, 0, gestureDirection: AxisDirection.down);
+    await checkFlingItemAfterMovement(tester, 0, gestureDirection: AxisDirection.left, mechanism: rollbackElement);
     expect(find.text('0'), findsOneWidget);
     expect(dismissedItems, isEmpty);
 
-    await rollbackItem(tester, 1, gestureDirection: AxisDirection.up);
+    await checkFlingItemAfterMovement(tester, 1, gestureDirection: AxisDirection.right, mechanism: rollbackElement);
     expect(find.text('1'), findsOneWidget);
     expect(dismissedItems, isEmpty);
   });

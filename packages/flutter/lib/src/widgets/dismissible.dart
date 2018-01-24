@@ -82,7 +82,7 @@ class Dismissible extends StatefulWidget {
     this.direction: DismissDirection.horizontal,
     this.resizeDuration: const Duration(milliseconds: 300),
     this.dismissThresholds: const <DismissDirection, double>{},
-    this.rollbackDuration: const Duration(milliseconds: 300),
+    this.movementDuration: const Duration(milliseconds: 200),
     this.crossAxisEndOffset: 0.0,
   }) : assert(key != null),
        assert(secondaryBackground != null ? background != null : true),
@@ -135,12 +135,13 @@ class Dismissible extends StatefulWidget {
   /// [direction] property.
   final Map<DismissDirection, double> dismissThresholds;
 
-  /// Defines the duration for card to come back to original position if not dismissed.
-  final Duration rollbackDuration;
+  /// Defines the duration for card to dismiss or to come back to original position if not dismissed.
+  final Duration movementDuration;
 
   /// Defines the end offset across the main axis after the card is dismissed.
   ///
-  /// If non-zero value is given then widget moves in cross direction depending on whether it is positive or negative.
+  /// If non-zero value is given then widget moves in cross direction depending on whether
+  /// it is positive or negative.
   final double crossAxisEndOffset;
 
   @override
@@ -192,7 +193,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _moveController = new AnimationController(duration: widget.rollbackDuration, vsync: this)
+    _moveController = new AnimationController(duration: widget.movementDuration, vsync: this)
       ..addStatusListener(_handleDismissStatusChanged);
     _updateMoveAnimation();
   }
