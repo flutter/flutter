@@ -200,11 +200,11 @@ class _FeaturePriceItem extends _PriceItem {
 class _HeadingLayout extends MultiChildLayoutDelegate {
   _HeadingLayout();
 
-  static final String price = 'price';
-  static final String image = 'image';
-  static final String title = 'title';
-  static final String description = 'description';
-  static final String vendor = 'vendor';
+  static const String price = 'price';
+  static const String image = 'image';
+  static const String title = 'title';
+  static const String description = 'description';
+  static const String vendor = 'vendor';
 
   @override
   void performLayout(Size size) {

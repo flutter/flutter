@@ -22,18 +22,18 @@ void main() {
     }
 
     await tester.pumpWidget(
-      new FlipWidget(
-        left: new DecoratedBox(decoration: kBoxDecorationA),
-        right: new DecoratedBox(decoration: kBoxDecorationB)
+      const FlipWidget(
+        left: const DecoratedBox(decoration: kBoxDecorationA),
+        right: const DecoratedBox(decoration: kBoxDecorationB)
       )
     );
 
     checkTree(kBoxDecorationA);
 
     await tester.pumpWidget(
-      new FlipWidget(
-        left: new DecoratedBox(decoration: kBoxDecorationB),
-        right: new DecoratedBox(decoration: kBoxDecorationA)
+      const FlipWidget(
+        left: const DecoratedBox(decoration: kBoxDecorationB),
+        right: const DecoratedBox(decoration: kBoxDecorationA)
       )
     );
 
@@ -46,9 +46,9 @@ void main() {
     checkTree(kBoxDecorationA);
 
     await tester.pumpWidget(
-      new FlipWidget(
-        left: new DecoratedBox(decoration: kBoxDecorationA),
-        right: new DecoratedBox(decoration: kBoxDecorationB)
+      const FlipWidget(
+        left: const DecoratedBox(decoration: kBoxDecorationA),
+        right: const DecoratedBox(decoration: kBoxDecorationB)
       )
     );
 
@@ -60,7 +60,7 @@ void main() {
       new FlipWidget(
         key: const Key('rebuild test'),
         left: new TestBuildCounter(),
-        right: new DecoratedBox(decoration: kBoxDecorationB)
+        right: const DecoratedBox(decoration: kBoxDecorationB)
       )
     );
 

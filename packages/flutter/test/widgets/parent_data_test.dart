@@ -53,14 +53,14 @@ void main() {
     await tester.pumpWidget(
       new Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
-          new DecoratedBox(decoration: kBoxDecorationA),
-          new Positioned(
+        children: const <Widget>[
+          const DecoratedBox(decoration: kBoxDecorationA),
+          const Positioned(
             top: 10.0,
             left: 10.0,
-            child: new DecoratedBox(decoration: kBoxDecorationB),
+            child: const DecoratedBox(decoration: kBoxDecorationB),
           ),
-          new DecoratedBox(decoration: kBoxDecorationC),
+          const DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
     );
@@ -74,18 +74,18 @@ void main() {
     await tester.pumpWidget(
       new Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
-          new Positioned(
+        children: const <Widget>[
+          const Positioned(
             bottom: 5.0,
             right: 7.0,
-            child: new DecoratedBox(decoration: kBoxDecorationA),
+            child: const DecoratedBox(decoration: kBoxDecorationA),
           ),
-          new Positioned(
+          const Positioned(
             top: 10.0,
             left: 10.0,
-            child: new DecoratedBox(decoration: kBoxDecorationB),
+            child: const DecoratedBox(decoration: kBoxDecorationB),
           ),
-          new DecoratedBox(decoration: kBoxDecorationC),
+          const DecoratedBox(decoration: kBoxDecorationC),
         ],
       ),
     );
@@ -96,9 +96,9 @@ void main() {
       kNonPositioned,
     ]);
 
-    final DecoratedBox kDecoratedBoxA = new DecoratedBox(decoration: kBoxDecorationA);
-    final DecoratedBox kDecoratedBoxB = new DecoratedBox(decoration: kBoxDecorationB);
-    final DecoratedBox kDecoratedBoxC = new DecoratedBox(decoration: kBoxDecorationC);
+    final DecoratedBox kDecoratedBoxA = const DecoratedBox(decoration: kBoxDecorationA);
+    final DecoratedBox kDecoratedBoxB = const DecoratedBox(decoration: kBoxDecorationB);
+    final DecoratedBox kDecoratedBoxC = const DecoratedBox(decoration: kBoxDecorationC);
 
     await tester.pumpWidget(
       new Stack(
@@ -254,13 +254,13 @@ void main() {
       new Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Positioned(
+          const Positioned(
             top: 5.0,
             bottom: 8.0,
-            child: new Positioned(
+            child: const Positioned(
               top: 6.0,
               left: 7.0,
-              child: new DecoratedBox(decoration: kBoxDecorationB),
+              child: const DecoratedBox(decoration: kBoxDecorationB),
             ),
           ),
         ],
@@ -276,10 +276,10 @@ void main() {
       new Container(
         child: new Row(
           children: <Widget>[
-            new Positioned(
+            const Positioned(
               top: 6.0,
               left: 7.0,
-              child: new DecoratedBox(decoration: kBoxDecorationB),
+              child: const DecoratedBox(decoration: kBoxDecorationB),
             ),
           ],
         ),

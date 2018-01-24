@@ -1025,7 +1025,7 @@ class Isolate extends ServiceObjectOwner {
     _updateHeaps(map['_heaps'], mapIsRef);
   }
 
-  static final int kIsolateReloadBarred = 1005;
+  static const int kIsolateReloadBarred = 1005;
 
   Future<Map<String, dynamic>> reloadSources(
       { bool pause: false,

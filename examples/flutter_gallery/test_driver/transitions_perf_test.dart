@@ -82,7 +82,7 @@ const List<Demo> demos = const <Demo>[
   const Demo('Typography'),
 ];
 
-final FileSystem _fs = const LocalFileSystem();
+const FileSystem _fs = const LocalFileSystem();
 
 const Duration kWaitBetweenActions = const Duration(milliseconds: 250);
 
