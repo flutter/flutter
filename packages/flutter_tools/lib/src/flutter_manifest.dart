@@ -53,7 +53,7 @@ class FlutterManifest {
   }
 
   List<Uri> get assets {
-    List<Uri> result = <Uri>[];
+    final List<Uri> result = <Uri>[];
     for (String asset in _flutterDescriptor['assets'] ?? const <String>[]) {
       result.add(Uri.parse(asset));
     }
