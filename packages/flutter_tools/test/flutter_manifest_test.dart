@@ -69,7 +69,9 @@ flutter:
     - a/bar
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
-      expect(flutterManifest.assets, <String>['a/foo', 'a/bar']);
+      expect(flutterManifest.assets.length, 2);
+      expect(flutterManifest.assets[0], Uri.parse('a/foo'));
+      expect(flutterManifest.assets[1], Uri.parse('a/bar'));
     });
 
     test('has one font family with one asset', () async {
