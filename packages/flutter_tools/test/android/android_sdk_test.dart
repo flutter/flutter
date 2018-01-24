@@ -5,17 +5,25 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
+
+class MockProcessManager extends Mock implements ProcessManager {}
 
 void main() {
   MemoryFileSystem fs;
+  MockProcessManager processManager;
 
   setUp(() {
     fs = new MemoryFileSystem();
+    processManager = new MockProcessManager();
   });
 
   group('android_sdk AndroidSdk', () {
@@ -46,6 +54,56 @@ void main() {
       expect(sdk.latestVersion.sdkLevel, 24);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+    });
+
+    testUsingContext('returns sdkmanager path', () {
+      sdkDir = _createSdkDirectory();
+      Config.instance.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      expect(sdk.sdkManagerPath, fs.path.join(sdk.directory, 'tools', 'bin', 'sdkmanager'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
+
+    testUsingContext('returns sdkmanager version', () {
+      sdkDir = _createSdkDirectory();
+      Config.instance.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
+      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version']))
+          .thenReturn(new ProcessResult(1, 0, '26.1.1\n', ''));
+      expect(sdk.sdkManagerVersion, '26.1.1');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('throws on sdkmanager version check failure', () {
+      sdkDir = _createSdkDirectory();
+      Config.instance.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
+      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version']))
+          .thenReturn(new ProcessResult(1, 1, '26.1.1\n', 'Mystery error'));
+      expect(() => sdk.sdkManagerVersion, throwsToolExit(exitCode: 1));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('throws on sdkmanager version check if sdkmanager not found', () {
+      sdkDir = _createSdkDirectory(withSdkManager: false);
+      Config.instance.setValue('android-sdk', sdkDir.path);
+
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+      when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(false);
+      expect(() => sdk.sdkManagerVersion, throwsToolExit());
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => processManager,
     });
 
     group('ndk', () {
@@ -102,8 +160,12 @@ void main() {
   });
 }
 
-Directory _createSdkDirectory(
-    {bool withAndroidN: false, String withNdkDir, bool withNdkSysroot: false}) {
+Directory _createSdkDirectory({
+  bool withAndroidN: false,
+  String withNdkDir,
+  bool withNdkSysroot: false,
+  bool withSdkManager: true,
+}) {
   final Directory dir = fs.systemTempDirectory.createTempSync('android-sdk');
 
   _createSdkFile(dir, 'platform-tools/adb');
@@ -120,6 +182,9 @@ Directory _createSdkDirectory(
     _createSdkFile(dir, 'platforms/android-N/android.jar');
     _createSdkFile(dir, 'platforms/android-N/build.prop', contents: _buildProp);
   }
+
+  if (withSdkManager)
+    _createSdkFile(dir, 'tools/bin/sdkmanager');
 
   if (withNdkDir != null) {
     final String ndkCompiler = fs.path.join(

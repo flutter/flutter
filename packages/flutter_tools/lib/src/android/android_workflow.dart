@@ -186,13 +186,9 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
           fs.path.dirname(javaBinary) + os.pathVarSeparator + platform.environment['PATH'];
     }
 
-    final String sdkManagerPath = fs.path.join(
-        androidSdk.directory, 'tools', 'bin',
-        platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager',
-    );
     final Process process = await runCommand(
-        <String>[sdkManagerPath, '--licenses'],
-        environment: sdkManagerEnv,
+      <String>[androidSdk.sdkManagerPath, '--licenses'],
+      environment: sdkManagerEnv,
     );
 
     waitGroup<Null>(<Future<Null>>[
