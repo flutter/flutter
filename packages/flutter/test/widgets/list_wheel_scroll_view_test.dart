@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -689,6 +690,8 @@ void main() {
     });
 
     testWidgets('high fling velocities lands exactly on items', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
       final FixedExtentScrollController controller = new FixedExtentScrollController(initialItem: 40);
       final List<double> scrolledPositions = <double>[];
 
@@ -735,6 +738,8 @@ void main() {
       expect(controller.selectedItem, 49);
       // More importantly, lands tightly on 49.
       expect(scrolledPositions.last, moreOrLessEquals(49 * 100.0, epsilon: 0.2));
+
+      debugDefaultTargetPlatformOverride = null;
     });
   });
 }
