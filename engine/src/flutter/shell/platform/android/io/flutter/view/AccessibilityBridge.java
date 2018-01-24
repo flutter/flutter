@@ -123,8 +123,12 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
 
         if (object.hasFlag(Flag.IS_TEXT_FIELD)) {
             result.setClassName("android.widget.EditText");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 result.setEditable(true);
+                if (object.textSelectionStart != -1 && object.textSelectionEnd != -1) {
+                    result.setTextSelection(object.textSelectionStart, object.textSelectionEnd);
+                }
+            }
 
             // Cursor movements
             int granularities = 0;
@@ -599,6 +603,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
 
         int flags;
         int actions;
+        int textSelectionStart;
+        int textSelectionEnd;
         String label;
         String value;
         String increasedValue;
@@ -658,6 +664,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
 
             flags = buffer.getInt();
             actions = buffer.getInt();
+            textSelectionStart = buffer.getInt();
+            textSelectionEnd = buffer.getInt();
 
             int stringIndex = buffer.getInt();
             label = stringIndex == -1 ? null : strings[stringIndex];
