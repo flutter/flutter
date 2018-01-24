@@ -103,7 +103,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       // This can happen if the superclass decides the primary pointer
       // exceeded the touch slop, or if the recognizer is disposed.
       if (onTapCancel != null)
-        invokeCallback<Null>('spontaneous onTapCancel', onTapCancel);
+        invokeCallback<void>('spontaneous onTapCancel', onTapCancel);
       _reset();
     }
     super.resolve(disposition);
@@ -131,7 +131,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       // Another gesture won the arena.
       assert(state != GestureRecognizerState.possible);
       if (onTapCancel != null)
-        invokeCallback<Null>('forced onTapCancel', onTapCancel);
+        invokeCallback<void>('forced onTapCancel', onTapCancel);
       _reset();
     }
   }
@@ -139,7 +139,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkDown() {
     if (!_sentTapDown) {
       if (onTapDown != null)
-        invokeCallback<Null>('onTapDown', () { onTapDown(new TapDownDetails(globalPosition: initialPosition)); });
+        invokeCallback<void>('onTapDown', () { onTapDown(new TapDownDetails(globalPosition: initialPosition)); });
       _sentTapDown = true;
     }
   }
@@ -156,9 +156,9 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
         return;
       }
       if (onTapUp != null)
-        invokeCallback<Null>('onTapUp', () { onTapUp(new TapUpDetails(globalPosition: _finalPosition)); });
+        invokeCallback<void>('onTapUp', () { onTapUp(new TapUpDetails(globalPosition: _finalPosition)); });
       if (onTap != null)
-        invokeCallback<Null>('onTap', onTap);
+        invokeCallback<void>('onTap', onTap);
       _reset();
     }
   }

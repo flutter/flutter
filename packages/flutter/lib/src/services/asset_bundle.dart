@@ -181,7 +181,7 @@ abstract class CachingAssetBundle extends AssetBundle {
       return _structuredDataCache[key];
     Completer<T> completer;
     Future<T> result;
-    loadString(key, cache: false).then<T>(parser).then<Null>((T value) {
+    loadString(key, cache: false).then<T>(parser).then<void>((T value) {
       result = new SynchronousFuture<T>(value);
       _structuredDataCache[key] = result;
       if (completer != null) {
