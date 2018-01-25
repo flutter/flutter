@@ -369,7 +369,7 @@ class Scaffold extends StatefulWidget {
   /// A panel displayed to the side of the [body], often hidden on mobile
   /// devices. Swipes in from either left-to-right ([TextDirection.ltr]) or
   /// right-to-left ([TextDirection.rtl])
-  /// 
+  ///
   /// In the uncommon case that you wish to open the drawer manually, use the
   /// [ScaffoldState.openDrawer] function.
   ///
@@ -678,7 +678,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_snackBars.isEmpty || _snackBarController.status == AnimationStatus.dismissed)
       return;
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
-    _snackBarController.reverse().then<Null>((Null _) {
+    _snackBarController.reverse().then<void>((Null _) {
       assert(mounted);
       if (!completer.isCompleted)
         completer.complete(reason);

@@ -90,7 +90,7 @@ class TestAssetBundle extends CachingAssetBundle {
 
 class FakeImageStreamCompleter extends ImageStreamCompleter {
   FakeImageStreamCompleter(Future<ImageInfo> image) {
-    image.then<Null>(setImage);
+    image.then<void>(setImage);
   }
 }
 
@@ -100,7 +100,7 @@ class TestAssetImage extends AssetImage {
   @override
   ImageStreamCompleter load(AssetBundleImageKey key) {
     ImageInfo imageInfo;
-    key.bundle.load(key.name).then<Null>((ByteData data) {
+    key.bundle.load(key.name).then<void>((ByteData data) {
       final TestByteData testData = data;
       final ui.Image image = new TestImage(testData.scale);
       imageInfo = new ImageInfo(image: image, scale: key.scale);
