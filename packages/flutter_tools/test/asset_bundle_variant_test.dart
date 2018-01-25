@@ -19,16 +19,12 @@ void main()  {
   // These tests do not use a memory file system because we want to ensure that
   // asset bundles work correctly on Windows and Posix systems.
   Directory tempDir;
-  Directory oldCurrentDir;
 
-  setUp(() async {
-    tempDir = await fs.systemTempDirectory.createTemp('asset_bundle_tests');
-    oldCurrentDir = fs.currentDirectory;
-    fs.currentDirectory = tempDir;
+  setUp(() {
+    tempDir = fs.systemTempDirectory.createTempSync('asset_bundle_tests');
   });
 
   tearDown(() {
-    fs.currentDirectory = oldCurrentDir;
     try {
       tempDir?.deleteSync(recursive: true);
       tempDir = null;
@@ -43,8 +39,9 @@ void main()  {
       // Setting flutterRoot here so that it picks up the MemoryFileSystem's
       // path separator.
       Cache.flutterRoot = getFlutterRoot();
+      final String pubspec = fs.path.join(tempDir.path, 'pubspec.yaml');
 
-      fs.file('pubspec.yaml')
+      fs.file(pubspec)
         ..createSync()
         ..writeAsStringSync(
 '''
@@ -57,7 +54,7 @@ flutter:
     - a/b/c/foo
 '''
       );
-      fs.file('.packages')..createSync();
+      fs.file(fs.path.join(tempDir.path, '.packages'))..createSync();
 
       final List<String> assets = <String>[
         'a/b/c/foo',
@@ -66,13 +63,13 @@ flutter:
         'a/b/c/var3/foo',
       ];
       for (String asset in assets) {
-        fs.file(asset)
+        fs.file(fs.path.join(tempDir.path, asset))
           ..createSync(recursive: true)
           ..writeAsStringSync(asset);
       }
 
       AssetBundle bundle = new AssetBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml');
+      await bundle.build(manifestPath: pubspec);
 
       // The main asset file, /a/b/c/foo, and its variants exist.
       for (String asset in assets) {
@@ -80,9 +77,9 @@ flutter:
         expect(UTF8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
       }
 
-      fs.file('a/b/c/foo').deleteSync();
+      fs.file(fs.path.join(tempDir.path, 'a/b/c/foo')).deleteSync();
       bundle = new AssetBundle();
-      await bundle.build(manifestPath: 'pubspec.yaml');
+      await bundle.build(manifestPath: pubspec);
 
       // Now the main asset file, /a/b/c/foo, does not exist. This is OK because
       // the /a/b/c/*/foo variants do exist.
