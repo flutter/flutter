@@ -55,8 +55,8 @@ struct SemanticsNode {
   int32_t id = 0;
   int32_t flags = 0;
   int32_t actions = 0;
-  int32_t textSelectionStart = -1;
-  int32_t textSelectionEnd = -1;
+  int32_t textSelectionBase = -1;
+  int32_t textSelectionExtent = -1;
   std::string label;
   std::string hint;
   std::string value;

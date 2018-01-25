@@ -488,8 +488,8 @@ void PlatformViewAndroid::UpdateSemantics(
       buffer_int32[position++] = node.id;
       buffer_int32[position++] = node.flags;
       buffer_int32[position++] = node.actions;
-      buffer_int32[position++] = node.textSelectionStart;
-      buffer_int32[position++] = node.textSelectionEnd;
+      buffer_int32[position++] = node.textSelectionBase;
+      buffer_int32[position++] = node.textSelectionExtent;
       if (node.label.empty()) {
         buffer_int32[position++] = -1;
       } else {
