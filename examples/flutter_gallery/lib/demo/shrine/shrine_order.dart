@@ -101,10 +101,10 @@ class _VendorItem extends StatelessWidget {
 class _HeadingLayout extends MultiChildLayoutDelegate {
   _HeadingLayout();
 
-  static final String image = 'image';
-  static final String icon = 'icon';
-  static final String product = 'product';
-  static final String vendor = 'vendor';
+  static const String image = 'image';
+  static const String icon = 'icon';
+  static const String product = 'product';
+  static const String vendor = 'vendor';
 
   @override
   void performLayout(Size size) {

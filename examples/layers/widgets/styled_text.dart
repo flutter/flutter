@@ -25,8 +25,8 @@ final List<List<String>> _kNameLines = _kDialogText
 
 final TextStyle _kDaveStyle = new TextStyle(color: Colors.indigo.shade400, height: 1.8);
 final TextStyle _kHalStyle = new TextStyle(color: Colors.red.shade400, fontFamily: 'monospace');
-final TextStyle _kBold = const TextStyle(fontWeight: FontWeight.bold);
-final TextStyle _kUnderline = const TextStyle(
+const TextStyle _kBold = const TextStyle(fontWeight: FontWeight.bold);
+const TextStyle _kUnderline = const TextStyle(
   decoration: TextDecoration.underline,
   decorationColor: const Color(0xFF000000),
   decorationStyle: TextDecorationStyle.wavy
