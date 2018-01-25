@@ -7,7 +7,9 @@ import 'dart:convert';
 import 'dart:io' as io show IOSink;
 
 import 'package:flutter_tools/src/android/android_device.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -31,6 +33,74 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
       projectBundleId: 'io.flutter.ios.mock'
     )
   );
+}
+
+/// An SDK installation with several SDK levels (19, 22, 23).
+class MockAndroidSdk extends Mock implements AndroidSdk {
+  static Directory createSdkDirectory({
+    bool withAndroidN: false,
+    String withNdkDir,
+    bool withNdkSysroot: false,
+    bool withSdkManager: true,
+  }) {
+    final Directory dir = fs.systemTempDirectory.createTempSync('android-sdk');
+
+    _createSdkFile(dir, 'platform-tools/adb');
+
+    _createSdkFile(dir, 'build-tools/19.1.0/aapt');
+    _createSdkFile(dir, 'build-tools/22.0.1/aapt');
+    _createSdkFile(dir, 'build-tools/23.0.2/aapt');
+    if (withAndroidN)
+      _createSdkFile(dir, 'build-tools/24.0.0-preview/aapt');
+
+    _createSdkFile(dir, 'platforms/android-22/android.jar');
+    _createSdkFile(dir, 'platforms/android-23/android.jar');
+    if (withAndroidN) {
+      _createSdkFile(dir, 'platforms/android-N/android.jar');
+      _createSdkFile(dir, 'platforms/android-N/build.prop', contents: _buildProp);
+    }
+
+    if (withSdkManager)
+      _createSdkFile(dir, 'tools/bin/sdkmanager');
+
+    if (withNdkDir != null) {
+      final String ndkCompiler = fs.path.join(
+          'ndk-bundle',
+          'toolchains',
+          'arm-linux-androideabi-4.9',
+          'prebuilt',
+          withNdkDir,
+          'bin',
+          'arm-linux-androideabi-gcc');
+      _createSdkFile(dir, ndkCompiler);
+    }
+    if (withNdkSysroot) {
+      final String armPlatform =
+          fs.path.join('ndk-bundle', 'platforms', 'android-9', 'arch-arm');
+      _createDir(dir, armPlatform);
+    }
+
+    return dir;
+  }
+
+  static void _createSdkFile(Directory dir, String filePath, { String contents }) {
+    final File file = dir.childFile(filePath);
+    file.createSync(recursive: true);
+    if (contents != null) {
+      file.writeAsStringSync(contents, flush: true);
+    }
+  }
+
+  static void _createDir(Directory dir, String path) {
+    final Directory directory = fs.directory(fs.path.join(dir.path, path));
+    directory.createSync(recursive: true);
+  }
+
+  static const String _buildProp = r'''
+ro.build.version.incremental=1624448
+ro.build.version.sdk=24
+ro.build.version.codename=REL
+''';
 }
 
 /// A strategy for creating Process objects from a list of commands.
