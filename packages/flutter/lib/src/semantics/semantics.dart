@@ -31,6 +31,10 @@ typedef bool SemanticsNodeVisitor(SemanticsNode node);
 /// current selection or (if nothing is currently selected) start a selection.
 typedef void MoveCursorHandler(bool extendSelection);
 
+/// Signature for the [SemanticsAction.setSelection] handlers to change the
+/// text selection (or re-position the cursor) to `selection`.
+typedef void SetSelectionHandler(TextSelection selection);
+
 typedef void _SemanticsActionHandler(dynamic args);
 
 /// A tag for a [SemanticsNode].
@@ -1656,6 +1660,28 @@ class SemanticsConfiguration {
       value(extentSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
+  }
+
+  /// The handler for [SemanticsActio.setSelection].
+  ///
+  /// This handler is invoked when the user either wants to change the currently
+  /// selected text in a text field or change the position of the cursor.
+  ///
+  /// TalkBack users can trigger this handler by selecting "Move cursor to
+  /// beginning/end" or "Select all" from the Local Context Menu.
+  SetSelectionHandler get onSetSelection => _onSetSelection;
+  SetSelectionHandler _onSetSelection;
+  set onSetSelection(SetSelectionHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.setSelection, (dynamic args) {
+      final Map<String, int> selection = args;
+      assert(selection != null && selection['base'] != null && selection['extent'] != null);
+      value(new TextSelection(
+        baseOffset: selection['base'],
+        extentOffset: selection['extent'],
+      ));
+    });
+    _onSetSelection = value;
   }
 
   /// Returns the action handler registered for [action] or null if none was
