@@ -2006,7 +2006,7 @@ void main() {
     await tester.pump();
     expect(controller.selection, const TextSelection.collapsed(offset: 4));
 
-    // move courser to front
+    // move cursor to front
     semanticsOwner.performAction(inputFieldId, SemanticsAction.setSelection, <String, int>{
       'base': 0,
       'extent': 0,
