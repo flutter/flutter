@@ -834,6 +834,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(() { _debugLocked = false; return true; }());
   }
 
+  /// The top-most [Route] in this navigator
+  Route<dynamic> get current => _history.last;
+
   /// The overlay this navigator uses for its visual presentation.
   OverlayState get overlay => _overlayKey.currentState;
 
