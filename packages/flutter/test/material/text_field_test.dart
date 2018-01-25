@@ -1808,6 +1808,7 @@ void main() {
           id: 2,
           textDirection: TextDirection.ltr,
           value: 'Guten Tag',
+          textSelection: const TextSelection.collapsed(offset: 9),
           actions: <SemanticsAction>[
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
@@ -1828,6 +1829,7 @@ void main() {
         new TestSemantics.rootChild(
           id: 2,
           textDirection: TextDirection.ltr,
+          textSelection: const TextSelection.collapsed(offset: 4),
           value: 'Guten Tag',
           actions: <SemanticsAction>[
             SemanticsAction.tap,
@@ -1851,9 +1853,90 @@ void main() {
         new TestSemantics.rootChild(
           id: 2,
           textDirection: TextDirection.ltr,
+          textSelection: const TextSelection.collapsed(offset: 0),
           value: 'Schönen Feierabend',
           actions: <SemanticsAction>[
             SemanticsAction.tap,
+            SemanticsAction.moveCursorForwardByCharacter,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+            SemanticsFlag.isFocused,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('TextField semantics for selections', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    final TextEditingController controller = new TextEditingController()
+      ..text = 'Hello';
+    final Key key = new UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+          child: new TextField(
+            key: key,
+            controller: controller,
+          )
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 2,
+          value: 'Hello',
+          textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    // Focus the text field
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 2,
+          value: 'Hello',
+          textSelection: const TextSelection.collapsed(offset: 5),
+          textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.moveCursorBackwardByCharacter,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+            SemanticsFlag.isFocused,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    controller.selection = const TextSelection(baseOffset: 5, extentOffset: 3);
+    await tester.pump();
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 2,
+          value: 'Hello',
+          textSelection: const TextSelection(baseOffset: 5, extentOffset: 3),
+          textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
           ],
           flags: <SemanticsFlag>[
