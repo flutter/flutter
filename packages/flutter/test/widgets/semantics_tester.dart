@@ -256,8 +256,8 @@ class TestSemantics {
       return fail('expected node id $id to have rect $rect but found rect ${nodeData.rect}.');
     if (!ignoreTransform && transform != nodeData.transform)
       return fail('expected node id $id to have transform $transform but found transform:\n${nodeData.transform}.');
-    if (textSelection?.end != nodeData.textSelection?.end || textSelection?.start != nodeData.textSelection?.start) {
-      return fail('expected node id $id to have textDirection [${textSelection?.start}, ${textSelection?.end}] but found: [${nodeData.textSelection?.start}, ${nodeData.textSelection?.end}].');
+    if (textSelection?.baseOffset != nodeData.textSelection?.baseOffset || textSelection?.extentOffset != nodeData.textSelection?.extentOffset) {
+      return fail('expected node id $id to have textDirection [${textSelection?.baseOffset}, ${textSelection?.end}] but found: [${nodeData.textSelection?.baseOffset}, ${nodeData.textSelection?.extentOffset}].');
     }
     final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
     if (children.length != childrenCount)

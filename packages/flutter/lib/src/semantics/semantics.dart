@@ -1061,8 +1061,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       increasedValue: data.increasedValue,
       hint: data.hint,
       textDirection: data.textDirection,
-      textSelectionStart: data.textSelection != null ? data.textSelection.start : -1,
-      textSelectionEnd: data.textSelection != null ? data.textSelection.end : -1,
+      textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
+      textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
       transform: data.transform?.storage ?? _kIdentityTransform,
       children: children,
     );
