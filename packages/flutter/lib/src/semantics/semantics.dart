@@ -279,6 +279,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onDecrease,
     this.onMoveCursorForwardByCharacter,
     this.onMoveCursorBackwardByCharacter,
+    this.onSetSelection,
   });
 
   /// If non-null, indicates that this subtree represents something that can be
@@ -488,6 +489,15 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
   final MoveCursorHandler onMoveCursorBackwardByCharacter;
+
+  /// The handler for [SemanticsAction.setSelection].
+  ///
+  /// This handler is invoked when the user either wants to change the currently
+  /// selected text in a text field or change the position of the cursor.
+  ///
+  /// TalkBack users can trigger this handler by selecting "Move cursor to
+  /// beginning/end" or "Select all" from the Local Context Menu.
+  final SetSelectionHandler onSetSelection;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
