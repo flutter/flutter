@@ -293,7 +293,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   /// string describes what result an action performed on this node has. The
   /// reading direction of all these strings is given by `textDirection`.
   ///
-  /// The fields 'textSelectionStart' and 'textSelectionEnd' describe the
+  /// The fields 'textSelectionBase' and 'textSelectionExtent' describe the
   /// currently selected text within `value`.
   ///
   /// The `rect` is the region occupied by this node in its own coordinate
@@ -305,8 +305,8 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     int id,
     int flags,
     int actions,
-    int textSelectionStart,
-    int textSelectionEnd,
+    int textSelectionBase,
+    int textSelectionExtent,
     Rect rect,
     String label,
     String hint,
@@ -323,8 +323,8 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
       id,
       flags,
       actions,
-      textSelectionStart,
-      textSelectionEnd,
+      textSelectionBase,
+      textSelectionExtent,
       rect.left,
       rect.top,
       rect.right,
@@ -343,8 +343,8 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     int id,
     int flags,
     int actions,
-    int textSelectionStart,
-    int textSelectionEnd,
+    int textSelectionBase,
+    int textSelectionExtent,
     double left,
     double top,
     double right,
