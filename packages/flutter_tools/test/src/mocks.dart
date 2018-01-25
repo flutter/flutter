@@ -62,7 +62,7 @@ class MockProcessManager implements ProcessManager {
 class MockProcess extends Mock implements Process {
   MockProcess({
     this.pid: 1,
-    int exitCode,
+    Future<int> exitCode,
     Stream<List<int>> stdin,
     this.stdout: const Stream<List<int>>.empty(),
     this.stderr: const Stream<List<int>>.empty(),
