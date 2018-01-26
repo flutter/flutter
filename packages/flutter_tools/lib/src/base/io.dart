@@ -42,6 +42,7 @@ export 'dart:io'
         // File              NO! Use `file_system.dart`
         // FileSystemEntity  NO! Use `file_system.dart`
         GZIP,
+        HandshakeException,
         HttpClient,
         HttpClientRequest,
         HttpClientResponse,
