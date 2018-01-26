@@ -21,6 +21,9 @@ class SemanticsAction {
   static const int _kMoveCursorForwardByCharacterIndex = 1 << 9;
   static const int _kMoveCursorBackwardByCharacterIndex = 1 << 10;
   static const int _kSetSelectionIndex = 1 << 11;
+  static const int _kCopyIndex = 1 << 12;
+  static const int _kCutIndex = 1 << 13;
+  static const int _kPasteIndex = 1 << 14;
 
   /// The numerical value for this action.
   ///
@@ -79,7 +82,6 @@ class SemanticsAction {
   /// is partially off screen to bring it on screen.
   static const SemanticsAction showOnScreen = const SemanticsAction._(_kShowOnScreenIndex);
 
-
   /// Move the cursor forward by one character.
   ///
   /// This is for example used by the cursor control in text fields.
@@ -107,6 +109,15 @@ class SemanticsAction {
   /// that position (without selecting anything).
   static const SemanticsAction setSelection = const SemanticsAction._(_kSetSelectionIndex);
 
+  /// Copy the current selection to the clipboard.
+  static const SemanticsAction copy = const SemanticsAction._(_kCopyIndex);
+
+  /// Cut the current selection and place it in the clipboard.
+  static const SemanticsAction cut = const SemanticsAction._(_kCutIndex);
+
+  /// Paste the current content of the clipboard.
+  static const SemanticsAction paste = const SemanticsAction._(_kPasteIndex);
+
   /// The possible semantics actions.
   ///
   /// The map's key is the [index] of the action and the value is the action
@@ -124,6 +135,9 @@ class SemanticsAction {
     _kMoveCursorForwardByCharacterIndex: moveCursorForwardByCharacter,
     _kMoveCursorBackwardByCharacterIndex: moveCursorBackwardByCharacter,
     _kSetSelectionIndex: setSelection,
+    _kCopyIndex: copy,
+    _kCutIndex: cut,
+    _kPasteIndex: paste,
   };
 
   @override
@@ -153,6 +167,12 @@ class SemanticsAction {
         return 'SemanticsAction.moveCursorBackwardByCharacter';
       case _kSetSelectionIndex:
         return 'SemanticsAction.setSelection';
+      case _kCopyIndex:
+        return 'SemanticsAction.copy';
+      case _kCutIndex:
+        return 'SemanticsAction.cut';
+      case _kPasteIndex:
+        return 'SemanticsAction.paste';
     }
     return null;
   }

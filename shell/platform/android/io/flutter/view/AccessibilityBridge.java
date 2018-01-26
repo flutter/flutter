@@ -57,7 +57,10 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         SHOW_ON_SCREEN(1 << 8),
         MOVE_CURSOR_FORWARD_BY_CHARACTER(1 << 9),
         MOVE_CURSOR_BACKWARD_BY_CHARACTER(1 << 10),
-        SET_SELECTION(1 << 11);
+        SET_SELECTION(1 << 11),
+        COPY(1 << 12),
+        CUT(1 << 13),
+        PASTE(1 << 14);
 
         Action(int value) {
             this.value = value;
@@ -150,6 +153,15 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         }
         if (object.hasAction(Action.SET_SELECTION)) {
             result.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
+        }
+        if (object.hasAction(Action.COPY)) {
+            result.addAction(AccessibilityNodeInfo.ACTION_COPY);
+        }
+        if (object.hasAction(Action.CUT)) {
+            result.addAction(AccessibilityNodeInfo.ACTION_CUT);
+        }
+        if (object.hasAction(Action.PASTE)) {
+            result.addAction(AccessibilityNodeInfo.ACTION_PASTE);
         }
 
         if (object.hasFlag(Flag.IS_BUTTON)) {
@@ -348,6 +360,18 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
                     selection.put("extent", object.textSelectionExtent);
                 }
                 mOwner.dispatchSemanticsAction(virtualViewId, Action.SET_SELECTION, selection);
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_COPY: {
+                mOwner.dispatchSemanticsAction(virtualViewId, Action.COPY);
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_CUT: {
+                mOwner.dispatchSemanticsAction(virtualViewId, Action.CUT);
+                return true;
+            }
+            case AccessibilityNodeInfo.ACTION_PASTE: {
+                mOwner.dispatchSemanticsAction(virtualViewId, Action.PASTE);
                 return true;
             }
         }
