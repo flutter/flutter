@@ -31,7 +31,9 @@ class FuchsiaDartVm {
   /// Throws an error if unable to connect.
   static Future<FuchsiaDartVm> connect(Uri uri) async {
     final Stopwatch timer = new Stopwatch()..start();
-    if (uri.scheme == 'http') uri = uri.replace(scheme: 'ws', path: '/ws');
+    if (uri.scheme == 'http') {
+      uri = uri.replace(scheme: 'ws', path: '/ws');
+    }
     return await _attemptConnection(uri, timer);
   }
 
