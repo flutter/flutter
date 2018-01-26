@@ -420,7 +420,7 @@ abstract class ResidentRunner {
     if (projectAssets != null)
       _assetBundle = new AssetBundle.fixed(_projectRootPath, projectAssets);
     else
-      _assetBundle = new AssetBundle();
+      _assetBundle = AssetBundleFactory.instance.createBundle();
   }
 
   final List<FlutterDevice> flutterDevices;
