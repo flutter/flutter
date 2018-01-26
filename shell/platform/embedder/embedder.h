@@ -41,6 +41,7 @@ typedef struct {
   BoolCallback clear_current;
   BoolCallback present;
   UIntCallback fbo_callback;
+  BoolCallback make_resource_current;
 } FlutterOpenGLRendererConfig;
 
 typedef struct {
