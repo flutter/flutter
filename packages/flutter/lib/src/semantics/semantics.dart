@@ -496,7 +496,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// selected text in a text field or change the position of the cursor.
   ///
   /// TalkBack users can trigger this handler by selecting "Move cursor to
-  /// beginning/end" or "Select all" from the Local Context Menu.
+  /// beginning/end" or "Select all" from the local context menu.
   final SetSelectionHandler onSetSelection;
 
   @override
@@ -1672,13 +1672,13 @@ class SemanticsConfiguration {
     _onMoveCursorBackwardByCharacter = value;
   }
 
-  /// The handler for [SemanticsActio.setSelection].
+  /// The handler for [SemanticsAction.setSelection].
   ///
   /// This handler is invoked when the user either wants to change the currently
   /// selected text in a text field or change the position of the cursor.
   ///
   /// TalkBack users can trigger this handler by selecting "Move cursor to
-  /// beginning/end" or "Select all" from the Local Context Menu.
+  /// beginning/end" or "Select all" from the local context menu.
   SetSelectionHandler get onSetSelection => _onSetSelection;
   SetSelectionHandler _onSetSelection;
   set onSetSelection(SetSelectionHandler value) {
