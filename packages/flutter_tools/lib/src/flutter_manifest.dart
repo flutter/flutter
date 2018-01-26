@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:json_schema/json_schema.dart';
+import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
@@ -15,11 +16,16 @@ import 'globals.dart';
 class FlutterManifest {
   FlutterManifest._();
 
-  /// Returns null on missing or invalid manifest
+  /// Returns null on invalid manifest. Returns empty manifest on missing file.
   static Future<FlutterManifest> createFromPath(String path) async {
-    return  _createFromYaml(await _loadFlutterManifest(path));
+    if (path == null || !fs.isFileSync(path))
+      return _createFromYaml(null);
+    final String manifest = await fs.file(path).readAsString();
+    return createFromString(manifest);
   }
+
   /// Returns null on missing or invalid manifest
+  @visibleForTesting
   static Future<FlutterManifest> createFromString(String manifest) async {
     return _createFromYaml(loadYaml(manifest));
   }
@@ -143,13 +149,6 @@ class FontAsset {
 
   @override
   String toString() => '$runtimeType(asset: ${assetUri.path}, weight; $weight, style: $style)';
-}
-
-Future<dynamic> _loadFlutterManifest(String manifestPath) async {
-  if (manifestPath == null || !fs.isFileSync(manifestPath))
-    return null;
-  final String manifestDescriptor = await fs.file(manifestPath).readAsString();
-  return loadYaml(manifestDescriptor);
 }
 
 Future<bool> _validate(Object manifest) async {
