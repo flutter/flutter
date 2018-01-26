@@ -81,7 +81,6 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   bool _platformSupportsTouchTypes;
   bool _platformSupportsTouchPressure;
   bool _platformSupportsTouchOrientationAndTilt;
-  bool _platformSupportsSafeAreaInsets;
   BOOL _initialized;
   BOOL _connected;
 }
@@ -130,7 +129,6 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   _platformSupportsTouchTypes = fml::IsPlatformVersionAtLeast(9);
   _platformSupportsTouchPressure = fml::IsPlatformVersionAtLeast(9);
   _platformSupportsTouchOrientationAndTilt = fml::IsPlatformVersionAtLeast(9, 1);
-  _platformSupportsSafeAreaInsets = fml::IsPlatformVersionAtLeast(11, 0);
 
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
@@ -621,11 +619,9 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
 }
 
 - (void)viewSafeAreaInsetsDidChange {
-  if (_platformSupportsSafeAreaInsets) {
-    [self updateViewportPadding];
-    [self updateViewportMetrics];
-    [super viewSafeAreaInsetsDidChange];
-  }
+  [self updateViewportPadding];
+  [self updateViewportMetrics];
+  [super viewSafeAreaInsetsDidChange];
 }
 
 // Updates _viewportMetrics physical padding.
@@ -633,16 +629,11 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
 // Viewport padding represents the iOS safe area insets.
 - (void)updateViewportPadding {
   CGFloat scale = [UIScreen mainScreen].scale;
-  // TODO(cbracken) once clang toolchain compiler-rt has been updated, replace with
-  // if (@available(iOS 11, *)) {
-  if (_platformSupportsSafeAreaInsets) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+  if (@available(iOS 11, *)) {
     _viewportMetrics.physical_padding_top = self.view.safeAreaInsets.top * scale;
     _viewportMetrics.physical_padding_left = self.view.safeAreaInsets.left * scale;
     _viewportMetrics.physical_padding_right = self.view.safeAreaInsets.right * scale;
     _viewportMetrics.physical_padding_bottom = self.view.safeAreaInsets.bottom * scale;
-#pragma clang diagnostic pop
   } else {
     _viewportMetrics.physical_padding_top = [self statusBarPadding] * scale;
   }
@@ -828,11 +819,8 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
 
 - (void)handleStatusBarTouches:(UIEvent*)event {
   CGFloat standardStatusBarHeight = kStandardStatusBarHeight;
-  if (_platformSupportsSafeAreaInsets) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+  if (@available(iOS 11, *)) {
     standardStatusBarHeight = self.view.safeAreaInsets.top;
-#pragma clang diagnostic pop
   }
 
   // If the status bar is double-height, don't handle status bar taps. iOS
