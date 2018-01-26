@@ -50,7 +50,7 @@ Future<bool> _checkPort(int port) async {
   bool connected = true;
   Socket s;
   try {
-    s = await Socket.connect(ipv4Loopback, port);
+    s = await Socket.connect(_ipv4Loopback, port);
   } catch (_) {
     connected = false;
   }
@@ -60,7 +60,7 @@ Future<bool> _checkPort(int port) async {
 
 Future<FuchsiaDartVm> _getFuchsiaDartVm(int port) async {
   if (!_fuchsiaDartVmCache.containsKey(port)) {
-    final String addr = 'http://$ipv4Loopback:$port';
+    final String addr = 'http://$_ipv4Loopback:$port';
     final Uri uri = Uri.parse(addr);
     final FuchsiaDartVm fuchsiaDartVm = FuchsiaDartVm.connect(uri);
     _fuchsiaDartVmCache[port] = fuchsiaDartVm;
@@ -141,7 +141,7 @@ class _ForwardedPort {
       sshConfig,
       '-nNT',
       '-L',
-      '$localPort:$ipv4Loopback:$remotePort',
+      '$localPort:$_ipv4Loopback:$remotePort',
       address
     ];
     _log.fine("_ForwardedPort running '${command.join(' ')}'");
@@ -168,7 +168,7 @@ class _ForwardedPort {
       '-O',
       'cancel',
       '-L',
-      '$_localPort:$ipv4Loopback:$_remotePort',
+      '$_localPort:$_ipv4Loopback:$_remotePort',
       _remoteAddress
     ];
     final ProcessResult result = await _processManager.run(command);
@@ -183,7 +183,7 @@ class _ForwardedPort {
     int port = 0;
     ServerSocket s;
     try {
-      s = await ServerSocket.bind(ipv4Loopback, 0);
+      s = await ServerSocket.bind(_ipv4Loopback, 0);
       port = s.port;
     } catch (e) {
       // Failures are signaled by a return value of 0 from this function.
