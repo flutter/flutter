@@ -545,17 +545,23 @@ void Paragraph::Layout(double width, bool force) {
           int32_t next_grapheme;
           if (run.is_rtl()) {
             next_grapheme = grapheme_breaker_->previous();
+            if (next_grapheme == icu::BreakIterator::DONE)
+              break;
             subglyph_code_unit_counts.push_back(current_grapheme -
                                                 next_grapheme);
           } else {
             next_grapheme = grapheme_breaker_->next();
+            if (next_grapheme == icu::BreakIterator::DONE)
+              break;
             subglyph_code_unit_counts.push_back(next_grapheme -
                                                 current_grapheme);
             while (next_grapheme < static_cast<int32_t>(text_count)) {
               if (layout.getCharAdvance(next_grapheme) != 0)
                 break;
-              size_t sub_grapheme = grapheme_breaker_->current();
-              next_grapheme = grapheme_breaker_->next();
+              if (grapheme_breaker_->next() == icu::BreakIterator::DONE)
+                break;
+              size_t sub_grapheme = next_grapheme;
+              next_grapheme = grapheme_breaker_->current();
               subglyph_code_unit_counts.push_back(next_grapheme - sub_grapheme);
             }
           }
@@ -589,6 +595,9 @@ void Paragraph::Layout(double width, bool force) {
             }
           }
         }
+
+        if (glyph_positions.empty())
+          continue;
 
         SkPaint::FontMetrics metrics;
         paint.getFontMetrics(&metrics);
