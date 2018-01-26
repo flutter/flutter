@@ -42,8 +42,8 @@ enum MaterialType {
   /// A [Material] with type transparency can be placed on top of opaque widgets
   /// to show ink effects on top of them.
   ///
-  /// Since the introduction of the [Ink] widget, the [Ink] widget is the
-  /// preferred way to show ink effects on top of opaque widgets.
+  /// Prefer using the [Ink] widget for showing ink effects on top of opaque
+  /// widgets.
   transparency
 }
 
@@ -86,14 +86,16 @@ abstract class MaterialInkController {
 /// A piece of material.
 ///
 /// The Material widget is responsible for:
-/// 1. Clipping - Material clips its widget sub-tree to the shape specified by
-///               [type] and [borderRadius].
-/// 2. Elevation - Material elevates its widget sub-tree on the Z axis by
-///                [elevation] pixels, and draws the appropriate shadow.
-/// 3. Ink effects - Material shows ink effects implemented by [InkFeature]s
-///                  like [InkSplash] and [InkHighlight] below its children.
+///
+/// 1. Clipping: Material clips its widget sub-tree to the shape specified by
+///    [type] and [borderRadius].
+/// 2. Elevation: Material elevates its widget sub-tree on the Z axis by
+///    [elevation] pixels, and draws the appropriate shadow.
+/// 3. Ink effects: Material shows ink effects implemented by [InkFeature]s
+///    like [InkSplash] and [InkHighlight] below its children.
 ///
 /// ## The Material Metaphor
+///
 /// Material is the central metaphor in material design. Each piece of material
 /// exists at a given elevation, which influences how that piece of material
 /// visually relates to other pieces of material and how that material casts
@@ -104,8 +106,14 @@ abstract class MaterialInkController {
 /// [InkSplash] and [InkHighlight] effects. To trigger a reaction on the
 /// material, use a [MaterialInkController] obtained via [Material.of].
 ///
+/// In general, the features of a [Material] should not change over time (e.g. a
+/// [Material] should not change its [color], [shadowColor] or [type]). The one
+/// exception is the [elevation], changes to which will be animated.
+///
 /// ## Shape
+///
 /// The shape for material is determined by [type] and [borderRadius].
+///
 ///  - If [borderRadius] is non null, the shape is a rounded rectangle, with
 ///    corners specified by [borderRadius].
 ///  - If [borderRadius] is null, [type] determines the shape as follows:
@@ -117,6 +125,8 @@ abstract class MaterialInkController {
 ///      rounded edges. The edge radii is specified by [kMaterialEdges].
 ///    - [MaterialType.transparency]: the default material shape is a rectangle.
 ///
+/// ## Layout change notifications
+///
 /// If the layout changes (e.g. because there's a list on the material, and it's
 /// been scrolled), a [LayoutChangedNotification] must be dispatched at the
 /// relevant subtree. This in particular means that transitions (e.g.
@@ -125,10 +135,6 @@ abstract class MaterialInkController {
 /// widgets that use the [InkFeature] mechanism. Otherwise, in-progress ink
 /// features (e.g., ink splashes and ink highlights) won't move to account for
 /// the new layout.
-///
-/// In general, the features of a [Material] should not change over time (e.g. a
-/// [Material] should not change its [color], [shadowColor] or [type]). The one
-/// exception is the [elevation], changes to which will be animated.
 ///
 /// See also:
 ///
