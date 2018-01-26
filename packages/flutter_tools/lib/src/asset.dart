@@ -19,7 +19,7 @@ import 'globals.dart';
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
   /// The singleton instance, pulled from the [AppContext].
-  static FlutterVersion get instance => context.putIfAbsent(
+  static AssetBundleFactory get instance => context.putIfAbsent(
       AssetBundleFactory, () => new _ManifestAssetBundleFactory());
 
   /// Creates a new [AssetBundle].
@@ -32,11 +32,11 @@ abstract class AssetBundle {
 
   Map<String, DevFSContent> get entries;
 
-  bool needsBuild({String manifestPath: FlutterManifest.defaultPath});
+  bool needsBuild({String manifestPath: _ManifestAssetBundle.defaultManifestPath});
 
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
-    String manifestPath: FlutterManifest.defaultPath,
+    String manifestPath: _ManifestAssetBundle.defaultManifestPath,
     String workingDirPath,
     String packagesPath,
     bool includeDefaultFonts: true,
@@ -51,7 +51,7 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
 
 
 /// A bundle of assets.
-class _ManifestAssetBundle {
+class _ManifestAssetBundle implements AssetBundle {
   @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
 
