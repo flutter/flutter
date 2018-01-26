@@ -351,7 +351,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                 return new ExpansionPanel(
                   isExpanded: item.isExpanded,
                   headerBuilder: item.headerBuilder,
-                  body: item.builder(item)
+                  body: (item.builder as Function)(item)
                 );
               }).toList()
             ),

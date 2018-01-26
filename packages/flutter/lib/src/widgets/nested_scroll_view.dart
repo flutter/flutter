@@ -867,7 +867,7 @@ class _NestedScrollController extends ScrollController {
   }
 
   Iterable<_NestedScrollPosition> get nestedPositions sync* {
-    yield* positions;
+    yield* Iterable.castFrom<ScrollPosition, _NestedScrollPosition>(positions);
   }
 }
 
