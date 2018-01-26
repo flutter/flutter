@@ -33,6 +33,8 @@ class AssetDataProvider {
 
   size_t GetFamilyCount() const;
 
+  const std::string& GetFamilyName(int index) const;
+
   AssetFontStyleSet* MatchFamily(const std::string& family_name);
 
   void RegisterTypeface(sk_sp<SkTypeface> typeface);
@@ -42,6 +44,7 @@ class AssetDataProvider {
 
  private:
   std::unordered_map<std::string, AssetFontStyleSet> registered_families_;
+  std::vector<std::string> family_names_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(AssetDataProvider);
 };

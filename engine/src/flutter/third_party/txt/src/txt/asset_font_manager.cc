@@ -33,7 +33,7 @@ int AssetFontManager::onCountFamilies() const {
 }
 
 void AssetFontManager::onGetFamilyName(int index, SkString* familyName) const {
-  FXL_DCHECK(false);
+  familyName->set(data_provider_->GetFamilyName(index).c_str());
 }
 
 SkFontStyleSet* AssetFontManager::onCreateStyleSet(int index) const {
@@ -47,10 +47,14 @@ SkFontStyleSet* AssetFontManager::onMatchFamily(
   return data_provider_->MatchFamily(family_name);
 }
 
-SkTypeface* AssetFontManager::onMatchFamilyStyle(const char familyName[],
-                                                 const SkFontStyle&) const {
-  FXL_DCHECK(false);
-  return nullptr;
+SkTypeface* AssetFontManager::onMatchFamilyStyle(
+    const char familyName[],
+    const SkFontStyle& style) const {
+  SkFontStyleSet* font_style_set =
+      data_provider_->MatchFamily(std::string(familyName));
+  if (font_style_set == nullptr)
+    return nullptr;
+  return font_style_set->matchStyle(style);
 }
 
 SkTypeface* AssetFontManager::onMatchFamilyStyleCharacter(

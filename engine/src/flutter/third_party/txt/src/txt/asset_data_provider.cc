@@ -24,7 +24,11 @@ AssetDataProvider::AssetDataProvider() = default;
 AssetDataProvider::~AssetDataProvider() = default;
 
 size_t AssetDataProvider::GetFamilyCount() const {
-  return registered_families_.size();
+  return family_names_.size();
+}
+
+const std::string& AssetDataProvider::GetFamilyName(int index) const {
+  return family_names_[index];
 }
 
 AssetFontStyleSet* AssetDataProvider::MatchFamily(
@@ -44,18 +48,26 @@ void AssetDataProvider::RegisterTypeface(sk_sp<SkTypeface> typeface) {
   SkString sk_family_name;
   typeface->getFamilyName(&sk_family_name);
 
-  if (sk_family_name.isEmpty()) {
-    return;
-  }
-
   std::string family_name(sk_family_name.c_str(), sk_family_name.size());
   RegisterTypeface(std::move(typeface), std::move(family_name));
 }
 
 void AssetDataProvider::RegisterTypeface(sk_sp<SkTypeface> typeface,
                                          std::string family_name_alias) {
-  registered_families_[std::move(family_name_alias)].registerTypeface(
-      std::move(typeface));
+  if (family_name_alias.empty()) {
+    return;
+  }
+
+  auto family_it = registered_families_.find(family_name_alias);
+  if (family_it == registered_families_.end()) {
+    family_names_.push_back(family_name_alias);
+    family_it = registered_families_
+                    .emplace(std::piecewise_construct,
+                             std::forward_as_tuple(family_name_alias),
+                             std::forward_as_tuple())
+                    .first;
+  }
+  family_it->second.registerTypeface(std::move(typeface));
 }
 
 }  // namespace txt
