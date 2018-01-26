@@ -125,6 +125,15 @@ FlutterResult FlutterEngineRun(size_t version,
     };
   }
 
+  const FlutterOpenGLRendererConfig* open_gl_config = &config->open_gl;
+  std::function<bool()> make_resource_current_callback = nullptr;
+  if (SAFE_ACCESS(open_gl_config, make_resource_current, nullptr) != nullptr) {
+    make_resource_current_callback =
+        [ ptr = config->open_gl.make_resource_current, user_data ]() {
+      return ptr(user_data);
+    };
+  }
+
   std::string icu_data_path;
   if (SAFE_ACCESS(args, icu_data_path, nullptr) != nullptr) {
     icu_data_path = SAFE_ACCESS(args, icu_data_path, nullptr);
@@ -154,6 +163,7 @@ FlutterResult FlutterEngineRun(size_t version,
       .gl_present_callback = present,
       .gl_fbo_callback = fbo_callback,
       .platform_message_response_callback = platform_message_response_callback,
+      .gl_make_resource_current_callback = make_resource_current_callback,
   };
 
   auto platform_view = std::make_shared<shell::PlatformViewEmbedder>(table);

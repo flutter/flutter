@@ -34,11 +34,17 @@ intptr_t PlatformViewEmbedder::GLContextFBO() const {
 void PlatformViewEmbedder::Attach() {
   CreateEngine();
   NotifyCreated(std::make_unique<shell::GPUSurfaceGL>(this));
+
+  if (dispatch_table_.gl_make_resource_current_callback != nullptr) {
+    SetupResourceContextOnIOThread();
+  }
 }
 
 bool PlatformViewEmbedder::ResourceContextMakeCurrent() {
-  // Unsupported.
-  return false;
+  if (dispatch_table_.gl_make_resource_current_callback == nullptr) {
+    return false;
+  }
+  return dispatch_table_.gl_make_resource_current_callback();
 }
 
 void PlatformViewEmbedder::RunFromSource(const std::string& assets_directory,
