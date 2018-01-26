@@ -69,7 +69,7 @@ void main() {
             emptyStdout,
       };
       processManager.setResults(calls);
-      new ArchivePublisher('deadbeef', '1.2.3', 'dev',
+      new ArchivePublisher('deadbeef', '1.2.3', Channel.dev,
           processManager: processManager, tempDir: tempDir)
         ..publishArchive();
       processManager.verifyCalls(calls.keys);

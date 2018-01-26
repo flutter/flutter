@@ -10,15 +10,31 @@ import 'package:process/process.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
+/// A mock that can be used to fake a process manager that runs commands
+/// and returns results.
+///
+/// Call [setResults] to provide a list of results that will return from
+/// each command line (with arguments).
+///
+/// Call [verifyCalls] to verify that each desired call occurred.
 class FakeProcessManager extends Mock implements ProcessManager {
   FakeProcessManager({this.stdinResults}) {
     _setupMock();
   }
 
+  /// The callback that will be called each time stdin input is supplied to
+  /// a call.
   final StringReceivedCallback stdinResults;
+
+  /// The list of results that will be sent back, organized by the command line
+  /// that will produce them.  Each command line has a list of returned stdout
+  /// output that will be returned on each successive call.
   Map<String, List<ProcessResult>> fakeResults = <String, List<ProcessResult>>{};
+
+  /// The list of invocations that occurred, in the order they occurred.
   List<Invocation> invocations = <Invocation>[];
 
+  /// Verify that the given command lines were called, in the given order.
   void verifyCalls(List<String> calls) {
     int index = 0;
     expect(invocations.length, equals(calls.length));
@@ -28,6 +44,7 @@ class FakeProcessManager extends Mock implements ProcessManager {
     }
   }
 
+  /// Sets the list of results that will be returned from each successive call.
   void setResults(Map<String, List<String>> results) {
     final Map<String, List<ProcessResult>> resultCodeUnits = <String, List<ProcessResult>>{};
     for (String key in results.keys) {
@@ -63,6 +80,9 @@ class FakeProcessManager extends Mock implements ProcessManager {
   }
 
   void _setupMock() {
+    // Note that not all possible types of invocations are covered here, just the ones
+    // expected to be called.
+    // TODO(gspencer): make this more general so that any call will be captured.
     when(
       start(
         typed(captureAny),
@@ -117,6 +137,7 @@ class FakeProcessManager extends Mock implements ProcessManager {
   }
 }
 
+/// A fake process that can be used to interact with a process "started" by the FakeProcessManager.
 class FakeProcess extends Mock implements Process {
   FakeProcess(ProcessResult result, {void stdinResults(String input)})
       : stdoutStream = new Stream<List<int>>.fromIterable(<List<int>>[result.stdout.codeUnits]),
@@ -151,14 +172,18 @@ class FakeProcess extends Mock implements Process {
   Stream<List<int>> get stdout => stdoutStream;
 }
 
+/// Callback used to receive stdin input when it occurs.
 typedef void StringReceivedCallback(String received);
 
+/// A stream consumer class that consumes UTF8 strings as lists of ints.
 class StringStreamConsumer implements StreamConsumer<List<int>> {
   StringStreamConsumer(this.sendString);
 
   List<Stream<List<int>>> streams = <Stream<List<int>>>[];
   List<StreamSubscription<List<int>>> subscriptions = <StreamSubscription<List<int>>>[];
   List<Completer<dynamic>> completers = <Completer<dynamic>>[];
+
+  /// The callback called when this consumer receives input.
   StringReceivedCallback sendString;
 
   @override

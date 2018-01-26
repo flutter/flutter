@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -114,7 +114,7 @@ void main(List<String> args) {
   // Publish the archive before pushing the tag so that if something fails in
   // the publish step, we can clean up.
   try {
-    new ArchivePublisher(hash, version, 'dev')..publishArchive();
+    new ArchivePublisher(hash, version, Channel.dev)..publishArchive();
   } on ArchivePublisherException catch (e) {
     print('Archive publishing failed.\n$e');
     runGit('tag -d $version', 'remove the tag that was not published');

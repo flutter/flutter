@@ -28,38 +28,52 @@ class ArchivePublisherException implements Exception {
   }
 }
 
+enum Channel { dev, beta }
+
 /// Publishes the archive created for a particular version and git hash to
 /// the releases directory on cloud storage, and updates the metadata for
 /// releases.
+///
+/// See https://github.com/flutter/flutter/wiki/Release-process for more
+/// information on the release process.
 class ArchivePublisher {
-  /// [revision] is a git hash for the revision to publish, [version] is the
-  /// version number for the release (e.g. 1.2.3), and [channel]` must be either
-  /// "dev" or "beta". [processManager] is the process manager to use for invoking
-  /// commands, which is typically not provided, except by tests.
   ArchivePublisher(
     this.revision,
     this.version,
     this.channel, {
     this.processManager = const LocalProcessManager(),
     this.tempDir,
-  });
+  }) : assert(revision.length == 40, 'Git hash must be 40 characters long (i.e. the entire hash).');
 
-  /// A git hash describing the revision to publish.
+  /// A git hash describing the revision to publish. It should be the complete
+  /// hash, not just a prefix.
   final String revision;
 
-  /// A version number for the release (e.g. 1.2.3).
+  /// A version number for the release (e.g. "1.2.3").
   final String version;
 
-  /// The channel to publish to. Can be either "dev" or "beta".
-  final String channel;
+  /// The channel to publish to.
+  // TODO(gspencer): support Channel.beta: it is currently unimplemented.
+  final Channel channel;
+
+  /// Get the name of the channel as a string.
+  String get channelName {
+    switch (channel) {
+      case Channel.beta:
+        return 'beta';
+      case Channel.dev:
+      default:
+        return 'dev';
+    }
+  }
 
   /// The process manager to use for invoking commands. Typically only
   /// used for testing purposes.
   final ProcessManager processManager;
 
   /// The temporary directory used for this publisher. If not set, one will
-  /// be created, used, and then removed automatically. Typically used by
-  /// tests.
+  /// be created, used, and then removed automatically. If set, it will not be
+  /// deleted when done: that is left to the caller. Typically used by tests.
   Directory tempDir;
 
   static String gsBase = 'gs://flutter_infra';
@@ -72,7 +86,7 @@ class ArchivePublisher {
 
   /// Publishes the archive for the given constructor parameters.
   bool publishArchive() {
-    assert(channel == 'dev', 'Channel must be dev (beta not yet supported)');
+    assert(channel == Channel.dev, 'Channel must be dev (beta not yet supported)');
     // Check for access early so that we don't try to publish things if the
     // user doesn't have access to the metadata file.
     _checkForGSUtilAccess();
@@ -84,7 +98,7 @@ class ArchivePublisher {
       final String srcGsPath = '$gsBase$src';
       final String destGsPath = '$gsBase$releaseFolder$dest';
       _cloudCopy(srcGsPath, destGsPath);
-      metadata['${platform}_archive'] = '$channel/$platform$dest';
+      metadata['${platform}_archive'] = '$channelName/$platform$dest';
     }
     metadata['release_date'] = new DateTime.now().toUtc().toIso8601String();
     metadata['version'] = version;
@@ -93,7 +107,7 @@ class ArchivePublisher {
   }
 
   /// Checks to make sure the user has access to the Google Storage bucket
-  /// required to publish. Will print an error and return false if not.
+  /// required to publish. Will throw an [ArchivePublisherException] if not.
   void _checkForGSUtilAccess() {
     // Fetching ACLs requires FULL_CONTROL access.
     final ProcessResult result = _runGsUtil(<String>['acl', 'get', metadataGsPath]);
@@ -119,7 +133,7 @@ class ArchivePublisher {
     } on FormatException catch (e) {
       throw new ArchivePublisherException('Unable to parse JSON metadata received from cloud: $e');
     }
-    jsonData['current_$channel'] = revision;
+    jsonData['current_$channelName'] = revision;
     if (!jsonData.containsKey('releases')) {
       jsonData['releases'] = <String, dynamic>{};
     }
@@ -159,9 +173,9 @@ class ArchivePublisher {
   }
 
   String _destinationArchivePath(String platform) {
-    final String archivePathBase = '/$channel/$platform/$archivePrefix';
+    final String archivePathBase = '/$channelName/$platform/$archivePrefix';
     final String suffix = _getArchiveSuffix(platform);
-    return '$archivePathBase${platform}_$version-$channel$suffix';
+    return '$archivePathBase${platform}_$version-$channelName$suffix';
   }
 
   ProcessResult _runGsUtil(List<String> args) {
