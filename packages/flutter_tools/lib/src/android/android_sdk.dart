@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart' show ProcessResult;
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
@@ -283,6 +284,22 @@ class AndroidSdk {
     _sdkVersions.sort();
 
     _latestVersion = _sdkVersions.isEmpty ? null : _sdkVersions.last;
+  }
+
+  /// Returns the filesystem path of the Android SDK manager tool or null if not found.
+  String get sdkManagerPath {
+    return fs.path.join(directory, 'tools', 'bin', 'sdkmanager');
+  }
+
+  /// Returns the version of the Android SDK manager tool or null if not found.
+  String get sdkManagerVersion {
+    if (!processManager.canRun(sdkManagerPath))
+      throwToolExit('Android sdkmanager not found. Update to the latest Android SDK to resolve this.');
+    final ProcessResult result = processManager.runSync(<String>[sdkManagerPath, '--version']);
+    if (result.exitCode != 0) {
+      throwToolExit('sdkmanager --version failed: ${result.exitCode}', exitCode: result.exitCode);
+    }
+    return result.stdout.trim();
   }
 
   @override

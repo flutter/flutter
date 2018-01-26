@@ -51,7 +51,7 @@ class TravelDestinationItem extends StatelessWidget {
     : assert(destination != null && destination.isValid),
       super(key: key);
 
-  static final double height = 366.0;
+  static const double height = 366.0;
   final TravelDestination destination;
 
   @override

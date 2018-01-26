@@ -357,6 +357,7 @@ class RenderEditable extends RenderBox {
       ..isTextField = true;
 
     if (_selection?.isValid == true) {
+      config.textSelection = _selection;
       if (_textPainter.getOffsetBefore(_selection.extentOffset) != null)
         config.onMoveCursorBackwardByCharacter = _handleMoveCursorBackwardByCharacter;
       if (_textPainter.getOffsetAfter(_selection.extentOffset) != null)

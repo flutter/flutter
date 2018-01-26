@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/file.dart';
-import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -93,6 +92,28 @@ $assetsSection
     }
   }
 
+  // These tests do not use a memory file system because we want to ensure that
+  // asset bundles work correctly on Windows and Posix systems.
+  Directory tempDir;
+  Directory oldCurrentDir;
+
+  setUp(() async {
+    tempDir = await fs.systemTempDirectory.createTemp('asset_bundle_tests');
+    oldCurrentDir = fs.currentDirectory;
+    fs.currentDirectory = tempDir;
+  });
+
+  tearDown(() {
+    fs.currentDirectory = oldCurrentDir;
+    try {
+      tempDir?.deleteSync(recursive: true);
+      tempDir = null;
+    } on FileSystemException catch (e) {
+      // Do nothing, windows sometimes has trouble deleting.
+      print('Ignored exception during tearDown: $e');
+    }
+  });
+
   group('AssetBundle assets from packages', () {
     testUsingContext('No assets are bundled when the package has no assets', () async {
       establishFlutterRoot();
@@ -109,7 +130,7 @@ $assetsSection
         UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,
       );
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('No assets are bundled when the package has an asset that is not listed', () async {
       establishFlutterRoot();
@@ -130,7 +151,7 @@ $assetsSection
         expectedAssetManifest,
       );
 
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('One asset is bundled when the package has and lists one asset its pubspec', () async {
       establishFlutterRoot();
@@ -154,7 +175,7 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext("One asset is bundled when the package has one asset, listed in the app's pubspec", () async {
       establishFlutterRoot();
@@ -178,7 +199,7 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('One asset and its variant are bundled when the package has an asset and a variant, and lists the asset in its pubspec', () async {
       establishFlutterRoot();
@@ -202,7 +223,7 @@ $assetsSection
         <String>['test_package'],
         expectedManifest,
       );
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('One asset and its variant are bundled when the package has an asset and a variant, and the app lists the asset in its pubspec', () async {
       establishFlutterRoot();
@@ -229,7 +250,7 @@ $assetsSection
         <String>['test_package'],
         expectedManifest,
       );
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('Two assets are bundled when the package has and lists two assets in its pubspec', () async {
       establishFlutterRoot();
@@ -254,7 +275,7 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext("Two assets are bundled when the package has two assets, listed in the app's pubspec", () async {
       establishFlutterRoot();
@@ -286,7 +307,7 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('Two assets are bundled when two packages each have and list an asset their pubspec', () async {
       establishFlutterRoot();
@@ -322,7 +343,7 @@ $assetsSection
         <String>['test_package', 'test_package2'],
         expectedAssetManifest,
       );
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext("Two assets are bundled when two packages each have an asset, listed in the app's pubspec", () async {
       establishFlutterRoot();
@@ -361,7 +382,7 @@ $assetsSection
         <String>['test_package', 'test_package2'],
         expectedAssetManifest,
       );
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('One asset is bundled when the app depends on a package, listing in its pubspec an asset from another package', () async {
       establishFlutterRoot();
@@ -392,10 +413,6 @@ $assetsSection
         <String>['test_package2'],
         expectedAssetManifest,
       );
-    }, overrides: contextOverrides);
+    });
   });
-}
-
-Map<Type, Generator> get contextOverrides {
-  return <Type, Generator>{FileSystem: () => new MemoryFileSystem()};
 }

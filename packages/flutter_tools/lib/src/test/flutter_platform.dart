@@ -217,14 +217,16 @@ class _FlutterPlatform extends PlatformPlugin {
             .createTempSync('flutter_bundle_directory');
         finalizers.add(() async {
           printTrace('test $ourTestCount: deleting temporary bundle directory');
-          temporaryDirectory.deleteSync(recursive: true);
+          tempBundleDirectory.deleteSync(recursive: true);
         });
 
         // copy 'vm_platform_strong.dill' into 'platform.dill'
         final File vmPlatformStrongDill = fs.file(
-            artifacts.getArtifactPath(Artifact.platformKernelStrongDill));
+          artifacts.getArtifactPath(Artifact.platformKernelStrongDill),
+        );
         final File platformDill = vmPlatformStrongDill.copySync(
-            tempBundleDirectory.childFile('platform.dill').path);
+          tempBundleDirectory.childFile('platform.dill').path,
+        );
         if (!platformDill.existsSync()) {
           printError('unexpected error copying platform kernel file');
         }

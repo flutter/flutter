@@ -823,11 +823,11 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       initialValue: widget.initialValue,
       position: position,
     )
-    .then<Null>((T newValue) {
+    .then<void>((T newValue) {
       if (!mounted || newValue == null) {
         if (widget.onCancelled != null)
           widget.onCancelled();
-        return;
+        return null;
       }
       if (widget.onSelected != null)
         widget.onSelected(newValue);
