@@ -865,6 +865,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.onMoveCursorBackwardByCharacter != null) {
       config.onMoveCursorBackwardByCharacter = properties.onMoveCursorBackwardByCharacter;
     }
+    if (properties.onSetSelection != null) {
+      config.onSetSelection = properties.onSetSelection;
+    }
 
     newChild.updateWith(
       config: config,
