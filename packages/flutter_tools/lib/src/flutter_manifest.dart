@@ -16,10 +16,10 @@ import 'globals.dart';
 class FlutterManifest {
   FlutterManifest._();
 
-  /// Returns null on missing or invalid manifest
+  /// Returns null on invalid manifest. Returns empty manifest on missing file.
   static Future<FlutterManifest> createFromPath(String path) async {
     if (path == null || !fs.isFileSync(path))
-      return null;
+      return _createFromYaml(null);
     final String manifest = await fs.file(path).readAsString();
     return createFromString(manifest);
   }
