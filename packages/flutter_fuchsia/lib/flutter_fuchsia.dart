@@ -12,3 +12,4 @@
 library flutter_fuchsia;
 
 export 'src/flutter_views.dart' show getFlutterViews;
+export 'src/dart/fuchsia_dart_vm.dart' show FuchsiaDartVm, FuchsiaFlutterView;

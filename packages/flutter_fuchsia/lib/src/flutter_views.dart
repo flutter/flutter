@@ -23,13 +23,10 @@ final ProcessManager _processManager = new LocalProcessManager();
 final HashMap<int, FuchsiaDartVm> _fuchsiaDartVmCache =
     new HashMap<int, FuchsiaDartVm>();
 
-/// Returns a list of flutter views for the given `ipv4Address`.
-///
-/// TODO(awdavies): just returns flutter view names. Needs to return
-/// FlutterView objects of some kind that contain a JSON RPC peer.
-Future<List<String>> getFlutterViews(
+/// Returns a list of `FuchsiaFlutterView` objects for the given `ipv4Address`.
+Future<List<FuchsiaFlutterView>> getFlutterViews(
     String ipv4Address, String fuchsiaRoot, String buildType) async {
-  final List<String> views = <FlutterView>[];
+  final List<FuchsiaFlutterViews> views = <FlutterView>[];
   final List<_ForwardedPort> ports =
       await _forwardLocalPortsToDeviceServicePorts(
           ipv4Address, fuchsiaRoot, buildType);
@@ -39,8 +36,7 @@ Future<List<String>> getFlutterViews(
   for (_ForwardedPort fp in ports) {
     if (!await _checkPort(fp.port)) continue;
     final FuchsiaDartVm vmService = await _getFuchsiaDartVm(fp.port);
-    List<String> viewNames = await vmService.listFlutterViewNames();
-    views.addAll(viewNames);
+    views.addAll(await vmService.getAllFlutterViews());
   }
   await Future.wait(ports.map((_ForwardedPort fp) => fp.stop()));
   return views;

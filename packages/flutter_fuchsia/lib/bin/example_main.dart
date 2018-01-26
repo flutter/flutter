@@ -24,9 +24,9 @@ Future<Null> main(List<String> args) async {
   Logger.root.onRecord.listen((LogRecord rec) {
     print('[${rec.level.name}] -- ${rec.time}: ${rec.message}');
   });
-  List<FlutterView> views =
+  List<FuchsiaFlutterView> views =
       await getFlutterViews('192.168.42.62', '../../', 'release-x86-64');
-  print(views);
+  print(views.map((FuchsiaFlutterView view) => view.name ?? view.id));
 
   // Program hangs here, so force an exit.
   exit(0);

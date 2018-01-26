@@ -45,12 +45,12 @@ class FuchsiaDartVm {
       return new FuchsiaDartVm._(peer);
     } catch (e) {
       await socket?.close();
-      if (runningTimer.elapse < _kConnectTimeout) {
-        log.info('Attempting to reconnect');
+      if (runningTimer.elapsed < _kConnectTimeout) {
+        _log.info('Attempting to reconnect');
         await new Future<Null>.delayed(_kReconnectAttemptInterval);
         return FuchsiaDartVm._attemptConnection(uri, runningTimer);
       } else {
-        log.critical('Connection to Fuchsia\'s Dart VM timed out at '
+        _log.severe('Connection to Fuchsia\'s Dart VM timed out at '
             '${uri.toString()}');
         rethrow;
       }
@@ -63,43 +63,72 @@ class FuchsiaDartVm {
     return _peer.sendRequest(function, params ?? {});
   }
 
-  /// Returns a list of flutter views names.
+  /// Returns a list of `FuchsiaFlutterViews` running across all Dart VM's.
   ///
   /// If there is no associated isolate with the flutter view (used to determine
   /// the flutter view's name), then the flutter view's ID will be added
   /// instead. If none of these things can be found (isolate has no name or the
   /// flutter view has no ID), then the result will not be added to the list.
-  Future<List<String>> listFlutterViewNames() async {
-    // TODO(awdavies): Add some abstraction so that these views can be talked to
-    // over RPC as well. Then these errors won't need to be handled in such an
-    // ugly way.
-    final List<String> viewNames = <String>[];
+  Future<List<FuchsiaFlutterView>> getAllFlutterViews() async {
+    final List<String> views = <String>[];
     final Map<String, dynamic> rpcResponse =
         await invokeRpc('_flutter.listViews', timeout: _kRpcTimeout);
-    final List<Map<String, dynamic>> flutterViews = rpcResponse['views'];
-    for (Map<String, dynamic> flutterView in flutterViews) {
-      Map<String, dynamic> isolate = flutterView['isolate'];
-      final String id = flutterView['id'];
-      if (isolate != null) {
-        final String name = isolate['name'];
-        if (name != null) {
-          viewNames.add(name);
-        } else {
-          _log.warning('Unable to find name for isolate "$isolate"');
-        }
-      } else if (id != null) {
-        viewNames.add(id);
-      } else {
-        _log.warning(
-            'Unable to find view name for the following JSON structure '
-            '"$flutterView"');
+    final List<Map<String, dynamic>> flutterViewsJson = rpcResponse['views'];
+    for (Map<String, dynamic> jsonView in flutterViewsJson) {
+      final FuchsiaFlutterView flutterView =
+          new FuchsiaFlutterView._fromJson(jsonView);
+      if (flutterView != null) {
+        views.add(flutterView);
       }
     }
-    return viewNames;
+    return views;
   }
 
   /// Shuts down all active connections.
   Future<Null> stop() async {
     await _peer?.close();
+  }
+}
+
+/// Represents an instance of a Flutter view running on a Fuchsia device.
+class FuchsiaFlutterView {
+  /// Determines the name of the Isolate associated with this view. If there is
+  /// no associated Isolate, this will be set to the view's ID.
+  final String _name;
+  String get name => _name;
+
+  /// The ID of the Flutter view.
+  final String _id;
+  String get id => _id;
+
+  FuchsiaFlutterView._(this._name, this._id);
+
+  /// Attempts to construct a `FuchsiaFlutterView` from a json representation.
+  ///
+  /// If there is no Isolate and no id for the view, returns null. If there is
+  /// an associated isolate, and there is name for said isolate, also returns
+  /// null.
+  ///
+  /// All other cases return a `FuchsiaFlutterView` instance. The name of the
+  /// view may be null, but the id will always be set.
+  factory FuchsiaFlutterView._fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> isolate = json['isolate'];
+    final String id = json['id'];
+    String name;
+    if (isolate != null) {
+      name = isolate['name'];
+      if (name == null) {
+        _log.warning('Unable to find name for isolate "$isolate"');
+        return null;
+      }
+    }
+
+    if (id == null) {
+      _log.warning('Unable to find view name for the following JSON structure '
+          '"$json"');
+      return null;
+    }
+
+    return new FuchsiaFlutterView._(name, id);
   }
 }
