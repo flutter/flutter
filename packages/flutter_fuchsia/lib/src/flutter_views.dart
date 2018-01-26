@@ -12,18 +12,19 @@ import 'package:logging/logging.dart';
 import 'dart/fuchsia_dart_vm.dart';
 import 'fuchsia_device_command_runner.dart';
 
-final String ipv4Loopback = InternetAddress.LOOPBACK_IP_V4.address;
+final String _ipv4Loopback = InternetAddress.LOOPBACK_IP_V4.address;
 
-final Logger _log = new Logger('flutter_fuchsia::flutter_views');
+final Logger _log = new Logger('FlutterViews');
 
 final ProcessManager _processManager = new LocalProcessManager();
 
 /// Persistent VM service cache to avoid repeating handshakes across function
-/// calls.
+/// calls. Keys a forwarded port to a FuchsiaDartVm connection instance.
 final HashMap<int, FuchsiaDartVm> _fuchsiaDartVmCache =
     new HashMap<int, FuchsiaDartVm>();
 
-/// Returns a list of flutter views for the given [ipv4Address].
+/// Returns a list of flutter views for the given `ipv4Address`.
+///
 /// TODO(awdavies): just returns flutter view names. Needs to return
 /// FlutterView objects of some kind that contain a JSON RPC peer.
 Future<List<String>> getFlutterViews(
@@ -92,6 +93,11 @@ Future<List<int>> getDeviceServicePorts(
   );
   final List<String> lsOutput = await runner.run('ls /tmp/dart.services');
   final List<int> ports = <int>[];
+
+  // The output of lsOutput is a list of available ports as the Fuchsia dart
+  // service advertises. An example lsOutput would look like:
+  //
+  // [ '31782\n', '1234\n', '11967' ]
   for (String s in lsOutput) {
     final String trimmed = s.trim();
     final int lastSpace = trimmed.lastIndexOf(' ');
@@ -104,9 +110,11 @@ Future<List<int>> getDeviceServicePorts(
   return ports;
 }
 
-// Instances of this class represent a running ssh tunnel from the host to a
-// VM service running on a Fuchsia device. [process] is the ssh process running
-// the tunnel and [port] is the local port.
+/// Instances of this class represent a running ssh tunnel.
+///
+/// The SSH tunnel is from the host to a VM service running on a Fuchsia device.
+/// `process` is the ssh process running the tunnel and [port] is the local
+/// port.
 class _ForwardedPort {
   final String _remoteAddress;
   final int _remotePort;
