@@ -35,7 +35,7 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> { }
 ///
 /// This class works in 3 coordinate systems:
 ///
-/// 1- The **scrollable layout coordinates**. This coordinate system is used to
+/// 1. The **scrollable layout coordinates**. This coordinate system is used to
 ///    communicate with [ViewportOffset] and describes its children's abstract
 ///    offset from the beginning of the scrollable list at (0.0, 0.0).
 ///
@@ -44,7 +44,7 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> { }
 ///
 ///    Children's layout coordinates don't change as the viewport scrolls.
 ///
-/// 2- The **untransformed plane's viewport painting coordinates**. Children are
+/// 2. The **untransformed plane's viewport painting coordinates**. Children are
 ///    not painted in this coordinate system. It's an abstract intermediary used
 ///    before transforming into the next cylindrical coordinate system.
 ///
@@ -63,7 +63,7 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> { }
 ///    paint 10-11 visible 10px children if there are enough children in the
 ///    viewport.
 ///
-/// 3- The **transformed cylindrical space viewport painting coordinates**.
+/// 3. The **transformed cylindrical space viewport painting coordinates**.
 ///    Children from system 2 get their positions transformed into a cylindrical
 ///    projection matrix instead of its cartesian offset with respect to the
 ///    scroll offset.
@@ -130,13 +130,13 @@ class RenderListWheelViewport
   /// An arbitrary but aesthetically reasonable default value for [diameterRatio].
   static const double defaultDiameterRatio = 2.0;
 
-  /// Ar arbitrary but aesthetically reasonable default value for [perspective].
+  /// An arbitrary but aesthetically reasonable default value for [perspective].
   static const double defaultPerspective = 0.003;
 
   /// An error message to show when the provided [diameterRatio] is zero.
   static const String diameterRatioZeroMessage = "You can't set a diameterRatio "
-      'of 0. It would imply a cylinder of 0 in diameter in which case nothing '
-      'will be drawn.';
+      'of 0 or of a negative number. It would imply a cylinder of 0 in diameter '
+      'in which case nothing will be drawn.';
 
   /// An error message to show when the [perspective] value is too high.
   static const String perspectiveTooHighMessage = 'A perspective too high will '
@@ -563,7 +563,9 @@ class RenderListWheelViewport
     );
 
     context.pushTransform(
-      needsCompositing,
+      // Text with TransformLayers and no cullRects currently have an issue rendering
+      // https://github.com/flutter/flutter/issues/14224.
+      false,
       offset,
       _centerOriginTransform(transform),
       // Pre-transform painting function.
@@ -591,9 +593,12 @@ class RenderListWheelViewport
     return result;
   }
 
+  /// This returns the matrices relative to the **untransformed plane's viewport
+  /// painting coordinates** system.
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.translate(0.0, _getUntransformedPaintingCoordinateY(0.0));
+    final ListWheelParentData parentData = child?.parentData;
+    transform.translate(0.0, _getUntransformedPaintingCoordinateY(parentData.offset.dy));
   }
 
   @override

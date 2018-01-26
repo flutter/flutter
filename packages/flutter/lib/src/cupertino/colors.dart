@@ -37,11 +37,11 @@ class CupertinoColors {
   /// Used in iOS 10 for light background fills such as the chat bubble background.
   static const Color lightBackgroundGray = const Color(0xFFE5E5EA);
 
-  /// Used in iOS 10 for unselected selectables such as tab bar items in their
-  /// inactive state.
+  /// Used in iOS 11 for unselected selectables such as tab bar items in their
+  /// inactive state or de-emphasized subtitles and details text.
   ///
   /// Not the same gray as disabled buttons etc.
-  static const Color inactiveGray = const Color(0xFF929292);
+  static const Color inactiveGray = const Color(0xFF8E8E93);
 
   /// Used for iOS 10 for destructive actions such as the delete actions in
   /// table view cells and dialogs.
