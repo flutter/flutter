@@ -116,7 +116,7 @@ static NSURL* URLForSwitch(const fxl::StringView name) {
     if (flutterAssetsURL == nil) {
       // If the URL was not specified on the command line, look inside the
       // FlutterApplication bundle.
-      NSString* flutterAssetsPath = [self pathForFlutterAssetsFromBundle:bundle];
+      NSString* flutterAssetsPath = [FlutterDartProject pathForFlutterAssetsFromBundle:bundle];
       if (flutterAssetsPath != nil) {
         flutterAssetsURL = [NSURL fileURLWithPath:flutterAssetsPath isDirectory:NO];
       }
@@ -154,7 +154,9 @@ static NSURL* URLForSwitch(const fxl::StringView name) {
   }
 }
 
-- (NSString*)pathForFlutterAssetsFromBundle:(NSBundle*)bundle {
+#pragma mark - Assets-related utilities
+
++ (NSString*)pathForFlutterAssetsFromBundle:(NSBundle*)bundle {
   NSString* flutterAssetsName = [bundle objectForInfoDictionaryKey:@"FLTAssetsPath"];
   if (flutterAssetsName == nil) {
     // Default to "flutter_assets"
@@ -269,7 +271,7 @@ static NSString* NSStringFromVMType(VMType type) {
     return;
   }
 
-  NSString* path = [self pathForFlutterAssetsFromBundle:_precompiledDartBundle];
+  NSString* path = [FlutterDartProject pathForFlutterAssetsFromBundle:_precompiledDartBundle];
   if (path.length == 0) {
     NSString* message = [NSString stringWithFormat:
                                       @"Could not find the 'flutter_assets' dir in "
