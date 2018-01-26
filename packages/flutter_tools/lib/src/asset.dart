@@ -16,11 +16,14 @@ import 'devfs.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart';
 
+const AssetBundleFactory _kManifestFactory = const _ManifestAssetBundleFactory();
+
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
   /// The singleton instance, pulled from the [AppContext].
-  static AssetBundleFactory get instance => context.putIfAbsent(
-      AssetBundleFactory, () => new _ManifestAssetBundleFactory());
+  static AssetBundleFactory get instance => context == null
+      ? _kManifestFactory
+      : context.putIfAbsent(AssetBundleFactory, () => _kManifestFactory);
 
   /// Creates a new [AssetBundle].
   AssetBundle createBundle();
@@ -45,6 +48,8 @@ abstract class AssetBundle {
 }
 
 class _ManifestAssetBundleFactory implements AssetBundleFactory {
+  const _ManifestAssetBundleFactory();
+
   @override
   AssetBundle createBundle() => new _ManifestAssetBundle();
 }
