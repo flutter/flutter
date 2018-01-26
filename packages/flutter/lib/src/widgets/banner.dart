@@ -115,7 +115,7 @@ class BannerPainter extends CustomPainter {
   void _prepare() {
     _paintShadow = new Paint()
       ..color = const Color(0x7F000000)
-      ..maskFilter = new MaskFilter.blur(BlurStyle.normal, 4.0);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
     _paintBanner = new Paint()
       ..color = color;
     _textPainter = new TextPainter(
@@ -254,6 +254,8 @@ class Banner extends StatelessWidget {
        super(key: key);
 
   /// The widget to show behind the banner.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The message to show in the banner.
@@ -332,6 +334,8 @@ class CheckedModeBanner extends StatelessWidget {
   }) : super(key: key);
 
   /// The widget to show behind the banner.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override

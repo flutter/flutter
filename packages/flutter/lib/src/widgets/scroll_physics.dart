@@ -67,9 +67,10 @@ class ScrollPhysics {
     return new ScrollPhysics(parent: buildParent(ancestor));
   }
 
-  /// Used by [DragScrollActivity] and other user-driven activities to
-  /// convert an offset in logical pixels as provided by the [DragUpdateDetails]
-  /// into a delta to apply using [ScrollActivityDelegate.setPixels].
+  /// Used by [DragScrollActivity] and other user-driven activities to convert
+  /// an offset in logical pixels as provided by the [DragUpdateDetails] into a
+  /// delta to apply (subtract from the current position) using
+  /// [ScrollActivityDelegate.setPixels].
   ///
   /// This is used by some [ScrollPosition] subclasses to apply friction during
   /// overscroll situations.
@@ -124,6 +125,17 @@ class ScrollPhysics {
   /// The given `position` is only valid during this method call. Do not keep a
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
+  ///
+  /// ## Examples
+  ///
+  /// [BouncingScrollPhysics] returns zero. In other words, it allows scrolling
+  /// past the boundary unhindered.
+  ///
+  /// [ClampingScrollPhysics] returns the amount by which the value is beyond
+  /// the position or the boundary, whichever is furthest from the content. In
+  /// other words, it disallows scrolling past the boundary, but allows
+  /// scrolling back from being overscrolled, if for some reason the position
+  /// ends up overscrolled.
   double applyBoundaryConditions(ScrollMetrics position, double value) {
     if (parent == null)
       return 0.0;

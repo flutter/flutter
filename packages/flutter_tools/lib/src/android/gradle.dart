@@ -23,7 +23,7 @@ import 'android_studio.dart';
 const String gradleManifestPath = 'android/app/src/main/AndroidManifest.xml';
 const String gradleAppOutV1 = 'android/app/build/outputs/apk/app-debug.apk';
 const String gradleAppOutDirV1 = 'android/app/build/outputs/apk';
-const String gradleVersion = '3.3';
+const String gradleVersion = '4.1';
 final RegExp _assembleTaskPattern = new RegExp(r'assemble([^:]+): task ');
 
 GradleProject _cachedGradleProject;
@@ -86,6 +86,7 @@ Future<GradleProject> _gradleProject() async {
 Future<GradleProject> _readGradleProject() async {
   final String gradle = await _ensureGradle();
   updateLocalProperties();
+  injectPlugins();
   try {
     final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
     final RunResult runResult = await runCheckedAsync(
@@ -223,8 +224,6 @@ Future<Null> buildGradleProject(BuildInfo buildInfo, String target) async {
   // update local.properties, in case we want to use it in the future.
   updateLocalProperties(buildInfo: buildInfo);
 
-  injectPlugins();
-
   final String gradle = await _ensureGradle();
 
   switch (flutterPluginVersion) {
@@ -292,6 +291,8 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   }
   if (buildInfo.previewDart2) {
     command.add('-Ppreview-dart-2=true');
+  if (buildInfo.strongMode)
+    command.add('-Pstrong=true');
   if (buildInfo.extraFrontEndOptions != null)
     command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
   if (buildInfo.extraGenSnapshotOptions != null)
@@ -336,6 +337,12 @@ File _findApkFile(GradleProject project, BuildInfo buildInfo) {
   apkFile = fs.file(fs.path.join(project.apkDirectory, buildInfo.modeName, apkFileName));
   if (apkFile.existsSync())
     return apkFile;
+  if (buildInfo.flavor != null) {
+    // Android Studio Gradle plugin v3 adds flavor to path.
+    apkFile = fs.file(fs.path.join(project.apkDirectory, buildInfo.flavor, buildInfo.modeName, apkFileName));
+    if (apkFile.existsSync())
+      return apkFile;
+  }
   return null;
 }
 

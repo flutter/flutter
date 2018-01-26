@@ -25,7 +25,7 @@ enum ImageRepeat {
   repeatY,
 
   /// Leave uncovered portions of the box transparent.
-  noRepeat
+  noRepeat,
 }
 
 /// An image for a box decoration.
@@ -86,6 +86,13 @@ class DecorationImage {
   /// when the image is painted.
   ///
   /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The center slice for a nine-patch image.
@@ -180,7 +187,7 @@ class DecorationImage {
 /// This object should be disposed using the [dispose] method when it is no
 /// longer needed.
 class DecorationImagePainter {
-  DecorationImagePainter._(this._details, this._onChanged);
+  DecorationImagePainter._(this._details, this._onChanged) : assert(_details != null);
 
   final DecorationImage _details;
   final VoidCallback _onChanged;
@@ -203,9 +210,6 @@ class DecorationImagePainter {
   /// then the `onChanged` callback passed to [DecorationImage.createPainter]
   /// will be called.
   void paint(Canvas canvas, Rect rect, Path clipPath, ImageConfiguration configuration) {
-    if (_details == null)
-      return;
-
     assert(canvas != null);
     assert(rect != null);
     assert(configuration != null);
@@ -279,6 +283,11 @@ class DecorationImagePainter {
   @mustCallSuper
   void dispose() {
     _imageStream?.removeListener(_imageListener);
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType(stream: $_imageStream, image: $_image) for $_details';
   }
 }
 

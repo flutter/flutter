@@ -118,7 +118,7 @@ class ImageConfiguration {
     if (devicePixelRatio != null) {
       if (hasArguments)
         result.write(', ');
-      result.write('devicePixelRatio: $devicePixelRatio');
+      result.write('devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}');
       hasArguments = true;
     }
     if (locale != null) {
@@ -167,6 +167,8 @@ class ImageConfiguration {
 ///
 /// The type argument does not have to be specified when using the type as an
 /// argument (where any image provider is acceptable).
+///
+/// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
 /// ## Sample code
 ///
@@ -259,7 +261,7 @@ abstract class ImageProvider<T> {
     assert(configuration != null);
     final ImageStream stream = new ImageStream();
     T obtainedKey;
-    obtainKey(configuration).then<Null>((T key) {
+    obtainKey(configuration).then<void>((T key) {
       obtainedKey = key;
       stream.setCompleter(PaintingBinding.instance.imageCache.putIfAbsent(key, () => load(key)));
     }).catchError(

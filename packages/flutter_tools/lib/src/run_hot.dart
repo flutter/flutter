@@ -40,6 +40,7 @@ class HotRunner extends ResidentRunner {
     this.benchmarkMode: false,
     this.applicationBinary,
     this.previewDart2: false,
+    this.strongMode: false,
     this.hostIsIde: false,
     String projectRootPath,
     String packagesFilePath,
@@ -65,6 +66,7 @@ class HotRunner extends ResidentRunner {
   // The initial launch is from a snapshot.
   bool _runningFromSnapshot = true;
   bool previewDart2 = false;
+  bool strongMode = false;
 
   void _addBenchmarkData(String name, int value) {
     benchmarkData[name] ??= <int>[];
@@ -455,8 +457,8 @@ class HotRunner extends ResidentRunner {
         status.cancel();
         if (result.isOk)
           printStatus('${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-        if (result.hint != null)
-          printStatus('\n${result.hint}');
+        if (result.hintMessage != null)
+          printStatus('\n${result.hintMessage}');
         return result;
       } catch (error) {
         status.cancel();
@@ -513,6 +515,12 @@ class HotRunner extends ResidentRunner {
 
       int countExpectedReports = 0;
       for (FlutterDevice device in flutterDevices) {
+        if (_runningFromSnapshot) {
+          // Asset directory has to be set only once when we switch from
+          // running from snapshot to running from uploaded files.
+          await device.resetAssetDirectory();
+        }
+
         // List has one report per Flutter view.
         final List<Future<Map<String, dynamic>>> reports = device.reloadSources(
           entryPath,
@@ -670,7 +678,8 @@ class HotRunner extends ResidentRunner {
     return new OperationResult(
       reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,
       reloadMessage,
-      hint: unusedElementMessage,
+      hintMessage: unusedElementMessage,
+      hintId: unusedElementMessage != null ? 'restartRecommended' : null,
     );
   }
 

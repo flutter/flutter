@@ -110,6 +110,13 @@ List<GalleryItem> _buildGalleryItems() {
       buildRoute: (BuildContext context) => new ChipDemo(),
     ),
     new GalleryItem(
+      title: 'Data tables',
+      subtitle: 'Data tables',
+      category: 'Material Components',
+      routeName: DataTableDemo.routeName,
+      buildRoute: (BuildContext context) => new DataTableDemo(),
+    ),
+    new GalleryItem(
       title: 'Date and time pickers',
       subtitle: 'Date and time selection widgets',
       category: 'Material Components',
@@ -298,6 +305,13 @@ List<GalleryItem> _buildGalleryItems() {
       category: 'Cupertino Components',
       routeName: CupertinoNavigationDemo.routeName,
       buildRoute: (BuildContext context) => new CupertinoNavigationDemo(),
+    ),
+    new GalleryItem(
+      title: 'Pickers',
+      subtitle: 'Cupertino styled pickers',
+      category: 'Cupertino Components',
+      routeName: CupertinoPickerDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoPickerDemo(),
     ),
     new GalleryItem(
       title: 'Sliders',

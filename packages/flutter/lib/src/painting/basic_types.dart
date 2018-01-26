@@ -43,7 +43,7 @@ export 'dart:ui' show
   hashList;
 
 // Intentionally not exported:
-//  - Image, decodeImageFromDataPipe, decodeImageFromList:
+//  - Image, instantiateImageCodec, decodeImageFromList:
 //      We use ui.* to make it very explicit that these are low-level image APIs.
 //      Generally, higher layers provide more reasonable APIs around images.
 //  - lerpDouble:

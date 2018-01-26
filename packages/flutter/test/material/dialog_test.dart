@@ -71,10 +71,10 @@ void main() {
                   onPressed: () {
                     showDialog<Null>(
                       context: context,
-                      child: new AlertDialog(
+                      child: const AlertDialog(
                         title: const Text('Title'),
                         content: const Text('Y'),
-                        actions: <Widget>[ ],
+                        actions: const <Widget>[ ],
                       ),
                     );
                   },
@@ -231,27 +231,34 @@ void main() {
   });
 
   testWidgets('Dialogs removes MediaQuery padding', (WidgetTester tester) async {
-    BuildContext scaffoldContext;
+    BuildContext outerContext;
     BuildContext dialogContext;
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new MediaQuery(
+    await tester.pumpWidget(new Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultMaterialLocalizations.delegate,
+      ],
+      child:  new MediaQuery(
         data: const MediaQueryData(
           padding: const EdgeInsets.all(50.0),
         ),
-        child: new Builder(
-          builder: (BuildContext context) {
-            scaffoldContext = context;
-            return new Container();
-          }
+        child: new Navigator(
+          onGenerateRoute: (_) {
+            return new PageRouteBuilder<Null>(
+              pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                outerContext = context;
+                return new Container();
+              },
+            );
+          },
         ),
-      )
+      ),
     ));
 
-    await tester.pump();
-
     showDialog<Null>(
-      context: scaffoldContext,
+      context: outerContext,
       barrierDismissible: false,
       child: new Builder(
         builder: (BuildContext context) {
@@ -263,6 +270,7 @@ void main() {
 
     await tester.pump();
 
+    expect(MediaQuery.of(outerContext).padding, const EdgeInsets.all(50.0));
     expect(MediaQuery.of(dialogContext).padding, EdgeInsets.zero);
   });
 }

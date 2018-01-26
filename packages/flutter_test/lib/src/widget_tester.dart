@@ -277,10 +277,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   ///  * [pumpAndSettle], which essentially calls [pump] until there are no
   ///    scheduled frames.
-  ///
   ///  * [SchedulerBinding.transientCallbackCount], which is the value on which
   ///    this is based.
-  ///
   ///  * [SchedulerBinding.hasScheduledFrame], which is true whenever a frame is
   ///    pending. [SchedulerBinding.hasScheduledFrame] is made true when a
   ///    widget calls [State.setState], even if there are no transient callbacks

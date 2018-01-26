@@ -265,10 +265,17 @@ TextEditingValue _selectionAwareTextManipulation(
       value.text.substring(selectionEndIndex)
     );
     manipulatedText = beforeSelection + inSelection + afterSelection;
-    manipulatedSelection = value.selection.copyWith(
-      baseOffset: beforeSelection.length,
-      extentOffset: beforeSelection.length + inSelection.length,
-    );
+    if (value.selection.baseOffset > value.selection.extentOffset) {
+      manipulatedSelection = value.selection.copyWith(
+        baseOffset: beforeSelection.length + inSelection.length,
+        extentOffset: beforeSelection.length,
+      );
+    } else {
+      manipulatedSelection = value.selection.copyWith(
+        baseOffset: beforeSelection.length,
+        extentOffset: beforeSelection.length + inSelection.length,
+      );
+    }
   }
   return new TextEditingValue(
     text: manipulatedText,

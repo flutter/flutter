@@ -778,6 +778,25 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [ModalBarrier], the widget that implements this feature.
   Color get barrierColor;
 
+  /// The semantic label used for a dismissible barrier.
+  ///
+  /// If the barrier is dismissible, this label will be read out if
+  /// accessibility tools (like VoiceOver on iOS) focus on the barrier.
+  ///
+  /// The modal barrier is the scrim that is rendered behind each route, which
+  /// generally prevents the user from interacting with the route below the
+  /// current route, and normally partially obscures such routes.
+  ///
+  /// For example, when a dialog is on the screen, the page below the dialog is
+  /// usually darkened by the modal barrier.
+  ///
+  /// See also:
+  ///
+  ///  * [barrierDismissible], which controls the behavior of the barrier when
+  ///    tapped.
+  ///  * [ModalBarrier], the widget that implements this feature.
+  String get barrierLabel;
+
   /// Whether the route should remain in memory when it is inactive. If this is
   /// true, then the route is maintained, so that any futures it is holding from
   /// the next route will properly resolve when the next route pops. If this is
@@ -984,10 +1003,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       ));
       barrier = new AnimatedModalBarrier(
         color: color,
-        dismissible: barrierDismissible
+        dismissible: barrierDismissible,
+        semanticsLabel: barrierLabel,
       );
     } else {
-      barrier = new ModalBarrier(dismissible: barrierDismissible);
+      barrier = new ModalBarrier(
+        dismissible: barrierDismissible,
+        semanticsLabel: barrierLabel,
+      );
     }
     assert(animation.status != AnimationStatus.dismissed);
     return new IgnorePointer(
@@ -1091,10 +1114,9 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///   Widget build(BuildContext context) => new Container();
 ///
 /// }
-///
 /// ```
 class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
-  final Map<T, RouteAware> _listeners = <T, RouteAware>{};
+  final Map<T, Set<RouteAware>> _listeners = <T, Set<RouteAware>>{};
 
   /// Subscribe [routeAware] to be informed about changes to [route].
   ///
@@ -1104,37 +1126,63 @@ class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
   void subscribe(RouteAware routeAware, T route) {
     assert(routeAware != null);
     assert(route != null);
-    if (!_listeners.containsKey(route)) {
+    final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => new Set<RouteAware>());
+    if (subscribers.add(routeAware)) {
       routeAware.didPush();
-      _listeners[route] = routeAware;
     }
   }
 
   /// Unsubscribe [routeAware].
   ///
-  /// [routeAware] is no longer informed about changes to its route.
+  /// [routeAware] is no longer informed about changes to its route. If the given argument was
+  /// subscribed to multiple types, this will unregister it (once) from each type.
   void unsubscribe(RouteAware routeAware) {
     assert(routeAware != null);
-    _listeners.remove(routeAware);
+    for (T route in _listeners.keys) {
+      final Set<RouteAware> subscribers = _listeners[route];
+      subscribers?.remove(routeAware);
+    }
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
     if (route is T && previousRoute is T) {
-      _listeners[previousRoute]?.didPopNext();
-      _listeners[route]?.didPop();
+      final List<RouteAware> previousSubscribers = _listeners[previousRoute]?.toList();
+
+      if (previousSubscribers != null) {
+        for (RouteAware routeAware in previousSubscribers) {
+          routeAware.didPopNext();
+        }
+      }
+
+      final List<RouteAware> subscribers = _listeners[route]?.toList();
+
+      if (subscribers != null) {
+        for (RouteAware routeAware in subscribers) {
+          routeAware.didPop();
+        }
+      }
     }
   }
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
     if (route is T && previousRoute is T) {
-      _listeners[previousRoute]?.didPushNext();
+      final Set<RouteAware> previousSubscribers = _listeners[previousRoute];
+
+      if (previousSubscribers != null) {
+        for (RouteAware routeAware in previousSubscribers) {
+          routeAware.didPushNext();
+        }
+      }
     }
   }
 }
 
-/// A interface that is aware of its current Route.
+/// An interface for objects that are aware of their current [Route].
+///
+/// This is used with [RouteObserver] to make a widget aware of changes to the
+/// [Navigator]'s session history.
 abstract class RouteAware {
   /// Called when the top route has been popped off, and the current route
   /// shows up.

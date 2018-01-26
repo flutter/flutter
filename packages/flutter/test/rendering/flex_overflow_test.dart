@@ -12,7 +12,7 @@ void main() {
     await tester.pumpWidget(
       new Center(
         child: new Column(
-          children: <Widget>[
+          children: const <Widget>[
             const SizedBox(width: 200.0, height: 200.0),
           ],
         ),
@@ -26,7 +26,7 @@ void main() {
         child: new SizedBox(
           height: 100.0,
           child: new Column(
-            children: <Widget>[
+            children: const <Widget>[
               const SizedBox(width: 200.0, height: 200.0),
             ],
           ),
@@ -43,7 +43,7 @@ void main() {
         child: new SizedBox(
           height: 0.0,
           child: new Column(
-            children: <Widget>[
+            children: const <Widget>[
               const SizedBox(width: 200.0, height: 200.0),
             ],
           ),

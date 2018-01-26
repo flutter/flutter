@@ -300,11 +300,12 @@ class _TableElement extends RenderObjectElement {
   void update(Table newWidget) {
     assert(!_debugWillReattachChildren);
     assert(() { _debugWillReattachChildren = true; return true; }());
-    final Map<LocalKey, List<Element>> oldKeyedRows = new Map<LocalKey, List<Element>>.fromIterable(
-      _children.where((_TableElementRow row) => row.key != null),
-      key:   (_TableElementRow row) => row.key,
-      value: (_TableElementRow row) => row.children
-    );
+    final Map<LocalKey, List<Element>> oldKeyedRows = <LocalKey, List<Element>>{};
+    for (_TableElementRow row in _children) {
+      if (row.key != null) {
+        oldKeyedRows[row.key] = row.children;
+      }
+    }
     final Iterator<_TableElementRow> oldUnkeyedRows = _children.where((_TableElementRow row) => row.key == null).iterator;
     final List<_TableElementRow> newChildren = <_TableElementRow>[];
     final Set<List<Element>> taken = new Set<List<Element>>();
@@ -339,7 +340,12 @@ class _TableElement extends RenderObjectElement {
     assert(renderObject != null);
     renderObject.setFlatChildren(
       _children.isNotEmpty ? _children[0].children.length : 0,
-      _children.expand((_TableElementRow row) => row.children.map((Element child) => child.renderObject)).toList()
+      _children.expand<RenderBox>((_TableElementRow row) {
+        return row.children.map<RenderBox>((Element child) {
+          final RenderBox box = child.renderObject;
+          return box;
+        });
+      }).toList()
     );
   }
 

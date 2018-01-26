@@ -182,7 +182,7 @@ const double _kPadding = 8.0;
 const Color _kTrackColor = const Color(0xFFB5B5B5);
 const double _kSliderHeight = 2.0 * (CupertinoThumbPainter.radius + _kPadding);
 const double _kSliderWidth = 176.0; // Matches Material Design slider.
-final Duration _kDiscreteTransitionDuration = const Duration(milliseconds: 500);
+const Duration _kDiscreteTransitionDuration = const Duration(milliseconds: 500);
 
 const double _kAdjustmentUnit = 0.1; // Matches iOS implementation of material slider.
 
@@ -383,8 +383,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
     config.isSemanticBoundary = isInteractive;
     if (isInteractive) {
-      config.addAction(SemanticsAction.increase, _increaseAction);
-      config.addAction(SemanticsAction.decrease, _decreaseAction);
+      config.onIncrease = _increaseAction;
+      config.onDecrease = _decreaseAction;
     }
   }
 

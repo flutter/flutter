@@ -53,10 +53,10 @@ class GalleryTransitionTest {
     final Map<String, List<int>> original = JSON.decode(file(
             '${galleryDirectory.path}/build/transition_durations.timeline.json')
         .readAsStringSync());
-    final Map<String, List<int>> transitions = new Map<String, List<int>>.fromIterable(
-        original.keys,
-        key: (String key) => key.replaceAll('/', ''),
-        value: (String key) => original[key]);
+    final Map<String, List<int>> transitions = <String, List<int>>{};
+    for (String key in original.keys) {
+      transitions[key.replaceAll('/', '')] = original[key];
+    }
 
     final Map<String, dynamic> summary = JSON.decode(file('${galleryDirectory.path}/build/transitions.timeline_summary.json').readAsStringSync());
 

@@ -93,4 +93,90 @@ void main() {
     expect(painter.preferredLineHeight, 100.0);
     expect(painter.size, const Size(100.0, 100.0));
   });
+
+  test('TextPainter intrinsic dimensions', () {
+    const TextStyle style = const TextStyle(
+      inherit: false,
+      fontFamily: 'Ahem',
+      fontSize: 10.0,
+    );
+    TextPainter painter;
+
+    painter = new TextPainter(
+      text: const TextSpan(
+        text: 'X X X',
+        style: style,
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    painter.layout();
+    expect(painter.size, const Size(50.0, 10.0));
+    expect(painter.minIntrinsicWidth, 10.0);
+    expect(painter.maxIntrinsicWidth, 50.0);
+
+    painter = new TextPainter(
+      text: const TextSpan(
+        text: 'X X X',
+        style: style,
+      ),
+      textDirection: TextDirection.ltr,
+      ellipsis: 'e',
+    );
+    painter.layout();
+    expect(painter.size, const Size(50.0, 10.0));
+    expect(painter.minIntrinsicWidth, 50.0);
+    expect(painter.maxIntrinsicWidth, 50.0);
+
+    painter = new TextPainter(
+      text: const TextSpan(
+        text: 'X X XXXX',
+        style: style,
+      ),
+      textDirection: TextDirection.ltr,
+      maxLines: 2,
+    );
+    painter.layout();
+    expect(painter.size, const Size(80.0, 10.0));
+    expect(painter.minIntrinsicWidth, 40.0);
+    expect(painter.maxIntrinsicWidth, 80.0);
+
+    painter = new TextPainter(
+      text: const TextSpan(
+        text: 'X X XXXX XX',
+        style: style,
+      ),
+      textDirection: TextDirection.ltr,
+      maxLines: 2,
+    );
+    painter.layout();
+    expect(painter.size, const Size(110.0, 10.0));
+    expect(painter.minIntrinsicWidth, 70.0);
+    expect(painter.maxIntrinsicWidth, 110.0);
+
+    painter = new TextPainter(
+      text: const TextSpan(
+        text: 'XXXXXXXX XXXX XX X',
+        style: style,
+      ),
+      textDirection: TextDirection.ltr,
+      maxLines: 2,
+    );
+    painter.layout();
+    expect(painter.size, const Size(180.0, 10.0));
+    expect(painter.minIntrinsicWidth, 90.0);
+    expect(painter.maxIntrinsicWidth, 180.0);
+
+    painter = new TextPainter(
+      text: const TextSpan(
+        text: 'X XX XXXX XXXXXXXX',
+        style: style,
+      ),
+      textDirection: TextDirection.ltr,
+      maxLines: 2,
+    );
+    painter.layout();
+    expect(painter.size, const Size(180.0, 10.0));
+    expect(painter.minIntrinsicWidth, 90.0);
+    expect(painter.maxIntrinsicWidth, 180.0);
+  }, skip: true); // https://github.com/flutter/flutter/issues/13512
 }

@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'basic.dart';
@@ -149,6 +150,8 @@ class SlideTransition extends AnimatedWidget {
   final bool transformHitTests;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -191,6 +194,8 @@ class ScaleTransition extends AnimatedWidget {
   final Alignment alignment;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -224,6 +229,8 @@ class RotationTransition extends AnimatedWidget {
   Animation<double> get turns => listenable;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -269,6 +276,8 @@ class SizeTransition extends AnimatedWidget {
   final double axisAlignment;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -293,15 +302,15 @@ class SizeTransition extends AnimatedWidget {
 ///
 /// For a widget that automatically animates between the sizes of two children,
 /// fading between them, see [AnimatedCrossFade].
-class FadeTransition extends AnimatedWidget {
+class FadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
   ///
   /// The [opacity] argument must not be null.
   const FadeTransition({
     Key key,
-    @required Animation<double> opacity,
-    this.child,
-  }) : super(key: key, listenable: opacity);
+    @required this.opacity,
+    Widget child,
+  }) : super(key: key, child: child);
 
   /// The animation that controls the opacity of the child.
   ///
@@ -309,14 +318,19 @@ class FadeTransition extends AnimatedWidget {
   /// painted with an opacity of v. For example, if v is 0.5, the child will be
   /// blended 50% with its background. Similarly, if v is 0.0, the child will be
   /// completely transparent.
-  Animation<double> get opacity => listenable;
-
-  /// The widget below this widget in the tree.
-  final Widget child;
+  final Animation<double> opacity;
 
   @override
-  Widget build(BuildContext context) {
-    return new Opacity(opacity: opacity.value, child: child);
+  RenderAnimatedOpacity createRenderObject(BuildContext context) {
+    return new RenderAnimatedOpacity(
+      opacity: opacity,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderAnimatedOpacity renderObject) {
+    renderObject
+      ..opacity = opacity;
   }
 }
 
@@ -362,6 +376,8 @@ class PositionedTransition extends AnimatedWidget {
   Animation<RelativeRect> get rect => listenable;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -405,6 +421,8 @@ class RelativePositionedTransition extends AnimatedWidget {
   final Size size;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -454,6 +472,8 @@ class DecoratedBoxTransition extends AnimatedWidget {
   final DecorationPosition position;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -492,6 +512,8 @@ class AlignTransition extends AnimatedWidget {
   final double heightFactor;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -594,13 +616,15 @@ class AnimatedBuilder extends AnimatedWidget {
   /// Called every time the animation changes value.
   final TransitionBuilder builder;
 
-  /// If your builder function contains a subtree that does not depend on the
-  /// animation, it's more efficient to build that subtree once instead of
-  /// rebuilding it on every animation tick.
+  /// The child widget to pass to the [builder].
   ///
-  /// If you pass the pre-built subtree as the [child] parameter, the
-  /// AnimatedBuilder will pass it back to your builder function so that you
-  /// can incorporate it into your build.
+  /// If a [builder] callback's return value contains a subtree that does not
+  /// depend on the animation, it's more efficient to build that subtree once
+  /// instead of rebuilding it on every animation tick.
+  ///
+  /// If the pre-built subtree is passed as the [child] parameter, the
+  /// [AnimatedBuilder] will pass it back to the [builder] function so that it
+  /// can be incorporated into the build.
   ///
   /// Using this pre-built child is entirely optional, but can improve
   /// performance significantly in some cases and is therefore a good practice.

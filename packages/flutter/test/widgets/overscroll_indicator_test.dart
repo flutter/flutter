@@ -27,7 +27,7 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new CustomScrollView(
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
           ],
         ),
@@ -57,7 +57,7 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
   });
-  
+
   testWidgets('Nested scrollable', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Directionality(
@@ -71,7 +71,7 @@ void main() {
             child: new Container(
                 width: 600.0,
                 child: new CustomScrollView(
-                  slivers: <Widget>[
+                  slivers: const <Widget>[
                       const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
                   ],
                 ),
@@ -80,21 +80,21 @@ void main() {
           ),
         ),
       );
-    
+
     final RenderObject outerPainter = tester.renderObject(find.byType(CustomPaint).first);
     final RenderObject innerPainter = tester.renderObject(find.byType(CustomPaint).last);
-    
+
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
     expect(outerPainter, paints..circle());
     expect(innerPainter, paints..circle());
   });
-  
+
   testWidgets('Overscroll indicator changes side when you drag on the other side', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new CustomScrollView(
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
           ],
         ),
@@ -132,7 +132,7 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new CustomScrollView(
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
           ],
         ),
@@ -169,7 +169,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            slivers: <Widget>[
+            slivers: const <Widget>[
               const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
             ],
           ),
@@ -190,7 +190,7 @@ void main() {
           child: new CustomScrollView(
             reverse: true,
             physics: const AlwaysScrollableScrollPhysics(),
-            slivers: <Widget>[
+            slivers: const <Widget>[
               const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
             ],
           ),
@@ -211,7 +211,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
           ],
         ),
@@ -235,7 +235,7 @@ void main() {
         child: new CustomScrollView(
           scrollDirection: Axis.horizontal,
           physics: const AlwaysScrollableScrollPhysics(),
-          slivers: <Widget>[
+          slivers: const <Widget>[
             const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
           ],
         ),
@@ -287,7 +287,7 @@ void main() {
             scrollDirection: Axis.horizontal,
             physics: const AlwaysScrollableScrollPhysics(),
             reverse: true,
-            slivers: <Widget>[
+            slivers: const <Widget>[
               const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
             ],
           ),
@@ -308,7 +308,7 @@ void main() {
           child: new CustomScrollView(
             scrollDirection: Axis.horizontal,
             physics: const AlwaysScrollableScrollPhysics(),
-            slivers: <Widget>[
+            slivers: const <Widget>[
               const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
             ],
           ),

@@ -39,6 +39,7 @@ Future<Null> build({
   String workingDirPath,
   String packagesPath,
   bool previewDart2 : false,
+  bool strongMode : false,
   bool precompiledSnapshot: false,
   bool reportLicensedPackages: false
 }) async {
@@ -72,8 +73,12 @@ Future<Null> build({
     final String kernelBinaryFilename = await compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       incrementalCompilerByteStorePath: fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
-      mainPath: fs.file(mainPath).absolute.path
+      mainPath: fs.file(mainPath).absolute.path,
+      strongMode: strongMode
     );
+    if (kernelBinaryFilename == null) {
+      throwToolExit('Compiler terminated unexpectedly on $mainPath');
+    }
     kernelContent = new DevFSFileContent(fs.file(kernelBinaryFilename));
   }
 
@@ -85,6 +90,7 @@ Future<Null> build({
     privateKeyPath: privateKeyPath,
     workingDirPath: workingDirPath,
     packagesPath: packagesPath,
+    strongMode: strongMode,
     reportLicensedPackages: reportLicensedPackages
   ).then((_) => null);
 }
@@ -98,6 +104,7 @@ Future<List<String>> assemble({
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
   String packagesPath,
+  bool strongMode : false,
   bool includeDefaultFonts: true,
   bool reportLicensedPackages: false
 }) async {
@@ -128,7 +135,9 @@ Future<List<String>> assemble({
       .toList();
 
   if (kernelContent != null) {
-    final String platformKernelDill = artifacts.getArtifactPath(Artifact.platformKernelDill);
+    final String platformKernelDill = strongMode ?
+        artifacts.getArtifactPath(Artifact.platformKernelStrongDill) :
+        artifacts.getArtifactPath(Artifact.platformKernelDill);
     zipBuilder.entries[_kKernelKey] = kernelContent;
     zipBuilder.entries[_kPlatformKernelKey] = new DevFSFileContent(fs.file(platformKernelDill));
   }
@@ -140,6 +149,10 @@ Future<List<String>> assemble({
   ensureDirectoryExists(outputPath);
 
   printTrace('Encoding zip file to $outputPath');
+
+  // TODO(zarah): Remove the zipBuilder and write the files directly once FLX
+  // is deprecated.
+
   await zipBuilder.createZip(fs.file(outputPath), fs.directory(workingDirPath));
 
   printTrace('Built $outputPath.');

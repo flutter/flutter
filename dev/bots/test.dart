@@ -45,10 +45,17 @@ const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
 Future<Null> main(List<String> args) async {
   flutterTestArgs.addAll(args);
 
-  final String shard = Platform.environment['SHARD'] ?? 'tests';
-  if (!_kShards.containsKey(shard))
-    throw new ArgumentError('Invalid shard: $shard');
-  await _kShards[shard]();
+  final String shard = Platform.environment['SHARD'];
+  if (shard != null) {
+    if (!_kShards.containsKey(shard))
+      throw new ArgumentError('Invalid shard: $shard');
+    await _kShards[shard]();
+  } else {
+    for (String currentShard in _kShards.keys) {
+      print('${bold}SHARD=$currentShard$reset');
+      await _kShards[currentShard]();
+    }
+  }
 }
 
 Future<Null> _generateDocs() async {
@@ -87,7 +94,9 @@ Future<Null> _verifyInternationalizations() async {
 }
 
 Future<Null> _analyzeRepo() async {
-  await _verifyNoBadImports(flutterRoot);
+  await _verifyGeneratedPluginRegistrants(flutterRoot);
+  await _verifyNoBadImportsInFlutter(flutterRoot);
+  await _verifyNoBadImportsInFlutterTools(flutterRoot);
   await _verifyInternationalizations();
 
   // Analyze all the Dart code in the repo.
@@ -161,9 +170,11 @@ Future<Null> _runTests() async {
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
   await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
+  await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
 
   await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
@@ -176,6 +187,10 @@ Future<Null> _runTests() async {
 Future<Null> _runCoverage() async {
   if (Platform.environment['TRAVIS'] != null) {
     print('${bold}DONE: test.dart does not run coverage in Travis$reset');
+    return;
+  }
+  if (Platform.isWindows) {
+    print('${bold}DONE: test.dart does not run coverage on Windows$reset');
     return;
   }
 
@@ -207,12 +222,15 @@ Future<Null> _pubRunTest(
   final List<String> args = <String>['run', 'test', '-j1', '-rexpanded'];
   if (testPath != null)
     args.add(testPath);
-  final Map<String, String> pubEnvironment = <String, String>{'DART_VM_OPTIONS': '--assert-initializer'};
+  final Map<String, String> pubEnvironment = <String, String>{};
   if (new Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;
   }
-  return _runCommand(pub, args, workingDirectory: workingDirectory,
-      environment: pubEnvironment);
+  return _runCommand(
+    pub, args,
+    workingDirectory: workingDirectory,
+    environment: pubEnvironment,
+  );
 }
 
 class EvalResult {
@@ -326,7 +344,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
     workingDirectory: workingDirectory,
     expectFailure: expectFailure,
     printOutput: printOutput,
-    skip: skip || Platform.isWindows, // TODO(goderbauer): run on Windows when sky_shell is available
+    skip: skip,
   );
 }
 
@@ -348,7 +366,7 @@ Future<Null> _runFlutterAnalyze(String workingDirectory, {
   );
 }
 
-Future<Null> _verifyNoBadImports(String workingDirectory) async {
+Future<Null> _verifyNoBadImportsInFlutter(String workingDirectory) async {
   final List<String> errors = <String>[];
   final String libPath = path.join(workingDirectory, 'packages', 'flutter', 'lib');
   final String srcPath = path.join(workingDirectory, 'packages', 'flutter', 'lib', 'src');
@@ -371,11 +389,10 @@ Future<Null> _verifyNoBadImports(String workingDirectory) async {
     );
   }
   // Verify that the imports are well-ordered.
-  final Map<String, Set<String>> dependencyMap = new Map<String, Set<String>>.fromIterable(
-    directories,
-    key: (String directory) => directory,
-    value: (String directory) => _findDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation'),
-  );
+  final Map<String, Set<String>> dependencyMap = <String, Set<String>>{};
+  for (String directory in directories) {
+    dependencyMap[directory] = _findDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation');
+  }
   for (String package in dependencyMap.keys) {
     if (dependencyMap[package].contains(package)) {
       errors.add(
@@ -422,7 +439,7 @@ final RegExp _importPattern = new RegExp(r"import 'package:flutter/([^.]+)\.dart
 final RegExp _importMetaPattern = new RegExp(r"import 'package:meta/meta.dart'");
 
 Set<String> _findDependencies(String srcPath, List<String> errors, { bool checkForMeta: false }) {
-  return new Directory(srcPath).listSync().where((FileSystemEntity entity) {
+  return new Directory(srcPath).listSync(recursive: true).where((FileSystemEntity entity) {
     return entity is File && path.extension(entity.path) == '.dart';
   }).map<Set<String>>((FileSystemEntity entity) {
     final Set<String> result = new Set<String>();
@@ -473,7 +490,92 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
   return null;
 }
 
+Future<Null> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  for (FileSystemEntity entity in new Directory(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'))
+    .listSync(recursive: true)
+    .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
+    final File file = entity;
+    if (file.readAsStringSync().contains('package:flutter_tools/')) {
+      errors.add('$yellow${file.path}$reset imports flutter_tools.');
+    }
+  }
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    if (errors.length == 1) {
+      print('${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset\n');
+    } else {
+      print('${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset\n');
+    }
+    print(errors.join('\n\n'));
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n');
+    exit(1);
+  }
+}
+
 void _printProgress(String action, String workingDir, String command) {
   const String arrow = '⏩';
   print('$arrow $action: cd $cyan$workingDir$reset; $yellow$command$reset');
+}
+
+Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
+  final Directory flutterRootDir = new Directory(flutterRoot);
+
+  final Map<String, List<File>> packageToRegistrants = <String, List<File>>{};
+
+  for (FileSystemEntity entity in flutterRootDir.listSync(recursive: true)) {
+    if (entity is! File)
+      continue;
+    if (_isGeneratedPluginRegistrant(entity)) {
+      final String package = _getPackageFor(entity, flutterRootDir);
+      final List<File> registrants = packageToRegistrants.putIfAbsent(package, () => <File>[]);
+      registrants.add(entity);
+    }
+  }
+
+  final Set<String> outOfDate = new Set<String>();
+
+  for (String package in packageToRegistrants.keys) {
+    final Map<File, String> fileToContent = <File, String>{};
+    for(File f in packageToRegistrants[package]) {
+      fileToContent[f] = f.readAsStringSync();
+    }
+    await _runCommand(flutter, <String>['inject-plugins'],
+      workingDirectory: package,
+      printOutput: false,
+    );
+    for (File registrant in fileToContent.keys) {
+      if (registrant.readAsStringSync() != fileToContent[registrant]) {
+        outOfDate.add(registrant.path);
+      }
+    }
+  }
+
+  if (outOfDate.isNotEmpty) {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('${bold}The following GeneratedPluginRegistrants are out of date:$reset');
+    for (String registrant in outOfDate) {
+      print(' - $registrant');
+    }
+    print('\nRun "flutter inject-plugins" in the package that\'s out of date.');
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    exit(1);
+  }
+}
+
+String _getPackageFor(File entity, Directory flutterRootDir) {
+  for (Directory dir = entity.parent; dir != flutterRootDir; dir = dir.parent) {
+    if (new File(path.join(dir.path, 'pubspec.yaml')).existsSync()) {
+      return dir.path;
+    }
+  }
+  throw new ArgumentError('$entity is not within a dart package.');
+}
+
+bool _isGeneratedPluginRegistrant(File file) {
+  final String filename = path.basename(file.path);
+  return filename == 'GeneratedPluginRegistrant.java' ||
+      filename == 'GeneratedPluginRegistrant.h' ||
+      filename == 'GeneratedPluginRegistrant.m';
 }

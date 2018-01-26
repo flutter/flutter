@@ -389,6 +389,8 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// container will expand to fill all available space in its parent, unless
   /// the parent provides unbounded constraints, in which case the container
   /// will attempt to be as small as possible.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Align the [child] within the container.
@@ -398,6 +400,13 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// constraints are unbounded, then the child will be shrink-wrapped instead.
   ///
   /// Ignored if [child] is null.
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// Empty space to inscribe inside the [decoration]. The [child], if any, is
@@ -516,6 +525,8 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
   final EdgeInsetsGeometry padding;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -590,6 +601,8 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
   final AlignmentGeometry alignment;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -677,6 +690,8 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The offset of the child's left edge from the left of the stack.
@@ -798,6 +813,8 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
       super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The offset of the child's start edge from the start of the stack.
@@ -904,6 +921,8 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The target opacity.
@@ -945,27 +964,66 @@ class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
 /// default text style (the text style to apply to descendant [Text] widgets
 /// without explicit style) over a given duration whenever the given style
 /// changes.
+///
+/// The [textAlign], [softWrap], [textOverflow], and [maxLines] properties are
+/// not animated and take effect immediately when changed.
 class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the default text style implicitly.
   ///
-  /// The [child], [style], [curve], and [duration] arguments must not be null.
+  /// The [child], [style], [softWrap], [overflow], [curve], and [duration]
+  /// arguments must not be null.
   const AnimatedDefaultTextStyle({
     Key key,
     @required this.child,
     @required this.style,
+    this.textAlign,
+    this.softWrap: true,
+    this.overflow: TextOverflow.clip,
+    this.maxLines,
     Curve curve: Curves.linear,
     @required Duration duration,
   }) : assert(style != null),
        assert(child != null),
+       assert(softWrap != null),
+       assert(overflow != null),
+       assert(maxLines == null || maxLines > 0),
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The target text style.
   ///
   /// The text style must not be null.
+  ///
+  /// When this property is changed, the style will be animated over [duration] time.
   final TextStyle style;
+
+  /// How the text should be aligned horizontally.
+  ///
+  /// This property takes effect immediately when changed, it is not animated.
+  final TextAlign textAlign;
+
+  /// Whether the text should break at soft line breaks.
+  ///
+  /// This property takes effect immediately when changed, it is not animated.
+  ///
+  /// See [DefaultTextStyle.softWrap] for more details.
+  final bool softWrap;
+
+  /// How visual overflow should be handled.
+  ///
+  /// This property takes effect immediately when changed, it is not animated.
+  final TextOverflow overflow;
+
+  /// An optional maximum number of lines for the text to span, wrapping if necessary.
+  ///
+  /// This property takes effect immediately when changed, it is not animated.
+  ///
+  /// See [DefaultTextStyle.maxLines] for more details.
+  final int maxLines;
 
   @override
   _AnimatedDefaultTextStyleState createState() => new _AnimatedDefaultTextStyleState();
@@ -974,6 +1032,10 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     style?.debugFillProperties(description);
+    description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    description.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    description.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    description.add(new IntProperty('maxLines', maxLines, defaultValue: null));
   }
 }
 
@@ -989,7 +1051,11 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
   Widget build(BuildContext context) {
     return new DefaultTextStyle(
       style: _style.evaluate(animation),
-      child: widget.child
+      textAlign: widget.textAlign,
+      softWrap: widget.softWrap,
+      overflow: widget.overflow,
+      maxLines: widget.maxLines,
+      child: widget.child,
     );
   }
 }
@@ -1036,6 +1102,8 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The type of shape.
@@ -1099,7 +1167,7 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
       borderRadius: _borderRadius.evaluate(animation),
       elevation: _elevation.evaluate(animation),
       color: widget.animateColor ? _color.evaluate(animation) : widget.color,
-      shadowColor: widget.animateShadowColor 
+      shadowColor: widget.animateShadowColor
           ? _shadowColor.evaluate(animation)
           : widget.shadowColor,
     );

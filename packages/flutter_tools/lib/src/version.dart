@@ -10,19 +10,12 @@ import 'package:quiver/time.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
+import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process.dart';
 import 'base/process_manager.dart';
 import 'cache.dart';
 import 'globals.dart';
-
-final Set<String> kKnownBranchNames = new Set<String>.from(<String>[
-  'master',
-  'alpha',
-  'hackathon',
-  'codelab',
-  'beta'
-]);
 
 class FlutterVersion {
   @visibleForTesting
@@ -42,6 +35,7 @@ class FlutterVersion {
 
     _frameworkRevision = _runGit('git log -n 1 --pretty=format:%H');
     _frameworkAge = _runGit('git log -n 1 --pretty=format:%ar');
+    _frameworkVersion = GitTagVersion.determine().frameworkVersionFor(_frameworkRevision);
   }
 
   final Clock _clock;
@@ -49,11 +43,31 @@ class FlutterVersion {
   String _repositoryUrl;
   String get repositoryUrl => _repositoryUrl;
 
+  static Set<String> officialChannels = new Set<String>.from(<String>[
+    'master',
+    'dev',
+    'beta',
+    'release',
+  ]);
+
+  /// This maps old branch names to the names of branches that replaced them.
+  ///
+  /// For example, in early 2018 we changed from having an "alpha" branch to
+  /// having a "dev" branch, so anyone using "alpha" now gets transitioned to
+  /// "dev".
+  static Map<String, String> obsoleteBranches = <String, String>{
+    'alpha': 'dev',
+    'hackathon': 'dev',
+    'codelab': 'dev',
+  };
+
   String _channel;
-  /// `master`, `alpha`, `hackathon`, ...
+  /// The channel is the upstream branch.
+  /// `master`, `dev`, `beta`, `release`; or old ones, like `alpha`, `hackathon`, ...
   String get channel => _channel;
 
-  /// The name of the local branch
+  /// The name of the local branch.
+  /// Use getBranchName() to read this.
   String _branch;
 
   String _frameworkRevision;
@@ -63,6 +77,9 @@ class FlutterVersion {
   String _frameworkAge;
   String get frameworkAge => _frameworkAge;
 
+  String _frameworkVersion;
+  String get frameworkVersion => _frameworkVersion;
+
   String get frameworkDate => frameworkCommitDate;
 
   String get dartSdkVersion => Cache.instance.dartSdkVersion.split(' ')[0];
@@ -71,16 +88,19 @@ class FlutterVersion {
   String get engineRevision => Cache.instance.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
-  String _runGit(String command) => runSync(command.split(' '), workingDirectory: Cache.flutterRoot);
+  Future<Null> ensureVersionFile() {
+    return fs.file(fs.path.join(Cache.flutterRoot, 'version')).writeAsString(_frameworkVersion);
+  }
 
   @override
   String toString() {
-    final String flutterText = 'Flutter • channel $channel • ${repositoryUrl == null ? 'unknown source' : repositoryUrl}';
+    final String versionText = frameworkVersion == 'unknown' ? '' : ' $frameworkVersion';
+    final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl == null ? 'unknown source' : repositoryUrl}';
     final String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
     final String engineText = 'Engine • revision $engineRevisionShort';
     final String toolsText = 'Tools • Dart $dartSdkVersion';
 
-    // Flutter • channel master • https://github.com/flutter/flutter.git
+    // Flutter 1.3.922-pre.2 • channel master • https://github.com/flutter/flutter.git
     // Framework • revision 2259c59be8 • 19 minutes ago • 2016-08-15 22:51:40
     // Engine • revision fe509b0d96
     // Tools • Dart 1.19.0-dev.5.0
@@ -150,20 +170,22 @@ class FlutterVersion {
 
   static FlutterVersion get instance => context.putIfAbsent(FlutterVersion, () => new FlutterVersion(const Clock()));
 
-  /// Return a short string for the version (`alpha/a76bc8e22b`).
-  String getVersionString({bool whitelistBranchName: false}) {
-    return '${getBranchName(whitelistBranchName: whitelistBranchName)}/$frameworkRevisionShort';
+  /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
+  String getVersionString({bool redactUnknownBranches: false}) {
+    if (frameworkVersion != 'unknown')
+      return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkVersion';
+    return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkRevisionShort';
   }
 
   /// Return the branch name.
   ///
-  /// If [whitelistBranchName] is true and the branch is unknown,
-  /// the branch name will be returned as 'dev'.
-  String getBranchName({ bool whitelistBranchName: false }) {
-    if (whitelistBranchName || _branch.isEmpty) {
+  /// If [redactUnknownBranches] is true and the branch is unknown,
+  /// the branch name will be returned as `'[user-branch]'`.
+  String getBranchName({ bool redactUnknownBranches: false }) {
+    if (redactUnknownBranches || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
-      if (!kKnownBranchNames.contains(_branch))
-        return 'dev';
+      if (!officialChannels.contains(_branch) && !obsoleteBranches.containsKey(_branch))
+        return '[user-branch]';
     }
     return _branch;
   }
@@ -424,6 +446,10 @@ String _runSync(List<String> command, {bool lenient: true}) {
   return '';
 }
 
+String _runGit(String command) {
+  return runSync(command.split(' '), workingDirectory: Cache.flutterRoot);
+}
+
 /// Runs [command] in the root of the Flutter installation and returns the
 /// standard output as a string.
 ///
@@ -444,4 +470,46 @@ String _shortGitRevision(String revision) {
   if (revision == null)
     return '';
   return revision.length > 10 ? revision.substring(0, 10) : revision;
+}
+
+class GitTagVersion {
+  const GitTagVersion(this.x, this.y, this.z, this.commits, this.hash);
+  const GitTagVersion.unknown() : x = null, y = null, z = null, commits = 0, hash = '';
+
+  /// The X in vX.Y.Z.
+  final int x;
+
+  /// The Y in vX.Y.Z.
+  final int y;
+
+  /// The Z in vX.Y.Z.
+  final int z;
+
+  /// Number of commits since the vX.Y.Z tag.
+  final int commits;
+
+  /// The git hash (or an abbreviation thereof) for this commit.
+  final String hash;
+
+  static GitTagVersion determine() {
+    final String version = _runGit('git describe --match v*.*.* --exclude *-* --first-parent --long --tags');
+    final RegExp versionPattern = new RegExp('^v([0-9]+)\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)\$');
+    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5]);
+    if (parts == null) {
+      printTrace('Could not interpret results of "git describe": $version');
+      return const GitTagVersion.unknown();
+    }
+    final List<int> parsedParts = parts.take(4).map<int>(
+      (String value) => int.parse(value, onError: (String value) => null),
+    ).toList();
+    return new GitTagVersion(parsedParts[0], parsedParts[1], parsedParts[2], parsedParts[3], parts[4]);
+  }
+
+  String frameworkVersionFor(String revision) {
+    if (x == null || y == null || z == null || !revision.startsWith(hash))
+      return 'unknown';
+    if (commits == 0)
+      return '$x.$y.$z';
+    return '$x.$y.${z + 1}-pre.$commits';
+  }
 }

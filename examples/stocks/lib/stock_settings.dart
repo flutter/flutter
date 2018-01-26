@@ -85,7 +85,7 @@ class StockSettingsState extends State<StockSettings> {
               ),
             ]
           )
-        ).then<Null>(_handleOptimismChanged);
+        ).then<void>(_handleOptimismChanged);
         break;
     }
   }

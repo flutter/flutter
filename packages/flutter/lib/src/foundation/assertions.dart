@@ -140,6 +140,38 @@ class FlutterErrorDetails {
       longMessage = '  <no message available>';
     return longMessage;
   }
+
+  @override
+  String toString() {
+    final StringBuffer buffer = new StringBuffer();
+    if ((library != null && library != '') || (context != null && context != '')) {
+      if (library != null && library != '') {
+        buffer.write('Error caught by $library');
+        if (context != null && context != '')
+          buffer.write(', ');
+      } else {
+        buffer.writeln('Exception ');
+      }
+      if (context != null && context != '')
+        buffer.write('thrown $context');
+      buffer.writeln('.');
+    } else {
+      buffer.write('An error was caught.');
+    }
+    buffer.writeln(exceptionAsString());
+    if (informationCollector != null)
+      informationCollector(buffer);
+    if (stack != null) {
+      Iterable<String> stackLines = stack.toString().trimRight().split('\n');
+      if (stackFilter != null) {
+        stackLines = stackFilter(stackLines);
+      } else {
+        stackLines = FlutterError.defaultStackFilter(stackLines);
+      }
+      buffer.writeAll(stackLines, '\n');
+    }
+    return buffer.toString().trimRight();
+  }
 }
 
 /// Error class used to report Flutter-specific assertion failures and
@@ -329,7 +361,7 @@ class FlutterError extends AssertionError {
       '_FakeAsync',
       '_FrameCallbackEntry',
     ];
-    final RegExp stackParser = new RegExp(r'^#[0-9]+ +([^.]+).* \(([^/]*)/.+:[0-9]+(?::[0-9]+)?\)$');
+    final RegExp stackParser = new RegExp(r'^#[0-9]+ +([^.]+).* \(([^/\\]*)[/\\].+:[0-9]+(?::[0-9]+)?\)$');
     final RegExp packageParser = new RegExp(r'^([^:]+):(.+)$');
     final List<String> result = <String>[];
     final List<String> skipped = <String>[];

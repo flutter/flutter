@@ -161,21 +161,25 @@ abstract class BindingBase {
   /// callback's future completes.
   ///
   /// This causes input lag and should therefore be avoided when possible. It is
-  /// primarily intended for development features, in particular to allow
-  /// [reassembleApplication] to block input while it walks the tree (which it
-  /// partially does asynchronously).
+  /// primarily intended for use during non-user-interactive time such as to
+  /// allow [reassembleApplication] to block input while it walks the tree
+  /// (which it partially does asynchronously).
   ///
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
   @protected
   Future<Null> lockEvents(Future<Null> callback()) {
+    developer.Timeline.startSync('Lock events');
+
     assert(callback != null);
     _lockCount += 1;
     final Future<Null> future = callback();
     assert(future != null, 'The lockEvents() callback returned null; it should return a Future<Null> that completes when the lock is to expire.');
     future.whenComplete(() {
       _lockCount -= 1;
-      if (!locked)
+      if (!locked) {
+        developer.Timeline.finishSync();
         unlocked();
+      }
     });
     return future;
   }
@@ -189,7 +193,7 @@ abstract class BindingBase {
     assert(!locked);
   }
 
-  /// Cause the entire application to redraw.
+  /// Cause the entire application to redraw, e.g. after a hot reload.
   ///
   /// This is used by development tools when the application code has changed,
   /// to cause the application to pick up any changed code. It can be triggered
@@ -212,7 +216,7 @@ abstract class BindingBase {
   }
 
   /// This method is called by [reassembleApplication] to actually cause the
-  /// application to reassemble.
+  /// application to reassemble, e.g. after a hot reload.
   ///
   /// Bindings are expected to use this method to reregister anything that uses
   /// closures, so that they do not keep pointing to old code, and to flush any

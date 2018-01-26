@@ -91,4 +91,47 @@ void main() {
     expect(config.getActionHandler(SemanticsAction.scrollLeft), isNotNull);
     expect(config.getActionHandler(SemanticsAction.scrollRight), isNull);
   });
+
+  group('RenderPhysicalShape', () {
+    setUp(() {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    });
+
+    test('shape change triggers repaint', () {
+      final RenderPhysicalShape root = new RenderPhysicalShape(
+        color: const Color(0xffff00ff),
+        clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
+      );
+      layout(root, phase: EnginePhase.composite);
+      expect(root.debugNeedsPaint, isFalse);
+
+      // Same shape, no repaint.
+      root.clipper = const ShapeBorderClipper(shapeBorder: const CircleBorder());
+      expect(root.debugNeedsPaint, isFalse);
+
+      // Different shape triggers repaint.
+      root.clipper = const ShapeBorderClipper(shapeBorder: const StadiumBorder());
+      expect(root.debugNeedsPaint, isTrue);
+    });
+
+    test('compositing on non-Fuchsia', () {
+      final RenderPhysicalShape root = new RenderPhysicalShape(
+        color: const Color(0xffff00ff),
+        clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
+      );
+      layout(root, phase: EnginePhase.composite);
+      expect(root.needsCompositing, isFalse);
+
+      // On non-Fuchsia platforms, Flutter draws its own shadows.
+      root.elevation = 1.0;
+      pumpFrame(phase: EnginePhase.composite);
+      expect(root.needsCompositing, isFalse);
+
+      root.elevation = 0.0;
+      pumpFrame(phase: EnginePhase.composite);
+      expect(root.needsCompositing, isFalse);
+
+      debugDefaultTargetPlatformOverride = null;
+    });
+  });
 }

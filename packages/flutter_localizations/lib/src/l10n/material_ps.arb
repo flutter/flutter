@@ -1,8 +1,8 @@
 {
   "scriptCategory": "tall",
   "timeOfDayFormat": "HH:mm",
-  "@anteMeridiemAbbreviation": { "notUsed": "Pashto time format does not use a.m. indicator" },
-  "@postMeridiemAbbreviation": { "notUsed": "Pashto time format does not use p.m. indicator" },
+  "@anteMeridiemAbbreviation": {"notUsed":"Pashto time format does not use a.m. indicator"},
+  "@postMeridiemAbbreviation": {"notUsed":"Pashto time format does not use p.m. indicator"},
   "openAppDrawerTooltip": "د پرانیستی نیینګ مینو",
   "backButtonTooltip": "شاته",
   "closeButtonTooltip": "بنده",
@@ -17,6 +17,7 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow د $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow څخه $rowCount د",
   "rowsPerPageTitle": "د هرې پاڼې پاڼې:",
+  "tabLabel": "$tabIndex د $tabCount",
   "selectedRowCountTitleOther": "$selectedRowCount توکي غوره شوي",
   "cancelButtonLabel": "لغوه کول",
   "closeButtonLabel": "تړل",
@@ -28,5 +29,9 @@
   "selectAllButtonLabel": "غوره کړئ",
   "viewLicensesButtonLabel": "لیدلس وګورئ",
   "timePickerHourModeAnnouncement": "وختونه وټاکئ",
-  "timePickerMinuteModeAnnouncement": "منې غوره کړئ"
+  "timePickerMinuteModeAnnouncement": "منې غوره کړئ",
+  "signedInLabel": "ننوتل",
+  "hideAccountsLabel": "حسابونه پټ کړئ",
+  "showAccountsLabel": "حسابونه ښکاره کړئ",
+  "modalBarrierDismissLabel": "رد کړه"
 }

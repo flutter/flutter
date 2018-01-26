@@ -131,11 +131,13 @@ class RenderEditable extends RenderBox {
     @required ViewportOffset offset,
     this.onSelectionChanged,
     this.onCaretChanged,
+    this.ignorePointer: false,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
        assert(textScaleFactor != null),
        assert(offset != null),
+       assert(ignorePointer != null),
        _textPainter = new TextPainter(
          text: text,
          textAlign: textAlign,
@@ -153,8 +155,7 @@ class RenderEditable extends RenderBox {
     assert(!_showCursor.value || cursorColor != null);
     _tap = new TapGestureRecognizer(debugOwner: this)
       ..onTapDown = _handleTapDown
-      ..onTap = _handleTap
-      ..onTapCancel = _handleTapCancel;
+      ..onTap = _handleTap;
     _longPress = new LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
   }
@@ -166,6 +167,13 @@ class RenderEditable extends RenderBox {
 
   /// Called during the paint phase when the caret location changes.
   CaretChangedHandler onCaretChanged;
+
+  /// If true [handleEvent] does nothing and it's assumed that this
+  /// renderer will be notified of input gestures via [handleTapDown],
+  /// [handleTap], and [handleLongPress].
+  ///
+  /// The default value of this property is false.
+  bool ignorePointer;
 
   Rect _lastCaretRect;
 
@@ -348,29 +356,40 @@ class RenderEditable extends RenderBox {
       ..isFocused = hasFocus
       ..isTextField = true;
 
-    if (_selection?.isValid == true) {
-      if (_textPainter.getOffsetBefore(_selection.extentOffset) != null) {
-        config.addAction(SemanticsAction.moveCursorBackwardByCharacter, () {
-          final int offset = _textPainter.getOffsetBefore(_selection.extentOffset);
-          if (offset == null)
-            return;
-          onSelectionChanged(
-            new TextSelection.collapsed(offset: offset), this, SelectionChangedCause.keyboard,
-          );
-        });
-      }
+    if (hasFocus)
+      config.onSetSelection = _handleSetSelection;
 
-      if (_textPainter.getOffsetAfter(_selection.extentOffset) != null) {
-        config.addAction(SemanticsAction.moveCursorForwardByCharacter, () {
-          final int offset = _textPainter.getOffsetAfter(_selection.extentOffset);
-          if (offset == null)
-            return;
-          onSelectionChanged(
-            new TextSelection.collapsed(offset: offset), this, SelectionChangedCause.keyboard,
-          );
-        });
-      }
+    if (_selection?.isValid == true) {
+      config.textSelection = _selection;
+      if (_textPainter.getOffsetBefore(_selection.extentOffset) != null)
+        config.onMoveCursorBackwardByCharacter = _handleMoveCursorBackwardByCharacter;
+      if (_textPainter.getOffsetAfter(_selection.extentOffset) != null)
+        config.onMoveCursorForwardByCharacter = _handleMoveCursorForwardByCharacter;
     }
+  }
+
+  void _handleSetSelection(TextSelection selection) {
+    onSelectionChanged(selection, this, SelectionChangedCause.keyboard);
+  }
+
+  void _handleMoveCursorForwardByCharacter(bool extentSelection) {
+    final int extentOffset = _textPainter.getOffsetAfter(_selection.extentOffset);
+    if (extentOffset == null)
+      return;
+    final int baseOffset = !extentSelection ? extentOffset : _selection.baseOffset;
+    onSelectionChanged(
+      new TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), this, SelectionChangedCause.keyboard,
+    );
+  }
+
+  void _handleMoveCursorBackwardByCharacter(bool extentSelection) {
+    final int extentOffset = _textPainter.getOffsetBefore(_selection.extentOffset);
+    if (extentOffset == null)
+      return;
+    final int baseOffset = !extentSelection ? extentOffset : _selection.baseOffset;
+    onSelectionChanged(
+      new TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), this, SelectionChangedCause.keyboard,
+    );
   }
 
   @override
@@ -547,6 +566,8 @@ class RenderEditable extends RenderBox {
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (ignorePointer)
+      return;
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && onSelectionChanged != null) {
       _tap.addPointer(event);
@@ -555,36 +576,57 @@ class RenderEditable extends RenderBox {
   }
 
   Offset _lastTapDownPosition;
-  Offset _longPressPosition;
-  void _handleTapDown(TapDownDetails details) {
+
+  /// If [ignorePointer] is false (the default) then this method is called by
+  /// the internal gesture recognizer's [TapGestureRecognizer.onTapDown]
+  /// callback.
+  ///
+  /// When [ignorePointer] is true, an ancestor widget must respond to tap
+  /// down events by calling this method.
+  void handleTapDown(TapDownDetails details) {
     _lastTapDownPosition = details.globalPosition + -_paintOffset;
   }
+  void _handleTapDown(TapDownDetails details) {
+    assert(!ignorePointer);
+    handleTapDown(details);
+  }
 
-  void _handleTap() {
+  /// If [ignorePointer] is false (the default) then this method is called by
+  /// the internal gesture recognizer's [TapGestureRecognizer.onTap]
+  /// callback.
+  ///
+  /// When [ignorePointer] is true, an ancestor widget must respond to tap
+  /// events by calling this method.
+  void handleTap() {
     _layoutText(constraints.maxWidth);
     assert(_lastTapDownPosition != null);
-    final Offset globalPosition = _lastTapDownPosition;
-    _lastTapDownPosition = null;
     if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition));
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
       onSelectionChanged(new TextSelection.fromPosition(position), this, SelectionChangedCause.tap);
     }
   }
-
-  void _handleTapCancel() {
-    // longPress arrives after tapCancel, so remember the tap position.
-    _longPressPosition = _lastTapDownPosition;
-    _lastTapDownPosition = null;
+  void _handleTap() {
+    assert(!ignorePointer);
+    handleTap();
   }
 
-  void _handleLongPress() {
+  /// If [ignorePointer] is false (the default) then this method is called by
+  /// the internal gesture recognizer's [LongPressRecognizer.onLongPress]
+  /// callback.
+  ///
+  /// When [ignorePointer] is true, an ancestor widget must respond to long
+  /// press events by calling this method.
+  void handleLongPress() {
     _layoutText(constraints.maxWidth);
-    final Offset globalPosition = _longPressPosition;
-    _longPressPosition = null;
+    assert(_lastTapDownPosition != null);
     if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition));
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition));
       onSelectionChanged(_selectWordAtOffset(position), this, SelectionChangedCause.longPress);
     }
+  }
+  void _handleLongPress() {
+    assert(!ignorePointer);
+    handleLongPress();
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {

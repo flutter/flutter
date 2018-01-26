@@ -29,6 +29,14 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 // abstract class FrogJar extends RenderObjectWidget { }
 // abstract class FrogJarParentData extends ParentData { Size size; }
 
+// DOCUMENTATION TEMPLATES FOR THE WIDGET LIBRARY
+
+/// {@template flutter.widgets.child}
+/// This widget can only have one child. To lay out multiple children, let this
+/// widget's child be a widget such as [Row], [Column], or [Stack], which have a
+/// `children` property, and then provide the children to that widget.
+/// {@endtemplate}
+
 // KEYS
 
 /// A key that is only equal to itself.
@@ -857,6 +865,10 @@ typedef void StateSetter(VoidCallback fn);
 ///    associated widget (e.g., to start implicit animations). The framework
 ///    always calls [build] after calling [didUpdateWidget], which means any
 ///    calls to [setState] in [didUpdateWidget] are redundant.
+///  * During development, if a hot reload occurs (whether initiated from the
+///    command line `flutter` tool by pressing `r`, or from an IDE), the
+///    [reassemble] method is called. This provides an opportunity to
+///    reinitialize any data that was prepared in the [initState] method.
 ///  * If the subtree containing the [State] object is removed from the tree
 ///    (e.g., because the parent built a widget with a different [runtimeType]
 ///    or [Widget.key]), the framework calls the [deactivate] method. Subclasses
@@ -994,7 +1006,8 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   @protected
   void didUpdateWidget(covariant T oldWidget) { }
 
-  /// Called whenever the application is reassembled during debugging.
+  /// Called whenever the application is reassembled during debugging, for
+  /// example during hot reload.
   ///
   /// This method should rerun any initialization logic that depends on global
   /// state, for example, image loading from asset bundles (since the asset
@@ -1311,6 +1324,8 @@ abstract class ProxyWidget extends Widget {
   const ProxyWidget({ Key key, @required this.child }) : super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 }
 
@@ -1592,6 +1607,8 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   const SingleChildRenderObjectWidget({ Key key, this.child }) : super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -2001,7 +2018,7 @@ abstract class BuildContext {
 /// This class tracks which widgets need rebuilding, and handles other tasks
 /// that apply to widget trees as a whole, such as managing the inactive element
 /// list for the tree and triggering the "reassemble" command when necessary
-/// during debugging.
+/// during hot reload when debugging.
 ///
 /// The main build owner is typically owned by the [WidgetsBinding], and is
 /// driven from the operating system along with the rest of the
@@ -2365,7 +2382,8 @@ class BuildOwner {
 
   /// Cause the entire subtree rooted at the given [Element] to be entirely
   /// rebuilt. This is used by development tools when the application code has
-  /// changed, to cause the widget tree to pick up any changed implementations.
+  /// changed and is being hot-reloaded, to cause the widget tree to pick up any
+  /// changed implementations.
   ///
   /// This is expensive and should not be called except during development.
   void reassemble(Element root) {
@@ -3147,7 +3165,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Set<InheritedElement> _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
-  bool _debugCheckStateIsActiveForAncestorLoopkup() {
+  bool _debugCheckStateIsActiveForAncestorLookup() {
     assert(() {
       if (_debugLifecycleState != _ElementLifecycle.active) {
         throw new FlutterError(
@@ -3165,7 +3183,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
-    assert(_debugCheckStateIsActiveForAncestorLoopkup());
+    assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
@@ -3180,7 +3198,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType) {
-    assert(_debugCheckStateIsActiveForAncestorLoopkup());
+    assert(_debugCheckStateIsActiveForAncestorLookup());
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     return ancestor;
   }
@@ -3192,7 +3210,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   Widget ancestorWidgetOfExactType(Type targetType) {
-    assert(_debugCheckStateIsActiveForAncestorLoopkup());
+    assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
     while (ancestor != null && ancestor.widget.runtimeType != targetType)
       ancestor = ancestor._parent;
@@ -3201,7 +3219,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   State ancestorStateOfType(TypeMatcher matcher) {
-    assert(_debugCheckStateIsActiveForAncestorLoopkup());
+    assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
     while (ancestor != null) {
       if (ancestor is StatefulElement && matcher.check(ancestor.state))
@@ -3214,7 +3232,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   State rootAncestorStateOfType(TypeMatcher matcher) {
-    assert(_debugCheckStateIsActiveForAncestorLoopkup());
+    assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
     StatefulElement statefulAncestor;
     while (ancestor != null) {
@@ -3227,7 +3245,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher) {
-    assert(_debugCheckStateIsActiveForAncestorLoopkup());
+    assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
     while (ancestor != null) {
       if (ancestor is RenderObjectElement && matcher.check(ancestor.renderObject))
@@ -3240,7 +3258,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   @override
   void visitAncestorElements(bool visitor(Element element)) {
-    assert(_debugCheckStateIsActiveForAncestorLoopkup());
+    assert(_debugCheckStateIsActiveForAncestorLookup());
     Element ancestor = _parent;
     while (ancestor != null && visitor(ancestor))
       ancestor = ancestor._parent;
@@ -3456,6 +3474,20 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void performRebuild();
 }
 
+/// Signature for the constructor that is called when an error occurs while
+/// building a widget.
+///
+/// The argument provides information regarding the cause of the error.
+///
+/// See also:
+///
+///  * [ErrorWidget.builder], which can be set to override the default
+///    [ErrorWidget] builder.
+///  * [FlutterError.reportError], which is typically called with the same
+///    [FlutterErrorDetails] object immediately prior to [ErrorWidget.builder]
+///    being called.
+typedef Widget ErrorWidgetBuilder(FlutterErrorDetails details);
+
 /// A widget that renders an exception's message.
 ///
 /// This widget is used when a build method fails, to help with determining
@@ -3466,6 +3498,32 @@ class ErrorWidget extends LeafRenderObjectWidget {
   /// Creates a widget that displays the given error message.
   ErrorWidget(Object exception) : message = _stringify(exception),
       super(key: new UniqueKey());
+
+  /// The configurable factory for [ErrorWidget].
+  ///
+  /// When an error occurs while building a widget, the broken widget is
+  /// replaced by the widget returned by this function. By default, an
+  /// [ErrorWidget] is returned.
+  ///
+  /// The system is typically in an unstable state when this function is called.
+  /// An exception has just been thrown in the middle of build (and possibly
+  /// layout), so surrounding widgets and render objects may be in a rather
+  /// fragile state. The framework itself (especially the [BuildOwner]) may also
+  /// be confused, and additional exceptions are quite likely to be thrown.
+  ///
+  /// Because of this, it is highly recommended that the widget returned from
+  /// this function perform the least amount of work possible. A
+  /// [LeafRenderObjectWidget] is the best choice, especially one that
+  /// corresponds to a [RenderBox] that can handle the most absurd of incoming
+  /// constraints. The default constructor maps to a [RenderErrorBox].
+  ///
+  /// See also:
+  ///
+  ///  * [FlutterError.onError], which is typically called with the same
+  ///    [FlutterErrorDetails] object immediately prior to this callback being
+  ///    invoked, and which can also be configured to control how errors are
+  ///    reported.
+  static ErrorWidgetBuilder builder = (FlutterErrorDetails details) => new ErrorWidget(details.exception);
 
   /// The message to display.
   final String message;
@@ -3544,8 +3602,7 @@ abstract class ComponentElement extends Element {
       built = build();
       debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
-      _debugReportException('building $this', e, stack);
-      built = new ErrorWidget(e);
+      built = ErrorWidget.builder(_debugReportException('building $this', e, stack));
     } finally {
       // We delay marking the element as clean until after calling build() so
       // that attempts to markNeedsBuild() during build() will be ignored.
@@ -3556,8 +3613,7 @@ abstract class ComponentElement extends Element {
       _child = updateChild(_child, built, slot);
       assert(_child != null);
     } catch (e, stack) {
-      _debugReportException('building $this', e, stack);
-      built = new ErrorWidget(e);
+      built = ErrorWidget.builder(_debugReportException('building $this', e, stack));
       _child = updateChild(null, built, slot);
     }
 
@@ -4656,14 +4712,19 @@ class _DebugCreator {
   String toString() => element.debugGetCreatorChain(12);
 }
 
-void _debugReportException(String context, dynamic exception, StackTrace stack, {
+FlutterErrorDetails _debugReportException(
+  String context,
+  dynamic exception,
+  StackTrace stack, {
   InformationCollector informationCollector
 }) {
-  FlutterError.reportError(new FlutterErrorDetails(
+  final FlutterErrorDetails details = new FlutterErrorDetails(
     exception: exception,
     stack: stack,
     library: 'widgets library',
     context: context,
     informationCollector: informationCollector,
-  ));
+  );
+  FlutterError.reportError(details);
+  return details;
 }

@@ -240,11 +240,10 @@ class CompileTest {
     watch.stop();
 
     final RegExp metricExpression = new RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
-    final Map<String, dynamic> metrics = new Map<String, dynamic>.fromIterable(
-      metricExpression.allMatches(compileLog),
-      key: (Match m) => _sdkNameToMetricName(m.group(1)),
-      value: (Match m) => int.parse(m.group(2)),
-    );
+    final Map<String, dynamic> metrics = <String, dynamic>{};
+    for (Match m in metricExpression.allMatches(compileLog)) {
+      metrics[_sdkNameToMetricName(m.group(1))] = int.parse(m.group(2));
+    }
     metrics['aot_snapshot_compile_millis'] = watch.elapsedMilliseconds;
 
     return metrics;
@@ -274,7 +273,12 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        releaseSizeInBytes = await file('$cwd/build/app/outputs/apk/app-release.apk').length();
+        File apk = file('$cwd/build/app/outputs/apk/app.apk');
+        if (!apk.existsSync()) {
+          // Pre Android SDK 26 path
+          apk = file('$cwd/build/app/outputs/apk/app-release.apk');
+        }
+        releaseSizeInBytes = apk.lengthSync();
         break;
     }
 

@@ -33,14 +33,24 @@ class _ArchiveZipBuilder extends ZipBuilder {
   Future<Null> createZip(File outFile, Directory zipBuildDir) async {
     final Archive archive = new Archive();
 
+    if (zipBuildDir.existsSync())
+      zipBuildDir.deleteSync(recursive: true);
+    zipBuildDir.createSync(recursive: true);
+
     final Completer<Null> finished = new Completer<Null>();
     int count = entries.length;
     entries.forEach((String archivePath, DevFSContent content) {
       content.contentsAsBytes().then<Null>((List<int> data) {
         archive.addFile(new ArchiveFile.noCompress(archivePath, data.length, data));
-        count -= 1;
-        if (count == 0)
-          finished.complete();
+
+        final File file = fs.file(fs.path.join(zipBuildDir.path, archivePath));
+        file.parent.createSync(recursive: true);
+
+        file.writeAsBytes(data).then<Null>((File value) {
+          count -= 1;
+          if (count == 0)
+            finished.complete();
+        });
       });
     });
     await finished.future;

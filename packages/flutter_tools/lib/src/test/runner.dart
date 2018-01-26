@@ -28,6 +28,7 @@ Future<int> runTests(
     bool startPaused: false,
     bool ipv6: false,
     bool machine: false,
+    bool previewDart2: false,
     TestWatcher watcher,
     }) async {
   // Compute the command-line arguments for package:test.
@@ -42,10 +43,10 @@ Future<int> runTests(
   if (enableObservatory) {
     // (In particular, for collecting code coverage.)
 
-    // Turn on concurrency, but just barely.  If we just go with full concurrency, then
-    // individual tests timeout.  If we turn it off (=1), then the overall tests timeout.
-    // This is a lit fuse... Eventually it won't matter what number we put here.
-    // TODO(gspencer): Fix this: https://github.com/flutter/flutter/issues/10694
+    // Turn on concurrency, but just barely. This is a trade-off between running
+    // too many tests such that they all time out, and too few tests such that
+    // the tests overall take too much time. The current number is empirically
+    // based on what our infrastructure can handle, which isn't ideal...
     testArgs.add('--concurrency=2');
   }
 
@@ -75,6 +76,7 @@ Future<int> runTests(
     machine: machine,
     startPaused: startPaused,
     serverType: serverType,
+    previewDart2: previewDart2,
   );
 
   // Make the global packages path absolute.
@@ -94,7 +96,6 @@ Future<int> runTests(
     await test.main(testArgs);
 
     // test.main() sets dart:io's exitCode global.
-    // TODO(skybrian): restore previous value?
     printTrace('test package returned with exit code $exitCode');
 
     return exitCode;

@@ -128,7 +128,7 @@ void main() {
                   key: dropdownMenuButtonKey,
                   onChanged: (String newValue) { },
                   value: 'menuItem',
-                  items: <DropdownMenuItem<String>>[
+                  items: const <DropdownMenuItem<String>>[
                     const DropdownMenuItem<String>(
                       value: 'menuItem',
                       child: const Text('menuItem'),
@@ -417,7 +417,7 @@ void main() {
       }
     }
 
-    expect(theme.textTheme.display4.debugLabel, 'blackMountainView display4 < englishLike display4');
+    expect(theme.textTheme.display4.debugLabel, '(englishLike display4).merge(blackMountainView display4)');
   });
 }
 

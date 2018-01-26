@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -44,9 +44,11 @@ class TestSemantics {
     this.textDirection,
     this.rect,
     this.transform,
+    this.textSelection,
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
-  }) : assert(flags != null),
+  }) : assert(flags is int || flags is List<SemanticsFlag>),
+       assert(actions is int || actions is List<SemanticsAction>),
        assert(label != null),
        assert(value != null),
        assert(increasedValue != null),
@@ -67,10 +69,12 @@ class TestSemantics {
     this.hint: '',
     this.textDirection,
     this.transform,
+    this.textSelection,
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
   }) : id = 0,
-       assert(flags != null),
+       assert(flags is int || flags is List<SemanticsFlag>),
+       assert(actions is int || actions is List<SemanticsAction>),
        assert(label != null),
        assert(increasedValue != null),
        assert(decreasedValue != null),
@@ -101,9 +105,11 @@ class TestSemantics {
     this.textDirection,
     this.rect,
     Matrix4 transform,
+    this.textSelection,
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
-  }) : assert(flags != null),
+  }) : assert(flags is int || flags is List<SemanticsFlag>),
+       assert(actions is int || actions is List<SemanticsAction>),
        assert(label != null),
        assert(value != null),
        assert(increasedValue != null),
@@ -119,11 +125,24 @@ class TestSemantics {
   /// they are created.
   final int id;
 
-  /// A bit field of [SemanticsFlags] that apply to this node.
-  final int flags;
+  /// The [SemanticsFlag]s set on this node.
+  ///
+  /// There are two ways to specify this property: as an `int` that encodes the
+  /// flags as a bit field, or as a `List<SemanticsFlag>` that are _on_.
+  ///
+  /// Using `List<SemanticsFlag>` is recommended due to better readability.
+  final dynamic flags;
 
-  /// A bit field of [SemanticsActions] that apply to this node.
-  final int actions;
+  /// The [SemanticsAction]s set on this node.
+  ///
+  /// There are two ways to specify this property: as an `int` that encodes the
+  /// actions as a bit field, or as a `List<SemanticsAction>`.
+  ///
+  /// Using `List<SemanticsAction>` is recommended due to better readability.
+  ///
+  /// The tester does not check the function corresponding to the action, but
+  /// only its existence.
+  final dynamic actions;
 
   /// A textual description of this node.
   final String label;
@@ -179,6 +198,8 @@ class TestSemantics {
   /// parent).
   final Matrix4 transform;
 
+  final TextSelection textSelection;
+
   static Matrix4 _applyRootChildScale(Matrix4 transform) {
     final Matrix4 result = new Matrix4.diagonal3Values(3.0, 3.0, 1.0);
     if (transform != null)
@@ -204,10 +225,19 @@ class TestSemantics {
       return fail('could not find node with id $id.');
     if (!ignoreId && id != node.id)
       return fail('expected node id $id but found id ${node.id}.');
-    if (flags != nodeData.flags)
+
+    final int flagsBitmask = flags is int
+      ? flags
+      : flags.fold<int>(0, (int bitmask, SemanticsFlag flag) => bitmask | flag.index);
+    if (flagsBitmask != nodeData.flags)
       return fail('expected node id $id to have flags $flags but found flags ${nodeData.flags}.');
-    if (actions != nodeData.actions)
+
+    final int actionsBitmask = actions is int
+        ? actions
+        : actions.fold<int>(0, (int bitmask, SemanticsAction action) => bitmask | action.index);
+    if (actionsBitmask != nodeData.actions)
       return fail('expected node id $id to have actions $actions but found actions ${nodeData.actions}.');
+
     if (label != nodeData.label)
       return fail('expected node id $id to have label "$label" but found label "${nodeData.label}".');
     if (value != nodeData.value)
@@ -226,6 +256,9 @@ class TestSemantics {
       return fail('expected node id $id to have rect $rect but found rect ${nodeData.rect}.');
     if (!ignoreTransform && transform != nodeData.transform)
       return fail('expected node id $id to have transform $transform but found transform:\n${nodeData.transform}.');
+    if (textSelection?.baseOffset != nodeData.textSelection?.baseOffset || textSelection?.extentOffset != nodeData.textSelection?.extentOffset) {
+      return fail('expected node id $id to have textDirection [${textSelection?.baseOffset}, ${textSelection?.end}] but found: [${nodeData.textSelection?.baseOffset}, ${nodeData.textSelection?.extentOffset}].');
+    }
     final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
     if (children.length != childrenCount)
       return fail('expected node id $id to have ${children.length} child${ children.length == 1 ? "" : "ren" } but found $childrenCount.');
@@ -249,25 +282,37 @@ class TestSemantics {
   String toString([int indentAmount = 0]) {
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = new StringBuffer();
-    buf.writeln('$indent$runtimeType {');
+    buf.writeln('${indent}new $runtimeType(');
     if (id != null)
-      buf.writeln('$indent  id: $id');
-    buf.writeln('$indent  flags: $flags');
-    buf.writeln('$indent  actions: $actions');
-    if (label != null)
-      buf.writeln('$indent  label: "$label"');
+      buf.writeln('$indent  id: $id,');
+    if (flags is int && flags != 0 || flags is List<SemanticsFlag> && flags.isNotEmpty)
+      buf.writeln('$indent  flags: ${SemanticsTester._flagsToSemanticsFlagExpression(flags)},');
+    if (actions is int && actions != 0 || actions is List<SemanticsAction> && actions.isNotEmpty)
+      buf.writeln('$indent  actions: ${SemanticsTester._actionsToSemanticsActionExpression(actions)},');
+    if (label != null && label != '')
+      buf.writeln('$indent  label: \'$label\',');
+    if (value != null && value != '')
+      buf.writeln('$indent  value: \'$value\',');
+    if (increasedValue != null && increasedValue != '')
+      buf.writeln('$indent  increasedValue: \'$increasedValue\',');
+    if (decreasedValue != null && decreasedValue != '')
+      buf.writeln('$indent  decreasedValue: \'$decreasedValue\',');
+    if (hint != null && hint != '')
+      buf.writeln('$indent  hint: \'$hint\',');
     if (textDirection != null)
-      buf.writeln('$indent  textDirection: $textDirection');
+      buf.writeln('$indent  textDirection: $textDirection,');
+    if (textSelection?.isValid == true)
+      buf.writeln('$indent  textSelection:\n[${textSelection.start}, ${textSelection.end}],');
     if (rect != null)
-      buf.writeln('$indent  rect: $rect');
+      buf.writeln('$indent  rect: $rect,');
     if (transform != null)
-      buf.writeln('$indent  transform:\n${transform.toString().trim().split('\n').map((String line) => '$indent    $line').join('\n')}');
-    buf.writeln('$indent  children: [');
+      buf.writeln('$indent  transform:\n${transform.toString().trim().split('\n').map((String line) => '$indent    $line').join('\n')},');
+    buf.writeln('$indent  children: <TestSemantics>[');
     for (TestSemantics child in children) {
-      buf.writeln(child.toString(indentAmount + 2));
+      buf.writeln('${child.toString(indentAmount + 2)},');
     }
-    buf.writeln('$indent  ]');
-    buf.write('$indent}');
+    buf.writeln('$indent  ],');
+    buf.write('$indent)');
     return buf.toString();
   }
 }
@@ -300,12 +345,20 @@ class SemanticsTester {
   @override
   String toString() => 'SemanticsTester for ${tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode}';
 
+  /// Returns all semantics nodes in the current semantics tree whose properties
+  /// match the non-null arguments.
+  ///
+  /// If multiple arguments are non-null, each of the returned nodes must match
+  /// on all of them.
+  ///
+  /// If `ancestor` is not null, only the descendants of it are returned.
   Iterable<SemanticsNode> nodesWith({
     String label,
     String value,
     TextDirection textDirection,
     List<SemanticsAction> actions,
-    List<SemanticsFlags> flags,
+    List<SemanticsFlag> flags,
+    SemanticsNode ancestor,
   }) {
     bool checkNode(SemanticsNode node) {
       if (label != null && node.label != label)
@@ -321,7 +374,7 @@ class SemanticsTester {
           return false;
       }
       if (flags != null) {
-        final int expectedFlags = flags.fold(0, (int value, SemanticsFlags flag) => value | flag.index);
+        final int expectedFlags = flags.fold(0, (int value, SemanticsFlag flag) => value | flag.index);
         final int actualFlags = node.getSemanticsData().flags;
         if (expectedFlags != actualFlags)
           return false;
@@ -337,8 +390,125 @@ class SemanticsTester {
       node.visitChildren(visit);
       return true;
     }
-    visit(tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode);
+    if (ancestor != null) {
+      visit(ancestor);
+    } else {
+      visit(tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode);
+    }
     return result;
+  }
+
+  /// Generates an expression that creates a [TestSemantics] reflecting the
+  /// current tree of [SemanticsNode]s.
+  ///
+  /// Use this method to generate code for unit tests. It works similar to
+  /// screenshot testing. The very first time you add semantics to a widget you
+  /// verify manually that the widget behaves correctly. You then use ths method
+  /// to generate test code for this widget.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// testWidgets('generate code for MyWidget', (WidgetTester tester) async {
+  ///   var semantics = new SemanticsTester(tester);
+  ///   await tester.pumpWidget(new MyWidget());
+  ///   print(semantics.generateTestSemanticsExpressionForCurrentSemanticsTree());
+  ///   semantics.dispose();
+  /// });
+  /// ```
+  ///
+  /// You can now copy the code printed to the console into a unit test:
+  ///
+  /// ```dart
+  /// testWidgets('generate code for MyWidget', (WidgetTester tester) async {
+  ///   var semantics = new SemanticsTester(tester);
+  ///   await tester.pumpWidget(new MyWidget());
+  ///   expect(semantics, hasSemantics(
+  ///     // Generated code:
+  ///     new TestSemantics(
+  ///       ... properties and child nodes ...
+  ///     ),
+  ///     ignoreRect: true,
+  ///     ignoreTransform: true,
+  ///     ignoreId: true,
+  ///   ));
+  ///   semantics.dispose();
+  /// });
+  ///
+  /// At this point the unit test should automatically pass because it was
+  /// generated from the actual [SemanticsNode]s. Next time the semantics tree
+  /// changes, the test code may either be updated manually, or regenerated and
+  /// replaced using this method again.
+  ///
+  /// Avoid submitting huge piles of generated test code. This will make test
+  /// code hard to review and it will make it tempting to regenerate test code
+  /// every time and ignore potential regressions. Make sure you do not
+  /// over-test. Prefer breaking your widgets into smaller widgets and test them
+  /// individually.
+  String generateTestSemanticsExpressionForCurrentSemanticsTree() {
+    final SemanticsNode node = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
+    return _generateSemanticsTestForNode(node, 0);
+  }
+
+  static String _flagsToSemanticsFlagExpression(dynamic flags) {
+    Iterable<SemanticsFlag> list;
+    if (flags is int) {
+      list = SemanticsFlag.values.values
+          .where((SemanticsFlag flag) => (flag.index & flags) != 0);
+    } else {
+      list = flags;
+    }
+    return '<SemanticsFlag>[${list.join(', ')}]';
+  }
+
+  static String _actionsToSemanticsActionExpression(dynamic actions) {
+    Iterable<SemanticsAction> list;
+    if (actions is int) {
+      list = SemanticsAction.values.values
+          .where((SemanticsAction action) => (action.index & actions) != 0);
+    } else {
+      list = actions;
+    }
+    return '<SemanticsAction>[${list.join(', ')}]';
+  }
+
+  /// Recursively generates [TestSemantics] code for [node] and its children,
+  /// indenting the expression by `indentAmount`.
+  static String _generateSemanticsTestForNode(SemanticsNode node, int indentAmount) {
+    final String indent = '  ' * indentAmount;
+    final StringBuffer buf = new StringBuffer();
+    final SemanticsData nodeData = node.getSemanticsData();
+    buf.writeln('new TestSemantics(');
+    if (nodeData.flags != 0)
+      buf.writeln('  flags: ${_flagsToSemanticsFlagExpression(nodeData.flags)},');
+    if (nodeData.actions != 0)
+      buf.writeln('  actions: ${_actionsToSemanticsActionExpression(nodeData.actions)},');
+    if (node.label != null && node.label.isNotEmpty)
+      buf.writeln('  label: r\'${node.label}\',');
+    if (node.value != null && node.value.isNotEmpty)
+      buf.writeln('  value: r\'${node.value}\',');
+    if (node.increasedValue != null && node.increasedValue.isNotEmpty)
+      buf.writeln('  increasedValue: r\'${node.increasedValue}\',');
+    if (node.decreasedValue != null && node.decreasedValue.isNotEmpty)
+      buf.writeln('  decreasedValue: r\'${node.decreasedValue}\',');
+    if (node.hint != null && node.hint.isNotEmpty)
+      buf.writeln('  hint: r\'${node.hint}\',');
+    if (node.textDirection != null)
+      buf.writeln('  textDirection: ${node.textDirection},');
+
+    if (node.hasChildren) {
+      buf.writeln('  children: <TestSemantics>[');
+      node.visitChildren((SemanticsNode child) {
+        buf
+          ..write(_generateSemanticsTestForNode(child, 2))
+          ..writeln(',');
+        return true;
+      });
+      buf.writeln('  ],');
+    }
+
+    buf.write(')');
+    return buf.toString().split('\n').map((String l) => '$indent$l').join('\n');
   }
 }
 
@@ -352,7 +522,11 @@ class _HasSemantics extends Matcher {
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
-    return _semantics._matches(item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode, matchState, ignoreTransform: ignoreTransform, ignoreRect: ignoreRect, ignoreId: ignoreId);
+    final bool doesMatch = _semantics._matches(item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode, matchState, ignoreTransform: ignoreTransform, ignoreRect: ignoreRect, ignoreId: ignoreId);
+    if (!doesMatch) {
+      matchState['would-match'] = item.generateTestSemanticsExpressionForCurrentSemanticsTree();
+    }
+    return doesMatch;
   }
 
   @override
@@ -364,10 +538,10 @@ class _HasSemantics extends Matcher {
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
     return mismatchDescription
         .add('${matchState[TestSemantics]}\n')
-        .add(
-          'Current SemanticsNode tree:\n'
-        )
-        .add(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest));
+        .add('Current SemanticsNode tree:\n')
+        .add(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest))
+        .add('The semantics tree would have matched the following configuration:\n')
+        .add(matchState['would-match']);
   }
 }
 
@@ -391,7 +565,7 @@ class _IncludesNodeWith extends Matcher {
   final String value;
   final TextDirection textDirection;
   final List<SemanticsAction> actions;
-  final List<SemanticsFlags> flags;
+  final List<SemanticsFlag> flags;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -439,7 +613,7 @@ Matcher includesNodeWith({
   String value,
   TextDirection textDirection,
   List<SemanticsAction> actions,
-  List<SemanticsFlags> flags,
+  List<SemanticsFlag> flags,
 }) {
   return new _IncludesNodeWith(
     label: label,

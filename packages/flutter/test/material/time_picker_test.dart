@@ -16,6 +16,10 @@ import '../rendering/recording_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
+final Finder _hourControl = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_HourControl');
+final Finder _minuteControl = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_MinuteControl');
+final Finder _timePickerDialog = find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_TimePickerDialog');
+
 class _TimePickerLauncher extends StatelessWidget {
   const _TimePickerLauncher({ Key key, this.onChanged, this.locale }) : super(key: key);
 
@@ -301,9 +305,9 @@ void _tests() {
     await mediaQueryBoilerplate(tester, true);
 
     expect(semantics, isNot(includesNodeWith(label: ':')));
-    expect(semantics.nodesWith(label: '00'), hasLength(2),
+    expect(semantics.nodesWith(value: '00'), hasLength(2),
         reason: '00 appears once in the header, then again in the dial');
-    expect(semantics.nodesWith(label: '07'), hasLength(2),
+    expect(semantics.nodesWith(value: '07'), hasLength(2),
         reason: '07 appears once in the header, then again in the dial');
     expect(semantics, includesNodeWith(label: 'CANCEL'));
     expect(semantics, includesNodeWith(label: 'OK'));
@@ -355,7 +359,7 @@ void _tests() {
   testWidgets('provides semantics information for minutes', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await mediaQueryBoilerplate(tester, true);
-    await tester.tap(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_MinuteControl'));
+    await tester.tap(_minuteControl);
     await tester.pumpAndSettle();
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
@@ -389,6 +393,114 @@ void _tests() {
     await mediaQueryBoilerplate(tester, true, initialTime: const TimeOfDay(hour: 0, minute: 0));
     dialPaint = tester.widget(findDialPaint);
     expect('${dialPaint.painter.activeRing}', '_DialRing.outer');
+  });
+
+  testWidgets('can increment and decrement hours', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    Future<Null> actAndExpect({ String initialValue, SemanticsAction action, String finalValue }) async {
+      final SemanticsNode elevenHours = semantics.nodesWith(
+        value: initialValue,
+        ancestor: tester.renderObject(_hourControl).debugSemantics,
+      ).single;
+      tester.binding.pipelineOwner.semanticsOwner.performAction(elevenHours.id, action);
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(of: _hourControl, matching: find.text(finalValue)),
+        findsOneWidget,
+      );
+    }
+
+    // 12-hour format
+    await mediaQueryBoilerplate(tester, false, initialTime: const TimeOfDay(hour: 11, minute: 0));
+    await actAndExpect(
+      initialValue: '11',
+      action: SemanticsAction.increase,
+      finalValue: '12',
+    );
+    await actAndExpect(
+      initialValue: '12',
+      action: SemanticsAction.increase,
+      finalValue: '1',
+    );
+
+    // Ensure we preserve day period as we roll over.
+    final dynamic pickerState = tester.state(_timePickerDialog);
+    expect(pickerState.selectedTime, const TimeOfDay(hour: 1, minute: 0));
+
+    await actAndExpect(
+      initialValue: '1',
+      action: SemanticsAction.decrease,
+      finalValue: '12',
+    );
+    await tester.pumpWidget(new Container());  // clear old boilerplate
+
+    // 24-hour format
+    await mediaQueryBoilerplate(tester, true, initialTime: const TimeOfDay(hour: 23, minute: 0));
+    await actAndExpect(
+      initialValue: '23',
+      action: SemanticsAction.increase,
+      finalValue: '00',
+    );
+    await actAndExpect(
+      initialValue: '00',
+      action: SemanticsAction.increase,
+      finalValue: '01',
+    );
+    await actAndExpect(
+      initialValue: '01',
+      action: SemanticsAction.decrease,
+      finalValue: '00',
+    );
+    await actAndExpect(
+      initialValue: '00',
+      action: SemanticsAction.decrease,
+      finalValue: '23',
+    );
+  });
+
+  testWidgets('can increment and decrement minutes', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    Future<Null> actAndExpect({ String initialValue, SemanticsAction action, String finalValue }) async {
+      final SemanticsNode elevenHours = semantics.nodesWith(
+        value: initialValue,
+        ancestor: tester.renderObject(_minuteControl).debugSemantics,
+      ).single;
+      tester.binding.pipelineOwner.semanticsOwner.performAction(elevenHours.id, action);
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(of: _minuteControl, matching: find.text(finalValue)),
+        findsOneWidget,
+      );
+    }
+
+    await mediaQueryBoilerplate(tester, false, initialTime: const TimeOfDay(hour: 11, minute: 58));
+    await actAndExpect(
+      initialValue: '58',
+      action: SemanticsAction.increase,
+      finalValue: '59',
+    );
+    await actAndExpect(
+      initialValue: '59',
+      action: SemanticsAction.increase,
+      finalValue: '00',
+    );
+
+    // Ensure we preserve hour period as we roll over.
+    final dynamic pickerState = tester.state(_timePickerDialog);
+    expect(pickerState.selectedTime, const TimeOfDay(hour: 11, minute: 0));
+
+    await actAndExpect(
+      initialValue: '00',
+      action: SemanticsAction.decrease,
+      finalValue: '59',
+    );
+    await actAndExpect(
+      initialValue: '59',
+      action: SemanticsAction.decrease,
+      finalValue: '58',
+    );
   });
 }
 
@@ -436,9 +548,9 @@ class _CustomPainterSemanticsTester {
     int i = 0;
 
     for (_SemanticsNodeExpectation expectation in expectedNodes) {
-      expect(semantics, includesNodeWith(label: expectation.label));
+      expect(semantics, includesNodeWith(value: expectation.label));
       final Iterable<SemanticsNode> dialLabelNodes = semantics
-          .nodesWith(label: expectation.label)
+          .nodesWith(value: expectation.label)
           .where((SemanticsNode node) => node.tags?.contains(const SemanticsTag('dial-label')) ?? false);
       expect(dialLabelNodes, hasLength(1), reason: 'Expected exactly one label ${expectation.label}');
       final Rect rect = new Rect.fromLTRB(expectation.left, expectation.top, expectation.right, expectation.bottom);

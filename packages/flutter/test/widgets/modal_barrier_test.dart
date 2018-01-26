@@ -99,24 +99,25 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
     final SemanticsTester semantics = new SemanticsTester(tester);
-    await tester.pumpWidget(const ModalBarrier(dismissible: true));
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.ltr,
+      child: const ModalBarrier(
+        dismissible: true,
+        semanticsLabel: 'Dismiss',
+      ),
+    ));
 
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 3,
           rect: TestSemantics.fullScreen,
-          children: <TestSemantics>[
-            new TestSemantics(
-              id: 4,
-              rect: TestSemantics.fullScreen,
-              actions: SemanticsAction.tap.index,
-            ),
-          ]
+          actions: SemanticsAction.tap.index,
+          label: 'Dismiss',
+          textDirection: TextDirection.ltr,
         ),
       ]
     );
-    expect(semantics, hasSemantics(expectedSemantics));
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
 
     semantics.dispose();
     debugDefaultTargetPlatformOverride = null;

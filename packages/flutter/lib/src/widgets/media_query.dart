@@ -89,6 +89,17 @@ class MediaQueryData {
   /// system UI (such as the system notification area), or or physical
   /// intrusions in the display (e.g. overscan regions on television screens or
   /// phone sensor housings).
+  ///
+  /// If you consumed this padding (e.g. by building a widget that envelops or
+  /// accounts for this padding in its layout in such a way that children are
+  /// no longer exposed to this padding), you should remove this padding
+  /// for subsequent descendents in the widget tree by inserting a new
+  /// [MediaQuery] widget using the [MediaQuery.removePadding] factory.
+  ///
+  /// See also:
+  ///
+  ///  * [SafeArea], a widget that consumes this padding with a [Padding] widget
+  ///    and automatically removes it from the [MediaQuery] for its child.
   final EdgeInsets padding;
 
   /// Whether to use 24-hour format when formatting time.
@@ -223,6 +234,10 @@ class MediaQuery extends InheritedWidget {
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery] from
   /// the given context, but removes the specified paddings.
+  ///
+  /// This should be inserted into the widget tree when the [MediaQuery] padding
+  /// is consumed in such a way that the padding is no longer exposed to its
+  /// descendents or siblings.
   ///
   /// The [context] argument is required, must not be null, and must have a
   /// [MediaQuery] in scope.

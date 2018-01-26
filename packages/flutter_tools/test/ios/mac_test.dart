@@ -81,8 +81,8 @@ void main() {
 
       testUsingContext('idevicescreenshot captures and returns screenshot', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
-        when(mockProcessManager.run(any, environment: null, workingDirectory:  null))
-            .thenReturn(new Future<ProcessResult>.value(new ProcessResult(4, 0, '', '')));
+        when(mockProcessManager.run(any, environment: null, workingDirectory:  null)).thenAnswer(
+            (Invocation invocation) => new Future<ProcessResult>.value(new ProcessResult(4, 0, '', '')));
 
         await iMobileDevice.takeScreenshot(mockOutputFile);
         verify(mockProcessManager.run(<String>['idevicescreenshot', outputPath],
@@ -187,7 +187,7 @@ void main() {
 
     testUsingContext('xcodeVersionSatisfactory is false when version is less than minimum', () {
       when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 7.0.1\nBuild version 7A1001', ''));
+          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
       expect(xcode.xcodeVersionSatisfactory, isFalse);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -203,7 +203,7 @@ void main() {
 
     testUsingContext('xcodeVersionSatisfactory is true when version meets minimum', () {
       when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
+          .thenReturn(new ProcessResult(1, 0, 'Xcode 9.0\nBuild version 9A235', ''));
       expect(xcode.xcodeVersionSatisfactory, isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -211,7 +211,7 @@ void main() {
 
     testUsingContext('xcodeVersionSatisfactory is true when version exceeds minimum', () {
       when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 9.0\nBuild version 9M137d', ''));
+          .thenReturn(new ProcessResult(1, 0, 'Xcode 10.0\nBuild version 10A123', ''));
       expect(xcode.xcodeVersionSatisfactory, isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -282,7 +282,7 @@ Xcode's output:
     === CLEAN TARGET Runner OF PROJECT Runner WITH CONFIGURATION Release ===
 
     Check dependencies
-    [BCEROR]No profiles for 'com.yourcompany.test' were found:  Xcode couldn't find a provisioning profile matching 'com.yourcompany.test'.
+    [BCEROR]No profiles for 'com.example.test' were found:  Xcode couldn't find a provisioning profile matching 'com.example.test'.
     [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
     [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
     [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
@@ -304,7 +304,7 @@ Xcode's output:
     === BUILD TARGET Runner OF PROJECT Runner WITH CONFIGURATION Release ===
 
     Check dependencies
-    No profiles for 'com.yourcompany.test' were found:  Xcode couldn't find a provisioning profile matching 'com.yourcompany.test'.
+    No profiles for 'com.example.test' were found:  Xcode couldn't find a provisioning profile matching 'com.example.test'.
     Code signing is required for product type 'Application' in SDK 'iOS 10.3'
     Code signing is required for product type 'Application' in SDK 'iOS 10.3'
     Code signing is required for product type 'Application' in SDK 'iOS 10.3'

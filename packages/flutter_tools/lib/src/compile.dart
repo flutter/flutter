@@ -5,11 +5,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process_manager.dart';
@@ -45,7 +44,7 @@ class _StdoutHandler {
         ? string.substring(boundaryKey.length + 1)
         : null);
     else
-      printTrace('compile debug message: $string');
+      printError('compiler message: $string');
   }
 
   // This is needed to get ready to process next compilation result output,
@@ -59,10 +58,12 @@ class _StdoutHandler {
 Future<String> compile(
     {String sdkRoot,
     String mainPath,
-    bool linkPlatformKernelIn : false,
-    bool aot : false,
+    bool linkPlatformKernelIn: false,
+    bool aot: false,
+    bool strongMode: false,
     List<String> extraFrontEndOptions,
-    String incrementalCompilerByteStorePath}) async {
+    String incrementalCompilerByteStorePath,
+    String packagesPath}) async {
   final String frontendServer = artifacts.getArtifactPath(
     Artifact.frontendServerSnapshotForEngineDartSdk
   );
@@ -81,33 +82,36 @@ Future<String> compile(
   if (aot) {
     command.add('--aot');
   }
-  if (incrementalCompilerByteStorePath != null) {
-    command.addAll(<String>[
-      '--incremental',
-      '--byte-store',
-      incrementalCompilerByteStorePath]);
-    fs.directory(incrementalCompilerByteStorePath).createSync(recursive: true);
+  if (strongMode) {
+    command.add('--strong');
   }
+  if (incrementalCompilerByteStorePath != null) {
+    command.add('--incremental');
+  }
+  if (packagesPath != null) {
+    command.addAll(<String>['--packages', packagesPath]);
+  }
+
   if (extraFrontEndOptions != null)
     command.addAll(extraFrontEndOptions);
   command.add(mainPath);
   final Process server = await processManager
       .start(command)
       .catchError((dynamic error, StackTrace stack) {
-    printTrace('Failed to start frontend server $error, $stack');
+    printError('Failed to start frontend server $error, $stack');
   });
 
   final _StdoutHandler stdoutHandler = new _StdoutHandler();
 
   server.stderr
     .transform(UTF8.decoder)
-    .listen((String s) { printTrace('compile debug message: $s'); });
+    .listen((String s) { printError('compiler message: $s'); });
   server.stdout
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
     .listen(stdoutHandler.handler);
-  await server.exitCode;
-  return stdoutHandler.outputFilename.future;
+  final int exitCode = await server.exitCode;
+  return exitCode == 0 ? stdoutHandler.outputFilename.future : null;
 }
 
 /// Wrapper around incremental frontend server compiler, that communicates with
@@ -116,14 +120,16 @@ Future<String> compile(
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
 class ResidentCompiler {
-  ResidentCompiler(this._sdkRoot)
+  ResidentCompiler(this._sdkRoot, {bool strongMode: false})
     : assert(_sdkRoot != null) {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
+    _strongMode = strongMode;
   }
 
   String _sdkRoot;
+  bool _strongMode;
   Process _server;
   final _StdoutHandler stdoutHandler = new _StdoutHandler();
 
@@ -153,21 +159,34 @@ class ResidentCompiler {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
-    _server = await processManager.start(<String>[
+    final List<String> args = <String>[
       _dartExecutable(),
       frontendServer,
       '--sdk-root',
       _sdkRoot,
       '--incremental'
-    ]);
+    ];
+    if (_strongMode) {
+      args.add('--strong');
+    }
+    _server = await processManager.start(args);
     _server.stdout
       .transform(UTF8.decoder)
       .transform(const LineSplitter())
-      .listen(stdoutHandler.handler);
+      .listen(
+        stdoutHandler.handler,
+        onDone: () {
+          // when outputFilename future is not completed, but stdout is closed
+          // process has died unexpectedly.
+          if (!stdoutHandler.outputFilename.isCompleted) {
+            stdoutHandler.outputFilename.complete(null);
+          }
+        });
+
     _server.stderr
       .transform(UTF8.decoder)
       .transform(const LineSplitter())
-      .listen((String s) { printTrace('compile debug message: $s'); });
+      .listen((String s) { printError('compiler message: $s'); });
 
     _server.stdin.writeln('compile $scriptFilename');
 

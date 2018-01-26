@@ -459,7 +459,8 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       observer.didHaveMemoryPressure();
   }
 
-  Future<dynamic> _handleSystemMessage(Map<String, dynamic> message) async {
+  Future<Null> _handleSystemMessage(Object systemMessage) async {
+    final Map<String, dynamic> message = systemMessage;
     final String type = message['type'];
     switch (type) {
       case 'memoryPressure':
@@ -472,6 +473,15 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
   bool _needToReportFirstFrame = true;
   int _deferFirstFrameReportCount = 0;
   bool get _reportFirstFrame => _deferFirstFrameReportCount == 0;
+
+  /// Whether the first frame has finished rendering.
+  ///
+  /// Only valid in profile and debug builds, it can't be used in release
+  /// builds.
+  /// It can be deferred using [deferFirstFrameReport] and
+  /// [allowFirstFrameReport].
+  /// The value is set at the end of the call to [drawFrame].
+  bool get debugDidSendFirstFrameEvent => !_needToReportFirstFrame;
 
   /// Tell the framework not to report the frame it is building as a "useful"
   /// first frame until there is a corresponding call to [allowFirstFrameReport].
@@ -498,7 +508,7 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
     _deferFirstFrameReportCount -= 1;
   }
 
-    void _handleBuildScheduled() {
+  void _handleBuildScheduled() {
     // If we're in the process of building dirty elements, then changes
     // should not trigger a new frame.
     assert(() {
@@ -722,6 +732,8 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   }) : super(key: new GlobalObjectKey(container));
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The [RenderObject] that is the parent of the [Element] created by this widget.
@@ -840,13 +852,14 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
       _child = updateChild(_child, widget.child, _rootChildSlot);
       assert(_child != null);
     } catch (exception, stack) {
-      FlutterError.reportError(new FlutterErrorDetails(
+      final FlutterErrorDetails details = new FlutterErrorDetails(
         exception: exception,
         stack: stack,
         library: 'widgets library',
         context: 'attaching to the render tree'
-      ));
-      final Widget error = new ErrorWidget(exception);
+      );
+      FlutterError.reportError(details);
+      final Widget error = ErrorWidget.builder(details);
       _child = updateChild(null, error, _rootChildSlot);
     }
   }

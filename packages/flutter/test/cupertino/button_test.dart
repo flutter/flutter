@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/cupertino.dart';
@@ -142,11 +142,11 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check opacity
-    final Opacity opacity = tester.widget(find.descendant(
+    final FadeTransition opacity = tester.widget(find.descendant(
       of: find.byType(CupertinoButton),
-      matching: find.byType(Opacity),
+      matching: find.byType(FadeTransition),
     ));
-    expect(opacity.opacity, 0.1);
+    expect(opacity.opacity.value, 0.1);
   });
 
   testWidgets('pressedOpacity parameter', (WidgetTester tester) async {
@@ -163,11 +163,11 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check opacity
-    final Opacity opacity = tester.widget(find.descendant(
+    final FadeTransition opacity = tester.widget(find.descendant(
       of: find.byType(CupertinoButton),
-      matching: find.byType(Opacity),
+      matching: find.byType(FadeTransition),
     ));
-    expect(opacity.opacity, pressedOpacity);
+    expect(opacity.opacity.value, pressedOpacity);
   });
 
   testWidgets('Cupertino button is semantically a button', (WidgetTester tester) async {
@@ -189,7 +189,7 @@ void main() {
           new TestSemantics.rootChild(
             actions: SemanticsAction.tap.index,
             label: 'ABC',
-            flags: SemanticsFlags.isButton.index,
+            flags: SemanticsFlag.isButton.index,
           )
         ],
       ),

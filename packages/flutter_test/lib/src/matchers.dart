@@ -145,8 +145,8 @@ const Matcher hasAGoodToStringDeep = const _HasGoodToStringDeep();
 /// See also:
 ///
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
+///  * [throwsArgumentError], to test if a functions throws an [ArgumentError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
-///  * [isAssertionError], to test if any object is any kind of [AssertionError].
 Matcher throwsFlutterError = throwsA(isFlutterError);
 
 /// A matcher for functions that throw [AssertionError].
@@ -156,7 +156,7 @@ Matcher throwsFlutterError = throwsA(isFlutterError);
 /// See also:
 ///
 ///  * [throwsFlutterError], to test if a function throws a [FlutterError].
-///  * [isFlutterError], to test if any object is a [FlutterError].
+///  * [throwsArgumentError], to test if a functions throws an [ArgumentError].
 ///  * [isAssertionError], to test if any object is any kind of [AssertionError].
 Matcher throwsAssertionError = throwsA(isAssertionError);
 
@@ -167,7 +167,6 @@ Matcher throwsAssertionError = throwsA(isAssertionError);
 /// See also:
 ///
 ///  * [throwsFlutterError], to test if a function throws a [FlutterError].
-///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [isAssertionError], to test if any object is any kind of [AssertionError].
 const Matcher isFlutterError = const isInstanceOf<FlutterError>();
 
@@ -177,7 +176,6 @@ const Matcher isFlutterError = const isInstanceOf<FlutterError>();
 ///
 /// See also:
 ///
-///  * [throwsFlutterError], to test if a function throws a [FlutterError].
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
 const Matcher isAssertionError = const isInstanceOf<AssertionError>();
@@ -592,7 +590,20 @@ class _HasGoodToStringDeep extends Matcher {
 /// sets of value for which a metric space is defined.
 typedef num DistanceFunction<T>(T a, T b);
 
-const Map<Type, DistanceFunction<dynamic>> _kStandardDistanceFunctions = const <Type, DistanceFunction<dynamic>>{
+/// The type of a union of instances of [DistanceFunction<T>] for various types
+/// T.
+///
+/// This type is used to describe a collection of [DistanceFunction<T>]
+/// functions which have (potentially) unrelated argument types.  Since the
+/// argument types of the functions may be unrelated, the only thing that the
+/// type system can statically assume about them is that they accept null (since
+/// all types in Dart are nullable).
+///
+/// Calling an instance of this type must either be done dynamically, or by
+/// first casting it to a [DistanceFunction<T>] for some concrete T.
+typedef num AnyDistanceFunction(Null a, Null b);
+
+const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = const <Type, AnyDistanceFunction>{
   Color: _maxComponentColorDistance,
   Offset: _offsetDistance,
   int: _intDistance,

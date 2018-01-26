@@ -39,22 +39,52 @@ abstract class ServicesBinding extends BindingBase {
     LicenseRegistry.addLicense(_addLicenses);
   }
 
-  static final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
-
   Stream<LicenseEntry> _addLicenses() async* {
-    final String rawLicenses = await rootBundle.loadString('LICENSE', cache: false);
+    // We use timers here (rather than scheduleTask from the scheduler binding)
+    // because the services layer can't use the scheduler binding (the scheduler
+    // binding uses the services layer to manage its lifecycle events). Timers
+    // are what scheduleTask uses under the hood anyway. The only difference is
+    // that these will just run next, instead of being prioritized relative to
+    // the other tasks that might be running. Using _something_ here to break
+    // this into two parts is important because isolates take a while to copy
+    // data at the moment, and if we receive the data in the same event loop
+    // iteration as we send the data to the next isolate, we are definitely
+    // going to miss frames. Another solution would be to have the work all
+    // happen in one isolate, and we may go there eventually, but first we are
+    // going to see if isolate communication can be made cheaper.
+    // See: https://github.com/dart-lang/sdk/issues/31959
+    //      https://github.com/dart-lang/sdk/issues/31960
+    // TODO(ianh): Remove this complexity once these bugs are fixed.
+    final Completer<String> rawLicenses = new Completer<String>();
+    Timer.run(() async {
+      rawLicenses.complete(rootBundle.loadString('LICENSE', cache: false));
+    });
+    await rawLicenses.future;
+    final Completer<List<LicenseEntry>> parsedLicenses = new Completer<List<LicenseEntry>>();
+    Timer.run(() async {
+      parsedLicenses.complete(compute(_parseLicenses, await rawLicenses.future, debugLabel: 'parseLicenses'));
+    });
+    await parsedLicenses.future;
+    yield* new Stream<LicenseEntry>.fromIterable(await parsedLicenses.future);
+  }
+
+  // This is run in another isolate created by _addLicenses above.
+  static List<LicenseEntry> _parseLicenses(String rawLicenses) {
+    final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
+    final List<LicenseEntry> result = <LicenseEntry>[];
     final List<String> licenses = rawLicenses.split(_licenseSeparator);
     for (String license in licenses) {
       final int split = license.indexOf('\n\n');
       if (split >= 0) {
-        yield new LicenseEntryWithLineBreaks(
+        result.add(new LicenseEntryWithLineBreaks(
           license.substring(0, split).split('\n'),
           license.substring(split + 2)
-        );
+        ));
       } else {
-        yield new LicenseEntryWithLineBreaks(const <String>[], license);
+        result.add(new LicenseEntryWithLineBreaks(const <String>[], license));
       }
     }
+    return result;
   }
 
   @override

@@ -1,4 +1,5 @@
 # Miscellaneous
+*.class
 *.lock
 *.log
 *.pyc
@@ -20,6 +21,7 @@
 
 # Flutter repo-specific
 /bin/cache/
+/bin/mingit/
 /dev/benchmarks/mega_gallery/
 /dev/bots/.recipe_deps
 /dev/bots/android_tools/
@@ -27,6 +29,7 @@
 /dev/docs/lib/
 /dev/docs/pubspec.yaml
 /packages/flutter/coverage/
+version
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -41,7 +44,6 @@ unlinked.ds
 unlinked_spec.ds
 
 # Android related
-**/android/**/GeneratedPluginRegistrant.java
 **/android/**/gradle-wrapper.jar
 **/android/.gradle
 **/android/captures/
@@ -60,8 +62,6 @@ unlinked_spec.ds
 **/ios/**/.tags*
 **/ios/**/.vagrant/
 **/ios/**/DerivedData/
-**/ios/**/GeneratedPluginRegistrant.h
-**/ios/**/GeneratedPluginRegistrant.m
 **/ios/**/Icon?
 **/ios/**/Pods/
 **/ios/**/profile
@@ -72,6 +72,7 @@ unlinked_spec.ds
 **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/app.flx
 **/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
 **/ios/ServiceDefinitions.json
 
 # Exceptions to above rules.

@@ -14,6 +14,7 @@ import 'framework.dart';
 export 'package:flutter/animation.dart';
 export 'package:flutter/foundation.dart' show
   ChangeNotifier,
+  FlutterErrorDetails,
   Listenable,
   TargetPlatform,
   ValueNotifier;
@@ -641,6 +642,9 @@ class ClipPath extends SingleChildRenderObjectWidget {
 /// Physical layers cast shadows based on an [elevation] which is nominally in
 /// logical pixels, coming vertically out of the rendering surface.
 ///
+/// For shapes that cannot be expressed as a rectangle with rounded corners use
+/// [PhysicalShape].
+///
 /// See also:
 ///
 ///  * [DecoratedBox], which can apply more arbitrary shadow effects.
@@ -710,6 +714,73 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
     super.debugFillProperties(description);
     description.add(new EnumProperty<BoxShape>('shape', shape));
     description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
+    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DiagnosticsProperty<Color>('color', color));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
+  }
+}
+
+/// A widget representing a physical layer that clips its children to a path.
+///
+/// Physical layers cast shadows based on an [elevation] which is nominally in
+/// logical pixels, coming vertically out of the rendering surface.
+///
+/// [PhysicalModel] does the same but only supports shapes that can be expressed
+/// as rectangles with rounded corners.
+class PhysicalShape extends SingleChildRenderObjectWidget {
+  /// Creates a physical model with an arbitrary shape clip.
+  ///
+  /// The [color] is required; physical things have a color.
+  ///
+  /// The [clipper], [elevation], [color], and [shadowColor] must not be null.
+  const PhysicalShape({
+    Key key,
+    @required this.clipper,
+    this.elevation: 0.0,
+    @required this.color,
+    this.shadowColor: const Color(0xFF000000),
+    Widget child,
+  }) : assert(clipper != null),
+       assert(elevation != null),
+       assert(color != null),
+       assert(shadowColor != null),
+       super(key: key, child: child);
+
+  /// Determines which clip to use.
+  final CustomClipper<Path> clipper;
+
+  /// The z-coordinate at which to place this physical object.
+  final double elevation;
+
+  /// The background color.
+  final Color color;
+
+  /// When elevation is non zero the color to use for the shadow color.
+  final Color shadowColor;
+
+  @override
+  RenderPhysicalShape createRenderObject(BuildContext context) {
+    return new RenderPhysicalShape(
+      clipper: clipper,
+      elevation: elevation,
+      color: color,
+      shadowColor: shadowColor
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderPhysicalShape renderObject) {
+    renderObject
+      ..clipper = clipper
+      ..elevation = elevation
+      ..color = color
+      ..shadowColor = shadowColor;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<CustomClipper<Path>>('clipper', clipper));
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
     description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
@@ -1001,6 +1072,15 @@ class FittedBox extends SingleChildRenderObjectWidget {
   /// An alignment of (-1.0, -1.0) aligns the child to the top-left corner of its
   /// parent's bounds.  An alignment of (1.0, 0.0) aligns the child to the middle
   /// of the right edge of its parent's bounds.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   @override
@@ -1672,7 +1752,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   /// be retained, and if set to [Axis.horizontal], then horizontal constraints
   /// will be retained.
   final Axis constrainedAxis;
-  
+
   @override
   void updateRenderObject(BuildContext context, covariant RenderUnconstrainedBox renderObject) {
     renderObject
@@ -1752,6 +1832,15 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   @override
@@ -1886,6 +1975,15 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The minimum width constraint to give the child. Set this to null (the
@@ -1973,6 +2071,15 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The size this widget should attempt to be.
@@ -2498,6 +2605,15 @@ class Stack extends MultiChildRenderObjectWidget {
   /// particular axis (e.g. that have neither `top` nor `bottom` set), use the
   /// alignment to determine how they should be positioned in that
   /// under-specified axis.
+  ///
+  /// Defaults to [AlignmentDirectional.topStart].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The text direction with which to resolve [alignment].
@@ -2947,6 +3063,8 @@ class PositionedDirectional extends StatelessWidget {
   final double height;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -4244,6 +4362,13 @@ class RawImage extends LeafRenderObjectWidget {
   /// must be in scope.
   ///
   /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
@@ -4709,6 +4834,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     Widget child,
     bool container: false,
     bool explicitChildNodes: false,
+    bool enabled,
     bool checked,
     bool selected,
     bool button,
@@ -4726,14 +4852,16 @@ class Semantics extends SingleChildRenderObjectWidget {
     VoidCallback onScrollDown,
     VoidCallback onIncrease,
     VoidCallback onDecrease,
-    VoidCallback onMoveCursorForwardByCharacter,
-    VoidCallback onMoveCursorBackwardByCharacter,
+    MoveCursorHandler onMoveCursorForwardByCharacter,
+    MoveCursorHandler onMoveCursorBackwardByCharacter,
+    SetSelectionHandler onSetSelection,
   }) : this.fromProperties(
     key: key,
     child: child,
     container: container,
     explicitChildNodes: explicitChildNodes,
     properties: new SemanticsProperties(
+      enabled: enabled,
       checked: checked,
       selected: selected,
       button: button,
@@ -4753,6 +4881,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onDecrease: onDecrease,
       onMoveCursorForwardByCharacter: onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
+      onSetSelection: onSetSelection,
     ),
   );
 
@@ -4773,7 +4902,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// more accessible.
   final SemanticsProperties properties;
 
-  /// If 'container' is true, this widget will introduce a new
+  /// If [container] is true, this widget will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors (if the ancestor allows that).
   ///
@@ -4801,6 +4930,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     return new RenderSemanticsAnnotations(
       container: container,
       explicitChildNodes: explicitChildNodes,
+      enabled: properties.enabled,
       checked: properties.checked,
       selected: properties.selected,
       button: properties.button,
@@ -4820,6 +4950,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onDecrease: properties.onDecrease,
       onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
+      onSetSelection: properties.onSetSelection,
     );
   }
 
@@ -4840,6 +4971,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     renderObject
       ..container = container
       ..explicitChildNodes = explicitChildNodes
+      ..enabled = properties.enabled
       ..checked = properties.checked
       ..selected = properties.selected
       ..label = properties.label
@@ -4857,7 +4989,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onIncrease = properties.onIncrease
       ..onDecrease = properties.onDecrease
       ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
-      ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter;
+      ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
+      ..onSetSelection = properties.onSetSelection;
   }
 
   @override
@@ -4911,10 +5044,25 @@ class MergeSemantics extends SingleChildRenderObjectWidget {
 class BlockSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that excludes the semantics of all widgets painted before
   /// it in the same semantic container.
-  const BlockSemantics({ Key key, Widget child }) : super(key: key, child: child);
+  const BlockSemantics({ Key key, this.blocking: true, Widget child }) : super(key: key, child: child);
+
+  /// Whether this widget is blocking semantics of all widget that were painted
+  /// before it in the same semantic container.
+  final bool blocking;
 
   @override
-  RenderBlockSemantics createRenderObject(BuildContext context) => new RenderBlockSemantics();
+  RenderBlockSemantics createRenderObject(BuildContext context) => new RenderBlockSemantics(blocking: blocking);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderBlockSemantics renderObject) {
+    renderObject.blocking = blocking;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('blocking', blocking));
+  }
 }
 
 /// A widget that drops all the semantics of its descendants.
@@ -4969,6 +5117,8 @@ class KeyedSubtree extends StatelessWidget {
        super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.

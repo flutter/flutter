@@ -72,21 +72,21 @@ void main() {
         ),
       ),
     );
-    
+
     await tester.fling(find.text('A'), const Offset(300.0, 0.0), 1000.0); // horizontal fling
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
-    expect(refreshCalled, false); 
-    
+    expect(refreshCalled, false);
+
 
     await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0); // vertical fling
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
-    expect(refreshCalled, true); 
+    expect(refreshCalled, true);
   });
 
   testWidgets('RefreshIndicator - bottom', (WidgetTester tester) async {
@@ -98,7 +98,7 @@ void main() {
           child: new ListView(
             reverse: true,
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <Widget>[
+            children: const <Widget>[
               const SizedBox(
                 height: 200.0,
                 child: const Text('X'),
@@ -125,7 +125,7 @@ void main() {
           onRefresh: holdRefresh,
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <Widget>[
+            children: const <Widget>[
               const SizedBox(
                 height: 200.0,
                 child: const Text('X'),
@@ -152,7 +152,7 @@ void main() {
           child: new ListView(
             reverse: true,
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <Widget>[
+            children: const <Widget>[
               const SizedBox(
                 height: 200.0,
                 child: const Text('X'),
@@ -178,7 +178,7 @@ void main() {
           onRefresh: refresh,
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <Widget>[
+            children: const <Widget>[
               const SizedBox(
                 height: 200.0,
                 child: const Text('X'),
@@ -206,7 +206,7 @@ void main() {
           onRefresh: refresh,
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <Widget>[
+            children: const <Widget>[
               const SizedBox(
                 height: 200.0,
                 child: const Text('X'),
@@ -233,7 +233,7 @@ void main() {
           onRefresh: holdRefresh, // this one never returns
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <Widget>[
+            children: const <Widget>[
               const SizedBox(
                 height: 200.0,
                 child: const Text('X'),
@@ -276,7 +276,7 @@ void main() {
           onRefresh: refresh,
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <Widget>[
+            children: const <Widget>[
               const SizedBox(
                 height: 200.0,
                 child: const Text('X'),
@@ -320,7 +320,7 @@ void main() {
           onRefresh: refresh,
           child: new ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: <Widget>[
+            children: const <Widget>[
               const SizedBox(
                 height: 200.0,
                 child: const Text('X'),

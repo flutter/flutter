@@ -192,6 +192,8 @@ class GestureDetector extends StatelessWidget {
        super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// A pointer that might cause a tap has contacted the screen at a particular
@@ -461,6 +463,8 @@ class RawGestureDetector extends StatefulWidget {
        super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The gestures that this widget will attempt to recognize.
@@ -563,21 +567,6 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     if (!widget.excludeFromSemantics) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
       semanticsGestureHandler.validActions = actions;  // will call _markNeedsSemanticsUpdate(), if required.
-    }
-  }
-
-  /// Sends a [SemanticsEvent] in the context of the [SemanticsNode] that is
-  /// annotated with this object's semantics information.
-  ///
-  /// The event can be interpreted by assistive technologies to provide
-  /// additional feedback to the user about the state of the UI.
-  ///
-  /// The event will not be sent if [RawGestureDetector.excludeFromSemantics] is
-  /// set to true.
-  void sendSemanticsEvent(SemanticsEvent event) {
-    if (!widget.excludeFromSemantics) {
-      final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
-      semanticsGestureHandler.sendSemanticsEvent(event);
     }
   }
 

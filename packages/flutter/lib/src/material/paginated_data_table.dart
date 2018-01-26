@@ -324,7 +324,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final List<Widget> footerWidgets = <Widget>[];
     if (widget.onRowsPerPageChanged != null) {
       final List<Widget> availableRowsPerPage = widget.availableRowsPerPage
-        .where((int value) => value <= _rowCount)
+        .where((int value) => (value <= _rowCount || value == widget.rowsPerPage))
         .map<DropdownMenuItem<int>>((int value) {
           return new DropdownMenuItem<int>(
             value: value,
@@ -333,15 +333,22 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         })
         .toList();
       footerWidgets.addAll(<Widget>[
+        new Container(width: 14.0), // to match trailing padding in case we overflow and end up scrolling
         new Text(localizations.rowsPerPageTitle),
-        new DropdownButtonHideUnderline(
-          child: new DropdownButton<int>(
-            items: availableRowsPerPage,
-            value: widget.rowsPerPage,
-            onChanged: widget.onRowsPerPageChanged,
-            style: footerTextStyle,
-            iconSize: 24.0
-          )
+        new ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 64.0), // 40.0 for the text, 24.0 for the icon
+          child: new Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: new DropdownButtonHideUnderline(
+              child: new DropdownButton<int>(
+                items: availableRowsPerPage,
+                value: widget.rowsPerPage,
+                onChanged: widget.onRowsPerPageChanged,
+                style: footerTextStyle,
+                iconSize: 24.0,
+              ),
+            ),
+          ),
         ),
       ]);
     }
@@ -422,15 +429,18 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               ),
               child: new Container(
                 height: 56.0,
-                child: new Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: footerWidgets
-                )
-              )
-            )
-          )
-        ]
-      )
+                child: new SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  reverse: true,
+                  child: new Row(
+                    children: footerWidgets,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

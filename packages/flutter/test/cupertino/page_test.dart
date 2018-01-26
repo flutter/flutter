@@ -77,7 +77,7 @@ void main() {
   testWidgets('test iOS page transition (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
       new WidgetsApp(
-        localizationsDelegates: <LocalizationsDelegate<dynamic>>[
+        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
           const RtlOverrideWidgetsDelegate(),
         ],
         color: const Color(0xFFFFFFFF),
@@ -279,7 +279,7 @@ void main() {
   testWidgets('test only edge swipes work (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
       new WidgetsApp(
-        localizationsDelegates: <LocalizationsDelegate<dynamic>>[
+        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
           const RtlOverrideWidgetsDelegate(),
         ],
         color: const Color(0xFFFFFFFF),

@@ -123,6 +123,10 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   }
 
   @override
+  ArgParser get argParser => _argParser;
+  final ArgParser _argParser = new ArgParser(allowTrailingOptions: false);
+
+  @override
   String get usageFooter {
     return 'Run "flutter help -v" for verbose help output, including less commonly used options.';
   }
@@ -243,6 +247,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       flutterUsage.suppressAnalytics = true;
 
     _checkFlutterCopy();
+    await FlutterVersion.instance.ensureVersionFile();
     await FlutterVersion.instance.checkFlutterVersionFreshness();
 
     if (globalResults.wasParsed('packages'))
@@ -337,8 +342,10 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       throwToolExit('No Flutter engine build found at $engineBuildPath.', exitCode: 2);
     }
 
-    final String hostLocalEngine = 'host_' + localEngine.substring(localEngine.indexOf('_') + 1);
-    final String engineHostBuildPath = fs.path.normalize(fs.path.join(enginePath, 'out', hostLocalEngine));
+    final String basename = fs.path.basename(engineBuildPath);
+    final String engineHostBuildPath = fs.path.normalize(fs.path.join(
+        fs.path.dirname(engineBuildPath),
+        'host_' + basename.substring(basename.indexOf('_') + 1)));
 
     return new EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
@@ -361,15 +368,18 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     if (fs.isFileSync(fs.path.join(rootPath, '.dartignore')))
       return <String>[];
 
-    if (fs.isFileSync(fs.path.join(rootPath, 'pubspec.yaml')))
-      return <String>[rootPath];
 
-    return fs.directory(rootPath)
+    final List<String> projectPaths = fs.directory(rootPath)
       .listSync(followLinks: false)
       .expand((FileSystemEntity entity) {
         return entity is Directory ? _gatherProjectPaths(entity.path) : <String>[];
       })
       .toList();
+
+    if (fs.isFileSync(fs.path.join(rootPath, 'pubspec.yaml')))
+      projectPaths.add(rootPath);
+
+    return projectPaths;
   }
 
   void _checkFlutterCopy() {

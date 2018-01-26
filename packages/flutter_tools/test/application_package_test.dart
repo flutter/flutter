@@ -29,7 +29,7 @@ void main() {
   });
 }
 
-final String _aaptData = '''
+const String _aaptData = '''
 package: name='io.flutter.gallery' versionCode='1' versionName='0.0.1' platformBuildVersionName='NMR1'
 sdkVersion:'14'
 targetSdkVersion:'21'
@@ -62,7 +62,7 @@ final Map<String, String> _swiftBuildSettings = <String, String>{
   'CLANG_ENABLE_MODULES': 'YES',
   'ENABLE_BITCODE': 'NO',
   'INFOPLIST_FILE': 'Runner/Info.plist',
-  'PRODUCT_BUNDLE_IDENTIFIER': 'com.yourcompany.test',
+  'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test',
   'PRODUCT_NAME': 'blah',
   'SWIFT_OBJC_BRIDGING_HEADER': 'Runner/Runner-Bridging-Header.h',
   'SWIFT_OPTIMIZATION_LEVEL': '-Onone',

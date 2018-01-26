@@ -21,7 +21,7 @@ void main() {
       new Wrap(
         alignment: WrapAlignment.start,
         textDirection: TextDirection.ltr,
-        children: <Widget>[
+        children: const <Widget>[
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -40,7 +40,7 @@ void main() {
       new Wrap(
         alignment: WrapAlignment.center,
         textDirection: TextDirection.ltr,
-        children: <Widget>[
+        children: const <Widget>[
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -59,7 +59,7 @@ void main() {
       new Wrap(
         alignment: WrapAlignment.end,
         textDirection: TextDirection.ltr,
-        children: <Widget>[
+        children: const <Widget>[
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -79,7 +79,7 @@ void main() {
         alignment: WrapAlignment.start,
         crossAxisAlignment: WrapCrossAlignment.start,
         textDirection: TextDirection.ltr,
-        children: <Widget>[
+        children: const <Widget>[
           const SizedBox(width: 300.0, height: 50.0),
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -99,7 +99,7 @@ void main() {
         alignment: WrapAlignment.start,
         crossAxisAlignment: WrapCrossAlignment.center,
         textDirection: TextDirection.ltr,
-        children: <Widget>[
+        children: const <Widget>[
           const SizedBox(width: 300.0, height: 50.0),
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -119,7 +119,7 @@ void main() {
         alignment: WrapAlignment.start,
         crossAxisAlignment: WrapCrossAlignment.end,
         textDirection: TextDirection.ltr,
-        children: <Widget>[
+        children: const <Widget>[
           const SizedBox(width: 300.0, height: 50.0),
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -141,7 +141,7 @@ void main() {
       new Wrap(
         alignment: WrapAlignment.start,
         textDirection: TextDirection.rtl,
-        children: <Widget>[
+        children: const <Widget>[
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -160,7 +160,7 @@ void main() {
       new Wrap(
         alignment: WrapAlignment.center,
         textDirection: TextDirection.rtl,
-        children: <Widget>[
+        children: const <Widget>[
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -179,7 +179,7 @@ void main() {
       new Wrap(
         alignment: WrapAlignment.end,
         textDirection: TextDirection.rtl,
-        children: <Widget>[
+        children: const <Widget>[
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -200,7 +200,7 @@ void main() {
         crossAxisAlignment: WrapCrossAlignment.start,
         textDirection: TextDirection.ltr,
         verticalDirection: VerticalDirection.up,
-        children: <Widget>[
+        children: const <Widget>[
           const SizedBox(width: 300.0, height: 50.0),
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -221,7 +221,7 @@ void main() {
         crossAxisAlignment: WrapCrossAlignment.center,
         textDirection: TextDirection.ltr,
         verticalDirection: VerticalDirection.up,
-        children: <Widget>[
+        children: const <Widget>[
           const SizedBox(width: 300.0, height: 50.0),
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -242,7 +242,7 @@ void main() {
         crossAxisAlignment: WrapCrossAlignment.end,
         textDirection: TextDirection.ltr,
         verticalDirection: VerticalDirection.up,
-        children: <Widget>[
+        children: const <Widget>[
           const SizedBox(width: 300.0, height: 50.0),
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -269,7 +269,7 @@ void main() {
       alignment: WrapAlignment.center,
       spacing: 5.0,
       textDirection: TextDirection.ltr,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 300.0, height: 30.0),
@@ -286,7 +286,7 @@ void main() {
       alignment: WrapAlignment.spaceBetween,
       spacing: 5.0,
       textDirection: TextDirection.ltr,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 300.0, height: 30.0),
@@ -303,7 +303,7 @@ void main() {
       alignment: WrapAlignment.spaceAround,
       spacing: 5.0,
       textDirection: TextDirection.ltr,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 310.0, height: 30.0),
@@ -320,7 +320,7 @@ void main() {
       alignment: WrapAlignment.spaceEvenly,
       spacing: 5.0,
       textDirection: TextDirection.ltr,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 310.0, height: 30.0),
@@ -339,7 +339,7 @@ void main() {
       alignment: WrapAlignment.center,
       spacing: 5.0,
       textDirection: TextDirection.rtl,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 300.0, height: 30.0),
@@ -356,7 +356,7 @@ void main() {
       alignment: WrapAlignment.spaceBetween,
       spacing: 5.0,
       textDirection: TextDirection.rtl,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 300.0, height: 30.0),
@@ -373,7 +373,7 @@ void main() {
       alignment: WrapAlignment.spaceAround,
       spacing: 5.0,
       textDirection: TextDirection.rtl,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 310.0, height: 30.0),
@@ -390,7 +390,7 @@ void main() {
       alignment: WrapAlignment.spaceEvenly,
       spacing: 5.0,
       textDirection: TextDirection.rtl,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 310.0, height: 30.0),
@@ -409,7 +409,7 @@ void main() {
       runAlignment: WrapAlignment.center,
       runSpacing: 5.0,
       textDirection: TextDirection.ltr,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 300.0, height: 30.0),
@@ -430,7 +430,7 @@ void main() {
       runAlignment: WrapAlignment.spaceBetween,
       runSpacing: 5.0,
       textDirection: TextDirection.ltr,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 300.0, height: 30.0),
@@ -451,7 +451,7 @@ void main() {
       runAlignment: WrapAlignment.spaceAround,
       runSpacing: 5.0,
       textDirection: TextDirection.ltr,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 300.0, height: 30.0),
@@ -472,7 +472,7 @@ void main() {
       runAlignment: WrapAlignment.spaceEvenly,
       runSpacing: 5.0,
       textDirection: TextDirection.ltr,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 300.0, height: 30.0),
@@ -497,7 +497,7 @@ void main() {
       runSpacing: 5.0,
       textDirection: TextDirection.ltr,
       verticalDirection: VerticalDirection.up,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 300.0, height: 30.0),
@@ -519,7 +519,7 @@ void main() {
       runSpacing: 5.0,
       textDirection: TextDirection.ltr,
       verticalDirection: VerticalDirection.up,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 300.0, height: 30.0),
@@ -541,7 +541,7 @@ void main() {
       runSpacing: 5.0,
       textDirection: TextDirection.ltr,
       verticalDirection: VerticalDirection.up,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 300.0, height: 30.0),
@@ -563,7 +563,7 @@ void main() {
       runSpacing: 5.0,
       textDirection: TextDirection.ltr,
       verticalDirection: VerticalDirection.up,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
         const SizedBox(width: 300.0, height: 30.0),
@@ -590,7 +590,7 @@ void main() {
           alignment: WrapAlignment.end,
           crossAxisAlignment: WrapCrossAlignment.end,
           textDirection: TextDirection.ltr,
-          children: <Widget>[
+          children: const <Widget>[
             const SizedBox(width: 100.0, height: 10.0),
             const SizedBox(width: 200.0, height: 20.0),
             const SizedBox(width: 300.0, height: 30.0),
@@ -614,7 +614,7 @@ void main() {
           alignment: WrapAlignment.end,
           crossAxisAlignment: WrapCrossAlignment.end,
           textDirection: TextDirection.ltr,
-          children: <Widget>[
+          children: const <Widget>[
             const SizedBox(width: 400.0, height: 40.0),
             const SizedBox(width: 300.0, height: 30.0),
             const SizedBox(width: 200.0, height: 20.0),
@@ -641,7 +641,7 @@ void main() {
           alignment: WrapAlignment.start,
           crossAxisAlignment: WrapCrossAlignment.start,
           textDirection: TextDirection.ltr,
-          children: <Widget>[
+          children: const <Widget>[
             const SizedBox(width: 500.0, height: 10.0),
             const SizedBox(width: 500.0, height: 20.0),
             const SizedBox(width: 500.0, height: 30.0),
@@ -670,7 +670,7 @@ void main() {
           alignment: WrapAlignment.start,
           crossAxisAlignment: WrapCrossAlignment.start,
           textDirection: TextDirection.ltr,
-          children: <Widget>[
+          children: const <Widget>[
             const SizedBox(width: 10.0, height: 250.0),
             const SizedBox(width: 20.0, height: 250.0),
             const SizedBox(width: 30.0, height: 250.0),
@@ -699,7 +699,7 @@ void main() {
           spacing: 12.0,
           runSpacing: 8.0,
           textDirection: TextDirection.ltr,
-          children: <Widget>[
+          children: const <Widget>[
             const SizedBox(width: 10.0, height: 250.0),
             const SizedBox(width: 20.0, height: 250.0),
             const SizedBox(width: 30.0, height: 250.0),
@@ -724,7 +724,7 @@ void main() {
   testWidgets('Visual overflow generates a clip', (WidgetTester tester) async {
     await tester.pumpWidget(new Wrap(
       textDirection: TextDirection.ltr,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 500.0, height: 500.0),
       ],
     ));
@@ -733,7 +733,7 @@ void main() {
 
     await tester.pumpWidget(new Wrap(
       textDirection: TextDirection.ltr,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 500.0, height: 500.0),
         const SizedBox(width: 500.0, height: 500.0),
       ],
@@ -790,7 +790,7 @@ void main() {
       direction: Axis.vertical,
       runSpacing: 7.0,
       textDirection: TextDirection.ltr,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 500.0, height: 400.0),
         const SizedBox(width: 500.0, height: 400.0),
         const SizedBox(width: 500.0, height: 400.0),
@@ -816,7 +816,7 @@ void main() {
             ),
             child: new Wrap(
               textDirection: TextDirection.ltr,
-              children: <Widget>[
+              children: const <Widget>[
                 const Text('X', textDirection: TextDirection.ltr),
               ],
             ),

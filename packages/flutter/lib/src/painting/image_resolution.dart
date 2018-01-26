@@ -152,8 +152,6 @@ class AssetImage extends AssetBundleImageProvider {
   /// documentation for the [AssetImage] class itself for details.
   final String package;
 
-
-
   // We assume the main asset is designed for a device pixel ratio of 1.0
   static const double _naturalResolution = 1.0;
 
@@ -168,7 +166,7 @@ class AssetImage extends AssetBundleImageProvider {
     final AssetBundle chosenBundle = bundle ?? configuration.bundle ?? rootBundle;
     Completer<AssetBundleImageKey> completer;
     Future<AssetBundleImageKey> result;
-    chosenBundle.loadStructuredData<Map<String, List<String>>>(_kAssetManifestFileName, _manifestParser).then<Null>(
+    chosenBundle.loadStructuredData<Map<String, List<String>>>(_kAssetManifestFileName, _manifestParser).then<void>(
       (Map<String, List<String>> manifest) {
         final String chosenName = _chooseVariant(
           keyName,
@@ -216,7 +214,11 @@ class AssetImage extends AssetBundleImageProvider {
     if (json == null)
       return null;
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
-    final Map<String, List<String>> parsedManifest = JSON.decode(json);
+    final Map<String, dynamic> parsedJson = JSON.decode(json);
+    final Iterable<String> keys = parsedJson.keys;
+    final Map<String, List<String>> parsedManifest =
+        new Map<String, List<String>>.fromIterables(keys,
+          keys.map((String key) => new List<String>.from(parsedJson[key])));
     // TODO(ianh): convert that data structure to the right types.
     return new SynchronousFuture<Map<String, List<String>>>(parsedManifest);
   }

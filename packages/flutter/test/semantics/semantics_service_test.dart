@@ -12,7 +12,8 @@ void main() {
   test('Semantic announcement', () async {
     final List<Map<String, dynamic>> log = <Map<String, dynamic>>[];
 
-    SystemChannels.accessibility.setMockMessageHandler((Map<String, dynamic> message) async {
+    SystemChannels.accessibility.setMockMessageHandler((Object mockMessage) async {
+      final Map<String, dynamic> message = mockMessage;
       log.add(message);
     });
 

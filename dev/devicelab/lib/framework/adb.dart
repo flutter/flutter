@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -307,30 +308,14 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     _workingDevice = allDevices[new math.Random().nextInt(allDevices.length)];
   }
 
-  // Physical device line format to be matched:
-  // My iPhone (10.3.2) [75b90e947c5f429fa67f3e9169fda0d89f0492f1]
-  //
-  // Other formats in output (desktop, simulator) to be ignored:
-  // my-mac-pro [2C10513E-4dA5-405C-8EF5-C44353DB3ADD]
-  // iPhone 6s (9.3) [F6CEE7CF-81EB-4448-81B4-1755288C7C11] (Simulator)
-  static final RegExp _deviceRegex = new RegExp(r'^.* +\(.*\) +\[(.*)\]$');
-
   @override
   Future<List<String>> discoverDevices() async {
-    final List<String> iosDeviceIDs = <String>[];
-    final Iterable<String> deviceLines = (await eval('instruments', <String>['-s', 'devices']))
-        .split('\n')
-        .map((String line) => line.trim());
-    for (String line in deviceLines) {
-      final Match match = _deviceRegex.firstMatch(line);
-      if (match != null) {
-        final String deviceID = match.group(1);
-        iosDeviceIDs.add(deviceID);
-      }
-    }
+    final List<String> iosDeviceIDs = LineSplitter.split(await eval('idevice_id', <String>['-l']))
+      .map((String line) => line.trim())
+      .where((String line) => line.isNotEmpty)
+      .toList();
     if (iosDeviceIDs.isEmpty)
       throw 'No connected iOS devices found.';
-
     return iosDeviceIDs;
   }
 

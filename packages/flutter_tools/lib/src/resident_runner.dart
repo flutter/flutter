@@ -38,10 +38,12 @@ class FlutterDevice {
 
   StreamSubscription<String> _loggingSubscription;
 
-  FlutterDevice(this.device, { bool previewDart2 : false }) {
+  FlutterDevice(this.device,
+                { bool previewDart2 : false, bool strongMode : false }) {
     if (previewDart2)
       generator = new ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        strongMode: strongMode);
   }
 
   String viewFilter;
@@ -138,6 +140,15 @@ class FlutterDevice {
       reports.add(report);
     }
     return reports;
+  }
+
+  Future<Null> resetAssetDirectory() async {
+    final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(
+        fs.path.toUri(getAssetBuildDirectory()));
+    assert(deviceAssetsDirectoryUri != null);
+    await Future.wait(views.map(
+      (FlutterView view) => view.setAssetDirectory(deviceAssetsDirectoryUri)
+    ));
   }
 
   // Lists program elements changed in the most recent reload that have not
@@ -259,6 +270,8 @@ class FlutterDevice {
     }
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
+    if (hotRunner.strongMode != null)
+      platformArgs['strong'] = hotRunner.strongMode;
 
     startEchoingDeviceLog();
 
@@ -320,6 +333,8 @@ class FlutterDevice {
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
     if (coldRunner.traceStartup != null)
       platformArgs['trace-startup'] = coldRunner.traceStartup;
+    if (coldRunner.strongMode != null)
+      platformArgs['strong'] = coldRunner.strongMode;
 
     startEchoingDeviceLog();
 
@@ -829,11 +844,24 @@ abstract class ResidentRunner {
 }
 
 class OperationResult {
-  OperationResult(this.code, this.message, { this.hint });
+  OperationResult(this.code, this.message, { this.hintMessage, this.hintId });
 
+  /// The result of the operation; a non-zero code indicates a failure.
   final int code;
+
+  /// A user facing message about the results of the operation.
   final String message;
-  final String hint;
+
+  /// An optional hint about the results of the operation. This is used to provide
+  /// sidecar data about the operation results. For example, this is used when
+  /// a reload is successful but some changed program elements where not run after a
+  /// reassemble.
+  final String hintMessage;
+
+  /// A key used by tools to discriminate between different kinds of operation results.
+  /// For example, a successful reload might have a [code] of 0 and a [hintId] of
+  /// `'restartRecommended'`.
+  final String hintId;
 
   bool get isOk => code == 0;
 

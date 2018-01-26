@@ -27,26 +27,29 @@ void main() {
       mockFrontendServerStdIn = new MockStdIn();
       mockFrontendServerStdErr = new MockStream();
 
-      when(mockFrontendServer.stderr).thenReturn(mockFrontendServerStdErr);
+      when(mockFrontendServer.stderr)
+          .thenAnswer((Invocation invocation) => mockFrontendServerStdErr);
       final StreamController<String> stdErrStreamController = new StreamController<String>();
       when(mockFrontendServerStdErr.transform<String>(any)).thenReturn(stdErrStreamController.stream);
       when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
-      when(mockProcessManager.start(any)).thenReturn(new Future<Process>.value(mockFrontendServer));
+      when(mockProcessManager.start(any)).thenAnswer(
+          (Invocation invocation) => new Future<Process>.value(mockFrontendServer));
       when(mockFrontendServer.exitCode).thenReturn(0);
     });
 
     testUsingContext('single dart successful compilation', () async {
       final BufferLogger logger = context[Logger];
-      when(mockFrontendServer.stdout).thenReturn(new Stream<List<int>>.fromFuture(
-        new Future<List<int>>.value(UTF8.encode(
-          'result abc\nline1\nline2\nabc /path/to/main.dart.dill'
-        ))
-      ));
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
+            new Future<List<int>>.value(UTF8.encode(
+              'result abc\nline1\nline2\nabc /path/to/main.dart.dill'
+            ))
+          ));
       final String output = await compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart'
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-      expect(logger.traceText, equals('compile debug message: line1\ncompile debug message: line2\n'));
+      expect(logger.errorText, equals('compiler message: line1\ncompiler message: line2\n'));
       expect(output, equals('/path/to/main.dart.dill'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -55,17 +58,40 @@ void main() {
     testUsingContext('single dart failed compilation', () async {
       final BufferLogger logger = context[Logger];
 
-      when(mockFrontendServer.stdout).thenReturn(new Stream<List<int>>.fromFuture(
-        new Future<List<int>>.value(UTF8.encode(
-          'result abc\nline1\nline2\nabc'
-        ))
-      ));
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
+            new Future<List<int>>.value(UTF8.encode(
+              'result abc\nline1\nline2\nabc'
+            ))
+          ));
 
       final String output = await compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart'
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-      expect(logger.traceText, equals('compile debug message: line1\ncompile debug message: line2\n'));
+      expect(logger.errorText, equals('compiler message: line1\ncompiler message: line2\n'));
+      expect(output, equals(null));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('single dart abnormal compiler termination', () async {
+      when(mockFrontendServer.exitCode).thenReturn(255);
+
+      final BufferLogger logger = context[Logger];
+
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
+          new Future<List<int>>.value(UTF8.encode(
+              'result abc\nline1\nline2\nabc'
+          ))
+      ));
+
+      final String output = await compile(sdkRoot: '/path/to/sdkroot',
+          mainPath: '/path/to/main.dart'
+      );
+      expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
+      expect(logger.errorText, equals('compiler message: line1\ncompiler message: line2\n'));
       expect(output, equals(null));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -88,32 +114,51 @@ void main() {
       mockFrontendServerStdErr = new MockStream();
 
       when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
-      when(mockFrontendServer.stderr).thenReturn(mockFrontendServerStdErr);
+      when(mockFrontendServer.stderr)
+          .thenAnswer((Invocation invocation) => mockFrontendServerStdErr);
       stdErrStreamController = new StreamController<String>();
-      when(mockFrontendServerStdErr.transform<String>(any)).thenReturn(stdErrStreamController.stream);
+      when(mockFrontendServerStdErr.transform<String>(any))
+          .thenAnswer((Invocation invocation) => stdErrStreamController.stream);
 
-      when(mockProcessManager.start(any)).thenReturn(
-          new Future<Process>.value(mockFrontendServer)
+      when(mockProcessManager.start(any)).thenAnswer(
+          (Invocation invocation) => new Future<Process>.value(mockFrontendServer)
       );
-      when(mockFrontendServer.exitCode).thenReturn(0);
+    });
+
+    tearDown(() {
+      verifyNever(mockFrontendServer.exitCode);
     });
 
     testUsingContext('single dart compile', () async {
       final BufferLogger logger = context[Logger];
 
-      when(mockFrontendServer.stdout).thenReturn(new Stream<List<int>>.fromFuture(
-        new Future<List<int>>.value(UTF8.encode(
-          'result abc\nline1\nline2\nabc /path/to/main.dart.dill'
-        ))
-      ));
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
+            new Future<List<int>>.value(UTF8.encode(
+              'result abc\nline1\nline2\nabc /path/to/main.dart.dill'
+            ))
+          ));
 
       final String output = await generator.recompile(
         '/path/to/main.dart', null /* invalidatedFiles */
       );
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
       verifyNoMoreInteractions(mockFrontendServerStdIn);
-      expect(logger.traceText, equals('compile debug message: line1\ncompile debug message: line2\n'));
+      expect(logger.errorText, equals('compiler message: line1\ncompiler message: line2\n'));
       expect(output, equals('/path/to/main.dart.dill'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('single dart compile abnormally terminates', () async {
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty()
+      );
+
+      final String output = await generator.recompile(
+          '/path/to/main.dart', null /* invalidatedFiles */
+      );
+      expect(output, equals(null));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
@@ -122,7 +167,8 @@ void main() {
       final BufferLogger logger = context[Logger];
 
       final StreamController<List<int>> streamController = new StreamController<List<int>>();
-      when(mockFrontendServer.stdout).thenReturn(streamController.stream);
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) => streamController.stream);
       streamController.add(UTF8.encode('result abc\nline0\nline1\nabc /path/to/main.dart.dill\n'));
       await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */);
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
@@ -132,9 +178,9 @@ void main() {
 
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-      expect(logger.traceText, equals(
-        'compile debug message: line0\ncompile debug message: line1\n'
-        'compile debug message: line1\ncompile debug message: line2\n'
+      expect(logger.errorText, equals(
+        'compiler message: line0\ncompiler message: line1\n'
+        'compiler message: line1\ncompiler message: line2\n'
       ));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -144,7 +190,8 @@ void main() {
       final BufferLogger logger = context[Logger];
 
       final StreamController<List<int>> streamController = new StreamController<List<int>>();
-      when(mockFrontendServer.stdout).thenReturn(streamController.stream);
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) => streamController.stream);
       streamController.add(UTF8.encode(
         'result abc\nline0\nline1\nabc /path/to/main.dart.dill\n'
       ));
@@ -158,10 +205,10 @@ void main() {
 
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-      expect(logger.traceText, equals(
-        'compile debug message: line0\ncompile debug message: line1\n'
-        'compile debug message: line1\ncompile debug message: line2\n'
-        'compile debug message: line2\ncompile debug message: line3\n'
+      expect(logger.errorText, equals(
+        'compiler message: line0\ncompiler message: line1\n'
+        'compiler message: line1\ncompiler message: line2\n'
+        'compiler message: line2\ncompiler message: line3\n'
       ));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,

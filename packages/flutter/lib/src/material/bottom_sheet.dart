@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 
@@ -209,6 +210,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   _ModalBottomSheetRoute({
     this.builder,
     this.theme,
+    this.barrierLabel,
   });
 
   final WidgetBuilder builder;
@@ -219,6 +221,9 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   bool get barrierDismissible => true;
+
+  @override
+  final String barrierLabel;
 
   @override
   Color get barrierColor => Colors.black54;
@@ -234,7 +239,13 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    Widget bottomSheet = new _ModalBottomSheet<T>(route: this);
+    // By definition, the bottom sheet is aligned to the bottom of the page
+    // and isn't exposed to the top padding of the MediaQuery.
+    Widget bottomSheet = new MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      child: new _ModalBottomSheet<T>(route: this),
+    );
     if (theme != null)
       bottomSheet = new Theme(data: theme, child: bottomSheet);
     return bottomSheet;
@@ -276,6 +287,7 @@ Future<T> showModalBottomSheet<T>({
   return Navigator.push(context, new _ModalBottomSheetRoute<T>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   ));
 }
 

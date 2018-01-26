@@ -58,6 +58,8 @@ class SafeArea extends StatelessWidget {
   ///
   /// The padding on the [MediaQuery] for the [child] will be suitably adjusted
   /// to zero out any sides that were avoided by this widget.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override

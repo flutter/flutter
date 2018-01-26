@@ -289,7 +289,7 @@ final Color _kActiveTrackColor = Colors.grey;
 final Tween<double> _kReactionRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kReactionRadius);
 final Tween<double> _kThumbRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kActiveThumbRadius);
 final ColorTween _kTickColorTween = new ColorTween(begin: Colors.transparent, end: Colors.black54);
-final Duration _kDiscreteTransitionDuration = const Duration(milliseconds: 500);
+const Duration _kDiscreteTransitionDuration = const Duration(milliseconds: 500);
 
 const double _kLabelBalloonRadius = 14.0;
 final Tween<double> _kLabelBalloonCenterTween = new Tween<double>(begin: 0.0, end: -_kLabelBalloonRadius * 2.0);
@@ -713,8 +713,8 @@ class _RenderSlider extends RenderBox {
 
     config.isSemanticBoundary = isInteractive;
     if (isInteractive) {
-      config.addAction(SemanticsAction.increase, _increaseAction);
-      config.addAction(SemanticsAction.decrease, _decreaseAction);
+      config.onIncrease = _increaseAction;
+      config.onDecrease = _decreaseAction;
     }
   }
 

@@ -27,11 +27,11 @@ beautiful Material Design and
 Cupertino (iOS-flavor) widgets, rich motion APIs,
 smooth natural scrolling, and platform awareness.
 
-<img src="https://flutter.io/images/homepage/screenshot-1.png" width="270" height="480" alt="Brand-first shopping design" align="left">
-<img src="https://flutter.io/images/homepage/screenshot-2.png" width="270" height="480" alt="Fitness app design">
+[<img src="https://github.com/flutter/website/blob/master/images/homepage/screenshot-1.png" width="270" height="480" alt="Brand-first shopping design" align="left">](https://github.com/flutter/flutter/tree/master/examples/flutter_gallery/lib/demo/animation)
+[<img src="https://github.com/flutter/website/blob/master/images/homepage/screenshot-2.png" width="270" height="480" alt="Fitness app design">](https://github.com/flutter/posse_gallery)
 
-<img src="https://flutter.io/images/homepage/screenshot-3.png" width="270" height="480" alt="Contact app design" align="left">
-<img src="https://flutter.io/images/homepage/ios-friendlychat.png" width="270" height="480" alt="iOS chat app design">
+[<img src="https://github.com/flutter/website/blob/master/images/homepage/screenshot-3.png" width="270" height="480" alt="Contact app design" align="left">](https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/lib/demo/contacts_demo.dart)
+[<img src="https://github.com/flutter/website/blob/master/images/homepage/ios-friendlychat.png" width="270" height="480" alt="iOS chat app design">](https://codelabs.developers.google.com/codelabs/flutter-firebase)
 
 Browse the <a href="https://flutter.io/widgets/">widget catalog</a>.
 
@@ -84,8 +84,8 @@ and learn more about the
 Make your app come to life
 with platform APIs, 3rd party SDKs,
 and native code.
-Flutter lets you reuse your existing Java, Swift, and ObjC code,
-and access native features and SDKs on iOS and Android.
+Flutter lets you reuse your existing Java/Kotlin and ObjC/Swift code,
+and access native features and SDKs on Android and iOS.
 
 Accessing platform features is easy. Here is a snippet from our <a href="https://github.com/flutter/flutter/tree/master/examples/platform_channel">interop example</a>:
 
@@ -116,7 +116,7 @@ If you don't have any mobile development experience, Flutter
 is an easy and fast way to build beautiful mobile apps.
 If you are an experienced iOS or Android developer,
 you can use Flutter for your views and leverage much of your
-existing Java/ObjC/Swift investment.
+existing Java/Kotlin/ObjC/Swift investment.
 
 ### Build
 
@@ -132,7 +132,7 @@ existing Java/ObjC/Swift investment.
   * Package manager
 * **Full-featured apps**
   * Interop with mobile OS APIs & SDKs
-  * Maven/Java
+  * Gradle/Java/Kotlin
   * Cocoapods/ObjC/Swift
 
 ### Optimize

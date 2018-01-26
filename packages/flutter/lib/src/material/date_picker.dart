@@ -126,22 +126,31 @@ class _DatePickerHeader extends StatelessWidget {
         break;
     }
 
-    Widget yearButton = new _DateHeaderButton(
-      color: backgroundColor,
-      onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.year), context),
-      child: new Text(localizations.formatYear(selectedDate), style: yearStyle),
-    );
-    Widget dayButton = new _DateHeaderButton(
-      color: backgroundColor,
-      onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.day), context),
-      child: new Text(localizations.formatMediumDate(selectedDate), style: dayStyle),
+    final Widget yearButton = new IgnorePointer(
+      ignoring: mode != DatePickerMode.day,
+      ignoringSemantics: false,
+      child: new _DateHeaderButton(
+        color: backgroundColor,
+        onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.year), context),
+        child: new Semantics(
+          selected: mode == DatePickerMode.year,
+          child: new Text(localizations.formatYear(selectedDate), style: yearStyle),
+        ),
+      ),
     );
 
-    // Disable the button for the current mode.
-    if (mode == DatePickerMode.day)
-      dayButton = new IgnorePointer(child: dayButton);
-    else
-      yearButton = new IgnorePointer(child: yearButton);
+    final Widget dayButton = new IgnorePointer(
+      ignoring: mode == DatePickerMode.day,
+      ignoringSemantics: false,
+      child: new _DateHeaderButton(
+        color: backgroundColor,
+        onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.day), context),
+        child: new Semantics(
+          selected: mode == DatePickerMode.day,
+          child: new Text(localizations.formatMediumDate(selectedDate), style: dayStyle),
+        ),
+      ),
+    );
 
     return new Container(
       width: width,
@@ -238,7 +247,6 @@ class DayPicker extends StatelessWidget {
     @required this.firstDate,
     @required this.lastDate,
     @required this.displayedMonth,
-    this.onMonthHeaderTap,
     this.selectableDayPredicate,
   }) : assert(selectedDate != null),
        assert(currentDate != null),
@@ -258,9 +266,6 @@ class DayPicker extends StatelessWidget {
 
   /// Called when the user picks a day.
   final ValueChanged<DateTime> onChanged;
-
-  /// Called when the user taps on the header that displays the current month.
-  final VoidCallback onMonthHeaderTap;
 
   /// The earliest date the user is permitted to pick.
   final DateTime firstDate;
@@ -296,7 +301,9 @@ class DayPicker extends StatelessWidget {
     final List<Widget> result = <Widget>[];
     for (int i = localizations.firstDayOfWeekIndex; true; i = (i + 1) % 7) {
       final String weekday = localizations.narrowWeekdays[i];
-      result.add(new Center(child: new Text(weekday, style: headerStyle)));
+      result.add(new ExcludeSemantics(
+        child: new Center(child: new Text(weekday, style: headerStyle)),
+      ));
       if (i == (localizations.firstDayOfWeekIndex - 1) % 7)
         break;
     }
@@ -392,7 +399,8 @@ class DayPicker extends StatelessWidget {
         BoxDecoration decoration;
         TextStyle itemStyle = themeData.textTheme.body1;
 
-        if (selectedDate.year == year && selectedDate.month == month && selectedDate.day == day) {
+        final bool isSelectedDay = selectedDate.year == year && selectedDate.month == month && selectedDate.day == day;
+        if (isSelectedDay) {
           // The selected day gets a circle background highlight, and a contrasting text color.
           itemStyle = themeData.accentTextTheme.body2;
           decoration = new BoxDecoration(
@@ -409,7 +417,19 @@ class DayPicker extends StatelessWidget {
         Widget dayWidget = new Container(
           decoration: decoration,
           child: new Center(
-            child: new Text(localizations.formatDecimal(day), style: itemStyle),
+            child: new Semantics(
+              // We want the day of month to be spoken first irrespective of the
+              // locale-specific preferences or TextDirection. This is because
+              // an accessibility user is more likely to be interested in the
+              // day of month before the rest of the date, as they are looking
+              // for the day of month. To do that we prepend day of month to the
+              // formatted full date.
+              label: '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}',
+              selected: isSelectedDay,
+              child: new ExcludeSemantics(
+                child: new Text(localizations.formatDecimal(day), style: itemStyle),
+              ),
+            ),
           ),
         );
 
@@ -434,9 +454,9 @@ class DayPicker extends StatelessWidget {
           new Container(
             height: _kDayPickerRowHeight,
             child: new Center(
-              child: new GestureDetector(
-                onTap: onMonthHeaderTap != null ? Feedback.wrapForTap(onMonthHeaderTap, context) : null,
-                child: new Text(localizations.formatMonthYear(displayedMonth),
+              child: new ExcludeSemantics(
+                child: new Text(
+                  localizations.formatMonthYear(displayedMonth),
                   style: themeData.textTheme.subhead,
                 ),
               ),
@@ -478,7 +498,6 @@ class MonthPicker extends StatefulWidget {
     @required this.firstDate,
     @required this.lastDate,
     this.selectableDayPredicate,
-    this.onMonthHeaderTap,
   }) : assert(selectedDate != null),
        assert(onChanged != null),
        assert(!firstDate.isAfter(lastDate)),
@@ -492,9 +511,6 @@ class MonthPicker extends StatefulWidget {
 
   /// Called when the user picks a month.
   final ValueChanged<DateTime> onChanged;
-
-  /// Called when the user taps on the header that displays the current month.
-  final VoidCallback onMonthHeaderTap;
 
   /// The earliest date the user is permitted to pick.
   final DateTime firstDate;
@@ -514,8 +530,9 @@ class _MonthPickerState extends State<MonthPicker> {
   void initState() {
     super.initState();
     // Initially display the pre-selected date.
-    _dayPickerController = new PageController(initialPage: _monthDelta(widget.firstDate, widget.selectedDate));
-    _currentDisplayedMonthDate = new DateTime(widget.selectedDate.year, widget.selectedDate.month);
+    final int monthPage = _monthDelta(widget.firstDate, widget.selectedDate);
+    _dayPickerController = new PageController(initialPage: monthPage);
+    _handleMonthPageChanged(monthPage);
     _updateCurrentDate();
   }
 
@@ -523,10 +540,20 @@ class _MonthPickerState extends State<MonthPicker> {
   void didUpdateWidget(MonthPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selectedDate != oldWidget.selectedDate) {
-      _dayPickerController = new PageController(initialPage: _monthDelta(widget.firstDate, widget.selectedDate));
-      _currentDisplayedMonthDate =
-          new DateTime(widget.selectedDate.year, widget.selectedDate.month);
+      final int monthPage = _monthDelta(widget.firstDate, widget.selectedDate);
+      _dayPickerController = new PageController(initialPage: monthPage);
+      _handleMonthPageChanged(monthPage);
     }
+  }
+
+  MaterialLocalizations localizations;
+  TextDirection textDirection;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    localizations = MaterialLocalizations.of(context);
+    textDirection = Directionality.of(context);
   }
 
   DateTime _todayDate;
@@ -567,18 +594,21 @@ class _MonthPickerState extends State<MonthPicker> {
       lastDate: widget.lastDate,
       displayedMonth: month,
       selectableDayPredicate: widget.selectableDayPredicate,
-      onMonthHeaderTap: widget.onMonthHeaderTap,
     );
   }
 
   void _handleNextMonth() {
-    if (!_isDisplayingLastMonth)
+    if (!_isDisplayingLastMonth) {
+      SemanticsService.announce(localizations.formatMonthYear(_nextMonthDate), textDirection);
       _dayPickerController.nextPage(duration: _kMonthScrollDuration, curve: Curves.ease);
+    }
   }
 
   void _handlePreviousMonth() {
-    if (!_isDisplayingFirstMonth)
+    if (!_isDisplayingFirstMonth) {
+      SemanticsService.announce(localizations.formatMonthYear(_previousMonthDate), textDirection);
       _dayPickerController.previousPage(duration: _kMonthScrollDuration, curve: Curves.ease);
+    }
   }
 
   /// True if the earliest allowable month is displayed.
@@ -593,15 +623,19 @@ class _MonthPickerState extends State<MonthPicker> {
         new DateTime(widget.lastDate.year, widget.lastDate.month));
   }
 
+  DateTime _previousMonthDate;
+  DateTime _nextMonthDate;
+
   void _handleMonthPageChanged(int monthPage) {
     setState(() {
+      _previousMonthDate = _addMonthsToMonthDate(widget.firstDate, monthPage - 1);
       _currentDisplayedMonthDate = _addMonthsToMonthDate(widget.firstDate, monthPage);
+      _nextMonthDate = _addMonthsToMonthDate(widget.firstDate, monthPage + 1);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return new SizedBox(
       width: _kMonthPickerPortraitWidth,
       height: _kMaxDayPickerHeight,
@@ -620,7 +654,7 @@ class _MonthPickerState extends State<MonthPicker> {
             start: 8.0,
             child: new IconButton(
               icon: const Icon(Icons.chevron_left),
-              tooltip: localizations.previousMonthTooltip,
+              tooltip: _isDisplayingFirstMonth ? null : '${localizations.previousMonthTooltip} ${localizations.formatMonthYear(_previousMonthDate)}',
               onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
             ),
           ),
@@ -629,7 +663,7 @@ class _MonthPickerState extends State<MonthPicker> {
             end: 8.0,
             child: new IconButton(
               icon: const Icon(Icons.chevron_right),
-              tooltip: localizations.nextMonthTooltip,
+              tooltip: _isDisplayingLastMonth ? null : '${localizations.nextMonthTooltip} ${localizations.formatMonthYear(_nextMonthDate)}',
               onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
             ),
           ),
@@ -640,8 +674,8 @@ class _MonthPickerState extends State<MonthPicker> {
 
   @override
   void dispose() {
-    if (_timer != null)
-      _timer.cancel();
+    _timer?.cancel();
+    _dayPickerController?.dispose();
     super.dispose();
   }
 }
@@ -718,15 +752,20 @@ class _YearPickerState extends State<YearPicker> {
       itemCount: widget.lastDate.year - widget.firstDate.year + 1,
       itemBuilder: (BuildContext context, int index) {
         final int year = widget.firstDate.year + index;
-        final TextStyle itemStyle = year == widget.selectedDate.year ?
-            themeData.textTheme.headline.copyWith(color: themeData.accentColor) : style;
+        final bool isSelected = year == widget.selectedDate.year;
+        final TextStyle itemStyle = isSelected
+          ? themeData.textTheme.headline.copyWith(color: themeData.accentColor)
+          : style;
         return new InkWell(
           key: new ValueKey<int>(year),
           onTap: () {
             widget.onChanged(new DateTime(year, widget.selectedDate.month, widget.selectedDate.day));
           },
           child: new Center(
-            child: new Text(year.toString(), style: itemStyle),
+            child: new Semantics(
+              selected: isSelected,
+              child: new Text(year.toString(), style: itemStyle),
+            ),
           ),
         );
       },
@@ -762,6 +801,25 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     _mode = widget.initialDatePickerMode;
   }
 
+  bool _announcedInitialDate = false;
+
+  MaterialLocalizations localizations;
+  TextDirection textDirection;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    localizations = MaterialLocalizations.of(context);
+    textDirection = Directionality.of(context);
+    if (!_announcedInitialDate) {
+      _announcedInitialDate = true;
+      SemanticsService.announce(
+        localizations.formatFullDate(_selectedDate),
+        textDirection,
+      );
+    }
+  }
+
   DateTime _selectedDate;
   DatePickerMode _mode;
   final GlobalKey _pickerKey = new GlobalKey();
@@ -781,6 +839,11 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     _vibrate();
     setState(() {
       _mode = mode;
+      if (_mode == DatePickerMode.day) {
+        SemanticsService.announce(localizations.formatMonthYear(_selectedDate), textDirection);
+      } else {
+        SemanticsService.announce(localizations.formatYear(_selectedDate), textDirection);
+      }
     });
   }
 
@@ -807,10 +870,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     Navigator.pop(context, _selectedDate);
   }
 
-  void _handleMonthHeaderTap() {
-    _handleModeChanged(DatePickerMode.year);
-  }
-
   Widget _buildPicker() {
     assert(_mode != null);
     switch (_mode) {
@@ -822,7 +881,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           firstDate: widget.firstDate,
           lastDate: widget.lastDate,
           selectableDayPredicate: widget.selectableDayPredicate,
-          onMonthHeaderTap: _handleMonthHeaderTap,
         );
       case DatePickerMode.year:
         return new YearPicker(
@@ -844,7 +902,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         child: _buildPicker(),
       ),
     );
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Widget actions = new ButtonTheme.bar(
       child: new ButtonBar(
         children: <Widget>[
@@ -862,13 +919,13 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     return new Dialog(
       child: new OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
+          assert(orientation != null);
           final Widget header = new _DatePickerHeader(
             selectedDate: _selectedDate,
             mode: _mode,
             onModeChanged: _handleModeChanged,
             orientation: orientation,
           );
-          assert(orientation != null);
           switch (orientation) {
             case Orientation.portrait:
               return new SizedBox(
