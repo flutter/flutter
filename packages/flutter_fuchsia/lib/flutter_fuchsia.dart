@@ -5,7 +5,9 @@
 /// Provides an API to test Flutter applications on Fuchsia devices and
 /// emulators.
 ///
-/// The application runs in a separate process from the actual test.
+/// The tested application typically runs in a separate process from the actual
+/// test, wherein the user can supply the process with various events to test
+/// the behavior of said application.
 
 library flutter_fuchsia;
 
