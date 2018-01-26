@@ -5,10 +5,10 @@ dependencies:
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
-  test: 0.12.26
+  test: 0.12.30+1
 
   # We use FakeAsync and other testing utilities.
-  quiver: 0.27.0
+  quiver: 0.28.0
 
   flutter:
     sdk: flutter
@@ -46,6 +46,7 @@ dependencies:
   meta: 1.1.1 # TRANSITIVE DEPENDENCY
   mime: 0.9.5 # TRANSITIVE DEPENDENCY
   mockito: 2.2.1 # TRANSITIVE DEPENDENCY
+  multi_server_socket: 1.0.1 # TRANSITIVE DEPENDENCY
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
