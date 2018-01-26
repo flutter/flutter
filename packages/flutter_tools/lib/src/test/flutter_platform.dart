@@ -217,7 +217,7 @@ class _FlutterPlatform extends PlatformPlugin {
             .createTempSync('flutter_bundle_directory');
         finalizers.add(() async {
           printTrace('test $ourTestCount: deleting temporary bundle directory');
-          temporaryDirectory.deleteSync(recursive: true);
+          tempBundleDirectory.deleteSync(recursive: true);
         });
 
         // copy 'vm_platform_strong.dill' into 'platform.dill'
