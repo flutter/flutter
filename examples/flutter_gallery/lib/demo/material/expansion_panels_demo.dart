@@ -168,6 +168,8 @@ class DemoItem<T> {
       );
     };
   }
+
+  Widget build() => builder(this);
 }
 
 class ExpasionPanelsDemo extends StatefulWidget {
@@ -348,11 +350,10 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                 });
               },
               children: _demoItems.map((DemoItem<dynamic> item) {
-                final dynamic builder = item.builder;
                 return new ExpansionPanel(
                   isExpanded: item.isExpanded,
                   headerBuilder: item.headerBuilder,
-                  body: builder(item)
+                  body: item.build()
                 );
               }).toList()
             ),
