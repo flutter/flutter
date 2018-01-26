@@ -867,6 +867,17 @@ File _pubspecFor(Directory directory) {
 /// Generates the source of a fake pubspec.yaml file given a list of
 /// dependencies.
 String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
+  if (_kManuallyPinnedDependencies.isNotEmpty) {
+    final String hardCodedConstraints = _kManuallyPinnedDependencies.keys
+      .map((String packageName) {
+        return '  - $packageName: ${_kManuallyPinnedDependencies[packageName]}';
+      })
+      .join('\n');
+    printStatus(
+      'WARNING: the following packages use hard-coded version constraints:\n'
+      '$hardCodedConstraints',
+    );
+  }
   final StringBuffer result = new StringBuffer();
   final StringBuffer overrides = new StringBuffer();
   result.writeln('name: flutter_update_packages');
