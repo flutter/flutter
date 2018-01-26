@@ -31,6 +31,10 @@ typedef bool SemanticsNodeVisitor(SemanticsNode node);
 /// current selection or (if nothing is currently selected) start a selection.
 typedef void MoveCursorHandler(bool extendSelection);
 
+/// Signature for the [SemanticsAction.setSelection] handlers to change the
+/// text selection (or re-position the cursor) to `selection`.
+typedef void SetSelectionHandler(TextSelection selection);
+
 typedef void _SemanticsActionHandler(dynamic args);
 
 /// A tag for a [SemanticsNode].
@@ -275,6 +279,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onDecrease,
     this.onMoveCursorForwardByCharacter,
     this.onMoveCursorBackwardByCharacter,
+    this.onSetSelection,
   });
 
   /// If non-null, indicates that this subtree represents something that can be
@@ -484,6 +489,15 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
   final MoveCursorHandler onMoveCursorBackwardByCharacter;
+
+  /// The handler for [SemanticsAction.setSelection].
+  ///
+  /// This handler is invoked when the user either wants to change the currently
+  /// selected text in a text field or change the position of the cursor.
+  ///
+  /// TalkBack users can trigger this handler by selecting "Move cursor to
+  /// beginning/end" or "Select all" from the local context menu.
+  final SetSelectionHandler onSetSelection;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
@@ -1656,6 +1670,28 @@ class SemanticsConfiguration {
       value(extentSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
+  }
+
+  /// The handler for [SemanticsAction.setSelection].
+  ///
+  /// This handler is invoked when the user either wants to change the currently
+  /// selected text in a text field or change the position of the cursor.
+  ///
+  /// TalkBack users can trigger this handler by selecting "Move cursor to
+  /// beginning/end" or "Select all" from the local context menu.
+  SetSelectionHandler get onSetSelection => _onSetSelection;
+  SetSelectionHandler _onSetSelection;
+  set onSetSelection(SetSelectionHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.setSelection, (dynamic args) {
+      final Map<String, int> selection = args;
+      assert(selection != null && selection['base'] != null && selection['extent'] != null);
+      value(new TextSelection(
+        baseOffset: selection['base'],
+        extentOffset: selection['extent'],
+      ));
+    });
+    _onSetSelection = value;
   }
 
   /// Returns the action handler registered for [action] or null if none was

@@ -3017,6 +3017,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     VoidCallback onDecrease,
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
+    SetSelectionHandler onSetSelection,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
@@ -3040,6 +3041,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onDecrease = onDecrease,
        _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
        _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
+       _onSetSelection = onSetSelection,
        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
@@ -3399,6 +3401,24 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handler for [SemanticsAction.setSelection].
+  ///
+  /// This handler is invoked when the user either wants to change the currently
+  /// selected text in a text field or change the position of the cursor.
+  ///
+  /// TalkBack users can trigger this handler by selecting "Move cursor to
+  /// beginning/end" or "Select all" from the local context menu.
+  SetSelectionHandler get onSetSelection => _onSetSelection;
+  SetSelectionHandler _onSetSelection;
+  set onSetSelection(SetSelectionHandler handler) {
+    if (_onSetSelection == handler)
+      return;
+    final bool hadValue = _onSetSelection != null;
+    _onSetSelection = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -3448,6 +3468,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onMoveCursorForwardByCharacter = _performMoveCursorForwardByCharacter;
     if (onMoveCursorBackwardByCharacter != null)
       config.onMoveCursorBackwardByCharacter = _performMoveCursorBackwardByCharacter;
+    if (onSetSelection != null)
+      config.onSetSelection = _performSetSelection;
   }
 
   void _performTap() {
@@ -3498,6 +3520,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   void _performMoveCursorBackwardByCharacter(bool extendSelection) {
     if (onMoveCursorBackwardByCharacter != null)
       onMoveCursorBackwardByCharacter(extendSelection);
+  }
+
+  void _performSetSelection(TextSelection selection) {
+    if (onSetSelection != null)
+      onSetSelection(selection);
   }
 }
 

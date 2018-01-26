@@ -1761,7 +1761,7 @@ void main() {
         child: new TextField(
           key: key,
           controller: controller,
-        )
+        ),
       ),
     );
 
@@ -1812,6 +1812,7 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.setSelection,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1835,6 +1836,7 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.setSelection,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1858,6 +1860,7 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.tap,
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.setSelection,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1878,10 +1881,10 @@ void main() {
 
     await tester.pumpWidget(
       overlay(
-          child: new TextField(
-            key: key,
-            controller: controller,
-          )
+        child: new TextField(
+          key: key,
+          controller: controller,
+        ),
       ),
     );
 
@@ -1915,6 +1918,7 @@ void main() {
           actions: <SemanticsAction>[
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.setSelection,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1938,6 +1942,7 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
+            SemanticsAction.setSelection,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1949,5 +1954,95 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('TextField change selection with semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final TextEditingController controller = new TextEditingController()
+      ..text = 'Hello';
+    final Key key = new UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: new TextField(
+          key: key,
+          controller: controller,
+        ),
+      ),
+    );
+
+    // Focus the text field
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+
+    const int inputFieldId = 2;
+
+    expect(controller.selection, const TextSelection.collapsed(offset: 5, affinity: TextAffinity.upstream));
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: inputFieldId,
+          value: 'Hello',
+          textSelection: const TextSelection.collapsed(offset: 5),
+          textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.setSelection,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+            SemanticsFlag.isFocused,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    // move cursor back once
+    semanticsOwner.performAction(inputFieldId, SemanticsAction.setSelection, <String, int>{
+      'base': 4,
+      'extent': 4,
+    });
+    await tester.pump();
+    expect(controller.selection, const TextSelection.collapsed(offset: 4));
+
+    // move cursor to front
+    semanticsOwner.performAction(inputFieldId, SemanticsAction.setSelection, <String, int>{
+      'base': 0,
+      'extent': 0,
+    });
+    await tester.pump();
+    expect(controller.selection, const TextSelection.collapsed(offset: 0));
+
+    // select all
+    semanticsOwner.performAction(inputFieldId, SemanticsAction.setSelection, <String, int>{
+      'base': 0,
+      'extent': 5,
+    });
+    await tester.pump();
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: inputFieldId,
+          value: 'Hello',
+          textSelection: const TextSelection(baseOffset: 0, extentOffset: 5),
+          textDirection: TextDirection.ltr,
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
+            SemanticsAction.moveCursorBackwardByCharacter,
+            SemanticsAction.setSelection,
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isTextField,
+            SemanticsFlag.isFocused,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
 
 }

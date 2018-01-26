@@ -4854,6 +4854,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     VoidCallback onDecrease,
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
+    SetSelectionHandler onSetSelection,
   }) : this.fromProperties(
     key: key,
     child: child,
@@ -4880,6 +4881,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onDecrease: onDecrease,
       onMoveCursorForwardByCharacter: onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
+      onSetSelection: onSetSelection,
     ),
   );
 
@@ -4948,6 +4950,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       onDecrease: properties.onDecrease,
       onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
+      onSetSelection: properties.onSetSelection,
     );
   }
 
@@ -4986,7 +4989,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onIncrease = properties.onIncrease
       ..onDecrease = properties.onDecrease
       ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
-      ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter;
+      ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
+      ..onSetSelection = properties.onSetSelection;
   }
 
   @override
