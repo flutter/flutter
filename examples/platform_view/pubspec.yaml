@@ -27,6 +27,7 @@ dependencies:
   meta: 1.1.1 # TRANSITIVE DEPENDENCY
   mime: 0.9.5 # TRANSITIVE DEPENDENCY
   mockito: 2.2.1 # TRANSITIVE DEPENDENCY
+  multi_server_socket: 1.0.1 # TRANSITIVE DEPENDENCY
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
@@ -45,7 +46,7 @@ dependencies:
   stream_channel: 1.6.3 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
-  test: 0.12.26 # TRANSITIVE DEPENDENCY
+  test: 0.12.30+1 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
   utf: 0.9.0+3 # TRANSITIVE DEPENDENCY
   vector_math: 2.0.5 # TRANSITIVE DEPENDENCY
