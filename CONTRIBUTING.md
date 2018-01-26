@@ -291,10 +291,13 @@ API docs for master branch
 --------------------------
 
 To view the API docs for the `master` branch,
-visit [https://master-docs-flutter-io.firebaseapp.com/][].
+visit https://master-docs-flutter-io.firebaseapp.com/.
 
 Those docs should be updated after a successful CI build
 of Flutter's `master` branch.
+
+(Looking for the API docs for our releases?
+Please visit https://docs.flutter.io.)
 
 Build infrastructure
 --------------------
