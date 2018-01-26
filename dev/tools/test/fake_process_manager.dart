@@ -5,204 +5,150 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:process/process.dart';
 import 'package:mockito/mockito.dart';
+import 'package:test/test.dart';
 
 class FakeProcessManager extends Mock implements ProcessManager {
-  FakeProcessManager(this.results);
-
-  final Map<String, List<ProcessResult>> results;
-  String lastStdin = '';
-
-  @override
-  Future<Process> start(List<dynamic> command,
-      {String workingDirectory,
-      Map<String, String> environment,
-      bool includeParentEnvironment: true,
-      bool runInShell: false,
-      ProcessStartMode mode: ProcessStartMode.NORMAL}) {
-    final ProcessResult nextResult = results[command.join(' ')]?.removeAt(0);
-    return new Future<Process>.value(new FakeProcess(
-      nextResult?.stdout ?? <int>[],
-      desiredStderr: nextResult?.stderr ?? <int>[],
-      stdinResults: (String input) => lastStdin = lastStdin + input,
-      shouldError: (nextResult?.exitCode ?? 0) != 0,
-    ));
+  FakeProcessManager({this.stdinResults}) {
+    _setupMock();
   }
 
-  @override
-  bool killPid(int pid, [ProcessSignal signal = ProcessSignal.SIGTERM]) {
-    return true;
+  final StringReceivedCallback stdinResults;
+  Map<String, List<ProcessResult>> fakeResults = <String, List<ProcessResult>>{};
+  List<Invocation> invocations = <Invocation>[];
+
+  void verifyCalls(List<String> calls) {
+    int index = 0;
+    expect(invocations.length, equals(calls.length));
+    for (String call in calls) {
+      expect(call.split(' '), orderedEquals(invocations[index].positionalArguments[0]));
+      index++;
+    }
   }
 
-  @override
-  bool canRun(dynamic executable, {String workingDirectory}) {
-    return true;
+  void setResults(Map<String, List<String>> results) {
+    final Map<String, List<ProcessResult>> resultCodeUnits = <String, List<ProcessResult>>{};
+    for (String key in results.keys) {
+      resultCodeUnits[key] =
+          results[key].map((String result) => new ProcessResult(0, 0, result, '')).toList();
+    }
+    fakeResults = resultCodeUnits;
   }
 
-  @override
-  ProcessResult runSync(List<dynamic> command,
-      {String workingDirectory,
-      Map<String, String> environment,
-      bool includeParentEnvironment: true,
-      bool runInShell: false,
-      Encoding stdoutEncoding: SYSTEM_ENCODING,
-      Encoding stderrEncoding: SYSTEM_ENCODING}) {
-    return results[command.join(' ')]?.removeAt(0);
+  ProcessResult _popResult(String key) {
+    expect(fakeResults, isNotEmpty);
+    expect(fakeResults, contains(key));
+    expect(fakeResults[key], isNotEmpty);
+    return fakeResults[key].removeAt(0);
   }
 
-  @override
-  Future<ProcessResult> run(List<dynamic> command,
-      {String workingDirectory,
-      Map<String, String> environment,
-      bool includeParentEnvironment: true,
-      bool runInShell: false,
-      Encoding stdoutEncoding: SYSTEM_ENCODING,
-      Encoding stderrEncoding: SYSTEM_ENCODING}) {
-    return new Future<ProcessResult>.value(results[command.join(' ')]?.removeAt(0));
+  FakeProcess _popProcess(String key) =>
+      new FakeProcess(_popResult(key), stdinResults: stdinResults);
+
+  Future<Process> _nextProcess(Invocation invocation) async {
+    invocations.add(invocation);
+    return new Future<Process>.value(_popProcess(invocation.positionalArguments[0].join(' ')));
   }
-}
 
-class MockProcess extends Mock implements Process {
-  MockProcess(this._stdout, [this._stderr, this._exitCode]);
+  ProcessResult _nextResultSync(Invocation invocation) {
+    invocations.add(invocation);
+    return _popResult(invocation.positionalArguments[0].join(' '));
+  }
 
-  String _stdout;
-  String _stderr;
-  int _exitCode;
+  Future<ProcessResult> _nextResult(Invocation invocation) async {
+    invocations.add(invocation);
+    return new Future<ProcessResult>.value(_popResult(invocation.positionalArguments[0].join(' ')));
+  }
 
-  @override
-  Stream<List<int>> get stdout =>
-    new Stream<List<int>>.fromIterable(<List<int>>[_stdout.codeUnits]);
+  void _setupMock() {
+    when(
+      start(
+        typed(captureAny),
+        environment: typed(captureAny, named: 'environment'),
+        workingDirectory: typed(captureAny, named: 'workingDirectory'),
+      ),
+    ).thenAnswer(_nextProcess);
 
-  @override
-  Stream<List<int>> get stderr =>
-    new Stream<List<int>>.fromIterable(<List<int>>[_stderr.codeUnits]);
+    when(
+      start(
+        typed(captureAny),
+      ),
+    ).thenAnswer(_nextProcess);
 
-  @override
-  Future<int> get exitCode => new Future<int>.value(_exitCode);
+    when(
+      run(
+        typed(captureAny),
+        environment: typed(captureAny, named: 'environment'),
+        workingDirectory: typed(captureAny, named: 'workingDirectory'),
+      ),
+    ).thenAnswer(_nextResult);
+
+    when(
+      run(
+        typed(captureAny),
+      ),
+    ).thenAnswer(_nextResult);
+
+    when(
+      runSync(
+        typed(captureAny),
+        environment: typed(captureAny, named: 'environment'),
+        workingDirectory: typed(captureAny, named: 'workingDirectory'),
+      ),
+    ).thenAnswer(_nextResultSync);
+
+    when(
+      runSync(
+        typed(captureAny),
+      ),
+    ).thenAnswer(_nextResultSync);
+
+    when(killPid(typed(captureAny), typed(captureAny))).thenReturn(true);
+
+    when(
+      canRun(captureAny,
+          workingDirectory: typed(
+            captureAny,
+            named: 'workingDirectory',
+          )),
+    ).thenReturn(true);
+  }
 }
 
 class FakeProcess extends Mock implements Process {
-  FakeProcess(String desiredStdout,
-      {String desiredStderr = '', void stdinResults(String input), this.shouldError = false})
-      : stdoutStream = new Stream<List<int>>.fromIterable(<List<int>>[desiredStdout.codeUnits]),
-        stderrStream = new Stream<List<int>>.fromIterable(<List<int>>[desiredStderr.codeUnits]),
-        stdinSink = new IOSink(new StringStreamConsumer(stdinResults));
+  FakeProcess(ProcessResult result, {void stdinResults(String input)})
+      : stdoutStream = new Stream<List<int>>.fromIterable(<List<int>>[result.stdout.codeUnits]),
+        stderrStream = new Stream<List<int>>.fromIterable(<List<int>>[result.stderr.codeUnits]),
+        desiredExitCode = result.exitCode,
+        stdinSink = new IOSink(new StringStreamConsumer(stdinResults)) {
+    _setupMock();
+  }
 
   final IOSink stdinSink;
   final Stream<List<int>> stdoutStream;
   final Stream<List<int>> stderrStream;
-  final bool shouldError;
+  final int desiredExitCode;
 
-  @override
-  Future<int> get exitCode {
-    return new Future<int>.value(0);
+  void _setupMock() {
+    when(kill(typed(captureAny))).thenReturn(true);
   }
 
   @override
-  bool kill([ProcessSignal signal = ProcessSignal.SIGTERM]) {
-    return true;
-  }
+  Future<int> get exitCode => new Future<int>.value(desiredExitCode);
 
   @override
-  int get pid {
-    return 0;
-  }
+  int get pid => 0;
 
   @override
-  IOSink get stdin {
-    return stdinSink;
-  }
+  IOSink get stdin => stdinSink;
 
   @override
   Stream<List<int>> get stderr => stderrStream;
 
   @override
   Stream<List<int>> get stdout => stdoutStream;
-}
-
-typedef void FakeDataCallback(List<int> event);
-typedef void VoidCallback();
-
-class FakeStringStreamSubscription extends StreamSubscription<List<int>> {
-  FakeStringStreamSubscription(this.data, this._onData, this._onError, this._onDone,
-      [this.cancelOnError = true, this.shouldError = false]);
-
-  FakeDataCallback _onData;
-  Function _onError;
-  VoidCallback _onDone;
-  final bool cancelOnError;
-  final bool shouldError;
-  Completer<dynamic> completer;
-  final List<int> data;
-  bool paused = false;
-
-  @override
-  Future<dynamic> cancel() {
-    return deliverData();
-  }
-
-  @override
-  Future<E> asFuture<E>([E futureValue]) {
-    return new Future<E>.value(futureValue);
-  }
-
-  @override
-  bool get isPaused {
-    return paused;
-  }
-
-  @override
-  void resume() {
-    paused = false;
-    completer.complete(null);
-    completer = null;
-  }
-
-  @override
-  void pause([Future<dynamic> resumeSignal]) {
-    paused = true;
-    completer = new Completer<dynamic>();
-  }
-
-  @override
-  void onDone(void handleDone()) => _onDone = handleDone;
-
-  @override
-  void onError(Function handleError) => _onError = handleError;
-
-  @override
-  void onData(void handleData(List<int> data)) => _onData = handleData;
-
-  Future<dynamic> deliverData() async {
-    if (completer != null) {
-      await completer.future;
-    }
-    _onData(data);
-    if (shouldError) {
-      if (cancelOnError) {
-        await cancel();
-      }
-      Function.apply(_onError, <dynamic>[]);
-    }
-    _onDone();
-  }
-}
-
-class FakeStringStream extends Stream<List<int>> {
-  FakeStringStream(this.data, this.shouldError);
-
-  final List<int> data;
-  final bool shouldError;
-
-  @override
-  StreamSubscription<List<int>> listen(void onData(List<int> event),
-      {Function onError, void onDone(), bool cancelOnError}) {
-    final FakeStringStreamSubscription subscription =
-        new FakeStringStreamSubscription(data, onData, onError, onDone, cancelOnError, shouldError);
-    subscription.deliverData();
-    return subscription;
-  }
 }
 
 typedef void StringReceivedCallback(String received);

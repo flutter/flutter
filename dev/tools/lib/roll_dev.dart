@@ -117,7 +117,7 @@ void main(List<String> args) {
     new ArchivePublisher(hash, version, 'dev')..publishArchive();
   } on ArchivePublisherException catch (e) {
     print('Archive publishing failed.\n$e');
-    runGit('tag -d $version', 'remove the tag you did not want to publish');
+    runGit('tag -d $version', 'remove the tag that was not published');
     print('The dev roll has been aborted.');
     exit(0);
   }

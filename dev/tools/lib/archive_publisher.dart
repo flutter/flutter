@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
 class ArchivePublisherException implements Exception {
-  ArchivePublisherException(this.message, this.result);
+  ArchivePublisherException(this.message, [this.result]);
 
   final String message;
   final ProcessResult result;
@@ -31,23 +31,36 @@ class ArchivePublisherException implements Exception {
 /// Publishes the archive created for a particular version and git hash to
 /// the releases directory on cloud storage, and updates the metadata for
 /// releases.
-///
-/// `revision` is a git hash for the revision to publish, `version` is the
-/// version number for the release (e.g. 1.2.3), and channel must be either
-/// "dev" or "beta".
-///
 class ArchivePublisher {
+  /// [revision] is a git hash for the revision to publish, [version] is the
+  /// version number for the release (e.g. 1.2.3), and [channel]` must be either
+  /// "dev" or "beta". [processManager] is the process manager to use for invoking
+  /// commands, which is typically not provided, except by tests.
   ArchivePublisher(
     this.revision,
     this.version,
     this.channel, {
     this.processManager = const LocalProcessManager(),
+    this.tempDir,
   });
 
+  /// A git hash describing the revision to publish.
   final String revision;
+
+  /// A version number for the release (e.g. 1.2.3).
   final String version;
+
+  /// The channel to publish to. Can be either "dev" or "beta".
   final String channel;
+
+  /// The process manager to use for invoking commands. Typically only
+  /// used for testing purposes.
   final ProcessManager processManager;
+
+  /// The temporary directory used for this publisher. If not set, one will
+  /// be created, used, and then removed automatically. Typically used by
+  /// tests.
+  Directory tempDir;
 
   static String gsBase = 'gs://flutter_infra';
   static String releaseFolder = '/releases';
@@ -55,10 +68,14 @@ class ArchivePublisher {
   static String archivePrefix = 'flutter_';
   static String releaseNotesPrefix = 'release_notes_';
 
-  final String metadataGsPath = '$gsBase/releases/releases.json';
+  final String metadataGsPath = '$gsBase$releaseFolder/releases.json';
 
-  void publishArchive() {
+  /// Publishes the archive for the given constructor parameters.
+  bool publishArchive() {
     assert(channel == 'dev', 'Channel must be dev (beta not yet supported)');
+    // Check for access early so that we don't try to publish things if the
+    // user doesn't have access to the metadata file.
+    _checkForGSUtilAccess();
     final List<String> platforms = <String>['linux', 'mac', 'win'];
     final Map<String, String> metadata = <String, String>{};
     for (String platform in platforms) {
@@ -67,44 +84,57 @@ class ArchivePublisher {
       final String srcGsPath = '$gsBase$src';
       final String destGsPath = '$gsBase$releaseFolder$dest';
       _cloudCopy(srcGsPath, destGsPath);
-      metadata['${platform}_archive'] =
-          '$channel/$platform$dest';
+      metadata['${platform}_archive'] = '$channel/$platform$dest';
     }
     metadata['release_date'] = new DateTime.now().toUtc().toIso8601String();
     metadata['version'] = version;
     _updateMetadata(metadata);
+    return true;
   }
 
-  void checkForGSUtilAccess() {
-    final ProcessResult result = _runGsUtil(<String>['ls', gsBase]);
+  /// Checks to make sure the user has access to the Google Storage bucket
+  /// required to publish. Will print an error and return false if not.
+  void _checkForGSUtilAccess() {
+    // Fetching ACLs requires FULL_CONTROL access.
+    final ProcessResult result = _runGsUtil(<String>['acl', 'get', metadataGsPath]);
     if (result.exitCode != 0) {
-      throw new ArchivePublisherException('GSUtil cannot list $gsBase: ${result.stderr}', result);
+      throw new ArchivePublisherException(
+          'GSUtil cannot get ACLs for metadata file $metadataGsPath', result);
     }
   }
 
   void _updateMetadata(Map<String, String> metadata) {
-    ProcessResult result = _runGsUtil(<String>['cat', metadataGsPath]);
+    final ProcessResult result = _runGsUtil(<String>['cat', metadataGsPath]);
     if (result.exitCode != 0) {
       throw new ArchivePublisherException(
           'Unable to get existing metadata at $metadataGsPath', result);
     }
     final String currentMetadata = result.stdout;
-    final Map<String, dynamic> jsonData = json.decode(currentMetadata);
-    jsonData['current_$channel'] = revision;
-    jsonData['releases'][revision] = metadata;
-    final Directory tempDir = Directory.systemTemp.createTempSync('flutter_');
-    final File tempFile = new File(path.join(tempDir.absolute.path, 'releases.json'));
-    tempFile.writeAsStringSync(json.encode(jsonData));
-    result = _runGsUtil(<String>['cp', metadataGsPath, '$metadataGsPath.1']);
-    if (result.exitCode != 0) {
-      throw new ArchivePublisherException(
-          'Unable to backup existing metadata from $metadataGsPath to $metadataGsPath.1', result);
+    if (currentMetadata.isEmpty) {
+      throw new ArchivePublisherException('Empty metadata received from server', result);
     }
-    result = _runGsUtil(<String>['cp', tempFile.absolute.path, metadataGsPath]);
-    tempDir.delete(recursive: true);
-    if (result.exitCode != 0) {
+    Map<String, dynamic> jsonData;
+    try {
+      jsonData = json.decode(currentMetadata);
+    } on FormatException catch (e) {
+      throw new ArchivePublisherException('Unable to parse JSON metadata received from cloud: $e');
+    }
+    jsonData['current_$channel'] = revision;
+    if (!jsonData.containsKey('releases')) {
+      jsonData['releases'] = <String, dynamic>{};
+    }
+    if (jsonData['releases'].containsKey(revision)) {
       throw new ArchivePublisherException(
-          'Unable to overwrite existing metadata at $metadataGsPath:\n${result.stderr}', result);
+          'Revision $revision already exists in metadata! Aborting.');
+    }
+    jsonData['releases'][revision] = metadata;
+    final Directory localTempDir = tempDir ?? Directory.systemTemp.createTempSync('flutter_');
+    final File tempFile = new File(path.join(localTempDir.absolute.path, 'releases.json'));
+    final JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+    tempFile.writeAsStringSync(encoder.convert(jsonData));
+    _cloudCopy(tempFile.absolute.path, metadataGsPath);
+    if (tempDir == null) {
+      localTempDir.delete(recursive: true);
     }
   }
 
