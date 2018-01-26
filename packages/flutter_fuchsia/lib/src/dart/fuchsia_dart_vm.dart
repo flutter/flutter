@@ -26,8 +26,9 @@ class FuchsiaDartVm {
 
   FuchsiaDartVm._(this._peer);
 
-  /// Attempts to connect to the given [Uri]. Throws an error if unable to
-  /// connect.
+  /// Attempts to connect to the given `Uri`.
+  ///
+  /// Throws an error if unable to connect.
   static Future<FuchsiaDartVm> connect(Uri uri) async {
     final Stopwatch timer = new Stopwatch()..start();
     if (uri.scheme == 'http') uri = uri.replace(scheme: 'ws', path: '/ws');
@@ -49,22 +50,26 @@ class FuchsiaDartVm {
         await new Future<Null>.delayed(_kReconnectAttemptInterval);
         return FuchsiaDartVm._attemptConnection(uri, runningTimer);
       } else {
-        log.critical('Connection to Fuchsia\'s Dart VM timed out.');
+        log.critical('Connection to Fuchsia\'s Dart VM timed out at '
+            '${uri.toString()}');
         rethrow;
       }
     }
   }
 
-  /// Invokes a raw RPC command with the VM service.
+  /// Invokes a raw JSON RPC command with the VM service.
   Future<Map<String, dynamic>> invokeRpc(String function,
       {Map<String, dynamic> params, Duration timeout}) async {
     return _peer.sendRequest(function, params ?? {});
   }
 
-  /// Returns a list of flutter views by name. If the name of a flutter view
-  /// cannot be determined (there is no associated isolate), then the flutter
-  /// view's ID will be added instead.
-  Future<List<String>> listFlutterViewsByName() async {
+  /// Returns a list of flutter views names.
+  ///
+  /// If there is no associated isolate with the flutter view (used to determine
+  /// the flutter view's name), then the flutter view's ID will be added
+  /// instead. If none of these things can be found (isolate has no name or the
+  /// flutter view has no ID), then the result will not be added to the list.
+  Future<List<String>> listFlutterViewNames() async {
     // TODO(awdavies): Add some abstraction so that these views can be talked to
     // over RPC as well. Then these errors won't need to be handled in such an
     // ugly way.
@@ -74,18 +79,19 @@ class FuchsiaDartVm {
     final List<Map<String, dynamic>> flutterViews = rpcResponse['views'];
     for (Map<String, dynamic> flutterView in flutterViews) {
       Map<String, dynamic> isolate = flutterView['isolate'];
-      String id = flutterView['id'];
+      final String id = flutterView['id'];
       if (isolate != null) {
-        String name = isolate['name'];
+        final String name = isolate['name'];
         if (name != null) {
           viewNames.add(name);
         } else {
-          _log.severe('Unable to find name for isolate "$isolate"');
+          _log.warning('Unable to find name for isolate "$isolate"');
         }
       } else if (id != null) {
         viewNames.add(id);
       } else {
-        _log.severe('Unable to find view name for the following JSON structure '
+        _log.warning(
+            'Unable to find view name for the following JSON structure '
             '"$flutterView"');
       }
     }

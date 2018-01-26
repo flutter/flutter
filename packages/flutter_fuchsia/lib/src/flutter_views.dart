@@ -38,7 +38,7 @@ Future<List<String>> getFlutterViews(
   for (_ForwardedPort fp in ports) {
     if (!await _checkPort(fp.port)) continue;
     final FuchsiaDartVm vmService = await _getFuchsiaDartVm(fp.port);
-    List<String> viewNames = await vmService.listFlutterViewsByName();
+    List<String> viewNames = await vmService.listFlutterViewNames();
     views.addAll(viewNames);
   }
   await Future.wait(ports.map((_ForwardedPort fp) => fp.stop()));
@@ -166,7 +166,7 @@ class _ForwardedPort {
     final ProcessResult result = await _processManager.run(command);
     _log.fine(command.join(' '));
     if (result.exitCode != 0) {
-      _log.severe(
+      _log.warning(
           'Command failed:\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
     }
   }
@@ -179,7 +179,7 @@ class _ForwardedPort {
       port = s.port;
     } catch (e) {
       // Failures are signaled by a return value of 0 from this function.
-      _log.severe('_potentiallyAvailablePort failed: $e');
+      _log.warning('_potentiallyAvailablePort failed: $e');
     }
     if (s != null) await s.close();
     return port;
