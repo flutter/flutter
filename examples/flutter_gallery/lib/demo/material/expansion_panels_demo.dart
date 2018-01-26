@@ -348,10 +348,11 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                 });
               },
               children: _demoItems.map((DemoItem<dynamic> item) {
+                final Function builder = item.builder;
                 return new ExpansionPanel(
                   isExpanded: item.isExpanded,
                   headerBuilder: item.headerBuilder,
-                  body: (item.builder as Function)(item)
+                  body: builder(item)
                 );
               }).toList()
             ),
