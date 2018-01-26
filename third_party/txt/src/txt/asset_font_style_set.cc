@@ -35,8 +35,14 @@ SkTypeface* AssetFontStyleSet::createTypeface(int index) {
 }
 
 SkTypeface* AssetFontStyleSet::matchStyle(const SkFontStyle& pattern) {
-  FXL_DCHECK(false);
-  return nullptr;
+  if (typefaces_.empty())
+    return nullptr;
+
+  for (const sk_sp<SkTypeface>& typeface : typefaces_)
+    if (typeface->fontStyle() == pattern)
+      return typeface.get();
+
+  return typefaces_[0].get();
 }
 
 }  // namespace txt
