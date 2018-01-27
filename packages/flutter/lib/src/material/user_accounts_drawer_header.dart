@@ -82,15 +82,41 @@ class _AccountDetails extends StatefulWidget {
   _AccountDetailsState createState() => new _AccountDetailsState();
 }
 
-class _AccountDetailsState extends State<_AccountDetails> {
+class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProviderStateMixin {
+  Animation<double> _animation;
+  AnimationController _controller;
+
   @override
   void initState () {
     super.initState();
+
+    _controller = new AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _animation = new CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      )
+      ..addListener(() {
+        setState(() {});
+      });
   }
 
   @override
   void dispose() {
+    _controller.dispose();
     super.dispose();
+  }
+
+  void _onTap() {
+    if (widget.isOpen) {
+      _controller.reverse();
+    } else {
+      _controller.forward();
+    }
+
+    return widget.onTap();
   }
 
   @override
@@ -138,17 +164,20 @@ class _AccountDetailsState extends State<_AccountDetails> {
         child: Semantics(
           container: true,
           button: true,
-          onTap: widget.onTap,
+          onTap: _onTap,
           child: SizedBox(
             height: _kAccountDetailsHeight,
             width: _kAccountDetailsHeight,
             child: Center(
-              child: Icon(
-                widget.isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-                color: Colors.white,
-                semanticLabel: widget.isOpen
-                    ? localizations.hideAccountsLabel
-                    : localizations.showAccountsLabel,
+              child: Transform.rotate(
+                angle: _animation.value * math.PI,
+                child: Icon(
+                  Icons.arrow_drop_down,
+                  color: Colors.white,
+                  semanticLabel: widget.isOpen
+                      ? localizations.hideAccountsLabel
+                      : localizations.showAccountsLabel,
+                ),
               ),
             ),
           ),
@@ -166,7 +195,7 @@ class _AccountDetailsState extends State<_AccountDetails> {
 
     if (widget.onTap != null) {
       accountDetails = InkWell(
-        onTap: widget.onTap,
+        onTap: _onTap,
         child: accountDetails,
         excludeFromSemantics: true,
       );
