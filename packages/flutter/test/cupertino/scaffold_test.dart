@@ -254,4 +254,53 @@ void main() {
     expect(find.text('Page 1 of tab 2'), isOnstage);
     expect(find.text('Page 2 of tab 1', skipOffstage: false), isOffstage);
   });
+
+  testWidgets('Decorated with white background by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return const CupertinoPageScaffold(
+                child: const Center(),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.color, CupertinoColors.white);
+  });
+
+  testWidgets('Overrides background color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return const CupertinoPageScaffold(
+                child: const Center(),
+                backgroundColor: const Color(0xFF010203),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.color, const Color(0xFF010203));
+  });
 }
