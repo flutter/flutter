@@ -63,7 +63,7 @@ class _AccountPictures extends StatelessWidget {
 }
 
 class _AccountDetails extends StatefulWidget {
-  _AccountDetails({
+  const _AccountDetails({
     @required this.accountName,
     @required this.accountEmail,
     this.onTap,
