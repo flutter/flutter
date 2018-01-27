@@ -27,6 +27,7 @@ void main() {
   Directory tempDir;
   String basePath;
   DevFS devFS;
+  final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
 
   setUpAll(() {
     fs = new MemoryFileSystem();
@@ -212,7 +213,6 @@ void main() {
     });
 
     testUsingContext('add an asset bundle', () async {
-      final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
       assetBundle.entries['a.txt'] = new DevFSStringContent('abc');
       final int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
       devFSOperations.expectMessages(<String>[
@@ -226,7 +226,6 @@ void main() {
     });
 
     testUsingContext('add a file to the asset bundle - bundleDirty', () async {
-      final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
       assetBundle.entries['b.txt'] = new DevFSStringContent('abcd');
       final int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
       // Expect entire asset bundle written because bundleDirty is true
@@ -243,7 +242,6 @@ void main() {
     });
 
     testUsingContext('add a file to the asset bundle', () async {
-      final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
       assetBundle.entries['c.txt'] = new DevFSStringContent('12');
       final int bytes = await devFS.update(bundle: assetBundle);
       devFSOperations.expectMessages(<String>[
@@ -258,7 +256,6 @@ void main() {
     });
 
     testUsingContext('delete a file from the asset bundle', () async {
-      final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
       assetBundle.entries.remove('c.txt');
       final int bytes = await devFS.update(bundle: assetBundle);
       devFSOperations.expectMessages(<String>[
@@ -272,7 +269,6 @@ void main() {
     });
 
     testUsingContext('delete all files from the asset bundle', () async {
-      final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
       assetBundle.entries.clear();
       final int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
       devFSOperations.expectMessages(<String>[
