@@ -116,7 +116,7 @@ void main(List<String> args) {
 
 String getFullTag() {
   return getGitOutput(
-    'describe --match v*.*.* --exclude *-* --first-parent --long --tags',
+    'describe --match v*.*.* --first-parent --long --tags',
     'obtain last released version number',
   );
 }
