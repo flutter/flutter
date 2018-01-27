@@ -342,10 +342,12 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       throwToolExit('No Flutter engine build found at $engineBuildPath.', exitCode: 2);
     }
 
+    // Determine the host engine directory associated with the local engine:
+    // * strip '_sim_' since there are no host simulator builds.
+    // * replace the target platform with host.
     final String basename = fs.path.basename(engineBuildPath);
-    final String engineHostBuildPath = fs.path.normalize(fs.path.join(
-        fs.path.dirname(engineBuildPath),
-        'host_' + basename.substring(basename.indexOf('_') + 1)));
+    final String hostBasename = 'host_' + basename.replaceFirst('_sim_', '_').substring(basename.indexOf('_') + 1);
+    final String engineHostBuildPath = fs.path.normalize(fs.path.join(fs.path.dirname(engineBuildPath), hostBasename));
 
     return new EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
