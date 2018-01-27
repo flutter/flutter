@@ -1,43 +1,45 @@
-# This file contains the fastlane.tools configuration
-# You can find the documentation at https://docs.fastlane.tools
-#
-# For a list of all available actions, check out
-#
-#     https://docs.fastlane.tools/actions
-#
-
-# Uncomment the line if you want fastlane to automatically update itself
-# update_fastlane
-
 default_platform(:ios)
 
+# This should be run after running
+# flutter build ios --release --no-codesign
+# to build the app using the Flutter toolchain. This lane is meant to only
+# rebuild the app by:
+# 1- Signing using the publishing credentials; and
+# 2- xcodebuild with archive option
 platform :ios do
   desc "Push a new release to TestFlight"
   lane :build_and_deploy_testflight do
-    get_certificates
-    get_provisioning_profile
-    # resign(
-    #   ipa: "../build/ios/iphoneos/Runner.app",
-    #   signing_identity: "iPhone Distribution: Store Ladd (S8QB4VV633)",
+    # setup_travis(
+    #   force: true
     # )
+
+    # Retrieves all the necessary certs and provisioning profiles
+    sync_code_signing(
+      git_url: ENV["PUBLISHING_MATCH_CERTIFICATE_REPO"],
+      type: "appstore",
+      readonly: true
+    )
+
+    # Modify the Xcode project to use the new team and profile.
+    # It will put the git state to dirty but Travis will be wiped after
+    # then run session.
     disable_automatic_code_signing
     update_project_provisioning(
       xcodeproj: "Runner.xcodeproj",
       target_filter: "Runner",
       build_configuration: "Release",
+      profile: ENV["sigh_io.flutter.demo.gallery_appstore_profile-path"],
     )
+
+    # Build and archive the app again.
     build_ios_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
       export_method: "app-store",
-      # codesigning_identity: "iPhone Distribution: Store Ladd (S8QB4VV633)",
-      # export_options: {
-      #   provisioningProfiles: {
-      #     "io.flutter.demo.gallery" => "iPhone Distribution: Store Ladd (S8QB4VV633)",
-      #   }
-      # }
+      # Verify that the right signing identity is used for publishing.
+      codesigning_identity: "iPhone Distribution: Store Ladd (S8QB4VV633)",
     )
-    enable_automatic_code_signing
+
     upload_to_testflight
   end
 end
