@@ -313,10 +313,21 @@ class _NestedScrollViewState extends State<NestedScrollView> {
     super.dispose();
   }
 
+  bool _lastHasScrolledBody;
+
   void _handleHasScrolledBodyChanged() {
     if (!mounted)
       return;
-    setState(() { /* _coordinator.hasScrolledBody changed (we use it in the build method) */ });
+    final bool newHasScrolledBody = _coordinator.hasScrolledBody;
+    if (_lastHasScrolledBody != newHasScrolledBody) {
+      setState(() {
+        // _coordinator.hasScrolledBody changed (we use it in the build method)
+        // (We record _lastHasScrolledBody in the build() method, rather than in
+        // this setState call, because the build() method may be called more
+        // often than just from here, and we want to only call setState when the
+        // new value is different than the last built value.)
+      });
+    }
   }
 
   @override
@@ -325,6 +336,7 @@ class _NestedScrollViewState extends State<NestedScrollView> {
       state: this,
       child: new Builder(
         builder: (BuildContext context) {
+          _lastHasScrolledBody = _coordinator.hasScrolledBody;
           return new _NestedScrollViewCustomScrollView(
             scrollDirection: widget.scrollDirection,
             reverse: widget.reverse,
@@ -335,7 +347,7 @@ class _NestedScrollViewState extends State<NestedScrollView> {
             slivers: widget._buildSlivers(
               context,
               _coordinator._innerController,
-              _coordinator.hasScrolledBody,
+              _lastHasScrolledBody,
             ),
             handle: _absorberHandle,
           );
@@ -461,13 +473,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     return false;
   }
 
-  bool _lastHasScrolledBody;
   void updateShadow() {
-    final bool newHasScrolledBody = hasScrolledBody;
-    if (_lastHasScrolledBody != newHasScrolledBody) {
-      if (_onHasScrolledBodyChanged != null)
-        _onHasScrolledBodyChanged();
-    }
+    if (_onHasScrolledBodyChanged != null)
+      _onHasScrolledBodyChanged();
   }
 
   ScrollDirection get userScrollDirection => _userScrollDirection;
@@ -833,22 +841,24 @@ class _NestedScrollController extends ScrollController {
     super.attach(position);
     coordinator.updateParent();
     coordinator.updateCanDrag();
+    position.addListener(_scheduleUpdateShadow);
     _scheduleUpdateShadow();
   }
 
   @override
   void detach(ScrollPosition position) {
     assert(position is _NestedScrollPosition);
+    position.removeListener(_scheduleUpdateShadow);
     super.detach(position);
     _scheduleUpdateShadow();
   }
 
   void _scheduleUpdateShadow() {
     // We do this asynchronously for attach() so that the new position has had
-    // time to be initialized, and we do it asynchronously for detach() because
-    // that happens synchronously during a frame, at a time where it's too late
-    // to call setState. Since the result is usually animated, the lag incurred
-    // is no big deal.
+    // time to be initialized, and we do it asynchronously for detach() and from
+    // the position change notifications because those happen synchronously
+    // during a frame, at a time where it's too late to call setState. Since the
+    // result is usually animated, the lag incurred is no big deal.
     SchedulerBinding.instance.addPostFrameCallback(
       (Duration timeStamp) {
         coordinator.updateShadow();
