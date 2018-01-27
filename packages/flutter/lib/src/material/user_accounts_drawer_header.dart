@@ -88,6 +88,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
     super.initState();
 
     _controller = new AnimationController(
+      value: widget.isOpen ? 1.0 : 0.0,
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
