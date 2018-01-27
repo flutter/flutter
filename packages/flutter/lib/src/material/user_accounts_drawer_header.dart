@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -60,19 +62,33 @@ class _AccountPictures extends StatelessWidget {
   }
 }
 
-class _AccountDetails extends StatelessWidget {
-  const _AccountDetails({
-    Key key,
+class _AccountDetails extends StatefulWidget {
+  _AccountDetails({
     @required this.accountName,
     @required this.accountEmail,
     this.onTap,
     this.isOpen,
-  }) : super(key: key);
+  });
 
   final Widget accountName;
   final Widget accountEmail;
   final VoidCallback onTap;
   final bool isOpen;
+
+  @override
+  _AccountDetailsState createState() => new _AccountDetailsState();
+}
+
+class _AccountDetailsState extends State<_AccountDetails> {
+  @override
+  void initState () {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +97,7 @@ class _AccountDetails extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final List<Widget> children = <Widget>[];
 
-    if (accountName != null) {
+    if (widget.accountName != null) {
       final Widget accountNameLine = new LayoutId(
         id: _AccountDetailsLayout.accountName,
         child: new Padding(
@@ -89,14 +105,14 @@ class _AccountDetails extends StatelessWidget {
           child: new DefaultTextStyle(
             style: theme.primaryTextTheme.body2,
             overflow: TextOverflow.ellipsis,
-            child: accountName,
+            child: widget.accountName,
           ),
         ),
       );
       children.add(accountNameLine);
     }
 
-    if (accountEmail != null) {
+    if (widget.accountEmail != null) {
       final Widget accountEmailLine = new LayoutId(
         id: _AccountDetailsLayout.accountEmail,
         child: new Padding(
@@ -104,29 +120,29 @@ class _AccountDetails extends StatelessWidget {
           child: new DefaultTextStyle(
             style: theme.primaryTextTheme.body1,
             overflow: TextOverflow.ellipsis,
-            child: accountEmail,
+            child: widget.accountEmail,
           ),
         ),
       );
       children.add(accountEmailLine);
     }
 
-    if (onTap != null) {
+    if (widget.onTap != null) {
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
       final Widget dropDownIcon = new LayoutId(
         id: _AccountDetailsLayout.dropdownIcon,
         child: new Semantics(
           container: true,
           button: true,
-          onTap: onTap,
+          onTap: widget.onTap,
           child: new SizedBox(
             height: _kAccountDetailsHeight,
             width: _kAccountDetailsHeight,
             child: new Center(
               child: new Icon(
-                isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                widget.isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
                 color: Colors.white,
-                semanticLabel: isOpen
+                semanticLabel: widget.isOpen
                     ? localizations.hideAccountsLabel
                     : localizations.showAccountsLabel,
               ),
@@ -144,9 +160,9 @@ class _AccountDetails extends StatelessWidget {
       children: children,
     );
 
-    if (onTap != null) {
+    if (widget.onTap != null) {
       accountDetails = new InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: accountDetails,
         excludeFromSemantics: true,
       );
