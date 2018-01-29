@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -337,7 +337,7 @@ void main() {
           child: new MediaQuery(
             data: const MediaQueryData(),
             child: new Column(
-              children: <Widget>[
+              children: const <Widget>[
                 const ListTile(
                   title: const Text('one'),
                 ),
@@ -347,6 +347,7 @@ void main() {
                 ),
                 const ListTile(
                   title: const Text('three'),
+                  enabled: false,
                 ),
               ],
             ),
@@ -360,13 +361,24 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             label: 'one',
+            flags: <SemanticsFlag>[
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+            ],
           ),
           new TestSemantics.rootChild(
             label: 'two',
-            flags: <SemanticsFlags>[SemanticsFlags.isSelected],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isSelected,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+            ],
           ),
           new TestSemantics.rootChild(
             label: 'three',
+            flags: <SemanticsFlag>[
+              SemanticsFlag.hasEnabledState,
+            ],
           ),
         ]
       ),

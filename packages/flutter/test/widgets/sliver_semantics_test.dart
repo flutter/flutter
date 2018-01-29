@@ -51,7 +51,7 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
-            tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
+            tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
                 id: 5,
@@ -89,7 +89,7 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
-            tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
+            tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
                 id: 5,
@@ -112,7 +112,7 @@ void main() {
               new TestSemantics(
                 id: 4,
                 label: 'Semantics Test with Slivers',
-                tags: <SemanticsTag>[RenderSemanticsGestureHandler.excludeFromScrolling],
+                tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
               ),
             ],
           )
@@ -132,7 +132,7 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
-            tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
+            tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
                 id: 5,
@@ -203,7 +203,7 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 7,
-            tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
+            tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
                 id: 10,
@@ -257,7 +257,7 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 11,
-            tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
+            tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
                 id: 17,
@@ -339,7 +339,7 @@ void main() {
           new TestSemantics.rootChild(
             id: 18,
             rect: TestSemantics.fullScreen,
-            tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
+            tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
                 id: 23,
@@ -371,7 +371,7 @@ void main() {
               new TestSemantics(
                 id: 22,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
-                tags: <SemanticsTag>[RenderSemanticsGestureHandler.excludeFromScrolling],
+                tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                 label: 'AppBar',
               ),
             ],
@@ -422,7 +422,7 @@ void main() {
           new TestSemantics.rootChild(
             id: 24,
             rect: TestSemantics.fullScreen,
-            tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
+            tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
                 id: 29,
@@ -454,7 +454,7 @@ void main() {
               new TestSemantics(
                 id: 28,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
-                tags: <SemanticsTag>[RenderSemanticsGestureHandler.excludeFromScrolling],
+                tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                 label: 'AppBar'
               ),
             ],
@@ -507,7 +507,7 @@ void main() {
           new TestSemantics.rootChild(
             id: 30,
             rect: TestSemantics.fullScreen,
-            tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
+            tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
                 id: 35,
@@ -540,7 +540,7 @@ void main() {
                 id: 34,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 transform: new Matrix4.translation(new Vector3(0.0, 544.0, 0.0)),
-                tags: <SemanticsTag>[RenderSemanticsGestureHandler.excludeFromScrolling],
+                tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                 label: 'AppBar'
               ),
             ],
@@ -592,7 +592,7 @@ void main() {
           new TestSemantics.rootChild(
             id: 36,
             rect: TestSemantics.fullScreen,
-            tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
+            tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
                 id: 41,
@@ -625,7 +625,7 @@ void main() {
                 id: 40,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 transform: new Matrix4.translation(new Vector3(0.0, 544.0, 0.0)),
-                tags: <SemanticsTag>[RenderSemanticsGestureHandler.excludeFromScrolling],
+                tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                 label: 'AppBar'
               ),
             ],

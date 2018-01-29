@@ -13,7 +13,7 @@ Future<Null> test(WidgetTester tester, double offset, { double anchor: 0.0 }) {
       child: new Viewport(
         anchor: anchor / 600.0,
         offset: new ViewportOffset.fixed(offset),
-        slivers: <Widget>[
+        slivers: const <Widget>[
           const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
           const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
           const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),

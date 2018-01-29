@@ -19,7 +19,7 @@ if [ -d "$FLUTTER_PUB_CACHE" ]; then
 fi
 
 # Install dartdoc.
-bin/cache/dart-sdk/bin/pub global activate dartdoc 0.15.0+1
+bin/cache/dart-sdk/bin/pub global activate dartdoc 0.15.1
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc.
@@ -44,7 +44,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
       done
     fi
 
-    if [ "$TRAVIS_BRANCH" == "alpha" ]; then
+    if [ "$TRAVIS_BRANCH" == "dev" ]; then
       while : ; do
         firebase deploy --project docs-flutter-io && break
         echo Error: Unable to deploy documentation to firebase. Retrying in five seconds...

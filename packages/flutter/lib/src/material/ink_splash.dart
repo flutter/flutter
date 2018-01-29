@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'ink_well.dart';
 import 'material.dart';
 
 const Duration _kUnconfirmedSplashDuration = const Duration(seconds: 1);
@@ -42,7 +43,39 @@ double _getSplashRadiusForPositionInSize(Size bounds, Offset position) {
   return math.max(math.max(d1, d2), math.max(d3, d4)).ceilToDouble();
 }
 
+class _InkSplashFactory extends InteractiveInkFeatureFactory {
+  const _InkSplashFactory();
+
+  @override
+  InteractiveInkFeature create({
+    @required MaterialInkController controller,
+    @required RenderBox referenceBox,
+    @required Offset position,
+    @required Color color,
+    bool containedInkWell: false,
+    RectCallback rectCallback,
+    BorderRadius borderRadius,
+    double radius,
+    VoidCallback onRemoved,
+  }) {
+    return new InkSplash(
+      controller: controller,
+      referenceBox: referenceBox,
+      position: position,
+      color: color,
+      containedInkWell: containedInkWell,
+      rectCallback: rectCallback,
+      borderRadius: borderRadius,
+      radius: radius,
+      onRemoved: onRemoved,
+    );
+  }
+}
+
 /// A visual reaction on a piece of [Material] to user input.
+///
+/// A circular ink feature whose origin starts at the input touch point
+/// and whose radius expands from zero.
 ///
 /// This object is rarely created directly. Instead of creating an ink splash
 /// directly, consider using an [InkResponse] or [InkWell] widget, which uses
@@ -50,6 +83,8 @@ double _getSplashRadiusForPositionInSize(Size bounds, Offset position) {
 ///
 /// See also:
 ///
+///  * [InkRipple], which is an ink splash feature that expands more
+///    aggressively than this class does.
 ///  * [InkResponse], which uses gestures to trigger ink highlights and ink
 ///    splashes in the parent [Material].
 ///  * [InkWell], which is a rectangular [InkResponse] (the most common type of
@@ -57,7 +92,11 @@ double _getSplashRadiusForPositionInSize(Size bounds, Offset position) {
 ///  * [Material], which is the widget on which the ink splash is painted.
 ///  * [InkHighlight], which is an ink feature that emphasizes a part of a
 ///    [Material].
-class InkSplash extends InkFeature {
+class InkSplash extends InteractiveInkFeature {
+  /// Used to specify this type of ink splash for an [InkWell], [InkResponse]
+  /// or material [Theme].
+  static const InteractiveInkFeatureFactory splashFactory = const _InkSplashFactory();
+
   /// Begin a splash, centered at position relative to [referenceBox].
   ///
   /// The [controller] argument is typically obtained via
@@ -80,16 +119,15 @@ class InkSplash extends InkFeature {
     Color color,
     bool containedInkWell: false,
     RectCallback rectCallback,
-    BorderRadius borderRadius = BorderRadius.zero,
+    BorderRadius borderRadius,
     double radius,
     VoidCallback onRemoved,
   }) : _position = position,
-       _color = color,
-       _borderRadius = borderRadius,
+       _borderRadius = borderRadius ?? BorderRadius.zero,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        _repositionToReferenceBox = !containedInkWell,
-       super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
+       super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     assert(_borderRadius != null);
     _radiusController = new AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
@@ -121,20 +159,7 @@ class InkSplash extends InkFeature {
   Animation<int> _alpha;
   AnimationController _alphaController;
 
-  /// The color of the splash.
-  Color get color => _color;
-  Color _color;
-  set color(Color value) {
-    if (value == _color)
-      return;
-    _color = value;
-    controller.markNeedsPaint();
-  }
-
-
-  /// The user input is confirmed.
-  ///
-  /// Causes the reaction to propagate faster across the material.
+  @override
   void confirm() {
     final int duration = (_targetRadius / _kSplashConfirmedVelocity).floor();
     _radiusController
@@ -143,9 +168,7 @@ class InkSplash extends InkFeature {
     _alphaController.forward();
   }
 
-  /// The user input was canceled.
-  ///
-  /// Causes the reaction to gradually disappear.
+  @override
   void cancel() {
     _alphaController.forward();
   }
@@ -184,7 +207,7 @@ class InkSplash extends InkFeature {
 
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
-    final Paint paint = new Paint()..color = _color.withAlpha(_alpha.value);
+    final Paint paint = new Paint()..color = color.withAlpha(_alpha.value);
     Offset center = _position;
     if (_repositionToReferenceBox)
       center = Offset.lerp(center, referenceBox.size.center(Offset.zero), _radiusController.value);

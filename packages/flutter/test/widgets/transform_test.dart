@@ -277,4 +277,22 @@ void main() {
       700.0, -100.0, 0.0, 1.0,
     ]);
   });
+
+  testWidgets('applyPaintTransform of Transform in Padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Padding(
+        padding: const EdgeInsets.only(
+          left: 30.0,
+          top: 20.0,
+          right: 50.0,
+          bottom: 70.0,
+        ),
+        child: new Transform(
+          transform: new Matrix4.diagonal3Values(2.0, 2.0, 2.0),
+          child: const Placeholder(),
+        ),
+      ),
+    );
+    expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(30.0, 20.0));
+  });
 }

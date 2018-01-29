@@ -457,8 +457,8 @@ class HotRunner extends ResidentRunner {
         status.cancel();
         if (result.isOk)
           printStatus('${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-        if (result.hint != null)
-          printStatus('\n${result.hint}');
+        if (result.hintMessage != null)
+          printStatus('\n${result.hintMessage}');
         return result;
       } catch (error) {
         status.cancel();
@@ -515,9 +515,13 @@ class HotRunner extends ResidentRunner {
 
       int countExpectedReports = 0;
       for (FlutterDevice device in flutterDevices) {
-        // List has one report per Flutter view.
-        await device.resetAssetDirectory();
+        if (_runningFromSnapshot) {
+          // Asset directory has to be set only once when we switch from
+          // running from snapshot to running from uploaded files.
+          await device.resetAssetDirectory();
+        }
 
+        // List has one report per Flutter view.
         final List<Future<Map<String, dynamic>>> reports = device.reloadSources(
           entryPath,
           pause: pause
@@ -674,7 +678,8 @@ class HotRunner extends ResidentRunner {
     return new OperationResult(
       reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,
       reloadMessage,
-      hint: unusedElementMessage,
+      hintMessage: unusedElementMessage,
+      hintId: unusedElementMessage != null ? 'restartRecommended' : null,
     );
   }
 

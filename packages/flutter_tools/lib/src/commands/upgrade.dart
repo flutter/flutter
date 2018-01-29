@@ -14,6 +14,7 @@ import '../doctor.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
+import 'channel.dart';
 
 class UpgradeCommand extends FlutterCommand {
   @override
@@ -38,6 +39,8 @@ class UpgradeCommand extends FlutterCommand {
     final FlutterVersion flutterVersion = FlutterVersion.instance;
 
     printStatus('Upgrading Flutter from ${Cache.flutterRoot}...');
+
+    await ChannelCommand.upgradeChannel();
 
     int code = await runCommandAndStreamOutput(
       <String>['git', 'pull', '--ff-only'],

@@ -160,6 +160,15 @@ abstract class CachingAssetBundle extends AssetBundle {
     final ByteData data = await load(key);
     if (data == null)
       throw new FlutterError('Unable to load asset: $key');
+    if (data.lengthInBytes < 10 * 1024) {
+      // 10KB takes about 3ms to parse on a Pixel 2 XL.
+      // See: https://github.com/dart-lang/sdk/issues/31954
+      return UTF8.decode(data.buffer.asUint8List());
+    }
+    return compute(_utf8decode, data, debugLabel: 'UTF8 decode for "$key"');
+  }
+
+  static String _utf8decode(ByteData data) {
     return UTF8.decode(data.buffer.asUint8List());
   }
 
@@ -179,10 +188,10 @@ abstract class CachingAssetBundle extends AssetBundle {
     assert(parser != null);
     if (_structuredDataCache.containsKey(key))
       return _structuredDataCache[key];
-    Completer<dynamic> completer;
-    Future<dynamic> result;
-    loadString(key, cache: false).then<T>(parser).then<Null>((T value) {
-      result = new SynchronousFuture<dynamic>(value);
+    Completer<T> completer;
+    Future<T> result;
+    loadString(key, cache: false).then<T>(parser).then<void>((T value) {
+      result = new SynchronousFuture<T>(value);
       _structuredDataCache[key] = result;
       if (completer != null) {
         // We already returned from the loadStructuredData function, which means
@@ -198,7 +207,7 @@ abstract class CachingAssetBundle extends AssetBundle {
     }
     // The code above hasn't yet run its "then" handler yet. Let's prepare a
     // completer for it to use when it does run.
-    completer = new Completer<dynamic>();
+    completer = new Completer<T>();
     _structuredDataCache[key] = completer.future;
     return completer.future;
   }

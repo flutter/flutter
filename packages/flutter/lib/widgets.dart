@@ -45,6 +45,7 @@ export 'src/widgets/image.dart';
 export 'src/widgets/image_icon.dart';
 export 'src/widgets/implicit_animations.dart';
 export 'src/widgets/layout_builder.dart';
+export 'src/widgets/list_wheel_scroll_view.dart';
 export 'src/widgets/localizations.dart';
 export 'src/widgets/media_query.dart';
 export 'src/widgets/modal_barrier.dart';

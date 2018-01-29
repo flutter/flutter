@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-final Key blockKey = const Key('test');
+const Key blockKey = const Key('test');
 
 void main() {
   testWidgets('Cannot scroll a non-overflowing block', (WidgetTester tester) async {
@@ -120,7 +120,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new ListView(
           controller: controller,
-          children: <Widget>[const Text('A'), const Text('B'), const Text('C')],
+          children: const <Widget>[const Text('A'), const Text('B'), const Text('C')],
         ),
       );
     }
@@ -178,7 +178,7 @@ void main() {
             new Flexible(
               // The overall height of the ListView's contents is 500
               child: new ListView(
-                children: <Widget>[
+                children: const <Widget>[
                   const SizedBox(
                     height: 150.0,
                     child: const Center(

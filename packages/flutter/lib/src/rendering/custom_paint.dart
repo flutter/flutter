@@ -627,6 +627,13 @@ class RenderCustomPaint extends RenderProxyBox {
     super.assembleSemanticsNode(node, config, finalChildren);
   }
 
+  @override
+  void clearSemantics() {
+    super.clearSemantics();
+    _backgroundSemanticsNodes = null;
+    _foregroundSemanticsNodes = null;
+  }
+
   /// Updates the nodes of `oldSemantics` using data in `newChildSemantics`, and
   /// returns a new list containing child nodes sorted according to the order
   /// specified by `newChildSemantics`.
@@ -852,11 +859,23 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.onDecrease != null) {
       config.onDecrease = properties.onDecrease;
     }
+    if (properties.onCopy != null) {
+      config.onCopy = properties.onCopy;
+    }
+    if (properties.onCut != null) {
+      config.onCut = properties.onCut;
+    }
+    if (properties.onPaste != null) {
+      config.onPaste = properties.onPaste;
+    }
     if (properties.onMoveCursorForwardByCharacter != null) {
       config.onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter;
     }
     if (properties.onMoveCursorBackwardByCharacter != null) {
       config.onMoveCursorBackwardByCharacter = properties.onMoveCursorBackwardByCharacter;
+    }
+    if (properties.onSetSelection != null) {
+      config.onSetSelection = properties.onSetSelection;
     }
 
     newChild.updateWith(

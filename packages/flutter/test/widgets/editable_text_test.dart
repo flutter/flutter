@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -277,13 +277,13 @@ void main() {
       ),
     );
 
-    expect(semantics, includesNodeWith(flags: <SemanticsFlags>[SemanticsFlags.isTextField]));
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
 
     await tester.tap(find.byType(EditableText));
     await tester.idle();
     await tester.pump();
 
-    expect(semantics, includesNodeWith(flags: <SemanticsFlags>[SemanticsFlags.isTextField, SemanticsFlags.isFocused]));
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused]));
   });
 
   testWidgets('EditableText includes text as value in semantics', (WidgetTester tester) async {
@@ -309,7 +309,7 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(
-      flags: <SemanticsFlags>[SemanticsFlags.isTextField],
+      flags: <SemanticsFlag>[SemanticsFlag.isTextField],
       value: value1,
     ));
 
@@ -319,7 +319,7 @@ void main() {
     await tester.pump();
 
     expect(semantics, includesNodeWith(
-      flags: <SemanticsFlags>[SemanticsFlags.isTextField],
+      flags: <SemanticsFlag>[SemanticsFlag.isTextField],
       value: value2,
     ));
   });
@@ -383,6 +383,7 @@ void main() {
       value: 'test',
       actions: <SemanticsAction>[
         SemanticsAction.moveCursorBackwardByCharacter,
+        SemanticsAction.setSelection,
       ],
     ));
 
@@ -395,6 +396,7 @@ void main() {
       actions: <SemanticsAction>[
         SemanticsAction.moveCursorBackwardByCharacter,
         SemanticsAction.moveCursorForwardByCharacter,
+        SemanticsAction.setSelection,
       ],
     ));
 
@@ -406,6 +408,7 @@ void main() {
       value: 'test',
       actions: <SemanticsAction>[
         SemanticsAction.moveCursorForwardByCharacter,
+        SemanticsAction.setSelection,
       ],
     ));
 
@@ -452,6 +455,7 @@ void main() {
       actions: <SemanticsAction>[
         SemanticsAction.moveCursorBackwardByCharacter,
         SemanticsAction.moveCursorForwardByCharacter,
+        SemanticsAction.setSelection,
       ],
     ));
 
@@ -470,6 +474,7 @@ void main() {
       value: 'test',
       actions: <SemanticsAction>[
         SemanticsAction.moveCursorForwardByCharacter,
+        SemanticsAction.setSelection,
       ],
     ));
 
@@ -523,6 +528,7 @@ void main() {
       actions: <SemanticsAction>[
         SemanticsAction.moveCursorBackwardByCharacter,
         SemanticsAction.moveCursorForwardByCharacter,
+        SemanticsAction.setSelection,
       ],
     ));
 
@@ -541,6 +547,7 @@ void main() {
       value: 'test',
       actions: <SemanticsAction>[
         SemanticsAction.moveCursorForwardByCharacter,
+        SemanticsAction.setSelection,
       ],
     ));
 

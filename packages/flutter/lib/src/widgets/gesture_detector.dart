@@ -570,21 +570,6 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }
   }
 
-  /// Sends a [SemanticsEvent] in the context of the [SemanticsNode] that is
-  /// annotated with this object's semantics information.
-  ///
-  /// The event can be interpreted by assistive technologies to provide
-  /// additional feedback to the user about the state of the UI.
-  ///
-  /// The event will not be sent if [RawGestureDetector.excludeFromSemantics] is
-  /// set to true.
-  void sendSemanticsEvent(SemanticsEvent event) {
-    if (!widget.excludeFromSemantics) {
-      final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
-      semanticsGestureHandler.sendSemanticsEvent(event);
-    }
-  }
-
   @override
   void dispose() {
     for (GestureRecognizer recognizer in _recognizers.values)

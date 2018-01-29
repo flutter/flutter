@@ -156,9 +156,6 @@ class ImageStream extends Diagnosticable {
   Object get key => _completer != null ? _completer : this;
 
   @override
-  String toStringShort() => '$runtimeType';
-
-  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new ObjectFlagProperty<ImageStreamCompleter>(
@@ -181,10 +178,10 @@ class ImageStream extends Diagnosticable {
 /// Base class for those that manage the loading of [dart:ui.Image] objects for
 /// [ImageStream]s.
 ///
-/// This class is rarely used directly. Generally, an [ImageProvider] subclass
-/// will return an [ImageStream] and automatically configure it with the right
-/// [ImageStreamCompleter] when possible.
-class ImageStreamCompleter extends Diagnosticable {
+/// [ImageStreamListener] objects are rarely constructed directly. Generally, an
+/// [ImageProvider] subclass will return an [ImageStream] and automatically
+/// configure it with the right [ImageStreamCompleter] when possible.
+abstract class ImageStreamCompleter extends Diagnosticable {
   final List<ImageListener> _listeners = <ImageListener>[];
   ImageInfo _current;
 
@@ -240,9 +237,6 @@ class ImageStreamCompleter extends Diagnosticable {
     ));
   }
 
-  @override
-  String toStringShort() => '$runtimeType';
-
   /// Accumulates a list of strings describing the object's state. Subclasses
   /// should override this to have their information included in [toString].
   @override
@@ -276,7 +270,7 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   /// FlutterErrorDetails]).
   OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector informationCollector })
     : assert(image != null) {
-    image.then<Null>(setImage, onError: (dynamic error, StackTrace stack) {
+    image.then<void>(setImage, onError: (dynamic error, StackTrace stack) {
       FlutterError.reportError(new FlutterErrorDetails(
         exception: error,
         stack: stack,
@@ -339,7 +333,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
        _scale = scale,
        _framesEmitted = 0,
        _timer = null {
-    codec.then<Null>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
+    codec.then<void>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
       FlutterError.reportError(new FlutterErrorDetails(
         exception: error,
         stack: stack,

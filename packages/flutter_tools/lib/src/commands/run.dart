@@ -109,10 +109,6 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Turn on strong mode semantics.\n'
               'Valid only when --preview-dart-2 is also specified');
-    argParser.addOption('packages',
-        hide: !verboseHelp,
-        valueHelp: 'path',
-        help: 'Specify the path to the .packages file.');
     argParser.addOption('project-root',
         hide: !verboseHelp,
         help: 'Specify the project root directory.');
@@ -257,9 +253,12 @@ class RunCommand extends RunCommandBase {
           devices.first, fs.currentDirectory.path, targetFile, route,
           _createDebuggingOptions(), hotMode,
           applicationBinary: argResults['use-application-binary'],
+          previewDart2: argResults['preview-dart-2'],
+          strongMode: argResults['strong'],
           projectRootPath: argResults['project-root'],
-          packagesFilePath: argResults['packages'],
-          projectAssets: argResults['project-assets']
+          packagesFilePath: globalResults['packages'],
+          projectAssets: argResults['project-assets'],
+          ipv6: ipv6,
         );
       } catch (error) {
         throwToolExit(error.toString());
@@ -310,7 +309,7 @@ class RunCommand extends RunCommandBase {
         previewDart2: argResults['preview-dart-2'],
         strongMode: argResults['strong'],
         projectRootPath: argResults['project-root'],
-        packagesFilePath: argResults['packages'],
+        packagesFilePath: globalResults['packages'],
         projectAssets: argResults['project-assets'],
         stayResident: stayResident,
         ipv6: ipv6,

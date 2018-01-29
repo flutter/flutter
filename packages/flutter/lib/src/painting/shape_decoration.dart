@@ -150,6 +150,20 @@ class ShapeDecoration extends Decoration {
   ///
   /// The [shape] property specifies the outline (border) of the decoration. The
   /// shape must not be null.
+  ///
+  /// ## Directionality-dependent shapes
+  ///
+  /// Some [ShapeBorder] subclasses are sensitive to the [TextDirection]. The
+  /// direction that is provided to the border (e.g. for its [ShapeBorder.paint]
+  /// method) is the one specified in the [ImageConfiguration]
+  /// ([ImageConfiguration.textDirection]) provided to the [BoxPainter] (via its
+  /// [BoxPainter.paint method). The [BoxPainter] is obtained when
+  /// [createBoxPainter] is called.
+  ///
+  /// When a [ShapeDecoration] is used with a [Container] widget or a
+  /// [DecoratedBox] widget (which is what [Container] uses), the
+  /// [TextDirection] specified in the [ImageConfiguration] is obtained from the
+  /// ambient [Directionality], using [createLocalImageConfiguration].
   final ShapeBorder shape;
 
   /// The inset space occupied by the [shape]'s border.
@@ -285,6 +299,7 @@ class _ShapeDecorationPainter extends BoxPainter {
   final ShapeDecoration _decoration;
 
   Rect _lastRect;
+  TextDirection _lastTextDirection;
   Path _outerPath;
   Path _innerPath;
   Paint _interiorPaint;
@@ -292,10 +307,11 @@ class _ShapeDecorationPainter extends BoxPainter {
   List<Path> _shadowPaths;
   List<Paint> _shadowPaints;
 
-  void _precache(Rect rect) {
+  void _precache(Rect rect, TextDirection textDirection) {
     assert(rect != null);
-    if (rect == _lastRect)
+    if (rect == _lastRect && textDirection == _lastTextDirection)
       return;
+
     // We reach here in two cases:
     //  - the very first time we paint, in which case everything except _decoration is null
     //  - subsequent times, if the rect has changed, in which case we only need to update
@@ -321,14 +337,16 @@ class _ShapeDecorationPainter extends BoxPainter {
       }
       for (int index = 0; index < _shadowCount; index += 1) {
         final BoxShadow shadow = _decoration.shadows[index];
-        _shadowPaths[index] = _decoration.shape.getOuterPath(rect.shift(shadow.offset).inflate(shadow.spreadRadius));
+        _shadowPaths[index] = _decoration.shape.getOuterPath(rect.shift(shadow.offset).inflate(shadow.spreadRadius), textDirection: textDirection);
       }
     }
     if (_interiorPaint != null || _shadowCount != null)
-      _outerPath = _decoration.shape.getOuterPath(rect);
+      _outerPath = _decoration.shape.getOuterPath(rect, textDirection: textDirection);
     if (_decoration.image != null)
-      _innerPath = _decoration.shape.getInnerPath(rect);
+      _innerPath = _decoration.shape.getInnerPath(rect, textDirection: textDirection);
+
     _lastRect = rect;
+    _lastTextDirection = textDirection;
   }
 
   void _paintShadows(Canvas canvas) {
@@ -362,10 +380,11 @@ class _ShapeDecorationPainter extends BoxPainter {
     assert(configuration != null);
     assert(configuration.size != null);
     final Rect rect = offset & configuration.size;
-    _precache(rect);
+    final TextDirection textDirection = configuration.textDirection;
+    _precache(rect, textDirection);
     _paintShadows(canvas);
     _paintInterior(canvas);
     _paintImage(canvas, configuration);
-    _decoration.shape.paint(canvas, rect);
+    _decoration.shape.paint(canvas, rect, textDirection: textDirection);
   }
 }

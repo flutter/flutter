@@ -123,6 +123,10 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   }
 
   @override
+  ArgParser get argParser => _argParser;
+  final ArgParser _argParser = new ArgParser(allowTrailingOptions: false);
+
+  @override
   String get usageFooter {
     return 'Run "flutter help -v" for verbose help output, including less commonly used options.';
   }
@@ -243,6 +247,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       flutterUsage.suppressAnalytics = true;
 
     _checkFlutterCopy();
+    await FlutterVersion.instance.ensureVersionFile();
     await FlutterVersion.instance.checkFlutterVersionFreshness();
 
     if (globalResults.wasParsed('packages'))
@@ -337,8 +342,12 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       throwToolExit('No Flutter engine build found at $engineBuildPath.', exitCode: 2);
     }
 
-    final String hostLocalEngine = 'host_' + localEngine.substring(localEngine.indexOf('_') + 1);
-    final String engineHostBuildPath = fs.path.normalize(fs.path.join(enginePath, 'out', hostLocalEngine));
+    // Determine the host engine directory associated with the local engine:
+    // * strip '_sim_' since there are no host simulator builds.
+    // * replace the target platform with host.
+    final String basename = fs.path.basename(engineBuildPath);
+    final String hostBasename = 'host_' + basename.replaceFirst('_sim_', '_').substring(basename.indexOf('_') + 1);
+    final String engineHostBuildPath = fs.path.normalize(fs.path.join(fs.path.dirname(engineBuildPath), hostBasename));
 
     return new EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }

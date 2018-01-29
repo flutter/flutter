@@ -11,7 +11,7 @@ const String kTitleString = 'Hello World';
 Future<Null> pumpApp(WidgetTester tester, { GenerateAppTitle onGenerateTitle }) async {
   await tester.pumpWidget(
     new WidgetsApp(
-      supportedLocales: <Locale>[
+      supportedLocales: const <Locale>[
         const Locale('en', 'US'),
         const Locale('en', 'GB'),
       ],

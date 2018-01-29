@@ -118,15 +118,12 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
-    return new Semantics(
-      checked: widget.value == widget.groupValue,
-      child: new _RadioRenderObjectWidget(
-        selected: widget.value == widget.groupValue,
-        activeColor: widget.activeColor ?? themeData.accentColor,
-        inactiveColor: _getInactiveColor(themeData),
-        onChanged: _enabled ? _handleChanged : null,
-        vsync: this,
-      )
+    return new _RadioRenderObjectWidget(
+      selected: widget.value == widget.groupValue,
+      activeColor: widget.activeColor ?? themeData.accentColor,
+      inactiveColor: _getInactiveColor(themeData),
+      onChanged: _enabled ? _handleChanged : null,
+      vsync: this,
     );
   }
 }
@@ -188,9 +185,6 @@ class _RenderRadio extends RenderToggleable {
   );
 
   @override
-  bool get isInteractive => super.isInteractive && !value;
-
-  @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
 
@@ -211,5 +205,11 @@ class _RenderRadio extends RenderToggleable {
       paint.style = PaintingStyle.fill;
       canvas.drawCircle(center, _kInnerRadius * position.value, paint);
     }
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isInMutuallyExclusiveGroup = true;
   }
 }

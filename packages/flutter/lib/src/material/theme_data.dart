@@ -8,6 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'ink_splash.dart';
+import 'ink_well.dart' show InteractiveInkFeatureFactory;
+import 'input_decorator.dart';
 import 'typography.dart';
 
 /// Describes the contrast needs of a color.
@@ -82,6 +85,7 @@ class ThemeData {
     Color dividerColor,
     Color highlightColor,
     Color splashColor,
+    InteractiveInkFeatureFactory splashFactory,
     Color selectedRowColor,
     Color unselectedWidgetColor,
     Color disabledColor,
@@ -98,6 +102,7 @@ class ThemeData {
     TextTheme textTheme,
     TextTheme primaryTextTheme,
     TextTheme accentTextTheme,
+    InputDecorationTheme inputDecorationTheme,
     IconThemeData iconTheme,
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
@@ -118,6 +123,7 @@ class ThemeData {
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
+    splashFactory ??= InkSplash.splashFactory;
     selectedRowColor ??= Colors.grey[100];
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
     disabledColor ??= isDark ? Colors.white30 : Colors.black26;
@@ -131,6 +137,7 @@ class ThemeData {
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
     hintColor ??= isDark ? const Color(0x42FFFFFF) : const Color(0x4C000000);
     errorColor ??= Colors.red[700];
+    inputDecorationTheme ??= const InputDecorationTheme();
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
@@ -156,6 +163,7 @@ class ThemeData {
       dividerColor: dividerColor,
       highlightColor: highlightColor,
       splashColor: splashColor,
+      splashFactory: splashFactory,
       selectedRowColor: selectedRowColor,
       unselectedWidgetColor: unselectedWidgetColor,
       disabledColor: disabledColor,
@@ -171,6 +179,7 @@ class ThemeData {
       textTheme: textTheme,
       primaryTextTheme: primaryTextTheme,
       accentTextTheme: accentTextTheme,
+      inputDecorationTheme: inputDecorationTheme,
       iconTheme: iconTheme,
       primaryIconTheme: primaryIconTheme,
       accentIconTheme: accentIconTheme,
@@ -196,6 +205,7 @@ class ThemeData {
     @required this.dividerColor,
     @required this.highlightColor,
     @required this.splashColor,
+    @required this.splashFactory,
     @required this.selectedRowColor,
     @required this.unselectedWidgetColor,
     @required this.disabledColor,
@@ -211,6 +221,7 @@ class ThemeData {
     @required this.textTheme,
     @required this.primaryTextTheme,
     @required this.accentTextTheme,
+    @required this.inputDecorationTheme,
     @required this.iconTheme,
     @required this.primaryIconTheme,
     @required this.accentIconTheme,
@@ -226,6 +237,7 @@ class ThemeData {
        assert(dividerColor != null),
        assert(highlightColor != null),
        assert(splashColor != null),
+       assert(splashFactory != null),
        assert(selectedRowColor != null),
        assert(unselectedWidgetColor != null),
        assert(disabledColor != null),
@@ -241,6 +253,7 @@ class ThemeData {
        assert(textTheme != null),
        assert(primaryTextTheme != null),
        assert(accentTextTheme != null),
+       assert(inputDecorationTheme != null),
        assert(iconTheme != null),
        assert(primaryIconTheme != null),
        assert(accentIconTheme != null),
@@ -317,6 +330,16 @@ class ThemeData {
   /// The color of ink splashes. See [InkWell].
   final Color splashColor;
 
+  /// Defines the appearance of ink splashes produces by [InkWell]
+  /// and [InkResponse].
+  ///
+  /// See also:
+  ///
+  ///  * [InkSplash.splashFactory], which defines the default splash.
+  ///  * [InkRipple.splashFactory], which defines a splash that spreads out
+  ///    more aggresively than the default.
+  final InteractiveInkFeatureFactory splashFactory;
+
   /// The color used to highlight selected rows.
   final Color selectedRowColor;
 
@@ -371,6 +394,12 @@ class ThemeData {
   /// A text theme that contrasts with the accent color.
   final TextTheme accentTextTheme;
 
+  /// The default [InputDecoration] values for [InputDecorator], [TextField],
+  /// and [TextFormField] are based on this theme.
+  ///
+  /// See [InputDecoration.applyDefaults].
+  final InputDecorationTheme inputDecorationTheme;
+
   /// An icon theme that contrasts with the card and canvas colors.
   final IconThemeData iconTheme;
 
@@ -398,6 +427,7 @@ class ThemeData {
     Color dividerColor,
     Color highlightColor,
     Color splashColor,
+    InteractiveInkFeatureFactory splashFactory,
     Color selectedRowColor,
     Color unselectedWidgetColor,
     Color disabledColor,
@@ -413,6 +443,7 @@ class ThemeData {
     TextTheme textTheme,
     TextTheme primaryTextTheme,
     TextTheme accentTextTheme,
+    InputDecorationTheme inputDecorationTheme,
     IconThemeData iconTheme,
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
@@ -430,6 +461,7 @@ class ThemeData {
       dividerColor: dividerColor ?? this.dividerColor,
       highlightColor: highlightColor ?? this.highlightColor,
       splashColor: splashColor ?? this.splashColor,
+      splashFactory: splashFactory ?? this.splashFactory,
       selectedRowColor: selectedRowColor ?? this.selectedRowColor,
       unselectedWidgetColor: unselectedWidgetColor ?? this.unselectedWidgetColor,
       disabledColor: disabledColor ?? this.disabledColor,
@@ -445,6 +477,7 @@ class ThemeData {
       textTheme: textTheme ?? this.textTheme,
       primaryTextTheme: primaryTextTheme ?? this.primaryTextTheme,
       accentTextTheme: accentTextTheme ?? this.accentTextTheme,
+      inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
       iconTheme: iconTheme ?? this.iconTheme,
       primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
       accentIconTheme: accentIconTheme ?? this.accentIconTheme,
@@ -545,6 +578,7 @@ class ThemeData {
       dividerColor: Color.lerp(a.dividerColor, b.dividerColor, t),
       highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t),
       splashColor: Color.lerp(a.splashColor, b.splashColor, t),
+      splashFactory: t < 0.5 ? a.splashFactory : b.splashFactory,
       selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t),
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t),
       disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t),
@@ -562,6 +596,7 @@ class ThemeData {
       textTheme: TextTheme.lerp(a.textTheme, b.textTheme, t),
       primaryTextTheme: TextTheme.lerp(a.primaryTextTheme, b.primaryTextTheme, t),
       accentTextTheme: TextTheme.lerp(a.accentTextTheme, b.accentTextTheme, t),
+      inputDecorationTheme: t < 0.5 ? a.inputDecorationTheme : b.inputDecorationTheme,
       iconTheme: IconThemeData.lerp(a.iconTheme, b.iconTheme, t),
       primaryIconTheme: IconThemeData.lerp(a.primaryIconTheme, b.primaryIconTheme, t),
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
@@ -583,6 +618,7 @@ class ThemeData {
            (otherData.dividerColor == dividerColor) &&
            (otherData.highlightColor == highlightColor) &&
            (otherData.splashColor == splashColor) &&
+           (otherData.splashFactory == splashFactory) &&
            (otherData.selectedRowColor == selectedRowColor) &&
            (otherData.unselectedWidgetColor == unselectedWidgetColor) &&
            (otherData.disabledColor == disabledColor) &&
@@ -600,6 +636,7 @@ class ThemeData {
            (otherData.textTheme == textTheme) &&
            (otherData.primaryTextTheme == primaryTextTheme) &&
            (otherData.accentTextTheme == accentTextTheme) &&
+           (otherData.inputDecorationTheme == inputDecorationTheme) &&
            (otherData.iconTheme == iconTheme) &&
            (otherData.primaryIconTheme == primaryIconTheme) &&
            (otherData.accentIconTheme == accentIconTheme) &&
@@ -618,6 +655,7 @@ class ThemeData {
       dividerColor,
       highlightColor,
       splashColor,
+      splashFactory,
       selectedRowColor,
       unselectedWidgetColor,
       disabledColor,
@@ -627,8 +665,8 @@ class ThemeData {
       textSelectionHandleColor,
       backgroundColor,
       accentColor,
-      accentColorBrightness,
       hashValues( // Too many values.
+        accentColorBrightness,
         indicatorColor,
         dialogBackgroundColor,
         hintColor,
@@ -637,6 +675,7 @@ class ThemeData {
         primaryTextTheme,
         accentTextTheme,
         iconTheme,
+        inputDecorationTheme,
         primaryIconTheme,
         accentIconTheme,
         platform,

@@ -611,7 +611,7 @@ void main() {
         child: new PageView(
           key: const PageStorageKey<String>('PageView'),
           controller: controller,
-          children: <Widget>[
+          children: const <Widget>[
             const Placeholder(),
             const Placeholder(),
             const Placeholder(),
@@ -645,7 +645,7 @@ void main() {
         child: new PageView(
           key: const PageStorageKey<String>('PageView'),
           controller: controller,
-          children: <Widget>[
+          children: const <Widget>[
             const Placeholder(),
             const Placeholder(),
             const Placeholder(),
@@ -663,7 +663,7 @@ void main() {
         child: new PageView(
           key: const PageStorageKey<String>('Check it again against your list and see consistency!'),
           controller: controller2,
-          children: <Widget>[
+          children: const <Widget>[
             const Placeholder(),
             const Placeholder(),
             const Placeholder(),

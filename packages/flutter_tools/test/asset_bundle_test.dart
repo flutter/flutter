@@ -5,7 +5,6 @@
 import 'dart:convert';
 
 import 'package:file/file.dart';
-import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -76,8 +75,30 @@ void main()  {
   });
 
   group('AssetBundle.build', () {
-    test('nonempty', () async {
-      final AssetBundle ab = new AssetBundle();
+    // These tests do not use a memory file system because we want to ensure that
+    // asset bundles work correctly on Windows and Posix systems.
+    Directory tempDir;
+    Directory oldCurrentDir;
+
+    setUp(() async {
+      tempDir = await fs.systemTempDirectory.createTemp('asset_bundle_tests');
+      oldCurrentDir = fs.currentDirectory;
+      fs.currentDirectory = tempDir;
+    });
+
+    tearDown(() {
+      fs.currentDirectory = oldCurrentDir;
+      try {
+        tempDir?.deleteSync(recursive: true);
+        tempDir = null;
+      } on FileSystemException catch (e) {
+        // Do nothing, windows sometimes has trouble deleting.
+        print('Ignored exception during tearDown: $e');
+      }
+    });
+
+    testUsingContext('nonempty', () async {
+      final AssetBundle ab = AssetBundleFactory.instance.createBundle();
       expect(await ab.build(), 0);
       expect(ab.entries.length, greaterThan(0));
     });
@@ -87,7 +108,7 @@ void main()  {
         ..createSync()
         ..writeAsStringSync('');
 
-      final AssetBundle bundle = new AssetBundle();
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
       expect(bundle.entries.length, 1);
       final String expectedAssetManifest = '{}';
@@ -95,7 +116,7 @@ void main()  {
         UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,
       );
-    }, overrides: <Type, Generator>{FileSystem: () => new MemoryFileSystem(),});
+    });
   });
 
 }

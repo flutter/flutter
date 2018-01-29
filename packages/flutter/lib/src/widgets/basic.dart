@@ -642,6 +642,9 @@ class ClipPath extends SingleChildRenderObjectWidget {
 /// Physical layers cast shadows based on an [elevation] which is nominally in
 /// logical pixels, coming vertically out of the rendering surface.
 ///
+/// For shapes that cannot be expressed as a rectangle with rounded corners use
+/// [PhysicalShape].
+///
 /// See also:
 ///
 ///  * [DecoratedBox], which can apply more arbitrary shadow effects.
@@ -711,6 +714,73 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
     super.debugFillProperties(description);
     description.add(new EnumProperty<BoxShape>('shape', shape));
     description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
+    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DiagnosticsProperty<Color>('color', color));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
+  }
+}
+
+/// A widget representing a physical layer that clips its children to a path.
+///
+/// Physical layers cast shadows based on an [elevation] which is nominally in
+/// logical pixels, coming vertically out of the rendering surface.
+///
+/// [PhysicalModel] does the same but only supports shapes that can be expressed
+/// as rectangles with rounded corners.
+class PhysicalShape extends SingleChildRenderObjectWidget {
+  /// Creates a physical model with an arbitrary shape clip.
+  ///
+  /// The [color] is required; physical things have a color.
+  ///
+  /// The [clipper], [elevation], [color], and [shadowColor] must not be null.
+  const PhysicalShape({
+    Key key,
+    @required this.clipper,
+    this.elevation: 0.0,
+    @required this.color,
+    this.shadowColor: const Color(0xFF000000),
+    Widget child,
+  }) : assert(clipper != null),
+       assert(elevation != null),
+       assert(color != null),
+       assert(shadowColor != null),
+       super(key: key, child: child);
+
+  /// Determines which clip to use.
+  final CustomClipper<Path> clipper;
+
+  /// The z-coordinate at which to place this physical object.
+  final double elevation;
+
+  /// The background color.
+  final Color color;
+
+  /// When elevation is non zero the color to use for the shadow color.
+  final Color shadowColor;
+
+  @override
+  RenderPhysicalShape createRenderObject(BuildContext context) {
+    return new RenderPhysicalShape(
+      clipper: clipper,
+      elevation: elevation,
+      color: color,
+      shadowColor: shadowColor
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderPhysicalShape renderObject) {
+    renderObject
+      ..clipper = clipper
+      ..elevation = elevation
+      ..color = color
+      ..shadowColor = shadowColor;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<CustomClipper<Path>>('clipper', clipper));
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
     description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
@@ -4764,6 +4834,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     Widget child,
     bool container: false,
     bool explicitChildNodes: false,
+    bool enabled,
     bool checked,
     bool selected,
     bool button,
@@ -4781,14 +4852,19 @@ class Semantics extends SingleChildRenderObjectWidget {
     VoidCallback onScrollDown,
     VoidCallback onIncrease,
     VoidCallback onDecrease,
+    VoidCallback onCopy,
+    VoidCallback onCut,
+    VoidCallback onPaste,
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
+    SetSelectionHandler onSetSelection,
   }) : this.fromProperties(
     key: key,
     child: child,
     container: container,
     explicitChildNodes: explicitChildNodes,
     properties: new SemanticsProperties(
+      enabled: enabled,
       checked: checked,
       selected: selected,
       button: button,
@@ -4806,8 +4882,12 @@ class Semantics extends SingleChildRenderObjectWidget {
       onScrollDown: onScrollDown,
       onIncrease: onIncrease,
       onDecrease: onDecrease,
+      onCopy: onCopy,
+      onCut: onCut,
+      onPaste: onPaste,
       onMoveCursorForwardByCharacter: onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
+      onSetSelection: onSetSelection,
     ),
   );
 
@@ -4856,6 +4936,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     return new RenderSemanticsAnnotations(
       container: container,
       explicitChildNodes: explicitChildNodes,
+      enabled: properties.enabled,
       checked: properties.checked,
       selected: properties.selected,
       button: properties.button,
@@ -4873,8 +4954,12 @@ class Semantics extends SingleChildRenderObjectWidget {
       onScrollDown: properties.onScrollDown,
       onIncrease: properties.onIncrease,
       onDecrease: properties.onDecrease,
+      onCopy: properties.onCopy,
+      onCut: properties.onCut,
+      onPaste: properties.onPaste,
       onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
+      onSetSelection: properties.onSetSelection,
     );
   }
 
@@ -4895,6 +4980,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     renderObject
       ..container = container
       ..explicitChildNodes = explicitChildNodes
+      ..enabled = properties.enabled
       ..checked = properties.checked
       ..selected = properties.selected
       ..label = properties.label
@@ -4911,8 +4997,12 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onScrollDown = properties.onScrollDown
       ..onIncrease = properties.onIncrease
       ..onDecrease = properties.onDecrease
+      ..onCopy = properties.onCopy
+      ..onCut = properties.onCut
+      ..onPaste = properties.onPaste
       ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
-      ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter;
+      ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
+      ..onSetSelection = properties.onSetSelection;
   }
 
   @override

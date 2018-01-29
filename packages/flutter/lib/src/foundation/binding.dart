@@ -161,21 +161,25 @@ abstract class BindingBase {
   /// callback's future completes.
   ///
   /// This causes input lag and should therefore be avoided when possible. It is
-  /// primarily intended for development features, in particular to allow
-  /// [reassembleApplication] to block input while it walks the tree (which it
-  /// partially does asynchronously).
+  /// primarily intended for use during non-user-interactive time such as to
+  /// allow [reassembleApplication] to block input while it walks the tree
+  /// (which it partially does asynchronously).
   ///
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
   @protected
   Future<Null> lockEvents(Future<Null> callback()) {
+    developer.Timeline.startSync('Lock events');
+
     assert(callback != null);
     _lockCount += 1;
     final Future<Null> future = callback();
     assert(future != null, 'The lockEvents() callback returned null; it should return a Future<Null> that completes when the lock is to expire.');
     future.whenComplete(() {
       _lockCount -= 1;
-      if (!locked)
+      if (!locked) {
+        developer.Timeline.finishSync();
         unlocked();
+      }
     });
     return future;
   }

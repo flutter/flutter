@@ -282,7 +282,7 @@ Xcode's output:
     === CLEAN TARGET Runner OF PROJECT Runner WITH CONFIGURATION Release ===
 
     Check dependencies
-    [BCEROR]No profiles for 'com.yourcompany.test' were found:  Xcode couldn't find a provisioning profile matching 'com.yourcompany.test'.
+    [BCEROR]No profiles for 'com.example.test' were found:  Xcode couldn't find a provisioning profile matching 'com.example.test'.
     [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
     [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
     [BCEROR]Code signing is required for product type 'Application' in SDK 'iOS 10.3'
@@ -304,7 +304,7 @@ Xcode's output:
     === BUILD TARGET Runner OF PROJECT Runner WITH CONFIGURATION Release ===
 
     Check dependencies
-    No profiles for 'com.yourcompany.test' were found:  Xcode couldn't find a provisioning profile matching 'com.yourcompany.test'.
+    No profiles for 'com.example.test' were found:  Xcode couldn't find a provisioning profile matching 'com.example.test'.
     Code signing is required for product type 'Application' in SDK 'iOS 10.3'
     Code signing is required for product type 'Application' in SDK 'iOS 10.3'
     Code signing is required for product type 'Application' in SDK 'iOS 10.3'

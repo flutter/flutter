@@ -356,6 +356,11 @@ Future<XcodeBuildResult> buildXcodeProject({
       // Copy app folder to a place where other tools can find it without knowing
       // the BuildInfo.
       outputDir = actualOutputDir.replaceFirst('/$configuration-', '/');
+      if (fs.isDirectorySync(outputDir)) {
+        // Previous output directory might have incompatible artifacts
+        // (for example, kernel binary files produced from previous `--preview-dart-2` run).
+        fs.directory(outputDir).deleteSync(recursive: true);
+      }
       copyDirectorySync(fs.directory(actualOutputDir), fs.directory(outputDir));
     }
     return new XcodeBuildResult(success: true, output: outputDir);
@@ -393,10 +398,10 @@ Future<Null> diagnoseXcodeBuildFailure(
   }
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      app.id?.contains('com.yourcompany') ?? false) {
+      app.id?.contains('com.example') ?? false) {
     printError('');
     printError('It appears that your application still contains the default signing identifier.');
-    printError("Try replacing 'com.yourcompany' with your signing id in Xcode:");
+    printError("Try replacing 'com.example' with your signing id in Xcode:");
     printError('  open ios/Runner.xcworkspace');
     return;
   }

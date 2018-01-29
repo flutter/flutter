@@ -11,6 +11,8 @@ void main() {
       onPressed: null,
       child: const Text('Go'),
     ));
-    expect(tester.takeException(), isFlutterError);
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), endsWith(':\n  FlatButton(disabled)\n  [root]'));
   });
 }

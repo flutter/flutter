@@ -59,25 +59,19 @@ typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 /// New [PaintingContext] objects are created automatically when using
 /// [PaintingContext.repaintCompositedChild] and [pushLayer].
 class PaintingContext {
-  PaintingContext._(this._containerLayer, this.canvasBounds)
+  PaintingContext._(this._containerLayer, this.estimatedBounds)
     : assert(_containerLayer != null),
-      assert(canvasBounds != null);
+      assert(estimatedBounds != null);
 
   final ContainerLayer _containerLayer;
 
-  /// The bounds within which the painting context's [canvas] will record
-  /// painting commands.
+  /// An estimate of the bounds within which the painting context's [canvas]
+  /// will record painting commands.  This can be useful for debugging.
   ///
-  /// A render object provided with this [PaintingContext] (e.g. in its
-  /// [RenderObject.paint] method) is permitted to paint outside the region that
-  /// the render object occupies during layout, but is not permitted to paint
-  /// outside these canvas paints bounds. These paint bounds are used to
-  /// construct memory-efficient composited layers, which means attempting to
-  /// paint outside these bounds can attempt to write to pixels that do not
-  /// exist in the composited layer.
+  /// The canvas will allow painting outside these bounds.
   ///
-  /// The [canvasBounds] rectangle is in the [canvas] coordinate system.
-  final Rect canvasBounds;
+  /// The [estimatedBounds] rectangle is in the [canvas] coordinate system.
+  final Rect estimatedBounds;
 
   /// Repaint the given render object.
   ///
@@ -200,8 +194,6 @@ class PaintingContext {
   /// The current canvas can change whenever you paint a child using this
   /// context, which means it's fragile to hold a reference to the canvas
   /// returned by this getter.
-  ///
-  /// Only calls within the [canvasBounds] will be recorded.
   Canvas get canvas {
     if (_canvas == null)
       _startRecording();
@@ -210,9 +202,9 @@ class PaintingContext {
 
   void _startRecording() {
     assert(!_isRecording);
-    _currentLayer = new PictureLayer(canvasBounds);
+    _currentLayer = new PictureLayer(estimatedBounds);
     _recorder = new ui.PictureRecorder();
-    _canvas = new Canvas(_recorder, canvasBounds);
+    _canvas = new Canvas(_recorder);
     _containerLayer.append(_currentLayer);
   }
 
@@ -225,14 +217,14 @@ class PaintingContext {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 6.0
           ..color = debugCurrentRepaintColor.toColor();
-        canvas.drawRect(canvasBounds.deflate(3.0), paint);
+        canvas.drawRect(estimatedBounds.deflate(3.0), paint);
       }
       if (debugPaintLayerBordersEnabled) {
         final Paint paint = new Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0
           ..color = const Color(0xFFFF9800);
-        canvas.drawRect(canvasBounds, paint);
+        canvas.drawRect(estimatedBounds, paint);
       }
       return true;
     }());
@@ -284,9 +276,9 @@ class PaintingContext {
   }
 
   /// Appends the given layer to the recording, and calls the `painter` callback
-  /// with that layer, providing the `childPaintBounds` as the paint bounds of
-  /// the child. Canvas recording commands are not guaranteed to be stored
-  /// outside of the paint bounds.
+  /// with that layer, providing the `childPaintBounds` as the estimated paint
+  /// bounds of the child.  The `childPaintBounds` can be used for debugging but
+  /// have no effect on painting.
   ///
   /// The given layer must be an unattached orphan. (Providing a newly created
   /// object, rather than reusing an existing layer, satisfies that
@@ -309,7 +301,7 @@ class PaintingContext {
     assert(painter != null);
     _stopRecordingIfNeeded();
     _appendLayer(childLayer);
-    final PaintingContext childContext = new PaintingContext._(childLayer, childPaintBounds ?? canvasBounds);
+    final PaintingContext childContext = new PaintingContext._(childLayer, childPaintBounds ?? estimatedBounds);
     painter(childContext, offset);
     childContext._stopRecordingIfNeeded();
   }
@@ -413,7 +405,7 @@ class PaintingContext {
         new TransformLayer(transform: effectiveTransform),
         painter,
         offset,
-        childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, canvasBounds),
+        childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, estimatedBounds),
       );
     } else {
       canvas
@@ -444,7 +436,7 @@ class PaintingContext {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode(layer: $_containerLayer, canvas bounds: $canvasBounds)';
+  String toString() => '$runtimeType#$hashCode(layer: $_containerLayer, canvas bounds: $estimatedBounds)';
 }
 
 /// An abstract set of layout constraints.
@@ -700,8 +692,13 @@ class PipelineOwner {
   ///
   /// See [RendererBinding] for an example of how this function is used.
   void flushLayout() {
-    Timeline.startSync('Layout', arguments: timelineWhitelistArguments);
-    _debugDoingLayout = true;
+    profile(() {
+      Timeline.startSync('Layout', arguments: timelineWhitelistArguments);
+    });
+    assert(() {
+      _debugDoingLayout = true;
+      return true;
+    }());
     try {
       // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themselves
       while (_nodesNeedingLayout.isNotEmpty) {
@@ -713,8 +710,13 @@ class PipelineOwner {
         }
       }
     } finally {
-      _debugDoingLayout = false;
-      Timeline.finishSync();
+      assert(() {
+        _debugDoingLayout = false;
+        return true;
+      }());
+      profile(() {
+        Timeline.finishSync();
+      });
     }
   }
 
@@ -728,12 +730,19 @@ class PipelineOwner {
   // See [RenderObject.invokeLayoutCallback].
   void _enableMutationsToDirtySubtrees(VoidCallback callback) {
     assert(_debugDoingLayout);
-    final bool oldState = _debugAllowMutationsToDirtySubtrees;
-    _debugAllowMutationsToDirtySubtrees = true;
+    bool oldState;
+    assert(() {
+      oldState = _debugAllowMutationsToDirtySubtrees;
+      _debugAllowMutationsToDirtySubtrees = true;
+      return true;
+    }());
     try {
       callback();
     } finally {
-      _debugAllowMutationsToDirtySubtrees = oldState;
+      assert(() {
+        _debugAllowMutationsToDirtySubtrees = oldState;
+        return true;
+      }());
     }
   }
 
@@ -743,14 +752,14 @@ class PipelineOwner {
   /// Called as part of the rendering pipeline after [flushLayout] and before
   /// [flushPaint].
   void flushCompositingBits() {
-    Timeline.startSync('Compositing bits');
+    profile(() { Timeline.startSync('Compositing bits'); });
     _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     for (RenderObject node in _nodesNeedingCompositingBitsUpdate) {
       if (node._needsCompositingBitsUpdate && node.owner == this)
         node._updateCompositingBits();
     }
     _nodesNeedingCompositingBitsUpdate.clear();
-    Timeline.finishSync();
+    profile(() { Timeline.finishSync(); });
   }
 
   List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
@@ -771,8 +780,11 @@ class PipelineOwner {
   ///
   /// See [RendererBinding] for an example of how this function is used.
   void flushPaint() {
-    Timeline.startSync('Paint', arguments: timelineWhitelistArguments);
-    _debugDoingPaint = true;
+    profile(() { Timeline.startSync('Paint', arguments: timelineWhitelistArguments); });
+    assert(() {
+      _debugDoingPaint = true;
+      return true;
+    }());
     try {
       final List<RenderObject> dirtyNodes = _nodesNeedingPaint;
       _nodesNeedingPaint = <RenderObject>[];
@@ -789,8 +801,11 @@ class PipelineOwner {
       }
       assert(_nodesNeedingPaint.isEmpty);
     } finally {
-      _debugDoingPaint = false;
-      Timeline.finishSync();
+      assert(() {
+        _debugDoingPaint = false;
+        return true;
+      }());
+      profile(() { Timeline.finishSync(); });
     }
   }
 
@@ -860,7 +875,7 @@ class PipelineOwner {
   void flushSemantics() {
     if (_semanticsOwner == null)
       return;
-    Timeline.startSync('Semantics');
+    profile(() { Timeline.startSync('Semantics'); });
     assert(_semanticsOwner != null);
     assert(() { _debugDoingSemantics = true; return true; }());
     try {
@@ -875,7 +890,7 @@ class PipelineOwner {
     } finally {
       assert(_nodesNeedingSemantics.isEmpty);
       assert(() { _debugDoingSemantics = false; return true; }());
-      Timeline.finishSync();
+      profile(() { Timeline.finishSync(); });
     }
   }
 }
@@ -2014,17 +2029,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }());
   }
 
-  /// The bounds within which this render object will paint.
-  ///
-  /// A render object and its descendants are permitted to paint outside the
-  /// region it occupies during layout, but they are not permitted to paint
-  /// outside these paints bounds. These paint bounds are used to construct
-  /// memory-efficient composited layers, which means attempting to paint
-  /// outside these bounds can attempt to write to pixels that do not exist in
-  /// this render object's composited layer.
-  ///
-  /// The [paintBounds] are only actually enforced when the render object is a
-  /// repaint boundary; see [isRepaintBoundary].
+  /// An estimate of the bounds within which this render object will paint.
+  /// Useful for debugging flags such as [debugPaintLayerBordersEnabled].
   Rect get paintBounds;
 
   /// Override this method to paint debugging information.
@@ -2197,6 +2203,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Removes all semantics from this render object and its descendants.
   ///
   /// Should only be called on objects whose [parent] is not a [RenderObject].
+  ///
+  /// Override this method if you instantiate new [SemanticsNode]s in an
+  /// overridden [assembleSemanticsNode] method, to dispose of those nodes.
+  @mustCallSuper
   void clearSemantics() {
     _needsSemanticsUpdate = true;
     _semantics = null;
@@ -2220,7 +2230,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     // RenderObject are still up-to date. Therefore, we will later only rebuild
     // the semantics subtree starting at th identified semantics boundary.
 
-    final bool wasSemanticsBoundary = _cachedSemanticsConfiguration?.isSemanticBoundary == true;
+    final bool wasSemanticsBoundary = _semantics != null && _cachedSemanticsConfiguration?.isSemanticBoundary == true;
     _cachedSemanticsConfiguration = null;
     bool isEffectiveSemanticsBoundary = _semanticsConfiguration.isSemanticBoundary && wasSemanticsBoundary;
     RenderObject node = this;
@@ -2231,7 +2241,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       node._needsSemanticsUpdate = true;
 
       node = node.parent;
-      node._cachedSemanticsConfiguration = null;
       isEffectiveSemanticsBoundary = node._semanticsConfiguration.isSemanticBoundary;
       if (isEffectiveSemanticsBoundary && node._semantics == null) {
         // We have reached a semantics boundary that doesn't own a semantics node.
@@ -2251,10 +2260,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       owner._nodesNeedingSemantics.remove(this);
     }
     if (!node._needsSemanticsUpdate) {
-      if (node != this) {
-        // Reset for `this` happened above already.
-        node._cachedSemanticsConfiguration = null;
-      }
       node._needsSemanticsUpdate = true;
       if (owner != null) {
         assert(node._semanticsConfiguration.isSemanticBoundary || node.parent is! RenderObject);
@@ -2381,7 +2386,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// `children` to it.
   ///
   /// Subclasses can override this method to add additional [SemanticsNode]s
-  /// to the tree.
+  /// to the tree. If new [SemanticsNode]s are instantiated in this method
+  /// they must be disposed in [clearSemantics].
   void assembleSemanticsNode(
       SemanticsNode node,
       SemanticsConfiguration config,
@@ -2452,16 +2458,21 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     String prefixOtherLines: '',
     DiagnosticLevel minLevel: DiagnosticLevel.debug,
   }) {
-    final RenderObject debugPreviousActiveLayout = _debugActiveLayout;
-    _debugActiveLayout = null;
-
+    RenderObject debugPreviousActiveLayout;
+    assert(() {
+      debugPreviousActiveLayout = _debugActiveLayout;
+      _debugActiveLayout = null;
+      return true;
+    }());
     final String result = super.toStringDeep(
       prefixLineOne: prefixLineOne,
       prefixOtherLines: prefixOtherLines,
       minLevel: minLevel,
     );
-
-    _debugActiveLayout = debugPreviousActiveLayout;
+    assert(() {
+      _debugActiveLayout = debugPreviousActiveLayout;
+      return true;
+    }());
     return result;
   }
 
@@ -2475,10 +2486,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     String joiner: '; ',
     DiagnosticLevel minLevel: DiagnosticLevel.debug,
   }) {
-    final RenderObject debugPreviousActiveLayout = _debugActiveLayout;
-    _debugActiveLayout = null;
+    RenderObject debugPreviousActiveLayout;
+    assert(() {
+      debugPreviousActiveLayout = _debugActiveLayout;
+      _debugActiveLayout = null;
+      return true;
+    }());
     final String result = super.toStringShallow(joiner: joiner, minLevel: minLevel);
-    _debugActiveLayout = debugPreviousActiveLayout;
+    assert(() {
+      _debugActiveLayout = debugPreviousActiveLayout;
+      return true;
+    }());
     return result;
   }
 

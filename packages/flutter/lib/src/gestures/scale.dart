@@ -200,9 +200,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           final Offset pixelsPerSecond = velocity.pixelsPerSecond;
           if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
             velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
-          invokeCallback<Null>('onEnd', () => onEnd(new ScaleEndDetails(velocity: velocity))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+          invokeCallback<void>('onEnd', () => onEnd(new ScaleEndDetails(velocity: velocity)));
         } else {
-          invokeCallback<Null>('onEnd', () => onEnd(new ScaleEndDetails(velocity: Velocity.zero))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+          invokeCallback<void>('onEnd', () => onEnd(new ScaleEndDetails(velocity: Velocity.zero)));
         }
       }
       _state = _ScaleState.accepted;
@@ -230,13 +230,13 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     if (_state == _ScaleState.started && onUpdate != null)
-      invokeCallback<Null>('onUpdate', () => onUpdate(new ScaleUpdateDetails(scale: _scaleFactor, focalPoint: _currentFocalPoint))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+      invokeCallback<void>('onUpdate', () => onUpdate(new ScaleUpdateDetails(scale: _scaleFactor, focalPoint: _currentFocalPoint)));
   }
 
   void _dispatchOnStartCallbackIfNeeded() {
     assert(_state == _ScaleState.started);
     if (onStart != null)
-      invokeCallback<Null>('onStart', () => onStart(new ScaleStartDetails(focalPoint: _currentFocalPoint))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+      invokeCallback<void>('onStart', () => onStart(new ScaleStartDetails(focalPoint: _currentFocalPoint)));
   }
 
   @override

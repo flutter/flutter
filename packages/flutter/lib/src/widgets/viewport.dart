@@ -12,21 +12,6 @@ export 'package:flutter/rendering.dart' show
   AxisDirection,
   GrowthDirection;
 
-AxisDirection _getDefaultCrossAxisDirection(BuildContext context, AxisDirection axisDirection) {
-  assert(axisDirection != null);
-  switch (axisDirection) {
-    case AxisDirection.up:
-      return textDirectionToAxisDirection(Directionality.of(context));
-    case AxisDirection.right:
-      return AxisDirection.down;
-    case AxisDirection.down:
-      return textDirectionToAxisDirection(Directionality.of(context));
-    case AxisDirection.left:
-      return AxisDirection.down;
-  }
-  return null;
-}
-
 /// A widget that is bigger on the inside.
 ///
 /// [Viewport] is the visual workhorse of the scrolling machinery. It displays a
@@ -124,11 +109,31 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// The [center] must be the key of a child of the viewport.
   final Key center;
 
+  /// Given a [BuildContext] and an [AxisDirection], determine the correct cross
+  /// axis direction.
+  ///
+  /// This depends on the [Directionality] if the `axisDirection` is vertical;
+  /// otherwise, the default cross axis direction is downwards.
+  static AxisDirection getDefaultCrossAxisDirection(BuildContext context, AxisDirection axisDirection) {
+    assert(axisDirection != null);
+    switch (axisDirection) {
+      case AxisDirection.up:
+        return textDirectionToAxisDirection(Directionality.of(context));
+      case AxisDirection.right:
+        return AxisDirection.down;
+      case AxisDirection.down:
+        return textDirectionToAxisDirection(Directionality.of(context));
+      case AxisDirection.left:
+        return AxisDirection.down;
+    }
+    return null;
+  }
+
   @override
   RenderViewport createRenderObject(BuildContext context) {
     return new RenderViewport(
       axisDirection: axisDirection,
-      crossAxisDirection: crossAxisDirection ?? _getDefaultCrossAxisDirection(context, axisDirection),
+      crossAxisDirection: crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection),
       anchor: anchor,
       offset: offset,
     );
@@ -138,7 +143,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderViewport renderObject) {
     renderObject
       ..axisDirection = axisDirection
-      ..crossAxisDirection = crossAxisDirection ?? _getDefaultCrossAxisDirection(context, axisDirection)
+      ..crossAxisDirection = crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection)
       ..anchor = anchor
       ..offset = offset;
   }
@@ -271,7 +276,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   RenderShrinkWrappingViewport createRenderObject(BuildContext context) {
     return new RenderShrinkWrappingViewport(
       axisDirection: axisDirection,
-      crossAxisDirection: crossAxisDirection ?? _getDefaultCrossAxisDirection(context, axisDirection),
+      crossAxisDirection: crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection),
       offset: offset,
     );
   }
@@ -280,7 +285,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderShrinkWrappingViewport renderObject) {
     renderObject
       ..axisDirection = axisDirection
-      ..crossAxisDirection = crossAxisDirection ?? _getDefaultCrossAxisDirection(context, axisDirection)
+      ..crossAxisDirection = crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection)
       ..offset = offset;
   }
 

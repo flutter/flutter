@@ -307,6 +307,13 @@ List<GalleryItem> _buildGalleryItems() {
       buildRoute: (BuildContext context) => new CupertinoNavigationDemo(),
     ),
     new GalleryItem(
+      title: 'Pickers',
+      subtitle: 'Cupertino styled pickers',
+      category: 'Cupertino Components',
+      routeName: CupertinoPickerDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoPickerDemo(),
+    ),
+    new GalleryItem(
       title: 'Sliders',
       subtitle: 'Cupertino styled sliders',
       category: 'Cupertino Components',

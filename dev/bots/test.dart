@@ -45,10 +45,17 @@ const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
 Future<Null> main(List<String> args) async {
   flutterTestArgs.addAll(args);
 
-  final String shard = Platform.environment['SHARD'] ?? 'tests';
-  if (!_kShards.containsKey(shard))
-    throw new ArgumentError('Invalid shard: $shard');
-  await _kShards[shard]();
+  final String shard = Platform.environment['SHARD'];
+  if (shard != null) {
+    if (!_kShards.containsKey(shard))
+      throw new ArgumentError('Invalid shard: $shard');
+    await _kShards[shard]();
+  } else {
+    for (String currentShard in _kShards.keys) {
+      print('${bold}SHARD=$currentShard$reset');
+      await _kShards[currentShard]();
+    }
+  }
 }
 
 Future<Null> _generateDocs() async {
@@ -88,7 +95,8 @@ Future<Null> _verifyInternationalizations() async {
 
 Future<Null> _analyzeRepo() async {
   await _verifyGeneratedPluginRegistrants(flutterRoot);
-  await _verifyNoBadImports(flutterRoot);
+  await _verifyNoBadImportsInFlutter(flutterRoot);
+  await _verifyNoBadImportsInFlutterTools(flutterRoot);
   await _verifyInternationalizations();
 
   // Analyze all the Dart code in the repo.
@@ -156,6 +164,9 @@ Future<Null> _runTests() async {
     printOutput: false,
   );
 
+  // Verify that we correctly generated the version file.
+  await _verifyVersion(path.join(flutterRoot, 'version'));
+
   // Run tests.
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
@@ -179,6 +190,10 @@ Future<Null> _runTests() async {
 Future<Null> _runCoverage() async {
   if (Platform.environment['TRAVIS'] != null) {
     print('${bold}DONE: test.dart does not run coverage in Travis$reset');
+    return;
+  }
+  if (Platform.isWindows) {
+    print('${bold}DONE: test.dart does not run coverage on Windows$reset');
     return;
   }
 
@@ -210,12 +225,15 @@ Future<Null> _pubRunTest(
   final List<String> args = <String>['run', 'test', '-j1', '-rexpanded'];
   if (testPath != null)
     args.add(testPath);
-  final Map<String, String> pubEnvironment = <String, String>{'DART_VM_OPTIONS': '--assert-initializer'};
+  final Map<String, String> pubEnvironment = <String, String>{};
   if (new Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;
   }
-  return _runCommand(pub, args, workingDirectory: workingDirectory,
-      environment: pubEnvironment);
+  return _runCommand(
+    pub, args,
+    workingDirectory: workingDirectory,
+    environment: pubEnvironment,
+  );
 }
 
 class EvalResult {
@@ -329,7 +347,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
     workingDirectory: workingDirectory,
     expectFailure: expectFailure,
     printOutput: printOutput,
-    skip: skip || Platform.isWindows, // TODO(goderbauer): run on Windows when sky_shell is available
+    skip: skip,
   );
 }
 
@@ -351,7 +369,7 @@ Future<Null> _runFlutterAnalyze(String workingDirectory, {
   );
 }
 
-Future<Null> _verifyNoBadImports(String workingDirectory) async {
+Future<Null> _verifyNoBadImportsInFlutter(String workingDirectory) async {
   final List<String> errors = <String>[];
   final String libPath = path.join(workingDirectory, 'packages', 'flutter', 'lib');
   final String srcPath = path.join(workingDirectory, 'packages', 'flutter', 'lib', 'src');
@@ -424,7 +442,7 @@ final RegExp _importPattern = new RegExp(r"import 'package:flutter/([^.]+)\.dart
 final RegExp _importMetaPattern = new RegExp(r"import 'package:meta/meta.dart'");
 
 Set<String> _findDependencies(String srcPath, List<String> errors, { bool checkForMeta: false }) {
-  return new Directory(srcPath).listSync().where((FileSystemEntity entity) {
+  return new Directory(srcPath).listSync(recursive: true).where((FileSystemEntity entity) {
     return entity is File && path.extension(entity.path) == '.dart';
   }).map<Set<String>>((FileSystemEntity entity) {
     final Set<String> result = new Set<String>();
@@ -473,6 +491,30 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
     }
   }
   return null;
+}
+
+Future<Null> _verifyNoBadImportsInFlutterTools(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  for (FileSystemEntity entity in new Directory(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'))
+    .listSync(recursive: true)
+    .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
+    final File file = entity;
+    if (file.readAsStringSync().contains('package:flutter_tools/')) {
+      errors.add('$yellow${file.path}$reset imports flutter_tools.');
+    }
+  }
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    if (errors.length == 1) {
+      print('${bold}An error was detected when looking at import dependencies within the flutter_tools package:$reset\n');
+    } else {
+      print('${bold}Multiple errors were detected when looking at import dependencies within the flutter_tools package:$reset\n');
+    }
+    print(errors.join('\n\n'));
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n');
+    exit(1);
+  }
 }
 
 void _printProgress(String action, String workingDir, String command) {
@@ -539,4 +581,27 @@ bool _isGeneratedPluginRegistrant(File file) {
   return filename == 'GeneratedPluginRegistrant.java' ||
       filename == 'GeneratedPluginRegistrant.h' ||
       filename == 'GeneratedPluginRegistrant.m';
+}
+
+Future<Null> _verifyVersion(String filename) async {
+  if (!new File(filename).existsSync()) {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('The version logic failed to create the Flutter version file.');
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    exit(1);
+  }
+  final String version = await new File(filename).readAsString();
+  if (version == '0.0.0-unknown') {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('The version logic failed to determine the Flutter version.');
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    exit(1);
+  }
+  final RegExp pattern = new RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
+  if (!version.contains(pattern)) {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('The version logic generated an invalid version string.');
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    exit(1);
+  }
 }

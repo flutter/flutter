@@ -52,7 +52,7 @@ void main() {
         header: const Text('Test table'),
         source: source,
         rowsPerPage: 2,
-        availableRowsPerPage: <int>[
+        availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
         onRowsPerPageChanged: (int rowsPerPage) {
@@ -61,7 +61,7 @@ void main() {
         onPageChanged: (int rowIndex) {
           log.add('page-changed: $rowIndex');
         },
-        columns: <DataColumn>[
+        columns: const <DataColumn>[
           const DataColumn(label: const Text('Name')),
           const DataColumn(label: const Text('Calories'), numeric: true),
           const DataColumn(label: const Text('Generation')),
@@ -199,11 +199,11 @@ void main() {
         header: const Text('HEADER'),
         source: new TestDataSource(),
         rowsPerPage: 8,
-        availableRowsPerPage: <int>[
+        availableRowsPerPage: const <int>[
           8, 9,
         ],
         onRowsPerPageChanged: (int rowsPerPage) { },
-        columns: <DataColumn>[
+        columns: const <DataColumn>[
           const DataColumn(label: const Text('COL1')),
           const DataColumn(label: const Text('COL2')),
           const DataColumn(label: const Text('COL3')),
@@ -226,9 +226,9 @@ void main() {
           header: const Text('HEADER'),
           source: source,
           rowsPerPage: 501,
-          availableRowsPerPage: <int>[ 501 ],
+          availableRowsPerPage: const <int>[ 501 ],
           onRowsPerPageChanged: (int rowsPerPage) { },
-          columns: <DataColumn>[
+          columns: const <DataColumn>[
             const DataColumn(label: const Text('COL1')),
             const DataColumn(label: const Text('COL2')),
             const DataColumn(label: const Text('COL3')),
@@ -257,9 +257,9 @@ void main() {
             header: const Text('HEADER'),
             source: source,
             rowsPerPage: 5,
-            availableRowsPerPage: <int>[ 5 ],
+            availableRowsPerPage: const <int>[ 5 ],
             onRowsPerPageChanged: (int rowsPerPage) { },
-            columns: <DataColumn>[
+            columns: const <DataColumn>[
               const DataColumn(label: const Text('COL1')),
               const DataColumn(label: const Text('COL2')),
               const DataColumn(label: const Text('COL3')),
