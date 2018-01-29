@@ -135,8 +135,8 @@ class WidgetController {
            // TODO(vegorov) replace with Iterable.whereType, when it is available. https://github.com/dart-lang/sdk/issues/27827
            .where((Element element) => element is StatefulElement)
            .map((Element element) {
-             final StatefulElement stateful_element = element;
-             return stateful_element.state;
+             final StatefulElement statefulElement = element;
+             return statefulElement.state;
            });
   }
 
