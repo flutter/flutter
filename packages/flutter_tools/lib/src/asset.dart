@@ -54,8 +54,6 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
   AssetBundle createBundle() => new _ManifestAssetBundle();
 }
 
-
-/// A bundle of assets.
 class _ManifestAssetBundle implements AssetBundle {
   @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
