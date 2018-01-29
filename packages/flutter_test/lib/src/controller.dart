@@ -132,9 +132,9 @@ class WidgetController {
   Iterable<State> get allStates {
     TestAsyncUtils.guardSync();
     return allElements
+           // TODO(vegorov) replace with Iterable.whereType, when it is available. https://github.com/dart-lang/sdk/issues/27827
            .where((Element element) => element is StatefulElement)
            .map((Element element) {
-             // TODO(vegorov) replace with proper filtering once it is available, https://github.com/dart-lang/sdk/issues/27827
              final StatefulElement stateful_element = element;
              return stateful_element.state;
            });
