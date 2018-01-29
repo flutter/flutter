@@ -59,7 +59,7 @@ FontCollection::FontCollection(
 
 void FontCollection::init(
     const vector<std::shared_ptr<FontFamily>>& typefaces) {
-  std::lock_guard<std::mutex> _l(gMinikinLock);
+  std::lock_guard<std::recursive_mutex> _l(gMinikinLock);
   mId = sNextId++;
   vector<uint32_t> lastChar;
   size_t nTypefaces = typefaces.size();
@@ -321,6 +321,15 @@ const std::shared_ptr<FontFamily>& FontCollection::getFamilyForChar(
     }
   }
   if (bestFamilyIndex == -1) {
+    // libtxt: check if the fallback font provider can match this character
+    if (mFallbackFontProvider) {
+      const std::shared_ptr<FontFamily>& fallback =
+          mFallbackFontProvider->matchFallbackFont(ch);
+      if (fallback) {
+        return fallback;
+      }
+    }
+
     UErrorCode errorCode = U_ZERO_ERROR;
     const UNormalizer2* normalizer = unorm2_getNFDInstance(&errorCode);
     if (U_SUCCESS(errorCode)) {
@@ -380,7 +389,7 @@ bool FontCollection::hasVariationSelector(uint32_t baseCodepoint,
     return false;
   }
 
-  std::lock_guard<std::mutex> _l(gMinikinLock);
+  std::lock_guard<std::recursive_mutex> _l(gMinikinLock);
 
   // Currently mRanges can not be used here since it isn't aware of the
   // variation sequence.
