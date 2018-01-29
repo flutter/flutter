@@ -347,14 +347,14 @@ void main() {
     final EditableTextState textState = tester.state(find.byType(EditableText));
 
     expect(textState.selectionOverlay.handlesAreVisible, isTrue);
-    expect(textState.selectionOverlay.textEditingValue.selection, const TextSelection.collapsed(offset: 4));
+    expect(textState.selectionOverlay.selectionDelegate.textEditingValue.selection, const TextSelection.collapsed(offset: 4));
 
     // Simulate selection change via keyboard and expect handles to disappear.
     render.onSelectionChanged(const TextSelection.collapsed(offset: 10), render, SelectionChangedCause.keyboard);
     await tester.pumpAndSettle();
 
     expect(textState.selectionOverlay.handlesAreVisible, isFalse);
-    expect(textState.selectionOverlay.textEditingValue.selection, const TextSelection.collapsed(offset: 10));
+    expect(textState.selectionOverlay.selectionDelegate.textEditingValue.selection, const TextSelection.collapsed(offset: 10));
   });
 
   testWidgets('exposes correct cursor movement semantics', (WidgetTester tester) async {
