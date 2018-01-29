@@ -1223,6 +1223,8 @@ FILE: ../../../flutter/third_party/txt/src/txt/platform_mac.mm
 FILE: ../../../flutter/vulkan/skia_vulkan_header.h
 FILE: ../../../flutter/vulkan/vulkan_native_surface_magma.cc
 FILE: ../../../flutter/vulkan/vulkan_native_surface_magma.h
+FILE: ../../../flutter/vulkan/vulkan_provider.cc
+FILE: ../../../flutter/vulkan/vulkan_provider.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2017 The Chromium Authors. All rights reserved.
 
