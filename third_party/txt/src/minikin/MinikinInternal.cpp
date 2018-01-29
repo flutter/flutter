@@ -24,7 +24,7 @@
 
 namespace minikin {
 
-std::recursive_mutex gMinikinLock;
+std::mutex gMinikinLock;
 
 void assertMinikinLocked() {
 #ifdef ENABLE_RACE_DETECTION

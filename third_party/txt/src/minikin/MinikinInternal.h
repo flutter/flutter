@@ -31,7 +31,7 @@ namespace minikin {
 // Presently, that's implemented by through a global lock, and having
 // all external interfaces take that lock.
 
-extern std::recursive_mutex gMinikinLock;
+extern std::mutex gMinikinLock;
 
 // Aborts if gMinikinLock is not acquired. Do nothing on the release build.
 void assertMinikinLocked();

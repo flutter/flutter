@@ -31,7 +31,7 @@
 
 namespace txt {
 
-class FontCollection : public std::enable_shared_from_this<FontCollection> {
+class FontCollection {
  public:
   FontCollection();
 
@@ -46,18 +46,12 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
   std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamily(
       const std::string& family);
 
-  const std::shared_ptr<minikin::FontFamily>& MatchFallbackFont(uint32_t ch);
-
  private:
   std::deque<sk_sp<SkFontMgr>> skia_font_managers_;
   std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>
       font_collections_cache_;
-  std::unordered_map<SkFontID, std::shared_ptr<minikin::FontFamily>>
+  std::unordered_map<SkUnichar, std::shared_ptr<minikin::FontFamily>>
       fallback_fonts_;
-  std::shared_ptr<minikin::FontFamily> null_family_;
-
-  const std::shared_ptr<minikin::FontFamily>& GetFontFamilyForTypeface(
-      const sk_sp<SkTypeface>& typeface);
 
   void UpdateFallbackFonts(sk_sp<SkFontMgr> manager);
 
