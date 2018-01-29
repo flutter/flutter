@@ -17,3 +17,11 @@ fi
 
 # run pub get in all the repo packages
 ./bin/flutter update-packages
+
+cd packages/flutter_tools
+cat .packages
+../../bin/cache/dart-sdk/bin/pub deps
+../../bin/cache/dart-sdk/bin/dart --version
+../../bin/flutter analyze -v
+../../bin/flutter analyze -v --flutter-repo
+cd ../..
