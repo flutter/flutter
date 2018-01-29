@@ -32,6 +32,14 @@ class FontCollection {
       const std::vector<std::shared_ptr<FontFamily>>& typefaces);
   explicit FontCollection(std::shared_ptr<FontFamily>&& typeface);
 
+  // libtxt extension: an interface for looking up fallback fonts for characters
+  // that do not match this collection's font families.
+  class FallbackFontProvider {
+   public:
+    virtual const std::shared_ptr<FontFamily>& matchFallbackFont(
+        uint32_t ch) = 0;
+  };
+
   struct Run {
     FakedFont fakedFont;
     int start;
@@ -62,6 +70,10 @@ class FontCollection {
   }
 
   uint32_t getId() const;
+
+  void set_fallback_font_provider(std::unique_ptr<FallbackFontProvider> ffp) {
+    mFallbackFontProvider = std::move(ffp);
+  }
 
  private:
   static const int kLogCharsPerPage = 8;
@@ -131,6 +143,9 @@ class FontCollection {
 
   // Set of supported axes in this collection.
   std::unordered_set<AxisTag> mSupportedAxes;
+
+  // libtxt extension: Fallback font provider.
+  std::unique_ptr<FallbackFontProvider> mFallbackFontProvider;
 };
 
 }  // namespace minikin
