@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:yaml/yaml.dart';
 
+import 'base/context.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'cache.dart';
@@ -15,8 +16,46 @@ import 'devfs.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart';
 
-/// A bundle of assets.
-class AssetBundle {
+const AssetBundleFactory _kManifestFactory = const _ManifestAssetBundleFactory();
+
+/// Injected factory class for spawning [AssetBundle] instances.
+abstract class AssetBundleFactory {
+  /// The singleton instance, pulled from the [AppContext].
+  static AssetBundleFactory get instance => context == null
+      ? _kManifestFactory
+      : context.putIfAbsent(AssetBundleFactory, () => _kManifestFactory);
+
+  /// Creates a new [AssetBundle].
+  AssetBundle createBundle();
+}
+
+abstract class AssetBundle {
+  factory AssetBundle.fixed(String projectRoot, String projectAssets) =>
+      new _ManifestAssetBundle.fixed(projectRoot, projectAssets);
+
+  Map<String, DevFSContent> get entries;
+
+  bool needsBuild({String manifestPath: _ManifestAssetBundle.defaultManifestPath});
+
+  /// Returns 0 for success; non-zero for failure.
+  Future<int> build({
+    String manifestPath: _ManifestAssetBundle.defaultManifestPath,
+    String workingDirPath,
+    String packagesPath,
+    bool includeDefaultFonts: true,
+    bool reportLicensedPackages: false
+  });
+}
+
+class _ManifestAssetBundleFactory implements AssetBundleFactory {
+  const _ManifestAssetBundleFactory();
+
+  @override
+  AssetBundle createBundle() => new _ManifestAssetBundle();
+}
+
+class _ManifestAssetBundle implements AssetBundle {
+  @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
 
   static const String defaultManifestPath = 'pubspec.yaml';
@@ -28,14 +67,14 @@ class AssetBundle {
   bool _fixed = false;
   DateTime _lastBuildTimestamp;
 
-  /// Constructs an [AssetBundle] that gathers the set of assets from the
+  /// Constructs an [_ManifestAssetBundle] that gathers the set of assets from the
   /// pubspec.yaml manifest.
-  AssetBundle();
+  _ManifestAssetBundle();
 
-  /// Constructs an [AssetBundle] with a fixed set of assets.
+  /// Constructs an [_ManifestAssetBundle] with a fixed set of assets.
   /// [projectRoot] The absolute path to the project root.
   /// [projectAssets] comma separated list of assets.
-  AssetBundle.fixed(String projectRoot, String projectAssets) {
+  _ManifestAssetBundle.fixed(String projectRoot, String projectAssets) {
     _fixed = true;
     if ((projectRoot == null) || (projectAssets == null))
       return;
@@ -50,6 +89,7 @@ class AssetBundle {
     }
   }
 
+  @override
   bool needsBuild({String manifestPath: defaultManifestPath}) {
     if (_fixed)
       return false;
@@ -63,6 +103,7 @@ class AssetBundle {
     return stat.modified.isAfter(_lastBuildTimestamp);
   }
 
+  @override
   Future<int> build({
     String manifestPath: defaultManifestPath,
     String workingDirPath,
@@ -190,11 +231,6 @@ class AssetBundle {
     entries[_kLICENSE] = await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
 
     return 0;
-  }
-
-  void dump() {
-    printTrace('Dumping AssetBundle:');
-    (entries.keys.toList()..sort()).forEach(printTrace);
   }
 }
 
@@ -369,7 +405,7 @@ List<Map<String, dynamic>> _parseFonts(
 }) {
   final List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
   if (manifest.usesMaterialDesign && includeDefaultFonts) {
-    fonts.addAll(_getMaterialFonts(AssetBundle._kFontSetMaterial));
+    fonts.addAll(_getMaterialFonts(_ManifestAssetBundle._kFontSetMaterial));
   }
   if (packageName == null) {
     fonts.addAll(manifest.fontsDescriptor);
