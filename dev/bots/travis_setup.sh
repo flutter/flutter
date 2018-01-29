@@ -20,5 +20,5 @@ fi
 
 cd packages/flutter_tools
 cat .packages
-pub deps
+../../bin/cache/dart-sdk/bin/pub deps
 cd ../..
