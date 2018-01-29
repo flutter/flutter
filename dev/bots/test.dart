@@ -99,6 +99,8 @@ Future<Null> _analyzeRepo() async {
   await _verifyNoBadImportsInFlutterTools(flutterRoot);
   await _verifyInternationalizations();
 
+  print(new File('packages/flutter_tools/.packages').readAsStringSync());
+
   // Analyze all the Dart code in the repo.
   await _runFlutterAnalyze(flutterRoot,
     options: <String>['--flutter-repo'],
