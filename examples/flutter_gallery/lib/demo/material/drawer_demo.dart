@@ -16,7 +16,7 @@ class DrawerDemo extends StatefulWidget {
   _DrawerDemoState createState() => new _DrawerDemoState();
 }
 
-class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
+class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin<DrawerDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   static const List<String> _drawerContents = const <String>[

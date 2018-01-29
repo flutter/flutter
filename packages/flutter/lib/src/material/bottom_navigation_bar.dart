@@ -271,7 +271,7 @@ class _BottomNavigationTile extends StatelessWidget {
   }
 }
 
-class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin {
+class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin<BottomNavigationBar> {
   List<AnimationController> _controllers;
   List<CurvedAnimation> _animations;
 

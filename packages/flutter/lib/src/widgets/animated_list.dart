@@ -206,7 +206,7 @@ class AnimatedList extends StatefulWidget {
 ///
 /// [AnimatedList] item input handlers can also refer to their [AnimatedListState]
 /// with the static [AnimatedList.of] method.
-class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixin {
+class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixin<AnimatedList> {
   final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
   final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
   int _itemsCount = 0;

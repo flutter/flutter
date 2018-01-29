@@ -416,7 +416,7 @@ class AnimationDemo extends StatefulWidget {
   _AnimationDemoState createState() => new _AnimationDemoState();
 }
 
-class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateMixin {
+class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateMixin<AnimationDemo> {
   List<_ArcDemo> _allDemos;
 
   @override

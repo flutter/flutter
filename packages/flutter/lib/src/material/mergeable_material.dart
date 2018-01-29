@@ -150,7 +150,7 @@ class _AnimationTuple {
   double gapStart;
 }
 
-class _MergeableMaterialState extends State<MergeableMaterial> with TickerProviderStateMixin {
+class _MergeableMaterialState extends State<MergeableMaterial> with TickerProviderStateMixin<MergeableMaterial> {
   List<MergeableMaterialItem> _children;
   final Map<LocalKey, _AnimationTuple> _animationTuples =
       <LocalKey, _AnimationTuple>{};

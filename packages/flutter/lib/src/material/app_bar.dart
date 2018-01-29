@@ -403,7 +403,7 @@ class _AppBarState extends State<AppBar> {
         icon: const Icon(Icons.menu),
         onPressed: _handleDrawerButtonEnd,
         tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-      );      
+      );
     }
 
     final Widget toolbar = new Padding(
@@ -919,7 +919,7 @@ class SliverAppBar extends StatefulWidget {
 
 // This class is only Stateful because it owns the TickerProvider used
 // by the floating appbar snap animation (via FloatingHeaderSnapConfiguration).
-class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMixin {
+class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMixin<SliverAppBar> {
   FloatingHeaderSnapConfiguration _snapConfiguration;
 
   void _updateSnapConfiguration() {

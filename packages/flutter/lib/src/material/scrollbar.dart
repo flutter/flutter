@@ -52,7 +52,7 @@ class Scrollbar extends StatefulWidget {
 }
 
 
-class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
+class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin<Scrollbar> {
   ScrollbarPainter _materialPainter;
   TargetPlatform _currentPlatform;
   TextDirection _textDirection;

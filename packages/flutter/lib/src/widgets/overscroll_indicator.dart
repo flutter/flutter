@@ -126,7 +126,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   }
 }
 
-class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator> with TickerProviderStateMixin {
+class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator> with TickerProviderStateMixin<GlowingOverscrollIndicator> {
   _GlowController _leadingController;
   _GlowController _trailingController;
   Listenable _leadingAndTrailingListener;

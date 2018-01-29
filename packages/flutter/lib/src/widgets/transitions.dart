@@ -568,7 +568,7 @@ typedef Widget TransitionBuilder(BuildContext context, Widget child);
 ///   _SpinnerState createState() => new _SpinnerState();
 /// }
 ///
-/// class _SpinnerState extends State<Spinner> with SingleTickerProviderStateMixin {
+/// class _SpinnerState extends State<Spinner> with SingleTickerProviderStateMixin<Spinner> {
 ///   AnimationController _controller;
 ///
 ///   @override

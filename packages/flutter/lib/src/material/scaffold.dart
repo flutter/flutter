@@ -179,7 +179,7 @@ class _FloatingActionButtonTransition extends StatefulWidget {
   _FloatingActionButtonTransitionState createState() => new _FloatingActionButtonTransitionState();
 }
 
-class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> with TickerProviderStateMixin {
+class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> with TickerProviderStateMixin<_FloatingActionButtonTransition> {
   AnimationController _previousController;
   AnimationController _currentController;
   CurvedAnimation _previousAnimation;
@@ -541,7 +541,7 @@ class Scaffold extends StatefulWidget {
 ///
 /// Can display [SnackBar]s and [BottomSheet]s. Retrieve a [ScaffoldState] from
 /// the current [BuildContext] using [Scaffold.of].
-class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
+class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin<Scaffold> {
 
   // DRAWER API
 

@@ -33,7 +33,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
 const double _kIndicatorWidth = 20.0;
 const double _kIndicatorHeight = 20.0;
 
-class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator> with SingleTickerProviderStateMixin {
+class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator> with SingleTickerProviderStateMixin<CupertinoActivityIndicator> {
   AnimationController _controller;
 
   @override

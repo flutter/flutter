@@ -111,7 +111,7 @@ class CupertinoButton extends StatefulWidget {
   }
 }
 
-class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProviderStateMixin {
+class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProviderStateMixin<CupertinoButton> {
   // Eyeballed values. Feel free to tweak.
   static const Duration kFadeOutDuration = const Duration(milliseconds: 10);
   static const Duration kFadeInDuration = const Duration(milliseconds: 100);

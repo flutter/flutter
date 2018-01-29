@@ -679,7 +679,7 @@ class _SortArrow extends StatefulWidget {
   _SortArrowState createState() => new _SortArrowState();
 }
 
-class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
+class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin<_SortArrow> {
 
   AnimationController _opacityController;
   Animation<double> _opacityAnimation;

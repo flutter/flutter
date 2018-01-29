@@ -233,7 +233,7 @@ typedef Tween<T> TweenVisitor<T>(Tween<T> tween, T targetValue, TweenConstructor
 /// Subclasses must implement the [forEachTween] method to help
 /// [AnimatedWidgetBaseState] iterate through the subclasses' widget's fields
 /// and animate them.
-abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin {
+abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin<T> {
   AnimationController _controller;
 
   /// The animation driving this widget's implicit animations.

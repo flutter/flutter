@@ -96,7 +96,7 @@ class Checkbox extends StatefulWidget {
   _CheckboxState createState() => new _CheckboxState();
 }
 
-class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
+class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin<Checkbox> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));

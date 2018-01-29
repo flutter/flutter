@@ -225,7 +225,7 @@ class FadeAnimation extends StatefulWidget {
 }
 
 class _FadeAnimationState extends State<FadeAnimation>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin<FadeAnimation> {
   AnimationController animationController;
 
   @override
@@ -361,7 +361,7 @@ Future<bool> isIOSSimulator() async {
 }
 
 class _VideoDemoState extends State<VideoDemo>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin<VideoDemo> {
   final VideoPlayerController butterflyController = new VideoPlayerController(
     butterflyUri,
   );

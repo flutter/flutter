@@ -229,7 +229,7 @@ class AnimatedCrossFade extends StatefulWidget {
   }
 }
 
-class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProviderStateMixin {
+class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProviderStateMixin<AnimatedCrossFade> {
   AnimationController _controller;
   Animation<double> _firstAnimation;
   Animation<double> _secondAnimation;

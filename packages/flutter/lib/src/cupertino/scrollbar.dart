@@ -51,7 +51,7 @@ class CupertinoScrollbar extends StatefulWidget {
   _CupertinoScrollbarState createState() => new _CupertinoScrollbarState();
 }
 
-class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProviderStateMixin {
+class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProviderStateMixin<CupertinoScrollbar> {
   ScrollbarPainter _painter;
   TextDirection _textDirection;
 

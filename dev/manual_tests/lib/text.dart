@@ -116,7 +116,7 @@ class Fuzzer extends StatefulWidget {
   _FuzzerState createState() => new _FuzzerState();
 }
 
-class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
+class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin<Fuzzer> {
   TextSpan _textSpan = const TextSpan(text: 'Welcome to the Flutter text fuzzer.');
   Ticker _ticker;
   math.Random _random;
@@ -790,7 +790,7 @@ class Zalgo extends StatefulWidget {
   _ZalgoState createState() => new _ZalgoState();
 }
 
-class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
+class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin<Zalgo> {
   String _text;
   Ticker _ticker;
   math.Random _random;
@@ -897,7 +897,7 @@ class Painting extends StatefulWidget {
   _PaintingState createState() => new _PaintingState();
 }
 
-class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin {
+class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin<Painting> {
   String _text;
   Ticker _ticker;
   math.Random _random;

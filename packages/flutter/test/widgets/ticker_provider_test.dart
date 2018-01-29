@@ -69,7 +69,7 @@ class BoringTickerTest extends StatefulWidget {
   _BoringTickerTestState createState() => new _BoringTickerTestState();
 }
 
-class _BoringTickerTestState extends State<BoringTickerTest> with SingleTickerProviderStateMixin {
+class _BoringTickerTestState extends State<BoringTickerTest> with SingleTickerProviderStateMixin<BoringTickerTest> {
   @override
   Widget build(BuildContext context) => new Container();
 }

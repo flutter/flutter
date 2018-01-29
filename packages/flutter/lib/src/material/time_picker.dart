@@ -998,7 +998,7 @@ class _Dial extends StatefulWidget {
   _DialState createState() => new _DialState();
 }
 
-class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
+class _DialState extends State<_Dial> with SingleTickerProviderStateMixin<_Dial> {
   @override
   void initState() {
     super.initState();

@@ -23,7 +23,7 @@ const MethodChannel channel = const MethodChannel('texture');
 
 enum FrameState { initial, slow, afterSlow, fast, afterFast }
 
-class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
+class MyAppState extends State<MyApp> with SingleTickerProviderStateMixin<MyApp> {
   int _widgetBuilds = 0;
   FrameState _state;
   String _summary = '';

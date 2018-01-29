@@ -31,7 +31,7 @@ import 'constants.dart';
 ///   _MyTabbedPageState createState() => new _MyTabbedPageState();
 /// }
 ///
-/// class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderStateMixin {
+/// class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderStateMixin<MyTabbedPage> {
 ///   final List<Tab> myTabs = <Tab>[
 ///     new Tab(text: 'LEFT'),
 ///     new Tab(text: 'RIGHT'),
@@ -285,7 +285,7 @@ class DefaultTabController extends StatefulWidget {
   _DefaultTabControllerState createState() => new _DefaultTabControllerState();
 }
 
-class _DefaultTabControllerState extends State<DefaultTabController> with SingleTickerProviderStateMixin {
+class _DefaultTabControllerState extends State<DefaultTabController> with SingleTickerProviderStateMixin<DefaultTabController> {
   TabController _controller;
 
   @override
