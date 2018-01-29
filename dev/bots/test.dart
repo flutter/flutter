@@ -164,6 +164,9 @@ Future<Null> _runTests() async {
     printOutput: false,
   );
 
+  // Verify that we correctly generated the version file.
+  await _verifyVersion(path.join(flutterRoot, 'version'));
+
   // Run tests.
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
@@ -578,4 +581,27 @@ bool _isGeneratedPluginRegistrant(File file) {
   return filename == 'GeneratedPluginRegistrant.java' ||
       filename == 'GeneratedPluginRegistrant.h' ||
       filename == 'GeneratedPluginRegistrant.m';
+}
+
+Future<Null> _verifyVersion(String filename) async {
+  if (!new File(filename).existsSync()) {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('The version logic failed to create the Flutter version file.');
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    exit(1);
+  }
+  final String version = await new File(filename).readAsString();
+  if (version == '0.0.0-unknown') {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('The version logic failed to determine the Flutter version.');
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    exit(1);
+  }
+  final RegExp pattern = new RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
+  if (!version.contains(pattern)) {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('The version logic generated an invalid version string.');
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    exit(1);
+  }
 }

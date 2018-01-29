@@ -57,7 +57,7 @@ $fontsSection
     List<String> packages,
     String expectedAssetManifest,
   ) async {
-    final AssetBundle bundle = new AssetBundle();
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(manifestPath: 'pubspec.yaml');
 
     for (String packageName in packages) {
@@ -121,7 +121,7 @@ $fontsSection
       writePackagesFile('test_package:p/p/lib/');
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
-      final AssetBundle bundle = new AssetBundle();
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
       expect(bundle.entries.length, 2); // LICENSE, AssetManifest
       expect(bundle.entries.containsKey('FontManifest.json'), false);

@@ -492,7 +492,7 @@ class GitTagVersion {
   final String hash;
 
   static GitTagVersion determine() {
-    final String version = _runGit('git describe --match v*.*.* --exclude *-* --first-parent --long --tags');
+    final String version = _runGit('git describe --match v*.*.* --first-parent --long --tags');
     final RegExp versionPattern = new RegExp('^v([0-9]+)\.([0-9]+)\.([0-9]+)-([0-9]+)-g([a-f0-9]+)\$');
     final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5]);
     if (parts == null) {
@@ -507,7 +507,7 @@ class GitTagVersion {
 
   String frameworkVersionFor(String revision) {
     if (x == null || y == null || z == null || !revision.startsWith(hash))
-      return 'unknown';
+      return '0.0.0-unknown';
     if (commits == 0)
       return '$x.$y.$z';
     return '$x.$y.${z + 1}-pre.$commits';

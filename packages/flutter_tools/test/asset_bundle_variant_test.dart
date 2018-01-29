@@ -71,7 +71,7 @@ flutter:
           ..writeAsStringSync(asset);
       }
 
-      AssetBundle bundle = new AssetBundle();
+      AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
 
       // The main asset file, /a/b/c/foo, and its variants exist.
@@ -81,7 +81,7 @@ flutter:
       }
 
       fs.file('a/b/c/foo').deleteSync();
-      bundle = new AssetBundle();
+      bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
 
       // Now the main asset file, /a/b/c/foo, does not exist. This is OK because

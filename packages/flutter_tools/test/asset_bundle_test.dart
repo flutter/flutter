@@ -97,8 +97,8 @@ void main()  {
       }
     });
 
-    test('nonempty', () async {
-      final AssetBundle ab = new AssetBundle();
+    testUsingContext('nonempty', () async {
+      final AssetBundle ab = AssetBundleFactory.instance.createBundle();
       expect(await ab.build(), 0);
       expect(ab.entries.length, greaterThan(0));
     });
@@ -108,7 +108,7 @@ void main()  {
         ..createSync()
         ..writeAsStringSync('');
 
-      final AssetBundle bundle = new AssetBundle();
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
       expect(bundle.entries.length, 1);
       final String expectedAssetManifest = '{}';
