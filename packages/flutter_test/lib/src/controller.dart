@@ -133,7 +133,11 @@ class WidgetController {
     TestAsyncUtils.guardSync();
     return allElements
            .where((Element element) => element is StatefulElement)
-           .map((StatefulElement element) => element.state); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27827
+           .map((Element element) {
+             // TODO(vegorov) replace with proper filtering once it is available, https://github.com/dart-lang/sdk/issues/27827
+             final StatefulElement stateful_element = element;
+             return stateful_element.state;
+           });
   }
 
   /// The matching state in the widget tree.

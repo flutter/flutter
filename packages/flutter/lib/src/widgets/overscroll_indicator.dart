@@ -198,7 +198,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         }
       }
     } else if (notification is ScrollEndNotification || notification is ScrollUpdateNotification) {
-      if (notification.dragDetails != null) { // ignore: undefined_getter
+      if ((notification as dynamic).dragDetails != null) {
         _leadingController.scrollEnd();
         _trailingController.scrollEnd();
       }
