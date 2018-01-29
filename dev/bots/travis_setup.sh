@@ -18,6 +18,7 @@ fi
 # run pub get in all the repo packages
 ./bin/flutter update-packages
 
+cd packages/flutter_tools
 cat .packages
-
 pub deps
+cd ../..
