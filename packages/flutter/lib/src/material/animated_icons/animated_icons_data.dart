@@ -16,46 +16,46 @@ part of material_animated_icons;
 abstract class AnimatedIcons {
 
   /// The material design add to event icon animation.
-  static const AnimatedIconData  add_event = _$add_event;
+  static const AnimatedIconData add_event = _$add_event;
 
   /// The material design arrow to menu icon animation.
-  static const AnimatedIconData  arrow_menu = _$arrow_menu;
+  static const AnimatedIconData arrow_menu = _$arrow_menu;
 
   /// The material design close to menu icon animation.
-  static const AnimatedIconData  close_menu = _$close_menu;
+  static const AnimatedIconData close_menu = _$close_menu;
 
   /// The material design ellipsis to search icon animation.
-  static const AnimatedIconData  ellipsis_search = _$ellipsis_search;
+  static const AnimatedIconData ellipsis_search = _$ellipsis_search;
 
   /// The material design event to add icon animation.
-  static const AnimatedIconData  event_add = _$event_add;
+  static const AnimatedIconData event_add = _$event_add;
 
   /// The material design home to menu icon animation.
-  static const AnimatedIconData  home_menu = _$home_menu;
+  static const AnimatedIconData home_menu = _$home_menu;
 
   /// The material design list to view icon animation.
-  static const AnimatedIconData  list_view = _$list_view;
+  static const AnimatedIconData list_view = _$list_view;
 
   /// The material design menu to arrow icon animation.
-  static const AnimatedIconData  menu_arrow = _$menu_arrow;
+  static const AnimatedIconData menu_arrow = _$menu_arrow;
 
   /// The material design menu to close icon animation.
-  static const AnimatedIconData  menu_close = _$menu_close;
+  static const AnimatedIconData menu_close = _$menu_close;
 
   /// The material design menu to home icon animation.
-  static const AnimatedIconData  menu_home = _$menu_home;
+  static const AnimatedIconData menu_home = _$menu_home;
 
   /// The material design pause to play icon animation.
-  static const AnimatedIconData  pause_play = _$pause_play;
+  static const AnimatedIconData pause_play = _$pause_play;
 
   /// The material design play to pause icon animation.
-  static const AnimatedIconData  play_pause = _$play_pause;
+  static const AnimatedIconData play_pause = _$play_pause;
 
   /// The material design search to ellipsis icon animation.
-  static const AnimatedIconData  search_ellipsis = _$search_ellipsis;
+  static const AnimatedIconData search_ellipsis = _$search_ellipsis;
 
   /// The material design view to list icon animation.
-  static const AnimatedIconData  view_list = _$view_list;
+  static const AnimatedIconData view_list = _$view_list;
 }
 
 /// Vector graphics data for icons used by [AnimatedIcon].
