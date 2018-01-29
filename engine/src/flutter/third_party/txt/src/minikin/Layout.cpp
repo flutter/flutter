@@ -604,7 +604,7 @@ void Layout::doLayout(const uint16_t* buf,
                       const FontStyle& style,
                       const MinikinPaint& paint,
                       const std::shared_ptr<FontCollection>& collection) {
-  std::lock_guard<std::recursive_mutex> _l(gMinikinLock);
+  std::lock_guard<std::mutex> _l(gMinikinLock);
 
   LayoutContext ctx;
   ctx.style = style;
@@ -628,7 +628,7 @@ float Layout::measureText(const uint16_t* buf,
                           const MinikinPaint& paint,
                           const std::shared_ptr<FontCollection>& collection,
                           float* advances) {
-  std::lock_guard<std::recursive_mutex> _l(gMinikinLock);
+  std::lock_guard<std::mutex> _l(gMinikinLock);
 
   LayoutContext ctx;
   ctx.style = style;
@@ -1197,7 +1197,7 @@ void Layout::getBounds(MinikinRect* bounds) const {
 }
 
 void Layout::purgeCaches() {
-  std::lock_guard<std::recursive_mutex> _l(gMinikinLock);
+  std::lock_guard<std::mutex> _l(gMinikinLock);
   LayoutCache& layoutCache = LayoutEngine::getInstance().layoutCache;
   layoutCache.clear();
   purgeHbFontCacheLocked();
