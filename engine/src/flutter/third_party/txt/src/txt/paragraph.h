@@ -71,11 +71,13 @@ class Paragraph {
 
   template <typename T>
   struct Range {
+    Range() : start(), end() {}
     Range(T s, T e) : start(s), end(e) {}
     T start, end;
     bool operator==(const Range<T>& other) const {
       return start == other.start && end == other.end;
     }
+    T width() { return end - start; }
   };
 
   // Minikin Layout doLayout() and LineBreaker addStyleRun() has an

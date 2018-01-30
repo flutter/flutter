@@ -508,7 +508,7 @@ void Paragraph::Layout(double width, bool force) {
       grapheme_breaker_->setText(
           icu::UnicodeString(false, text_ptr + text_start, text_count));
       if (run.is_rtl())
-        grapheme_breaker_->preceding(text_count);
+        grapheme_breaker_->last();
 
       double word_start_position = std::numeric_limits<double>::quiet_NaN();
 
@@ -530,47 +530,41 @@ void Paragraph::Layout(double width, bool force) {
           blob_buffer.pos[pos_index] = glyph_x_offset;
           blob_buffer.pos[pos_index + 1] = layout.getY(glyph_index);
 
-          int32_t current_grapheme = grapheme_breaker_->current();
-          if (word_index < words.size() &&
-              words[word_index].start == run.start() + current_grapheme) {
-            word_start_position = run_x_offset + glyph_x_offset;
-          }
-
-          float glyph_advance = layout.getCharAdvance(current_grapheme);
-
           // The glyph may be a ligature.  Determine how many input characters
           // are joined into this glyph.  Note that each character may be
           // encoded as multiple UTF-16 code units.
+          Range<int32_t> glyph_code_units;
           std::vector<size_t> subglyph_code_unit_counts;
-          int32_t next_grapheme;
           if (run.is_rtl()) {
-            next_grapheme = grapheme_breaker_->previous();
-            if (next_grapheme == icu::BreakIterator::DONE)
+            glyph_code_units.end = grapheme_breaker_->current();
+            glyph_code_units.start = grapheme_breaker_->previous();
+            if (glyph_code_units.start == icu::BreakIterator::DONE)
               break;
-            subglyph_code_unit_counts.push_back(current_grapheme -
-                                                next_grapheme);
+            subglyph_code_unit_counts.push_back(glyph_code_units.width());
           } else {
-            next_grapheme = grapheme_breaker_->next();
-            if (next_grapheme == icu::BreakIterator::DONE)
+            glyph_code_units.start = grapheme_breaker_->current();
+            glyph_code_units.end = grapheme_breaker_->next();
+            if (glyph_code_units.end == icu::BreakIterator::DONE)
               break;
-            subglyph_code_unit_counts.push_back(next_grapheme -
-                                                current_grapheme);
-            while (next_grapheme < static_cast<int32_t>(text_count)) {
-              if (layout.getCharAdvance(next_grapheme) != 0)
+            subglyph_code_unit_counts.push_back(glyph_code_units.width());
+            while (glyph_code_units.end < static_cast<int32_t>(text_count)) {
+              if (layout.getCharAdvance(glyph_code_units.end) != 0)
                 break;
               if (grapheme_breaker_->next() == icu::BreakIterator::DONE)
                 break;
-              size_t sub_grapheme = next_grapheme;
-              next_grapheme = grapheme_breaker_->current();
-              subglyph_code_unit_counts.push_back(next_grapheme - sub_grapheme);
+              subglyph_code_unit_counts.push_back(grapheme_breaker_->current() -
+                                                  glyph_code_units.end);
+              glyph_code_units.end = grapheme_breaker_->current();
             }
           }
+          float glyph_advance = layout.getCharAdvance(glyph_code_units.start);
           float subglyph_advance =
               glyph_advance / subglyph_code_unit_counts.size();
 
-          glyph_positions.emplace_back(
-              run_x_offset + glyph_x_offset, subglyph_advance,
-              run.start() + current_grapheme, subglyph_code_unit_counts[0]);
+          glyph_positions.emplace_back(run_x_offset + glyph_x_offset,
+                                       subglyph_advance,
+                                       run.start() + glyph_code_units.start,
+                                       subglyph_code_unit_counts[0]);
 
           // Compute positions for the additional characters in the ligature.
           for (size_t i = 1; i < subglyph_code_unit_counts.size(); ++i) {
@@ -582,7 +576,12 @@ void Paragraph::Layout(double width, bool force) {
           }
 
           if (word_index < words.size() &&
-              words[word_index].end == run.start() + next_grapheme) {
+              words[word_index].start == run.start() + glyph_code_units.start) {
+            word_start_position = run_x_offset + glyph_x_offset;
+          }
+
+          if (word_index < words.size() &&
+              words[word_index].end == run.start() + glyph_code_units.end) {
             if (justify_line)
               justify_x_offset += word_gap_width;
             word_index++;
