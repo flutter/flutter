@@ -9,11 +9,10 @@ default_platform(:ios)
 platform :ios do
   desc "Push a new release to TestFlight"
   lane :build_and_deploy_testflight do
-    # setup_travis(
-    #   force: true
-    # )
+    # Doesn't do anything when not on Travis.
+    setup_travis
 
-    # Retrieves all the necessary certs and provisioning profiles
+    # Retrieves all the necessary certs and provisioning profiles.
     sync_code_signing(
       git_url: ENV["PUBLISHING_MATCH_CERTIFICATE_REPO"],
       type: "appstore",
