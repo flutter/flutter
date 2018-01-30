@@ -1173,3 +1173,107 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
     );
   }
 }
+
+/// Animated version of [PhysicalShape].
+///
+/// The [elevation] is animated.
+///
+/// The [color] is animated if the [animateColor] property is set; otherwise,
+/// the color changes immediately at the start of the animation for the other
+/// two properties. This allows the color to be animated independently (e.g.
+/// because it is being driven by an [AnimatedTheme]).
+///
+/// The [clipper] is not animated.
+class AnimatedPhysicalShape extends ImplicitlyAnimatedWidget {
+  /// Creates a widget that animates the properties of a [PhysicalShape] not
+  /// including the [clipper].
+  ///
+  /// The [child], [clipper], [elevation], [color], [shadowColor], [curve], and
+  /// [duration] arguments must not be null.
+  ///
+  /// Animating [color] is optional and is controlled by the [animateColor] flag.
+  ///
+  /// Animating [shadowColor] is optional and is controlled by the [animateShadowColor] flag.
+  const AnimatedPhysicalShape({
+    Key key,
+    @required this.child,
+    @required this.clipper,
+    @required this.elevation,
+    @required this.color,
+    this.animateColor: true,
+    @required this.shadowColor,
+    this.animateShadowColor: true,
+    Curve curve: Curves.linear,
+    @required Duration duration,
+  }) : assert(child != null),
+       assert(clipper != null),
+       assert(elevation != null),
+       assert(color != null),
+       assert(shadowColor != null),
+       assert(animateColor != null),
+       assert(animateShadowColor != null),
+       super(key: key, curve: curve, duration: duration);
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
+
+  /// Determines which clip to use, for clipping the widget and casting shadow.
+  final CustomClipper<Path> clipper;
+
+  /// The target z-coordinate at which to place this physical object.
+  final double elevation;
+
+  /// The target background color.
+  final Color color;
+
+  /// Whether the color should be animated.
+  final bool animateColor;
+
+  /// The target shadow color.
+  final Color shadowColor;
+
+  /// Whether the shadow color should be animated.
+  final bool animateShadowColor;
+
+  @override
+  _AnimatedPhysicalShapeState createState() => new _AnimatedPhysicalShapeState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<CustomClipper<Path>>('clipper', clipper));
+    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DiagnosticsProperty<Color>('color', color));
+    description.add(new DiagnosticsProperty<bool>('animateColor', animateColor));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
+    description.add(new DiagnosticsProperty<bool>('animateShadowColor', animateShadowColor));
+  }
+}
+
+class _AnimatedPhysicalShapeState extends AnimatedWidgetBaseState<AnimatedPhysicalShape> {
+  Tween<double> _elevation;
+  ColorTween _color;
+  ColorTween _shadowColor;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _elevation = visitor(_elevation, widget.elevation, (dynamic value) => new Tween<double>(begin: value));
+    _color = visitor(_color, widget.color, (dynamic value) => new ColorTween(begin: value));
+    _shadowColor = visitor(_shadowColor, widget.shadowColor, (dynamic value) => new ColorTween(begin: value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new PhysicalShape(
+      child: widget.child,
+      clipper: widget.clipper,
+      elevation: _elevation.evaluate(animation),
+      color: widget.animateColor ? _color.evaluate(animation) : widget.color,
+      shadowColor: widget.animateShadowColor
+          ? _shadowColor.evaluate(animation)
+          : widget.shadowColor,
+    );
+  }
+}
