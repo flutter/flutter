@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart';
@@ -780,3 +781,142 @@ class _IsMethodCall extends Matcher {
   }
 }
 
+/// Asserts that a [Finder] locates a single object whose root RenderObject
+/// is a [RenderClipRect] with no clipper set.
+const Matcher clipsWithBoundingRect = const _ClipsWithBoundingRect();
+
+/// Asserts that a [Finder] locates a single object whose root RenderObject
+/// is a [RenderClipRRect] with no clipper set, and border radius equals to
+/// [borderRadius].
+Matcher clipsWithBoundingRRect({@required BorderRadius borderRadius}) {
+  return new _ClipsWithBoundingRRect(borderRadius: borderRadius);
+}
+
+/// Asserts that a [Finder] locates a single object whose root RenderObject
+/// is a [RenderPhysicalModel].
+///
+///  - If [shape] is non null asserts that [RenderPhysicalModel.shape] is equal to
+/// [shape].
+///  - If [borderRadius] is non null asserts that [RenderPhysicalModel.borderRadius] is equal to
+/// [borderRadius].
+///  - If [elevation] is non null asserts that [RenderPhysicalModel.elevation] is equal to
+/// [elevation].
+Matcher rendersOnPhysicalModel({
+  BoxShape shape,
+  BorderRadius borderRadius,
+  double elevation,
+}) {
+  return new _RendersOnPhysicalModel(
+    shape: shape,
+    borderRadius: borderRadius,
+    elevation: elevation,
+  );
+}
+
+abstract class _MatchRenderObject<T extends RenderObject> extends Matcher {
+  const _MatchRenderObject();
+
+  bool renderObjectMatches(Map<dynamic, dynamic> matchState, T renderObject);
+
+  @override
+  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
+    final Iterable<Element> nodes = finder.evaluate();
+    if (nodes.length != 1)
+      return failWithDescription(matchState, 'did not have a exactly one child element');
+    final RenderObject renderObject = nodes.single.renderObject;
+    if (renderObject.runtimeType != T)
+      return failWithDescription(matchState, 'had a root render object of type: ${renderObject.runtimeType}');
+
+    return renderObjectMatches(matchState, renderObject);
+  }
+
+  bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {
+    matchState['failure'] = description;
+    return false;
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose
+  ) {
+    return mismatchDescription.add(matchState['failure']);
+  }
+}
+
+class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalModel> {
+  const _RendersOnPhysicalModel({
+    this.shape,
+    this.borderRadius,
+    this.elevation,
+  });
+
+  final BoxShape shape;
+  final BorderRadius borderRadius;
+  final double elevation;
+
+  @override
+  bool renderObjectMatches(Map<dynamic, dynamic> matchState, RenderPhysicalModel renderObject) {
+    if (shape != null && renderObject.shape != shape)
+      return failWithDescription(matchState, 'had shape: ${renderObject.shape}');
+
+    if (borderRadius != null && renderObject.borderRadius != borderRadius)
+      return failWithDescription(matchState, 'had borderRadius: ${renderObject.borderRadius}');
+
+    if (elevation != null && renderObject.elevation != elevation)
+      return failWithDescription(matchState, 'had elevation: ${renderObject.elevation}');
+
+    return true;
+  }
+
+  @override
+  Description describe(Description description) {
+    description.add('renders on a physical model');
+    if (shape != null)
+      description.add(' with shape $shape');
+    if (borderRadius != null)
+      description.add(' with borderRadius $borderRadius');
+    if (elevation != null)
+      description.add(' with elevation $elevation');
+    return description;
+  }
+}
+
+class _ClipsWithBoundingRect extends _MatchRenderObject<RenderClipRect> {
+  const _ClipsWithBoundingRect();
+
+  @override
+  bool renderObjectMatches(Map<dynamic, dynamic> matchState, RenderClipRect renderObject) {
+    if (renderObject.clipper != null)
+      return failWithDescription(matchState, 'had a non null clipper ${renderObject.clipper}');
+    return true;
+  }
+
+  @override
+  Description describe(Description description) =>
+    description.add('clips with bounding rectangle');
+}
+
+class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipRRect> {
+  const _ClipsWithBoundingRRect({@required this.borderRadius});
+
+  final BorderRadius borderRadius;
+
+
+  @override
+  bool renderObjectMatches(Map<dynamic, dynamic> matchState, RenderClipRRect renderObject) {
+    if (renderObject.clipper != null)
+      return failWithDescription(matchState, 'had a non null clipper ${renderObject.clipper}');
+
+    if (renderObject.borderRadius != borderRadius)
+      return failWithDescription(matchState, 'had borderRadius: ${renderObject.borderRadius}');
+
+    return true;
+  }
+
+  @override
+  Description describe(Description description) =>
+    description.add('clips with bounding rounded rectangle with borderRadius: $borderRadius');
+}
