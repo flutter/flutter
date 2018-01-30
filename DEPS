@@ -124,7 +124,7 @@ deps = {
    # and not have to specific specific hashes.
 
   'src/garnet':
-   Var('fuchsia_git') + '/garnet' + '@' + 'cf0752b219fc43b8354eb54a9b2c972b278bd428',
+   Var('fuchsia_git') + '/garnet' + '@' + 'b3ba6b6d6ab8ef658278cc43c9f839a8a8d1718e',
 
   'src/topaz':
    Var('fuchsia_git') + '/topaz' + '@' + '1eb2e77be92ed968223b0cea19fe2108e689dcd5',
