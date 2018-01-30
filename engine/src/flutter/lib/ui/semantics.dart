@@ -340,7 +340,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   /// The `rect` is the region occupied by this node in its own coordinate
   /// system.
   ///
-  /// The `transform` is a matrix that maps this node's coodinate system into
+  /// The `transform` is a matrix that maps this node's coordinate system into
   /// its parent's coordinate system.
   void updateNode({
     int id,
@@ -355,30 +355,30 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     String increasedValue,
     String decreasedValue,
     TextDirection textDirection,
+    int nextNodeId,
     Float64List transform,
     Int32List children,
   }) {
     if (transform.length != 16)
       throw new ArgumentError('transform argument must have 16 entries.');
-    _updateNode(
-      id,
-      flags,
-      actions,
-      textSelectionBase,
-      textSelectionExtent,
-      rect.left,
-      rect.top,
-      rect.right,
-      rect.bottom,
-      label,
-      hint,
-      value,
-      increasedValue,
-      decreasedValue,
-      textDirection != null ? textDirection.index + 1 : 0,
-      transform,
-      children,
-    );
+    _updateNode(id,
+                flags,
+                actions,
+                textSelectionBase,
+                textSelectionExtent,
+                rect.left,
+                rect.top,
+                rect.right,
+                rect.bottom,
+                label,
+                hint,
+                value,
+                increasedValue,
+                decreasedValue,
+                textDirection != null ? textDirection.index + 1 : 0,
+                nextNodeId ?? -1,
+                transform,
+                children,);
   }
   void _updateNode(
     int id,
@@ -396,6 +396,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     String increasedValue,
     String decreasedValue,
     int textDirection,
+    int nextNodeId,
     Float64List transform,
     Int32List children,
   ) native 'SemanticsUpdateBuilder_updateNode';
