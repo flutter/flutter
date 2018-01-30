@@ -223,9 +223,9 @@ void RuntimeHolder::CreateView(
   view_->GetServiceProvider(view_services.NewRequest());
 
   // Listen for input events.
-  ConnectToService(view_services.get(), fidl::GetProxy(&input_connection_));
+  ConnectToService(view_services.get(), input_connection_.NewRequest());
   mozart::InputListenerPtr input_listener;
-  input_listener_binding_.Bind(GetProxy(&input_listener));
+  input_listener_binding_.Bind(input_listener.NewRequest());
   input_connection_->SetEventListener(std::move(input_listener));
 
   // Setup the session.
@@ -436,7 +436,7 @@ void RuntimeHolder::InitFuchsia() {
 
 void RuntimeHolder::InitMozartInternal() {
   fidl::InterfaceHandle<mozart::ViewContainer> view_container;
-  view_->GetContainer(fidl::GetProxy(&view_container));
+  view_->GetContainer(view_container.NewRequest());
 
   Dart_Handle mozart_internal =
       Dart_LookupLibrary(ToDart("dart:mozart.internal"));
@@ -451,7 +451,7 @@ void RuntimeHolder::InitMozartInternal() {
 
   DART_CHECK_VALID(Dart_SetField(mozart_internal, ToDart("_viewContainer"),
                                  ToDart(zircon::dart::Handle::Create(
-                                     view_container.PassHandle().release()))));
+                                     view_container.TakeChannel().release()))));
 }
 
 void RuntimeHolder::InitRootBundle(std::vector<char> bundle) {
@@ -569,7 +569,7 @@ bool RuntimeHolder::HandleTextInputPlatformMessage(
   } else if (method->value == "TextInput.setClient") {
     current_text_input_client_ = 0;
     if (text_input_binding_.is_bound())
-      text_input_binding_.Close();
+      text_input_binding_.Unbind();
     input_method_editor_ = nullptr;
 
     auto args = root.FindMember("args");
@@ -588,7 +588,7 @@ bool RuntimeHolder::HandleTextInputPlatformMessage(
     input_connection_->GetInputMethodEditor(
         mozart::KeyboardType::TEXT, mozart::InputMethodAction::DONE,
         std::move(state), text_input_binding_.NewBinding(),
-        fidl::GetProxy(&input_method_editor_));
+        input_method_editor_.NewRequest());
   } else if (method->value == "TextInput.setEditingState") {
     if (input_method_editor_) {
       auto args_it = root.FindMember("args");
@@ -630,7 +630,7 @@ bool RuntimeHolder::HandleTextInputPlatformMessage(
   } else if (method->value == "TextInput.clearClient") {
     current_text_input_client_ = 0;
     if (text_input_binding_.is_bound())
-      text_input_binding_.Close();
+      text_input_binding_.Unbind();
     input_method_editor_ = nullptr;
   } else {
     FXL_DLOG(ERROR) << "Unknown " << kTextInputChannel << " method "

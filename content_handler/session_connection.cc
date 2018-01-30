@@ -15,7 +15,7 @@ SessionConnection::SessionConnection(scenic::SceneManagerPtr scene_manager,
       scene_update_context_(&session_, surface_producer_.get()) {
   ASSERT_IS_GPU_THREAD;
 
-  session_.set_connection_error_handler(
+  session_.set_error_handler(
       std::bind(&SessionConnection::OnSessionError, this));
   session_.set_event_handler(std::bind(&SessionConnection::OnSessionEvents,
                                        this, std::placeholders::_1));

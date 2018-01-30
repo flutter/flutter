@@ -60,7 +60,7 @@ void VulkanRasterizer::SetScene(
   ASSERT_IS_GPU_THREAD;
   FXL_DCHECK(valid_ && !session_connection_);
   session_connection_ = std::make_unique<SessionConnection>(
-      scenic::SceneManagerPtr::Create(std::move(scene_manager)),
+      scene_manager.Bind(),
       std::move(import_token));
   session_connection_->set_metrics_changed_callback(
       std::move(metrics_changed_callback));

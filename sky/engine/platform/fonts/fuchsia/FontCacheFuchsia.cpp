@@ -122,7 +122,7 @@ sk_sp<SkTypeface> FontCache::createTypeface(
   font_provider->GetFont(
       std::move(request),
       [&response](fonts::FontResponsePtr r) { response = std::move(r); });
-  font_provider.WaitForIncomingResponse();
+  font_provider.WaitForResponse();
 
   FXL_DCHECK(response)
       << "Unable to contact the font provider. Did you run "
