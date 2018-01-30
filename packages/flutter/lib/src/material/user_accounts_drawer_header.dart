@@ -110,14 +110,15 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
     super.dispose();
   }
 
-  void _onTap() {
-    if (widget.isOpen) {
-      _controller.reverse();
-    } else {
-      _controller.forward();
-    }
+  @override
+  void didUpdateWidget (_AccountDetails oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
-    return widget.onTap();
+    if (widget.isOpen) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
   }
 
   @override
@@ -165,7 +166,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
         child: Semantics(
           container: true,
           button: true,
-          onTap: _onTap,
+          onTap: widget.onTap,
           child: SizedBox(
             height: _kAccountDetailsHeight,
             width: _kAccountDetailsHeight,
@@ -196,7 +197,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
 
     if (widget.onTap != null) {
       accountDetails = InkWell(
-        onTap: _onTap,
+        onTap: widget.onTap,
         child: accountDetails,
         excludeFromSemantics: true,
       );
