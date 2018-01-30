@@ -835,7 +835,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   }
 
   /// The top-most [Route] in this navigator
-  Route<dynamic> get current => _history.last;
+  Route<dynamic> get current => _history.isNotEmpty ? _history.last : null;
 
   /// The overlay this navigator uses for its visual presentation.
   OverlayState get overlay => _overlayKey.currentState;
