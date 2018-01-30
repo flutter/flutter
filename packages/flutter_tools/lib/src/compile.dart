@@ -95,6 +95,7 @@ Future<String> compile(
   if (extraFrontEndOptions != null)
     command.addAll(extraFrontEndOptions);
   command.add(mainPath);
+  printTrace(command.join(' '));
   final Process server = await processManager
       .start(command)
       .catchError((dynamic error, StackTrace stack) {
