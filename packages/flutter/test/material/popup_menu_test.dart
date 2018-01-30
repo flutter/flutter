@@ -58,6 +58,72 @@ void main() {
     expect(find.text('Next'), findsOneWidget);
   });
 
+  testWidgets('PopupMenuButton calls onCanceled callback when an item is not selected', (WidgetTester tester) async {
+    int cancels = 0;
+    BuildContext popupContext;
+    final Key noCallbackKey = new UniqueKey();
+    final Key withCallbackKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Column(
+            children: <Widget>[
+              new PopupMenuButton<int>(
+                key: noCallbackKey,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: const Text('Tap me please!'),
+                    ),
+                  ];
+                },
+              ),
+              new PopupMenuButton<int>(
+                key: withCallbackKey,
+                onCanceled: () => cancels++,
+                itemBuilder: (BuildContext context) {
+                  popupContext = context;
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: const Text('Tap me, too!'),
+                    ),
+                  ];
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Make sure everything works if no callback is provided
+    await tester.tap(find.byKey(noCallbackKey));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tapAt(const Offset(0.0, 0.0));
+    await tester.pump();
+    expect(cancels, equals(0));
+
+    // Make sure callback is called when a non-selection tap occurs
+    await tester.tap(find.byKey(withCallbackKey));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tapAt(const Offset(0.0, 0.0));
+    await tester.pump();
+    expect(cancels, equals(1));
+
+    // Make sure callback is called when back navigation occurs
+    await tester.tap(find.byKey(withCallbackKey));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    Navigator.of(popupContext).pop();
+    await tester.pump();
+    expect(cancels, equals(2));
+  });
+
   testWidgets('PopupMenuButton is horizontal on iOS', (WidgetTester tester) async {
     Widget build(TargetPlatform platform) {
       return new MaterialApp(
