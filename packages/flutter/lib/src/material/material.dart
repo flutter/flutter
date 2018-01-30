@@ -310,10 +310,10 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 
   // Determines the shape for this Material.
   //
-  // If a shapeBorder was specified it will determine the shape,
-  // Otherwise if a borderRadius was specified, the shape is a rounded
+  // If a shapeBorder was specified, it will determine the shape.
+  // If a borderRadius was specified, the shape is a rounded
   // rectangle.
-  // Otherwise the shape is determined by the widget type as described in the
+  // Otherwise, the shape is determined by the widget type as described in the
   // Material class documentation.
   ShapeBorder _getShape() {
     if (widget.shapeBorder != null)
@@ -499,23 +499,21 @@ abstract class InkFeature {
   String toString() => describeIdentity(this);
 }
 
-/// An interpolation between to [ShapeBorder]s.
+/// An interpolation between two [ShapeBorder]s.
 ///
-/// This class specialises the interpolation of [Tween] to use [ShapeBorder.lerp].
+/// This class specializes the interpolation of [Tween] to use [ShapeBorder.lerp].
 class ShapeBorderTween extends Tween<ShapeBorder> {
-
   /// Creates a [ShapeBorder] tween.
   ///
   /// the [begin] and [end] properties may be null; see [ShapeBorder.lerp] for
   /// the null handling semantics.
   ShapeBorderTween({ShapeBorder begin, ShapeBorder end}): super(begin: begin, end: end);
 
-  /// Returns the value this variable has at the given animation clock value.
+  /// Returns the value this tween has at the given animation clock value.
   @override
   ShapeBorder lerp(double t) {
     return ShapeBorder.lerp(begin, end, t);
   }
-
 }
 
 /// Animated version of [PhysicalShape].
