@@ -147,6 +147,10 @@ class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
   /// The [type], [elevation] and [shadowColor] arguments must not be null.
+  ///
+  /// [shape] and [borderRadius] must not be both non-null.
+  /// If [type] is [MaterialType.circle] then [borderRadius] and [shape] must be
+  /// null.
   const Material({
     Key key,
     this.type: MaterialType.canvas,
@@ -160,7 +164,8 @@ class Material extends StatefulWidget {
   }) : assert(type != null),
        assert(elevation != null),
        assert(shadowColor != null),
-       assert(!(identical(type, MaterialType.circle) && borderRadius != null)),
+       assert(!(shape != null && borderRadius != null)),
+       assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
        super(key: key);
 
   /// The widget below this widget in the tree.

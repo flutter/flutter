@@ -206,7 +206,6 @@ void main() {
         new Material(
           key: materialKey,
           type: MaterialType.transparency,
-          borderRadius: const BorderRadius.all(const Radius.circular(10.0)),
           shape: const StadiumBorder(),
           child: const SizedBox(width: 100.0, height: 100.0)
         )
@@ -264,7 +263,6 @@ void main() {
         new Material(
           key: materialKey,
           type: MaterialType.canvas,
-          borderRadius: const BorderRadius.all(const Radius.circular(5.0)),
           shape: const StadiumBorder(),
           child: const SizedBox(width: 100.0, height: 100.0),
           elevation: 1.0,
@@ -319,7 +317,6 @@ void main() {
         new Material(
           key: materialKey,
           type: MaterialType.card,
-          borderRadius: const BorderRadius.all(const Radius.circular(5.0)),
           shape: const StadiumBorder(),
           elevation: 5.0,
           child: const SizedBox(width: 100.0, height: 100.0),
@@ -345,24 +342,6 @@ void main() {
 
       expect(find.byKey(materialKey), rendersOnPhysicalModel(
           shape: BoxShape.circle,
-          elevation: 0.0,
-      ));
-    });
-
-    testWidgets('circle overridden by shape', (WidgetTester tester) async {
-      final GlobalKey materialKey = new GlobalKey();
-      await tester.pumpWidget(
-        new Material(
-          key: materialKey,
-          type: MaterialType.circle,
-          shape: const StadiumBorder(),
-          child: const SizedBox(width: 100.0, height: 100.0),
-          color: const Color(0xFF0000FF),
-        )
-      );
-
-      expect(find.byKey(materialKey), rendersOnPhysicalShape(
-          shape: const StadiumBorder(),
           elevation: 0.0,
       ));
     });
@@ -413,7 +392,6 @@ void main() {
           type: MaterialType.button,
           child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
-          borderRadius: const BorderRadius.all(const Radius.circular(6.0)),
           shape: const StadiumBorder(),
           elevation: 4.0,
         )
