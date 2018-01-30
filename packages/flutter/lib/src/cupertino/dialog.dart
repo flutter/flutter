@@ -117,6 +117,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     this.title,
     this.content,
     this.actions,
+    this.scrollController,
   }) : super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -136,6 +137,12 @@ class CupertinoAlertDialog extends StatelessWidget {
   ///
   /// Typically this is a list of [CupertinoDialogAction] widgets.
   final List<Widget> actions;
+
+  /// A scroll controller that can be used to control the scrolling of the message
+  /// in the dialog.
+  ///
+  /// Defaults to null, and is typically not needed, since most alert messages are short.
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -181,6 +188,7 @@ class CupertinoAlertDialog extends StatelessWidget {
         new Flexible(
           child: new CupertinoScrollbar(
             child: new ListView(
+              controller: scrollController,
               shrinkWrap: true,
               children: titleContentGroup,
             ),
@@ -263,12 +271,13 @@ class CupertinoDialogAction extends StatelessWidget {
       style = style.copyWith(color: style.color.withOpacity(0.5));
     }
 
+    final double textScaleFactor = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
     return new GestureDetector(
       onTap: onPressed,
       behavior: HitTestBehavior.opaque,
       child: new Container(
         alignment: Alignment.center,
-        padding: new EdgeInsets.all(10.0 * MediaQuery.of(context).textScaleFactor),
+        padding: new EdgeInsets.all(10.0 * textScaleFactor),
         child: new DefaultTextStyle(
           style: style,
           child: child,
@@ -311,7 +320,7 @@ class _CupertinoButtonBar extends StatelessWidget {
       child: new UnconstrainedBox(
         constrainedAxis: Axis.horizontal,
         child: new ConstrainedBox(
-          constraints: new BoxConstraints(minHeight: _kButtonBarHeight),
+          constraints: const BoxConstraints(minHeight: _kButtonBarHeight),
           child: new Row(children: buttons),
         ),
       ),
