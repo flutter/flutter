@@ -37,6 +37,11 @@ typedef Widget DragTargetBuilder<T>(BuildContext context, List<T> candidateData,
 /// Used by [Draggable.onDraggableCanceled].
 typedef void DraggableCanceledCallback(Velocity velocity, Offset offset);
 
+/// Signature for when a [Draggable] leaves a [DragTarget].
+///
+/// Used by [DragTarget.onLeave].
+typedef void DragTargetLeave<T>(T data);
+
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
   /// Display the feedback anchored at the position of the original child. If
@@ -372,7 +377,8 @@ class DragTarget<T> extends StatefulWidget {
     Key key,
     @required this.builder,
     this.onWillAccept,
-    this.onAccept
+    this.onAccept,
+    this.onLeave,
   }) : super(key: key);
 
   /// Called to build the contents of this widget.
@@ -383,10 +389,18 @@ class DragTarget<T> extends StatefulWidget {
 
   /// Called to determine whether this widget is interested in receiving a given
   /// piece of data being dragged over this drag target.
+  ///
+  /// Called when a piece of data enters the target.  This will be followed by
+  /// either [onAccept], if the data is dropped, or [onLeave], if the drag
+  /// leaves the target.
   final DragTargetWillAccept<T> onWillAccept;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
   final DragTargetAccept<T> onAccept;
+
+  /// Called when a given piece of data being dragged over this target leaves
+  /// the target.
+  final DragTargetLeave<T> onLeave;
 
   @override
   _DragTargetState<T> createState() => new _DragTargetState<T>();
@@ -421,6 +435,8 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
       _candidateAvatars.remove(avatar);
       _rejectedAvatars.remove(avatar);
     });
+    if (widget.onLeave != null)
+      widget.onLeave(avatar.data);
   }
 
   void didDrop(_DragAvatar<dynamic> avatar) {

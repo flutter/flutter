@@ -459,7 +459,7 @@ class FlutterTask extends BaseFlutterTask {
 
             if (buildMode != 'debug') {
                 if (preferSharedLibrary) {
-                    include "${intermediateDir}/app.so"
+                    include "app.so"
                 } else {
                     include "vm_snapshot_data"
                     include "vm_snapshot_instr"

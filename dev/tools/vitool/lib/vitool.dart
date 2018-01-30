@@ -292,7 +292,7 @@ class SvgPath {
   final List<SvgPathCommand> commands;
   final double opacity;
 
-  static final String _pathCommandAtom = ' *([a-zA-Z]) *([\-\.0-9 ,]*)';
+  static const String _pathCommandAtom = ' *([a-zA-Z]) *([\-\.0-9 ,]*)';
   static final RegExp _pathCommandValidator = new RegExp('^($_pathCommandAtom)*\$');
   static final RegExp _pathCommandMatcher = new RegExp(_pathCommandAtom);
 
@@ -460,7 +460,7 @@ class _Transform {
 }
 
 
-final String _transformCommandAtom = ' *([^(]+)\\(([^)]*)\\)';
+const String _transformCommandAtom = ' *([^(]+)\\(([^)]*)\\)';
 final RegExp _transformValidator = new RegExp('^($_transformCommandAtom)*\$');
 final RegExp _transformCommand = new RegExp(_transformCommandAtom);
 

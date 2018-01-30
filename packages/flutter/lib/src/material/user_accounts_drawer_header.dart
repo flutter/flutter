@@ -165,9 +165,9 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
 
   _AccountDetailsLayout({ @required this.textDirection });
 
-  static final String accountName = 'accountName';
-  static final String accountEmail = 'accountEmail';
-  static final String dropdownIcon = 'dropdownIcon';
+  static const String accountName = 'accountName';
+  static const String accountEmail = 'accountEmail';
+  static const String dropdownIcon = 'dropdownIcon';
 
   final TextDirection textDirection;
 

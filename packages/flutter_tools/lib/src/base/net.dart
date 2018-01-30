@@ -37,7 +37,18 @@ Future<List<int>> _attempt(Uri url) async {
   } else {
     httpClient = new HttpClient();
   }
-  final HttpClientRequest request = await httpClient.getUrl(url);
+  HttpClientRequest request;
+  try {
+    request = await httpClient.getUrl(url);
+  } on HandshakeException catch (error) {
+    printTrace(error.toString());
+    throwToolExit(
+      'Could not authenticate download server. You may be experiencing a man-in-the-middle attack,\n'
+      'your network may be compromised, or you may have malware installed on your computer.\n'
+      'URL: $url',
+      exitCode: kNetworkProblemExitCode,
+    );
+  }
   final HttpClientResponse response = await request.close();
   if (response.statusCode != 200) {
     if (response.statusCode > 0 && response.statusCode < 500) {

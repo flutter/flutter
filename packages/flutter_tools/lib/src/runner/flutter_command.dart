@@ -11,6 +11,7 @@ import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -62,6 +63,11 @@ class FlutterOptions {
 }
 
 abstract class FlutterCommand extends Command<Null> {
+  /// The currently executing command (or sub-command).
+  ///
+  /// Will be `null` until the top-most command has begun execution.
+  static FlutterCommand get current => context[FlutterCommand];
+
   @override
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = new ArgParser(allowTrailingOptions: false);
@@ -202,6 +208,8 @@ abstract class FlutterCommand extends Command<Null> {
   @override
   Future<Null> run() async {
     final DateTime startTime = clock.now();
+
+    context.setVariable(FlutterCommand, this);
 
     if (flutterUsage.isFirstRun)
       flutterUsage.printWelcome();

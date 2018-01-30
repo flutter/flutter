@@ -279,7 +279,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     fontSize: 40.0,
   );
 
-  static final Widget _kPreTestMessage = const Center(
+  static const Widget _kPreTestMessage = const Center(
     child: const Text(
       'Test starting...',
       style: _kMessageStyle,
@@ -287,7 +287,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     )
   );
 
-  static final Widget _kPostTestMessage = const Center(
+  static const Widget _kPostTestMessage = const Center(
     child: const Text(
       'Test finished.',
       style: _kMessageStyle,

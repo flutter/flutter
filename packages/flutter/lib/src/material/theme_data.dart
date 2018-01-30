@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
+import 'input_decorator.dart';
 import 'typography.dart';
 
 /// Describes the contrast needs of a color.
@@ -101,6 +102,7 @@ class ThemeData {
     TextTheme textTheme,
     TextTheme primaryTextTheme,
     TextTheme accentTextTheme,
+    InputDecorationTheme inputDecorationTheme,
     IconThemeData iconTheme,
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
@@ -135,6 +137,7 @@ class ThemeData {
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
     hintColor ??= isDark ? const Color(0x42FFFFFF) : const Color(0x4C000000);
     errorColor ??= Colors.red[700];
+    inputDecorationTheme ??= const InputDecorationTheme();
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
@@ -176,6 +179,7 @@ class ThemeData {
       textTheme: textTheme,
       primaryTextTheme: primaryTextTheme,
       accentTextTheme: accentTextTheme,
+      inputDecorationTheme: inputDecorationTheme,
       iconTheme: iconTheme,
       primaryIconTheme: primaryIconTheme,
       accentIconTheme: accentIconTheme,
@@ -217,6 +221,7 @@ class ThemeData {
     @required this.textTheme,
     @required this.primaryTextTheme,
     @required this.accentTextTheme,
+    @required this.inputDecorationTheme,
     @required this.iconTheme,
     @required this.primaryIconTheme,
     @required this.accentIconTheme,
@@ -248,6 +253,7 @@ class ThemeData {
        assert(textTheme != null),
        assert(primaryTextTheme != null),
        assert(accentTextTheme != null),
+       assert(inputDecorationTheme != null),
        assert(iconTheme != null),
        assert(primaryIconTheme != null),
        assert(accentIconTheme != null),
@@ -388,6 +394,12 @@ class ThemeData {
   /// A text theme that contrasts with the accent color.
   final TextTheme accentTextTheme;
 
+  /// The default [InputDecoration] values for [InputDecorator], [TextField],
+  /// and [TextFormField] are based on this theme.
+  ///
+  /// See [InputDecoration.applyDefaults].
+  final InputDecorationTheme inputDecorationTheme;
+
   /// An icon theme that contrasts with the card and canvas colors.
   final IconThemeData iconTheme;
 
@@ -431,6 +443,7 @@ class ThemeData {
     TextTheme textTheme,
     TextTheme primaryTextTheme,
     TextTheme accentTextTheme,
+    InputDecorationTheme inputDecorationTheme,
     IconThemeData iconTheme,
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
@@ -464,6 +477,7 @@ class ThemeData {
       textTheme: textTheme ?? this.textTheme,
       primaryTextTheme: primaryTextTheme ?? this.primaryTextTheme,
       accentTextTheme: accentTextTheme ?? this.accentTextTheme,
+      inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
       iconTheme: iconTheme ?? this.iconTheme,
       primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
       accentIconTheme: accentIconTheme ?? this.accentIconTheme,
@@ -582,6 +596,7 @@ class ThemeData {
       textTheme: TextTheme.lerp(a.textTheme, b.textTheme, t),
       primaryTextTheme: TextTheme.lerp(a.primaryTextTheme, b.primaryTextTheme, t),
       accentTextTheme: TextTheme.lerp(a.accentTextTheme, b.accentTextTheme, t),
+      inputDecorationTheme: t < 0.5 ? a.inputDecorationTheme : b.inputDecorationTheme,
       iconTheme: IconThemeData.lerp(a.iconTheme, b.iconTheme, t),
       primaryIconTheme: IconThemeData.lerp(a.primaryIconTheme, b.primaryIconTheme, t),
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
@@ -621,6 +636,7 @@ class ThemeData {
            (otherData.textTheme == textTheme) &&
            (otherData.primaryTextTheme == primaryTextTheme) &&
            (otherData.accentTextTheme == accentTextTheme) &&
+           (otherData.inputDecorationTheme == inputDecorationTheme) &&
            (otherData.iconTheme == iconTheme) &&
            (otherData.primaryIconTheme == primaryIconTheme) &&
            (otherData.accentIconTheme == accentIconTheme) &&
@@ -659,6 +675,7 @@ class ThemeData {
         primaryTextTheme,
         accentTextTheme,
         iconTheme,
+        inputDecorationTheme,
         primaryIconTheme,
         accentIconTheme,
         platform,

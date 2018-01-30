@@ -28,6 +28,13 @@ import 'package:flutter/widgets.dart';
 ///    rounded rectangle around the input decorator's container.
 ///  * [InputDecoration], which is used to configure an [InputDecorator].
 abstract class InputBorder extends ShapeBorder {
+  /// No input border.
+  ///
+  /// Use this value with [InputDecoration.border] to specify that no border
+  /// should be drawn. The [InputDecoration.collapsed] constructor sets
+  /// its border to this value.
+  static const InputBorder none = const _NoInputBorder();
+
   /// Creates a border for an [InputDecorator].
   ///
   /// The [borderSide] parameter must not be null. Applications typically do
@@ -70,6 +77,43 @@ abstract class InputBorder extends ShapeBorder {
       double gapPercentage: 0.0,
       TextDirection textDirection,
   });
+}
+
+// Used to create the InputBorder.none singleton.
+class _NoInputBorder extends InputBorder {
+  const _NoInputBorder() : super(borderSide: BorderSide.none);
+
+  @override
+  _NoInputBorder copyWith({ BorderSide borderSide }) => const _NoInputBorder();
+
+  @override
+  bool get isOutline => false;
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  _NoInputBorder scale(double t) => const _NoInputBorder();
+
+  @override
+  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+    return new Path()..addRect(rect);
+  }
+
+  @override
+  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+    return new Path()..addRect(rect);
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {
+      double gapStart,
+      double gapExtent: 0.0,
+      double gapPercentage: 0.0,
+      TextDirection textDirection,
+  }) {
+    // Do not paint.
+  }
 }
 
 /// Draws a horizontal line at the bottom of an [InputDecorator]'s container.

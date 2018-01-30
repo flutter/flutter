@@ -6,7 +6,7 @@ dependencies:
     sdk: flutter
 
   args: 1.2.0 # TRANSITIVE DEPENDENCY
-  async: 1.13.3 # TRANSITIVE DEPENDENCY
+  async: 2.0.3 # TRANSITIVE DEPENDENCY
   barback: 0.15.2+14 # TRANSITIVE DEPENDENCY
   boolean_selector: 1.0.2 # TRANSITIVE DEPENDENCY
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
@@ -17,7 +17,7 @@ dependencies:
   csslib: 0.14.1 # TRANSITIVE DEPENDENCY
   glob: 1.1.5 # TRANSITIVE DEPENDENCY
   html: 0.13.2+2 # TRANSITIVE DEPENDENCY
-  http: 0.11.3+14 # TRANSITIVE DEPENDENCY
+  http: 0.11.3+16 # TRANSITIVE DEPENDENCY
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
   io: 0.3.1 # TRANSITIVE DEPENDENCY
@@ -28,6 +28,7 @@ dependencies:
   meta: 1.1.1 # TRANSITIVE DEPENDENCY
   mime: 0.9.5 # TRANSITIVE DEPENDENCY
   mockito: 2.2.1 # TRANSITIVE DEPENDENCY
+  multi_server_socket: 1.0.1 # TRANSITIVE DEPENDENCY
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
@@ -46,7 +47,7 @@ dependencies:
   stream_channel: 1.6.3 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
-  test: 0.12.26 # TRANSITIVE DEPENDENCY
+  test: 0.12.30+1 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
   utf: 0.9.0+3 # TRANSITIVE DEPENDENCY
   vector_math: 2.0.5 # TRANSITIVE DEPENDENCY

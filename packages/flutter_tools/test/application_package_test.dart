@@ -29,7 +29,7 @@ void main() {
   });
 }
 
-final String _aaptData = '''
+const String _aaptData = '''
 package: name='io.flutter.gallery' versionCode='1' versionName='0.0.1' platformBuildVersionName='NMR1'
 sdkVersion:'14'
 targetSdkVersion:'21'

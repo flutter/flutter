@@ -111,6 +111,14 @@ class TestRecordingPaintingContext implements PaintingContext {
   }
 
   @override
+  void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
+    canvas.save();
+    canvas.transform(transform.storage);
+    painter(this, offset);
+    canvas.restore();
+  }
+
+  @override
   void noSuchMethod(Invocation invocation) { }
 }
 

@@ -200,7 +200,7 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  static final String kBundleName = 'Runner.app';
+  static const String kBundleName = 'Runner.app';
 
   BuildableIOSApp({
     this.appDirectory,
