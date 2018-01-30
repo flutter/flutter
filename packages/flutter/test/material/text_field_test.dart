@@ -1813,6 +1813,7 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1837,6 +1838,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1861,6 +1863,7 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1919,6 +1922,7 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1943,6 +1947,9 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
+            SemanticsAction.cut,
+            SemanticsAction.copy,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1989,6 +1996,7 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -2032,6 +2040,9 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
+            SemanticsAction.cut,
+            SemanticsAction.copy,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,

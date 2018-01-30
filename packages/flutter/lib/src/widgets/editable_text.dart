@@ -670,9 +670,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         return new CompositedTransformTarget(
           link: _layerLink,
           child: new Semantics(
-            onCopy: controls.canCopy(this) ? () => controls.handleCopy(this) : null,
-            onCut: controls.canCut(this) ? () => controls.handleCut(this) : null,
-            onPaste: controls.canPaste(this) ? () => controls.handlePaste(this) : null,
+            onCopy: _hasFocus && controls?.canCopy(this) == true ? () => controls.handleCopy(this) : null,
+            onCut: _hasFocus && controls?.canCut(this) == true ? () => controls.handleCut(this) : null,
+            onPaste: _hasFocus && controls?.canPaste(this) == true ? () => controls.handlePaste(this) : null,
             child: new _Editable(
               key: _editableKey,
               value: _value,
