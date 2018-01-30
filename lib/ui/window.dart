@@ -342,7 +342,7 @@ class Window {
   ///
   /// When this changes, [onMetricsChanged] is called.
   ///
-  /// At startup, the size of the application window may not be know before Dart
+  /// At startup, the size of the application window may not be known before Dart
   /// code runs. If this value is observed early in the application lifecycle,
   /// it may report [Size.zero].
   ///
