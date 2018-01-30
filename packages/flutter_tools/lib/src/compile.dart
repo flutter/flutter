@@ -58,9 +58,9 @@ class _StdoutHandler {
 Future<String> compile(
     {String sdkRoot,
     String mainPath,
-    bool linkPlatformKernelIn : false,
-    bool aot : false,
-    bool strongMode : false,
+    bool linkPlatformKernelIn: false,
+    bool aot: false,
+    bool strongMode: false,
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath,
     String packagesPath}) async {
@@ -95,6 +95,7 @@ Future<String> compile(
   if (extraFrontEndOptions != null)
     command.addAll(extraFrontEndOptions);
   command.add(mainPath);
+  printTrace(command.join(' '));
   final Process server = await processManager
       .start(command)
       .catchError((dynamic error, StackTrace stack) {

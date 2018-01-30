@@ -356,12 +356,20 @@ class RenderEditable extends RenderBox {
       ..isFocused = hasFocus
       ..isTextField = true;
 
+    if (hasFocus)
+      config.onSetSelection = _handleSetSelection;
+
     if (_selection?.isValid == true) {
+      config.textSelection = _selection;
       if (_textPainter.getOffsetBefore(_selection.extentOffset) != null)
         config.onMoveCursorBackwardByCharacter = _handleMoveCursorBackwardByCharacter;
       if (_textPainter.getOffsetAfter(_selection.extentOffset) != null)
         config.onMoveCursorForwardByCharacter = _handleMoveCursorForwardByCharacter;
     }
+  }
+
+  void _handleSetSelection(TextSelection selection) {
+    onSelectionChanged(selection, this, SelectionChangedCause.keyboard);
   }
 
   void _handleMoveCursorForwardByCharacter(bool extentSelection) {

@@ -95,20 +95,25 @@ assume you want to check a single package and the flutter repository has several
 Running the tests
 -----------------
 
-To automatically find all files named `_test.dart` inside a package's `test/` subdirectory, and run them inside the flutter shell as a test, use the `flutter test` command, e.g:
+To automatically find all files named `_test.dart` inside a package's `test/` subdirectory, and
+run them inside the flutter shell as a test, use the `flutter test` command, e.g:
 
  * `cd examples/stocks`
  * `flutter test`
 
 Individual tests can also be run directly, e.g. `flutter test lib/my_app_test.dart`
 
-Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree/master/packages/flutter_test) which provides flutter-specific extensions on top of [package:test](https://pub.dartlang.org/packages/test).
+Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree/master/packages/flutter_test)
+which provides flutter-specific extensions on top of [package:test](https://pub.dartlang.org/packages/test).
 
-`flutter test` runs tests inside the flutter shell. To debug tests in Observatory, use the `--start-paused` option to start the test in a paused state and wait for connection from a debugger. This option lets you set breakpoints before the test runs.
+`flutter test` runs tests inside the flutter shell. To debug tests in Observatory, use the `--start-paused`
+option to start the test in a paused state and wait for connection from a debugger. This option lets you
+set breakpoints before the test runs.
 
 To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `dart dev/bots/test.dart`.
 
-If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you can pass `--local-engine` to change what flutter shell `flutter test` uses. For example,
+If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you
+can pass `--local-engine` to change what flutter shell `flutter test` uses. For example,
 if you built an engine in the `out/host_debug_unopt` directory, you can pass
 `--local-engine=host_debug_unopt` to run the tests in that engine.
 
@@ -281,6 +286,18 @@ few steps:
    see the new dependency. As part of landing this change, you should make
    whatever other changes are needed in this repository to account for your
    breaking change.
+   
+API docs for master branch
+--------------------------
+
+To view the API docs for the `master` branch,
+visit https://master-docs-flutter-io.firebaseapp.com/.
+
+Those docs should be updated after a successful CI build
+of Flutter's `master` branch.
+
+(Looking for the API docs for our releases?
+Please visit https://docs.flutter.io.)
 
 Build infrastructure
 --------------------

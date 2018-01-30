@@ -49,11 +49,13 @@ Future<Null> main(List<String> args) async {
   if (shard != null) {
     if (!_kShards.containsKey(shard))
       throw new ArgumentError('Invalid shard: $shard');
+    print('${bold}SHARD=$shard$reset');
     await _kShards[shard]();
   } else {
     for (String currentShard in _kShards.keys) {
       print('${bold}SHARD=$currentShard$reset');
       await _kShards[currentShard]();
+      print('');
     }
   }
 }
@@ -91,6 +93,7 @@ Future<Null> _verifyInternationalizations() async {
       ..writeln('Did you forget to run gen_localizations.dart after updating a .arb file?');
     exit(1);
   }
+  print('Contents of $localizationsFile matches output of gen_localizations.dart script.');
 }
 
 Future<Null> _analyzeRepo() async {
@@ -163,6 +166,9 @@ Future<Null> _runTests() async {
     expectFailure: true,
     printOutput: false,
   );
+
+  // Verify that we correctly generated the version file.
+  await _verifyVersion(path.join(flutterRoot, 'version'));
 
   // Run tests.
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
@@ -578,4 +584,27 @@ bool _isGeneratedPluginRegistrant(File file) {
   return filename == 'GeneratedPluginRegistrant.java' ||
       filename == 'GeneratedPluginRegistrant.h' ||
       filename == 'GeneratedPluginRegistrant.m';
+}
+
+Future<Null> _verifyVersion(String filename) async {
+  if (!new File(filename).existsSync()) {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('The version logic failed to create the Flutter version file.');
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    exit(1);
+  }
+  final String version = await new File(filename).readAsString();
+  if (version == '0.0.0-unknown') {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('The version logic failed to determine the Flutter version.');
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    exit(1);
+  }
+  final RegExp pattern = new RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
+  if (!version.contains(pattern)) {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('The version logic generated an invalid version string.');
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    exit(1);
+  }
 }

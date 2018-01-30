@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/file.dart';
-import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -58,7 +57,7 @@ $fontsSection
     List<String> packages,
     String expectedAssetManifest,
   ) async {
-    final AssetBundle bundle = new AssetBundle();
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(manifestPath: 'pubspec.yaml');
 
     for (String packageName in packages) {
@@ -92,6 +91,28 @@ $fontsSection
       ..writeAsStringSync(font);
   }
 
+  // These tests do not use a memory file system because we want to ensure that
+  // asset bundles work correctly on Windows and Posix systems.
+  Directory tempDir;
+  Directory oldCurrentDir;
+
+  setUp(() async {
+    tempDir = await fs.systemTempDirectory.createTemp('asset_bundle_tests');
+    oldCurrentDir = fs.currentDirectory;
+    fs.currentDirectory = tempDir;
+  });
+
+  tearDown(() {
+    fs.currentDirectory = oldCurrentDir;
+    try {
+      tempDir?.deleteSync(recursive: true);
+      tempDir = null;
+    } on FileSystemException catch (e) {
+      // Do nothing, windows sometimes has trouble deleting.
+      print('Ignored exception during tearDown: $e');
+    }
+  });
+
   group('AssetBundle fonts from packages', () {
     testUsingContext('App includes neither font manifest nor fonts when no defines fonts', () async {
       establishFlutterRoot();
@@ -100,11 +121,11 @@ $fontsSection
       writePackagesFile('test_package:p/p/lib/');
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
-      final AssetBundle bundle = new AssetBundle();
+      final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
       expect(bundle.entries.length, 2); // LICENSE, AssetManifest
       expect(bundle.entries.containsKey('FontManifest.json'), false);
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('App font uses font file from package', () async {
       establishFlutterRoot();
@@ -129,7 +150,7 @@ $fontsSection
         <String>['test_package'],
         expectedFontManifest,
       );
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('App font uses local font file and package font file', () async {
       establishFlutterRoot();
@@ -158,7 +179,7 @@ $fontsSection
         <String>['test_package'],
         expectedFontManifest,
       );
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('App uses package font with own font file', () async {
       establishFlutterRoot();
@@ -188,7 +209,7 @@ $fontsSection
         <String>['test_package'],
         expectedFontManifest,
       );
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('App uses package font with font file from another package', () async {
       establishFlutterRoot();
@@ -219,7 +240,7 @@ $fontsSection
         <String>['test_package2'],
         expectedFontManifest,
       );
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('App uses package font with properties and own font file', () async {
       establishFlutterRoot();
@@ -251,7 +272,7 @@ $fontsSection
         <String>['test_package'],
         expectedFontManifest,
       );
-    }, overrides: contextOverrides);
+    });
 
     testUsingContext('App uses local font and package font with own font file.', () async {
       establishFlutterRoot();
@@ -287,10 +308,6 @@ $fontsSection
         <String>['test_package'],
         expectedFontManifest,
       );
-    }, overrides: contextOverrides);
+    });
   });
-}
-
-Map<Type, Generator> get contextOverrides {
-  return <Type, Generator>{FileSystem: () => new MemoryFileSystem()};
 }

@@ -114,7 +114,7 @@ Future<List<String>> assemble({
   printTrace('Building $outputPath');
 
   // Build the asset bundle.
-  final AssetBundle assetBundle = new AssetBundle();
+  final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(
     manifestPath: manifestPath,
     workingDirPath: workingDirPath,

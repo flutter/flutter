@@ -1,0 +1,8 @@
+name: font
+description: A test project that contains a font.
+flutter:
+  uses-material-design: true
+  fonts:
+   - family: test_font
+     fonts:
+       - asset: test_font_file
