@@ -10,7 +10,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:path/path.dart' as path;
+import 'archive_publisher.dart';
 
 const String kIncrement = 'increment';
 const String kX = 'x';
@@ -19,9 +19,9 @@ const String kZ = 'z';
 const String kHelp = 'help';
 
 void main(List<String> args) {
-  // If we're run from the `tools` dir, set the cwd to the repo root.
-  if (path.basename(Directory.current.path) == 'tools')
-    Directory.current = Directory.current.parent.parent;
+  // Set the cwd to the repo root, since we know where this script is located.
+  final Directory scriptLocation = new Directory(Platform.script.toFilePath());
+  Directory.current = scriptLocation.parent.parent.parent;
 
   final ArgParser argParser = new ArgParser(allowTrailingOptions: false);
   argParser.addOption(
@@ -100,11 +100,24 @@ void main(List<String> args) {
   runGit('fetch upstream', 'fetch upstream');
   runGit('reset upstream/master --hard', 'check out master branch');
   runGit('tag $version', 'tag the commit with the version label');
+  final String hash = getGitOutput('rev-parse HEAD', 'Get git hash for $version tag');
 
-  print('Your tree is ready to publish Flutter $version to the "dev" channel.');
+  print('Your tree is ready to publish Flutter $version (${hash.substring(0, 10)}) '
+    'to the "dev" channel.');
   stdout.write('Are you? [yes/no] ');
   if (stdin.readLineSync() != 'yes') {
     runGit('tag -d $version', 'remove the tag you did not want to publish');
+    print('The dev roll has been aborted.');
+    exit(0);
+  }
+
+  // Publish the archive before pushing the tag so that if something fails in
+  // the publish step, we can clean up.
+  try {
+    new ArchivePublisher(hash, version, Channel.dev)..publishArchive();
+  } on ArchivePublisherException catch (e) {
+    print('Archive publishing failed.\n$e');
+    runGit('tag -d $version', 'remove the tag that was not published');
     print('The dev roll has been aborted.');
     exit(0);
   }
