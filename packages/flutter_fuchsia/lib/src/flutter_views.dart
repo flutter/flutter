@@ -19,7 +19,7 @@ final String _ipv4SocketFallback = 'localhost';
 
 final Logger _log = new Logger('FlutterViews');
 
-final ProcessManager _processManager = new LocalProcessManager();
+final ProcessManager _processManager = const LocalProcessManager();
 
 /// Persistent VM service cache to avoid repeating handshakes across function
 /// calls. Keys a forwarded port to a FuchsiaDartVm connection instance.
@@ -29,7 +29,7 @@ final HashMap<int, FuchsiaDartVm> _fuchsiaDartVmCache =
 /// Returns a list of `FuchsiaFlutterView` objects for the given `ipv4Address`.
 Future<List<FuchsiaFlutterView>> getFlutterViews(
     String ipv4Address, String fuchsiaRoot, String buildType) async {
-  final List<FuchsiaFlutterViews> views = <FlutterView>[];
+  final List<FuchsiaFlutterView> views = <FuchsiaFlutterView>[];
   final List<_ForwardedPort> ports =
       await _forwardLocalPortsToDeviceServicePorts(
           ipv4Address, fuchsiaRoot, buildType);
@@ -120,7 +120,9 @@ Future<List<int>> getDeviceServicePorts(
     final String lastWord = trimmed.substring(lastSpace + 1);
     if ((lastWord != '.') && (lastWord != '..')) {
       final int value = int.parse(lastWord, onError: (_) => null);
-      if (value != null) ports.add(value);
+      if (value != null) {
+        ports.add(value);
+      }
     }
   }
   return ports;
@@ -141,13 +143,17 @@ class _ForwardedPort {
   _ForwardedPort._(this._remoteAddress, this._remotePort, this._localPort,
       this._process, this._sshConfig);
 
+  /// Gets the port on the localhost machine through which the SSH tunnel is
+  /// being forwarded.
   int get port => _localPort;
 
+  /// Starts SSH forwarding through a subprocess, and returns an instance of
+  /// `_ForwardedPort`.
   static Future<_ForwardedPort> start(
       String sshConfig, String address, int remotePort) async {
     final int localPort = await _potentiallyAvailablePort();
     if (localPort == 0) {
-      printStatus(
+      _log.warning(
           '_ForwardedPort failed to find a local port for $address:$remotePort');
       return new _ForwardedPort._(null, 0, 0, null, null);
     }
@@ -170,6 +176,8 @@ class _ForwardedPort {
         address, remotePort, localPort, process, sshConfig);
   }
 
+  /// Kills the SSH forwarding command, then to ensure no ports are forwarded,
+  /// runs the ssh 'cancel' command to shut down port forwarding completely.
   Future<Null> stop() async {
     // Kill the original ssh process if it is still around.
     _process?.kill();

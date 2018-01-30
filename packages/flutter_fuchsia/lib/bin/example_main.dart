@@ -7,7 +7,6 @@
 ///
 /// The application runs in a separate process from the actual test.
 
-import 'dart:io';
 import 'dart:async';
 import 'dart:core';
 
@@ -23,7 +22,7 @@ Future<Null> main(List<String> args) async {
   Logger.root.onRecord.listen((LogRecord rec) {
     print('[${rec.level.name}] -- ${rec.time}: ${rec.message}');
   });
-  List<FuchsiaFlutterView> views =
+  final List<FuchsiaFlutterView> views =
       await getFlutterViews(args[0], '../../', 'release-x86-64');
   print(views.map((FuchsiaFlutterView view) => view.name ?? view.id));
 }

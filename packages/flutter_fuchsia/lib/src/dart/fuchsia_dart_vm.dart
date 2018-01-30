@@ -3,11 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:io';
 
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
-import 'package:meta/meta.dart';
 import 'package:logging/logging.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -63,7 +61,7 @@ class FuchsiaDartVm {
   /// Invokes a raw JSON RPC command with the VM service.
   Future<Map<String, dynamic>> invokeRpc(String function,
       {Map<String, dynamic> params, Duration timeout}) async {
-    return _peer.sendRequest(function, params ?? {});
+    return _peer.sendRequest(function, params ?? <String, dynamic>{});
   }
 
   /// Returns a list of `FuchsiaFlutterViews` running across all Dart VM's.
@@ -73,7 +71,7 @@ class FuchsiaDartVm {
   /// instead. If none of these things can be found (isolate has no name or the
   /// flutter view has no ID), then the result will not be added to the list.
   Future<List<FuchsiaFlutterView>> getAllFlutterViews() async {
-    final List<String> views = <String>[];
+    final List<FuchsiaFlutterView> views = <FuchsiaFlutterView>[];
     final Map<String, dynamic> rpcResponse =
         await invokeRpc('_flutter.listViews', timeout: _kRpcTimeout);
     final List<Map<String, dynamic>> flutterViewsJson = rpcResponse['views'];
@@ -98,13 +96,9 @@ class FuchsiaFlutterView {
   /// Determines the name of the Isolate associated with this view. If there is
   /// no associated Isolate, this will be set to the view's ID.
   final String _name;
-  String get name => _name;
 
   /// The ID of the Flutter view.
   final String _id;
-  String get id => _id;
-
-  FuchsiaFlutterView._(this._name, this._id);
 
   /// Attempts to construct a `FuchsiaFlutterView` from a json representation.
   ///
@@ -115,7 +109,7 @@ class FuchsiaFlutterView {
   /// All other cases return a `FuchsiaFlutterView` instance. The name of the
   /// view may be null, but the id will always be set.
   factory FuchsiaFlutterView._fromJson(Map<String, dynamic> json) {
-    Map<String, dynamic> isolate = json['isolate'];
+    final Map<String, dynamic> isolate = json['isolate'];
     final String id = json['id'];
     String name;
     if (isolate != null) {
@@ -134,4 +128,14 @@ class FuchsiaFlutterView {
 
     return new FuchsiaFlutterView._(name, id);
   }
+
+  FuchsiaFlutterView._(this._name, this._id);
+
+  /// The ID of the `FuchsiaFlutterView`.
+  String get id => _id;
+
+  /// Returns the name of the `FucshiaFlutterView`.
+  ///
+  /// May be null if there is no associated isolate.
+  String get name => _name;
 }

@@ -8,8 +8,7 @@
 /// The tested application typically runs in a separate process from the actual
 /// test, wherein the user can supply the process with various events to test
 /// the behavior of said application.
-
 library flutter_fuchsia;
 
-export 'src/flutter_views.dart' show getFlutterViews;
 export 'src/dart/fuchsia_dart_vm.dart' show FuchsiaDartVm, FuchsiaFlutterView;
+export 'src/flutter_views.dart' show getFlutterViews;
