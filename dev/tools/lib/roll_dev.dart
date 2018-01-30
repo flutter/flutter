@@ -99,14 +99,14 @@ void main(List<String> args) {
 
   runGit('fetch upstream', 'fetch upstream');
   runGit('reset upstream/master --hard', 'check out master branch');
-  runGit('tag $version', 'tag the commit with the version label');
+  runGit('tag v$version', 'tag the commit with the version label');
   final String hash = getGitOutput('rev-parse HEAD', 'Get git hash for $version tag');
 
   print('Your tree is ready to publish Flutter $version (${hash.substring(0, 10)}) '
     'to the "dev" channel.');
   stdout.write('Are you? [yes/no] ');
   if (stdin.readLineSync() != 'yes') {
-    runGit('tag -d $version', 'remove the tag you did not want to publish');
+    runGit('tag -d v$version', 'remove the tag you did not want to publish');
     print('The dev roll has been aborted.');
     exit(0);
   }
@@ -122,7 +122,7 @@ void main(List<String> args) {
     exit(0);
   }
 
-  runGit('push upstream $version', 'publish the version');
+  runGit('push upstream v$version', 'publish the version');
   runGit('push upstream HEAD:dev', 'land the new version on the "dev" branch');
   print('Flutter version $version has been rolled to the "dev" channel!');
 }
