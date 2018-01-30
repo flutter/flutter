@@ -14,6 +14,9 @@ import 'fuchsia_device_command_runner.dart';
 
 final String _ipv4Loopback = InternetAddress.LOOPBACK_IP_V4.address;
 
+/// Fallback hostname in the event that the standard loopback fails.
+final String _ipv4SocketFallback = 'localhost';
+
 final Logger _log = new Logger('FlutterViews');
 
 final ProcessManager _processManager = new LocalProcessManager();
@@ -34,31 +37,48 @@ Future<List<FuchsiaFlutterView>> getFlutterViews(
     return views;
   }
   for (_ForwardedPort fp in ports) {
-    if (!await _checkPort(fp.port)) continue;
+    _checkPort(fp.port);
     final FuchsiaDartVm vmService = await _getFuchsiaDartVm(fp.port);
     views.addAll(await vmService.getAllFlutterViews());
   }
+  // TODO(awdavies): These should be moved to a "stop" or "cleanup" method to
+  // make use of the cache.
+  await Future.wait(_fuchsiaDartVmCache.values
+      .map((FuchsiaDartVm vmService) => vmService.stop()));
   await Future.wait(ports.map((_ForwardedPort fp) => fp.stop()));
   return views;
 }
 
-Future<bool> _checkPort(int port) async {
-  bool connected = true;
+/// Attempts to create then close a socket. Throws an exception if the port
+/// cannot be opened.
+Future<Null> _checkPort(int port) async {
   Socket s;
+  // First attempts to connect to IPV4 Loopback.
   try {
     s = await Socket.connect(_ipv4Loopback, port);
-  } catch (_) {
-    connected = false;
+  } catch (e) {
+    _log.warning(
+        'Unable to create a socket, attempting fallback after err: $e');
   }
-  if (s != null) await s.close();
-  return connected;
+  if (s == null) {
+    try {
+      s = await Socket.connect(_ipv4SocketFallback, port);
+    } catch (_) {
+      _log.severe('Fallback failed to connect. Giving up.');
+      await s?.close();
+      s?.destroy();
+      rethrow;
+    }
+  }
+  await s?.close();
+  s?.destroy();
 }
 
 Future<FuchsiaDartVm> _getFuchsiaDartVm(int port) async {
   if (!_fuchsiaDartVmCache.containsKey(port)) {
     final String addr = 'http://$_ipv4Loopback:$port';
     final Uri uri = Uri.parse(addr);
-    final FuchsiaDartVm fuchsiaDartVm = FuchsiaDartVm.connect(uri);
+    final FuchsiaDartVm fuchsiaDartVm = await FuchsiaDartVm.connect(uri);
     _fuchsiaDartVmCache[port] = fuchsiaDartVm;
   }
   return _fuchsiaDartVmCache[port];
@@ -152,10 +172,7 @@ class _ForwardedPort {
 
   Future<Null> stop() async {
     // Kill the original ssh process if it is still around.
-    if (_process != null) {
-      _log.fine('_ForwardedPort killing ${_process.pid} for port $_localPort');
-      _process.kill();
-    }
+    _process?.kill();
     // Cancel the forwarding request.
     final List<String> command = <String>[
       'ssh',
@@ -185,7 +202,7 @@ class _ForwardedPort {
       // Failures are signaled by a return value of 0 from this function.
       _log.warning('_potentiallyAvailablePort failed: $e');
     }
-    if (s != null) await s.close();
+    await s?.close();
     return port;
   }
 }

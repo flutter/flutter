@@ -40,12 +40,13 @@ class FuchsiaDartVm {
   static Future<FuchsiaDartVm> _attemptConnection(
       final Uri uri, final Stopwatch runningTimer) async {
     WebSocket socket;
+    json_rpc.Peer peer;
     try {
       socket = await WebSocket.connect(uri.toString());
-      json_rpc.Peer peer =
-          new json_rpc.Peer(new IOWebSocketChannel(socket).cast())..listen();
+      peer = new json_rpc.Peer(new IOWebSocketChannel(socket).cast())..listen();
       return new FuchsiaDartVm._(peer);
     } catch (e) {
+      await peer?.close();
       await socket?.close();
       if (runningTimer.elapsed < _kConnectTimeout) {
         _log.info('Attempting to reconnect');
