@@ -886,6 +886,7 @@ String findMainDartFile([String target]) {
 String getMissingPackageHintForPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       String manifest = 'android/AndroidManifest.xml';
