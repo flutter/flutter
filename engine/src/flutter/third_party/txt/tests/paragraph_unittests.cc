@@ -902,7 +902,7 @@ TEST_F(ParagraphTest, GetGlyphPositionAtCoordinateParagraph) {
             36ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-100000, 90).position,
             18ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(20, -80).position, 0ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(20, -80).position, 1ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 90).position, 18ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 180).position, 36ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 180).position,
@@ -1449,7 +1449,8 @@ TEST_F(ParagraphTest, RepeatLayoutParagraph) {
   const char* text =
       "Sentence to layout at diff widths to get diff line counts. short words "
       "short words short words short words short words short words short words "
-      "short words short words short words short words short words short words";
+      "short words short words short words short words short words short words "
+      "end";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
                           icu_text.getBuffer() + icu_text.length());
