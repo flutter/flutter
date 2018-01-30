@@ -148,9 +148,11 @@ class Material extends StatefulWidget {
   ///
   /// The [type], [elevation] and [shadowColor] arguments must not be null.
   ///
-  /// [shape] and [borderRadius] must not be both non-null.
-  /// If [type] is [MaterialType.circle] then [borderRadius] and [shape] must be
-  /// null.
+  /// If a [shape] is specified, then the [borderRadius] property must not be
+  /// null and the [type] property must not be [MaterialType.circle]. If the
+  /// [borderRadius] is specified, then the [type] property must not be
+  /// [MaterialType.circle]. In both cases, these restrictions are intended to
+  /// catch likely errors.
   const Material({
     Key key,
     this.type: MaterialType.canvas,
