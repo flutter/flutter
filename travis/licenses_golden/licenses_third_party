@@ -1,4 +1,4 @@
-Signature: 7c75f42d3017d4e04ffabb0610211290
+Signature: e1601cabb1413f87ee1b29529975516c
 
 UNUSED LICENSES:
 
@@ -4758,6 +4758,7 @@ FILE: ../../../third_party/dart/runtime/bin/sync_socket_macos.cc
 FILE: ../../../third_party/dart/runtime/bin/sync_socket_patch.dart
 FILE: ../../../third_party/dart/runtime/bin/sync_socket_win.cc
 FILE: ../../../third_party/dart/runtime/lib/async.cc
+FILE: ../../../third_party/dart/runtime/lib/bigint_patch.dart
 FILE: ../../../third_party/dart/runtime/lib/class_id_fasta.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/containers/search_bar.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/allocations.dart
@@ -5288,7 +5289,7 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/lib/bigint.dart
 TYPE: LicenseType.mit
 FILE: ../../../third_party/dart/runtime/lib/bigint.dart
-FILE: ../../../third_party/dart/sdk/lib/core/bigint.dart
+FILE: ../../../third_party/dart/runtime/lib/bigint_patch.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2003-2005  Tom Wu
 Copyright (c) 2012 Adam Singer (adam@solvr.io)
@@ -5326,7 +5327,7 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/lib/bigint.dart + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/lib/bigint.dart
-FILE: ../../../third_party/dart/sdk/lib/core/bigint.dart
+FILE: ../../../third_party/dart/runtime/lib/bigint_patch.dart
 ----------------------------------------------------------------------------------------------------
 Copyright 2009 The Go Authors. All rights reserved.
 
