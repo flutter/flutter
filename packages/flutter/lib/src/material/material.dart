@@ -332,7 +332,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         );
 
       case MaterialType.circle:
-        return new CircleBorder();
+        return const CircleBorder();
     }
     return new RoundedRectangleBorder();
   }
