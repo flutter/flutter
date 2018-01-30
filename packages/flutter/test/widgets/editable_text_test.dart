@@ -16,8 +16,8 @@ void main() {
   final TextEditingController controller = new TextEditingController();
   final FocusNode focusNode = new FocusNode();
   final FocusScopeNode focusScopeNode = new FocusScopeNode();
-  final TextStyle textStyle = const TextStyle();
-  final Color cursorColor = const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+  const TextStyle textStyle = const TextStyle();
+  const Color cursorColor = const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(new Directionality(

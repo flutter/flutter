@@ -1332,7 +1332,7 @@ void main() {
   test('color property test', () {
     // Add more tests if colorProperty becomes more than a wrapper around
     // objectProperty.
-    final Color color = const Color.fromARGB(255, 255, 255, 255);
+    const Color color = const Color.fromARGB(255, 255, 255, 255);
     final DiagnosticsProperty<Color> simple = new DiagnosticsProperty<Color>(
       'name',
       color,

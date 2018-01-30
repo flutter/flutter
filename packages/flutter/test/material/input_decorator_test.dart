@@ -1034,7 +1034,7 @@ void main() {
   });
 
   testWidgets('InputDecorator.toString()', (WidgetTester tester) async {
-    final Widget child = const InputDecorator(
+    const Widget child = const InputDecorator(
       key: const Key('key'),
       decoration: const InputDecoration(),
       baseStyle: const TextStyle(),

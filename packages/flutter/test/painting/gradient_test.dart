@@ -7,7 +7,7 @@ import 'package:flutter/painting.dart';
 
 void main() {
   test('LinearGradient scale test', () {
-    final LinearGradient testGradient = const LinearGradient(
+    const LinearGradient testGradient = const LinearGradient(
       begin: Alignment.bottomRight,
       end: const Alignment(0.7, 1.0),
       colors: const <Color>[
@@ -30,7 +30,7 @@ void main() {
   });
 
   test('LinearGradient lerp test', () {
-    final LinearGradient testGradient1 = const LinearGradient(
+    const LinearGradient testGradient1 = const LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomLeft,
       colors: const <Color>[
@@ -38,7 +38,7 @@ void main() {
         const Color(0x66666666),
       ],
     );
-    final LinearGradient testGradient2 = const LinearGradient(
+    const LinearGradient testGradient2 = const LinearGradient(
       begin: Alignment.topRight,
       end: Alignment.topLeft,
       colors: const <Color>[
@@ -153,7 +153,7 @@ void main() {
   });
 
   test('RadialGradient lerp test', () {
-    final RadialGradient testGradient1 = const RadialGradient(
+    const RadialGradient testGradient1 = const RadialGradient(
       center: Alignment.topLeft,
       radius: 20.0,
       colors: const <Color>[
@@ -161,7 +161,7 @@ void main() {
         const Color(0x66666666),
       ],
     );
-    final RadialGradient testGradient2 = const RadialGradient(
+    const RadialGradient testGradient2 = const RadialGradient(
       center: Alignment.topRight,
       radius: 10.0,
       colors: const <Color>[
@@ -182,7 +182,7 @@ void main() {
   });
 
   test('Gradient lerp test (with RadialGradient)', () {
-    final RadialGradient testGradient1 = const RadialGradient(
+    const RadialGradient testGradient1 = const RadialGradient(
       center: Alignment.topLeft,
       radius: 20.0,
       colors: const <Color>[
@@ -190,7 +190,7 @@ void main() {
         const Color(0x66666666),
       ],
     );
-    final RadialGradient testGradient2 = const RadialGradient(
+    const RadialGradient testGradient2 = const RadialGradient(
       center: const Alignment(0.0, -1.0),
       radius: 15.0,
       colors: const <Color>[
@@ -198,7 +198,7 @@ void main() {
         const Color(0x77777777),
       ],
     );
-    final RadialGradient testGradient3 = const RadialGradient(
+    const RadialGradient testGradient3 = const RadialGradient(
       center: Alignment.topRight,
       radius: 10.0,
       colors: const <Color>[
@@ -216,7 +216,7 @@ void main() {
   });
 
   test('Gradient lerp test (LinearGradient to RadialGradient)', () {
-    final LinearGradient testGradient1 = const LinearGradient(
+    const LinearGradient testGradient1 = const LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: const <Color>[
@@ -224,7 +224,7 @@ void main() {
         const Color(0x66666666),
       ],
     );
-    final RadialGradient testGradient2 = const RadialGradient(
+    const RadialGradient testGradient2 = const RadialGradient(
       center: Alignment.center,
       radius: 20.0,
       colors: const <Color>[
@@ -239,21 +239,21 @@ void main() {
   });
 
   test('Gradients can handle missing stops and report mismatched stops', () {
-    final LinearGradient test1a = const LinearGradient(
+    const LinearGradient test1a = const LinearGradient(
       colors: const <Color>[
         const Color(0x11111111),
         const Color(0x22222222),
         const Color(0x33333333),
       ],
     );
-    final RadialGradient test1b = const RadialGradient(
+    const RadialGradient test1b = const RadialGradient(
       colors: const <Color>[
         const Color(0x11111111),
         const Color(0x22222222),
         const Color(0x33333333),
       ],
     );
-    final LinearGradient test2a = const LinearGradient(
+    const LinearGradient test2a = const LinearGradient(
       colors: const <Color>[
         const Color(0x11111111),
         const Color(0x22222222),
@@ -261,7 +261,7 @@ void main() {
       ],
       stops: const <double>[0.0, 1.0],
     );
-    final RadialGradient test2b = const RadialGradient(
+    const RadialGradient test2b = const RadialGradient(
       colors: const <Color>[
         const Color(0x11111111),
         const Color(0x22222222),

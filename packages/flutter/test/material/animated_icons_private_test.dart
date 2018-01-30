@@ -30,7 +30,7 @@ class MockPath extends Mock implements ui.Path {}
 void main () {
   group('Interpolate points', () {
     test('- single point', () {
-      final List<Offset> points = const <Offset>[
+      const List<Offset> points = const <Offset>[
         const Offset(25.0, 1.0),
       ];
       expect(_interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
@@ -39,7 +39,7 @@ void main () {
     });
 
     test('- two points', () {
-      final List<Offset> points = const <Offset>[
+      const List<Offset> points = const <Offset>[
         const Offset(25.0, 1.0),
         const Offset(12.0, 12.0),
       ];
@@ -49,7 +49,7 @@ void main () {
     });
 
     test('- three points', () {
-      final List<Offset> points = const <Offset>[
+      const List<Offset> points = const <Offset>[
         const Offset(25.0, 1.0),
         const Offset(12.0, 12.0),
         const Offset(23.0, 9.0),
@@ -63,7 +63,7 @@ void main () {
   });
 
   group('_AnimatedIconPainter', () {
-    final Size size = const Size(48.0, 48.0);
+    const Size size = const Size(48.0, 48.0);
     final MockCanvas mockCanvas = new MockCanvas();
     List<MockPath> generatedPaths;
     final _UiPathFactory pathFactory = () {

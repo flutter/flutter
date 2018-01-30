@@ -34,7 +34,7 @@ void main() {
   });
 
   testWidgets('Contents are between opaque bars', (WidgetTester tester) async {
-    final Center page1Center = const Center();
+    const Center page1Center = const Center();
 
     await tester.pumpWidget(
       new WidgetsApp(
@@ -59,7 +59,7 @@ void main() {
                 ),
                 tabBuilder: (BuildContext context, int index) {
                   return index == 0
-                      ? new CupertinoPageScaffold(
+                      ? const CupertinoPageScaffold(
                         navigationBar: const CupertinoNavigationBar(
                           backgroundColor: CupertinoColors.white,
                           middle: const Text('Title'),

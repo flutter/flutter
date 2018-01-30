@@ -210,9 +210,9 @@ class _RenderCheckbox extends RenderToggleable {
         ..style = PaintingStyle.stroke
         ..strokeWidth = _kStrokeWidth;
       final Path path = new Path();
-      final Offset start = const Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
-      final Offset mid = const Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
-      final Offset end = const Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
+      const Offset start = const Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
+      const Offset mid = const Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
+      const Offset end = const Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
       final Offset drawStart = Offset.lerp(start, mid, 1.0 - value);
       final Offset drawEnd = Offset.lerp(mid, end, value);
       path.moveTo(offsetX + drawStart.dx, offsetY + drawStart.dy);

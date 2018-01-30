@@ -490,7 +490,7 @@ void main() {
 
     await tester.pumpWidget(buildTest());
     final Offset location = tester.getTopLeft(find.text('0'));
-    final Offset offset = const Offset(0.0, 5.0);
+    const Offset offset = const Offset(0.0, 5.0);
     final TestGesture gesture = await tester.startGesture(location, pointer: 5);
     await gesture.moveBy(offset);
     await tester.pumpWidget(buildTest());
