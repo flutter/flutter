@@ -96,11 +96,9 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
         parent: _controller,
         curve: Curves.fastOutSlowIn,
       )
-      ..addListener(() {
-        setState(() {
-          // [animation]'s value has changed here.
-        });
-      });
+      ..addListener(() => setState(() {
+        // [animation]'s value has changed here.
+      }));
   }
 
   @override
