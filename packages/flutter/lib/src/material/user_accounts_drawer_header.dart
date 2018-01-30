@@ -97,7 +97,9 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
         curve: Curves.easeInOut,
       )
       ..addListener(() {
-        setState(() {});
+        setState(() {
+          // [animation]'s value has changed here.
+        });
       });
   }
 
