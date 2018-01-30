@@ -37,21 +37,37 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
-/// A docking position that the [FloatingActionButton] can occupy in a [Scaffold].
+/// A position that the [FloatingActionButton] can dock to in a [Scaffold].
+/// 
+/// [getOffset] 
 class FabPosition {
-  static const FabPosition centerFloat = const _CenterFloatFab();
+  /// End-aligned FAB, floating at the bottom of the screen.
+  /// 
+  /// This is the default alignment of FABs in Material apps.
   static const FabPosition endFloat = const _EndFloatFab();
+
+  /// Centered FAB, floating at the bottom of the screen.
+  static const FabPosition centerFloat = const _CenterFloatFab();
 
   const FabPosition(this.getOffset);
 
-  final Offset Function(Size size, Size fabSize, Size snackBarSize, Size bottomSheetSize, TextDirection textDirection, double contentBottom, double endPadding) getOffset;
+  /// Places the FAB with the layout parameters of the [Scaffold].
+  /// 
+  /// [scaffoldSize] is the size of the whole [Scaffold].
+  /// [fabSize] is the size of the [FloatingActionButton] to be placed.
+  /// [snackBarSize] is the size of the Scaffold's [SnackBar] (if available).
+  /// [bottomSheetSize] is the size of the [BottomSheet] (if available).
+  /// [textDirection] is the direction used by the Scaffold (either RTL or LTR).
+  /// [contentBottom] is the height from the top where the Scaffold's body ends.
+  /// [horizontalPadding] is padding the Scaffold would like the FAB to observe.
+  final Offset Function(Size scaffoldSize, Size fabSize, Size snackBarSize, Size bottomSheetSize, TextDirection textDirection, double contentBottom, double horizontalPadding) getOffset;
 }
 
 class _CenterFloatFab extends FabPosition {
   const _CenterFloatFab() : super(_getOffset);
 
-  static Offset _getOffset(Size size, Size fabSize, Size snackBarSize, Size bottomSheetSize, TextDirection textDirection, double contentBottom, double endPadding) {
-    final double fabX = (size.width - fabSize.width) / 2;
+  static Offset _getOffset(Size scaffoldSize, Size fabSize, Size snackBarSize, Size bottomSheetSize, TextDirection textDirection, double contentBottom, double endPadding) {
+    final double fabX = (scaffoldSize.width - fabSize.width) / 2;
     double fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
     if (snackBarSize.height > 0.0)
       fabY = math.min(fabY, contentBottom - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
@@ -66,7 +82,7 @@ class _EndFloatFab extends FabPosition {
 
   const _EndFloatFab() : super(_getOffset);
 
-  static Offset _getOffset(Size size, Size fabSize, Size snackBarSize, Size bottomSheetSize, TextDirection textDirection, double contentBottom, double endPadding) {
+  static Offset _getOffset(Size scaffoldSize, Size fabSize, Size snackBarSize, Size bottomSheetSize, TextDirection textDirection, double contentBottom, double endPadding) {
     double fabX;
     assert(textDirection != null);
     switch (textDirection) {
@@ -74,7 +90,7 @@ class _EndFloatFab extends FabPosition {
         fabX = _kFloatingActionButtonMargin + endPadding;
         break;
       case TextDirection.ltr:
-        fabX = size.width - fabSize.width - _kFloatingActionButtonMargin - endPadding;
+        fabX = scaffoldSize.width - fabSize.width - _kFloatingActionButtonMargin - endPadding;
       break;
     }
 
@@ -185,6 +201,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     if (hasChild(_ScaffoldSlot.floatingActionButton)) {
       final Size fabSize = layoutChild(_ScaffoldSlot.floatingActionButton, looseConstraints);
       
+      // To account for the FAB position being changed, we'll lerp between its old and new position.
       final Offset currentFabOffset = currentFabPosition.getOffset(size, fabSize, snackBarSize, bottomSheetSize, textDirection, contentBottom, endPadding);
       final Offset previousFabOffset = previousFabPosition.getOffset(size, fabSize, snackBarSize, bottomSheetSize, textDirection, contentBottom, endPadding);
       final Offset fabOffset = new MaterialPointArcTween(begin: previousFabOffset, end: currentFabOffset).lerp(fabMoveProgress);
@@ -219,6 +236,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   }
 }
 
+/// Handles fab entrance and exit, but not fab motions within a page.
 class _FloatingActionButtonTransition extends StatefulWidget {
   const _FloatingActionButtonTransition({
     Key key,
@@ -843,6 +861,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _fabMoveController.forward(from: 0.0);
     }
 
+    // If the fab is moved while still animating, schedule the new transition for the end of the current animation.
     if (_fabMoveController.isAnimating) {
       new Future<Null>.delayed(_fabMoveController.duration - _fabMoveController.lastElapsedDuration).then((_) {
         updatePosition();
@@ -882,11 +901,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     super.initState();
     _fabPosition = widget.fabPosition ?? FabPosition.endFloat;
     _previousFabPosition = _fabPosition;
-    _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 0.0, duration: const Duration(milliseconds: 500));
+    _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 0.0, duration: _kFloatingActionButtonSegue * 2);
     _fabMoveController.addStatusListener(_handleFabMotion);
-    _fabMoveController.addListener(() {
-      print('Fab transition value: ${_fabMoveController.value}');
-    });
+    _fabMoveController.addListener(() {print('fab status');});
   }
 
   @override
@@ -1146,7 +1163,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         controller: _primaryScrollController,
         child: new Material(
           color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
-          child: new AnimatedBuilder(animation: _fabMoveController, builder: (context, _) {
+          child: new AnimatedBuilder(animation: _fabMoveController, builder: (BuildContext context, _) {
             return new CustomMultiChildLayout(
               children: children,
               delegate: new _ScaffoldLayout(
