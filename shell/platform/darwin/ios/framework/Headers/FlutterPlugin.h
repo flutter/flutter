@@ -127,7 +127,8 @@ NS_ASSUME_NONNULL_BEGIN
 */
 - (BOOL)application:(UIApplication*)application
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
-               completionHandler:(void (^)(BOOL succeeded))completionHandler;
+               completionHandler:(void (^)(BOOL succeeded))completionHandler
+    API_AVAILABLE(ios(9.0));
 
 @end
 
