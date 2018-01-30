@@ -823,8 +823,7 @@ abstract class _MatchRenderObject<T extends RenderObject> extends Matcher {
     final Iterable<Element> nodes = finder.evaluate();
     if (nodes.length != 1)
       return failWithDescription(matchState, 'did not have a exactly one child element');
-    List<Element> children = <Element> [];
-    RenderObject renderObject = nodes.single.renderObject;
+    final RenderObject renderObject = nodes.single.renderObject;
     if (renderObject.runtimeType != T)
       return failWithDescription(matchState, 'had a root render object of type: ${renderObject.runtimeType}');
 
