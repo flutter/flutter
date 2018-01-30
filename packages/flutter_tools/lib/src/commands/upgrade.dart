@@ -60,7 +60,7 @@ class UpgradeCommand extends FlutterCommand {
     printStatus('Upgrading engine...');
     code = await runCommandAndStreamOutput(
       <String>[
-        fs.path.join(Cache.flutterRoot, 'bin', 'flutter'), '--no-color', 'precache',
+        fs.path.join('bin', 'flutter'), '--no-color', 'precache',
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true
@@ -80,7 +80,7 @@ class UpgradeCommand extends FlutterCommand {
     printStatus('Running flutter doctor...');
     code = await runCommandAndStreamOutput(
       <String>[
-        fs.path.join(Cache.flutterRoot, 'bin', 'flutter'), 'doctor',
+        fs.path.join('bin', 'flutter'), 'doctor',
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
