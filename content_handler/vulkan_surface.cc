@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <async/default.h>
+
 #include "flutter/content_handler/vulkan_surface.h"
 #include "flutter/common/threads.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -19,7 +21,8 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
                              const SkISize& size)
     : vulkan_provider_(vulkan_provider),
       backend_context_(std::move(backend_context)),
-      session_(session) {
+      session_(session),
+      wait_(this) {
   ASSERT_IS_GPU_THREAD;
 
   FXL_DCHECK(session_);
@@ -40,8 +43,10 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
     return;
   }
 
-  event_handler_key_ = fsl::MessageLoop::GetCurrent()->AddHandler(
-      this, release_event_.get(), ZX_EVENT_SIGNALED);
+  wait_.set_object(release_event_.get());
+  wait_.set_trigger(ZX_EVENT_SIGNALED);
+  async_ = async_get_default();
+  wait_.Begin(async_);
 
   // Probably not necessary as the events should be in the unsignalled state
   // already.
@@ -52,9 +57,10 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
 
 VulkanSurface::~VulkanSurface() {
   ASSERT_IS_GPU_THREAD;
-  if (event_handler_key_ != 0) {
-    fsl::MessageLoop::GetCurrent()->RemoveHandler(event_handler_key_);
-    event_handler_key_ = 0;
+  if (async_) {
+    wait_.Cancel(async_);
+    wait_.set_object(ZX_HANDLE_INVALID);
+    async_ = nullptr;
   }
 }
 
@@ -398,13 +404,13 @@ void VulkanSurface::Reset() {
   }
 }
 
-void VulkanSurface::OnHandleReady(zx_handle_t handle,
-                                  zx_signals_t pending,
-                                  uint64_t count) {
+async_wait_result_t VulkanSurface::OnHandleReady(async_t* async,
+                                                 zx_status_t status,
+                                                 const zx_packet_signal_t* signal) {
   ASSERT_IS_GPU_THREAD;
-  FXL_DCHECK(pending & ZX_EVENT_SIGNALED);
-  FXL_DCHECK(handle == release_event_.get());
+  FXL_DCHECK(signal->observed & ZX_EVENT_SIGNALED);
   Reset();
+  return ASYNC_WAIT_AGAIN;
 }
 
 }  // namespace flutter_runner
