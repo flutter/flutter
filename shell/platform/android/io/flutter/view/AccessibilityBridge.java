@@ -907,7 +907,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             StringBuilder sb = new StringBuilder();
             String[] array = { value, label, hint };
             for (String word: array) {
-                if (word != null && (word = word.trim()).length() > 0) {
+                if (word != null && word.length() > 0) {
                     if (sb.length() > 0)
                         sb.append(", ");
                     sb.append(word);
