@@ -200,14 +200,14 @@ void main() {
       );
     });
 
-    testWidgets('clips to shapeBorder when provided', (WidgetTester tester) async {
+    testWidgets('clips to shape when provided', (WidgetTester tester) async {
       final GlobalKey materialKey = new GlobalKey();
       await tester.pumpWidget(
         new Material(
           key: materialKey,
           type: MaterialType.transparency,
           borderRadius: const BorderRadius.all(const Radius.circular(10.0)),
-          shapeBorder: const StadiumBorder(),
+          shape: const StadiumBorder(),
           child: const SizedBox(width: 100.0, height: 100.0)
         )
       );
@@ -215,7 +215,7 @@ void main() {
       expect(
         find.byKey(materialKey),
         clipsWithShapeBorder(
-          shapeBorder: const StadiumBorder(),
+          shape: const StadiumBorder(),
         ),
       );
     });
@@ -258,21 +258,21 @@ void main() {
       ));
     });
 
-    testWidgets('canvas with shapeBorder and elevation', (WidgetTester tester) async {
+    testWidgets('canvas with shape and elevation', (WidgetTester tester) async {
       final GlobalKey materialKey = new GlobalKey();
       await tester.pumpWidget(
         new Material(
           key: materialKey,
           type: MaterialType.canvas,
           borderRadius: const BorderRadius.all(const Radius.circular(5.0)),
-          shapeBorder: const StadiumBorder(),
+          shape: const StadiumBorder(),
           child: const SizedBox(width: 100.0, height: 100.0),
           elevation: 1.0,
         )
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalShape(
-          shapeBorder: const StadiumBorder(),
+          shape: const StadiumBorder(),
           elevation: 1.0,
       ));
     });
@@ -313,21 +313,21 @@ void main() {
       ));
     });
 
-    testWidgets('card with shapeBorder and elevation', (WidgetTester tester) async {
+    testWidgets('card with shape and elevation', (WidgetTester tester) async {
       final GlobalKey materialKey = new GlobalKey();
       await tester.pumpWidget(
         new Material(
           key: materialKey,
           type: MaterialType.card,
           borderRadius: const BorderRadius.all(const Radius.circular(5.0)),
-          shapeBorder: const StadiumBorder(),
+          shape: const StadiumBorder(),
           elevation: 5.0,
           child: const SizedBox(width: 100.0, height: 100.0),
         )
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalShape(
-          shapeBorder: const StadiumBorder(),
+          shape: const StadiumBorder(),
           elevation: 5.0,
       ));
     });
@@ -349,20 +349,20 @@ void main() {
       ));
     });
 
-    testWidgets('circle overridden by shapeBorder', (WidgetTester tester) async {
+    testWidgets('circle overridden by shape', (WidgetTester tester) async {
       final GlobalKey materialKey = new GlobalKey();
       await tester.pumpWidget(
         new Material(
           key: materialKey,
           type: MaterialType.circle,
-          shapeBorder: const StadiumBorder(),
+          shape: const StadiumBorder(),
           child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
         )
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalShape(
-          shapeBorder: const StadiumBorder(),
+          shape: const StadiumBorder(),
           elevation: 0.0,
       ));
     });
@@ -405,7 +405,7 @@ void main() {
       ));
     });
 
-    testWidgets('button with elevation and shapeBorder', (WidgetTester tester) async {
+    testWidgets('button with elevation and shape', (WidgetTester tester) async {
       final GlobalKey materialKey = new GlobalKey();
       await tester.pumpWidget(
         new Material(
@@ -414,13 +414,13 @@ void main() {
           child: const SizedBox(width: 100.0, height: 100.0),
           color: const Color(0xFF0000FF),
           borderRadius: const BorderRadius.all(const Radius.circular(6.0)),
-          shapeBorder: const StadiumBorder(),
+          shape: const StadiumBorder(),
           elevation: 4.0,
         )
       );
 
       expect(find.byKey(materialKey), rendersOnPhysicalShape(
-          shapeBorder: const StadiumBorder(),
+          shape: const StadiumBorder(),
           elevation: 4.0,
       ));
     });

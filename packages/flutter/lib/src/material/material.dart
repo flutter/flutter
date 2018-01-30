@@ -114,10 +114,10 @@ abstract class MaterialInkController {
 ///
 /// The shape for material is determined by [type] and [borderRadius].
 ///
-///  - If [shapeBorder] is non null, it determines the shape.
-///  - If [shapeBorder] is null and [borderRadius] is non null, the shape is a
+///  - If [shape] is non null, it determines the shape.
+///  - If [shape] is null and [borderRadius] is non null, the shape is a
 ///    rounded rectangle, with corners specified by [borderRadius].
-///  - If [shapeBorder] and [borderRadius] are null, [type] determines the
+///  - If [shape] and [borderRadius] are null, [type] determines the
 ///    shape as follows:
 ///    - [MaterialType.canvas]: the default material shape is a rectangle.
 ///    - [MaterialType.card]: the default material shape is a rectangle with
@@ -155,7 +155,7 @@ class Material extends StatefulWidget {
     this.shadowColor: const Color(0xFF000000),
     this.textStyle,
     this.borderRadius,
-    this.shapeBorder,
+    this.shape,
     this.child,
   }) : assert(type != null),
        assert(elevation != null),
@@ -199,7 +199,7 @@ class Material extends StatefulWidget {
   /// The typographical style to use for text within this material.
   final TextStyle textStyle;
 
-  final ShapeBorder shapeBorder;
+  final ShapeBorder shape;
 
   /// If non-null, the corners of this box are rounded by this [BorderRadius].
   /// Otherwise, the corners specified for the current [type] of material are
@@ -281,43 +281,42 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       )
     );
 
-    final ShapeBorder shapeBorder = _getShape();
+    final ShapeBorder shape = _getShape();
 
     if (widget.type == MaterialType.transparency)
-      return _clipToShape(shapeBorder: shapeBorder, contents: contents);
+      return _clipToShape(shape: shape, contents: contents);
     
-    return new _AnimatedPhysicalShape(
+    return new _MaterialInterior(
       curve: Curves.fastOutSlowIn,
       duration: kThemeChangeDuration,
-      shapeBorder: shapeBorder,
+      shape: shape,
       elevation: widget.elevation,
       color: backgroundColor,
       shadowColor: widget.shadowColor,
-      animateColor: false,
       child: contents,
     );
 
   }
 
-  Widget _clipToShape({ShapeBorder shapeBorder, Widget contents}) {
+  static Widget _clipToShape({ShapeBorder shape, Widget contents}) {
     return new ClipPath(
       child: contents,
       clipper: new ShapeBorderClipper(
-        shapeBorder: shapeBorder,
+        shape: shape,
       ),
     );
   }
 
   // Determines the shape for this Material.
   //
-  // If a shapeBorder was specified, it will determine the shape.
+  // If a shape was specified, it will determine the shape.
   // If a borderRadius was specified, the shape is a rounded
   // rectangle.
   // Otherwise, the shape is determined by the widget type as described in the
   // Material class documentation.
   ShapeBorder _getShape() {
-    if (widget.shapeBorder != null)
-      return widget.shapeBorder;
+    if (widget.shape != null)
+      return widget.shape;
     if (widget.borderRadius != null)
       return new RoundedRectangleBorder(borderRadius: widget.borderRadius);
     switch (widget.type) {
@@ -516,44 +515,24 @@ class ShapeBorderTween extends Tween<ShapeBorder> {
   }
 }
 
-/// Animated version of [PhysicalShape].
+/// The interior of non-transparent material.
 ///
-/// The [elevation] is animated.
-///
-/// The [color] is animated if the [animateColor] property is set; otherwise,
-/// the color changes immediately at the start of the animation for the other
-/// two properties. This allows the color to be animated independently (e.g.
-/// because it is being driven by an [AnimatedTheme]).
-///
-/// The [clipper] is not animated.
-class _AnimatedPhysicalShape extends ImplicitlyAnimatedWidget {
-  /// Creates a widget that animates the properties of a [PhysicalShape] not
-  /// including the [clipper].
-  ///
-  /// The [child], [clipper], [elevation], [color], [shadowColor], [curve], and
-  /// [duration] arguments must not be null.
-  ///
-  /// Animating [color] is optional and is controlled by the [animateColor] flag.
-  ///
-  /// Animating [shadowColor] is optional and is controlled by the [animateShadowColor] flag.
-  const _AnimatedPhysicalShape({
+/// Animates [elevation], [shadowColor], and [shape].
+class _MaterialInterior extends ImplicitlyAnimatedWidget {
+  const _MaterialInterior({
     Key key,
     @required this.child,
-    @required this.shapeBorder,
+    @required this.shape,
     @required this.elevation,
     @required this.color,
-    this.animateColor: true,
     @required this.shadowColor,
-    this.animateShadowColor: true,
     Curve curve: Curves.linear,
     @required Duration duration,
   }) : assert(child != null),
-       assert(shapeBorder != null),
+       assert(shape != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
-       assert(animateColor != null),
-       assert(animateShadowColor != null),
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
@@ -565,7 +544,7 @@ class _AnimatedPhysicalShape extends ImplicitlyAnimatedWidget {
   ///
   /// This border will be painted, and in addition the outer path of the border
   /// determines the physical shape.
-  final ShapeBorder shapeBorder;
+  final ShapeBorder shape;
 
   /// The target z-coordinate at which to place this physical object.
   final double elevation;
@@ -573,42 +552,32 @@ class _AnimatedPhysicalShape extends ImplicitlyAnimatedWidget {
   /// The target background color.
   final Color color;
 
-  /// Whether the color should be animated.
-  final bool animateColor;
-
   /// The target shadow color.
   final Color shadowColor;
 
-  /// Whether the shadow color should be animated.
-  final bool animateShadowColor;
-
   @override
-  _AnimatedPhysicalShapeState createState() => new _AnimatedPhysicalShapeState();
+  _MaterialInteriorState createState() => new _MaterialInteriorState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<ShapeBorder>('shapeBorder', shapeBorder));
+    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape));
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
-    description.add(new DiagnosticsProperty<bool>('animateColor', animateColor));
     description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
-    description.add(new DiagnosticsProperty<bool>('animateShadowColor', animateShadowColor));
   }
 }
 
-class _AnimatedPhysicalShapeState extends AnimatedWidgetBaseState<_AnimatedPhysicalShape> {
+class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> {
   Tween<double> _elevation;
-  ColorTween _color;
   ColorTween _shadowColor;
   ShapeBorderTween _border;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _elevation = visitor(_elevation, widget.elevation, (dynamic value) => new Tween<double>(begin: value));
-    _color = visitor(_color, widget.color, (dynamic value) => new ColorTween(begin: value));
     _shadowColor = visitor(_shadowColor, widget.shadowColor, (dynamic value) => new ColorTween(begin: value));
-    _border = visitor(_border, widget.shapeBorder, (dynamic value) => new ShapeBorderTween(begin: value));
+    _border = visitor(_border, widget.shape, (dynamic value) => new ShapeBorderTween(begin: value));
   }
 
   @override
@@ -616,14 +585,12 @@ class _AnimatedPhysicalShapeState extends AnimatedWidgetBaseState<_AnimatedPhysi
     return new PhysicalShape(
       child: widget.child,
       clipper: new ShapeBorderClipper(
-        shapeBorder: _border.evaluate(animation),
+        shape: _border.evaluate(animation),
         textDirection: Directionality.of(context)
       ),
       elevation: _elevation.evaluate(animation),
-      color: widget.animateColor ? _color.evaluate(animation) : widget.color,
-      shadowColor: widget.animateShadowColor
-          ? _shadowColor.evaluate(animation)
-          : widget.shadowColor,
+      color: widget.color,
+      shadowColor: _shadowColor.evaluate(animation),
     );
   }
 }

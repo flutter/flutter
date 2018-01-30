@@ -795,9 +795,9 @@ Matcher clipsWithBoundingRRect({@required BorderRadius borderRadius}) {
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipPath] with a [ShapeBorderClipper] that clips to
-/// [shapeBorder].
-Matcher clipsWithShapeBorder({@required ShapeBorder shapeBorder}) {
-  return new _ClipsWithShapeBorder(shapeBorder: shapeBorder);
+/// [shape].
+Matcher clipsWithShapeBorder({@required ShapeBorder shape}) {
+  return new _ClipsWithShapeBorder(shape: shape);
 }
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
@@ -831,15 +831,15 @@ Matcher rendersOnPhysicalModel({
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is [RenderPhysicalShape] that uses a [ShapeBorderClipper] that clips to
-/// [shapeBorder] as its clipper.
+/// [shape] as its clipper.
 /// If [elevation] is non null asserts that [RenderPhysicalShape.elevation] is
 /// equal to [elevation].
 Matcher rendersOnPhysicalShape({
-  ShapeBorder shapeBorder,
+  ShapeBorder shape,
   double elevation,
 }) {
   return new _RendersOnPhysicalShape(
-    shapeBorder: shapeBorder,
+    shape: shape,
     elevation: elevation,
   );
 }
@@ -937,17 +937,17 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
   }
 
   bool assertRoundedRectangle(ShapeBorderClipper shapeClipper, BorderRadius borderRadius, Map<dynamic, dynamic> matchState) {
-      if (shapeClipper.shapeBorder.runtimeType != RoundedRectangleBorder)
-        return failWithDescription(matchState, 'had shape border: ${shapeClipper.shapeBorder}');
-      final RoundedRectangleBorder border = shapeClipper.shapeBorder;
+      if (shapeClipper.shape.runtimeType != RoundedRectangleBorder)
+        return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
+      final RoundedRectangleBorder border = shapeClipper.shape;
       if (border.borderRadius != borderRadius)
         return failWithDescription(matchState, 'had borderRadius: ${border.borderRadius}');
       return true;
   }
 
   bool assertCircle(ShapeBorderClipper shapeClipper, Map<dynamic, dynamic> matchState) {
-      if (shapeClipper.shapeBorder.runtimeType != CircleBorder)
-        return failWithDescription(matchState, 'had shape border: ${shapeClipper.shapeBorder}');
+      if (shapeClipper.shape.runtimeType != CircleBorder)
+        return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
       return true;
   }
 
@@ -966,11 +966,11 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
 
 class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, Null> {
   const _RendersOnPhysicalShape({
-    this.shapeBorder,
+    this.shape,
     this.elevation,
   });
 
-  final ShapeBorder shapeBorder;
+  final ShapeBorder shape;
   final double elevation;
 
   @override
@@ -979,8 +979,8 @@ class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, Nu
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     final ShapeBorderClipper shapeClipper = renderObject.clipper;
 
-    if (shapeClipper.shapeBorder != shapeBorder)
-      return failWithDescription(matchState, 'shapeBorder was: ${shapeClipper.shapeBorder}');
+    if (shapeClipper.shape != shape)
+      return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
 
     if (elevation != null && renderObject.elevation != elevation)
       return failWithDescription(matchState, 'had elevation: ${renderObject.elevation}');
@@ -995,7 +995,7 @@ class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, Nu
 
   @override
   Description describe(Description description) {
-    description.add('renders on a physical model with shapeBorder $shapeBorder');
+    description.add('renders on a physical model with shape $shape');
     if (elevation != null)
       description.add(' with elevation $elevation');
     return description;
@@ -1017,9 +1017,9 @@ class _ClipsWithBoundingRect extends _MatchRenderObject<RenderClipPath, RenderCl
     if (renderObject.clipper.runtimeType != ShapeBorderClipper)
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     final ShapeBorderClipper shapeClipper = renderObject.clipper;
-    if (shapeClipper.shapeBorder.runtimeType != RoundedRectangleBorder)
-      return failWithDescription(matchState, 'shapeBorder was: ${shapeClipper.shapeBorder}');
-    final RoundedRectangleBorder border = shapeClipper.shapeBorder;
+    if (shapeClipper.shape.runtimeType != RoundedRectangleBorder)
+      return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
+    final RoundedRectangleBorder border = shapeClipper.shape;
     if (border.borderRadius != BorderRadius.zero)
       return failWithDescription(matchState, 'borderRadius was: ${border.borderRadius}');
     return true;
@@ -1052,9 +1052,9 @@ class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipPath, RenderC
     if (renderObject.clipper.runtimeType != ShapeBorderClipper)
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     final ShapeBorderClipper shapeClipper = renderObject.clipper;
-    if (shapeClipper.shapeBorder.runtimeType != RoundedRectangleBorder)
-      return failWithDescription(matchState, 'shapeBorder was: ${shapeClipper.shapeBorder}');
-    final RoundedRectangleBorder border = shapeClipper.shapeBorder;
+    if (shapeClipper.shape.runtimeType != RoundedRectangleBorder)
+      return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
+    final RoundedRectangleBorder border = shapeClipper.shape;
     if (border.borderRadius != borderRadius)
       return failWithDescription(matchState, 'had borderRadius: ${border.borderRadius}');
     return true;
@@ -1066,17 +1066,17 @@ class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipPath, RenderC
 }
 
 class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, Null> {
-  const _ClipsWithShapeBorder({@required this.shapeBorder});
+  const _ClipsWithShapeBorder({@required this.shape});
 
-  final ShapeBorder shapeBorder;
+  final ShapeBorder shape;
 
   @override
   bool renderObjectMatchesM(Map<dynamic, dynamic> matchState, RenderClipPath renderObject) {
     if (renderObject.clipper.runtimeType != ShapeBorderClipper)
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     final ShapeBorderClipper shapeClipper = renderObject.clipper;
-    if (shapeClipper.shapeBorder != shapeBorder)
-      return failWithDescription(matchState, 'shapeBorder was: ${shapeClipper.shapeBorder}');
+    if (shapeClipper.shape != shape)
+      return failWithDescription(matchState, 'shape was: ${shapeClipper.shape}');
     return true;
   }
 
@@ -1088,5 +1088,5 @@ class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, Null> {
 
   @override
   Description describe(Description description) =>
-    description.add('clips with shapeBorder: $shapeBorder');
+    description.add('clips with shape: $shape');
 }
