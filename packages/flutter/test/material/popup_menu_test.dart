@@ -58,7 +58,7 @@ void main() {
     expect(find.text('Next'), findsOneWidget);
   });
 
-  testWidgets('PopupMenuButton calls onCancelled callback when an item is not selected', (WidgetTester tester) async {
+  testWidgets('PopupMenuButton calls onCanceled callback when an item is not selected', (WidgetTester tester) async {
     int cancels = 0;
     BuildContext popupContext;
     final Key noCallbackKey = new UniqueKey();
@@ -82,7 +82,7 @@ void main() {
               ),
               new PopupMenuButton<int>(
                 key: withCallbackKey,
-                onCancelled: () => cancels++,
+                onCanceled: () => cancels++,
                 itemBuilder: (BuildContext context) {
                   popupContext = context;
                   return <PopupMenuEntry<int>>[
@@ -99,7 +99,7 @@ void main() {
       ),
     );
 
-    //Make sure everything works if no callback is provided
+    // Make sure everything works if no callback is provided
     await tester.tap(find.byKey(noCallbackKey));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -107,7 +107,7 @@ void main() {
     await tester.pump();
     expect(cancels, equals(0));
 
-    //Make sure callback is called when a non-selection tap occurs
+    // Make sure callback is called when a non-selection tap occurs
     await tester.tap(find.byKey(withCallbackKey));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
@@ -115,7 +115,7 @@ void main() {
     await tester.pump();
     expect(cancels, equals(1));
 
-    //Make sure callback is called when back navigation occurs
+    // Make sure callback is called when back navigation occurs
     await tester.tap(find.byKey(withCallbackKey));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
