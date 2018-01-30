@@ -94,7 +94,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
     );
     _animation = new CurvedAnimation(
         parent: _controller,
-        curve: Curves.easeInOut,
+        curve: Curves.fastOutSlowIn,
       )
       ..addListener(() {
         setState(() {
