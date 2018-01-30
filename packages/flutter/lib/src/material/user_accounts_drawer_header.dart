@@ -111,14 +111,15 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
     super.dispose();
   }
 
-  void _onTap() {
-    if (widget.isOpen) {
-      _controller.reverse();
-    } else {
-      _controller.forward();
-    }
+  @override
+  void didUpdateWidget (_AccountDetails oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
-    return widget.onTap();
+    if (widget.isOpen) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
   }
 
   @override
