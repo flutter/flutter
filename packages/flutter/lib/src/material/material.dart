@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show Canvas;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -129,6 +131,12 @@ abstract class MaterialInkController {
 ///    - [MaterialType.button]: the default material shape is a rectangle with
 ///      rounded edges. The edge radii is specified by [kMaterialEdges].
 ///    - [MaterialType.transparency]: the default material shape is a rectangle.
+///
+/// ## Border
+///
+/// If [shape] is specified, it will be used it to paint a border.
+/// [ShapeBorder] implementations like [CircleBorder] only paint a border when
+/// [CircleBorder.side] is not [BorderSide.none].
 ///
 /// ## Layout change notifications
 ///
@@ -626,7 +634,10 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
   @override
   Widget build(BuildContext context) {
     return new PhysicalShape(
-      child: widget.child,
+      child: new CustomPaint(
+        child: widget.child,
+        foregroundPainter: new _ShapeBorderPainter(_border.evaluate(animation)),
+      ),
       clipper: new ShapeBorderClipper(
         shape: _border.evaluate(animation),
         textDirection: Directionality.of(context)
@@ -635,5 +646,20 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       color: widget.color,
       shadowColor: _shadowColor.evaluate(animation),
     );
+  }
+}
+
+class _ShapeBorderPainter extends CustomPainter {
+  _ShapeBorderPainter(this.border);
+  final ShapeBorder border;
+
+  @override
+  void paint(ui.Canvas canvas, Size size) {
+    border.paint(canvas, Offset.zero & size);
+  }
+
+  @override
+  bool shouldRepaint(_ShapeBorderPainter oldDelegate) {
+    return oldDelegate.border != border;
   }
 }
