@@ -45,17 +45,13 @@ class Cache {
 
   /// Turn off the [lock]/[releaseLockEarly] mechanism.
   ///
-  /// This is used by the tests since they run simultaneously and all in one
+  /// This is useful in tests since they run simultaneously and all in one
   /// process and so it would be a mess if they had to use the lock.
-  @visibleForTesting
   static void disableLocking() {
     _lockEnabled = false;
   }
 
   /// Turn on the [lock]/[releaseLockEarly] mechanism.
-  ///
-  /// This is used by the tests.
-  @visibleForTesting
   static void enableLocking() {
     _lockEnabled = true;
   }
