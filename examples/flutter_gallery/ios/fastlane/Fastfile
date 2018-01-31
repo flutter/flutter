@@ -1,3 +1,6 @@
+# Prevent Fastlane from overwriting README.md
+skip_docs
+
 default_platform(:ios)
 
 # This should be run after running

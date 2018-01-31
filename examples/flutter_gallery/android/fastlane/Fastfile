@@ -1,16 +1,11 @@
-# This file contains the fastlane.tools configuration
-# You can find the documentation at https://docs.fastlane.tools
-#
-# For a list of all available actions, check out
-#
-#     https://docs.fastlane.tools/actions
-#
-
-# Uncomment the line if you want fastlane to automatically update itself
-# update_fastlane
+# Prevent Fastlane from overwriting README.md
+skip_docs
 
 default_platform(:android)
 
+# This should be run after running
+# flutter build apk --release
+# to build the app using the Flutter toolchain.
 platform :android do
   desc 'Push the built release APK to alpha'
   lane :deploy_play_store_alpha do

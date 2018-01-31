@@ -1,29 +1,10 @@
 fastlane documentation
 ================
-# Installation
+This folder contains hermetic scripts to deploy a built APK to the play store.
 
-Make sure you have the latest version of the Xcode command line tools installed:
+This is done using the [fastlane](https://fastlane.tools) tool suite.
 
-```
-xcode-select --install
-```
+Deployment can be done manually by Googlers by following
+go/flutter-gallery-publish (internal doc).
 
-Install _fastlane_ using
-```
-[sudo] gem install fastlane -NV
-```
-or alternatively using `brew cask install fastlane`
-
-# Available Actions
-## Android
-### android deploy_play_store_alpha
-```
-fastlane android deploy_play_store_alpha
-```
-Push the built release APK to alpha
-
-----
-
-This README.md is auto-generated and will be re-generated every time [fastlane](https://fastlane.tools) is run.
-More information about fastlane can be found on [fastlane.tools](https://fastlane.tools).
-The documentation of fastlane can be found on [docs.fastlane.tools](https://docs.fastlane.tools).
+Deployment is automatically done by Travis on branch cuts.
