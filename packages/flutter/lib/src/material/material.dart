@@ -332,7 +332,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     switch (widget.type) {
       case MaterialType.canvas:
       case MaterialType.transparency:
-        return new RoundedRectangleBorder();
+        return const RoundedRectangleBorder();
 
       case MaterialType.card:
       case MaterialType.button:
@@ -343,7 +343,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       case MaterialType.circle:
         return const CircleBorder();
     }
-    return new RoundedRectangleBorder();
+    return const RoundedRectangleBorder();
   }
 }
 
