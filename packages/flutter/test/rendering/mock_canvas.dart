@@ -539,13 +539,26 @@ class _TestRecordingCanvasPaintsNothingMatcher extends _TestRecordingCanvasMatch
 
   @override
   bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description) {
-    if (calls.isEmpty)
+    final Iterable<RecordedInvocation> paintingCalls = _filterCanvasCalls(calls);
+    if (paintingCalls.isEmpty)
       return true;
     description.write(
       'painted something, the first call having the following stack:\n'
-      '${calls.first.stackToString(indent: "  ")}\n'
+      '${paintingCalls.first.stackToString(indent: "  ")}\n'
     );
     return false;
+  }
+
+  static const List<Symbol> _nonPaintingOperations = const <Symbol> [
+    const Symbol('save'),
+    const Symbol('restore'),
+  ];
+
+  // Filters out canvas calls that are not painting anything.
+  static Iterable<RecordedInvocation> _filterCanvasCalls(Iterable<RecordedInvocation> canvasCalls) {
+    return canvasCalls.where((RecordedInvocation canvasCall) =>
+      !_nonPaintingOperations.contains(canvasCall.invocation.memberName)
+    );
   }
 }
 
