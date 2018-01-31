@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 
 import 'button.dart';
 
@@ -59,15 +58,11 @@ class _TextSelectionToolbarNotchPainter extends CustomPainter {
 class _TextSelectionToolbar extends StatelessWidget {
   const _TextSelectionToolbar({
     Key key,
-    this.delegate,
     this.handleCut,
     this.handleCopy,
     this.handlePaste,
     this.handleSelectAll,
   }) : super(key: key);
-
-  final TextSelectionDelegate delegate;
-  TextEditingValue get value => delegate.textEditingValue;
 
   final VoidCallback handleCut;
   final VoidCallback handleCopy;
@@ -80,20 +75,24 @@ class _TextSelectionToolbar extends StatelessWidget {
     final Widget onePhysicalPixelVerticalDivider =
         new SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
 
-    if (!value.selection.isCollapsed) {
+    if (handleCut != null)
       items.add(_buildToolbarButton('Cut', handleCut));
-      items.add(onePhysicalPixelVerticalDivider);
+
+    if (handleCopy != null) {
+      if (items.isNotEmpty)
+        items.add(onePhysicalPixelVerticalDivider);
       items.add(_buildToolbarButton('Copy', handleCopy));
     }
 
-    // TODO(https://github.com/flutter/flutter/issues/11254):
-    // This should probably be grayed-out if there is nothing to paste.
-    if (items.isNotEmpty)
-      items.add(onePhysicalPixelVerticalDivider);
-    items.add(_buildToolbarButton('Paste', handlePaste));
+    if (handlePaste != null) {
+      if (items.isNotEmpty)
+        items.add(onePhysicalPixelVerticalDivider);
+      items.add(_buildToolbarButton('Paste', handlePaste));
+    }
 
-    if (value.text.isNotEmpty && value.selection.isCollapsed) {
-      items.add(onePhysicalPixelVerticalDivider);
+    if (handleSelectAll != null) {
+      if (items.isNotEmpty)
+        items.add(onePhysicalPixelVerticalDivider);
       items.add(_buildToolbarButton('Select All', handleSelectAll));
     }
 
@@ -236,11 +235,10 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
           position,
         ),
         child: new _TextSelectionToolbar(
-          delegate: delegate,
-          handleCut: () => handleCut(delegate),
-          handleCopy: () => handleCopy(delegate),
-          handlePaste: () => handlePaste(delegate),
-          handleSelectAll: () => handleSelectAll(delegate),
+          handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+          handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
+          handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
+          handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
         ),
       )
     );
