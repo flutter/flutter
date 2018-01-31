@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/base/terminal.dart';
+
 import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -791,6 +793,7 @@ class AppInstance {
     _logger ??= new _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
 
     final AppContext appContext = new AppContext();
+    appContext.setVariable(AnsiTerminal, new AnsiTerminal());
     appContext.setVariable(Logger, _logger);
     return appContext.runInZone(method);
   }
