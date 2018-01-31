@@ -66,6 +66,7 @@ class HotRunner extends ResidentRunner {
   // The initial launch is from a snapshot.
   bool _runningFromSnapshot = true;
   bool previewDart2 = false;
+  DateTime firstBuildTime;
   bool strongMode = false;
 
   void _addBenchmarkData(String name, int value) {
@@ -213,6 +214,8 @@ class HotRunner extends ResidentRunner {
       return 1;
     }
 
+    firstBuildTime = new DateTime.now();
+
     for (FlutterDevice device in flutterDevices) {
       final int result = await device.runHot(
         hotRunner: this,
@@ -262,6 +265,7 @@ class HotRunner extends ResidentRunner {
       // Did not update DevFS because of a Dart source error.
       return false;
     }
+    final bool isFirstUpload = assetBundle.wasBuiltOnce() == false;
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       printTrace('Updating assets');
@@ -275,7 +279,9 @@ class HotRunner extends ResidentRunner {
         mainPath: mainPath,
         target: target,
         bundle: assetBundle,
-        bundleDirty: rebuildBundle,
+        firstBuildTime: firstBuildTime,
+        bundleFirstUpload: isFirstUpload,
+        bundleDirty: isFirstUpload == false && rebuildBundle,
         fileFilter: _dartDependencies,
         fullRestart: fullRestart
       );
