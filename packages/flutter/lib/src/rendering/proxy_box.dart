@@ -1052,35 +1052,35 @@ abstract class CustomClipper<T> {
 class ShapeBorderClipper extends CustomClipper<Path> {
   /// Creates a [ShapeBorder] clipper.
   ///
-  /// The [shapeBorder] argument must not be null.
+  /// The [shape] argument must not be null.
   ///
-  /// The [textDirection] argument must be provided non-null if [shapeBorder]
+  /// The [textDirection] argument must be provided non-null if [shape]
   /// has a text direction dependency (for example if it is expressed in terms
   /// of "start" and "end" instead of "left" and "right"). It may be null if
   /// the border will not need the text direction to paint itself.
   const ShapeBorderClipper({
-    @required this.shapeBorder,
+    @required this.shape,
     this.textDirection,
-  }) : assert(shapeBorder != null);
+  }) : assert(shape != null);
 
   /// The shape border whose outer path this clipper clips to.
-  final ShapeBorder shapeBorder;
+  final ShapeBorder shape;
 
-  /// The text direction to use for getting the outer path for [shapeBorder].
+  /// The text direction to use for getting the outer path for [shape].
   ///
   /// [ShapeBorder]s can depend on the text direction (e.g having a "dent"
   /// towards the start of the shape).
   final TextDirection textDirection;
 
-  /// Returns the outer path of [shapeBorder] as the clip.
+  /// Returns the outer path of [shape] as the clip.
   @override
   Path getClip(Size size) {
-    return shapeBorder.getOuterPath(Offset.zero & size, textDirection: textDirection);
+    return shape.getOuterPath(Offset.zero & size, textDirection: textDirection);
   }
 
   @override
   bool shouldReclip(covariant ShapeBorderClipper oldClipper) {
-    return oldClipper.shapeBorder != shapeBorder;
+    return oldClipper.shape != shape;
   }
 }
 
