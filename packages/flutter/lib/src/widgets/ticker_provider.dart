@@ -73,7 +73,7 @@ class TickerMode extends InheritedWidget {
 /// This mixin only supports vending a single ticker. If you might have multiple
 /// [AnimationController] objects over the lifetime of the [State], use a full
 /// [TickerProviderStateMixin] instead.
-abstract class SingleTickerProviderStateMixin extends State<dynamic> implements TickerProvider { // ignore: TYPE_ARGUMENT_NOT_MATCHING_BOUNDS, https://github.com/dart-lang/sdk/issues/25232
+abstract class SingleTickerProviderStateMixin<T extends StatefulWidget> extends State<T> implements TickerProvider { // ignore: TYPE_ARGUMENT_NOT_MATCHING_BOUNDS, https://github.com/dart-lang/sdk/issues/25232
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory SingleTickerProviderStateMixin._() => null;
@@ -155,7 +155,7 @@ abstract class SingleTickerProviderStateMixin extends State<dynamic> implements 
 /// If you only have a single [Ticker] (for example only a single
 /// [AnimationController]) for the lifetime of your [State], then using a
 /// [SingleTickerProviderStateMixin] is more efficient. This is the common case.
-abstract class TickerProviderStateMixin extends State<dynamic> implements TickerProvider { // ignore: TYPE_ARGUMENT_NOT_MATCHING_BOUNDS, https://github.com/dart-lang/sdk/issues/25232
+abstract class TickerProviderStateMixin<T extends StatefulWidget> extends State<T> implements TickerProvider { // ignore: TYPE_ARGUMENT_NOT_MATCHING_BOUNDS, https://github.com/dart-lang/sdk/issues/25232
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory TickerProviderStateMixin._() => null;
@@ -231,7 +231,7 @@ abstract class TickerProviderStateMixin extends State<dynamic> implements Ticker
 class _WidgetTicker extends Ticker {
   _WidgetTicker(TickerCallback onTick, this._creator, { String debugLabel }) : super(onTick, debugLabel: debugLabel);
 
-  final TickerProviderStateMixin _creator;
+  final TickerProviderStateMixin<StatefulWidget> _creator;
 
   @override
   void dispose() {
