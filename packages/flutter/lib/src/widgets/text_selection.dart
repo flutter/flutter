@@ -72,6 +72,10 @@ abstract class TextSelectionDelegate {
 
   /// Hides the text selection toolbar.
   void hideToolbar();
+
+  /// Brings the provided [TextPosition] into the visible area of the text
+  /// input.
+  void bringIntoView(TextPosition position);
 }
 
 /// An interface for building the selection UI, to be provided by the
@@ -93,6 +97,49 @@ abstract class TextSelectionControls {
   /// Returns the size of the selection handle.
   Size get handleSize;
 
+  /// Whether the current selection of the text field managed by the given
+  /// `delegate` can be removed from the text field and placed into the
+  /// [Clipboard].
+  ///
+  /// By default, false is returned when nothing is selected in the text field.
+  ///
+  /// Subclasses can use this to decide if they should expose the cut
+  /// functionality to the user.
+  bool canCut(TextSelectionDelegate delegate) {
+    return !delegate.textEditingValue.selection.isCollapsed;
+  }
+
+  /// Whether the current selection of the text field managed by the given
+  /// `delegate` can be copied to the [Clipboard].
+  ///
+  /// By default, false is returned when nothing is selected in the text field.
+  ///
+  /// Subclasses can use this to decide if they should expose the copy
+  /// functionality to the user.
+  bool canCopy(TextSelectionDelegate delegate) {
+    return !delegate.textEditingValue.selection.isCollapsed;
+  }
+
+  /// Whether the current [Clipboard] content can be pasted into the text field
+  /// managed by the given `delegate`.
+  ///
+  /// Subclasses can use this to decide if they should expose the paste
+  /// functionality to the user.
+  bool canPaste(TextSelectionDelegate delegate) {
+    // TODO(goderbauer): return false when clipboard is empty, https://github.com/flutter/flutter/issues/11254
+    return true;
+  }
+
+  /// Whether the the current selection of the text field managed by the given
+  /// `delegate` can be extended to include the entire content of the text
+  /// field.
+  ///
+  /// Subclasses can use this to decide if they should expose the select all
+  /// functionality to the user.
+  bool canSelectAll(TextSelectionDelegate delegate) {
+    return delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
+  }
+
   /// Copy the current selection of the text field managed by the given
   /// `delegate` to the [Clipboard]. Then, remove the selected text from the
   /// text field and hide the toolbar.
@@ -111,6 +158,7 @@ abstract class TextSelectionControls {
         offset: value.selection.start
       ),
     );
+    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
     delegate.hideToolbar();
   }
 
@@ -129,6 +177,7 @@ abstract class TextSelectionControls {
       text: value.text,
       selection: new TextSelection.collapsed(offset: value.selection.end),
     );
+    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
     delegate.hideToolbar();
   }
 
@@ -156,6 +205,7 @@ abstract class TextSelectionControls {
         ),
       );
     }
+    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
     delegate.hideToolbar();
   }
 
@@ -174,6 +224,7 @@ abstract class TextSelectionControls {
         extentOffset: delegate.textEditingValue.text.length
       ),
     );
+    delegate.bringIntoView(delegate.textEditingValue.selection.extent);
   }
 }
 
@@ -181,7 +232,7 @@ abstract class TextSelectionControls {
 ///
 /// The selection handles are displayed in the [Overlay] that most closely
 /// encloses the given [BuildContext].
-class TextSelectionOverlay implements TextSelectionDelegate {
+class TextSelectionOverlay {
   /// Creates an object that manages overly entries for selection handles.
   ///
   /// The [context] must not be null and must have an [Overlay] as an ancestor.
@@ -191,8 +242,8 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     this.debugRequiredFor,
     @required this.layerLink,
     @required this.renderObject,
-    this.onSelectionOverlayChanged,
     this.selectionControls,
+    this.selectionDelegate,
   }): assert(value != null),
       assert(context != null),
       _value = value {
@@ -220,14 +271,12 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   /// The editable line in which the selected text is being displayed.
   final RenderEditable renderObject;
 
-  /// Called when the the selection changes.
-  ///
-  /// For example, if the use drags one of the selection handles, this function
-  /// will be called with a new input value with an updated selection.
-  final TextSelectionOverlayChanged onSelectionOverlayChanged;
-
   /// Builds text selection handles and toolbar.
   final TextSelectionControls selectionControls;
+
+  /// The delegate for manipulating the current selection in the owning
+  /// text field.
+  final TextSelectionDelegate selectionDelegate;
 
   /// Controls the fade-in animations.
   static const Duration _kFadeDuration = const Duration(milliseconds: 150);
@@ -372,24 +421,23 @@ class TextSelectionOverlay implements TextSelectionDelegate {
         link: layerLink,
         showWhenUnlinked: false,
         offset: -editingRegion.topLeft,
-        child: selectionControls.buildToolbar(context, editingRegion, midpoint, this),
+        child: selectionControls.buildToolbar(context, editingRegion, midpoint, selectionDelegate),
       ),
     );
   }
 
   void _handleSelectionHandleChanged(TextSelection newSelection, _TextSelectionHandlePosition position) {
-    Rect caretRect;
+    TextPosition textPosition;
     switch (position) {
       case _TextSelectionHandlePosition.start:
-        caretRect = renderObject.getLocalRectForCaret(newSelection.base);
+        textPosition = newSelection.base;
         break;
       case _TextSelectionHandlePosition.end:
-        caretRect = renderObject.getLocalRectForCaret(newSelection.extent);
+        textPosition =newSelection.extent;
         break;
     }
-    update(_value.copyWith(selection: newSelection, composing: TextRange.empty));
-    if (onSelectionOverlayChanged != null)
-      onSelectionOverlayChanged(_value, caretRect);
+    selectionDelegate.textEditingValue = _value.copyWith(selection: newSelection, composing: TextRange.empty);
+    selectionDelegate.bringIntoView(textPosition);
   }
 
   void _handleSelectionHandleTapped() {
@@ -401,23 +449,6 @@ class TextSelectionOverlay implements TextSelectionDelegate {
         showToolbar();
       }
     }
-  }
-
-  @override
-  TextEditingValue get textEditingValue => _value;
-
-  @override
-  set textEditingValue(TextEditingValue newValue) {
-    update(newValue);
-    if (onSelectionOverlayChanged != null) {
-      final Rect caretRect = renderObject.getLocalRectForCaret(newValue.selection.extent);
-      onSelectionOverlayChanged(newValue, caretRect);
-    }
-  }
-
-  @override
-  void hideToolbar() {
-    hide();
   }
 }
 
