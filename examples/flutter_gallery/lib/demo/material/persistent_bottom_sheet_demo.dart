@@ -79,7 +79,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
         child: const Icon(
           Icons.add,
           semanticLabel: 'Add',
-        )
+        ),
       ),
       body: new Center(
         child: new RaisedButton(

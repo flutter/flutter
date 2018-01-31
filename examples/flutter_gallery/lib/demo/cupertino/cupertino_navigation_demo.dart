@@ -107,7 +107,7 @@ class ExitButton extends StatelessWidget {
       child: const Tooltip(
         message: 'Back',
         child: const Text('Exit'),
-        excludeFromSematics: true,
+        excludeFromSemantics: true,
       ),
       onPressed: () {
         // The demo is on the root navigator.

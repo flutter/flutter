@@ -172,7 +172,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
             onTap: widget.onPressed,
             onHighlightChanged: _handleHighlightChanged,
             child: result,
-          )
+          ),
         ),
       ),
     );

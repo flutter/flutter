@@ -220,7 +220,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           new IconButton(
             icon: const Icon(
               Icons.thumb_up,
-              semanticLabel: 'Thumb up',
+              semanticLabel: 'Thumbs up',
             ),
             onPressed: () {
               setState(() => iconButtonToggle = !iconButtonToggle);
@@ -230,7 +230,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           const IconButton(
             icon: const Icon(
               Icons.thumb_up,
-              semanticLabel: 'Thumb up',
+              semanticLabel: 'Thumbs up',
             ),
             onPressed: null,
           )
