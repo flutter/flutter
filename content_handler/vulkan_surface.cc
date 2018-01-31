@@ -408,6 +408,8 @@ async_wait_result_t VulkanSurface::OnHandleReady(async_t* async,
                                                  zx_status_t status,
                                                  const zx_packet_signal_t* signal) {
   ASSERT_IS_GPU_THREAD;
+  if (status != ZX_OK)
+    return ASYNC_WAIT_FINISHED;
   FXL_DCHECK(signal->observed & ZX_EVENT_SIGNALED);
   Reset();
   return ASYNC_WAIT_AGAIN;
