@@ -122,7 +122,7 @@ class _BorderContainer extends StatefulWidget {
   _BorderContainerState createState() => new _BorderContainerState();
 }
 
-class _BorderContainerState extends State<_BorderContainer> with SingleTickerProviderStateMixin {
+class _BorderContainerState extends State<_BorderContainer> with SingleTickerProviderStateMixin<_BorderContainer> {
   AnimationController _controller;
   Animation<double> _borderAnimation;
   _InputBorderTween _border;
@@ -236,7 +236,7 @@ class _HelperError extends StatefulWidget {
   _HelperErrorState createState() => new _HelperErrorState();
 }
 
-class _HelperErrorState extends State<_HelperError> with SingleTickerProviderStateMixin {
+class _HelperErrorState extends State<_HelperError> with SingleTickerProviderStateMixin<_HelperError> {
   // If the height of this widget and the counter are zero ("empty") at
   // layout time, no space is allocated for the subtext.
   static const Widget empty = const SizedBox();
@@ -1328,7 +1328,7 @@ class InputDecorator extends StatefulWidget {
   }
 }
 
-class _InputDecoratorState extends State<InputDecorator> with TickerProviderStateMixin {
+class _InputDecoratorState extends State<InputDecorator> with TickerProviderStateMixin<InputDecorator> {
   AnimationController _floatingLabelController;
   AnimationController _shakingLabelController;
   final _InputBorderGap _borderGap = new _InputBorderGap();

@@ -102,7 +102,7 @@ class Radio<T> extends StatefulWidget {
   _RadioState<T> createState() => new _RadioState<T>();
 }
 
-class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
+class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin<Radio<T>> {
   bool get _enabled => widget.onChanged != null;
 
   Color _getInactiveColor(ThemeData themeData) {

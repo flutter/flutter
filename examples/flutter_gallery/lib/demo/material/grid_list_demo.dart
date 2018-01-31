@@ -60,7 +60,7 @@ class _GridTitleText extends StatelessWidget {
   }
 }
 
-class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProviderStateMixin {
+class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProviderStateMixin<GridPhotoViewer> {
   AnimationController _controller;
   Animation<Offset> _flingAnimation;
   Offset _offset = Offset.zero;

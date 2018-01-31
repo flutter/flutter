@@ -279,7 +279,7 @@ class TextField extends StatefulWidget {
   }
 }
 
-class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixin {
+class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixin<TextField> {
   final GlobalKey<EditableTextState> _editableTextKey = new GlobalKey<EditableTextState>();
 
   Set<InteractiveInkFeature> _splashes;

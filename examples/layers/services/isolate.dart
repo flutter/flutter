@@ -204,7 +204,7 @@ class IsolateExampleWidget extends StatefulWidget {
 }
 
 // Main application state.
-class IsolateExampleState extends State<StatefulWidget> with SingleTickerProviderStateMixin {
+class IsolateExampleState extends State<StatefulWidget> with SingleTickerProviderStateMixin<StatefulWidget> {
 
   String _status = 'Idle';
   String _label = 'Start';

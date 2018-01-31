@@ -58,7 +58,7 @@ class ExpandIcon extends StatefulWidget {
   _ExpandIconState createState() => new _ExpandIconState();
 }
 
-class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateMixin {
+class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateMixin<ExpandIcon> {
   AnimationController _controller;
   Animation<double> _iconTurns;
 

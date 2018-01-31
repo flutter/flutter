@@ -119,7 +119,7 @@ class CupertinoSlider extends StatefulWidget {
   }
 }
 
-class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
+class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin<CupertinoSlider> {
   void _handleChanged(double value) {
     assert(widget.onChanged != null);
     widget.onChanged(value * (widget.max - widget.min) + widget.min);

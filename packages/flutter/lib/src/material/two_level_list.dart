@@ -147,7 +147,7 @@ class TwoLevelSublist extends StatefulWidget {
 }
 
 @deprecated
-class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProviderStateMixin {
+class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProviderStateMixin<TwoLevelSublist> {
   AnimationController _controller;
   CurvedAnimation _easeOutAnimation;
   CurvedAnimation _easeInAnimation;

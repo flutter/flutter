@@ -169,7 +169,7 @@ class LinearProgressIndicator extends ProgressIndicator {
   _LinearProgressIndicatorState createState() => new _LinearProgressIndicatorState();
 }
 
-class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with SingleTickerProviderStateMixin {
+class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with SingleTickerProviderStateMixin<LinearProgressIndicator> {
   Animation<double> _animation;
   AnimationController _controller;
 
@@ -349,7 +349,7 @@ final Animatable<int> _kStepTween = new StepTween(begin: 0, end: 5);
 
 final Animatable<double> _kRotationTween = new CurveTween(curve: const SawTooth(5));
 
-class _CircularProgressIndicatorState extends State<CircularProgressIndicator> with SingleTickerProviderStateMixin {
+class _CircularProgressIndicatorState extends State<CircularProgressIndicator> with SingleTickerProviderStateMixin<CircularProgressIndicator> {
   AnimationController _controller;
 
   @override

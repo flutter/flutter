@@ -79,7 +79,7 @@ class ExpansionTile extends StatefulWidget {
   _ExpansionTileState createState() => new _ExpansionTileState();
 }
 
-class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderStateMixin {
+class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProviderStateMixin<ExpansionTile> {
   AnimationController _controller;
   CurvedAnimation _easeOutAnimation;
   CurvedAnimation _easeInAnimation;

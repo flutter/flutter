@@ -39,7 +39,7 @@ class TabsFabDemo extends StatefulWidget {
   _TabsFabDemoState createState() => new _TabsFabDemoState();
 }
 
-class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStateMixin {
+class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStateMixin<TabsFabDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   TabController _controller;

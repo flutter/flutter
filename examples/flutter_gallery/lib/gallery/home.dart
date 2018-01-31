@@ -108,7 +108,7 @@ class GalleryHome extends StatefulWidget {
   GalleryHomeState createState() => new GalleryHomeState();
 }
 
-class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStateMixin {
+class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStateMixin<GalleryHome> {
   static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   AnimationController _controller;

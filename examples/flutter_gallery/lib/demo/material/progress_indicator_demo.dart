@@ -11,7 +11,7 @@ class ProgressIndicatorDemo extends StatefulWidget {
   _ProgressIndicatorDemoState createState() => new _ProgressIndicatorDemoState();
 }
 
-class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with SingleTickerProviderStateMixin {
+class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with SingleTickerProviderStateMixin<ProgressIndicatorDemo> {
   AnimationController _controller;
   Animation<double> _animation;
 

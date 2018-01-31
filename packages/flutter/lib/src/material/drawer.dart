@@ -158,7 +158,7 @@ class DrawerController extends StatefulWidget {
 /// State for a [DrawerController].
 ///
 /// Typically used by a [Scaffold] to [open] and [close] the drawer.
-class DrawerControllerState extends State<DrawerController> with SingleTickerProviderStateMixin {
+class DrawerControllerState extends State<DrawerController> with SingleTickerProviderStateMixin<DrawerController> {
   @override
   void initState() {
     super.initState();

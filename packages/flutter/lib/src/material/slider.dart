@@ -169,7 +169,7 @@ class Slider extends StatefulWidget {
   }
 }
 
-class _SliderState extends State<Slider> with TickerProviderStateMixin {
+class _SliderState extends State<Slider> with TickerProviderStateMixin<Slider> {
   _SliderState() {
     _reactionController = new AnimationController(
       duration: kRadialReactionDuration,

@@ -94,7 +94,7 @@ class Tooltip extends StatefulWidget {
   }
 }
 
-class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
+class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin<Tooltip> {
   AnimationController _controller;
   OverlayEntry _entry;
   Timer _timer;

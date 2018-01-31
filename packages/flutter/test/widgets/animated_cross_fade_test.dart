@@ -370,7 +370,7 @@ class _TickerWatchingWidget extends StatefulWidget {
   State<StatefulWidget> createState() => new _TickerWatchingWidgetState();
 }
 
-class _TickerWatchingWidgetState extends State<_TickerWatchingWidget> with SingleTickerProviderStateMixin {
+class _TickerWatchingWidgetState extends State<_TickerWatchingWidget> with SingleTickerProviderStateMixin<_TickerWatchingWidget> {
   Ticker ticker;
 
   @override

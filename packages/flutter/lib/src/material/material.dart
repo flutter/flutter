@@ -249,7 +249,7 @@ class Material extends StatefulWidget {
   static const double defaultSplashRadius = 35.0;
 }
 
-class _MaterialState extends State<Material> with TickerProviderStateMixin {
+class _MaterialState extends State<Material> with TickerProviderStateMixin<Material> {
   final GlobalKey _inkFeatureRenderer = new GlobalKey(debugLabel: 'ink renderer');
 
   Color _getBackgroundColor(BuildContext context) {

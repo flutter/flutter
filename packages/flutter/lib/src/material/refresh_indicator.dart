@@ -133,7 +133,7 @@ class RefreshIndicator extends StatefulWidget {
 
 /// Contains the state for a [RefreshIndicator]. This class can be used to
 /// programmatically show the refresh indicator, see the [show] method.
-class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderStateMixin {
+class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderStateMixin<RefreshIndicator> {
   AnimationController _positionController;
   AnimationController _scaleController;
   Animation<double> _positionFactor;

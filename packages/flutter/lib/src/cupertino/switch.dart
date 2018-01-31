@@ -95,7 +95,7 @@ class CupertinoSwitch extends StatefulWidget {
   }
 }
 
-class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderStateMixin {
+class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderStateMixin<CupertinoSwitch> {
   @override
   Widget build(BuildContext context) {
     return new _CupertinoSwitchRenderObjectWidget(

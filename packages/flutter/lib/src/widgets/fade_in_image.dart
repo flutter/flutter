@@ -348,7 +348,7 @@ class _ImageProviderResolver {
   }
 }
 
-class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin {
+class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin<FadeInImage> {
   _ImageProviderResolver _imageResolver;
   _ImageProviderResolver _placeholderResolver;
 

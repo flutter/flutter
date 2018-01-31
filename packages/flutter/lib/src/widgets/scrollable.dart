@@ -249,7 +249,7 @@ class _ScrollableScope extends InheritedWidget {
 ///
 /// This class is not intended to be subclassed. To specialize the behavior of a
 /// [Scrollable], provide it with a [ScrollPhysics].
-class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
+class ScrollableState extends State<Scrollable> with TickerProviderStateMixin<Scrollable>
     implements ScrollContext {
   /// The manager for this [Scrollable] widget's viewport position.
   ///

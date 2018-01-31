@@ -123,7 +123,7 @@ class Switch extends StatefulWidget {
   }
 }
 
-class _SwitchState extends State<Switch> with TickerProviderStateMixin {
+class _SwitchState extends State<Switch> with TickerProviderStateMixin<Switch> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));

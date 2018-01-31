@@ -84,7 +84,7 @@ class TabControllerFrame extends StatefulWidget {
   TabControllerFrameState createState() => new TabControllerFrameState();
 }
 
-class TabControllerFrameState extends State<TabControllerFrame> with SingleTickerProviderStateMixin {
+class TabControllerFrameState extends State<TabControllerFrame> with SingleTickerProviderStateMixin<TabControllerFrame> {
   TabController _controller;
 
   @override

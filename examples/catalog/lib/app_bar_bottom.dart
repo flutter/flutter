@@ -9,7 +9,7 @@ class AppBarBottomSample extends StatefulWidget {
   _AppBarBottomSampleState createState() => new _AppBarBottomSampleState();
 }
 
-class _AppBarBottomSampleState extends State<AppBarBottomSample> with SingleTickerProviderStateMixin {
+class _AppBarBottomSampleState extends State<AppBarBottomSample> with SingleTickerProviderStateMixin<AppBarBottomSample> {
   TabController _tabController;
 
   @override
