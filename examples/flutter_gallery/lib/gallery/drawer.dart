@@ -98,7 +98,7 @@ class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
               _logoColor = options[new math.Random().nextInt(options.length)];
             });
           }
-        )
+        ),
       ),
     );
   }
