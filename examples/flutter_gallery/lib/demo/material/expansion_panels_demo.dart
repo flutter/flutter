@@ -168,6 +168,8 @@ class DemoItem<T> {
       );
     };
   }
+
+  Widget build() => builder(this);
 }
 
 class ExpasionPanelsDemo extends StatefulWidget {
@@ -351,7 +353,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                 return new ExpansionPanel(
                   isExpanded: item.isExpanded,
                   headerBuilder: item.headerBuilder,
-                  body: item.builder(item)
+                  body: item.build()
                 );
               }).toList()
             ),
