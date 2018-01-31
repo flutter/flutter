@@ -91,6 +91,7 @@ class _ManifestAssetBundle implements AssetBundle {
 
   bool wasBuiltOnce() => _lastBuildTimestamp != null;
 
+  @override
   bool needsBuild({String manifestPath: defaultManifestPath}) {
     if (_fixed)
       return false;
