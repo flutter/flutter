@@ -35,6 +35,8 @@ abstract class AssetBundle {
 
   Map<String, DevFSContent> get entries;
 
+  bool wasBuiltOnce();
+
   bool needsBuild({String manifestPath: _ManifestAssetBundle.defaultManifestPath});
 
   /// Returns 0 for success; non-zero for failure.
@@ -88,6 +90,9 @@ class _ManifestAssetBundle implements AssetBundle {
       entries[archivePath] = new DevFSFileContent(fs.file(assetPath));
     }
   }
+
+  @override
+  bool wasBuiltOnce() => _lastBuildTimestamp != null;
 
   @override
   bool needsBuild({String manifestPath: defaultManifestPath}) {
