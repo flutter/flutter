@@ -261,7 +261,7 @@ abstract class ImageProvider<T> {
     assert(configuration != null);
     final ImageStream stream = new ImageStream();
     T obtainedKey;
-    obtainKey(configuration).then<Null>((T key) {
+    obtainKey(configuration).then<void>((T key) {
       obtainedKey = key;
       stream.setCompleter(PaintingBinding.instance.imageCache.putIfAbsent(key, () => load(key)));
     }).catchError(

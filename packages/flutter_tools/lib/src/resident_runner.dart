@@ -365,6 +365,8 @@ class FlutterDevice {
     String mainPath,
     String target,
     AssetBundle bundle,
+    DateTime firstBuildTime,
+    bool bundleFirstUpload: false,
     bool bundleDirty: false,
     Set<String> fileFilter,
     bool fullRestart: false
@@ -379,6 +381,8 @@ class FlutterDevice {
         mainPath: mainPath,
         target: target,
         bundle: bundle,
+        firstBuildTime: firstBuildTime,
+        bundleFirstUpload: bundleFirstUpload,
         bundleDirty: bundleDirty,
         fileFilter: fileFilter,
         generator: generator,
@@ -420,7 +424,7 @@ abstract class ResidentRunner {
     if (projectAssets != null)
       _assetBundle = new AssetBundle.fixed(_projectRootPath, projectAssets);
     else
-      _assetBundle = new AssetBundle();
+      _assetBundle = AssetBundleFactory.instance.createBundle();
   }
 
   final List<FlutterDevice> flutterDevices;

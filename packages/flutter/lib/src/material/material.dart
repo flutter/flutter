@@ -35,6 +35,15 @@ enum MaterialType {
   button,
 
   /// A transparent piece of material that draws ink splashes and highlights.
+  ///
+  /// While the material metaphor describes child widgets as printed on the
+  /// material itself and do not hide ink effects, in practice the [Material]
+  /// widget draws child widgets on top of the ink effects.
+  /// A [Material] with type transparency can be placed on top of opaque widgets
+  /// to show ink effects on top of them.
+  ///
+  /// Prefer using the [Ink] widget for showing ink effects on top of opaque
+  /// widgets.
   transparency
 }
 
@@ -76,6 +85,17 @@ abstract class MaterialInkController {
 
 /// A piece of material.
 ///
+/// The Material widget is responsible for:
+///
+/// 1. Clipping: Material clips its widget sub-tree to the shape specified by
+///    [type] and [borderRadius].
+/// 2. Elevation: Material elevates its widget sub-tree on the Z axis by
+///    [elevation] pixels, and draws the appropriate shadow.
+/// 3. Ink effects: Material shows ink effects implemented by [InkFeature]s
+///    like [InkSplash] and [InkHighlight] below its children.
+///
+/// ## The Material Metaphor
+///
 /// Material is the central metaphor in material design. Each piece of material
 /// exists at a given elevation, which influences how that piece of material
 /// visually relates to other pieces of material and how that material casts
@@ -86,9 +106,31 @@ abstract class MaterialInkController {
 /// [InkSplash] and [InkHighlight] effects. To trigger a reaction on the
 /// material, use a [MaterialInkController] obtained via [Material.of].
 ///
-/// If a material has a non-zero [elevation], then the material will clip its
-/// contents because content that is conceptually printing on a separate piece
-/// of material cannot be printed beyond the bounds of the material.
+/// In general, the features of a [Material] should not change over time (e.g. a
+/// [Material] should not change its [color], [shadowColor] or [type]).
+/// Changes to [elevation] and [shadowColor] are animated. Changes to [shape] are
+/// animated if [type] is not [MaterialType.transparency] and [ShapeBorder.lerp]
+/// between the previous and next [shape] values is supported.
+///
+///
+/// ## Shape
+///
+/// The shape for material is determined by [type] and [borderRadius].
+///
+///  - If [shape] is non null, it determines the shape.
+///  - If [shape] is null and [borderRadius] is non null, the shape is a
+///    rounded rectangle, with corners specified by [borderRadius].
+///  - If [shape] and [borderRadius] are null, [type] determines the
+///    shape as follows:
+///    - [MaterialType.canvas]: the default material shape is a rectangle.
+///    - [MaterialType.card]: the default material shape is a rectangle with
+///      rounded edges. The edge radii is specified by [kMaterialEdges].
+///    - [MaterialType.circle]: the default material shape is a circle.
+///    - [MaterialType.button]: the default material shape is a rectangle with
+///      rounded edges. The edge radii is specified by [kMaterialEdges].
+///    - [MaterialType.transparency]: the default material shape is a rectangle.
+///
+/// ## Layout change notifications
 ///
 /// If the layout changes (e.g. because there's a list on the material, and it's
 /// been scrolled), a [LayoutChangedNotification] must be dispatched at the
@@ -99,10 +141,6 @@ abstract class MaterialInkController {
 /// features (e.g., ink splashes and ink highlights) won't move to account for
 /// the new layout.
 ///
-/// In general, the features of a [Material] should not change over time (e.g. a
-/// [Material] should not change its [color], [shadowColor] or [type]). The one
-/// exception is the [elevation], changes to which will be animated.
-///
 /// See also:
 ///
 /// * [MergeableMaterial], a piece of material that can split and remerge.
@@ -112,6 +150,12 @@ class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
   /// The [type], [elevation] and [shadowColor] arguments must not be null.
+  ///
+  /// If a [shape] is specified, then the [borderRadius] property must not be
+  /// null and the [type] property must not be [MaterialType.circle]. If the
+  /// [borderRadius] is specified, then the [type] property must not be
+  /// [MaterialType.circle]. In both cases, these restrictions are intended to
+  /// catch likely errors.
   const Material({
     Key key,
     this.type: MaterialType.canvas,
@@ -120,11 +164,13 @@ class Material extends StatefulWidget {
     this.shadowColor: const Color(0xFF000000),
     this.textStyle,
     this.borderRadius,
+    this.shape,
     this.child,
   }) : assert(type != null),
        assert(elevation != null),
        assert(shadowColor != null),
-       assert(!(identical(type, MaterialType.circle) && borderRadius != null)),
+       assert(!(shape != null && borderRadius != null)),
+       assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -162,6 +208,8 @@ class Material extends StatefulWidget {
 
   /// The typographical style to use for text within this material.
   final TextStyle textStyle;
+
+  final ShapeBorder shape;
 
   /// If non-null, the corners of this box are rounded by this [BorderRadius].
   /// Otherwise, the corners specified for the current [type] of material are
@@ -222,7 +270,6 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     final Color backgroundColor = _getBackgroundColor(context);
     assert(backgroundColor != null || widget.type == MaterialType.transparency);
     Widget contents = widget.child;
-    final BorderRadius radius = widget.borderRadius ?? kMaterialEdges[widget.type];
     if (contents != null) {
       contents = new AnimatedDefaultTextStyle(
         style: widget.textStyle ?? Theme.of(context).textTheme.body1,
@@ -244,41 +291,59 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       )
     );
 
-    if (widget.type == MaterialType.circle) {
-      contents = new AnimatedPhysicalModel(
-        curve: Curves.fastOutSlowIn,
-        duration: kThemeChangeDuration,
-        shape: BoxShape.circle,
-        elevation: widget.elevation,
-        color: backgroundColor,
-        shadowColor: widget.shadowColor,
-        animateColor: false,
-        child: contents,
-      );
-    } else if (widget.type == MaterialType.transparency) {
-      if (radius == null) {
-        contents = new ClipRect(child: contents);
-      } else {
-        contents = new ClipRRect(
-          borderRadius: radius,
-          child: contents
-        );
-      }
-    } else {
-      contents = new AnimatedPhysicalModel(
-        curve: Curves.fastOutSlowIn,
-        duration: kThemeChangeDuration,
-        shape: BoxShape.rectangle,
-        borderRadius: radius ?? BorderRadius.zero,
-        elevation: widget.elevation,
-        color: backgroundColor,
-        shadowColor: widget.shadowColor,
-        animateColor: false,
-        child: contents,
-      );
-    }
+    final ShapeBorder shape = _getShape();
 
-    return contents;
+    if (widget.type == MaterialType.transparency)
+      return _clipToShape(shape: shape, contents: contents);
+    
+    return new _MaterialInterior(
+      curve: Curves.fastOutSlowIn,
+      duration: kThemeChangeDuration,
+      shape: shape,
+      elevation: widget.elevation,
+      color: backgroundColor,
+      shadowColor: widget.shadowColor,
+      child: contents,
+    );
+
+  }
+
+  static Widget _clipToShape({ShapeBorder shape, Widget contents}) {
+    return new ClipPath(
+      child: contents,
+      clipper: new ShapeBorderClipper(
+        shape: shape,
+      ),
+    );
+  }
+
+  // Determines the shape for this Material.
+  //
+  // If a shape was specified, it will determine the shape.
+  // If a borderRadius was specified, the shape is a rounded
+  // rectangle.
+  // Otherwise, the shape is determined by the widget type as described in the
+  // Material class documentation.
+  ShapeBorder _getShape() {
+    if (widget.shape != null)
+      return widget.shape;
+    if (widget.borderRadius != null)
+      return new RoundedRectangleBorder(borderRadius: widget.borderRadius);
+    switch (widget.type) {
+      case MaterialType.canvas:
+      case MaterialType.transparency:
+        return const RoundedRectangleBorder();
+
+      case MaterialType.card:
+      case MaterialType.button:
+        return new RoundedRectangleBorder(
+          borderRadius: kMaterialEdges[widget.type],
+        );
+
+      case MaterialType.circle:
+        return const CircleBorder();
+    }
+    return const RoundedRectangleBorder();
   }
 }
 
@@ -441,4 +506,101 @@ abstract class InkFeature {
 
   @override
   String toString() => describeIdentity(this);
+}
+
+/// An interpolation between two [ShapeBorder]s.
+///
+/// This class specializes the interpolation of [Tween] to use [ShapeBorder.lerp].
+class ShapeBorderTween extends Tween<ShapeBorder> {
+  /// Creates a [ShapeBorder] tween.
+  ///
+  /// the [begin] and [end] properties may be null; see [ShapeBorder.lerp] for
+  /// the null handling semantics.
+  ShapeBorderTween({ShapeBorder begin, ShapeBorder end}): super(begin: begin, end: end);
+
+  /// Returns the value this tween has at the given animation clock value.
+  @override
+  ShapeBorder lerp(double t) {
+    return ShapeBorder.lerp(begin, end, t);
+  }
+}
+
+/// The interior of non-transparent material.
+///
+/// Animates [elevation], [shadowColor], and [shape].
+class _MaterialInterior extends ImplicitlyAnimatedWidget {
+  const _MaterialInterior({
+    Key key,
+    @required this.child,
+    @required this.shape,
+    @required this.elevation,
+    @required this.color,
+    @required this.shadowColor,
+    Curve curve: Curves.linear,
+    @required Duration duration,
+  }) : assert(child != null),
+       assert(shape != null),
+       assert(elevation != null),
+       assert(color != null),
+       assert(shadowColor != null),
+       super(key: key, curve: curve, duration: duration);
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
+
+  /// The border of the widget.
+  ///
+  /// This border will be painted, and in addition the outer path of the border
+  /// determines the physical shape.
+  final ShapeBorder shape;
+
+  /// The target z-coordinate at which to place this physical object.
+  final double elevation;
+
+  /// The target background color.
+  final Color color;
+
+  /// The target shadow color.
+  final Color shadowColor;
+
+  @override
+  _MaterialInteriorState createState() => new _MaterialInteriorState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape));
+    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DiagnosticsProperty<Color>('color', color));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
+  }
+}
+
+class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> {
+  Tween<double> _elevation;
+  ColorTween _shadowColor;
+  ShapeBorderTween _border;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _elevation = visitor(_elevation, widget.elevation, (dynamic value) => new Tween<double>(begin: value));
+    _shadowColor = visitor(_shadowColor, widget.shadowColor, (dynamic value) => new ColorTween(begin: value));
+    _border = visitor(_border, widget.shape, (dynamic value) => new ShapeBorderTween(begin: value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new PhysicalShape(
+      child: widget.child,
+      clipper: new ShapeBorderClipper(
+        shape: _border.evaluate(animation),
+        textDirection: Directionality.of(context)
+      ),
+      elevation: _elevation.evaluate(animation),
+      color: widget.color,
+      shadowColor: _shadowColor.evaluate(animation),
+    );
+  }
 }

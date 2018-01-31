@@ -93,7 +93,7 @@ class ChannelCommand extends FlutterCommand {
 
   static Future<Null> _checkout(String branchName) async {
     final int result = await runCommandAndStreamOutput(
-      <String>['git', 'checkout', branchName],
+      <String>['git', 'checkout', '-b', branchName],
       workingDirectory: Cache.flutterRoot,
       prefix: 'git: ',
     );

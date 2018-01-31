@@ -859,11 +859,23 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.onDecrease != null) {
       config.onDecrease = properties.onDecrease;
     }
+    if (properties.onCopy != null) {
+      config.onCopy = properties.onCopy;
+    }
+    if (properties.onCut != null) {
+      config.onCut = properties.onCut;
+    }
+    if (properties.onPaste != null) {
+      config.onPaste = properties.onPaste;
+    }
     if (properties.onMoveCursorForwardByCharacter != null) {
       config.onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter;
     }
     if (properties.onMoveCursorBackwardByCharacter != null) {
       config.onMoveCursorBackwardByCharacter = properties.onMoveCursorBackwardByCharacter;
+    }
+    if (properties.onSetSelection != null) {
+      config.onSetSelection = properties.onSetSelection;
     }
 
     newChild.updateWith(

@@ -44,6 +44,7 @@ class TestSemantics {
     this.textDirection,
     this.rect,
     this.transform,
+    this.textSelection,
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
@@ -68,6 +69,7 @@ class TestSemantics {
     this.hint: '',
     this.textDirection,
     this.transform,
+    this.textSelection,
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
   }) : id = 0,
@@ -103,6 +105,7 @@ class TestSemantics {
     this.textDirection,
     this.rect,
     Matrix4 transform,
+    this.textSelection,
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
@@ -195,6 +198,8 @@ class TestSemantics {
   /// parent).
   final Matrix4 transform;
 
+  final TextSelection textSelection;
+
   static Matrix4 _applyRootChildScale(Matrix4 transform) {
     final Matrix4 result = new Matrix4.diagonal3Values(3.0, 3.0, 1.0);
     if (transform != null)
@@ -251,6 +256,9 @@ class TestSemantics {
       return fail('expected node id $id to have rect $rect but found rect ${nodeData.rect}.');
     if (!ignoreTransform && transform != nodeData.transform)
       return fail('expected node id $id to have transform $transform but found transform:\n${nodeData.transform}.');
+    if (textSelection?.baseOffset != nodeData.textSelection?.baseOffset || textSelection?.extentOffset != nodeData.textSelection?.extentOffset) {
+      return fail('expected node id $id to have textDirection [${textSelection?.baseOffset}, ${textSelection?.end}] but found: [${nodeData.textSelection?.baseOffset}, ${nodeData.textSelection?.extentOffset}].');
+    }
     final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
     if (children.length != childrenCount)
       return fail('expected node id $id to have ${children.length} child${ children.length == 1 ? "" : "ren" } but found $childrenCount.');
@@ -293,6 +301,8 @@ class TestSemantics {
       buf.writeln('$indent  hint: \'$hint\',');
     if (textDirection != null)
       buf.writeln('$indent  textDirection: $textDirection,');
+    if (textSelection?.isValid == true)
+      buf.writeln('$indent  textSelection:\n[${textSelection.start}, ${textSelection.end}],');
     if (rect != null)
       buf.writeln('$indent  rect: $rect,');
     if (transform != null)

@@ -111,6 +111,15 @@ class TestRecordingPaintingContext implements PaintingContext {
   }
 
   @override
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter) {
+    canvas
+      ..save()
+      ..clipPath(clipPath.shift(offset));
+    painter(this, offset);
+    canvas.restore();
+  }
+
+  @override
   void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
     canvas.save();
     canvas.transform(transform.storage);

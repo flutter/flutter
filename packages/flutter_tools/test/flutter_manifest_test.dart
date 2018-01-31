@@ -69,7 +69,9 @@ flutter:
     - a/bar
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
-      expect(flutterManifest.assets, <String>['a/foo', 'a/bar']);
+      expect(flutterManifest.assets.length, 2);
+      expect(flutterManifest.assets[0], Uri.parse('a/foo'));
+      expect(flutterManifest.assets[1], Uri.parse('a/bar'));
     });
 
     test('has one font family with one asset', () async {
@@ -97,7 +99,7 @@ flutter:
       final List<FontAsset> assets = font.fontAssets;
       expect(assets.length, 1);
       final FontAsset fontAsset = assets[0];
-      expect(fontAsset.asset, 'a/bar');
+      expect(fontAsset.assetUri.path, 'a/bar');
       expect(fontAsset.weight, isNull);
       expect(fontAsset.style, isNull);
     });
@@ -130,11 +132,11 @@ flutter:
       final List<FontAsset> assets = font.fontAssets;
       expect(assets.length, 2);
       final FontAsset fontAsset0 = assets[0];
-      expect(fontAsset0.asset, 'a/bar');
+      expect(fontAsset0.assetUri.path, 'a/bar');
       expect(fontAsset0.weight, isNull);
       expect(fontAsset0.style, isNull);
       final FontAsset fontAsset1 = assets[1];
-      expect(fontAsset1.asset, 'a/bar');
+      expect(fontAsset1.assetUri.path, 'a/bar');
       expect(fontAsset1.weight, 400);
       expect(fontAsset1.style, isNull);
     });
@@ -168,11 +170,11 @@ flutter:
       final List<FontAsset> assets = font.fontAssets;
       expect(assets.length, 2);
       final FontAsset fontAsset0 = assets[0];
-      expect(fontAsset0.asset, 'a/bar');
+      expect(fontAsset0.assetUri.path, 'a/bar');
       expect(fontAsset0.weight, isNull);
       expect(fontAsset0.style, isNull);
       final FontAsset fontAsset1 = assets[1];
-      expect(fontAsset1.asset, 'a/bar');
+      expect(fontAsset1.assetUri.path, 'a/bar');
       expect(fontAsset1.weight, 400);
       expect(fontAsset1.style, 'italic');
     });
@@ -214,11 +216,11 @@ flutter:
       final List<FontAsset> fooAassets = fooFont.fontAssets;
       expect(fooAassets.length, 2);
       final FontAsset fooFontAsset0 = fooAassets[0];
-      expect(fooFontAsset0.asset, 'a/bar');
+      expect(fooFontAsset0.assetUri.path, 'a/bar');
       expect(fooFontAsset0.weight, isNull);
       expect(fooFontAsset0.style, isNull);
       final FontAsset fooFontAsset1 = fooAassets[1];
-      expect(fooFontAsset1.asset, 'a/bar');
+      expect(fooFontAsset1.assetUri.path, 'a/bar');
       expect(fooFontAsset1.weight, 400);
       expect(fooFontAsset1.style, 'italic');
 
@@ -229,11 +231,11 @@ flutter:
       final List<FontAsset> barAssets = barFont.fontAssets;
       expect(barAssets.length, 2);
       final FontAsset barFontAsset0 = barAssets[0];
-      expect(barFontAsset0.asset, 'a/baz');
+      expect(barFontAsset0.assetUri.path, 'a/baz');
       expect(barFontAsset0.weight, isNull);
       expect(barFontAsset0.style, isNull);
       final FontAsset barFontAsset1 = barAssets[1];
-      expect(barFontAsset1.asset, 'a/baz');
+      expect(barFontAsset1.assetUri.path, 'a/baz');
       expect(barFontAsset1.weight, 400);
       expect(barFontAsset1.style, 'italic');
     });
@@ -274,11 +276,11 @@ flutter:
       final List<FontAsset> fooAassets = fooFont.fontAssets;
       expect(fooAassets.length, 2);
       final FontAsset fooFontAsset0 = fooAassets[0];
-      expect(fooFontAsset0.asset, 'a/bar');
+      expect(fooFontAsset0.assetUri.path, 'a/bar');
       expect(fooFontAsset0.weight, isNull);
       expect(fooFontAsset0.style, isNull);
       final FontAsset fooFontAsset1 = fooAassets[1];
-      expect(fooFontAsset1.asset, 'a/bar');
+      expect(fooFontAsset1.assetUri.path, 'a/bar');
       expect(fooFontAsset1.weight, 400);
       expect(fooFontAsset1.style, 'italic');
     });
@@ -314,11 +316,11 @@ flutter:
       final List<FontAsset> fooAassets = fooFont.fontAssets;
       expect(fooAassets.length, 2);
       final FontAsset fooFontAsset0 = fooAassets[0];
-      expect(fooFontAsset0.asset, 'a/bar');
+      expect(fooFontAsset0.assetUri.path, 'a/bar');
       expect(fooFontAsset0.weight, isNull);
       expect(fooFontAsset0.style, isNull);
       final FontAsset fooFontAsset1 = fooAassets[1];
-      expect(fooFontAsset1.asset, 'a/bar');
+      expect(fooFontAsset1.assetUri.path, 'a/bar');
       expect(fooFontAsset1.weight, 400);
       expect(fooFontAsset1.style, 'italic');
     });
