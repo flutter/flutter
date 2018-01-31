@@ -17,6 +17,46 @@ const Duration _kRpcTimeout = const Duration(seconds: 5);
 
 final Logger _log = new Logger('FuchsiaDartVm');
 
+typedef Future<json_rpc2.Peer> RpcPeerConnectionFunction(Uri uri);
+
+RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
+
+/// Attempts to connect to a Fuchsia Dart VM service.
+///
+/// Gives up after `_kConnectTimeout` has elapsed.
+RpcPeerConnectionFunction _waitAndConnect(Uri uri) async {
+  final Stopwatch timer = new Stopwatch()..start();
+
+  RpcPeerConnectionFunction attemptConnection(Uri uri) async {
+    WebSocket socket;
+    json_rpc.Peer peer;
+    try {
+      socket = await WebSocket.connect(uri.toString());
+      peer = new json_rpc.Peer(new IOWebSocketChannel(socket).cast())..listen();
+      return peer;
+    } catch (e) {
+      await peer?.close();
+      await socket?.close();
+      if (timer.elapsed < _kConnectTimeout) {
+        _log.info('Attempting to reconnect');
+        await new Future<Null>.delayed(_kReconnectAttemptInterval);
+        return attemptConnection(uri);
+      } else {
+        _log.severe('Connection to Fuchsia\'s Dart VM timed out at '
+            '${uri.toString()}');
+        rethrow;
+      }
+    }
+  }
+
+  return attemptConnection(uri);
+}
+
+/// Restores the VM service connection function to the original state.
+void restoreFuchsiaVmServiceConnectionFunction() {
+  fuchsiaVmServiceConnectionFunction = _waitAndConnect;
+}
+
 /// Simple JSON RPC peer with a Fuchsia Dart VM service instance. Wraps most
 /// methods around a JSON RPC peer class.
 class FuchsiaDartVm {
@@ -28,34 +68,14 @@ class FuchsiaDartVm {
   ///
   /// Throws an error if unable to connect.
   static Future<FuchsiaDartVm> connect(Uri uri) async {
-    final Stopwatch timer = new Stopwatch()..start();
     if (uri.scheme == 'http') {
       uri = uri.replace(scheme: 'ws', path: '/ws');
     }
-    return await _attemptConnection(uri, timer);
-  }
-
-  static Future<FuchsiaDartVm> _attemptConnection(
-      final Uri uri, final Stopwatch runningTimer) async {
-    WebSocket socket;
-    json_rpc.Peer peer;
-    try {
-      socket = await WebSocket.connect(uri.toString());
-      peer = new json_rpc.Peer(new IOWebSocketChannel(socket).cast())..listen();
-      return new FuchsiaDartVm._(peer);
-    } catch (e) {
-      await peer?.close();
-      await socket?.close();
-      if (runningTimer.elapsed < _kConnectTimeout) {
-        _log.info('Attempting to reconnect');
-        await new Future<Null>.delayed(_kReconnectAttemptInterval);
-        return FuchsiaDartVm._attemptConnection(uri, runningTimer);
-      } else {
-        _log.severe('Connection to Fuchsia\'s Dart VM timed out at '
-            '${uri.toString()}');
-        rethrow;
-      }
+    json_rpc.Peer peer = await fuchsiaVmServiceConnectionFunction(uri);
+    if (peer == null) {
+      return null;
     }
+    return new FuchsiaDartVm._(peer);
   }
 
   /// Invokes a raw JSON RPC command with the VM service.
@@ -64,20 +84,20 @@ class FuchsiaDartVm {
     return _peer.sendRequest(function, params ?? <String, dynamic>{});
   }
 
-  /// Returns a list of `FuchsiaFlutterViews` running across all Dart VM's.
+  /// Returns a list of `FlutterFuchsiaView`s running across all Dart VM's.
   ///
   /// If there is no associated isolate with the flutter view (used to determine
   /// the flutter view's name), then the flutter view's ID will be added
   /// instead. If none of these things can be found (isolate has no name or the
   /// flutter view has no ID), then the result will not be added to the list.
-  Future<List<FuchsiaFlutterView>> getAllFlutterViews() async {
-    final List<FuchsiaFlutterView> views = <FuchsiaFlutterView>[];
+  Future<List<FlutterFuchsiaView>> getAllFlutterViews() async {
+    final List<FlutterFuchsiaView> views = <FlutterFuchsiaView>[];
     final Map<String, dynamic> rpcResponse =
         await invokeRpc('_flutter.listViews', timeout: _kRpcTimeout);
     final List<Map<String, dynamic>> flutterViewsJson = rpcResponse['views'];
     for (Map<String, dynamic> jsonView in flutterViewsJson) {
-      final FuchsiaFlutterView flutterView =
-          new FuchsiaFlutterView._fromJson(jsonView);
+      final FlutterFuchsiaView flutterView =
+          new FlutterFuchsiaView._fromJson(jsonView);
       if (flutterView != null) {
         views.add(flutterView);
       }
@@ -92,7 +112,7 @@ class FuchsiaDartVm {
 }
 
 /// Represents an instance of a Flutter view running on a Fuchsia device.
-class FuchsiaFlutterView {
+class FlutterFuchsiaView {
   /// Determines the name of the Isolate associated with this view. If there is
   /// no associated Isolate, this will be set to the view's ID.
   final String _name;
@@ -100,15 +120,15 @@ class FuchsiaFlutterView {
   /// The ID of the Flutter view.
   final String _id;
 
-  /// Attempts to construct a `FuchsiaFlutterView` from a json representation.
+  /// Attempts to construct a `FlutterFuchsiaView` from a json representation.
   ///
   /// If there is no Isolate and no id for the view, returns null. If there is
   /// an associated isolate, and there is name for said isolate, also returns
   /// null.
   ///
-  /// All other cases return a `FuchsiaFlutterView` instance. The name of the
+  /// All other cases return a `FlutterFuchsiaView` instance. The name of the
   /// view may be null, but the id will always be set.
-  factory FuchsiaFlutterView._fromJson(Map<String, dynamic> json) {
+  factory FlutterFuchsiaView._fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> isolate = json['isolate'];
     final String id = json['id'];
     String name;
@@ -126,12 +146,12 @@ class FuchsiaFlutterView {
       return null;
     }
 
-    return new FuchsiaFlutterView._(name, id);
+    return new FlutterFuchsiaView._(name, id);
   }
 
-  FuchsiaFlutterView._(this._name, this._id);
+  FlutterFuchsiaView._(this._name, this._id);
 
-  /// The ID of the `FuchsiaFlutterView`.
+  /// The ID of the `FlutterFuchsiaView`.
   String get id => _id;
 
   /// Returns the name of the `FucshiaFlutterView`.

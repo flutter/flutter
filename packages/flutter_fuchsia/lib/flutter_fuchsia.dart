@@ -10,5 +10,5 @@
 /// the behavior of said application.
 library flutter_fuchsia;
 
-export 'src/dart/fuchsia_dart_vm.dart' show FuchsiaDartVm, FuchsiaFlutterView;
-export 'src/flutter_views.dart' show getFlutterViews;
+export 'src/dart/fuchsia_dart_vm.dart' show FuchsiaDartVm, FlutterFuchsiaView;
+export 'src/flutter_fuchsia_driver.dart' show FlutterFuchsiaDriver;

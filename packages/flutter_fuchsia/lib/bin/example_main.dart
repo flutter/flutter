@@ -22,7 +22,21 @@ Future<Null> main(List<String> args) async {
   Logger.root.onRecord.listen((LogRecord rec) {
     print('[${rec.level.name}] -- ${rec.time}: ${rec.message}');
   });
-  final List<FuchsiaFlutterView> views =
-      await getFlutterViews(args[0], '../../', 'release-x86-64');
-  print(views.map((FuchsiaFlutterView view) => view.name ?? view.id));
+  final String address = args[0];
+  final String root = '../../';
+  final String build = 'release-x86-64';
+  print('On ${address}, the following Dart VM ports are running:');
+  for (int port in await FlutterFuchsiaDriver.getDeviceServicePorts(
+      address, root, build)) {
+    print('\t$port');
+  }
+  print('');
+
+  final FlutterFuchsiaDriver driver =
+      await FlutterFuchsiaDriver.connect(address, root, build);
+  print('The following Flutter views are running:');
+  for (FuchsiaFlutterView view in await driver.getFlutterViews()) {
+    print('\t${view.name ?? view.id}');
+  }
+  await driver.stop();
 }
