@@ -76,7 +76,7 @@ public interface PluginRegistry {
         Activity activity();
 
         /**
-         * Returns the {@link Application}'s {@link Context}.
+         * Returns the {@link android.app.Application}'s {@link Context}.
          */
         Context context();
 
@@ -124,8 +124,8 @@ public interface PluginRegistry {
 
         /**
          * Adds a callback allowing the plugin to take part in handling incoming
-         * calls to {@link Activity#onRequestPermissionsResult(int, String[], int[])}
-         * or {android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback#onRequestPermissionsResult(int, String[], int[])}.
+         * calls to {@code Activity#onRequestPermissionsResult(int, String[], int[])}
+         * or {@code android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback#onRequestPermissionsResult(int, String[], int[])}.
          *
          * @param listener a {@link RequestPermissionsResultListener} callback.
          * @return this {@link Registrar}.
@@ -134,8 +134,8 @@ public interface PluginRegistry {
 
         /**
          * Adds a callback allowing the plugin to take part in handling incoming
-         * calls to {@link Activity#onRequestPermissionsResult(int, String[], int[])}
-         * or {android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback#onRequestPermissionsResult(int, String[], int[])}.
+         * calls to {@code Activity#onRequestPermissionsResult(int, String[], int[])}
+         * or {@code android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback#onRequestPermissionsResult(int, String[], int[])}.
          *
          * @param listener a {@link RequestPermissionResultListener} callback.
          * @return this {@link Registrar}.
