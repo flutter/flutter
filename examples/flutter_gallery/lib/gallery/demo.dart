@@ -154,7 +154,10 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     return new Scaffold(
       appBar: new AppBar(
         leading: new IconButton(
-          icon: const Icon(Icons.clear),
+          icon: const Icon(
+            Icons.clear,
+            semanticLabel: 'Close',
+          ),
           onPressed: () { Navigator.pop(context); }
         ),
         title: const Text('Example code')
