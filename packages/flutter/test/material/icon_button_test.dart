@@ -312,7 +312,7 @@ void main() {
 
     await tester.pumpWidget(
       wrap(
-        child: new IconButton(
+        child: const IconButton(
           onPressed: null,
           icon: const Icon(Icons.link, semanticLabel: 'link'),
         ),

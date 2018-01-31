@@ -176,9 +176,9 @@ void main() {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
-      new Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
+        child: const Center(
           child: const FloatingActionButton(
             onPressed: null,
             child: const Icon(Icons.add, semanticLabel: 'Add'),

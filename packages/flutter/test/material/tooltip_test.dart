@@ -607,7 +607,7 @@ void main() {
 
     await tester.pumpWidget(
       new MaterialApp(
-        home: new Center(
+        home: const Center(
           child: const Tooltip(
             message: 'Foo',
             child: const Text('Bar'),
@@ -633,7 +633,7 @@ void main() {
 
     await tester.pumpWidget(
       new MaterialApp(
-        home: new Center(
+        home: const Center(
           child: const Tooltip(
             message: 'Foo',
             child: const Text('Bar'),
