@@ -57,7 +57,7 @@ TaskFunction createHelloWorldMemoryTest() {
 TaskFunction createGalleryNavigationMemoryTest() {
   return new MemoryTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
-    'io.flutter.examples.gallery',
+    'io.flutter.demo.gallery',
     testTarget: 'test_driver/memory_nav.dart',
   ).run;
 }
@@ -65,8 +65,8 @@ TaskFunction createGalleryNavigationMemoryTest() {
 TaskFunction createGalleryBackButtonMemoryTest() {
   return new AndroidBackButtonMemoryTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
-    'io.flutter.examples.gallery',
-    'io.flutter.examples.gallery.MainActivity',
+    'io.flutter.demo.gallery',
+    'io.flutter.demo.gallery.MainActivity',
   ).run;
 }
 

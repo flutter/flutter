@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/gallery/app.dart';
 
 /// Reports success or failure to the native code.
-const MethodChannel _kTestChannel = const MethodChannel('io.flutter.examples.gallery/TestLifecycleListener');
+const MethodChannel _kTestChannel = const MethodChannel('io.flutter.demo.gallery/TestLifecycleListener');
 
 Future<Null> main() async {
   try {
