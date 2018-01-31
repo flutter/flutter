@@ -591,12 +591,6 @@ class ClipPathLayer extends ContainerLayer {
     addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Path>('clipPath', clipPath));
-  }
 }
 
 /// A composited layer that applies a given transformation matrix to its
