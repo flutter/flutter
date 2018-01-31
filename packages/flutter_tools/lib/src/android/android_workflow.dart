@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -12,6 +13,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import 'android_sdk.dart';
@@ -186,13 +188,24 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
           fs.path.dirname(javaBinary) + os.pathVarSeparator + platform.environment['PATH'];
     }
 
-    final String sdkManagerPath = fs.path.join(
-        androidSdk.directory, 'tools', 'bin',
-        platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager',
-    );
+    if (!processManager.canRun(androidSdk.sdkManagerPath))
+      throwToolExit(
+        'Android sdkmanager tool not found.\n'
+        'Try re-installing or updating your Android SDK,\n'
+        'visit https://flutter.io/setup/#android-setup for detailed instructions.'
+      );
+
+    final Version sdkManagerVersion = new Version.parse(androidSdk.sdkManagerVersion);
+    if (sdkManagerVersion.major < 26)
+      // SDK manager is found, but needs to be updated.
+      throwToolExit(
+        'A newer version of the Android SDK is required. To update, run:\n'
+        '${androidSdk.sdkManagerPath} --update\n'
+      );
+
     final Process process = await runCommand(
-        <String>[sdkManagerPath, '--licenses'],
-        environment: sdkManagerEnv,
+      <String>[androidSdk.sdkManagerPath, '--licenses'],
+      environment: sdkManagerEnv,
     );
 
     waitGroup<Null>(<Future<Null>>[

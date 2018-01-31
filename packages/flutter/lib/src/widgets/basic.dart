@@ -780,7 +780,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new EnumProperty<CustomClipper<Path>>('clipper', clipper));
+    description.add(new DiagnosticsProperty<CustomClipper<Path>>('clipper', clipper));
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
     description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
@@ -4852,8 +4852,12 @@ class Semantics extends SingleChildRenderObjectWidget {
     VoidCallback onScrollDown,
     VoidCallback onIncrease,
     VoidCallback onDecrease,
+    VoidCallback onCopy,
+    VoidCallback onCut,
+    VoidCallback onPaste,
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
+    SetSelectionHandler onSetSelection,
   }) : this.fromProperties(
     key: key,
     child: child,
@@ -4878,8 +4882,12 @@ class Semantics extends SingleChildRenderObjectWidget {
       onScrollDown: onScrollDown,
       onIncrease: onIncrease,
       onDecrease: onDecrease,
+      onCopy: onCopy,
+      onCut: onCut,
+      onPaste: onPaste,
       onMoveCursorForwardByCharacter: onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
+      onSetSelection: onSetSelection,
     ),
   );
 
@@ -4946,8 +4954,12 @@ class Semantics extends SingleChildRenderObjectWidget {
       onScrollDown: properties.onScrollDown,
       onIncrease: properties.onIncrease,
       onDecrease: properties.onDecrease,
+      onCopy: properties.onCopy,
+      onCut: properties.onCut,
+      onPaste: properties.onPaste,
       onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
+      onSetSelection: properties.onSetSelection,
     );
   }
 
@@ -4985,8 +4997,12 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onScrollDown = properties.onScrollDown
       ..onIncrease = properties.onIncrease
       ..onDecrease = properties.onDecrease
+      ..onCopy = properties.onCopy
+      ..onCut = properties.onCut
+      ..onPaste = properties.onPaste
       ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
-      ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter;
+      ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
+      ..onSetSelection = properties.onSetSelection;
   }
 
   @override

@@ -6,15 +6,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-final BoxDecoration kBoxDecorationA = const BoxDecoration(
+const BoxDecoration kBoxDecorationA = const BoxDecoration(
   color: const Color(0xFFFF0000),
 );
 
-final BoxDecoration kBoxDecorationB = const BoxDecoration(
+const BoxDecoration kBoxDecorationB = const BoxDecoration(
   color: const Color(0xFF00FF00),
 );
 
-final BoxDecoration kBoxDecorationC = const BoxDecoration(
+const BoxDecoration kBoxDecorationC = const BoxDecoration(
   color: const Color(0xFF0000FF),
 );
 
@@ -24,7 +24,7 @@ class TestBuildCounter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     buildCount += 1;
-    return new DecoratedBox(decoration: kBoxDecorationA);
+    return const DecoratedBox(decoration: kBoxDecorationA);
   }
 }
 

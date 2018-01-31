@@ -279,7 +279,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     fontSize: 40.0,
   );
 
-  static final Widget _kPreTestMessage = const Center(
+  static const Widget _kPreTestMessage = const Center(
     child: const Text(
       'Test starting...',
       style: _kMessageStyle,
@@ -287,7 +287,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     )
   );
 
-  static final Widget _kPostTestMessage = const Center(
+  static const Widget _kPostTestMessage = const Center(
     child: const Text(
       'Test finished.',
       style: _kMessageStyle,
@@ -463,7 +463,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         ));
         assert(_parentZone != null);
         assert(_pendingExceptionDetails != null, 'A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpected additional errors that it could not handle. Typically, this is caused by using expect() before restoring FlutterError.onError.');
-        _parentZone.run<Null>(_testCompletionHandler);
+        _parentZone.run<void>(_testCompletionHandler);
       }
     );
     _parentZone = Zone.current;

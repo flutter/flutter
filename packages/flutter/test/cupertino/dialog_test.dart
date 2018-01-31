@@ -98,6 +98,69 @@ void main() {
     expect(widget.style.fontWeight, equals(FontWeight.w600));
     expect(widget.style.color.red, greaterThan(widget.style.color.blue));
   });
+
+  testWidgets('Message is scrollable, has correct padding with large text sizes',
+      (WidgetTester tester) async {
+    final ScrollController scrollController = new ScrollController(keepScrollOffset: true);
+    await tester.pumpWidget(
+      new MaterialApp(home: new Material(
+        child: new Center(
+          child: new Builder(builder: (BuildContext context) {
+            return new RaisedButton(
+              onPressed: () {
+                showDialog<Null>(
+                  context: context,
+                  child: new Builder(builder: (BuildContext context) {
+                    return new MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+                      child: new CupertinoAlertDialog(
+                        title: const Text('The Title'),
+                        content: new Text('Very long content ' * 20),
+                        actions: <Widget>[
+                          const CupertinoDialogAction(
+                            child: const Text('Cancel'),
+                          ),
+                          const CupertinoDialogAction(
+                            isDestructiveAction: true,
+                            child: const Text('OK'),
+                          ),
+                        ],
+                        scrollController: scrollController,
+                      ),
+                    );
+                  }),
+                );
+              },
+              child: const Text('Go'),
+            );
+          }),
+        ),
+      )),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(scrollController.offset, 0.0);
+    scrollController.jumpTo(100.0);
+    expect(scrollController.offset, 100.0);
+
+    // Find the actual dialog box.  The first decorated box is the popup barrier.
+    expect(tester.getSize(find.byType(DecoratedBox).at(1)), equals(const Size(270.0, 560.0)));
+
+    // Check sizes/locations of the text.
+    expect(tester.getSize(find.text('The Title')), equals(const Size(230.0, 198.0)));
+    expect(tester.getSize(find.text('Cancel')), equals(const Size(75.0, 300.0)));
+    expect(tester.getSize(find.text('OK')), equals(const Size(75.0, 100.0)));
+    expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(285.0, 40.0)));
+
+    // The Cancel and OK buttons have different Y values because "Cancel" is
+    // wrapping (as it should with large text sizes like this).
+    expect(tester.getTopLeft(find.text('Cancel')), equals(const Offset(295.0, 250.0)));
+    expect(tester.getTopLeft(find.text('OK')), equals(const Offset(430.0, 350.0)));
+  });
 }
 
 Widget boilerplate(Widget child) {

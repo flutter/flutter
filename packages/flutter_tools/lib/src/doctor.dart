@@ -199,10 +199,13 @@ class _FlutterValidator extends DoctorValidator {
     final FlutterVersion version = FlutterVersion.instance;
 
     messages.add(new ValidationMessage('Flutter version ${version.frameworkVersion} at ${Cache.flutterRoot}'));
-    if (Cache.flutterRoot.contains(' '))
+    if (Cache.flutterRoot.contains(' ')) {
       messages.add(new ValidationMessage.error(
-        'Flutter SDK install paths with spaces are not yet supported. (https://github.com/flutter/flutter/issues/6577)\n'
-        'Please move the SDK to a path that does not include spaces.'));
+        'Flutter SDK install paths with spaces are not yet supported. '
+        '(https://github.com/flutter/flutter/issues/6577)\n'
+        'Please move the SDK to a path that does not include spaces.'
+      ));
+    }
     messages.add(new ValidationMessage(
       'Framework revision ${version.frameworkRevisionShort} '
       '(${version.frameworkAge}), ${version.frameworkDate}'
@@ -215,13 +218,16 @@ class _FlutterValidator extends DoctorValidator {
 
     // Check that the binaries we downloaded for this platform actually run on it.
     if (!_genSnapshotRuns(genSnapshotPath)) {
-      messages.add(new ValidationMessage.error('Downloaded executables cannot execute '
-          'on host (see https://github.com/flutter/flutter/issues/6207 for more information)'));
+      messages.add(new ValidationMessage.error(
+        'Downloaded executables cannot execute '
+        'on host (see https://github.com/flutter/flutter/issues/6207 for more information)'
+      ));
       valid = ValidationType.partial;
     }
 
     return new ValidationResult(valid, messages,
-      statusInfo: 'on ${os.name}, locale ${platform.localeName}, channel ${version.channel}');
+      statusInfo: 'on ${os.name}, locale ${platform.localeName}, channel ${version.channel}'
+    );
   }
 }
 

@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+echo "Running docs.sh"
+
 # If you want to run this script locally, make sure you run it from
 # the root of the flutter repository.
 export FLUTTER_ROOT="$PWD"
@@ -32,10 +34,12 @@ cp dev/docs/google2ed1af765c529f57.html dev/docs/doc
 
 # Upload new API docs when on Travis
 if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-  if [ "$TRAVIS_BRANCH" == "master" -o "$TRAVIS_BRANCH" == "alpha" ]; then
+  echo "This is not a pull request; considering whether to upload docs... (branch=$TRAVIS_BRANCH)"
+  if [ "$TRAVIS_BRANCH" == "master" -o "$TRAVIS_BRANCH" == "dev" ]; then
     cd dev/docs
 
     if [ "$TRAVIS_BRANCH" == "master" ]; then
+      echo "Updating master docs: https://master-docs-flutter-io.firebaseapp.com/"
       echo -e "User-agent: *\nDisallow: /" > doc/robots.txt
       while : ; do
         firebase deploy --project master-docs-flutter-io && break
@@ -45,6 +49,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     fi
 
     if [ "$TRAVIS_BRANCH" == "dev" ]; then
+      echo "Updating dev docs: https://docs.flutter.io/"
       while : ; do
         firebase deploy --project docs-flutter-io && break
         echo Error: Unable to deploy documentation to firebase. Retrying in five seconds...
