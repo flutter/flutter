@@ -107,8 +107,11 @@ abstract class MaterialInkController {
 /// material, use a [MaterialInkController] obtained via [Material.of].
 ///
 /// In general, the features of a [Material] should not change over time (e.g. a
-/// [Material] should not change its [color], [shadowColor] or [type]). The one
-/// exception is the [elevation], changes to which will be animated.
+/// [Material] should not change its [color], [shadowColor] or [type]).
+/// Changes to [elevation] and [shadowColor] are animated. Changes to [shape] are
+/// animated if [type] is not [MaterialType.transparency] and [ShapeBorder.lerp]
+/// between the previous and next [shape] values is supported.
+///
 ///
 /// ## Shape
 ///
