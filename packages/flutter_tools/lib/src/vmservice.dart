@@ -345,7 +345,7 @@ abstract class ServiceObject {
     // fallback return a ServiceMap object.
     serviceObject ??= new ServiceMap._empty(owner);
     // We have now constructed an empty service object, call update to populate it.
-    serviceObject.update(map);
+    serviceObject.updateWith(map);
     return serviceObject;
   }
 
@@ -420,7 +420,7 @@ abstract class ServiceObject {
           // An object may have been collected.
           completer.complete(new ServiceObject._fromMap(owner, response));
         } else {
-          update(response);
+          updateWith(response);
           completer.complete(this);
         }
       } catch (e, st) {
@@ -433,7 +433,7 @@ abstract class ServiceObject {
   }
 
   /// Update [this] using [map] as a source. [map] can be a service reference.
-  void update(Map<String, dynamic> map) {
+  void updateWith(Map<String, dynamic> map) {
     // Don't allow the type to change on an object update.
     final bool mapIsRef = _hasRef(map['type']);
     final String mapType = _stripRef(map['type']);
@@ -457,11 +457,11 @@ abstract class ServiceObject {
 
     // We have now updated all common properties, let the subclasses update
     // their specific properties.
-    _update(map, mapIsRef);
+    _updateWith(map, mapIsRef);
   }
 
   /// Implemented by subclasses to populate their model.
-  void _update(Map<String, dynamic> map, bool mapIsRef);
+  void _updateWith(Map<String, dynamic> map, bool mapIsRef);
 }
 
 class ServiceEvent extends ServiceObject {
@@ -507,7 +507,7 @@ class ServiceEvent extends ServiceObject {
   List<Map<String, dynamic>> get timelineEvents => _timelineEvents;
 
   @override
-  void _update(Map<String, dynamic> map, bool mapIsRef) {
+  void _updateWith(Map<String, dynamic> map, bool mapIsRef) {
     _loaded = true;
     _upgradeCollection(map, owner);
     _kind = map['kind'];
@@ -571,7 +571,7 @@ class VM extends ServiceObjectOwner {
   }
 
   @override
-  void _update(Map<String, dynamic> map, bool mapIsRef) {
+  void _updateWith(Map<String, dynamic> map, bool mapIsRef) {
     if (mapIsRef)
       return;
 
@@ -662,7 +662,7 @@ class VM extends ServiceObjectOwner {
     final String type = _stripRef(map['type']);
     if (type == 'VM') {
       // Update this VM object.
-      update(map);
+      updateWith(map);
       return this;
     }
 
@@ -684,7 +684,7 @@ class VM extends ServiceObjectOwner {
           });
         } else {
           // Existing isolate, update data.
-          isolate.update(map);
+          isolate.updateWith(map);
         }
         return isolate;
       }
@@ -696,7 +696,7 @@ class VM extends ServiceObjectOwner {
           view = new ServiceObject._fromMap(this, map);
           _viewCache[mapId] = view;
         } else {
-          view.update(map);
+          view.updateWith(map);
         }
         return view;
       }
@@ -896,7 +896,7 @@ class HeapSpace extends ServiceObject {
   }
 
   @override
-  void _update(Map<String, dynamic> map, bool mapIsRef) {
+  void _updateWith(Map<String, dynamic> map, bool mapIsRef) {
     _used = map['used'];
     _capacity = map['capacity'];
     _external = map['external'];
@@ -965,7 +965,7 @@ class Isolate extends ServiceObjectOwner {
     final String mapId = map['id'];
     ServiceObject serviceObject = (mapId != null) ? _cache[mapId] : null;
     if (serviceObject != null) {
-      serviceObject.update(map);
+      serviceObject.updateWith(map);
       return serviceObject;
     }
     // Build the object from the map directly.
@@ -1004,13 +1004,13 @@ class Isolate extends ServiceObjectOwner {
 
   void _updateHeaps(Map<String, dynamic> map, bool mapIsRef) {
     _newSpace ??= new HeapSpace._empty(this);
-    _newSpace._update(map['new'], mapIsRef);
+    _newSpace._updateWith(map['new'], mapIsRef);
     _oldSpace ??= new HeapSpace._empty(this);
-    _oldSpace._update(map['old'], mapIsRef);
+    _oldSpace._updateWith(map['old'], mapIsRef);
   }
 
   @override
-  void _update(Map<String, dynamic> map, bool mapIsRef) {
+  void _updateWith(Map<String, dynamic> map, bool mapIsRef) {
     if (mapIsRef)
       return;
     _loaded = true;
@@ -1238,7 +1238,7 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   final Map<String, dynamic> _map = <String, dynamic>{};
 
   @override
-  void _update(Map<String, dynamic> map, bool mapIsRef) {
+  void _updateWith(Map<String, dynamic> map, bool mapIsRef) {
     _loaded = !mapIsRef;
     _upgradeCollection(map, owner);
     _map.clear();
@@ -1249,17 +1249,72 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   @override
   void addAll(Map<String, dynamic> other) => _map.addAll(other);
   @override
+  // TODO: Dart 2.0 requires this method to be implemented.
+  // ignore: override_on_non_overriding_method
+  void addEntries(Iterable<Object> entries) {
+    // Change Iterable<Object> to Iterable<MapEntry<K, V>> when
+    // the MapEntry class has been added.
+    throw new UnimplementedError('addEntries');
+  }
+  @override
+  // TODO: Dart 2.0 requires this method to be implemented.
+  // ignore: override_on_non_overriding_method
+  Map<K2, V2> cast<K2, V2>() {
+    throw new UnimplementedError('cast');
+  }
+  @override
   void clear() => _map.clear();
   @override
   bool containsValue(dynamic v) => _map.containsValue(v);
   @override
   bool containsKey(Object k) => _map.containsKey(k);
   @override
+  // TODO: Dart 2.0 requires this method to be implemented.
+  // ignore: override_on_non_overriding_getter
+  Iterable<Null> get entries {
+    // Change Iterable<Null> to Iterable<MapEntry<K, V>> when
+    // the MapEntry class has been added.
+    throw new UnimplementedError('entries');
+  }
+  @override
   void forEach(void f(String key, dynamic value)) => _map.forEach(f);
+  @override
+  // TODO: Dart 2.0 requires this method to be implemented.
+  // ignore: override_on_non_overriding_method
+  Map<K2, V2> map<K2, V2>(Object transform(String key, dynamic value)) {
+    // Change Object to MapEntry<K2, V2> when
+    // the MapEntry class has been added.
+    throw new UnimplementedError('map');
+  }
   @override
   dynamic putIfAbsent(String key, dynamic ifAbsent()) => _map.putIfAbsent(key, ifAbsent);
   @override
   void remove(Object key) => _map.remove(key);
+  @override
+  // TODO: Dart 2.0 requires this method to be implemented.
+  // ignore: override_on_non_overriding_method
+  void removeWhere(bool test(String key, dynamic value)) {
+    throw new UnimplementedError('removeWhere');
+  }
+  @override
+  // TODO: Dart 2.0 requires this method to be implemented.
+  // ignore: override_on_non_overriding_method
+  Map<K2, V2> retype<K2, V2>() {
+    throw new UnimplementedError('retype');
+  }
+  @override
+  // TODO: Dart 2.0 requires this method to be implemented.
+  // ignore: override_on_non_overriding_method
+  dynamic update(String key, dynamic update(dynamic value),
+      { dynamic ifAbsent() }) {
+    throw new UnimplementedError('update');
+  }
+  @override
+  // TODO: Dart 2.0 requires this method to be implemented.
+  // ignore: override_on_non_overriding_method
+  void updateAll(dynamic update(String key, dynamic value)) {
+    throw new UnimplementedError('updateAll');
+  }
   @override
   dynamic operator [](Object k) => _map[k];
   @override
@@ -1286,7 +1341,7 @@ class FlutterView extends ServiceObject {
   Isolate get uiIsolate => _uiIsolate;
 
   @override
-  void _update(Map<String, dynamic> map, bool mapIsRef) {
+  void _updateWith(Map<String, dynamic> map, bool mapIsRef) {
     _loaded = !mapIsRef;
     _upgradeCollection(map, owner);
     _uiIsolate = map['isolate'];
