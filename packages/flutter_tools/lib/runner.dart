@@ -36,6 +36,7 @@ import 'src/version.dart';
 Future<int> run(
   List<String> args,
   List<FlutterCommand> commands, {
+  bool muteCommandLogging: false,
   bool verbose: false,
   bool verboseHelp: false,
   bool reportCrashes,
@@ -43,8 +44,9 @@ Future<int> run(
 }) async {
   reportCrashes ??= !isRunningOnBot;
 
-  if (verboseHelp) {
-    // Remove the verbose option; for help, users don't need to see verbose logs.
+  if (muteCommandLogging) {
+    // Remove the verbose option; for help and doctor, users don't need to see
+    // verbose logs.
     args = new List<String>.from(args);
     args.removeWhere((String option) => option == '-v' || option == '--verbose');
   }

@@ -37,8 +37,12 @@ import 'src/runner/flutter_command.dart';
 /// This function is intended to be used from the `flutter` command line tool.
 Future<Null> main(List<String> args) async {
   final bool verbose = args.contains('-v') || args.contains('--verbose');
+
+  final bool doctor = (args.isNotEmpty && args.first == 'doctor') ||
+      (args.length == 2 && verbose && args.last == 'doctor');
   final bool help = args.contains('-h') || args.contains('--help') ||
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
+  final bool muteCommandLogging = (help || doctor);
   final bool verboseHelp = help && verbose;
 
   await runner.run(args, <FlutterCommand>[
@@ -51,7 +55,7 @@ Future<Null> main(List<String> args) async {
     new CreateCommand(),
     new DaemonCommand(hidden: !verboseHelp),
     new DevicesCommand(),
-    new DoctorCommand(),
+    new DoctorCommand(verbose: verbose),
     new DriveCommand(),
     new FormatCommand(),
     new FuchsiaReloadCommand(),
@@ -67,5 +71,7 @@ Future<Null> main(List<String> args) async {
     new TraceCommand(),
     new UpdatePackagesCommand(hidden: !verboseHelp),
     new UpgradeCommand(),
-  ], verbose: verbose, verboseHelp: verboseHelp);
+  ], verbose: verbose,
+     muteCommandLogging: muteCommandLogging,
+     verboseHelp: verboseHelp);
 }
