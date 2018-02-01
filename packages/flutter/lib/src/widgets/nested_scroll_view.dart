@@ -895,6 +895,10 @@ class _NestedScrollController extends ScrollController {
   }
 }
 
+// The _NestedScrollPosition is used by both the inner and outer viewports of a
+// NestedScrollView. It tracks the offset to use for those viewports, and knows
+// about the _NestedScrollCoordinator, so that when activities are triggered on
+// this class, they can defer, or be influenced by, the coordinator.
 class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDelegate {
   _NestedScrollPosition({
     @required ScrollPhysics physics,
@@ -945,10 +949,31 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   // Returns the amount of delta that was not used.
+  //
+  // Positive delta means going down (exposing stuff above), negative delta
+  // going up (exposing stuff below).
   double applyClampedDragUpdate(double delta) {
     assert(delta != 0.0);
-    final double min = delta < 0.0 ? -double.INFINITY : minScrollExtent;
-    final double max = delta > 0.0 ? double.INFINITY : maxScrollExtent;
+    // If we are going towards the maxScrollExtent (negative scroll offset),
+    // then the furthest we can be in the minScrollExtent direction is negative
+    // infinity. For example, if we are already overscrolled, then scrolling to
+    // reduce the overscroll should not disallow the overscroll.
+    //
+    // If we are going towards the minScrollExtent (positive scroll offset),
+    // then the furthest we can be in the minScrollExtent direction is wherever
+    // we are now, if we are already overscrolled (in which case pixels is less
+    // than the minScrollExtent), or the minScrollExtent if we are not.
+    //
+    // In other words, we cannot, via applyClampedDragUpdate, _enter_ an
+    // overscroll situation.
+    //
+    // An overscroll situation might be nonetheless entered via several means.
+    // One is if the physics allow it, via applyFullDragUpdate (see below). An
+    // overscroll situation can also be forced, e.g. if the scroll position is
+    // artificially set using the scroll controller.
+    final double min = delta < 0.0 ? -double.INFINITY : math.min(minScrollExtent, pixels);
+    // The logic for max is equivalent but on the other side.
+    final double max = delta > 0.0 ? double.INFINITY : math.max(maxScrollExtent, pixels);
     final double oldPixels = pixels;
     final double newPixels = (pixels - delta).clamp(min, max);
     final double clampedDelta = newPixels - pixels;
