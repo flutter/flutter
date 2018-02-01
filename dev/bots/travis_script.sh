@@ -4,24 +4,35 @@ set -ex
 
 export PATH="$PWD/bin:$PWD/bin/cache/dart-sdk/bin:$PATH"
 
-if [ "$SHARD" -ne "build_and_deploy_gallery" ]
-  dart ./dev/bots/test.dart
-else
-  if [ "$TRAVIS_OS_NAME" = "linux" ]
+if [ "$SHARD" = "build_and_deploy_gallery" ]; then
+  echo "Building and deploying Flutter Gallery"
+  if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+    echo "Building Flutter Gallery for Android..."
+    export ANDROID_HOME=`pwd`/android-sdk
     (cd examples/flutter_gallery; flutter build apk --release)
-    if [ "$TRAVIS_PULL_REQUEST" = false ] # TODO(xster): add back && [ "$TRAVIS_BRANCH" = "dev" ] after testing
+    echo "Android Flutter Gallery built"
+    if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then # TODO(xster): add back && [ "$TRAVIS_BRANCH" = "dev" ] after testing
+      echo "Deploying to Play Store..."
       (cd examples/flutter_gallery/android; bundle exec fastlane deploy_play_store)
+    else
+      echo "Flutter Gallery is only deployed to the Play Store on merged dev branch commits"
     fi
-  elif [ "$TRAVIS_OS_NAME" = "osx" ]
+  elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
+    echo "Building Flutter Gallery for iOS..."
     (cd examples/flutter_gallery; flutter build ios --release --no-codesign)
-    if [ "$TRAVIS_PULL_REQUEST" = false ] # TODO(xster): add back && [ "$TRAVIS_BRANCH" = "dev" ] after testing
+    echo "iOS Flutter Gallery built"
+    if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then # TODO(xster): add back && [ "$TRAVIS_BRANCH" = "dev" ] after testing
+      echo "Re-building with distribution profile and deploying to TestFlight..."
       (cd examples/flutter_gallery/ios; bundle exec fastlane build_and_deploy_testflight)
+    else
+      echo "Flutter Gallery is only deployed to the TestFlight on merged dev branch commits"
     fi
   fi
-fi
-
-if [ "$TRAVIS_OS_NAME" = "linux" ] && \
-   [ "$SHARD" = "docs" ]; then
-  # generate the API docs, upload them
-  ./dev/bots/docs.sh
+elif [ "$SHARD" = "docs" ]; then
+  if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+    # Generate the API docs, upload them
+    ./dev/bots/docs.sh
+  fi
+else
+  dart ./dev/bots/test.dart
 fi

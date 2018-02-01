@@ -2,6 +2,7 @@
 os:
   - linux
   - osx
+osx_image: xcode9.2
 env:
   - SHARD=analyze
   - SHARD=tests
@@ -26,6 +27,7 @@ addons:
     sources:
       - ubuntu-toolchain-r-test # if we don't specify this, the libstdc++6 we get is the wrong version
     packages:
+      - lib32stdc++6
       - libstdc++6
       - fonts-droid
 language: node_js
