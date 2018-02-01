@@ -89,7 +89,7 @@ source_set("flow") {
       "//topaz/public/dart-pkg/zircon",
     ]
 
-    public_deps += [ "//zircon/system/ulib/zx" ]
+    public_deps += [ "//zircon/public/lib/zx" ]
   }
 }
 
