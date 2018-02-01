@@ -45,7 +45,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   FabPosition _fabPosition = FabPosition.endFloat;
   TabController _controller;
   _Page _selectedPage;
-  PersistentBottomSheetController bottomSheetController;
+  PersistentBottomSheetController<Null> bottomSheetController;
 
   @override
   void initState() {
