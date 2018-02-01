@@ -1129,7 +1129,7 @@ void main() {
     expect(tester.getRect(find.byKey(tabs[1].key)), new Rect.fromLTRB(530.0, 279.0, 670.0, 319.0));
     expect(tester.getRect(find.byKey(tabs[2].key)), new Rect.fromLTRB(380.0, 274.0, 530.0, 324.0));
 
-    final RenderBox tabBar = tester.renderObject<RenderBox>(find.byType(CustomPaint).at(1));
+    final RenderBox tabBar = tester.renderObject<RenderBox>(find.byType(CustomPaint).at(2));
 
     expect(tabBar.size, const Size(420.0, 52.0));
     expect(tabBar, paints..rect(
