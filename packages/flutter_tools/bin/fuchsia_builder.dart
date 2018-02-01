@@ -15,7 +15,6 @@ import '../lib/src/base/io.dart';
 import '../lib/src/base/logger.dart';
 import '../lib/src/base/os.dart';
 import '../lib/src/base/platform.dart';
-import '../lib/src/base/terminal.dart';
 import '../lib/src/cache.dart';
 import '../lib/src/disabled_usage.dart';
 import '../lib/src/flx.dart';
@@ -50,7 +49,6 @@ Future<Null> main(List<String> args) async {
     context.putIfAbsent(Platform, () => const LocalPlatform());
     context.putIfAbsent(FileSystem, () => const LocalFileSystem());
     context.putIfAbsent(ProcessManager, () => const LocalProcessManager());
-    context.putIfAbsent(AnsiTerminal, () => new AnsiTerminal());
     context.putIfAbsent(Logger, () => new StdoutLogger());
     context.putIfAbsent(Cache, () => new Cache());
     context.putIfAbsent(Config, () => new Config());
