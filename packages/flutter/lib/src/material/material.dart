@@ -347,11 +347,18 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       child: contents,
     );
 
+
+  static Widget _paintBorder(ShapeBorder shape, Widget contents) {
+      return new CustomPaint(
+        child: contents,
+        foregroundPainter: new _ShapeBorderPainter(shape),
+      );
   }
 
   static Widget _clipToShape({ShapeBorder shape, Widget contents}) {
+    final Widget borderedContents = _paintBorder(shape, contents);
     return new ClipPath(
-      child: contents,
+      child: borderedContents,
       clipper: new ShapeBorderClipper(
         shape: shape,
       ),
