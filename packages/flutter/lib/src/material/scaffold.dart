@@ -59,9 +59,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // so the app bar's shadow is drawn on top of the body.
 
     final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
-    final double bottom = math.max(0.0, size.height - bottomViewInset);
+    final double bottom = size.height;
     double contentTop = 0.0;
-    double contentBottom = bottom;
+    double bottomWidgetsHeight = 0.0;
 
     if (hasChild(_ScaffoldSlot.appBar)) {
       contentTop = layoutChild(_ScaffoldSlot.appBar, fullWidthConstraints).height;
@@ -70,19 +70,24 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     if (hasChild(_ScaffoldSlot.bottomNavigationBar)) {
       final double bottomNavigationBarHeight = layoutChild(_ScaffoldSlot.bottomNavigationBar, fullWidthConstraints).height;
-      contentBottom -= bottomNavigationBarHeight;
-      positionChild(_ScaffoldSlot.bottomNavigationBar, new Offset(0.0, contentBottom));
+      bottomWidgetsHeight += bottomNavigationBarHeight;
+      positionChild(_ScaffoldSlot.bottomNavigationBar, new Offset(0.0, math.max(0.0, bottom - bottomWidgetsHeight)));
     }
 
     if (hasChild(_ScaffoldSlot.persistentFooter)) {
       final BoxConstraints footerConstraints = new BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
-        maxHeight: math.max(0.0, contentBottom - contentTop),
+        maxHeight: math.max(0.0, bottom - bottomWidgetsHeight - contentTop),
       );
       final double persistentFooterHeight = layoutChild(_ScaffoldSlot.persistentFooter, footerConstraints).height;
-      contentBottom -= persistentFooterHeight;
-      positionChild(_ScaffoldSlot.persistentFooter, new Offset(0.0, contentBottom));
+      bottomWidgetsHeight += persistentFooterHeight;
+      positionChild(_ScaffoldSlot.persistentFooter, new Offset(0.0, math.max(0.0, bottom - bottomWidgetsHeight)));
     }
+
+    // Set the content bottom to account for the greater of the height of any
+    // bottom-anchored material widgets or of the keyboard or other
+    // bottom-anchored system UI.
+    final double contentBottom = math.max(0.0, bottom - math.max(bottomViewInset, bottomWidgetsHeight));
 
     if (hasChild(_ScaffoldSlot.body)) {
       final BoxConstraints bodyConstraints = new BoxConstraints(
@@ -114,7 +119,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         maxHeight: math.max(0.0, contentBottom - contentTop),
       );
       bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, bottomSheetConstraints);
-      positionChild(_ScaffoldSlot.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, bottom - bottomSheetSize.height));
+      positionChild(_ScaffoldSlot.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, contentBottom - bottomSheetSize.height));
     }
 
     if (hasChild(_ScaffoldSlot.snackBar)) {
@@ -861,7 +866,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeLeftPadding: false,
       removeTopPadding: widget.appBar != null,
       removeRightPadding: false,
-      removeBottomPadding: widget.bottomNavigationBar != null,
+      removeBottomPadding: widget.bottomNavigationBar != null || widget.persistentFooterButtons != null,
     );
 
     if (widget.appBar != null) {
