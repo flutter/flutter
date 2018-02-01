@@ -5,127 +5,138 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_theme.dart';
 import 'colors.dart';
-import 'constants.dart';
-import 'debug.dart';
-import 'flat_button.dart';
 import 'ink_well.dart';
 import 'material.dart';
-import 'raised_button.dart';
 import 'theme.dart';
 
-/// Whether a button should use the accent color for its text.
+/// Creates a button based on [Semantics], [Material], and [InkWell].
 ///
-/// See also:
-///
-///  * [ButtonTheme], which uses this enum to define the [ButtonTheme.textTheme].
-///  * [RaisedButton], which styles itself based on the ambient [ButtonTheme].
-///  * [FlatButton], which styles itself based on the ambient [ButtonTheme].
-enum ButtonTextTheme {
-  /// The button should use the normal color (e.g., black or white depending on
-  /// the [ThemeData.brightness]) for its text.
-  normal,
-
-  /// The button should use the accent color (e.g., [ThemeData.accentColor]) for
-  /// its text.
-  accent,
-}
-
-/// Defines the button color used by a widget subtree.
-///
-/// See also:
-///
-///  * [ButtonTextTheme], which is used by [textTheme].
-///  * [RaisedButton], which styles itself based on the ambient [ButtonTheme].
-///  * [FlatButton], which styles itself based on the ambient [ButtonTheme].
-class ButtonTheme extends InheritedWidget {
-  /// Creates a button theme.
+/// [RaisedButton] and [FlatButton] configure a [ShapedMaterialButton] based
+/// on the current [Theme] and [ButtonTheme].
+class ShapedMaterialButton extends StatelessWidget {
+  /// Create a button based on [Semantics], [Material], and [InkWell].
   ///
-  /// The child argument is required.
-  const ButtonTheme({
+  /// The [borderRadius], [elevation], [padding], and [constraints] arguments
+  /// must not be null.
+  const ShapedMaterialButton({
     Key key,
-    this.textTheme: ButtonTextTheme.normal,
-    this.minWidth: 88.0,
-    this.height: 36.0,
-    this.padding: const EdgeInsets.symmetric(horizontal: 16.0),
-    Widget child
-  }) : super(key: key, child: child);
+    @required this.onPressed,
+    this.textStyle,
+    this.fillColor,
+    this.highlightColor,
+    this.splashColor,
+    this.elevation: 0.0,
+    this.padding: EdgeInsets.zero,
+    this.onHighlightChanged,
+    this.constraints: const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
+    this.borderRadius: BorderRadius.zero,
+    this.child
+  }) : assert(borderRadius != null),
+       assert(elevation != null),
+       assert(padding != null),
+       assert(constraints != null),
+       super(key: key);
 
-  /// Creates a button theme that is appropriate for button bars, as used in
-  /// dialog footers and in the headers of data tables.
+  /// Called when the button is tapped or otherwise activated.
   ///
-  /// This theme is denser, with a smaller [minWidth] and [padding], than the
-  /// default theme. Also, this theme uses [ButtonTextTheme.accent] rather than
-  /// [ButtonTextTheme.normal].
-  ///
-  /// For best effect, the label of the button at the edge of the container
-  /// should have text that ends up wider than 64.0 pixels. This ensures that
-  /// the alignment of the text matches the alignment of the edge of the
-  /// container.
-  ///
-  /// For example, buttons at the bottom of [Dialog] or [Card] widgets use this
-  /// button theme.
-  const ButtonTheme.bar({
-    Key key,
-    this.textTheme: ButtonTextTheme.accent,
-    this.minWidth: 64.0,
-    this.height: 36.0,
-    this.padding: const EdgeInsets.symmetric(horizontal: 8.0),
-    Widget child
-  }) : super(key: key, child: child);
+  /// If this is set to null, the button will be disabled, see [enabled].
+  final VoidCallback onPressed;
 
-  /// The button color that this subtree should use.
-  final ButtonTextTheme textTheme;
+  /// Defines the default text style, with [Material.textStyle], for the
+  /// button's [child].
+  final TextStyle textStyle;
 
-  /// The smallest horizontal extent that the button will occupy.
-  ///
-  /// Defaults to 88.0 logical pixels.
-  final double minWidth;
+  /// The color of the button's [Material].
+  final Color fillColor;
 
-  /// The vertical extent of the button.
-  ///
-  /// Defaults to 36.0 logical pixels.
-  final double height;
+  /// The highlight color for the button's [InkWell].
+  final Color highlightColor;
 
-  /// The amount of space to surround the child inside the bounds of the button.
-  ///
-  /// Defaults to 16.0 pixels of horizontal padding.
+  /// The splash color for the button's [InkWell].
+  final Color splashColor;
+
+  /// The elevation for the button's [Material].
+  final double elevation;
+
+  /// The internal padding for the button's [child].
   final EdgeInsetsGeometry padding;
 
-  /// The closest instance of this class that encloses the given context.
+  /// Called when a tap-down gesture is detected.
   ///
-  /// Typical usage is as follows:
+  /// Typically used to configure the button's elevation.
+  final ValueChanged<bool> onHighlightChanged;
+
+  /// Defines the button's size.
   ///
-  /// ```dart
-  /// ButtonTheme theme = ButtonTheme.of(context);
-  /// ```
-  static ButtonTheme of(BuildContext context) {
-    final ButtonTheme result = context.inheritFromWidgetOfExactType(ButtonTheme);
-    return result ?? const ButtonTheme();
-  }
+  /// Typically used to constrain the button's minimum size.
+  final BoxConstraints constraints;
+
+  /// The shape of the button's [Material].
+  ///
+  /// The button's highlight and splash are clipped to this shape. If the
+  /// button has an elevation, then its drop shadow is defined by this
+  /// shape as well.
+  final BorderRadius borderRadius;
+
+  /// Typically the button's label.
+  final Widget child;
 
   @override
-  bool updateShouldNotify(ButtonTheme oldTheme) {
-    return textTheme != oldTheme.textTheme
-        || padding != oldTheme.padding
-        || minWidth != oldTheme.minWidth
-        || height != oldTheme.height;
+  Widget build(BuildContext context) {
+    return new Semantics(
+      container: true,
+      button: true,
+      enabled: onPressed != null,
+      child: new ConstrainedBox(
+        constraints: constraints,
+        child: new Material(
+          elevation: elevation,
+          textStyle: textStyle,
+          borderRadius: borderRadius,
+          color: fillColor,
+          child: new InkWell(
+            onHighlightChanged: onHighlightChanged,
+            borderRadius: borderRadius,
+            splashColor: splashColor,
+            highlightColor: highlightColor,
+            onTap: onPressed,
+            child: IconTheme.merge(
+              data: new IconThemeData(color: textStyle?.color),
+              child: new Container(
+                padding: padding,
+                child: new Center(
+                  widthFactor: 1.0,
+                  heightFactor: 1.0,
+                  child: child,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
-/// The framework for building material design buttons.
+/// A utility class for building Material buttons that depend on the
+/// ambient [ButtonTheme] and [Theme].
+///
+/// The button's size will expand to fit the child widget, if necessary.
+///
+/// MaterialButtons whose [onPressed] handler is null will be disabled. To have
+/// an enabled button, make sure to pass a non-null value for onPressed.
 ///
 /// Rather than using this class directly, consider using [FlatButton] or
 /// [RaisedButton], which configure this class with appropriate defaults that
 /// match the material design specification.
 ///
-/// MaterialButtons whose [onPressed] handler is null will be disabled. To have
-/// an enabled button, make sure to pass a non-null value for onPressed.
+/// To create a button directly, without inheriting theme defaults, use
+/// [ShapedMaterialButton].
 ///
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
-///
-/// The button will expand to fit the child widget, if necessary.
 ///
 /// See also:
 ///
@@ -157,15 +168,14 @@ class MaterialButton extends StatefulWidget {
   /// Defaults to the brightness from [ThemeData.brightness].
   final Brightness colorBrightness;
 
-  /// The color scheme to use for this button's text.
-  ///
-  /// Defaults to the button color from [ButtonTheme].
+  /// Defines the button's base colors, and the defaults for the button's minimum
+  /// size, internal padding, and shape.
   final ButtonTextTheme textTheme;
 
   /// The color to use for this button's text.
   final Color textColor;
 
-  /// The primary color of the button, as printed on the [Material], while it
+  /// The the button's fill color, displayed by its [Material], while the button
   /// is in its default (unpressed, enabled) state.
   ///
   /// Defaults to null, meaning that the color is automatically derived from the [Theme].
@@ -238,9 +248,10 @@ class MaterialButton extends StatefulWidget {
   /// Defaults to the value from the current [ButtonTheme].
   final double height;
 
-  /// The amount of space to surround the child inside the bounds of the button.
+  /// The internal padding for the button's [child].
   ///
-  /// Defaults to the value from the current [ButtonTheme].
+  /// Defaults to the value from the current [ButtonTheme],
+  /// [ButtonThemeData.padding].
   final EdgeInsetsGeometry padding;
 
   /// The callback that is called when the button is tapped or otherwise activated.
@@ -270,33 +281,37 @@ class MaterialButton extends StatefulWidget {
 class _MaterialButtonState extends State<MaterialButton> {
   bool _highlight = false;
 
-  Brightness get _colorBrightness {
-    return widget.colorBrightness ?? Theme.of(context).brightness;
+  Brightness _getBrightness(ThemeData theme) {
+    return widget.colorBrightness ?? theme.brightness;
   }
 
-  Color get _textColor {
+  ButtonTextTheme _getTextTheme(ButtonThemeData buttonTheme) {
+    return widget.textTheme ?? buttonTheme.textTheme;
+  }
+
+  Color _getTextColor(ThemeData theme, ButtonThemeData buttonTheme, Color fillColor) {
     if (widget.textColor != null)
       return widget.textColor;
-    if (widget.enabled) {
-      switch (widget.textTheme ?? ButtonTheme.of(context).textTheme) {
-        case ButtonTextTheme.accent:
-          return Theme.of(context).accentColor;
-        case ButtonTextTheme.normal:
-          switch (_colorBrightness) {
-            case Brightness.light:
-              return Colors.black87;
-            case Brightness.dark:
-              return Colors.white;
-          }
-      }
-    } else {
-      assert(_colorBrightness != null);
-      switch (_colorBrightness) {
-        case Brightness.light:
-          return Colors.black26;
-        case Brightness.dark:
-          return Colors.white30;
-      }
+
+    final bool enabled = widget.enabled;
+    final bool themeIsDark = _getBrightness(theme) == Brightness.dark;
+    final bool fillIsDark = fillColor != null
+      ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
+      : themeIsDark;
+
+    switch (_getTextTheme(buttonTheme)) {
+      case ButtonTextTheme.normal:
+        return enabled
+          ? (themeIsDark ? Colors.white : Colors.black87)
+          : (themeIsDark ? Colors.white30 : Colors.black26);
+      case ButtonTextTheme.accent:
+        return enabled
+          ? theme.accentColor
+          : (themeIsDark ? Colors.white30 : Colors.black26);
+      case ButtonTextTheme.primary:
+        return enabled
+          ? (fillIsDark ? Colors.white : Colors.black)
+          : (themeIsDark ? Colors.white30 : Colors.black38);
     }
     return null;
   }
@@ -309,60 +324,25 @@ class _MaterialButtonState extends State<MaterialButton> {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
-    final Color textColor = _textColor;
-    final TextStyle style = theme.textTheme.button.copyWith(color: textColor);
-    final ButtonTheme buttonTheme = ButtonTheme.of(context);
-    final double height = widget.height ?? buttonTheme.height;
-    final double elevation = (_highlight ? widget.highlightElevation : widget.elevation) ?? 0.0;
-    final bool hasColorOrElevation = (widget.color != null || elevation > 0);
-    Widget contents = IconTheme.merge(
-      data: new IconThemeData(
-        color: textColor
+    final ButtonThemeData buttonTheme = ButtonTheme.of(context);
+    final Color textColor = _getTextColor(theme, buttonTheme, widget.color);
+
+    return new ShapedMaterialButton(
+      onPressed: widget.onPressed,
+      fillColor: widget.color,
+      textStyle: theme.textTheme.button.copyWith(color: textColor),
+      highlightColor: widget.highlightColor ?? theme.highlightColor,
+      splashColor: widget.splashColor ?? theme.splashColor,
+      elevation: (_highlight ? widget.highlightElevation : widget.elevation) ?? 0.0,
+      padding: widget.padding ?? buttonTheme.padding,
+      onHighlightChanged: _handleHighlightChanged,
+      constraints: buttonTheme.constraints.copyWith(
+        minWidth: widget.minWidth,
+        minHeight: widget.height,
       ),
-      child: new InkWell(
-        borderRadius: hasColorOrElevation ? null : kMaterialEdges[MaterialType.button],
-        highlightColor: widget.highlightColor ?? theme.highlightColor,
-        splashColor: widget.splashColor ?? theme.splashColor,
-        onTap: widget.onPressed,
-        onHighlightChanged: _handleHighlightChanged,
-        child: new Container(
-          padding: widget.padding ?? ButtonTheme.of(context).padding,
-          child: new Center(
-            widthFactor: 1.0,
-            heightFactor: 1.0,
-            child: widget.child,
-          )
-        )
-      )
-    );
-    if (hasColorOrElevation) {
-      contents = new Material(
-        type: MaterialType.button,
-        color: widget.color,
-        elevation: elevation,
-        textStyle: style,
-        child: contents
-      );
-    } else {
-      contents = new AnimatedDefaultTextStyle(
-        style: style,
-        duration: kThemeChangeDuration,
-        child: contents
-      );
-    }
-    return new Semantics(
-      container: true,
-      button: true,
-      enabled: widget.enabled,
-      child: new ConstrainedBox(
-        constraints: new BoxConstraints(
-          minWidth: widget.minWidth ?? buttonTheme.minWidth,
-          minHeight: height,
-        ),
-        child: contents
-      ),
+      borderRadius: buttonTheme.borderRadius,
+      child: widget.child,
     );
   }
 }
