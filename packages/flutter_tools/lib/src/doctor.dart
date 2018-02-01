@@ -95,18 +95,26 @@ class Doctor {
     return buffer.toString();
   }
 
-  /// Print verbose information about the state of installed tooling.
-  Future<bool> diagnose({ bool androidLicenses: false }) async {
+  /// Print information about the state of installed tooling.
+  Future<bool> diagnose({ bool androidLicenses: false, bool verbose: true }) async {
     if (androidLicenses)
       return AndroidWorkflow.runLicenseManager();
 
+    if (!verbose) {
+      printStatus('Doctor summary (to see all details, run flutter doctor -v):');
+    }
     bool doctorResult = true;
+    int issues = 0;
 
     for (DoctorValidator validator in validators) {
       final ValidationResult result = await validator.validate();
 
-      if (result.type == ValidationType.missing)
+      if (result.type == ValidationType.missing) {
         doctorResult = false;
+      }
+      if (result.type != ValidationType.installed) {
+        issues += 1;
+      }
 
       if (result.statusInfo != null)
         printStatus('${result.leadingBox} ${validator.title} (${result.statusInfo})');
@@ -114,15 +122,28 @@ class Doctor {
         printStatus('${result.leadingBox} ${validator.title}');
 
       for (ValidationMessage message in result.messages) {
-        final String text = message.message.replaceAll('\n', '\n      ');
-        if (message.isError) {
-          printStatus('    ✗ $text', emphasis: true);
-        } else {
-          printStatus('    • $text');
+        if (message.isError || message.isHint || verbose == true) {
+          final String text = message.message.replaceAll('\n', '\n      ');
+          if (message.isError) {
+            printStatus('    ✗ $text', emphasis: true);
+          } else if (message.isHint) {
+            printStatus('    ! $text');
+          } else {
+            printStatus('    • $text');
+          }
         }
       }
+      if (verbose)
+        printStatus('');
+    }
 
+    // Make sure there's always one line before the summary even when not verbose.
+    if (!verbose)
       printStatus('');
+    if (issues > 0) {
+      printStatus('! Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.');
+    } else {
+      printStatus('• No issues found!');
     }
 
     return doctorResult;
@@ -159,7 +180,10 @@ abstract class DoctorValidator {
   Future<ValidationResult> validate();
 }
 
+
 class ValidationResult {
+  /// [ValidationResult.type] should only equal [ValidationResult.installed]
+  /// if no [messages] are hints or errors.
   ValidationResult(this.type, this.messages, { this.statusInfo });
 
   final ValidationType type;
@@ -168,20 +192,26 @@ class ValidationResult {
   final List<ValidationMessage> messages;
 
   String get leadingBox {
-    if (type == ValidationType.missing)
-      return '[✗]';
-    else if (type == ValidationType.installed)
-      return '[✓]';
-    else
-      return '[-]';
+    assert(type != null);
+    switch (type) {
+      case ValidationType.missing:
+        return '[✗]';
+      case ValidationType.installed:
+        return '[✓]';
+      case ValidationType.partial:
+        return '[!]';
+    }
+    return null;
   }
 }
 
 class ValidationMessage {
-  ValidationMessage(this.message) : isError = false;
-  ValidationMessage.error(this.message) : isError = true;
+  ValidationMessage(this.message) : isError = false, isHint = false;
+  ValidationMessage.error(this.message) : isError = true, isHint = false;
+  ValidationMessage.hint(this.message) : isError = false, isHint = true;
 
   final bool isError;
+  final bool isHint;
   final String message;
 
   @override
@@ -512,7 +542,7 @@ class DeviceValidator extends DoctorValidator {
       if (diagnostics.isNotEmpty) {
         messages = diagnostics.map((String message) => new ValidationMessage(message)).toList();
       } else {
-        messages = <ValidationMessage>[new ValidationMessage('None')];
+        messages = <ValidationMessage>[new ValidationMessage.hint('No devices available')];
       }
     } else {
       messages = await Device.descriptions(devices)
