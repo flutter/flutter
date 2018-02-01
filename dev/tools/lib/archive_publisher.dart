@@ -143,7 +143,7 @@ class ArchivePublisher {
     jsonData['releases'][revision] = metadata;
     final Directory localTempDir = tempDir ?? Directory.systemTemp.createTempSync('flutter_');
     final File tempFile = new File(path.join(localTempDir.absolute.path, 'releases.json'));
-    final JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+    const JsonEncoder encoder = const JsonEncoder.withIndent('  ');
     tempFile.writeAsStringSync(encoder.convert(jsonData));
     _cloudCopy(tempFile.absolute.path, metadataGsPath);
     if (tempDir == null) {

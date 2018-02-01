@@ -1503,8 +1503,7 @@ void main() {
   });
 
   test('illegal constructor combinations', () {
-    final Widget $null = null;
-    expect(() => new Tab(icon: $null), throwsAssertionError);
+    expect(() => new Tab(icon: nonconst(null)), throwsAssertionError);
     expect(() => new Tab(icon: new Container(), text: 'foo', child: new Container()), throwsAssertionError);
     expect(() => new Tab(text: 'foo', child: new Container()), throwsAssertionError);
   });

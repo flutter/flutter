@@ -7,11 +7,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Border constructor', () {
-    final Null $null = null;
-    expect(() => new Border(left: $null), throwsAssertionError);
-    expect(() => new Border(top: $null), throwsAssertionError);
-    expect(() => new Border(right: $null), throwsAssertionError);
-    expect(() => new Border(bottom: $null), throwsAssertionError);
+    expect(() => new Border(left: nonconst(null)), throwsAssertionError);
+    expect(() => new Border(top: nonconst(null)), throwsAssertionError);
+    expect(() => new Border(right: nonconst(null)), throwsAssertionError);
+    expect(() => new Border(bottom: nonconst(null)), throwsAssertionError);
   });
 
   test('Border.merge', () {

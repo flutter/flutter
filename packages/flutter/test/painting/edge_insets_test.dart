@@ -73,7 +73,7 @@ void main() {
   });
 
   test('EdgeInsets equality', () {
-    final double $5 = 5.0; // we want these instances to be separate instances so that we're not just checking with a single object
+    final double $5 = nonconst(5.0);
     expect(new EdgeInsetsDirectional.only(top: $5, bottom: 7.0), new EdgeInsetsDirectional.only(top: $5, bottom: 7.0));
     expect(new EdgeInsets.only(top: $5, bottom: 7.0), new EdgeInsetsDirectional.only(top: $5, bottom: 7.0));
     expect(new EdgeInsetsDirectional.only(top: $5, bottom: 7.0), new EdgeInsets.only(top: $5, bottom: 7.0));
