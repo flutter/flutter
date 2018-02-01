@@ -27,7 +27,7 @@ void main() {
     });
 
     test('has no fonts or assets when the "flutter" section is empty', () async {
-      final String manifest = '''
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -44,7 +44,7 @@ dependencies:
     });
 
     test('knows if material design is used', () async {
-      final String manifest = '''
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -57,7 +57,7 @@ flutter:
     });
 
     test('has two assets', () async {
-      final String manifest = '''
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -75,7 +75,7 @@ flutter:
     });
 
     test('has one font family with one asset', () async {
-      final String manifest = '''
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -93,7 +93,7 @@ flutter:
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font font = fonts[0];
-      final String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}]}';
+      const String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}]}';
       expect(font.descriptor.toString(), fontDescriptor);
       expect(font.familyName, 'foo');
       final List<FontAsset> assets = font.fontAssets;
@@ -105,7 +105,7 @@ flutter:
     });
 
     test('has one font family with a simple asset and one with weight', () async {
-      final String manifest = '''
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -121,12 +121,12 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
 
-      final String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {weight: 400, asset: a/bar}], family: foo}]';
+      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {weight: 400, asset: a/bar}], family: foo}]';
       expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font font = fonts[0];
-      final String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, asset: a/bar}]}';
+      const String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, asset: a/bar}]}';
       expect(font.descriptor.toString(), fontDescriptor);
       expect(font.familyName, 'foo');
       final List<FontAsset> assets = font.fontAssets;
@@ -142,7 +142,7 @@ flutter:
     });
 
     test('has one font family with a simple asset and one with weight and style', () async {
-      final String manifest = '''
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -159,12 +159,12 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
 
-      final String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo}]';
+      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo}]';
       expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font font = fonts[0];
-      final String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
+      const String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
       expect(font.descriptor.toString(), fontDescriptor);
       expect(font.familyName, 'foo');
       final List<FontAsset> assets = font.fontAssets;
@@ -180,7 +180,7 @@ flutter:
     });
 
     test('has two font families, each with one simple asset and one with weight and style', () async {
-      final String manifest = '''
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -210,7 +210,7 @@ flutter:
       expect(fonts.length, 2);
 
       final Font fooFont = fonts[0];
-      final String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
+      const String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
       expect(fooFont.descriptor.toString(), barFontDescriptor);
       expect(fooFont.familyName, 'foo');
       final List<FontAsset> fooAassets = fooFont.fontAssets;
@@ -225,7 +225,7 @@ flutter:
       expect(fooFontAsset1.style, 'italic');
 
       final Font barFont = fonts[1];
-      final String fontDescriptor = '{family: bar, fonts: [{asset: a/baz}, {weight: 400, style: italic, asset: a/baz}]}';
+      const String fontDescriptor = '{family: bar, fonts: [{asset: a/baz}, {weight: 400, style: italic, asset: a/baz}]}';
       expect(barFont.descriptor.toString(), fontDescriptor);
       expect(barFont.familyName, 'bar');
       final List<FontAsset> barAssets = barFont.fontAssets;
@@ -241,7 +241,7 @@ flutter:
     });
 
     testUsingContext('has only one of two font familes when one declaration is missing the "family" option', () async {
-      final String manifest = '''
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -270,7 +270,7 @@ flutter:
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font fooFont = fonts[0];
-      final String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
+      const String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
       expect(fooFont.descriptor.toString(), barFontDescriptor);
       expect(fooFont.familyName, 'foo');
       final List<FontAsset> fooAassets = fooFont.fontAssets;
@@ -286,7 +286,7 @@ flutter:
     });
 
     testUsingContext('has only one of two font familes when one declaration is missing the "fonts" option', () async {
-      final String manifest = '''
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -310,7 +310,7 @@ flutter:
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font fooFont = fonts[0];
-      final String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
+      const String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
       expect(fooFont.descriptor.toString(), barFontDescriptor);
       expect(fooFont.familyName, 'foo');
       final List<FontAsset> fooAassets = fooFont.fontAssets;
@@ -326,7 +326,7 @@ flutter:
     });
 
     testUsingContext('has no font family when declaration is missing the "asset" option', () async {
-      final String manifest = '''
+      const String manifest = '''
 name: test
 dependencies:
   flutter:
@@ -340,7 +340,7 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
 
-      final String expectedFontsDescriptor = '[{fonts: [{weight: 400}], family: foo}]';
+      const String expectedFontsDescriptor = '[{fonts: [{weight: 400}], family: foo}]';
       expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 0);

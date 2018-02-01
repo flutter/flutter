@@ -256,7 +256,7 @@ void addHtmlBaseToIndex() {
 }
 
 void putRedirectInOldIndexLocation() {
-  final String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
+  const String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
   new File('$kDocRoot/flutter/index.html').writeAsStringSync(metaTag);
 }
 

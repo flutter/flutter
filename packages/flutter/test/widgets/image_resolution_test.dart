@@ -150,13 +150,13 @@ TestImage getTestImage(WidgetTester tester, Key key) {
 }
 
 Future<Null> pumpTreeToLayout(WidgetTester tester, Widget widget) {
-  final Duration pumpDuration = const Duration(milliseconds: 0);
+  const Duration pumpDuration = const Duration(milliseconds: 0);
   final EnginePhase pumpPhase = EnginePhase.layout;
   return tester.pumpWidget(widget, pumpDuration, pumpPhase);
 }
 
 void main() {
-  final String image = 'assets/image.png';
+  const String image = 'assets/image.png';
 
   testWidgets('Image for device pixel ratio 1.0', (WidgetTester tester) async {
     const double ratio = 1.0;

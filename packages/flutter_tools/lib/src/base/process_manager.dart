@@ -35,7 +35,7 @@ ProcessManager get processManager {
 void enableRecordingProcessManager(String location) {
   final ProcessManager originalProcessManager = processManager;
   final Directory dir = getRecordingSink(location, _kRecordingType);
-  final ProcessManager delegate = const LocalProcessManager();
+  const ProcessManager delegate = const LocalProcessManager();
   final RecordingProcessManager manager = new RecordingProcessManager(delegate, dir);
   addShutdownHook(() async {
     await manager.flush(finishRunningProcesses: true);

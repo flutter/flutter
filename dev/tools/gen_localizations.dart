@@ -271,7 +271,7 @@ void main(List<String> rawArgs) {
     validateLocalizations(localeToResources, localeToResourceAttributes)
   );
 
-  final String regenerate = 'dart dev/tools/gen_localizations.dart --overwrite';
+  const String regenerate = 'dart dev/tools/gen_localizations.dart --overwrite';
   final StringBuffer buffer = new StringBuffer();
   buffer.writeln(outputHeader.replaceFirst('@(regenerate)', regenerate));
   buffer.write(generateTranslationBundles());

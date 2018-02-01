@@ -15,30 +15,30 @@ void main() {
   });
 
   test('Border.merge', () {
-    final BorderSide magenta3 = const BorderSide(color: const Color(0xFFFF00FF), width: 3.0);
-    final BorderSide magenta6 = const BorderSide(color: const Color(0xFFFF00FF), width: 6.0);
-    final BorderSide yellow2 = const BorderSide(color: const Color(0xFFFFFF00), width: 2.0);
-    final BorderSide yellowNone0 = const BorderSide(color: const Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
+    const BorderSide magenta3 = const BorderSide(color: const Color(0xFFFF00FF), width: 3.0);
+    const BorderSide magenta6 = const BorderSide(color: const Color(0xFFFF00FF), width: 6.0);
+    const BorderSide yellow2 = const BorderSide(color: const Color(0xFFFFFF00), width: 2.0);
+    const BorderSide yellowNone0 = const BorderSide(color: const Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
     expect(
       Border.merge(
-        new Border(top: yellow2),
-        new Border(right: magenta3),
+        const Border(top: yellow2),
+        const Border(right: magenta3),
       ),
-      new Border(top: yellow2, right: magenta3),
+      const Border(top: yellow2, right: magenta3),
     );
     expect(
       Border.merge(
-        new Border(bottom: magenta3),
-        new Border(bottom: magenta3),
+        const Border(bottom: magenta3),
+        const Border(bottom: magenta3),
       ),
-      new Border(bottom: magenta6),
+      const Border(bottom: magenta6),
     );
     expect(
       Border.merge(
-        new Border(left: magenta3, right: yellowNone0),
-        new Border(right: yellow2),
+        const Border(left: magenta3, right: yellowNone0),
+        const Border(right: yellow2),
       ),
-      new Border(left: magenta3, right: yellow2),
+      const Border(left: magenta3, right: yellow2),
     );
     expect(
       Border.merge(const Border(), const Border()),
@@ -46,43 +46,43 @@ void main() {
     );
     expect(
       () => Border.merge(
-        new Border(left: magenta3),
-        new Border(left: yellow2),
+        const Border(left: magenta3),
+        const Border(left: yellow2),
       ),
       throwsAssertionError,
     );
   });
 
   test('Border.add', () {
-    final BorderSide magenta3 = const BorderSide(color: const Color(0xFFFF00FF), width: 3.0);
-    final BorderSide magenta6 = const BorderSide(color: const Color(0xFFFF00FF), width: 6.0);
-    final BorderSide yellow2 = const BorderSide(color: const Color(0xFFFFFF00), width: 2.0);
-    final BorderSide yellowNone0 = const BorderSide(color: const Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
+    const BorderSide magenta3 = const BorderSide(color: const Color(0xFFFF00FF), width: 3.0);
+    const BorderSide magenta6 = const BorderSide(color: const Color(0xFFFF00FF), width: 6.0);
+    const BorderSide yellow2 = const BorderSide(color: const Color(0xFFFFFF00), width: 2.0);
+    const BorderSide yellowNone0 = const BorderSide(color: const Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
     expect(
-      new Border(top: yellow2) + new Border(right: magenta3),
-      new Border(top: yellow2, right: magenta3),
+      const Border(top: yellow2) + const Border(right: magenta3),
+      const Border(top: yellow2, right: magenta3),
     );
     expect(
-      new Border(bottom: magenta3) + new Border(bottom: magenta3),
-      new Border(bottom: magenta6),
+      const Border(bottom: magenta3) + const Border(bottom: magenta3),
+      const Border(bottom: magenta6),
     );
     expect(
-      new Border(left: magenta3, right: yellowNone0) + new Border(right: yellow2),
-      new Border(left: magenta3, right: yellow2),
+      const Border(left: magenta3, right: yellowNone0) + const Border(right: yellow2),
+      const Border(left: magenta3, right: yellow2),
     );
     expect(
       const Border() + const Border(),
       const Border(),
     );
     expect(
-      new Border(left: magenta3) + new Border(left: yellow2),
+      const Border(left: magenta3) + const Border(left: yellow2),
       isNot(const isInstanceOf<Border>()), // see shape_border_test.dart for better tests of this case
     );
-    final Border b3 = new Border(top: magenta3);
-    final Border b6 = new Border(top: magenta6);
+    const Border b3 = const Border(top: magenta3);
+    const Border b6 = const Border(top: magenta6);
     expect(b3 + b3, b6);
-    final Border b0 = new Border(top: yellowNone0);
-    final Border bZ = const Border();
+    const Border b0 = const Border(top: yellowNone0);
+    const Border bZ = const Border();
     expect(b0 + b0, bZ);
     expect(bZ + bZ, bZ);
     expect(b0 + bZ, bZ);
@@ -90,16 +90,16 @@ void main() {
   });
 
   test('Border.scale', () {
-    final BorderSide magenta3 = const BorderSide(color: const Color(0xFFFF00FF), width: 3.0);
-    final BorderSide magenta6 = const BorderSide(color: const Color(0xFFFF00FF), width: 6.0);
-    final BorderSide yellow2 = const BorderSide(color: const Color(0xFFFFFF00), width: 2.0);
-    final BorderSide yellowNone0 = const BorderSide(color: const Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
-    final Border b3 = new Border(left: magenta3);
-    final Border b6 = new Border(left: magenta6);
+    const BorderSide magenta3 = const BorderSide(color: const Color(0xFFFF00FF), width: 3.0);
+    const BorderSide magenta6 = const BorderSide(color: const Color(0xFFFF00FF), width: 6.0);
+    const BorderSide yellow2 = const BorderSide(color: const Color(0xFFFFFF00), width: 2.0);
+    const BorderSide yellowNone0 = const BorderSide(color: const Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
+    const Border b3 = const Border(left: magenta3);
+    const Border b6 = const Border(left: magenta6);
     expect(b3.scale(2.0), b6);
-    final Border bY0 = new Border(top: yellowNone0);
+    const Border bY0 = const Border(top: yellowNone0);
     expect(bY0.scale(3.0), bY0);
-    final Border bY2 = new Border(top: yellow2);
+    const Border bY2 = const Border(top: yellow2);
     expect(bY2.scale(0.0), bY0);
   });
 
@@ -195,13 +195,13 @@ void main() {
   });
 
   test('Border.lerp', () {
-    final Border visualWithTop10 = const Border(top: const BorderSide(width: 10.0));
-    final Border atMinus100 = const Border(left: const BorderSide(width: 0.0), right: const BorderSide(width: 300.0));
-    final Border at0 = const Border(left: const BorderSide(width: 100.0), right: const BorderSide(width: 200.0));
-    final Border at25 = const Border(left: const BorderSide(width: 125.0), right: const BorderSide(width: 175.0));
-    final Border at75 = const Border(left: const BorderSide(width: 175.0), right: const BorderSide(width: 125.0));
-    final Border at100 = const Border(left: const BorderSide(width: 200.0), right: const BorderSide(width: 100.0));
-    final Border at200 = const Border(left: const BorderSide(width: 300.0), right: const BorderSide(width: 0.0));
+    const Border visualWithTop10 = const Border(top: const BorderSide(width: 10.0));
+    const Border atMinus100 = const Border(left: const BorderSide(width: 0.0), right: const BorderSide(width: 300.0));
+    const Border at0 = const Border(left: const BorderSide(width: 100.0), right: const BorderSide(width: 200.0));
+    const Border at25 = const Border(left: const BorderSide(width: 125.0), right: const BorderSide(width: 175.0));
+    const Border at75 = const Border(left: const BorderSide(width: 175.0), right: const BorderSide(width: 125.0));
+    const Border at100 = const Border(left: const BorderSide(width: 200.0), right: const BorderSide(width: 100.0));
+    const Border at200 = const Border(left: const BorderSide(width: 300.0), right: const BorderSide(width: 0.0));
 
     expect(Border.lerp(null, null, -1.0), null);
     expect(Border.lerp(visualWithTop10, null, -1.0), const Border(top: const BorderSide(width: 20.0)));

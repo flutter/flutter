@@ -199,9 +199,9 @@ void main() {
     ));
     expect(find.text('A'), findsOneWidget);
 
-    final Key avatarA = const Key('A');
+    const Key avatarA = const Key('A');
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: new CircleAvatar(key: avatarA, child: const Text('A')),
+      currentAccountPicture: const CircleAvatar(key: avatarA, child: const Text('A')),
       accountName: const Text('accountName'),
     ));
     expect(
@@ -310,9 +310,9 @@ void main() {
     ));
     expect(find.text('A'), findsOneWidget);
 
-    final Key avatarA = const Key('A');
+    const Key avatarA = const Key('A');
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: new CircleAvatar(key: avatarA, child: const Text('A')),
+      currentAccountPicture: const CircleAvatar(key: avatarA, child: const Text('A')),
       accountName: const Text('accountName'),
     ));
     expect(

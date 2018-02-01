@@ -39,8 +39,8 @@ void main() {
   });
 
   test('EdgeInsets.lerp()', () {
-    final EdgeInsets a = const EdgeInsets.all(10.0);
-    final EdgeInsets b = const EdgeInsets.all(20.0);
+    const EdgeInsets a = const EdgeInsets.all(10.0);
+    const EdgeInsets b = const EdgeInsets.all(20.0);
     expect(EdgeInsets.lerp(a, b, 0.25), equals(a * 1.25));
     expect(EdgeInsets.lerp(a, b, 0.25), equals(b * 0.625));
     expect(EdgeInsets.lerp(a, b, 0.25), equals(a + const EdgeInsets.all(2.5)));
@@ -95,7 +95,7 @@ void main() {
   });
 
   test('EdgeInsets copyWith', () {
-    final EdgeInsets sourceEdgeInsets = const EdgeInsets.only(left: 1.0, top: 2.0, bottom: 3.0, right: 4.0);
+    const EdgeInsets sourceEdgeInsets = const EdgeInsets.only(left: 1.0, top: 2.0, bottom: 3.0, right: 4.0);
     final EdgeInsets copy = sourceEdgeInsets.copyWith(left: 5.0, top: 6.0);
     expect(copy, const EdgeInsets.only(left: 5.0, top: 6.0, bottom: 3.0, right: 4.0));
   });
@@ -113,8 +113,8 @@ void main() {
   });
 
   test('EdgeInsetsGeometry.lerp(normal, ...)', () {
-    final EdgeInsets a = const EdgeInsets.all(10.0);
-    final EdgeInsets b = const EdgeInsets.all(20.0);
+    const EdgeInsets a = const EdgeInsets.all(10.0);
+    const EdgeInsets b = const EdgeInsets.all(20.0);
     expect(EdgeInsetsGeometry.lerp(a, b, 0.25), equals(a * 1.25));
     expect(EdgeInsetsGeometry.lerp(a, b, 0.25), equals(b * 0.625));
     expect(EdgeInsetsGeometry.lerp(a, b, 0.25), equals(a + const EdgeInsets.all(2.5)));
@@ -126,8 +126,8 @@ void main() {
   });
 
   test('EdgeInsetsGeometry.lerp(directional, ...)', () {
-    final EdgeInsetsDirectional a = const EdgeInsetsDirectional.only(start: 10.0, end: 10.0);
-    final EdgeInsetsDirectional b = const EdgeInsetsDirectional.only(start: 20.0, end: 20.0);
+    const EdgeInsetsDirectional a = const EdgeInsetsDirectional.only(start: 10.0, end: 10.0);
+    const EdgeInsetsDirectional b = const EdgeInsetsDirectional.only(start: 20.0, end: 20.0);
     expect(EdgeInsetsGeometry.lerp(a, b, 0.25), equals(a * 1.25));
     expect(EdgeInsetsGeometry.lerp(a, b, 0.25), equals(b * 0.625));
     expect(EdgeInsetsGeometry.lerp(a, b, 0.25), equals(a + const EdgeInsetsDirectional.only(start: 2.5, end: 2.5)));

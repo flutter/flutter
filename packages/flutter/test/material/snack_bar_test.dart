@@ -7,16 +7,16 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
-    final String helloSnackBar = 'Hello SnackBar';
-    final Key tapTarget = const Key('tap-target');
+    const String helloSnackBar = 'Hello SnackBar';
+    const Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
           builder: (BuildContext context) {
             return new GestureDetector(
               onTap: () {
-                Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text(helloSnackBar),
+                Scaffold.of(context).showSnackBar(const SnackBar(
+                  content: const Text(helloSnackBar),
                   duration: const Duration(seconds: 2)
                 ));
               },
@@ -53,7 +53,7 @@ void main() {
 
   testWidgets('SnackBar twice test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    final Key tapTarget = const Key('tap-target');
+    const Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -128,7 +128,7 @@ void main() {
 
   testWidgets('SnackBar cancel test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    final Key tapTarget = const Key('tap-target');
+    const Key tapTarget = const Key('tap-target');
     int time;
     ScaffoldFeatureController<SnackBar, SnackBarClosedReason> lastController;
     await tester.pumpWidget(new MaterialApp(
@@ -214,7 +214,7 @@ void main() {
 
   testWidgets('SnackBar dismiss test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    final Key tapTarget = const Key('tap-target');
+    const Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(

@@ -179,8 +179,8 @@ void main() {
   });
 
   test('AlignmentGeometry add/subtract', () {
-    final AlignmentGeometry directional = const AlignmentDirectional(1.0, 2.0);
-    final AlignmentGeometry normal = const Alignment(3.0, 5.0);
+    const AlignmentGeometry directional = const AlignmentDirectional(1.0, 2.0);
+    const AlignmentGeometry normal = const Alignment(3.0, 5.0);
     expect(directional.add(normal).resolve(TextDirection.ltr), const Alignment(4.0, 7.0));
     expect(directional.add(normal).resolve(TextDirection.rtl), const Alignment(2.0, 7.0));
     expect(normal.add(normal), normal * 2.0);

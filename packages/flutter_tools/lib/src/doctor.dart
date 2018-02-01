@@ -232,7 +232,7 @@ class _FlutterValidator extends DoctorValidator {
 }
 
 bool _genSnapshotRuns(String genSnapshotPath) {
-  final int kExpectedExitCode = 255;
+  const int kExpectedExitCode = 255;
   try {
     return processManager.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
   } catch (error) {
@@ -355,7 +355,7 @@ abstract class IntelliJValidator extends DoctorValidator {
       final Archive archive = new ZipDecoder().decodeBytes(fs.file(jarPath).readAsBytesSync());
       final ArchiveFile file = archive.findFile('META-INF/plugin.xml');
       final String content = UTF8.decode(file.content);
-      final String versionStartTag = '<version>';
+      const String versionStartTag = '<version>';
       final int start = content.indexOf(versionStartTag);
       final int end = content.indexOf('</version>', start);
       return content.substring(start + versionStartTag.length, end);

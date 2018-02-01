@@ -570,7 +570,7 @@ void main() {
     void startTimeoutTimer(),
     void reportObservatoryUri(Uri uri),
   }) {
-    final String observatoryString = 'Observatory listening on ';
+    const String observatoryString = 'Observatory listening on ';
 
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {

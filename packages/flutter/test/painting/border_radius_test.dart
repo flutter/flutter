@@ -142,17 +142,17 @@ void main() {
   });
 
   test('BorderRadius.lerp() crazy', () {
-    final BorderRadius a = const BorderRadius.only(
+    const BorderRadius a = const BorderRadius.only(
       topLeft: const Radius.elliptical(10.0, 20.0),
       topRight: const Radius.elliptical(30.0, 40.0),
       bottomLeft: const Radius.elliptical(50.0, 60.0),
     );
-    final BorderRadius b = const BorderRadius.only(
+    const BorderRadius b = const BorderRadius.only(
       topRight: const Radius.elliptical(100.0, 110.0),
       bottomLeft: const Radius.elliptical(120.0, 130.0),
       bottomRight: const Radius.elliptical(140.0, 150.0),
     );
-    final BorderRadius c = const BorderRadius.only(
+    const BorderRadius c = const BorderRadius.only(
       topLeft: const Radius.elliptical(5.0, 10.0), // 10,20 -> 0
       topRight: const Radius.elliptical(65.0, 75.0), // 30,40 -> 100,110
       bottomLeft: const Radius.elliptical(85.0, 95.0), // 50,60 -> 120,130
@@ -321,17 +321,17 @@ void main() {
   });
 
   test('BorderRadiusDirectional.lerp() crazy', () {
-    final BorderRadiusDirectional a = const BorderRadiusDirectional.only(
+    const BorderRadiusDirectional a = const BorderRadiusDirectional.only(
       topStart: const Radius.elliptical(10.0, 20.0),
       topEnd: const Radius.elliptical(30.0, 40.0),
       bottomStart: const Radius.elliptical(50.0, 60.0),
     );
-    final BorderRadiusDirectional b = const BorderRadiusDirectional.only(
+    const BorderRadiusDirectional b = const BorderRadiusDirectional.only(
       topEnd: const Radius.elliptical(100.0, 110.0),
       bottomStart: const Radius.elliptical(120.0, 130.0),
       bottomEnd: const Radius.elliptical(140.0, 150.0),
     );
-    final BorderRadiusDirectional c = const BorderRadiusDirectional.only(
+    const BorderRadiusDirectional c = const BorderRadiusDirectional.only(
       topStart: const Radius.elliptical(5.0, 10.0), // 10,20 -> 0
       topEnd: const Radius.elliptical(65.0, 75.0), // 30,40 -> 100,110
       bottomStart: const Radius.elliptical(85.0, 95.0), // 50,60 -> 120,130
@@ -341,23 +341,23 @@ void main() {
   });
 
   test('BorderRadiusGeometry.lerp()', () {
-    final BorderRadius a = const BorderRadius.only(
+    const BorderRadius a = const BorderRadius.only(
       topLeft: const Radius.elliptical(10.0, 20.0),
       topRight: const Radius.elliptical(30.0, 40.0),
       bottomLeft: const Radius.elliptical(50.0, 60.0),
     );
-    final BorderRadiusDirectional b = const BorderRadiusDirectional.only(
+    const BorderRadiusDirectional b = const BorderRadiusDirectional.only(
       topEnd: const Radius.elliptical(100.0, 110.0),
       bottomStart: const Radius.elliptical(120.0, 130.0),
       bottomEnd: const Radius.elliptical(140.0, 150.0),
     );
-    final BorderRadius ltr = const BorderRadius.only(
+    const BorderRadius ltr = const BorderRadius.only(
       topLeft: const Radius.elliptical(5.0, 10.0), // 10,20 -> 0
       topRight: const Radius.elliptical(65.0, 75.0), // 30,40 -> 100,110
       bottomLeft: const Radius.elliptical(85.0, 95.0), // 50,60 -> 120,130
       bottomRight: const Radius.elliptical(70.0, 75.0), // 0,0 -> 140,150
     );
-    final BorderRadius rtl = const BorderRadius.only(
+    const BorderRadius rtl = const BorderRadius.only(
       topLeft: const Radius.elliptical(55.0, 65.0), // 10,20 -> 100,110
       topRight: const Radius.elliptical(15.0, 20.0), // 30,40 -> 0,0
       bottomLeft: const Radius.elliptical(95.0, 105.0), // 50,60 -> 140,150
@@ -370,12 +370,12 @@ void main() {
   });
 
   test('BorderRadiusGeometry subtract', () {
-    final BorderRadius a = const BorderRadius.only(
+    const BorderRadius a = const BorderRadius.only(
       topLeft: const Radius.elliptical(10.0, 20.0),
       topRight: const Radius.elliptical(30.0, 40.0),
       bottomLeft: const Radius.elliptical(50.0, 60.0),
     );
-    final BorderRadiusDirectional b = const BorderRadiusDirectional.only(
+    const BorderRadiusDirectional b = const BorderRadiusDirectional.only(
       topEnd: const Radius.elliptical(100.0, 110.0),
       bottomStart: const Radius.elliptical(120.0, 130.0),
       bottomEnd: const Radius.elliptical(140.0, 150.0),
@@ -395,12 +395,12 @@ void main() {
   });
 
   test('BorderRadiusGeometry add', () {
-    final BorderRadius a = const BorderRadius.only(
+    const BorderRadius a = const BorderRadius.only(
       topLeft: const Radius.elliptical(10.0, 20.0),
       topRight: const Radius.elliptical(30.0, 40.0),
       bottomLeft: const Radius.elliptical(50.0, 60.0),
     );
-    final BorderRadiusDirectional b = const BorderRadiusDirectional.only(
+    const BorderRadiusDirectional b = const BorderRadiusDirectional.only(
       topEnd: const Radius.elliptical(100.0, 110.0),
       bottomStart: const Radius.elliptical(120.0, 130.0),
       bottomEnd: const Radius.elliptical(140.0, 150.0),
@@ -420,12 +420,12 @@ void main() {
   });
 
   test('BorderRadiusGeometry add and multiply', () {
-    final BorderRadius a = const BorderRadius.only(
+    const BorderRadius a = const BorderRadius.only(
       topLeft: const Radius.elliptical(10.0, 20.0),
       topRight: const Radius.elliptical(30.0, 40.0),
       bottomLeft: const Radius.elliptical(50.0, 60.0),
     );
-    final BorderRadiusDirectional b = const BorderRadiusDirectional.only(
+    const BorderRadiusDirectional b = const BorderRadiusDirectional.only(
       topEnd: const Radius.elliptical(100.0, 110.0),
       bottomStart: const Radius.elliptical(120.0, 130.0),
       bottomEnd: const Radius.elliptical(140.0, 150.0),
@@ -445,23 +445,23 @@ void main() {
   });
 
   test('BorderRadiusGeometry add and subtract', () {
-    final BorderRadius a = const BorderRadius.only(
+    const BorderRadius a = const BorderRadius.only(
       topLeft: const Radius.elliptical(300.0, 500.0),
     );
-    final BorderRadiusDirectional b = const BorderRadiusDirectional.only(
+    const BorderRadiusDirectional b = const BorderRadiusDirectional.only(
       topEnd: const Radius.elliptical(30.0, 50.0),
     );
-    final BorderRadius c = const BorderRadius.only(
+    const BorderRadius c = const BorderRadius.only(
       bottomLeft: const Radius.elliptical(3.0, 5.0),
     );
 
-    final BorderRadius ltr = const BorderRadius.only(
+    const BorderRadius ltr = const BorderRadius.only(
       topLeft: const Radius.elliptical(300.0, 500.0), // tL + 0 - 0
       topRight: const Radius.elliptical(30.0, 50.0), // 0 + tE - 0
       bottomLeft: const Radius.elliptical(-3.0, -5.0), // 0 + 0 - bL
       bottomRight: Radius.zero, // 0 + 0 - 0
     );
-    final BorderRadius rtl = const BorderRadius.only(
+    const BorderRadius rtl = const BorderRadius.only(
       topLeft: const Radius.elliptical(330.0, 550.0), // tL + tE - 0
       topRight: Radius.zero, // 0 + 0 - 0
       bottomLeft: const Radius.elliptical(-3.0, -5.0), // 0 + 0 - bL
@@ -472,32 +472,32 @@ void main() {
   });
 
   test('BorderRadiusGeometry add and subtract, more', () {
-    final BorderRadius a = const BorderRadius.only(
+    const BorderRadius a = const BorderRadius.only(
       topLeft: const Radius.elliptical(300.0, 300.0),
       topRight: const Radius.elliptical(500.0, 500.0),
       bottomLeft: const Radius.elliptical(700.0, 700.0),
       bottomRight: const Radius.elliptical(900.0, 900.0),
     );
-    final BorderRadiusDirectional b = const BorderRadiusDirectional.only(
+    const BorderRadiusDirectional b = const BorderRadiusDirectional.only(
       topStart: const Radius.elliptical(30.0, 30.0),
       topEnd: const Radius.elliptical(50.0, 50.0),
       bottomStart: const Radius.elliptical(70.0, 70.0),
       bottomEnd: const Radius.elliptical(90.0, 90.0),
     );
-    final BorderRadius c = const BorderRadius.only(
+    const BorderRadius c = const BorderRadius.only(
       topLeft: const Radius.elliptical(3.0, 3.0),
       topRight: const Radius.elliptical(5.0, 5.0),
       bottomLeft: const Radius.elliptical(7.0, 7.0),
       bottomRight: const Radius.elliptical(9.0, 9.0),
     );
 
-    final BorderRadius ltr = const BorderRadius.only(
+    const BorderRadius ltr = const BorderRadius.only(
       topLeft: const Radius.elliptical(327.0, 327.0), // tL + tS - tL
       topRight: const Radius.elliptical(545.0, 545.0), // tR + tE - tR
       bottomLeft: const Radius.elliptical(763.0, 763.0), // bL + bS - bL
       bottomRight: const Radius.elliptical(981.0, 981.0), // bR + bE - bR
     );
-    final BorderRadius rtl = const BorderRadius.only(
+    const BorderRadius rtl = const BorderRadius.only(
       topLeft: const Radius.elliptical(347.0, 347.0), // tL + tE - tL
       topRight: const Radius.elliptical(525.0, 525.0), // tR + TS - tR
       bottomLeft: const Radius.elliptical(783.0, 783.0), // bL + bE + bL
@@ -508,24 +508,24 @@ void main() {
   });
 
   test('BorderRadiusGeometry operators', () {
-    final BorderRadius a = const BorderRadius.only(
+    const BorderRadius a = const BorderRadius.only(
       topLeft: const Radius.elliptical(10.0, 20.0),
       topRight: const Radius.elliptical(30.0, 40.0),
       bottomLeft: const Radius.elliptical(50.0, 60.0),
     );
-    final BorderRadiusDirectional b = const BorderRadiusDirectional.only(
+    const BorderRadiusDirectional b = const BorderRadiusDirectional.only(
       topEnd: const Radius.elliptical(100.0, 110.0),
       bottomStart: const Radius.elliptical(120.0, 130.0),
       bottomEnd: const Radius.elliptical(140.0, 150.0),
     );
 
-    final BorderRadius ltr = const BorderRadius.only(
+    const BorderRadius ltr = const BorderRadius.only(
       topLeft: const Radius.elliptical(5.0, 10.0), // 10,20 -> 0
       topRight: const Radius.elliptical(65.0, 75.0), // 30,40 -> 100,110
       bottomLeft: const Radius.elliptical(85.0, 95.0), // 50,60 -> 120,130
       bottomRight: const Radius.elliptical(70.0, 75.0), // 0,0 -> 140,150
     );
-    final BorderRadius rtl = const BorderRadius.only(
+    const BorderRadius rtl = const BorderRadius.only(
       topLeft: const Radius.elliptical(55.0, 65.0), // 10,20 -> 100,110
       topRight: const Radius.elliptical(15.0, 20.0), // 30,40 -> 0,0
       bottomLeft: const Radius.elliptical(95.0, 105.0), // 50,60 -> 140,150

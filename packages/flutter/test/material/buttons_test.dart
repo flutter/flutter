@@ -172,8 +172,8 @@ void main() {
   // This test is very similar to the '...explicit splashColor and highlightColor' test
   // in icon_button_test.dart. If you change this one, you may want to also change that one.
   testWidgets('MaterialButton with explicit splashColor and highlightColor', (WidgetTester tester) async {
-    final Color directSplashColor = const Color(0xFF000011);
-    final Color directHighlightColor = const Color(0xFF000011);
+    const Color directSplashColor = const Color(0xFF000011);
+    const Color directHighlightColor = const Color(0xFF000011);
 
     Widget buttonWidget = new Material(
       child: new Center(
@@ -207,8 +207,8 @@ void main() {
         ..rrect(color: directHighlightColor)
     );
 
-    final Color themeSplashColor1 = const Color(0xFF001100);
-    final Color themeHighlightColor1 = const Color(0xFF001100);
+    const Color themeSplashColor1 = const Color(0xFF001100);
+    const Color themeHighlightColor1 = const Color(0xFF001100);
 
     buttonWidget = new Material(
       child: new Center(
@@ -238,8 +238,8 @@ void main() {
         ..rrect(color: themeHighlightColor1)
     );
 
-    final Color themeSplashColor2 = const Color(0xFF002200);
-    final Color themeHighlightColor2 = const Color(0xFF002200);
+    const Color themeSplashColor2 = const Color(0xFF002200);
+    const Color themeHighlightColor2 = const Color(0xFF002200);
 
     await tester.pumpWidget(
       new Directionality(
