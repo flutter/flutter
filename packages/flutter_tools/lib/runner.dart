@@ -18,7 +18,6 @@ import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/platform.dart';
 import 'src/base/process.dart';
-import 'src/base/terminal.dart';
 import 'src/base/utils.dart';
 import 'src/cache.dart';
 import 'src/crash_reporting.dart';
@@ -68,7 +67,6 @@ Future<int> run(
     context.putIfAbsent(Platform, () => const LocalPlatform());
     context.putIfAbsent(FileSystem, () => const LocalFileSystem());
     context.putIfAbsent(ProcessManager, () => const LocalProcessManager());
-    context.putIfAbsent(AnsiTerminal, () => new AnsiTerminal());
     context.putIfAbsent(Logger, () => platform.isWindows ? new WindowsStdoutLogger() : new StdoutLogger());
     context.putIfAbsent(Config, () => new Config());
 
