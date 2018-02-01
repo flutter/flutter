@@ -149,7 +149,7 @@ void main() {
   test('TapGestureRecognizer _sentTapDown toString', () {
     final TapGestureRecognizer tap = new TapGestureRecognizer();
     expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready)'));
-    final PointerEvent event = const PointerDownEvent(pointer: 1, position: const Offset(10.0, 10.0));
+    const PointerEvent event = const PointerDownEvent(pointer: 1, position: const Offset(10.0, 10.0));
     tap.addPointer(event);
     tap.didExceedDeadline();
     expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: possible, sent tap down)'));

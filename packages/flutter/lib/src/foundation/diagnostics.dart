@@ -918,7 +918,7 @@ abstract class DiagnosticsNode {
       if (i > 0)
         builder.write(config.propertySeparator);
 
-      final int kWrapWidth = 65;
+      const int kWrapWidth = 65;
       if (property.style != DiagnosticsTreeStyle.singleLine) {
         final TextTreeConfiguration propertyStyle = property.textTreeConfiguration;
         builder.writeRaw(property.toStringDeep(

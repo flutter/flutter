@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('TableBorder constructor', () {
-    final TableBorder border1 = const TableBorder(
+    const TableBorder border1 = const TableBorder(
       left: const BorderSide(width: 1.0),
       right: const BorderSide(color: const Color(0xFF00FF00)),
       verticalInside: const BorderSide(),
@@ -69,7 +69,7 @@ void main() {
     const BorderSide side4 = const BorderSide(width: 4.0, color: const Color(4));
     const BorderSide side5 = const BorderSide(width: 5.0, color: const Color(5));
     const BorderSide side6 = const BorderSide(width: 6.0, color: const Color(6));
-    final TableBorder tableA = const TableBorder(
+    const TableBorder tableA = const TableBorder(
       top: side1,
       right: side2,
       bottom: side3,

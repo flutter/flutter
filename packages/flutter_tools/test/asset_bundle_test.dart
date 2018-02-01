@@ -56,8 +56,8 @@ void main()  {
       // Create a temporary directory and write a single file into it.
       final Directory tempDir = fs.systemTempDirectory.createTempSync();
       final String projectRoot = tempDir.path;
-      final String assetPath = 'banana.txt';
-      final String assetContents = 'banana';
+      const String assetPath = 'banana.txt';
+      const String assetContents = 'banana';
       final File tempFile = fs.file(fs.path.join(projectRoot, assetPath));
       tempFile.parent.createSync(recursive: true);
       tempFile.writeAsBytesSync(UTF8.encode(assetContents));
@@ -111,7 +111,7 @@ void main()  {
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
       expect(bundle.entries.length, 1);
-      final String expectedAssetManifest = '{}';
+      const String expectedAssetManifest = '{}';
       expect(
         UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,

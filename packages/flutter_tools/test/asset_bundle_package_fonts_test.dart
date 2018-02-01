@@ -130,7 +130,7 @@ $fontsSection
     testUsingContext('App font uses font file from package', () async {
       establishFlutterRoot();
 
-      final String fontsSection = '''
+      const String fontsSection = '''
        - family: foo
          fonts:
            - asset: packages/test_package/bar
@@ -139,10 +139,10 @@ $fontsSection
       writePackagesFile('test_package:p/p/lib/');
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
-      final String font = 'bar';
+      const String font = 'bar';
       writeFontAsset('p/p/lib/', font);
 
-      final String expectedFontManifest =
+      const String expectedFontManifest =
           '[{"fonts":[{"asset":"packages/test_package/bar"}],"family":"foo"}]';
       await buildAndVerifyFonts(
         <String>[],
@@ -155,7 +155,7 @@ $fontsSection
     testUsingContext('App font uses local font file and package font file', () async {
       establishFlutterRoot();
 
-      final String fontsSection = '''
+      const String fontsSection = '''
        - family: foo
          fonts:
            - asset: packages/test_package/bar
@@ -165,9 +165,9 @@ $fontsSection
       writePackagesFile('test_package:p/p/lib/');
       writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
-      final String packageFont = 'bar';
+      const String packageFont = 'bar';
       writeFontAsset('p/p/lib/', packageFont);
-      final String localFont = 'a/bar';
+      const String localFont = 'a/bar';
       writeFontAsset('', localFont);
 
       final String expectedFontManifest =
@@ -186,7 +186,7 @@ $fontsSection
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
-      final String fontsSection = '''
+      const String fontsSection = '''
        - family: foo
          fonts:
            - asset: a/bar
@@ -197,7 +197,7 @@ $fontsSection
         fontsSection: fontsSection,
       );
 
-      final String font = 'a/bar';
+      const String font = 'a/bar';
       writeFontAsset('p/p/', font);
 
       final String expectedFontManifest =
@@ -216,7 +216,7 @@ $fontsSection
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/\ntest_package2:p2/p/lib/');
-      final String fontsSection = '''
+      const String fontsSection = '''
        - family: foo
          fonts:
            - asset: packages/test_package2/bar
@@ -228,7 +228,7 @@ $fontsSection
       );
       writePubspecFile('p2/p/pubspec.yaml', 'test_package2');
 
-      final String font = 'bar';
+      const String font = 'bar';
       writeFontAsset('p2/p/lib/', font);
 
       final String expectedFontManifest =
@@ -248,7 +248,7 @@ $fontsSection
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
-      final String pubspec = '''
+      const String pubspec = '''
        - family: foo
          fonts:
            - style: italic
@@ -260,7 +260,7 @@ $fontsSection
         'test_package',
         fontsSection: pubspec,
       );
-      final String font = 'a/bar';
+      const String font = 'a/bar';
       writeFontAsset('p/p/', font);
 
       final String expectedFontManifest =
@@ -277,7 +277,7 @@ $fontsSection
     testUsingContext('App uses local font and package font with own font file.', () async {
       establishFlutterRoot();
 
-      final String fontsSection = '''
+      const String fontsSection = '''
        - family: foo
          fonts:
            - asset: a/bar
@@ -294,7 +294,7 @@ $fontsSection
         fontsSection: fontsSection,
       );
 
-      final String font = 'a/bar';
+      const String font = 'a/bar';
       writeFontAsset('', font);
       writeFontAsset('p/p/', font);
 

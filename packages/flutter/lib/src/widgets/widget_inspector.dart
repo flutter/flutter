@@ -954,7 +954,7 @@ class _InspectorOverlayLayer extends Layer {
     final Rect targetRect = MatrixUtils.transformRect(
         state.selected.transform, state.selected.rect);
     final Offset target = new Offset(targetRect.left, targetRect.center.dy);
-    final double offsetFromWidget = 9.0;
+    const double offsetFromWidget = 9.0;
     final double verticalOffset = (targetRect.height) / 2 + offsetFromWidget;
 
     _paintDescription(canvas, state.tooltip, state.textDirection, target, verticalOffset, size, targetRect);

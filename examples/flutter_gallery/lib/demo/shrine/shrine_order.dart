@@ -113,8 +113,8 @@ class _HeadingLayout extends MultiChildLayoutDelegate {
     final double imageWidth = (landscape ? size.width / 2.0 : size.width) - margin * 2.0;
     final BoxConstraints imageConstraints = new BoxConstraints(maxHeight: 224.0, maxWidth: imageWidth);
     final Size imageSize = layoutChild(image, imageConstraints);
-    final double imageY = 0.0;
-    positionChild(image, new Offset(margin, imageY));
+    const double imageY = 0.0;
+    positionChild(image, const Offset(margin, imageY));
 
     final double productWidth = landscape ? size.width / 2.0 : size.width - margin;
     final BoxConstraints productConstraints = new BoxConstraints(maxWidth: productWidth);
