@@ -17,7 +17,6 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  /*
   testWidgets('Does FlatButton contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(
@@ -172,7 +171,6 @@ void main() {
 
   // This test is very similar to the '...explicit splashColor and highlightColor' test
   // in icon_button_test.dart. If you change this one, you may want to also change that one.
-*/
   testWidgets('MaterialButton with explicit splashColor and highlightColor', (WidgetTester tester) async {
     const Color directSplashColor = const Color(0xFF000011);
     const Color directHighlightColor = const Color(0xFF000011);
@@ -267,7 +265,7 @@ void main() {
 
     await gesture.up();
   });
-/*
+
   testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
@@ -346,5 +344,4 @@ void main() {
 
     semantics.dispose();
   });
-*/
 }
