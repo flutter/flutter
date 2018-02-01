@@ -42,7 +42,7 @@ import 'recording_canvas.dart';
 /// To match something which asserts instead of painting, see [paintsAssertion].
 PaintPattern get paints => new _TestRecordingCanvasPatternMatcher();
 
-/// Matches objects or functions that paint an empty display list.
+/// Matches objects or functions that does not paint anything on the canvas.
 Matcher get paintsNothing => new _TestRecordingCanvasPaintsNothingMatcher();
 
 /// Matches objects or functions that assert when they try to paint.
@@ -550,8 +550,8 @@ class _TestRecordingCanvasPaintsNothingMatcher extends _TestRecordingCanvasMatch
   }
 
   static const List<Symbol> _nonPaintingOperations = const <Symbol> [
-    const Symbol('save'),
-    const Symbol('restore'),
+    #save,
+    #restore,
   ];
 
   // Filters out canvas calls that are not painting anything.

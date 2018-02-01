@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Canvas;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -134,9 +132,7 @@ abstract class MaterialInkController {
 ///
 /// ## Border
 ///
-/// If [shape] is specified, it will be used it to paint a border.
-/// [ShapeBorder] implementations like [CircleBorder] only paint a border when
-/// [CircleBorder.side] is not [BorderSide.none].
+/// If [shape] is not null, then its border will also be painted (if any).
 ///
 /// ## Layout change notifications
 ///
@@ -349,10 +345,11 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 
 
   static Widget _paintBorder(ShapeBorder shape, Widget contents) {
-      return new CustomPaint(
+      return new _ShapeBorderPaint(
         child: contents,
-        foregroundPainter: new _ShapeBorderPainter(shape),
-      );
+        shape: shape
+      ),
+    );
   }
 
   static Widget _clipToShape({ShapeBorder shape, Widget contents}) {
@@ -640,13 +637,14 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
 
   @override
   Widget build(BuildContext context) {
+    final ShapeBorder shape = _border.evaluate(animation);
     return new PhysicalShape(
-      child: new CustomPaint(
+      child: new _ShapeBorderPaint(
         child: widget.child,
-        foregroundPainter: new _ShapeBorderPainter(_border.evaluate(animation)),
+        shape: shape,
       ),
       clipper: new ShapeBorderClipper(
-        shape: _border.evaluate(animation),
+        shape: shape,
         textDirection: Directionality.of(context)
       ),
       elevation: _elevation.evaluate(animation),
@@ -656,13 +654,32 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
   }
 }
 
-class _ShapeBorderPainter extends CustomPainter {
-  _ShapeBorderPainter(this.border);
-  final ShapeBorder border;
+class _ShapeBorderPaint extends StatelessWidget {
+  const _ShapeBorderPaint({
+    @required this.child,
+    @required this.shape,
+  });
+
+  final Widget child;
+  final ShapeBorder shape;
 
   @override
-  void paint(ui.Canvas canvas, Size size) {
-    border.paint(canvas, Offset.zero & size);
+  Widget build(BuildContext context) {
+    return new CustomPaint(
+      child: child,
+      foregroundPainter: new _ShapeBorderPainter(shape, Directionality.of(context)),
+    );
+  }
+}
+
+class _ShapeBorderPainter extends CustomPainter {
+  _ShapeBorderPainter(this.border, this.textDirection);
+  final ShapeBorder border;
+  final TextDirection textDirection;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    border.paint(canvas, Offset.zero & size, textDirection: textDirection);
   }
 
   @override
