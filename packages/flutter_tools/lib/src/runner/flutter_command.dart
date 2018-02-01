@@ -185,7 +185,10 @@ abstract class FlutterCommand extends Command<Null> {
           : null,
       preferSharedLibrary: argParser.options.containsKey('prefer-shared-library')
         ? argResults['prefer-shared-library']
-        : false);
+        : false,
+      targetPlatform: argParser.options.containsKey('target-platform')
+        ? getTargetPlatformForName(argResults['target-platform'])
+        : null);
   }
 
   void setupApplicationPackages() {
