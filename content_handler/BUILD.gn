@@ -71,7 +71,7 @@ template("flutter_content_handler") {
              "//topaz/lib/tonic",
              "//topaz/public/dart-pkg/fuchsia",
              "//topaz/public/lib/ui/flutter/sdk_ext",
-             "//zircon/system/ulib/trace-provider",
+             "//zircon/public/lib/trace-provider",
            ] + extra_deps
 
     # The flags below are needed so that Dart's CPU profiler can walk the

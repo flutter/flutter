@@ -20,7 +20,7 @@ source_set("glue") {
     sources += [ "stack_trace_fuchsia.cc" ]
 
     public_deps = [
-      "//zircon/system/ulib/trace",
+      "//zircon/public/lib/trace",
     ]
   } else {
     sources += [ "stack_trace_base.cc" ]
