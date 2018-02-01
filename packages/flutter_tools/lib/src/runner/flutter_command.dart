@@ -389,10 +389,6 @@ abstract class FlutterCommand extends Command<Null> {
       if (!fs.isFileSync(targetPath))
         throw new ToolExit('Target file "$targetPath" not found.');
     }
-
-    final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
-        ? argResults['preview-dart-2']
-        : false;
   }
 
   ApplicationPackageStore applicationPackages;
