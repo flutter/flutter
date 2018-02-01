@@ -109,7 +109,7 @@ class Doctor {
     for (DoctorValidator validator in validators) {
       final ValidationResult result = await validator.validate();
 
-      if (result.type == ValidationType.missing ) {
+      if (result.type == ValidationType.missing) {
         doctorResult = false;
       }
       if (result.type != ValidationType.installed) {

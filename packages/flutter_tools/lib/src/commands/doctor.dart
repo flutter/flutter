@@ -8,8 +8,6 @@ import '../doctor.dart';
 import '../runner/flutter_command.dart';
 
 class DoctorCommand extends FlutterCommand {
-  final bool verbose;
-
   DoctorCommand({this.verbose: false}) {
     argParser.addFlag('android-licenses',
       defaultsTo: false,
@@ -17,6 +15,8 @@ class DoctorCommand extends FlutterCommand {
       help: 'Run the Android SDK manager tool to accept the SDK\'s licenses.',
     );
   }
+
+  final bool verbose;
 
   @override
   final String name = 'doctor';
