@@ -394,6 +394,8 @@ class FlutterEngine extends CachedArtifact {
     <String>['linux-x64', 'dart-sdk-linux-x64.zip'],
     <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
     <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
+    <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
+    <String>['android-arm64-release/linux-x64', 'android-arm64-release/linux-x64.zip'],
   ];
 
   List<List<String>> get _windowsBinaryDirs => <List<String>>[
@@ -409,6 +411,9 @@ class FlutterEngine extends CachedArtifact {
     <String>['android-arm', 'android-arm/artifacts.zip'],
     <String>['android-arm-profile', 'android-arm-profile/artifacts.zip'],
     <String>['android-arm-release', 'android-arm-release/artifacts.zip'],
+    <String>['android-arm64', 'android-arm64/artifacts.zip'],
+    <String>['android-arm64-profile', 'android-arm64-profile/artifacts.zip'],
+    <String>['android-arm64-release', 'android-arm64-release/artifacts.zip'],
   ];
 
   List<List<String>> get _iosBinaryDirs => <List<String>>[
