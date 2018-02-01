@@ -166,7 +166,7 @@ void main() {
   });
 
   testWidgets('Provide initial value to input when no controller is specified', (WidgetTester tester) async {
-    final String initialValue = 'hello';
+    const String initialValue = 'hello';
     final GlobalKey<FormFieldState<String>> inputKey = new GlobalKey<FormFieldState<String>>();
 
     Widget builder() {
@@ -206,7 +206,7 @@ void main() {
 
   testWidgets('Provide initial value to input when controller is specified', (WidgetTester tester) async {
     final TextEditingController controller = new TextEditingController();
-    final String initialValue = 'hello';
+    const String initialValue = 'hello';
     final GlobalKey<FormFieldState<String>> inputKey = new GlobalKey<FormFieldState<String>>();
 
     Widget builder() {

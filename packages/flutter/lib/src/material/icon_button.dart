@@ -193,6 +193,7 @@ class IconButton extends StatelessWidget {
 
     Widget result = new Semantics(
       button: true,
+      enabled: onPressed != null,
       child: new ConstrainedBox(
         constraints: const BoxConstraints(minWidth: _kMinButtonSize, minHeight: _kMinButtonSize),
         child: new Padding(

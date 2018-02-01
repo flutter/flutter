@@ -38,7 +38,7 @@ void main() {
 
   test('RoundedRectangleBorder and CircleBorder', () {
     final RoundedRectangleBorder r = new RoundedRectangleBorder(side: BorderSide.none, borderRadius: new BorderRadius.circular(10.0));
-    final CircleBorder c = const CircleBorder(side: BorderSide.none);
+    const CircleBorder c = const CircleBorder(side: BorderSide.none);
     final Rect rect = new Rect.fromLTWH(0.0, 0.0, 100.0, 20.0); // center is x=40..60 y=10
     final Matcher looksLikeR = isPathThat(
       includes: const <Offset>[ const Offset(30.0, 10.0), const Offset(50.0, 10.0), ],

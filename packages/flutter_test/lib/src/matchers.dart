@@ -514,8 +514,8 @@ class _HasGoodToStringDeep extends Matcher {
     // If a toStringDeep method doesn't properly handle nested values that
     // contain line breaks it can  fail to add the required prefixes to all
     // lined when toStringDeep is called specifying prefixes.
-    final String prefixLineOne    = 'PREFIX_LINE_ONE____';
-    final String prefixOtherLines = 'PREFIX_OTHER_LINES_';
+    const String prefixLineOne    = 'PREFIX_LINE_ONE____';
+    const String prefixOtherLines = 'PREFIX_OTHER_LINES_';
     final List<String> prefixIssues = <String>[];
     String descriptionWithPrefixes =
         object.toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines);

@@ -163,7 +163,7 @@ void main() {
       ),
       alignment: Alignment.center,
     );
-    final BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    const BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     layout(unconstrained, constraints: viewport);
     expect(unconstrained.getMinIntrinsicHeight(100.0), equals(200.0));
     expect(unconstrained.getMaxIntrinsicHeight(100.0), equals(200.0));
@@ -179,7 +179,7 @@ void main() {
       ),
       alignment: Alignment.center,
     );
-    final BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    const BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     layout(unconstrained, constraints: viewport);
     expect(unconstrained.getMinIntrinsicHeight(100.0), equals(0.0));
     expect(unconstrained.getMaxIntrinsicHeight(100.0), equals(0.0));
@@ -224,7 +224,7 @@ void main() {
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 
-    final BoxConstraints viewport = const BoxConstraints(maxWidth: 100.0);
+    const BoxConstraints viewport = const BoxConstraints(maxWidth: 100.0);
     layout(unconstrained, constraints: viewport);
 
     expect(unconstrained.size.width, equals(100.0), reason: 'constrained width');
@@ -248,7 +248,7 @@ void main() {
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 
-    final BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0);
+    const BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0);
     layout(unconstrained, constraints: viewport);
 
     expect(unconstrained.size.width, equals(200.0), reason: 'unconstrained width');

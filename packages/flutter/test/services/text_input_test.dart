@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 void main() {
   group('TextInputConfiguration', () {
     test('sets expected defaults', () {
-      final TextInputConfiguration configuration = const TextInputConfiguration();
+      const TextInputConfiguration configuration = const TextInputConfiguration();
       expect(configuration.inputType, TextInputType.text);
       expect(configuration.obscureText, false);
       expect(configuration.autocorrect, true);
@@ -16,7 +16,7 @@ void main() {
     });
 
     test('serializes to JSON', () async {
-      final TextInputConfiguration configuration = const TextInputConfiguration(
+      const TextInputConfiguration configuration = const TextInputConfiguration(
         inputType: TextInputType.number,
         obscureText: true,
         autocorrect: false,

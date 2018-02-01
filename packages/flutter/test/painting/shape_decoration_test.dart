@@ -15,12 +15,12 @@ void main() {
   new TestRenderingFlutterBinding(); // initializes the imageCache
 
   test('ShapeDecoration constructor', () {
-    final Color colorR = const Color(0xffff0000);
-    final Color colorG = const Color(0xff00ff00);
+    const Color colorR = const Color(0xffff0000);
+    const Color colorG = const Color(0xff00ff00);
     final Gradient gradient = new LinearGradient(colors: <Color>[colorR, colorG]);
     expect(const ShapeDecoration(shape: const Border()), const ShapeDecoration(shape: const Border()));
     expect(() => new ShapeDecoration(color: colorR, gradient: gradient, shape: const Border()), throwsAssertionError);
-    expect(() => new ShapeDecoration(color: colorR, shape: null), throwsAssertionError);
+    expect(() => new ShapeDecoration(gradient: gradient, shape: null), throwsAssertionError);
     expect(
       new ShapeDecoration.fromBoxDecoration(const BoxDecoration(shape: BoxShape.circle)),
       const ShapeDecoration(shape: const CircleBorder(side: BorderSide.none)),
@@ -31,7 +31,7 @@ void main() {
     );
     expect(
       new ShapeDecoration.fromBoxDecoration(new BoxDecoration(shape: BoxShape.circle, border: new Border.all(color: colorG))),
-      new ShapeDecoration(shape: new CircleBorder(side: new BorderSide(color: colorG))),
+      const ShapeDecoration(shape: const CircleBorder(side: const BorderSide(color: colorG))),
     );
     expect(
       new ShapeDecoration.fromBoxDecoration(new BoxDecoration(shape: BoxShape.rectangle, border: new Border.all(color: colorR))),
@@ -44,8 +44,8 @@ void main() {
   });
 
   test('ShapeDecoration.lerp and hit test', () {
-    final Decoration a = const ShapeDecoration(shape: const CircleBorder());
-    final Decoration b = const ShapeDecoration(shape: const RoundedRectangleBorder());
+    const Decoration a = const ShapeDecoration(shape: const CircleBorder());
+    const Decoration b = const ShapeDecoration(shape: const RoundedRectangleBorder());
     expect(Decoration.lerp(a, b, 0.0), a);
     expect(Decoration.lerp(a, b, 1.0), b);
     const Size size = const Size(200.0, 100.0); // at t=0.5, width will be 150 (x=25 to x=175).

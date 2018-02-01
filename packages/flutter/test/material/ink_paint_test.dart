@@ -10,8 +10,8 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
-    final Color highlightColor = const Color(0xAAFF0000);
-    final Color splashColor = const Color(0xAA0000FF);
+    const Color highlightColor = const Color(0xAAFF0000);
+    const Color splashColor = const Color(0xAA0000FF);
     final BorderRadius borderRadius = new BorderRadius.circular(6.0);
 
     await tester.pumpWidget(
@@ -52,8 +52,8 @@ void main() {
   });
 
   testWidgets('The InkWell widget renders an ink ripple', (WidgetTester tester) async {
-    final Color highlightColor = const Color(0xAAFF0000);
-    final Color splashColor = const Color(0xB40000FF);
+    const Color highlightColor = const Color(0xAAFF0000);
+    const Color splashColor = const Color(0xB40000FF);
     final BorderRadius borderRadius = new BorderRadius.circular(6.0);
 
     await tester.pumpWidget(
@@ -111,7 +111,7 @@ void main() {
       final double radius = arguments[1];
       final Paint paint = arguments[2];
       final Offset expectedCenter = tapDownOffset + const Offset(17.0, 17.0);
-      final double expectedRadius = 56.0;
+      const double expectedRadius = 56.0;
       if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 120)
         return true;
       throw '''
@@ -129,7 +129,7 @@ void main() {
       final double radius = arguments[1];
       final Paint paint = arguments[2];
       final Offset expectedCenter = tapDownOffset + const Offset(29.0, 29.0);
-      final double expectedRadius = 73.0;
+      const double expectedRadius = 73.0;
       if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 180)
         return true;
       throw '''
@@ -149,7 +149,7 @@ void main() {
       final double radius = arguments[1];
       final Paint paint = arguments[2];
       final Offset expectedCenter = inkWellCenter;
-      final double expectedRadius = 105.0;
+      const double expectedRadius = 105.0;
       if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 180)
         return true;
       throw '''
@@ -166,7 +166,7 @@ void main() {
       final double radius = arguments[1];
       final Paint paint = arguments[2];
       final Offset expectedCenter = inkWellCenter;
-      final double expectedRadius = 105.0;
+      const double expectedRadius = 105.0;
       if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 0)
         return true;
       throw '''

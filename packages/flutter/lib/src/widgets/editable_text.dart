@@ -308,7 +308,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin implements TextInputClient {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin implements TextInputClient, TextSelectionDelegate {
   Timer _cursorTimer;
   final ValueNotifier<bool> _showCursor = new ValueNotifier<bool>(false);
   final GlobalKey _editableKey = new GlobalKey();
@@ -516,8 +516,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         debugRequiredFor: widget,
         layerLink: _layerLink,
         renderObject: renderObject,
-        onSelectionOverlayChanged: _handleSelectionOverlayChanged,
         selectionControls: widget.selectionControls,
+        selectionDelegate: this,
       );
       final bool longPress = cause == SelectionChangedCause.longPress;
       if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
@@ -527,12 +527,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);
     }
-  }
-
-  void _handleSelectionOverlayChanged(TextEditingValue value, Rect caretRect) {
-    assert(!value.composing.isValid);  // composing range must be empty while selecting.
-    _formatAndSetValue(value);
-    _scrollController.jumpTo(_getScrollOffsetForCaret(caretRect));
   }
 
   bool _textChangedSinceLastCaretUpdate = false;
@@ -644,9 +638,29 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   RenderEditable get renderEditable => _editableKey.currentContext.findRenderObject();
 
   @override
+  TextEditingValue get textEditingValue => _value;
+
+  @override
+  set textEditingValue(TextEditingValue value) {
+    _selectionOverlay?.update(value);
+    _formatAndSetValue(value);
+  }
+
+  @override
+  void bringIntoView(TextPosition position) {
+    _scrollController.jumpTo(_getScrollOffsetForCaret(renderEditable.getLocalRectForCaret(position)));
+  }
+
+  @override
+  void hideToolbar() {
+    _selectionOverlay?.hide();
+  }
+
+  @override
   Widget build(BuildContext context) {
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
     super.build(context); // See AutomaticKeepAliveClientMixin.
+    final TextSelectionControls controls = widget.selectionControls;
     return new Scrollable(
       excludeFromSemantics: true,
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
@@ -655,25 +669,30 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return new CompositedTransformTarget(
           link: _layerLink,
-          child: new _Editable(
-            key: _editableKey,
-            value: _value,
-            style: widget.style,
-            cursorColor: widget.cursorColor,
-            showCursor: _showCursor,
-            hasFocus: _hasFocus,
-            maxLines: widget.maxLines,
-            selectionColor: widget.selectionColor,
-            textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
-            textAlign: widget.textAlign,
-            textDirection: _textDirection,
-            obscureText: widget.obscureText,
-            obscureShowCharacterAtIndex: _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null,
-            autocorrect: widget.autocorrect,
-            offset: offset,
-            onSelectionChanged: _handleSelectionChanged,
-            onCaretChanged: _handleCaretChanged,
-            rendererIgnoresPointer: widget.rendererIgnoresPointer,
+          child: new Semantics(
+            onCopy: _hasFocus && controls?.canCopy(this) == true ? () => controls.handleCopy(this) : null,
+            onCut: _hasFocus && controls?.canCut(this) == true ? () => controls.handleCut(this) : null,
+            onPaste: _hasFocus && controls?.canPaste(this) == true ? () => controls.handlePaste(this) : null,
+            child: new _Editable(
+              key: _editableKey,
+              value: _value,
+              style: widget.style,
+              cursorColor: widget.cursorColor,
+              showCursor: _showCursor,
+              hasFocus: _hasFocus,
+              maxLines: widget.maxLines,
+              selectionColor: widget.selectionColor,
+              textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
+              textAlign: widget.textAlign,
+              textDirection: _textDirection,
+              obscureText: widget.obscureText,
+              obscureShowCharacterAtIndex: _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null,
+              autocorrect: widget.autocorrect,
+              offset: offset,
+              onSelectionChanged: _handleSelectionChanged,
+              onCaretChanged: _handleCaretChanged,
+              rendererIgnoresPointer: widget.rendererIgnoresPointer,
+            ),
           ),
         );
       },

@@ -37,7 +37,7 @@ void main() {
   });
 
   testWidgets('Can change position data', (WidgetTester tester) async {
-    final Key key = const Key('container');
+    const Key key = const Key('container');
 
     await tester.pumpWidget(
       new Stack(
@@ -94,7 +94,7 @@ void main() {
   });
 
   testWidgets('Can remove parent data', (WidgetTester tester) async {
-    final Key key = const Key('container');
+    const Key key = const Key('container');
     final Container container = new Container(key: key, width: 10.0, height: 10.0);
 
     await tester.pumpWidget(
@@ -132,8 +132,8 @@ void main() {
   });
 
   testWidgets('Can align non-positioned children (LTR)', (WidgetTester tester) async {
-    final Key child0Key = const Key('child0');
-    final Key child1Key = const Key('child1');
+    const Key child0Key = const Key('child0');
+    const Key child1Key = const Key('child1');
 
     await tester.pumpWidget(
       new Directionality(
@@ -178,8 +178,8 @@ void main() {
   });
 
   testWidgets('Can align non-positioned children (RTL)', (WidgetTester tester) async {
-    final Key child0Key = const Key('child0');
-    final Key child1Key = const Key('child1');
+    const Key child0Key = const Key('child0');
+    const Key child1Key = const Key('child1');
 
     await tester.pumpWidget(
       new Directionality(
@@ -242,7 +242,7 @@ void main() {
   });
 
   testWidgets('Can construct an IndexedStack', (WidgetTester tester) async {
-    final int itemCount = 3;
+    const int itemCount = 3;
     List<int> itemsPainted;
 
     Widget buildFrame(int index) {
@@ -278,8 +278,8 @@ void main() {
   });
 
   testWidgets('Can hit test an IndexedStack', (WidgetTester tester) async {
-    final Key key = const Key('indexedStack');
-    final int itemCount = 3;
+    const Key key = const Key('indexedStack');
+    const int itemCount = 3;
     List<int> itemsTapped;
 
     Widget buildFrame(int index) {
@@ -309,21 +309,21 @@ void main() {
   });
 
   testWidgets('Can set width and height', (WidgetTester tester) async {
-    final Key key = const Key('container');
+    const Key key = const Key('container');
 
-    final BoxDecoration kBoxDecoration = const BoxDecoration(
+    const BoxDecoration kBoxDecoration = const BoxDecoration(
       color: const Color(0xFF00FF00),
     );
 
     await tester.pumpWidget(
       new Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
-          new Positioned(
+        children: const <Widget>[
+          const Positioned(
             left: 10.0,
             width: 11.0,
             height: 12.0,
-            child: new DecoratedBox(key: key, decoration: kBoxDecoration),
+            child: const DecoratedBox(key: key, decoration: kBoxDecoration),
           ),
         ],
       ),
@@ -350,12 +350,12 @@ void main() {
     await tester.pumpWidget(
       new Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
-          new Positioned(
+        children: const <Widget>[
+          const Positioned(
             right: 10.0,
             width: 11.0,
             height: 12.0,
-            child: new DecoratedBox(key: key, decoration: kBoxDecoration),
+            child: const DecoratedBox(key: key, decoration: kBoxDecoration),
           ),
         ],
       ),

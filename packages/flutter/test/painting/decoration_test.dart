@@ -93,8 +93,8 @@ void main() {
   new TestRenderingFlutterBinding(); // initializes the imageCache
 
   test('Decoration.lerp()', () {
-    final BoxDecoration a = const BoxDecoration(color: const Color(0xFFFFFFFF));
-    final BoxDecoration b = const BoxDecoration(color: const Color(0x00000000));
+    const BoxDecoration a = const BoxDecoration(color: const Color(0xFFFFFFFF));
+    const BoxDecoration b = const BoxDecoration(color: const Color(0x00000000));
 
     BoxDecoration c = Decoration.lerp(a, b, 0.0);
     expect(c.color, equals(a.color));
@@ -117,7 +117,7 @@ void main() {
     });
 
     final TestCanvas canvas = new TestCanvas();
-    final ImageConfiguration imageConfiguration = const ImageConfiguration(size: Size.zero);
+    const ImageConfiguration imageConfiguration = const ImageConfiguration(size: Size.zero);
     boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
     // The onChanged callback should not be invoked during the call to boxPainter.paint
@@ -136,7 +136,7 @@ void main() {
       });
 
       final TestCanvas canvas = new TestCanvas();
-      final ImageConfiguration imageConfiguration = const ImageConfiguration(size: Size.zero);
+      const ImageConfiguration imageConfiguration = const ImageConfiguration(size: Size.zero);
       boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
       // The onChanged callback should be invoked asynchronously.
@@ -163,7 +163,7 @@ void main() {
 
         final List<Invocation> invocations = <Invocation>[];
         final TestCanvas canvas = new TestCanvas(invocations);
-        final ImageConfiguration imageConfiguration = const ImageConfiguration(
+        const ImageConfiguration imageConfiguration = const ImageConfiguration(
             size: const Size(100.0, 100.0)
         );
         bool onChangedCalled = false;
@@ -203,7 +203,7 @@ void main() {
   });
 
   test('DecorationImage test', () {
-    final ColorFilter colorFilter = const ui.ColorFilter.mode(const Color(0xFF00FF00), BlendMode.src);
+    const ColorFilter colorFilter = const ui.ColorFilter.mode(const Color(0xFF00FF00), BlendMode.src);
     final DecorationImage backgroundImage = new DecorationImage(
       image: new SynchronousTestImageProvider(),
       colorFilter: colorFilter,
@@ -284,11 +284,11 @@ void main() {
   });
 
   test('BoxDecoration.lerp - gradients', () {
-    final Gradient gradient = const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0xFFFFFFFF) ]);
+    const Gradient gradient = const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0xFFFFFFFF) ]);
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
-        new BoxDecoration(gradient: gradient),
+        const BoxDecoration(gradient: gradient),
         -1.0,
       ),
       const BoxDecoration(gradient: const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0x00FFFFFF) ]))
@@ -296,7 +296,7 @@ void main() {
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
-        new BoxDecoration(gradient: gradient),
+        const BoxDecoration(gradient: gradient),
         0.0,
       ),
       const BoxDecoration()
@@ -304,7 +304,7 @@ void main() {
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
-        new BoxDecoration(gradient: gradient),
+        const BoxDecoration(gradient: gradient),
         0.25,
       ),
       const BoxDecoration(gradient: const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0x40FFFFFF) ]))
@@ -312,7 +312,7 @@ void main() {
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
-        new BoxDecoration(gradient: gradient),
+        const BoxDecoration(gradient: gradient),
         0.75,
       ),
       const BoxDecoration(gradient: const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0xBFFFFFFF) ]))
@@ -320,18 +320,18 @@ void main() {
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
-        new BoxDecoration(gradient: gradient),
+        const BoxDecoration(gradient: gradient),
         1.0,
       ),
-      new BoxDecoration(gradient: gradient)
+      const BoxDecoration(gradient: gradient)
     );
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
-        new BoxDecoration(gradient: gradient),
+        const BoxDecoration(gradient: gradient),
         2.0,
       ),
-      new BoxDecoration(gradient: gradient)
+      const BoxDecoration(gradient: gradient)
     );
   });
 

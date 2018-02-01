@@ -269,9 +269,9 @@ void main() {
     final WidgetInspectorService service = WidgetInspectorService.instance;
     service.disposeAllGroups();
     final Object a = new Object();
-    final String group1 = 'group-1';
-    final String group2 = 'group-2';
-    final String group3 = 'group-3';
+    const String group1 = 'group-1';
+    const String group2 = 'group-2';
+    const String group3 = 'group-3';
     final String aId = service.toId(a, group1);
     expect(service.toId(a, group2), equals(aId));
     expect(service.toId(a, group3), equals(aId));
@@ -287,8 +287,8 @@ void main() {
     service.disposeAllGroups();
     final Object a = new Object();
     final Object b = new Object();
-    final String group1 = 'group-1';
-    final String group2 = 'group-2';
+    const String group1 = 'group-1';
+    const String group2 = 'group-2';
     final String aId = service.toId(a, group1);
     final String bId = service.toId(b, group1);
     expect(service.toId(a, group2), equals(aId));
@@ -301,8 +301,8 @@ void main() {
   });
 
   test('WidgetInspectorService toObjectForSourceLocation', () {
-    final String group = 'test-group';
-    final Text widget = const Text('a', textDirection: TextDirection.ltr);
+    const String group = 'test-group';
+    const Text widget = const Text('a', textDirection: TextDirection.ltr);
     final WidgetInspectorService service = WidgetInspectorService.instance;
     service.disposeAllGroups();
     final String id = service.toId(widget, group);
@@ -316,14 +316,14 @@ void main() {
   });
 
   test('WidgetInspectorService object id test', () {
-    final Text a = const Text('a', textDirection: TextDirection.ltr);
-    final Text b = const Text('b', textDirection: TextDirection.ltr);
-    final Text c = const Text('c', textDirection: TextDirection.ltr);
-    final Text d = const Text('d', textDirection: TextDirection.ltr);
+    const Text a = const Text('a', textDirection: TextDirection.ltr);
+    const Text b = const Text('b', textDirection: TextDirection.ltr);
+    const Text c = const Text('c', textDirection: TextDirection.ltr);
+    const Text d = const Text('d', textDirection: TextDirection.ltr);
 
-    final String group1 = 'group-1';
-    final String group2 = 'group-2';
-    final String group3 = 'group-3';
+    const String group1 = 'group-1';
+    const String group2 = 'group-2';
+    const String group3 = 'group-3';
     final WidgetInspectorService service = WidgetInspectorService.instance;
     service.disposeAllGroups();
 
@@ -397,7 +397,7 @@ void main() {
   });
 
   testWidgets('WidgetInspectorService getParentChain', (WidgetTester tester) async {
-    final String group = 'test-group';
+    const String group = 'test-group';
 
     await tester.pumpWidget(
       new Directionality(
@@ -454,7 +454,7 @@ void main() {
 
   test('WidgetInspectorService getProperties', () {
     final DiagnosticsNode diagnostic = const Text('a', textDirection: TextDirection.ltr).toDiagnosticsNode();
-    final String group = 'group';
+    const String group = 'group';
     final WidgetInspectorService service = WidgetInspectorService.instance;
     service.disposeAllGroups();
     final String id = service.toId(diagnostic, group);
@@ -470,7 +470,7 @@ void main() {
   });
 
   testWidgets('WidgetInspectorService getChildren', (WidgetTester tester) async {
-    final String group = 'test-group';
+    const String group = 'test-group';
 
     await tester.pumpWidget(
       new Directionality(
