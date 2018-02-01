@@ -17,7 +17,7 @@ platform :ios do
 
     increment_version_number(
       # Relative to this file. Accept only digits and dots.
-      version_number: /[0-9\.]+/.match(File.read('../../../../version'))[0]
+      version_number: File.read('../../../../version').gsub(/[^0-9\.]/, '')
     )
 
     # Retrieves all the necessary certs and provisioning profiles.
