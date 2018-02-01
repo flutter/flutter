@@ -161,7 +161,7 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = new MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
-    verifyInOrder(<dynamic>[
+    verifyInOrder(<void>[
       canvas.rotate(math.pi),
       canvas.translate(-48.0, -48.0)
     ]);
@@ -208,7 +208,7 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = new MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
-    verifyInOrder(<dynamic>[
+    verifyInOrder(<void>[
       canvas.rotate(math.pi),
       canvas.translate(-48.0, -48.0)
     ]);
