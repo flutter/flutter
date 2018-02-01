@@ -81,7 +81,7 @@ class FlatButton extends StatelessWidget {
     this.splashColor,
     this.colorBrightness,
     this.padding,
-    this.borderRadius,
+    this.shape,
     @required this.child,
   }) : super(key: key);
 
@@ -103,7 +103,7 @@ class FlatButton extends StatelessWidget {
     this.highlightColor,
     this.splashColor,
     this.colorBrightness,
-    this.borderRadius,
+    this.shape,
     @required Widget icon,
     @required Widget label,
   }) : assert(icon != null),
@@ -222,7 +222,7 @@ class FlatButton extends StatelessWidget {
   /// The button's highlight and splash are clipped to this shape. If the
   /// button has an elevation, then its drop shadow is defined by this
   /// shape as well.
-  final BorderRadius borderRadius;
+  final ShapeBorder shape;
 
   Brightness _getBrightness(ThemeData theme) {
     return colorBrightness ?? theme.brightness;
@@ -304,7 +304,7 @@ class FlatButton extends StatelessWidget {
       splashColor: _getSplashColor(theme, buttonTheme),
       padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints,
-      borderRadius: borderRadius ?? buttonTheme.borderRadius,
+      shape: shape ?? buttonTheme.shape,
       child: child,
     );
   }
@@ -322,6 +322,6 @@ class FlatButton extends StatelessWidget {
     description.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
     description.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
     description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
+    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }

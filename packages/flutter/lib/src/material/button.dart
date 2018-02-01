@@ -18,7 +18,7 @@ import 'theme.dart';
 class ShapedMaterialButton extends StatelessWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell].
   ///
-  /// The [borderRadius], [elevation], [padding], and [constraints] arguments
+  /// The [shape], [elevation], [padding], and [constraints] arguments
   /// must not be null.
   const ShapedMaterialButton({
     Key key,
@@ -31,9 +31,9 @@ class ShapedMaterialButton extends StatelessWidget {
     this.padding: EdgeInsets.zero,
     this.onHighlightChanged,
     this.constraints: const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
-    this.borderRadius: BorderRadius.zero,
-    this.child
-  }) : assert(borderRadius != null),
+    this.shape: const RoundedRectangleBorder(),
+    this.child,
+  }) : assert(shape != null),
        assert(elevation != null),
        assert(padding != null),
        assert(constraints != null),
@@ -78,7 +78,7 @@ class ShapedMaterialButton extends StatelessWidget {
   /// The button's highlight and splash are clipped to this shape. If the
   /// button has an elevation, then its drop shadow is defined by this
   /// shape as well.
-  final BorderRadius borderRadius;
+  final ShapeBorder shape;
 
   /// Typically the button's label.
   final Widget child;
@@ -94,11 +94,10 @@ class ShapedMaterialButton extends StatelessWidget {
         child: new Material(
           elevation: elevation,
           textStyle: textStyle,
-          borderRadius: borderRadius,
+          shape: shape,
           color: fillColor,
           child: new InkWell(
             onHighlightChanged: onHighlightChanged,
-            borderRadius: borderRadius,
             splashColor: splashColor,
             highlightColor: highlightColor,
             onTap: onPressed,
@@ -341,7 +340,7 @@ class _MaterialButtonState extends State<MaterialButton> {
         minWidth: widget.minWidth,
         minHeight: widget.height,
       ),
-      borderRadius: buttonTheme.borderRadius,
+      shape: buttonTheme.shape,
       child: widget.child,
     );
   }

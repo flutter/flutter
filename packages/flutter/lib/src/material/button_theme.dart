@@ -71,7 +71,7 @@ class ButtonTheme extends InheritedWidget {
     double minWidth: 88.0,
     double height: 36.0,
     EdgeInsetsGeometry padding,
-    BorderRadius borderRadius,
+    ShapeBorder shape,
     Widget child,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
@@ -81,7 +81,7 @@ class ButtonTheme extends InheritedWidget {
          minWidth: minWidth,
          height: height,
          padding: padding,
-         borderRadius: borderRadius,
+         shape: shape,
        ),
        super(key: key, child: child);
 
@@ -105,7 +105,7 @@ class ButtonTheme extends InheritedWidget {
     double minWidth: 64.0,
     double height: 36.0,
     EdgeInsetsGeometry padding: const EdgeInsets.symmetric(horizontal: 8.0),
-    BorderRadius borderRadius,
+    ShapeBorder shape,
     Widget child,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
@@ -115,7 +115,7 @@ class ButtonTheme extends InheritedWidget {
          minWidth: minWidth,
          height: height,
          padding: padding,
-         borderRadius: borderRadius,
+         shape: shape,
        ),
        super(key: key, child: child);
 
@@ -153,12 +153,12 @@ class ButtonThemeData {
     this.minWidth: 88.0,
     this.height: 36.0,
     EdgeInsetsGeometry padding,
-    BorderRadius borderRadius,
+    ShapeBorder shape,
   }) : assert(textTheme != null),
        assert(minWidth != null && minWidth >= 0.0),
        assert(height != null && height >= 0.0),
        _padding = padding,
-       _borderRadius = borderRadius;
+       _shape = shape;
 
   /// The minimum width for buttons.
   ///
@@ -222,19 +222,23 @@ class ButtonThemeData {
   /// Defaults to a rounded rectangle with circular corner radii of 4.0 if
   /// [textTheme] is [ButtonTextTheme.primary], a rounded rectangle with
   /// circular corner radii of 2.0 otherwise.
-  BorderRadius get borderRadius {
-    if (_borderRadius != null)
-      return _borderRadius;
+  ShapeBorder get shape {
+    if (_shape != null)
+      return _shape;
     switch (textTheme) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
-        return const BorderRadius.all(const Radius.circular(2.0));
+        return const RoundedRectangleBorder(
+          borderRadius: const BorderRadius.all(const Radius.circular(2.0)),
+        );
       case ButtonTextTheme.primary:
-        return const BorderRadius.all(const Radius.circular(4.0));
+        return const RoundedRectangleBorder(
+          borderRadius: const BorderRadius.all(const Radius.circular(4.0)),
+        );
     }
-    return const BorderRadius.all(Radius.zero);
+    return const RoundedRectangleBorder();
   }
-  final BorderRadius _borderRadius;
+  final ShapeBorder _shape;
 
   @override
   bool operator ==(dynamic other) {
@@ -245,7 +249,7 @@ class ButtonThemeData {
         && minWidth == typedOther.minWidth
         && height == typedOther.height
         && padding == typedOther.padding
-        && borderRadius == typedOther.borderRadius;
+        && shape == typedOther.shape;
   }
 
   @override
@@ -255,7 +259,7 @@ class ButtonThemeData {
       minWidth,
       height,
       padding,
-      borderRadius,
+      shape,
     );
   }
 }

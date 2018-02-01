@@ -57,7 +57,7 @@ class RaisedButton extends StatefulWidget {
     this.highlightElevation: 8.0,
     this.disabledElevation: 0.0,
     this.padding,
-    this.borderRadius,
+    this.shape,
     this.child,
   }) : assert(elevation != null),
        assert(highlightElevation != null),
@@ -86,7 +86,7 @@ class RaisedButton extends StatefulWidget {
     this.elevation: 2.0,
     this.highlightElevation: 8.0,
     this.disabledElevation: 0.0,
-    this.borderRadius,
+    this.shape,
     @required Widget icon,
     @required Widget label,
   }) : assert(elevation != null),
@@ -261,7 +261,7 @@ class RaisedButton extends StatefulWidget {
   /// The button's highlight and splash are clipped to this shape. If the
   /// button has an elevation, then its drop shadow is defined by this
   /// shape as well.
-  final BorderRadius borderRadius;
+  final ShapeBorder shape;
 
   @override
   _RaisedButtonState createState() => new _RaisedButtonState();
@@ -281,7 +281,7 @@ class RaisedButton extends StatefulWidget {
     description.add(new DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: null));
     description.add(new DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: null));
     description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
+    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }
 
@@ -385,7 +385,7 @@ class _RaisedButtonState extends State<RaisedButton> {
       padding: widget.padding ?? buttonTheme.padding,
       onHighlightChanged: _handleHighlightChanged,
       constraints: buttonTheme.constraints,
-      borderRadius: widget.borderRadius ?? buttonTheme.borderRadius,
+      shape: widget.shape ?? buttonTheme.shape,
       child: widget.child,
     );
   }
