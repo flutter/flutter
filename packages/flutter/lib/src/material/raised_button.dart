@@ -39,6 +39,9 @@ import 'theme.dart';
 ///  * <https://material.google.com/components/buttons.html>
 class RaisedButton extends StatefulWidget {
   /// Create a filled button.
+  ///
+  /// The [elevation], [highlightElevation], and [disabledElevation]
+  /// arguments must not be null.
   const RaisedButton({
     Key key,
     @required this.onPressed,
@@ -56,13 +59,19 @@ class RaisedButton extends StatefulWidget {
     this.padding,
     this.borderRadius,
     this.child,
-  }) : super(key: key);
+  }) : assert(elevation != null),
+       assert(highlightElevation != null),
+       assert(disabledElevation != null),
+       super(key: key);
 
   /// Create a filled button from a pair of widgets that serve as the button's
   /// [icon] and [label].
   ///
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
+  ///
+  /// The [elevation], [highlightElevation], [disabledElevation], [icon], and
+  /// [label] arguments must not be null.
   RaisedButton.icon({
     Key key,
     @required this.onPressed,
@@ -81,6 +90,8 @@ class RaisedButton extends StatefulWidget {
     @required Widget icon,
     @required Widget label,
   }) : assert(elevation != null),
+       assert(highlightElevation != null),
+       assert(disabledElevation != null),
        assert(icon != null),
        assert(label != null),
        padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
@@ -133,9 +144,7 @@ class RaisedButton extends StatefulWidget {
   /// The button's fill color, displayed by its [Material], while it
   /// is in its default (unpressed, [enabled]) state.
   ///
-  /// If [textTheme] is [ButtonTextTheme.primary], the default color is the
-  /// current theme's primary color, [ThemeData.primaryColor]. Otherwise
-  /// color defaults to [ThemeData.buttonColor].
+  /// The default fill color is the theme's button color, [ThemeData.buttonColor].
   ///
   /// Typically the default color will be overidden with a Material color,
   /// for example:
@@ -154,8 +163,8 @@ class RaisedButton extends StatefulWidget {
 
   /// The fill color of the button when the button is disabled.
   ///
-  /// The default value of this color is white or black, depending
-  /// on the theme's brightness, [ThemeData.brightness].
+  /// The default value of this color is the theme's disabled color,
+  /// [ThemeData.disabledColor].
   ///
   /// See also:
   ///   * [color] - the fill color of the button when the button is [enabled].
@@ -167,8 +176,7 @@ class RaisedButton extends StatefulWidget {
   /// appears on top of the button's child and spreads in an expanding
   /// circle beginning where the touch occurred.
   ///
-  /// If [textTheme] is [ButtonTextTheme.primary], the default splash color is
-  /// white, otherwise it's the current theme's splash color,
+  /// The default splash color is the current theme's splash color,
   /// [ThemeData.splashColor].
   ///
   /// The appearance of the splash can be configured with the theme's splash
@@ -299,17 +307,16 @@ class _RaisedButtonState extends State<RaisedButton> {
       return color;
 
     final bool themeIsDark = _getBrightness(theme) == Brightness.dark;
-    final bool enabled = widget.enabled;
     switch (_getTextTheme(buttonTheme)) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
-        return enabled
+        return widget.enabled
+          ? theme.buttonColor
+          : theme.disabledColor;
+      case ButtonTextTheme.primary:
+        return widget.enabled
           ? theme.buttonColor
           : (themeIsDark ? Colors.white12 : Colors.black12);
-      case ButtonTextTheme.primary:
-        return themeIsDark
-          ? (enabled ? theme.buttonColor : Colors.white12)
-          : (enabled ? theme.primaryColor : Colors.black12);
     }
     return null;
   }
@@ -342,20 +349,6 @@ class _RaisedButtonState extends State<RaisedButton> {
     return null;
   }
 
-  Color _getSplashColor(ThemeData theme, ButtonThemeData buttonTheme) {
-    if (widget.splashColor != null)
-      return widget.splashColor;
-
-    switch (_getTextTheme(buttonTheme)) {
-      case ButtonTextTheme.normal:
-      case ButtonTextTheme.accent:
-        return theme.splashColor;
-      case ButtonTextTheme.primary:
-        return Colors.white24;
-    }
-    return Colors.transparent;
-  }
-
   Color _getHighlightColor(ThemeData theme, ButtonThemeData buttonTheme) {
     if (widget.highlightColor != null)
       return widget.highlightColor;
@@ -378,7 +371,7 @@ class _RaisedButtonState extends State<RaisedButton> {
     final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
     final double elevation = widget.enabled
       ? (_highlight
-         ? widget.highlightElevation ?? widget.elevation + 4.0
+         ? widget.highlightElevation ?? (widget.elevation + 6.0)
          : widget.elevation)
       : widget.disabledElevation ?? 0.0;
 
@@ -387,7 +380,7 @@ class _RaisedButtonState extends State<RaisedButton> {
       fillColor: fillColor,
       textStyle: theme.textTheme.button.copyWith(color: textColor),
       highlightColor: _getHighlightColor(theme, buttonTheme),
-      splashColor: _getSplashColor(theme, buttonTheme),
+      splashColor: widget.splashColor ?? theme.splashColor,
       elevation: elevation,
       padding: widget.padding ?? buttonTheme.padding,
       onHighlightChanged: _handleHighlightChanged,

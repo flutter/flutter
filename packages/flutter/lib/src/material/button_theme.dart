@@ -13,11 +13,6 @@ import 'theme.dart';
 /// colors, and the defaults for the button's minimum size, internal padding,
 /// and shape.
 ///
-/// Individual button widgets may interpret the button text theme differently.
-/// For example if the button text theme is [ButtonTextTheme.primary]
-/// [FlatButton]'s default text color is based on [Theme.primaryColor] and
-/// [RaisedButton]'s default fill color is based on [Theme.primaryColor].
-///
 /// See also:
 ///
 ///  * [RaisedButton], which styles itself based on the ambient [ButtonTheme].
@@ -33,7 +28,7 @@ enum ButtonTextTheme {
   /// For more information see [FlatButton], [RaisedButton].
   accent,
 
-  /// A button's fill or text color is based on [ThemeData.primaryColor].
+  /// A button's text color is based on [ThemeData.primaryColor].
   ///
   /// For more information see [FlatButton], [RaisedButton].
   primary,
@@ -136,7 +131,7 @@ class ButtonTheme extends InheritedWidget {
   /// ```
   static ButtonThemeData of(BuildContext context) {
     final ButtonTheme result = context.inheritFromWidgetOfExactType(ButtonTheme);
-    return result?.data ?? const ButtonThemeData();
+    return result?.data ?? Theme.of(context).buttonTheme;
   }
 
   @override

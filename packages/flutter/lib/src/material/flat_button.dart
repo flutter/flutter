@@ -90,6 +90,8 @@ class FlatButton extends StatelessWidget {
   ///
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
+  ///
+  /// The [icon] and [label] arguments must not be null.
   FlatButton.icon({
     Key key,
     @required this.onPressed,
@@ -175,8 +177,8 @@ class FlatButton extends StatelessWidget {
   /// circle beginning where the touch occurred.
   ///
   /// If [textTheme] is [ButtonTextTheme.primary], the default splash color is
-  /// is the theme's primary color [ThemeData.primaryColor], otherwise it's the
-  /// current theme's splash color, [ThemeData.splashColor].
+  /// is based on the theme's primary color [ThemeData.primaryColor],
+  /// otherwise it's the current theme's splash color, [ThemeData.splashColor].
   ///
   /// The appearance of the splash can be configured with the theme's splash
   /// factory, [ThemeData.splashFactory].
