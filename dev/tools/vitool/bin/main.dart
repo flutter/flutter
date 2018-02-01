@@ -54,6 +54,13 @@ void main(List<String> args) {
             '$kCodegenComment'
   );
 
+  parser.addOption(
+      'sample-rate',
+      abbr: 's',
+      defaultsTo: '1',
+      help: 'Frame sample rate; E.g if this is 2, every second frame will be sampled.'
+  );
+
   final ArgResults argResults = parser.parse(args);
 
   if (argResults['help'] ||
@@ -64,8 +71,15 @@ void main(List<String> args) {
     return;
   }
 
+  int sampleRate = int.parse(argResults['sample-rate']);
+  // The loop first increases frameIdx and then checks if frameIdx % sampleRate
+  // is 0. To make sure we keep the first frame, we initialize this with -1.
+  int frameIdx = -1;
   final List<FrameData> frames = <FrameData>[];
   for (String filePath in argResults.rest) {
+    frameIdx = frameIdx + 1;
+    if (frameIdx % sampleRate != 0)
+      continue;
     final FrameData data = interpretSvg(filePath);
     frames.add(data);
   }
