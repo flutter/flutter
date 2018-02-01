@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 
 import 'flat_button.dart';
 import 'material.dart';
@@ -22,15 +21,11 @@ const double _kToolbarScreenPadding = 8.0;
 class _TextSelectionToolbar extends StatelessWidget {
   const _TextSelectionToolbar({
     Key key,
-    this.delegate,
     this.handleCut,
     this.handleCopy,
     this.handlePaste,
     this.handleSelectAll,
   }) : super(key: key);
-
-  final TextSelectionDelegate delegate;
-  TextEditingValue get value => delegate.textEditingValue;
 
   final VoidCallback handleCut;
   final VoidCallback handleCopy;
@@ -42,20 +37,14 @@ class _TextSelectionToolbar extends StatelessWidget {
     final List<Widget> items = <Widget>[];
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
-    if (!value.selection.isCollapsed) {
+    if (handleCut != null)
       items.add(new FlatButton(child: new Text(localizations.cutButtonLabel), onPressed: handleCut));
+    if (handleCopy != null)
       items.add(new FlatButton(child: new Text(localizations.copyButtonLabel), onPressed: handleCopy));
-    }
-    items.add(new FlatButton(
-      child: new Text(localizations.pasteButtonLabel),
-      // TODO(https://github.com/flutter/flutter/issues/11254):
-      // This should probably be grayed-out if there is nothing to paste.
-      onPressed: handlePaste,
-    ));
-    if (value.text.isNotEmpty) {
-      if (value.selection.isCollapsed)
-        items.add(new FlatButton(child: new Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll));
-    }
+    if (handlePaste != null)
+      items.add(new FlatButton(child: new Text(localizations.pasteButtonLabel), onPressed: handlePaste,));
+    if (handleSelectAll != null)
+      items.add(new FlatButton(child: new Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll));
 
     return new Material(
       elevation: 1.0,
@@ -152,11 +141,10 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
           position,
         ),
         child: new _TextSelectionToolbar(
-          delegate: delegate,
-          handleCut: () => handleCut(delegate),
-          handleCopy: () => handleCopy(delegate),
-          handlePaste: () => handlePaste(delegate),
-          handleSelectAll: () => handleSelectAll(delegate),
+          handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+          handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
+          handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
+          handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
         ),
       )
     );

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.examples.gallery;
+package io.flutter.demo.gallery;
 
 import android.os.ConditionVariable;
 import io.flutter.plugin.common.MethodCall;
@@ -18,7 +18,7 @@ public class FlutterGalleryInstrumentation implements MethodCallHandler {
   private volatile boolean testSuccessful;
 
   FlutterGalleryInstrumentation(FlutterView view) {
-    new MethodChannel(view, "io.flutter.examples.gallery/TestLifecycleListener")
+    new MethodChannel(view, "io.flutter.demo.gallery/TestLifecycleListener")
         .setMethodCallHandler(this);
   }
 

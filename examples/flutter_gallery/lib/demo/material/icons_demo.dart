@@ -108,21 +108,24 @@ class _IconsDemoCard extends StatelessWidget {
     return new Card(
       child: new DefaultTextStyle(
         style: textStyle,
-        child: new Table(
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          children: <TableRow> [
-            new TableRow(
-              children: <Widget> [
-                _centeredText('Size'),
-                _centeredText('Enabled'),
-                _centeredText('Disabled'),
-              ]
-            ),
-            _buildIconRow(18.0),
-            _buildIconRow(24.0),
-            _buildIconRow(36.0),
-            _buildIconRow(48.0),
-          ],
+        child: new Semantics(
+          explicitChildNodes: true,
+          child: new Table(
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: <TableRow> [
+              new TableRow(
+                children: <Widget> [
+                  _centeredText('Size'),
+                  _centeredText('Enabled'),
+                  _centeredText('Disabled'),
+                ]
+              ),
+              _buildIconRow(18.0),
+              _buildIconRow(24.0),
+              _buildIconRow(36.0),
+              _buildIconRow(48.0),
+            ],
+          ),
         ),
       ),
     );

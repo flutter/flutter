@@ -22,7 +22,7 @@ class ArchivePublisherException implements Exception {
     }
     final String stderr = result?.stderr ?? '';
     if (stderr.isNotEmpty) {
-      output += ':\n$result.stderr';
+      output += ':\n${result.stderr}';
     }
     return output;
   }
@@ -87,9 +87,6 @@ class ArchivePublisher {
   /// Publishes the archive for the given constructor parameters.
   bool publishArchive() {
     assert(channel == Channel.dev, 'Channel must be dev (beta not yet supported)');
-    // Check for access early so that we don't try to publish things if the
-    // user doesn't have access to the metadata file.
-    _checkForGSUtilAccess();
     final List<String> platforms = <String>['linux', 'mac', 'win'];
     final Map<String, String> metadata = <String, String>{};
     for (String platform in platforms) {
@@ -108,12 +105,14 @@ class ArchivePublisher {
 
   /// Checks to make sure the user has access to the Google Storage bucket
   /// required to publish. Will throw an [ArchivePublisherException] if not.
-  void _checkForGSUtilAccess() {
+  void checkForGSUtilAccess() {
     // Fetching ACLs requires FULL_CONTROL access.
     final ProcessResult result = _runGsUtil(<String>['acl', 'get', metadataGsPath]);
     if (result.exitCode != 0) {
       throw new ArchivePublisherException(
-          'GSUtil cannot get ACLs for metadata file $metadataGsPath', result);
+        'GSUtil cannot get ACLs for metadata file $metadataGsPath',
+        result,
+      );
     }
   }
 

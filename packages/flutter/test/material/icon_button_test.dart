@@ -275,7 +275,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('IconButton Semantics', (WidgetTester tester) async {
+  testWidgets('IconButton Semantics (enabled)', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -291,11 +291,45 @@ void main() {
       children: <TestSemantics>[
         new TestSemantics.rootChild(
           rect: new Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
-          actions: <SemanticsAction>[SemanticsAction.tap],
-          flags: <SemanticsFlag>[SemanticsFlag.isButton],
+          actions: <SemanticsAction>[
+            SemanticsAction.tap
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isButton
+          ],
           label: 'link',
         )
       ]
+    ), ignoreId: true, ignoreTransform: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('IconButton Semantics (disabled)', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      wrap(
+        child: const IconButton(
+          onPressed: null,
+          icon: const Icon(Icons.link, semanticLabel: 'link'),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            rect: new Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+            flags: <SemanticsFlag>[
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isButton
+            ],
+            label: 'link',
+          )
+        ]
     ), ignoreId: true, ignoreTransform: true));
 
     semantics.dispose();

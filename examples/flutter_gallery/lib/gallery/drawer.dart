@@ -52,51 +52,54 @@ class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
   Widget build(BuildContext context) {
     final double systemTopPadding = MediaQuery.of(context).padding.top;
 
-    return new DrawerHeader(
-      decoration: new FlutterLogoDecoration(
-        margin: new EdgeInsets.fromLTRB(12.0, 12.0 + systemTopPadding, 12.0, 12.0),
-        style: _logoHasName ? _logoHorizontal ? FlutterLogoStyle.horizontal
-                                              : FlutterLogoStyle.stacked
-                                              : FlutterLogoStyle.markOnly,
-        lightColor: _logoColor.shade400,
-        darkColor: _logoColor.shade900,
-        textColor: widget.light ? const Color(0xFF616161) : const Color(0xFF9E9E9E),
+    return new Semantics(
+      label: 'Flutter',
+      child: new DrawerHeader(
+        decoration: new FlutterLogoDecoration(
+          margin: new EdgeInsets.fromLTRB(12.0, 12.0 + systemTopPadding, 12.0, 12.0),
+          style: _logoHasName ? _logoHorizontal ? FlutterLogoStyle.horizontal
+                                                : FlutterLogoStyle.stacked
+                                                : FlutterLogoStyle.markOnly,
+          lightColor: _logoColor.shade400,
+          darkColor: _logoColor.shade900,
+          textColor: widget.light ? const Color(0xFF616161) : const Color(0xFF9E9E9E),
+        ),
+        duration: const Duration(milliseconds: 750),
+        child: new GestureDetector(
+          onLongPress: () {
+            setState(() {
+              _logoHorizontal = !_logoHorizontal;
+              if (!_logoHasName)
+                _logoHasName = true;
+            });
+          },
+          onTap: () {
+            setState(() {
+              _logoHasName = !_logoHasName;
+            });
+          },
+          onDoubleTap: () {
+            setState(() {
+              final List<MaterialColor> options = <MaterialColor>[];
+              if (_logoColor != Colors.blue)
+                options.addAll(<MaterialColor>[Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue]);
+              if (_logoColor != Colors.amber)
+                options.addAll(<MaterialColor>[Colors.amber, Colors.amber, Colors.amber]);
+              if (_logoColor != Colors.red)
+                options.addAll(<MaterialColor>[Colors.red, Colors.red, Colors.red]);
+              if (_logoColor != Colors.indigo)
+                options.addAll(<MaterialColor>[Colors.indigo, Colors.indigo, Colors.indigo]);
+              if (_logoColor != Colors.pink)
+                options.addAll(<MaterialColor>[Colors.pink]);
+              if (_logoColor != Colors.purple)
+                options.addAll(<MaterialColor>[Colors.purple]);
+              if (_logoColor != Colors.cyan)
+                options.addAll(<MaterialColor>[Colors.cyan]);
+              _logoColor = options[new math.Random().nextInt(options.length)];
+            });
+          }
+        ),
       ),
-      duration: const Duration(milliseconds: 750),
-      child: new GestureDetector(
-        onLongPress: () {
-          setState(() {
-            _logoHorizontal = !_logoHorizontal;
-            if (!_logoHasName)
-              _logoHasName = true;
-          });
-        },
-        onTap: () {
-          setState(() {
-            _logoHasName = !_logoHasName;
-          });
-        },
-        onDoubleTap: () {
-          setState(() {
-            final List<MaterialColor> options = <MaterialColor>[];
-            if (_logoColor != Colors.blue)
-              options.addAll(<MaterialColor>[Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue]);
-            if (_logoColor != Colors.amber)
-              options.addAll(<MaterialColor>[Colors.amber, Colors.amber, Colors.amber]);
-            if (_logoColor != Colors.red)
-              options.addAll(<MaterialColor>[Colors.red, Colors.red, Colors.red]);
-            if (_logoColor != Colors.indigo)
-              options.addAll(<MaterialColor>[Colors.indigo, Colors.indigo, Colors.indigo]);
-            if (_logoColor != Colors.pink)
-              options.addAll(<MaterialColor>[Colors.pink]);
-            if (_logoColor != Colors.purple)
-              options.addAll(<MaterialColor>[Colors.purple]);
-            if (_logoColor != Colors.cyan)
-              options.addAll(<MaterialColor>[Colors.cyan]);
-            _logoColor = options[new math.Random().nextInt(options.length)];
-          });
-        }
-      )
     );
   }
 }
