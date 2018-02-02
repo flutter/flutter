@@ -233,7 +233,7 @@ abstract class TickerProviderStateMixin<T extends StatefulWidget> extends State<
 class _WidgetTicker extends Ticker {
   _WidgetTicker(TickerCallback onTick, this._creator, { String debugLabel }) : super(onTick, debugLabel: debugLabel);
 
-  final TickerProviderStateMixin _creator;
+  final TickerProviderStateMixin<StatefulWidget> _creator;
 
   @override
   void dispose() {
