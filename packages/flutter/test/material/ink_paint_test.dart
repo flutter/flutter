@@ -268,7 +268,6 @@ void main() {
     );
 
     final Offset tapDownOffset = tester.getTopLeft(find.byType(InkWell));
-    final Offset inkWellCenter = tester.getCenter(find.byType(InkWell));
     await tester.tapAt(tapDownOffset);
     await tester.pump(); // start splash
     await tester.pump(const Duration(milliseconds: 375)); // _kFadeOutDuration, in_ripple.dart
