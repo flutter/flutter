@@ -248,4 +248,34 @@ void main() {
 
     await gesture.up();
   });
+
+  testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Material(
+        child: new Center(
+          child: new Container(
+            width: 100.0,
+            height: 100.0,
+            child: new InkWell(
+              onTap: () { },
+              radius: 100.0,
+              splashFactory: InkRipple.splashFactory,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset tapDownOffset = tester.getTopLeft(find.byType(InkWell));
+    final Offset inkWellCenter = tester.getCenter(find.byType(InkWell));
+    await tester.tapAt(tapDownOffset);
+    await tester.pump(); // start gesture
+    await tester.pump(const Duration(milliseconds: 375)); // _kFadeOutDuration, in_ripple.dart
+
+    final TestGesture gesture = await tester.startGesture(tapDownOffset);
+    await tester.pump(); // start gesture
+    await gesture.moveTo(const Offset(0.0, 0.0));
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
 }
