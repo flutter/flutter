@@ -51,6 +51,7 @@ class GalleryAppState extends State<GalleryApp> {
   bool _showPerformanceOverlay = false;
   bool _checkerboardRasterCacheImages = false;
   bool _checkerboardOffscreenLayers = false;
+  TextDirection _overrideDirection = TextDirection.ltr;
   double _timeDilation = 1.0;
   TargetPlatform _platform;
 
@@ -139,6 +140,12 @@ class GalleryAppState extends State<GalleryApp> {
           _textScaleFactor = value;
         });
       },
+      overrideDirection: _overrideDirection,
+      onOverrideDirectionChanged: (TextDirection value) {
+        setState(() {
+          _overrideDirection = value;
+        });
+      },
       onSendFeedback: widget.onSendFeedback,
     );
 
@@ -155,7 +162,7 @@ class GalleryAppState extends State<GalleryApp> {
       // using named routes, consider the example in the Navigator class documentation:
       // https://docs.flutter.io/flutter/widgets/Navigator-class.html
       _kRoutes[item.routeName] = (BuildContext context) {
-        return _applyScaleFactor(item.buildRoute(context));
+        return item.buildRoute(context);
       };
     }
 
@@ -168,6 +175,12 @@ class GalleryAppState extends State<GalleryApp> {
       checkerboardOffscreenLayers: _checkerboardOffscreenLayers,
       routes: _kRoutes,
       home: _applyScaleFactor(home),
+      builder: (BuildContext context, Widget child) {
+        return new Directionality(
+          textDirection: _overrideDirection,
+          child: _applyScaleFactor(child),
+        );
+      },
     );
   }
 }
