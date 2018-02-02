@@ -14,7 +14,7 @@ String javaHome;
 void main() {
   task(() async {
     section('Running flutter doctor to get JAVA_HOME');
-    final String flutterDoctor = await evalFlutter('doctor');
+    final String flutterDoctor = await evalFlutter('doctor', options: <String>['-v']);
     final RegExp javaHomeExtractor = new RegExp(r'Android Studio at (.*)');
     javaHome = javaHomeExtractor.firstMatch(flutterDoctor).group(1) + '/jre';
 
