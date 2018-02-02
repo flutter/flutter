@@ -344,14 +344,17 @@ void main() {
   });
 
   testWidgets('NestedScrollView and internal scrolling', (WidgetTester tester) async {
-    final List<String> _tabs = <String>['Hello', 'World'];
+    const List<String> _tabs = const <String>['Hello', 'World'];
+    int buildCount = 0;
     await tester.pumpWidget(
       new MaterialApp(home: new Material(child:
         // THE FOLLOWING SECTION IS FROM THE NestedScrollView DOCUMENTATION
+        // (EXCEPT FOR THE CHANGES TO THE buildCount COUNTER)
         new DefaultTabController(
           length: _tabs.length, // This is the number of tabs.
           child: new NestedScrollView(
             headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              buildCount += 1; // THIS LINE IS NOT IN THE ORIGINAL -- ADDED FOR TEST
               // These are the slivers that show up in the "outer" scroll view.
               return <Widget>[
                 new SliverOverlapAbsorber(
@@ -449,21 +452,46 @@ void main() {
         // END
       )),
     );
+    int expectedBuildCount = 0;
+    expectedBuildCount += 1;
+    expect(buildCount, expectedBuildCount);
     expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 18'), findsNothing);
     expect(find.byType(NestedScrollView), isNot(paints..shadow()));
+    // scroll down
+    final TestGesture gesture0 = await tester.startGesture(tester.getCenter(find.text('Item 2')));
+    await gesture0.moveBy(const Offset(0.0, -120.0)); // tiny bit more than the pinned app bar height (56px * 2)
+    await tester.pump();
+    expect(buildCount, expectedBuildCount);
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 18'), findsNothing);
+    await gesture0.up();
+    await tester.pump(const Duration(milliseconds: 1)); // start shadow animation
+    expectedBuildCount += 1;
+    expect(buildCount, expectedBuildCount);
+    await tester.pump(const Duration(milliseconds: 1)); // during shadow animation
+    expect(buildCount, expectedBuildCount);
+    expect(find.byType(NestedScrollView), paints..shadow());
+    await tester.pump(const Duration(seconds: 1)); // end shadow animation
+    expect(buildCount, expectedBuildCount);
+    expect(find.byType(NestedScrollView), paints..shadow());
     // scroll down
     final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.text('Item 2')));
     await gesture1.moveBy(const Offset(0.0, -800.0));
-    await tester.pump(); // start shadow animation
+    await tester.pump();
+    expect(buildCount, expectedBuildCount);
+    expect(find.byType(NestedScrollView), paints..shadow());
     expect(find.text('Item 2'), findsNothing);
     expect(find.text('Item 18'), findsOneWidget);
     await gesture1.up();
-    await tester.pump(const Duration(seconds: 1)); // end shadow animation
+    await tester.pump(const Duration(seconds: 1));
+    expect(buildCount, expectedBuildCount);
     expect(find.byType(NestedScrollView), paints..shadow());
     // swipe left to bring in tap on the right
     final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(NestedScrollView)));
     await gesture2.moveBy(const Offset(-400.0, 0.0));
     await tester.pump();
+    expect(buildCount, expectedBuildCount);
     expect(find.text('Item 18'), findsOneWidget);
     expect(find.text('Item 2'), findsOneWidget);
     expect(find.text('Item 0'), findsOneWidget);
@@ -472,44 +500,61 @@ void main() {
     expect(find.byType(NestedScrollView), paints..shadow());
     await gesture2.up();
     await tester.pump(); // start sideways scroll
-    await tester.pump(const Duration(seconds: 1)); // end sideways scroll
-    await tester.pump(); // start shadow going away
+    await tester.pump(const Duration(seconds: 1)); // end sideways scroll, triggers shadow going away
+    expect(buildCount, expectedBuildCount);
+    await tester.pump(const Duration(seconds: 1)); // start shadow going away
+    expectedBuildCount += 1;
+    expect(buildCount, expectedBuildCount);
     await tester.pump(const Duration(seconds: 1)); // end shadow going away
+    expect(buildCount, expectedBuildCount);
     expect(find.text('Item 18'), findsNothing);
     expect(find.text('Item 2'), findsOneWidget);
     expect(find.byType(NestedScrollView), isNot(paints..shadow()));
+    await tester.pump(const Duration(seconds: 1)); // just checking we don't rebuild...
+    expect(buildCount, expectedBuildCount);
     // peek left to see it's still in the right place
     final TestGesture gesture3 = await tester.startGesture(tester.getCenter(find.byType(NestedScrollView)));
     await gesture3.moveBy(const Offset(400.0, 0.0));
     await tester.pump(); // bring the left page into view
+    expect(buildCount, expectedBuildCount);
     await tester.pump(); // shadow comes back starting here
+    expectedBuildCount += 1;
+    expect(buildCount, expectedBuildCount);
     expect(find.text('Item 18'), findsOneWidget);
     expect(find.text('Item 2'), findsOneWidget);
     expect(find.byType(NestedScrollView), isNot(paints..shadow()));
     await tester.pump(const Duration(seconds: 1)); // shadow finishes coming back
+    expect(buildCount, expectedBuildCount);
     expect(find.byType(NestedScrollView), paints..shadow());
     await gesture3.moveBy(const Offset(-400.0, 0.0));
     await gesture3.up();
     await tester.pump(); // left tab view goes away
+    expect(buildCount, expectedBuildCount);
     await tester.pump(); // shadow goes away starting here
+    expectedBuildCount += 1;
+    expect(buildCount, expectedBuildCount);
     expect(find.byType(NestedScrollView), paints..shadow());
     await tester.pump(const Duration(seconds: 1)); // shadow finishes going away
+    expect(buildCount, expectedBuildCount);
     expect(find.byType(NestedScrollView), isNot(paints..shadow()));
     // scroll back up
     final TestGesture gesture4 = await tester.startGesture(tester.getCenter(find.byType(NestedScrollView)));
     await gesture4.moveBy(const Offset(0.0, 200.0)); // expands the appbar again
     await tester.pump();
+    expect(buildCount, expectedBuildCount);
     expect(find.text('Item 2'), findsOneWidget);
     expect(find.text('Item 18'), findsNothing);
     expect(find.byType(NestedScrollView), isNot(paints..shadow()));
     await gesture4.up();
     await tester.pump(const Duration(seconds: 1));
+    expect(buildCount, expectedBuildCount);
     expect(find.byType(NestedScrollView), isNot(paints..shadow()));
     // peek left to see it's now back at zero
     final TestGesture gesture5 = await tester.startGesture(tester.getCenter(find.byType(NestedScrollView)));
     await gesture5.moveBy(const Offset(400.0, 0.0));
     await tester.pump(); // bring the left page into view
     await tester.pump(); // shadow would come back starting here, but there's no shadow to show
+    expect(buildCount, expectedBuildCount);
     expect(find.text('Item 18'), findsNothing);
     expect(find.text('Item 2'), findsNWidgets(2));
     expect(find.byType(NestedScrollView), isNot(paints..shadow()));
@@ -518,6 +563,7 @@ void main() {
     await gesture5.up();
     await tester.pump(); // right tab view goes away
     await tester.pumpAndSettle();
+    expect(buildCount, expectedBuildCount);
     expect(find.byType(NestedScrollView), isNot(paints..shadow()));
   });
 }

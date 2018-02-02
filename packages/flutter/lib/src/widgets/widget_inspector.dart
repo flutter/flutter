@@ -843,10 +843,10 @@ class _InspectorOverlayRenderState {
   int get hashCode => hashValues(overlayRect, selected, hashList(candidates), tooltip);
 }
 
-final int _kMaxTooltipLines = 5;
-final Color _kTooltipBackgroundColor = const Color.fromARGB(230, 60, 60, 60);
-final Color _kHighlightedRenderObjectFillColor = const Color.fromARGB(128, 128, 128, 255);
-final Color _kHighlightedRenderObjectBorderColor = const Color.fromARGB(128, 64, 64, 128);
+const int _kMaxTooltipLines = 5;
+const Color _kTooltipBackgroundColor = const Color.fromARGB(230, 60, 60, 60);
+const Color _kHighlightedRenderObjectFillColor = const Color.fromARGB(128, 128, 128, 255);
+const Color _kHighlightedRenderObjectBorderColor = const Color.fromARGB(128, 64, 64, 128);
 
 /// A layer that outlines the selected [RenderObject] and candidate render
 /// objects that also match the last pointer location.

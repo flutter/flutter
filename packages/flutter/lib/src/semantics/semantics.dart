@@ -31,6 +31,10 @@ typedef bool SemanticsNodeVisitor(SemanticsNode node);
 /// current selection or (if nothing is currently selected) start a selection.
 typedef void MoveCursorHandler(bool extendSelection);
 
+/// Signature for the [SemanticsAction.setSelection] handlers to change the
+/// text selection (or re-position the cursor) to `selection`.
+typedef void SetSelectionHandler(TextSelection selection);
+
 typedef void _SemanticsActionHandler(dynamic args);
 
 /// A tag for a [SemanticsNode].
@@ -90,6 +94,7 @@ class SemanticsData extends Diagnosticable {
     @required this.hint,
     @required this.textDirection,
     @required this.rect,
+    @required this.textSelection,
     this.tags,
     this.transform,
   }) : assert(flags != null),
@@ -143,6 +148,10 @@ class SemanticsData extends Diagnosticable {
   /// [increasedValue], and [decreasedValue].
   final TextDirection textDirection;
 
+  /// The currently selected text (or the position of the cursor) within [value]
+  /// if this node represents a text field.
+  final TextSelection textSelection;
+
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
 
@@ -189,6 +198,8 @@ class SemanticsData extends Diagnosticable {
     properties.add(new StringProperty('decreasedValue', decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    if (textSelection?.isValid == true)
+      properties.add(new MessageProperty('text selection', '[${textSelection.start}, ${textSelection.end}]'));
   }
 
   @override
@@ -206,11 +217,12 @@ class SemanticsData extends Diagnosticable {
         && typedOther.textDirection == textDirection
         && typedOther.rect == rect
         && setEquals(typedOther.tags, tags)
+        && typedOther.textSelection == textSelection
         && typedOther.transform == transform;
   }
 
   @override
-  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, rect, tags, transform);
+  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, rect, tags, textSelection, transform);
 }
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
@@ -265,8 +277,12 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onScrollDown,
     this.onIncrease,
     this.onDecrease,
+    this.onCopy,
+    this.onCut,
+    this.onPaste,
     this.onMoveCursorForwardByCharacter,
     this.onMoveCursorBackwardByCharacter,
+    this.onSetSelection,
   });
 
   /// If non-null, indicates that this subtree represents something that can be
@@ -459,6 +475,31 @@ class SemanticsProperties extends DiagnosticableTree {
   /// volume down button.
   final VoidCallback onDecrease;
 
+  /// The handler for [SemanticsAction.copy].
+  ///
+  /// This is a request to copy the current selection to the clipboard.
+  ///
+  /// TalkBack users on Android can trigger this action from the local context
+  /// menu of a text field, for example.
+  final VoidCallback onCopy;
+
+  /// The handler for [SemanticsAction.cut].
+  ///
+  /// This is a request to cut the current selection and place it in the
+  /// clipboard.
+  ///
+  /// TalkBack users on Android can trigger this action from the local context
+  /// menu of a text field, for example.
+  final VoidCallback onCut;
+
+  /// The handler for [SemanticsAction.paste].
+  ///
+  /// This is a request to paste the current content of the clipboard.
+  ///
+  /// TalkBack users on Android can trigger this action from the local context
+  /// menu of a text field, for example.
+  final VoidCallback onPaste;
+
   /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
@@ -476,6 +517,15 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
   final MoveCursorHandler onMoveCursorBackwardByCharacter;
+
+  /// The handler for [SemanticsAction.setSelection].
+  ///
+  /// This handler is invoked when the user either wants to change the currently
+  /// selected text in a text field or change the position of the cursor.
+  ///
+  /// TalkBack users can trigger this handler by selecting "Move cursor to
+  /// beginning/end" or "Select all" from the local context menu.
+  final SetSelectionHandler onSetSelection;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
@@ -840,6 +890,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         _increasedValue != config.increasedValue ||
         _flags != config._flags ||
         _textDirection != config.textDirection ||
+        _textSelection != config._textSelection ||
         _actionsAsBits != config._actionsAsBits ||
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
   }
@@ -906,6 +957,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection = _kEmptyConfig.textDirection;
 
+  /// The currently selected text (or the position of the cursor) within [value]
+  /// if this node represents a text field.
+  TextSelection get textSelection => _textSelection;
+  TextSelection _textSelection;
+
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
   static final SemanticsConfiguration _kEmptyConfig = new SemanticsConfiguration();
@@ -936,6 +992,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _textDirection = config.textDirection;
     _actions = new Map<SemanticsAction, _SemanticsActionHandler>.from(config._actions);
     _actionsAsBits = config._actionsAsBits;
+    _textSelection = config._textSelection;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
@@ -965,6 +1022,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     String decreasedValue = _decreasedValue;
     TextDirection textDirection = _textDirection;
     Set<SemanticsTag> mergedTags = tags == null ? null : new Set<SemanticsTag>.from(tags);
+    TextSelection textSelection = _textSelection;
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
@@ -972,6 +1030,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         flags |= node._flags;
         actions |= node._actionsAsBits;
         textDirection ??= node._textDirection;
+        textSelection ??= node._textSelection;
         if (value == '' || value == null)
           value = node._value;
         if (increasedValue == '' || increasedValue == null)
@@ -1010,6 +1069,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       rect: rect,
       transform: transform,
       tags: mergedTags,
+      textSelection: textSelection,
     );
   }
 
@@ -1043,6 +1103,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       increasedValue: data.increasedValue,
       hint: data.hint,
       textDirection: data.textDirection,
+      textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
+      textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
       transform: data.transform?.storage ?? _kIdentityTransform,
       children: children,
     );
@@ -1110,6 +1172,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(new StringProperty('decreasedValue', _decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', _hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
+    if (_textSelection?.isValid == true)
+      properties.add(new MessageProperty('text selection', '[${_textSelection.start}, ${_textSelection.end}]'));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -1582,6 +1646,46 @@ class SemanticsConfiguration {
     _onDecrease = value;
   }
 
+  /// The handler for [SemanticsAction.copy].
+  ///
+  /// This is a request to copy the current selection to the clipboard.
+  ///
+  /// TalkBack users on Android can trigger this action from the local context
+  /// menu of a text field, for example.
+  VoidCallback get onCopy => _onCopy;
+  VoidCallback _onCopy;
+  set onCopy(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.copy, value);
+    _onCopy = value;
+  }
+
+  /// The handler for [SemanticsAction.cut].
+  ///
+  /// This is a request to cut the current selection and place it in the
+  /// clipboard.
+  ///
+  /// TalkBack users on Android can trigger this action from the local context
+  /// menu of a text field, for example.
+  VoidCallback get onCut => _onCut;
+  VoidCallback _onCut;
+  set onCut(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.cut, value);
+    _onCut = value;
+  }
+
+  /// The handler for [SemanticsAction.paste].
+  ///
+  /// This is a request to paste the current content of the clipboard.
+  ///
+  /// TalkBack users on Android can trigger this action from the local context
+  /// menu of a text field, for example.
+  VoidCallback get onPaste => _onPaste;
+  VoidCallback _onPaste;
+  set onPaste(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.paste, value);
+    _onPaste = value;
+  }
+
   /// The handler for [SemanticsAction.showOnScreen].
   ///
   /// A request to fully show the semantics node on screen. For example, this
@@ -1634,6 +1738,28 @@ class SemanticsConfiguration {
       value(extentSelection);
     });
     _onMoveCursorBackwardByCharacter = value;
+  }
+
+  /// The handler for [SemanticsAction.setSelection].
+  ///
+  /// This handler is invoked when the user either wants to change the currently
+  /// selected text in a text field or change the position of the cursor.
+  ///
+  /// TalkBack users can trigger this handler by selecting "Move cursor to
+  /// beginning/end" or "Select all" from the local context menu.
+  SetSelectionHandler get onSetSelection => _onSetSelection;
+  SetSelectionHandler _onSetSelection;
+  set onSetSelection(SetSelectionHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.setSelection, (dynamic args) {
+      final Map<String, int> selection = args;
+      assert(selection != null && selection['base'] != null && selection['extent'] != null);
+      value(new TextSelection(
+        baseOffset: selection['base'],
+        extentOffset: selection['extent'],
+      ));
+    });
+    _onSetSelection = value;
   }
 
   /// Returns the action handler registered for [action] or null if none was
@@ -1819,6 +1945,16 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isTextField, value);
   }
 
+  /// The currently selected text (or the position of the cursor) within [value]
+  /// if this node represents a text field.
+  TextSelection get textSelection => _textSelection;
+  TextSelection _textSelection;
+  set textSelection(TextSelection value) {
+    assert(value != null);
+    _textSelection = value;
+    _hasBeenAnnotated = true;
+  }
+
   // TAGS
 
   /// The set of tags that this configuration wants to add to all child
@@ -1901,6 +2037,7 @@ class SemanticsConfiguration {
     _actions.addAll(other._actions);
     _actionsAsBits |= other._actionsAsBits;
     _flags |= other._flags;
+    _textSelection ??= other._textSelection;
 
     textDirection ??= other.textDirection;
     _label = _concatStrings(
@@ -1941,6 +2078,7 @@ class SemanticsConfiguration {
       .._hint = _hint
       .._flags = _flags
       .._tagsForChildren = _tagsForChildren
+      .._textSelection = _textSelection
       .._actionsAsBits = _actionsAsBits
       .._actions.addAll(_actions);
   }

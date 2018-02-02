@@ -26,10 +26,6 @@ import '../runner/flutter_command.dart';
 ///   'linter': '0.1.35', // TODO(yjbanov): https://github.com/dart-lang/linter/issues/824
 /// ```
 const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
-  // New test package breaks the analyzer, see:
-  // https://github.com/dart-lang/sdk/issues/31442
-  // TODO(amirh): unpin this.
-  'test': '0.12.26',
   // Add pinned packages here.
 };
 
@@ -871,6 +867,17 @@ File _pubspecFor(Directory directory) {
 /// Generates the source of a fake pubspec.yaml file given a list of
 /// dependencies.
 String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
+  if (_kManuallyPinnedDependencies.isNotEmpty) {
+    final String hardCodedConstraints = _kManuallyPinnedDependencies.keys
+      .map((String packageName) {
+        return '  - $packageName: ${_kManuallyPinnedDependencies[packageName]}';
+      })
+      .join('\n');
+    printStatus(
+      'WARNING: the following packages use hard-coded version constraints:\n'
+      '$hardCodedConstraints',
+    );
+  }
   final StringBuffer result = new StringBuffer();
   final StringBuffer overrides = new StringBuffer();
   result.writeln('name: flutter_update_packages');

@@ -11,6 +11,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
+  setUp(() {
+    debugResetSemanticsIdCounter();
+  });
+
   testWidgets('Semantics shutdown and restart', (WidgetTester tester) async {
     SemanticsTester semantics = new SemanticsTester(tester);
 
@@ -388,15 +392,19 @@ void main() {
         onScrollDown: () => performedActions.add(SemanticsAction.scrollDown),
         onIncrease: () => performedActions.add(SemanticsAction.increase),
         onDecrease: () => performedActions.add(SemanticsAction.decrease),
+        onCopy: () => performedActions.add(SemanticsAction.copy),
+        onCut: () => performedActions.add(SemanticsAction.cut),
+        onPaste: () => performedActions.add(SemanticsAction.paste),
         onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
         onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
+        onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
       )
     );
 
     final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
       ..remove(SemanticsAction.showOnScreen); // showOnScreen is non user-exposed.
 
-    final int expectedId = 32;
+    const int expectedId = 2;
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
@@ -416,6 +424,12 @@ void main() {
         case SemanticsAction.moveCursorBackwardByCharacter:
         case SemanticsAction.moveCursorForwardByCharacter:
           semanticsOwner.performAction(expectedId, action, true);
+          break;
+        case SemanticsAction.setSelection:
+          semanticsOwner.performAction(expectedId, action, <String, int>{
+            'base': 4,
+            'extent': 5,
+          });
           break;
         default:
           semanticsOwner.performAction(expectedId, action);
@@ -446,7 +460,7 @@ void main() {
       ),
     );
 
-    final int expectedId = 35;
+    const int expectedId = 2;
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(

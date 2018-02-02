@@ -3015,8 +3015,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     VoidCallback onScrollDown,
     VoidCallback onIncrease,
     VoidCallback onDecrease,
+    VoidCallback onCopy,
+    VoidCallback onCut,
+    VoidCallback onPaste,
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
+    SetSelectionHandler onSetSelection,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
@@ -3038,8 +3042,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onScrollDown = onScrollDown,
        _onIncrease = onIncrease,
        _onDecrease = onDecrease,
+       _onCopy = onCopy,
+       _onCut = onCut,
+       _onPaste = onPaste,
        _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
        _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
+       _onSetSelection = onSetSelection,
        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
@@ -3363,6 +3371,58 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handler for [SemanticsAction.copy].
+  ///
+  /// This is a request to copy the current selection to the clipboard.
+  ///
+  /// TalkBack users on Android can trigger this action from the local context
+  /// menu of a text field, for example.
+  VoidCallback get onCopy => _onCopy;
+  VoidCallback _onCopy;
+  set onCopy(VoidCallback handler) {
+    if (_onCopy == handler)
+      return;
+    final bool hadValue = _onCopy != null;
+    _onCopy = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
+  /// The handler for [SemanticsAction.cut].
+  ///
+  /// This is a request to cut the current selection and place it in the
+  /// clipboard.
+  ///
+  /// TalkBack users on Android can trigger this action from the local context
+  /// menu of a text field, for example.
+  VoidCallback get onCut => _onCut;
+  VoidCallback _onCut;
+  set onCut(VoidCallback handler) {
+    if (_onCut == handler)
+      return;
+    final bool hadValue = _onCut != null;
+    _onCut = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
+  /// The handler for [SemanticsAction.paste].
+  ///
+  /// This is a request to paste the current content of the clipboard.
+  ///
+  /// TalkBack users on Android can trigger this action from the local context
+  /// menu of a text field, for example.
+  VoidCallback get onPaste => _onPaste;
+  VoidCallback _onPaste;
+  set onPaste(VoidCallback handler) {
+    if (_onPaste == handler)
+      return;
+    final bool hadValue = _onPaste != null;
+    _onPaste = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
   /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
   ///
   /// This handler is invoked when the user wants to move the cursor in a
@@ -3395,6 +3455,24 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     final bool hadValue = _onMoveCursorBackwardByCharacter != null;
     _onMoveCursorBackwardByCharacter = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
+  /// The handler for [SemanticsAction.setSelection].
+  ///
+  /// This handler is invoked when the user either wants to change the currently
+  /// selected text in a text field or change the position of the cursor.
+  ///
+  /// TalkBack users can trigger this handler by selecting "Move cursor to
+  /// beginning/end" or "Select all" from the local context menu.
+  SetSelectionHandler get onSetSelection => _onSetSelection;
+  SetSelectionHandler _onSetSelection;
+  set onSetSelection(SetSelectionHandler handler) {
+    if (_onSetSelection == handler)
+      return;
+    final bool hadValue = _onSetSelection != null;
+    _onSetSelection = handler;
     if ((handler != null) != hadValue)
       markNeedsSemanticsUpdate();
   }
@@ -3444,10 +3522,18 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onIncrease = _performIncrease;
     if (onDecrease != null)
       config.onDecrease = _performDecrease;
+    if (onCopy != null)
+      config.onCopy = _performCopy;
+    if (onCut != null)
+      config.onCut = _performCut;
+    if (onPaste != null)
+      config.onPaste = _performPaste;
     if (onMoveCursorForwardByCharacter != null)
       config.onMoveCursorForwardByCharacter = _performMoveCursorForwardByCharacter;
     if (onMoveCursorBackwardByCharacter != null)
       config.onMoveCursorBackwardByCharacter = _performMoveCursorBackwardByCharacter;
+    if (onSetSelection != null)
+      config.onSetSelection = _performSetSelection;
   }
 
   void _performTap() {
@@ -3490,6 +3576,21 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       onDecrease();
   }
 
+  void _performCopy() {
+    if (onCopy != null)
+      onCopy();
+  }
+
+  void _performCut() {
+    if (onCut != null)
+      onCut();
+  }
+
+  void _performPaste() {
+    if (onPaste != null)
+      onPaste();
+  }
+
   void _performMoveCursorForwardByCharacter(bool extendSelection) {
     if (onMoveCursorForwardByCharacter != null)
       onMoveCursorForwardByCharacter(extendSelection);
@@ -3498,6 +3599,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   void _performMoveCursorBackwardByCharacter(bool extendSelection) {
     if (onMoveCursorBackwardByCharacter != null)
       onMoveCursorBackwardByCharacter(extendSelection);
+  }
+
+  void _performSetSelection(TextSelection selection) {
+    if (onSetSelection != null)
+      onSetSelection(selection);
   }
 }
 
