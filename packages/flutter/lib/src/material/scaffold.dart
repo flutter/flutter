@@ -21,7 +21,9 @@ import 'snack_bar.dart';
 import 'theme.dart';
 
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
-const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 200);
+// Total time the Fab spends in motion transitions.
+// Entrance time is one half of this duration.
+const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 400);
 final Tween<double> _kFloatingActionButtonTurnTween = new Tween<double>(begin: -0.125, end: 0.0);
 
 enum _ScaffoldSlot {
@@ -339,14 +341,16 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   }
 }
 
-/// Handles fab entrance and exit, but not fab motions within a page.
 class _FloatingActionButtonTransition extends StatefulWidget {
   const _FloatingActionButtonTransition({
     Key key,
-    this.child,
-  }) : super(key: key);
+    @required this.child,
+    @required this.fabMoveAnimation,
+  }) : assert(fabMoveAnimation != null), 
+       super(key: key);
 
   final Widget child;
+  final Animation<double> fabMoveAnimation;
 
   @override
   _FloatingActionButtonTransitionState createState() => new _FloatingActionButtonTransitionState();
@@ -354,8 +358,8 @@ class _FloatingActionButtonTransition extends StatefulWidget {
 
 class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> with TickerProviderStateMixin {
   AnimationController _previousController;
-  AnimationController _currentController;
   CurvedAnimation _previousAnimation;
+  AnimationController _currentController;
   CurvedAnimation _currentAnimation;
   Widget _previousChild;
 
@@ -363,17 +367,8 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   void initState() {
     super.initState();
 
-    _previousController = new AnimationController(
-      duration: _kFloatingActionButtonSegue,
-      vsync: this,
-    )..addStatusListener(_handleAnimationStatusChanged);
-    _previousAnimation = new CurvedAnimation(
-      parent: _previousController,
-      curve: Curves.easeIn
-    );
-
-    _currentController = new AnimationController(
-      duration: _kFloatingActionButtonSegue,
+        _currentController = new AnimationController(
+      duration: _kFloatingActionButtonSegue * 0.5,
       vsync: this,
     );
     _currentAnimation = new CurvedAnimation(
@@ -385,11 +380,12 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     // of animating in.
     if (widget.child != null)
       _currentController.value = 1.0;
+    else
+      _currentController.forward();
   }
 
   @override
   void dispose() {
-    _previousController.dispose();
     _currentController.dispose();
     super.dispose();
   }
@@ -435,22 +431,39 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
-    if (_previousAnimation.status != AnimationStatus.dismissed) {
-      children.add(new ScaleTransition(
-        scale: _previousAnimation,
-        child: _previousChild,
-      ));
+    if (_currentAnimation.status == AnimationStatus.completed && widget.child != null) {
+      return new AnimatedBuilder(
+        animation: widget.fabMoveAnimation,
+        builder: (BuildContext context, Widget widget) => widget,
+        child: new ScaleTransition(
+          scale: FabMotionAnimator.of(context).scaleTween.animate(widget.fabMoveAnimation),
+          child: new Opacity(
+            opacity: FabMotionAnimator.of(context).opacityTween.evaluate(widget.fabMoveAnimation),
+            child: new RotationTransition(
+              turns: _kFloatingActionButtonTurnTween.animate(widget.fabMoveAnimation),
+              child: widget.child,
+            ),
+          ),
+        ),
+      );
     }
-    if (_currentAnimation.status != AnimationStatus.dismissed) {
-      children.add(new ScaleTransition(
-        scale: _currentAnimation,
-        child: new RotationTransition(
-          turns: _kFloatingActionButtonTurnTween.animate(_currentAnimation),
-          child: widget.child,
-        )
-      ));
-    }
-    return new Stack(children: children);
+    return widget.child ?? _previousChild ?? new Stack(children: const []);
+    // if (_previousAnimation.status != AnimationStatus.dismissed) {
+    //   children.add(new ScaleTransition(
+    //     scale: _previousAnimation,
+    //     child: _previousChild,
+    //   ));
+    // }
+    // if (_currentAnimation.status != AnimationStatus.dismissed) {
+    //   children.add(new ScaleTransition(
+    //     scale: _currentAnimation,
+    //     child: new RotationTransition(
+    //       turns: _kFloatingActionButtonTurnTween.animate(_currentAnimation),
+    //       child: widget.child,
+    //     )
+    //   ));
+    // }
+    // return new Stack(children: children);
   }
 }
 
@@ -1001,7 +1014,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     super.initState();
     _fabPosition = widget.fabPosition ?? FabPositioner.endFloat;
     _previousFabPosition = _fabPosition;
-    _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 0.0, duration: _kFloatingActionButtonSegue * 2);
+    _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 1.0, duration: _kFloatingActionButtonSegue * 2);
     _fabMoveController.addStatusListener(_handleFabMotion);
   }
 
@@ -1184,6 +1197,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       children,
       new _FloatingActionButtonTransition(
         child: widget.floatingActionButton,
+        fabMoveAnimation: _fabMoveController,
       ),
       _ScaffoldSlot.floatingActionButton,
       removeLeftPadding: true,
