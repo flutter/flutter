@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 import 'src/common.dart';
 import 'src/context.dart';
 
-void main()  {
+void main() {
   group('DependencyChecker', () {
     final String dataPath = fs.path.join(
         getFlutterRoot(),
@@ -96,7 +96,7 @@ void main()  {
       final Directory destinationPath = fs.systemTempDirectory.createTempSync('dependency_checker_test_');
       // Copy the golden input and let the test run in an isolated temporary in-memory file system.
       const LocalFileSystem localFileSystem = const LocalFileSystem();
-      final Directory sourcePath =  localFileSystem.directory(localFileSystem.path.join(dataPath, 'changed_sdk_location'));
+      final Directory sourcePath = localFileSystem.directory(localFileSystem.path.join(dataPath, 'changed_sdk_location'));
       copyDirectorySync(sourcePath, destinationPath);
       fs.currentDirectory = destinationPath;
 

@@ -371,7 +371,7 @@ void main() {
       child: new Container(
         width: 0.0,
         height: 0.0,
-        child:  new Column(
+        child: new Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             new Container(
@@ -763,7 +763,7 @@ void main() {
       child: new Container(
         width: 0.0,
         height: 0.0,
-        child:  new Column(
+        child: new Column(
           mainAxisSize: MainAxisSize.min,
           verticalDirection: VerticalDirection.up,
           children: <Widget>[

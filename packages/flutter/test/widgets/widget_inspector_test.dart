@@ -427,7 +427,7 @@ void main() {
     for (int i = 0; i < expectedChain.length; i += 1) {
       expect(chainElements[i], isMap);
       final Map<String, Object> chainNode = chainElements[i];
-      final Element element =  expectedChain[i];
+      final Element element = expectedChain[i];
       expect(chainNode['node'], isMap);
       final Map<String, Object> jsonNode = chainNode['node'];
       expect(service.toObject(jsonNode['valueId']), equals(element));

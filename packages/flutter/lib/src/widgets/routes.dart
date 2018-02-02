@@ -652,7 +652,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// is popped, the secondaryAnimation can be used to define how the route
   /// below it reappears on the screen. When the Navigator pushes a new route
   /// on the top of its stack, the old topmost route's secondaryAnimation
-  /// runs from 0.0 to 1.0.  When the Navigator pops the topmost route, the
+  /// runs from 0.0 to 1.0. When the Navigator pops the topmost route, the
   /// secondaryAnimation for the route below it runs from 1.0 to 0.0.
   ///
   /// The example below adds a transition that's driven by the
@@ -694,7 +694,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    pops the topmost route this animation runs from 1.0 to 0.0.
   ///  * [secondaryAnimation]: When the Navigator pushes a new route
   ///    on the top of its stack, the old topmost route's [secondaryAnimation]
-  ///    runs from 0.0 to 1.0.  When the [Navigator] pops the topmost route, the
+  ///    runs from 0.0 to 1.0. When the [Navigator] pops the topmost route, the
   ///    [secondaryAnimation] for the route below it runs from 1.0 to 0.0.
   ///  * `child`, the page contents.
   ///

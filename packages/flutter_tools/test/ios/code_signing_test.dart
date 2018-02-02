@@ -96,8 +96,8 @@ void main() {
       when(mockProcessManager.runSync(
         argThat(contains('find-identity')), environment: any, workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
     1 valid identities found''',
@@ -108,8 +108,8 @@ void main() {
         environment: any,
         workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         'This is a mock certificate',
         '',
       ));
@@ -151,8 +151,8 @@ void main() {
       when(mockProcessManager.runSync(
         argThat(contains('find-identity')), environment: any, workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
 2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
@@ -167,8 +167,8 @@ void main() {
         environment: any,
         workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         'This is a mock certificate',
         '',
       ));
@@ -221,8 +221,8 @@ void main() {
       when(mockProcessManager.runSync(
         argThat(contains('find-identity')), environment: any, workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
 2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
@@ -237,8 +237,8 @@ void main() {
         environment: any,
         workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         'This is a mock certificate',
         '',
       ));
@@ -285,8 +285,8 @@ void main() {
       when(mockProcessManager.runSync(
         argThat(contains('find-identity')), environment: any, workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
 2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
@@ -299,8 +299,8 @@ void main() {
         environment: any,
         workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         'This is a mock certificate',
         '',
       ));
@@ -351,8 +351,8 @@ void main() {
       when(mockProcessManager.runSync(
         argThat(contains('find-identity')), environment: any, workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
 2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
@@ -367,8 +367,8 @@ void main() {
         environment: any,
         workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         'This is a mock certificate',
         '',
       ));
@@ -415,17 +415,17 @@ void main() {
 }
 
 final ProcessResult exitsHappy = new ProcessResult(
-  1,     // pid
-  0,     // exitCode
-  '',    // stdout
-  '',    // stderr
+  1, // pid
+  0, // exitCode
+  '', // stdout
+  '', // stderr
 );
 
 final ProcessResult exitsFail = new ProcessResult(
-  2,     // pid
-  1,     // exitCode
-  '',    // stdout
-  '',    // stderr
+  2, // pid
+  1, // exitCode
+  '', // stdout
+  '', // stderr
 );
 
 class MockProcessManager extends Mock implements ProcessManager {}

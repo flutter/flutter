@@ -52,7 +52,7 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
 /// of [RenderProxyBox] is desired but inheriting from [RenderProxyBox] is
 /// impractical (e.g. because you want to mix in other classes as well).
 /// TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/15101 is fixed
-@optionalTypeArgs 
+@optionalTypeArgs
 abstract class RenderProxyBoxMixin<T extends RenderBox> extends RenderBox with RenderObjectWithChildMixin<T> {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
@@ -2108,7 +2108,7 @@ class RenderFittedBox extends RenderProxyBox {
   /// How to align the child within its parent's bounds.
   ///
   /// An alignment of (0.0, 0.0) aligns the child to the top-left corner of its
-  /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
+  /// parent's bounds. An alignment of (1.0, 0.5) aligns the child to the middle
   /// of the right edge of its parent's bounds.
   ///
   /// If this is set to an [AlignmentDirectional] object, then

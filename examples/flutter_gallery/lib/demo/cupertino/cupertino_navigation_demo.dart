@@ -30,10 +30,10 @@ const List<String> coolColorNames = const <String>[
 
 class CupertinoNavigationDemo extends StatelessWidget {
   CupertinoNavigationDemo()
-      : colorItems = new List<Color>.generate(50, (int index){
+      : colorItems = new List<Color>.generate(50, (int index) {
           return coolColors[new math.Random().nextInt(coolColors.length)];
         }) ,
-        colorNameItems = new List<String>.generate(50, (int index){
+        colorNameItems = new List<String>.generate(50, (int index) {
           return coolColorNames[new math.Random().nextInt(coolColorNames.length)];
         });
 

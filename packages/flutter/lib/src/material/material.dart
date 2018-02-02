@@ -303,7 +303,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     // https://github.com/flutter/flutter/issues/14403
     if (shape.runtimeType == CircleBorder || shape.runtimeType == RoundedRectangleBorder)
       return _physicalModelInterior(contents, shape, backgroundColor);
-    
+
     return new _MaterialInterior(
       curve: Curves.fastOutSlowIn,
       duration: kThemeChangeDuration,

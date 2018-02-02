@@ -135,7 +135,7 @@ class LeastSquaresSolver {
         r.set(j, i, i < j ? 0.0 : q.getRow(j) * a.getRow(i));
     }
 
-    // Solve R B = Qt W Y to find B.  This is easy because R is upper triangular.
+    // Solve R B = Qt W Y to find B. This is easy because R is upper triangular.
     // We just work from bottom-right to top-left calculating B's coefficients.
     final _Vector wy = new _Vector(m);
     for (int h = 0; h < m; h += 1)

@@ -1173,7 +1173,7 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
     if (value == null)
       return value.toString();
 
-    return unit != null ?  '${numberToString()}$unit' : numberToString();
+    return unit != null ? '${numberToString()}$unit' : numberToString();
   }
 }
 /// Property describing a [double] [value] with an optional [unit] of measurement.
@@ -1297,7 +1297,7 @@ class PercentProperty extends DoubleProperty {
   String valueToString({ TextTreeConfiguration parentConfiguration }) {
     if (value == null)
       return value.toString();
-    return unit != null ?  '${numberToString()} $unit' : numberToString();
+    return unit != null ? '${numberToString()} $unit' : numberToString();
   }
 
   @override
@@ -1345,7 +1345,7 @@ class PercentProperty extends DoubleProperty {
 ///  * [ObjectFlagProperty], which provides similar behavior describing whether
 ///    a [value] is null.
 class FlagProperty extends DiagnosticsProperty<bool> {
-  /// Constructs a FlagProperty with the given descriptions  with the specified descriptions.
+  /// Constructs a FlagProperty with the given descriptions with the specified descriptions.
   ///
   /// [showName] defaults to false as typically [ifTrue] and [ifFalse] should
   /// be descriptions that make the property name redundant.
@@ -2214,7 +2214,7 @@ abstract class Diagnosticable {
   /// common [DiagnosticsProperty] parameters.
   ///
   /// ```dart
-  /// class ExampleObject extends ExampleSuperclass  {
+  /// class ExampleObject extends ExampleSuperclass {
   ///
   ///   // ...various members and properties...
   ///

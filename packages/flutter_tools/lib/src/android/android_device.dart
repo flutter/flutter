@@ -410,7 +410,7 @@ class AndroidDevice extends Device {
     cmd = adbCommandForDevice(<String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.RUN',
-      '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
+      '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
       '--ez', 'enable-background-compilation', 'true',
       '--ez', 'enable-dart-profiling', 'true',
     ]);

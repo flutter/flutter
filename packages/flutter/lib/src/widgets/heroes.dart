@@ -288,7 +288,7 @@ class _HeroFlight {
           right: offsets.right,
           bottom: offsets.bottom,
           left: offsets.left,
-          child:  new IgnorePointer(
+          child: new IgnorePointer(
             child: new RepaintBoundary(
               child: new Opacity(
                 key: manifest.toHero._key,

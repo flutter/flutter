@@ -29,7 +29,7 @@ class BuildInfo {
 
   // Whether build should be done using Dart2 Frontend parser.
   final bool previewDart2;
-  
+
   // Whether build should use strong mode semantics.
   final bool strongMode;
 

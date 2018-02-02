@@ -1210,13 +1210,13 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   ///
   /// For example, [AnimatedWidget] is a subclass of [StatefulWidget] that
   /// introduces an abstract `Widget build(BuildContext context)` method for its
-  /// subclasses to implement.  If [StatefulWidget] already had a [build] method
+  /// subclasses to implement. If [StatefulWidget] already had a [build] method
   /// that took a [State] argument, [AnimatedWidget] would be forced to provide
   /// its [State] object to subclasses even though its [State] object is an
   /// internal implementation detail of [AnimatedWidget].
   ///
   /// Conceptually, [StatelessWidget] could also be implemented as a subclass of
-  /// [StatefulWidget] in a similar manner.  If the [build] method were on
+  /// [StatefulWidget] in a similar manner. If the [build] method were on
   /// [StatefulWidget] rather than [State], that would not be possible anymore.
   ///
   /// Putting the [build] function on [State] rather than [StatefulWidget] also
@@ -1239,8 +1239,8 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// ```
   ///
   /// For example, suppose the parent builds `MyButton` with `color` being blue,
-  /// the `$color` in the print function refers to blue, as expected.  Now,
-  /// suppose the parent rebuilds `MyButton` with green.  The closure created by
+  /// the `$color` in the print function refers to blue, as expected. Now,
+  /// suppose the parent rebuilds `MyButton` with green. The closure created by
   /// the first build still implicitly refers to the original widget and the
   /// `$color` still prints blue even through the widget has been updated to
   /// green.

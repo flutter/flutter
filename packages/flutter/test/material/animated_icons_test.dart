@@ -41,7 +41,7 @@ void main() {
         child: const IconTheme(
           data: const IconThemeData(
             color: const Color(0xFF666666),
-            opacity:  0.5,
+            opacity: 0.5,
           ),
           child: const AnimatedIcon(
             progress: const AlwaysStoppedAnimation<double>(0.0),

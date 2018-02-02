@@ -207,7 +207,7 @@ class _BottomNavigationTile extends StatelessWidget {
   }
 
   Widget _buildShiftingLabel() {
-    return  new Align(
+    return new Align(
       alignment: Alignment.bottomCenter,
       heightFactor: 1.0,
       child: new Container(

@@ -27,7 +27,7 @@ class FakeProcessManager extends Mock implements ProcessManager {
   final StringReceivedCallback stdinResults;
 
   /// The list of results that will be sent back, organized by the command line
-  /// that will produce them.  Each command line has a list of returned stdout
+  /// that will produce them. Each command line has a list of returned stdout
   /// output that will be returned on each successive call.
   Map<String, List<ProcessResult>> fakeResults = <String, List<ProcessResult>>{};
 

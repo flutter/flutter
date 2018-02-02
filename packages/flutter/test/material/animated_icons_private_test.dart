@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // This is the test for the private implementation of animated icons.
-// To make the private API accessible from the test we do not import the 
+// To make the private API accessible from the test we do not import the
 // material material_animated_icons library, but instead, this test file is an
 // implementation of that library, using some of the parts of the real
 // material_animated_icons, this give the test access to the private APIs.
@@ -101,7 +101,7 @@ void main () {
         shouldMirror: false,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
       verifyInOrder(<dynamic>[
@@ -123,7 +123,7 @@ void main () {
         shouldMirror: false,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
       verifyInOrder(<dynamic>[
@@ -145,7 +145,7 @@ void main () {
         shouldMirror: false,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
       verifyInOrder(<dynamic>[
@@ -167,7 +167,7 @@ void main () {
         shouldMirror: false,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       verify(mockCanvas.scale(0.5, 0.5));
     });
 
@@ -180,7 +180,7 @@ void main () {
         shouldMirror: true,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       verifyInOrder(<dynamic>[
         mockCanvas.rotate(math.pi),
         mockCanvas.translate(-48.0, -48.0)
@@ -196,7 +196,7 @@ void main () {
         shouldMirror: false,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
       verifyInOrder(<dynamic>[
@@ -218,7 +218,7 @@ void main () {
         shouldMirror: false,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
       verifyInOrder(<dynamic>[
@@ -238,7 +238,7 @@ void main () {
         shouldMirror: false,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
       verifyInOrder(<dynamic>[

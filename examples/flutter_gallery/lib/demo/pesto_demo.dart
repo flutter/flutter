@@ -18,7 +18,7 @@ class PestoDemo extends StatelessWidget {
 const String _kSmallLogoImage = 'pesto/logo_small.png';
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 const double _kAppBarHeight = 128.0;
-const double _kFabHalfSize = 28.0;  // TODO(mpcomplete): needs to adapt to screen size
+const double _kFabHalfSize = 28.0; // TODO(mpcomplete): needs to adapt to screen size
 const double _kRecipePageMaxWidth = 500.0;
 
 final Set<Recipe> _favoriteRecipes = new Set<Recipe>();
@@ -667,7 +667,7 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     author: 'Ali Connors',
     ingredientsImagePath: 'pesto/healthy.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'This dish is a terrific pairing to almost any main. Bonus- it’s quick, easy to make, and turns even the simplest of dishes into a delicacy. Sweet coconut cream will leave your mouth watering, with yummy caramelized  flecks of rice adding an extra bit of taste. Fluff with fork before serving for best results.',
+    description: 'This dish is a terrific pairing to almost any main. Bonus- it’s quick, easy to make, and turns even the simplest of dishes into a delicacy. Sweet coconut cream will leave your mouth watering, with yummy caramelized flecks of rice adding an extra bit of taste. Fluff with fork before serving for best results.',
     imagePath: 'pesto/image6.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
@@ -732,7 +732,7 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
       const RecipeIngredient(amount: '1', description: 'Small garlic clove, peeled'),
-      const RecipeIngredient(amount: '2', description: 'Whole  artichokes'),
+      const RecipeIngredient(amount: '2', description: 'Whole artichokes'),
       const RecipeIngredient(amount: '4 tbsp', description: 'Fresh lemon juice'),
       const RecipeIngredient(amount: '4 tbsp', description: 'Unsalted butter'),
       const RecipeIngredient(amount: '2 tbsp', description: 'Extra-virgin olive oil'),
@@ -748,7 +748,7 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     author: 'Trevor Hansen',
     ingredientsImagePath: 'pesto/veggie.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'Life is good when you add amazingly warm bread, fresh pesto sauce, and roasted tomatoes to the table. This a  classic starter to break out in a pinch. It’s easy to make and extra tasty.',
+    description: 'Life is good when you add amazingly warm bread, fresh pesto sauce, and roasted tomatoes to the table. This a classic starter to break out in a pinch. It’s easy to make and extra tasty.',
     imagePath: 'pesto/image10.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
@@ -771,7 +771,7 @@ const List<Recipe> kPestoRecipes = const <Recipe>[
     author: 'Sandra Adams',
     ingredientsImagePath: 'pesto/spicy.png',
     ingredientsImagePackage: _kGalleryAssetsPackage,
-    description: 'Great stir-fried bok choy starts at the market. For me, nothing says tasty like garlic and baby bok choy. Choose fresh, crisp greens. Once home, wash, chop, and then ready for the wok.  No family style spread is complete without these greens.',
+    description: 'Great stir-fried bok choy starts at the market. For me, nothing says tasty like garlic and baby bok choy. Choose fresh, crisp greens. Once home, wash, chop, and then ready for the wok. No family style spread is complete without these greens.',
     imagePath: 'pesto/image11.jpg',
     imagePackage: _kGalleryAssetsPackage,
     ingredients: const<RecipeIngredient>[
