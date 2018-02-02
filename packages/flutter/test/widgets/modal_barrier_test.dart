@@ -73,13 +73,13 @@ void main() {
 
     // Tapping on X routes to the barrier
     await tester.tap(find.text('X'));
-    await tester.pump();  // begin transition
-    await tester.pump(const Duration(seconds: 1));  // end transition
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
 
     // Tap on the barrier to dismiss it
     await tester.tap(find.byKey(const ValueKey<String>('barrier')));
-    await tester.pump();  // begin transition
-    await tester.pump(const Duration(seconds: 1));  // end transition
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
 
     expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
       reason: 'The route should have been dismissed by tapping the barrier.');

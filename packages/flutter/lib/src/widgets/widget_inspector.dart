@@ -190,7 +190,7 @@ class WidgetInspectorService {
       id = 'inspector-$_nextId';
       _nextId += 1;
       _objectToId[object] = id;
-      referenceData =  new _InspectorReferenceData(object);
+      referenceData = new _InspectorReferenceData(object);
       _idToReferenceData[id] = referenceData;
       group.add(referenceData);
     } else {
@@ -656,7 +656,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
       children.add(new Positioned(
         left: _kInspectButtonMargin,
         bottom: _kInspectButtonMargin,
-        child:  widget.selectButtonBuilder(context, _handleEnableSelect)
+        child: widget.selectButtonBuilder(context, _handleEnableSelect)
       ));
     }
     children.add(new _InspectorOverlay(selection: selection));
@@ -905,7 +905,7 @@ class _InspectorOverlayLayer extends Layer {
     final _InspectorOverlayRenderState state = new _InspectorOverlayRenderState(
       overlayRect: overlayRect,
       selected: new _TransformedRect(selected),
-      tooltip:  selection.currentElement.toStringShort(),
+      tooltip: selection.currentElement.toStringShort(),
       textDirection: TextDirection.ltr,
       candidates: candidates,
     );

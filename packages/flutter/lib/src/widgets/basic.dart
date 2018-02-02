@@ -311,7 +311,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///
 /// Custom painters normally size themselves to their child. If they do not have
 /// a child, they attempt to size themselves to the [size], which defaults to
-/// [Size.zero].  [size] must not be null.
+/// [Size.zero]. [size] must not be null.
 ///
 /// [isComplex] and [willChange] are hints to the compositor's raster cache
 /// and must not be null.
@@ -376,7 +376,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   ///
   /// The compositor contains a raster cache that holds bitmaps of layers in
   /// order to avoid the cost of repeatedly rendering those layers on each
-  /// frame.  If this flag is not set, then the compositor will apply its own
+  /// frame. If this flag is not set, then the compositor will apply its own
   /// heuristics to decide whether the this layer is complex enough to benefit
   /// from caching.
   final bool isComplex;
@@ -1070,7 +1070,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
   /// How to align the child within its parent's bounds.
   ///
   /// An alignment of (-1.0, -1.0) aligns the child to the top-left corner of its
-  /// parent's bounds.  An alignment of (1.0, 0.0) aligns the child to the middle
+  /// parent's bounds. An alignment of (1.0, 0.0) aligns the child to the middle
   /// of the right edge of its parent's bounds.
   ///
   /// Defaults to [Alignment.center].
@@ -1702,7 +1702,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// This allows a child to render at the size it would render if it were alone
 /// on an infinite canvas with no constraints. This container will then expand
 /// as much as it can within its own constraints and align the child based on
-/// [alignment].  If the container cannot expand enough to accommodate the
+/// [alignment]. If the container cannot expand enough to accommodate the
 /// entire child, the child will be clipped.
 ///
 /// In debug mode, if the child overflows the container, a warning will be
@@ -1748,7 +1748,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   /// The axis to retain constraints on, if any.
   ///
   /// If not set, or set to null (the default), neither axis will retain its
-  /// constraints.  If set to [Axis.vertical], then vertical constraints will
+  /// constraints. If set to [Axis.vertical], then vertical constraints will
   /// be retained, and if set to [Axis.horizontal], then horizontal constraints
   /// will be retained.
   final Axis constrainedAxis;

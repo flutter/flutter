@@ -15,7 +15,7 @@ import 'package:test/test.dart';
 import 'src/common.dart';
 import 'src/context.dart';
 
-void main()  {
+void main() {
   // These tests do not use a memory file system because we want to ensure that
   // asset bundles work correctly on Windows and Posix systems.
   Directory tempDir;

@@ -23,7 +23,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
         title: const Text('Cupertino Switch'),
       ),
       body: new Center(
-        child:  new CupertinoSwitch(
+        child: new CupertinoSwitch(
           value: _switchValue,
           onChanged: (bool value) {
             setState(() {

@@ -306,8 +306,8 @@ Future<String> _buildAotSnapshot(
       }
       if (platform == TargetPlatform.android_arm) {
         genSnapshotCmd.addAll(<String>[
-          '--no-sim-use-hardfp',  // Android uses the softfloat ABI.
-          '--no-use-integer-division',  // Not supported by the Pixel in 32-bit mode.
+          '--no-sim-use-hardfp', // Android uses the softfloat ABI.
+          '--no-use-integer-division', // Not supported by the Pixel in 32-bit mode.
         ]);
       }
       break;
@@ -449,9 +449,9 @@ Future<String> _buildAotSnapshot(
   } else {
     if (compileToSharedLibrary) {
       // A word of warning: Instead of compiling via two steps, to a .o file and
-      // then to a .so file we use only one command.  When using two commands
+      // then to a .so file we use only one command. When using two commands
       // gcc will end up putting a .eh_frame and a .debug_frame into the shared
-      // library.  Without stripping .debug_frame afterwards, unwinding tools
+      // library. Without stripping .debug_frame afterwards, unwinding tools
       // based upon libunwind use just one and ignore the contents of the other
       // (which causes it to not look into the other section and therefore not
       // find the correct unwinding information).

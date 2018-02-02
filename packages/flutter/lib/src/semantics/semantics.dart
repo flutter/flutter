@@ -418,7 +418,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// VoiceOver users on iOS can trigger this action by swiping right with three
   /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// left and then right in one motion path.  On Android, [onScrollDown] and
+  /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
   final VoidCallback onScrollRight;
@@ -1564,7 +1564,7 @@ class SemanticsConfiguration {
   ///
   /// VoiceOver users on iOS can trigger this action by swiping right with three
   /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// left and then right in one motion path.  On Android, [onScrollDown] and
+  /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
   VoidCallback get onScrollRight => _onScrollRight;

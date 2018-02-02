@@ -512,7 +512,7 @@ class _HasGoodToStringDeep extends Matcher {
       issues.add('Last line is all tree connector characters.');
 
     // If a toStringDeep method doesn't properly handle nested values that
-    // contain line breaks it can  fail to add the required prefixes to all
+    // contain line breaks it can fail to add the required prefixes to all
     // lined when toStringDeep is called specifying prefixes.
     const String prefixLineOne    = 'PREFIX_LINE_ONE____';
     const String prefixOtherLines = 'PREFIX_OTHER_LINES_';
@@ -595,7 +595,7 @@ typedef num DistanceFunction<T>(T a, T b);
 /// T.
 ///
 /// This type is used to describe a collection of [DistanceFunction<T>]
-/// functions which have (potentially) unrelated argument types.  Since the
+/// functions which have (potentially) unrelated argument types. Since the
 /// argument types of the functions may be unrelated, the only thing that the
 /// type system can statically assume about them is that they accept null (since
 /// all types in Dart are nullable).

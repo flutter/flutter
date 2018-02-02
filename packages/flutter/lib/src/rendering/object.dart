@@ -66,7 +66,7 @@ class PaintingContext {
   final ContainerLayer _containerLayer;
 
   /// An estimate of the bounds within which the painting context's [canvas]
-  /// will record painting commands.  This can be useful for debugging.
+  /// will record painting commands. This can be useful for debugging.
   ///
   /// The canvas will allow painting outside these bounds.
   ///
@@ -277,7 +277,7 @@ class PaintingContext {
 
   /// Appends the given layer to the recording, and calls the `painter` callback
   /// with that layer, providing the `childPaintBounds` as the estimated paint
-  /// bounds of the child.  The `childPaintBounds` can be used for debugging but
+  /// bounds of the child. The `childPaintBounds` can be used for debugging but
   /// have no effect on painting.
   ///
   /// The given layer must be an unattached orphan. (Providing a newly created

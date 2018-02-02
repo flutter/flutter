@@ -101,7 +101,7 @@ void main() {
     }));
 
     // The ripple fades in for 75ms. During that time its alpha is eased from
-    // 0 to  the splashColor's alpha value and its center moves towards the
+    // 0 to the splashColor's alpha value and its center moves towards the
     // center of the ink well.
     await tester.pump(const Duration(milliseconds: 50));
     expect(box, paints..something((Symbol method, List<dynamic> arguments) {

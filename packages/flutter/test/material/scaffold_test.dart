@@ -505,7 +505,7 @@ void main() {
       persistentFooterButtons: const <Widget>[const Text(persistentFooterButtonLabel)],
       bottomNavigationBar: const Text(bottomNavigationBarLabel),
       floatingActionButton: const Text(floatingActionButtonLabel),
-      drawer: const Drawer(child:const Text(drawerLabel)),
+      drawer: const Drawer(child: const Text(drawerLabel)),
     )));
 
     expect(semantics, includesNodeWith(label: bodyLabel));
@@ -719,8 +719,8 @@ void main() {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(new MaterialApp(home: const Scaffold(
       body: const Text(bodyLabel),
-      drawer: const Drawer(child:const Text(drawerLabel)),
-      endDrawer: const Drawer(child:const Text(endDrawerLabel)),
+      drawer: const Drawer(child: const Text(drawerLabel)),
+      endDrawer: const Drawer(child: const Text(endDrawerLabel)),
     )));
 
     expect(semantics, includesNodeWith(label: bodyLabel));

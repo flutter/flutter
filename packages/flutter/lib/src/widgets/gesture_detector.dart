@@ -566,7 +566,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }());
     if (!widget.excludeFromSemantics) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
-      semanticsGestureHandler.validActions = actions;  // will call _markNeedsSemanticsUpdate(), if required.
+      semanticsGestureHandler.validActions = actions; // will call _markNeedsSemanticsUpdate(), if required.
     }
   }
 
