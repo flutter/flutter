@@ -12,8 +12,8 @@ import 'theme.dart';
 
 /// A material design "raised button".
 ///
-/// A raised button consists of a rectangular piece of material that hovers over
-/// the interface.
+/// A raised button is based on a [Material] widget whose [Material.elevation]
+/// increases when the button is pressed.
 ///
 /// Use raised buttons to add dimension to otherwise mostly flat layouts, e.g.
 /// in long busy lists of content, or in wide spaces. Avoid using raised buttons
@@ -36,6 +36,7 @@ import 'theme.dart';
 ///  * [FloatingActionButton], the round button in material applications.
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
+//// * [RawMaterialButton], the widget this widget is based on.
 ///  * <https://material.google.com/components/buttons.html>
 class RaisedButton extends StatelessWidget {
   /// Create a filled button.

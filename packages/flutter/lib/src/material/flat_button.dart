@@ -12,8 +12,8 @@ import 'theme.dart';
 
 /// A material design "flat button".
 ///
-/// A flat button is a text label displayed on a [Material] widget that
-/// reacts to touches by filling with color.
+/// A flat button is a text label displayed on a (zero elevation) [Material]
+/// widget that reacts to touches by filling with color.
 ///
 /// Use flat buttons on toolbars, in dialogs, or inline with other content but
 /// offset from that content with padding so that the button's presence is
@@ -34,38 +34,16 @@ import 'theme.dart';
 /// trying to change the button's [color] and it is not having any effect, check
 /// that you are passing a non-null [onPressed] handler.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
-///
 /// Flat buttons will expand to fit the child widget, if necessary.
-///
-/// ## Troubleshooting
-///
-/// ### Why does my button not have splash effects?
-///
-/// If you place a [FlatButton] on top of an [Image], [Container],
-/// [DecoratedBox], or some other widget that draws an opaque background between
-/// the [FlatButton] and its ancestor [Material], the splashes will not be
-/// visible. This is because ink splashes draw in the [Material] itself, as if
-/// the ink was spreading inside the material.
-///
-/// The [Ink] widget can be used as a replacement for [Image], [Container], or
-/// [DecoratedBox] to ensure that the image or decoration also paints in the
-/// [Material] itself, below the ink.
-///
-/// If this is not possible for some reason, e.g. because you are using an
-/// opaque [CustomPaint] widget, alternatively consider using a second
-/// [Material] above the opaque widget but below the [FlatButton] (as an
-/// ancestor to the button). The [MaterialType.transparency] material kind can
-/// be used for this purpose.
 ///
 /// See also:
 ///
-///  * [RaisedButton], which is a button that hovers above the containing
-///    material.
+///  * [RaisedButton], a filled button whose material elevates when pressed.
 ///  * [DropdownButton], which offers the user a choice of a number of options.
 ///  * [SimpleDialogOption], which is used in [SimpleDialog]s.
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
+//// * [RawMaterialButton], the widget this widget is based on.
 ///  * <https://material.google.com/components/buttons.html>
 class FlatButton extends StatelessWidget {
   /// Create a simple text button.
@@ -238,9 +216,10 @@ class FlatButton extends StatelessWidget {
       return color;
 
     final bool themeIsDark = _getBrightness(theme) == Brightness.dark;
-    final bool fillIsDark = fillColor != null
-      ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
-      : themeIsDark;
+    final bool fillIsDark = fillColor == null
+      ? themeIsDark
+      : (fillColor.alpha != 0 &&
+         ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark);
 
     switch (_getTextTheme(buttonTheme)) {
       case ButtonTextTheme.normal:
@@ -298,7 +277,7 @@ class FlatButton extends StatelessWidget {
 
     return new RawMaterialButton(
       onPressed: onPressed,
-      fillColor: fillColor,
+      fillColor: fillColor ?? Colors.transparent,
       textStyle: theme.textTheme.button.copyWith(color: textColor),
       highlightColor: _getHighlightColor(theme, buttonTheme),
       splashColor: _getSplashColor(theme, buttonTheme),
