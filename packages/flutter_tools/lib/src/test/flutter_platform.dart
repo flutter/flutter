@@ -479,7 +479,10 @@ void main() {
     return test.main;
   });
   WebSocket.connect(server).then((WebSocket socket) {
-    socket.map(JSON.decode).pipe(channel.sink);
+    socket.map((dynamic x) {
+      assert(x is String);
+      return JSON.decode(x);
+    }).pipe(channel.sink);
     socket.addStream(channel.stream.map(JSON.encode));
   });
 }
@@ -567,7 +570,7 @@ void main() {
     void startTimeoutTimer(),
     void reportObservatoryUri(Uri uri),
   }) {
-    final String observatoryString = 'Observatory listening on ';
+    const String observatoryString = 'Observatory listening on ';
 
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {

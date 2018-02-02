@@ -15,7 +15,8 @@ class BuildInfo {
       this.strongMode,
       this.extraFrontEndOptions,
       this.extraGenSnapshotOptions,
-      this.preferSharedLibrary});
+      this.preferSharedLibrary,
+      this.targetPlatform});
 
   final BuildMode mode;
   /// Represents a custom Android product flavor or an Xcode scheme, null for
@@ -41,6 +42,9 @@ class BuildInfo {
   // Whether to prefer AOT compiling to a *so file.
   final bool preferSharedLibrary;
 
+  /// Target platform for the build (e.g. android_arm versus android_arm64).
+  final TargetPlatform targetPlatform;
+
   static const BuildInfo debug = const BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = const BuildInfo(BuildMode.profile, null);
   static const BuildInfo release = const BuildInfo(BuildMode.release, null);
@@ -64,6 +68,15 @@ class BuildInfo {
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => getModeName(mode);
+
+  BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
+      new BuildInfo(mode, flavor,
+          previewDart2: previewDart2,
+          strongMode: strongMode,
+          extraFrontEndOptions: extraFrontEndOptions,
+          extraGenSnapshotOptions: extraGenSnapshotOptions,
+          preferSharedLibrary: preferSharedLibrary,
+          targetPlatform: targetPlatform);
 }
 
 /// The type of build - `debug`, `profile`, or `release`.
@@ -114,6 +127,7 @@ String getNameForHostPlatform(HostPlatform platform) {
 
 enum TargetPlatform {
   android_arm,
+  android_arm64,
   android_x64,
   android_x86,
   ios,
@@ -127,6 +141,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.android_arm:
       return 'android-arm';
+    case TargetPlatform.android_arm64:
+      return 'android-arm64';
     case TargetPlatform.android_x64:
       return 'android-x64';
     case TargetPlatform.android_x86:
@@ -150,6 +166,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
   switch (platform) {
     case 'android-arm':
       return TargetPlatform.android_arm;
+    case 'android-arm64':
+      return TargetPlatform.android_arm64;
     case 'android-x64':
       return TargetPlatform.android_x64;
     case 'android-x86':

@@ -301,6 +301,8 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   if (buildInfo.preferSharedLibrary && androidSdk.ndkCompiler != null) {
     command.add('-Pprefer-shared-library=true');
   }
+  if (buildInfo.targetPlatform == TargetPlatform.android_arm64)
+    command.add('-Ptarget-platform=android-arm64');
 
   command.add(assembleTask);
   final int exitCode = await runCommandAndStreamOutput(

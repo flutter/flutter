@@ -259,6 +259,7 @@ Future<ApplicationPackage> getApplicationPackageForPlatform(TargetPlatform platf
 }) async {
   switch (platform) {
     case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       return applicationBinary == null
@@ -287,6 +288,7 @@ class ApplicationPackageStore {
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
     switch (platform) {
       case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         android ??= await AndroidApk.fromCurrentDirectory();

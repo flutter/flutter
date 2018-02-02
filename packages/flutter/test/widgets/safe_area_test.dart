@@ -39,7 +39,7 @@ void main() {
   });
 
   testWidgets('SafeArea - changing', (WidgetTester tester) async {
-    final Widget child = const SafeArea(
+    const Widget child = const SafeArea(
       bottom: false,
       child: const SafeArea(
         left: false,
@@ -48,7 +48,7 @@ void main() {
       ),
     );
     await tester.pumpWidget(
-      new MediaQuery(
+      const MediaQuery(
         data: const MediaQueryData(padding: const EdgeInsets.all(20.0)),
         child: child,
       ),
@@ -56,7 +56,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(20.0, 20.0));
     expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 600.0));
     await tester.pumpWidget(
-      new MediaQuery(
+      const MediaQuery(
         data: const MediaQueryData(padding: const EdgeInsets.only(
           left: 100.0,
           top: 30.0,

@@ -35,7 +35,7 @@ class BuildAotCommand extends BuildSubCommand {
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'ios']
+        allowed: <String>['android-arm', 'android-arm64', 'ios']
       )
       ..addFlag('interpreter')
       ..addFlag('quiet', defaultsTo: false)
@@ -159,7 +159,9 @@ Future<String> _buildAotSnapshot(
     return null;
   }
 
-  if (platform != TargetPlatform.android_arm && platform != TargetPlatform.ios) {
+  if (!(platform == TargetPlatform.android_arm ||
+        platform == TargetPlatform.android_arm64 ||
+        platform == TargetPlatform.ios)) {
     printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
     return null;
   }
@@ -217,6 +219,7 @@ Future<String> _buildAotSnapshot(
 
   switch (platform) {
     case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       if (compileToSharedLibrary) {
@@ -287,6 +290,7 @@ Future<String> _buildAotSnapshot(
 
   switch (platform) {
     case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       if (compileToSharedLibrary) {
@@ -300,10 +304,12 @@ Future<String> _buildAotSnapshot(
           '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
         ]);
       }
-      genSnapshotCmd.addAll(<String>[
-        '--no-sim-use-hardfp',  // Android uses the softfloat ABI.
-        '--no-use-integer-division',  // Not supported by the Pixel in 32-bit mode.
-      ]);
+      if (platform == TargetPlatform.android_arm) {
+        genSnapshotCmd.addAll(<String>[
+          '--no-sim-use-hardfp',  // Android uses the softfloat ABI.
+          '--no-use-integer-division',  // Not supported by the Pixel in 32-bit mode.
+        ]);
+      }
       break;
     case TargetPlatform.ios:
       if (interpreter) {

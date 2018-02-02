@@ -15,7 +15,7 @@ import '../src/context.dart';
 void main() {
   group('android_device', () {
     testUsingContext('stores the requested id', () {
-      final String deviceId = '1234';
+      const String deviceId = '1234';
       final AndroidDevice device = new AndroidDevice(deviceId);
       expect(device.id, deviceId);
     });

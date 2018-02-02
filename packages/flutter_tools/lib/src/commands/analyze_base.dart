@@ -40,7 +40,7 @@ abstract class AnalyzeBase {
   }
 
   void writeBenchmark(Stopwatch stopwatch, int errorCount, int membersMissingDocumentation) {
-    final String benchmarkOut = 'analysis_benchmark.json';
+    const String benchmarkOut = 'analysis_benchmark.json';
     final Map<String, dynamic> data = <String, dynamic>{
       'time': (stopwatch.elapsedMilliseconds / 1000.0),
       'issues': errorCount,

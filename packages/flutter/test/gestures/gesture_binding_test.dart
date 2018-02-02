@@ -32,7 +32,7 @@ void main() {
   setUp(ensureTestGestureBinding);
 
   test('Pointer tap events', () {
-    final ui.PointerDataPacket packet = const ui.PointerDataPacket(
+    const ui.PointerDataPacket packet = const ui.PointerDataPacket(
       data: const <ui.PointerData>[
         const ui.PointerData(change: ui.PointerChange.down),
         const ui.PointerData(change: ui.PointerChange.up),
@@ -49,7 +49,7 @@ void main() {
   });
 
   test('Pointer move events', () {
-    final ui.PointerDataPacket packet = const ui.PointerDataPacket(
+    const ui.PointerDataPacket packet = const ui.PointerDataPacket(
       data: const <ui.PointerData>[
         const ui.PointerData(change: ui.PointerChange.down),
         const ui.PointerData(change: ui.PointerChange.move),
@@ -95,7 +95,7 @@ void main() {
   });
 
   test('Pointer cancel events', () {
-    final ui.PointerDataPacket packet = const ui.PointerDataPacket(
+    const ui.PointerDataPacket packet = const ui.PointerDataPacket(
       data: const <ui.PointerData>[
         const ui.PointerData(change: ui.PointerChange.down),
         const ui.PointerData(change: ui.PointerChange.cancel),
@@ -112,7 +112,7 @@ void main() {
   });
 
   test('Can cancel pointers', () {
-    final ui.PointerDataPacket packet = const ui.PointerDataPacket(
+    const ui.PointerDataPacket packet = const ui.PointerDataPacket(
       data: const <ui.PointerData>[
         const ui.PointerData(change: ui.PointerChange.down),
         const ui.PointerData(change: ui.PointerChange.up),
@@ -133,7 +133,7 @@ void main() {
   });
 
   test('Can expand add and hover pointers', () {
-    final ui.PointerDataPacket packet = const ui.PointerDataPacket(
+    const ui.PointerDataPacket packet = const ui.PointerDataPacket(
       data: const <ui.PointerData>[
         const ui.PointerData(change: ui.PointerChange.add, device: 24),
         const ui.PointerData(change: ui.PointerChange.hover, device: 24),

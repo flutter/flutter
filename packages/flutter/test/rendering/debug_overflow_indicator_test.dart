@@ -21,12 +21,12 @@ void main() {
   });
 
   testWidgets('overflow indicator is shown when overflowing', (WidgetTester tester) async {
-    final UnconstrainedBox box = const UnconstrainedBox(
+    const UnconstrainedBox box = const UnconstrainedBox(
       child: const SizedBox(width: 200.0, height: 200.0),
     );
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      const Center(
+        child: const SizedBox(
           height: 100.0,
           child: box,
         ),
@@ -37,8 +37,8 @@ void main() {
     expect(find.byType(UnconstrainedBox), paints..rect());
 
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      const Center(
+        child: const SizedBox(
           height: 100.0,
           child: box,
         ),

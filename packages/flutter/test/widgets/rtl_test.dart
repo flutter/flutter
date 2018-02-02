@@ -7,16 +7,16 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Padding RTL', (WidgetTester tester) async {
-    final Widget child = const Padding(
+    const Widget child = const Padding(
       padding: const EdgeInsetsDirectional.only(start: 10.0),
       child: const Placeholder(),
     );
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: child,
     ));
     expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(10.0, 0.0));
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: child,
     ));

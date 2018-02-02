@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -164,5 +165,242 @@ void main() {
     await tester.pump(kThemeChangeDuration);
     final RenderPhysicalModel modelE = getShadow(tester);
     expect(modelE.shadowColor, equals(const Color(0xFFFF0000)));
+  });
+
+  group('Transparency clipping', () {
+    testWidgets('clips to bounding rect by default', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.transparency,
+          child: const SizedBox(width: 100.0, height: 100.0)
+        )
+      );
+
+      expect(find.byKey(materialKey), clipsWithBoundingRRect(borderRadius: BorderRadius.zero));
+    });
+
+    testWidgets('clips to rounded rect when borderRadius provided', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.transparency,
+          borderRadius: const BorderRadius.all(const Radius.circular(10.0)),
+          child: const SizedBox(width: 100.0, height: 100.0)
+        )
+      );
+
+      expect(
+        find.byKey(materialKey),
+        clipsWithBoundingRRect(
+          borderRadius: const BorderRadius.all(const Radius.circular(10.0))
+        ),
+      );
+    });
+
+    testWidgets('clips to shape when provided', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.transparency,
+          shape: const StadiumBorder(),
+          child: const SizedBox(width: 100.0, height: 100.0)
+        )
+      );
+
+      expect(
+        find.byKey(materialKey),
+        clipsWithShapeBorder(
+          shape: const StadiumBorder(),
+        ),
+      );
+    });
+  });
+
+  group('PhysicalModels', () {
+    testWidgets('canvas', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.canvas,
+          child: const SizedBox(width: 100.0, height: 100.0)
+        )
+      );
+
+      expect(find.byKey(materialKey), rendersOnPhysicalModel(
+          shape: BoxShape.rectangle,
+          borderRadius: BorderRadius.zero,
+          elevation: 0.0,
+      ));
+    });
+
+    testWidgets('canvas with borderRadius and elevation', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.canvas,
+          borderRadius: const BorderRadius.all(const Radius.circular(5.0)),
+          child: const SizedBox(width: 100.0, height: 100.0),
+          elevation: 1.0,
+        )
+      );
+
+      expect(find.byKey(materialKey), rendersOnPhysicalModel(
+          shape: BoxShape.rectangle,
+          borderRadius: const BorderRadius.all(const Radius.circular(5.0)),
+          elevation: 1.0,
+      ));
+    });
+
+    testWidgets('canvas with shape and elevation', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.canvas,
+          shape: const StadiumBorder(),
+          child: const SizedBox(width: 100.0, height: 100.0),
+          elevation: 1.0,
+        )
+      );
+
+      expect(find.byKey(materialKey), rendersOnPhysicalShape(
+          shape: const StadiumBorder(),
+          elevation: 1.0,
+      ));
+    });
+
+    testWidgets('card', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.card,
+          child: const SizedBox(width: 100.0, height: 100.0),
+        )
+      );
+
+      expect(find.byKey(materialKey), rendersOnPhysicalModel(
+          shape: BoxShape.rectangle,
+          borderRadius: const BorderRadius.all(const Radius.circular(2.0)),
+          elevation: 0.0,
+      ));
+    });
+
+    testWidgets('card with borderRadius and elevation', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.card,
+          borderRadius: const BorderRadius.all(const Radius.circular(5.0)),
+          elevation: 5.0,
+          child: const SizedBox(width: 100.0, height: 100.0),
+        )
+      );
+
+      expect(find.byKey(materialKey), rendersOnPhysicalModel(
+          shape: BoxShape.rectangle,
+          borderRadius: const BorderRadius.all(const Radius.circular(5.0)),
+          elevation: 5.0,
+      ));
+    });
+
+    testWidgets('card with shape and elevation', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.card,
+          shape: const StadiumBorder(),
+          elevation: 5.0,
+          child: const SizedBox(width: 100.0, height: 100.0),
+        )
+      );
+
+      expect(find.byKey(materialKey), rendersOnPhysicalShape(
+          shape: const StadiumBorder(),
+          elevation: 5.0,
+      ));
+    });
+
+    testWidgets('circle', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.circle,
+          child: const SizedBox(width: 100.0, height: 100.0),
+          color: const Color(0xFF0000FF),
+        )
+      );
+
+      expect(find.byKey(materialKey), rendersOnPhysicalModel(
+          shape: BoxShape.circle,
+          elevation: 0.0,
+      ));
+    });
+
+    testWidgets('button', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.button,
+          child: const SizedBox(width: 100.0, height: 100.0),
+          color: const Color(0xFF0000FF),
+        )
+      );
+
+      expect(find.byKey(materialKey), rendersOnPhysicalModel(
+          shape: BoxShape.rectangle,
+          borderRadius: const BorderRadius.all(const Radius.circular(2.0)),
+          elevation: 0.0,
+      ));
+    });
+
+    testWidgets('button with elevation and borderRadius', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.button,
+          child: const SizedBox(width: 100.0, height: 100.0),
+          color: const Color(0xFF0000FF),
+          borderRadius: const BorderRadius.all(const Radius.circular(6.0)),
+          elevation: 4.0,
+        )
+      );
+
+      expect(find.byKey(materialKey), rendersOnPhysicalModel(
+          shape: BoxShape.rectangle,
+          borderRadius: const BorderRadius.all(const Radius.circular(6.0)),
+          elevation: 4.0,
+      ));
+    });
+
+    testWidgets('button with elevation and shape', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.button,
+          child: const SizedBox(width: 100.0, height: 100.0),
+          color: const Color(0xFF0000FF),
+          shape: const StadiumBorder(),
+          elevation: 4.0,
+        )
+      );
+
+      expect(find.byKey(materialKey), rendersOnPhysicalShape(
+          shape: const StadiumBorder(),
+          elevation: 4.0,
+      ));
+    });
   });
 }

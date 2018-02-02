@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:test/test.dart';
@@ -26,6 +28,91 @@ void main() {
       expect(message.message, contains('recommended minimum version'));
     });
   });
+
+  group('doctor with fake validators', () {
+    testUsingContext('validate non-verbose output format for run without issues', () async {
+      expect(await new FakeQuietDoctor().diagnose(verbose: false), isTrue);
+      expect(testLogger.statusText, equals(
+              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              '[✓] Passing Validator (with statusInfo)\n'
+              '[✓] Another Passing Validator (with statusInfo)\n'
+              '[✓] Validators are fun (with statusInfo)\n'
+              '[✓] Four score and seven validators ago (with statusInfo)\n'
+              '\n'
+              '• No issues found!\n'
+      ));
+    });
+
+    testUsingContext('validate non-verbose output format when only one category fails', () async {
+      expect(await new FakeSinglePassingDoctor().diagnose(verbose: false), isTrue);
+      expect(testLogger.statusText, equals(
+              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              '[!] Partial Validator with only a Hint\n'
+              '    ! There is a hint here\n'
+              '\n'
+              '! Doctor found issues in 1 category.\n'
+      ));
+    });
+
+    testUsingContext('validate non-verbose output format for a passing run', () async {
+      expect(await new FakePassingDoctor().diagnose(verbose: false), isTrue);
+      expect(testLogger.statusText, equals(
+              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              '[✓] Passing Validator (with statusInfo)\n'
+              '[!] Partial Validator with only a Hint\n'
+              '    ! There is a hint here\n'
+              '[!] Partial Validator with Errors\n'
+              '    ✗ A error message indicating partial installation\n'
+              '    ! Maybe a hint will help the user\n'
+              '[✓] Another Passing Validator (with statusInfo)\n'
+              '\n'
+              '! Doctor found issues in 2 categories.\n'
+      ));
+    });
+
+    testUsingContext('validate non-verbose output format', () async {
+      expect(await new FakeDoctor().diagnose(verbose: false), isFalse);
+      expect(testLogger.statusText, equals(
+              'Doctor summary (to see all details, run flutter doctor -v):\n'
+              '[✓] Passing Validator (with statusInfo)\n'
+              '[✗] Missing Validator\n'
+              '    ✗ A useful error message\n'
+              '    ! A hint message\n'
+              '[!] Partial Validator with only a Hint\n'
+              '    ! There is a hint here\n'
+              '[!] Partial Validator with Errors\n'
+              '    ✗ A error message indicating partial installation\n'
+              '    ! Maybe a hint will help the user\n'
+              '\n'
+              '! Doctor found issues in 3 categories.\n'
+      ));
+    });
+
+    testUsingContext('validate verbose output format', () async {
+      expect(await new FakeDoctor().diagnose(verbose: true), isFalse);
+      expect(testLogger.statusText, equals(
+              '[✓] Passing Validator (with statusInfo)\n'
+              '    • A helpful message\n'
+              '    • A second, somewhat longer helpful message\n'
+              '\n'
+              '[✗] Missing Validator\n'
+              '    ✗ A useful error message\n'
+              '    • A message that is not an error\n'
+              '    ! A hint message\n'
+              '\n'
+              '[!] Partial Validator with only a Hint\n'
+              '    ! There is a hint here\n'
+              '    • But there is no error\n'
+              '\n'
+              '[!] Partial Validator with Errors\n'
+              '    ✗ A error message indicating partial installation\n'
+              '    ! Maybe a hint will help the user\n'
+              '    • An extra message with some verbose details\n'
+              '\n'
+              '! Doctor found issues in 3 categories.\n'
+      ));
+    });
+  });
 }
 
 class IntelliJValidatorTestTarget extends IntelliJValidator {
@@ -36,4 +123,117 @@ class IntelliJValidatorTestTarget extends IntelliJValidator {
 
   @override
   String get version => 'test.test.test';
+}
+
+class PassingValidator extends DoctorValidator {
+  PassingValidator(String name) : super(name);
+
+  @override
+  Future<ValidationResult> validate() async {
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    messages.add(new ValidationMessage('A helpful message'));
+    messages.add(new ValidationMessage('A second, somewhat longer helpful message'));
+    return new ValidationResult(ValidationType.installed, messages, statusInfo: 'with statusInfo');
+  }
+}
+
+class MissingValidator extends DoctorValidator {
+  MissingValidator(): super('Missing Validator');
+
+  @override
+  Future<ValidationResult> validate() async {
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    messages.add(new ValidationMessage.error('A useful error message'));
+    messages.add(new ValidationMessage('A message that is not an error'));
+    messages.add(new ValidationMessage.hint('A hint message'));
+    return new ValidationResult(ValidationType.missing, messages);
+  }
+}
+
+class PartialValidatorWithErrors extends DoctorValidator {
+  PartialValidatorWithErrors() : super('Partial Validator with Errors');
+
+  @override
+  Future<ValidationResult> validate() async {
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    messages.add(new ValidationMessage.error('A error message indicating partial installation'));
+    messages.add(new ValidationMessage.hint('Maybe a hint will help the user'));
+    messages.add(new ValidationMessage('An extra message with some verbose details'));
+    return new ValidationResult(ValidationType.partial, messages);
+  }
+}
+
+class PartialValidatorWithHintsOnly extends DoctorValidator {
+  PartialValidatorWithHintsOnly() : super('Partial Validator with only a Hint');
+
+  @override
+  Future<ValidationResult> validate() async {
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    messages.add(new ValidationMessage.hint('There is a hint here'));
+    messages.add(new ValidationMessage('But there is no error'));
+    return new ValidationResult(ValidationType.partial, messages);
+  }
+}
+
+/// A doctor that fails with a missing [ValidationResult].
+class FakeDoctor extends Doctor {
+  List<DoctorValidator> _validators;
+
+  @override
+  List<DoctorValidator> get validators {
+    if (_validators == null) {
+      _validators = <DoctorValidator>[];
+      _validators.add(new PassingValidator('Passing Validator'));
+      _validators.add(new MissingValidator());
+      _validators.add(new PartialValidatorWithHintsOnly());
+      _validators.add(new PartialValidatorWithErrors());
+    }
+    return _validators;
+  }
+}
+
+/// A doctor that should pass, but still has issues in some categories.
+class FakePassingDoctor extends Doctor {
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    if (_validators == null) {
+      _validators = <DoctorValidator>[];
+      _validators.add(new PassingValidator('Passing Validator'));
+      _validators.add(new PartialValidatorWithHintsOnly());
+      _validators.add(new PartialValidatorWithErrors());
+      _validators.add(new PassingValidator('Another Passing Validator'));
+    }
+    return _validators;
+  }
+}
+
+/// A doctor that should pass, but still has 1 issue to test the singular of
+/// categories.
+class FakeSinglePassingDoctor extends Doctor {
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    if (_validators == null) {
+      _validators = <DoctorValidator>[];
+      _validators.add(new PartialValidatorWithHintsOnly());
+    }
+    return _validators;
+  }
+}
+
+/// A doctor that passes and has no issues anywhere.
+class FakeQuietDoctor extends Doctor {
+  List<DoctorValidator> _validators;
+  @override
+  List<DoctorValidator> get validators {
+    if (_validators == null) {
+      _validators = <DoctorValidator>[];
+      _validators.add(new PassingValidator('Passing Validator'));
+      _validators.add(new PassingValidator('Another Passing Validator'));
+      _validators.add(new PassingValidator('Validators are fun'));
+      _validators.add(new PassingValidator('Four score and seven validators ago'));
+    }
+    return _validators;
+  }
 }

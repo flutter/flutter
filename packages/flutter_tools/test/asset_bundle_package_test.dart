@@ -125,7 +125,7 @@ $assetsSection
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
       expect(bundle.entries.length, 2); // LICENSE, AssetManifest
-      final String expectedAssetManifest = '{}';
+      const String expectedAssetManifest = '{}';
       expect(
         UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,
@@ -145,7 +145,7 @@ $assetsSection
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
       expect(bundle.entries.length, 2); // LICENSE, AssetManifest
-      final String expectedAssetManifest = '{}';
+      const String expectedAssetManifest = '{}';
       expect(
         UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,

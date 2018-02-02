@@ -207,7 +207,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/12053
     // Positions a DropdownButton at the left and right edges of the screen,
     // forcing it to be sized down to the viewport width
-    final String value = 'foo';
+    const String value = 'foo';
     final UniqueKey itemKey = new UniqueKey();
     await tester.pumpWidget(
       new MaterialApp(
@@ -220,7 +220,7 @@ void main() {
                   new DropdownMenuItem<String>(
                     key: itemKey,
                     value: value,
-                    child: new Text(value),
+                    child: const Text(value),
                   ),
                 ],
                 onChanged: (_) {},
@@ -293,7 +293,7 @@ void main() {
   for (TextDirection textDirection in TextDirection.values) {
     testWidgets('Dropdown button aligns selected menu item ($textDirection)', (WidgetTester tester) async {
       final Key buttonKey = new UniqueKey();
-      final String value = 'two';
+      const String value = 'two';
 
       Widget build() => buildFrame(buttonKey: buttonKey, value: value, textDirection: textDirection);
 
@@ -339,7 +339,7 @@ void main() {
 
   testWidgets('Dropdown button with isDense:true aligns selected menu item', (WidgetTester tester) async {
     final Key buttonKey = new UniqueKey();
-    final String value = 'two';
+    const String value = 'two';
 
     Widget build() => buildFrame(buttonKey: buttonKey, value: value, isDense: true);
 

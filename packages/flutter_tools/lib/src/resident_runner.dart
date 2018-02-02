@@ -365,6 +365,8 @@ class FlutterDevice {
     String mainPath,
     String target,
     AssetBundle bundle,
+    DateTime firstBuildTime,
+    bool bundleFirstUpload: false,
     bool bundleDirty: false,
     Set<String> fileFilter,
     bool fullRestart: false
@@ -379,6 +381,8 @@ class FlutterDevice {
         mainPath: mainPath,
         target: target,
         bundle: bundle,
+        firstBuildTime: firstBuildTime,
+        bundleFirstUpload: bundleFirstUpload,
         bundleDirty: bundleDirty,
         fileFilter: fileFilter,
         generator: generator,
@@ -882,6 +886,7 @@ String findMainDartFile([String target]) {
 String getMissingPackageHintForPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       String manifest = 'android/AndroidManifest.xml';

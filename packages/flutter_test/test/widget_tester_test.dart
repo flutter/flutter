@@ -113,7 +113,7 @@ void main() {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
-      final String customDescription = 'custom description';
+      const String customDescription = 'custom description';
       TestFailure failure;
       try {
         expect(find.byElementPredicate((_) => false, description: customDescription), findsOneWidget);
@@ -130,7 +130,7 @@ void main() {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
-      final String customDescription = 'custom description';
+      const String customDescription = 'custom description';
       TestFailure failure;
       try {
         expect(find.byWidgetPredicate((_) => false, description: customDescription), findsOneWidget);

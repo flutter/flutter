@@ -18,7 +18,6 @@ import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/platform.dart';
 import 'src/base/process.dart';
-import 'src/base/terminal.dart';
 import 'src/base/utils.dart';
 import 'src/cache.dart';
 import 'src/crash_reporting.dart';
@@ -37,6 +36,7 @@ import 'src/version.dart';
 Future<int> run(
   List<String> args,
   List<FlutterCommand> commands, {
+  bool muteCommandLogging: false,
   bool verbose: false,
   bool verboseHelp: false,
   bool reportCrashes,
@@ -44,8 +44,9 @@ Future<int> run(
 }) async {
   reportCrashes ??= !isRunningOnBot;
 
-  if (verboseHelp) {
-    // Remove the verbose option; for help, users don't need to see verbose logs.
+  if (muteCommandLogging) {
+    // Remove the verbose option; for help and doctor, users don't need to see
+    // verbose logs.
     args = new List<String>.from(args);
     args.removeWhere((String option) => option == '-v' || option == '--verbose');
   }
@@ -68,7 +69,6 @@ Future<int> run(
     context.putIfAbsent(Platform, () => const LocalPlatform());
     context.putIfAbsent(FileSystem, () => const LocalFileSystem());
     context.putIfAbsent(ProcessManager, () => const LocalProcessManager());
-    context.putIfAbsent(AnsiTerminal, () => new AnsiTerminal());
     context.putIfAbsent(Logger, () => platform.isWindows ? new WindowsStdoutLogger() : new StdoutLogger());
     context.putIfAbsent(Config, () => new Config());
 

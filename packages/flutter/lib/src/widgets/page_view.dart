@@ -178,18 +178,54 @@ class PageController extends ScrollController {
 /// The metrics are available on [ScrollNotification]s generated from
 /// [PageView]s.
 class PageMetrics extends FixedScrollMetrics {
-  /// Creates page metrics that add the given information to the `parent`
-  /// metrics.
+  /// Creates an immutable snapshot of values associated with a [PageView].
   PageMetrics({
-    ScrollMetrics parent,
-    this.page,
-  }) : super.clone(parent);
+    @required double minScrollExtent,
+    @required double maxScrollExtent,
+    @required double pixels,
+    @required double viewportDimension,
+    @required AxisDirection axisDirection,
+    @required this.viewportFraction,
+  }) : super(
+         minScrollExtent: minScrollExtent,
+         maxScrollExtent: maxScrollExtent,
+         pixels: pixels,
+         viewportDimension: viewportDimension,
+         axisDirection: axisDirection,
+       );
+
+  @override
+  PageMetrics copyWith({
+    double minScrollExtent,
+    double maxScrollExtent,
+    double pixels,
+    double viewportDimension,
+    AxisDirection axisDirection,
+    double viewportFraction,
+  }) {
+    return new PageMetrics(
+      minScrollExtent: minScrollExtent ?? this.minScrollExtent,
+      maxScrollExtent: maxScrollExtent ?? this.maxScrollExtent,
+      pixels: pixels ?? this.pixels,
+      viewportDimension: viewportDimension ?? this.viewportDimension,
+      axisDirection: axisDirection ?? this.axisDirection,
+      viewportFraction: viewportFraction ?? this.viewportFraction,
+    );
+  }
 
   /// The current page displayed in the [PageView].
-  final double page;
+  double get page {
+    return math.max(0.0, pixels.clamp(minScrollExtent, maxScrollExtent)) /
+           math.max(1.0, viewportDimension * viewportFraction);
+  }
+
+  /// The fraction of the viewport that each page occupies.
+  ///
+  /// Used to compute [page] from the current [pixels].
+  final double viewportFraction;
 }
 
-class _PagePosition extends ScrollPositionWithSingleContext {
+class _PagePosition extends ScrollPositionWithSingleContext implements PageMetrics {
   _PagePosition({
     ScrollPhysics physics,
     ScrollContext context,
@@ -214,6 +250,7 @@ class _PagePosition extends ScrollPositionWithSingleContext {
   final int initialPage;
   double _pageToUseOnStartup;
 
+  @override
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
   set viewportFraction(double value) {
@@ -233,6 +270,7 @@ class _PagePosition extends ScrollPositionWithSingleContext {
     return page * viewportDimension * viewportFraction;
   }
 
+  @override
   double get page => pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
 
   @override
@@ -264,10 +302,21 @@ class _PagePosition extends ScrollPositionWithSingleContext {
   }
 
   @override
-  PageMetrics cloneMetrics() {
+  PageMetrics copyWith({
+    double minScrollExtent,
+    double maxScrollExtent,
+    double pixels,
+    double viewportDimension,
+    AxisDirection axisDirection,
+    double viewportFraction,
+  }) {
     return new PageMetrics(
-      parent: this,
-      page: page,
+      minScrollExtent: minScrollExtent ?? this.minScrollExtent,
+      maxScrollExtent: maxScrollExtent ?? this.maxScrollExtent,
+      pixels: pixels ?? this.pixels,
+      viewportDimension: viewportDimension ?? this.viewportDimension,
+      axisDirection: axisDirection ?? this.axisDirection,
+      viewportFraction: viewportFraction ?? this.viewportFraction,
     );
   }
 }
