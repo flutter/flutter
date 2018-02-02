@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// This function can be used to prevent some const lints.
-///
-/// It's usually used when we want several instances to be separate instances so
-/// that we're not just checking with a single object.
+/// This function can be used to call a const constructor in such a way as to
+/// create a new instance rather than creating the common const instance.
 ///
 /// ```dart
 /// class A {
