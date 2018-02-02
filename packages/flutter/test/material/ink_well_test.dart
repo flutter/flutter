@@ -140,17 +140,17 @@ void main() {
           ),
         ),
       );
-      expect(tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child, paintsNothing);
+      expect(tester.renderObject<RenderProxyBox>(find.byType(PhysicalShape)).child, paintsNothing);
       await tester.tap(find.byType(InkWell));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 10));
-      expect(tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child, paints..circle());
+      expect(tester.renderObject<RenderProxyBox>(find.byType(PhysicalShape)).child, paints..circle());
       await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
       await tester.pump(const Duration(milliseconds: 10));
       await tester.drag(find.byType(ListView), const Offset(0.0, 1000.0));
       await tester.pump(const Duration(milliseconds: 10));
       expect(
-        tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child,
+        tester.renderObject<RenderProxyBox>(find.byType(PhysicalShape)).child,
         keepAlive ? (paints..circle()) : paintsNothing,
       );
     }
