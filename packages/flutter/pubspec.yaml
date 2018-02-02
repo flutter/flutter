@@ -12,7 +12,7 @@ dependencies:
   vector_math: 2.0.5
 
   sky_engine:
-    path: ../../bin/cache/pkg/sky_engine
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
