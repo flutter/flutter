@@ -398,6 +398,7 @@ void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
   }
   InitDartIoInternal();
   InitFuchsia();
+  InitZircon();
   InitMozartInternal();
 }
 
@@ -432,6 +433,17 @@ void RuntimeHolder::InitFuchsia() {
   context_->environment()->GetServices(
       parent_env_service_provider.NewRequest());
   ConnectToService(parent_env_service_provider.get(), clipboard_.NewRequest());
+}
+
+void RuntimeHolder::InitZircon() {
+  Dart_Handle zircon_lib = Dart_LookupLibrary(ToDart("dart:zircon"));
+  DART_CHECK_VALID(zircon_lib);
+
+  Dart_Handle namespace_type =
+      Dart_GetType(zircon_lib, ToDart("_Namespace"), 0, nullptr);
+  DART_CHECK_VALID(namespace_type);
+  DART_CHECK_VALID(Dart_SetField(namespace_type, ToDart("_namespace"),
+                                 ToDart(reinterpret_cast<intptr_t>(namespc_))));
 }
 
 void RuntimeHolder::InitMozartInternal() {
