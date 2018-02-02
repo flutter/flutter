@@ -291,6 +291,14 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       )
     );
 
+    // PhysicalModel has a temporary workaround for a perfomance issues that is
+    // important for rectangular canvas material (the workaround is to skip the
+    // call to ui.Canvas.saveLayer).
+    // Until the saveLayer perfomance issue is resolved, we're keeping this
+    // special case here to use PhysicalModel for rrect canvases.
+    if (widget.type == MaterialType.canvas && _isRRect())
+      return _rrectPhysicalModelInterior(backgroundColor, contents);
+
     final ShapeBorder shape = _getShape();
 
     if (widget.type == MaterialType.transparency)
@@ -314,6 +322,33 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       clipper: new ShapeBorderClipper(
         shape: shape,
       ),
+    );
+  }
+
+  bool _isRRect() =>
+    widget.shape == null || widget.shape.runtimeType == RoundedRectangleBorder;
+
+  // Returns the material's shape border radius. If the shape is not a rounded
+  // rectangle returns BorderRadius.zero;
+  BorderRadius _getBorderRadius() {
+    if (widget.shape.runtimeType == RoundedRectangleBorder) {
+      final RoundedRectangleBorder border = widget.shape;
+      return border.borderRadius;
+    }
+    return widget.borderRadius ?? BorderRadius.zero;
+  }
+
+  Widget _rrectPhysicalModelInterior(Color backgroundColor, Widget contents) {
+    return new AnimatedPhysicalModel(
+      curve: Curves.fastOutSlowIn,
+      duration: kThemeChangeDuration,
+      shape: BoxShape.rectangle,
+      borderRadius: _getBorderRadius(),
+      elevation: widget.elevation,
+      color: backgroundColor,
+      shadowColor: widget.shadowColor,
+      animateColor: false,
+      child: contents,
     );
   }
 
