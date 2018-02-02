@@ -254,7 +254,6 @@ class RunCommand extends RunCommandBase {
           _createDebuggingOptions(), hotMode,
           applicationBinary: argResults['use-application-binary'],
           previewDart2: argResults['preview-dart-2'],
-          strongMode: argResults['strong'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: globalResults['packages'],
           projectAssets: argResults['project-assets'],
@@ -293,9 +292,7 @@ class RunCommand extends RunCommandBase {
     }
 
     final List<FlutterDevice> flutterDevices = devices.map((Device device) {
-      return new FlutterDevice(device,
-                               previewDart2: argResults['preview-dart-2'],
-                               strongMode : argResults['strong']);
+      return new FlutterDevice(device, previewDart2: argResults['preview-dart-2']);
     }).toList();
 
     ResidentRunner runner;
@@ -307,7 +304,6 @@ class RunCommand extends RunCommandBase {
         benchmarkMode: argResults['benchmark'],
         applicationBinary: argResults['use-application-binary'],
         previewDart2: argResults['preview-dart-2'],
-        strongMode: argResults['strong'],
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
         projectAssets: argResults['project-assets'],
@@ -322,7 +318,6 @@ class RunCommand extends RunCommandBase {
         traceStartup: traceStartup,
         applicationBinary: argResults['use-application-binary'],
         previewDart2: argResults['preview-dart-2'],
-        strongMode: argResults['strong'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
