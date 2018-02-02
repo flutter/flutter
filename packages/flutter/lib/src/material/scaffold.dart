@@ -37,47 +37,61 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
-/// A position that the [FloatingActionButton] can dock to in a [Scaffold].
+/// Responsible for placing the [FloatingActionButton] in the [Scaffold].
 /// 
-/// [getOffset] 
-abstract class FabPosition {
+/// Flutter provides [FabPositioner]s for the common FAB placements in
+/// Material Design apps, whose implementations are available as static
+/// members of this class.
+abstract class FabPositioner {
   /// End-aligned FAB, floating at the bottom of the screen.
   /// 
   /// This is the default alignment of FABs in Material apps.
-  static const FabPosition endFloat = const _EndFloatFab();
+  static const FabPositioner endFloat = const _EndFloatFab();
 
   /// Centered FAB, floating at the bottom of the screen.
-  static const FabPosition centerFloat = const _CenterFloatFab();
+  static const FabPositioner centerFloat = const _CenterFloatFab();
 
-  const FabPosition();
+  const FabPositioner();
 
-  /// Places the FAB with the layout parameters of the [Scaffold].
-  /// 
-  /// [scaffoldSize] is the size of the whole [Scaffold].
-  /// [fabSize] is the size of the [FloatingActionButton] to be placed.
-  /// [snackBarSize] is the size of the Scaffold's [SnackBar] (if available).
-  /// [bottomSheetSize] is the size of the [BottomSheet] (if available).
-  /// [context] is the direction used by the Scaffold (either RTL or LTR).
-  /// [contentBottom] is the height from the top where the Scaffold's body ends.
-  /// [horizontalPadding] is padding the Scaffold would like the FAB to observe.
+  /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
   Offset getOffset(ScaffoldGeometry scaffoldGeometry);
 }
 
+/// Container for the sizes of the Scaffold's layout process.
+/// 
+/// The [Scaffold] passes this to [FabPositioner]s for them to place the
+/// [FloatingActionButton].
 @immutable
 class ScaffoldGeometry {
+  /// The [Scaffold]'s [BuildContext].
+  /// 
+  /// This is used to, for example, retrieve the [Directionality] of the 
+  /// Scaffold.
   final BuildContext context;
-  final Size scaffoldSize;
-  final Size fabSize;
-  final Size snackBarSize;
-  final Size bottomSheetSize;
-  final double contentBottom;
-  final double horizontalPadding;
 
-  const ScaffoldGeometry({this.context, this.scaffoldSize, this.fabSize, this.snackBarSize, this.bottomSheetSize, this.contentBottom, this.horizontalPadding});
+  /// The [Size] of the whole [Scaffold].
+  final Size scaffoldSize;
+
+  /// The [Size] of the Scaffold's [FloatingActionButton] (if available).
+  final Size fabSize;
+
+  /// The [Size] of the Scaffold's [SnackBar] (if available).
+  final Size snackBarSize;
+
+  /// The [Size] of the Scaffold's [BottomSheet] (if available).
+  final Size bottomSheetSize;
+
+  /// The height from the [Scaffold]'s top where its body ends.
+  final double contentBottom;
+
+  /// The minimum horizontal padding the [FloatingActionButton] should observe.
+  final double horizontalFabPadding;
+
+  const ScaffoldGeometry({this.context, this.scaffoldSize, this.fabSize, this.snackBarSize, this.bottomSheetSize, this.contentBottom, this.horizontalFabPadding});
   
 }
 
-class _CenterFloatFab extends FabPosition {
+class _CenterFloatFab extends FabPositioner {
   const _CenterFloatFab();
 
   @override
@@ -100,7 +114,7 @@ class _CenterFloatFab extends FabPosition {
   }
 }
 
-class _EndFloatFab extends FabPosition {
+class _EndFloatFab extends FabPositioner {
 
   const _EndFloatFab();
 
@@ -112,10 +126,10 @@ class _EndFloatFab extends FabPosition {
     assert(textDirection != null);
     switch (textDirection) {
       case TextDirection.rtl:
-        fabX = _kFloatingActionButtonMargin + scaffoldGeometry.horizontalPadding;
+        fabX = _kFloatingActionButtonMargin + scaffoldGeometry.horizontalFabPadding;
         break;
       case TextDirection.ltr:
-        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.fabSize.width - _kFloatingActionButtonMargin - scaffoldGeometry.horizontalPadding;
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.fabSize.width - _kFloatingActionButtonMargin - scaffoldGeometry.horizontalFabPadding;
       break;
     }
 
@@ -152,8 +166,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final double horizontalPadding;
   final BuildContext context;
 
-  final FabPosition previousFabPosition;
-  final FabPosition currentFabPosition;
+  final FabPositioner previousFabPosition;
+  final FabPositioner currentFabPosition;
   final double fabMoveProgress;
 
   @override
@@ -240,7 +254,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         snackBarSize: snackBarSize,
         bottomSheetSize: bottomSheetSize,
         contentBottom: contentBottom,
-        horizontalPadding: horizontalPadding,
+        horizontalFabPadding: horizontalPadding,
       );
       final Offset currentFabOffset = currentFabPosition.getOffset(currentGeometry);
       final Offset previousFabOffset = previousFabPosition.getOffset(currentGeometry);
@@ -462,7 +476,7 @@ class Scaffold extends StatefulWidget {
   /// Typically a [FloatingActionButton].
   final Widget floatingActionButton;
 
-  final FabPosition fabPosition;
+  final FabPositioner fabPosition;
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
@@ -886,17 +900,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // FAB API
   AnimationController _fabMoveController;
-  FabPosition _previousFabPosition;
-  FabPosition _fabPosition;
+  FabPositioner _previousFabPosition;
+  FabPositioner _fabPosition;
 
-  void _moveFab(final FabPosition newPosition) {
+  void _moveFab(final FabPositioner newPosition) {
     void updatePosition() {
       setState(() {
         _previousFabPosition = _fabPosition;
         _fabPosition = newPosition;
-        print(
-          'Moving fab from $_previousFabPosition to $_fabPosition'
-        );
       });
       _fabMoveController.forward(from: 0.0);
     }
@@ -939,11 +950,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _fabPosition = widget.fabPosition ?? FabPosition.endFloat;
+    _fabPosition = widget.fabPosition ?? FabPositioner.endFloat;
     _previousFabPosition = _fabPosition;
     _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 0.0, duration: _kFloatingActionButtonSegue * 2);
     _fabMoveController.addStatusListener(_handleFabMotion);
-    _fabMoveController.addListener(() {print('fab status');});
   }
 
   @override
