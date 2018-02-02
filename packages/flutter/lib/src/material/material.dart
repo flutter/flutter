@@ -305,15 +305,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 
     if (widget.type == MaterialType.transparency)
       return _clipToShape(shape: shape, contents: contents);
-
-    // PhysicalModel performs better than PhysicalShape, so we use it when
-    // possible.
-    // This is not expected, and we do this as a temporary workaround until the
-    // shape performance regression is resolved, see:
-    // https://github.com/flutter/flutter/issues/14403
-    if (shape.runtimeType == CircleBorder || shape.runtimeType == RoundedRectangleBorder)
-      return _physicalModelInterior(contents, shape, backgroundColor);
-
+    
     return new _MaterialInterior(
       curve: Curves.fastOutSlowIn,
       duration: kThemeChangeDuration,
@@ -323,45 +315,10 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       shadowColor: widget.shadowColor,
       child: contents,
     );
-  }
 
-  Widget _physicalModelInterior(Widget contents, ShapeBorder shape, Color backgroundColor) {
-    assert(shape.runtimeType == CircleBorder || shape.runtimeType == RoundedRectangleBorder);
-    BoxShape boxShape;
-    BorderRadius borderRadius;
-    if (shape.runtimeType == CircleBorder) {
-      boxShape = BoxShape.circle;
-      borderRadius = BorderRadius.zero;
-    } else {
-      final RoundedRectangleBorder border = shape;
-      boxShape = BoxShape.rectangle;
-      borderRadius = border.borderRadius;
-    }
-    return new AnimatedPhysicalModel(
-      curve: Curves.fastOutSlowIn,
-      duration: kThemeChangeDuration,
-      shape: boxShape,
-      borderRadius: borderRadius,
-      elevation: widget.elevation,
-      color: backgroundColor,
-      shadowColor: widget.shadowColor,
-      animateColor: false,
-      child: contents,
-    );
   }
 
   static Widget _clipToShape({ShapeBorder shape, Widget contents}) {
-    // ClipRRect performs better than ClipPath, so we use it when possible.
-    // This is not expected, and we do this as a temporary workaround until the
-    // shape performance regression is resolved, see:
-    // https://github.com/flutter/flutter/issues/14403
-    if (shape.runtimeType == RoundedRectangleBorder) {
-      final RoundedRectangleBorder border = shape;
-      return new ClipRRect(
-        borderRadius: border.borderRadius,
-        child: contents,
-      );
-    }
     return new ClipPath(
       child: contents,
       clipper: new ShapeBorderClipper(
