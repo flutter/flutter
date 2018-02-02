@@ -153,7 +153,7 @@ Future<Null> main(List<String> arguments) async {
   );
   printStream(process.stderr, prefix: args['json'] ? '' : 'dartdoc:stderr: ',
     filter: args['verbose'] ? const <Pattern>[] : <Pattern>[
-      new RegExp(r'^ warning: generic type handled as HTML:'), // https://github.com/dart-lang/dartdoc/issues/1475
+      new RegExp(r'^[ ]+warning: generic type handled as HTML:'), // https://github.com/dart-lang/dartdoc/issues/1475
       new RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
     ],
   );
