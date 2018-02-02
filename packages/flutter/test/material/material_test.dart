@@ -24,6 +24,7 @@ Widget buildMaterial(
       child: new Material(
         shadowColor: shadowColor,
         elevation: elevation,
+        shape: const CircleBorder(),
       ),
     ),
   );
