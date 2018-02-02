@@ -92,8 +92,7 @@ void main() {
     expect(const AlignmentDirectional(0.0, 0.0).resolve(TextDirection.rtl), const Alignment(0.0, 0.0));
     expect(const AlignmentDirectional(1.0, 1.0).resolve(TextDirection.ltr), const Alignment(1.0, 1.0));
     expect(const AlignmentDirectional(1.0, 1.0).resolve(TextDirection.rtl), const Alignment(-1.0, 1.0));
-    final double $1 = 1.0; // we want these instances to be separate instances so that we're not just checking with a single object
-    expect(new AlignmentDirectional($1, 2.0), new AlignmentDirectional($1, 2.0));
+    expect(new AlignmentDirectional(nonconst(1.0), 2.0), new AlignmentDirectional(nonconst(1.0), 2.0));
     expect(const AlignmentDirectional(1.0, 2.0), isNot(const AlignmentDirectional(2.0, 1.0)));
     expect(const AlignmentDirectional(-1.0, 0.0).resolve(TextDirection.ltr),
            const AlignmentDirectional(1.0, 0.0).resolve(TextDirection.rtl));
