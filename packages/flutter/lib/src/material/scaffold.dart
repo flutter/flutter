@@ -88,7 +88,6 @@ class ScaffoldGeometry {
   final double horizontalFabPadding;
 
   const ScaffoldGeometry({this.context, this.scaffoldSize, this.fabSize, this.snackBarSize, this.bottomSheetSize, this.contentBottom, this.horizontalFabPadding});
-  
 }
 
 class _CenterFloatFab extends FabPositioner {
