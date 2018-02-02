@@ -22,7 +22,7 @@ typedef Rect RectCallback();
 ///  * [Material], in particular [Material.type]
 ///  * [kMaterialEdges]
 enum MaterialType {
-  /// Infinite extent using default theme canvas color.
+  /// Rectangle using default theme canvas color.
   canvas,
 
   /// Rounded edges, card theme color.
