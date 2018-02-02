@@ -57,6 +57,56 @@ abstract class FabPositioner {
   Offset getOffset(ScaffoldGeometry scaffoldGeometry);
 }
 
+/// Provider for details about the [Offset] and [Size] of the Fab after the [Scaffold] and [FabPositioner] have determined its layout.
+class FabPosition extends InheritedWidget {
+
+  final Offset _position;
+  final Size _size;
+
+  const FabPosition(this._position, this._size);
+
+  Rect get rect => new Rect.fromLTWH(_position.dx, _position.dy, _size.width, _size.height);
+
+  @override
+  bool updateShouldNotify(InheritedWidget oldWidget) => false;
+}
+
+/// [Tween] provider to animate the [FloatingActionButton] around the Scaffold.
+class FabMotionAnimator extends InheritedWidget {
+  /// Animates the FAB around by scaling it out and in at its new location.
+  static final FabMotionAnimator scale = new FabMotionAnimator(
+    positionTween: new CurveTween(curve: const Threshold(0.5)),
+    scaleTween: new CurveTween(curve: new Interval(0.0, 0.5, curve: Curves.easeIn.flipped)).chain(
+      new CurveTween(curve: const Interval(0.5, 1.0, curve: Curves.easeIn))
+    ),
+    opacityTween: new Tween<double>(begin: 1.0, end: 1.0),
+  );
+
+  final Animatable<double> positionTween;
+  final Animatable<double> scaleTween;
+  final Animatable<double> opacityTween;
+
+  Animatable<Offset> buildOffsetAnimation({@required Offset begin, @required Offset end}) {
+    return new Tween<Offset>(begin: begin, end: end).chain(positionTween);
+  }
+
+  const FabMotionAnimator({@required this.positionTween, @required this.scaleTween, @required this.opacityTween})
+    : assert(positionTween != null),
+      assert(scaleTween != null), 
+      assert(opacityTween != null);
+
+  @override
+  bool updateShouldNotify(FabMotionAnimator oldWidget) {
+    return positionTween != oldWidget.positionTween
+        && scaleTween != oldWidget.scaleTween
+        && opacityTween != oldWidget.opacityTween;
+  }
+
+  static FabMotionAnimator of(BuildContext context) {
+    return context.inheritFromWidgetOfExactType(FabMotionAnimator) ?? scale;
+  }
+}
+
 /// Container for the sizes of the Scaffold's layout process.
 /// 
 /// The [Scaffold] passes this to [FabPositioner]s for them to place the
@@ -257,7 +307,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       );
       final Offset currentFabOffset = currentFabPosition.getOffset(currentGeometry);
       final Offset previousFabOffset = previousFabPosition.getOffset(currentGeometry);
-      final Offset fabOffset = new MaterialPointArcTween(begin: previousFabOffset, end: currentFabOffset).lerp(fabMoveProgress);
+      final Offset fabOffset = FabMotionAnimator.of(context).buildOffsetAnimation(begin: previousFabOffset, end: currentFabOffset).evaluate(new AlwaysStoppedAnimation<double>(fabMoveProgress));
       positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
     }
 
