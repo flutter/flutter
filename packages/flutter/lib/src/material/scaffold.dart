@@ -40,7 +40,7 @@ enum _ScaffoldSlot {
 /// A position that the [FloatingActionButton] can dock to in a [Scaffold].
 /// 
 /// [getOffset] 
-class FabPosition {
+abstract class FabPosition {
   /// End-aligned FAB, floating at the bottom of the screen.
   /// 
   /// This is the default alignment of FABs in Material apps.
@@ -49,7 +49,7 @@ class FabPosition {
   /// Centered FAB, floating at the bottom of the screen.
   static const FabPosition centerFloat = const _CenterFloatFab();
 
-  const FabPosition(this.getOffset);
+  const FabPosition();
 
   /// Places the FAB with the layout parameters of the [Scaffold].
   /// 
@@ -57,22 +57,44 @@ class FabPosition {
   /// [fabSize] is the size of the [FloatingActionButton] to be placed.
   /// [snackBarSize] is the size of the Scaffold's [SnackBar] (if available).
   /// [bottomSheetSize] is the size of the [BottomSheet] (if available).
-  /// [textDirection] is the direction used by the Scaffold (either RTL or LTR).
+  /// [context] is the direction used by the Scaffold (either RTL or LTR).
   /// [contentBottom] is the height from the top where the Scaffold's body ends.
   /// [horizontalPadding] is padding the Scaffold would like the FAB to observe.
-  final Offset Function(Size scaffoldSize, Size fabSize, Size snackBarSize, Size bottomSheetSize, TextDirection textDirection, double contentBottom, double horizontalPadding) getOffset;
+  Offset getOffset(ScaffoldGeometry scaffoldGeometry);
+}
+
+@immutable
+class ScaffoldGeometry {
+  final BuildContext context;
+  final Size scaffoldSize;
+  final Size fabSize;
+  final Size snackBarSize;
+  final Size bottomSheetSize;
+  final double contentBottom;
+  final double horizontalPadding;
+
+  const ScaffoldGeometry({this.context, this.scaffoldSize, this.fabSize, this.snackBarSize, this.bottomSheetSize, this.contentBottom, this.horizontalPadding});
+  
 }
 
 class _CenterFloatFab extends FabPosition {
-  const _CenterFloatFab() : super(_getOffset);
+  const _CenterFloatFab();
 
-  static Offset _getOffset(Size scaffoldSize, Size fabSize, Size snackBarSize, Size bottomSheetSize, TextDirection textDirection, double contentBottom, double endPadding) {
-    final double fabX = (scaffoldSize.width - fabSize.width) / 2;
-    double fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
-    if (snackBarSize.height > 0.0)
-      fabY = math.min(fabY, contentBottom - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
-    if (bottomSheetSize.height > 0.0)
-      fabY = math.min(fabY, contentBottom - bottomSheetSize.height - fabSize.height / 2.0);
+  @override
+  Offset getOffset(ScaffoldGeometry scaffoldGeometry) {
+    // Compute the x-axis offset.
+    final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.fabSize.width) / 2;
+
+    // Compute the y-axis offset.
+    final double contentBottom = scaffoldGeometry.contentBottom;
+    final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
+    final double fabHeight = scaffoldGeometry.fabSize.height;
+    final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
+    double fabY = contentBottom - fabHeight - _kFloatingActionButtonMargin;
+    if (snackBarHeight > 0.0)
+      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - _kFloatingActionButtonMargin);
+    if (bottomSheetHeight > 0.0)
+      fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
 
     return new Offset(fabX, fabY);
   }
@@ -80,25 +102,34 @@ class _CenterFloatFab extends FabPosition {
 
 class _EndFloatFab extends FabPosition {
 
-  const _EndFloatFab() : super(_getOffset);
+  const _EndFloatFab();
 
-  static Offset _getOffset(Size scaffoldSize, Size fabSize, Size snackBarSize, Size bottomSheetSize, TextDirection textDirection, double contentBottom, double endPadding) {
+  @override
+  Offset getOffset(ScaffoldGeometry scaffoldGeometry) {
+    // Compute the x-axis offset.
+    final TextDirection textDirection = Directionality.of(scaffoldGeometry.context);
     double fabX;
     assert(textDirection != null);
     switch (textDirection) {
       case TextDirection.rtl:
-        fabX = _kFloatingActionButtonMargin + endPadding;
+        fabX = _kFloatingActionButtonMargin + scaffoldGeometry.horizontalPadding;
         break;
       case TextDirection.ltr:
-        fabX = scaffoldSize.width - fabSize.width - _kFloatingActionButtonMargin - endPadding;
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.fabSize.width - _kFloatingActionButtonMargin - scaffoldGeometry.horizontalPadding;
       break;
     }
 
-    double fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
-    if (snackBarSize.height > 0.0)
-      fabY = math.min(fabY, contentBottom - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
-    if (bottomSheetSize.height > 0.0)
-      fabY = math.min(fabY, contentBottom - bottomSheetSize.height - fabSize.height / 2.0);
+    // Compute the y-axis offset.
+    final double contentBottom = scaffoldGeometry.contentBottom;
+    final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
+    final double fabHeight = scaffoldGeometry.fabSize.height;
+    final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
+
+    double fabY = contentBottom - fabHeight - _kFloatingActionButtonMargin;
+    if (snackBarHeight > 0.0)
+      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - _kFloatingActionButtonMargin);
+    if (bottomSheetHeight > 0.0)
+      fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
 
     return new Offset(fabX, fabY);
   }
@@ -108,9 +139,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
     @required this.statusBarHeight,
     @required this.bottomViewInset,
-    @required this.textDirection,
+    @required this.context,
     // for floating action button
-    @required this.endPadding, 
+    @required this.horizontalPadding, 
     @required this.previousFabPosition,
     @required this.currentFabPosition,
     @required this.fabMoveProgress,
@@ -118,8 +149,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   final double statusBarHeight;
   final double bottomViewInset;
-  final double endPadding;
-  final TextDirection textDirection;
+  final double horizontalPadding;
+  final BuildContext context;
 
   final FabPosition previousFabPosition;
   final FabPosition currentFabPosition;
@@ -202,8 +233,17 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       final Size fabSize = layoutChild(_ScaffoldSlot.floatingActionButton, looseConstraints);
       
       // To account for the FAB position being changed, we'll lerp between its old and new position.
-      final Offset currentFabOffset = currentFabPosition.getOffset(size, fabSize, snackBarSize, bottomSheetSize, textDirection, contentBottom, endPadding);
-      final Offset previousFabOffset = previousFabPosition.getOffset(size, fabSize, snackBarSize, bottomSheetSize, textDirection, contentBottom, endPadding);
+      final ScaffoldGeometry currentGeometry = new ScaffoldGeometry(
+        context: context,
+        scaffoldSize: size,
+        fabSize: fabSize,
+        snackBarSize: snackBarSize,
+        bottomSheetSize: bottomSheetSize,
+        contentBottom: contentBottom,
+        horizontalPadding: horizontalPadding,
+      );
+      final Offset currentFabOffset = currentFabPosition.getOffset(currentGeometry);
+      final Offset previousFabOffset = previousFabPosition.getOffset(currentGeometry);
       final Offset fabOffset = new MaterialPointArcTween(begin: previousFabOffset, end: currentFabOffset).lerp(fabMoveProgress);
       positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
     }
@@ -228,8 +268,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   bool shouldRelayout(_ScaffoldLayout oldDelegate) {
     return oldDelegate.statusBarHeight != statusBarHeight
         || oldDelegate.bottomViewInset != bottomViewInset
-        || oldDelegate.endPadding != endPadding
-        || oldDelegate.textDirection != textDirection
+        || oldDelegate.horizontalPadding != horizontalPadding
+        || oldDelegate.context != context
         || oldDelegate.fabMoveProgress != fabMoveProgress
         || oldDelegate.previousFabPosition != previousFabPosition
         || oldDelegate.currentFabPosition != currentFabPosition;
@@ -1169,8 +1209,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
               delegate: new _ScaffoldLayout(
                 statusBarHeight: mediaQuery.padding.top,
                 bottomViewInset: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
-                endPadding: endPadding,
-                textDirection: textDirection,
+                horizontalPadding: endPadding,
+                context: context,
                 previousFabPosition: _previousFabPosition,
                 currentFabPosition: _fabPosition,
                 fabMoveProgress: new CurveTween(curve: Curves.ease).evaluate(_fabMoveController),
