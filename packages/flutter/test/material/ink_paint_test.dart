@@ -250,6 +250,7 @@ void main() {
   });
 
   testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/14391
     await tester.pumpWidget(
       new Material(
         child: new Center(
@@ -269,13 +270,13 @@ void main() {
     final Offset tapDownOffset = tester.getTopLeft(find.byType(InkWell));
     final Offset inkWellCenter = tester.getCenter(find.byType(InkWell));
     await tester.tapAt(tapDownOffset);
-    await tester.pump(); // start gesture
+    await tester.pump(); // start splash
     await tester.pump(const Duration(milliseconds: 375)); // _kFadeOutDuration, in_ripple.dart
 
     final TestGesture gesture = await tester.startGesture(tapDownOffset);
     await tester.pump(); // start gesture
     await gesture.moveTo(const Offset(0.0, 0.0));
-    await gesture.up();
+    await gesture.up(); // generates a tap cancel
     await tester.pumpAndSettle();
   });
 }
