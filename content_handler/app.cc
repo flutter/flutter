@@ -9,6 +9,8 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
+#include "flutter/content_handler/fuchsia_font_manager.h"
+#include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.h"
 #include "lib/fsl/tasks/message_loop.h"
 #include "lib/fxl/macros.h"
@@ -67,8 +69,14 @@ App::App() {
   settings.enable_dart_profiling = true;
   blink::Settings::Set(settings);
 
-  blink::SetFontProvider(
+  fonts::FontProviderPtr font_provider(
       context_->ConnectToEnvironmentService<fonts::FontProvider>());
+  if (settings.using_blink) {
+    blink::SetFontProvider(std::move(font_provider));
+  } else {
+    blink::FontCollection::ForProcess().GetFontCollection()->PushFront(
+        sk_make_sp<txt::FuchsiaFontManager>(std::move(font_provider)));
+  }
 
   context_->outgoing_services()->AddService<app::ApplicationRunner>(
       [this](fidl::InterfaceRequest<app::ApplicationRunner> request) {
