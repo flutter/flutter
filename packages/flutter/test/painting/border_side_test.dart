@@ -15,13 +15,10 @@ void main() {
         style: BorderStyle.solid,
       ),
     );
-    // so that we can use `new` below, we use these:
-    final Null $null = null;
-    final double $minus1 = -1.0;
-    expect(() => new BorderSide(color: $null), throwsAssertionError);
-    expect(() => new BorderSide(width: $null), throwsAssertionError);
-    expect(() => new BorderSide(style: $null), throwsAssertionError);
-    expect(() => new BorderSide(width: $minus1), throwsAssertionError);
+    expect(() => new BorderSide(color: nonconst(null)), throwsAssertionError);
+    expect(() => new BorderSide(width: nonconst(null)), throwsAssertionError);
+    expect(() => new BorderSide(style: nonconst(null)), throwsAssertionError);
+    expect(() => new BorderSide(width: nonconst(-1.0)), throwsAssertionError);
     expect(
       const BorderSide(width: -0.0),
       const BorderSide(

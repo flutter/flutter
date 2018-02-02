@@ -317,11 +317,10 @@ void main() {
   });
 
   test('BorderDirectional constructor', () {
-    final Null $null = null;
-    expect(() => new BorderDirectional(top: $null), throwsAssertionError);
-    expect(() => new BorderDirectional(start: $null), throwsAssertionError);
-    expect(() => new BorderDirectional(end: $null), throwsAssertionError);
-    expect(() => new BorderDirectional(bottom: $null), throwsAssertionError);
+    expect(() => new BorderDirectional(top: nonconst(null)), throwsAssertionError);
+    expect(() => new BorderDirectional(start: nonconst(null)), throwsAssertionError);
+    expect(() => new BorderDirectional(end: nonconst(null)), throwsAssertionError);
+    expect(() => new BorderDirectional(bottom: nonconst(null)), throwsAssertionError);
   });
 
   test('BorderDirectional.merge', () {
@@ -622,7 +621,7 @@ void main() {
   });
 
   test('BorderDirectional hashCode', () {
-    final BorderSide side = const BorderSide(width: 2.0);
+    final BorderSide side = new BorderSide(width: nonconst(2.0));
     expect(new BorderDirectional(top: side).hashCode, new BorderDirectional(top: side).hashCode);
     expect(new BorderDirectional(top: side).hashCode, isNot(new BorderDirectional(bottom: side).hashCode));
   });
