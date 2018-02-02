@@ -17,18 +17,12 @@ import 'theme.dart';
 ///  * [FlatButton], which styles itself based on the ambient [ButtonTheme].
 enum ButtonTextTheme {
   /// Button text is black or white depending on [ThemeData.brightness].
-  ///
-  /// For more information see [FlatButton], [RaisedButton].
   normal,
 
   /// Button text is [ThemeData.accentColor].
-  ///
-  /// For more information see [FlatButton], [RaisedButton].
   accent,
 
-  /// A button's text color is based on [ThemeData.primaryColor].
-  ///
-  /// For more information see [FlatButton], [RaisedButton].
+  /// Button text is based on [ThemeData.primaryColor].
   primary,
 }
 
@@ -44,9 +38,9 @@ enum ButtonTextTheme {
 ///
 /// See also:
 ///
-///  * [FlatButton], and [RaisedButton] which are styled based on the
+///  * [FlatButton] and [RaisedButton], which are styled based on the
 ///    ambient button theme.
-///  * [ThemeData.textTheme.button], the default text style for button labels.
+///  * [ThemeData.textTheme], `button` is the default text style for button labels.
 ///  * [ThemeData.buttonColor], the fill color for [RaisedButton]s unless the
 ///    button theme's text theme is [ButtonTextTheme.primary].
 ///  * [ThemeData.primaryColor], the fill or text color if a button theme's text
@@ -57,7 +51,7 @@ enum ButtonTextTheme {
 ///  * [ThemeData.brightness], used to select contrasting text and fill colors.
 ///  * [ThemeData.highlightColor], a button [InkWell]'s default highlight color.
 ///  * [ThemeData.splashColor], a button [InkWell]'s default splash color.
-///  * [ShapedMaterialButton], which can be used to configure a button that doesn't
+///  * [RawMaterialButton], which can be used to configure a button that doesn't
 ///    depend on any inherited themes.
 class ButtonTheme extends InheritedWidget {
   /// Creates a button theme.
@@ -168,9 +162,6 @@ class ButtonThemeData {
 
   /// The minimum height for buttons.
   ///
-  /// The actual vertical space allocated for a button's child is
-  /// at least this value less the theme's horizontal [padding].
-  ///
   /// Defaults to 36.0 logical pixels.
   final double height;
 
@@ -240,7 +231,7 @@ class ButtonThemeData {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! ButtonThemeData)
+    if (other.runtimeType != runtimeType)
       return false;
     final ButtonThemeData typedOther = other;
     return textTheme == typedOther.textTheme
