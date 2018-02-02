@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
@@ -118,6 +119,47 @@ void main() {
     expect(tabsBuilt, <int>[0, 0, 1, 0, 1]);
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2', skipOffstage: false), isOffstage);
+  });
+
+  testWidgets('Last tab gets focus', (WidgetTester tester) async {
+    // 2 nodes for 2 tabs
+    final List<FocusNode> focusNodes = <FocusNode>[new FocusNode(), new FocusNode()];
+
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoTabScaffold(
+                  tabBar: _buildTabBar(),
+                  tabBuilder: (BuildContext context, int index) {
+                    return new TextField(
+                      focusNode: focusNodes[index],
+                      autofocus: true,
+                    );
+                  }
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    expect(focusNodes[0].hasFocus, isTrue);
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pump();
+
+    expect(focusNodes[0].hasFocus, isFalse);
+    expect(focusNodes[1].hasFocus, isTrue);
+
+    await tester.tap(find.text('Tab 1'));
+    await tester.pump();
+
+    expect(focusNodes[0].hasFocus, isTrue);
+    expect(focusNodes[1].hasFocus, isFalse);
   });
 }
 

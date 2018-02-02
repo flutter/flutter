@@ -218,15 +218,29 @@ class _TabView extends StatefulWidget {
 
 class _TabViewState extends State<_TabView> {
   List<Widget> tabs;
+  List<FocusScopeNode> tabFocusNodes;
 
   @override
   void initState() {
     super.initState();
     tabs = new List<Widget>(widget.tabNumber);
+    tabFocusNodes = new List<FocusScopeNode>.generate(
+      widget.tabNumber,
+      (_) => new FocusScopeNode(),
+    );
+  }
+
+  @override
+  void dispose() {
+    for (FocusScopeNode focusScopeNode in tabFocusNodes) {
+      focusScopeNode.detach();
+    }
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    FocusScope.of(context).setFirstFocus(tabFocusNodes[widget.currentTabIndex]);
     return new Stack(
       fit: StackFit.expand,
       children: new List<Widget>.generate(widget.tabNumber, (int index) {
@@ -239,7 +253,10 @@ class _TabViewState extends State<_TabView> {
           offstage: !active,
           child: new TickerMode(
             enabled: active,
-            child: tabs[index] ?? new Container(),
+            child: new FocusScope(
+              node: tabFocusNodes[index],
+              child: tabs[index] ?? new Container(),
+            ),
           ),
         );
       }),
