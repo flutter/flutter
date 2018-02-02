@@ -29,8 +29,8 @@ Widget buildMaterial(
   );
 }
 
-RenderPhysicalModel getShadow(WidgetTester tester) {
-  return tester.renderObject(find.byType(PhysicalModel));
+RenderPhysicalShape getShadow(WidgetTester tester) {
+  return tester.renderObject(find.byType(PhysicalShape));
 }
 
 class PaintRecorder extends CustomPainter {
@@ -122,23 +122,23 @@ void main() {
     // a kThemeChangeDuration time interval.
 
     await tester.pumpWidget(buildMaterial(elevation: 0.0));
-    final RenderPhysicalModel modelA = getShadow(tester);
+    final RenderPhysicalShape modelA = getShadow(tester);
     expect(modelA.elevation, equals(0.0));
 
     await tester.pumpWidget(buildMaterial(elevation: 9.0));
-    final RenderPhysicalModel modelB = getShadow(tester);
+    final RenderPhysicalShape modelB = getShadow(tester);
     expect(modelB.elevation, equals(0.0));
 
     await tester.pump(const Duration(milliseconds: 1));
-    final RenderPhysicalModel modelC = getShadow(tester);
+    final RenderPhysicalShape modelC = getShadow(tester);
     expect(modelC.elevation, closeTo(0.0, 0.001));
 
     await tester.pump(kThemeChangeDuration ~/ 2);
-    final RenderPhysicalModel modelD = getShadow(tester);
+    final RenderPhysicalShape modelD = getShadow(tester);
     expect(modelD.elevation, isNot(closeTo(0.0, 0.001)));
 
     await tester.pump(kThemeChangeDuration);
-    final RenderPhysicalModel modelE = getShadow(tester);
+    final RenderPhysicalShape modelE = getShadow(tester);
     expect(modelE.elevation, equals(9.0));
   });
 
@@ -147,23 +147,23 @@ void main() {
     // a kThemeChangeDuration time interval.
 
     await tester.pumpWidget(buildMaterial(shadowColor: const Color(0xFF00FF00)));
-    final RenderPhysicalModel modelA = getShadow(tester);
+    final RenderPhysicalShape modelA = getShadow(tester);
     expect(modelA.shadowColor, equals(const Color(0xFF00FF00)));
 
     await tester.pumpWidget(buildMaterial(shadowColor: const Color(0xFFFF0000)));
-    final RenderPhysicalModel modelB = getShadow(tester);
+    final RenderPhysicalShape modelB = getShadow(tester);
     expect(modelB.shadowColor, equals(const Color(0xFF00FF00)));
 
     await tester.pump(const Duration(milliseconds: 1));
-    final RenderPhysicalModel modelC = getShadow(tester);
+    final RenderPhysicalShape modelC = getShadow(tester);
     expect(modelC.shadowColor, within<Color>(distance: 1, from: const Color(0xFF00FF00)));
 
     await tester.pump(kThemeChangeDuration ~/ 2);
-    final RenderPhysicalModel modelD = getShadow(tester);
+    final RenderPhysicalShape modelD = getShadow(tester);
     expect(modelD.shadowColor, isNot(within<Color>(distance: 1, from: const Color(0xFF00FF00))));
 
     await tester.pump(kThemeChangeDuration);
-    final RenderPhysicalModel modelE = getShadow(tester);
+    final RenderPhysicalShape modelE = getShadow(tester);
     expect(modelE.shadowColor, equals(const Color(0xFFFF0000)));
   });
 
@@ -178,7 +178,7 @@ void main() {
         )
       );
 
-      expect(find.byKey(materialKey), clipsWithBoundingRRect(borderRadius: BorderRadius.zero));
+      expect(find.byKey(materialKey), clipsWithBoundingRect);
     });
 
     testWidgets('clips to rounded rect when borderRadius provided', (WidgetTester tester) async {
