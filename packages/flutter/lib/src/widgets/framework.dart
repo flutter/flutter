@@ -3557,6 +3557,14 @@ typedef Widget WidgetBuilder(BuildContext context);
 /// Used by [ListView.builder] and other APIs that use lazily-generated widgets.
 typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
 
+/// A builder that builds a widget given a child.
+///
+/// The child should typically be part of the returned widget tree.
+///
+/// Used by [AnimatedBuilder.builder], as well as [WidgetsApp.builder] and
+/// [MaterialApp.builder].
+typedef Widget TransitionBuilder(BuildContext context, Widget child);
+
 /// An [Element] that composes other [Element]s.
 ///
 /// Rather than creating a [RenderObject] directly, a [ComponentElement] creates
