@@ -22,7 +22,7 @@ typedef Rect RectCallback();
 ///  * [Material], in particular [Material.type]
 ///  * [kMaterialEdges]
 enum MaterialType {
-  /// Infinite extent using default theme canvas color.
+  /// Rectangle using default theme canvas color.
   canvas,
 
   /// Rounded edges, card theme color.
@@ -291,19 +291,19 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       )
     );
 
+    // PhysicalModel has a temporary workaround for a perfomance issues that is
+    // important for rectangular canvas material (the workaround is to skip the
+    // call to ui.Canvas.saveLayer).
+    // Until the saveLayer perfomance issue is resolved, we're keeping this
+    // special case here to use PhysicalModel for rrect canvases.
+    if (widget.type == MaterialType.canvas && _isRRect())
+      return _rrectPhysicalModelInterior(backgroundColor, contents);
+
     final ShapeBorder shape = _getShape();
 
     if (widget.type == MaterialType.transparency)
       return _clipToShape(shape: shape, contents: contents);
-
-    // PhysicalModel performs better than PhysicalShape, so we use it when
-    // possible.
-    // This is not expected, and we do this as a temporary workaround until the
-    // shape performance regression is resolved, see:
-    // https://github.com/flutter/flutter/issues/14403
-    if (shape.runtimeType == CircleBorder || shape.runtimeType == RoundedRectangleBorder)
-      return _physicalModelInterior(contents, shape, backgroundColor);
-
+    
     return new _MaterialInterior(
       curve: Curves.fastOutSlowIn,
       duration: kThemeChangeDuration,
@@ -313,50 +313,42 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       shadowColor: widget.shadowColor,
       child: contents,
     );
-  }
 
-  Widget _physicalModelInterior(Widget contents, ShapeBorder shape, Color backgroundColor) {
-    assert(shape.runtimeType == CircleBorder || shape.runtimeType == RoundedRectangleBorder);
-    BoxShape boxShape;
-    BorderRadius borderRadius;
-    if (shape.runtimeType == CircleBorder) {
-      boxShape = BoxShape.circle;
-      borderRadius = BorderRadius.zero;
-    } else {
-      final RoundedRectangleBorder border = shape;
-      boxShape = BoxShape.rectangle;
-      borderRadius = border.borderRadius;
-    }
-    return new AnimatedPhysicalModel(
-      curve: Curves.fastOutSlowIn,
-      duration: kThemeChangeDuration,
-      shape: boxShape,
-      borderRadius: borderRadius,
-      elevation: widget.elevation,
-      color: backgroundColor,
-      shadowColor: widget.shadowColor,
-      animateColor: false,
-      child: contents,
-    );
   }
 
   static Widget _clipToShape({ShapeBorder shape, Widget contents}) {
-    // ClipRRect performs better than ClipPath, so we use it when possible.
-    // This is not expected, and we do this as a temporary workaround until the
-    // shape performance regression is resolved, see:
-    // https://github.com/flutter/flutter/issues/14403
-    if (shape.runtimeType == RoundedRectangleBorder) {
-      final RoundedRectangleBorder border = shape;
-      return new ClipRRect(
-        borderRadius: border.borderRadius,
-        child: contents,
-      );
-    }
     return new ClipPath(
       child: contents,
       clipper: new ShapeBorderClipper(
         shape: shape,
       ),
+    );
+  }
+
+  bool _isRRect() =>
+    widget.shape == null || widget.shape.runtimeType == RoundedRectangleBorder;
+
+  // Returns the material's shape border radius. If the shape is not a rounded
+  // rectangle returns BorderRadius.zero;
+  BorderRadius _getBorderRadius() {
+    if (widget.shape.runtimeType == RoundedRectangleBorder) {
+      final RoundedRectangleBorder border = widget.shape;
+      return border.borderRadius;
+    }
+    return widget.borderRadius ?? BorderRadius.zero;
+  }
+
+  Widget _rrectPhysicalModelInterior(Color backgroundColor, Widget contents) {
+    return new AnimatedPhysicalModel(
+      curve: Curves.fastOutSlowIn,
+      duration: kThemeChangeDuration,
+      shape: BoxShape.rectangle,
+      borderRadius: _getBorderRadius(),
+      elevation: widget.elevation,
+      color: backgroundColor,
+      shadowColor: widget.shadowColor,
+      animateColor: false,
+      child: contents,
     );
   }
 
