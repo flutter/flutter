@@ -301,6 +301,29 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       )
     );
 
+    // PhysicalModel has a temporary workaround for a perfomance issue that
+    // speeds up rectangular non transparent material (the workaround is to
+    // skip the call to ui.Canvas.saveLayer if the border radius is 0).
+    // Until the saveLayer perfomance issue is resolved, we're keeping this
+    // special case here for canvas material type that is using the default
+    // shape (rectangle). We could go down this fast path for explicitly
+    // specified rectangles (e.g shape RoundeRectangleBorder with radius 0, but
+    // we choose not to as we want the change from the fast-path to the
+    // slow-path to be noticeable in the construction site of Material.
+    if (widget.type == MaterialType.canvas && widget.shape == null && widget.borderRadius == null) {
+      return new AnimatedPhysicalModel(
+        curve: Curves.fastOutSlowIn,
+        duration: kThemeChangeDuration,
+        shape: BoxShape.rectangle,
+        borderRadius: BorderRadius.zero,
+        elevation: widget.elevation,
+        color: backgroundColor,
+        shadowColor: widget.shadowColor,
+        animateColor: false,
+        child: contents,
+      );
+    }
+
     final ShapeBorder shape = _getShape();
 
     if (widget.type == MaterialType.transparency)
@@ -347,7 +370,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       case MaterialType.card:
       case MaterialType.button:
         return new RoundedRectangleBorder(
-          borderRadius: kMaterialEdges[widget.type],
+          borderRadius: widget.borderRadius ?? kMaterialEdges[widget.type],
         );
 
       case MaterialType.circle:
