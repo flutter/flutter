@@ -11,30 +11,39 @@ import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
 
-/// Creates a button based on [Semantics], [Material], and [InkWell].
+/// Creates a button based on [Semantics], [Material], and [InkWell]
+/// widgets.
 ///
-/// [RaisedButton] and [FlatButton] configure a [ShapedMaterialButton] based
+/// This class does not use the current [Theme] or [ButtonTheme] to
+/// compute default values for unspecified parameters. It's intended to
+/// be used for custom Material buttons that optionally incorporate defaults
+/// from the themes or from app-specific sources.
+///
+/// [RaisedButton] and [FlatButton] configure a [RawMaterialButton] based
 /// on the current [Theme] and [ButtonTheme].
-class ShapedMaterialButton extends StatelessWidget {
-  /// Create a button based on [Semantics], [Material], and [InkWell].
+class RawMaterialButton extends StatefulWidget {
+  /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
   ///
   /// The [shape], [elevation], [padding], and [constraints] arguments
   /// must not be null.
-  const ShapedMaterialButton({
+  const RawMaterialButton({
     Key key,
     @required this.onPressed,
     this.textStyle,
     this.fillColor,
     this.highlightColor,
     this.splashColor,
-    this.elevation: 0.0,
+    this.elevation: 2.0,
+    this.highlightElevation: 8.0,
+    this.disabledElevation: 0.0,
     this.padding: EdgeInsets.zero,
-    this.onHighlightChanged,
     this.constraints: const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape: const RoundedRectangleBorder(),
     this.child,
   }) : assert(shape != null),
        assert(elevation != null),
+       assert(highlightElevation != null),
+       assert(disabledElevation != null),
        assert(padding != null),
        assert(constraints != null),
        super(key: key);
@@ -57,16 +66,39 @@ class ShapedMaterialButton extends StatelessWidget {
   /// The splash color for the button's [InkWell].
   final Color splashColor;
 
-  /// The elevation for the button's [Material].
+  /// The elevation for the button's [Material] when the button
+  /// is [enabled] but not pressed.
+  ///
+  /// Defaults to 2.0.
+  ///
+  /// See also:
+  ///
+  ///  * [highlightElevation], the default elevation.
+  ///  * [disabledElevation], the elevation when the button is disabled.
   final double elevation;
+
+  /// The elevation for the button's [Material] when the button
+  /// is [enabled] and pressed.
+  ///
+  /// Defaults to 8.0.
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], the default elevation.
+  ///  * [disabledElevation], the elevation when the button is disabled.
+  final double highlightElevation;
+
+  /// The elevation for the button's [Material] when the button
+  /// is not [enabled].
+  ///
+  /// Defaults to 0.0.
+  ///
+  ///  * [elevation], the default elevation.
+  ///  * [highlightElevation], the elevation when the button is pressed.
+  final double disabledElevation;
 
   /// The internal padding for the button's [child].
   final EdgeInsetsGeometry padding;
-
-  /// Called when a tap-down gesture is detected.
-  ///
-  /// Typically used to configure the button's elevation.
-  final ValueChanged<bool> onHighlightChanged;
 
   /// Defines the button's size.
   ///
@@ -76,39 +108,60 @@ class ShapedMaterialButton extends StatelessWidget {
   /// The shape of the button's [Material].
   ///
   /// The button's highlight and splash are clipped to this shape. If the
-  /// button has an elevation, then its drop shadow is defined by this
-  /// shape as well.
+  /// button has an elevation, then its drop shadow is defined by this shape.
   final ShapeBorder shape;
 
   /// Typically the button's label.
   final Widget child;
 
+  /// Whether the button is enabled or disabled.
+  ///
+  /// Buttons are disabled by default. To enable a button, set its [onPressed]
+  /// property to a non-null value.
+  bool get enabled => onPressed != null;
+
+  @override
+  _RawMaterialButtonState createState() => new _RawMaterialButtonState();
+}
+
+class _RawMaterialButtonState extends State<RawMaterialButton> {
+  bool _highlight = false;
+  void _handleHighlightChanged(bool value) {
+    setState(() {
+      _highlight = value;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final double elevation = widget.enabled
+      ? (_highlight ? widget.highlightElevation : widget.elevation)
+      : widget.disabledElevation;
+
     return new Semantics(
       container: true,
       button: true,
-      enabled: onPressed != null,
+      enabled: widget.enabled,
       child: new ConstrainedBox(
-        constraints: constraints,
+        constraints: widget.constraints,
         child: new Material(
           elevation: elevation,
-          textStyle: textStyle,
-          shape: shape,
-          color: fillColor,
+          textStyle: widget.textStyle,
+          shape: widget.shape,
+          color: widget.fillColor,
           child: new InkWell(
-            onHighlightChanged: onHighlightChanged,
-            splashColor: splashColor,
-            highlightColor: highlightColor,
-            onTap: onPressed,
+            onHighlightChanged: _handleHighlightChanged,
+            splashColor: widget.splashColor,
+            highlightColor: widget.highlightColor,
+            onTap: widget.onPressed,
             child: IconTheme.merge(
-              data: new IconThemeData(color: textStyle?.color),
+              data: new IconThemeData(color: widget.textStyle?.color),
               child: new Container(
-                padding: padding,
+                padding: widget.padding,
                 child: new Center(
                   widthFactor: 1.0,
                   heightFactor: 1.0,
-                  child: child,
+                  child: widget.child,
                 ),
               ),
             ),
@@ -132,7 +185,7 @@ class ShapedMaterialButton extends StatelessWidget {
 /// match the material design specification.
 ///
 /// To create a button directly, without inheriting theme defaults, use
-/// [ShapedMaterialButton].
+/// [RawMaterialButton].
 ///
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
@@ -140,11 +193,12 @@ class ShapedMaterialButton extends StatelessWidget {
 /// See also:
 ///
 ///  * [IconButton], to create buttons that contain icons rather than text.
-class MaterialButton extends StatefulWidget {
+class MaterialButton extends StatelessWidget {
   /// Creates a material button.
   ///
   /// Rather than creating a material button directly, consider using
-  /// [FlatButton] or [RaisedButton].
+  /// [FlatButton] or [RaisedButton]. To create a custom Material button
+  /// consider using [RawMaterialButton].
   const MaterialButton({
     Key key,
     this.colorBrightness,
@@ -267,32 +321,18 @@ class MaterialButton extends StatefulWidget {
   /// enable a button, set its [onPressed] property to a non-null value.
   bool get enabled => onPressed != null;
 
-  @override
-  _MaterialButtonState createState() => new _MaterialButtonState();
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
-  }
-}
-
-class _MaterialButtonState extends State<MaterialButton> {
-  bool _highlight = false;
-
   Brightness _getBrightness(ThemeData theme) {
-    return widget.colorBrightness ?? theme.brightness;
+    return colorBrightness ?? theme.brightness;
   }
 
   ButtonTextTheme _getTextTheme(ButtonThemeData buttonTheme) {
-    return widget.textTheme ?? buttonTheme.textTheme;
+    return textTheme ?? buttonTheme.textTheme;
   }
 
   Color _getTextColor(ThemeData theme, ButtonThemeData buttonTheme, Color fillColor) {
-    if (widget.textColor != null)
-      return widget.textColor;
+    if (textColor != null)
+      return textColor;
 
-    final bool enabled = widget.enabled;
     final bool themeIsDark = _getBrightness(theme) == Brightness.dark;
     final bool fillIsDark = fillColor != null
       ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
@@ -315,33 +355,33 @@ class _MaterialButtonState extends State<MaterialButton> {
     return null;
   }
 
-  void _handleHighlightChanged(bool value) {
-    setState(() {
-      _highlight = value;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
-    final Color textColor = _getTextColor(theme, buttonTheme, widget.color);
+    final Color textColor = _getTextColor(theme, buttonTheme, color);
 
-    return new ShapedMaterialButton(
-      onPressed: widget.onPressed,
-      fillColor: widget.color,
+    return new RawMaterialButton(
+      onPressed: onPressed,
+      fillColor: color,
       textStyle: theme.textTheme.button.copyWith(color: textColor),
-      highlightColor: widget.highlightColor ?? theme.highlightColor,
-      splashColor: widget.splashColor ?? theme.splashColor,
-      elevation: (_highlight ? widget.highlightElevation : widget.elevation) ?? 0.0,
-      padding: widget.padding ?? buttonTheme.padding,
-      onHighlightChanged: _handleHighlightChanged,
+      highlightColor: highlightColor ?? theme.highlightColor,
+      splashColor: splashColor ?? theme.splashColor,
+      elevation: elevation ?? 2.0,
+      highlightElevation: highlightElevation ?? 8.0,
+      padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints.copyWith(
-        minWidth: widget.minWidth,
-        minHeight: widget.height,
+        minWidth: minWidth,
+        minHeight: height,
       ),
       shape: buttonTheme.shape,
-      child: widget.child,
+      child: child,
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }
 }

@@ -5,8 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'flat_button.dart';
-import 'raised_button.dart';
 import 'theme.dart';
 
 /// Used with [ButtonTheme] and [ButtonThemeData] to define a button's base

@@ -37,7 +37,7 @@ import 'theme.dart';
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
 ///  * <https://material.google.com/components/buttons.html>
-class RaisedButton extends StatefulWidget {
+class RaisedButton extends StatelessWidget {
   /// Create a filled button.
   ///
   /// The [elevation], [highlightElevation], and [disabledElevation]
@@ -206,15 +206,24 @@ class RaisedButton extends StatefulWidget {
   ///  * [highlightElevation], the elevation when the button is pressed.
   final double elevation;
 
-  /// The z-coordinate at which to place this button when it has been
-  /// pressed.
+  /// The elevation for the button's [Material] when the button
+  /// is [enabled] but not pressed.
+  ///
+  /// Defaults to 2.0.
+  ///
+  /// See also:
+  ///
+  ///  * [highlightElevation], the default elevation.
+  ///  * [disabledElevation], the elevation when the button is disabled.
+
+  /// The elevation for the button's [Material] when the button
+  /// is [enabled] and pressed.
   ///
   /// This controls the size of the shadow below the button. When a tap
   /// down gesture occurs within the button, its [InkWell] displays a
   /// [highlightColor] "highlight".
   ///
-  /// Defaults to 8, the appropriate elevation for raised buttons while they
-  /// are pressed.
+  /// Defaults to 8.0.
   ///
   /// See also:
   ///
@@ -222,11 +231,10 @@ class RaisedButton extends StatefulWidget {
   ///  * [disabledElevation], the elevation when the button is disabled.
   final double highlightElevation;
 
-  /// The z-coordinate at which to place this button when it is disabled.
+  /// The elevation for the button's [Material] when the button
+  /// is not [enabled].
   ///
-  /// This controls the size of the shadow below the button.
-  ///
-  /// Defaults to 0, the appropriate elevation for disabled raised buttons.
+  /// Defaults to 0.0.
   ///
   /// See also:
   ///
@@ -263,58 +271,28 @@ class RaisedButton extends StatefulWidget {
   /// shape as well.
   final ShapeBorder shape;
 
-  @override
-  _RaisedButtonState createState() => new _RaisedButtonState();
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    description.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
-    description.add(new DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
-    description.add(new DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: null));
-    description.add(new DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: null));
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-  }
-}
-
-class _RaisedButtonState extends State<RaisedButton> {
-  bool _highlight = false;
-  void _handleHighlightChanged(bool value) {
-    setState(() {
-      _highlight = value;
-    });
-  }
-
   Brightness _getBrightness(ThemeData theme) {
-    return widget.colorBrightness ?? theme.brightness;
+    return colorBrightness ?? theme.brightness;
   }
 
   ButtonTextTheme _getTextTheme(ButtonThemeData buttonTheme) {
-    return widget.textTheme ?? buttonTheme.textTheme;
+    return textTheme ?? buttonTheme.textTheme;
   }
 
   Color _getFillColor(ThemeData theme, ButtonThemeData buttonTheme) {
-    final Color color = widget.enabled ? widget.color : widget.disabledColor;
-    if (color != null)
-      return color;
+    final Color fillColor = enabled ? color : disabledColor;
+    if (fillColor != null)
+      return fillColor;
 
     final bool themeIsDark = _getBrightness(theme) == Brightness.dark;
     switch (_getTextTheme(buttonTheme)) {
       case ButtonTextTheme.normal:
       case ButtonTextTheme.accent:
-        return widget.enabled
+        return enabled
           ? theme.buttonColor
           : theme.disabledColor;
       case ButtonTextTheme.primary:
-        return widget.enabled
+        return enabled
           ? theme.buttonColor
           : (themeIsDark ? Colors.white12 : Colors.black12);
     }
@@ -322,11 +300,10 @@ class _RaisedButtonState extends State<RaisedButton> {
   }
 
   Color _getTextColor(ThemeData theme, ButtonThemeData buttonTheme, Color fillColor) {
-    final Color color = widget.enabled ? widget.textColor : widget.disabledTextColor;
+    final Color color = enabled ? textColor : disabledTextColor;
     if (color != null)
       return color;
 
-    final bool enabled = widget.enabled;
     final bool themeIsDark = _getBrightness(theme) == Brightness.dark;
     final bool fillIsDark = fillColor != null
       ? ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark
@@ -350,8 +327,8 @@ class _RaisedButtonState extends State<RaisedButton> {
   }
 
   Color _getHighlightColor(ThemeData theme, ButtonThemeData buttonTheme) {
-    if (widget.highlightColor != null)
-      return widget.highlightColor;
+    if (highlightColor != null)
+      return highlightColor;
 
     switch (_getTextTheme(buttonTheme)) {
       case ButtonTextTheme.normal:
@@ -369,24 +346,38 @@ class _RaisedButtonState extends State<RaisedButton> {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     final Color fillColor = _getFillColor(theme, buttonTheme);
     final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
-    final double elevation = widget.enabled
-      ? (_highlight
-         ? widget.highlightElevation ?? (widget.elevation + 6.0)
-         : widget.elevation)
-      : widget.disabledElevation ?? 0.0;
 
-    return new ShapedMaterialButton(
-      onPressed: widget.onPressed,
+    return new RawMaterialButton(
+      onPressed: onPressed,
       fillColor: fillColor,
       textStyle: theme.textTheme.button.copyWith(color: textColor),
       highlightColor: _getHighlightColor(theme, buttonTheme),
-      splashColor: widget.splashColor ?? theme.splashColor,
+      splashColor: splashColor ?? theme.splashColor,
       elevation: elevation,
-      padding: widget.padding ?? buttonTheme.padding,
-      onHighlightChanged: _handleHighlightChanged,
+      highlightElevation: highlightElevation,
+      disabledElevation: disabledElevation,
+      padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints,
-      shape: widget.shape ?? buttonTheme.shape,
-      child: widget.child,
+      shape: shape ?? buttonTheme.shape,
+      child: child,
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    description.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
+    description.add(new DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    description.add(new DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: null));
+    description.add(new DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: null));
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }

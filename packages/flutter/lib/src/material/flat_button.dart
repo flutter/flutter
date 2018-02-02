@@ -296,12 +296,13 @@ class FlatButton extends StatelessWidget {
     final Color fillColor = enabled ? color : disabledColor;
     final Color textColor = _getTextColor(theme, buttonTheme, fillColor);
 
-    return new ShapedMaterialButton(
+    return new RawMaterialButton(
       onPressed: onPressed,
       fillColor: fillColor,
       textStyle: theme.textTheme.button.copyWith(color: textColor),
       highlightColor: _getHighlightColor(theme, buttonTheme),
       splashColor: _getSplashColor(theme, buttonTheme),
+      elevation: 0.0,
       padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints,
       shape: shape ?? buttonTheme.shape,
