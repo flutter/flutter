@@ -199,7 +199,7 @@ class Colors {
   ///    are variants on this color but with different opacities.
   ///  * [white], a solid white color.
   ///  * [transparent], a fully-transparent color.
-  static const Color black   = const Color(0xFF000000);
+  static const Color black = const Color(0xFF000000);
 
   /// Black with 87% opacity.
   ///
@@ -299,7 +299,7 @@ class Colors {
   ///    but with different opacities.
   ///  * [black], a solid black color.
   ///  * [transparent], a fully-transparent color.
-  static const Color white   = const Color(0xFFFFFFFF);
+  static const Color white = const Color(0xFFFFFFFF);
 
   /// White with 70% opacity.
   ///

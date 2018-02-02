@@ -619,7 +619,7 @@ void main() {
     expect(find.text('1'), findsOneWidget);
   });
 
-  testWidgets('Checking fling item  after movementDuration', (WidgetTester tester) async {
+  testWidgets('Checking fling item after movementDuration', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 

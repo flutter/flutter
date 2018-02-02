@@ -114,7 +114,7 @@ class CachedArtifacts extends Artifacts {
   }
 
   @override
-  String getEngineType(TargetPlatform platform, [BuildMode mode]){
+  String getEngineType(TargetPlatform platform, [BuildMode mode]) {
     return fs.path.basename(_getEngineArtifactsPath(platform, mode));
   }
 

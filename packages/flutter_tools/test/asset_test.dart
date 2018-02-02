@@ -11,7 +11,7 @@ import 'package:test/test.dart';
 import 'src/common.dart';
 import 'src/context.dart';
 
-void main()  {
+void main() {
   group('Assets', () {
     final String dataPath = fs.path.join(
       getFlutterRoot(),

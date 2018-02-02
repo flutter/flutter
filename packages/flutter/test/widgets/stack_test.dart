@@ -581,7 +581,7 @@ void main() {
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.rtl,
-        child:  new Stack(
+        child: new Stack(
           children: <Widget>[
             new PositionedDirectional(
               start: 50.0,
@@ -597,7 +597,7 @@ void main() {
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
-        child:  new Stack(
+        child: new Stack(
           children: <Widget>[
             new PositionedDirectional(
               start: 50.0,

@@ -111,7 +111,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
             child: new Container(
               key: new ObjectKey(page.icon),
               padding: const EdgeInsets.all(12.0),
-              child:new Card(
+              child: new Card(
                 child: new Center(
                   child: new Icon(
                     page.icon,

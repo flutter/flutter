@@ -1084,7 +1084,7 @@ void main() {
       ),
     );
 
-    // Not focused.  The prefix and suffix should not appear, but the label should.
+    // Not focused. The prefix and suffix should not appear, but the label should.
     expect(getOpacity(tester, find.text('Prefix')), 0.0);
     expect(getOpacity(tester, find.text('Suffix')), 0.0);
     expect(find.text('Label'), findsOneWidget);

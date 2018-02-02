@@ -18,7 +18,7 @@ class SampleError extends Error {
 
 // Sample apps are .dart files in the lib directory which contain a block
 // comment that begins with a '/* Sample Catalog' line, and ends with a line
-// that just  contains '*/'. The following keywords may appear at the
+// that just contains '*/'. The following keywords may appear at the
 // beginning of lines within the comment. A keyword's value is all of
 // the following text up to the next keyword or the end of the comment,
 // sans leading and trailing whitespace.

@@ -32,7 +32,7 @@ class ProcessFailedException extends Error {
 
 /// Creates a pre-populated Flutter archive from a git repo.
 class ArchiveCreator {
-  /// [_tempDir] is the directory to use for creating the archive.  The script
+  /// [_tempDir] is the directory to use for creating the archive. The script
   /// will place several GiB of data there, so it should have available space.
   ///
   /// The processManager argument is used to inject a mock of [ProcessManager] for
@@ -151,7 +151,7 @@ class ArchiveCreator {
   ///
   /// May only be run on Windows (since 7Zip is not available on other platforms).
   Future<String> _unzipArchive(File archive, {Directory currentDirectory}) {
-    assert(Platform.isWindows);  // 7Zip is only available on Windows.
+    assert(Platform.isWindows); // 7Zip is only available on Windows.
     currentDirectory ??= new Directory(path.dirname(archive.absolute.path));
     final List<String> commandLine = <String>['7za', 'x', archive.absolute.path];
     return _runProcess(commandLine, workingDirectory: currentDirectory);
@@ -161,7 +161,7 @@ class ArchiveCreator {
   ///
   /// May only be run on Windows (since 7Zip is not available on other platforms).
   Future<String> _createZipArchive(File output, Directory source) {
-    assert(Platform.isWindows);  // 7Zip is only available on Windows.
+    assert(Platform.isWindows); // 7Zip is only available on Windows.
     final List<String> commandLine = <String>[
       '7za',
       'a',

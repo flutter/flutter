@@ -452,7 +452,7 @@ class HotRunner extends ResidentRunner {
     } else {
       final bool reloadOnTopOfSnapshot = _runningFromSnapshot;
       final String progressPrefix = reloadOnTopOfSnapshot ? 'Initializing' : 'Performing';
-      final Status status =  logger.startProgress(
+      final Status status = logger.startProgress(
         '$progressPrefix hot reload...',
         progressId: 'hot.reload'
       );

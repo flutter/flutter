@@ -248,7 +248,7 @@ class _DayPeriodControl extends StatelessWidget {
             child: new Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle),
           ),
         ),
-        const SizedBox(width: 0.0, height: 4.0),  // Vertical spacer
+        const SizedBox(width: 0.0, height: 4.0), // Vertical spacer
         new GestureDetector(
           excludeFromSemantics: true,
           onTap: Feedback.wrapForTap(() {

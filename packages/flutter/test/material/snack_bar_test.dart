@@ -444,7 +444,7 @@ void main() {
     await tester.tap(find.text('ACTION'));
     expect(actionPressed, isTrue);
     // Closed reason is only set when the animation is complete.
-    await tester.pump(const Duration(milliseconds:250));
+    await tester.pump(const Duration(milliseconds: 250));
     expect(closedReason, isNull);
     // Wait for animation to complete.
     await tester.pumpAndSettle(const Duration(seconds: 1));

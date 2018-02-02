@@ -14,7 +14,7 @@ class FakeFrameInfo extends FrameInfo {
   final Image _image;
 
   FakeFrameInfo(int width, int height, this._duration) :
-    _image = new FakeImage(width, height); 
+    _image = new FakeImage(width, height);
 
   @override
   Duration get duration => _duration;
