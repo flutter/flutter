@@ -4,6 +4,7 @@ dart:io,_EmbedderConfig,_mayExit
 dart:io,_Namespace,_setupNamespace
 dart:mozart.internal,::,_context
 dart:mozart.internal,::,_viewContainer
+dart:zircon,_Namespace,_namespace
 dart:zircon,GetSizeResult,GetSizeResult.
 dart:zircon,Handle,Handle._
 dart:zircon,HandlePairResult,HandlePairResult.
