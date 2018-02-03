@@ -545,7 +545,6 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
         final double max = layout.computeMaxScrollOffset(childManager.childCount);
         geometry = new SliverGeometry(
           scrollExtent: max,
-          paintExtent: 0.0,
           maxPaintExtent: max,
         );
         childManager.didFinishLayout();
