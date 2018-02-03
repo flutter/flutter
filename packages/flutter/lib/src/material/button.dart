@@ -149,6 +149,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           textStyle: widget.textStyle,
           shape: widget.shape,
           color: widget.fillColor,
+          type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
           child: new InkWell(
             onHighlightChanged: _handleHighlightChanged,
             splashColor: widget.splashColor,

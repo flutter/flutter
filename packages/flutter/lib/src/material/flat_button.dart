@@ -218,8 +218,7 @@ class FlatButton extends StatelessWidget {
     final bool themeIsDark = _getBrightness(theme) == Brightness.dark;
     final bool fillIsDark = fillColor == null
       ? themeIsDark
-      : (fillColor.alpha != 0 &&
-         ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark);
+      : ThemeData.estimateBrightnessForColor(fillColor) == Brightness.dark;
 
     switch (_getTextTheme(buttonTheme)) {
       case ButtonTextTheme.normal:
@@ -277,7 +276,7 @@ class FlatButton extends StatelessWidget {
 
     return new RawMaterialButton(
       onPressed: onPressed,
-      fillColor: fillColor ?? Colors.transparent,
+      fillColor: fillColor,
       textStyle: theme.textTheme.button.copyWith(color: textColor),
       highlightColor: _getHighlightColor(theme, buttonTheme),
       splashColor: _getSplashColor(theme, buttonTheme),
