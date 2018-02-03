@@ -84,9 +84,7 @@ class _ShrineGridLayout extends SliverGridLayout {
   }
 
   @override
-  double estimateMaxScrollOffset(int childCount) {
-    if (childCount == null)
-      return null;
+  double computeMaxScrollOffset(int childCount) {
     if (childCount == 0)
       return 0.0;
     final int rowCount = _rowAtIndex(childCount - 1) + 1;
