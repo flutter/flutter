@@ -171,7 +171,6 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         final double max = computeMaxScrollOffset(constraints, itemExtent);
         geometry = new SliverGeometry(
           scrollExtent: max,
-          paintExtent: 0.0,
           maxPaintExtent: max,
         );
         childManager.didFinishLayout();
