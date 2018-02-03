@@ -15,10 +15,8 @@ namespace blink {
 IsolateClient::~IsolateClient() {}
 
 UIDartState::UIDartState(IsolateClient* isolate_client,
-                         std::unique_ptr<Window> window,
-                         int dirfd)
-    : tonic::DartState(dirfd),
-      isolate_client_(isolate_client),
+                         std::unique_ptr<Window> window)
+    : isolate_client_(isolate_client),
       main_port_(ILLEGAL_PORT),
       window_(std::move(window)) {}
 
