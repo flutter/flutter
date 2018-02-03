@@ -64,7 +64,6 @@ ApplicationControllerImpl::ApplicationControllerImpl(
   fdio_ns_t* fdio_ns = SetupNamespace(startup_info->flat_namespace);
   if (fdio_ns == nullptr) {
     FXL_LOG(ERROR) << "Failed to initialize namespace";
-    return;
   }
 
   url_ = startup_info->launch_info->url;

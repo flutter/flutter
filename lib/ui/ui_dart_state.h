@@ -28,9 +28,7 @@ class IsolateClient {
 
 class UIDartState : public tonic::DartState {
  public:
-  UIDartState(IsolateClient* isolate_client,
-              std::unique_ptr<Window> window,
-              int dirfd = -1);
+  UIDartState(IsolateClient* isolate_client, std::unique_ptr<Window> window);
   ~UIDartState() override;
 
   static UIDartState* Current();
