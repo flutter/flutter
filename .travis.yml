@@ -2,16 +2,21 @@
 os:
   - linux
   - osx
+osx_image: xcode9.2
 env:
   - SHARD=analyze
   - SHARD=tests
   - SHARD=docs
+  - SHARD=build_and_deploy_gallery
 matrix:
   exclude:
   - os: osx
     env: SHARD=analyze
   - os: osx
     env: SHARD=docs
+  # TODO(xster): remove this when we know it works on Travis.
+  allow_failures:
+  - env: SHARD=build_and_deploy_gallery
 sudo: false
 filter_secrets: false
 
@@ -22,6 +27,7 @@ addons:
     sources:
       - ubuntu-toolchain-r-test # if we don't specify this, the libstdc++6 we get is the wrong version
     packages:
+      - lib32stdc++6
       - libstdc++6
       - fonts-droid
 language: node_js
@@ -31,6 +37,7 @@ git:
   # We rely on git tags for determining the version.
   depth: false
 cache:
+  bundler: true
   directories:
     - $HOME/.pub-cache
 install:
@@ -41,4 +48,4 @@ before_script:
   - ./dev/bots/travis_setup.sh
 script:
   - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-  - (./bin/cache/dart-sdk/bin/dart ./dev/bots/test.dart && ./dev/bots/travis_upload.sh)
+  - ./dev/bots/travis_script.sh
