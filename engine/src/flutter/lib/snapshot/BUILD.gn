@@ -3,20 +3,7 @@
 # found in the LICENSE file.
 
 import("$flutter_root/lib/ui/dart_ui.gni")
-
-import("//third_party/dart/runtime/bin/io_sources.gni")
-import("//third_party/dart/runtime/lib/async_sources.gni")
-import("//third_party/dart/runtime/lib/collection_sources.gni")
-import("//third_party/dart/runtime/lib/convert_sources.gni")
-import("//third_party/dart/runtime/lib/core_sources.gni")
-import("//third_party/dart/runtime/lib/developer_sources.gni")
-import("//third_party/dart/runtime/lib/internal_sources.gni")
-import("//third_party/dart/runtime/lib/isolate_sources.gni")
-import("//third_party/dart/runtime/lib/math_sources.gni")
-import("//third_party/dart/runtime/lib/mirrors_sources.gni")
-import("//third_party/dart/runtime/lib/typed_data_sources.gni")
-
-import("//third_party/dart/utils/generate_patch_sdk.gni")
+import("//third_party/dart/utils/compile_platform.gni")
 
 if (is_fuchsia) {
   import("//build/dart/toolchain.gni")
@@ -268,35 +255,7 @@ source_set("snapshot") {
   ]
 }
 
-# Generate flutter_patched_sdk
-
-template("process_library_source") {
-  assert(defined(invoker.libsources), "Need libsources in $target_name")
-  assert(defined(invoker.output), "Need output in $target_name")
-  action(target_name) {
-    deps = [
-      ":generate_dart_ui",
-    ]
-
-    visibility = [ ":*" ]  # Only targets in this file can see this.
-    libsources = invoker.libsources
-
-    script = invoker.script
-    inputs = invoker.inputs + libsources
-    outputs = [
-      invoker.output,
-    ]
-    args = invoker.args + rebase_path(libsources, root_build_dir)
-  }
-}
-
-action("compile_non_strong_platform") {
-  script = "//third_party/dart/tools/compile_platform.py"
-
-  visibility = [
-    ":kernel_platform_files"
-  ]
-
+compile_platform("non_strong_platform") {
   sources = [
     "libraries.json",
   ]
@@ -306,26 +265,13 @@ action("compile_non_strong_platform") {
     "$root_out_dir/flutter_patched_sdk/vm_outline.dill",
   ]
 
-  inputs = [
-    "libraries.json",
-  ]
-
-  depfile = "$root_out_dir/flutter_patched_sdk/platform.dill.d"
-
   args = [
             "--target=flutter",
-            "dart:core"
-         ] + rebase_path(sources, root_build_dir) +
-         rebase_path(outputs, root_build_dir)
+            "dart:core",
+         ]
 }
 
-action("compile_platform") {
-  script = "//third_party/dart/tools/compile_platform.py"
-
-  visibility = [
-    ":kernel_platform_files"
-  ]
-
+compile_platform("strong_platform") {
   sources = [
     "libraries.json",
   ]
@@ -335,23 +281,16 @@ action("compile_platform") {
     "$root_out_dir/flutter_patched_sdk/vm_outline_strong.dill",
   ]
 
-  inputs = [
-    "libraries.json",
-  ]
-
-  depfile = "$root_out_dir/flutter_patched_sdk/platform_strong.dill.d"
-
   args = [
             "--target=flutter",
             "--strong",
             "dart:core"
-         ] + rebase_path(sources, root_build_dir) +
-         rebase_path(outputs, root_build_dir)
+         ]
 }
 
 group("kernel_platform_files") {
   public_deps = [
-    ":compile_platform",
-    ":compile_non_strong_platform",
+    ":non_strong_platform",
+    ":strong_platform",
   ]
 }
