@@ -186,7 +186,7 @@ class Material extends StatefulWidget {
   /// The z-coordinate at which to place this material. This controls the size
   /// of the shadow below the material.
   ///
-  /// If this is non-zero, the contents of the card are clipped, because the
+  /// If this is non-zero, the contents of the material are clipped, because the
   /// widget conceptually defines an independent printed piece of material.
   ///
   /// Defaults to 0. Changing this value will cause the shadow to animate over
@@ -209,11 +209,20 @@ class Material extends StatefulWidget {
   /// The typographical style to use for text within this material.
   final TextStyle textStyle;
 
+  /// Defines the material's shape as well its shadow.
+  ///
+  /// If shape is non null, the [borderRadius] is ignored and the material's
+  /// clip boundary and shadow are defined by the shape.
+  ///
+  /// A shadow is only displayed if the [elevation] is greater than
+  /// zero.
   final ShapeBorder shape;
 
   /// If non-null, the corners of this box are rounded by this [BorderRadius].
   /// Otherwise, the corners specified for the current [type] of material are
   /// used.
+  ///
+  /// If [shape] is non null then the border radius is ignored.
   ///
   /// Must be null if [type] is [MaterialType.circle].
   final BorderRadius borderRadius;
@@ -242,6 +251,7 @@ class Material extends StatefulWidget {
     description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
     description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
     textStyle?.debugFillProperties(description, prefix: 'textStyle.');
+    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     description.add(new EnumProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
   }
 
