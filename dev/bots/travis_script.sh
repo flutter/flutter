@@ -13,7 +13,7 @@ if [ "$SHARD" = "build_and_deploy_gallery" ]; then
     echo "Android Flutter Gallery built"
     if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then # TODO(xster): add back && [ "$TRAVIS_BRANCH" = "dev" ] after testing
       echo "Deploying to Play Store..."
-      (cd examples/flutter_gallery/android; bundle exec fastlane deploy_play_store)
+      (cd examples/flutter_gallery/android; bundle install && bundle exec fastlane deploy_play_store)
     else
       echo "Flutter Gallery is only deployed to the Play Store on merged dev branch commits"
     fi
@@ -23,7 +23,7 @@ if [ "$SHARD" = "build_and_deploy_gallery" ]; then
     echo "iOS Flutter Gallery built"
     if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then # TODO(xster): add back && [ "$TRAVIS_BRANCH" = "dev" ] after testing
       echo "Re-building with distribution profile and deploying to TestFlight..."
-      (cd examples/flutter_gallery/ios; bundle exec fastlane build_and_deploy_testflight)
+      (cd examples/flutter_gallery/ios; bundle install && bundle exec fastlane build_and_deploy_testflight)
     else
       echo "Flutter Gallery is only deployed to the TestFlight on merged dev branch commits"
     fi
