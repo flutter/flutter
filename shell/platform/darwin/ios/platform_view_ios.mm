@@ -99,7 +99,7 @@ bool PlatformViewIOS::ResourceContextMakeCurrent() {
   return ios_surface_ != nullptr ? ios_surface_->ResourceContextMakeCurrent() : false;
 }
 
-void PlatformViewIOS::UpdateSemantics(std::vector<blink::SemanticsNode> update) {
+void PlatformViewIOS::UpdateSemantics(blink::SemanticsNodeUpdates update) {
   if (accessibility_bridge_)
     accessibility_bridge_->UpdateSemantics(std::move(update));
 }

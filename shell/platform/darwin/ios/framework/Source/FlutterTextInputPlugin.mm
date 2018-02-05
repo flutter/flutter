@@ -41,16 +41,6 @@ static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inp
 
 #pragma mark - FlutterTextPosition
 
-/** An indexed position in the buffer of a Flutter text editing widget. */
-@interface FlutterTextPosition : UITextPosition
-
-@property(nonatomic, readonly) NSUInteger index;
-
-+ (instancetype)positionWithIndex:(NSUInteger)index;
-- (instancetype)initWithIndex:(NSUInteger)index;
-
-@end
-
 @implementation FlutterTextPosition
 
 + (instancetype)positionWithIndex:(NSUInteger)index {
@@ -68,15 +58,6 @@ static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inp
 @end
 
 #pragma mark - FlutterTextRange
-
-/** A range of text in the buffer of a Flutter text editing widget. */
-@interface FlutterTextRange : UITextRange<NSCopying>
-
-@property(nonatomic, readonly) NSRange range;
-
-+ (instancetype)rangeWithNSRange:(NSRange)range;
-
-@end
 
 @implementation FlutterTextRange
 
@@ -536,8 +517,28 @@ static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inp
 
 @end
 
+/**
+ * Hides `FlutterTextInputView` from iOS accessibility system so it
+ * does not show up twice, once where it is in the `UIView` hierarchy,
+ * and a second time as part of the `SemanticsObject` hierarchy.
+ */
+@interface FlutterTextInputViewAccessibilityHider : UIView {
+}
+
+@end
+
+@implementation FlutterTextInputViewAccessibilityHider {
+}
+
+- (BOOL)accessibilityElementsHidden {
+  return YES;
+}
+
+@end
+
 @implementation FlutterTextInputPlugin {
   FlutterTextInputView* _view;
+  FlutterTextInputViewAccessibilityHider* _inputHider;
 }
 
 @synthesize textInputDelegate = _textInputDelegate;
@@ -547,6 +548,7 @@ static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inp
 
   if (self) {
     _view = [[FlutterTextInputView alloc] init];
+    _inputHider = [[FlutterTextInputViewAccessibilityHider alloc] init];
   }
 
   return self;
@@ -555,8 +557,13 @@ static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inp
 - (void)dealloc {
   [self hideTextInput];
   [_view release];
+  [_inputHider release];
 
   [super dealloc];
+}
+
+- (UIView<UITextInput>*)textInputView {
+  return _view;
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
@@ -587,13 +594,15 @@ static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inp
            @"The application must have a key window since the keyboard client "
            @"must be part of the responder chain to function");
   _view.textInputDelegate = _textInputDelegate;
-  [[UIApplication sharedApplication].keyWindow addSubview:_view];
+  [_inputHider addSubview:_view];
+  [[UIApplication sharedApplication].keyWindow addSubview:_inputHider];
   [_view becomeFirstResponder];
 }
 
 - (void)hideTextInput {
   [_view resignFirstResponder];
   [_view removeFromSuperview];
+  [_inputHider removeFromSuperview];
 }
 
 - (void)setTextInputClient:(int)client withConfiguration:(NSDictionary*)configuration {

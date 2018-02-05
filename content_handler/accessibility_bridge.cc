@@ -20,8 +20,9 @@ AccessibilityBridge::AccessibilityBridge(app::ApplicationContext* context)
     : writer_(context->ConnectToEnvironmentService<maxwell::ContextWriter>()) {}
 
 void AccessibilityBridge::UpdateSemantics(
-    const std::vector<blink::SemanticsNode>& update) {
-  for (const auto& node : update) {
+    const blink::SemanticsNodeUpdates& update) {
+  for (const auto& update : update) {
+    const auto& node = update.second;
     semantics_nodes_[node.id] = node;
   }
   std::vector<int> visited_nodes;

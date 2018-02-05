@@ -130,7 +130,7 @@ VsyncWaiter* PlatformView::GetVsyncWaiter() {
   return vsync_waiter_.get();
 }
 
-void PlatformView::UpdateSemantics(std::vector<blink::SemanticsNode> update) {}
+void PlatformView::UpdateSemantics(blink::SemanticsNodeUpdates update) {}
 
 void PlatformView::HandlePlatformMessage(
     fxl::RefPtr<blink::PlatformMessage> message) {

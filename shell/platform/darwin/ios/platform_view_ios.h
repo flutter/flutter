@@ -10,6 +10,7 @@
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterTexture.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
@@ -53,13 +54,30 @@ class PlatformViewIOS : public PlatformView {
 
   void RegisterExternalTexture(int64_t id, NSObject<FlutterTexture>* texture);
 
-  void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
+  void UpdateSemantics(blink::SemanticsNodeUpdates update) override;
 
   void RunFromSource(const std::string& assets_directory,
                      const std::string& main,
                      const std::string& packages) override;
 
   void SetAssetBundlePath(const std::string& assets_directory) override;
+
+  /**
+   * Exposes the `FlutterTextInputPlugin` singleton for the
+   * `AccessibilityBridge` to be able to interact with the text entry system.
+   */
+  fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin() {
+    return text_input_plugin_;
+  }
+
+  /**
+   * Sets the `FlutterTextInputPlugin` singleton returned by
+   * `text_input_plugin`.
+   */
+  void SetTextInputPlugin(
+      fml::scoped_nsprotocol<FlutterTextInputPlugin*> textInputPlugin) {
+    text_input_plugin_ = textInputPlugin;
+  }
 
   NSObject<FlutterBinaryMessenger>* binary_messenger() const {
     return binary_messenger_;
@@ -72,6 +90,7 @@ class PlatformViewIOS : public PlatformView {
   fxl::Closure firstFrameCallback_;
   fml::WeakPtrFactory<PlatformViewIOS> weak_factory_;
   NSObject<FlutterBinaryMessenger>* binary_messenger_;
+  fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin_;
 
   void SetupAndLoadFromSource(const std::string& assets_directory,
                               const std::string& main,

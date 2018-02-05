@@ -370,7 +370,7 @@ void RuntimeHolder::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   }));
 }
 
-void RuntimeHolder::UpdateSemantics(std::vector<blink::SemanticsNode> update) {
+void RuntimeHolder::UpdateSemantics(blink::SemanticsNodeUpdates update) {
   accessibility_bridge_->UpdateSemantics(update);
 }
 

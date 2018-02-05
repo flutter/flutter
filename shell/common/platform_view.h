@@ -60,7 +60,7 @@ class PlatformView : public std::enable_shared_from_this<PlatformView> {
 
   virtual bool ResourceContextMakeCurrent() = 0;
 
-  virtual void UpdateSemantics(std::vector<blink::SemanticsNode> update);
+  virtual void UpdateSemantics(blink::SemanticsNodeUpdates update);
   virtual void HandlePlatformMessage(
       fxl::RefPtr<blink::PlatformMessage> message);
 

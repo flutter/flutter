@@ -65,7 +65,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   std::string DefaultRouteName() override;
   void ScheduleFrame(bool regenerate_layer_tree = true) override;
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
-  void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
+  void UpdateSemantics(blink::SemanticsNodeUpdates update) override;
   void HandlePlatformMessage(
       fxl::RefPtr<blink::PlatformMessage> message) override;
   void DidCreateMainIsolate(Dart_Isolate isolate) override;

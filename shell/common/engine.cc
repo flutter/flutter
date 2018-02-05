@@ -662,7 +662,7 @@ void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   animator_->Render(std::move(layer_tree));
 }
 
-void Engine::UpdateSemantics(std::vector<blink::SemanticsNode> update) {
+void Engine::UpdateSemantics(blink::SemanticsNodeUpdates update) {
   blink::Threads::Platform()->PostTask(fxl::MakeCopyable([
     platform_view = platform_view_.lock(), update = std::move(update)
   ]() mutable {

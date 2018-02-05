@@ -21,7 +21,7 @@ class AccessibilityBridge {
 
   // Update the internal representation of the semantics nodes, and write the
   // semantics to Context Service.
-  void UpdateSemantics(const std::vector<blink::SemanticsNode>& update);
+  void UpdateSemantics(const blink::SemanticsNodeUpdates& update);
 
  private:
   // Walk the semantics node tree starting at |id|, and store the id of each

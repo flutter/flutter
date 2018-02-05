@@ -2,60 +2,52 @@
 # See http://pub.dartlang.org/doc/glossary.html#lockfile
 packages:
   archive:
-    dependency: "direct main"
     description:
       name: archive
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.33"
   args:
-    dependency: "direct main"
     description:
       name: args
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.13.7"
   charcode:
-    dependency: transitive
     description:
       name: charcode
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.1"
   collection:
-    dependency: transitive
     description:
       name: collection
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.14.5"
   convert:
-    dependency: transitive
     description:
       name: convert
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.1"
   crypto:
-    dependency: "direct main"
     description:
       name: crypto
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.2+1"
   path:
-    dependency: "direct main"
     description:
       name: path
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.5.1"
   typed_data:
-    dependency: transitive
     description:
       name: typed_data
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.5"
 sdks:
-  dart: ">=1.21.0 <=2.0.0-dev.16.0"
+  dart: ">=1.21.0 <2.0.0"
