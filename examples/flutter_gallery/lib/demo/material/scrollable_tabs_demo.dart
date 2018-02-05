@@ -117,6 +117,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
                     page.icon,
                     color: iconColor,
                     size: 128.0,
+                    semanticLabel: 'Placeholer for ${page.text} tab',
                   ),
                 ),
               ),
