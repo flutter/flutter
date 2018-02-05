@@ -1553,6 +1553,7 @@ FILE: ../../../flutter/frontend_server/bin/starter.dart
 FILE: ../../../flutter/frontend_server/lib/server.dart
 FILE: ../../../flutter/lib/io/dart_io.cc
 FILE: ../../../flutter/lib/io/dart_io.h
+FILE: ../../../flutter/lib/snapshot/libraries.json
 FILE: ../../../flutter/lib/ui/dart_runtime_hooks.cc
 FILE: ../../../flutter/lib/ui/dart_runtime_hooks.h
 FILE: ../../../flutter/lib/ui/dart_ui.cc
