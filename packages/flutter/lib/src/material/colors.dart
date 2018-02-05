@@ -336,6 +336,18 @@ class Colors {
   ///    but with different opacities.
   static const Color white30 = const Color(0x4DFFFFFF);
 
+  /// White with 24% opacity.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.whites.png)
+  ///
+  /// Used for the splash color for filled buttons.
+  ///
+  /// See also:
+  ///
+  ///  * [white, white70, white30, white10], which are variants on this color
+  ///    but with different opacities.
+  static const Color white24 = const Color(0x3DFFFFFF);
+
   /// White with 12% opacity.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.whites.png)

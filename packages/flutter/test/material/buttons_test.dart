@@ -203,8 +203,9 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(MaterialButton))),
       paints
+        ..clipRRect(rrect: new RRect.fromLTRBR(356.0, 282.0, 444.0, 318.0, const Radius.circular(2.0)))
         ..circle(color: directSplashColor)
-        ..rrect(color: directHighlightColor)
+        ..rect(color: directHighlightColor)
     );
 
     const Color themeSplashColor1 = const Color(0xFF001100);
@@ -234,8 +235,9 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(MaterialButton))),
       paints
+        ..clipRRect(rrect: new RRect.fromLTRBR(356.0, 282.0, 444.0, 318.0, const Radius.circular(2.0)))
         ..circle(color: themeSplashColor1)
-        ..rrect(color: themeHighlightColor1)
+        ..rect(color: themeHighlightColor1)
     );
 
     const Color themeSplashColor2 = const Color(0xFF002200);
@@ -258,7 +260,7 @@ void main() {
       Material.of(tester.element(find.byType(MaterialButton))),
       paints
         ..circle(color: themeSplashColor2)
-        ..rrect(color: themeHighlightColor2)
+        ..rect(color: themeHighlightColor2)
     );
 
     await gesture.up();
@@ -342,5 +344,4 @@ void main() {
 
     semantics.dispose();
   });
-
 }
