@@ -353,7 +353,13 @@ class WidgetInspectorService {
     final Map<String, Object> json = node.toJsonMap();
 
     json['objectId'] = toId(node, groupName);
-    json['valueId'] = toId(node.value, groupName);
+    final Object value = node.value;
+    json['valueId'] = toId(value, groupName);
+
+    final _Location creationLocation = _getCreationLocation(value);
+    if (creationLocation != null) {
+      json['creationLocation'] = creationLocation.toJsonMap();
+    }
     return json;
   }
 
@@ -415,6 +421,19 @@ class WidgetInspectorService {
     final Element current = selection?.currentElement;
     return _serialize(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), groupName);
   }
+
+  /// Returns whether [Widget] creation locations are available.
+  ///
+  /// [Widget] creation locations are only available for slow mode builds when
+  /// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0
+  /// is required as injecting creation locations requires a
+  /// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+  bool isWidgetCreationTracked() => new _WidgetForTypeTests() is _HasCreationLocation;
+}
+
+class _WidgetForTypeTests extends Widget {
+  @override
+  Element createElement() => null;
 }
 
 /// A widget that enables inspecting the child widget's structure.
@@ -1037,3 +1056,81 @@ const TextStyle _messageStyle = const TextStyle(
   fontSize: 10.0,
   height: 1.2,
 );
+
+/// Interface for classes that track the source code location the their
+/// constructor was called from.
+///
+/// A [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+/// adds this interface to the [Widget] class when the the
+/// `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
+/// required as injecting creation locations requires a
+/// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+// ignore: unused_element
+abstract class _HasCreationLocation {
+  _Location get _location;
+}
+
+/// A tuple with file, line, and column number, for displaying human-readable
+/// file locations.
+class _Location {
+  const _Location({
+    this.file,
+    this.line,
+    this.column,
+    this.name,
+    this.parameterLocations
+  });
+
+  /// File path of the location.
+  final String file;
+
+  /// 1-based line number.
+  final int line;
+  /// 1-based column number.
+  final int column;
+
+  /// Optional name of the parameter or function at this location.
+  final String name;
+
+  /// Optional locations of the parameters of the member at this location.
+  final List<_Location> parameterLocations;
+
+  Map<String, Object> toJsonMap() {
+    final Map<String, Object> json = <String, Object>{
+      'file': file,
+      'line': line,
+      'column': column,
+    };
+    if (parameterLocations != null) {
+      json['parameterLocations'] = parameterLocations.map<Map<String, Object>>(
+          (_Location location) => location.toJsonMap()).toList();
+    }
+    return json;
+  }
+
+  @override
+  String toString() {
+    final List<String> parts = <String>[];
+    if (name != null) {
+      parts.add(name);
+    }
+    if (file != null) {
+      parts.add(file);
+    }
+    parts..add('$line')..add('$column');
+    return parts.join(':');
+  }
+}
+
+/// Returns the creation location of an object if one is available.
+///
+/// Creation locations are only available for slow mode builds when
+/// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
+/// required as injecting creation locations requires a
+/// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+///
+/// Currently creation locations are only available for [Widget] and [Element]
+_Location _getCreationLocation(Object object) {
+  final Object candidate =  object is Element ? object.widget : object;
+  return candidate is _HasCreationLocation ? candidate._location : null;
+}
