@@ -363,7 +363,7 @@ void main() {
         try {
           await driver.waitFor(find.byTooltip('foo'), timeout: const Duration(milliseconds: 100));
           fail('expected an exception');
-        } catch(error) {
+        } catch (error) {
           expect(error is DriverError, isTrue);
           expect(error.message, 'Failed to fulfill WaitFor: Flutter application not responding');
         }
@@ -378,7 +378,7 @@ void main() {
         try {
           await driver.waitFor(find.byTooltip('foo'));
           fail('expected an exception');
-        } catch(error) {
+        } catch (error) {
           expect(error is DriverError, isTrue);
           expect(error.message, 'Error in Flutter application: {message: This is a failure}');
         }

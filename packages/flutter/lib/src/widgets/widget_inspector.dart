@@ -340,7 +340,7 @@ class WidgetInspectorService {
 
   List<_DiagnosticsPathNode> _getRenderObjectParentChain(RenderObject renderObject, String groupName) {
     final List<RenderObject> chain = <RenderObject>[];
-    while(renderObject != null) {
+    while (renderObject != null) {
       chain.add(renderObject);
       renderObject = renderObject.parent;
     }

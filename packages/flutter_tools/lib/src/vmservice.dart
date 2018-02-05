@@ -1045,7 +1045,7 @@ class Isolate extends ServiceObjectOwner {
       }
       final Map<String, dynamic> response = await invokeRpcRaw('_reloadSources', params: arguments);
       return response;
-    } on rpc.RpcException catch(e) {
+    } on rpc.RpcException catch (e) {
       return new Future<Map<String, dynamic>>.error(<String, dynamic>{
         'code': e.code,
         'message': e.message,

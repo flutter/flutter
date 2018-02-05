@@ -96,7 +96,7 @@ String generateTranslationBundles() {
 
   final Map<String, List<String>> languageToLocales = <String, List<String>>{};
   final Set<String> allResourceIdentifiers = new Set<String>();
-  for(String locale in localeToResources.keys.toList()..sort()) {
+  for (String locale in localeToResources.keys.toList()..sort()) {
     final List<String> codes = locale.split('_'); // [language, country]
     assert(codes.length == 1 || codes.length == 2);
     languageToLocales[codes[0]] ??= <String>[];
@@ -142,7 +142,7 @@ class TranslationBundle {
   //   @override String get scriptCategory => r'English-like';
   //   ...
   // }
-  for(String language in languageToLocales.keys) {
+  for (String language in languageToLocales.keys) {
     final Map<String, String> resources = localeToResources[language];
     output.writeln('''
 
@@ -170,9 +170,9 @@ class _Bundle_$language extends TranslationBundle {
   //   @override String get licensesPageTitle => r'Licences';
   //   ...
   // }
-  for(String language in languageToLocales.keys) {
+  for (String language in languageToLocales.keys) {
     final Map<String, String> languageResources = localeToResources[language];
-    for(String localeName in languageToLocales[language]) {
+    for (String localeName in languageToLocales[language]) {
       if (localeName == language)
         continue;
       final Map<String, String> localeResources = localeToResources[localeName];
@@ -198,8 +198,8 @@ class _Bundle_$localeName extends TranslationBundle {
   output.writeln('''
 
 TranslationBundle translationBundleForLocale(Locale locale) {
-  switch(locale.languageCode) {''');
-  for(String language in languageToLocales.keys) {
+  switch (locale.languageCode) {''');
+  for (String language in languageToLocales.keys) {
     if (languageToLocales[language].length == 1) {
       output.writeln('''
     case \'$language\':
@@ -207,8 +207,8 @@ TranslationBundle translationBundleForLocale(Locale locale) {
     } else {
       output.writeln('''
     case \'$language\': {
-      switch(locale.toString()) {''');
-      for(String localeName in languageToLocales[language]) {
+      switch (locale.toString()) {''');
+      for (String localeName in languageToLocales[language]) {
         if (localeName == language)
           continue;
         output.writeln('''
