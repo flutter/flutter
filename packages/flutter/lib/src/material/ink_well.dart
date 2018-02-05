@@ -581,6 +581,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// kind can be used for this purpose.
 ///
 /// See also:
+///
 ///  * [GestureDetector], for listening for gestures without ink splashes.
 ///  * [RaisedButton] and [FlatButton], two kinds of buttons in material design.
 ///  * [InkResponse], a variant of [InkWell] that doesn't force a rectangular
