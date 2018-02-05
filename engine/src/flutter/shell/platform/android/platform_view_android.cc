@@ -460,7 +460,7 @@ bool PlatformViewAndroid::ResourceContextMakeCurrent() {
 }
 
 void PlatformViewAndroid::UpdateSemantics(
-    std::vector<blink::SemanticsNode> update) {
+    blink::SemanticsNodeUpdates update) {
   constexpr size_t kBytesPerNode = 33 * sizeof(int32_t);
   constexpr size_t kBytesPerChild = sizeof(int32_t);
 

@@ -69,7 +69,7 @@ void SemanticsUpdateBuilder::updateNode(int id,
   node.transform.setColMajord(transform.data());
   node.children = std::vector<int32_t>(
       children.data(), children.data() + children.num_elements());
-  nodes_.push_back(node);
+  nodes_[id] = node;
 }
 
 fxl::RefPtr<SemanticsUpdate> SemanticsUpdateBuilder::build() {

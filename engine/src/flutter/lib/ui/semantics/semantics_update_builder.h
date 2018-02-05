@@ -51,7 +51,7 @@ class SemanticsUpdateBuilder
  private:
   explicit SemanticsUpdateBuilder();
 
-  std::vector<SemanticsNode> nodes_;
+  SemanticsNodeUpdates nodes_;
 };
 
 }  // namespace blink

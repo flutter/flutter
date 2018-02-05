@@ -93,7 +93,7 @@ class PlatformViewAndroid : public PlatformView {
 
   bool ResourceContextMakeCurrent() override;
 
-  void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
+  void UpdateSemantics(blink::SemanticsNodeUpdates update) override;
 
   void HandlePlatformMessage(
       fxl::RefPtr<blink::PlatformMessage> message) override;

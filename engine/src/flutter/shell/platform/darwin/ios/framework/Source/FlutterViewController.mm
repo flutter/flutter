@@ -197,6 +197,7 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   [_textInputChannel.get() setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
     [_textInputPlugin.get() handleMethodCall:call result:result];
   }];
+  _platformView->SetTextInputPlugin(_textInputPlugin);
 
   [self setupNotificationCenterObservers];
 }

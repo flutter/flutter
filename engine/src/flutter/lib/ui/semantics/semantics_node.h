@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "third_party/skia/include/core/SkMatrix44.h"
@@ -69,6 +70,12 @@ struct SemanticsNode {
   SkMatrix44 transform = SkMatrix44(SkMatrix44::kIdentity_Constructor);
   std::vector<int32_t> children;
 };
+
+// Contains semantic nodes that need to be updated.
+//
+// The keys in the map are stable node IDd, and the values contain
+// semantic information for the node corresponding to the ID.
+using SemanticsNodeUpdates = std::unordered_map<int32_t, SemanticsNode>;
 
 }  // namespace blink
 

@@ -85,7 +85,7 @@ class Engine : public blink::RuntimeDelegate {
   // RuntimeDelegate methods:
   std::string DefaultRouteName() override;
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
-  void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
+  void UpdateSemantics(blink::SemanticsNodeUpdates update) override;
   void HandlePlatformMessage(
       fxl::RefPtr<blink::PlatformMessage> message) override;
   void DidCreateMainIsolate(Dart_Isolate isolate) override;
