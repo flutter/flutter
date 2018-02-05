@@ -10,15 +10,20 @@ default_platform(:ios)
 # 1- Signing using the publishing credentials; and
 # 2- xcodebuild with archive option
 platform :ios do
-  desc "Push a new release to TestFlight"
+  desc 'Push a new release to TestFlight'
   lane :build_and_deploy_testflight do
     # Doesn't do anything when not on Travis.
     setup_travis
 
+    increment_version_number(
+      # Relative to this file. Accept only digits and dots.
+      version_number: File.read('../../../../version').gsub(/[^0-9\.]/, '')
+    )
+
     # Retrieves all the necessary certs and provisioning profiles.
     sync_code_signing(
-      git_url: ENV["PUBLISHING_MATCH_CERTIFICATE_REPO"],
-      type: "appstore",
+      git_url: ENV['PUBLISHING_MATCH_CERTIFICATE_REPO'],
+      type: 'appstore',
       readonly: true
     )
 
@@ -27,19 +32,19 @@ platform :ios do
     # then run session.
     disable_automatic_code_signing
     update_project_provisioning(
-      xcodeproj: "Runner.xcodeproj",
-      target_filter: "Runner",
-      build_configuration: "Release",
-      profile: ENV["sigh_io.flutter.demo.gallery_appstore_profile-path"],
+      xcodeproj: 'Runner.xcodeproj',
+      target_filter: 'Runner',
+      build_configuration: 'Release',
+      profile: ENV['sigh_io.flutter.demo.gallery_appstore_profile-path'],
     )
 
     # Build and archive the app again.
     build_ios_app(
-      workspace: "Runner.xcworkspace",
-      scheme: "Runner",
-      export_method: "app-store",
+      workspace: 'Runner.xcworkspace',
+      scheme: 'Runner',
+      export_method: 'app-store',
       # Verify that the right signing identity is used for publishing.
-      codesigning_identity: "iPhone Distribution: Store Ladd (S8QB4VV633)",
+      codesigning_identity: 'iPhone Distribution: Store Ladd (S8QB4VV633)',
     )
 
     upload_to_testflight
