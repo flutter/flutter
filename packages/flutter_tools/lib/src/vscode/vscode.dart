@@ -8,7 +8,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/version.dart';
-import '../ios/plist_utils.dart';
 
 // VS Code layout:
 
@@ -62,7 +61,8 @@ class VsCode {
         fs.path.join(installPath, 'resources', 'app', 'package.json');
     final String versionString = _getVersionFromPackageJson(packageJsonPath);
     Version version;
-    if (versionString != null) version = new Version.parse(versionString);
+    if (versionString != null)
+      version = new Version.parse(versionString);
     return new VsCode(installPath, dataFolderName, version: version);
   }
 
@@ -79,17 +79,17 @@ class VsCode {
       return _installedLinux();
     else
       // VS Code isn't supported on the other platforms.
-      return [];
+      return <VsCode>[];
   }
 
   static List<VsCode> _installedMacOS() {
-    final stable = {
+    final Map<String, String> stable = <String, String>{
       fs.path.join('/Applications', 'Visual Studio Code.app', 'Contents'):
           '.vscode',
       fs.path.join(homeDirPath, 'Applications', 'Visual Studio Code.app',
           'Contents'): '.vscode'
     };
-    final insiders = {
+    final Map<String, String> insiders = <String, String>{
       fs.path.join(
               '/Applications', 'Visual Studio Code - Insiders.app', 'Contents'):
           '.vscode-insiders',
@@ -101,14 +101,14 @@ class VsCode {
   }
 
   static List<VsCode> _installedWindows() {
-    final progFiles86 = platform.environment['programfiles(x86)'];
-    final progFiles = platform.environment['programfiles'];
+    final String progFiles86 = platform.environment['programfiles(x86)'];
+    final String progFiles = platform.environment['programfiles'];
 
-    final stable = {
+    final Map<String, String> stable = <String, String>{
       fs.path.join(progFiles86, 'Microsoft VS Code'): '.vscode',
       fs.path.join(progFiles, 'Microsoft VS Code'): '.vscode'
     };
-    final insiders = {
+    final Map<String, String> insiders = <String, String>{
       fs.path.join(progFiles86, 'Microsoft VS Code Insiders'):
           '.vscode-insiders',
       fs.path.join(progFiles, 'Microsoft VS Code Insiders'): '.vscode-insiders'
@@ -118,19 +118,22 @@ class VsCode {
   }
 
   static List<VsCode> _installedLinux() {
-    return _findInstalled({'/usr/share/code': '.vscode'},
-        {'/usr/share/code-insiders': '.vscode-insiders'});
+    return _findInstalled(
+      <String, String>{'/usr/share/code': '.vscode'},
+      <String, String>{'/usr/share/code-insiders': '.vscode-insiders'}
+    );
   }
 
   static List<VsCode> _findInstalled(
       Map<String, String> stable, Map<String, String> insiders) {
-    final allPaths = new Map<String, String>();
+    final Map<String, String> allPaths = <String, String>{};
     allPaths.addAll(stable);
-    if (_includeInsiders) allPaths.addAll(insiders);
+    if (_includeInsiders)
+      allPaths.addAll(insiders);
 
     final List<VsCode> results = <VsCode>[];
 
-    for (var directory in allPaths.keys) {
+    for (String directory in allPaths.keys) {
       if (fs.directory(directory).existsSync())
         results.add(new VsCode.fromFolder(directory, allPaths[directory]));
     }
@@ -148,14 +151,14 @@ class VsCode {
     }
 
     // Check for presence of extension.
-    final extensionFolders = fs
+    final Iterable<FileSystemEntity> extensionFolders = fs
         .directory(fs.path.join(homeDirPath, dataFolderName, 'extensions'))
         .listSync()
-        .where((d) => fs.isDirectorySync(d.path))
-        .where((d) => d.basename.startsWith(extensionIdentifier));
+        .where((FileSystemEntity d) => fs.isDirectorySync(d.path))
+        .where((FileSystemEntity d) => d.basename.startsWith(extensionIdentifier));
 
     if (extensionFolders.isNotEmpty) {
-      final extensionFolder = extensionFolders.first;
+      final FileSystemEntity extensionFolder = extensionFolders.first;
 
       _isValid = true;
       extensionVersion = new Version.parse(
@@ -169,9 +172,10 @@ class VsCode {
       'VS Code ($version)${(extensionVersion != Version.unknown ? ', Dart Code ($extensionVersion)' : '')}';
 
   static String _getVersionFromPackageJson(String packageJsonPath) {
-    if (!fs.isFileSync(packageJsonPath)) return null;
-    final jsonString = fs.file(packageJsonPath).readAsStringSync();
-    Map json = JSON.decode(jsonString);
+    if (!fs.isFileSync(packageJsonPath))
+      return null;
+    final String jsonString = fs.file(packageJsonPath).readAsStringSync();
+    final Map<String, String> json = JSON.decode(jsonString);
     return json['version'];
   }
 }
