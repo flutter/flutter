@@ -77,7 +77,7 @@ void main() {
         return new TaskResult.failure('Gradle did not produce an apk file at the expected place');
 
       return new TaskResult.success(null);
-    } catch(e) {
+    } catch (e) {
       return new TaskResult.failure(e.toString());
     } finally {
       project.parent.deleteSync(recursive: true);

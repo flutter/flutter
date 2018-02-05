@@ -65,7 +65,7 @@ List<Plugin> _findPlugins(String directory) {
   try {
     final String packagesFile = fs.path.join(directory, PackageMap.globalPackagesPath);
     packages = new PackageMap(packagesFile).map;
-  } on FormatException catch(e) {
+  } on FormatException catch (e) {
     printTrace('Invalid .packages file: $e');
     return plugins;
   }

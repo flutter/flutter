@@ -66,11 +66,11 @@ void main() {
       try {
         await channel.invokeMethod('sayHello', 'hello');
         fail('Exception expected');
-      } on PlatformException catch(e) {
+      } on PlatformException catch (e) {
         expect(e.code, equals('bad'));
         expect(e.message, equals('Something happened'));
         expect(e.details, equals(<String, dynamic>{'a': 42, 'b': 3.14}));
-      } catch(e) {
+      } catch (e) {
         fail('PlatformException expected');
       }
     });
@@ -82,10 +82,10 @@ void main() {
       try {
         await channel.invokeMethod('sayHello', 'hello');
         fail('Exception expected');
-      } on MissingPluginException catch(e) {
+      } on MissingPluginException catch (e) {
         expect(e.message, contains('sayHello'));
         expect(e.message, contains('ch7'));
-      } catch(e) {
+      } catch (e) {
         fail('MissingPluginException expected');
       }
     });
@@ -130,7 +130,7 @@ void main() {
       try {
         jsonMethod.decodeEnvelope(envelope);
         fail('Exception expected');
-      } on PlatformException catch(e) {
+      } on PlatformException catch (e) {
         expect(e.code, equals('bad'));
         expect(e.message, equals('sayHello failed'));
       } catch (e) {
@@ -149,7 +149,7 @@ void main() {
       try {
         jsonMethod.decodeEnvelope(envelope);
         fail('Exception expected');
-      } on PlatformException catch(e) {
+      } on PlatformException catch (e) {
         expect(e.code, equals('error'));
         expect(e.message, equals('Invalid argument(s): bad'));
       } catch (e) {
