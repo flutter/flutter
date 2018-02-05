@@ -60,20 +60,23 @@ class ColorItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
-      height: kColorItemHeight,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      color: color,
-      child: new SafeArea(
-        top: false,
-        bottom: false,
-        child: new Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            new Text('$prefix$index'),
-            new Text(colorString()),
-          ],
+    return new Semantics(
+      container: true,
+      child: new Container(
+        height: kColorItemHeight,
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        color: color,
+        child: new SafeArea(
+          top: false,
+          bottom: false,
+          child: new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              new Text('$prefix$index'),
+              new Text(colorString()),
+            ],
+          ),
         ),
       ),
     );
