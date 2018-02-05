@@ -290,112 +290,6 @@ template("process_library_source") {
   }
 }
 
-template("concatenate_patch") {
-  assert(defined(invoker.libsources), "Need a sources in $target_name")
-  assert(defined(invoker.output), "Need an output in $target_name")
-
-  process_library_source(target_name) {
-    libsources = invoker.libsources
-    inputs = []
-    output = invoker.output
-    script = "//third_party/dart/runtime/tools/concatenate_patches.py"
-    args = [
-      "--output",
-      rebase_path(output, root_build_dir),
-    ]
-  }
-}
-
-template("generate_vm_patched_sdk") {
-  assert(defined(invoker.libraries), "Need libraries in $target_name")
-
-  concatenation_target_names = []
-
-  # Concatenate vm library patches.
-  foreach(library, invoker.libraries) {
-    name = library[0]
-
-    target_output = "$target_gen_dir/patches/${name}_patch.dart"
-    concatenate_patch("concatenate_${name}_patch") {
-      libsources = rebase_path(library[1], ".", library[2])
-      output = target_output
-    }
-    concatenation_target_names += [ ":concatenate_${name}_patch" ]
-  }
-
-  # Build the patched sdk out of the concatenated patches and the special
-  # libraries.
-  generate_patched_sdk(target_name) {
-    mode = "flutter"
-    deps = concatenation_target_names + ["//third_party/dart/runtime/vm:kernel_platform_files"]
-    input_patches_dir = "$target_gen_dir/patches"
-    patched_sdk_dir = "flutter_patched_sdk"
-    outputs = [
-        "$root_out_dir/${patched_sdk_dir}/lib/libraries.json",
-    ]
-  }
-}
-
-generate_vm_patched_sdk("flutter_patched_sdk") {
-  libraries = [
-    [
-      "async",
-      async_runtime_sources,
-      "//third_party/dart/runtime/lib",
-    ],
-    [
-      "collection",
-      collection_runtime_sources,
-      "//third_party/dart/runtime/lib",
-    ],
-    [
-      "convert",
-      convert_runtime_sources,
-      "//third_party/dart/runtime/lib",
-    ],
-    [
-      "core",
-      core_runtime_sources,
-      "//third_party/dart/runtime/lib",
-    ],
-    [
-      "developer",
-      developer_runtime_sources,
-      "//third_party/dart/runtime/lib",
-    ],
-    [
-      "internal",
-      internal_runtime_sources,
-      "//third_party/dart/runtime/lib",
-    ],
-    [
-      "io",
-      io_runtime_sources,
-      "//third_party/dart/runtime/bin",
-    ],
-    [
-      "isolate",
-      isolate_runtime_sources,
-      "//third_party/dart/runtime/lib",
-    ],
-    [
-      "math",
-      math_runtime_sources,
-      "//third_party/dart/runtime/lib",
-    ],
-    [
-      "mirrors",
-      mirrors_runtime_sources,
-      "//third_party/dart/runtime/lib",
-    ],
-    [
-      "typed_data",
-      typed_data_runtime_sources,
-      "//third_party/dart/runtime/lib",
-    ],
-  ]
-}
-
 action("compile_non_strong_platform") {
   script = "//third_party/dart/tools/compile_platform.py"
 
@@ -404,7 +298,7 @@ action("compile_non_strong_platform") {
   ]
 
   sources = [
-    "$root_out_dir/flutter_patched_sdk/lib/libraries.json",
+    "libraries.json",
   ]
 
   outputs = [
@@ -412,10 +306,8 @@ action("compile_non_strong_platform") {
     "$root_out_dir/flutter_patched_sdk/vm_outline.dill",
   ]
 
-  inputs = []
-
-  deps = [
-    ":flutter_patched_sdk",
+  inputs = [
+    "libraries.json",
   ]
 
   depfile = "$root_out_dir/flutter_patched_sdk/platform.dill.d"
@@ -433,9 +325,9 @@ action("compile_platform") {
   visibility = [
     ":kernel_platform_files"
   ]
-  
+
   sources = [
-    "$root_out_dir/flutter_patched_sdk/lib/libraries.json",
+    "libraries.json",
   ]
 
   outputs = [
@@ -443,10 +335,8 @@ action("compile_platform") {
     "$root_out_dir/flutter_patched_sdk/vm_outline_strong.dill",
   ]
 
-  inputs = []
-
-  deps = [
-    ":flutter_patched_sdk",
+  inputs = [
+    "libraries.json",
   ]
 
   depfile = "$root_out_dir/flutter_patched_sdk/platform_strong.dill.d"
