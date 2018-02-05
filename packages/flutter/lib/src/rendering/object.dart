@@ -168,7 +168,7 @@ class PaintingContext {
   }
 
   bool get _isRecording {
-    final bool hasCanvas = (_canvas != null);
+    final bool hasCanvas = _canvas != null;
     assert(() {
       if (hasCanvas) {
         assert(_currentLayer != null);
@@ -2222,7 +2222,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// any way to update the semantics tree.
   void markNeedsSemanticsUpdate() {
     assert(!attached || !owner._debugDoingSemantics);
-    if ((attached && owner._semanticsOwner == null))
+    if (attached && owner._semanticsOwner == null)
       return;
 
     // Dirty the semantics tree starting at `this` until we have reached a

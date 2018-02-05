@@ -57,7 +57,7 @@ String expandTemplate(String template, Map<String, String> values) {
     if (match.groupCount != 1)
       throw new SampleError('bad template keyword $match[0]');
     final String keyword = match[1];
-    return (values[keyword] ?? '');
+    return values[keyword] ?? '';
   });
 }
 

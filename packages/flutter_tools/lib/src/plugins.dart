@@ -82,7 +82,7 @@ List<Plugin> _findPlugins(String directory) {
 bool _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
   final File pluginsProperties = fs.file(fs.path.join(directory, '.flutter-plugins'));
   final String previousFlutterPlugins =
-      (pluginsProperties.existsSync() ? pluginsProperties.readAsStringSync() : null);
+      pluginsProperties.existsSync() ? pluginsProperties.readAsStringSync() : null;
   final String pluginManifest =
       plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
   if (pluginManifest.isNotEmpty) {
@@ -93,7 +93,7 @@ bool _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
     }
   }
   final String currentFlutterPlugins =
-      (pluginsProperties.existsSync() ? pluginsProperties.readAsStringSync() : null);
+      pluginsProperties.existsSync() ? pluginsProperties.readAsStringSync() : null;
   return currentFlutterPlugins != previousFlutterPlugins;
 }
 

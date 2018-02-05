@@ -326,7 +326,7 @@ class _RecipePageState extends State<RecipePage> {
     // the edge of the screen, use a slightly different layout.
     final double appBarHeight = _getAppBarHeight(context);
     final Size screenSize = MediaQuery.of(context).size;
-    final bool fullWidth = (screenSize.width < _kRecipePageMaxWidth);
+    final bool fullWidth = screenSize.width < _kRecipePageMaxWidth;
     final bool isFavorite = _favoriteRecipes.contains(widget.recipe);
     return new Scaffold(
       key: _scaffoldKey,
