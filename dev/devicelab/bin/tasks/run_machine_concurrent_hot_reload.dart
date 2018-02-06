@@ -119,7 +119,9 @@ void main() {
       if (successResponses.length != 1)
         throw 'Did not receive the expected (exactly one) successful hot reload response.';
 
-      // TODO: Send another hot reload to ensure it works correctly
+      final dynamic hotReload3 = await sendRequest('app.restart', { 'appId': appId, 'fullRestart': false });
+      if (hotReload3['error'] != null)
+        throw 'Received an error response from a hot reload after all other hot reloads had completed.';
       
       sendRequest('app.stop', { 'appId': appId });
       final int result = await run.exitCode;
