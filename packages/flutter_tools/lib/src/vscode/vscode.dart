@@ -153,6 +153,12 @@ class VsCode {
       return;
     }
 
+    // If the extensions directory doesn't exist at all, the listSync()
+    // below will fail, so just bail out early.
+    if (!fs.isDirectorySync(extensionDirectory)) {
+      return;
+    }
+
     // Check for presence of extension.
     final Iterable<FileSystemEntity> extensionDirs = fs
         .directory(extensionDirectory)
