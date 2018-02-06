@@ -17,13 +17,13 @@ const double kTextTabBarHeight = 48.0;
 const Duration kThemeChangeDuration = const Duration(milliseconds: 200);
 
 /// The radius of a circular material ink response in logical pixels.
-const double kRadialReactionRadius = 24.0;
+const double kRadialReactionRadius = 20.0;
 
 /// The amount of time a circular material ink response should take to expand to its full size.
-const Duration kRadialReactionDuration = const Duration(milliseconds: 200);
+const Duration kRadialReactionDuration = const Duration(milliseconds: 100);
 
 /// The value of the alpha channel to use when drawing a circular material ink response.
-const int kRadialReactionAlpha = 0x33;
+const int kRadialReactionAlpha = 0x1F;
 
 /// The duration of the horizontal scroll animation that occurs when a tab is tapped.
 const Duration kTabScrollDuration = const Duration(milliseconds: 300);
