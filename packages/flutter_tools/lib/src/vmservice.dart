@@ -269,7 +269,7 @@ bool _isServiceMap(Map<String, dynamic> m) {
   return (m != null) && (m['type'] != null);
 }
 bool _hasRef(String type) => (type != null) && type.startsWith('@');
-String _stripRef(String type) => (_hasRef(type) ? type.substring(1) : type);
+String _stripRef(String type) => _hasRef(type) ? type.substring(1) : type;
 
 /// Given a raw response from the service protocol and a [ServiceObjectOwner],
 /// recursively walk the response and replace values that are service maps with
@@ -522,13 +522,13 @@ class ServiceEvent extends ServiceObject {
   }
 
   bool get isPauseEvent {
-    return (kind == kPauseStart ||
-            kind == kPauseExit ||
-            kind == kPauseBreakpoint ||
-            kind == kPauseInterrupted ||
-            kind == kPauseException ||
-            kind == kPausePostRequest ||
-            kind == kNone);
+    return kind == kPauseStart ||
+           kind == kPauseExit ||
+           kind == kPauseBreakpoint ||
+           kind == kPauseInterrupted ||
+           kind == kPauseException ||
+           kind == kPausePostRequest ||
+           kind == kNone;
   }
 }
 
@@ -1192,7 +1192,7 @@ class Isolate extends ServiceObjectOwner {
   }
 
   Future<bool> flutterFrameworkPresent() async {
-    return (await invokeFlutterExtensionRpcRaw('ext.flutter.frameworkPresent') != null);
+    return await invokeFlutterExtensionRpcRaw('ext.flutter.frameworkPresent') != null;
   }
 
   Future<Map<String, dynamic>> uiWindowScheduleFrame() async {

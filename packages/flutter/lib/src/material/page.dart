@@ -129,7 +129,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    return (previousRoute is MaterialPageRoute || previousRoute is CupertinoPageRoute);
+    return previousRoute is MaterialPageRoute || previousRoute is CupertinoPageRoute;
   }
 
   @override

@@ -42,7 +42,7 @@ Future<Null> main(List<String> args) async {
       (args.length == 2 && verbose && args.last == 'doctor');
   final bool help = args.contains('-h') || args.contains('--help') ||
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
-  final bool muteCommandLogging = (help || doctor);
+  final bool muteCommandLogging = help || doctor;
   final bool verboseHelp = help && verbose;
 
   await runner.run(args, <FlutterCommand>[
