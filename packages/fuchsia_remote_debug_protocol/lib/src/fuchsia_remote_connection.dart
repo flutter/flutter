@@ -64,6 +64,10 @@ class FuchsiaRemoteConnection {
   }
 
   /// Closes all open connections.
+  ///
+  /// Any objects that this class returns (including any child objects from
+  /// those objects) will subsequently have its connection closed as well, so
+  /// behavior for them will be undefined.
   Future<Null> stop() async {
     for (_ForwardedPort fp in _forwardedVmServicePorts) {
       // Closes VM service first to ensure that the connection is closed cleanly
@@ -77,7 +81,7 @@ class FuchsiaRemoteConnection {
 
   /// Returns a list of `FlutterView` objects.
   ///
-  /// This is across all connected DartVM connections that this class is
+  /// This is run across all connected DartVM connections that this class is
   /// managing.
   Future<List<FlutterView>> getFlutterViews() async {
     final List<FlutterView> views = <FlutterView>[];
@@ -101,8 +105,8 @@ class FuchsiaRemoteConnection {
     return _dartVmCache[port];
   }
 
-  /// Forwards a series of local device ports to the [deviceIpv4Address] using SSH
-  /// port forwarding.
+  /// Forwards a series of local device ports to the [deviceIpv4Address] using
+  /// SSH port forwarding.
   ///
   /// Returns a [List] of [_ForwardedPort] objects that the caller
   /// must close when done using. Path to the ssh config is optional.
@@ -117,8 +121,12 @@ class FuchsiaRemoteConnection {
     }));
   }
 
-  /// Returns a list of the device service ports on success, else returns an empty
-  /// list.
+  /// Gets the open Dart VM service ports on a remote Fuchsia device.
+  ///
+  /// The method attempts to get service ports through an SSH connection. Upon
+  /// successfully getting the VM service ports, returns them as a list of
+  /// integers. If an empty list is returned, then no Dart VM instances could be
+  /// found.
   static Future<List<int>> getDeviceServicePorts(String ipv4Address,
       [String sshConfigPath = null]) async {
     final SshCommandRunner runner = new SshCommandRunner(
