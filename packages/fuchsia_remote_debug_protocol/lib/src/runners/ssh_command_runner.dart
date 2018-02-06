@@ -19,33 +19,23 @@ class SshCommandRunner {
   /// The IPv4 address to access the Fuchsia machine over SSH.
   final String ipv4Address;
 
-  /// The build type for the Fuchsia instance. Defaults to 'release-x86-64'.
-  final String buildType;
-
-  /// The root directory for the fuchsia build.
-  final String fuchsiaRoot;
+  /// The path to the SSH config (optional).
+  final String sshConfigPath;
 
   /// Instantiates the command runner, pointing to an `ipv4Address` as well as
-  /// the root directory and build type in order to access the ssh-keys
-  /// directory. The directory is defined under the fuchsia root as
-  /// out/$buildType/ssh-keys/ssh_config.
-  SshCommandRunner(
-      {this.ipv4Address, this.fuchsiaRoot, this.buildType = 'release-x86-64'});
+  /// an optional SSH config file.
+  SshCommandRunner({this.ipv4Address, this.sshConfigPath = null});
 
   /// Runs a command on a Fuchsia device through an SSH tunnel. If an error is
   /// encountered, returns null, else a list of lines of stdout from running the
   /// command.
-  ///
-  /// TODO(awdavies): Make the SSH config location optional.
   Future<List<String>> run(String command) async {
-    final String config = '$fuchsiaRoot/out/$buildType/ssh-keys/ssh_config';
-    final List<String> args = <String>[
-      'ssh',
-      '-F',
-      config,
-      ipv4Address,
-      command
-    ];
+    List<String> args;
+    if (sshConfigPath != null) {
+      args = <String>['ssh', '-F', sshConfigPath, ipv4Address, command];
+    } else {
+      args = <String>['ssh', ipv4Address, command];
+    }
     _log.fine(args.join(' '));
     final ProcessResult result = await _processManager.run(args);
     if (result.exitCode != 0) {

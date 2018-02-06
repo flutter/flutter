@@ -30,18 +30,17 @@ final Logger _log = new Logger('FuchsiaRemoteConnection');
 /// device's Dart VM at any given time.
 class FuchsiaRemoteConnection {
   final String _address;
-  // TODO(awdavies): Remove this, and change it to an optional string pointing
-  // to an SSH config.
-  final String _fuchsiaRoot;
-  final String _buildType;
+
+  /// Optional path to an SSH config.
+  final String _sshConfigPath;
   final List<_ForwardedPort> _forwardedVmServicePorts;
 
   /// VM service cache to avoid repeating handshakes across function
   /// calls. Keys a forwarded port to a DartVm connection instance.
   final HashMap<int, DartVm> _dartVmCache = <int, DartVm>{};
 
-  FuchsiaRemoteConnection._(this._address, this._fuchsiaRoot, this._buildType,
-      this._forwardedVmServicePorts);
+  FuchsiaRemoteConnection._(
+      this._address, this._sshConfigPath, this._forwardedVmServicePorts);
 
   /// Opens a connection to a Fuchsia device.
   ///
@@ -55,16 +54,13 @@ class FuchsiaRemoteConnection {
   /// lifetime of the object.
   ///
   /// At its current state Dart VM connections will not be added or removed.
-  ///
-  /// TODO(awdavies): Remove this fuchsiaRoot and buildType nonsense.
-  static Future<FuchsiaRemoteConnection> connect(
-      String ipv4Address, String fuchsiaRoot, String buildType) async {
+  static Future<FuchsiaRemoteConnection> connect(String ipv4Address,
+      [String sshConfigPath = null]) async {
     final List<_ForwardedPort> ports =
         await _forwardLocalPortsToDeviceServicePorts(
-            ipv4Address, fuchsiaRoot, buildType);
+            ipv4Address, sshConfigPath);
 
-    return new FuchsiaRemoteConnection._(
-        ipv4Address, fuchsiaRoot, buildType, ports);
+    return new FuchsiaRemoteConnection._(ipv4Address, sshConfigPath, ports);
   }
 
   /// Closes all open connections.
@@ -132,27 +128,28 @@ class FuchsiaRemoteConnection {
   }
 
   /// Forwards a series of local device ports to the [deviceIpv4Address] using SSH
-  /// port forwarding. Returns a [List] of [_ForwardedPort] objects that the caller
-  /// must close when done using. Needs [fuchsiaRoot] and [buildType] to
-  /// determine the path for the SSH config.
+  /// port forwarding.
+  ///
+  /// Returns a [List] of [_ForwardedPort] objects that the caller
+  /// must close when done using. Path to the ssh config is optional.
   static Future<List<_ForwardedPort>> _forwardLocalPortsToDeviceServicePorts(
-      String deviceIpv4Address, String fuchsiaRoot, String buildType) async {
-    final String config = '$fuchsiaRoot/out/$buildType/ssh-keys/ssh_config';
+      String deviceIpv4Address,
+      [String sshConfigPath = null]) async {
     final List<int> servicePorts =
-        await getDeviceServicePorts(deviceIpv4Address, fuchsiaRoot, buildType);
+        await getDeviceServicePorts(deviceIpv4Address, sshConfigPath);
     return Future.wait(servicePorts.map((int deviceServicePort) {
-      return _ForwardedPort.start(config, deviceIpv4Address, deviceServicePort);
+      return _ForwardedPort.start(
+          deviceIpv4Address, deviceServicePort, sshConfigPath);
     }));
   }
 
   /// Returns a list of the device service ports on success, else returns an empty
   /// list.
-  static Future<List<int>> getDeviceServicePorts(
-      String ipv4Address, String fuchsiaRoot, String buildType) async {
+  static Future<List<int>> getDeviceServicePorts(String ipv4Address,
+      [String sshConfigPath = null]) async {
     final SshCommandRunner runner = new SshCommandRunner(
       ipv4Address: ipv4Address,
-      fuchsiaRoot: fuchsiaRoot,
-      buildType: buildType,
+      sshConfigPath: sshConfigPath,
     );
     final List<String> lsOutput = await runner.run('ls /tmp/dart.services');
     final List<int> ports = <int>[];
@@ -186,10 +183,10 @@ class _ForwardedPort {
   final int _remotePort;
   final int _localPort;
   final Process _process;
-  final String _sshConfig;
+  final String _sshConfigPath;
 
   _ForwardedPort._(this._remoteAddress, this._remotePort, this._localPort,
-      this._process, this._sshConfig);
+      this._process, this._sshConfigPath);
 
   /// Gets the port on the localhost machine through which the SSH tunnel is
   /// being forwarded.
@@ -197,23 +194,35 @@ class _ForwardedPort {
 
   /// Starts SSH forwarding through a subprocess, and returns an instance of
   /// `_ForwardedPort`.
-  static Future<_ForwardedPort> start(
-      String sshConfig, String address, int remotePort) async {
+  static Future<_ForwardedPort> start(String address, int remotePort,
+      [String sshConfigPath = null]) async {
     final int localPort = await _potentiallyAvailablePort();
     if (localPort == 0) {
       _log.warning(
           '_ForwardedPort failed to find a local port for $address:$remotePort');
       return new _ForwardedPort._(null, 0, 0, null, null);
     }
-    final List<String> command = <String>[
-      'ssh',
-      '-F',
-      sshConfig,
-      '-nNT',
-      '-L',
-      '$localPort:$_ipv4Loopback:$remotePort',
-      address
-    ];
+    String formattedForwardingUrl = '$localPort:$_ipv4Loopback:$remotePort';
+    List<String> command;
+    if (sshConfigPath != null) {
+      command = <String>[
+        'ssh',
+        '-F',
+        sshConfigPath,
+        '-nNT',
+        '-L',
+        formattedForwardingUrl,
+        address,
+      ];
+    } else {
+      command = <String>[
+        'ssh',
+        '-nNT',
+        '-L',
+        formattedForwardingUrl,
+        address,
+      ];
+    }
     _log.fine("_ForwardedPort running '${command.join(' ')}'");
     final Process process = await _processManager.start(command);
     process.exitCode.then((int c) {
@@ -221,7 +230,7 @@ class _ForwardedPort {
     });
     _log.fine('Set up forwarding from $localPort to $address:$remotePort');
     return new _ForwardedPort._(
-        address, remotePort, localPort, process, sshConfig);
+        address, remotePort, localPort, process, sshConfigPath);
   }
 
   /// Kills the SSH forwarding command, then to ensure no ports are forwarded,
@@ -230,16 +239,28 @@ class _ForwardedPort {
     // Kill the original ssh process if it is still around.
     _process?.kill();
     // Cancel the forwarding request.
-    final List<String> command = <String>[
-      'ssh',
-      '-F',
-      _sshConfig,
-      '-O',
-      'cancel',
-      '-L',
-      '$_localPort:$_ipv4Loopback:$_remotePort',
-      _remoteAddress
-    ];
+    List<String> command;
+    if (_sshConfigPath != null) {
+      command = <String>[
+        'ssh',
+        '-F',
+        _sshConfigPath,
+        '-O',
+        'cancel',
+        '-L',
+        '$_localPort:$_ipv4Loopback:$_remotePort',
+        _remoteAddress
+      ];
+    } else {
+      command = <String>[
+        'ssh',
+        '-O',
+        'cancel',
+        '-L',
+        '$_localPort:$_ipv4Loopback:$_remotePort',
+        _remoteAddress
+      ];
+    }
     final ProcessResult result = await _processManager.run(command);
     _log.fine(command.join(' '));
     if (result.exitCode != 0) {
