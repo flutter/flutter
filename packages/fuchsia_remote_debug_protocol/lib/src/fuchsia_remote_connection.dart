@@ -9,8 +9,8 @@ import 'dart:io';
 import 'package:process/process.dart';
 import 'package:logging/logging.dart';
 
-import 'dart/fuchsia_dart_vm.dart';
-import 'fuchsia_device_command_runner.dart';
+import 'dart/dart_vm.dart';
+import 'runners/ssh_command_runner.dart';
 
 final String _ipv4Loopback = InternetAddress.LOOPBACK_IP_V4.address;
 
@@ -19,69 +19,78 @@ final String _ipv4SocketFallback = 'localhost';
 
 final ProcessManager _processManager = const LocalProcessManager();
 
-final Logger _log = new Logger('FlutterFuchsiaDriver');
+final Logger _log = new Logger('FuchsiaRemoteConnection');
 
-/// Drives a Flutter application running in a Fuchsia context.
-class FlutterFuchsiaDriver {
+/// Manages a remote connection to a Fuchsia Device.
+///
+/// Provides affordances to observe and connect to Flutter views, isolates, and
+/// perform actions on the Fuchsia device's various VM services.
+///
+/// Note that this class can be connected to several instances of the Fuchsia
+/// device's Dart VM at any given time.
+class FuchsiaRemoteConnection {
   final String _address;
+  // TODO(awdavies): Remove this, and change it to an optional string pointing
+  // to an SSH config.
   final String _fuchsiaRoot;
   final String _buildType;
   final List<_ForwardedPort> _forwardedVmServicePorts;
 
   /// VM service cache to avoid repeating handshakes across function
-  /// calls. Keys a forwarded port to a FuchsiaDartVm connection instance.
-  final HashMap<int, FuchsiaDartVm> _fuchsiaDartVmCache =
-      <int, FuchsiaDartVm>{};
+  /// calls. Keys a forwarded port to a DartVm connection instance.
+  final HashMap<int, DartVm> _dartVmCache = <int, DartVm>{};
 
-  FlutterFuchsiaDriver._(this._address, this._fuchsiaRoot, this._buildType,
+  FuchsiaRemoteConnection._(this._address, this._fuchsiaRoot, this._buildType,
       this._forwardedVmServicePorts);
 
-  /// Opens a driver connection to a Fuchsia device.
+  /// Opens a connection to a Fuchsia device.
   ///
   /// Accepts an `ipv4Address` to a Fuchsia device, and requires a root
   /// directory in which the Fuchsia Device was built (along with the
   /// `buildType`) in order to open the associated ssh_config for port
   /// forwarding.
   ///
-  /// Once this function is called, the instance of `FlutterFuchsiaDriver`
+  /// Once this function is called, the instance of `FuchsiaRemoteConnection`
   /// returned will keep all associated DartVM connections opened over the
   /// lifetime of the object.
   ///
   /// At its current state Dart VM connections will not be added or removed.
-  static Future<FlutterFuchsiaDriver> connect(
+  ///
+  /// TODO(awdavies): Remove this fuchsiaRoot and buildType nonsense.
+  static Future<FuchsiaRemoteConnection> connect(
       String ipv4Address, String fuchsiaRoot, String buildType) async {
     final List<_ForwardedPort> ports =
         await _forwardLocalPortsToDeviceServicePorts(
             ipv4Address, fuchsiaRoot, buildType);
 
-    return new FlutterFuchsiaDriver._(
+    return new FuchsiaRemoteConnection._(
         ipv4Address, fuchsiaRoot, buildType, ports);
   }
 
-  /// Closes all connections handled by this driver.
+  /// Closes all open connections.
   Future<Null> stop() async {
     for (_ForwardedPort fp in _forwardedVmServicePorts) {
       // Closes VM service first to ensure that the connection is closed cleanly
       // on the target before shutting down the forwarding itself.
-      final FuchsiaDartVm vmService = _fuchsiaDartVmCache[fp.port];
-      _fuchsiaDartVmCache[fp.port] = null;
+      final DartVm vmService = _dartVmCache[fp.port];
+      _dartVmCache[fp.port] = null;
       await vmService?.stop();
       await fp.stop();
     }
   }
 
-  /// Returns a list of `FlutterFuchsiaView` objects.
+  /// Returns a list of `FlutterView` objects.
   ///
   /// This is across all connected DartVM connections that this class is
   /// managing.
-  Future<List<FlutterFuchsiaView>> getFlutterViews() async {
-    final List<FlutterFuchsiaView> views = <FlutterFuchsiaView>[];
+  Future<List<FlutterView>> getFlutterViews() async {
+    final List<FlutterView> views = <FlutterView>[];
     if (_forwardedVmServicePorts.isEmpty) {
       return views;
     }
     for (_ForwardedPort fp in _forwardedVmServicePorts) {
       _checkPort(fp.port);
-      final FuchsiaDartVm vmService = await _getFuchsiaDartVm(fp.port);
+      final DartVm vmService = await _getDartVm(fp.port);
       views.addAll(await vmService.getAllFlutterViews());
     }
     return views;
@@ -112,14 +121,14 @@ class FlutterFuchsiaDriver {
     s?.destroy();
   }
 
-  Future<FuchsiaDartVm> _getFuchsiaDartVm(int port) async {
-    if (!_fuchsiaDartVmCache.containsKey(port)) {
+  Future<DartVm> _getDartVm(int port) async {
+    if (!_dartVmCache.containsKey(port)) {
       final String addr = 'http://$_ipv4Loopback:$port';
       final Uri uri = Uri.parse(addr);
-      final FuchsiaDartVm fuchsiaDartVm = await FuchsiaDartVm.connect(uri);
-      _fuchsiaDartVmCache[port] = fuchsiaDartVm;
+      final DartVm dartVm = await DartVm.connect(uri);
+      _dartVmCache[port] = dartVm;
     }
-    return _fuchsiaDartVmCache[port];
+    return _dartVmCache[port];
   }
 
   /// Forwards a series of local device ports to the [deviceIpv4Address] using SSH
@@ -140,7 +149,7 @@ class FlutterFuchsiaDriver {
   /// list.
   static Future<List<int>> getDeviceServicePorts(
       String ipv4Address, String fuchsiaRoot, String buildType) async {
-    final FuchsiaDeviceCommandRunner runner = new FuchsiaDeviceCommandRunner(
+    final SshCommandRunner runner = new SshCommandRunner(
       ipv4Address: ipv4Address,
       fuchsiaRoot: fuchsiaRoot,
       buildType: buildType,

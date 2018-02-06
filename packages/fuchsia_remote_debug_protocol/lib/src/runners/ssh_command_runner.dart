@@ -1,4 +1,4 @@
-// Copyright 2018 The Fuchsia Authors. All rights reserved.
+// Copyright 2018 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,8 +11,8 @@ import 'package:logging/logging.dart';
 /// Runs a command remotely on a Fuchsia device. Requires a fuchsia root and
 /// build type (to load the ssh config), and the ipv4 address of the fuchsia
 /// device.
-class FuchsiaDeviceCommandRunner {
-  final Logger _log = new Logger('FuchsiaDeviceCommandRunner');
+class SshCommandRunner {
+  final Logger _log = new Logger('SshCommandRunner');
 
   final ProcessManager _processManager = const LocalProcessManager();
 
@@ -29,12 +29,14 @@ class FuchsiaDeviceCommandRunner {
   /// the root directory and build type in order to access the ssh-keys
   /// directory. The directory is defined under the fuchsia root as
   /// out/$buildType/ssh-keys/ssh_config.
-  FuchsiaDeviceCommandRunner(
+  SshCommandRunner(
       {this.ipv4Address, this.fuchsiaRoot, this.buildType = 'release-x86-64'});
 
   /// Runs a command on a Fuchsia device through an SSH tunnel. If an error is
   /// encountered, returns null, else a list of lines of stdout from running the
   /// command.
+  ///
+  /// TODO(awdavies): Make the SSH config location optional.
   Future<List<String>> run(String command) async {
     final String config = '$fuchsiaRoot/out/$buildType/ssh-keys/ssh_config';
     final List<String> args = <String>[
