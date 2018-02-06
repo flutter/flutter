@@ -398,7 +398,7 @@ Future<Null> diagnoseXcodeBuildFailure(
   }
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      app.id?.contains('com.example') ?? false) {
+      app.id.contains('com.example')) {
     printError('');
     printError('It appears that your application still contains the default signing identifier.');
     printError("Try replacing 'com.example' with your signing id in Xcode:");
