@@ -230,7 +230,7 @@ Matcher isMethodCall(String name, {@required dynamic arguments}) {
 /// that the [Path.contains] method returns the same value for each of the
 /// points for both paths.
 ///
-/// When using this matcher you typically want to use a rectangle larget than
+/// When using this matcher you typically want to use a rectangle larger than
 /// the area you expect to paint in for [areaToCompare] to catch errors where
 /// the path draws outside the expected area.
 Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int sampleSize = 20})
@@ -1106,11 +1106,11 @@ class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, Null> {
 class _CoversSameAreaAs extends Matcher {
   _CoversSameAreaAs(
     this.expectedPath, {
-      @required this.areaToCompare,
-      this.sampleSize = 20,
+    @required this.areaToCompare,
+    this.sampleSize = 20,
   }) : maxHorizontalNoise = areaToCompare.width / sampleSize,
-       maxVerticalNoise = areaToCompare.height / sampleSize
-  {
+       maxVerticalNoise = areaToCompare.height / sampleSize {
+    // Use a fixed random seed to make sure tests are deterministic.
     random = new math.Random(1);
   }
 
