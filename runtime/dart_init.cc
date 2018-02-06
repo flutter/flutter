@@ -299,7 +299,7 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
 static bool GetAssetAsBuffer(
     const std::string& name,
     std::vector<uint8_t>* data,
-    std::unique_ptr<DirectoryAssetBundle>& directory_asset_bundle,
+    fxl::RefPtr<DirectoryAssetBundle>& directory_asset_bundle,
     fxl::RefPtr<ZipAssetStore>& asset_store) {
   return (directory_asset_bundle &&
           directory_asset_bundle->GetAsBuffer(name, data)) ||
@@ -340,7 +340,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
       struct stat stat_result = {};
       if (::stat(bundle_path.c_str(), &stat_result) == 0) {
-        std::unique_ptr<DirectoryAssetBundle> directory_asset_bundle;
+        fxl::RefPtr<DirectoryAssetBundle> directory_asset_bundle;
         // TODO(zarah): Remove usage of zip_asset_store once app.flx is removed.
         fxl::RefPtr<ZipAssetStore> zip_asset_store;
         // bundle_path is either the path to app.flx or the flutter assets
@@ -348,7 +348,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
         std::string flx_path = bundle_path;
         if (S_ISDIR(stat_result.st_mode)) {
           directory_asset_bundle =
-              std::make_unique<DirectoryAssetBundle>(bundle_path);
+              fxl::MakeRefCounted<DirectoryAssetBundle>(bundle_path);
           flx_path = files::GetDirectoryName(bundle_path) + "/app.flx";
         }
 
