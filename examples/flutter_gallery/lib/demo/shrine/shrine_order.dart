@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -259,6 +261,13 @@ class _OrderPageState extends State<OrderPage> {
 
   @override
   Widget build(BuildContext context) {
+    final EdgeInsets mediaPadding = MediaQuery.of(context).padding;
+    final EdgeInsets sliverPadding = new EdgeInsets.fromLTRB(
+      math.max(8.0, mediaPadding.left),
+      32.0,
+      math.max(8.0, mediaPadding.right),
+      math.max(8.0, mediaPadding.bottom),
+    );
     return new ShrinePage(
       scaffoldKey: scaffoldKey,
       products: widget.products,
@@ -278,40 +287,46 @@ class _OrderPageState extends State<OrderPage> {
           color: Colors.black,
         ),
       ),
-      body: new CustomScrollView(
-        slivers: <Widget>[
-          new SliverToBoxAdapter(
-            child: new _Heading(
-              product: widget.order.product,
-              quantity: currentOrder.quantity,
-              quantityChanged: (int value) { updateOrder(quantity: value); },
-            ),
-          ),
-          new SliverPadding(
-            padding: const EdgeInsets.fromLTRB(8.0, 32.0, 8.0, 8.0),
-            sliver: new SliverGrid(
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 248.0,
-                mainAxisSpacing: 8.0,
-                crossAxisSpacing: 8.0,
-              ),
-              delegate: new SliverChildListDelegate(
-                widget.products
-                  .where((Product product) => product != widget.order.product)
-                  .map((Product product) {
-                    return new Card(
-                      elevation: 1.0,
-                      child: new Image.asset(
-                        product.imageAsset,
-                        package: product.imageAssetPackage,
-                        fit: BoxFit.contain,
-                      ),
-                    );
-                  }).toList(),
+      body: new MediaQuery.removePadding(
+        context: context,
+        removeLeft: true,
+        removeRight: true,
+        removeBottom: true,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new SliverToBoxAdapter(
+              child: new _Heading(
+                product: widget.order.product,
+                quantity: currentOrder.quantity,
+                quantityChanged: (int value) { updateOrder(quantity: value); },
               ),
             ),
-          ),
-        ],
+            new SliverPadding(
+              padding: sliverPadding,
+              sliver: new SliverGrid(
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 248.0,
+                  mainAxisSpacing: 8.0,
+                  crossAxisSpacing: 8.0,
+                ),
+                delegate: new SliverChildListDelegate(
+                  widget.products
+                    .where((Product product) => product != widget.order.product)
+                    .map((Product product) {
+                      return new Card(
+                        elevation: 1.0,
+                        child: new Image.asset(
+                          product.imageAsset,
+                          package: product.imageAssetPackage,
+                          fit: BoxFit.contain,
+                        ),
+                      );
+                    }).toList(),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

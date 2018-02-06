@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -382,30 +383,43 @@ class _ShrineHomeState extends State<ShrineHome> {
   @override
   Widget build(BuildContext context) {
     final Product featured = _products.firstWhere((Product product) => product.featureDescription != null);
+    final EdgeInsets mediaPadding = MediaQuery.of(context).padding;
+    final EdgeInsets sliverPadding = new EdgeInsets.fromLTRB(
+        math.max(16.0, mediaPadding.left),
+        16.0,
+        math.max(16.0, mediaPadding.right),
+        math.max(16.0, mediaPadding.bottom),
+    );
     return new ShrinePage(
       scaffoldKey: _scaffoldKey,
       products: _products,
       shoppingCart: _shoppingCart,
-      body: new CustomScrollView(
-        slivers: <Widget>[
-          new SliverToBoxAdapter(
-            child: new _Heading(product: featured),
-          ),
-          new SliverPadding(
-            padding: const EdgeInsets.all(16.0),
-            sliver: new SliverGrid(
-              gridDelegate: gridDelegate,
-              delegate: new SliverChildListDelegate(
-                _products.map((Product product) {
-                  return new _ProductItem(
-                    product: product,
-                    onPressed: () { _showOrderPage(product); },
-                  );
-                }).toList(),
+      body: new MediaQuery.removePadding(
+        context: context,
+        removeLeft: true,
+        removeRight: true,
+        removeBottom: true,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new SliverToBoxAdapter(
+              child: new _Heading(product: featured),
+            ),
+            new SliverPadding(
+              padding: sliverPadding,
+              sliver: new SliverGrid(
+                gridDelegate: gridDelegate,
+                delegate: new SliverChildListDelegate(
+                  _products.map((Product product) {
+                    return new _ProductItem(
+                      product: product,
+                      onPressed: () { _showOrderPage(product); },
+                    );
+                  }).toList(),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
