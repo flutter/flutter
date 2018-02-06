@@ -24,9 +24,9 @@ ResourceContext::~ResourceContext() {
   g_mutex.Unlock();
 }
 
-void ResourceContext::Set(GrContext* context) {
+void ResourceContext::Set(sk_sp<GrContext> context) {
   FXL_DCHECK(!g_context);
-  g_context = context;
+  g_context = context.release();
 }
 
 GrContext* ResourceContext::Get() {

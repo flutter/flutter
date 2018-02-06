@@ -15,7 +15,7 @@ class ResourceContext {
   /**
    * Globally set the GrContext singleton instance.
    */
-  static void Set(GrContext* context);
+  static void Set(sk_sp<GrContext> context);
 
   /**
    * Acquire a GrContext wrapping ResourceContext that's also an exclusive mutex

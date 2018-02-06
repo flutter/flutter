@@ -103,9 +103,7 @@ bool VulkanWindow::CreateSkiaGrContext() {
     return false;
   }
 
-  sk_sp<GrContext> context(GrContext::Create(
-      kVulkan_GrBackend,
-      reinterpret_cast<GrBackendContext>(backend_context.get())));
+  sk_sp<GrContext> context = GrContext::MakeVulkan(backend_context);
 
   if (context == nullptr) {
     return false;
