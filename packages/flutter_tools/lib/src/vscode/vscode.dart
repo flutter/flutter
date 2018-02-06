@@ -43,27 +43,27 @@ const bool _includeInsiders =
     false; // Include VS Code insiders (useful for debugging).
 
 class VsCode {
-  VsCode._(this.directory, this.extensionFolder, {Version version})
+  VsCode._(this.directory, this.extensionDirectory, {Version version})
       : this.version = version ?? Version.unknown {
     _init();
   }
 
   final String directory;
-  final String extensionFolder;
+  final String extensionDirectory;
   final Version version;
 
   bool _isValid = false;
   Version extensionVersion;
   final List<String> _validationMessages = <String>[];
 
-  factory VsCode.fromFolder(String installPath, String extensionFolder) {
+  factory VsCode.fromDirectory(String installPath, String extensionDirectory) {
     final String packageJsonPath =
         fs.path.join(installPath, 'resources', 'app', 'package.json');
     final String versionString = _getVersionFromPackageJson(packageJsonPath);
     Version version;
     if (versionString != null)
       version = new Version.parse(versionString);
-    return new VsCode._(installPath, extensionFolder, version: version);
+    return new VsCode._(installPath, extensionDirectory, version: version);
   }
 
   bool get isValid => _isValid;
@@ -135,9 +135,9 @@ class VsCode {
 
     for (String directory in allPaths.keys) {
       if (fs.directory(directory).existsSync()) {
-        final String extensionFolder =
+        final String extensionDirectory =
             fs.path.join(homeDirPath, allPaths[directory], 'extensions');
-        results.add(new VsCode.fromFolder(directory, extensionFolder));
+        results.add(new VsCode.fromDirectory(directory, extensionDirectory));
       }
     }
 
@@ -154,19 +154,19 @@ class VsCode {
     }
 
     // Check for presence of extension.
-    final Iterable<FileSystemEntity> extensionFolders = fs
-        .directory(extensionFolder)
+    final Iterable<FileSystemEntity> extensionDirs = fs
+        .directory(extensionDirectory)
         .listSync()
         .where((FileSystemEntity d) => fs.isDirectorySync(d.path))
         .where(
             (FileSystemEntity d) => d.basename.startsWith(extensionIdentifier));
 
-    if (extensionFolders.isNotEmpty) {
-      final FileSystemEntity extensionFolder = extensionFolders.first;
+    if (extensionDirs.isNotEmpty) {
+      final FileSystemEntity extensionDir = extensionDirs.first;
 
       _isValid = true;
       extensionVersion = new Version.parse(
-          extensionFolder.basename.substring('Dart-Code.dart-code-'.length));
+          extensionDir.basename.substring('Dart-Code.dart-code-'.length));
       validationMessages.add('Dart Code extension version $extensionVersion');
     }
   }
