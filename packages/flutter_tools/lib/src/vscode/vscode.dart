@@ -43,27 +43,27 @@ const bool _includeInsiders =
     false; // Include VS Code insiders (useful for debugging).
 
 class VsCode {
-  VsCode(this.directory, this.dataFolderName, {Version version})
+  VsCode._(this.directory, this.extensionFolder, {Version version})
       : this.version = version ?? Version.unknown {
     _init();
   }
 
   final String directory;
-  final String dataFolderName;
+  final String extensionFolder;
   final Version version;
 
   bool _isValid = false;
   Version extensionVersion;
   final List<String> _validationMessages = <String>[];
 
-  factory VsCode.fromFolder(String installPath, String dataFolderName) {
+  factory VsCode.fromFolder(String installPath, String extensionFolder) {
     final String packageJsonPath =
         fs.path.join(installPath, 'resources', 'app', 'package.json');
     final String versionString = _getVersionFromPackageJson(packageJsonPath);
     Version version;
     if (versionString != null)
       version = new Version.parse(versionString);
-    return new VsCode(installPath, dataFolderName, version: version);
+    return new VsCode._(installPath, extensionFolder, version: version);
   }
 
   bool get isValid => _isValid;
@@ -134,8 +134,11 @@ class VsCode {
     final List<VsCode> results = <VsCode>[];
 
     for (String directory in allPaths.keys) {
-      if (fs.directory(directory).existsSync())
-        results.add(new VsCode.fromFolder(directory, allPaths[directory]));
+      if (fs.directory(directory).existsSync()) {
+        final String extensionFolder =
+            fs.path.join(homeDirPath, allPaths[directory], 'extensions');
+        results.add(new VsCode.fromFolder(directory, extensionFolder));
+      }
     }
 
     return results;
@@ -152,10 +155,11 @@ class VsCode {
 
     // Check for presence of extension.
     final Iterable<FileSystemEntity> extensionFolders = fs
-        .directory(fs.path.join(homeDirPath, dataFolderName, 'extensions'))
+        .directory(extensionFolder)
         .listSync()
         .where((FileSystemEntity d) => fs.isDirectorySync(d.path))
-        .where((FileSystemEntity d) => d.basename.startsWith(extensionIdentifier));
+        .where(
+            (FileSystemEntity d) => d.basename.startsWith(extensionIdentifier));
 
     if (extensionFolders.isNotEmpty) {
       final FileSystemEntity extensionFolder = extensionFolders.first;
