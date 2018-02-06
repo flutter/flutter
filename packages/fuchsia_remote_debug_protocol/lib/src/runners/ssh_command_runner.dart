@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:io' show ProcessResult;
 
+import '../common/logging.dart';
 import 'package:process/process.dart';
-import 'package:logging/logging.dart';
 
 /// Runs a command remotely on a Fuchsia device. Requires a fuchsia root and
 /// build type (to load the ssh config), and the ipv4 address of the fuchsia

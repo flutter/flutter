@@ -5,18 +5,16 @@
 import 'dart:async';
 import 'dart:core';
 
-import 'package:logging/logging.dart';
-
 import '../lib/fuchsia_remote_debug_protocol.dart';
+import '../lib/lib_logging.dart' as lib_logging;
 
 /// Runs through a simple usage of the fuchsia_remote_debug_protocol library:
 /// connects to a remote machine at the ipv4 address in argument 1 to list all
 /// active flutter views and Dart VM's running on said device.
 Future<Null> main(List<String> args) async {
-  // Sets up a basic logger to see what's happening.
-  Logger.root.onRecord.listen((LogRecord rec) {
-    print('[${rec.level.name}] -- ${rec.time}: ${rec.message}');
-  });
+  /// Log only at info level within the library.
+  lib_logging.Logger.globalLevel = lib_logging.LoggingLevel.info;
+
   final String address = args[0];
   final String root = '../../';
   final String build = 'release-x86-64';
@@ -27,11 +25,11 @@ Future<Null> main(List<String> args) async {
   }
   print('');
 
-  final FuchsiaRemoteConnection driver =
+  final FuchsiaRemoteConnection connection =
       await FuchsiaRemoteConnection.connect(address, root, build);
   print('The following Flutter views are running:');
-  for (FlutterView view in await driver.getFlutterViews()) {
+  for (FlutterView view in await connection.getFlutterViews()) {
     print('\t${view.name ?? view.id}');
   }
-  await driver.stop();
+  await connection.stop();
 }
