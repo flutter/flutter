@@ -9,34 +9,6 @@ import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/version.dart';
 
-// VS Code layout:
-
-// macOS:
-//   /Applications/Visual Studio Code.app/Contents/
-//   /Applications/Visual Studio Code - Insiders.app/Contents/
-//   $HOME/Applications/Visual Studio Code.app/Contents/
-//   $HOME/Applications/Visual Studio Code - Insiders.app/Contents/
-// macOS Extensions:
-//   $HOME/.vscode/extensions
-//   $HOME/.vscode-insiders/extensions
-
-// Windows:
-//   $programfiles(x86)\Microsoft VS Code
-//   $programfiles(x86)\Microsoft VS Code Insiders
-// TODO: Confirm these are correct for 64bit
-//   $programfiles\Microsoft VS Code
-//   $programfiles\Microsoft VS Code Insiders
-// Windows Extensions:
-//   $HOME/.vscode/extensions
-//   $HOME/.vscode-insiders/extensions
-
-// Linux:
-//   /usr/share/code/bin/code
-//   /usr/share/code-insiders/bin/code-insiders
-// Linux Extensions:
-//   $HOME/.vscode/extensions
-//   $HOME/.vscode-insiders/extensions
-
 const String extensionIdentifier = 'Dart-Code.dart-code';
 
 // Include VS Code insiders (useful for debugging).
@@ -82,6 +54,14 @@ class VsCode {
       return <VsCode>[];
   }
 
+  // macOS:
+  //   /Applications/Visual Studio Code.app/Contents/
+  //   /Applications/Visual Studio Code - Insiders.app/Contents/
+  //   $HOME/Applications/Visual Studio Code.app/Contents/
+  //   $HOME/Applications/Visual Studio Code - Insiders.app/Contents/
+  // macOS Extensions:
+  //   $HOME/.vscode/extensions
+  //   $HOME/.vscode-insiders/extensions
   static List<VsCode> _installedMacOS() {
     final Map<String, String> stable = <String, String>{
       fs.path.join('/Applications', 'Visual Studio Code.app', 'Contents'):
@@ -100,6 +80,15 @@ class VsCode {
     return _findInstalled(stable, insiders);
   }
 
+  // Windows:
+  //   $programfiles(x86)\Microsoft VS Code
+  //   $programfiles(x86)\Microsoft VS Code Insiders
+  // TODO: Confirm these are correct for 64bit
+  //   $programfiles\Microsoft VS Code
+  //   $programfiles\Microsoft VS Code Insiders
+  // Windows Extensions:
+  //   $HOME/.vscode/extensions
+  //   $HOME/.vscode-insiders/extensions
   static List<VsCode> _installedWindows() {
     final String progFiles86 = platform.environment['programfiles(x86)'];
     final String progFiles = platform.environment['programfiles'];
@@ -117,6 +106,12 @@ class VsCode {
     return _findInstalled(stable, insiders);
   }
 
+  // Linux:
+  //   /usr/share/code/bin/code
+  //   /usr/share/code-insiders/bin/code-insiders
+  // Linux Extensions:
+  //   $HOME/.vscode/extensions
+  //   $HOME/.vscode-insiders/extensions
   static List<VsCode> _installedLinux() {
     return _findInstalled(
       <String, String>{'/usr/share/code': '.vscode'},
