@@ -39,11 +39,11 @@ import '../base/version.dart';
 
 const String extensionIdentifier = 'Dart-Code.dart-code';
 
-const bool _includeInsiders =
-    false; // Include VS Code insiders (useful for debugging).
+// Include VS Code insiders (useful for debugging).
+const bool _includeInsiders = false;
 
 class VsCode {
-  VsCode._(this.directory, this.extensionDirectory, {Version version})
+  VsCode._(this.directory, this.extensionDirectory, { Version version })
       : this.version = version ?? Version.unknown {
     _init();
   }
