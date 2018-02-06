@@ -14,13 +14,19 @@ class ImagesDemo extends StatelessWidget {
           tabName: 'ANIMATED WEBP',
           description: '',
           exampleCodeTag: 'animated_image',
-          demoWidget: new Image.asset('packages/flutter_gallery_assets/animated_flutter_stickers.webp'),
+          demoWidget: new Semantics(
+            label: 'Example of animated WEBP',
+            child: new Image.asset('packages/flutter_gallery_assets/animated_flutter_stickers.webp'),
+          ),
         ),
         new ComponentDemoTabData(
           tabName: 'ANIMATED GIF',
           description: '',
           exampleCodeTag: 'animated_image',
-          demoWidget: new Image.asset('packages/flutter_gallery_assets/animated_flutter_lgtm.gif'),
+          demoWidget: new Semantics(
+            label: 'Example of animated GIF',
+            child:new Image.asset('packages/flutter_gallery_assets/animated_flutter_lgtm.gif'),
+          ),
         ),
       ]
     );
