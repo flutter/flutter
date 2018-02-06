@@ -388,11 +388,10 @@ class _ShrineHomeState extends State<ShrineHome> {
       shoppingCart: _shoppingCart,
       body: new CustomScrollView(
         slivers: <Widget>[
-          new SliverToBoxAdapter(
-            child: new _Heading(product: featured),
-          ),
-          new SliverPadding(
-            padding: const EdgeInsets.all(16.0),
+          new SliverToBoxAdapter(child: new _Heading(product: featured)),
+          new SliverSafeArea(
+            top: false,
+            minimum: const EdgeInsets.all(16.0),
             sliver: new SliverGrid(
               gridDelegate: gridDelegate,
               delegate: new SliverChildListDelegate(

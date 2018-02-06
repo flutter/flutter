@@ -287,8 +287,9 @@ class _OrderPageState extends State<OrderPage> {
               quantityChanged: (int value) { updateOrder(quantity: value); },
             ),
           ),
-          new SliverPadding(
-            padding: const EdgeInsets.fromLTRB(8.0, 32.0, 8.0, 8.0),
+          new SliverSafeArea(
+            top: false,
+            minimum: const EdgeInsets.fromLTRB(8.0, 32.0, 8.0, 8.0),
             sliver: new SliverGrid(
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 248.0,
