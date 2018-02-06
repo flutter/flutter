@@ -386,13 +386,13 @@ Future<Null> diagnoseXcodeBuildFailure(
     printError(noProvisioningProfileInstruction, emphasis: true);
     return;
   }
+  // Make sure the user has specified one of:
+  // * DEVELOPMENT_TEAM (automatic signing)
+  // * PROVISIONING_PROFILE (manual signing)
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      // Make sure the user has specified one of:
-      // DEVELOPMENT_TEAM (automatic signing)
-      // PROVISIONING_PROFILE (manual signing)
-      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true
-          || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
+      app.buildSettings != null &&
+      !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(app.buildSettings.containsKey)) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
