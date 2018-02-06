@@ -12,7 +12,6 @@ import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-
 import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
@@ -93,6 +92,7 @@ class SemanticsData extends Diagnosticable {
     @required this.decreasedValue,
     @required this.hint,
     @required this.textDirection,
+    @required this.nextNodeId,
     @required this.rect,
     @required this.textSelection,
     this.tags,
@@ -148,6 +148,10 @@ class SemanticsData extends Diagnosticable {
   /// [increasedValue], and [decreasedValue].
   final TextDirection textDirection;
 
+  /// The index indicating the ID of the next node in the traversal order after
+  /// this node for the platform's accessibility services.
+  final int nextNodeId;
+
   /// The currently selected text (or the position of the cursor) within [value]
   /// if this node represents a text field.
   final TextSelection textSelection;
@@ -198,6 +202,7 @@ class SemanticsData extends Diagnosticable {
     properties.add(new StringProperty('decreasedValue', decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new IntProperty('nextNodeId', nextNodeId, defaultValue: null));
     if (textSelection?.isValid == true)
       properties.add(new MessageProperty('text selection', '[${textSelection.start}, ${textSelection.end}]'));
   }
@@ -215,6 +220,7 @@ class SemanticsData extends Diagnosticable {
         && typedOther.decreasedValue == decreasedValue
         && typedOther.hint == hint
         && typedOther.textDirection == textDirection
+        && typedOther.nextNodeId == nextNodeId
         && typedOther.rect == rect
         && setEquals(typedOther.tags, tags)
         && typedOther.textSelection == textSelection
@@ -222,7 +228,7 @@ class SemanticsData extends Diagnosticable {
   }
 
   @override
-  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, rect, tags, textSelection, transform);
+  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, nextNodeId, rect, tags, textSelection, transform);
 }
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
@@ -256,8 +262,6 @@ class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
 @immutable
 class SemanticsProperties extends DiagnosticableTree {
   /// Creates a semantic annotation.
-  ///
-  /// The [container] argument must not be null.
   const SemanticsProperties({
     this.enabled,
     this.checked,
@@ -269,6 +273,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.decreasedValue,
     this.hint,
     this.textDirection,
+    this.sortOrder,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -376,6 +381,23 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// Defaults to the ambient [Directionality].
   final TextDirection textDirection;
+
+  /// Provides a traversal sorting order for this [Semantics] node.
+  ///
+  /// This is used to describe the order in which the semantic node should be
+  /// traversed by the accessibility services on the platform (e.g. VoiceOver
+  /// on iOS and TalkBack on Android).
+  ///
+  /// If [sortOrder.discardParentOrder] is false (the default), [sortOrder]'s
+  /// sort keys are appended to the list of keys from any ancestor nodes into a
+  /// list of [SemanticsSortKey]s that are compared in pairwise order.
+  /// Otherwise, it ignores the ancestor's [sortOrder] on this node.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsSortOrder] which provides a way to specify the order in
+  ///    which semantic nodes are sorted.
+  final SemanticsSortOrder sortOrder;
 
   /// The handler for [SemanticsAction.tap].
   ///
@@ -536,6 +558,7 @@ class SemanticsProperties extends DiagnosticableTree {
     description.add(new StringProperty('value', value));
     description.add(new StringProperty('hint', hint));
     description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    description.add(new DiagnosticsProperty<SemanticsSortOrder>('sortOrder', sortOrder, defaultValue: null));
   }
 }
 
@@ -732,7 +755,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     if (newChildren != null) {
       for (SemanticsNode child in newChildren) {
-        assert(!child.isInvisible, '$child is invisible and should not be added as child of $this.');
+        assert(!child.isInvisible, 'Child $child is invisible and should not be added as a child of $this.');
         child._dead = false;
       }
     }
@@ -890,6 +913,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         _increasedValue != config.increasedValue ||
         _flags != config._flags ||
         _textDirection != config.textDirection ||
+        _sortOrder != config._sortOrder ||
         _textSelection != config._textSelection ||
         _actionsAsBits != config._actionsAsBits ||
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
@@ -957,6 +981,31 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection = _kEmptyConfig.textDirection;
 
+  /// The sort order for ordering the traversal of [SemanticsNode]s by the
+  /// platform's accessibility services (e.g. VoiceOver on iOS and TalkBack on
+  /// Android). This is used to determine the [nextNodeId] during a semantics update.
+  SemanticsSortOrder _sortOrder;
+  SemanticsSortOrder get sortOrder => _sortOrder;
+
+  /// The ID of the next node in the traversal order after this node.
+  ///
+  /// Only valid after at least one semantics update has been built.
+  ///
+  /// This is the value passed to the engine to tell it what the order
+  /// should be for traversing semantics nodes.
+  ///
+  /// If this is set to -1, it will indicate that there is no next node to
+  /// the engine (i.e. this is the last node in the sort order). When it is
+  /// null, it means that no semantics update has been built yet.
+  int _nextNodeId;
+  void _updateNextNodeId(int value) {
+    if (value == _nextNodeId)
+      return;
+    _nextNodeId = value;
+    _markDirty();
+  }
+  int get nextNodeId => _nextNodeId;
+
   /// The currently selected text (or the position of the cursor) within [value]
   /// if this node represents a text field.
   TextSelection get textSelection => _textSelection;
@@ -990,6 +1039,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _hint = config.hint;
     _flags = config._flags;
     _textDirection = config.textDirection;
+    _sortOrder = config.sortOrder;
     _actions = new Map<SemanticsAction, _SemanticsActionHandler>.from(config._actions);
     _actionsAsBits = config._actionsAsBits;
     _textSelection = config._textSelection;
@@ -1021,6 +1071,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     String increasedValue = _increasedValue;
     String decreasedValue = _decreasedValue;
     TextDirection textDirection = _textDirection;
+    int nextNodeId = _nextNodeId;
     Set<SemanticsTag> mergedTags = tags == null ? null : new Set<SemanticsTag>.from(tags);
     TextSelection textSelection = _textSelection;
 
@@ -1030,6 +1081,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         flags |= node._flags;
         actions |= node._actionsAsBits;
         textDirection ??= node._textDirection;
+        nextNodeId ??= node._nextNodeId;
         textSelection ??= node._textSelection;
         if (value == '' || value == null)
           value = node._value;
@@ -1066,6 +1118,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       decreasedValue: decreasedValue,
       hint: hint,
       textDirection: textDirection,
+      nextNodeId: nextNodeId,
       rect: rect,
       transform: transform,
       tags: mergedTags,
@@ -1089,8 +1142,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     } else {
       final int childCount = _children.length;
       children = new Int32List(childCount);
-      for (int i = 0; i < childCount; ++i)
+      for (int i = 0; i < childCount; ++i) {
         children[i] = _children[i].id;
+      }
     }
     builder.updateNode(
       id: id,
@@ -1103,6 +1157,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       increasedValue: data.increasedValue,
       hint: data.hint,
       textDirection: data.textDirection,
+      nextNodeId: data.nextNodeId,
       textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
       transform: data.transform?.storage ?? _kIdentityTransform,
@@ -1166,12 +1221,15 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(new FlagProperty('isFocused', value: _hasFlag(SemanticsFlag.isFocused), ifTrue: 'focused'));
     properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlag.isButton), ifTrue: 'button'));
     properties.add(new FlagProperty('isTextField', value: _hasFlag(SemanticsFlag.isTextField), ifTrue: 'textField'));
+    properties.add(new FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
     properties.add(new StringProperty('label', _label, defaultValue: ''));
     properties.add(new StringProperty('value', _value, defaultValue: ''));
     properties.add(new StringProperty('increasedValue', _increasedValue, defaultValue: ''));
     properties.add(new StringProperty('decreasedValue', _decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', _hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
+    properties.add(new IntProperty('nextNodeId', _nextNodeId, defaultValue: null));
+    properties.add(new DiagnosticsProperty<SemanticsSortOrder>('sortOrder', sortOrder, defaultValue: null));
     if (_textSelection?.isValid == true)
       properties.add(new MessageProperty('text selection', '[${_textSelection.start}, ${_textSelection.end}]'));
   }
@@ -1185,7 +1243,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     String prefixLineOne: '',
     String prefixOtherLines,
     DiagnosticLevel minLevel: DiagnosticLevel.debug,
-    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.traversal,
+    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.geometricOrder,
   }) {
     assert(childOrder != null);
     return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
@@ -1195,7 +1253,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   DiagnosticsNode toDiagnosticsNode({
     String name,
     DiagnosticsTreeStyle style: DiagnosticsTreeStyle.dense,
-    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.traversal,
+    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.geometricOrder,
   }) {
     return new _SemanticsDiagnosticableNode(
       name: name,
@@ -1218,7 +1276,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       return const <SemanticsNode>[];
 
     switch (childOrder) {
-      case DebugSemanticsDumpOrder.traversal:
+      case DebugSemanticsDumpOrder.geometricOrder:
         return new List<SemanticsNode>.from(_children)..sort(_geometryComparator);
       case DebugSemanticsDumpOrder.inverseHitTest:
         return _children;
@@ -1232,6 +1290,34 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     final Rect rectB = b.transform == null ? b.rect : MatrixUtils.transformRect(b.transform, b.rect);
     final int top = rectA.top.compareTo(rectB.top);
     return top == 0 ? rectA.left.compareTo(rectB.left) : top;
+  }
+}
+
+/// A helper class to contain a semantics node and the effective
+/// sort order of that node during the traversal of the tree. This is
+/// what is actually sorted when semantics nodes are sorted.
+class _TraversalSortNode implements Comparable<_TraversalSortNode> {
+  _TraversalSortNode(this.node, this.order);
+  SemanticsNode node;
+  SemanticsSortOrder order;
+
+  int _compareGeometry(_TraversalSortNode other) {
+    // TODO(gspencer): Move the geometric comparison from the platform side to here.
+    // This involves calculating the globally-transformed quad for the semantics node rect
+    // and then sorting by its bounding box, based on the container's directionality.
+    return 0;
+  }
+
+  @override
+  int compareTo(_TraversalSortNode other) {
+    if (order == null || other?.order == null) {
+      return _compareGeometry(other);
+    }
+    final int comparison = order.compareTo(other.order);
+    if (comparison != 0) {
+      return comparison;
+    }
+    return _compareGeometry(other);
   }
 }
 
@@ -1259,10 +1345,41 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
+  // Updates the nextNodeId IDs on the semantics nodes. These IDs are used
+  // on the platform side to order the nodes for traversal by the accessibility
+  // services. If the nextNodeId for a node changes, the node will be marked as
+  // dirty.
+  void _updateTraversalOrder() {
+    final List<_TraversalSortNode> nodesInSemanticsTraversalOrder = <_TraversalSortNode>[];
+    SemanticsSortOrder currentSortOrder = new SemanticsSortOrder(keys: <SemanticsSortKey>[]);
+    bool visitor(SemanticsNode node) {
+      final SemanticsSortOrder previousOrder = currentSortOrder;
+      if (node.sortOrder != null) {
+        currentSortOrder = currentSortOrder.merge(node.sortOrder);
+      }
+      final _TraversalSortNode traversalNode = new _TraversalSortNode(node, currentSortOrder);
+      nodesInSemanticsTraversalOrder.add(traversalNode);
+      if (node.hasChildren) {
+        node.visitChildren(visitor);
+      }
+      currentSortOrder = previousOrder;
+      return true;
+    }
+    rootSemanticsNode.visitChildren(visitor);
+    nodesInSemanticsTraversalOrder.sort();
+    int nextNodeId = -1;
+    for (_TraversalSortNode node in nodesInSemanticsTraversalOrder.reversed) {
+      node.node._updateNextNodeId(nextNodeId);
+      nextNodeId = node.node.id;
+    }
+  }
+
   /// Update the semantics using [Window.updateSemantics].
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;
+    // Nodes that change their nextNodeId will be marked as dirty.
+    _updateTraversalOrder();
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
       final List<SemanticsNode> localDirtyNodes = _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
@@ -1770,6 +1887,22 @@ class SemanticsConfiguration {
   ///  * [addAction] to add an action.
   _SemanticsActionHandler getActionHandler(SemanticsAction action) => _actions[action];
 
+  /// The semantics traversal order.
+  ///
+  /// This is used to sort this semantic node with all other semantic
+  /// nodes to determine the traversal order of accessible nodes.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsSortOrder], which manages a list of sort keys.
+  SemanticsSortOrder get sortOrder => _sortOrder;
+  SemanticsSortOrder _sortOrder;
+  set sortOrder(SemanticsSortOrder value) {
+    assert(value != null);
+    _sortOrder = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// Whether the semantic information provided by the owning [RenderObject] and
   /// all of its descendants should be treated as one logical entity.
   ///
@@ -2040,6 +2173,7 @@ class SemanticsConfiguration {
     _textSelection ??= other._textSelection;
 
     textDirection ??= other.textDirection;
+    _sortOrder = _sortOrder?.merge(other._sortOrder);
     _label = _concatStrings(
       thisString: _label,
       thisTextDirection: textDirection,
@@ -2071,6 +2205,7 @@ class SemanticsConfiguration {
       .._hasBeenAnnotated = _hasBeenAnnotated
       .._isMergingSemanticsOfDescendants = _isMergingSemanticsOfDescendants
       .._textDirection = _textDirection
+      .._sortOrder = _sortOrder
       .._label = _label
       .._increasedValue = _increasedValue
       .._value = _value
@@ -2094,11 +2229,17 @@ enum DebugSemanticsDumpOrder {
   /// the second last, etc. until a taker is found.
   inverseHitTest,
 
-  /// Print nodes in traversal order.
+  /// Print nodes in geometric traversal order.
   ///
-  /// Traversal order defines how the user can move the accessibility focus from
-  /// one node to another.
-  traversal,
+  /// Geometric traversal order is the default traversal order for semantics nodes which
+  /// don't have [SemanticsNode.sortOrder] set.  This traversal order ignores the node
+  /// sort order, since the diagnostics system follows the widget tree and can only sort
+  /// a node's children, and the semantics system sorts nodes globally.
+  geometricOrder,
+
+  // TODO(gspencer): Add support to toStringDeep (and others) to print the tree in
+  // the actual traversal order that the user will experience.  This requires sorting
+  // nodes globally before printing, not just the children.
 }
 
 String _concatStrings({
@@ -2123,4 +2264,204 @@ String _concatStrings({
   if (thisString.isEmpty)
     return nestedLabel;
   return '$thisString\n$nestedLabel';
+}
+
+/// Provides a way to specify the order in which semantic nodes are sorted.
+///
+/// [TranversalSortOrder] objects contain a list of sort keys in the order in
+/// which they are applied. They are attached to [Semantics] widgets in the
+/// widget hierarchy, and are merged with the sort orders of their parent
+/// [Semantics] widgets. If [SemanticsSortOrder.discardParentOrder] is set to
+/// true, then they will instead ignore the sort order from the parents.
+///
+/// Keys at the same position in the sort order are compared with each other,
+/// and keys which are of different types, or which have different
+/// [SemanticSortKey.name] values compare as "equal" so that two different types
+/// of keys can co-exist at the same level and not interfere with each other,
+/// allowing for sorting into groups.  Keys that evaluate as equal, or when
+/// compared with Widgets that don't have [Semantics], fall back to the default
+/// upper-start-to-lower-end geometric ordering.
+///
+/// Since widgets are globally sorted by their sort key, the order does not have
+/// to conform to the widget hierarchy.
+///
+/// This class takes either `key` or `keys` at construction, but not both. The
+/// `key` argument is just shorthand for specifying `<SemanticsSortKey>[key]`
+/// for the `keys` argument.
+///
+/// ## Sample code
+///
+/// ```dart
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return new Column(
+///       children: <Widget>[
+///         new Semantics(
+///           sortOrder: new SemanticsSortOrder(key: new OrdinalSortKey(2.0)),
+///           child: const Text('Label One'),
+///         ),
+///         new Semantics(
+///           sortOrder: new SemanticsSortOrder(key: new OrdinalSortKey(2.0)),
+///           child: const Text('Label Two'),
+///         ),
+///       ],
+///     );
+///   }
+/// }
+/// ```
+///
+/// The above will create two [Text] widgets with "Label One" and "Label Two" as
+/// their text, but, in accessibility mode, "Label Two" will be traversed first,
+/// and "Label One" will be next. Without the sort keys, they would be traversed
+/// top to bottom instead.
+///
+/// See also:
+///
+///  * [Semantics] for an object that annotates widgets with accessibility
+///    semantics.
+///  * [SemanticsSortKey] for the base class of the sort keys which
+///    [SemanticsSortOrder] manages.
+///  * [OrdinalSortKey] for a sort key that sorts using an ordinal.
+class SemanticsSortOrder extends Diagnosticable implements Comparable<SemanticsSortOrder> {
+  /// Only one of `key` or `keys` may be specified, but at least one must
+  /// be specified. Specifying `key` is a shorthand for specifying
+  /// `keys = <SemanticsSortKey>[key]`.
+  ///
+  /// If [discardParentOrder] is set to true, then the
+  /// [SemanticsSortOrder.keys] will replace the list of keys from the parents
+  /// when merged, instead of extending them.
+  SemanticsSortOrder({
+    SemanticsSortKey key,
+    List<SemanticsSortKey> keys,
+    this.discardParentOrder = false,
+  })
+    : assert(key != null || keys != null, 'One of key or keys must be specified.'),
+      assert(key == null || keys == null, 'Only one of key or keys may be specified.'),
+      keys = key == null ? keys : <SemanticsSortKey>[key];
+
+  /// Whether or not this order is to replace the keys above it in the
+  /// semantics tree, or to be appended to them.
+  final bool discardParentOrder;
+
+  final List<SemanticsSortKey> keys;
+
+  /// Merges two sort orders by concatenating their sort key lists. If
+  /// other.discardParentOrder is true, then other's sort key list replaces
+  /// that of the list in this object.
+  SemanticsSortOrder merge(SemanticsSortOrder other) {
+    if (other == null)
+      return this;
+    if (other.discardParentOrder) {
+      return new SemanticsSortOrder(
+        keys: new List<SemanticsSortKey>.from(other.keys),
+        discardParentOrder: discardParentOrder,
+      );
+    }
+    return new SemanticsSortOrder(
+      keys: new List<SemanticsSortKey>.from(keys)
+        ..addAll(other.keys),
+      discardParentOrder: discardParentOrder,
+    );
+  }
+
+  @override
+  int compareTo(SemanticsSortOrder other) {
+    if (this == other) {
+      return 0;
+    }
+    for (int i = 0; i < keys.length && i < other.keys.length; ++i) {
+      final int comparison = keys[i].compareTo(other.keys[i]);
+      if (comparison != 0) {
+        return comparison;
+      }
+    }
+    // If there are more keys to compare, then assume that the shorter
+    // list comes before the longer list.
+    return keys.length.compareTo(other.keys.length);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new IterableProperty<SemanticsSortKey>('keys', keys, ifEmpty: null));
+    description.add(new FlagProperty(
+      'replace',
+      value: discardParentOrder,
+      defaultValue: false,
+      ifTrue: 'replace',
+    ));
+  }
+}
+
+/// Base class for all sort keys for [Semantics] accessibility traversal order
+/// sorting.
+///
+/// If subclasses of this class compare themselves to another subclass of
+/// [SemanticsSortKey], they will compare as "equal" so that keys of the same
+/// type are ordered only with respect to one another.
+///
+/// See Also:
+///
+///  * [SemanticsSortOrder] which manages a list of sort keys.
+///  * [OrdinalSortKey] for a sort key that sorts using an ordinal.
+abstract class SemanticsSortKey extends Diagnosticable implements Comparable<SemanticsSortKey> {
+  const SemanticsSortKey({this.name});
+
+  /// An optional name that will make this sort key only order itself
+  /// with respect to other sort keys of the same [name], as long as
+  /// they are of the same [runtimeType]. If compared with a
+  /// [SemanticsSortKey] with a different name or type, they will
+  /// compare as "equal".
+  final String name;
+
+  @override
+  int compareTo(SemanticsSortKey other) {
+    if (other.runtimeType != runtimeType || other.name != name) {
+      return 0;
+    }
+    return doCompare(other);
+  }
+
+  @protected
+  int doCompare(SemanticsSortKey other);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new StringProperty('name', name, defaultValue: null));
+  }
+}
+
+/// A [SemanticsSortKey] that sorts simply based on the ordinal given it.
+///
+/// The [OrdinalSortKey] compares itself with other [OrdinalSortKey]s
+/// to sort based on the order it is given.
+///
+/// See also:
+///
+///  * [SemanticsSortOrder] which manages a list of sort keys.
+class OrdinalSortKey extends SemanticsSortKey {
+  const OrdinalSortKey(this.order, {String name}) : super(name: name);
+
+  /// [order] is a double which describes the order in which this node
+  /// is traversed by the platform's accessibility services. Lower values
+  /// will be traversed first.
+  final double order;
+
+  @override
+  int doCompare(SemanticsSortKey other) {
+    assert(other.runtimeType == runtimeType);
+    final OrdinalSortKey otherOrder = other;
+    if (otherOrder.order == null || order == null || otherOrder.order == order) {
+      return 0;
+    }
+    return order.compareTo(otherOrder.order);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('order', order, defaultValue: null));
+  }
 }

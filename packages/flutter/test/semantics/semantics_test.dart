@@ -4,8 +4,8 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
-import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
 
@@ -125,11 +125,153 @@ void main() {
     expect(child2.transform, isNull);
 
     expect(
-      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
+      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.geometricOrder),
       'SemanticsNode#3(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 10.0, 5.0))\n'
       '├SemanticsNode#1(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 5.0, 5.0))\n'
       '└SemanticsNode#2(STALE, owner: null, Rect.fromLTRB(5.0, 0.0, 10.0, 5.0))\n',
     );
+  });
+
+  test('OrdinalSortKey compares correctly', () {
+    final List<List<SemanticsSortKey>> tests = <List<SemanticsSortKey>>[
+      <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(0.0)],
+      <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
+      <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
+      <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(1.0)],
+      <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(1.0)],
+      <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(0.0)],
+      <SemanticsSortKey>[const CustomSortKey(0.0), const OrdinalSortKey(0.0)],
+      <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(0.0)],
+    ];
+    final List<int> expectedResults = <int>[0, -1, 1, 0, 0, 0, 0, 0];
+    assert(tests.length == expectedResults.length);
+    final List<int> results = <int>[];
+    for (List<SemanticsSortKey> tuple in tests) {
+      results.add(tuple[0].compareTo(tuple[1]));
+    }
+    expect(results, orderedEquals(expectedResults));
+  });
+
+  test('SemanticsSortOrder sorts correctly', () {
+    final SemanticsSortOrder order1 = new SemanticsSortOrder(key: const CustomSortKey(0.0));
+    final SemanticsSortOrder order2 = new SemanticsSortOrder(key: const CustomSortKey(0.0));
+    // Equal single keys compare equal.
+    expect(order1.compareTo(order2), equals(0));
+    // Key lists that are longer compare as after the shorter ones.
+    order1.keys.add(const OrdinalSortKey(1.0));
+    expect(order1.compareTo(order2), equals(1));
+    // Equal multiple key lists compare equal.
+    order2.keys.add(const OrdinalSortKey(1.0));
+    expect(order1.compareTo(order2), equals(0));
+    // Different types compare equal.
+    order1.keys.add(const OrdinalSortKey(1.0));
+    order2.keys.add(const CustomSortKey(1.0));
+    expect(order1.compareTo(order2), equals(0));
+    // Unequal multiple-key lists sort the shorter list first.
+    order1.keys.add(const CustomSortKey(2.0));
+    expect(order1.compareTo(order2), equals(1));
+  });
+
+  test('SemanticsSortOrder sorts correctly when assigned names', () {
+    final SemanticsSortOrder order1g1 = new SemanticsSortOrder(key: const CustomSortKey(0.0, name: 'group 1'));
+    final SemanticsSortOrder order2g1 = new SemanticsSortOrder(key: const CustomSortKey(1.0, name: 'group 1'));
+    final SemanticsSortOrder order2g2 = new SemanticsSortOrder(key: const CustomSortKey(1.0, name: 'group 2'));
+    final SemanticsSortOrder order3g2 = new SemanticsSortOrder(key: const OrdinalSortKey(1.0, name: 'group 1'));
+    // Keys in the same group compare.
+    expect(order1g1.compareTo(order2g1), equals(-1));
+    // Keys with different names compare equal.
+    expect(order1g1.compareTo(order2g2), equals(0));
+    // Keys with same names but different types compare equal.
+    expect(order1g1.compareTo(order3g2), equals(0));
+  });
+
+  test('SemanticsSortOrder replaces correctly in merge', () {
+    final SemanticsSortOrder order1 = new SemanticsSortOrder(keys: <SemanticsSortKey>[const CustomSortKey(0.0), const OrdinalSortKey(0.0)]);
+    final SemanticsSortOrder order2 = new SemanticsSortOrder(keys: <SemanticsSortKey>[const CustomSortKey(0.0), const OrdinalSortKey(0.0)]);
+    final SemanticsSortOrder order3 = new SemanticsSortOrder(keys: <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(1.0)], discardParentOrder: true);
+    // Equal single keys compare equal.
+    expect(order1.compareTo(order2), equals(0));
+    // Merged orders with one that replaces merge correctly.
+    final SemanticsSortOrder merged = order1.merge(order3);
+    expect(merged.keys.length, 2);
+    expect(merged.keys, orderedEquals(order3.keys));
+    expect(merged.compareTo(order2), 1);
+    // Merged orders with one that doesn't replace merge correctly.
+    final SemanticsSortOrder merged2 = order1.merge(order2);
+    expect(merged2.keys.length, 4);
+    expect(merged2.keys, orderedEquals(<SemanticsSortKey>[]..addAll(order1.keys)..addAll(order2.keys)));
+    expect(merged2.compareTo(order2), 1); // (merged2 is longer, so greater than).
+  });
+
+  test('OrdinalSortKey compares correctly', () {
+    final List<List<SemanticsSortKey>> tests = <List<SemanticsSortKey>>[
+      <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(0.0)],
+      <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
+      <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
+      <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(1.0)],
+      <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(1.0)],
+      <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(0.0)],
+      <SemanticsSortKey>[const CustomSortKey(0.0), const OrdinalSortKey(0.0)],
+      <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(0.0)],
+    ];
+    final List<int> expectedResults = <int>[0, -1, 1, 0, 0, 0, 0, 0];
+    assert(tests.length == expectedResults.length);
+    final List<int> results = <int>[];
+    for (List<SemanticsSortKey> tuple in tests) {
+      results.add(tuple[0].compareTo(tuple[1]));
+    }
+    expect(results, orderedEquals(expectedResults));
+  });
+
+  test('SemanticsSortOrder sorts correctly', () {
+    final SemanticsSortOrder order1 = new SemanticsSortOrder(key: const CustomSortKey(0.0));
+    final SemanticsSortOrder order2 = new SemanticsSortOrder(key: const CustomSortKey(0.0));
+    // Equal single keys compare equal.
+    expect(order1.compareTo(order2), equals(0));
+    // Key lists that are longer compare as after the shorter ones.
+    order1.keys.add(const OrdinalSortKey(1.0));
+    expect(order1.compareTo(order2), equals(1));
+    // Equal multiple key lists compare equal.
+    order2.keys.add(const OrdinalSortKey(1.0));
+    expect(order1.compareTo(order2), equals(0));
+    // Different types compare equal.
+    order1.keys.add(const OrdinalSortKey(1.0));
+    order2.keys.add(const CustomSortKey(1.0));
+    expect(order1.compareTo(order2), equals(0));
+    // Unequal multiple-key lists sort the shorter list first.
+    order1.keys.add(const CustomSortKey(2.0));
+    expect(order1.compareTo(order2), equals(1));
+  });
+
+  test('SemanticsSortOrder sorts correctly when assigned names', () {
+    final SemanticsSortOrder order1g1 = new SemanticsSortOrder(key: const CustomSortKey(0.0, name: 'group 1'));
+    final SemanticsSortOrder order2g1 = new SemanticsSortOrder(key: const CustomSortKey(1.0, name: 'group 1'));
+    final SemanticsSortOrder order2g2 = new SemanticsSortOrder(key: const CustomSortKey(1.0, name: 'group 2'));
+    final SemanticsSortOrder order3g2 = new SemanticsSortOrder(key: const OrdinalSortKey(1.0, name: 'group 1'));
+    // Keys in the same group compare.
+    expect(order1g1.compareTo(order2g1), equals(-1));
+    // Keys with different names compare equal.
+    expect(order1g1.compareTo(order2g2), equals(0));
+    // Keys with same names but different types compare equal.
+    expect(order1g1.compareTo(order3g2), equals(0));
+  });
+
+  test('SemanticsSortOrder replaces correctly in merge', () {
+    final SemanticsSortOrder order1 = new SemanticsSortOrder(keys: <SemanticsSortKey>[const CustomSortKey(0.0), const OrdinalSortKey(0.0)]);
+    final SemanticsSortOrder order2 = new SemanticsSortOrder(keys: <SemanticsSortKey>[const CustomSortKey(0.0), const OrdinalSortKey(0.0)]);
+    final SemanticsSortOrder order3 = new SemanticsSortOrder(keys: <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(1.0)], discardParentOrder: true);
+    // Equal single keys compare equal.
+    expect(order1.compareTo(order2), equals(0));
+    // Merged orders with one that replaces merge correctly.
+    final SemanticsSortOrder merged = order1.merge(order3);
+    expect(merged.keys.length, 2);
+    expect(merged.keys, orderedEquals(order3.keys));
+    expect(merged.compareTo(order2), 1);
+    // Merged orders with one that doesn't replace merge correctly.
+    final SemanticsSortOrder merged2 = order1.merge(order2);
+    expect(merged2.keys.length, 4);
+    expect(merged2.keys, orderedEquals(<SemanticsSortKey>[]..addAll(order1.keys)..addAll(order2.keys)));
+    expect(merged2.compareTo(order2), 1); // (merged2 is longer, so greater than).
   });
 
   test('toStringDeep respects childOrder parameter', () {
@@ -144,7 +286,7 @@ void main() {
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
     );
     expect(
-      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
+      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.geometricOrder),
       'SemanticsNode#3(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 20.0, 5.0))\n'
       '├SemanticsNode#2(STALE, owner: null, Rect.fromLTRB(10.0, 0.0, 15.0, 5.0))\n'
       '└SemanticsNode#1(STALE, owner: null, Rect.fromLTRB(15.0, 0.0, 20.0, 5.0))\n',
@@ -177,7 +319,7 @@ void main() {
     );
 
     expect(
-      rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
+      rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.geometricOrder),
       'SemanticsNode#7(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 25.0, 5.0))\n'
       '├SemanticsNode#4(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 10.0, 5.0))\n'
       '│├SemanticsNode#6(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 5.0, 5.0))\n'
@@ -201,12 +343,12 @@ void main() {
     final SemanticsNode minimalProperties = new SemanticsNode();
     expect(
       minimalProperties.toStringDeep(),
-      'SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n',
+      'SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), invisible)\n',
     );
 
     expect(
       minimalProperties.toStringDeep(minLevel: DiagnosticLevel.hidden),
-      'SemanticsNode#1(owner: null, isMergedIntoParent: false, mergeAllDescendantsIntoThisNode: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), actions: [], isInMutuallyExcusiveGroup: false, isSelected: false, isFocused: false, isButton: false, isTextField: false, label: "", value: "", increasedValue: "", decreasedValue: "", hint: "", textDirection: null)\n'
+      'SemanticsNode#1(owner: null, isMergedIntoParent: false, mergeAllDescendantsIntoThisNode: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), actions: [], isInMutuallyExcusiveGroup: false, isSelected: false, isFocused: false, isButton: false, isTextField: false, invisible, label: "", value: "", increasedValue: "", decreasedValue: "", hint: "", textDirection: null, nextNodeId: null, sortOrder: null)\n'
     );
 
     final SemanticsConfiguration config = new SemanticsConfiguration()
@@ -219,14 +361,15 @@ void main() {
       ..isSelected = true
       ..isButton = true
       ..label = 'Use all the properties'
-      ..textDirection = TextDirection.rtl;
+      ..textDirection = TextDirection.rtl
+      ..sortOrder = new SemanticsSortOrder(keys: <SemanticsSortKey>[const OrdinalSortKey(1.0)]);
     final SemanticsNode allProperties = new SemanticsNode()
       ..rect = new Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = new Matrix4.translation(new Vector3(10.0, 10.0, 0.0))
       ..updateWith(config: config, childrenInInversePaintOrder: null);
     expect(
       allProperties.toStringDeep(),
-      'SemanticsNode#2(STALE, owner: null, merge boundary ⛔️, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), actions: [longPress, scrollUp, showOnScreen], unchecked, selected, button, label: "Use all the properties", textDirection: rtl)\n',
+      equalsIgnoringHashCodes('SemanticsNode#2(STALE, owner: null, merge boundary ⛔️, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), actions: [longPress, scrollUp, showOnScreen], unchecked, selected, button, label: "Use all the properties", textDirection: rtl, sortOrder: SemanticsSortOrder#8e690(keys: [OrdinalSortKey#ca2b8(order: 1.0)]))\n'),
     );
     expect(
       allProperties.getSemanticsData().toString(),
@@ -369,4 +512,8 @@ class TestRender extends RenderProxyBox {
     if (hasScrollDownAction)
       config.onScrollDown = () { };
   }
+}
+
+class CustomSortKey extends OrdinalSortKey {
+  const CustomSortKey(double order, {String name}) : super(order, name: name);
 }
