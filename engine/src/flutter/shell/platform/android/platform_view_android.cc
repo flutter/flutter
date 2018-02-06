@@ -471,9 +471,9 @@ void PlatformViewAndroid::UpdateSemantics(
       return;
 
     size_t num_bytes = 0;
-    for (const blink::SemanticsNode& node : update) {
+    for (const auto& value : update) {
       num_bytes += kBytesPerNode;
-      num_bytes += node.children.size() * kBytesPerChild;
+      num_bytes += value.second.children.size() * kBytesPerChild;
     }
 
     std::vector<uint8_t> buffer(num_bytes);
@@ -482,10 +482,11 @@ void PlatformViewAndroid::UpdateSemantics(
 
     std::vector<std::string> strings;
     size_t position = 0;
-    for (const blink::SemanticsNode& node : update) {
+    for (const auto& value : update) {
       // If you edit this code, make sure you update kBytesPerNode
       // and/or kBytesPerChild above to match the number of values you are
       // sending.
+      const blink::SemanticsNode& node = value.second;
       buffer_int32[position++] = node.id;
       buffer_int32[position++] = node.flags;
       buffer_int32[position++] = node.actions;
