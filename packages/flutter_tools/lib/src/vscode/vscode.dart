@@ -9,12 +9,12 @@ import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/version.dart';
 
-const String extensionIdentifier = 'Dart-Code.dart-code';
-
 // Include VS Code insiders (useful for debugging).
 const bool _includeInsiders = false;
 
 class VsCode {
+  static const String extensionIdentifier = 'Dart-Code.dart-code';
+
   VsCode._(this.directory, this.extensionDirectory, { Version version })
       : this.version = version ?? Version.unknown {
     _init();
@@ -167,7 +167,7 @@ class VsCode {
 
       _isValid = true;
       extensionVersion = new Version.parse(
-          extensionDir.basename.substring('Dart-Code.dart-code-'.length));
+          extensionDir.basename.substring('$extensionIdentifier-'.length));
       validationMessages.add('Dart Code extension version $extensionVersion');
     }
   }

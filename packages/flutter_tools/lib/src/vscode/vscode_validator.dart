@@ -9,6 +9,8 @@ import '../doctor.dart';
 import 'vscode.dart';
 
 class VsCodeValidator extends DoctorValidator {
+  static const String extensionMarketplaceUrl =
+    'https://marketplace.visualstudio.com/items?itemName=Dart-Code.dart-code';
   final VsCode _vsCode;
 
   VsCodeValidator(this._vsCode) : super('VS Code');
@@ -36,7 +38,7 @@ class VsCodeValidator extends DoctorValidator {
       messages.addAll(_vsCode.validationMessages
           .map((String m) => new ValidationMessage.error(m)));
       messages.add(new ValidationMessage(
-          'Dart Code extension not installed; install from\nhttps://marketplace.visualstudio.com/items?itemName=Dart-Code.dart-code'));
+          'Dart Code extension not installed; install from\n$extensionMarketplaceUrl'));
     }
 
     return new ValidationResult(type, messages, statusInfo: vsCodeVersionText);
