@@ -85,36 +85,10 @@ class FuchsiaRemoteConnection {
       return views;
     }
     for (_ForwardedPort fp in _forwardedVmServicePorts) {
-      _checkPort(fp.port);
       final DartVm vmService = await _getDartVm(fp.port);
       views.addAll(await vmService.getAllFlutterViews());
     }
     return views;
-  }
-
-  /// Attempts to create then close a socket. Throws an exception if the port
-  /// cannot be opened.
-  Future<Null> _checkPort(int port) async {
-    Socket s;
-    // First attempts to connect to IPV4 Loopback.
-    try {
-      s = await Socket.connect(_ipv4Loopback, port);
-    } catch (e) {
-      _log.warning(
-          'Unable to create a socket, attempting fallback after err: $e');
-    }
-    if (s == null) {
-      try {
-        s = await Socket.connect(_ipv4SocketFallback, port);
-      } catch (_) {
-        _log.severe('Fallback failed to connect. Giving up.');
-        await s?.close();
-        s?.destroy();
-        rethrow;
-      }
-    }
-    await s?.close();
-    s?.destroy();
   }
 
   Future<DartVm> _getDartVm(int port) async {
