@@ -224,6 +224,18 @@ Matcher isMethodCall(String name, {@required dynamic arguments}) {
   return new _IsMethodCall(name, arguments);
 }
 
+/// Asserts that 2 paths cover the same area by sampling multiple points.
+///
+/// Samples at least [sampleSize]^2 points inside [areaToCompare], and asserts
+/// that the [Path.contains] method returns the same value for each of the
+/// points for both paths.
+///
+/// When using this matcher you typically want to use a rectangle larger than
+/// the area you expect to paint in for [areaToCompare] to catch errors where
+/// the path draws outside the expected area.
+Matcher coversSameAreaAs(Path expectedPath, {@required Rect areaToCompare, int sampleSize = 20})
+  => new _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize); 
+
 class _FindsWidgetMatcher extends Matcher {
   const _FindsWidgetMatcher(this.min, this.max);
 
@@ -1089,4 +1101,76 @@ class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, Null> {
   @override
   Description describe(Description description) =>
     description.add('clips with shape: $shape');
+}
+
+class _CoversSameAreaAs extends Matcher {
+  _CoversSameAreaAs(
+    this.expectedPath, {
+    @required this.areaToCompare,
+    this.sampleSize = 20,
+  }) : maxHorizontalNoise = areaToCompare.width / sampleSize,
+       maxVerticalNoise = areaToCompare.height / sampleSize {
+    // Use a fixed random seed to make sure tests are deterministic.
+    random = new math.Random(1);
+  }
+
+  final Path expectedPath;
+  final Rect areaToCompare;
+  final int sampleSize;
+  final double maxHorizontalNoise;
+  final double maxVerticalNoise;
+  math.Random random;
+
+  @override
+  bool matches(covariant Path actualPath, Map<dynamic, dynamic> matchState) {
+    for (int i = 0; i < sampleSize; i += 1) {
+      for (int j = 0; j < sampleSize; j += 1) {
+        final Offset offset = new Offset(
+          i * (areaToCompare.width / sampleSize),
+          j * (areaToCompare.height / sampleSize)
+        );
+
+        if (!_samplePoint(matchState, actualPath, offset))
+          return false;
+
+        final Offset noise = new Offset(
+          maxHorizontalNoise * random.nextDouble(),
+          maxVerticalNoise * random.nextDouble(),
+        );
+
+        if (!_samplePoint(matchState, actualPath, offset + noise))
+          return false;
+      }
+    }
+    return true;
+  }
+
+  bool _samplePoint(Map<dynamic, dynamic> matchState, Path actualPath, Offset offset) {
+    if (expectedPath.contains(offset) == actualPath.contains(offset))
+      return true;
+
+    if (actualPath.contains(offset))
+      return failWithDescription(matchState, '$offset is contained in the actual path but not in the expected path');
+    else
+      return failWithDescription(matchState, '$offset is contained in the expected path but not in the actual path');
+  }
+
+  bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {
+    matchState['failure'] = description;
+    return false;
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose
+  ) {
+    return mismatchDescription.add(matchState['failure']);
+  }
+
+  @override
+  Description describe(Description description) =>
+    description.add('covers expected area and only expected area');
 }
