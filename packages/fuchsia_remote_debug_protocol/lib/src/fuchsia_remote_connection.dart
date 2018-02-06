@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:io';
 
 import 'package:process/process.dart';
@@ -26,18 +25,15 @@ final Logger _log = new Logger('FuchsiaRemoteConnection');
 /// Note that this class can be connected to several instances of the Fuchsia
 /// device's Dart VM at any given time.
 class FuchsiaRemoteConnection {
-  final String _address;
-
   /// Optional path to an SSH config.
   final String _sshConfigPath;
   final List<_ForwardedPort> _forwardedVmServicePorts;
 
   /// VM service cache to avoid repeating handshakes across function
   /// calls. Keys a forwarded port to a DartVm connection instance.
-  final HashMap<int, DartVm> _dartVmCache = <int, DartVm>{};
+  final Map<int, DartVm> _dartVmCache = <int, DartVm>{};
 
-  FuchsiaRemoteConnection._(
-      this._address, this._sshConfigPath, this._forwardedVmServicePorts);
+  FuchsiaRemoteConnection._(this._sshConfigPath, this._forwardedVmServicePorts);
 
   /// Opens a connection to a Fuchsia device.
   ///
@@ -53,12 +49,12 @@ class FuchsiaRemoteConnection {
   /// At its current state Dart VM connections will not be added or removed over
   /// the lifetime of this object.
   static Future<FuchsiaRemoteConnection> connect(String ipv4Address,
-      [String sshConfigPath = null]) async {
+      [String sshConfigPath]) async {
     final List<_ForwardedPort> ports =
         await _forwardLocalPortsToDeviceServicePorts(
             ipv4Address, sshConfigPath);
 
-    return new FuchsiaRemoteConnection._(ipv4Address, sshConfigPath, ports);
+    return new FuchsiaRemoteConnection._(sshConfigPath, ports);
   }
 
   /// Closes all open connections.
@@ -103,14 +99,15 @@ class FuchsiaRemoteConnection {
     return _dartVmCache[port];
   }
 
-  /// Forwards a series of local device ports to the [deviceIpv4Address] using
+  /// Forwards a series of local device ports to the `deviceIpv4Address` using
   /// SSH port forwarding.
   ///
-  /// Returns a [List] of [_ForwardedPort] objects that the caller
-  /// must close when done using. Path to the ssh config is optional.
+  /// Returns a `List` of `_ForwardedPort` objects that the caller
+  /// must close when done using. Path to the `sshConfigPath` is optional and
+  /// can be set to null.
   static Future<List<_ForwardedPort>> _forwardLocalPortsToDeviceServicePorts(
       String deviceIpv4Address,
-      [String sshConfigPath = null]) async {
+      [String sshConfigPath]) async {
     final List<int> servicePorts =
         await getDeviceServicePorts(deviceIpv4Address, sshConfigPath);
     return Future.wait(servicePorts.map((int deviceServicePort) {
@@ -125,8 +122,12 @@ class FuchsiaRemoteConnection {
   /// successfully getting the VM service ports, returns them as a list of
   /// integers. If an empty list is returned, then no Dart VM instances could be
   /// found.
+  ///
+  /// The path to an SSH config can be provided optionally under
+  /// `sshConfigPath`, and is required if the remote device needs SSH keys
+  /// different than the defaults on your machine.
   static Future<List<int>> getDeviceServicePorts(String ipv4Address,
-      [String sshConfigPath = null]) async {
+      [String sshConfigPath]) async {
     final SshCommandRunner runner = new SshCommandRunner(
       ipv4Address: ipv4Address,
       sshConfigPath: sshConfigPath,
@@ -175,14 +176,15 @@ class _ForwardedPort {
   /// Starts SSH forwarding through a subprocess, and returns an instance of
   /// `_ForwardedPort`.
   static Future<_ForwardedPort> start(String address, int remotePort,
-      [String sshConfigPath = null]) async {
+      [String sshConfigPath]) async {
     final int localPort = await _potentiallyAvailablePort();
     if (localPort == 0) {
-      _log.warning(
-          '_ForwardedPort failed to find a local port for $address:$remotePort');
+      _log.warning('_ForwardedPort failed to find a local port for '
+          '$address:$remotePort');
       return new _ForwardedPort._(null, 0, 0, null, null);
     }
-    String formattedForwardingUrl = '$localPort:$_ipv4Loopback:$remotePort';
+    final String formattedForwardingUrl =
+        '$localPort:$_ipv4Loopback:$remotePort';
     List<String> command;
     if (sshConfigPath != null) {
       command = <String>[

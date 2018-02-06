@@ -18,7 +18,10 @@ const Duration _kRpcTimeout = const Duration(seconds: 5);
 
 final Logger _log = new Logger('DartVm');
 
-typedef Future<json_rpc2.Peer> RpcPeerConnectionFunction(Uri uri);
+/// Definition of an asynchronous function for connecting to a `Uri`.
+///
+/// Creates a JSON RPC-2 connection.
+typedef Future<json_rpc.Peer> RpcPeerConnectionFunction(Uri uri);
 
 /// `DartVm` uses this function to connect to the Dart VM on Fuchsia.
 ///
@@ -29,10 +32,10 @@ RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 /// Attempts to connect to a Dart VM service.
 ///
 /// Gives up after `_kConnectTimeout` has elapsed.
-RpcPeerConnectionFunction _waitAndConnect(Uri uri) async {
+Future<json_rpc.Peer>  _waitAndConnect(Uri uri) async {
   final Stopwatch timer = new Stopwatch()..start();
 
-  RpcPeerConnectionFunction attemptConnection(Uri uri) async {
+  Future<json_rpc.Peer> attemptConnection(Uri uri) async {
     WebSocket socket;
     json_rpc.Peer peer;
     try {
@@ -76,7 +79,7 @@ class DartVm {
     if (uri.scheme == 'http') {
       uri = uri.replace(scheme: 'ws', path: '/ws');
     }
-    json_rpc.Peer peer = await fuchsiaVmServiceConnectionFunction(uri);
+    final json_rpc.Peer peer = await fuchsiaVmServiceConnectionFunction(uri);
     if (peer == null) {
       return null;
     }

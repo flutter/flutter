@@ -7,3 +7,17 @@ dependencies:
   json_rpc_2: 2.0.7
   process: 2.0.7
   web_socket_channel: 1.0.6
+
+  async: 2.0.3 # TRANSITIVE DEPENDENCY
+  charcode: 1.1.1 # TRANSITIVE DEPENDENCY
+  collection: 1.14.5 # TRANSITIVE DEPENDENCY
+  convert: 2.0.1 # TRANSITIVE DEPENDENCY
+  crypto: 2.0.2+1 # TRANSITIVE DEPENDENCY
+  file: 2.3.5 # TRANSITIVE DEPENDENCY
+  intl: 0.15.2 # TRANSITIVE DEPENDENCY
+  meta: 1.1.1 # TRANSITIVE DEPENDENCY
+  path: 1.5.1 # TRANSITIVE DEPENDENCY
+  platform: 2.1.1 # TRANSITIVE DEPENDENCY
+  stack_trace: 1.9.1 # TRANSITIVE DEPENDENCY
+  stream_channel: 1.6.3 # TRANSITIVE DEPENDENCY
+  typed_data: 1.1.4 # TRANSITIVE DEPENDENCY

@@ -18,7 +18,7 @@ Future<Null> main(List<String> args) async {
   // Example ssh config path for the fuchsia device after having made a local
   // build.
   final String sshConfigPath = '../../out/release-x86-64/ssh-keys/ssh_config';
-  print('On ${address}, the following Dart VM ports are running:');
+  print('On $address, the following Dart VM ports are running:');
   for (int port in await FuchsiaRemoteConnection.getDeviceServicePorts(
       address, sshConfigPath)) {
     print('\t$port');

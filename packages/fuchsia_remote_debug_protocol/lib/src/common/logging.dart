@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:core';
-import 'dart:async';
 
 /// Determines the level of logging.
 ///
@@ -31,9 +30,9 @@ enum LoggingLevel {
 
 /// Synchronously logs a `Log.`
 typedef void LoggingFunction(Log log);
-LoggingFunction _defaultFormatter(Log log) {
+LoggingFunction _defaultFormatter = (Log log) {
   print('[${log.levelName}] -- ${log.time}: ${log.message}');
-}
+};
 
 /// Represents a Log created by the logger.
 ///

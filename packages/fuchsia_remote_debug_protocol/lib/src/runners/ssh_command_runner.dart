@@ -5,8 +5,9 @@
 import 'dart:async';
 import 'dart:io' show ProcessResult;
 
-import '../common/logging.dart';
 import 'package:process/process.dart';
+
+import '../common/logging.dart';
 
 /// An error raised when a command fails to run within the `SshCommandRunner`.
 ///
@@ -14,7 +15,17 @@ import 'package:process/process.dart';
 /// running the command on the remote device. This error is raised when the
 /// subprocess running the SSH command returns a nonzero exit code.
 class SshCommandError extends Error {
-  SshCommandError(String msg) : super(msg);
+  /// The reason for the command failure.
+  final String message;
+
+  /// Basic constructor outlining the reason for the SSH command failure through
+  /// the message string.
+  SshCommandError(this.message);
+
+  @override
+  String toString() {
+    return 'SshCommandError: $message\n${super.stackTrace}';
+  }
 }
 
 /// Runs a command remotely on a Fuchsia device. Requires a fuchsia root and
@@ -32,11 +43,11 @@ class SshCommandRunner {
   final String sshConfigPath;
 
   /// Instantiates the command runner, pointing to an `ipv4Address` as well as
-  /// an optional SSH config file.
+  /// an optional SSH config file path.
   ///
   /// If the SSH config path is supplied as an empty string, behavior is
   /// undefined.
-  SshCommandRunner({this.ipv4Address, this.sshConfigPath = null});
+  SshCommandRunner({this.ipv4Address, this.sshConfigPath});
 
   /// Runs a command on a Fuchsia device through an SSH tunnel.
   ///
