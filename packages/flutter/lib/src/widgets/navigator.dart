@@ -1075,6 +1075,40 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(() { _debugLocked = false; return true; }());
   }
 
+  /// Inserts the `newRoute` below the given `anchorRoute`.
+  ///
+  /// The route prior to the added route, if any, is notified (see
+  /// [Route.didChangeNext]). The route above the added route is also notified
+  /// (see [Route.didChangePrevious]). The navigator observer is not notified.
+  /// Returns a [Future] that completes to the `result` value passed to [pop]
+  /// when the inserted route is popped off the navigator.
+  Future<Object> insertBelow(Route<dynamic> anchorRoute, Route<dynamic> newRoute) {
+    assert(!_debugLocked);
+    assert(() { _debugLocked = true; return true; }());
+    assert(anchorRoute._navigator == this);
+    final int index = _history.indexOf(anchorRoute);
+    assert(index >= 0);
+    assert(newRoute != null);
+    assert(newRoute._navigator == null);
+    assert(newRoute.overlayEntries.isEmpty);
+    setState(() {
+      final Route<dynamic> previousRoute = index > 0 ? _history[index - 1] : null;
+      newRoute._navigator = this;
+      final OverlayEntry entryPoint = previousRoute != null
+        ? previousRoute.overlayEntries.last
+        : null;
+      newRoute.install(entryPoint);
+      _history.insert(index, newRoute);
+      newRoute.didChangePrevious(previousRoute);
+      newRoute.didChangeNext(anchorRoute);
+      if (previousRoute != null)
+        previousRoute.didChangeNext(newRoute);
+      anchorRoute.didChangePrevious(newRoute);
+    });
+    assert(() { _debugLocked = false; return true; }());
+    return newRoute.popped;
+  }
+
   /// Push the given route and then remove all the previous routes until the
   /// `predicate` returns true.
   ///

@@ -275,13 +275,15 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   /// Insert the given entry into the overlay.
   ///
   /// If [above] is non-null, the entry is inserted just above [above].
-  /// Otherwise, the entry is inserted on top.
-  void insert(OverlayEntry entry, { OverlayEntry above }) {
+  /// Otherwise, the entry is inserted on the top, unless [atBottom] is `true`.
+  void insert(OverlayEntry entry, { OverlayEntry above, bool atBottom: false }) {
     assert(entry._overlay == null);
     assert(above == null || (above._overlay == this && _entries.contains(above)));
     entry._overlay = this;
     setState(() {
-      final int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
+      final int index = above == null
+        ? (atBottom ? 0 : _entries.length)
+        : _entries.indexOf(above) + 1;
       _entries.insert(index, entry);
     });
   }
@@ -289,8 +291,8 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   /// Insert all the entries in the given iterable.
   ///
   /// If [above] is non-null, the entries are inserted just above [above].
-  /// Otherwise, the entries are inserted on top.
-  void insertAll(Iterable<OverlayEntry> entries, { OverlayEntry above }) {
+  /// Otherwise, the entry is inserted on the top, unless [atBottom] is `true`.
+  void insertAll(Iterable<OverlayEntry> entries, { OverlayEntry above, bool atBottom: false }) {
     assert(above == null || (above._overlay == this && _entries.contains(above)));
     if (entries.isEmpty)
       return;
@@ -299,7 +301,9 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       entry._overlay = this;
     }
     setState(() {
-      final int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
+      final int index = above == null
+        ? (atBottom ? 0 : _entries.length)
+        : _entries.indexOf(above) + 1;
       _entries.insertAll(index, entries);
     });
   }

@@ -605,6 +605,80 @@ void main() {
     expect(previousRoute, routes['/']);
   });
 
+  testWidgets('insertBelow', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: const Material(child: const Text('home')),
+    ));
+    final Map<String, PageRouteBuilder<dynamic>> routes = <String, PageRouteBuilder<dynamic>> {
+      '/a': new PageRouteBuilder<Null>(pageBuilder: (_, __, ___) => const Material(child: const Text('a'))),
+      '/b': new PageRouteBuilder<Null>(pageBuilder: (_, __, ___) => const Material(child: const Text('b'))),
+      '/c': new PageRouteBuilder<Null>(pageBuilder: (_, __, ___) => const Material(child: const Text('c'))),
+      '/d': new PageRouteBuilder<Null>(pageBuilder: (_, __, ___) => const Material(child: const Text('d'))),
+    };
+
+    final NavigatorState navigator = tester.state(find.byType(Navigator));
+    navigator.pushReplacement(routes['/c']);
+    await tester.pumpAndSettle();
+
+    expect(find.text('a'), findsNothing);
+    expect(find.text('b'), findsNothing);
+    expect(find.text('c'), findsOneWidget);
+    expect(find.text('d'), findsNothing);
+
+    expect(routes['/a'].isActive, false);
+    expect(routes['/b'].isActive, false);
+    expect(routes['/c'].isActive, true);
+    expect(routes['/d'].isActive, false);
+    expect(routes['/c'].isFirst, true);
+    expect(routes['/c'].isCurrent, true);
+
+    navigator.insertBelow(routes['/c'], routes['/b']);
+    await tester.pumpAndSettle();
+
+    expect(find.text('a'), findsNothing);
+    expect(find.text('b'), findsNothing);
+    expect(find.text('c'), findsOneWidget);
+    expect(find.text('d'), findsNothing);
+
+    expect(routes['/a'].isActive, false);
+    expect(routes['/b'].isActive, true);
+    expect(routes['/c'].isActive, true);
+    expect(routes['/d'].isActive, false);
+    expect(routes['/b'].isFirst, true);
+    expect(routes['/c'].isFirst, false);
+    expect(routes['/c'].isCurrent, true);
+
+    navigator.insertBelow(routes['/b'], routes['/a']);
+    await tester.pumpAndSettle();
+
+    expect(find.text('a'), findsNothing);
+    expect(find.text('b'), findsNothing);
+    expect(find.text('c'), findsOneWidget);
+    expect(find.text('d'), findsNothing);
+
+    expect(routes['/a'].isActive, true);
+    expect(routes['/b'].isActive, true);
+    expect(routes['/c'].isActive, true);
+    expect(routes['/d'].isActive, false);
+    expect(routes['/a'].isFirst, true);
+    expect(routes['/c'].isCurrent, true);
+
+    navigator.push(routes['/d']);
+    await tester.pumpAndSettle();
+
+    expect(find.text('a'), findsNothing);
+    expect(find.text('b'), findsNothing);
+    expect(find.text('c'), findsNothing);
+    expect(find.text('d'), findsOneWidget);
+
+    expect(routes['/a'].isActive, true);
+    expect(routes['/b'].isActive, true);
+    expect(routes['/c'].isActive, true);
+    expect(routes['/d'].isActive, true);
+    expect(routes['/a'].isFirst, true);
+    expect(routes['/d'].isCurrent, true);
+  });
+
   testWidgets('remove a route whose value is awaited', (WidgetTester tester) async {
     Future<String> pageValue;
     final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{

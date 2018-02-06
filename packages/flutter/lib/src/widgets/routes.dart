@@ -32,7 +32,7 @@ abstract class OverlayRoute<T> extends Route<T> {
   void install(OverlayEntry insertionPoint) {
     assert(_overlayEntries.isEmpty);
     _overlayEntries.addAll(createOverlayEntries());
-    navigator.overlay?.insertAll(_overlayEntries, above: insertionPoint);
+    navigator.overlay?.insertAll(_overlayEntries, above: insertionPoint, atBottom: true);
     super.install(insertionPoint);
   }
 
