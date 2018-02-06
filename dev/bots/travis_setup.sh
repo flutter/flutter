@@ -21,7 +21,9 @@ if [ -n "$TRAVIS" ]; then
     export ANDROID_HOME=`pwd`/android-sdk
     export PATH=`pwd`/android-sdk/tools/bin:$PATH
     mkdir -p /home/travis/.android # silence sdkmanager warning
-    echo $ANDROID_GALLERY_UPLOAD_KEY | base64 --decode > /home/travis/.android/debug.keystore
+    if [ -n "$ANDROID_GALLERY_UPLOAD_KEY" ]; then
+      echo $ANDROID_GALLERY_UPLOAD_KEY | base64 --decode > /home/travis/.android/debug.keystore
+    fi
     echo 'count=0' > /home/travis/.android/repositories.cfg # silence sdkmanager warning
     # suppressing output of sdkmanager to keep log under 4MB (travis limit)
     echo y | sdkmanager "tools" >/dev/null
