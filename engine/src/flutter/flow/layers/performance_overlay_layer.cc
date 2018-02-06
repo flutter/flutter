@@ -16,9 +16,9 @@ void DrawStatisticsText(SkCanvas& canvas,
                         int x,
                         int y) {
   SkPaint paint;
-  paint.setTextSize(14);
+  paint.setTextSize(15);
   paint.setLinearText(false);
-  paint.setColor(SK_ColorRED);
+  paint.setColor(SK_ColorGRAY);
   canvas.drawText(string.c_str(), string.size(), x, y, paint);
 }
 
@@ -91,27 +91,30 @@ PerformanceOverlayLayer::PerformanceOverlayLayer(uint64_t options)
     : options_(options) {}
 
 void PerformanceOverlayLayer::Paint(PaintContext& context) const {
+  const int padding = 8;
+
   if (!options_)
     return;
 
   TRACE_EVENT0("flutter", "PerformanceOverlayLayer::Paint");
-  SkScalar x = paint_bounds().x();
-  SkScalar y = paint_bounds().y();
-  SkScalar width = paint_bounds().width();
+  SkScalar x = paint_bounds().x() + padding;
+  SkScalar y = paint_bounds().y() + padding;
+  SkScalar width = paint_bounds().width() - (padding * 2);
   SkScalar height = paint_bounds().height() / 2;
   SkAutoCanvasRestore save(&context.canvas, true);
 
-  VisualizeStopWatch(context.canvas, context.frame_time, x, y, width, height,
+  VisualizeStopWatch(context.canvas, context.frame_time, x, y, width,
+                     height - padding,
                      options_ & kVisualizeRasterizerStatistics,
                      options_ & kDisplayRasterizerStatistics, "Rasterizer");
 
   VisualizeStopWatch(context.canvas, context.engine_time, x, y + height, width,
-                     height, options_ & kVisualizeEngineStatistics,
+                     height - padding, options_ & kVisualizeEngineStatistics,
                      options_ & kDisplayEngineStatistics, "Engine");
 
   VisualizeCounterValuesBytes(
-      context.canvas, context.memory_usage, x, y + (2 * height), width, height,
-      options_ & kVisualizeMemoryStatistics,
+      context.canvas, context.memory_usage, x, y + (2 * height), width,
+      height - padding, options_ & kVisualizeMemoryStatistics,
       options_ & kDisplayMemoryStatistics, "Memory (Resident)");
 }
 
