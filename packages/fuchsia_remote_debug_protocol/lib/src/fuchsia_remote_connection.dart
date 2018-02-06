@@ -14,9 +14,6 @@ import 'runners/ssh_command_runner.dart';
 
 final String _ipv4Loopback = InternetAddress.LOOPBACK_IP_V4.address;
 
-/// Fallback hostname in the event that the standard loopback fails.
-final String _ipv4SocketFallback = 'localhost';
-
 final ProcessManager _processManager = const LocalProcessManager();
 
 final Logger _log = new Logger('FuchsiaRemoteConnection');
@@ -53,7 +50,8 @@ class FuchsiaRemoteConnection {
   /// returned will keep all associated DartVM connections opened over the
   /// lifetime of the object.
   ///
-  /// At its current state Dart VM connections will not be added or removed.
+  /// At its current state Dart VM connections will not be added or removed over
+  /// the lifetime of this object.
   static Future<FuchsiaRemoteConnection> connect(String ipv4Address,
       [String sshConfigPath = null]) async {
     final List<_ForwardedPort> ports =
