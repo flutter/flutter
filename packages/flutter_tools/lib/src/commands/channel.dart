@@ -92,11 +92,26 @@ class ChannelCommand extends FlutterCommand {
   }
 
   static Future<Null> _checkout(String branchName) async {
-    final int result = await runCommandAndStreamOutput(
-      <String>['git', 'checkout', '-b', branchName],
+    int result = await runCommandAndStreamOutput(
+      <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/$branchName'],
       workingDirectory: Cache.flutterRoot,
       prefix: 'git: ',
     );
+    if (result == 0) {
+      // branch already exists, try just switching to it
+      result = await runCommandAndStreamOutput(
+        <String>['git', 'checkout', branchName],
+        workingDirectory: Cache.flutterRoot,
+        prefix: 'git: ',
+      );
+    } else {
+      // branch does not exist, we have to create it
+      result = await runCommandAndStreamOutput(
+        <String>['git', 'checkout', '--track', '-b', branchName, 'origin/$branchName'],
+        workingDirectory: Cache.flutterRoot,
+        prefix: 'git: ',
+      );
+    }
     if (result != 0)
       throwToolExit('Switching channels failed with error code $result.', exitCode: result);
   }
