@@ -22,6 +22,21 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 580.0));
     });
 
+    testWidgets('SafeArea - with minimums', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: const MediaQueryData(padding: const EdgeInsets.all(20.0)),
+          child: const SafeArea(
+            top: false,
+            minimum: const EdgeInsets.fromLTRB(0.0, 10.0, 20.0, 30.0),
+            child: const Placeholder(),
+          ),
+        ),
+      );
+      expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(20.0, 10.0));
+      expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 570.0));
+    });
+
     testWidgets('SafeArea - nested', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
@@ -115,6 +130,24 @@ void main() {
       verify(tester, <Rect>[
         new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
         new Rect.fromLTWH(0.0, 120.0, 780.0, 100.0),
+        new Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
+      ]);
+    });
+
+    testWidgets('SliverSafeArea - basic', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildWidget(
+          const EdgeInsets.all(20.0),
+          const SliverSafeArea(
+            top: false,
+            minimum: const EdgeInsets.fromLTRB(0.0, 10.0, 20.0, 30.0),
+            sliver: const SliverToBoxAdapter(child: const SizedBox(width: 800.0, height: 100.0, child: const Text('padded'))),
+          ),
+        ),
+      );
+      verify(tester, <Rect>[
+        new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        new Rect.fromLTWH(20.0, 110.0, 760.0, 100.0),
         new Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
       ]);
     });
