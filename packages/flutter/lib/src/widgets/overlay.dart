@@ -291,7 +291,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   /// Insert all the entries in the given iterable.
   ///
   /// If [above] is non-null, the entries are inserted just above [above].
-  /// Otherwise, the entry is inserted on the top, unless [atBottom] is `true`.
+  /// Otherwise, the entries are inserted on the top, unless [atBottom] is `true`.
   void insertAll(Iterable<OverlayEntry> entries, { OverlayEntry above, bool atBottom: false }) {
     assert(above == null || (above._overlay == this && _entries.contains(above)));
     if (entries.isEmpty)
