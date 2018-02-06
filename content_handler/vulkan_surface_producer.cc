@@ -103,9 +103,7 @@ bool VulkanSurfaceProducer::Initialize(scenic_lib::Session* mozart_session) {
   logical_device_->ReleaseDeviceOwnership();
   application_->ReleaseInstanceOwnership();
 
-  context_.reset(GrContext::Create(
-      kVulkan_GrBackend,
-      reinterpret_cast<GrBackendContext>(backend_context_.get())));
+  context_ = GrContext::MakeVulkan(backend_context);
 
   context_->setResourceCacheLimits(vulkan::kGrCacheMaxCount,
                                    vulkan::kGrCacheMaxByteSize);
