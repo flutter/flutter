@@ -29,111 +29,88 @@ class FakeProcessManager extends Mock implements ProcessManager {
   /// The list of results that will be sent back, organized by the command line
   /// that will produce them. Each command line has a list of returned stdout
   /// output that will be returned on each successive call.
-  Map<String, List<ProcessResult>> fakeResults = <String, List<ProcessResult>>{};
+  Map<String, List<ProcessResult>> _fakeResults = <String, List<ProcessResult>>{};
+  Map<String, List<ProcessResult>> get fakeResults => _fakeResults;
+  set fakeResults(Map<String, List<ProcessResult>> value) {
+    _fakeResults = <String, List<ProcessResult>>{};
+    for (String key in value.keys) {
+      _fakeResults[key] = <ProcessResult>[]
+        ..addAll(value[key] ?? <ProcessResult>[new ProcessResult(0, 0, '', '')]);
+    }
+  }
 
   /// The list of invocations that occurred, in the order they occurred.
   List<Invocation> invocations = <Invocation>[];
 
-  /// Verify that the given command lines were called, in the given order.
+  /// Verify that the given command lines were called, in the given order, and that the
+  /// parameters were in the same order.
   void verifyCalls(List<String> calls) {
     int index = 0;
-    expect(invocations.length, equals(calls.length));
     for (String call in calls) {
       expect(call.split(' '), orderedEquals(invocations[index].positionalArguments[0]));
       index++;
     }
+    expect(invocations.length, equals(calls.length));
   }
 
-  /// Sets the list of results that will be returned from each successive call.
-  void setResults(Map<String, List<String>> results) {
-    final Map<String, List<ProcessResult>> resultCodeUnits = <String, List<ProcessResult>>{};
-    for (String key in results.keys) {
-      resultCodeUnits[key] =
-          results[key].map((String result) => new ProcessResult(0, 0, result, '')).toList();
-    }
-    fakeResults = resultCodeUnits;
-  }
-
-  ProcessResult _popResult(String key) {
+  ProcessResult _popResult(List<String> command) {
+    final String key = command.join(' ');
     expect(fakeResults, isNotEmpty);
     expect(fakeResults, contains(key));
     expect(fakeResults[key], isNotEmpty);
     return fakeResults[key].removeAt(0);
   }
 
-  FakeProcess _popProcess(String key) =>
-      new FakeProcess(_popResult(key), stdinResults: stdinResults);
+  FakeProcess _popProcess(List<String> command) =>
+      new FakeProcess(_popResult(command), stdinResults: stdinResults);
 
   Future<Process> _nextProcess(Invocation invocation) async {
     invocations.add(invocation);
-    return new Future<Process>.value(_popProcess(invocation.positionalArguments[0].join(' ')));
+    return new Future<Process>.value(_popProcess(invocation.positionalArguments[0]));
   }
 
   ProcessResult _nextResultSync(Invocation invocation) {
     invocations.add(invocation);
-    return _popResult(invocation.positionalArguments[0].join(' '));
+    return _popResult(invocation.positionalArguments[0]);
   }
 
   Future<ProcessResult> _nextResult(Invocation invocation) async {
     invocations.add(invocation);
-    return new Future<ProcessResult>.value(_popResult(invocation.positionalArguments[0].join(' ')));
+    return new Future<ProcessResult>.value(_popResult(invocation.positionalArguments[0]));
   }
 
   void _setupMock() {
     // Note that not all possible types of invocations are covered here, just the ones
     // expected to be called.
     // TODO(gspencer): make this more general so that any call will be captured.
-    when(
-      start(
-        typed(captureAny),
-        environment: typed(captureAny, named: 'environment'),
-        workingDirectory: typed(captureAny, named: 'workingDirectory'),
-      ),
-    ).thenAnswer(_nextProcess);
+    when(start(
+      typed(captureAny),
+      environment: typed(captureAny, named: 'environment'),
+      workingDirectory: typed(captureAny, named: 'workingDirectory'),
+    )).thenAnswer(_nextProcess);
 
-    when(
-      start(
-        typed(captureAny),
-      ),
-    ).thenAnswer(_nextProcess);
+    when(start(typed(captureAny))).thenAnswer(_nextProcess);
 
-    when(
-      run(
-        typed(captureAny),
-        environment: typed(captureAny, named: 'environment'),
-        workingDirectory: typed(captureAny, named: 'workingDirectory'),
-      ),
-    ).thenAnswer(_nextResult);
+    when(run(
+      typed(captureAny),
+      environment: typed(captureAny, named: 'environment'),
+      workingDirectory: typed(captureAny, named: 'workingDirectory'),
+    )).thenAnswer(_nextResult);
 
-    when(
-      run(
-        typed(captureAny),
-      ),
-    ).thenAnswer(_nextResult);
+    when(run(typed(captureAny))).thenAnswer(_nextResult);
 
-    when(
-      runSync(
-        typed(captureAny),
-        environment: typed(captureAny, named: 'environment'),
-        workingDirectory: typed(captureAny, named: 'workingDirectory'),
-      ),
-    ).thenAnswer(_nextResultSync);
+    when(runSync(
+      typed(captureAny),
+      environment: typed(captureAny, named: 'environment'),
+      workingDirectory: typed(captureAny, named: 'workingDirectory')
+    )).thenAnswer(_nextResultSync);
 
-    when(
-      runSync(
-        typed(captureAny),
-      ),
-    ).thenAnswer(_nextResultSync);
+    when(runSync(typed(captureAny))).thenAnswer(_nextResultSync);
 
     when(killPid(typed(captureAny), typed(captureAny))).thenReturn(true);
 
-    when(
-      canRun(captureAny,
-          workingDirectory: typed(
-            captureAny,
-            named: 'workingDirectory',
-          )),
-    ).thenReturn(true);
+    when(canRun(captureAny, workingDirectory: typed(captureAny, named: 'workingDirectory')))
+        .thenReturn(true);
   }
 }
 
@@ -190,9 +167,11 @@ class StringStreamConsumer implements StreamConsumer<List<int>> {
   Future<dynamic> addStream(Stream<List<int>> value) {
     streams.add(value);
     completers.add(new Completer<dynamic>());
-    subscriptions.add(value.listen((List<int> data) {
-      sendString(utf8.decode(data));
-    }));
+    subscriptions.add(
+      value.listen((List<int> data) {
+        sendString(utf8.decode(data));
+      }),
+    );
     subscriptions.last.onDone(() => completers.last.complete(null));
     return new Future<dynamic>.value(null);
   }
