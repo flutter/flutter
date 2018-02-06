@@ -447,6 +447,7 @@ class AppDomain extends Domain {
   bool isRestartSupported(bool enableHotReload, Device device) =>
       enableHotReload && device.supportsHotMode;
 
+  Future<Null> inProgressHotReload;
   Future<OperationResult> restart(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
     final bool fullRestart = _getBoolArg(args, 'fullRestart') ?? false;
@@ -456,9 +457,15 @@ class AppDomain extends Domain {
     if (app == null)
       throw "app '$appId' not found";
 
-    return app._runInZone(this, () {
+    if (!fullRestart && inProgressHotReload != null)
+      throw 'hot restart already in progress';
+
+    final Future<OperationResult> action = app._runInZone(this, () {
       return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
     });
+    if (!fullRestart)
+      inProgressHotReload = action.then((_) => inProgressHotReload = null);
+    return action;
   }
 
   /// Returns an error, or the service extension result (a map with two fixed
