@@ -6,11 +6,15 @@ echo $KEY_FILE | base64 --decode > ../gcloud_key_file.json
 set -x
 
 if [ -n "$TRAVIS" ]; then
-  export CLOUDSDK_CORE_DISABLE_PROMPTS=1
-  echo "Installing Google Cloud SDK..."
-  curl https://sdk.cloud.google.com | bash > /dev/null
-  echo "Google Cloud SDK installation completed."
+  # Only used to upload docs. Don't install gcloud SDK otherwise.
+  if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$SHARD" = "docs" ]; then
+    export CLOUDSDK_CORE_DISABLE_PROMPTS=1
+    echo "Installing Google Cloud SDK..."
+    curl https://sdk.cloud.google.com | bash > /dev/null
+    echo "Google Cloud SDK installation completed."
+  fi
 
+  # Android SDK only needed to build the gallery on build_and_deploy_gallery Linux shard.
   if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$SHARD" = "build_and_deploy_gallery" ]; then
     # Background for not using Travis's built-in Android tags
     # https://github.com/flutter/plugins/pull/145
