@@ -20,6 +20,8 @@ import 'media_query.dart';
 ///
 /// See also:
 ///
+///  * [SliverSafeArea], for insetting slivers to avoid operating system
+///    intrusions.
 ///  * [Padding], for insetting widgets in general.
 ///  * [MediaQuery], from which the window padding is obtained.
 ///  * [dart:ui.Window.padding], which reports the padding from the operating
@@ -80,6 +82,91 @@ class SafeArea extends StatelessWidget {
         removeRight: right,
         removeBottom: bottom,
         child: child,
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
+    description.add(new FlagProperty('top', value: left, ifTrue: 'avoid top padding'));
+    description.add(new FlagProperty('right', value: left, ifTrue: 'avoid right padding'));
+    description.add(new FlagProperty('bottom', value: left, ifTrue: 'avoid bottom padding'));
+  }
+}
+
+/// A sliver that insets another sliver by sufficient padding to avoid
+/// intrusions by the operating system.
+///
+/// For example, this will indent the sliver by enough to avoid the status bar
+/// at the top of the screen.
+///
+/// It will also indent the sliver by the amount necessary to avoid The Notch
+/// on the iPhone X, or other similar creative physical features of the
+/// display.
+///
+/// See also:
+///
+///  * [SafeArea], for insetting widgets to avoid operating system intrusions.
+///  * [SliverPadding], for insetting slivers in general.
+///  * [MediaQuery], from which the window padding is obtained.
+///  * [dart:ui.Window.padding], which reports the padding from the operating
+///    system.
+class SliverSafeArea extends StatelessWidget {
+  /// Creates a sliver that avoids operating system interfaces.
+  ///
+  /// The [left], [top], [right], and [bottom] arguments must not be null.
+  const SliverSafeArea({
+    Key key,
+    this.left: true,
+    this.top: true,
+    this.right: true,
+    this.bottom: true,
+    @required this.sliver,
+  }) : assert(left != null),
+       assert(top != null),
+       assert(right != null),
+       assert(bottom != null),
+       super(key: key);
+
+  /// Whether to avoid system intrusions on the left.
+  final bool left;
+
+  /// Whether to avoid system intrusions at the top of the screen, typically the
+  /// system status bar.
+  final bool top;
+
+  /// Whether to avoid system intrusions on the right.
+  final bool right;
+
+  /// Whether to avoid system intrusions on the bottom side of the screen.
+  final bool bottom;
+
+  /// The sliver below this sliver in the tree.
+  ///
+  /// The padding on the [MediaQuery] for the [sliver] will be suitably adjusted
+  /// to zero out any sides that were avoided by this sliver.
+  final Widget sliver;
+
+  @override
+  Widget build(BuildContext context) {
+    assert(debugCheckHasMediaQuery(context));
+    final EdgeInsets padding = MediaQuery.of(context).padding;
+    return new SliverPadding(
+      padding: new EdgeInsets.only(
+        left: left ? padding.left : 0.0,
+        top: top ? padding.top : 0.0,
+        right: right ? padding.right : 0.0,
+        bottom: bottom ? padding.bottom : 0.0,
+      ),
+      sliver: new MediaQuery.removePadding(
+        context: context,
+        removeLeft: left,
+        removeTop: top,
+        removeRight: right,
+        removeBottom: bottom,
+        child: sliver,
       ),
     );
   }
