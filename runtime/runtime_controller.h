@@ -28,7 +28,8 @@ class RuntimeController : public WindowClient, public IsolateClient {
 
   void CreateDartController(const std::string& script_uri,
                             const uint8_t* isolate_snapshot_data,
-                            const uint8_t* isolate_snapshot_instr);
+                            const uint8_t* isolate_snapshot_instr,
+                            int dirfd = -1);
   DartController* dart_controller() const { return dart_controller_.get(); }
 
   void SetViewportMetrics(const ViewportMetrics& metrics);

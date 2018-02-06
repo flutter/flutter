@@ -109,6 +109,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void Invalidate();
 
   fdio_ns_t* namespc_;
+  int dirfd_;
   std::unique_ptr<app::ApplicationContext> context_;
   fidl::InterfaceRequest<app::ServiceProvider> outgoing_services_;
   std::vector<char> root_bundle_data_;
