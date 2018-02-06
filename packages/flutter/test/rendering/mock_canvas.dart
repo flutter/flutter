@@ -148,6 +148,18 @@ abstract class PaintPattern {
   /// [Canvas.clipRect] call are ignored.
   void clipRect({ Rect rect });
 
+  /// Indicates that a path clip is expected next.
+  ///
+  /// The next path clip is examined.
+  /// The path that is passed to the actual [Canvas.clipPath] call is matched
+  /// using [pathMatcher].
+  ///
+  /// If no call to [Canvas.clipPath] was made, then this results in failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.clipPath] call are ignored.
+  void clipPath({Matcher pathMatcher});
+
   /// Indicates that a rectangle is expected next.
   ///
   /// The next rectangle is examined. Any arguments that are passed to this
@@ -627,6 +639,11 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   @override
   void clipRect({ Rect rect }) {
     _predicates.add(new _FunctionPaintPredicate(#clipRect, <dynamic>[rect]));
+  }
+
+  @override
+  void clipPath({Matcher pathMatcher}) {
+    _predicates.add(new _FunctionPaintPredicate(#clipPath, <dynamic>[pathMatcher]));
   }
 
   @override
