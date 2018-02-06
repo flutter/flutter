@@ -27,7 +27,7 @@ class _GesturePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Offset center = (size.center(Offset.zero) * zoom + offset);
+    final Offset center = size.center(Offset.zero) * zoom + offset;
     final double radius = size.width / 2.0 * zoom;
     final Gradient gradient = new RadialGradient(
       colors: forward ? <Color>[swatch.shade50, swatch.shade900]

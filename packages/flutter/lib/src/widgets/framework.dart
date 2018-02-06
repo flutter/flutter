@@ -2965,7 +2965,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(owner != null);
     assert(depth != null);
     assert(!_active);
-    final bool hadDependencies = ((_dependencies != null && _dependencies.isNotEmpty) || _hadUnsatisfiedDependencies);
+    final bool hadDependencies = (_dependencies != null && _dependencies.isNotEmpty) || _hadUnsatisfiedDependencies;
     _active = true;
     // We unregistered our dependencies in deactivate, but never cleared the list.
     // Since we're going to be reused, let's clear our list now.
