@@ -2228,7 +2228,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     // Dirty the semantics tree starting at `this` until we have reached a
     // RenderObject that is a semantics boundary. All semantics past this
     // RenderObject are still up-to date. Therefore, we will later only rebuild
-    // the semantics subtree starting at th identified semantics boundary.
+    // the semantics subtree starting at the identified semantics boundary.
 
     final bool wasSemanticsBoundary = _semantics != null && _cachedSemanticsConfiguration?.isSemanticBoundary == true;
     _cachedSemanticsConfiguration = null;
@@ -2254,7 +2254,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       // remove it as it is no longer guaranteed that its semantics
       // node will continue to be in the tree. If it still is in the tree, the
       // ancestor `node` added to [owner._nodesNeedingSemantics] at the end of
-      // this block will ensure that the semantics of `this` node actually get
+      // this block will ensure that the semantics of `this` node actually gets
       // updated.
       // (See semantics_10_test.dart for an example why this is required).
       owner._nodesNeedingSemantics.remove(this);
@@ -3005,8 +3005,8 @@ class _ContainerSemanticsFragment extends _SemanticsFragment {
 /// A [_SemanticsFragment] that describes which concrete semantic information
 /// a [RenderObject] wants to add to the [SemanticsNode] of its parent.
 ///
-/// Specifically, it describes what children (as returned by [compileChildren])
-/// should be added to the parent's [SemanticsNode] and what [config] should be
+/// Specifically, it describes which children (as returned by [compileChildren])
+/// should be added to the parent's [SemanticsNode] and which [config] should be
 /// merged into the parent's [SemanticsNode].
 abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   _InterestingSemanticsFragment({
@@ -3082,7 +3082,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
 /// An [_InterestingSemanticsFragment] that produces the root [SemanticsNode] of
 /// the semantics tree.
 ///
-/// The root node is available as only element in the Iterable returned by
+/// The root node is available as the only element in the Iterable returned by
 /// [children].
 class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   _RootSemanticsFragment({
@@ -3144,7 +3144,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
 /// fragment it will create a new [SemanticsNode]. The newly created node will
 /// be annotated with the [SemanticsConfiguration] that - without the call to
 /// [markAsExplicit] - would have been merged into the parent's [SemanticsNode].
-/// Similarity, the new node will also take over the children that otherwise
+/// Similarly, the new node will also take over the children that otherwise
 /// would have been added to the parent's [SemanticsNode].
 ///
 /// After a call to [markAsExplicit] the only element returned by [children]
