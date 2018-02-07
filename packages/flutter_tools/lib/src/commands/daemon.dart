@@ -458,7 +458,7 @@ class AppDomain extends Domain {
     if (app == null)
       throw "app '$appId' not found";
 
-    if (!fullRestart && _inProgressHotReload != null)
+    if (_inProgressHotReload != null)
       throw 'hot restart already in progress';
 
     final Future<OperationResult> action = app._runInZone(this, () {
