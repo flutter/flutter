@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:args/args.dart';
 import 'package:process/process.dart';
 
+import '../lib/src/asset.dart';
 import '../lib/src/base/common.dart';
 import '../lib/src/base/config.dart';
 import '../lib/src/base/context.dart';
@@ -81,15 +82,23 @@ Future<Null> run(List<String> args) async {
   try {
     final String snapshotPath = argResults[_kOptionSnapshot];
     final String dylibPath = argResults[_kOptionDylib];
+    final AssetBundle assets = await buildAssets(
+      manifestPath: argResults[_kOptionManifest] ?? defaultManifestPath,
+      workingDirPath: argResults[_kOptionWorking],
+      packagesPath: argResults[_kOptionPackages],
+      includeDefaultFonts: false,
+    );
+    if (assets == null)
+      throwToolExit('Error building assets for $outputPath', exitCode: 1);
+
     final List<String> dependencies = await assemble(
+      assetBundle: assets,
       outputPath: outputPath,
       snapshotFile: snapshotPath == null ? null : fs.file(snapshotPath),
       dylibFile: dylibPath == null ? null : fs.file(dylibPath),
       workingDirPath: argResults[_kOptionWorking],
-      packagesPath: argResults[_kOptionPackages],
-      manifestPath: argResults[_kOptionManifest] ?? defaultManifestPath,
-      includeDefaultFonts: false,
     );
+
     final String depFilePath = argResults[_kOptionDepFile];
     final int depFileResult = _createDepfile(
         depFilePath,

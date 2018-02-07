@@ -80,34 +80,34 @@ Future<Null> build({
     kernelContent = new DevFSFileContent(fs.file(kernelBinaryFilename));
   }
 
-  return assemble(
+  final AssetBundle assets = await buildAssets(
     manifestPath: manifestPath,
+    workingDirPath: workingDirPath,
+    packagesPath: packagesPath,
+    reportLicensedPackages: reportLicensedPackages,
+  );
+  if (assets == null)
+    throwToolExit('Error building assets for $outputPath', exitCode: 1);
+
+  return assemble(
+    assetBundle: assets,
     kernelContent: kernelContent,
     snapshotFile: snapshotFile,
     outputPath: outputPath,
     privateKeyPath: privateKeyPath,
     workingDirPath: workingDirPath,
-    packagesPath: packagesPath,
-    reportLicensedPackages: reportLicensedPackages
   ).then((_) => null);
 }
 
-Future<List<String>> assemble({
+Future<AssetBundle> buildAssets({
   String manifestPath,
-  DevFSContent kernelContent,
-  File snapshotFile,
-  File dylibFile,
-  String outputPath,
-  String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
   String packagesPath,
   bool includeDefaultFonts: true,
   bool reportLicensedPackages: false
 }) async {
-  outputPath ??= defaultFlxOutputPath;
   workingDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
-  printTrace('Building $outputPath');
 
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
@@ -119,7 +119,24 @@ Future<List<String>> assemble({
     reportLicensedPackages: reportLicensedPackages
   );
   if (result != 0)
-    throwToolExit('Error building $outputPath: $result', exitCode: result);
+    return null;
+
+  return assetBundle;
+}
+
+Future<List<String>> assemble({
+  AssetBundle assetBundle,
+  DevFSContent kernelContent,
+  File snapshotFile,
+  File dylibFile,
+  String outputPath,
+  String privateKeyPath: defaultPrivateKeyPath,
+  String workingDirPath,
+  bool strongMode : false,
+}) async {
+  outputPath ??= defaultFlxOutputPath;
+  workingDirPath ??= getAssetBuildDirectory();
+  printTrace('Building $outputPath');
 
   final ZipBuilder zipBuilder = new ZipBuilder();
 
