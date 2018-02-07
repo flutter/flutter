@@ -916,8 +916,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           ),
           child: new SafeArea(
             child: new ButtonTheme.bar(
-              child: new ButtonBar(
-                children: widget.persistentFooterButtons
+              child: new SafeArea(
+                top: false,
+                child: new ButtonBar(
+                  children: widget.persistentFooterButtons
+                ),
               ),
             ),
           ),
@@ -926,7 +929,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
-        removeBottomPadding: widget.resizeToAvoidBottomPadding,
+        removeBottomPadding: false,
       );
     }
 
