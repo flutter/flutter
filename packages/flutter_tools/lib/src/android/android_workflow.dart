@@ -186,7 +186,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
     }
 
     final Process process = await runDetachedWithIO(<String>[androidSdk.sdkManagerPath, '--licenses']);
-    final Future<Null> _ = new Future<Null>.delayed(new Duration(seconds: 30), () async {
+    final Future<Null> _ = new Future<Null>.delayed(const Duration(seconds: 30), () async {
       printTrace('Intentionally killing ${androidSdk.sdkManagerPath}');
       processManager.killPid((process).pid);
     });
