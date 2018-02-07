@@ -7,6 +7,8 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 class NotifyMaterial extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -402,6 +404,64 @@ void main() {
           shape: const StadiumBorder(),
           elevation: 4.0,
       ));
+    });
+  });
+
+  group('Border painting', () {
+    testWidgets('border is painted on physical layers', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.button,
+          child: const SizedBox(width: 100.0, height: 100.0),
+          color: const Color(0xFF0000FF),
+          shape: const CircleBorder(
+            side: const BorderSide(
+              width: 2.0,
+              color: const Color(0xFF0000FF),
+            )
+          ),
+        )
+      );
+
+      final RenderBox box = tester.renderObject(find.byKey(materialKey));
+      expect(box, paints..circle());
+    });
+
+    testWidgets('border is painted for transparent material', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.transparency,
+          child: const SizedBox(width: 100.0, height: 100.0),
+          shape: const CircleBorder(
+            side: const BorderSide(
+              width: 2.0,
+              color: const Color(0xFF0000FF),
+            )
+          ),
+        )
+      );
+
+      final RenderBox box = tester.renderObject(find.byKey(materialKey));
+      expect(box, paints..circle());
+    });
+
+    testWidgets('border is not painted for when border side is none', (WidgetTester tester) async {
+      final GlobalKey materialKey = new GlobalKey();
+      await tester.pumpWidget(
+        new Material(
+          key: materialKey,
+          type: MaterialType.transparency,
+          child: const SizedBox(width: 100.0, height: 100.0),
+          shape: const CircleBorder(),
+        )
+      );
+
+      final RenderBox box = tester.renderObject(find.byKey(materialKey));
+      expect(box, isNot(paints..circle()));
     });
   });
 }
