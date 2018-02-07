@@ -5,6 +5,7 @@ dependencies:
   path: 1.5.1
   args: 1.2.0
   process: 2.0.7
+  platform: 2.1.1
 
 dev_dependencies:
   test: 0.12.30+1
@@ -37,7 +38,6 @@ dev_dependencies:
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
-  platform: 2.1.1 # TRANSITIVE DEPENDENCY
   plugin: 0.2.0+2 # TRANSITIVE DEPENDENCY
   pool: 1.3.4 # TRANSITIVE DEPENDENCY
   pub_semver: 1.3.2 # TRANSITIVE DEPENDENCY
