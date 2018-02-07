@@ -7,7 +7,7 @@
 namespace txt {
 
 std::string GetDefaultFontFamily() {
-  return "Roboto";
+  return "Arial";
 }
 
 }  // namespace txt
