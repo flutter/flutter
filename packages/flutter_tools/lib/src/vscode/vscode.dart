@@ -17,7 +17,36 @@ class VsCode {
 
   VsCode._(this.directory, this.extensionDirectory, { Version version })
       : this.version = version ?? Version.unknown {
-    _init();
+    _isValid = false;
+    _validationMessages.clear();
+
+    if (!fs.isDirectorySync(directory)) {
+      _validationMessages.add('VS Code not found at $directory');
+      return;
+    }
+
+    // If the extensions directory doesn't exist at all, the listSync()
+    // below will fail, so just bail out early.
+    if (!fs.isDirectorySync(extensionDirectory)) {
+      return;
+    }
+
+    // Check for presence of extension.
+    final Iterable<FileSystemEntity> extensionDirs = fs
+        .directory(extensionDirectory)
+        .listSync()
+        .where((FileSystemEntity d) => fs.isDirectorySync(d.path))
+        .where(
+            (FileSystemEntity d) => d.basename.startsWith(extensionIdentifier));
+
+    if (extensionDirs.isNotEmpty) {
+      final FileSystemEntity extensionDir = extensionDirs.first;
+
+      _isValid = true;
+      extensionVersion = new Version.parse(
+          extensionDir.basename.substring('$extensionIdentifier-'.length));
+      validationMessages.add('Dart Code extension version $extensionVersion');
+    }
   }
 
   final String directory;
@@ -137,39 +166,6 @@ class VsCode {
     }
 
     return results;
-  }
-
-  void _init() {
-    _isValid = false;
-    _validationMessages.clear();
-
-    if (!fs.isDirectorySync(directory)) {
-      _validationMessages.add('VS Code not found at $directory');
-      return;
-    }
-
-    // If the extensions directory doesn't exist at all, the listSync()
-    // below will fail, so just bail out early.
-    if (!fs.isDirectorySync(extensionDirectory)) {
-      return;
-    }
-
-    // Check for presence of extension.
-    final Iterable<FileSystemEntity> extensionDirs = fs
-        .directory(extensionDirectory)
-        .listSync()
-        .where((FileSystemEntity d) => fs.isDirectorySync(d.path))
-        .where(
-            (FileSystemEntity d) => d.basename.startsWith(extensionIdentifier));
-
-    if (extensionDirs.isNotEmpty) {
-      final FileSystemEntity extensionDir = extensionDirs.first;
-
-      _isValid = true;
-      extensionVersion = new Version.parse(
-          extensionDir.basename.substring('$extensionIdentifier-'.length));
-      validationMessages.add('Dart Code extension version $extensionVersion');
-    }
   }
 
   @override
