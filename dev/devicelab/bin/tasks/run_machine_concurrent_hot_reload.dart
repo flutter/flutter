@@ -26,6 +26,10 @@ void main() {
     return null;
   }
 
+  Stream<String> transformToLines(Stream<List<int>> byteStream) {
+    return byteStream.transform(UTF8.decoder).transform(const LineSplitter());
+  }
+
   task(() async {
     int vmServicePort;
     String appId;
@@ -51,10 +55,7 @@ void main() {
       );
       final StreamController<String> stdout =
           new StreamController<String>.broadcast();
-      run.stdout
-          .transform(UTF8.decoder)
-          .transform(const LineSplitter())
-          .listen((String line) {
+      transformToLines(run.stdout).listen((String line) {
         print('run:stdout: $line');
         stdout.add(line);
         final dynamic json = parseFlutterResponse(line);
@@ -68,10 +69,7 @@ void main() {
           ok ??= true;
         }
       });
-      run.stderr
-          .transform(UTF8.decoder)
-          .transform(const LineSplitter())
-          .listen((String line) {
+      transformToLines(run.stderr).listen((String line) {
         stderr.writeln('run:stderr: $line');
       });
       run.exitCode.then((int exitCode) {
