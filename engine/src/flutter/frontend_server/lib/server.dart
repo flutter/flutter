@@ -160,7 +160,7 @@ class _FrontendCompiler implements CompilerInterface {
     if (options['incremental']) {
       _entryPoint = filenameUri;
       _compilerOptions = compilerOptions;
-      _generator = generator ?? _createGenerator(Uri.base.resolve(_kernelBinaryFilenameFull));
+      _generator = generator ?? _createGenerator(new Uri.file(_kernelBinaryFilenameFull));
       await invalidateIfBootstrapping();
       program = await _runWithPrintRedirection(() => _generator.computeDelta());
     } else {
@@ -260,7 +260,7 @@ class _FrontendCompiler implements CompilerInterface {
 
   @override
   void resetIncrementalCompiler() {
-    _generator = _createGenerator(Uri.base.resolve(_kernelBinaryFilenameFull));
+    _generator = _createGenerator(new Uri.file(_kernelBinaryFilenameFull));
     _kernelBinaryFilename = _kernelBinaryFilenameFull;
   }
 
