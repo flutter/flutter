@@ -254,8 +254,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
-  final InjectPluginsResult injectPluginsResult = injectPlugins();
-  final bool hasFlutterPlugins = injectPluginsResult.hasPlugin;
+  final bool hasFlutterPlugins = hasPlugins();
   final String previousGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
 
   updateXcodeGeneratedProperties(
@@ -272,8 +271,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         appIosDir: appDirectory,
         iosEngineDir: flutterFrameworkDir(buildInfo.mode),
         isSwift: app.isSwift,
-        pluginOrFlutterPodChanged: (injectPluginsResult.hasChanged
-            || previousGeneratedXcconfig != currentGeneratedXcconfig),
+        flutterPodChanged: (previousGeneratedXcconfig != currentGeneratedXcconfig),
     );
   }
 

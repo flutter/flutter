@@ -60,13 +60,13 @@ class CocoaPods {
     // For backward compatibility with previously created Podfile only.
     @required String iosEngineDir,
     bool isSwift: false,
-    bool pluginOrFlutterPodChanged: true,
+    bool flutterPodChanged: true,
   }) async {
     if (await _checkPodCondition()) {
       if (!fs.file(fs.path.join(appIosDir.path, 'Podfile')).existsSync()) {
         await _createPodfile(appIosDir, isSwift);
       } // TODO(xster): Add more logic for handling merge conflicts.
-      if (_shouldRunPodInstall(appIosDir.path, pluginOrFlutterPodChanged))
+      if (_shouldRunPodInstall(appIosDir.path, flutterPodChanged))
         await _runPodInstall(appIosDir, iosEngineDir);
     }
   }
@@ -113,25 +113,19 @@ class CocoaPods {
 
   // Check if you need to run pod install.
   // The pod install will run if any of below is true.
-  // 1. Any plugins changed (add/update/delete)
-  // 2. The flutter.framework has changed (debug/release/profile)
-  // 3. The podfile.lock doesn't exists
-  // 4. The Pods/manifest.lock doesn't exists
-  // 5. The podfile.lock doesn't match Pods/manifest.lock.
-  bool _shouldRunPodInstall(String appDir, bool pluginOrFlutterPodChanged) {
-    if (pluginOrFlutterPodChanged)
+  // 1. The flutter.framework has changed (debug/release/profile)
+  // 2. The podfile.lock doesn't exist
+  // 3. The Pods/Manifest.lock doesn't exist (It is deleted when plugins change)
+  // 4. The podfile.lock doesn't match Pods/Manifest.lock.
+  bool _shouldRunPodInstall(String appDir, bool flutterPodChanged) {
+    if (flutterPodChanged)
       return true;
-    // Check if podfile.lock and Pods/Manifest.lock exists and matches.
+    // Check if podfile.lock and Pods/Manifest.lock exist and match.
     final File podfileLockFile = fs.file(fs.path.join(appDir, 'Podfile.lock'));
-    final File manifestLockFile =
-        fs.file(fs.path.join(appDir, 'Pods', 'Manifest.lock'));
-    if (!podfileLockFile.existsSync()
+    final File manifestLockFile = fs.file(fs.path.join(appDir, 'Pods', 'Manifest.lock'));
+    return !podfileLockFile.existsSync()
         || !manifestLockFile.existsSync()
-        || podfileLockFile.readAsStringSync() !=
-            manifestLockFile.readAsStringSync()) {
-      return true;
-    }
-    return false;
+        || podfileLockFile.readAsStringSync() != manifestLockFile.readAsStringSync();
   }
 
   Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {

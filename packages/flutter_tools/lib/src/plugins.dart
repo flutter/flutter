@@ -128,7 +128,7 @@ public final class GeneratedPluginRegistrant {
 }
 ''';
 
-void _writeAndroidPluginRegistry(String directory, List<Plugin> plugins) {
+void _writeAndroidPluginRegistrant(String directory, List<Plugin> plugins) {
   final List<Map<String, dynamic>> androidPlugins = plugins
       .where((Plugin p) => p.androidPackage != null && p.pluginClass != null)
       .map((Plugin p) => <String, dynamic>{
@@ -140,6 +140,7 @@ void _writeAndroidPluginRegistry(String directory, List<Plugin> plugins) {
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': androidPlugins,
   };
+  print('Here BB plugins');
 
   final String pluginRegistry =
       new mustache.Template(_androidPluginRegistryTemplate).renderString(context);
@@ -187,7 +188,7 @@ const String _iosPluginRegistryImplementationTemplate = '''//
 @end
 ''';
 
-void _writeIOSPluginRegistry(String directory, List<Plugin> plugins) {
+void _writeIOSPluginRegistrant(String directory, List<Plugin> plugins) {
   final List<Map<String, dynamic>> iosPlugins = plugins
       .where((Plugin p) => p.pluginClass != null)
       .map((Plugin p) => <String, dynamic>{
@@ -210,7 +211,6 @@ void _writeIOSPluginRegistry(String directory, List<Plugin> plugins) {
   registryHeaderFile.writeAsStringSync(pluginRegistryHeader);
   final File registryImplementationFile = registryDirectory.childFile('GeneratedPluginRegistrant.m');
   registryImplementationFile.writeAsStringSync(pluginRegistryImplementation);
-
 }
 
 class InjectPluginsResult{
@@ -224,17 +224,31 @@ class InjectPluginsResult{
   final bool hasChanged;
 }
 
-/// Finds Flutter plugins in the pubspec.yaml, creates platform injection
-/// registries classes and add them to the build dependencies.
-///
-/// Returns whether any Flutter plugins are added and whether they changed.
-InjectPluginsResult injectPlugins({String directory}) {
+/// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
+void injectPlugins({String directory}) {
   directory ??= fs.currentDirectory.path;
   final List<Plugin> plugins = _findPlugins(directory);
-  final bool hasPluginsChanged = _writeFlutterPluginsList(directory, plugins);
+  final bool changed = _writeFlutterPluginsList(directory, plugins);
   if (fs.isDirectorySync(fs.path.join(directory, 'android')))
-    _writeAndroidPluginRegistry(directory, plugins);
-  if (fs.isDirectorySync(fs.path.join(directory, 'ios')))
-    _writeIOSPluginRegistry(directory, plugins);
-  return new InjectPluginsResult(hasPlugin: plugins.isNotEmpty, hasChanged: hasPluginsChanged);
+    _writeAndroidPluginRegistrant(directory, plugins);
+  if (fs.isDirectorySync(fs.path.join(directory, 'ios'))) {
+    _writeIOSPluginRegistrant(directory, plugins);
+    if (changed)
+      _ensurePodInstallIsExecutedOnNextIosBuild(directory);
+  }
+}
+
+void _ensurePodInstallIsExecutedOnNextIosBuild(String directory) {
+  final File manifest = fs.file(
+    fs.path.join(directory, 'ios', 'Pods', 'Manifest.lock'),
+  );
+  if (manifest.existsSync())
+    manifest.deleteSync();
+}
+
+/// Returns whether the Flutter project at the specified [directory]
+/// has any plugin dependencies.
+bool hasPlugins({String directory}) {
+  directory ??= fs.currentDirectory.path;
+  return _findPlugins(directory).isNotEmpty;
 }

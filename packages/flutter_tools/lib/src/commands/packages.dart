@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/plugins.dart';
+
 import '../base/common.dart';
 import '../base/os.dart';
 import '../dart/pub.dart';
@@ -75,6 +77,7 @@ class PackagesGetCommand extends FlutterCommand {
       offline: argResults['offline'],
       checkLastModified: false,
     );
+    injectPlugins(directory: target);
   }
 }
 

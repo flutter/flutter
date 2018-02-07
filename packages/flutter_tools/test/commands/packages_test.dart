@@ -29,9 +29,7 @@ void main() {
       temp.deleteSync(recursive: true);
     });
 
-    Future<String> runCommand(String verb, { List<String> args }) async {
-      final String projectPath = await createProject(temp);
-
+    Future<Null> runCommandIn(String projectPath, String verb, { List<String> args }) async {
       final PackagesCommand command = new PackagesCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
@@ -41,31 +39,70 @@ void main() {
       commandArgs.add(projectPath);
 
       await runner.run(commandArgs);
-
-      return projectPath;
     }
 
     void expectExists(String projectPath, String relPath) {
       expect(fs.isFileSync(fs.path.join(projectPath, relPath)), true);
     }
 
-    // Verify that we create a project that is well-formed.
-    testUsingContext('get', () async {
-      final String projectPath = await runCommand('get');
-      expectExists(projectPath, 'lib/main.dart');
+    void expectDependenciesToHaveBeenResolved(String projectPath) {
       expectExists(projectPath, '.packages');
+      expectExists(projectPath, 'pubspec.lock');
+    }
+
+    void expectPluginsToHaveBeenInjected(String projectPath) {
+      expectExists(projectPath, 'ios/Runner/GeneratedPluginRegistrant.h');
+      expectExists(projectPath, 'ios/Runner/GeneratedPluginRegistrant.m');
+      expectExists(projectPath, 'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java');
+    }
+
+    void removeGitIgnoredFiles(String projectPath) {
+      for (String path in <String>[
+        '.packages',
+        'pubspec.lock',
+        'ios/Runner/GeneratedPluginRegistrant.h',
+        'ios/Runner/GeneratedPluginRegistrant.m',
+        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+      ]) {
+        final File file = fs.file(fs.path.join(projectPath, path));
+        if (file.existsSync())
+          file.deleteSync();
+      }
+    }
+
+    testUsingContext('get', () async {
+      final String projectPath = await createProject(temp);
+      expectExists(projectPath, 'lib/main.dart'); // Sanity check.
+      expectExists(projectPath, 'lib/main.dart'); // Sanity check.
+
+      removeGitIgnoredFiles(projectPath);
+
+      await runCommandIn(projectPath, 'get');
+
+      expectDependenciesToHaveBeenResolved(projectPath);
+      expectPluginsToHaveBeenInjected(projectPath);
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('get --offline', () async {
-      final String projectPath = await runCommand('get', args: <String>['--offline']);
-      expectExists(projectPath, 'lib/main.dart');
-      expectExists(projectPath, '.packages');
-    });
+      final String projectPath = await createProject(temp);
+
+      removeGitIgnoredFiles(projectPath);
+
+      await runCommandIn(projectPath, 'get', args: <String>['--offline']);
+
+      expectDependenciesToHaveBeenResolved(projectPath);
+      expectPluginsToHaveBeenInjected(projectPath);
+    }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('upgrade', () async {
-      final String projectPath = await runCommand('upgrade');
-      expectExists(projectPath, 'lib/main.dart');
-      expectExists(projectPath, '.packages');
+      final String projectPath = await createProject(temp);
+
+      removeGitIgnoredFiles(projectPath);
+
+      await runCommandIn(projectPath, 'upgrade');
+
+      expectDependenciesToHaveBeenResolved(projectPath);
+      expectPluginsToHaveBeenInjected(projectPath);
     }, timeout: allowForRemotePubInvocation);
   });
 

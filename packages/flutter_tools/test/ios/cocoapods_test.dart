@@ -194,7 +194,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       await cocoaPodsUnderTest.processPods(
           appIosDir: projectUnderTest,
           iosEngineDir: 'engine/path',
-          pluginOrFlutterPodChanged: true
+          flutterPodChanged: true
       );
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
@@ -223,7 +223,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       await cocoaPodsUnderTest.processPods(
           appIosDir: projectUnderTest,
           iosEngineDir: 'engine/path',
-          pluginOrFlutterPodChanged: false
+          flutterPodChanged: false
       );
       verifyNever(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
