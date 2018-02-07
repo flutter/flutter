@@ -90,7 +90,7 @@ void main() {
           'method': method,
           'params': params
         };
-        final String json = JSON.encode([req]);
+        final String json = JSON.encode(<Map<String, dynamic>>[req]);
         print('run:stdin: $json');
         run.stdin.writeln(json);
         final Map<String, dynamic> result = await response.future;
@@ -99,8 +99,8 @@ void main() {
       }
 
       print('test: sending two hot reloads...');
-      final Future<dynamic> hotReload1 = sendRequest('app.restart', { 'appId': appId, 'fullRestart': false });
-      final Future<dynamic> hotReload2 = sendRequest('app.restart', { 'appId': appId, 'fullRestart': false });
+      final Future<dynamic> hotReload1 = sendRequest('app.restart', <String, dynamic>{ 'appId': appId, 'fullRestart': false });
+      final Future<dynamic> hotReload2 = sendRequest('app.restart', <String, dynamic>{ 'appId': appId, 'fullRestart': false });
       final Future<List<dynamic>> reloadRequests = Future.wait<dynamic>(<Future<dynamic>>[hotReload1, hotReload2]);
       final dynamic results = await Future.any<dynamic>(<Future<dynamic>>[run.exitCode, reloadRequests]);
 
@@ -108,8 +108,8 @@ void main() {
         throw 'App crashed during hot reloads.';
       
       final List<dynamic> responses = results;
-      final List errorResponses = responses.where((dynamic r) => r['error'] != null).toList();
-      final List successResponses = responses.where((dynamic r) => r['error'] == null && r['result'] != null && r['result']['code'] == 0).toList();
+      final List<dynamic> errorResponses = responses.where((dynamic r) => r['error'] != null).toList();
+      final List<dynamic> successResponses = responses.where((dynamic r) => r['error'] == null && r['result'] != null && r['result']['code'] == 0).toList();
 
       if (errorResponses.length != 1)
         throw 'Did not receive the expected (exactly one) hot reload error response.';
@@ -119,11 +119,11 @@ void main() {
       if (successResponses.length != 1)
         throw 'Did not receive the expected (exactly one) successful hot reload response.';
 
-      final dynamic hotReload3 = await sendRequest('app.restart', { 'appId': appId, 'fullRestart': false });
+      final dynamic hotReload3 = await sendRequest('app.restart', <String, dynamic>{ 'appId': appId, 'fullRestart': false });
       if (hotReload3['error'] != null)
         throw 'Received an error response from a hot reload after all other hot reloads had completed.';
       
-      sendRequest('app.stop', { 'appId': appId });
+      sendRequest('app.stop', <String, dynamic>{ 'appId': appId });
       final int result = await run.exitCode;
       if (result != 0)
         throw 'Received unexpected exit code $result from run process.';
