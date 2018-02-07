@@ -38,7 +38,7 @@ void main() {
 
       ValidationMessage message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
-      expect(message.message, 'VS Code at test/data/vscode/application');
+      expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
 
       message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Dart Code '));
@@ -53,7 +53,7 @@ void main() {
 
       ValidationMessage message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
-      expect(message.message, 'VS Code at test/data/vscode/application');
+      expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
 
       message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Dart Code '));
