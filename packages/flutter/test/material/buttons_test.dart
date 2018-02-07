@@ -200,10 +200,19 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
+    final Rect expectedClipRect = new Rect.fromLTRB(356.0, 282.0, 444.0, 318.0);
+    final Path expectedClipPath = new Path()
+     ..addRRect(new RRect.fromRectAndRadius(
+         expectedClipRect,
+         const Radius.circular(2.0),
+     ));
     expect(
       Material.of(tester.element(find.byType(MaterialButton))),
       paints
-        ..clipRRect(rrect: new RRect.fromLTRBR(356.0, 282.0, 444.0, 318.0, const Radius.circular(2.0)))
+        ..clipPath(pathMatcher: coversSameAreaAs(
+            expectedClipPath,
+            areaToCompare: expectedClipRect.inflate(10.0),
+        ))
         ..circle(color: directSplashColor)
         ..rect(color: directHighlightColor)
     );
@@ -235,7 +244,10 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(MaterialButton))),
       paints
-        ..clipRRect(rrect: new RRect.fromLTRBR(356.0, 282.0, 444.0, 318.0, const Radius.circular(2.0)))
+        ..clipPath(pathMatcher: coversSameAreaAs(
+            expectedClipPath,
+            areaToCompare: expectedClipRect.inflate(10.0),
+        ))
         ..circle(color: themeSplashColor1)
         ..rect(color: themeHighlightColor1)
     );

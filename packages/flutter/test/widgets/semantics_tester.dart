@@ -42,6 +42,7 @@ class TestSemantics {
     this.decreasedValue: '',
     this.hint: '',
     this.textDirection,
+    this.nextNodeId,
     this.rect,
     this.transform,
     this.textSelection,
@@ -68,6 +69,7 @@ class TestSemantics {
     this.decreasedValue: '',
     this.hint: '',
     this.textDirection,
+    this.nextNodeId,
     this.transform,
     this.textSelection,
     this.children: const <TestSemantics>[],
@@ -103,6 +105,7 @@ class TestSemantics {
     this.increasedValue: '',
     this.decreasedValue: '',
     this.textDirection,
+    this.nextNodeId,
     this.rect,
     Matrix4 transform,
     this.textSelection,
@@ -168,6 +171,10 @@ class TestSemantics {
   /// label is present on the [SemanticsNode], a [SemanticsNode.textDirection]
   /// is also set.
   final TextDirection textDirection;
+
+  /// The ID of the node that is next in the semantics traversal order after
+  /// this node.
+  final int nextNodeId;
 
   /// The bounding box for this node in its coordinate system.
   ///
@@ -250,6 +257,8 @@ class TestSemantics {
       return fail('expected node id $id to have hint "$hint" but found hint "${nodeData.hint}".');
     if (textDirection != null && textDirection != nodeData.textDirection)
       return fail('expected node id $id to have textDirection "$textDirection" but found "${nodeData.textDirection}".');
+    if (nextNodeId != null && nextNodeId != nodeData.nextNodeId)
+      return fail('expected node id $id to have nextNodeId "$nextNodeId" but found "${nodeData.nextNodeId}".');
     if ((nodeData.label != '' || nodeData.value != '' || nodeData.hint != '' || node.increasedValue != '' || node.decreasedValue != '') && nodeData.textDirection == null)
       return fail('expected node id $id, which has a label, value, or hint, to have a textDirection, but it did not.');
     if (!ignoreRect && rect != nodeData.rect)
@@ -301,6 +310,8 @@ class TestSemantics {
       buf.writeln('$indent  hint: \'$hint\',');
     if (textDirection != null)
       buf.writeln('$indent  textDirection: $textDirection,');
+    if (nextNodeId != null)
+      buf.writeln('$indent  nextNodeId: $nextNodeId,');
     if (textSelection?.isValid == true)
       buf.writeln('$indent  textSelection:\n[${textSelection.start}, ${textSelection.end}],');
     if (rect != null)
@@ -483,8 +494,14 @@ class SemanticsTester {
       buf.writeln('  flags: ${_flagsToSemanticsFlagExpression(nodeData.flags)},');
     if (nodeData.actions != 0)
       buf.writeln('  actions: ${_actionsToSemanticsActionExpression(nodeData.actions)},');
-    if (node.label != null && node.label.isNotEmpty)
-      buf.writeln('  label: r\'${node.label}\',');
+    if (node.label != null && node.label.isNotEmpty) {
+      final String escapedLabel = node.label.replaceAll('\n', r'\n');
+      if (escapedLabel == node.label) {
+        buf.writeln('  label: r\'$escapedLabel\',');
+      } else {
+        buf.writeln('  label: \'$escapedLabel\',');
+      }
+    }
     if (node.value != null && node.value.isNotEmpty)
       buf.writeln('  value: r\'${node.value}\',');
     if (node.increasedValue != null && node.increasedValue.isNotEmpty)
@@ -495,6 +512,8 @@ class SemanticsTester {
       buf.writeln('  hint: r\'${node.hint}\',');
     if (node.textDirection != null)
       buf.writeln('  textDirection: ${node.textDirection},');
+    if (node.nextNodeId != null)
+      buf.writeln('  nextNodeId: ${node.nextNodeId},');
 
     if (node.hasChildren) {
       buf.writeln('  children: <TestSemantics>[');

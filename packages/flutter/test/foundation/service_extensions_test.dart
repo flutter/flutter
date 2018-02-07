@@ -193,11 +193,11 @@ void main() {
     console.clear();
   });
 
-  test('Service extensions - debugDumpSemanticsTreeInTraversalOrder', () async {
+  test('Service extensions - debugDumpSemanticsTreeInGeometricOrder', () async {
     Map<String, String> result;
 
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
+    result = await binding.testExtension('debugDumpSemanticsTreeInGeometricOrder', <String, String>{});
     expect(result, <String, String>{});
     expect(console, <String>['Semantics not collected.']);
     console.clear();
