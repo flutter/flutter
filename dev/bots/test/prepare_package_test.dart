@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io' hide Platform;
+import 'dart:typed_data';
 
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -20,6 +22,39 @@ void main() {
       operatingSystem: platformName,
       environment: <String, String>{},
     );
+    group('ProcessRunner for $platform', () {
+      test('Defaults to local process manager, can actually run a command', () async {
+        final ProcessRunner processRunner =
+            new ProcessRunner(subprocessOutput: false, platform: platform);
+        // We want to test that we can actually run a process and obtain stdout.
+        // The command 'echo test' works on all platforms.
+        final String output = await processRunner.runProcess(<String>['echo', 'test']);
+        expect(output, equals('test'));
+      });
+      test('Returns stdout', () async {
+        final FakeProcessManager fakeProcessManager = new FakeProcessManager();
+        fakeProcessManager.fakeResults = <String, List<ProcessResult>>{
+          'echo test': <ProcessResult>[new ProcessResult(0, 0, 'output', 'error')],
+        };
+        final ProcessRunner processRunner = new ProcessRunner(
+            subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
+        final String output = await processRunner.runProcess(<String>['echo', 'test']);
+        expect(output, equals('output'));
+      });
+      test('Throws on process failure', () async {
+        final FakeProcessManager fakeProcessManager = new FakeProcessManager();
+        fakeProcessManager.fakeResults = <String, List<ProcessResult>>{
+          'echo test': <ProcessResult>[new ProcessResult(0, -1, 'output', 'error')],
+        };
+        final ProcessRunner processRunner = new ProcessRunner(
+            subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
+        expect(
+            expectAsync1((List<String> commandLine) async {
+              return processRunner.runProcess(commandLine);
+            })(<String>['echo', 'test']),
+            throwsA(const isInstanceOf<ProcessRunnerException>()));
+      });
+    });
     group('ArchiveCreator for $platformName', () {
       ArchiveCreator creator;
       Directory tmpDir;
@@ -28,6 +63,10 @@ void main() {
       final List<List<String>> args = <List<String>>[];
       final List<Map<Symbol, dynamic>> namedArgs = <Map<Symbol, dynamic>>[];
       String flutter;
+
+      Future<Uint8List> fakeHttpReader(Uri url, {Map<String, String> headers}) {
+        return new Future<Uint8List>.value(new Uint8List(0));
+      }
 
       setUp(() async {
         processManager = new FakeProcessManager();
@@ -44,6 +83,7 @@ void main() {
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
+          httpReader: fakeHttpReader,
         );
         flutter = path.join(creator.flutterRoot.absolute.path, 'bin', 'flutter');
       });
@@ -119,9 +159,7 @@ void main() {
           '$flutter precache': null,
           '$flutter ide-config': null,
           '$flutter create --template=app ${createBase}app': null,
-          // TODO(gspencer): Re-enable this when package works again:
-          // https://github.com/flutter/flutter/issues/14448
-          // '$flutter create --template=package ${createBase}package': null,
+          '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
           'git clean -f -X **/.packages': null,
         });
@@ -141,6 +179,7 @@ void main() {
           processManager: processManager,
           subprocessOutput: false,
           platform: platform,
+          httpReader: fakeHttpReader,
         );
         await creator.initializeRepo();
         await creator.createArchive();
