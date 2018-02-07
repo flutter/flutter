@@ -1249,7 +1249,7 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   @override
   void addAll(Map<String, dynamic> other) => _map.addAll(other);
   @override
-  // TODO: Dart 2.0 requires this method to be implemented.
+  // TODO(srawlins): Dart 2.0 requires this method to be implemented.
   // ignore: override_on_non_overriding_method
   void addEntries(Iterable<Object> entries) {
     // Change Iterable<Object> to Iterable<MapEntry<K, V>> when
@@ -1257,7 +1257,7 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
     throw new UnimplementedError('addEntries');
   }
   @override
-  // TODO: Dart 2.0 requires this method to be implemented.
+  // TODO(srawlins): Dart 2.0 requires this method to be implemented.
   // ignore: override_on_non_overriding_method
   Map<K2, V2> cast<K2, V2>() {
     throw new UnimplementedError('cast');
@@ -1269,7 +1269,7 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   @override
   bool containsKey(Object k) => _map.containsKey(k);
   @override
-  // TODO: Dart 2.0 requires this method to be implemented.
+  // TODO(srawlins): Dart 2.0 requires this method to be implemented.
   // ignore: override_on_non_overriding_getter
   Iterable<Null> get entries {
     // Change Iterable<Null> to Iterable<MapEntry<K, V>> when
@@ -1279,7 +1279,7 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   @override
   void forEach(void f(String key, dynamic value)) => _map.forEach(f);
   @override
-  // TODO: Dart 2.0 requires this method to be implemented.
+  // TODO(srawlins): Dart 2.0 requires this method to be implemented.
   // ignore: override_on_non_overriding_method
   Map<K2, V2> map<K2, V2>(Object transform(String key, dynamic value)) {
     // Change Object to MapEntry<K2, V2> when
@@ -1291,26 +1291,26 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   @override
   void remove(Object key) => _map.remove(key);
   @override
-  // TODO: Dart 2.0 requires this method to be implemented.
+  // TODO(srawlins): Dart 2.0 requires this method to be implemented.
   // ignore: override_on_non_overriding_method
   void removeWhere(bool test(String key, dynamic value)) {
     throw new UnimplementedError('removeWhere');
   }
   @override
-  // TODO: Dart 2.0 requires this method to be implemented.
+  // TODO(srawlins): Dart 2.0 requires this method to be implemented.
   // ignore: override_on_non_overriding_method
   Map<K2, V2> retype<K2, V2>() {
     throw new UnimplementedError('retype');
   }
   @override
-  // TODO: Dart 2.0 requires this method to be implemented.
+  // TODO(srawlins): Dart 2.0 requires this method to be implemented.
   // ignore: override_on_non_overriding_method
   dynamic update(String key, dynamic update(dynamic value),
       { dynamic ifAbsent() }) {
     throw new UnimplementedError('update');
   }
   @override
-  // TODO: Dart 2.0 requires this method to be implemented.
+  // TODO(srawlins): Dart 2.0 requires this method to be implemented.
   // ignore: override_on_non_overriding_method
   void updateAll(dynamic update(String key, dynamic value)) {
     throw new UnimplementedError('updateAll');
