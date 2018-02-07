@@ -74,11 +74,11 @@ Branch fromBranchName(String name) {
 /// properly without dropping any.
 class ProcessRunner {
   ProcessRunner({
-    this.processManager: const LocalProcessManager(),
+    ProcessManager processManager,
     this.subprocessOutput: true,
     this.defaultWorkingDirectory,
     this.platform: const LocalPlatform(),
-  }) {
+  }) : processManager = processManager ?? const LocalProcessManager() {
     environment = new Map<String, String>.from(platform.environment);
   }
 
@@ -167,6 +167,8 @@ class ProcessRunner {
   }
 }
 
+typedef Future<Uint8List> HttpReader(Uri url, {Map<String, String> headers});
+
 /// Creates a pre-populated Flutter archive from a git repo.
 class ArchiveCreator {
   /// [tempDir] is the directory to use for creating the archive.  The script
@@ -185,8 +187,10 @@ class ArchiveCreator {
     ProcessManager processManager,
     bool subprocessOutput: true,
     this.platform: const LocalPlatform(),
+    HttpReader httpReader,
   }) : assert(revision.length == 40),
        flutterRoot = new Directory(path.join(tempDir.path, 'flutter')),
+       httpReader = httpReader ?? http.readBytes,
        _processRunner = new ProcessRunner(
          processManager: processManager,
          subprocessOutput: subprocessOutput,
@@ -200,14 +204,31 @@ class ArchiveCreator {
     _processRunner.environment['PUB_CACHE'] = path.join(flutterRoot.absolute.path, '.pub-cache');
   }
 
+  /// The platform to use for the environment and determining which platform we're running on.
   final Platform platform;
+
+  /// The branch to build the archive for.
   final Branch branch;
+
+  /// The git revision hash to build the archive for.
   final String revision;
+
+  /// The flutter root directory in the [tempDir].
   final Directory flutterRoot;
+
+  /// The temporary directory used to build the archive in.
   final Directory tempDir;
+
+  /// The directory to write the output file to.
   final Directory outputDir;
+
   final Uri _minGitUri = Uri.parse(MINGIT_FOR_WINDOWS_URL);
   final ProcessRunner _processRunner;
+
+  /// Used to tell the [ArchiveCreator] which function to use for reading
+  /// bytes from a URL. Used in tests to inject a fake reader. Defaults to
+  /// [http.readBytes].
+  final HttpReader httpReader;
 
   File _outputFile;
   String _version;
@@ -268,7 +289,7 @@ class ArchiveCreator {
     if (!platform.isWindows) {
       return;
     }
-    final Uint8List data = await http.readBytes(_minGitUri);
+    final Uint8List data = await httpReader(_minGitUri);
     final File gitFile = new File(path.join(tempDir.absolute.path, 'mingit.zip'));
     await gitFile.writeAsBytes(data, flush: true);
 
@@ -289,10 +310,7 @@ class ArchiveCreator {
     // Create each of the templates, since they will call 'pub get' on
     // themselves when created, and this will warm the cache with their
     // dependencies too.
-    // TODO(gspencer): 'package' is broken on dev branch right now!
-    // Add it back in once the following is fixed:
-    // https://github.com/flutter/flutter/issues/14448
-    for (String template in <String>['app', 'plugin']) {
+    for (String template in <String>['app', 'package', 'plugin']) {
       final String createName = path.join(tempDir.path, 'create_$template');
       await _runFlutter(
         <String>['create', '--template=$template', createName],
@@ -503,8 +521,19 @@ Future<Null> main(List<String> argList) async {
         "the current directory. If the output directory doesn't exist, it, and "
         'the path to it, will be created.',
   );
+  argParser.addFlag(
+    'help',
+    defaultsTo: false,
+    negatable: false,
+    help: 'Print help for this command.',
+  );
 
   final ArgResults args = argParser.parse(argList);
+
+  if (args['help']) {
+    print(argParser.usage);
+    exit(0);
+  }
 
   void errorExit(String message, {int exitCode = -1}) {
     stderr.write('Error: $message\n\n');
