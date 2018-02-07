@@ -914,7 +914,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// Returns a [Future] that completes to the `result` value passed to [pop]
   /// when the pushed route is popped off the navigator.
-  Future<Object> push(Route<Object> route) {
+  Future<Object> push(Route<Object> route, { VoidCallback onPushed }) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; }());
     assert(route != null);
@@ -924,7 +924,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       route._navigator = this;
       route.install(_currentOverlayEntry);
       _history.add(route);
-      route.didPush();
+      route.didPush().whenCompleteOrCancel(() {
+        if (onPushed != null)
+          onPushed();
+      });
       route.didChangeNext(null);
       if (oldRoute != null)
         oldRoute.didChangeNext(route);
