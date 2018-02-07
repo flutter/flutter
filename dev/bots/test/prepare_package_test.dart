@@ -23,14 +23,6 @@ void main() {
       environment: <String, String>{},
     );
     group('ProcessRunner for $platform', () {
-      test('Defaults to local process manager, can actually run a command', () async {
-        final ProcessRunner processRunner =
-            new ProcessRunner(subprocessOutput: false, platform: platform);
-        // We want to test that we can actually run a process and obtain stdout.
-        // The command 'echo test' works on all platforms.
-        final String output = await processRunner.runProcess(<String>['echo', 'test']);
-        expect(output, equals('test'));
-      });
       test('Returns stdout', () async {
         final FakeProcessManager fakeProcessManager = new FakeProcessManager();
         fakeProcessManager.fakeResults = <String, List<ProcessResult>>{
