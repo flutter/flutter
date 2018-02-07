@@ -13,11 +13,15 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:platform/platform.dart' show Platform, LocalPlatform;
 
-const String CHROMIUM_REPO =
+const String chromiumRepo =
     'https://chromium.googlesource.com/external/github.com/flutter/flutter';
-const String GITHUB_REPO = 'https://github.com/flutter/flutter.git';
-const String MINGIT_FOR_WINDOWS_URL = 'https://storage.googleapis.com/flutter_infra/mingit/'
+const String githubRepo = 'https://github.com/flutter/flutter.git';
+const String mingitForWindowsUrl = 'https://storage.googleapis.com/flutter_infra/mingit/'
     '603511c649b00bbef0a6122a827ac419b656bc19/mingit.zip';
+const String gsBase = 'gs://flutter_infra';
+const String releaseFolder = '/releases';
+const String gsReleaseFolder = '$gsBase$releaseFolder';
+const String baseUrl = 'https://storage.googleapis.com/flutter_infra';
 
 /// Exception class for when a process fails to run, so we can catch
 /// it and provide something more readable than a stack trace.
@@ -204,13 +208,17 @@ class ArchiveCreator {
     _processRunner.environment['PUB_CACHE'] = path.join(flutterRoot.absolute.path, '.pub-cache');
   }
 
-  /// The platform to use for the environment and determining which platform we're running on.
+  /// The platform to use for the environment and determining which
+  /// platform we're running on.
   final Platform platform;
 
-  /// The branch to build the archive for.
+  /// The branch to build the archive for.  The branch must contain [revision].
   final Branch branch;
 
-  /// The git revision hash to build the archive for.
+  /// The git revision hash to build the archive for. This revision has
+  /// to be available in the [branch], although it doesn't have to be
+  /// at HEAD, since we clone the branch and then reset to this revision
+  /// to create the archive.
   final String revision;
 
   /// The flutter root directory in the [tempDir].
@@ -222,7 +230,7 @@ class ArchiveCreator {
   /// The directory to write the output file to.
   final Directory outputDir;
 
-  final Uri _minGitUri = Uri.parse(MINGIT_FOR_WINDOWS_URL);
+  final Uri _minGitUri = Uri.parse(mingitForWindowsUrl);
   final ProcessRunner _processRunner;
 
   /// Used to tell the [ArchiveCreator] which function to use for reading
@@ -276,12 +284,12 @@ class ArchiveCreator {
     // We want the user to start out the in the specified branch instead of a
     // detached head. To do that, we need to make sure the branch points at the
     // desired revision.
-    await _runGit(<String>['clone', '-b', branchName, CHROMIUM_REPO], workingDirectory: tempDir);
+    await _runGit(<String>['clone', '-b', branchName, chromiumRepo], workingDirectory: tempDir);
     await _runGit(<String>['reset', '--hard', revision]);
 
     // Make the origin point to github instead of the chromium mirror.
     await _runGit(<String>['remote', 'remove', 'origin']);
-    await _runGit(<String>['remote', 'add', 'origin', GITHUB_REPO]);
+    await _runGit(<String>['remote', 'add', 'origin', githubRepo]);
   }
 
   /// Retrieve the MinGit executable from storage and unpack it.
@@ -399,11 +407,6 @@ class ArchivePublisher {
          subprocessOutput: subprocessOutput,
        );
 
-  static String gsBase = 'gs://flutter_infra';
-  static String releaseFolder = '/releases';
-  static String gsReleaseFolder = '$gsBase$releaseFolder';
-  static String baseUrl = 'https://storage.googleapis.com/flutter_infra';
-
   final Platform platform;
   final String platformName;
   final String metadataGsPath;
@@ -516,10 +519,9 @@ Future<Null> main(List<String> argList) async {
   argParser.addFlag(
     'publish',
     defaultsTo: false,
-    help: 'The path to the directory where the output archive should be '
-        'written. If --output is not specified, the archive will be written to '
-        "the current directory. If the output directory doesn't exist, it, and "
-        'the path to it, will be created.',
+    help: 'If set, will publish the archive to Google Cloud Storage upon '
+        'successful creation of the archive. Will publish under this '
+        'directory: $baseUrl$releaseFolder',
   );
   argParser.addFlag(
     'help',

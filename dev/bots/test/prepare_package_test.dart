@@ -28,7 +28,7 @@ void main() {
             new ProcessRunner(subprocessOutput: false, platform: platform);
         // We want to test that we can actually run a process and obtain stdout.
         // The command 'echo test' works on all platforms.
-        final String output = await processRunner.runProcess(['echo', 'test']);
+        final String output = await processRunner.runProcess(<String>['echo', 'test']);
         expect(output, equals('test'));
       });
       test('Returns stdout', () async {
@@ -38,7 +38,7 @@ void main() {
         };
         final ProcessRunner processRunner = new ProcessRunner(
             subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
-        final String output = await processRunner.runProcess(['echo', 'test']);
+        final String output = await processRunner.runProcess(<String>['echo', 'test']);
         expect(output, equals('output'));
       });
       test('Throws on process failure', () async {
