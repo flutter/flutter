@@ -211,6 +211,16 @@ Future<Process> runDetached(List<String> cmd) {
   return proc;
 }
 
+Future<Process> runDetachedWithIO(List<String> cmd, {
+  Map<String, String> environment
+}) async {
+  _traceCommand(cmd);
+  return await processManager.start(
+    cmd,
+    mode: ProcessStartMode.DETACHED_WITH_STDIO,
+  );
+}
+
 Future<RunResult> runAsync(List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter: false,

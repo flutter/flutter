@@ -374,9 +374,8 @@ void main() {
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
-      final List<String> commands = loggingProcessManager.commands;
-      expect(commands, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
-      expect(commands, contains('--offline'));
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(loggingProcessManager.commands.first, contains('--offline'));
     },
       timeout: allowForCreateFlutterProject,
       overrides: <Type, Generator>{
@@ -391,9 +390,8 @@ void main() {
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--pub', projectDir.path]);
-      final List<String> commands = loggingProcessManager.commands;
-      expect(commands, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
-      expect(commands, isNot(contains('--offline')));
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(loggingProcessManager.commands.first, isNot(contains('--offline')));
     },
       timeout: allowForCreateFlutterProject,
       overrides: <Type, Generator>{
@@ -488,9 +486,9 @@ Future<Null> _runFlutterTest(Directory workingDir, {String target}) async {
 class MockFlutterVersion extends Mock implements FlutterVersion {}
 
 /// A ProcessManager that invokes a real process manager, but keeps
-/// the last commands sent to it.
+/// track of all commands sent to it.
 class LoggingProcessManager extends LocalProcessManager {
-  List<String> commands;
+  List<List<String>> commands = <List<String>>[];
 
   @override
   Future<Process> start(
@@ -501,7 +499,7 @@ class LoggingProcessManager extends LocalProcessManager {
       bool runInShell: false,
       ProcessStartMode mode: ProcessStartMode.NORMAL,
     }) {
-    commands = command;
+    commands.add(command);
     return super.start(
       command,
       workingDirectory: workingDirectory,

@@ -43,10 +43,7 @@ abstract class Logger {
   Status startProgress(String message, { String progressId, bool expectSlowOperation: false });
 }
 
-class Status {
-  void stop() { }
-  void cancel() { }
-}
+class Status extends Spinner {}
 
 typedef void _FinishCallback();
 
@@ -252,25 +249,27 @@ enum _LogType {
   trace
 }
 
-class _AnsiStatus extends Status {
-  _AnsiStatus(this.message, this.expectSlowOperation, this.onFinish) {
-    stopwatch = new Stopwatch()..start();
-
-    stdout.write('${message.padRight(52)}     ');
-    stdout.write('${_progress[0]}');
-
-    timer = new Timer.periodic(const Duration(milliseconds: 100), _callback);
+class Spinner {
+  Spinner();
+  /// Use this factory to generate AnsiSpinner or Spinner as necessary, and
+  /// start them.
+  factory Spinner.forContextTerminal() {
+    if (terminal.supportsColor)
+      return new AnsiSpinner()..start();
+    return new Spinner()..start();
   }
+  void start() {}
+  void stop() {}
+  void cancel() {}
+}
+
+/// Just a spinner, nothing more, nothing less.
+class AnsiSpinner extends Spinner {
+  int index = 0;
+  bool live = true;
+  Timer timer;
 
   static final List<String> _progress = <String>['-', r'\', '|', r'/', '-', r'\', '|', '/'];
-
-  final String message;
-  final bool expectSlowOperation;
-  final _FinishCallback onFinish;
-  Stopwatch stopwatch;
-  Timer timer;
-  int index = 1;
-  bool live = true;
 
   void _callback(Timer timer) {
     stdout.write('\b${_progress[index]}');
@@ -278,20 +277,50 @@ class _AnsiStatus extends Status {
   }
 
   @override
+  void start() {
+    stdout.write(' ');
+    _callback(null);
+    timer = new Timer.periodic(const Duration(milliseconds: 100), _callback);
+  }
+
+  @override
+  void stop() {
+    if (!live)
+      return;
+    live = false;
+    timer.cancel();
+    stdout.write('\b \b');
+  }
+
+  @override
+  void cancel() => stop();
+}
+
+class _AnsiStatus extends Status with AnsiSpinner {
+  _AnsiStatus(this.message, this.expectSlowOperation, this.onFinish) {
+    stopwatch = new Stopwatch()..start();
+    stdout.write('${message.padRight(52)}     ');
+    start();
+  }
+
+  Stopwatch stopwatch;
+  final String message;
+  final bool expectSlowOperation;
+  final _FinishCallback onFinish;
+
+  @override
   void stop() {
     onFinish();
 
     if (!live)
       return;
-    live = false;
+    super.stop();
 
     if (expectSlowOperation) {
       print('\b\b\b\b\b${getElapsedAsSeconds(stopwatch.elapsed).padLeft(5)}');
     } else {
       print('\b\b\b\b\b${getElapsedAsMilliseconds(stopwatch.elapsed).padLeft(5)}');
     }
-
-    timer.cancel();
   }
 
   @override
@@ -300,9 +329,8 @@ class _AnsiStatus extends Status {
 
     if (!live)
       return;
-    live = false;
+    super.cancel();
 
-    print('\b ');
-    timer.cancel();
+    print(' ');
   }
 }

@@ -233,7 +233,7 @@ Future<String> _doctorText() async {
 
     appContext.setVariable(Logger, logger);
 
-    await appContext.runInZone(() => doctor.diagnose());
+    await appContext.runInZone(() => doctor.diagnose(verbose: true));
 
     return logger.statusText;
   } catch (error, trace) {
