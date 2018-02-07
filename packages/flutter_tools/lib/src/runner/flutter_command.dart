@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/plugins.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/strings.dart';
 
@@ -272,8 +273,10 @@ abstract class FlutterCommand extends Command<Null> {
     if (shouldUpdateCache)
       await cache.updateAll();
 
-    if (shouldRunPub)
+    if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name));
+      injectPlugins();
+    }
 
     setupApplicationPackages();
 
