@@ -285,16 +285,16 @@ void main() {
     Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color;
 
     // A selected ListTile's leading, trailing, and text get the primary color by default
-    await(tester.pumpWidget(buildFrame(selected: true)));
-    await(tester.pump(const Duration(milliseconds: 300))); // DefaultTextStyle changes animate
+    await tester.pumpWidget(buildFrame(selected: true));
+    await tester.pump(const Duration(milliseconds: 300)); // DefaultTextStyle changes animate
     expect(iconColor(leadingKey), theme.primaryColor);
     expect(iconColor(trailingKey), theme.primaryColor);
     expect(textColor(titleKey), theme.primaryColor);
     expect(textColor(subtitleKey), theme.primaryColor);
 
     // A selected ListTile's leading, trailing, and text get the ListTileTheme's selectedColor
-    await(tester.pumpWidget(buildFrame(selected: true, selectedColor: green)));
-    await(tester.pump(const Duration(milliseconds: 300))); // DefaultTextStyle changes animate
+    await tester.pumpWidget(buildFrame(selected: true, selectedColor: green));
+    await tester.pump(const Duration(milliseconds: 300)); // DefaultTextStyle changes animate
     expect(iconColor(leadingKey), green);
     expect(iconColor(trailingKey), green);
     expect(textColor(titleKey), green);
@@ -302,16 +302,16 @@ void main() {
 
     // An unselected ListTile's leading and trailing get the ListTileTheme's iconColor
     // An unselected ListTile's title texts get the ListTileTheme's textColor
-    await(tester.pumpWidget(buildFrame(iconColor: red, textColor: green)));
-    await(tester.pump(const Duration(milliseconds: 300))); // DefaultTextStyle changes animate
+    await tester.pumpWidget(buildFrame(iconColor: red, textColor: green));
+    await tester.pump(const Duration(milliseconds: 300)); // DefaultTextStyle changes animate
     expect(iconColor(leadingKey), red);
     expect(iconColor(trailingKey), red);
     expect(textColor(titleKey), green);
     expect(textColor(subtitleKey), green);
 
     // If the item is disabled it's rendered with the theme's disabled color.
-    await(tester.pumpWidget(buildFrame(enabled: false)));
-    await(tester.pump(const Duration(milliseconds: 300))); // DefaultTextStyle changes animate
+    await tester.pumpWidget(buildFrame(enabled: false));
+    await tester.pump(const Duration(milliseconds: 300)); // DefaultTextStyle changes animate
     expect(iconColor(leadingKey), theme.disabledColor);
     expect(iconColor(trailingKey), theme.disabledColor);
     expect(textColor(titleKey), theme.disabledColor);
@@ -319,8 +319,8 @@ void main() {
 
     // If the item is disabled it's rendered with the theme's disabled color.
     // Even if it's selected.
-    await(tester.pumpWidget(buildFrame(enabled: false, selected: true)));
-    await(tester.pump(const Duration(milliseconds: 300))); // DefaultTextStyle changes animate
+    await tester.pumpWidget(buildFrame(enabled: false, selected: true));
+    await tester.pump(const Duration(milliseconds: 300)); // DefaultTextStyle changes animate
     expect(iconColor(leadingKey), theme.disabledColor);
     expect(iconColor(trailingKey), theme.disabledColor);
     expect(textColor(titleKey), theme.disabledColor);

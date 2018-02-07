@@ -117,7 +117,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
     // 0.0 -> Expanded
     // 1.0 -> Collapsed to toolbar
-    final double t = (1.0 - (settings.currentExtent - settings.minExtent) / (deltaExtent)).clamp(0.0, 1.0);
+    final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0);
 
     // background image
     if (widget.background != null) {

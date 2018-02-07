@@ -225,7 +225,7 @@ class ColorSwatch<T> extends Color {
     if (other.runtimeType != runtimeType)
       return false;
     final ColorSwatch<T> typedOther = other;
-    return super==(other) && _swatch == typedOther._swatch;
+    return super == other && _swatch == typedOther._swatch;
   }
 
   @override

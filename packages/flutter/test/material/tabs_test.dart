@@ -1332,11 +1332,11 @@ void main() {
 
     // A fling in the TabBar or TabBarView, shouldn't do anything.
 
-    await(tester.fling(find.byType(TabBar), const Offset(-100.0, 0.0), 5000.0));
-    await(tester.pumpAndSettle());
+    await tester.fling(find.byType(TabBar), const Offset(-100.0, 0.0), 5000.0);
+    await tester.pumpAndSettle();
 
-    await(tester.fling(find.byType(TabBarView), const Offset(100.0, 0.0), 5000.0));
-    await(tester.pumpAndSettle());
+    await tester.fling(find.byType(TabBarView), const Offset(100.0, 0.0), 5000.0);
+    await tester.pumpAndSettle();
 
     expect(controller.index, 0);
   });
@@ -1378,17 +1378,17 @@ void main() {
 
     // A fling in the TabBar or TabBarView, shouldn't move the tab.
 
-    await(tester.fling(find.byType(TabBar), const Offset(-100.0, 0.0), 5000.0));
-    await(tester.pump(const Duration(milliseconds: 50)));
+    await tester.fling(find.byType(TabBar), const Offset(-100.0, 0.0), 5000.0);
+    await tester.pump(const Duration(milliseconds: 50));
     expect(tester.getTopLeft(find.widgetWithText(Tab, 'TAB')).dx, 0);
     expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB')).dx, 800);
-    await(tester.pumpAndSettle());
+    await tester.pumpAndSettle();
 
-    await(tester.fling(find.byType(TabBarView), const Offset(100.0, 0.0), 5000.0));
-    await(tester.pump(const Duration(milliseconds: 50)));
+    await tester.fling(find.byType(TabBarView), const Offset(100.0, 0.0), 5000.0);
+    await tester.pump(const Duration(milliseconds: 50));
     expect(tester.getTopLeft(find.widgetWithText(Tab, 'TAB')).dx, 0);
     expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB')).dx, 800);
-    await(tester.pumpAndSettle());
+    await tester.pumpAndSettle();
 
     expect(controller.index, 0);
     expect(find.text('TAB'), findsOneWidget);

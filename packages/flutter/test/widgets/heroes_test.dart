@@ -758,7 +758,7 @@ void main() {
 
     // Scroll the target upwards by 25 pixels. The Hero flight's Y coordinate
     // will be redirected from 100 to 75.
-    await(tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -25.0)));
+    await tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -25.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     final double yAt110ms = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
@@ -833,7 +833,7 @@ void main() {
     expect(yAt100ms, lessThan(200.0));
     expect(yAt100ms, greaterThan(100.0));
 
-    await(tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -400.0)));
+    await tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -400.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.byKey(routeContainerKey), findsNothing); // Scrolled off the top
