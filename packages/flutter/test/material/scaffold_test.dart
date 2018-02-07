@@ -367,8 +367,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getBottomLeft(find.byType(ButtonBar)), const Offset(10.0, 560.0));
-    expect(tester.getBottomRight(find.byType(ButtonBar)), const Offset(770.0, 560.0));
+    expect(tester.getBottomLeft(find.byType(ButtonBar)), const Offset(6.0, 568.0));
+    expect(tester.getBottomRight(find.byType(ButtonBar)), const Offset(774.0, 568.0));
   });
 
   group('back arrow', () {
@@ -637,15 +637,15 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(tester.getRect(find.byKey(appBar)), new Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
-    expect(tester.getRect(find.byKey(body)), new Rect.fromLTRB(0.0, 43.0, 800.0, 348.0));
-    expect(tester.getRect(find.byKey(floatingActionButton)), new Rect.fromLTRB(36.0, 255.0, 113.0, 332.0));
-    expect(tester.getRect(find.byKey(persistentFooterButton)), new Rect.fromLTRB(28.0, 357.0, 128.0, 447.0)); // Note: has 8px each top/bottom padding.
+    expect(tester.getRect(find.byKey(body)), new Rect.fromLTRB(0.0, 43.0, 800.0, 356.0));
+    expect(tester.getRect(find.byKey(floatingActionButton)), new Rect.fromLTRB(36.0, 263.0, 113.0, 340.0));
+    expect(tester.getRect(find.byKey(persistentFooterButton)), new Rect.fromLTRB(24.0, 365.0, 124.0, 455.0)); // Note: has 8px each top/bottom padding.
     expect(tester.getRect(find.byKey(drawer)), new Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
     expect(tester.getRect(find.byKey(bottomNavigationBar)), new Rect.fromLTRB(0.0, 515.0, 800.0, 600.0));
     expect(tester.getRect(find.byKey(insideAppBar)), new Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
-    expect(tester.getRect(find.byKey(insideBody)), new Rect.fromLTRB(20.0, 43.0, 750.0, 348.0));
-    expect(tester.getRect(find.byKey(insideFloatingActionButton)), new Rect.fromLTRB(36.0, 255.0, 113.0, 332.0));
-    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), new Rect.fromLTRB(28.0, 357.0, 128.0, 447.0));
+    expect(tester.getRect(find.byKey(insideBody)), new Rect.fromLTRB(20.0, 43.0, 750.0, 356.0));
+    expect(tester.getRect(find.byKey(insideFloatingActionButton)), new Rect.fromLTRB(36.0, 263.0, 113.0, 340.0));
+    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), new Rect.fromLTRB(24.0, 395.0, 124.0, 455.0));
     expect(tester.getRect(find.byKey(insideDrawer)), new Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
     expect(tester.getRect(find.byKey(insideBottomNavigationBar)), new Rect.fromLTRB(20.0, 515.0, 750.0, 540.0));
   });
@@ -727,12 +727,12 @@ void main() {
     expect(tester.getRect(find.byKey(appBar)), new Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
     expect(tester.getRect(find.byKey(body)), new Rect.fromLTRB(0.0, 43.0, 800.0, 400.0));
     expect(tester.getRect(find.byKey(floatingActionButton)), new Rect.fromLTRB(36.0, 307.0, 113.0, 384.0));
-    expect(tester.getRect(find.byKey(persistentFooterButton)), new Rect.fromLTRB(28.0, 442.0, 128.0, 532.0)); // Note: has 8px each top/bottom padding.
+    expect(tester.getRect(find.byKey(persistentFooterButton)), new Rect.fromLTRB(24.0, 450.0, 124.0, 540.0)); // Note: has 8px each top/bottom padding.
     expect(tester.getRect(find.byKey(drawer)), new Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
     expect(tester.getRect(find.byKey(insideAppBar)), new Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
     expect(tester.getRect(find.byKey(insideBody)), new Rect.fromLTRB(20.0, 43.0, 750.0, 400.0));
     expect(tester.getRect(find.byKey(insideFloatingActionButton)), new Rect.fromLTRB(36.0, 307.0, 113.0, 384.0));
-    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), new Rect.fromLTRB(28.0, 442.0, 128.0, 532.0));
+    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), new Rect.fromLTRB(24.0, 480.0, 124.0, 540.0));
     expect(tester.getRect(find.byKey(insideDrawer)), new Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
   });
 
