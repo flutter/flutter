@@ -1,7 +1,6 @@
 language: dart
 dart:
-  # Pin to dev.16 to overcome dartbug.com/31940
-  - dev/release/2.0.0-dev.16.0
+  - dev
 sudo: false
 before_script:
   - ./travis/setup.sh
