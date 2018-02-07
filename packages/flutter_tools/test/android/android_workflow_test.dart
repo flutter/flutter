@@ -32,6 +32,12 @@ void main() {
     stdio = new MockStdio();
   });
 
+  MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {
+    final Stream<List<int>> stdoutStream = new Stream<List<int>>.fromIterable(
+        stdout.map((String s) => s.codeUnits));
+    return (List<String> command) => new MockProcess(stdout: stdoutStream);
+  }
+
   testUsingContext('licensesAccepted handles garbage/no output', () async {
     MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
@@ -49,11 +55,6 @@ void main() {
   });
 
   testUsingContext('licensesAccepted works for all licenses accepted', () async {
-    MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {
-      Stream<List<int>> stdoutStream = new Stream.fromIterable(stdout.map((String s) => s.codeUnits));
-      return (List<String> command) => new MockProcess(stdout: stdoutStream);
-    }
-
     MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.processFactory = processMetaFactory(<String>[
@@ -73,11 +74,6 @@ void main() {
   });
 
   testUsingContext('licensesAccepted works for some licenses accepted', () async {
-    MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {
-      Stream<List<int>> stdoutStream = new Stream.fromIterable(stdout.map((String s) => s.codeUnits));
-      return (List<String> command) => new MockProcess(stdout: stdoutStream);
-    }
-
     MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.processFactory = processMetaFactory(<String>[
@@ -98,11 +94,6 @@ void main() {
   });
 
   testUsingContext('licensesAccepted works for no licenses accepted', () async {
-    MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {
-      Stream<List<int>> stdoutStream = new Stream.fromIterable(stdout.map((String s) => s.codeUnits));
-      return (List<String> command) => new MockProcess(stdout: stdoutStream);
-    }
-
     MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.processFactory = processMetaFactory(<String>[
