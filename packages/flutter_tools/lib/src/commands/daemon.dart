@@ -447,7 +447,8 @@ class AppDomain extends Domain {
   bool isRestartSupported(bool enableHotReload, Device device) =>
       enableHotReload && device.supportsHotMode;
 
-  Future<Null> inProgressHotReload;
+  Future<Null> _inProgressHotReload;
+
   Future<OperationResult> restart(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
     final bool fullRestart = _getBoolArg(args, 'fullRestart') ?? false;
@@ -457,14 +458,14 @@ class AppDomain extends Domain {
     if (app == null)
       throw "app '$appId' not found";
 
-    if (!fullRestart && inProgressHotReload != null)
+    if (!fullRestart && _inProgressHotReload != null)
       throw 'hot restart already in progress';
 
     final Future<OperationResult> action = app._runInZone(this, () {
       return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
     });
     if (!fullRestart)
-      inProgressHotReload = action.then((_) => inProgressHotReload = null);
+      _inProgressHotReload = action.then((_) => _inProgressHotReload = null);
     return action;
   }
 
