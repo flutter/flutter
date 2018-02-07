@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/vscode/vscode.dart';
+import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 import 'package:test/test.dart';
 
 import '../src/context.dart';
@@ -26,6 +28,36 @@ void main() {
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, contains('Flutter plugin version 0.1.3'));
       expect(message.message, contains('recommended minimum version'));
+    });
+
+    testUsingContext('vs code validator when both installed', () async {
+      final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension.validate();
+      expect(result.type, ValidationType.installed);
+      expect(result.statusInfo, 'version 1.2.3');
+      expect(result.messages, hasLength(2));
+
+      ValidationMessage message = result.messages
+          .firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
+      expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
+
+      message = result.messages
+          .firstWhere((ValidationMessage m) => m.message.startsWith('Dart Code '));
+      expect(message.message, 'Dart Code extension version 4.5.6');
+    });
+
+    testUsingContext('vs code validator when extension missing', () async {
+      final ValidationResult result = await VsCodeValidatorTestTargets.installedWithoutExtension.validate();
+      expect(result.type, ValidationType.partial);
+      expect(result.statusInfo, 'version 1.2.3');
+      expect(result.messages, hasLength(2));
+
+      ValidationMessage message = result.messages
+          .firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
+      expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
+
+      message = result.messages
+          .firstWhere((ValidationMessage m) => m.message.startsWith('Dart Code '));
+      expect(message.message, startsWith('Dart Code extension not installed'));
     });
   });
 
@@ -236,4 +268,18 @@ class FakeQuietDoctor extends Doctor {
     }
     return _validators;
   }
+}
+
+class VsCodeValidatorTestTargets extends VsCodeValidator {
+  static final String validInstall = fs.path.join('test', 'data', 'vscode', 'application');
+  static final String validExtensions = fs.path.join('test', 'data', 'vscode', 'extensions');
+  static final String missingExtensions = fs.path.join('test', 'data', 'vscode', 'notExtensions');
+  VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory) 
+    : super(new VsCode.fromDirectory(installDirectory, extensionDirectory));
+
+  static VsCodeValidatorTestTargets get installedWithExtension =>
+    new VsCodeValidatorTestTargets._(validInstall, validExtensions);
+
+  static VsCodeValidatorTestTargets get installedWithoutExtension =>
+    new VsCodeValidatorTestTargets._(validInstall, missingExtensions);
 }
