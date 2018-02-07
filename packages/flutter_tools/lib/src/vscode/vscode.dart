@@ -17,8 +17,6 @@ class VsCode {
 
   VsCode._(this.directory, this.extensionDirectory, { Version version })
       : this.version = version ?? Version.unknown {
-    _isValid = false;
-    _validationMessages.clear();
 
     if (!fs.isDirectorySync(directory)) {
       _validationMessages.add('VS Code not found at $directory');
@@ -35,7 +33,7 @@ class VsCode {
     final Iterable<FileSystemEntity> extensionDirs = fs
         .directory(extensionDirectory)
         .listSync()
-        .where((FileSystemEntity d) => fs.isDirectorySync(d.path))
+        .where((FileSystemEntity d) => d is Directory)
         .where(
             (FileSystemEntity d) => d.basename.startsWith(extensionIdentifier));
 
@@ -43,9 +41,9 @@ class VsCode {
       final FileSystemEntity extensionDir = extensionDirs.first;
 
       _isValid = true;
-      extensionVersion = new Version.parse(
+      _extensionVersion = new Version.parse(
           extensionDir.basename.substring('$extensionIdentifier-'.length));
-      validationMessages.add('Dart Code extension version $extensionVersion');
+      _validationMessages.add('Dart Code extension version $_extensionVersion');
     }
   }
 
@@ -54,7 +52,7 @@ class VsCode {
   final Version version;
 
   bool _isValid = false;
-  Version extensionVersion;
+  Version _extensionVersion;
   final List<String> _validationMessages = <String>[];
 
   factory VsCode.fromDirectory(String installPath, String extensionDirectory) {
@@ -69,7 +67,7 @@ class VsCode {
 
   bool get isValid => _isValid;
 
-  List<String> get validationMessages => _validationMessages;
+  Iterable<String> get validationMessages => _validationMessages;
 
   static List<VsCode> allInstalled() {
     if (platform.isMacOS)
@@ -170,7 +168,7 @@ class VsCode {
 
   @override
   String toString() =>
-      'VS Code ($version)${(extensionVersion != Version.unknown ? ', Dart Code ($extensionVersion)' : '')}';
+      'VS Code ($version)${(_extensionVersion != Version.unknown ? ', Dart Code ($_extensionVersion)' : '')}';
 
   static String _getVersionFromPackageJson(String packageJsonPath) {
     if (!fs.isFileSync(packageJsonPath))
