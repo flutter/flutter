@@ -51,33 +51,25 @@ void restoreFuchsiaPortForwardingFunction() {
 /// Note that this class can be connected to several instances of the Fuchsia
 /// device's Dart VM at any given time.
 class FuchsiaRemoteConnection {
-  /// Optional path to an SSH config.
-  final String _sshConfigPath;
-  final List<PortForwarder> _forwardedVmServicePorts;
+  final List<PortForwarder> _forwardedVmServicePorts = <PortForwarder>[];
   final SshCommandRunner _sshCommandRunner;
+  final bool _useIpV6Loopback;
 
   /// VM service cache to avoid repeating handshakes across function
   /// calls. Keys a forwarded port to a DartVm connection instance.
   final Map<int, DartVm> _dartVmCache = <int, DartVm>{};
 
-  final bool _useIpV6Loopback;
-
-  FuchsiaRemoteConnection._(this._sshConfigPath, this._forwardedVmServicePorts,
-      this._useIpV6Loopback, this._sshCommandRunner);
+  FuchsiaRemoteConnection._(this._useIpV6Loopback, this._sshCommandRunner);
 
   /// Same as `FuchsiaRemoteConnection.connect` albeit with a provided
   /// `SshCommandRunner` instance.
   @visibleFortesting
   static Future<FuchsiaRemoteConnection> connectWithSshCommandRunner(
-      String address, SshCommandRunner commandRunner,
-      [String interface = '', String sshConfigPath]) async {
-    validateAddress(address);
-    final List<PortForwarder> ports =
-        await _forwardLocalPortsToDeviceServicePorts(
-            address, interface, sshConfigPath);
-
-    return new FuchsiaRemoteConnection._(
-        sshConfigPath, ports, isIpV6Address(address), commandRunner);
+      SshCommandRunner commandRunner) async {
+    final FuchsiaRemoteConnection connection = new FuchsiaRemoteConnection._(
+        isIpV6Address(commandRunner.address), commandRunner);
+    await connection._forwardLocalPortsToDeviceServicePorts();
+    return connection;
   }
 
   /// Opens a connection to a Fuchsia device.
@@ -97,20 +89,17 @@ class FuchsiaRemoteConnection {
   /// Throws an `ArgumentError` if the supplied `address` is not valid IPv6 or
   /// IPv4.
   ///
-  /// Note that if `address` is link local (usually starts with fe80::), then
-  /// `interface` will probably need to be set in order to connect
+  /// Note that if `address` is ipv6 link local (usually starts with fe80::),
+  /// then `interface` will probably need to be set in order to connect
   /// successfully (that being the outgoing interface of your machine, not the
   /// interface on the target machine).
   static Future<FuchsiaRemoteConnection> connect(String address,
       [String interface = '', String sshConfigPath]) async {
     return await FuchsiaRemoteConnection.connectWithSshCommandRunner(
-        address,
         new SshCommandRunner(
             address: address,
             interface: interface,
-            sshConfigPath: sshConfigPath),
-        interface,
-        sshConfigPath);
+            sshConfigPath: sshConfigPath));
   }
 
   /// Closes all open connections.
@@ -164,19 +153,19 @@ class FuchsiaRemoteConnection {
   /// Forwards a series of local device ports to the `deviceIpv4Address` using
   /// SSH port forwarding.
   ///
-  /// Returns a `List` of `PortForwarder` objects that the caller
-  /// must close when done using. Path to the `sshConfigPath` is optional and
-  /// can be set to null.
-  static Future<List<PortForwarder>> _forwardLocalPortsToDeviceServicePorts(
-      String deviceIpv4Address,
-      [String interface = '',
-      String sshConfigPath]) async {
-    final List<int> servicePorts = await getDeviceServicePorts(
-        deviceIpv4Address, interface, sshConfigPath);
-    return Future.wait(servicePorts.map((int deviceServicePort) {
+  /// When this function is run, all existing forwarded ports and connections
+  /// are reset, similar to running `stop`.
+  Future<Null> _forwardLocalPortsToDeviceServicePorts() async {
+    stop();
+    final List<int> servicePorts = await getDeviceServicePorts();
+    _forwardedVmServicePorts
+        .addAll(await Future.wait(servicePorts.map((int deviceServicePort) {
       return fuchsiaPortForwardingFunction(
-          deviceIpv4Address, deviceServicePort, interface, sshConfigPath);
-    }));
+          _sshCommandRunner.address,
+          deviceServicePort,
+          _sshCommandRunner.interface,
+          _sshCommandRunner.sshConfigPath);
+    })));
   }
 
   /// Gets the open Dart VM service ports on a remote Fuchsia device.
@@ -184,19 +173,11 @@ class FuchsiaRemoteConnection {
   /// The method attempts to get service ports through an SSH connection. Upon
   /// successfully getting the VM service ports, returns them as a list of
   /// integers. If an empty list is returned, then no Dart VM instances could be
-  /// found.
-  ///
-  /// The path to an SSH config can be provided optionally under
-  /// `sshConfigPath`, and is required if the remote device needs SSH keys
-  /// different than the defaults on your machine.
-  static Future<List<int>> getDeviceServicePorts(String address,
-      [String interface = '', String sshConfigPath]) async {
-    final SshCommandRunner runner = new SshCommandRunner(
-      address: address,
-      interface: interface,
-      sshConfigPath: sshConfigPath,
-    );
-    final List<String> lsOutput = await runner.run('ls /tmp/dart.services');
+  /// found. An exception is thrown in the event of an actual error when
+  /// attempting to acquire the ports.
+  Future<List<int>> getDeviceServicePorts() async {
+    final List<String> lsOutput =
+        await _sshCommandRunner.run('ls /tmp/dart.services');
     final List<int> ports = <int>[];
 
     // The output of lsOutput is a list of available ports as the Fuchsia dart
@@ -229,6 +210,9 @@ abstract class PortForwarder {
   /// Determines the port which is being forwarded from the local machine.
   int get port;
 
+  /// The destination port on the other end of the port forwarding tunnel.
+  int get remotePort;
+
   /// Shuts down and cleans up port forwarding.
   Future<Null> stop();
 }
@@ -257,10 +241,11 @@ class _SshPortForwarder extends PortForwarder {
     this._ipV6,
   );
 
-  /// Gets the port on the localhost machine through which the SSH tunnel is
-  /// being forwarded.
   @override
   int get port => _localPort;
+
+  @override
+  int get remotePort => _remotePort;
 
   /// Starts SSH forwarding through a subprocess, and returns an instance of
   /// `_SshPortForwarder`.

@@ -20,15 +20,14 @@ Future<Null> main(List<String> args) async {
   // Example ssh config path for the fuchsia device after having made a local
   // build.
   final String sshConfigPath = '../../out/release-x86-64/ssh-keys/ssh_config';
+  final FuchsiaRemoteConnection connection =
+      await FuchsiaRemoteConnection.connect(address, interface, sshConfigPath);
   print('On $address, the following Dart VM ports are running:');
-  for (int port in await FuchsiaRemoteConnection.getDeviceServicePorts(
-      address, interface, sshConfigPath)) {
+  for (int port in await connection.getDeviceServicePorts()) {
     print('\t$port');
   }
   print('');
 
-  final FuchsiaRemoteConnection connection =
-      await FuchsiaRemoteConnection.connect(address, interface, sshConfigPath);
   print('The following Flutter views are running:');
   for (FlutterView view in await connection.getFlutterViews()) {
     print('\t${view.name ?? view.id}');
