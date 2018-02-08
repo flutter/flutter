@@ -56,7 +56,6 @@ void updateXcodeGeneratedProperties({
 
   if (previewDart2) {
     localsBuffer.writeln('PREVIEW_DART_2=true');
-    localsBuffer.writeln('STRONG=true');
   }
 
   // Add dependency to CocoaPods' generated project only if plugins are used.
