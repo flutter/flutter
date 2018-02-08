@@ -31,7 +31,7 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = new MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
-    verify(canvas.drawPath(any, paintColorMatcher(0xFF666666)));
+    verify(canvas.drawPath(typed(any), typed(argThat(hasColor(0xFF666666)))));
   });
 
   testWidgets('IconTheme opacity', (WidgetTester tester) async {
@@ -53,7 +53,7 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = new MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
-    verify(canvas.drawPath(any, paintColorMatcher(0x80666666)));
+    verify(canvas.drawPath(typed(any), typed(argThat(hasColor(0x80666666)))));
   });
 
   testWidgets('color overrides IconTheme color', (WidgetTester tester) async {
@@ -75,7 +75,7 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = new MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
-    verify(canvas.drawPath(any, paintColorMatcher(0xFF0000FF)));
+    verify(canvas.drawPath(typed(any), typed(argThat(hasColor(0xFF0000FF)))));
   });
 
   testWidgets('IconTheme size', (WidgetTester tester) async {
@@ -185,8 +185,8 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = new MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
-    verifyNever(canvas.rotate(any));
-    verifyNever(canvas.translate(any, any));
+    verifyNever(canvas.rotate(typed(any)));
+    verifyNever(canvas.translate(typed(any), typed(any)));
   });
 
   testWidgets('Inherited text direction overridden', (WidgetTester tester) async {
@@ -215,7 +215,7 @@ void main() {
   });
 }
 
-dynamic paintColorMatcher(int color) {
+PaintColorMatcher hasColor(int color) {
   return new PaintColorMatcher(color);
 }
 
