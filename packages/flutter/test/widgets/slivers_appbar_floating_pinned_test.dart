@@ -18,8 +18,8 @@ void main() {
             slivers: <Widget>[
               const SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: const Text('A')),
               const SliverAppBar(primary: false, pinned: true, title: const Text('B')),
-              new SliverList(
-                delegate: new SliverChildListDelegate(
+              const SliverList(
+                delegate: const SliverChildListDelegate(
                   <Widget>[
                     const Text('C'),
                     const Text('D'),

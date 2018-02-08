@@ -14,7 +14,7 @@ void main() {
   group('construction check', () {
     testWidgets('ListWheelScrollView needs positive diameter ratio', (WidgetTester tester) async {
       try {
-        new ListWheelScrollView(
+        const ListWheelScrollView(
           diameterRatio: -2.0,
           itemExtent: 20.0,
           children: <Widget>[],
@@ -39,9 +39,9 @@ void main() {
 
     testWidgets('ListWheelScrollView can have zero child', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
-          child: new ListWheelScrollView(
+          child: const ListWheelScrollView(
             itemExtent: 50.0,
             children: <Widget>[],
           ),
@@ -96,9 +96,9 @@ void main() {
 
     testWidgets("ListWheelScrollView children can't be bigger than itemExtent", (WidgetTester tester) async {
       await tester.pumpWidget(
-        new Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
-          child: new ListWheelScrollView(
+          child: const ListWheelScrollView(
             itemExtent: 50.0,
             children: <Widget>[
               const SizedBox(
