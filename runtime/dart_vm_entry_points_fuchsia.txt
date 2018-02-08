@@ -4,11 +4,13 @@ dart:io,_EmbedderConfig,_mayExit
 dart:io,_Namespace,_setupNamespace
 dart:mozart.internal,::,_context
 dart:mozart.internal,::,_viewContainer
-dart:zircon,_Namespace,_namespace
+dart:zircon,FromFileResult,FromFileResult.
 dart:zircon,GetSizeResult,GetSizeResult.
 dart:zircon,Handle,Handle._
 dart:zircon,HandlePairResult,HandlePairResult.
 dart:zircon,HandleResult,HandleResult.
 dart:zircon,HandleWaiter,HandleWaiter._
+dart:zircon,MapResult,MapResult.
 dart:zircon,ReadResult,ReadResult.
 dart:zircon,WriteResult,WriteResult.
+dart:zircon,_Namespace,_namespace
