@@ -314,12 +314,12 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   @override
   String toString() {
     String selfType = runtimeType.toString();
-    // This is a temporary work-around to align what const GlobalObjectKey().toString()
-    // produces in Dart 2 with what it produces in Dart 1.
-    // In Dart 2 const GlobalObjectKey() is instantiated to bounds so it becomes
-    // const GlobalObjectKey<State<StatefulWidget>>().
-    if (selfType == 'GlobalObjectKey<State<StatefulWidget>>') {
-      selfType = 'GlobalObjectKey';
+    // const GlobalObjectKey().runtimeType.toString() returns 'GlobalObjectKey<State<StatefulWidget>>'
+    // because GlobalObjectKey is instantiated to its bounds. To avoid cluttering the output
+    // we remove the suffix.
+    const String suffix = '<State<StatefulWidget>>';
+    if (selfType.endsWith(suffix)) {
+      selfType = selfType.substring(0, selfType.length - suffix.length);
     }
     return '[$selfType ${describeIdentity(value)}]';
   }
