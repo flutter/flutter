@@ -29,7 +29,8 @@ import 'ticker_provider.dart';
 /// on the notification.
 ///
 /// Created automatically by [ScrollBehavior.buildViewportChrome] on platforms
-/// (e.g., Android) that commonly use this type of overscroll indication.
+/// (e.g., Android) that commonly use this type of overscroll indication with
+/// the [ThemeData.accentColor] color.
 class GlowingOverscrollIndicator extends StatefulWidget {
   /// Creates a visual indication that a scroll view has overscrolled.
   ///
