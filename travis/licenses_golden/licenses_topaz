@@ -1,4 +1,4 @@
-Signature: 3e1bb8a5b4dda0b0373e56c3c901bc6c
+Signature: 7f357165eef1d3c274d05d52eac7ddda
 
 UNUSED LICENSES:
 
@@ -925,6 +925,7 @@ FILE: ../../../topaz/public/lib/ui/flutter/child_view.dart
 FILE: ../../../topaz/public/lib/ui/flutter/sdk_ext/mozart.dart
 FILE: ../../../topaz/runtime/dart_runner/builtin_libraries.cc
 FILE: ../../../topaz/runtime/dart_runner/builtin_libraries.h
+FILE: ../../../topaz/runtime/dart_runner/dart2
 FILE: ../../../topaz/runtime/dart_runner/dart_application_controller.cc
 FILE: ../../../topaz/runtime/dart_runner/dart_application_controller.h
 FILE: ../../../topaz/runtime/dart_runner/dart_application_runner.cc
@@ -938,9 +939,11 @@ FILE: ../../../topaz/runtime/dart_runner/examples/greeting/greeting.dart
 FILE: ../../../topaz/runtime/dart_runner/examples/hello_app_dart/interfaces/hello.fidl
 FILE: ../../../topaz/runtime/dart_runner/examples/hello_app_dart/main.dart
 FILE: ../../../topaz/runtime/dart_runner/examples/hello_dart/bin/hello_dart.dart
+FILE: ../../../topaz/runtime/dart_runner/kernel/libraries.json
 FILE: ../../../topaz/runtime/dart_runner/main.cc
+FILE: ../../../topaz/runtime/dart_runner/meta/aot2_runtime
 FILE: ../../../topaz/runtime/dart_runner/meta/aot_runtime
-FILE: ../../../topaz/runtime/dart_runner/meta/jit_kernel_runtime
+FILE: ../../../topaz/runtime/dart_runner/meta/jit2_runtime
 FILE: ../../../topaz/runtime/dart_runner/meta/jit_runtime
 FILE: ../../../topaz/runtime/dart_runner/meta/sandbox
 FILE: ../../../topaz/runtime/dart_runner/snapshotter/main.cc
@@ -1170,6 +1173,7 @@ FILE: ../../../topaz/app/documents/modules/browser/lib/src/widgets/header.dart
 FILE: ../../../topaz/app/documents/modules/browser/lib/src/widgets/multi_select_header.dart
 FILE: ../../../topaz/examples/mine_digger/main.dart
 FILE: ../../../topaz/public/dart/fuchsia/lib/src/fuchsia_fakes.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/modular/dank_user_shell_widget.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/channel.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/channel_reader.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/constants.dart
@@ -1181,6 +1185,9 @@ FILE: ../../../topaz/public/dart/zircon/lib/src/handle_wrapper.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/socket.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/socket_reader.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/vmo.dart
+FILE: ../../../topaz/public/lib/proposal/dart/lib/proposal.dart
+FILE: ../../../topaz/public/lib/proposal/dart/lib/src/proposal_factory.dart
+FILE: ../../../topaz/public/lib/user/dart/lib/src/dank_user_shell_impl.dart
 FILE: ../../../topaz/runtime/dart_runner/kernel/compiler.dart
 FILE: ../../../topaz/runtime/dart_runner/mapped_resource.cc
 FILE: ../../../topaz/runtime/dart_runner/mapped_resource.h
