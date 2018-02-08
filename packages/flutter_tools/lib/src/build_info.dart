@@ -68,7 +68,6 @@ class BuildInfo {
   BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
       new BuildInfo(mode, flavor,
           previewDart2: previewDart2,
-          strongMode: strongMode,
           extraFrontEndOptions: extraFrontEndOptions,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
           preferSharedLibrary: preferSharedLibrary,
