@@ -28,7 +28,8 @@ platform :ios do
     sync_code_signing(
       git_url: ENV['PUBLISHING_MATCH_CERTIFICATE_REPO'],
       type: 'appstore',
-      readonly: true
+      readonly: true,
+      verbose: false
     )
 
     # Modify the Xcode project to use the new team and profile.
