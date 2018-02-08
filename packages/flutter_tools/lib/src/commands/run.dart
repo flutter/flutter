@@ -34,6 +34,11 @@ abstract class RunCommandBase extends FlutterCommand {
               'forwards the host port to a device port.');
     argParser.addOption('route',
         help: 'Which route to load when running the app.');
+    argParser.addOption('target-platform',
+        defaultsTo: 'default',
+        allowed: <String>['default', 'android-arm', 'android-arm64'],
+        help: 'Specify the target platform when building the app for an '
+              'Android device.\nIgnored on iOS.');
     usesTargetOption();
     usesPortOptions();
     usesPubOption();
