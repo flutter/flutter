@@ -215,7 +215,9 @@ void main() {
     ));
 
     expect(semantics, includesNodeWith(
-      scrollProgress: 0.0,
+      scrollExtentMin: 0.0,
+      scrollPosition: 0.0,
+      scrollExtentMax: 520.0,
       actions: <SemanticsAction>[
         SemanticsAction.scrollUp,
       ],
@@ -224,7 +226,9 @@ void main() {
     await flingUp(tester);
 
     expect(semantics, includesNodeWith(
-      scrollProgress: 0.73,
+      scrollExtentMin: 0.0,
+      scrollPosition: 380.2,
+      scrollExtentMax: 520.0,
       actions: <SemanticsAction>[
         SemanticsAction.scrollUp,
         SemanticsAction.scrollDown,
@@ -234,8 +238,57 @@ void main() {
     await flingUp(tester);
 
     expect(semantics, includesNodeWith(
-      scrollProgress: 1.0,
+      scrollExtentMin: 0.0,
+      scrollPosition: 520.0,
+      scrollExtentMax: 520.0,
       actions: <SemanticsAction>[
+        SemanticsAction.scrollDown,
+      ],
+    ));
+  });
+
+  testWidgets('correct scrollProgress for unbound', (WidgetTester tester) async {
+    semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new ListView.builder(
+        itemExtent: 20.0,
+        itemBuilder: (BuildContext context, int index) {
+          return new Text('entry $index');
+        },
+      ),
+    ));
+
+    expect(semantics, includesNodeWith(
+      scrollExtentMin: 0.0,
+      scrollPosition: 0.0,
+      scrollExtentMax: double.infinity,
+      actions: <SemanticsAction>[
+        SemanticsAction.scrollUp,
+      ],
+    ));
+
+    await flingUp(tester);
+
+    expect(semantics, includesNodeWith(
+      scrollExtentMin: 0.0,
+      scrollPosition: 380.2,
+      scrollExtentMax: double.infinity,
+      actions: <SemanticsAction>[
+        SemanticsAction.scrollUp,
+        SemanticsAction.scrollDown,
+      ],
+    ));
+
+    await flingUp(tester);
+
+    expect(semantics, includesNodeWith(
+      scrollExtentMin: 0.0,
+      scrollPosition: 760.4,
+      scrollExtentMax: double.infinity,
+      actions: <SemanticsAction>[
+        SemanticsAction.scrollUp,
         SemanticsAction.scrollDown,
       ],
     ));

@@ -5,6 +5,7 @@
 import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
@@ -369,7 +370,9 @@ class SemanticsTester {
     TextDirection textDirection,
     List<SemanticsAction> actions,
     List<SemanticsFlag> flags,
-    double scrollProgress,
+    double scrollPosition,
+    double scrollExtentMax,
+    double scrollExtentMin,
     SemanticsNode ancestor,
   }) {
     bool checkNode(SemanticsNode node) {
@@ -391,7 +394,11 @@ class SemanticsTester {
         if (expectedFlags != actualFlags)
           return false;
       }
-      if (scrollProgress != null && (node.scrollProgress * 100).round() != (scrollProgress * 100).round())
+      if (scrollPosition != null && !nearEqual(node.scrollPosition, scrollPosition, 0.1))
+        return false;
+      if (scrollExtentMax != null && !nearEqual(node.scrollExtentMax, scrollExtentMax, 0.1))
+        return false;
+      if (scrollExtentMin != null && !nearEqual(node.scrollExtentMin, scrollExtentMin, 0.1))
         return false;
       return true;
     }
@@ -581,15 +588,19 @@ class _IncludesNodeWith extends Matcher {
     this.textDirection,
     this.actions,
     this.flags,
-    this.scrollProgress,
-}) : assert(label != null || value != null || actions != null || flags != null || scrollProgress != null);
+    this.scrollPosition,
+    this.scrollExtentMax,
+    this.scrollExtentMin,
+}) : assert(label != null || value != null || actions != null || flags != null || scrollPosition != null || scrollExtentMax != null || scrollExtentMin != null);
 
   final String label;
   final String value;
   final TextDirection textDirection;
   final List<SemanticsAction> actions;
   final List<SemanticsFlag> flags;
-  final double scrollProgress;
+  final double scrollPosition;
+  final double scrollExtentMax;
+  final double scrollExtentMin;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -599,7 +610,9 @@ class _IncludesNodeWith extends Matcher {
       textDirection: textDirection,
       actions: actions,
       flags: flags,
-      scrollProgress: scrollProgress,
+      scrollPosition: scrollPosition,
+      scrollExtentMax: scrollExtentMax,
+      scrollExtentMin: scrollExtentMin,
     ).isNotEmpty;
   }
 
@@ -625,8 +638,12 @@ class _IncludesNodeWith extends Matcher {
       strings.add('actions "${actions.join(', ')}"');
     if (flags != null)
       strings.add('flags "${flags.join(', ')}"');
-    if (scrollProgress != null)
-      strings.add('scrollProgress "$scrollProgress"');
+    if (scrollPosition != null)
+      strings.add('scrollPosition "$scrollPosition"');
+    if (scrollExtentMax != null)
+      strings.add('scrollExtentMax "$scrollExtentMax"');
+    if (scrollExtentMin != null)
+      strings.add('scrollExtentMin "$scrollExtentMin"');
     return strings.join(', ');
   }
 }
@@ -641,7 +658,9 @@ Matcher includesNodeWith({
   TextDirection textDirection,
   List<SemanticsAction> actions,
   List<SemanticsFlag> flags,
-  double scrollProgress,
+  double scrollPosition,
+  double scrollExtentMax,
+  double scrollExtentMin,
 }) {
   return new _IncludesNodeWith(
     label: label,
@@ -649,6 +668,8 @@ Matcher includesNodeWith({
     textDirection: textDirection,
     actions: actions,
     flags: flags,
-    scrollProgress: scrollProgress,
+    scrollPosition: scrollPosition,
+    scrollExtentMax: scrollExtentMax,
+    scrollExtentMin: scrollExtentMin,
   );
 }

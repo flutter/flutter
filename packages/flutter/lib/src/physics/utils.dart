@@ -12,7 +12,7 @@ bool nearEqual(double a, double b, double epsilon) {
   assert(epsilon >= 0.0);
   if (a == null || b == null)
     return a == b;
-  return (a > (b - epsilon)) && (a < (b + epsilon));
+  return (a > (b - epsilon)) && (a < (b + epsilon)) || a == b;
 }
 
 /// Whether a double is within a given distance of zero.
