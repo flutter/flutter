@@ -366,15 +366,11 @@ class AndroidDevice extends Device {
       return new LaunchResult.failed();
     }
 
-    BuildInfo buildInfo = debuggingOptions.buildInfo;
-    if (buildInfo.targetPlatform == null && devicePlatform == TargetPlatform.android_arm64)
-      buildInfo = buildInfo.withTargetPlatform(TargetPlatform.android_arm64);
-
     if (!prebuiltApplication) {
       printTrace('Building APK');
       await buildApk(
           target: mainPath,
-          buildInfo: buildInfo,
+          buildInfo: debuggingOptions.buildInfo,
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
