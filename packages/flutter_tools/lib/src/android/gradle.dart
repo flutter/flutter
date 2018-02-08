@@ -36,6 +36,14 @@ enum FlutterPluginVersion {
   managed,
 }
 
+// Investigation documented in #13975 suggests the filter should be a subset
+// of the impact of -q, but users insist they see the error message sometimes
+// anyway.  If we can prove it really is impossible, delete the filter.
+final RegExp ndkMessageFilter = new RegExp(r'^(?!NDK is missing a ".*" directory'
+  r'|If you are not using NDK, unset the NDK variable from ANDROID_NDK_HOME or local.properties to remove this warning'
+  r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
+
+
 bool isProjectUsingGradle() {
   return fs.isFileSync('android/build.gradle');
 }
@@ -309,6 +317,7 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
       workingDirectory: 'android',
       allowReentrantFlutter: true,
       environment: _gradleEnv,
+      filter: logger.isVerbose ? null : ndkMessageFilter,
   );
   status.stop();
 
