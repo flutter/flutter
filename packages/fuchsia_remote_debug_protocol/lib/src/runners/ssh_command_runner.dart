@@ -48,13 +48,6 @@ class SshCommandRunner {
   /// connections. Ignored otherwise).
   final String interface;
 
-  /// Private constructor for dependency injection of the process manager.
-  @visibleForTesting
-  SshCommandRunner.withProcessManager(this._processManager,
-      {this.address, this.interface = '', this.sshConfigPath}) {
-    validateAddress(address);
-  }
-
   /// Instantiates the command runner, pointing to an `address` as well as
   /// an optional SSH config file path.
   ///
@@ -70,12 +63,19 @@ class SshCommandRunner {
     validateAddress(address);
   }
 
+  /// Private constructor for dependency injection of the process manager.
+  @visibleForTesting
+  SshCommandRunner.withProcessManager(this._processManager,
+      {this.address, this.interface = '', this.sshConfigPath}) {
+    validateAddress(address);
+  }
+
   /// Runs a command on a Fuchsia device through an SSH tunnel.
   ///
   /// If the subprocess creating the SSH tunnel returns a nonzero exit status,
   /// then an `SshCommandError` is raised.
   Future<List<String>> run(String command) async {
-    final List<String> args = ['ssh'];
+    final List<String> args = <String>['ssh'];
     if (sshConfigPath != null) {
       args.addAll(<String>['-F', sshConfigPath]);
     }

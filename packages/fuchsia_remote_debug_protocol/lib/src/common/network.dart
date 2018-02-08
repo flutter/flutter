@@ -18,7 +18,7 @@ bool isIpV6Address(String address) {
   try {
     Uri.parseIPv6Address(address);
     return true;
-  } on FormatException catch (e) {
+  } on FormatException {
     return false;
   }
 }
@@ -28,7 +28,7 @@ bool isIpV4Address(String address) {
   try {
     Uri.parseIPv4Address(address);
     return true;
-  } on FormatException catch (e) {
+  } on FormatException {
     return false;
   }
 }

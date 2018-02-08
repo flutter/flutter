@@ -24,7 +24,7 @@ void main() {
         () async {
       SshCommandRunner newCommandRunner() {
         return new SshCommandRunner.withProcessManager(
-            new LocalProcessManager(),
+            const LocalProcessManager(),
             address: '192.168.1.1.1');
       }
 
@@ -55,7 +55,7 @@ void main() {
       when(mockProcessResult.stdout).thenReturn('somestuff');
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
-      List<String> passedCommand =
+      final List<String> passedCommand =
           verify(mockProcessManager.run(captureAny)).captured.single;
       expect(passedCommand.indexOf('$ipV6Addr%$interface'), isNot(-1));
     });
@@ -70,7 +70,7 @@ void main() {
       when(mockProcessResult.stdout).thenReturn('somestuff');
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
-      List<String> passedCommand =
+      final List<String> passedCommand =
           verify(mockProcessManager.run(captureAny)).captured.single;
       expect(passedCommand.indexOf(ipV6Addr), isNot(-1));
     });
@@ -84,7 +84,7 @@ void main() {
           four
           lines''');
       when(mockProcessResult.exitCode).thenReturn(0);
-      List<String> result = await runner.run('oihaw');
+      final List<String> result = await runner.run('oihaw');
       expect(result.length, 4);
     });
 
@@ -112,7 +112,7 @@ void main() {
       when(mockProcessResult.stdout).thenReturn('somestuff');
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
-      List<String> passedCommand =
+      final List<String> passedCommand =
           verify(mockProcessManager.run(captureAny)).captured.single;
       final int indexOfFlag = passedCommand.indexOf('-F');
       final String passedConfig = passedCommand[indexOfFlag + 1];
@@ -129,7 +129,7 @@ void main() {
       when(mockProcessResult.stdout).thenReturn('somestuff');
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
-      List<String> passedCommand =
+      final List<String> passedCommand =
           verify(mockProcessManager.run(captureAny)).captured.single;
       final int indexOfFlag = passedCommand.indexOf('-F');
       expect(indexOfFlag, equals(-1));

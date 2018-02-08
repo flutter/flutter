@@ -32,7 +32,7 @@ RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 /// Attempts to connect to a Dart VM service.
 ///
 /// Gives up after `_kConnectTimeout` has elapsed.
-Future<json_rpc.Peer>  _waitAndConnect(Uri uri) async {
+Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
   final Stopwatch timer = new Stopwatch()..start();
 
   Future<json_rpc.Peer> attemptConnection(Uri uri) async {

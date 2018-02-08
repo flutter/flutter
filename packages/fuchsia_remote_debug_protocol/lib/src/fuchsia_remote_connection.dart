@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:process/process.dart';
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
 import 'common/logging.dart';
 import 'common/network.dart';
@@ -63,7 +63,7 @@ class FuchsiaRemoteConnection {
 
   /// Same as `FuchsiaRemoteConnection.connect` albeit with a provided
   /// `SshCommandRunner` instance.
-  @visibleFortesting
+  @visibleForTesting
   static Future<FuchsiaRemoteConnection> connectWithSshCommandRunner(
       SshCommandRunner commandRunner) async {
     final FuchsiaRemoteConnection connection = new FuchsiaRemoteConnection._(
@@ -116,6 +116,8 @@ class FuchsiaRemoteConnection {
       await vmService?.stop();
       await fp.stop();
     }
+    _dartVmCache.clear();
+    _forwardedVmServicePorts.clear();
   }
 
   /// Returns a list of `FlutterView` objects.
@@ -156,7 +158,7 @@ class FuchsiaRemoteConnection {
   /// When this function is run, all existing forwarded ports and connections
   /// are reset, similar to running `stop`.
   Future<Null> _forwardLocalPortsToDeviceServicePorts() async {
-    stop();
+    await stop();
     final List<int> servicePorts = await getDeviceServicePorts();
     _forwardedVmServicePorts
         .addAll(await Future.wait(servicePorts.map((int deviceServicePort) {
@@ -256,7 +258,7 @@ class _SshPortForwarder extends PortForwarder {
     if (localPort == 0) {
       _log.warning('_SshPortForwarder failed to find a local port for '
           '$address:$remotePort');
-      return new _SshPortForwarder._(null, 0, 0, null, null);
+      return null;
     }
     // TODO: The square-bracket enclosure for using the IPv6 loopback didn't
     // appear to work, but when assigning to the IPv4 loopback device, netstat
@@ -265,7 +267,7 @@ class _SshPortForwarder extends PortForwarder {
     // interface, it cannot be used to connect to a websocket.
     final String formattedForwardingUrl =
         '$localPort:$_ipv4Loopback:$remotePort';
-    final List<String> command = ['ssh'];
+    final List<String> command = <String>['ssh'];
     if (isIpV6) {
       command.add('-6');
     }
@@ -273,7 +275,7 @@ class _SshPortForwarder extends PortForwarder {
       command.addAll(<String>['-F', sshConfigPath]);
     }
     final String targetAddress =
-        isIpV6 && !interface.isEmpty ? '$address%$interface' : address;
+        isIpV6 && interface.isNotEmpty ? '$address%$interface' : address;
     command.addAll(<String>[
       '-nNT',
       '-L',
@@ -300,8 +302,8 @@ class _SshPortForwarder extends PortForwarder {
     // uses the IPv4 loopback.
     final String formattedForwardingUrl =
         '$_localPort:$_ipv4Loopback:$_remotePort';
-    final List<String> command = ['ssh'];
-    final String targetAddress = _ipV6 && !_interface.isEmpty
+    final List<String> command = <String>['ssh'];
+    final String targetAddress = _ipV6 && _interface.isNotEmpty
         ? '$_remoteAddress%$_interface'
         : _remoteAddress;
     if (_sshConfigPath != null) {
