@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/plugins.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/strings.dart';
 
@@ -22,6 +21,7 @@ import '../device.dart';
 import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../plugins.dart';
 import '../usage.dart';
 import 'flutter_command_runner.dart';
 

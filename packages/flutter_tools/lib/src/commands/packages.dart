@@ -4,11 +4,10 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/plugins.dart';
-
 import '../base/common.dart';
 import '../base/os.dart';
 import '../dart/pub.dart';
+import '../plugins.dart';
 import '../runner/flutter_command.dart';
 
 class PackagesCommand extends FlutterCommand {
