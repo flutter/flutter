@@ -95,6 +95,7 @@ class SemanticsData extends Diagnosticable {
     @required this.nextNodeId,
     @required this.rect,
     @required this.textSelection,
+    @required this.scrollProgress,
     this.tags,
     this.transform,
   }) : assert(flags != null),
@@ -156,6 +157,10 @@ class SemanticsData extends Diagnosticable {
   /// if this node represents a text field.
   final TextSelection textSelection;
 
+  /// Indicates in a range of [0.0, 1.0] how far the node has been scrolled,
+  /// if it is scrollable.
+  final double scrollProgress;
+
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
 
@@ -204,7 +209,8 @@ class SemanticsData extends Diagnosticable {
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(new IntProperty('nextNodeId', nextNodeId, defaultValue: null));
     if (textSelection?.isValid == true)
-      properties.add(new MessageProperty('text selection', '[${textSelection.start}, ${textSelection.end}]'));
+      properties.add(new MessageProperty('textSelection', '[${textSelection.start}, ${textSelection.end}]'));
+    properties.add(new DoubleProperty('scrollProgress', scrollProgress, defaultValue: null));
   }
 
   @override
@@ -915,6 +921,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         _textDirection != config.textDirection ||
         _sortOrder != config._sortOrder ||
         _textSelection != config._textSelection ||
+        _scrollProgress != config._scrollProgress ||
         _actionsAsBits != config._actionsAsBits ||
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
   }
@@ -1011,6 +1018,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   TextSelection get textSelection => _textSelection;
   TextSelection _textSelection;
 
+  /// Indicates in a range of [0.0, 1.0] how far the node has been scrolled,
+  /// if it is scrollable.
+  double get scrollProgress => _scrollProgress;
+  double _scrollProgress;
+
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
   static final SemanticsConfiguration _kEmptyConfig = new SemanticsConfiguration();
@@ -1043,6 +1055,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _actions = new Map<SemanticsAction, _SemanticsActionHandler>.from(config._actions);
     _actionsAsBits = config._actionsAsBits;
     _textSelection = config._textSelection;
+    _scrollProgress = config._scrollProgress;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
@@ -1074,6 +1087,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     int nextNodeId = _nextNodeId;
     Set<SemanticsTag> mergedTags = tags == null ? null : new Set<SemanticsTag>.from(tags);
     TextSelection textSelection = _textSelection;
+    double scrollProgress = _scrollProgress;
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
@@ -1083,6 +1097,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         textDirection ??= node._textDirection;
         nextNodeId ??= node._nextNodeId;
         textSelection ??= node._textSelection;
+        scrollProgress ??= node._scrollProgress;
         if (value == '' || value == null)
           value = node._value;
         if (increasedValue == '' || increasedValue == null)
@@ -1123,6 +1138,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       transform: transform,
       tags: mergedTags,
       textSelection: textSelection,
+      scrollProgress: scrollProgress,
     );
   }
 
@@ -1160,6 +1176,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       nextNodeId: data.nextNodeId,
       textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
+      scrollProgress: data.scrollProgress != null ? data.scrollProgress : -1.0,
       transform: data.transform?.storage ?? _kIdentityTransform,
       children: children,
     );
@@ -1232,6 +1249,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(new DiagnosticsProperty<SemanticsSortOrder>('sortOrder', sortOrder, defaultValue: null));
     if (_textSelection?.isValid == true)
       properties.add(new MessageProperty('text selection', '[${_textSelection.start}, ${_textSelection.end}]'));
+    properties.add(new DoubleProperty('scrollProgress', scrollProgress, defaultValue: null));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -2088,6 +2106,17 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// If this node is scrollable, the current scroll progress.
+  ///
+  /// Valid range: [0.0, 1.0].
+  double get scrollProgress => _scrollProgress;
+  double _scrollProgress;
+  set scrollProgress(double value) {
+    assert(value != null);
+    _scrollProgress = value;
+    _hasBeenAnnotated = true;
+  }
+
   // TAGS
 
   /// The set of tags that this configuration wants to add to all child
@@ -2171,6 +2200,7 @@ class SemanticsConfiguration {
     _actionsAsBits |= other._actionsAsBits;
     _flags |= other._flags;
     _textSelection ??= other._textSelection;
+    _scrollProgress ??= other._scrollProgress;
 
     textDirection ??= other.textDirection;
     _sortOrder = _sortOrder?.merge(other._sortOrder);
@@ -2214,6 +2244,7 @@ class SemanticsConfiguration {
       .._flags = _flags
       .._tagsForChildren = _tagsForChildren
       .._textSelection = _textSelection
+      .._scrollProgress = _scrollProgress
       .._actionsAsBits = _actionsAsBits
       .._actions.addAll(_actions);
   }

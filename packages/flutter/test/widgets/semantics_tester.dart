@@ -369,6 +369,7 @@ class SemanticsTester {
     TextDirection textDirection,
     List<SemanticsAction> actions,
     List<SemanticsFlag> flags,
+    double scrollProgress,
     SemanticsNode ancestor,
   }) {
     bool checkNode(SemanticsNode node) {
@@ -390,6 +391,8 @@ class SemanticsTester {
         if (expectedFlags != actualFlags)
           return false;
       }
+      if (scrollProgress != null && (node.scrollProgress * 100).round() != (scrollProgress * 100).round())
+        return false;
       return true;
     }
 
@@ -578,13 +581,15 @@ class _IncludesNodeWith extends Matcher {
     this.textDirection,
     this.actions,
     this.flags,
-}) : assert(label != null || value != null || actions != null || flags != null);
+    this.scrollProgress,
+}) : assert(label != null || value != null || actions != null || flags != null || scrollProgress != null);
 
   final String label;
   final String value;
   final TextDirection textDirection;
   final List<SemanticsAction> actions;
   final List<SemanticsFlag> flags;
+  final double scrollProgress;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -594,6 +599,7 @@ class _IncludesNodeWith extends Matcher {
       textDirection: textDirection,
       actions: actions,
       flags: flags,
+      scrollProgress: scrollProgress,
     ).isNotEmpty;
   }
 
@@ -619,6 +625,8 @@ class _IncludesNodeWith extends Matcher {
       strings.add('actions "${actions.join(', ')}"');
     if (flags != null)
       strings.add('flags "${flags.join(', ')}"');
+    if (scrollProgress != null)
+      strings.add('scrollProgress "$scrollProgress"');
     return strings.join(', ');
   }
 }
@@ -633,6 +641,7 @@ Matcher includesNodeWith({
   TextDirection textDirection,
   List<SemanticsAction> actions,
   List<SemanticsFlag> flags,
+  double scrollProgress,
 }) {
   return new _IncludesNodeWith(
     label: label,
@@ -640,5 +649,6 @@ Matcher includesNodeWith({
     textDirection: textDirection,
     actions: actions,
     flags: flags,
+    scrollProgress: scrollProgress,
   );
 }
