@@ -95,7 +95,9 @@ class SemanticsData extends Diagnosticable {
     @required this.nextNodeId,
     @required this.rect,
     @required this.textSelection,
-    @required this.scrollProgress,
+    @required this.scrollPosition,
+    @required this.scrollExtentMax,
+    @required this.scrollExtentMin,
     this.tags,
     this.transform,
   }) : assert(flags != null),
@@ -157,9 +159,37 @@ class SemanticsData extends Diagnosticable {
   /// if this node represents a text field.
   final TextSelection textSelection;
 
-  /// Indicates in a range of [0.0, 1.0] how far the node has been scrolled,
-  /// if it is scrollable.
-  final double scrollProgress;
+  /// Indicates the current scrolling position in logical pixels if the node is
+  /// scrollable.
+  ///
+  /// The properties [scrollExtentMin] and [scrollExtentMax] indicate the valid
+  /// in-range values for this property. The value for [scrollPosition] may
+  /// (temporarily) be outside that range, e.g. during an overscroll.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.pixels] from where this value is usually taken.
+  final double scrollPosition;
+
+  /// Indicates the maximum in-range value for [scrollPosition] if the node is
+  /// scrollable.
+  ///
+  /// This value may be infinity if the scroll is unbound.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.maxScrollExtent] from where this value is usually taken.
+  final double scrollExtentMax;
+
+  /// Indicates the mimimum in-range value for [scrollPosition] if the node is
+  /// scrollable.
+  ///
+  /// This value may be infinity if the scroll is unbound.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.minScrollExtent] from where this value is usually taken.
+  final double scrollExtentMin;
 
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
@@ -210,7 +240,9 @@ class SemanticsData extends Diagnosticable {
     properties.add(new IntProperty('nextNodeId', nextNodeId, defaultValue: null));
     if (textSelection?.isValid == true)
       properties.add(new MessageProperty('textSelection', '[${textSelection.start}, ${textSelection.end}]'));
-    properties.add(new DoubleProperty('scrollProgress', scrollProgress, defaultValue: null));
+    properties.add(new DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
+    properties.add(new DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
+    properties.add(new DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
   }
 
   @override
@@ -230,11 +262,14 @@ class SemanticsData extends Diagnosticable {
         && typedOther.rect == rect
         && setEquals(typedOther.tags, tags)
         && typedOther.textSelection == textSelection
+        && typedOther.scrollPosition == scrollPosition
+        && typedOther.scrollExtentMax == scrollExtentMax
+        && typedOther.scrollExtentMin == scrollExtentMin
         && typedOther.transform == transform;
   }
 
   @override
-  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, nextNodeId, rect, tags, textSelection, transform);
+  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, nextNodeId, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform);
 }
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
@@ -921,7 +956,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         _textDirection != config.textDirection ||
         _sortOrder != config._sortOrder ||
         _textSelection != config._textSelection ||
-        _scrollProgress != config._scrollProgress ||
+        _scrollPosition != config._scrollPosition ||
+        _scrollExtentMax != config._scrollExtentMax ||
+        _scrollExtentMin != config._scrollExtentMin ||
         _actionsAsBits != config._actionsAsBits ||
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
   }
@@ -1018,10 +1055,41 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   TextSelection get textSelection => _textSelection;
   TextSelection _textSelection;
 
-  /// Indicates in a range of [0.0, 1.0] how far the node has been scrolled,
-  /// if it is scrollable.
-  double get scrollProgress => _scrollProgress;
-  double _scrollProgress;
+  /// Indicates the current scrolling position in logical pixels if the node is
+  /// scrollable.
+  ///
+  /// The properties [scrollExtentMin] and [scrollExtentMax] indicate the valid
+  /// in-range values for this property. The value for [scrollPosition] may
+  /// (temporarily) be outside that range, e.g. during an overscroll.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.pixels] from where this value is usually taken.
+  double get scrollPosition => _scrollPosition;
+  double _scrollPosition;
+
+
+  /// Indicates the maximum in-range value for [scrollPosition] if the node is
+  /// scrollable.
+  ///
+  /// This value may be infinity if the scroll is unbound.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.maxScrollExtent] from where this value is usually taken.
+  double get scrollExtentMax => _scrollExtentMax;
+  double _scrollExtentMax;
+
+  /// Indicates the mimimum in-range value for [scrollPosition] if the node is
+  /// scrollable.
+  ///
+  /// This value may be infinity if the scroll is unbound.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.minScrollExtent] from where this value is usually taken.
+  double get scrollExtentMin => _scrollExtentMin;
+  double _scrollExtentMin;
 
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
@@ -1055,7 +1123,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _actions = new Map<SemanticsAction, _SemanticsActionHandler>.from(config._actions);
     _actionsAsBits = config._actionsAsBits;
     _textSelection = config._textSelection;
-    _scrollProgress = config._scrollProgress;
+    _scrollPosition = config._scrollPosition;
+    _scrollExtentMax = config._scrollExtentMax;
+    _scrollExtentMin = config._scrollExtentMin;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
@@ -1087,7 +1157,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     int nextNodeId = _nextNodeId;
     Set<SemanticsTag> mergedTags = tags == null ? null : new Set<SemanticsTag>.from(tags);
     TextSelection textSelection = _textSelection;
-    double scrollProgress = _scrollProgress;
+    double scrollPosition = _scrollPosition;
+    double scrollExtentMax = _scrollExtentMax;
+    double scrollExtentMin = _scrollExtentMin;
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
@@ -1097,7 +1169,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         textDirection ??= node._textDirection;
         nextNodeId ??= node._nextNodeId;
         textSelection ??= node._textSelection;
-        scrollProgress ??= node._scrollProgress;
+        scrollPosition ??= node._scrollPosition;
+        scrollExtentMax ??= node._scrollExtentMax;
+        scrollExtentMin ??= node._scrollExtentMin;
         if (value == '' || value == null)
           value = node._value;
         if (increasedValue == '' || increasedValue == null)
@@ -1138,7 +1212,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       transform: transform,
       tags: mergedTags,
       textSelection: textSelection,
-      scrollProgress: scrollProgress,
+      scrollPosition: scrollPosition,
+      scrollExtentMax: scrollExtentMax,
+      scrollExtentMin: scrollExtentMin,
     );
   }
 
@@ -1176,7 +1252,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       nextNodeId: data.nextNodeId,
       textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
-      scrollProgress: data.scrollProgress != null ? data.scrollProgress : -1.0,
+      scrollPosition: data.scrollPosition != null ? data.scrollPosition : double.nan,
+      scrollExtentMax: data.scrollExtentMax != null ? data.scrollExtentMax : double.nan,
+      scrollExtentMin: data.scrollExtentMin != null ? data.scrollExtentMin : double.nan,
       transform: data.transform?.storage ?? _kIdentityTransform,
       children: children,
     );
@@ -1249,7 +1327,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(new DiagnosticsProperty<SemanticsSortOrder>('sortOrder', sortOrder, defaultValue: null));
     if (_textSelection?.isValid == true)
       properties.add(new MessageProperty('text selection', '[${_textSelection.start}, ${_textSelection.end}]'));
-    properties.add(new DoubleProperty('scrollProgress', scrollProgress, defaultValue: null));
+    properties.add(new DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
+    properties.add(new DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
+    properties.add(new DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -2106,14 +2186,56 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// If this node is scrollable, the current scroll progress.
+
+
+
+  /// Indicates the current scrolling position in logical pixels if the node is
+  /// scrollable.
   ///
-  /// Valid range: [0.0, 1.0].
-  double get scrollProgress => _scrollProgress;
-  double _scrollProgress;
-  set scrollProgress(double value) {
+  /// The properties [scrollExtentMin] and [scrollExtentMax] indicate the valid
+  /// in-range values for this property. The value for [scrollPosition] may
+  /// (temporarily) be outside that range, e.g. during an overscroll.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.pixels] from where this value is usually taken.
+  double get scrollPosition => _scrollPosition;
+  double _scrollPosition;
+  set scrollPosition(double value) {
     assert(value != null);
-    _scrollProgress = value;
+    _scrollPosition = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// Indicates the maximum in-range value for [scrollPosition] if the node is
+  /// scrollable.
+  ///
+  /// This value may be infinity if the scroll is unbound.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.maxScrollExtent] from where this value is usually taken.
+  double get scrollExtentMax => _scrollExtentMax;
+  double _scrollExtentMax;
+  set scrollExtentMax(double value) {
+    assert(value != null);
+    _scrollExtentMax = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// Indicates the mimimum in-range value for [scrollPosition] if the node is
+  /// scrollable.
+  ///
+  /// This value may be infinity if the scroll is unbound.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.minScrollExtent] from where this value is usually taken.
+  double get scrollExtentMin => _scrollExtentMin;
+  double _scrollExtentMin;
+  set scrollExtentMin(double value) {
+    assert(value != null);
+    _scrollExtentMin = value;
     _hasBeenAnnotated = true;
   }
 
@@ -2200,7 +2322,9 @@ class SemanticsConfiguration {
     _actionsAsBits |= other._actionsAsBits;
     _flags |= other._flags;
     _textSelection ??= other._textSelection;
-    _scrollProgress ??= other._scrollProgress;
+    _scrollPosition ??= other._scrollPosition;
+    _scrollExtentMax ??= other._scrollExtentMax;
+    _scrollExtentMin ??= other._scrollExtentMin;
 
     textDirection ??= other.textDirection;
     _sortOrder = _sortOrder?.merge(other._sortOrder);
@@ -2244,7 +2368,9 @@ class SemanticsConfiguration {
       .._flags = _flags
       .._tagsForChildren = _tagsForChildren
       .._textSelection = _textSelection
-      .._scrollProgress = _scrollProgress
+      .._scrollPosition = _scrollPosition
+      .._scrollExtentMax = _scrollExtentMax
+      .._scrollExtentMin = _scrollExtentMin
       .._actionsAsBits = _actionsAsBits
       .._actions.addAll(_actions);
   }

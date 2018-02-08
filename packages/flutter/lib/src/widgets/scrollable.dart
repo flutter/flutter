@@ -575,16 +575,16 @@ class _RenderExcludableScrollSemantics extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  double get _scrollProgress {
-    return (position.pixels - position.minScrollExtent) / (position.maxScrollExtent - position.minScrollExtent);
-  }
-
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
-    if (position.haveDimensions)
-      config.scrollProgress = _scrollProgress;
+    if (position.haveDimensions) {
+      config
+          ..scrollPosition = _position.pixels
+          ..scrollExtentMax = _position.maxScrollExtent
+          ..scrollExtentMin = _position.minScrollExtent;
+    }
   }
 
   SemanticsNode _innerNode;
