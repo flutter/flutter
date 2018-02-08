@@ -59,7 +59,6 @@ if (!is_fuchsia_host) {
   mac_app("shell_application_bundle") {
     app_name = "FlutterTester"
     info_plist = "Info.plist"
-    xibs = [ "flutter_mac.xib" ]
 
     deps = [
       ":mac_desktop_platform",
