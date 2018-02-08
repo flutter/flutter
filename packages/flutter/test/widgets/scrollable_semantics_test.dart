@@ -167,7 +167,7 @@ void main() {
 
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child:new MediaQuery(
+      child: new MediaQuery(
         data: const MediaQueryData(),
         child: new Scrollable(
           controller: scrollController,
@@ -315,7 +315,7 @@ void main() {
     expect(semantics, includesNodeWith(label: 'Item 3'));
   });
 
-  testWidgets('Can toggle semantics on, off, on without crash',  (WidgetTester tester) async {
+  testWidgets('Can toggle semantics on, off, on without crash', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,

@@ -11,6 +11,14 @@ if (flutterRoot == null) {
     throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
+def flutterVersion = file("$flutterRoot/version").text
+def flutterVersionComponents = flutterVersion.split(/[^0-9]+/)
+// Let the integer version code of xx.yy.zz-pre.nnn be xxyyzznnn.
+int flutterVersionCode = Math.min(flutterVersionComponents[0].toInteger(), 20) * 100000000
+flutterVersionCode += Math.min(flutterVersionComponents[1].toInteger(), 99) * 1000000
+flutterVersionCode += Math.min(flutterVersionComponents[2].toInteger(), 999) * 1000
+flutterVersionCode += Math.min(flutterVersionComponents[3]?.toInteger() ?: 0, 999)
+
 apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
@@ -25,8 +33,9 @@ android {
         applicationId "io.flutter.demo.gallery"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 1
-        versionName "0.0.1"
+        // The Gallery app's version is defined by the Flutter framework's version.
+        versionCode flutterVersionCode
+        versionName "$flutterVersion"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 

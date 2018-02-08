@@ -1044,7 +1044,7 @@ void main() {
 
   bool isDivider(Widget widget, bool top, bool bottom) {
     final DecoratedBox box = widget;
-    final BorderSide side = const BorderSide(color: const Color(0x1F000000), width: 0.5);
+    const BorderSide side = const BorderSide(color: const Color(0x1F000000), width: 0.5);
 
     return box.decoration == new BoxDecoration(
       border: new Border(

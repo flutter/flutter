@@ -193,7 +193,7 @@ abstract class TextSelectionControls {
   /// implemented.
   // TODO(ianh): https://github.com/flutter/flutter/issues/11427
   Future<Null> handlePaste(TextSelectionDelegate delegate) async {
-    final TextEditingValue value = delegate.textEditingValue;  // Snapshot the input before using `await`.
+    final TextEditingValue value = delegate.textEditingValue; // Snapshot the input before using `await`.
     final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
     if (data != null) {
       delegate.textEditingValue = new TextEditingValue(
@@ -381,7 +381,7 @@ class TextSelectionOverlay {
   Widget _buildHandle(BuildContext context, _TextSelectionHandlePosition position) {
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
         selectionControls == null)
-      return new Container();  // hide the second handle when collapsed
+      return new Container(); // hide the second handle when collapsed
 
     return new FadeTransition(
       opacity: _handleOpacity,

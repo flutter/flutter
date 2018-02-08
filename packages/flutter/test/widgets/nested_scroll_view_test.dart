@@ -283,7 +283,7 @@ void main() {
       ),
     ));
 
-    // Initially Page0 is visible and  Page0's appbar is fully expanded (height = 200.0).
+    // Initially Page0 is visible and Page0's appbar is fully expanded (height = 200.0).
     expect(find.text('Page0'), findsOneWidget);
     expect(find.text('Page1'), findsNothing);
     expect(find.text('Page2'), findsNothing);
@@ -302,7 +302,7 @@ void main() {
     expect(find.text('Page2'), findsNothing);
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 150.0);
 
-    // Expand Page1's appbar and then fling to Page2.  Page2's appbar appears
+    // Expand Page1's appbar and then fling to Page2. Page2's appbar appears
     // fully expanded.
     controller.jumpTo(0.0);
     await(tester.pumpAndSettle());

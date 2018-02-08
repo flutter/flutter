@@ -141,7 +141,7 @@ bool _isBundleDirectory(FileSystemEntity entity) =>
     entity is Directory && entity.path.endsWith('.app');
 
 abstract class IOSApp extends ApplicationPackage {
-  IOSApp({String projectBundleId}) : super(id: projectBundleId);
+  IOSApp({@required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new IOSApp from an existing IPA.
   factory IOSApp.fromIpa(String applicationBinary) {
@@ -239,7 +239,7 @@ class PrebuiltIOSApp extends IOSApp {
     this.ipaPath,
     this.bundleDir,
     this.bundleName,
-    String projectBundleId,
+    @required String projectBundleId,
   }) : super(projectBundleId: projectBundleId);
 
   @override
@@ -259,6 +259,7 @@ Future<ApplicationPackage> getApplicationPackageForPlatform(TargetPlatform platf
 }) async {
   switch (platform) {
     case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       return applicationBinary == null
@@ -287,6 +288,7 @@ class ApplicationPackageStore {
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
     switch (platform) {
       case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         android ??= await AndroidApk.fromCurrentDirectory();

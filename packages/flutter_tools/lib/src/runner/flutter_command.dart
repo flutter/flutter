@@ -177,7 +177,10 @@ abstract class FlutterCommand extends Command<Null> {
           : null,
       preferSharedLibrary: argParser.options.containsKey('prefer-shared-library')
         ? argResults['prefer-shared-library']
-        : false);
+        : false,
+      targetPlatform: argParser.options.containsKey('target-platform')
+        ? getTargetPlatformForName(argResults['target-platform'])
+        : null);
   }
 
   void setupApplicationPackages() {
@@ -389,6 +392,19 @@ abstract class FlutterCommand extends Command<Null> {
       if (!fs.isFileSync(targetPath))
         throw new ToolExit('Target file "$targetPath" not found.');
     }
+<<<<<<< HEAD
+=======
+
+    final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
+        ? argResults['preview-dart-2']
+        : false;
+    final bool strongMode = argParser.options.containsKey('strong')
+        ? argResults['strong']
+        : false;
+    if (strongMode == true && previewDart2 == false) {
+      throw new ToolExit('--strong is valid only with --preview-dart-2 option.');
+    }
+>>>>>>> 8acb68888c0019864149431aeac9fc76c89db29e
   }
 
   ApplicationPackageStore applicationPackages;

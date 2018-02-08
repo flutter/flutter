@@ -120,6 +120,8 @@ class GalleryDrawer extends StatelessWidget {
     this.checkerboardOffscreenLayers,
     this.onCheckerboardOffscreenLayersChanged,
     this.onPlatformChanged,
+    this.overrideDirection: TextDirection.ltr,
+    this.onOverrideDirectionChanged,
     this.onSendFeedback,
   }) : assert(onThemeChanged != null),
        assert(onTimeDilationChanged != null),
@@ -144,6 +146,9 @@ class GalleryDrawer extends StatelessWidget {
   final ValueChanged<bool> onCheckerboardOffscreenLayersChanged;
 
   final ValueChanged<TargetPlatform> onPlatformChanged;
+
+  final TextDirection overrideDirection;
+  final ValueChanged<TextDirection> onOverrideDirectionChanged;
 
   final VoidCallback onSendFeedback;
 
@@ -220,6 +225,16 @@ class GalleryDrawer extends StatelessWidget {
       selected: timeDilation != 1.0,
     );
 
+    final Widget overrideDirectionItem = new CheckboxListTile(
+      title: const Text('Force RTL'),
+      value: overrideDirection == TextDirection.rtl,
+      onChanged: (bool value) {
+        onOverrideDirectionChanged(value ? TextDirection.rtl : TextDirection.ltr);
+      },
+      secondary: const Icon(Icons.format_textdirection_r_to_l),
+      selected: overrideDirection == TextDirection.rtl,
+    );
+
     final Widget sendFeedbackItem = new ListTile(
       leading: const Icon(Icons.report),
       title: const Text('Send feedback'),
@@ -285,6 +300,7 @@ class GalleryDrawer extends StatelessWidget {
     allDrawerItems.addAll(textSizeItems);
 
     allDrawerItems..addAll(<Widget>[
+      overrideDirectionItem,
       const Divider(),
       animateSlowlyItem,
       const Divider(),

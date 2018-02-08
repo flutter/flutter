@@ -274,7 +274,7 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
-  testWidgets('Can toggle semantics on, off, on without crash',  (WidgetTester tester) async {
+  testWidgets('Can toggle semantics on, off, on without crash', (WidgetTester tester) async {
     await tester.pumpWidget(new CustomPaint(
       painter: new _PainterWithSemantics(
         semantics: new CustomPainterSemantics(

@@ -167,14 +167,14 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     // circle (an onion pointing to 10:30). We rotate [handle] to point
     // straight up or up-right depending on the handle type.
     switch (type) {
-      case TextSelectionHandleType.left:  // points up-right
+      case TextSelectionHandleType.left: // points up-right
         return new Transform(
           transform: new Matrix4.rotationZ(math.PI / 2.0),
           child: handle
         );
-      case TextSelectionHandleType.right:  // points up-left
+      case TextSelectionHandleType.right: // points up-left
         return handle;
-      case TextSelectionHandleType.collapsed:  // points up
+      case TextSelectionHandleType.collapsed: // points up
         return new Transform(
           transform: new Matrix4.rotationZ(math.PI / 4.0),
           child: handle

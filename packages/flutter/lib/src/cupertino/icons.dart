@@ -79,7 +79,7 @@ class CupertinoIcons {
   /// A checkmark in a circle.
   static const IconData check_mark_circled = const IconData(0xf3fe, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A thicker left chevron used in iOS for the nav bar back button.
+  /// A thicker left chevron used in iOS for the navigation bar back button.
   static const IconData back = const IconData(0xf3cf, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
   /// Outline of a simple front-facing house.

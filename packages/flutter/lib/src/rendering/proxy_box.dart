@@ -51,9 +51,8 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
 /// This class can be used as a mixin for situations where the proxying behavior
 /// of [RenderProxyBox] is desired but inheriting from [RenderProxyBox] is
 /// impractical (e.g. because you want to mix in other classes as well).
-/// TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/15101 is fixed
-@optionalTypeArgs 
-abstract class RenderProxyBoxMixin<T extends RenderBox> extends RenderBox with RenderObjectWithChildMixin<T> {
+// TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/15101 is fixed
+abstract class RenderProxyBoxMixin extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory RenderProxyBoxMixin._() => null;
@@ -2108,7 +2107,7 @@ class RenderFittedBox extends RenderProxyBox {
   /// How to align the child within its parent's bounds.
   ///
   /// An alignment of (0.0, 0.0) aligns the child to the top-left corner of its
-  /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
+  /// parent's bounds. An alignment of (1.0, 0.5) aligns the child to the middle
   /// of the right edge of its parent's bounds.
   ///
   /// If this is set to an [AlignmentDirectional] object, then
@@ -3008,6 +3007,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     String decreasedValue,
     String hint,
     TextDirection textDirection,
+    SemanticsSortOrder sortOrder,
     VoidCallback onTap,
     VoidCallback onLongPress,
     VoidCallback onScrollLeft,
@@ -3035,6 +3035,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _decreasedValue = decreasedValue,
        _hint = hint,
        _textDirection = textDirection,
+       _sortOrder = sortOrder,
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onScrollLeft = onScrollLeft,
@@ -3205,6 +3206,20 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (textDirection == value)
       return;
     _textDirection = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Sets the [SemanticsNode.sortOrder] to the given value.
+  ///
+  /// This defines how this node will be sorted with the other semantics nodes
+  /// to determine the order in which they are traversed by the accessibility
+  /// services on the platform (e.g. VoiceOver on iOS and TalkBack on Android).
+  SemanticsSortOrder get sortOrder => _sortOrder;
+  SemanticsSortOrder _sortOrder;
+  set sortOrder(SemanticsSortOrder value) {
+    if (sortOrder == value)
+      return;
+    _sortOrder = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3504,6 +3519,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.hint = hint;
     if (textDirection != null)
       config.textDirection = textDirection;
+    if (sortOrder != null)
+      config.sortOrder = sortOrder;
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.

@@ -482,7 +482,7 @@ void main() {
       child: new MediaQuery(
         data: const MediaQueryData(),
         child: new CustomScrollView(
-          reverse: true,  // This is the important setting for this test.
+          reverse: true, // This is the important setting for this test.
           slivers: <Widget>[
             const SliverAppBar(
               pinned: true,
@@ -570,7 +570,7 @@ void main() {
       child: new MediaQuery(
         data: const MediaQueryData(),
         child: new CustomScrollView(
-          reverse: true,  // This is the important setting for this test.
+          reverse: true, // This is the important setting for this test.
           controller: controller,
           slivers: <Widget>[
             const SliverAppBar(

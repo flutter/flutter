@@ -41,7 +41,7 @@ void main() {
         child: const IconTheme(
           data: const IconThemeData(
             color: const Color(0xFF666666),
-            opacity:  0.5,
+            opacity: 0.5,
           ),
           child: const AnimatedIcon(
             progress: const AlwaysStoppedAnimation<double>(0.0),
@@ -161,7 +161,7 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = new MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
-    verifyInOrder(<dynamic>[
+    verifyInOrder(<void>[
       canvas.rotate(math.pi),
       canvas.translate(-48.0, -48.0)
     ]);
@@ -208,7 +208,7 @@ void main() {
     final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
     final MockCanvas canvas = new MockCanvas();
     customPaint.painter.paint(canvas, const Size(48.0, 48.0));
-    verifyInOrder(<dynamic>[
+    verifyInOrder(<void>[
       canvas.rotate(math.pi),
       canvas.translate(-48.0, -48.0)
     ]);

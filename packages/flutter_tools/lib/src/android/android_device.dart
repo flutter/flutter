@@ -126,6 +126,9 @@ class AndroidDevice extends Device {
     if (_platform == null) {
       // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
       switch (await _getProperty('ro.product.cpu.abi')) {
+        case 'arm64-v8a':
+          _platform = TargetPlatform.android_arm64;
+          break;
         case 'x86_64':
           _platform = TargetPlatform.android_x64;
           break;
@@ -355,16 +358,23 @@ class AndroidDevice extends Device {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return new LaunchResult.failed();
 
-    if (await targetPlatform != TargetPlatform.android_arm && !debuggingOptions.buildInfo.isDebug) {
+    final TargetPlatform devicePlatform = await targetPlatform;
+    if (!(devicePlatform == TargetPlatform.android_arm ||
+          devicePlatform == TargetPlatform.android_arm64) &&
+        !debuggingOptions.buildInfo.isDebug) {
       printError('Profile and release builds are only supported on ARM targets.');
       return new LaunchResult.failed();
     }
+
+    BuildInfo buildInfo = debuggingOptions.buildInfo;
+    if (devicePlatform == TargetPlatform.android_arm64)
+      buildInfo = buildInfo.withTargetPlatform(TargetPlatform.android_arm64);
 
     if (!prebuiltApplication) {
       printTrace('Building APK');
       await buildApk(
           target: mainPath,
-          buildInfo: debuggingOptions.buildInfo,
+          buildInfo: buildInfo,
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
@@ -400,7 +410,7 @@ class AndroidDevice extends Device {
     cmd = adbCommandForDevice(<String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.RUN',
-      '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
+      '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
       '--ez', 'enable-background-compilation', 'true',
       '--ez', 'enable-dart-profiling', 'true',
     ]);
@@ -683,7 +693,7 @@ class _AdbLogReader extends DeviceLogReader {
         _timeOrigin = null;
     runCommand(device.adbCommandForDevice(args)).then<Null>((Process process) {
       _process = process;
-      final Utf8Decoder decoder = const Utf8Decoder(allowMalformed: true);
+      const Utf8Decoder decoder = const Utf8Decoder(allowMalformed: true);
       _process.stdout.transform(decoder).transform(const LineSplitter()).listen(_onLine);
       _process.stderr.transform(decoder).transform(const LineSplitter()).listen(_onLine);
       _process.exitCode.whenComplete(() {

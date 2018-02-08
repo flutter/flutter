@@ -40,7 +40,7 @@ class _OverflowRegionData {
 /// container.
 ///
 /// This is used by some RenderObjects that are containers to show where, and by
-/// how much, their children overflow their containers.  These indicators are
+/// how much, their children overflow their containers. These indicators are
 /// typically only shown in a debug build (where the call to
 /// [paintOverflowIndicator] is surrounded by an assert).
 ///
@@ -57,10 +57,10 @@ class _OverflowRegionData {
 ///     TextDirection textDirection,
 ///     RenderBox child,
 ///   }) : super.mixin(alignment, textDirection, child);
-/// 
+///
 ///   Rect _containerRect;
 ///   Rect _childRect;
-/// 
+///
 ///   @override
 ///   void performLayout() {
 ///     // ...
@@ -68,12 +68,12 @@ class _OverflowRegionData {
 ///     _containerRect = Offset.zero & size;
 ///     _childRect = childParentData.offset & child.size;
 ///   }
-/// 
+///
 ///   @override
 ///   void paint(PaintingContext context, Offset offset) {
 ///     // Do normal painting here...
 ///     // ...
-/// 
+///
 ///     assert(() {
 ///       paintOverflowIndicator(context, offset, _containerRect, _childRect);
 ///       return true;
@@ -118,7 +118,7 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
   );
 
   // Set to true to trigger a debug message in the console upon
-  // the next paint call.  Will be reset after each paint.
+  // the next paint call. Will be reset after each paint.
   bool _overflowReportNeeded = true;
 
   String _formatPixels(double value) {

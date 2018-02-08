@@ -104,7 +104,7 @@ Future<Null> main() async {
   });
 
   testWidgets('Bordered Container insets its child', (WidgetTester tester) async {
-    final Key key = const Key('outerContainer');
+    const Key key = const Key('outerContainer');
     await tester.pumpWidget(
       new Center(
         child: new Container(
@@ -123,7 +123,7 @@ Future<Null> main() async {
   testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/7672
 
-    final Key key = const Key('Container with BoxDecoration');
+    const Key key = const Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       return new Center(
         child: new Container(
@@ -135,7 +135,7 @@ Future<Null> main() async {
       );
     }
 
-    final Color black = const Color(0xFF000000);
+    const Color black = const Color(0xFF000000);
 
     await tester.pumpWidget(buildFrame(new Border.all()));
     expect(find.byKey(key), paints
@@ -145,25 +145,25 @@ Future<Null> main() async {
     expect(find.byKey(key), paints
       ..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 0.0));
 
-    final Color green = const Color(0xFF00FF00);
-    final BorderSide greenSide = new BorderSide(color: green, width: 10.0);
+    const Color green = const Color(0xFF00FF00);
+    const BorderSide greenSide = const BorderSide(color: green, width: 10.0);
 
-    await tester.pumpWidget(buildFrame(new Border(top: greenSide)));
+    await tester.pumpWidget(buildFrame(const Border(top: greenSide)));
     expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
-    await tester.pumpWidget(buildFrame(new Border(left: greenSide)));
+    await tester.pumpWidget(buildFrame(const Border(left: greenSide)));
     expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
-    await tester.pumpWidget(buildFrame(new Border(right: greenSide)));
+    await tester.pumpWidget(buildFrame(const Border(right: greenSide)));
     expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
-    await tester.pumpWidget(buildFrame(new Border(bottom: greenSide)));
+    await tester.pumpWidget(buildFrame(const Border(bottom: greenSide)));
     expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
-    final Color blue = const Color(0xFF0000FF);
-    final BorderSide blueSide = new BorderSide(color: blue, width: 0.0);
+    const Color blue = const Color(0xFF0000FF);
+    const BorderSide blueSide = const BorderSide(color: blue, width: 0.0);
 
-    await tester.pumpWidget(buildFrame(new Border(top: blueSide, right: greenSide, bottom: greenSide)));
+    await tester.pumpWidget(buildFrame(const Border(top: blueSide, right: greenSide, bottom: greenSide)));
     expect(find.byKey(key), paints
       ..path() // There's not much point checking the arguments to these calls because paintBorder
       ..path() // reuses the same Paint object each time, configured differently, and so they will
@@ -268,7 +268,7 @@ Future<Null> main() async {
 
     List<int> itemsTapped;
 
-    final Key key = const Key('Container with BoxDecoration');
+    const Key key = const Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
       return new Center(
@@ -305,7 +305,7 @@ Future<Null> main() async {
 
     List<int> itemsTapped;
 
-    final Key key = const Key('Container with BoxDecoration');
+    const Key key = const Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
       return new Center(

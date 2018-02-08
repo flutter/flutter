@@ -209,4 +209,77 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  group('coversSameAreaAs', () {
+    test('empty Paths', () {
+      expect(
+        new Path(),
+        coversSameAreaAs(
+          new Path(),
+          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+        ),
+      );
+    });
+
+    test('mismatch', () {
+      final Path rectPath = new Path()
+        ..addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      expect(
+        new Path(),
+        isNot(coversSameAreaAs(
+          rectPath,
+          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+        )),
+      );
+    });
+
+    test('mismatch out of examined area', () {
+      final Path rectPath = new Path()
+        ..addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      rectPath.addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      expect(
+        new Path(),
+        coversSameAreaAs(
+          rectPath,
+          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 4.0, 4.0)
+        ),
+      );
+    });
+
+    test('differently constructed rects match', () {
+      final Path rectPath = new Path()
+        ..addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      final Path linePath = new Path()
+        ..moveTo(5.0, 5.0)
+        ..lineTo(5.0, 6.0)
+        ..lineTo(6.0, 6.0)
+        ..lineTo(6.0, 5.0)
+        ..close();
+      expect(
+        linePath,
+        coversSameAreaAs(
+          rectPath,
+          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+        ),
+      );
+    });
+
+     test('partially overlapping paths', () {
+      final Path rectPath = new Path()
+        ..addRect(new Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      final Path linePath = new Path()
+        ..moveTo(5.0, 5.0)
+        ..lineTo(5.0, 6.0)
+        ..lineTo(6.0, 6.0)
+        ..lineTo(6.0, 5.5)
+        ..close();
+      expect(
+        linePath,
+        isNot(coversSameAreaAs(
+          rectPath,
+          areaToCompare: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+        )),
+      );
+    });
+  });
 }

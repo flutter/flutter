@@ -81,7 +81,7 @@ void main() {
 
       testUsingContext('idevicescreenshot captures and returns screenshot', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
-        when(mockProcessManager.run(any, environment: null, workingDirectory:  null)).thenAnswer(
+        when(mockProcessManager.run(any, environment: null, workingDirectory: null)).thenAnswer(
             (Invocation invocation) => new Future<ProcessResult>.value(new ProcessResult(4, 0, '', '')));
 
         await iMobileDevice.takeScreenshot(mockOutputFile);
@@ -113,7 +113,7 @@ void main() {
     });
 
     testUsingContext('xcodeSelectPath returns path when xcode-select is installed', () {
-      final String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
+      const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
       when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
           .thenReturn(new ProcessResult(1, 0, xcodePath, ''));
       expect(xcode.xcodeSelectPath, xcodePath);

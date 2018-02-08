@@ -214,7 +214,7 @@ class Scrollable extends StatefulWidget {
       return new Future<Null>.value();
     if (futures.length == 1)
       return futures.single;
-    return Future.wait<Null>(futures);
+    return Future.wait<Null>(futures).then((List<Null> _) => null);
   }
 }
 
@@ -505,7 +505,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     assert(position != null);
     // TODO(ianh): Having all these global keys is sad.
-    Widget result =  new RawGestureDetector(
+    Widget result = new RawGestureDetector(
       key: _gestureDetectorKey,
       gestures: _gestureRecognizers,
       behavior: HitTestBehavior.opaque,

@@ -385,19 +385,19 @@ Future<Null> diagnoseXcodeBuildFailure(
     printError(noProvisioningProfileInstruction, emphasis: true);
     return;
   }
+  // Make sure the user has specified one of:
+  // * DEVELOPMENT_TEAM (automatic signing)
+  // * PROVISIONING_PROFILE (manual signing)
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      // Make sure the user has specified one of:
-      // DEVELOPMENT_TEAM (automatic signing)
-      // PROVISIONING_PROFILE (manual signing)
-      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true
-          || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
+      app.buildSettings != null &&
+      !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(app.buildSettings.containsKey)) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      app.id?.contains('com.example') ?? false) {
+      app.id.contains('com.example')) {
     printError('');
     printError('It appears that your application still contains the default signing identifier.');
     printError("Try replacing 'com.example' with your signing id in Xcode:");
@@ -527,14 +527,14 @@ Future<bool> upgradePbxProjWithFlutterAssets(String app) async {
   if (lines.any((String line) => line.contains('path = Flutter/flutter_assets')))
     return true;
 
-  final String l1 = '		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };';
-  final String l2 = '		2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */ = {isa = PBXBuildFile; fileRef = 2D5378251FAA1A9400D5DBA9 /* flutter_assets */; };';
-  final String l3 = '		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };';
-  final String l4 = '		2D5378251FAA1A9400D5DBA9 /* flutter_assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = flutter_assets; path = Flutter/flutter_assets; sourceTree = SOURCE_ROOT; };';
-  final String l5 = '				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,';
-  final String l6 = '				2D5378251FAA1A9400D5DBA9 /* flutter_assets */,';
-  final String l7 = '				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,';
-  final String l8 = '				2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */,';
+  const String l1 = '		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };';
+  const String l2 = '		2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */ = {isa = PBXBuildFile; fileRef = 2D5378251FAA1A9400D5DBA9 /* flutter_assets */; };';
+  const String l3 = '		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };';
+  const String l4 = '		2D5378251FAA1A9400D5DBA9 /* flutter_assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = flutter_assets; path = Flutter/flutter_assets; sourceTree = SOURCE_ROOT; };';
+  const String l5 = '				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,';
+  const String l6 = '				2D5378251FAA1A9400D5DBA9 /* flutter_assets */,';
+  const String l7 = '				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,';
+  const String l8 = '				2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */,';
 
 
   printStatus("Upgrading project.pbxproj of $app' to include the "
@@ -560,10 +560,10 @@ Future<bool> upgradePbxProjWithFlutterAssets(String app) async {
   lines.insert(lines.indexOf(l5) + 1, l6);
   lines.insert(lines.indexOf(l7) + 1, l8);
 
-  final String l9 = '		9740EEBB1CF902C7004384FC /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9740EEB71CF902C7004384FC /* app.flx */; };';
-  final String l10 = '		9740EEB71CF902C7004384FC /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; name = app.flx; path = Flutter/app.flx; sourceTree = "<group>"; };';
-  final String l11 = '				9740EEB71CF902C7004384FC /* app.flx */,';
-  final String l12 = '				9740EEBB1CF902C7004384FC /* app.flx in Resources */,';
+  const String l9 = '		9740EEBB1CF902C7004384FC /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9740EEB71CF902C7004384FC /* app.flx */; };';
+  const String l10 = '		9740EEB71CF902C7004384FC /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; name = app.flx; path = Flutter/app.flx; sourceTree = "<group>"; };';
+  const String l11 = '				9740EEB71CF902C7004384FC /* app.flx */,';
+  const String l12 = '				9740EEBB1CF902C7004384FC /* app.flx in Resources */,';
 
   if (lines.contains(l9)) {
     printStatus('Removing app.flx from project.pbxproj since it has been '

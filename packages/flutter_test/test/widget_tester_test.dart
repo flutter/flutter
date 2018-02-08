@@ -21,7 +21,7 @@ void main() {
       TestFailure failure;
       try {
         expect(find.text('foo', skipOffstage: false), findsOneWidget);
-      } catch(e) {
+      } catch (e) {
         failure = e;
       }
 
@@ -44,7 +44,7 @@ void main() {
       TestFailure failure;
       try {
         expect(find.text('foo', skipOffstage: false), findsNothing);
-      } catch(e) {
+      } catch (e) {
         failure = e;
       }
 
@@ -62,7 +62,7 @@ void main() {
       TestFailure failure;
       try {
         expect(find.text('foo'), findsNothing);
-      } catch(e) {
+      } catch (e) {
         failure = e;
       }
 
@@ -113,11 +113,11 @@ void main() {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
-      final String customDescription = 'custom description';
+      const String customDescription = 'custom description';
       TestFailure failure;
       try {
         expect(find.byElementPredicate((_) => false, description: customDescription), findsOneWidget);
-      } catch(e) {
+      } catch (e) {
         failure = e;
       }
 
@@ -130,11 +130,11 @@ void main() {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
-      final String customDescription = 'custom description';
+      const String customDescription = 'custom description';
       TestFailure failure;
       try {
         expect(find.byWidgetPredicate((_) => false, description: customDescription), findsOneWidget);
-      } catch(e) {
+      } catch (e) {
         failure = e;
       }
 

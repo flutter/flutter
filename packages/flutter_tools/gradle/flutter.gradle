@@ -115,9 +115,14 @@ class FlutterPlugin implements Plugin<Project> {
             }
         } else {
             Path baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
-            debugFlutterJar = baseEnginePath.resolve("android-arm").resolve("flutter.jar").toFile()
-            profileFlutterJar = baseEnginePath.resolve("android-arm-profile").resolve("flutter.jar").toFile()
-            releaseFlutterJar = baseEnginePath.resolve("android-arm-release").resolve("flutter.jar").toFile()
+            String targetArch = 'arm'
+            if (project.hasProperty('target-platform') &&
+                project.property('target-platform') == 'android-arm64') {
+              targetArch = 'arm64'
+            }
+            debugFlutterJar = baseEnginePath.resolve("android-${targetArch}").resolve("flutter.jar").toFile()
+            profileFlutterJar = baseEnginePath.resolve("android-${targetArch}-profile").resolve("flutter.jar").toFile()
+            releaseFlutterJar = baseEnginePath.resolve("android-${targetArch}-release").resolve("flutter.jar").toFile()
             if (!debugFlutterJar.isFile()) {
                 project.exec {
                     executable flutterExecutable.absolutePath
@@ -268,6 +273,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('prefer-shared-library')) {
             preferSharedLibraryValue = project.property('prefer-shared-library')
         }
+        String targetPlatformValue = null
+        if (project.hasProperty('target-platform')) {
+            targetPlatformValue = project.property('target-platform')
+        }
 
         project.android.applicationVariants.all { variant ->
             String flutterBuildMode = buildModeFor(variant.buildType)
@@ -291,6 +300,7 @@ class FlutterPlugin implements Plugin<Project> {
                 targetPath target
                 previewDart2 previewDart2Value
                 preferSharedLibrary preferSharedLibraryValue
+                targetPlatform targetPlatformValue
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
             }
@@ -305,6 +315,7 @@ class FlutterPlugin implements Plugin<Project> {
                 targetPath target
                 previewDart2 previewDart2Value
                 preferSharedLibrary preferSharedLibraryValue
+                targetPlatform targetPlatformValue
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
                 extraFrontEndOptions extraFrontEndOptionsValue
@@ -340,6 +351,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     Boolean previewDart2
     @Optional @Input
     Boolean preferSharedLibrary
+    @Optional @Input
+    String targetPlatform
     File sourceDir
     File intermediateDir
     @Optional @Input
@@ -387,6 +400,9 @@ abstract class BaseFlutterTask extends DefaultTask {
                 }
                 if (preferSharedLibrary) {
                     args "--prefer-shared-library"
+                }
+                if (targetPlatform != null) {
+                    args "--target-platform", "${targetPlatform}"
                 }
                 args "--${buildMode}"
             }

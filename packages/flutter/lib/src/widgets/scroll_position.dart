@@ -452,7 +452,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void applyNewDimensions() {
     assert(pixels != null);
     activity.applyNewDimensions();
-    _updateSemanticActions();  // will potentially request a semantics update.
+    _updateSemanticActions(); // will potentially request a semantics update.
   }
 
   /// Animates the position such that the given object is as visible as possible
@@ -631,7 +631,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   @override
   void notifyListeners() {
-    _updateSemanticActions();  // will potentially request a semantics update.
+    _updateSemanticActions(); // will potentially request a semantics update.
     super.notifyListeners();
   }
 

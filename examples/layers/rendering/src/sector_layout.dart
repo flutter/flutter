@@ -170,7 +170,7 @@ abstract class RenderDecoratedSector extends RenderSector {
       final Canvas canvas = context.canvas;
       final Paint paint = new Paint()..color = _decoration.color;
       final Path path = new Path();
-      final double outerRadius = (parentData.radius + deltaRadius);
+      final double outerRadius = parentData.radius + deltaRadius;
       final Rect outerBounds = new Rect.fromLTRB(offset.dx-outerRadius, offset.dy-outerRadius, offset.dx+outerRadius, offset.dy+outerRadius);
       path.arcTo(outerBounds, parentData.theta, deltaTheta, true);
       final double innerRadius = parentData.radius;

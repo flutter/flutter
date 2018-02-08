@@ -7,14 +7,15 @@ import 'package:flutter/material.dart';
 class NavigationIconView {
   NavigationIconView({
     Widget icon,
-    Widget title,
+    String title,
     Color color,
     TickerProvider vsync,
   }) : _icon = icon,
        _color = color,
+       _title = title,
        item = new BottomNavigationBarItem(
          icon: icon,
-         title: title,
+         title: new Text(title),
          backgroundColor: color,
        ),
        controller = new AnimationController(
@@ -29,6 +30,7 @@ class NavigationIconView {
 
   final Widget _icon;
   final Color _color;
+  final String _title;
   final BottomNavigationBarItem item;
   final AnimationController controller;
   CurvedAnimation _animation;
@@ -56,7 +58,10 @@ class NavigationIconView {
             color: iconColor,
             size: 120.0,
           ),
-          child: _icon,
+          child: new Semantics(
+            label: 'Placeholder for $_title tab',
+            child: _icon,
+          ),
         ),
       ),
     );
@@ -95,31 +100,31 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
     _navigationViews = <NavigationIconView>[
       new NavigationIconView(
         icon: const Icon(Icons.access_alarm),
-        title: const Text('Alarm'),
+        title: 'Alarm',
         color: Colors.deepPurple,
         vsync: this,
       ),
       new NavigationIconView(
         icon: new CustomIcon(),
-        title: const Text('Box'),
+        title: 'Box',
         color: Colors.deepOrange,
         vsync: this,
       ),
       new NavigationIconView(
         icon: const Icon(Icons.cloud),
-        title: const Text('Cloud'),
+        title: 'Cloud',
         color: Colors.teal,
         vsync: this,
       ),
       new NavigationIconView(
         icon: const Icon(Icons.favorite),
-        title: const Text('Favorites'),
+        title: 'Favorites',
         color: Colors.indigo,
         vsync: this,
       ),
       new NavigationIconView(
         icon: const Icon(Icons.event_available),
-        title: const Text('Event'),
+        title: 'Event',
         color: Colors.pink,
         vsync: this,
       )

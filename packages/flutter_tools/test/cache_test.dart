@@ -82,7 +82,7 @@ void main() {
     expect(flattenNameSubdirs(Uri.parse('http://flutter.io/foo/bar')), 'flutter.io/foo/bar');
     expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar')), 'docs.flutter.io/foo/bar');
     expect(flattenNameSubdirs(Uri.parse('https://www.flutter.io')), 'www.flutter.io');
-  },  overrides: <Type, Generator>{
+  }, overrides: <Type, Generator>{
     FileSystem: () => new MockFileSystem(),
   });
 }
