@@ -16,7 +16,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
-import '../plugins.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
