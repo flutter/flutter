@@ -134,8 +134,10 @@ Future<Null> pub(List<String> arguments, {
   MessageFilter filter,
   String failureMessage: 'pub failed',
   @required bool retry,
-  bool showTraceForErrors: true,
+  bool showTraceForErrors,
 }) async {
+  showTraceForErrors ??= isRunningOnBot;
+
   if (showTraceForErrors)
     arguments.insert(0, '--trace');
   int attempts = 0;
