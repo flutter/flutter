@@ -392,7 +392,6 @@ class IOSSimulator extends Device {
 
     final BuildInfo debugBuildInfo = new BuildInfo(BuildMode.debug, buildInfo.flavor,
         previewDart2: buildInfo.previewDart2,
-        strongMode: buildInfo.strongMode,
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
         preferSharedLibrary: buildInfo.preferSharedLibrary);
@@ -416,8 +415,7 @@ class IOSSimulator extends Device {
       // When running in previewDart2 mode, we still need to run compiler to
       // produce kernel file for the application.
       flx.build(precompiledSnapshot: !buildInfo.previewDart2,
-          previewDart2: buildInfo.previewDart2,
-          strongMode: buildInfo.strongMode);
+          previewDart2: buildInfo.previewDart2);
 
   @override
   Future<bool> stopApp(ApplicationPackage app) async {
