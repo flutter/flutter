@@ -205,6 +205,7 @@ tasks:
       Runs tests of concurrent hot reload commands via flutter run --machine.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+    flaky: true
 
   service_extensions_test:
     description: >
