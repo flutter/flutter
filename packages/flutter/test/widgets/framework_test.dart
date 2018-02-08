@@ -11,6 +11,7 @@ class TestState extends State<StatefulWidget> {
   Widget build(BuildContext context) => null;
 }
 
+@optionalTypeArgs
 class _MyGlobalObjectKey<T extends State<StatefulWidget>> extends GlobalObjectKey<T> {
   const _MyGlobalObjectKey(Object value) : super(value);
 }
