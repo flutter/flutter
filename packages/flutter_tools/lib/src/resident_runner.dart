@@ -38,12 +38,9 @@ class FlutterDevice {
 
   StreamSubscription<String> _loggingSubscription;
 
-  FlutterDevice(this.device,
-                { bool previewDart2 : false, bool strongMode : false }) {
+  FlutterDevice(this.device, { bool previewDart2 : false }) {
     if (previewDart2)
-      generator = new ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        strongMode: strongMode);
+      generator = new ResidentCompiler(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
   }
 
   String viewFilter;
@@ -270,8 +267,8 @@ class FlutterDevice {
     }
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
-    if (hotRunner.strongMode != null)
-      platformArgs['strong'] = hotRunner.strongMode;
+    if (hotRunner.previewDart2 != null)
+      platformArgs['strong'] = hotRunner.previewDart2;
 
     startEchoingDeviceLog();
 
@@ -333,8 +330,8 @@ class FlutterDevice {
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
     if (coldRunner.traceStartup != null)
       platformArgs['trace-startup'] = coldRunner.traceStartup;
-    if (coldRunner.strongMode != null)
-      platformArgs['strong'] = coldRunner.strongMode;
+    if (coldRunner.previewDart2 != null)
+      platformArgs['strong'] = coldRunner.previewDart2;
 
     startEchoingDeviceLog();
 
