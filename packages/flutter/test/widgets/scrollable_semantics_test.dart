@@ -225,7 +225,7 @@ void main() {
     expect(messages, isNot(hasLength(0)));
     expect(messages.every((dynamic message) => message['type'] == 'scroll'), isTrue);
 
-    Map<String, Object> message = messages.last['data'];
+    Map<Object, Object> message = messages.last['data'];
     expect(message['axis'], 'v');
     expect(message['pixels'], isPositive);
     expect(message['minScrollExtent'], 0.0);
@@ -271,7 +271,7 @@ void main() {
     expect(messages, isNot(hasLength(0)));
     expect(messages.every((dynamic message) => message['type'] == 'scroll'), isTrue);
 
-    Map<String, Object> message = messages.last['data'];
+    Map<Object, Object> message = messages.last['data'];
     expect(message['axis'], 'h');
     expect(message['pixels'], isPositive);
     expect(message['minScrollExtent'], 0.0);
