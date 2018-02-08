@@ -252,7 +252,7 @@ void main() {
     await tester.tap(find.text('SHOW'));
     await tester.pump(const Duration(seconds: 1));
 
-    final List<Material> materials = tester.widgetList(find.byType(Material)).toList();
+    final List<Material> materials = tester.widgetList<Material>(find.byType(Material)).toList();
     expect(materials.length, equals(2));
     expect(materials[0].color, green); // app scaffold
     expect(materials[1].color, green); // dialog scaffold

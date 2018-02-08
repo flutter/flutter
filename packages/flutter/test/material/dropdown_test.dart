@@ -93,7 +93,7 @@ class _TestAppState extends State<TestApp> {
 // The RenderParagraphs should be aligned, i.e. they should have the same
 // size and location.
 void checkSelectedItemTextGeometry(WidgetTester tester, String value) {
-  final List<RenderBox> boxes = tester.renderObjectList(find.byKey(new ValueKey<String>(value + 'Text'))).toList();
+  final List<RenderBox> boxes = tester.renderObjectList<RenderBox>(find.byKey(new ValueKey<String>(value + 'Text'))).toList();
   expect(boxes.length, equals(2));
   final RenderBox box0 = boxes[0];
   final RenderBox box1 = boxes[1];
@@ -232,7 +232,7 @@ void main() {
     );
     await tester.tap(find.text(value));
     await tester.pump();
-    final List<RenderBox> itemBoxes = tester.renderObjectList(find.byKey(itemKey)).toList();
+    final List<RenderBox> itemBoxes = tester.renderObjectList<RenderBox>(find.byKey(itemKey)).toList();
     expect(itemBoxes[0].localToGlobal(Offset.zero).dx, equals(0.0));
     expect(itemBoxes[1].localToGlobal(Offset.zero).dx, equals(16.0));
     expect(itemBoxes[1].size.width, equals(800.0 - 16.0 * 2));
@@ -354,7 +354,7 @@ void main() {
     // The selected dropdown item is both in menu we just popped up, and in
     // the IndexedStack contained by the dropdown button. Both of them should
     // have the same vertical center as the button.
-    final List<RenderBox> itemBoxes = tester.renderObjectList(find.byKey(const ValueKey<String>('two'))).toList();
+    final List<RenderBox> itemBoxes = tester.renderObjectList<RenderBox>(find.byKey(const ValueKey<String>('two'))).toList();
     expect(itemBoxes.length, equals(2));
 
     // When isDense is true, the button's height is reduced. The menu items'
