@@ -291,12 +291,11 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   }
   if (buildInfo.previewDart2) {
     command.add('-Ppreview-dart-2=true');
-  if (buildInfo.strongMode)
     command.add('-Pstrong=true');
-  if (buildInfo.extraFrontEndOptions != null)
-    command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
-  if (buildInfo.extraGenSnapshotOptions != null)
-    command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions}');
+    if (buildInfo.extraFrontEndOptions != null)
+      command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
+    if (buildInfo.extraGenSnapshotOptions != null)
+      command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions}');
   }
   if (buildInfo.preferSharedLibrary && androidSdk.ndkCompiler != null) {
     command.add('-Pprefer-shared-library=true');
