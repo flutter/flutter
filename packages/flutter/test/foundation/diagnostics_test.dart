@@ -970,7 +970,8 @@ void main() {
   });
 
   test('missing callback property test', () {
-    final Function onClick = () {};
+    void onClick() { }
+
     final ObjectFlagProperty<Function> present = new ObjectFlagProperty<Function>(
       'onClick',
       onClick,
@@ -982,7 +983,7 @@ void main() {
       ifNull: 'disabled',
     );
 
-    expect(present.toString(), equals('onClick: Closure: () => dynamic'));
+    expect(present.toString(), equals('onClick: Closure: () => void'));
     expect(present.isFiltered(DiagnosticLevel.fine), isTrue);
     expect(present.value, equals(onClick));
     expect(missing.toString(), equals('disabled'));
