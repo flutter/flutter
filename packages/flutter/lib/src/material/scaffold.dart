@@ -36,18 +36,42 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
+/// Geometry information for scaffold components.
+///
+/// To get a [ValueNotifier] for the scaffold gemoetry call
+/// [Scaffold.geometryOf].
+@immutable
+class ScaffoldGeometry {
+  /// The rectangle in which the scaffold is laying out
+  /// [Scaffold.bottomNavigationBar].
+  /// Null when there is no bottom navigation bar..
+  final Rect bottomNavigationBar;
+
+  /// The rectangle in which the scaffold is laying out
+  /// [Scaffold.floatingActionButton].
+  /// Null when there is no bottom navigation bar..
+  final Rect floatingActionButton;
+
+  const ScaffoldGeometry({
+    this.bottomNavigationBar,
+    this.floatingActionButton,
+  });
+}
+
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
     @required this.statusBarHeight,
     @required this.bottomViewInset,
     @required this.endPadding, // for floating action button
     @required this.textDirection,
+    @required this.geometryNotifier,
   });
 
   final double statusBarHeight;
   final double bottomViewInset;
   final double endPadding;
   final TextDirection textDirection;
+  final ValueNotifier<ScaffoldGeometry> geometryNotifier;
 
   @override
   void performLayout(Size size) {
@@ -68,10 +92,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.appBar, Offset.zero);
     }
 
+    Rect bottomNavigationBarRect;
     if (hasChild(_ScaffoldSlot.bottomNavigationBar)) {
       final double bottomNavigationBarHeight = layoutChild(_ScaffoldSlot.bottomNavigationBar, fullWidthConstraints).height;
       bottomWidgetsHeight += bottomNavigationBarHeight;
-      positionChild(_ScaffoldSlot.bottomNavigationBar, new Offset(0.0, math.max(0.0, bottom - bottomWidgetsHeight)));
+      final Offset topLeft = new Offset(0.0, math.max(0.0, bottom - bottomWidgetsHeight));
+      positionChild(_ScaffoldSlot.bottomNavigationBar, topLeft);
+      bottomNavigationBarRect = topLeft & new Size(size.width, bottomNavigationBarHeight);
     }
 
     if (hasChild(_ScaffoldSlot.persistentFooter)) {
@@ -127,6 +154,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.snackBar, new Offset(0.0, contentBottom - snackBarSize.height));
     }
 
+    Rect floatingActionButtonRect;
     if (hasChild(_ScaffoldSlot.floatingActionButton)) {
       final Size fabSize = layoutChild(_ScaffoldSlot.floatingActionButton, looseConstraints);
       double fabX;
@@ -145,6 +173,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       if (bottomSheetSize.height > 0.0)
         fabY = math.min(fabY, contentBottom - bottomSheetSize.height - fabSize.height / 2.0);
       positionChild(_ScaffoldSlot.floatingActionButton, new Offset(fabX, fabY));
+      floatingActionButtonRect = new Offset(fabX, fabY) & fabSize;
     }
 
     if (hasChild(_ScaffoldSlot.statusBar)) {
@@ -161,6 +190,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       layoutChild(_ScaffoldSlot.endDrawer, new BoxConstraints.tight(size));
       positionChild(_ScaffoldSlot.endDrawer, Offset.zero);
     }
+
+    geometryNotifier.value = new ScaffoldGeometry(
+      bottomNavigationBar: bottomNavigationBarRect,
+      floatingActionButton: floatingActionButtonRect,
+    );
   }
 
   @override
@@ -514,6 +548,35 @@ class Scaffold extends StatefulWidget {
     );
   }
 
+  /// Returns a [ValueNotifier] for the [ScaffoldGeometry] for the closest
+  /// [Scaffold] ancestor of the given context.
+  ///
+  /// Value notifications are sent during the layout pass.
+  static ValueNotifier<ScaffoldGeometry> geometryOf(BuildContext context) {
+    final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType(_ScaffoldScope);
+    if (scaffoldScope == null)
+    throw new FlutterError(
+      'Scaffold.geometryOf() called with a context that does not contain a Scaffold.\n'
+      'This usually happens when the context provided is from the same StatefulWidget as that '
+      'whose build function actually creates the Scaffold widget being sought.\n'
+      'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
+      'context that is "under" the Scaffold. For an example of this, please see the '
+      'documentation for Scaffold.of():\n'
+      '  https://docs.flutter.io/flutter/material/Scaffold/of.html\n'
+      'A more efficient solution is to split your build function into several widgets. This '
+      'introduces a new context from which you can obtain the Scaffold. In this solution, '
+      'you would have an outer widget that creates the Scaffold populated by instances of '
+      'your new inner widgets, and then in these inner widgets you would use Scaffold.geometryOf().\n'
+      'A less elegant but more expedient solution is assign a GlobalKey to the Scaffold, '
+      'then use the key.currentState property to obtain the ScaffoldState rather than '
+      'using the Scaffold.geometryOf() function.\n'
+      'The context used was:\n'
+      '  $context'
+    );
+
+    return scaffoldScope.geometryNotifier;
+  }
+
   /// Whether the Scaffold that most tightly encloses the given context has a
   /// drawer.
   ///
@@ -547,6 +610,8 @@ class Scaffold extends StatefulWidget {
 /// Can display [SnackBar]s and [BottomSheet]s. Retrieve a [ScaffoldState] from
 /// the current [BuildContext] using [Scaffold.of].
 class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
+
+  ValueNotifier<ScaffoldGeometry> _geometryNotifier;
 
   // DRAWER API
 
@@ -799,6 +864,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // INTERNALS
 
   @override
+  void initState() {
+    super.initState();
+    _geometryNotifier = new ValueNotifier<ScaffoldGeometry>(null);
+  }
+
+  @override
   void dispose() {
     _snackBarController?.dispose();
     _snackBarController = null;
@@ -1044,6 +1115,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     return new _ScaffoldScope(
       hasDrawer: hasDrawer,
+      geometryNotifier: _geometryNotifier,
       child: new PrimaryScrollController(
         controller: _primaryScrollController,
         child: new Material(
@@ -1055,6 +1127,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
               bottomViewInset: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
               endPadding: endPadding,
               textDirection: textDirection,
+              geometryNotifier: _geometryNotifier,
             ),
           ),
         ),
@@ -1161,11 +1234,13 @@ class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_Pers
 class _ScaffoldScope extends InheritedWidget {
   const _ScaffoldScope({
     @required this.hasDrawer,
+    @required this.geometryNotifier,
     @required Widget child,
   }) : assert(hasDrawer != null),
        super(child: child);
 
   final bool hasDrawer;
+  final ValueNotifier<ScaffoldGeometry> geometryNotifier;
 
   @override
   bool updateShouldNotify(_ScaffoldScope oldWidget) {
