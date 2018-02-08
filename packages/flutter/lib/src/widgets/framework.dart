@@ -312,7 +312,17 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   int get hashCode => identityHashCode(value);
 
   @override
-  String toString() => '[$runtimeType ${describeIdentity(value)}]';
+  String toString() {
+    String selfType = runtimeType.toString();
+    // This is a temporary work-around to align what const GlobalObjectKey().toString()
+    // produces in Dart 2 with what it produces in Dart 1.
+    // In Dart 2 const GlobalObjectKey() is instantiated to bounds so it becomes
+    // const GlobalObjectKey<State<StatefulWidget>>().
+    if (selfType == 'GlobalObjectKey<State<StatefulWidget>>') {
+      selfType = 'GlobalObjectKey';
+    }
+    return '[$selfType ${describeIdentity(value)}]';
+  }
 }
 
 /// This class is a work-around for the "is" operator not accepting a variable value as its right operand
