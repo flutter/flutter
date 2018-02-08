@@ -164,6 +164,12 @@ abstract class FlutterCommand extends Command<Null> {
         ? argResults['preview-dart-2']
         : false;
 
+    TargetPlatform targetPlatform;
+    if (argParser.options.containsKey('target-platform') &&
+        argResults['target-platform'] != 'default') {
+      targetPlatform = getTargetPlatformForName(argResults['target-platform']);
+    }
+
     return new BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
         ? argResults['flavor']
@@ -178,9 +184,7 @@ abstract class FlutterCommand extends Command<Null> {
       preferSharedLibrary: argParser.options.containsKey('prefer-shared-library')
         ? argResults['prefer-shared-library']
         : false,
-      targetPlatform: argParser.options.containsKey('target-platform')
-        ? getTargetPlatformForName(argResults['target-platform'])
-        : null);
+      targetPlatform: targetPlatform);
   }
 
   void setupApplicationPackages() {
