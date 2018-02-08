@@ -20,7 +20,7 @@ void main() {
               const SliverAppBar(primary: false, pinned: true, title: const Text('B')),
               const SliverList(
                 delegate: const SliverChildListDelegate(
-                  <Widget>[
+                  const <Widget>[
                     const Text('C'),
                     const Text('D'),
                     const SizedBox(height: 500.0),

@@ -55,7 +55,7 @@ void main() {
 
     LicenseRegistry.addLicense(() {
       return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(<String>[ 'Pirate package '], 'Pirate license')
+        const LicenseEntryWithLineBreaks(const <String>[ 'Pirate package '], 'Pirate license')
       ]);
     });
 

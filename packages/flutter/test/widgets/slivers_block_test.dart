@@ -152,7 +152,7 @@ void main() {
           offset: offset,
           slivers: <Widget>[
             const SliverList(
-              delegate: const SliverChildListDelegate(<Widget>[
+              delegate: const SliverChildListDelegate(const <Widget>[
                 const SizedBox(height: 251.0, child: const Text('a')),
                 const SizedBox(height: 252.0, child: const Text('b')),
               ]),

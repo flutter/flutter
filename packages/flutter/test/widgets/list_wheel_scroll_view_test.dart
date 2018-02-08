@@ -17,7 +17,7 @@ void main() {
         const ListWheelScrollView( // ignore: CONST_EVAL_THROWS_EXCEPTION
           diameterRatio: -2.0,
           itemExtent: 20.0,
-          children: <Widget>[],
+          children: const <Widget>[],
         );
         fail('Expected failure with negative diameterRatio');
       } on AssertionError catch (exception) {
