@@ -6,8 +6,9 @@ import 'dart:async';
 
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 
-import '../lib/fuchsia_remote_debug_protocol.dart';
+import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart';
 
 void main() {
   group('FuchsiaRemoteConnection.connect', () {
@@ -17,21 +18,23 @@ void main() {
     setUp(() {
       mockRunner = new MockSshCommandRunner();
       mockVmService = new MockDartVm();
-      // TODO(awdavies): Set things up!
     });
 
     tearDown(() {
-      // TODO(awdavies): Tear things down!
+      /// Most functions will mock out the port forwarding and connection
+      /// functions.
+      restoreFuchsiaPortForwardingFunction();
+      restoreVmServiceConnectionFunction();
     });
 
-    test('connects or whatever without ssh config path', () async {
-      when(mockRunner.run(any)).thenReturn(['wahoo']);
-      final FuchsiaRemoteConnection connection =
-          await FuchsiaRemoteConnection.connect('whatever');
-    });
+    test('???', () async {});
   });
 }
 
 class MockDartVm extends Mock implements DartVm {}
 
 class MockSshCommandRunner extends Mock implements SshCommandRunner {}
+
+class MockPortForwarder extends Mock implements PortForwarder {}
+
+class MockPeer extends Mock implements json_rpc.Peer {}

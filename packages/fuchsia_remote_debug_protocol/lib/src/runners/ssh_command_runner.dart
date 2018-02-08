@@ -5,9 +5,11 @@
 import 'dart:async';
 import 'dart:io' show ProcessResult;
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../common/logging.dart';
+import '../common/network.dart';
 
 /// An error raised when a command fails to run within the `SshCommandRunner`.
 ///
@@ -29,37 +31,62 @@ class SshCommandError extends Error {
 }
 
 /// Runs a command remotely on a Fuchsia device. Requires a fuchsia root and
-/// build type (to load the ssh config), and the ipv4 address of the fuchsia
+/// build type (to load the ssh config), and the address of the fuchsia
 /// device.
 class SshCommandRunner {
   final Logger _log = new Logger('SshCommandRunner');
 
-  final ProcessManager _processManager = const LocalProcessManager();
+  final ProcessManager _processManager;
 
   /// The IPv4 address to access the Fuchsia machine over SSH.
-  final String ipv4Address;
+  final String address;
 
   /// The path to the SSH config (optional).
   final String sshConfigPath;
 
-  /// Instantiates the command runner, pointing to an `ipv4Address` as well as
+  /// The name of the machine's network interface (for use with IPv6
+  /// connections. Ignored otherwise).
+  final String interface;
+
+  /// Private constructor for dependency injection of the process manager.
+  @visibleForTesting
+  SshCommandRunner.withProcessManager(this._processManager,
+      {this.address, this.interface = '', this.sshConfigPath}) {
+    validateAddress(address);
+  }
+
+  /// Instantiates the command runner, pointing to an `address` as well as
   /// an optional SSH config file path.
   ///
   /// If the SSH config path is supplied as an empty string, behavior is
   /// undefined.
-  SshCommandRunner({this.ipv4Address, this.sshConfigPath});
+  ///
+  /// `ArgumentError` is thrown in the event that `address` is neither valid
+  /// IPv4 nor IPv6. Note that when connecting to a link local address (fe80::
+  /// is usually at the start of the address), then an interface should be
+  /// supplied.
+  SshCommandRunner({this.address, this.interface = '', this.sshConfigPath})
+      : _processManager = const LocalProcessManager() {
+    validateAddress(address);
+  }
 
   /// Runs a command on a Fuchsia device through an SSH tunnel.
   ///
   /// If the subprocess creating the SSH tunnel returns a nonzero exit status,
   /// then an `SshCommandError` is raised.
   Future<List<String>> run(String command) async {
-    List<String> args;
+    final List<String> args = ['ssh'];
     if (sshConfigPath != null) {
-      args = <String>['ssh', '-F', sshConfigPath, ipv4Address, command];
-    } else {
-      args = <String>['ssh', ipv4Address, command];
+      args.addAll(<String>['-F', sshConfigPath]);
     }
+    if (isIpV6Address(address)) {
+      final String fullAddress =
+          interface.isEmpty ? address : '$address%$interface';
+      args.addAll(<String>['-6', fullAddress]);
+    } else {
+      args.add(address);
+    }
+    args.add(command);
     _log.fine(args.join(' '));
     final ProcessResult result = await _processManager.run(args);
     if (result.exitCode != 0) {
