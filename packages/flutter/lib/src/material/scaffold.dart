@@ -904,6 +904,30 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
 
     if (widget.persistentFooterButtons != null) {
+      final ButtonTheme buttonBarTheme = new ButtonTheme.bar(
+        child: new SafeArea(
+          top: false,
+          child: new ButtonBar(
+            children: widget.persistentFooterButtons,
+          ),
+        ),
+      );
+
+      // When adding a SafeArea around ButtonBar, reduce the SafeArea padding
+      // by the additional padding that ButtonBar applies.
+      //
+      // Normally, the SafeArea would be applied within ButtonBar, but we do
+      // it here due to the likelihood of ButtonBars being used in places where
+      // developers have inadvertently failed to remove media padding.
+      final double buttonPadding = buttonBarTheme.data.padding.horizontal / 2.0;
+      final MediaQueryData mediaQuery = MediaQuery.of(context);
+      final EdgeInsets reducedPadding = new EdgeInsets.fromLTRB(
+          math.max(0.0, mediaQuery.padding.left - buttonPadding / 2.0),
+          mediaQuery.padding.top,
+          math.max(0.0, mediaQuery.padding.right - buttonPadding / 2.0),
+          math.max(0.0, mediaQuery.padding.bottom - buttonPadding),
+      );
+
       _addIfNonNull(
         children,
         new Container(
@@ -914,15 +938,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
               ),
             ),
           ),
-          child: new SafeArea(
-            child: new ButtonTheme.bar(
-              child: new SafeArea(
-                top: false,
-                child: new ButtonBar(
-                  children: widget.persistentFooterButtons
-                ),
-              ),
-            ),
+          child: new MediaQuery(
+            data: mediaQuery.copyWith(padding: reducedPadding),
+            child: buttonBarTheme,
           ),
         ),
         _ScaffoldSlot.persistentFooter,
