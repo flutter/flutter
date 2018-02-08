@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 
 import 'src/context.dart';
 
-void main()  {
+void main() {
   group('validateReloadReport', () {
     testUsingContext('invalid', () async {
       expect(HotRunner.validateReloadReport(<String, dynamic>{}), false);

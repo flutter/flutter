@@ -1397,18 +1397,18 @@ class _Bundle_zh_TW extends TranslationBundle {
 }
 
 TranslationBundle translationBundleForLocale(Locale locale) {
-  switch(locale.languageCode) {
+  switch (locale.languageCode) {
     case 'ar':
       return const _Bundle_ar();
     case 'de': {
-      switch(locale.toString()) {
+      switch (locale.toString()) {
         case 'de_CH':
           return const _Bundle_de_CH();
       }
       return const _Bundle_de();
     }
     case 'en': {
-      switch(locale.toString()) {
+      switch (locale.toString()) {
         case 'en_AU':
           return const _Bundle_en_AU();
         case 'en_CA':
@@ -1427,7 +1427,7 @@ TranslationBundle translationBundleForLocale(Locale locale) {
       return const _Bundle_en();
     }
     case 'es': {
-      switch(locale.toString()) {
+      switch (locale.toString()) {
         case 'es_419':
           return const _Bundle_es_419();
         case 'es_AR':
@@ -1474,7 +1474,7 @@ TranslationBundle translationBundleForLocale(Locale locale) {
     case 'fa':
       return const _Bundle_fa();
     case 'fr': {
-      switch(locale.toString()) {
+      switch (locale.toString()) {
         case 'fr_CA':
           return const _Bundle_fr_CA();
       }
@@ -1497,7 +1497,7 @@ TranslationBundle translationBundleForLocale(Locale locale) {
     case 'ps':
       return const _Bundle_ps();
     case 'pt': {
-      switch(locale.toString()) {
+      switch (locale.toString()) {
         case 'pt_PT':
           return const _Bundle_pt_PT();
       }
@@ -1514,7 +1514,7 @@ TranslationBundle translationBundleForLocale(Locale locale) {
     case 'ur':
       return const _Bundle_ur();
     case 'zh': {
-      switch(locale.toString()) {
+      switch (locale.toString()) {
         case 'zh_HK':
           return const _Bundle_zh_HK();
         case 'zh_TW':

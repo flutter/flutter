@@ -63,7 +63,7 @@ double getBorderWeight(WidgetTester tester) {
     return 0.0;
   final CustomPaint customPaint = tester.widget(findBorderPainter());
   final dynamic/* _InputBorderPainter */ inputBorderPainter = customPaint.foregroundPainter;
-  final dynamic/*_InputBorderTween */  inputBorderTween = inputBorderPainter.border;
+  final dynamic/*_InputBorderTween */ inputBorderTween = inputBorderPainter.border;
   final Animation<double> animation = inputBorderPainter.borderAnimation;
   final dynamic/*_InputBorder */ border = inputBorderTween.evaluate(animation);
   return border.borderSide.width;

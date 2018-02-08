@@ -111,7 +111,7 @@ class TestBorder extends ShapeBorder {
   const TestBorder(this.onLog) : assert(onLog != null);
 
   final Logger onLog;
-  
+
   @override
   EdgeInsetsGeometry get dimensions => const EdgeInsetsDirectional.only(start: 1.0);
 

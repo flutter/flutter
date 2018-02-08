@@ -11,8 +11,8 @@ import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
-import 'button.dart';
 import 'button_bar.dart';
+import 'button_theme.dart';
 import 'drawer.dart';
 import 'flexible_space_bar.dart';
 import 'material.dart';
@@ -928,8 +928,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           ),
           child: new SafeArea(
             child: new ButtonTheme.bar(
-              child: new ButtonBar(
-                children: widget.persistentFooterButtons
+              child: new SafeArea(
+                top: false,
+                child: new ButtonBar(
+                  children: widget.persistentFooterButtons
+                ),
               ),
             ),
           ),
@@ -938,7 +941,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
-        removeBottomPadding: widget.resizeToAvoidBottomPadding,
+        removeBottomPadding: false,
       );
     }
 

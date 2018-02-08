@@ -30,10 +30,10 @@ const List<String> coolColorNames = const <String>[
 
 class CupertinoNavigationDemo extends StatelessWidget {
   CupertinoNavigationDemo()
-      : colorItems = new List<Color>.generate(50, (int index){
+      : colorItems = new List<Color>.generate(50, (int index) {
           return coolColors[new math.Random().nextInt(coolColors.length)];
         }) ,
-        colorNameItems = new List<String>.generate(50, (int index){
+        colorNameItems = new List<String>.generate(50, (int index) {
           return coolColorNames[new math.Random().nextInt(coolColorNames.length)];
         });
 
@@ -218,12 +218,18 @@ class Tab1RowItem extends StatelessWidget {
               ),
               new CupertinoButton(
                 padding: EdgeInsets.zero,
-                child: const Icon(CupertinoIcons.plus_circled, color: CupertinoColors.activeBlue),
+                child: const Icon(CupertinoIcons.plus_circled,
+                  color: CupertinoColors.activeBlue,
+                  semanticLabel: 'Add',
+                ),
                 onPressed: () { },
               ),
               new CupertinoButton(
                 padding: EdgeInsets.zero,
-                child: const Icon(CupertinoIcons.share, color: CupertinoColors.activeBlue),
+                child: const Icon(CupertinoIcons.share,
+                  color: CupertinoColors.activeBlue,
+                  semanticLabel: 'Share',
+                ),
                 onPressed: () { },
               ),
             ],

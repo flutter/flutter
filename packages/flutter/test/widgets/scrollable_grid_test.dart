@@ -29,7 +29,7 @@ void main() {
       child: new Align(
         child: new SizedBox(
           height: 800.0,
-          width: 300.0,  // forces the grid children to be 300..300
+          width: 300.0, // forces the grid children to be 300..300
           child: new GridView.count(
             crossAxisCount: 1,
             padding: padding,

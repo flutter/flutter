@@ -53,7 +53,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
     });
   }
 
-  void _showMessage()  {
+  void _showMessage() {
     showDialog<Null>(
       context: context,
       child: new AlertDialog(

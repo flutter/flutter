@@ -8,8 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
-import 'button.dart';
 import 'button_bar.dart';
+import 'button_theme.dart';
 import 'card.dart';
 import 'data_table.dart';
 import 'data_table_source.dart';
@@ -324,7 +324,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final List<Widget> footerWidgets = <Widget>[];
     if (widget.onRowsPerPageChanged != null) {
       final List<Widget> availableRowsPerPage = widget.availableRowsPerPage
-        .where((int value) => (value <= _rowCount || value == widget.rowsPerPage))
+        .where((int value) => value <= _rowCount || value == widget.rowsPerPage)
         .map<DropdownMenuItem<int>>((int value) {
           return new DropdownMenuItem<int>(
             value: value,

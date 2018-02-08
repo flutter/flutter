@@ -6,14 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
-
-/// Whether to report all error messages (true) or attempt to filter out some
-/// known false positives (false).
-///
-/// Set this to false locally if you want to address Flutter-specific issues.
-const bool kVerbose = true; // please leave this as true on Travis
 
 const String kDocRoot = 'dev/docs/doc';
 
@@ -30,7 +25,14 @@ const String kDocRoot = 'dev/docs/doc';
 /// in your path. It requires that 'flutter' has been run previously. It uses
 /// the version of Dart downloaded by the 'flutter' tool in this repository and
 /// will crash if that is absent.
-Future<Null> main(List<String> args) async {
+Future<Null> main(List<String> arguments) async {
+  final ArgParser argParser = _createArgsParser();
+  final ArgResults args = argParser.parse(arguments);
+  if (args['help']) {
+    print ('Usage:');
+    print (argParser.usage);
+    exit(0);
+  }
   // If we're run from the `tools` dir, set the cwd to the repo root.
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
@@ -95,18 +97,26 @@ Future<Null> main(List<String> args) async {
 
   createFooter('dev/docs/lib/footer.html');
 
+  final List<String> dartdocBaseArgs = <String>['global', 'run'];
+  if (args['checked']) {
+    dartdocBaseArgs.add('-c');
+  }
+  dartdocBaseArgs.add('dartdoc');
+
   // Verify which version of dartdoc we're using.
   final ProcessResult result = Process.runSync(
     pubExecutable,
-    <String>['global', 'run', 'dartdoc', '--version'],
+    <String>[]..addAll(dartdocBaseArgs)..add('--version'),
     workingDirectory: 'dev/docs',
     environment: pubEnvironment,
   );
   print('\n${result.stdout}flutter version: $version\n');
 
+  if (args['json']) {
+    dartdocBaseArgs.add('--json');
+  }
   // Generate the documentation.
-  final List<String> args = <String>[
-    'global', 'run', 'dartdoc',
+  final List<String> dartdocArgs = <String>[]..addAll(dartdocBaseArgs)..addAll(<String>[
     '--header', 'styles.html',
     '--header', 'analytics.html',
     '--header', 'survey.html',
@@ -120,30 +130,30 @@ Future<Null> main(List<String> args) async {
     '--category-order', 'flutter,Dart Core,flutter_test,flutter_driver',
     '--show-warnings',
     '--auto-include-dependencies',
-  ];
+  ]);
 
   // Explicitly list all the packages in //flutter/packages/* that are
   // not listed 'nodoc' in their pubspec.yaml.
   for (String libraryRef in libraryRefs(diskPath: true)) {
-    args.add('--include-external');
-    args.add(libraryRef);
+    dartdocArgs.add('--include-external');
+    dartdocArgs.add(libraryRef);
   }
 
   process = await Process.start(
     pubExecutable,
-    args,
+    dartdocArgs,
     workingDirectory: 'dev/docs',
     environment: pubEnvironment,
   );
-  printStream(process.stdout, prefix: 'dartdoc:stdout: ',
-    filter: kVerbose ? const <Pattern>[] : <Pattern>[
+  printStream(process.stdout, prefix: args['json'] ? '' : 'dartdoc:stdout: ',
+    filter: args['verbose'] ? const <Pattern>[] : <Pattern>[
       new RegExp(r'^generating docs for library '), // unnecessary verbosity
       new RegExp(r'^pars'), // unnecessary verbosity
     ],
   );
-  printStream(process.stderr, prefix: 'dartdoc:stderr: ',
-    filter: kVerbose ? const <Pattern>[] : <Pattern>[
-      new RegExp(r'^ warning: generic type handled as HTML:'), // https://github.com/dart-lang/dartdoc/issues/1475
+  printStream(process.stderr, prefix: args['json'] ? '' : 'dartdoc:stderr: ',
+    filter: args['verbose'] ? const <Pattern>[] : <Pattern>[
+      new RegExp(r'^[ ]+warning: generic type handled as HTML:'), // https://github.com/dart-lang/dartdoc/issues/1475
       new RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
     ],
   );
@@ -155,6 +165,21 @@ Future<Null> main(List<String> args) async {
   sanityCheckDocs();
 
   createIndexAndCleanup();
+}
+
+ArgParser _createArgsParser() {
+  final ArgParser parser = new ArgParser();
+  parser.addFlag('help', abbr: 'h', negatable: false,
+      help: 'Show command help.');
+  parser.addFlag('verbose', negatable: true, defaultsTo: true,
+      help: 'Whether to report all error messages (on) or attempt to '
+          'filter out some known false positives (off).  Shut this off '
+          'locally if you want to address Flutter-specific issues.');
+  parser.addFlag('checked', abbr: 'c', negatable: true,
+      help: 'Run dartdoc in checked mode.');
+  parser.addFlag('json', negatable: true,
+      help: 'Display json-formatted output from dartdoc and skip stdout/stderr prefixing.');
+  return parser;
 }
 
 void createFooter(String footerPath) {

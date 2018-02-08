@@ -29,9 +29,9 @@ class Stock {
     // FIXME: This class should only have static data, not lastSale, etc.
     // "Symbol","Name","LastSale","MarketCap","IPOyear","Sector","industry","Summary Quote",
     lastSale = 0.0;
-    try{
+    try {
       lastSale = double.parse(fields[2]);
-    } catch(_) {}
+    } catch (_) {}
     symbol = fields[0];
     name = fields[1];
     marketCap = fields[4];

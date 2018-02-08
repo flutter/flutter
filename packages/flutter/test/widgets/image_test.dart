@@ -230,7 +230,7 @@ void main() {
     final GlobalKey imageKey = new GlobalKey(debugLabel: 'image');
     final TestImageProvider imageProvider = new TestImageProvider();
 
-    // This is just a variation on the previous test.  In this version the location
+    // This is just a variation on the previous test. In this version the location
     // of the Image changes and the MediaQuery widgets do not.
     await tester.pumpWidget(
       new Row(
@@ -462,7 +462,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 class TestImageStreamCompleter extends ImageStreamCompleter {
   final List<ImageListener> listeners = <ImageListener> [];
 
-  @override 
+  @override
   void addListener(ImageListener listener) {
     listeners.add(listener);
   }

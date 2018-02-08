@@ -58,8 +58,8 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// [ImageProvider] is available.
 ///
 /// If the image is later used by an [Image] or [BoxDecoration] or [FadeInImage],
-/// it will probably be loaded faster.  The consumer of the image does not need
-/// to use the same [ImageProvider] instance.  The [ImageCache] will find the image
+/// it will probably be loaded faster. The consumer of the image does not need
+/// to use the same [ImageProvider] instance. The [ImageCache] will find the image
 /// as long as both images share the same key.
 ///
 /// The [BuildContext] and [Size] are used to select an image configuration

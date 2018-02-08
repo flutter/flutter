@@ -494,21 +494,21 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   const _MaterialLocalizationsDelegate();
 
   static const List<String> _supportedLanguages = const <String>[
-    'ar',  // Arabic
-    'de',  // German
-    'en',  // English
-    'es',  // Spanish
-    'fa',  // Farsi
-    'fr',  // French
-    'he',  // Hebrew
-    'it',  // Italian
-    'ja',  // Japanese
-    'ps',  // Pashto
-    'pt',  // Portugese
-    'ro',  // Romanian
-    'ru',  // Russian
-    'ur',  // Urdu
-    'zh',  // Simplified Chinese
+    'ar', // Arabic
+    'de', // German
+    'en', // English
+    'es', // Spanish
+    'fa', // Farsi
+    'fr', // French
+    'he', // Hebrew
+    'it', // Italian
+    'ja', // Japanese
+    'ps', // Pashto
+    'pt', // Portugese
+    'ro', // Romanian
+    'ru', // Russian
+    'ur', // Urdu
+    'zh', // Simplified Chinese
   ];
 
   @override

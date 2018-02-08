@@ -362,7 +362,7 @@ class _GlowController extends ChangeNotifier {
     _glowOpacityTween.end = math.min(_glowOpacity.value + overscroll / extent * _pullOpacityGlowFactor, _maxOpacity);
     final double height = math.min(extent, crossExtent * _kWidthToHeightFactor);
     _glowSizeTween.begin = _glowSize.value;
-    _glowSizeTween.end = math.max((1.0 - 1.0 / (0.7 * math.sqrt(_pullDistance * height))), _glowSize.value);
+    _glowSizeTween.end = math.max(1.0 - 1.0 / (0.7 * math.sqrt(_pullDistance * height)), _glowSize.value);
     _displacementTarget = crossAxisOffset / crossExtent;
     if (_displacementTarget != _displacement) {
       if (!_displacementTicker.isTicking) {

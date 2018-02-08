@@ -102,7 +102,7 @@ class PackagesTestCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() => pub(<String>['run', 'test']..addAll(argResults.rest), context:  PubContext.runTest, retry: false);
+  Future<Null> runCommand() => pub(<String>['run', 'test']..addAll(argResults.rest), context: PubContext.runTest, retry: false);
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {

@@ -7,13 +7,14 @@ default_platform(:android)
 # flutter build apk --release
 # to build the app using the Flutter toolchain.
 platform :android do
-  desc 'Push the built release APK to alpha'
-  lane :deploy_play_store_alpha do
+  desc 'Push the built release APK to alpha or beta depending on current branch'
+  lane :deploy_play_store do
     upload_to_play_store(
-      track: 'alpha',
+      track: ENV['TRAVIS_BRANCH'] == 'beta' ? 'beta' : 'alpha',
       apk: '../build/app/outputs/apk/release/app-release.apk',
       json_key_data: ENV['GOOGLE_DEVELOPER_SERVICE_ACCOUNT_ACTOR_FASTLANE'],
-      skip_upload_screenshots: true
+      skip_upload_screenshots: true,
+      skip_upload_images: true
     )
   end
 end

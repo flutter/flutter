@@ -190,7 +190,7 @@ class AnimatedList extends StatefulWidget {
 /// is needed.
 ///
 /// When an item is removed with [removeItem] its animation is reversed.
-/// The removed item's animation  is passed to the [removeItem] builder
+/// The removed item's animation is passed to the [removeItem] builder
 /// parameter.
 ///
 /// An app that needs to insert or remove items in response to an event

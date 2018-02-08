@@ -22,7 +22,7 @@ typedef Rect RectCallback();
 ///  * [Material], in particular [Material.type]
 ///  * [kMaterialEdges]
 enum MaterialType {
-  /// Infinite extent using default theme canvas color.
+  /// Rectangle using default theme canvas color.
   canvas,
 
   /// Rounded edges, card theme color.
@@ -186,7 +186,7 @@ class Material extends StatefulWidget {
   /// The z-coordinate at which to place this material. This controls the size
   /// of the shadow below the material.
   ///
-  /// If this is non-zero, the contents of the card are clipped, because the
+  /// If this is non-zero, the contents of the material are clipped, because the
   /// widget conceptually defines an independent printed piece of material.
   ///
   /// Defaults to 0. Changing this value will cause the shadow to animate over
@@ -209,11 +209,20 @@ class Material extends StatefulWidget {
   /// The typographical style to use for text within this material.
   final TextStyle textStyle;
 
+  /// Defines the material's shape as well its shadow.
+  ///
+  /// If shape is non null, the [borderRadius] is ignored and the material's
+  /// clip boundary and shadow are defined by the shape.
+  ///
+  /// A shadow is only displayed if the [elevation] is greater than
+  /// zero.
   final ShapeBorder shape;
 
   /// If non-null, the corners of this box are rounded by this [BorderRadius].
   /// Otherwise, the corners specified for the current [type] of material are
   /// used.
+  ///
+  /// If [shape] is non null then the border radius is ignored.
   ///
   /// Must be null if [type] is [MaterialType.circle].
   final BorderRadius borderRadius;
@@ -242,6 +251,7 @@ class Material extends StatefulWidget {
     description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
     description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
     textStyle?.debugFillProperties(description, prefix: 'textStyle.');
+    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     description.add(new EnumProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
   }
 
@@ -291,18 +301,33 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       )
     );
 
+    // PhysicalModel has a temporary workaround for a perfomance issue that
+    // speeds up rectangular non transparent material (the workaround is to
+    // skip the call to ui.Canvas.saveLayer if the border radius is 0).
+    // Until the saveLayer perfomance issue is resolved, we're keeping this
+    // special case here for canvas material type that is using the default
+    // shape (rectangle). We could go down this fast path for explicitly
+    // specified rectangles (e.g shape RoundeRectangleBorder with radius 0, but
+    // we choose not to as we want the change from the fast-path to the
+    // slow-path to be noticeable in the construction site of Material.
+    if (widget.type == MaterialType.canvas && widget.shape == null && widget.borderRadius == null) {
+      return new AnimatedPhysicalModel(
+        curve: Curves.fastOutSlowIn,
+        duration: kThemeChangeDuration,
+        shape: BoxShape.rectangle,
+        borderRadius: BorderRadius.zero,
+        elevation: widget.elevation,
+        color: backgroundColor,
+        shadowColor: widget.shadowColor,
+        animateColor: false,
+        child: contents,
+      );
+    }
+
     final ShapeBorder shape = _getShape();
 
     if (widget.type == MaterialType.transparency)
       return _clipToShape(shape: shape, contents: contents);
-
-    // PhysicalModel performs better than PhysicalShape, so we use it when
-    // possible.
-    // This is not expected, and we do this as a temporary workaround until the
-    // shape performance regression is resolved, see:
-    // https://github.com/flutter/flutter/issues/14403
-    if (shape.runtimeType == CircleBorder || shape.runtimeType == RoundedRectangleBorder)
-      return _physicalModelInterior(contents, shape, backgroundColor);
     
     return new _MaterialInterior(
       curve: Curves.fastOutSlowIn,
@@ -313,45 +338,10 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       shadowColor: widget.shadowColor,
       child: contents,
     );
-  }
 
-  Widget _physicalModelInterior(Widget contents, ShapeBorder shape, Color backgroundColor) {
-    assert(shape.runtimeType == CircleBorder || shape.runtimeType == RoundedRectangleBorder);
-    BoxShape boxShape;
-    BorderRadius borderRadius;
-    if (shape.runtimeType == CircleBorder) {
-      boxShape = BoxShape.circle;
-      borderRadius = BorderRadius.zero;
-    } else {
-      final RoundedRectangleBorder border = shape;
-      boxShape = BoxShape.rectangle;
-      borderRadius = border.borderRadius;
-    }
-    return new AnimatedPhysicalModel(
-      curve: Curves.fastOutSlowIn,
-      duration: kThemeChangeDuration,
-      shape: boxShape,
-      borderRadius: borderRadius,
-      elevation: widget.elevation,
-      color: backgroundColor,
-      shadowColor: widget.shadowColor,
-      animateColor: false,
-      child: contents,
-    );
   }
 
   static Widget _clipToShape({ShapeBorder shape, Widget contents}) {
-    // ClipRRect performs better than ClipPath, so we use it when possible.
-    // This is not expected, and we do this as a temporary workaround until the
-    // shape performance regression is resolved, see:
-    // https://github.com/flutter/flutter/issues/14403
-    if (shape.runtimeType == RoundedRectangleBorder) {
-      final RoundedRectangleBorder border = shape;
-      return new ClipRRect(
-        borderRadius: border.borderRadius,
-        child: contents,
-      );
-    }
     return new ClipPath(
       child: contents,
       clipper: new ShapeBorderClipper(
@@ -380,7 +370,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       case MaterialType.card:
       case MaterialType.button:
         return new RoundedRectangleBorder(
-          borderRadius: kMaterialEdges[widget.type],
+          borderRadius: widget.borderRadius ?? kMaterialEdges[widget.type],
         );
 
       case MaterialType.circle:

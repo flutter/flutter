@@ -476,7 +476,7 @@ String extractCloudAuthTokenArg(List<String> rawArgs) {
   ArgResults args;
   try {
     args = argParser.parse(rawArgs);
-  } on FormatException catch(error) {
+  } on FormatException catch (error) {
     stderr.writeln('${error.message}\n');
     stderr.writeln('Usage:\n');
     stderr.writeln(argParser.usage);

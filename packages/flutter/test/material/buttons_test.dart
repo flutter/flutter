@@ -200,11 +200,21 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
+    final Rect expectedClipRect = new Rect.fromLTRB(356.0, 282.0, 444.0, 318.0);
+    final Path expectedClipPath = new Path()
+     ..addRRect(new RRect.fromRectAndRadius(
+         expectedClipRect,
+         const Radius.circular(2.0),
+     ));
     expect(
       Material.of(tester.element(find.byType(MaterialButton))),
       paints
+        ..clipPath(pathMatcher: coversSameAreaAs(
+            expectedClipPath,
+            areaToCompare: expectedClipRect.inflate(10.0),
+        ))
         ..circle(color: directSplashColor)
-        ..rrect(color: directHighlightColor)
+        ..rect(color: directHighlightColor)
     );
 
     const Color themeSplashColor1 = const Color(0xFF001100);
@@ -234,8 +244,12 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(MaterialButton))),
       paints
+        ..clipPath(pathMatcher: coversSameAreaAs(
+            expectedClipPath,
+            areaToCompare: expectedClipRect.inflate(10.0),
+        ))
         ..circle(color: themeSplashColor1)
-        ..rrect(color: themeHighlightColor1)
+        ..rect(color: themeHighlightColor1)
     );
 
     const Color themeSplashColor2 = const Color(0xFF002200);
@@ -258,7 +272,7 @@ void main() {
       Material.of(tester.element(find.byType(MaterialButton))),
       paints
         ..circle(color: themeSplashColor2)
-        ..rrect(color: themeHighlightColor2)
+        ..rect(color: themeHighlightColor2)
     );
 
     await gesture.up();
@@ -342,5 +356,4 @@ void main() {
 
     semantics.dispose();
   });
-
 }

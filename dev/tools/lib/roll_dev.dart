@@ -10,7 +10,6 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'archive_publisher.dart';
 
 const String kIncrement = 'increment';
 const String kX = 'x';
@@ -114,19 +113,6 @@ void main(List<String> args) {
 
   final String hash = getGitOutput('rev-parse HEAD', 'Get git hash for $commit');
 
-  final ArchivePublisher publisher = new ArchivePublisher(hash, version, Channel.dev);
-
-  // Check for access early so that we don't try to publish things if the
-  // user doesn't have access to the metadata file.
-  try {
-    publisher.checkForGSUtilAccess();
-  } on ArchivePublisherException {
-    print('You do not appear to have the credentials required to update the archive links.');
-    print('Make sure you have "gsutil" installed, then run "gsutil config".');
-    print('Talk to @gspencergoog for details on which project to use.');
-    exit(1);
-  }
-
   runGit('tag v$version', 'tag the commit with the version label');
 
   // PROMPT
@@ -138,17 +124,6 @@ void main(List<String> args) {
     runGit('tag -d v$version', 'remove the tag you did not want to publish');
     print('The dev roll has been aborted.');
     exit(0);
-  }
-
-  // Publish the archive before pushing the tag so that if something fails in
-  // the publish step, we can clean up.
-  try {
-    publisher.publishArchive();
-  } on ArchivePublisherException catch (e) {
-    print('Archive publishing failed.\n$e');
-    runGit('tag -d v$version', 'remove the tag that was not published');
-    print('The dev roll has been aborted.');
-    exit(1);
   }
 
   runGit('push upstream v$version', 'publish the version');

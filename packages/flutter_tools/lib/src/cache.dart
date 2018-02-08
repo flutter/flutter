@@ -236,7 +236,7 @@ abstract class CachedArtifact {
   String get version => cache.getVersionFor(name);
 
   /// Keep track of the files we've downloaded for this execution so we
-  /// can delete them after completion.  We don't delete them right after
+  /// can delete them after completion. We don't delete them right after
   /// extraction in case [update] is interrupted, so we can restart without
   /// starting from scratch.
   final List<File> _downloadedFiles = <File>[];
