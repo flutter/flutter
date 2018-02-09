@@ -263,7 +263,7 @@ void main() {
           offset: new ViewportOffset.zero(),
           slivers: <Widget>[
             const SliverList(
-              delegate: const SliverChildListDelegate(<Widget>[
+              delegate: const SliverChildListDelegate(const <Widget>[
                 const SizedBox(height: 400.0, child: const Text('a')),
               ]),
             ),
