@@ -85,7 +85,7 @@ void main() {
 
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
         when(mockPeer.sendRequest(any, any))
-            .thenReturn(flutterViewCannedResponses);
+            .thenReturn(new Future(() => flutterViewCannedResponses));
         return new Future<json_rpc.Peer>(() => mockPeer);
       }
 
@@ -130,7 +130,7 @@ void main() {
 
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
         when(mockPeer.sendRequest(any, any))
-            .thenReturn(flutterViewCannedResponses);
+            .thenReturn(new Future(() => flutterViewCannedResponses));
         return new Future<json_rpc.Peer>(() => mockPeer);
       }
 
@@ -142,6 +142,38 @@ void main() {
 
       // Both views should be invalid as they were missing required fields.
       expect(views.isEmpty, true);
+    });
+  });
+
+  group('DartVm.invokeRpc', () {
+    MockPeer mockPeer;
+
+    setUp(() {
+      mockPeer = new MockPeer();
+    });
+
+    tearDown(() {
+      restoreVmServiceConnectionFunction();
+    });
+
+    test('verify timeout fires', () async {
+      const Duration timeoutTime = const Duration(milliseconds: 100);
+      Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
+        // Return a command that will never complete.
+        when(mockPeer.sendRequest(any, any))
+            .thenReturn(new Completer<Map<String, dynamic>>().future);
+        return new Future<json_rpc.Peer>(() => mockPeer);
+      }
+
+      fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
+      final DartVm vm =
+          await DartVm.connect(Uri.parse('http://whatever.com/ws'));
+      expect(vm, isNot(null));
+      Future<Null> failingFunction() async {
+        await vm.invokeRpc('somesillyfunction', timeout: timeoutTime);
+      }
+
+      expect(failingFunction, throwsA(const isInstanceOf<TimeoutException>()));
     });
   });
 }

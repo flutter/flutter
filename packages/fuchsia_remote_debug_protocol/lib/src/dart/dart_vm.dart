@@ -87,9 +87,21 @@ class DartVm {
   }
 
   /// Invokes a raw JSON RPC command with the VM service.
+  ///
+  /// When `timeout` is set and reached, throws a `TimeoutException`.
+  ///
+  /// If the function returns, it is with a raw JSON response.
   Future<Map<String, dynamic>> invokeRpc(String function,
       {Map<String, dynamic> params, Duration timeout}) async {
-    return _peer.sendRequest(function, params ?? <String, dynamic>{});
+    Future<Map<String, dynamic>> future =
+        _peer.sendRequest(function, params ?? <String, dynamic>{});
+    if (timeout == null) {
+      return future;
+    }
+    return future.timeout(timeout, onTimeout: () {
+      throw new TimeoutException(
+          'Peer connection timed out during RPC call', timeout);
+    });
   }
 
   /// Returns a list of `FlutterView`s running across all Dart VM's.
