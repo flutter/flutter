@@ -11,6 +11,11 @@ class TestState extends State<StatefulWidget> {
   Widget build(BuildContext context) => null;
 }
 
+@optionalTypeArgs
+class _MyGlobalObjectKey<T extends State<StatefulWidget>> extends GlobalObjectKey<T> {
+  const _MyGlobalObjectKey(Object value) : super(value);
+}
+
 void main() {
   testWidgets('UniqueKey control test', (WidgetTester tester) async {
     final Key key = new UniqueKey();
@@ -29,6 +34,18 @@ void main() {
     expect(keyA, equals(keyA2));
     expect(keyA.hashCode, equals(keyA2.hashCode));
     expect(keyA, isNot(equals(keyB)));
+  });
+
+  testWidgets('GlobalObjectKey toString test', (WidgetTester tester) async {
+    final GlobalObjectKey one = const GlobalObjectKey(1);
+    final GlobalObjectKey<TestState> two = const GlobalObjectKey<TestState>(2);
+    final GlobalObjectKey three = const _MyGlobalObjectKey(3);
+    final GlobalObjectKey<TestState> four = const _MyGlobalObjectKey<TestState>(4);
+
+    expect(one.toString(), equals('[GlobalObjectKey ${describeIdentity(1)}]'));
+    expect(two.toString(), equals('[GlobalObjectKey<TestState> ${describeIdentity(2)}]'));
+    expect(three.toString(), equals('[_MyGlobalObjectKey ${describeIdentity(3)}]'));
+    expect(four.toString(), equals('[_MyGlobalObjectKey<TestState> ${describeIdentity(4)}]'));
   });
 
   testWidgets('GlobalObjectKey control test', (WidgetTester tester) async {
