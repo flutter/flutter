@@ -111,6 +111,33 @@ class Cache {
 
   String get dartSdkVersion => _dartSdkVersion ??= platform.version;
 
+  Directory get engineDartSdkBin {
+    final Directory engineDirectory = getArtifactDirectory('engine');
+    List<String> dartSdkBinParts;
+    Directory platformDirectory;
+    if (platform.isLinux) {
+      platformDirectory = engineDirectory.childDirectory('linux-x64');
+    } else if (platform.isMacOS) {
+      platformDirectory = engineDirectory.childDirectory('darwin-x64');
+    } else if (platform.isWindows) {
+      platformDirectory = engineDirectory.childDirectory('windows-x64');
+    } else {
+      // Unknown platform, we can't derive version.
+      return null;
+    }
+    return platformDirectory.childDirectory('dart-sdk').childDirectory('bin');
+  }
+
+  File get engineDartExe {
+    if (platform.isLinux || platform.isMacOS) {
+      return engineDartSdkBin.childFile('dart');
+    } else if (platform.isWindows) {
+      return engineDartSdkBin.childFile('dart');
+    }
+    // Unknown platform, we can't figure out dart executable location.
+    return null;
+  }
+
   String _engineRevision;
 
   String get engineRevision {
@@ -122,21 +149,7 @@ class Cache {
 
   String get engineDartVersion {
     if (_engineDartVersion == null) {
-      final Directory engineDirectory = getArtifactDirectory('engine');
-
-      List<String> dartSdkBinParts;
-      if (platform.isLinux) {
-        dartSdkBinParts = <String>['linux-x64', 'dart-sdk', 'bin', 'dart'];
-      } else if (platform.isMacOS) {
-        dartSdkBinParts = <String>['darwin-x64', 'dart-sdk', 'bin', 'dart'];
-      } else if (platform.isWindows) {
-        dartSdkBinParts = <String>['windows-x64', 'dart-sdk', 'bin', 'dart.exe'];
-      } else {
-        // Unknown platform, we can't derive version.
-        return null;
-      }
-      final File dartSdkBin = engineDirectory.childFile(fs.path.joinAll(dartSdkBinParts));
-      final ProcessResult result = processManager.runSync(<String>[dartSdkBin.path, '--version']);
+      final ProcessResult result = processManager.runSync(<String>[engineDartExe.path, '--version']);
       // https://github.com/dart-lang/sdk/issues/31481
       // We can use the process utils directly when this is fixed instead of parsing stderr.
       _engineDartVersion = result.stderr.trim().replaceAll('Dart VM version: ', '');

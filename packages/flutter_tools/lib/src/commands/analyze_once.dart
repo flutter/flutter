@@ -82,7 +82,7 @@ class AnalyzeOnce extends AnalyzeBase {
         arguments.insert(1, packagesFile.path);
       }
 
-      final String dartanalyzer = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartanalyzer');
+      final String dartanalyzer = cache.engineDartSdkBin.childFile('dartanalyzer').path;
       arguments.insert(0, dartanalyzer);
       bool noErrors = false;
       final Set<String> issues = new Set<String>();
