@@ -168,7 +168,7 @@ class SemanticsData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [ScrollPosition.pixels] from where this value is usually taken.
+  ///  * [ScrollPosition.pixels], from where this value is usually taken.
   final double scrollPosition;
 
   /// Indicates the maximum in-range value for [scrollPosition] if the node is
@@ -178,7 +178,7 @@ class SemanticsData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [ScrollPosition.maxScrollExtent] from where this value is usually taken.
+  ///  * [ScrollPosition.maxScrollExtent], from where this value is usually taken.
   final double scrollExtentMax;
 
   /// Indicates the mimimum in-range value for [scrollPosition] if the node is
@@ -188,7 +188,7 @@ class SemanticsData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [ScrollPosition.minScrollExtent] from where this value is usually taken.
+  ///  * [ScrollPosition.minScrollExtent], from where this value is usually taken.
   final double scrollExtentMin;
 
   /// The bounding box for this node in its coordinate system.
@@ -1064,7 +1064,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// See also:
   ///
-  ///  * [ScrollPosition.pixels] from where this value is usually taken.
+  ///  * [ScrollPosition.pixels], from where this value is usually taken.
   double get scrollPosition => _scrollPosition;
   double _scrollPosition;
 
@@ -1076,7 +1076,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// See also:
   ///
-  ///  * [ScrollPosition.maxScrollExtent] from where this value is usually taken.
+  ///  * [ScrollPosition.maxScrollExtent], from where this value is usually taken.
   double get scrollExtentMax => _scrollExtentMax;
   double _scrollExtentMax;
 
@@ -2186,9 +2186,6 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-
-
-
   /// Indicates the current scrolling position in logical pixels if the node is
   /// scrollable.
   ///
@@ -2198,7 +2195,7 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  ///  * [ScrollPosition.pixels] from where this value is usually taken.
+  ///  * [ScrollPosition.pixels], from where this value is usually taken.
   double get scrollPosition => _scrollPosition;
   double _scrollPosition;
   set scrollPosition(double value) {
@@ -2214,7 +2211,7 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  ///  * [ScrollPosition.maxScrollExtent] from where this value is usually taken.
+  ///  * [ScrollPosition.maxScrollExtent], from where this value is usually taken.
   double get scrollExtentMax => _scrollExtentMax;
   double _scrollExtentMax;
   set scrollExtentMax(double value) {
@@ -2223,14 +2220,14 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// Indicates the mimimum in-range value for [scrollPosition] if the node is
+  /// Indicates the minimum in-range value for [scrollPosition] if the node is
   /// scrollable.
   ///
   /// This value may be infinity if the scroll is unbound.
   ///
   /// See also:
   ///
-  ///  * [ScrollPosition.minScrollExtent] from where this value is usually taken.
+  ///  * [ScrollPosition.minScrollExtent], from where this value is usually taken.
   double get scrollExtentMin => _scrollExtentMin;
   double _scrollExtentMin;
   set scrollExtentMin(double value) {
