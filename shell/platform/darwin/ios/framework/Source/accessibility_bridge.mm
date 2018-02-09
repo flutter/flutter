@@ -143,6 +143,14 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
   return [self node].rect != node->rect || [self node].transform != node->transform;
 }
 
+/**
+ * Whether calling `setSemanticsNode:` with `node` would cause a scroll event.
+ */
+- (BOOL)nodeWillCauseScroll:(const blink::SemanticsNode*)node {
+  return !isnan([self node].scrollPosition) && !isnan(node->scrollPosition) &&
+         [self node].scrollPosition != node->scrollPosition;
+}
+
 - (std::vector<SemanticsObject*>*)children {
   return &_children;
 }
@@ -404,11 +412,13 @@ void AccessibilityBridge::UpdateSemantics(blink::SemanticsNodeUpdates nodes) {
   // traversal order (top left to bottom right, with hit testing order as tie breaker).
   NSMutableSet<SemanticsObject*>* childOrdersToUpdate = [[[NSMutableSet alloc] init] autorelease];
   BOOL layoutChanged = NO;
+  BOOL scrollOccured = NO;
 
   for (const auto& entry : nodes) {
     const blink::SemanticsNode& node = entry.second;
     SemanticsObject* object = GetOrCreateObject(node.id, nodes);
     layoutChanged = layoutChanged || [object nodeWillCauseLayoutChange:&node];
+    scrollOccured = scrollOccured || [object nodeWillCauseScroll:&node];
     [object setSemanticsNode:&node];
     const size_t childrenCount = node.children.size();
     auto& children = *[object children];
@@ -451,6 +461,10 @@ void AccessibilityBridge::UpdateSemantics(blink::SemanticsNodeUpdates nodes) {
   if (layoutChanged) {
     // TODO(goderbauer): figure out which node to focus next.
     UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
+  }
+  if (scrollOccured) {
+    // TODO(tvolkert): provide meaningful string (e.g. "page 2 of 5")
+    UIAccessibilityPostNotification(UIAccessibilityPageScrolledNotification, @"");
   }
 }
 
@@ -511,10 +525,7 @@ void AccessibilityBridge::VisitObjectsRecursivelyAndRemove(SemanticsObject* obje
 
 void AccessibilityBridge::HandleEvent(NSDictionary<NSString*, id>* annotatedEvent) {
   NSString* type = annotatedEvent[@"type"];
-  if ([type isEqualToString:@"scroll"]) {
-    // TODO(tvolkert): provide meaningful string (e.g. "page 2 of 5")
-    UIAccessibilityPostNotification(UIAccessibilityPageScrolledNotification, @"");
-  } else if ([type isEqualToString:@"announce"]) {
+  if ([type isEqualToString:@"announce"]) {
     NSString* message = annotatedEvent[@"data"][@"message"];
     UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, message);
   } else {

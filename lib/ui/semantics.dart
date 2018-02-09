@@ -337,6 +337,13 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   /// The fields 'textSelectionBase' and 'textSelectionExtent' describe the
   /// currently selected text within `value`.
   ///
+  /// For scrollable nodes `scrollPosition` describes the current scroll
+  /// position in logical pixel. `scrollExtentMax` and `scrollExtentMin`
+  /// describe the maximum and minimum in-rage values that `scrollPosition` can
+  /// be. Both or either may be infinity to indicate unbound scrolling. The
+  /// value for `scrollPosition` can (temporarily) be outside this range, for
+  /// example during an overscroll.
+  ///
   /// The `rect` is the region occupied by this node in its own coordinate
   /// system.
   ///
@@ -348,6 +355,9 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     int actions,
     int textSelectionBase,
     int textSelectionExtent,
+    double scrollPosition,
+    double scrollExtentMax,
+    double scrollExtentMin,
     Rect rect,
     String label,
     String hint,
@@ -366,6 +376,9 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
                 actions,
                 textSelectionBase,
                 textSelectionExtent,
+                scrollPosition,
+                scrollExtentMax,
+                scrollExtentMin,
                 rect.left,
                 rect.top,
                 rect.right,
@@ -386,6 +399,9 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     int actions,
     int textSelectionBase,
     int textSelectionExtent,
+    double scrollPosition,
+    double scrollExtentMax,
+    double scrollExtentMin,
     double left,
     double top,
     double right,

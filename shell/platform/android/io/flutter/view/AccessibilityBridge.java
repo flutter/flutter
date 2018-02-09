@@ -34,7 +34,10 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
     // Constants from higher API levels.
     // TODO(goderbauer): Get these from Android Support Library when
     // https://github.com/flutter/flutter/issues/11099 is resolved.
-    public static final int ACTION_SHOW_ON_SCREEN = 16908342; // API level 23
+    private static final int ACTION_SHOW_ON_SCREEN = 16908342; // API level 23
+
+    private static final float SCROLL_EXTENT_FOR_INFINITY = 100000.0f;
+    private static final float SCROLL_POSITION_CAP_FOR_INFINITY = 70000.0f;
 
     private Map<Integer, SemanticsObject> mObjects;
     private final FlutterView mOwner;
@@ -460,7 +463,9 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             if (object.hasFlag(Flag.IS_FOCUSED)) {
                 mInputFocusedObject = object;
             }
-            updated.add(object);
+            if (object.hadPreviousConfig) {
+                updated.add(object);
+            }
         }
 
         Set<SemanticsObject> visitedObjects = new HashSet<SemanticsObject>();
@@ -481,13 +486,46 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             }
         }
 
-        // Send accessibility events for updated nodes
-        for (SemanticsObject object : updated) {
-            sendAccessibilityEvent(object.id, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-            if (!object.hadPreviousConfig) {
-                continue;
-            }
+        // TODO(goderbauer): Send this event only once (!) for changed subtrees,
+        //     see https://github.com/flutter/flutter/issues/14534
+        sendAccessibilityEvent(0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
 
+        for (SemanticsObject object : updated) {
+            if (object.didScroll()) {
+                AccessibilityEvent event =
+                        obtainAccessibilityEvent(object.id, AccessibilityEvent.TYPE_VIEW_SCROLLED);
+
+                // Android doesn't support unbound scrolling. So we pretend there is a large
+                // bound (SCROLL_EXTENT_FOR_INFINITY), which you can never reach.
+                float position = object.scrollPosition;
+                float max = object.scrollExtentMax;
+                if (Float.isInfinite(object.scrollExtentMax)) {
+                    max = SCROLL_EXTENT_FOR_INFINITY;
+                    if (position > SCROLL_POSITION_CAP_FOR_INFINITY) {
+                        position = SCROLL_POSITION_CAP_FOR_INFINITY;
+                    }
+                }
+                if (Float.isInfinite(object.scrollExtentMin)) {
+                    max += SCROLL_EXTENT_FOR_INFINITY;
+                    if (position < -SCROLL_POSITION_CAP_FOR_INFINITY) {
+                        position = -SCROLL_POSITION_CAP_FOR_INFINITY;
+                    }
+                    position += SCROLL_EXTENT_FOR_INFINITY;
+                } else {
+                    max -= object.scrollExtentMin;
+                    position -= object.scrollExtentMin;
+                }
+
+                if (object.hadAction(Action.SCROLL_UP) || object.hadAction(Action.SCROLL_DOWN)) {
+                    event.setScrollY((int) position);
+                    event.setMaxScrollY((int) max);
+                } else if (object.hadAction(Action.SCROLL_LEFT)
+                        || object.hadAction(Action.SCROLL_RIGHT)) {
+                    event.setScrollX((int) position);
+                    event.setMaxScrollX((int) max);
+                }
+                sendAccessibilityEvent(event);
+            }
             if (mA11yFocusedObject != null && mA11yFocusedObject.id == object.id
                     && object.hadFlag(Flag.HAS_CHECKED_STATE)
                     && object.hasFlag(Flag.HAS_CHECKED_STATE)
@@ -586,24 +624,6 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         final HashMap<String, Object> data = (HashMap<String, Object>)annotatedEvent.get("data");
 
         switch (type) {
-            case "scroll":
-                final int nodeId = (int)annotatedEvent.get("nodeId");
-                AccessibilityEvent event =
-                    obtainAccessibilityEvent(nodeId, AccessibilityEvent.TYPE_VIEW_SCROLLED);
-                char axis = ((String)data.get("axis")).charAt(0);
-                double minPosition = (double)data.get("minScrollExtent");
-                double maxPosition = (double)data.get("maxScrollExtent") - minPosition;
-                double position = (double)data.get("pixels") - minPosition;
-                if (axis == 'v') {
-                    event.setScrollY((int)position);
-                    event.setMaxScrollY((int)maxPosition);
-                } else {
-                    assert axis == 'h';
-                    event.setScrollX((int)position);
-                    event.setMaxScrollX((int)maxPosition);
-                }
-                sendAccessibilityEvent(event);
-                break;
             case "announce":
                 mOwner.announceForAccessibility((String) data.get("message"));
                 break;
@@ -660,6 +680,9 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         int actions;
         int textSelectionBase;
         int textSelectionExtent;
+        float scrollPosition;
+        float scrollExtentMax;
+        float scrollExtentMin;
         String label;
         String value;
         String increasedValue;
@@ -670,8 +693,12 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
 
         boolean hadPreviousConfig = false;
         int previousFlags;
+        int previousActions;
         int previousTextSelectionBase;
         int previousTextSelectionExtent;
+        float previousScrollPosition;
+        float previousScrollExtentMax;
+        float previousScrollExtentMin;
         String previousValue;
 
         private float left;
@@ -694,6 +721,10 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             return (actions & action.value) != 0;
         }
 
+        boolean hadAction(Action action) {
+            return (previousActions & action.value) != 0;
+        }
+
         boolean hasFlag(Flag flag) {
             return (flags & flag.value) != 0;
         }
@@ -701,6 +732,11 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         boolean hadFlag(Flag flag) {
             assert hadPreviousConfig;
             return (previousFlags & flag.value) != 0;
+        }
+
+        boolean didScroll() {
+            return !Float.isNaN(scrollPosition) && !Float.isNaN(previousScrollPosition)
+                    && previousScrollPosition != scrollPosition;
         }
 
         void log(String indent, boolean recursive) {
@@ -721,13 +757,20 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             hadPreviousConfig = true;
             previousValue = value;
             previousFlags = flags;
+            previousActions = actions;
             previousTextSelectionBase = textSelectionBase;
             previousTextSelectionExtent = textSelectionExtent;
+            previousScrollPosition = scrollPosition;
+            previousScrollExtentMax = scrollExtentMax;
+            previousScrollExtentMin = scrollExtentMin;
 
             flags = buffer.getInt();
             actions = buffer.getInt();
             textSelectionBase = buffer.getInt();
             textSelectionExtent = buffer.getInt();
+            scrollPosition = buffer.getFloat();
+            scrollExtentMax = buffer.getFloat();
+            scrollExtentMin = buffer.getFloat();
 
             int stringIndex = buffer.getInt();
             label = stringIndex == -1 ? null : strings[stringIndex];
