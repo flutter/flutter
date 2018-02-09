@@ -78,13 +78,13 @@ void main() {
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB')
+        const LicenseEntryWithLineBreaks(const <String>['AAA'], 'BBB')
       ]);
     });
 
     LicenseRegistry.addLicense(() {
       return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license')
+        const LicenseEntryWithLineBreaks(const <String>['Another package'], 'Another license')
       ]);
     });
 
