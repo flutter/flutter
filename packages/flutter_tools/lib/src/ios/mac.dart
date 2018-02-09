@@ -279,7 +279,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final Status cleanStatus =
       logger.startProgress('Running Xcode clean...', expectSlowOperation: true);
-  await runAsync(
+  final RunResult cleanResult = await runAsync(
     <String>[
       '/usr/bin/env',
       'xcrun',
@@ -289,6 +289,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     workingDirectory: app.appDirectory,
   );
   cleanStatus.stop();
+  if (cleanResult.exitCode != 0) {
+    throwToolExit('Xcode failed to clean\n${cleanResult.stderr}');
+  }
 
   final List<String> commands = <String>[
     '/usr/bin/env',
@@ -341,26 +344,26 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final Status buildStatus =
       logger.startProgress('Running Xcode build...', expectSlowOperation: true);
-  final RunResult result = await runAsync(
+  final RunResult buildResult = await runAsync(
     commands,
     workingDirectory: app.appDirectory,
     allowReentrantFlutter: true
   );
   buildStatus.stop();
-  if (result.exitCode != 0) {
+  if (buildResult.exitCode != 0) {
     printStatus('Failed to build iOS app');
-    if (result.stderr.isNotEmpty) {
+    if (buildResult.stderr.isNotEmpty) {
       printStatus('Error output from Xcode build:\n↳');
-      printStatus(result.stderr, indent: 4);
+      printStatus(buildResult.stderr, indent: 4);
     }
-    if (result.stdout.isNotEmpty) {
+    if (buildResult.stdout.isNotEmpty) {
       printStatus('Xcode\'s output:\n↳');
-      printStatus(result.stdout, indent: 4);
+      printStatus(buildResult.stdout, indent: 4);
     }
     return new XcodeBuildResult(
       success: false,
-      stdout: result.stdout,
-      stderr: result.stderr,
+      stdout: buildResult.stdout,
+      stderr: buildResult.stderr,
       xcodeBuildExecution: new XcodeBuildExecution(
         commands,
         app.appDirectory,
@@ -370,7 +373,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   } else {
     // Look for 'clean build/<configuration>-<sdk>/Runner.app'.
     final RegExp regexp = new RegExp(r' clean (.*\.app)$', multiLine: true);
-    final Match match = regexp.firstMatch(result.stdout);
+    final Match match = regexp.firstMatch(buildResult.stdout);
     String outputDir;
     if (match != null) {
       final String actualOutputDir = match.group(1).replaceAll('\\ ', ' ');
