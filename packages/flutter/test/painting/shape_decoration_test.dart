@@ -17,7 +17,7 @@ void main() {
   test('ShapeDecoration constructor', () {
     const Color colorR = const Color(0xffff0000);
     const Color colorG = const Color(0xff00ff00);
-    final Gradient gradient = new LinearGradient(colors: <Color>[colorR, colorG]);
+    final Gradient gradient = const LinearGradient(colors: const <Color>[colorR, colorG]);
     expect(const ShapeDecoration(shape: const Border()), const ShapeDecoration(shape: const Border()));
     expect(() => new ShapeDecoration(color: colorR, gradient: gradient, shape: const Border()), throwsAssertionError);
     expect(() => new ShapeDecoration(gradient: gradient, shape: null), throwsAssertionError);
