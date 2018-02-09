@@ -16,7 +16,7 @@ Future<Null> test(WidgetTester tester, double offset) {
         offset: new ViewportOffset.fixed(offset),
         slivers: <Widget>[
           const SliverList(
-            delegate: const SliverChildListDelegate(<Widget>[
+            delegate: const SliverChildListDelegate(const <Widget>[
               const SizedBox(height: 400.0, child: const Text('a')),
               const SizedBox(height: 400.0, child: const Text('b')),
               const SizedBox(height: 400.0, child: const Text('c')),
