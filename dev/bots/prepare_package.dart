@@ -13,8 +13,7 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:platform/platform.dart' show Platform, LocalPlatform;
 
-const String chromiumRepo =
-    'https://chromium.googlesource.com/external/github.com/flutter/flutter';
+const String chromiumRepo = 'https://chromium.googlesource.com/external/github.com/flutter/flutter';
 const String githubRepo = 'https://github.com/flutter/flutter.git';
 const String mingitForWindowsUrl = 'https://storage.googleapis.com/flutter_infra/mingit/'
     '603511c649b00bbef0a6122a827ac419b656bc19/mingit.zip';
@@ -475,8 +474,28 @@ class ArchivePublisher {
   }
 
   Future<String> _cloudCopy(String src, String dest) async {
+    // We often don't have permission to overwrite, but
+    // we have permission to remove, so that's what we do.
     await _runGsUtil(<String>['rm', dest], failOk: true);
-    return _runGsUtil(<String>['cp', src, dest]);
+    String mimeType;
+    if (dest.endsWith('.tar.xz')) {
+      mimeType = 'application/x-gtar';
+    }
+    if (dest.endsWith('.zip')) {
+      mimeType = 'application/zip';
+    }
+    if (dest.endsWith('.json')) {
+      mimeType = 'application/json';
+    }
+    final List<String> args = <String>['cp'];
+    // Use our preferred MIME type for the files we care about
+    // and let gsutil figure it out for anything else.
+    if (mimeType != null) {
+      args.addAll(<String>['-h', 'Content-Type:$mimeType']);
+    }
+    args.add(src);
+    args.add(dest);
+    return _runGsUtil(args);
   }
 }
 
