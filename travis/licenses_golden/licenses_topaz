@@ -1,4 +1,4 @@
-Signature: 7f357165eef1d3c274d05d52eac7ddda
+Signature: 8cb3458ba27bd953669ce82a810ccef6
 
 UNUSED LICENSES:
 
@@ -1185,6 +1185,7 @@ FILE: ../../../topaz/public/dart/zircon/lib/src/handle_wrapper.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/socket.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/socket_reader.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/vmo.dart
+FILE: ../../../topaz/public/lib/fidl/dart/lib/src/bindings/codec2.dart
 FILE: ../../../topaz/public/lib/proposal/dart/lib/proposal.dart
 FILE: ../../../topaz/public/lib/proposal/dart/lib/src/proposal_factory.dart
 FILE: ../../../topaz/public/lib/user/dart/lib/src/dank_user_shell_impl.dart
