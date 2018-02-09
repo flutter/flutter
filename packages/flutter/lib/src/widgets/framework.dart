@@ -312,7 +312,17 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   int get hashCode => identityHashCode(value);
 
   @override
-  String toString() => '[$runtimeType ${describeIdentity(value)}]';
+  String toString() {
+    String selfType = runtimeType.toString();
+    // const GlobalObjectKey().runtimeType.toString() returns 'GlobalObjectKey<State<StatefulWidget>>'
+    // because GlobalObjectKey is instantiated to its bounds. To avoid cluttering the output
+    // we remove the suffix.
+    const String suffix = '<State<StatefulWidget>>';
+    if (selfType.endsWith(suffix)) {
+      selfType = selfType.substring(0, selfType.length - suffix.length);
+    }
+    return '[$selfType ${describeIdentity(value)}]';
+  }
 }
 
 /// This class is a work-around for the "is" operator not accepting a variable value as its right operand
