@@ -69,6 +69,44 @@ void main() {
   }, overrides: <Type, Generator>{
     OperatingSystemUtils: () => os
   });
+
+  testUsingContext('--preview-dart-2', () async {
+    final String contents = "StringBuffer bar = StringBuffer('baz');";
+    tempDir.childFile('main.dart').writeAsStringSync(contents);
+    server = new AnalysisServer(dartSdkPath, <String>[tempDir.path], previewDart2: true);
+
+    int errorCount = 0;
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    server.onErrors.listen((FileAnalysisErrors errors) {
+      errorCount += errors.errors.length;
+    });
+
+    await server.start();
+    await onDone;
+
+    expect(errorCount, 0);
+  }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => os
+  });
+
+  testUsingContext('no --preview-dart-2 shows errors', () async {
+    final String contents = "StringBuffer bar = StringBuffer('baz');";
+    tempDir.childFile('main.dart').writeAsStringSync(contents);
+    server = new AnalysisServer(dartSdkPath, <String>[tempDir.path], previewDart2: false);
+
+    int errorCount = 0;
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    server.onErrors.listen((FileAnalysisErrors errors) {
+      errorCount += errors.errors.length;
+    });
+
+    await server.start();
+    await onDone;
+
+    expect(errorCount, 1);
+  }, overrides: <Type, Generator>{
+    OperatingSystemUtils: () => os
+  });
 }
 
 void _createSampleProject(Directory directory, { bool brokenCode: false }) {
