@@ -258,12 +258,12 @@ void main() {
     // Expect the height of the secondKey Hero to vary from 100 to 150
     // over duration and according to curve.
 
-    final Duration duration = const Duration(milliseconds: 300);
+    const Duration duration = const Duration(milliseconds: 300);
     final Curve curve = Curves.fastOutSlowIn;
     final double initialHeight = tester.getSize(find.byKey(firstKey, skipOffstage: false)).height;
     final double finalHeight = tester.getSize(find.byKey(secondKey, skipOffstage: false)).height;
     final double deltaHeight = finalHeight - initialHeight;
-    final double epsilon = 0.001;
+    const double epsilon = 0.001;
 
     await tester.pump(duration * 0.25);
     expect(
@@ -505,7 +505,7 @@ void main() {
 
     // Hero a's return flight at 149ms. The outgoing (push) flight took
     // 150ms so we should be just about back to where Hero 'a' started.
-    final double epsilon = 0.001;
+    const double epsilon = 0.001;
     await tester.pump(const Duration(milliseconds: 99));
     closeTo(tester.getSize(find.byKey(secondKey)).height - initialHeight, epsilon);
 
@@ -575,7 +575,7 @@ void main() {
 
     // Hero a's return flight at 149ms. The outgoing (push) flight took
     // 150ms so we should be just about back to where Hero 'a' started.
-    final double epsilon = 0.001;
+    const double epsilon = 0.001;
     await tester.pump(const Duration(milliseconds: 99));
     closeTo(tester.getSize(find.byKey(firstKey)).height - initialHeight, epsilon);
 
@@ -587,8 +587,8 @@ void main() {
   });
 
   testWidgets('Destination hero disappears mid-flight', (WidgetTester tester) async {
-    final Key homeHeroKey = const Key('home hero');
-    final Key routeHeroKey = const Key('route hero');
+    const Key homeHeroKey = const Key('home hero');
+    const Key routeHeroKey = const Key('route hero');
     bool routeIncludesHero = true;
     StateSetter heroCardSetState;
 
@@ -690,9 +690,9 @@ void main() {
   });
 
   testWidgets('Destination hero scrolls mid-flight', (WidgetTester tester) async {
-    final Key homeHeroKey = const Key('home hero');
-    final Key routeHeroKey = const Key('route hero');
-    final Key routeContainerKey = const Key('route hero container');
+    const Key homeHeroKey = const Key('home hero');
+    const Key routeHeroKey = const Key('route hero');
+    const Key routeContainerKey = const Key('route hero container');
 
     // Show a 200x200 Hero tagged 'H', with key routeHeroKey
     final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
@@ -772,9 +772,9 @@ void main() {
   });
 
   testWidgets('Destination hero scrolls out of view mid-flight', (WidgetTester tester) async {
-    final Key homeHeroKey = const Key('home hero');
-    final Key routeHeroKey = const Key('route hero');
-    final Key routeContainerKey = const Key('route hero container');
+    const Key homeHeroKey = const Key('home hero');
+    const Key routeHeroKey = const Key('route hero');
+    const Key routeContainerKey = const Key('route hero container');
 
     // Show a 200x200 Hero tagged 'H', with key routeHeroKey
     final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
@@ -851,8 +851,8 @@ void main() {
 
   testWidgets('Aborted flight', (WidgetTester tester) async {
     // See https://github.com/flutter/flutter/issues/5798
-    final Key heroABKey = const Key('AB hero');
-    final Key heroBCKey = const Key('BC hero');
+    const Key heroABKey = const Key('AB hero');
+    const Key heroBCKey = const Key('BC hero');
 
     // Show a 150x150 Hero tagged 'BC'
     final MaterialPageRoute<Null> routeC = new MaterialPageRoute<Null>(
@@ -1084,8 +1084,8 @@ void main() {
     await tester.pumpWidget(new MaterialApp(routes: createRectTweenHeroRoutes));
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
 
-    final double epsilon = 0.001;
-    final Duration duration = const Duration(milliseconds: 300);
+    const double epsilon = 0.001;
+    const Duration duration = const Duration(milliseconds: 300);
     final Curve curve = Curves.fastOutSlowIn;
     final MaterialPointArcTween pushCenterTween = new MaterialPointArcTween(
       begin: const Offset(50.0, 50.0),
@@ -1156,8 +1156,8 @@ void main() {
     await tester.tap(find.text('twoInset'));
     await tester.pump(); // begin navigation from / to /twoInset.
 
-    final double epsilon = 0.001;
-    final Duration duration = const Duration(milliseconds: 300);
+    const double epsilon = 0.001;
+    const Duration duration = const Duration(milliseconds: 300);
 
     await tester.pump();
     final double x0 = tester.getTopLeft(find.byKey(secondKey)).dx;

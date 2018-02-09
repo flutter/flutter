@@ -38,12 +38,9 @@ class FlutterDevice {
 
   StreamSubscription<String> _loggingSubscription;
 
-  FlutterDevice(this.device,
-                { bool previewDart2 : false, bool strongMode : false }) {
+  FlutterDevice(this.device, { bool previewDart2 : false }) {
     if (previewDart2)
-      generator = new ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        strongMode: strongMode);
+      generator = new ResidentCompiler(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
   }
 
   String viewFilter;
@@ -184,9 +181,9 @@ class FlutterDevice {
       await view.uiIsolate.flutterDebugDumpLayerTree();
   }
 
-  Future<Null> debugDumpSemanticsTreeInTraversalOrder() async {
+  Future<Null> debugDumpSemanticsTreeInGeometricOrder() async {
     for (FlutterView view in views)
-      await view.uiIsolate.flutterDebugDumpSemanticsTreeInTraversalOrder();
+      await view.uiIsolate.flutterDebugDumpSemanticsTreeInGeometricOrder();
   }
 
   Future<Null> debugDumpSemanticsTreeInInverseHitTestOrder() async {
@@ -270,8 +267,8 @@ class FlutterDevice {
     }
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
-    if (hotRunner.strongMode != null)
-      platformArgs['strong'] = hotRunner.strongMode;
+    if (hotRunner.previewDart2 != null)
+      platformArgs['strong'] = hotRunner.previewDart2;
 
     startEchoingDeviceLog();
 
@@ -333,8 +330,8 @@ class FlutterDevice {
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
     if (coldRunner.traceStartup != null)
       platformArgs['trace-startup'] = coldRunner.traceStartup;
-    if (coldRunner.strongMode != null)
-      platformArgs['strong'] = coldRunner.strongMode;
+    if (coldRunner.previewDart2 != null)
+      platformArgs['strong'] = coldRunner.previewDart2;
 
     startEchoingDeviceLog();
 
@@ -499,10 +496,10 @@ abstract class ResidentRunner {
       await device.debugDumpLayerTree();
   }
 
-  Future<Null> _debugDumpSemanticsTreeInTraversalOrder() async {
+  Future<Null> _debugDumpSemanticsTreeInGeometricOrder() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
-      await device.debugDumpSemanticsTreeInTraversalOrder();
+      await device.debugDumpSemanticsTreeInGeometricOrder();
   }
 
   Future<Null> _debugDumpSemanticsTreeInInverseHitTestOrder() async {
@@ -685,7 +682,7 @@ abstract class ResidentRunner {
       }
     } else if (character == 'S') {
       if (supportsServiceProtocol) {
-        await _debugDumpSemanticsTreeInTraversalOrder();
+        await _debugDumpSemanticsTreeInGeometricOrder();
         return true;
       }
     } else if (character == 'U') {
@@ -826,12 +823,12 @@ abstract class ResidentRunner {
       printStatus('You can dump the widget hierarchy of the app (debugDumpApp) by pressing "w".');
       printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
       if (isRunningDebug) {
-        printStatus('For layers (debugDumpLayerTree), use "L"; accessibility (debugDumpSemantics), "S" (traversal order) or "U" (inverse hit test order).');
+        printStatus('For layers (debugDumpLayerTree), use "L"; for accessibility (debugDumpSemantics), use "S" (for geometric order) or "U" (for inverse hit test order).');
         printStatus('To toggle the widget inspector (WidgetsApp.showWidgetInspectorOverride), press "i".');
         printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
         printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
       } else {
-        printStatus('To dump the accessibility tree (debugDumpSemantics), press "S" (for traversal order) or "U" (for inverse hit test order).');
+        printStatus('To dump the accessibility tree (debugDumpSemantics), press "S" (for geometric order) or "U" (for inverse hit test order).');
       }
       printStatus('To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
     }
@@ -886,6 +883,7 @@ String findMainDartFile([String target]) {
 String getMissingPackageHintForPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       String manifest = 'android/AndroidManifest.xml';

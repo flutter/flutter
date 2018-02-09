@@ -62,7 +62,7 @@ void main() {
           child: new Semantics(
             onTap: dummyTapHandler,
             textDirection: TextDirection.ltr,
-            label: 'bar',  // <-- only change
+            label: 'bar', // <-- only change
           ),
         ),
       ),

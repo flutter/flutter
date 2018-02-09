@@ -167,7 +167,7 @@ void main() {
 
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child:new MediaQuery(
+      child: new MediaQuery(
         data: const MediaQueryData(),
         child: new Scrollable(
           controller: scrollController,
@@ -225,7 +225,7 @@ void main() {
     expect(messages, isNot(hasLength(0)));
     expect(messages.every((dynamic message) => message['type'] == 'scroll'), isTrue);
 
-    Map<String, Object> message = messages.last['data'];
+    Map<Object, Object> message = messages.last['data'];
     expect(message['axis'], 'v');
     expect(message['pixels'], isPositive);
     expect(message['minScrollExtent'], 0.0);
@@ -271,7 +271,7 @@ void main() {
     expect(messages, isNot(hasLength(0)));
     expect(messages.every((dynamic message) => message['type'] == 'scroll'), isTrue);
 
-    Map<String, Object> message = messages.last['data'];
+    Map<Object, Object> message = messages.last['data'];
     expect(message['axis'], 'h');
     expect(message['pixels'], isPositive);
     expect(message['minScrollExtent'], 0.0);
@@ -315,7 +315,7 @@ void main() {
     expect(semantics, includesNodeWith(label: 'Item 3'));
   });
 
-  testWidgets('Can toggle semantics on, off, on without crash',  (WidgetTester tester) async {
+  testWidgets('Can toggle semantics on, off, on without crash', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,

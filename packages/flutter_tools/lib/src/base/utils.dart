@@ -115,7 +115,7 @@ String getElapsedAsMilliseconds(Duration duration) {
 /// absolute path.
 String getDisplayPath(String fullPath) {
   final String cwd = fs.currentDirectory.path + fs.path.separator;
-  return fullPath.startsWith(cwd) ?  fullPath.substring(cwd.length) : fullPath;
+  return fullPath.startsWith(cwd) ? fullPath.substring(cwd.length) : fullPath;
 }
 
 /// A class to maintain a list of items, fire events when items are added or
@@ -207,7 +207,7 @@ class Uuid {
       '${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}-'
           '${_bitsDigits(16, 4)}-'
           '4${_bitsDigits(12, 3)}-'
-          '${_printDigits(special,  1)}${_bitsDigits(12, 3)}-'
+          '${_printDigits(special, 1)}${_bitsDigits(12, 3)}-'
           '${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}';
   }
 

@@ -147,7 +147,7 @@ void main() {
     scrollController.jumpTo(100.0);
     expect(scrollController.offset, 100.0);
 
-    // Find the actual dialog box.  The first decorated box is the popup barrier.
+    // Find the actual dialog box. The first decorated box is the popup barrier.
     expect(tester.getSize(find.byType(DecoratedBox).at(1)), equals(const Size(270.0, 560.0)));
 
     // Check sizes/locations of the text.

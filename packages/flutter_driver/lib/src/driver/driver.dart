@@ -568,7 +568,7 @@ class FlutterDriver {
         'recordedStreams': _timelineStreamsToString(streams)
       }).timeout(timeout);
       return null;
-    } catch(error, stackTrace) {
+    } catch (error, stackTrace) {
       throw new DriverError(
         'Failed to start tracing due to remote error',
         error,
@@ -584,7 +584,7 @@ class FlutterDriver {
           .sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{'recordedStreams': '[]'})
           .timeout(timeout);
       return new Timeline.fromJson(await _peer.sendRequest(_kGetVMTimelineMethod));
-    } catch(error, stackTrace) {
+    } catch (error, stackTrace) {
       throw new DriverError(
         'Failed to stop tracing due to remote error',
         error,
@@ -626,7 +626,7 @@ class FlutterDriver {
       await _peer
           .sendRequest(_kClearVMTimelineMethod, <String, String>{})
           .timeout(timeout);
-    } catch(error, stackTrace) {
+    } catch (error, stackTrace) {
       throw new DriverError(
         'Failed to clear event timeline due to remote error',
         error,
@@ -723,7 +723,7 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
         new VMServiceClient(new IOWebSocketChannel(ws1).cast()),
         new rpc.Peer(new IOWebSocketChannel(ws2).cast())..listen()
       );
-    } catch(e) {
+    } catch (e) {
       await ws1?.close();
       await ws2?.close();
 

@@ -30,7 +30,7 @@ const Vendor _trevor = const Vendor(
   avatarAsset: 'shrine/vendors/zach.jpg',
   avatarAssetPackage: _kGalleryAssetsPackage,
   description:
-    'Trevor makes great stuff for awesome people like you.  Super cool and extra '
+    'Trevor makes great stuff for awesome people like you. Super cool and extra '
     'awesome all of his shop’s goods are handmade with love. Custom orders are '
     'available upon request if you need something extra special.'
 );
@@ -40,7 +40,7 @@ const Vendor _peter = const Vendor(
   avatarAsset: 'shrine/vendors/peter-carlsson.png',
   avatarAssetPackage: _kGalleryAssetsPackage,
   description:
-    'Peter makes great stuff for awesome people like you.  Super cool and extra '
+    'Peter makes great stuff for awesome people like you. Super cool and extra '
     'awesome all of his shop’s goods are handmade with love. Custom orders are '
     'available upon request if you need something extra special.'
 );

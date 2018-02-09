@@ -565,7 +565,7 @@ class _RenderTheatre extends RenderBox
     if (child != null)
       children.add(child.toDiagnosticsNode(name: 'onstage'));
 
-    if (firstChild  != null) {
+    if (firstChild != null) {
       RenderBox child = firstChild;
 
       int count = 1;

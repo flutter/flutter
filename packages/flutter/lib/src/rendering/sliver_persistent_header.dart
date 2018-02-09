@@ -515,8 +515,8 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
   double updateGeometry() {
     final double minExtent = this.minExtent;
     final double maxExtent = this.maxExtent;
-    final double paintExtent = (maxExtent - _effectiveScrollOffset);
-    final double layoutExtent = (maxExtent - constraints.scrollOffset);
+    final double paintExtent = maxExtent - _effectiveScrollOffset;
+    final double layoutExtent = maxExtent - constraints.scrollOffset;
     geometry = new SliverGeometry(
       scrollExtent: maxExtent,
       paintExtent: paintExtent.clamp(minExtent, constraints.remainingPaintExtent),

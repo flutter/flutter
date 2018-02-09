@@ -22,7 +22,7 @@ typedef Rect RectCallback();
 ///  * [Material], in particular [Material.type]
 ///  * [kMaterialEdges]
 enum MaterialType {
-  /// Infinite extent using default theme canvas color.
+  /// Rectangle using default theme canvas color.
   canvas,
 
   /// Rounded edges, card theme color.
@@ -130,6 +130,10 @@ abstract class MaterialInkController {
 ///      rounded edges. The edge radii is specified by [kMaterialEdges].
 ///    - [MaterialType.transparency]: the default material shape is a rectangle.
 ///
+/// ## Border
+///
+/// If [shape] is not null, then its border will also be painted (if any).
+///
 /// ## Layout change notifications
 ///
 /// If the layout changes (e.g. because there's a list on the material, and it's
@@ -186,7 +190,7 @@ class Material extends StatefulWidget {
   /// The z-coordinate at which to place this material. This controls the size
   /// of the shadow below the material.
   ///
-  /// If this is non-zero, the contents of the card are clipped, because the
+  /// If this is non-zero, the contents of the material are clipped, because the
   /// widget conceptually defines an independent printed piece of material.
   ///
   /// Defaults to 0. Changing this value will cause the shadow to animate over
@@ -209,11 +213,20 @@ class Material extends StatefulWidget {
   /// The typographical style to use for text within this material.
   final TextStyle textStyle;
 
+  /// Defines the material's shape as well its shadow.
+  ///
+  /// If shape is non null, the [borderRadius] is ignored and the material's
+  /// clip boundary and shadow are defined by the shape.
+  ///
+  /// A shadow is only displayed if the [elevation] is greater than
+  /// zero.
   final ShapeBorder shape;
 
   /// If non-null, the corners of this box are rounded by this [BorderRadius].
   /// Otherwise, the corners specified for the current [type] of material are
   /// used.
+  ///
+  /// If [shape] is non null then the border radius is ignored.
   ///
   /// Must be null if [type] is [MaterialType.circle].
   final BorderRadius borderRadius;
@@ -242,6 +255,7 @@ class Material extends StatefulWidget {
     description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
     description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
     textStyle?.debugFillProperties(description, prefix: 'textStyle.');
+    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     description.add(new EnumProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
   }
 
@@ -291,10 +305,33 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       )
     );
 
+    // PhysicalModel has a temporary workaround for a perfomance issue that
+    // speeds up rectangular non transparent material (the workaround is to
+    // skip the call to ui.Canvas.saveLayer if the border radius is 0).
+    // Until the saveLayer perfomance issue is resolved, we're keeping this
+    // special case here for canvas material type that is using the default
+    // shape (rectangle). We could go down this fast path for explicitly
+    // specified rectangles (e.g shape RoundeRectangleBorder with radius 0, but
+    // we choose not to as we want the change from the fast-path to the
+    // slow-path to be noticeable in the construction site of Material.
+    if (widget.type == MaterialType.canvas && widget.shape == null && widget.borderRadius == null) {
+      return new AnimatedPhysicalModel(
+        curve: Curves.fastOutSlowIn,
+        duration: kThemeChangeDuration,
+        shape: BoxShape.rectangle,
+        borderRadius: BorderRadius.zero,
+        elevation: widget.elevation,
+        color: backgroundColor,
+        shadowColor: widget.shadowColor,
+        animateColor: false,
+        child: contents,
+      );
+    }
+
     final ShapeBorder shape = _getShape();
 
     if (widget.type == MaterialType.transparency)
-      return _clipToShape(shape: shape, contents: contents);
+      return _transparentInterior(shape: shape, contents: contents);
     
     return new _MaterialInterior(
       curve: Curves.fastOutSlowIn,
@@ -305,12 +342,14 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       shadowColor: widget.shadowColor,
       child: contents,
     );
-
   }
 
-  static Widget _clipToShape({ShapeBorder shape, Widget contents}) {
+  static Widget _transparentInterior({ShapeBorder shape, Widget contents}) {
     return new ClipPath(
-      child: contents,
+      child: new _ShapeBorderPaint(
+        child: contents,
+        shape: shape,
+      ),
       clipper: new ShapeBorderClipper(
         shape: shape,
       ),
@@ -337,7 +376,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       case MaterialType.card:
       case MaterialType.button:
         return new RoundedRectangleBorder(
-          borderRadius: kMaterialEdges[widget.type],
+          borderRadius: widget.borderRadius ?? kMaterialEdges[widget.type],
         );
 
       case MaterialType.circle:
@@ -592,15 +631,53 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
 
   @override
   Widget build(BuildContext context) {
+    final ShapeBorder shape = _border.evaluate(animation);
     return new PhysicalShape(
-      child: widget.child,
+      child: new _ShapeBorderPaint(
+        child: widget.child,
+        shape: shape,
+      ),
       clipper: new ShapeBorderClipper(
-        shape: _border.evaluate(animation),
+        shape: shape,
         textDirection: Directionality.of(context)
       ),
       elevation: _elevation.evaluate(animation),
       color: widget.color,
       shadowColor: _shadowColor.evaluate(animation),
     );
+  }
+}
+
+class _ShapeBorderPaint extends StatelessWidget {
+  const _ShapeBorderPaint({
+    @required this.child,
+    @required this.shape,
+  });
+
+  final Widget child;
+  final ShapeBorder shape;
+
+  @override
+  Widget build(BuildContext context) {
+    return new CustomPaint(
+      child: child,
+      foregroundPainter: new _ShapeBorderPainter(shape, Directionality.of(context)),
+    );
+  }
+}
+
+class _ShapeBorderPainter extends CustomPainter {
+  _ShapeBorderPainter(this.border, this.textDirection);
+  final ShapeBorder border;
+  final TextDirection textDirection;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    border.paint(canvas, Offset.zero & size, textDirection: textDirection);
+  }
+
+  @override
+  bool shouldRepaint(_ShapeBorderPainter oldDelegate) {
+    return oldDelegate.border != border;
   }
 }

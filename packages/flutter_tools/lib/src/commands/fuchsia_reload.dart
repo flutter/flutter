@@ -251,7 +251,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     final Uri vmServiceAddr = isolate.owner.vmService.httpAddress;
     final String name = isolate.name;
     final String shortName = name.substring(0, name.indexOf('\$'));
-    final String main = '\$main-';
+    const String main = '\$main-';
     final String number = name.substring(name.indexOf(main) + main.length);
 
     // The Observatory requires somewhat non-standard URIs that the Uri class

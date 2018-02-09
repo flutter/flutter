@@ -206,8 +206,8 @@ class _PathFrames {
 }
 
 /// Paths are being built by a set of commands e.g moveTo, lineTo, etc...
-/// 
-/// _PathCommand instances represents such a command, and can apply it to 
+///
+/// _PathCommand instances represents such a command, and can apply it to
 /// a given Path.
 abstract class _PathCommand {
   const _PathCommand();
@@ -275,10 +275,10 @@ class _PathClose extends _PathCommand {
 
 // Interpolates a value given a set of values equally spaced in time.
 //
-// [interpolator] is the interpolation function used to  interpolate between 2
+// [interpolator] is the interpolation function used to interpolate between 2
 // points of type T.
 //
-// This is currently done with linear interpolation between every 2 consecutive 
+// This is currently done with linear interpolation between every 2 consecutive
 // points. Linear interpolation was smooth enough with the limited set of
 // animations we have tested, so we use it for simplicity. If we find this to
 // not be smooth enough we can try applying spline instead.

@@ -10,10 +10,10 @@ import 'package:test/test.dart';
 
 void main() {
   test('Semantic announcement', () async {
-    final List<Map<String, dynamic>> log = <Map<String, dynamic>>[];
+    final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
 
     SystemChannels.accessibility.setMockMessageHandler((Object mockMessage) async {
-      final Map<String, dynamic> message = mockMessage;
+      final Map<dynamic, dynamic> message = mockMessage;
       log.add(message);
     });
 

@@ -37,6 +37,14 @@ const Duration _kNavBarTitleFadeDuration = const Duration(milliseconds: 150);
 const Color _kDefaultNavBarBackgroundColor = const Color(0xCCF8F8F8);
 const Color _kDefaultNavBarBorderColor = const Color(0x4C000000);
 
+const Border _kDefaultNavBarBorder = const Border(
+  bottom: const BorderSide(
+    color: _kDefaultNavBarBorderColor,
+    width: 0.0, // One physical pixel.
+    style: BorderStyle.solid,
+  ),
+);
+
 const TextStyle _kLargeTitleTextStyle = const TextStyle(
   fontFamily: '.SF UI Text',
   fontSize: 34.0,
@@ -77,6 +85,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
     this.automaticallyImplyLeading: true,
     this.middle,
     this.trailing,
+    this.border: _kDefaultNavBarBorder,
     this.backgroundColor: _kDefaultNavBarBackgroundColor,
     this.actionsForegroundColor: CupertinoColors.activeBlue,
   }) : assert(automaticallyImplyLeading != null),
@@ -109,6 +118,11 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   /// behind it.
   final Color backgroundColor;
 
+  /// The border of the navigation bar. By default renders a single pixel bottom border side.
+  ///
+  /// If a border is null, the navigation bar will not display a border.
+  final Border border;
+
   /// Default color used for text and icons of the [leading] and [trailing]
   /// widgets in the navigation bar.
   ///
@@ -128,6 +142,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   @override
   Widget build(BuildContext context) {
     return _wrapWithBackground(
+      border: border,
       backgroundColor: backgroundColor,
       child: new _CupertinoPersistentNavigationBar(
         leading: leading,
@@ -265,16 +280,14 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
 
 /// Returns `child` wrapped with background and a bottom border if background color
 /// is opaque. Otherwise, also blur with [BackdropFilter].
-Widget _wrapWithBackground({Color backgroundColor, Widget child}) {
+Widget _wrapWithBackground({
+  Border border,
+  Color backgroundColor,
+  Widget child,
+}) {
   final DecoratedBox childWithBackground = new DecoratedBox(
     decoration: new BoxDecoration(
-      border: const Border(
-        bottom: const BorderSide(
-          color: _kDefaultNavBarBorderColor,
-          width: 0.0, // One physical pixel.
-          style: BorderStyle.solid,
-        ),
-      ),
+      border: border,
       color: backgroundColor,
     ),
     child: child,
@@ -282,7 +295,8 @@ Widget _wrapWithBackground({Color backgroundColor, Widget child}) {
 
   final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
   SystemChrome.setSystemUIOverlayStyle(
-      darkBackground ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
+    darkBackground ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark
+  );
 
   if (backgroundColor.alpha == 0xFF)
     return childWithBackground;
@@ -424,7 +438,8 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
     this.automaticallyImplyLeading,
     this.middle,
     this.trailing,
-    this.backgroundColor,
+    this.border: _kDefaultNavBarBorder,
+    this.backgroundColor: _kDefaultNavBarBackgroundColor,
     this.actionsForegroundColor,
   }) : assert(persistentHeight != null);
 
@@ -441,6 +456,8 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
   final Widget trailing;
 
   final Color backgroundColor;
+
+  final Border border;
 
   final Color actionsForegroundColor;
 
@@ -467,6 +484,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
     );
 
     return _wrapWithBackground(
+      border: border,
       backgroundColor: backgroundColor,
       child: new Stack(
         fit: StackFit.expand,

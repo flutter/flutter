@@ -209,7 +209,6 @@ class _FlutterPlatform extends PlatformPlugin {
           incrementalCompilerByteStorePath: '' /* not null is enough */,
           mainPath: listenerFile.path,
           packagesPath: PackageMap.globalPackagesPath,
-          strongMode: true,
         );
 
         // bundlePath needs to point to a folder with `platform.dill` file.
@@ -222,7 +221,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
         // copy 'vm_platform_strong.dill' into 'platform.dill'
         final File vmPlatformStrongDill = fs.file(
-          artifacts.getArtifactPath(Artifact.platformKernelStrongDill),
+          artifacts.getArtifactPath(Artifact.platformKernelDill),
         );
         final File platformDill = vmPlatformStrongDill.copySync(
           tempBundleDirectory.childFile('platform.dill').path,
@@ -547,11 +546,12 @@ void main() {
     }
     if (strongMode) {
       command.add('--strong');
+    } else {
+      command.add('--enable-checked-mode');
     }
     command.addAll(<String>[
       '--enable-dart-profiling',
       '--non-interactive',
-      '--enable-checked-mode',
       '--use-test-fonts',
       // '--enable-txt', // enable this to test libtxt rendering
       '--packages=$packages',
@@ -570,7 +570,7 @@ void main() {
     void startTimeoutTimer(),
     void reportObservatoryUri(Uri uri),
   }) {
-    final String observatoryString = 'Observatory listening on ';
+    const String observatoryString = 'Observatory listening on ';
 
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {

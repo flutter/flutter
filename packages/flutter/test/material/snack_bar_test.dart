@@ -7,16 +7,16 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
-    final String helloSnackBar = 'Hello SnackBar';
-    final Key tapTarget = const Key('tap-target');
+    const String helloSnackBar = 'Hello SnackBar';
+    const Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
           builder: (BuildContext context) {
             return new GestureDetector(
               onTap: () {
-                Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text(helloSnackBar),
+                Scaffold.of(context).showSnackBar(const SnackBar(
+                  content: const Text(helloSnackBar),
                   duration: const Duration(seconds: 2)
                 ));
               },
@@ -53,7 +53,7 @@ void main() {
 
   testWidgets('SnackBar twice test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    final Key tapTarget = const Key('tap-target');
+    const Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -128,7 +128,7 @@ void main() {
 
   testWidgets('SnackBar cancel test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    final Key tapTarget = const Key('tap-target');
+    const Key tapTarget = const Key('tap-target');
     int time;
     ScaffoldFeatureController<SnackBar, SnackBarClosedReason> lastController;
     await tester.pumpWidget(new MaterialApp(
@@ -214,7 +214,7 @@ void main() {
 
   testWidgets('SnackBar dismiss test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    final Key tapTarget = const Key('tap-target');
+    const Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -347,6 +347,63 @@ void main() {
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 14.0 + 40.0); // margin + bottom padding
   });
 
+  testWidgets('SnackBar is positioned above BottomNavigationBar', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: new MediaQuery(
+        data: const MediaQueryData(
+          padding: const EdgeInsets.only(
+            left: 10.0,
+            top: 20.0,
+            right: 30.0,
+            bottom: 40.0,
+          ),
+        ),
+        child: new Scaffold(
+          bottomNavigationBar: new BottomNavigationBar(
+            items: <BottomNavigationBarItem>[
+              const BottomNavigationBarItem(icon: const Icon(Icons.favorite), title: const Text('Animutation')),
+              const BottomNavigationBarItem(icon: const Icon(Icons.block), title: const Text('Zombo.com')),
+            ],
+          ),
+          body: new Builder(
+            builder: (BuildContext context) {
+              return new GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(new SnackBar(
+                    content: const Text('I am a snack bar.'),
+                    duration: const Duration(seconds: 2),
+                    action: new SnackBarAction(label: 'ACTION', onPressed: () {})
+                  ));
+                },
+                child: const Text('X')
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final RenderBox textBox = tester.firstRenderObject(find.text('I am a snack bar.'));
+    final RenderBox actionTextBox = tester.firstRenderObject(find.text('ACTION'));
+    final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
+
+    final Offset textBottomLeft = textBox.localToGlobal(textBox.size.bottomLeft(Offset.zero));
+    final Offset textBottomRight = textBox.localToGlobal(textBox.size.bottomRight(Offset.zero));
+    final Offset actionTextBottomLeft = actionTextBox.localToGlobal(actionTextBox.size.bottomLeft(Offset.zero));
+    final Offset actionTextBottomRight = actionTextBox.localToGlobal(actionTextBox.size.bottomRight(Offset.zero));
+    final Offset snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Offset.zero));
+    final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
+
+    expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
+    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 14.0); // margin (with no bottom padding)
+    expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
+    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 30.0); // margin + right padding
+    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 14.0); // margin (with no bottom padding)
+  });
+
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
     bool actionPressed = false;
@@ -387,7 +444,7 @@ void main() {
     await tester.tap(find.text('ACTION'));
     expect(actionPressed, isTrue);
     // Closed reason is only set when the animation is complete.
-    await tester.pump(const Duration(milliseconds:250));
+    await tester.pump(const Duration(milliseconds: 250));
     expect(closedReason, isNull);
     // Wait for animation to complete.
     await tester.pumpAndSettle(const Duration(seconds: 1));

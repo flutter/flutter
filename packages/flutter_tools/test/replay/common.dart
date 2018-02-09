@@ -53,7 +53,7 @@ void testReplay(
 /// be running in a test via [testReplay].
 ///
 /// [command] should be the list of arguments that are passed to the `flutter`
-/// command-line tool.  For example:
+/// command-line tool. For example:
 ///
 /// ```
 ///   <String>[

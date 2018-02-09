@@ -163,12 +163,11 @@ abstract class FlutterCommand extends Command<Null> {
     final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
         ? argResults['preview-dart-2']
         : false;
-    final bool strongMode =  argParser.options.containsKey('strong')
-        ? argResults['strong']
-        : false;
-    if (strongMode == true && previewDart2 == false) {
-      throw new UsageException(
-          '--strong is valid only when --preview-dart-2 is specified.', null);
+
+    TargetPlatform targetPlatform;
+    if (argParser.options.containsKey('target-platform') &&
+        argResults['target-platform'] != 'default') {
+      targetPlatform = getTargetPlatformForName(argResults['target-platform']);
     }
 
     return new BuildInfo(getBuildMode(),
@@ -176,7 +175,6 @@ abstract class FlutterCommand extends Command<Null> {
         ? argResults['flavor']
         : null,
       previewDart2: previewDart2,
-      strongMode: strongMode,
       extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
           ? argResults[FlutterOptions.kExtraFrontEndOptions]
           : null,
@@ -185,7 +183,8 @@ abstract class FlutterCommand extends Command<Null> {
           : null,
       preferSharedLibrary: argParser.options.containsKey('prefer-shared-library')
         ? argResults['prefer-shared-library']
-        : false);
+        : false,
+      targetPlatform: targetPlatform);
   }
 
   void setupApplicationPackages() {
@@ -396,16 +395,6 @@ abstract class FlutterCommand extends Command<Null> {
       final String targetPath = targetFile;
       if (!fs.isFileSync(targetPath))
         throw new ToolExit('Target file "$targetPath" not found.');
-    }
-
-    final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
-        ? argResults['preview-dart-2']
-        : false;
-    final bool strongMode =  argParser.options.containsKey('strong')
-        ? argResults['strong']
-        : false;
-    if (strongMode == true && previewDart2 == false) {
-      throw new ToolExit('--strong is valid only with --preview-dart-2 option.');
     }
   }
 

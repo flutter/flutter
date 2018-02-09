@@ -210,7 +210,7 @@ void main() {
 
   group('create PathAnimation', () {
     test('single path', () {
-      final List<FrameData> frameData = const <FrameData>[
+      const List<FrameData> frameData = const <FrameData>[
         const FrameData(
           const Point<double>(10.0, 10.0),
           const <SvgPath>[
@@ -240,7 +240,7 @@ void main() {
     });
 
     test('multiple paths', () {
-      final List<FrameData> frameData = const <FrameData>[
+      const List<FrameData> frameData = const <FrameData>[
         const FrameData(
           const Point<double>(10.0, 10.0),
           const <SvgPath>[
@@ -283,7 +283,7 @@ void main() {
     });
 
     test('multiple frames', () {
-      final List<FrameData> frameData = const <FrameData>[
+      const List<FrameData> frameData = const <FrameData>[
         const FrameData(
           const Point<double>(10.0, 10.0),
           const <SvgPath>[
@@ -326,7 +326,7 @@ void main() {
 
   group('create Animation', () {
     test('multiple paths', () {
-      final List<FrameData> frameData = const <FrameData>[
+      const List<FrameData> frameData = const <FrameData>[
         const FrameData(
           const Point<double>(10.0, 10.0),
           const <SvgPath>[
@@ -374,7 +374,7 @@ void main() {
 
   group('toDart', () {
     test('_PathMoveTo', () {
-      final PathCommandAnimation command = const PathCommandAnimation(
+      const PathCommandAnimation command = const PathCommandAnimation(
         'M',
         const <List<Point<double>>>[
           const <Point<double>>[
@@ -396,7 +396,7 @@ void main() {
     });
 
     test('_PathLineTo', () {
-      final PathCommandAnimation command = const PathCommandAnimation(
+      const PathCommandAnimation command = const PathCommandAnimation(
         'L',
         const <List<Point<double>>>[
           const <Point<double>>[
@@ -418,7 +418,7 @@ void main() {
     });
 
     test('_PathCubicTo', () {
-      final PathCommandAnimation command = const PathCommandAnimation(
+      const PathCommandAnimation command = const PathCommandAnimation(
         'C',
         const <List<Point<double>>>[
           const <Point<double>>[
@@ -456,7 +456,7 @@ void main() {
     });
 
     test('_PathClose', () {
-      final PathCommandAnimation command = const PathCommandAnimation(
+      const PathCommandAnimation command = const PathCommandAnimation(
         'Z',
         const <List<Point<double>>>[],
       );
@@ -469,7 +469,7 @@ void main() {
     });
 
     test('Unsupported path command', () {
-      final PathCommandAnimation command = const PathCommandAnimation(
+      const PathCommandAnimation command = const PathCommandAnimation(
         'h',
         const <List<Point<double>>>[],
       );
@@ -481,7 +481,7 @@ void main() {
     });
 
     test('_PathFrames', () {
-      final PathAnimation pathAnimation = const PathAnimation(
+      const PathAnimation pathAnimation = const PathAnimation(
           const <PathCommandAnimation>[
             const PathCommandAnimation('M', const <List<Point<double>>>[
               const <Point<double>>[
@@ -524,7 +524,7 @@ void main() {
     });
 
     test('Animation', () {
-      final Animation animation = const Animation(
+      const Animation animation = const Animation(
           const Point<double>(48.0, 48.0),
           const <PathAnimation>[
             const PathAnimation(

@@ -966,7 +966,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       if (index + 1 < _history.length) {
         newRoute.didChangeNext(_history[index + 1]);
         _history[index + 1].didChangePrevious(newRoute);
-      } else  {
+      } else {
         newRoute.didChangeNext(null);
       }
       if (index > 0)
