@@ -3022,6 +3022,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
     SetSelectionHandler onSetSelection,
+    VoidCallback onAccessibilityFocus,
+    VoidCallback onLoseAccessibilityFocus,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
@@ -3050,6 +3052,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
        _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
        _onSetSelection = onSetSelection,
+       _onAccessibilityFocus = onAccessibilityFocus,
+       _onLoseAccessibilityFocus = onLoseAccessibilityFocus,
        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
@@ -3493,6 +3497,62 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handler for [SemanticsAction.accessibilityFocus].
+  ///
+  /// This handler is invoked when the accessibility focus is moved
+  /// to the node annotated with this handler. The accessibility focus is the
+  /// green (on Android with  TalkBack) or black (on iOS with VoiceOver)
+  /// rectangular show on screen to indicate with what element an accessibility
+  /// user is currently interacting with.
+  ///
+  /// The accessibility focus is different from the input focus. The input focus
+  /// is usually held by the element that currently response to keyboard inputs.
+  /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///  * [onLoseAccessibilityFocus], which is invoked when the accessibility
+  ///    focus is removed from the node
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  VoidCallback get onAccessibilityFocus => _onAccessibilityFocus;
+  VoidCallback _onAccessibilityFocus;
+  set onAccessibilityFocus(VoidCallback handler) {
+    if (_onAccessibilityFocus == handler)
+      return;
+    final bool hadValue = _onAccessibilityFocus != null;
+    _onAccessibilityFocus = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
+  /// The handler for [SemanticsAction.loseAccessibilityFocus].
+  ///
+  /// This handler is invoked when the accessibility focus is moved
+  /// away from the node annotated with this handler. The accessibility focus is
+  /// the green (on Android with  TalkBack) or black (on iOS with VoiceOver)
+  /// rectangular show on screen to indicate with what element an accessibility
+  /// user is currently interacting with.
+  ///
+  /// The accessibility focus is different from the input focus. The input focus
+  /// is usually held by the element that currently response to keyboard inputs.
+  /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///  * [onAccessibilityFocus], which is invoked when the node gains
+  ///    accessibility focus
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  VoidCallback get onLoseAccessibilityFocus => _onLoseAccessibilityFocus;
+  VoidCallback _onLoseAccessibilityFocus;
+  set onLoseAccessibilityFocus(VoidCallback handler) {
+    if (_onLoseAccessibilityFocus == handler)
+      return;
+    final bool hadValue = _onLoseAccessibilityFocus != null;
+    _onLoseAccessibilityFocus = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -3552,6 +3612,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onMoveCursorBackwardByCharacter = _performMoveCursorBackwardByCharacter;
     if (onSetSelection != null)
       config.onSetSelection = _performSetSelection;
+    if (onAccessibilityFocus != null)
+      config.onAccessibilityFocus = _performAccessibilityFocus;
+    if (onLoseAccessibilityFocus != null)
+      config.onLoseAccessibilityFocus = _performLoseAccessibilityFocus;
   }
 
   void _performTap() {
@@ -3622,6 +3686,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   void _performSetSelection(TextSelection selection) {
     if (onSetSelection != null)
       onSetSelection(selection);
+  }
+
+  void _performAccessibilityFocus() {
+    if (onAccessibilityFocus != null)
+      onAccessibilityFocus();
+  }
+
+  void _performLoseAccessibilityFocus() {
+    if (onLoseAccessibilityFocus != null)
+      onLoseAccessibilityFocus();
   }
 }
 

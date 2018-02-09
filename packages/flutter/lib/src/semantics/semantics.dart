@@ -288,6 +288,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onMoveCursorForwardByCharacter,
     this.onMoveCursorBackwardByCharacter,
     this.onSetSelection,
+    this.onAccessibilityFocus,
+    this.onLoseAccessibilityFocus,
   });
 
   /// If non-null, indicates that this subtree represents something that can be
@@ -548,6 +550,44 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack users can trigger this handler by selecting "Move cursor to
   /// beginning/end" or "Select all" from the local context menu.
   final SetSelectionHandler onSetSelection;
+
+  /// The handler for [SemanticsAction.accessibilityFocus].
+  ///
+  /// This handler is invoked when the accessibility focus is moved
+  /// to the node annotated with this handler. The accessibility focus is the
+  /// green (on Android with  TalkBack) or black (on iOS with VoiceOver)
+  /// rectangular show on screen to indicate with what element an accessibility
+  /// user is currently interacting with.
+  ///
+  /// The accessibility focus is different from the input focus. The input focus
+  /// is usually held by the element that currently response to keyboard inputs.
+  /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///  * [onLoseAccessibilityFocus], which is invoked when the accessibility
+  ///    focus is removed from the node
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  final VoidCallback onAccessibilityFocus;
+
+  /// The handler for [SemanticsAction.loseAccessibilityFocus].
+  ///
+  /// This handler is invoked when the accessibility focus is moved
+  /// away from the node annotated with this handler. The accessibility focus is
+  /// the green (on Android with  TalkBack) or black (on iOS with VoiceOver)
+  /// rectangular show on screen to indicate with what element an accessibility
+  /// user is currently interacting with.
+  ///
+  /// The accessibility focus is different from the input focus. The input focus
+  /// is usually held by the element that currently response to keyboard inputs.
+  /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///  * [onAccessibilityFocus], which is invoked when the node gains
+  ///    accessibility focus
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  final VoidCallback onLoseAccessibilityFocus;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
@@ -1157,7 +1197,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       increasedValue: data.increasedValue,
       hint: data.hint,
       textDirection: data.textDirection,
-      nextNodeId: data.nextNodeId,
+//      nextNodeId: data.nextNodeId,
       textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
       transform: data.transform?.storage ?? _kIdentityTransform,
@@ -1877,6 +1917,54 @@ class SemanticsConfiguration {
       ));
     });
     _onSetSelection = value;
+  }
+
+  /// The handler for [SemanticsAction.accessibilityFocus].
+  ///
+  /// This handler is invoked when the accessibility focus is moved
+  /// to the node annotated with this handler. The accessibility focus is the
+  /// green (on Android with  TalkBack) or black (on iOS with VoiceOver)
+  /// rectangular show on screen to indicate with what element an accessibility
+  /// user is currently interacting with.
+  ///
+  /// The accessibility focus is different from the input focus. The input focus
+  /// is usually held by the element that currently response to keyboard inputs.
+  /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///  * [onLoseAccessibilityFocus], which is invoked when the accessibility
+  ///    focus is removed from the node
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  VoidCallback get onAccessibilityFocus => _onAccessibilityFocus;
+  VoidCallback _onAccessibilityFocus;
+  set onAccessibilityFocus(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.accessibilityFocus, value);
+    _onAccessibilityFocus = value;
+  }
+
+  /// The handler for [SemanticsAction.clearAccessibilityFocus].
+  ///
+  /// This handler is invoked when the accessibility focus is moved
+  /// away from the node annotated with this handler. The accessibility focus is
+  /// the green (on Android with  TalkBack) or black (on iOS with VoiceOver)
+  /// rectangular show on screen to indicate with what element an accessibility
+  /// user is currently interacting with.
+  ///
+  /// The accessibility focus is different from the input focus. The input focus
+  /// is usually held by the element that currently response to keyboard inputs.
+  /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///  * [onAccessibilityFocus], which is invoked when the node gains
+  ///    accessibility focus
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  VoidCallback get onLoseAccessibilityFocus => _onLoseAccessibilityFocus;
+  VoidCallback _onLoseAccessibilityFocus;
+  set onLoseAccessibilityFocus(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.loseAccessibilityFocus, value);
+    _onLoseAccessibilityFocus = value;
   }
 
   /// Returns the action handler registered for [action] or null if none was

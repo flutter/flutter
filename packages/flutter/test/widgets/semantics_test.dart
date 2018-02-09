@@ -398,6 +398,8 @@ void main() {
         onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
         onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
         onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
+        onAccessibilityFocus: () => performedActions.add(SemanticsAction.accessibilityFocus),
+        onLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.loseAccessibilityFocus),
       )
     );
 
