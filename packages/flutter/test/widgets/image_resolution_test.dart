@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestImage extends ui.Image {
+class TestImage implements ui.Image {
   TestImage(this.scale);
   final double scale;
 

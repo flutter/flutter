@@ -25,15 +25,15 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 }
 
-class TestImage extends ui.Image {
+class TestImage implements ui.Image {
   @override
   int get width => 16;
 
   @override
   int get height => 9;
 
-  // @override
-  // void dispose() { }
+  @override
+  void dispose() { }
 }
 
 void main() {
