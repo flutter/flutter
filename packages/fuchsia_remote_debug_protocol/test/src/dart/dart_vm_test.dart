@@ -84,8 +84,8 @@ void main() {
       };
 
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
-        when(mockPeer.sendRequest(any, any))
-            .thenReturn(new Future(() => flutterViewCannedResponses));
+        when(mockPeer.sendRequest(any, any)).thenReturn(
+            new Future<Map<String, dynamic>>(() => flutterViewCannedResponses));
         return new Future<json_rpc.Peer>(() => mockPeer);
       }
 
@@ -129,8 +129,8 @@ void main() {
       };
 
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
-        when(mockPeer.sendRequest(any, any))
-            .thenReturn(new Future(() => flutterViewCannedResponses));
+        when(mockPeer.sendRequest(any, any)).thenReturn(
+            new Future<Map<String, dynamic>>(() => flutterViewCannedResponses));
         return new Future<json_rpc.Peer>(() => mockPeer);
       }
 

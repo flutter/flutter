@@ -93,7 +93,7 @@ class DartVm {
   /// If the function returns, it is with a raw JSON response.
   Future<Map<String, dynamic>> invokeRpc(String function,
       {Map<String, dynamic> params, Duration timeout}) async {
-    Future<Map<String, dynamic>> future =
+    final Future<Map<String, dynamic>> future =
         _peer.sendRequest(function, params ?? <String, dynamic>{});
     if (timeout == null) {
       return future;
