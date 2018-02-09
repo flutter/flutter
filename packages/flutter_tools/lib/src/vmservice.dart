@@ -1276,6 +1276,7 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   int get length => _map.length;
   @override
   String toString() => _map.toString();
+  // TODO(tvolkert): Remove these ignores once dev.22 SDK is everywhere
   @override
   // ignore: undefined_method, override_on_non_overriding_method, non_type_as_type_argument
   void addEntries(Iterable<MapEntry<String, dynamic>> entries) => _map.addEntries(entries);
