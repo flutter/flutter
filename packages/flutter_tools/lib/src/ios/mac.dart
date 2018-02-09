@@ -277,15 +277,36 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
+  final Status cleanStatus =
+      logger.startProgress('Running Xcode clean...', expectSlowOperation: true);
+  await runAsync(
+    <String>[
+      '/usr/bin/env',
+      'xcrun',
+      'xcodebuild',
+      'clean',
+    ],
+    workingDirectory: app.appDirectory,
+  );
+  cleanStatus.stop();
+
   final List<String> commands = <String>[
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
-    'clean',
     'build',
     '-configuration', configuration,
     'ONLY_ACTIVE_ARCH=YES',
   ];
+
+  if (logger.isVerbose) {
+    // An environment variable to be passed to xcode_backend.sh determining
+    // whether to echo back executed commands.
+    commands.add('VERBOSE_SCRIPT_LOGGING=YES');
+  } else {
+    // This will print warnings and errors only.
+    commands.add('-quiet');
+  }
 
   if (developmentTeam != null)
     commands.add('DEVELOPMENT_TEAM=$developmentTeam');
@@ -318,13 +339,14 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
-  final Status status = logger.startProgress('Running Xcode build...', expectSlowOperation: true);
+  final Status buildStatus =
+      logger.startProgress('Running Xcode build...', expectSlowOperation: true);
   final RunResult result = await runAsync(
     commands,
     workingDirectory: app.appDirectory,
     allowReentrantFlutter: true
   );
-  status.stop();
+  buildStatus.stop();
   if (result.exitCode != 0) {
     printStatus('Failed to build iOS app');
     if (result.stderr.isNotEmpty) {
