@@ -345,7 +345,7 @@ abstract class ServiceObject {
     // fallback return a ServiceMap object.
     serviceObject ??= new ServiceMap._empty(owner);
     // We have now constructed an empty service object, call update to populate it.
-    serviceObject.update(map);
+    serviceObject.updateFromMap(map);
     return serviceObject;
   }
 
@@ -420,7 +420,7 @@ abstract class ServiceObject {
           // An object may have been collected.
           completer.complete(new ServiceObject._fromMap(owner, response));
         } else {
-          update(response);
+          updateFromMap(response);
           completer.complete(this);
         }
       } catch (e, st) {
@@ -433,7 +433,7 @@ abstract class ServiceObject {
   }
 
   /// Update [this] using [map] as a source. [map] can be a service reference.
-  void update(Map<String, dynamic> map) {
+  void updateFromMap(Map<String, dynamic> map) {
     // Don't allow the type to change on an object update.
     final bool mapIsRef = _hasRef(map['type']);
     final String mapType = _stripRef(map['type']);
@@ -662,7 +662,7 @@ class VM extends ServiceObjectOwner {
     final String type = _stripRef(map['type']);
     if (type == 'VM') {
       // Update this VM object.
-      update(map);
+      updateFromMap(map);
       return this;
     }
 
@@ -684,7 +684,7 @@ class VM extends ServiceObjectOwner {
           });
         } else {
           // Existing isolate, update data.
-          isolate.update(map);
+          isolate.updateFromMap(map);
         }
         return isolate;
       }
@@ -696,7 +696,7 @@ class VM extends ServiceObjectOwner {
           view = new ServiceObject._fromMap(this, map);
           _viewCache[mapId] = view;
         } else {
-          view.update(map);
+          view.updateFromMap(map);
         }
         return view;
       }
@@ -965,7 +965,7 @@ class Isolate extends ServiceObjectOwner {
     final String mapId = map['id'];
     ServiceObject serviceObject = (mapId != null) ? _cache[mapId] : null;
     if (serviceObject != null) {
-      serviceObject.update(map);
+      serviceObject.updateFromMap(map);
       return serviceObject;
     }
     // Build the object from the map directly.
@@ -1276,6 +1276,24 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   int get length => _map.length;
   @override
   String toString() => _map.toString();
+  @override
+  void addEntries(Iterable<MapEntry<String, dynamic>> entries) => _map.addEntries(entries);
+  @override
+  Map<RK, RV> cast<RK, RV>() => _map.cast<RK, RV>();
+  @override
+  void removeWhere(bool test(String key, dynamic value)) => _map.removeWhere(test);
+  @override
+  Map<K2, V2> map<K2, V2>(MapEntry<K2, V2> transform(String key, dynamic value)) =>
+      _map.map(transform);
+  @override
+  Iterable<MapEntry<String, dynamic>> get entries => _map.entries;
+  @override
+  void updateAll(dynamic update(String key, dynamic value)) => _map.updateAll(update);
+  @override
+  Map<RK, RV> retype<RK, RV>() => _map.retype<RK, RV>();
+  @override
+  dynamic update(String key, dynamic update(dynamic value), {dynamic ifAbsent()}) =>
+      _map.update(key, update, ifAbsent: ifAbsent);
 }
 
 /// Peered to a Android/iOS FlutterView widget on a device.
