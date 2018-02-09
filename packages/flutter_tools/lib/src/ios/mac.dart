@@ -287,8 +287,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     'ONLY_ACTIVE_ARCH=YES',
   ];
 
-  if (developmentTeam != null)
+  if (developmentTeam != null) {
     commands.add('DEVELOPMENT_TEAM=$developmentTeam');
+    commands.add('-allowProvisioningUpdates');
+    commands.add('-allowProvisioningDeviceRegistration');
+  }
 
   final List<FileSystemEntity> contents = fs.directory(app.appDirectory).listSync();
   for (FileSystemEntity entity in contents) {
