@@ -890,12 +890,12 @@ class ParagraphConstraints {
 ///
 /// Paragraphs can be displayed on a [Canvas] using the [Canvas.drawParagraph]
 /// method.
-abstract class Paragraph extends NativeFieldWrapperClass2 {
-  /// Creates an uninitialized Paragraph object.
+class Paragraph extends NativeFieldWrapperClass2 {
+  /// This class is created by the engine, and should not be instantiated
+  /// or extended directly.
   ///
-  /// Calling the [Paragraph] constructor directly will not create a useable
-  /// object. To create a [Paragraph] object, use a [ParagraphBuilder].
-  Paragraph(); // (this constructor is here just so we can document it)
+  /// To create a [Paragraph] object, use a [ParagraphBuilder].
+  Paragraph._();
 
   /// The amount of horizontal space this paragraph occupies.
   ///
