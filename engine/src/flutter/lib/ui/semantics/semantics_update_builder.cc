@@ -39,6 +39,9 @@ void SemanticsUpdateBuilder::updateNode(int id,
                                         int actions,
                                         int textSelectionBase,
                                         int textSelectionExtent,
+                                        double scrollPosition,
+                                        double scrollExtentMax,
+                                        double scrollExtentMin,
                                         double left,
                                         double top,
                                         double right,
@@ -58,6 +61,9 @@ void SemanticsUpdateBuilder::updateNode(int id,
   node.actions = actions;
   node.textSelectionBase = textSelectionBase;
   node.textSelectionExtent = textSelectionExtent;
+  node.scrollPosition = scrollPosition;
+  node.scrollExtentMax = scrollExtentMax;
+  node.scrollExtentMin = scrollExtentMin;
   node.rect = SkRect::MakeLTRB(left, top, right, bottom);
   node.label = label;
   node.hint = hint;
