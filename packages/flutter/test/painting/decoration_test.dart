@@ -78,7 +78,7 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   String toString() => '${describeIdentity(this)}}()';
 }
 
-class TestImage extends ui.Image {
+class TestImage implements ui.Image {
   @override
   int get width => 100;
 
