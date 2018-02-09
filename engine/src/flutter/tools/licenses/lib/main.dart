@@ -2106,6 +2106,7 @@ class RepositoryFlutterDirectory extends RepositoryDirectory {
         && entry.name != 'examples'
         && entry.name != 'build'
         && entry.name != 'travis'
+        && entry.name != 'frontend_server'
         && super.shouldRecurse(entry);
   }
 
