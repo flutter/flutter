@@ -1202,7 +1202,13 @@ class Paint {
 ///
 /// To draw an [Image], use one of the methods on the [Canvas] class, such as
 /// [Canvas.drawImage].
-abstract class Image extends NativeFieldWrapperClass2 {
+class Image extends NativeFieldWrapperClass2 {
+  /// This class is created by the engine, and should not be instantiated
+  /// or extended directly.
+  ///
+  /// To obtain an [Image] object, use [instantiateImageCodec].
+  Image._();
+
   /// The number of image pixels along the image's horizontal axis.
   int get width native 'Image_width';
 
@@ -1224,7 +1230,14 @@ typedef void ImageDecoderCallback(Image result);
 ///
 /// To obtain an instance of the [FrameInfo] interface, see
 /// [Codec.getNextFrame].
-abstract class FrameInfo extends NativeFieldWrapperClass2 {
+class FrameInfo extends NativeFieldWrapperClass2 {
+  /// This class is created by the engine, and should not be instantiated
+  /// or extended directly.
+  ///
+  /// To obtain an instance of the [FrameInfo] interface, see
+  /// [Codec.getNextFrame].
+  FrameInfo._();
+
   /// The duration this frame should be shown.
   Duration get duration => new Duration(milliseconds: _durationMillis);
   int get _durationMillis native 'FrameInfo_durationMillis';
@@ -1234,7 +1247,14 @@ abstract class FrameInfo extends NativeFieldWrapperClass2 {
 }
 
 /// A handle to an image codec.
-abstract class Codec extends NativeFieldWrapperClass2 {
+class Codec extends NativeFieldWrapperClass2 {
+  /// This class is created by the engine, and should not be instantiated
+  /// or extended directly.
+  ///
+  /// To obtain an instance of the [Codec] interface, see
+  /// [instantiateImageCodec].
+  Codec._();
+
   /// Number of frames in this image.
   int get frameCount native 'Codec_frameCount';
 
@@ -1744,7 +1764,11 @@ class ImageFilter extends NativeFieldWrapperClass2 {
 
 /// Base class for objects such as [Gradient] and [ImageShader] which
 /// correspond to shaders as used by [Paint.shader].
-abstract class Shader extends NativeFieldWrapperClass2 { }
+class Shader extends NativeFieldWrapperClass2 {
+  /// This class is created by the engine, and should not be instantiated
+  /// or extended directly.
+  Shader._();
+}
 
 /// Defines what happens at the edge of the gradient.
 ///
@@ -1836,11 +1860,7 @@ Float32List _encodeTwoPoints(Offset pointA, Offset pointB) {
 /// There are two useful types of gradients, created by [new Gradient.linear]
 /// and [new Gradient.radial].
 class Gradient extends Shader {
-  /// Creates a Gradient object that is not initialized.
-  ///
-  /// Use the [new Gradient.linear] or [new Gradient.radial] constructors to
-  /// obtain a usable [Gradient] object.
-  Gradient();
+
   void _constructor() native 'Gradient_constructor';
 
   /// Creates a linear gradient from `from` to `to`.
@@ -1869,7 +1889,8 @@ class Gradient extends Shader {
   ]) : assert(_offsetIsValid(from)),
        assert(_offsetIsValid(to)),
        assert(colors != null),
-       assert(tileMode != null) {
+       assert(tileMode != null),
+       super._() {
     _validateColorStops(colors, colorStops);
     final Float32List endPointsBuffer = _encodeTwoPoints(from, to);
     final Int32List colorsBuffer = _encodeColorList(colors);
@@ -1905,7 +1926,8 @@ class Gradient extends Shader {
     TileMode tileMode = TileMode.clamp,
   ]) : assert(_offsetIsValid(center)),
        assert(colors != null),
-       assert(tileMode != null) {
+       assert(tileMode != null),
+       super._() {
     _validateColorStops(colors, colorStops);
     final Int32List colorsBuffer = _encodeColorList(colors);
     final Float32List colorStopsBuffer = colorStops == null ? null : new Float32List.fromList(colorStops);
@@ -1936,7 +1958,8 @@ class ImageShader extends Shader {
     assert(image != null), // image is checked on the engine side
     assert(tmx != null),
     assert(tmy != null),
-    assert(matrix4 != null) {
+    assert(matrix4 != null),
+    super._() {
     if (matrix4.length != 16)
       throw new ArgumentError('"matrix4" must have 16 entries.');
     _constructor();
@@ -2795,12 +2818,12 @@ class Canvas extends NativeFieldWrapperClass2 {
 /// A [Picture] can be placed in a [Scene] using a [SceneBuilder], via
 /// the [SceneBuilder.addPicture] method. A [Picture] can also be
 /// drawn into a [Canvas], using the [Canvas.drawPicture] method.
-abstract class Picture extends NativeFieldWrapperClass2 {
-  /// Creates an uninitialized Picture object.
+class Picture extends NativeFieldWrapperClass2 {
+  /// This class is created by the engine, and should not be instantiated
+  /// or extended directly.
   ///
-  /// Calling the Picture constructor directly will not create a useable
-  /// object. To create a Picture object, use a [PictureRecorder].
-  Picture(); // (this constructor is here just so we can document it)
+  /// To create a [Picture], use a [PictureRecorder].
+  Picture._();
 
   /// Creates an image from this picture.
   ///

@@ -11,11 +11,11 @@ part of dart.ui;
 /// Scene objects can be displayed on the screen using the
 /// [Window.render] method.
 class Scene extends NativeFieldWrapperClass2 {
-  /// Creates an uninitialized Scene object.
+  /// This class is created by the engine, and should not be instantiated
+  /// or extended directly.
   ///
-  /// Calling the Scene constructor directly will not create a useable
-  /// object. To create a Scene object, use a [SceneBuilder].
-  Scene(); // (this constructor is here just so we can document it)
+  /// To create a Scene object, use a [SceneBuilder].
+  Scene._();
 
   /// Releases the resources used by this scene.
   ///

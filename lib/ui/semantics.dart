@@ -416,11 +416,11 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
 /// Semantics updates can be applied to the system's retained semantics tree
 /// using the [Window.updateSemantics] method.
 class SemanticsUpdate extends NativeFieldWrapperClass2 {
-  /// Creates an uninitialized SemanticsUpdate object.
+  /// This class is created by the engine, and should not be instantiated
+  /// or extended directly.
   ///
-  /// Calling the SemanticsUpdate constructor directly will not create a useable
-  /// object. To create a SemanticsUpdate object, use a [SemanticsUpdateBuilder].
-  SemanticsUpdate(); // (this constructor is here just so we can document it)
+  /// To create a SemanticsUpdate object, use a [SemanticsUpdateBuilder].
+  SemanticsUpdate._();
 
   /// Releases the resources used by this semantics update.
   ///
