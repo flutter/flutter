@@ -17,6 +17,7 @@ const String kY = 'y';
 const String kZ = 'z';
 const String kCommit = 'commit';
 const String kOrigin = 'origin';
+const String kYes = 'yes';
 const String kHelp = 'help';
 
 const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
@@ -46,6 +47,7 @@ void main(List<String> args) {
     valueHelp: 'repository',
     defaultsTo: 'upstream',
   );
+  argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');
   argParser.addFlag(kHelp, negatable: false, help: 'Show this help message.', hide: true);
   ArgResults argResults;
   try {
@@ -59,6 +61,7 @@ void main(List<String> args) {
   final String level = argResults[kIncrement];
   final String commit = argResults[kCommit];
   final String origin = argResults[kOrigin];
+  final bool autoApprove = argResults[kYes];
   final bool help = argResults[kHelp];
 
   if (help || level == null) {
@@ -125,13 +128,17 @@ void main(List<String> args) {
 
   // PROMPT
 
-  print('Your tree is ready to publish Flutter $version (${hash.substring(0, 10)}) '
-    'to the "dev" channel.');
-  stdout.write('Are you? [yes/no] ');
-  if (stdin.readLineSync() != 'yes') {
-    runGit('tag -d v$version', 'remove the tag you did not want to publish');
-    print('The dev roll has been aborted.');
-    exit(0);
+  if (autoApprove) {
+    print('Publishing Flutter $version (${hash.substring(0, 10)}) to the "dev" channel.');
+  } else {
+    print('Your tree is ready to publish Flutter $version (${hash.substring(0, 10)}) '
+      'to the "dev" channel.');
+    stdout.write('Are you? [yes/no] ');
+    if (stdin.readLineSync() != 'yes') {
+      runGit('tag -d v$version', 'remove the tag you did not want to publish');
+      print('The dev roll has been aborted.');
+      exit(0);
+    }
   }
 
   runGit('push $origin v$version', 'publish the version');
