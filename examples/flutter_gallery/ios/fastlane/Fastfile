@@ -15,16 +15,21 @@ platform :ios do
     # Doesn't do anything when not on Travis.
     setup_travis
 
+    # Relative to this file.
+    raw_version = File.read('../../../../version')
+    puts "Building and deploying version #{raw_version}..."
+
     increment_version_number(
-      # Relative to this file. Accept only digits and dots.
-      version_number: File.read('../../../../version').gsub(/[^0-9\.]/, '')
+      # Only major, minor, patch digits and dots.
+      version_number: /\d+\.\d+\.\d+/.match(raw_version)[0]
     )
 
     # Retrieves all the necessary certs and provisioning profiles.
     sync_code_signing(
       git_url: ENV['PUBLISHING_MATCH_CERTIFICATE_REPO'],
       type: 'appstore',
-      readonly: true
+      readonly: true,
+      verbose: false
     )
 
     # Modify the Xcode project to use the new team and profile.
