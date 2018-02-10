@@ -3501,12 +3501,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// This handler is invoked when the accessibility focus is moved
   /// to the node annotated with this handler. The accessibility focus is the
-  /// green (on Android with  TalkBack) or black (on iOS with VoiceOver)
-  /// rectangular show on screen to indicate with what element an accessibility
+  /// green (on Android with TalkBack) or black (on iOS with VoiceOver)
+  /// rectangle shown on screen to indicate what element an accessibility
   /// user is currently interacting with.
   ///
   /// The accessibility focus is different from the input focus. The input focus
-  /// is usually held by the element that currently response to keyboard inputs.
+  /// is usually held by the element that currently responds to keyboard inputs.
   /// Accessibility focus and input focus can be held by two different nodes!
   ///
   /// See also:
@@ -3529,12 +3529,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// This handler is invoked when the accessibility focus is moved
   /// away from the node annotated with this handler. The accessibility focus is
-  /// the green (on Android with  TalkBack) or black (on iOS with VoiceOver)
-  /// rectangular show on screen to indicate with what element an accessibility
+  /// the green (on Android with TalkBack) or black (on iOS with VoiceOver)
+  /// rectangle shown on screen to indicate what element an accessibility
   /// user is currently interacting with.
   ///
   /// The accessibility focus is different from the input focus. The input focus
-  /// is usually held by the element that currently response to keyboard inputs.
+  /// is usually held by the element that currently responds to keyboard inputs.
   /// Accessibility focus and input focus can be held by two different nodes!
   ///
   /// See also:
