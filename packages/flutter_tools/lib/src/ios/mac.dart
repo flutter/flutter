@@ -285,6 +285,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       'xcrun',
       'xcodebuild',
       'clean',
+      '-configuration', configuration,
     ],
     workingDirectory: app.appDirectory,
   );
