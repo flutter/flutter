@@ -23,7 +23,7 @@ import 'toggleable.dart';
 ///
 /// The checkbox can optionally display three values - true, false, and null -
 /// if [triState] is true. When [value] is null a dash is displayed. By default
-/// triState is false and the checkbox's value may only be true or false.
+/// triState is false and the checkbox's value must be true or false.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -74,12 +74,13 @@ class Checkbox extends StatefulWidget {
   /// change state until the parent widget rebuilds the checkbox with the new
   /// value.
   ///
-  /// If this callback is null, the checkbox will be displayed as disabled.
+  /// If this callback is null, the checkbox will be displayed as disabled
+  /// and will not respond to input gestures.
   ///
   /// When the checkbox is tapped, if [triState] is false (the default) then
   /// the onChanged callback will be applied to `!value`. If [triState] is
-  /// true this callback will be applied to true if the current value is
-  /// null or false, false otherwise.
+  /// true this callback will be applied to false if the current value is true,
+  /// false otherwise.
   ///
   /// The callback provided to [onChanged] should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
@@ -172,7 +173,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderCheckbox renderObject) {
-     renderObject
+    renderObject
       ..value = value
       ..triState = triState
       ..activeColor = activeColor

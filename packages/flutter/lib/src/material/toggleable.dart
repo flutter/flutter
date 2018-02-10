@@ -50,7 +50,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
       ..onTapCancel = _handleTapCancel;
     _positionController = new AnimationController(
       duration: _kToggleDuration,
-      value: (value == false ? 0.0 : 1.0),
+      value: value == false ? 0.0 : 1.0,
       vsync: vsync,
     );
     _position = new CurvedAnimation(
