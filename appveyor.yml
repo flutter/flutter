@@ -1,4 +1,7 @@
 install:
+- cmd: cd ..
+- cmd: move flutter "flutter sdk"
+- cmd: cd "flutter sdk"
 - cmd: bin\flutter.bat config --no-analytics
 - cmd: bin\flutter.bat update-packages
 
