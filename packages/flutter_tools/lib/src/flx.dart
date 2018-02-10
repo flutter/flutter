@@ -132,7 +132,6 @@ Future<List<String>> assemble({
   String outputPath,
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
-  bool strongMode : false,
 }) async {
   outputPath ??= defaultFlxOutputPath;
   workingDirPath ??= getAssetBuildDirectory();
