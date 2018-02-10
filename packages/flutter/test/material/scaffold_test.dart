@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -770,4 +771,149 @@ void main() {
     semantics.dispose();
   });
 
+  group('ScaffoldGeometry', () {
+    testWidgets('bottomNavigationBar', (WidgetTester tester) async {
+      final GlobalKey key = new GlobalKey();
+      await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+            body: new Container(),
+            bottomNavigationBar: new ConstrainedBox(
+              key: key,
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+      )));
+
+      final RenderBox navigationBox = tester.renderObject(find.byKey(key));
+      final RenderBox appBox = tester.renderObject(find.byType(MaterialApp));
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final ValueListenable<ScaffoldGeometry> geometry = listenerState.geometryListenable;
+
+      expect(
+        geometry.value.bottomNavigationBarTop,
+        appBox.size.height - navigationBox.size.height
+      );
+    });
+
+    testWidgets('no bottomNavigationBar', (WidgetTester tester) async {
+      await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+            body: new ConstrainedBox(
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+      )));
+
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final ValueListenable<ScaffoldGeometry> geometry = listenerState.geometryListenable;
+
+      expect(
+        geometry.value.bottomNavigationBarTop,
+        null
+      );
+    });
+
+    testWidgets('floatingActionButton', (WidgetTester tester) async {
+      final GlobalKey key = new GlobalKey();
+      await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+            body: new Container(),
+            floatingActionButton: new FloatingActionButton(
+              key: key,
+              child: new GeometryListener(),
+              onPressed: () {},
+            ),
+      )));
+
+      final RenderBox floatingActionButtonBox = tester.renderObject(find.byKey(key));
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final ValueListenable<ScaffoldGeometry> geometry = listenerState.geometryListenable;
+
+      expect(
+        geometry.value.floatingActionButton.size,
+        floatingActionButtonBox.size
+      );
+      expect(
+        geometry.value.floatingActionButtonScale,
+        1.0
+      );
+    });
+
+    testWidgets('no floatingActionButton', (WidgetTester tester) async {
+      await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+            body: new ConstrainedBox(
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+      )));
+
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final ValueListenable<ScaffoldGeometry> geometry = listenerState.geometryListenable;
+
+      expect(
+        geometry.value.floatingActionButtonScale,
+        0.0
+      );
+    });
+
+    testWidgets('floatingActionButton animation', (WidgetTester tester) async {
+      final GlobalKey key = new GlobalKey();
+      await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+            body: new ConstrainedBox(
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+      )));
+
+      await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+            body: new Container(),
+            floatingActionButton: new FloatingActionButton(
+              key: key,
+              child: new GeometryListener(),
+              onPressed: () {},
+            ),
+      )));
+
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final ValueListenable<ScaffoldGeometry> geometry = listenerState.geometryListenable;
+
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(
+        geometry.value.floatingActionButtonScale,
+        inExclusiveRange(0.0, 1.0),
+      );
+    });
+  });
+
+}
+
+class GeometryListener extends StatefulWidget {
+  @override
+  State createState() => new GeometryListenerState();
+}
+
+class GeometryListenerState extends State<GeometryListener> {
+  @override
+  Widget build(BuildContext context) {
+    return new Container();
+  }
+
+  int numNotifications = 0;
+  ValueListenable<ScaffoldGeometry> geometryListenable;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ValueListenable<ScaffoldGeometry> newListenable = Scaffold.geometryOf(context);
+    if (geometryListenable == newListenable)
+      return;
+
+    if (geometryListenable != null)
+      geometryListenable.removeListener(onGeometryChanged);
+    
+    geometryListenable = newListenable;
+    geometryListenable.addListener(onGeometryChanged);
+  }
+
+  void onGeometryChanged() {
+    numNotifications += 1;
+  }
 }

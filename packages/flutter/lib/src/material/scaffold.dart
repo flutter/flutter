@@ -38,24 +38,45 @@ enum _ScaffoldSlot {
 
 /// Geometry information for scaffold components.
 ///
-/// To get a [ValueNotifier] for the scaffold gemoetry call
+/// To get a [ValueNotifier] for the scaffold geometry call
 /// [Scaffold.geometryOf].
 @immutable
 class ScaffoldGeometry {
-  /// The rectangle in which the scaffold is laying out
-  /// [Scaffold.bottomNavigationBar].
-  /// Null when there is no bottom navigation bar..
-  final Rect bottomNavigationBar;
+  const ScaffoldGeometry({
+    this.bottomNavigationBarTop,
+    this.floatingActionButton,
+    this.floatingActionButtonScale = 1.0,
+  });
+
+  /// The distance from the scaffold's top edge to the top edge of the
+  /// rectangle in which the [Scaffold.bottomNavigationBar] bar is being laid
+  /// out.
+  ///
+  /// When there is no [Scaffold.bottomNavigationBar] set, this will be null.
+  final double bottomNavigationBarTop;
 
   /// The rectangle in which the scaffold is laying out
   /// [Scaffold.floatingActionButton].
-  /// Null when there is no bottom navigation bar..
+  ///
+  /// This can have any value when there is no [Scaffold.floatingActionButton]
+  /// set.
   final Rect floatingActionButton;
 
-  const ScaffoldGeometry({
-    this.bottomNavigationBar,
-    this.floatingActionButton,
-  });
+  /// The amount by which the [Scaffold.floatingActionButton] is scaled.
+  final double floatingActionButtonScale;
+
+  static ScaffoldGeometry _update({
+    ScaffoldGeometry previousGeometry,
+    double bottomNavigationBarTop,
+    Rect floatingActionButton,
+    double floatingActionButtonScale,
+  }) {
+    return new ScaffoldGeometry(
+      bottomNavigationBarTop: bottomNavigationBarTop ??  previousGeometry?.bottomNavigationBarTop,
+      floatingActionButton: floatingActionButton ??  previousGeometry?.floatingActionButton,
+      floatingActionButtonScale: floatingActionButtonScale ??  previousGeometry?.floatingActionButtonScale,
+    );
+  }
 }
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
@@ -92,13 +113,12 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.appBar, Offset.zero);
     }
 
-    Rect bottomNavigationBarRect;
+    double bottomNavigationBarTop;
     if (hasChild(_ScaffoldSlot.bottomNavigationBar)) {
       final double bottomNavigationBarHeight = layoutChild(_ScaffoldSlot.bottomNavigationBar, fullWidthConstraints).height;
       bottomWidgetsHeight += bottomNavigationBarHeight;
-      final Offset topLeft = new Offset(0.0, math.max(0.0, bottom - bottomWidgetsHeight));
-      positionChild(_ScaffoldSlot.bottomNavigationBar, topLeft);
-      bottomNavigationBarRect = topLeft & new Size(size.width, bottomNavigationBarHeight);
+      bottomNavigationBarTop = math.max(0.0, bottom - bottomWidgetsHeight);
+      positionChild(_ScaffoldSlot.bottomNavigationBar, new Offset(0.0, bottomNavigationBarTop));
     }
 
     if (hasChild(_ScaffoldSlot.persistentFooter)) {
@@ -191,8 +211,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.endDrawer, Offset.zero);
     }
 
-    geometryNotifier.value = new ScaffoldGeometry(
-      bottomNavigationBar: bottomNavigationBarRect,
+    geometryNotifier.value = ScaffoldGeometry._update(
+      previousGeometry: geometryNotifier.value,
+      bottomNavigationBarTop: bottomNavigationBarTop,
       floatingActionButton: floatingActionButtonRect,
     );
   }
@@ -210,9 +231,11 @@ class _FloatingActionButtonTransition extends StatefulWidget {
   const _FloatingActionButtonTransition({
     Key key,
     this.child,
+    this.geometryNotifier,
   }) : super(key: key);
 
   final Widget child;
+  final ValueNotifier<ScaffoldGeometry> geometryNotifier;
 
   @override
   _FloatingActionButtonTransitionState createState() => new _FloatingActionButtonTransitionState();
@@ -237,6 +260,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       parent: _previousController,
       curve: Curves.easeIn
     );
+    _previousAnimation.addListener(_onProgressChanged);
 
     _currentController = new AnimationController(
       duration: _kFloatingActionButtonSegue,
@@ -246,15 +270,20 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       parent: _currentController,
       curve: Curves.easeIn
     );
+    _currentAnimation.addListener(_onProgressChanged);
 
     // If we start out with a child, have the child appear fully visible instead
     // of animating in.
     if (widget.child != null)
       _currentController.value = 1.0;
+    else
+      _updateGeometryScale(_previousAnimation.value);
   }
 
   @override
   void dispose() {
+    _previousAnimation.removeListener(_onProgressChanged);
+    _currentAnimation.removeListener(_onProgressChanged);
     _previousController.dispose();
     _currentController.dispose();
     super.dispose();
@@ -317,6 +346,24 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       ));
     }
     return new Stack(children: children);
+  }
+
+  void _onProgressChanged() {
+    if (_previousAnimation.status != AnimationStatus.dismissed) {
+      _updateGeometryScale(_previousAnimation.value);
+      return;
+    }
+    if (_currentAnimation.status != AnimationStatus.dismissed) {
+      _updateGeometryScale(_currentAnimation.value);
+      return;
+    }
+  }
+
+  void _updateGeometryScale(double scale) {
+    widget.geometryNotifier.value = ScaffoldGeometry._update(
+      previousGeometry: widget.geometryNotifier.value,
+      floatingActionButtonScale: scale,
+    );
   }
 }
 
@@ -548,31 +595,46 @@ class Scaffold extends StatefulWidget {
     );
   }
 
-  /// Returns a [ValueNotifier] for the [ScaffoldGeometry] for the closest
+  /// Returns a [ValueListenable] for the [ScaffoldGeometry] for the closest
   /// [Scaffold] ancestor of the given context.
   ///
-  /// Value notifications are sent during the layout pass.
-  static ValueNotifier<ScaffoldGeometry> geometryOf(BuildContext context) {
+  /// The [ValueListenable.value] is only available at paint time.
+  ///
+  /// Notifications are guaranteed to be sent before the first paint pass
+  /// with the new geometry, but there is no guarantee whether a build or
+  /// layout passes are going to happen between the notification and the next
+  /// paint pass.
+  ///
+  /// The closest [Scaffold] ancestor for the context might change, e.g when
+  /// an element is moved from one scaffold to another. For [StatefulWidget]s
+  /// using this listenable, a change of the [Scaffold] ancestor will
+  /// trigger a [State.didChangeDependencies].
+  ///
+  /// A typical pattern for listening to the scaffold geometry would be to
+  /// call [Scaffold.geometryOf] in [State.didChangeDependencies], compare the
+  /// return value with the previous listenable, if it has changed, unregister
+  /// the listener, and register a listener to the new [ScaffoldGeometry]
+  /// listenable.
+  // TODO(amirh): return a ValueListenable subclass that asserts it's paint time
+  // when .value is accessed.
+  static ValueListenable<ScaffoldGeometry> geometryOf(BuildContext context) {
     final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType(_ScaffoldScope);
     if (scaffoldScope == null)
-    throw new FlutterError(
-      'Scaffold.geometryOf() called with a context that does not contain a Scaffold.\n'
-      'This usually happens when the context provided is from the same StatefulWidget as that '
-      'whose build function actually creates the Scaffold widget being sought.\n'
-      'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
-      'context that is "under" the Scaffold. For an example of this, please see the '
-      'documentation for Scaffold.of():\n'
-      '  https://docs.flutter.io/flutter/material/Scaffold/of.html\n'
-      'A more efficient solution is to split your build function into several widgets. This '
-      'introduces a new context from which you can obtain the Scaffold. In this solution, '
-      'you would have an outer widget that creates the Scaffold populated by instances of '
-      'your new inner widgets, and then in these inner widgets you would use Scaffold.geometryOf().\n'
-      'A less elegant but more expedient solution is assign a GlobalKey to the Scaffold, '
-      'then use the key.currentState property to obtain the ScaffoldState rather than '
-      'using the Scaffold.geometryOf() function.\n'
-      'The context used was:\n'
-      '  $context'
-    );
+      throw new FlutterError(
+        'Scaffold.geometryOf() called with a context that does not contain a Scaffold.\n'
+        'This usually happens when the context provided is from the same StatefulWidget as that '
+        'whose build function actually creates the Scaffold widget being sought.\n'
+        'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
+        'context that is "under" the Scaffold. For an example of this, please see the '
+        'documentation for Scaffold.of():\n'
+        '  https://docs.flutter.io/flutter/material/Scaffold/of.html\n'
+        'A more efficient solution is to split your build function into several widgets. This '
+        'introduces a new context from which you can obtain the Scaffold. In this solution, '
+        'you would have an outer widget that creates the Scaffold populated by instances of '
+        'your new inner widgets, and then in these inner widgets you would use Scaffold.geometryOf().\n'
+        'The context used was:\n'
+        '  $context'
+      );
 
     return scaffoldScope.geometryNotifier;
   }
@@ -1041,6 +1103,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       children,
       new _FloatingActionButtonTransition(
         child: widget.floatingActionButton,
+        geometryNotifier: _geometryNotifier,
       ),
       _ScaffoldSlot.floatingActionButton,
       removeLeftPadding: true,
