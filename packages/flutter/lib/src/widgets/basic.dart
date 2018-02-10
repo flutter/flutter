@@ -4869,8 +4869,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
     SetSelectionHandler onSetSelection,
-    VoidCallback onAccessibilityFocus,
-    VoidCallback onLoseAccessibilityFocus,
+    VoidCallback onDidGainAccessibilityFocus,
+    VoidCallback onDidLoseAccessibilityFocus,
   }) : this.fromProperties(
     key: key,
     child: child,
@@ -4901,8 +4901,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       onPaste: onPaste,
       onMoveCursorForwardByCharacter: onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
-      onAccessibilityFocus: onAccessibilityFocus,
-      onLoseAccessibilityFocus: onLoseAccessibilityFocus,
+      onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
+      onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
     onSetSelection: onSetSelection,),
   );
 
@@ -4981,8 +4981,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
       onSetSelection: properties.onSetSelection,
-      onAccessibilityFocus: properties.onAccessibilityFocus,
-      onLoseAccessibilityFocus: properties.onLoseAccessibilityFocus,
+      onDidGainAccessibilityFocus: properties.onDidGainAccessibilityFocus,
+      onDidLoseAccessibilityFocus: properties.onDidLoseAccessibilityFocus,
     );
   }
 
@@ -5027,8 +5027,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
       ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
       ..onSetSelection = properties.onSetSelection
-      ..onAccessibilityFocus = properties.onAccessibilityFocus
-      ..onLoseAccessibilityFocus = properties.onLoseAccessibilityFocus;
+      ..onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus
+      ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus;
   }
 
   @override

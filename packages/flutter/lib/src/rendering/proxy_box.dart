@@ -3022,8 +3022,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
     SetSelectionHandler onSetSelection,
-    VoidCallback onAccessibilityFocus,
-    VoidCallback onLoseAccessibilityFocus,
+    VoidCallback onDidGainAccessibilityFocus,
+    VoidCallback onDidLoseAccessibilityFocus,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
@@ -3052,8 +3052,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
        _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
        _onSetSelection = onSetSelection,
-       _onAccessibilityFocus = onAccessibilityFocus,
-       _onLoseAccessibilityFocus = onLoseAccessibilityFocus,
+       _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
+       _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
@@ -3497,10 +3497,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  /// The handler for [SemanticsAction.accessibilityFocus].
+  /// The handler for [SemanticsAction.didGainAccessibilityFocus].
   ///
-  /// This handler is invoked when the accessibility focus is moved
-  /// to the node annotated with this handler. The accessibility focus is the
+  /// This handler is invoked when the node annotated with this handler gains
+  /// the accessibility focus. The accessibility focus is the
   /// green (on Android with TalkBack) or black (on iOS with VoiceOver)
   /// rectangle shown on screen to indicate what element an accessibility
   /// user is currently interacting with.
@@ -3511,24 +3511,24 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// See also:
   ///
-  ///  * [onLoseAccessibilityFocus], which is invoked when the accessibility
+  ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
   ///    focus is removed from the node
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
-  VoidCallback get onAccessibilityFocus => _onAccessibilityFocus;
-  VoidCallback _onAccessibilityFocus;
-  set onAccessibilityFocus(VoidCallback handler) {
-    if (_onAccessibilityFocus == handler)
+  VoidCallback get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
+  VoidCallback _onDidGainAccessibilityFocus;
+  set onDidGainAccessibilityFocus(VoidCallback handler) {
+    if (_onDidGainAccessibilityFocus == handler)
       return;
-    final bool hadValue = _onAccessibilityFocus != null;
-    _onAccessibilityFocus = handler;
+    final bool hadValue = _onDidGainAccessibilityFocus != null;
+    _onDidGainAccessibilityFocus = handler;
     if ((handler != null) != hadValue)
       markNeedsSemanticsUpdate();
   }
 
-  /// The handler for [SemanticsAction.loseAccessibilityFocus].
+  /// The handler for [SemanticsAction.didLoseAccessibilityFocus].
   ///
-  /// This handler is invoked when the accessibility focus is moved
-  /// away from the node annotated with this handler. The accessibility focus is
+  /// This handler is invoked when the node annotated with this handler
+  /// loses the accessibility focus. The accessibility focus is
   /// the green (on Android with TalkBack) or black (on iOS with VoiceOver)
   /// rectangle shown on screen to indicate what element an accessibility
   /// user is currently interacting with.
@@ -3539,16 +3539,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// See also:
   ///
-  ///  * [onAccessibilityFocus], which is invoked when the node gains
+  ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
   ///    accessibility focus
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
-  VoidCallback get onLoseAccessibilityFocus => _onLoseAccessibilityFocus;
-  VoidCallback _onLoseAccessibilityFocus;
-  set onLoseAccessibilityFocus(VoidCallback handler) {
-    if (_onLoseAccessibilityFocus == handler)
+  VoidCallback get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
+  VoidCallback _onDidLoseAccessibilityFocus;
+  set onDidLoseAccessibilityFocus(VoidCallback handler) {
+    if (_onDidLoseAccessibilityFocus == handler)
       return;
-    final bool hadValue = _onLoseAccessibilityFocus != null;
-    _onLoseAccessibilityFocus = handler;
+    final bool hadValue = _onDidLoseAccessibilityFocus != null;
+    _onDidLoseAccessibilityFocus = handler;
     if ((handler != null) != hadValue)
       markNeedsSemanticsUpdate();
   }
@@ -3612,10 +3612,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onMoveCursorBackwardByCharacter = _performMoveCursorBackwardByCharacter;
     if (onSetSelection != null)
       config.onSetSelection = _performSetSelection;
-    if (onAccessibilityFocus != null)
-      config.onAccessibilityFocus = _performAccessibilityFocus;
-    if (onLoseAccessibilityFocus != null)
-      config.onLoseAccessibilityFocus = _performLoseAccessibilityFocus;
+    if (onDidGainAccessibilityFocus != null)
+      config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
+    if (onDidLoseAccessibilityFocus != null)
+      config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
   }
 
   void _performTap() {
@@ -3688,14 +3688,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       onSetSelection(selection);
   }
 
-  void _performAccessibilityFocus() {
-    if (onAccessibilityFocus != null)
-      onAccessibilityFocus();
+  void _performDidGainAccessibilityFocus() {
+    if (onDidGainAccessibilityFocus != null)
+      onDidGainAccessibilityFocus();
   }
 
-  void _performLoseAccessibilityFocus() {
-    if (onLoseAccessibilityFocus != null)
-      onLoseAccessibilityFocus();
+  void _performDidLoseAccessibilityFocus() {
+    if (onDidLoseAccessibilityFocus != null)
+      onDidLoseAccessibilityFocus();
   }
 }
 

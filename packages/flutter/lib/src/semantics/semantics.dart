@@ -288,8 +288,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onMoveCursorForwardByCharacter,
     this.onMoveCursorBackwardByCharacter,
     this.onSetSelection,
-    this.onAccessibilityFocus,
-    this.onLoseAccessibilityFocus,
+    this.onDidGainAccessibilityFocus,
+    this.onDidLoseAccessibilityFocus,
   });
 
   /// If non-null, indicates that this subtree represents something that can be
@@ -551,10 +551,10 @@ class SemanticsProperties extends DiagnosticableTree {
   /// beginning/end" or "Select all" from the local context menu.
   final SetSelectionHandler onSetSelection;
 
-  /// The handler for [SemanticsAction.accessibilityFocus].
+  /// The handler for [SemanticsAction.didGainAccessibilityFocus].
   ///
-  /// This handler is invoked when the accessibility focus is moved
-  /// to the node annotated with this handler. The accessibility focus is the
+  /// This handler is invoked when the node annotated with this handler gains
+  /// the accessibility focus. The accessibility focus is the
   /// green (on Android with TalkBack) or black (on iOS with VoiceOver)
   /// rectangle shown on screen to indicate what element an accessibility
   /// user is currently interacting with.
@@ -565,15 +565,15 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// See also:
   ///
-  ///  * [onLoseAccessibilityFocus], which is invoked when the accessibility
+  ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
   ///    focus is removed from the node
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
-  final VoidCallback onAccessibilityFocus;
+  final VoidCallback onDidGainAccessibilityFocus;
 
-  /// The handler for [SemanticsAction.loseAccessibilityFocus].
+  /// The handler for [SemanticsAction.didLoseAccessibilityFocus].
   ///
-  /// This handler is invoked when the accessibility focus is moved
-  /// away from the node annotated with this handler. The accessibility focus is
+  /// This handler is invoked when the node annotated with this handler
+  /// loses the accessibility focus. The accessibility focus is
   /// the green (on Android with TalkBack) or black (on iOS with VoiceOver)
   /// rectangle shown on screen to indicate what element an accessibility
   /// user is currently interacting with.
@@ -584,10 +584,10 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// See also:
   ///
-  ///  * [onAccessibilityFocus], which is invoked when the node gains
+  ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
   ///    accessibility focus
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
-  final VoidCallback onLoseAccessibilityFocus;
+  final VoidCallback onDidLoseAccessibilityFocus;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
@@ -1919,10 +1919,10 @@ class SemanticsConfiguration {
     _onSetSelection = value;
   }
 
-  /// The handler for [SemanticsAction.accessibilityFocus].
+  /// The handler for [SemanticsAction.didGainAccessibilityFocus].
   ///
-  /// This handler is invoked when the accessibility focus is moved
-  /// to the node annotated with this handler. The accessibility focus is the
+  /// This handler is invoked when the node annotated with this handler gains
+  /// the accessibility focus. The accessibility focus is the
   /// green (on Android with TalkBack) or black (on iOS with VoiceOver)
   /// rectangle shown on screen to indicate what element an accessibility
   /// user is currently interacting with.
@@ -1933,20 +1933,20 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  ///  * [onLoseAccessibilityFocus], which is invoked when the accessibility
+  ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
   ///    focus is removed from the node
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
-  VoidCallback get onAccessibilityFocus => _onAccessibilityFocus;
-  VoidCallback _onAccessibilityFocus;
-  set onAccessibilityFocus(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.accessibilityFocus, value);
-    _onAccessibilityFocus = value;
+  VoidCallback get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
+  VoidCallback _onDidGainAccessibilityFocus;
+  set onDidGainAccessibilityFocus(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.didGainAccessibilityFocus, value);
+    _onDidGainAccessibilityFocus = value;
   }
 
-  /// The handler for [SemanticsAction.loseAccessibilityFocus].
+  /// The handler for [SemanticsAction.didLoseAccessibilityFocus].
   ///
-  /// This handler is invoked when the accessibility focus is moved
-  /// away from the node annotated with this handler. The accessibility focus is
+  /// This handler is invoked when the node annotated with this handler
+  /// loses the accessibility focus. The accessibility focus is
   /// the green (on Android with TalkBack) or black (on iOS with VoiceOver)
   /// rectangle shown on screen to indicate what element an accessibility
   /// user is currently interacting with.
@@ -1957,14 +1957,14 @@ class SemanticsConfiguration {
   ///
   /// See also:
   ///
-  ///  * [onAccessibilityFocus], which is invoked when the node gains
+  ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
   ///    accessibility focus
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
-  VoidCallback get onLoseAccessibilityFocus => _onLoseAccessibilityFocus;
-  VoidCallback _onLoseAccessibilityFocus;
-  set onLoseAccessibilityFocus(VoidCallback value) {
-    _addArgumentlessAction(SemanticsAction.loseAccessibilityFocus, value);
-    _onLoseAccessibilityFocus = value;
+  VoidCallback get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
+  VoidCallback _onDidLoseAccessibilityFocus;
+  set onDidLoseAccessibilityFocus(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.didLoseAccessibilityFocus, value);
+    _onDidLoseAccessibilityFocus = value;
   }
 
   /// Returns the action handler registered for [action] or null if none was
