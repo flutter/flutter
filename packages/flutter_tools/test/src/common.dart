@@ -32,7 +32,7 @@ String getFlutterRoot() {
       scriptUri = platform.script;
       break;
     case 'data':
-      final RegExp flutterTools = new RegExp(r'(file://[^%]*[/\\]flutter_tools[^%]+\.dart)%');
+      final RegExp flutterTools = new RegExp(r'(file://[^ ;]*[/\\]flutter_tools[^%]+\.dart)%');
       final Match match = flutterTools.firstMatch(platform.script.path);
       if (match == null)
         throw invalidScript();
