@@ -3,6 +3,16 @@ skip_docs
 
 default_platform(:ios)
 
+def suppress_output
+  original_stdout, original_stderr = $stdout.clone, $stderr.clone
+  $stderr.reopen File.new('/dev/null', 'w')
+  $stdout.reopen File.new('/dev/null', 'w')
+  yield
+ensure
+  $stdout.reopen original_stdout
+  $stderr.reopen original_stderr
+end
+
 # This should be run after running
 # flutter build ios --release --no-codesign
 # to build the app using the Flutter toolchain. This lane is meant to only
@@ -24,13 +34,17 @@ platform :ios do
       version_number: /\d+\.\d+\.\d+/.match(raw_version)[0]
     )
 
-    # Retrieves all the necessary certs and provisioning profiles.
-    sync_code_signing(
-      git_url: ENV['PUBLISHING_MATCH_CERTIFICATE_REPO'],
-      type: 'appstore',
-      readonly: true,
-      verbose: false
-    )
+    puts 'Retrieving signing certificates and profiles...'
+    # Stop fastlane from echoing back PUBLISHING_MATCH_CERTIFICATE_REPO var.
+    suppress_output {
+      # Retrieves all the necessary certs and provisioning profiles.
+      sync_code_signing(
+        git_url: ENV['PUBLISHING_MATCH_CERTIFICATE_REPO'],
+        type: 'appstore',
+        readonly: true
+      )
+    }
+    puts 'Certificates and profiles installed'
 
     # Modify the Xcode project to use the new team and profile.
     # It will put the git state to dirty but Travis will be wiped after
