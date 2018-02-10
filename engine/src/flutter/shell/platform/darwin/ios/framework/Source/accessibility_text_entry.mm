@@ -224,10 +224,12 @@
 
 - (void)accessibilityElementDidBecomeFocused {
   [[self textInputSurrogate] accessibilityElementDidBecomeFocused];
+  [super accessibilityElementDidBecomeFocused];
 }
 
 - (void)accessibilityElementDidLoseFocus {
   [[self textInputSurrogate] accessibilityElementDidLoseFocus];
+  [super accessibilityElementDidLoseFocus];
 }
 
 - (BOOL)accessibilityElementIsFocused {
