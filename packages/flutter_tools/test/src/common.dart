@@ -32,8 +32,8 @@ String getFlutterRoot() {
       scriptUri = platform.script;
       break;
     case 'data':
-      final RegExp flutterTools = new RegExp(r'(file://[^ ;]*[/\\]flutter_tools[^%]+\.dart)%');
-      final Match match = flutterTools.firstMatch(platform.script.path);
+      final RegExp flutterTools = new RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
+      final Match match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
       if (match == null)
         throw invalidScript();
       scriptUri = Uri.parse(match.group(1));
