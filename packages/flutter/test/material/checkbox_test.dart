@@ -102,4 +102,36 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('CheckBox triState:true', (WidgetTester tester) async {
+    bool checkBoxValue = null;
+
+    await tester.pumpWidget(
+      new Material(
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new Checkbox(
+              triState: true,
+              value: checkBoxValue,
+              onChanged: (bool value) {
+                setState(() {
+                  checkBoxValue = value;
+                });
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, null);
+
+    await tester.tap(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+    expect(checkBoxValue, false);
+
+    await tester.tap(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+    expect(checkBoxValue, true);
+  });
 }
