@@ -390,11 +390,14 @@ class _FloatingActionButtonTransition extends StatefulWidget {
     Key key,
     @required this.child,
     @required this.fabMoveAnimation,
+    @required this.fabMotionAnimator,
   }) : assert(fabMoveAnimation != null), 
+       assert(fabMotionAnimator != null),
        super(key: key);
 
   final Widget child;
   final Animation<double> fabMoveAnimation;
+  final FabMotionAnimator fabMotionAnimator;
 
   @override
   _FloatingActionButtonTransitionState createState() => new _FloatingActionButtonTransitionState();
@@ -486,9 +489,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     final List<Widget> children = <Widget>[];
     if (_currentAnimation.status == AnimationStatus.completed && widget.child != null) { 
       return new ScaleTransition(
-        scale: FabMotionAnimator._of(context).getScaleAnimation(parent: widget.fabMoveAnimation),
+        scale: widget.fabMotionAnimator.getScaleAnimation(parent: widget.fabMoveAnimation),
         child: new RotationTransition(
-          turns: FabMotionAnimator._of(context).getRotationAnimation(parent: widget.fabMoveAnimation),
+          turns: widget.fabMotionAnimator.getRotationAnimation(parent: widget.fabMoveAnimation),
           child: widget.child,
         ),
         
@@ -1013,6 +1016,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // FAB API
   AnimationController _fabMoveController;
+  FabMotionAnimator _fabMotionAnimator;
   FabPositioner _previousFabPositioner;
   FabPositioner _fabPositioner;
 
@@ -1064,6 +1068,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _fabPositioner = widget.fabPositioner ?? FabPositioner.endFloat;
+    _fabMotionAnimator = widget.fabMotionAnimator ?? FabMotionAnimator.scaling;
     _previousFabPositioner = _fabPositioner;
     _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 1.0, duration: _kFloatingActionButtonSegue * 2);
     _fabMoveController.addStatusListener(_handleFabMotion);
@@ -1071,6 +1076,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   @override
   void didUpdateWidget(Scaffold oldWidget) {
+    // Update the fab animator, and then schedule the fab for repositioning.
+    setState(() {
+      _fabMotionAnimator = widget.fabMotionAnimator ?? FabMotionAnimator.scaling;
+    });
     if (widget.fabPositioner != oldWidget.fabPositioner) {
       _moveFab(widget.fabPositioner);
     }
@@ -1253,6 +1262,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       new _FloatingActionButtonTransition(
         child: widget.floatingActionButton,
         fabMoveAnimation: _fabMoveController,
+        fabMotionAnimator: _fabMotionAnimator,
       ),
       _ScaffoldSlot.floatingActionButton,
       removeLeftPadding: true,
@@ -1342,7 +1352,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 previousFabPosition: _previousFabPositioner,
                 currentFabPosition: _fabPositioner,
                 fabMoveAnimation: _fabMoveController.view,
-                fabMotionAnimator: FabMotionAnimator._of(context),
+                fabMotionAnimator: _fabMotionAnimator,
               ),
             );
           }),
