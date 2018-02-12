@@ -60,6 +60,7 @@ Future<String> compile(
     String mainPath,
     bool linkPlatformKernelIn: false,
     bool aot: false,
+    bool trackWidgetCreation: false,
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath,
     String packagesPath}) async {
@@ -77,6 +78,8 @@ Future<String> compile(
     sdkRoot,
     '--strong',
   ];
+  if (trackWidgetCreation)
+    command.add('--track-widget-creation');
   if (!linkPlatformKernelIn)
     command.add('--no-link-platform');
   if (aot) {
@@ -118,12 +121,15 @@ Future<String> compile(
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
 class ResidentCompiler {
-  ResidentCompiler(this._sdkRoot) : assert(_sdkRoot != null) {
+  ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation: false})
+    : assert(_sdkRoot != null),
+      _trackWidgetCreation = trackWidgetCreation {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
   }
 
+  final bool _trackWidgetCreation;
   String _sdkRoot;
   Process _server;
   final _StdoutHandler stdoutHandler = new _StdoutHandler();
@@ -162,6 +168,9 @@ class ResidentCompiler {
       '--incremental',
       '--strong'
     ];
+    if (_trackWidgetCreation) {
+      args.add('--track-widget-creation');
+    }
     _server = await processManager.start(args);
     _server.stdout
       .transform(UTF8.decoder)
