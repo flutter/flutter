@@ -240,10 +240,10 @@ Future<int> main() async {
       await recompileCalled.first;
 
       verifyInOrder(
-        <dynamic>[
+        <void>[
           compiler.invalidate(Uri.base.resolve('file1.dart')),
           compiler.invalidate(Uri.base.resolve('file2.dart')),
-          compiler.recompileDelta(),
+          await compiler.recompileDelta(),
         ]
       );
       streamController.close();
@@ -314,12 +314,12 @@ Future<int> main() async {
       streamController.add('recompile def\nfile2.dart\nfile3.dart\ndef\n'.codeUnits);
       await recompileCalled.first;
 
-      verifyInOrder(<dynamic>[
-        compiler.compile('file1.dart', any, generator: any),
+      verifyInOrder(<void>[
+        await compiler.compile('file1.dart', any, generator: any),
         compiler.acceptLastDelta(),
         compiler.invalidate(Uri.base.resolve('file2.dart')),
         compiler.invalidate(Uri.base.resolve('file3.dart')),
-        compiler.recompileDelta(),
+        await compiler.recompileDelta(),
       ]);
       streamController.close();
     });
@@ -360,9 +360,8 @@ Future<int> main() async {
 
       final _MockedIncrementalKernelGenerator generator =
         new _MockedIncrementalKernelGenerator();
-      when(generator.computeDelta()).thenReturn(new Future<Program>.value(
-        new Program()
-      ));
+      when(generator.computeDelta())
+          .thenAnswer((_) => new Future<Program>.value(new Program()));
       final _MockedBinaryPrinterFactory printerFactory =
         new _MockedBinaryPrinterFactory();
       when(printerFactory.newBinaryPrinter(any))
