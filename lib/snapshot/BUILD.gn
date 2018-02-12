@@ -25,9 +25,8 @@ copy("generate_dart_ui") {
 if (is_fuchsia) {
   action("generate_package_map") {
     dart_deps = [
-      "//third_party/dart-pkg/git/flutter/packages/flutter:flutter",
-      "//topaz/public/lib/app/dart:dart",
-      "//topaz/public/lib/fidl/dart",
+      "//topaz/public/dart/fuchsia",
+      "//topaz/public/dart/zircon",
     ]
 
     dot_packages_file = "$target_gen_dir/snapshot.packages"
