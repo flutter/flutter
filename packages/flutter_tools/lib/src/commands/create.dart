@@ -236,7 +236,6 @@ class CreateCommand extends FlutterCommand {
       projectPath: appPath,
       buildInfo: BuildInfo.debug,
       target: flx.defaultMainPath,
-      hasPlugins: generatePlugin,
       previewDart2: false,
     );
 

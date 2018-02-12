@@ -263,7 +263,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     projectPath: fs.currentDirectory.path,
     buildInfo: buildInfo,
     target: target,
-    hasPlugins: hasFlutterPlugins,
     previewDart2: buildInfo.previewDart2,
   );
 
@@ -463,7 +462,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
 String readGeneratedXcconfig(String appPath) {
   final String generatedXcconfigPath =
-      fs.path.join(fs.currentDirectory.path, appPath, 'Flutter','Generated.xcconfig');
+      fs.path.join(fs.currentDirectory.path, appPath, 'Flutter', 'Generated.xcconfig');
   final File generatedXcconfigFile = fs.file(generatedXcconfigPath);
   if (!generatedXcconfigFile.existsSync())
     return null;

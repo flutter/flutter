@@ -9,6 +9,7 @@ import 'package:yaml/yaml.dart';
 import 'base/file_system.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
+import 'ios/cocoapods.dart';
 
 class Plugin {
   final String name;
@@ -140,7 +141,6 @@ void _writeAndroidPluginRegistrant(String directory, List<Plugin> plugins) {
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': androidPlugins,
   };
-  print('Here BB plugins');
 
   final String pluginRegistry =
       new mustache.Template(_androidPluginRegistryTemplate).renderString(context);
@@ -233,6 +233,9 @@ void injectPlugins({String directory}) {
     _writeAndroidPluginRegistrant(directory, plugins);
   if (fs.isDirectorySync(fs.path.join(directory, 'ios'))) {
     _writeIOSPluginRegistrant(directory, plugins);
+    if (plugins.isNotEmpty) {
+      const CocoaPods().createPodfileIfMissing(directory);
+    }
     if (changed)
       _ensurePodInstallIsExecutedOnNextIosBuild(directory);
   }

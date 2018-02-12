@@ -23,7 +23,6 @@ void updateXcodeGeneratedProperties({
   @required String projectPath,
   @required BuildInfo buildInfo,
   @required String target,
-  @required bool hasPlugins,
   @required bool previewDart2,
 }) {
   final StringBuffer localsBuffer = new StringBuffer();
@@ -57,10 +56,6 @@ void updateXcodeGeneratedProperties({
   if (previewDart2) {
     localsBuffer.writeln('PREVIEW_DART_2=true');
   }
-
-  // Add dependency to CocoaPods' generated project only if plugins are used.
-  if (hasPlugins)
-    localsBuffer.writeln('#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"');
 
   final File localsFile = fs.file(fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
   localsFile.createSync(recursive: true);

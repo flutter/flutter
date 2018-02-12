@@ -16,6 +16,7 @@ import '../base/process_manager.dart';
 import '../base/version.dart';
 import '../cache.dart';
 import '../globals.dart';
+import 'xcodeproj.dart';
 
 const String noCocoaPodsConsequence = '''
   CocoaPods is used to retrieve the iOS platform side's plugin code that responds to your plugin usage on the Dart side.
@@ -63,9 +64,6 @@ class CocoaPods {
     bool flutterPodChanged: true,
   }) async {
     if (await _checkPodCondition()) {
-      if (!fs.file(fs.path.join(appIosDir.path, 'Podfile')).existsSync()) {
-        await _createPodfile(appIosDir, isSwift);
-      } // TODO(xster): Add more logic for handling merge conflicts.
       if (_shouldRunPodInstall(appIosDir.path, flutterPodChanged))
         await _runPodInstall(appIosDir, iosEngineDir);
     }
@@ -99,7 +97,15 @@ class CocoaPods {
     return true;
   }
 
-  Future<Null> _createPodfile(Directory bundle, bool isSwift) async {
+  /// Creates a default `Podfile` in the Flutter project at [directory],
+  /// unless one already exists at `ios/Podfile`.
+  Future<Null> createPodfileIfMissing(String directory) async {
+    final String iosPath = fs.path.join(directory, 'ios');
+    final String podfilePath = fs.path.join(iosPath, 'Podfile');
+    if (fs.file(podfilePath).existsSync()) {
+      return;
+    }
+    final bool isSwift = getXcodeBuildSettings(iosPath, 'Runner').containsKey('SWIFT_VERSION');
     final File podfileTemplate = fs.file(fs.path.join(
       Cache.flutterRoot,
       'packages',
@@ -108,7 +114,21 @@ class CocoaPods {
       'cocoapods',
       isSwift ? 'Podfile-swift' : 'Podfile-objc',
     ));
-    podfileTemplate.copySync(fs.path.join(bundle.path, 'Podfile'));
+    podfileTemplate.copySync(podfilePath);
+    await _addPodsDependencyToFlutterXcconfig(directory, 'Debug');
+    await _addPodsDependencyToFlutterXcconfig(directory, 'Release');
+  }
+
+  Future<Null> _addPodsDependencyToFlutterXcconfig(String directory, String mode) async {
+    final File file = fs.file(fs.path.join(directory, 'ios', 'Flutter', '$mode.xcconfig'));
+    if (await file.exists()) {
+      final String content = await file.readAsString();
+      final String include = '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
+          .toLowerCase()}.xcconfig"';
+      if (!content.contains(include)) {
+        await file.writeAsString('$include\n$content');
+      }
+    }
   }
 
   // Check if you need to run pod install.
