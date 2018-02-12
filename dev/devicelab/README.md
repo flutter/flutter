@@ -32,8 +32,8 @@ requires attention. All other agents are healthy.
 The table below the agent statuses displays the statuses of build tasks. Task
 statuses are color-coded. The following statuses are available:
 
-**New task** (light blue): the task is waiting for an agent to pick it up start
-the build.
+**New task** (light blue): the task is waiting for an agent to pick it up and
+start the build.
 
 **Task is running** (spinning blue): an agent is currently building the task.
 
@@ -78,8 +78,20 @@ The dashboard aggregates build results from multiple build environments,
 including Travis, AppVeyor, Chrome Infra, and devicelab. While devicelab
 tests every commit that goes into the `master` branch, other environments
 may skip some commits. For example, Travis and AppVeyor will only test the
-_last_ commit in a PR. Chrome Infra may skip commits when they come in too
-fast.
+_last_ commit of a PR that's merged into the `master` branch. Chrome Infra may
+skip commits when they come in too fast.
+
+## How the devicelab runs the tasks
+
+The devicelab agents have a small script installed on them that continuously
+asks the CI server for tasks to run. When the server finds a suitable task for
+an agent it reserves that task for the agent. If the task succeeds, the agent
+reports the success to the server and the dashboard shows that task in green.
+If the task fails, the agent reports the failure to the server, the server
+increments the counter counting the number of attempts it took to run the task
+and puts the task back in the pool of available tasks. If a task does not
+succeed after a certain number of attempts (as of this writing the limit is 2),
+the task is marked as failed and is displayed using red color on the dashboard.
 
 # Running tests locally
 
