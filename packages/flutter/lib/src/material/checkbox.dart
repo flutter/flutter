@@ -247,7 +247,7 @@ class _RenderCheckbox extends RenderToggleable {
     final Canvas canvas = context.canvas;
     paintRadialReaction(canvas, offset, size.center(Offset.zero));
 
-    final Offset origin = offset + (size - const Size.square(_kEdgeSize)) / 2.0;
+    final Offset origin = offset + (size / 2.0 - const Size.square(_kEdgeSize) / 2.0);
     final double t = position.value;
     final Color borderColor = (onChanged == null)
       ? inactiveColor

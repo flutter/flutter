@@ -104,7 +104,7 @@ void main() {
   });
 
   testWidgets('CheckBox triState:true', (WidgetTester tester) async {
-    bool checkBoxValue = null;
+    bool checkBoxValue;
 
     await tester.pumpWidget(
       new Material(
