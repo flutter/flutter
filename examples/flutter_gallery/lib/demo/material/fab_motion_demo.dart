@@ -27,14 +27,16 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
   void _toggleSlideFab(bool newSlideFabValue) {
     setState(() {
       _slideFab = newSlideFabValue;
+      
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final Widget scaffold = new Scaffold(
-      appBar: new AppBar(title: new Text('FAB Positioner')),
+      appBar: new AppBar(title: const Text('FAB Positioner')),
       fabPositioner: _fabPositioner,
+      fabMotionAnimator: _slideFab ? _slidingFabMotionAnimator : FabMotionAnimator.scaling,
       floatingActionButton: new Builder(builder: (BuildContext context) {
         // We use a widget builder here so that this inner context can find the Scaffold.
         // This makes it possible to show the snackbar.
@@ -63,9 +65,6 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
         ),
       ),
     );
-    if (_slideFab) {
-      return new _SlidingFabMotionAnimator(child: scaffold);
-    }
     return scaffold;
   }
 
@@ -80,12 +79,15 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
   }
 }
 
+const _SlidingFabMotionAnimator _slidingFabMotionAnimator = const _SlidingFabMotionAnimator();
+
+/// Custom [FabMotionAnimator] that will slide the fab instead of scaling it.
 class _SlidingFabMotionAnimator extends FabMotionAnimator {
-  const _SlidingFabMotionAnimator({Key key, Widget child}): super(key: key, child: child);
+  const _SlidingFabMotionAnimator();
 
   @override
   Animation<Offset> getOffsetAnimation({Offset begin, Offset end, Animation<double> parent}) {
-    return new Tween<Offset>(begin: begin, end: end).chain(new CurveTween(curve: Curves.bounceIn)).animate(parent);
+    return new Tween<Offset>(begin: begin, end: end).chain(new CurveTween(curve: Curves.decelerate)).animate(parent);
   }
 
   @override

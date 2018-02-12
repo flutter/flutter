@@ -45,6 +45,8 @@ enum _ScaffoldSlot {
 /// Material Design apps, whose implementations are available as static
 /// members of this class.
 abstract class FabPositioner {
+  const FabPositioner();
+
   /// End-aligned FAB, floating at the bottom of the screen.
   /// 
   /// This is the default alignment of FABs in Material apps.
@@ -53,18 +55,18 @@ abstract class FabPositioner {
   /// Centered FAB, floating at the bottom of the screen.
   static const FabPositioner centerFloat = const _CenterFloatFab();
 
-  const FabPositioner();
-
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
   Offset getOffset(ScaffoldGeometry scaffoldGeometry);
 }
 
 /// Provider of [FloatingActionButton] animations.
-abstract class FabMotionAnimator extends InheritedWidget {
-  const FabMotionAnimator({Key key, Widget child}) : super(key: key, child: child);
+abstract class FabMotionAnimator {
+  const FabMotionAnimator();
 
   /// Moves the [FloatingActionButton] by scaling out and in at a new location.
-  factory FabMotionAnimator.scaling({Key key, Widget child}) => new _ScalingFabMotionAnimator(key: key, child: child);
+  /// 
+  /// This is the default fab motion animation.
+  static const FabMotionAnimator scaling = const _ScalingFabMotionAnimator();
 
   /// Animates the [FloatingActionButton]'s [Offset].
   Animation<Offset> getOffsetAnimation({@required Offset begin, @required Offset end, @required Animation<double> parent});
@@ -86,19 +88,18 @@ abstract class FabMotionAnimator extends InheritedWidget {
   @override
   bool updateShouldNotify(FabMotionAnimator oldWidget) => oldWidget.runtimeType != runtimeType;
 
-  /// Retrieves a [FabMotionAnimator].
+  /// Retrieves the [Scaffold]'s [FabMotionAnimator].
   /// 
   /// This will return a scaling animator by default if no other animator
-  /// is found in the widget tree.
-  static FabMotionAnimator of(BuildContext context) {
-    final FabMotionAnimator animator = context.ancestorInheritedElementForWidgetOfExactType(FabMotionAnimator) ?? const _ScalingFabMotionAnimator();
-    print(animator.runtimeType);
-    return animator;
+  /// is found in the current scaffold.
+  static FabMotionAnimator _of(BuildContext context) {
+    final ScaffoldState scaffold = Scaffold.of(context);
+    return scaffold.widget?.fabMotionAnimator ?? FabMotionAnimator.scaling;
   }
 }
 
 class _ScalingFabMotionAnimator extends FabMotionAnimator {
-  const _ScalingFabMotionAnimator({Key key, Widget child}) : super(key: key, child: child);
+  const _ScalingFabMotionAnimator();
 
   @override
   Animation<Offset> getOffsetAnimation({Offset begin, Offset end, Animation<double> parent}) {
@@ -485,9 +486,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     final List<Widget> children = <Widget>[];
     if (_currentAnimation.status == AnimationStatus.completed && widget.child != null) { 
       return new ScaleTransition(
-        scale: FabMotionAnimator.of(context).getScaleAnimation(parent: widget.fabMoveAnimation),
+        scale: FabMotionAnimator._of(context).getScaleAnimation(parent: widget.fabMoveAnimation),
         child: new RotationTransition(
-          turns: FabMotionAnimator.of(context).getRotationAnimation(parent: widget.fabMoveAnimation),
+          turns: FabMotionAnimator._of(context).getRotationAnimation(parent: widget.fabMoveAnimation),
           child: widget.child,
         ),
         
@@ -548,6 +549,7 @@ class Scaffold extends StatefulWidget {
     this.body,
     this.floatingActionButton,
     this.fabPositioner,
+    this.fabMotionAnimator,
     this.persistentFooterButtons,
     this.drawer,
     this.endDrawer,
@@ -583,7 +585,11 @@ class Scaffold extends StatefulWidget {
   /// Typically a [FloatingActionButton].
   final Widget floatingActionButton;
 
+  /// Responsible for determining where the `floatingActionButton` should go.
   final FabPositioner fabPositioner;
+
+  /// Provider for how the `floatingActionButton` changes `fabPositioner`s.
+  final FabMotionAnimator fabMotionAnimator;
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
@@ -1336,7 +1342,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 previousFabPosition: _previousFabPositioner,
                 currentFabPosition: _fabPositioner,
                 fabMoveAnimation: _fabMoveController.view,
-                fabMotionAnimator: FabMotionAnimator.of(context),
+                fabMotionAnimator: FabMotionAnimator._of(context),
               ),
             );
           }),
