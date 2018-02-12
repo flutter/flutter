@@ -77,6 +77,7 @@ export 'src/material/scaffold.dart';
 export 'src/material/scrollbar.dart';
 export 'src/material/shadows.dart';
 export 'src/material/slider.dart';
+export 'src/material/slider_theme.dart';
 export 'src/material/snack_bar.dart';
 export 'src/material/stepper.dart';
 export 'src/material/switch.dart';

@@ -12,6 +12,7 @@ import 'colors.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
+import 'slider_theme.dart';
 import 'typography.dart';
 
 /// Describes the contrast needs of a color.
@@ -78,6 +79,8 @@ class ThemeData extends Diagnosticable {
     MaterialColor primarySwatch,
     Color primaryColor,
     Brightness primaryColorBrightness,
+    Color primaryColorLight,
+    Color primaryColorDark,
     Color accentColor,
     Brightness accentColorBrightness,
     Color canvasColor,
@@ -116,6 +119,8 @@ class ThemeData extends Diagnosticable {
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch[500];
     primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
+    primaryColorLight ??= isDark ? Colors.grey[500] : primarySwatch[100];
+    primaryColorDark ??= isDark ? Colors.black : primarySwatch[700];
     final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
     accentColor ??= isDark ? Colors.tealAccent[200] : primarySwatch[500];
     accentColorBrightness ??= estimateBrightnessForColor(accentColor);
@@ -162,10 +167,17 @@ class ThemeData extends Diagnosticable {
       primaryTextTheme = primaryTextTheme.apply(fontFamily: fontFamily);
       accentTextTheme = accentTextTheme.apply(fontFamily: fontFamily);
     }
+    sliderTheme ??= new SliderThemeData.materialDefaults(
+      primaryColor: primaryColor,
+      primaryColorLight: primaryColorLight,
+      primaryColorDark: primaryColorDark,
+    );
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
       primaryColorBrightness: primaryColorBrightness,
+      primaryColorLight: primaryColorLight,
+      primaryColorDark: primaryColorDark,
       accentColor: accentColor,
       accentColorBrightness: accentColorBrightness,
       canvasColor: canvasColor,
@@ -200,7 +212,7 @@ class ThemeData extends Diagnosticable {
     );
   }
 
-  /// Create a ThemeData given a set of exact values. All the values
+  /// Create a [ThemeData] given a set of exact values. All the values
   /// must be specified.
   ///
   /// This will rarely be used directly. It is used by [lerp] to
@@ -210,6 +222,8 @@ class ThemeData extends Diagnosticable {
     @required this.brightness,
     @required this.primaryColor,
     @required this.primaryColorBrightness,
+    @required this.primaryColorLight,
+    @required this.primaryColorDark,
     @required this.accentColor,
     @required this.accentColorBrightness,
     @required this.canvasColor,
@@ -244,6 +258,8 @@ class ThemeData extends Diagnosticable {
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
+       assert(primaryColorLight != null),
+       assert(primaryColorDark != null),
        assert(accentColor != null),
        assert(accentColorBrightness != null),
        assert(canvasColor != null),
@@ -273,6 +289,7 @@ class ThemeData extends Diagnosticable {
        assert(iconTheme != null),
        assert(primaryIconTheme != null),
        assert(accentIconTheme != null),
+       assert(sliderTheme != null),
        assert(platform != null);
 
   /// A default light blue theme.
@@ -316,6 +333,14 @@ class ThemeData extends Diagnosticable {
   /// The brightness of the [primaryColor]. Used to determine the color of text and
   /// icons placed on top of the primary color (e.g. toolbar text).
   final Brightness primaryColorBrightness;
+
+  /// A lighter version of the primary color, used for showing subtle differences
+  /// in the parts of components.
+  final Color primaryColorLight;
+
+  /// A darker version of the primary color, used for showing subtle differences
+  /// in the parts of components.
+  final Color primaryColorDark;
 
   /// The foreground color for widgets (knobs, text, overscroll edge effect, etc).
   final Color accentColor;
@@ -434,6 +459,10 @@ class ThemeData extends Diagnosticable {
   /// An icon theme that contrasts with the accent color.
   final IconThemeData accentIconTheme;
 
+  /// A slider theme that describes the colors and shapes used in
+  /// application sliders.
+  final SliderThemeData sliderTheme;
+
   /// The platform the material widgets should adapt to target.
   ///
   /// Defaults to the current platform.
@@ -444,6 +473,8 @@ class ThemeData extends Diagnosticable {
     Brightness brightness,
     Color primaryColor,
     Brightness primaryColorBrightness,
+    Color primaryColorLight,
+    Color primaryColorDark,
     Color accentColor,
     Brightness accentColorBrightness,
     Color canvasColor,
@@ -474,12 +505,15 @@ class ThemeData extends Diagnosticable {
     IconThemeData iconTheme,
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
+    SliderThemeData sliderTheme,
     TargetPlatform platform,
   }) {
     return new ThemeData.raw(
       brightness: brightness ?? this.brightness,
       primaryColor: primaryColor ?? this.primaryColor,
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
+      primaryColorLight: primaryColorLight ?? this.primaryColorLight,
+      primaryColorDark: primaryColorDark ?? this.primaryColorDark,
       accentColor: accentColor ?? this.accentColor,
       accentColorBrightness: accentColorBrightness ?? this.accentColorBrightness,
       canvasColor: canvasColor ?? this.canvasColor,
@@ -510,6 +544,7 @@ class ThemeData extends Diagnosticable {
       iconTheme: iconTheme ?? this.iconTheme,
       primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
       accentIconTheme: accentIconTheme ?? this.accentIconTheme,
+      sliderTheme: sliderTheme ?? this.sliderTheme,
       platform: platform ?? this.platform,
     );
   }
@@ -602,6 +637,8 @@ class ThemeData extends Diagnosticable {
       brightness: t < 0.5 ? a.brightness : b.brightness,
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t),
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
+      primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t),
+      primaryColorDark: Color.lerp(a.primaryColorDark, b.primaryColorDark, t),
       canvasColor: Color.lerp(a.canvasColor, b.canvasColor, t),
       scaffoldBackgroundColor: Color.lerp(a.scaffoldBackgroundColor, b.scaffoldBackgroundColor, t),
       bottomAppBarColor: Color.lerp(a.bottomAppBarColor, b.bottomAppBarColor, t),
@@ -632,6 +669,7 @@ class ThemeData extends Diagnosticable {
       iconTheme: IconThemeData.lerp(a.iconTheme, b.iconTheme, t),
       primaryIconTheme: IconThemeData.lerp(a.primaryIconTheme, b.primaryIconTheme, t),
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
+      sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
     );
   }
@@ -674,6 +712,7 @@ class ThemeData extends Diagnosticable {
            (otherData.iconTheme == iconTheme) &&
            (otherData.primaryIconTheme == primaryIconTheme) &&
            (otherData.accentIconTheme == accentIconTheme) &&
+           (otherData.sliderTheme == sliderTheme) &&
            (otherData.platform == platform);
   }
 
