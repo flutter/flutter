@@ -591,16 +591,16 @@ void main() {
       controller.selection = new TextSelection.collapsed(offset: controller.text.length);
 
       controls = new MockTextSelectionControls();
-      when(controls.buildHandle(any, any, any)).thenReturn(new Container());
-      when(controls.buildToolbar(any, any, any, any)).thenReturn(new Container());
+      when(controls.buildHandle(typed(any), typed(any), typed(any))).thenReturn(new Container());
+      when(controls.buildToolbar(typed(any), typed(any), typed(any), typed(any))).thenReturn(new Container());
     });
 
     testWidgets('are exposed', (WidgetTester tester) async {
       final SemanticsTester semantics = new SemanticsTester(tester);
 
-      when(controls.canCopy(any)).thenReturn(false);
-      when(controls.canCut(any)).thenReturn(false);
-      when(controls.canPaste(any)).thenReturn(false);
+      when(controls.canCopy(typed(any))).thenReturn(false);
+      when(controls.canCut(typed(any))).thenReturn(false);
+      when(controls.canPaste(typed(any))).thenReturn(false);
 
       await _buildApp(controls, tester);
       await tester.tap(find.byType(EditableText));
@@ -614,7 +614,7 @@ void main() {
         ],
       ));
 
-      when(controls.canCopy(any)).thenReturn(true);
+      when(controls.canCopy(typed(any))).thenReturn(true);
       await _buildApp(controls, tester);
       expect(semantics, includesNodeWith(
         value: 'test',
@@ -625,8 +625,8 @@ void main() {
         ],
       ));
 
-      when(controls.canCopy(any)).thenReturn(false);
-      when(controls.canPaste(any)).thenReturn(true);
+      when(controls.canCopy(typed(any))).thenReturn(false);
+      when(controls.canPaste(typed(any))).thenReturn(true);
       await _buildApp(controls, tester);
       expect(semantics, includesNodeWith(
         value: 'test',
@@ -637,8 +637,8 @@ void main() {
         ],
       ));
 
-      when(controls.canPaste(any)).thenReturn(false);
-      when(controls.canCut(any)).thenReturn(true);
+      when(controls.canPaste(typed(any))).thenReturn(false);
+      when(controls.canCut(typed(any))).thenReturn(true);
       await _buildApp(controls, tester);
       expect(semantics, includesNodeWith(
         value: 'test',
@@ -649,9 +649,9 @@ void main() {
         ],
       ));
 
-      when(controls.canCopy(any)).thenReturn(true);
-      when(controls.canCut(any)).thenReturn(true);
-      when(controls.canPaste(any)).thenReturn(true);
+      when(controls.canCopy(typed(any))).thenReturn(true);
+      when(controls.canCut(typed(any))).thenReturn(true);
+      when(controls.canPaste(typed(any))).thenReturn(true);
       await _buildApp(controls, tester);
       expect(semantics, includesNodeWith(
         value: 'test',
@@ -670,9 +670,9 @@ void main() {
     testWidgets('can copy/cut/paste with a11y', (WidgetTester tester) async {
       final SemanticsTester semantics = new SemanticsTester(tester);
 
-      when(controls.canCopy(any)).thenReturn(true);
-      when(controls.canCut(any)).thenReturn(true);
-      when(controls.canPaste(any)).thenReturn(true);
+      when(controls.canCopy(typed(any))).thenReturn(true);
+      when(controls.canCut(typed(any))).thenReturn(true);
+      when(controls.canPaste(typed(any))).thenReturn(true);
       await _buildApp(controls, tester);
       await tester.tap(find.byType(EditableText));
       await tester.pump();
@@ -703,13 +703,13 @@ void main() {
       ), ignoreRect: true, ignoreTransform: true));
 
       owner.performAction(expectedNodeId, SemanticsAction.copy);
-      verify(controls.handleCopy(any)).called(1);
+      verify(controls.handleCopy(typed(any))).called(1);
 
       owner.performAction(expectedNodeId, SemanticsAction.cut);
-      verify(controls.handleCut(any)).called(1);
+      verify(controls.handleCut(typed(any))).called(1);
 
       owner.performAction(expectedNodeId, SemanticsAction.paste);
-      verify(controls.handlePaste(any)).called(1);
+      verify(controls.handlePaste(typed(any))).called(1);
 
       semantics.dispose();
     });
