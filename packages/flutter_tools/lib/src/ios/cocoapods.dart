@@ -105,7 +105,10 @@ class CocoaPods {
     if (fs.file(podfilePath).existsSync()) {
       return;
     }
-    final bool isSwift = getXcodeBuildSettings(iosPath, 'Runner').containsKey('SWIFT_VERSION');
+    final bool isSwift = getXcodeBuildSettings(
+      fs.path.join(iosPath, 'Runner.xcodeproj'),
+      'Runner',
+    ).containsKey('SWIFT_VERSION');
     final File podfileTemplate = fs.file(fs.path.join(
       Cache.flutterRoot,
       'packages',

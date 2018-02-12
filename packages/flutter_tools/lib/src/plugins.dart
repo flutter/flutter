@@ -233,15 +233,14 @@ void injectPlugins({String directory}) {
     _writeAndroidPluginRegistrant(directory, plugins);
   if (fs.isDirectorySync(fs.path.join(directory, 'ios'))) {
     _writeIOSPluginRegistrant(directory, plugins);
-    if (plugins.isNotEmpty) {
+    if (plugins.isNotEmpty)
       const CocoaPods().createPodfileIfMissing(directory);
-    }
     if (changed)
-      _ensurePodInstallIsExecutedOnNextIosBuild(directory);
+      _ensurePodInstallIsExecutedOnNextIOSBuild(directory);
   }
 }
 
-void _ensurePodInstallIsExecutedOnNextIosBuild(String directory) {
+void _ensurePodInstallIsExecutedOnNextIOSBuild(String directory) {
   final File manifest = fs.file(
     fs.path.join(directory, 'ios', 'Pods', 'Manifest.lock'),
   );
