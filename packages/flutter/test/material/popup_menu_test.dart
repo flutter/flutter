@@ -215,7 +215,12 @@ void main() {
         child: const Text('XXX'),
       ),
     );
-    final WidgetPredicate popupMenu = (Widget widget) => widget.runtimeType.toString() == '_PopupMenu';
+    final WidgetPredicate popupMenu = (Widget widget) {
+      final String widgetType = widget.runtimeType.toString();
+      // Dart 2 implements reified generic methods which means showMenu<int>(...)
+      // creates _PopupMenu<int> and not _PopupMenu<dynamic>.
+      return widgetType == '_PopupMenu' || widgetType == '_PopupMenu<int>';
+    };
 
     Future<Null> openMenu(TextDirection textDirection, Alignment alignment) async {
       return TestAsyncUtils.guard(() async {
