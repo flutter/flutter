@@ -23,7 +23,8 @@ import 'theme.dart';
 
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
 const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 200);
-final Tween<double> _kFloatingActionButtonTurnTween = new Tween<double>(begin: -0.125, end: 0.0);
+// The fraction of a circle the FAB should turn when it enters.
+const double _kFloatingActionButtonTurnInterval = 0.125;
 
 enum _ScaffoldSlot {
   body,
@@ -58,53 +59,74 @@ abstract class FabPositioner {
   Offset getOffset(ScaffoldGeometry scaffoldGeometry);
 }
 
-/// Provider for details about the [Offset] and [Size] of the Fab after the [Scaffold] and [FabPositioner] have determined its layout.
-class FabPosition extends InheritedWidget {
+/// Provider of [FloatingActionButton] animations.
+abstract class FabMotionAnimator extends InheritedWidget {
+  const FabMotionAnimator({Key key, Widget child}) : super(key: key, child: child);
 
-  final Offset _position;
-  final Size _size;
-
-  const FabPosition(this._position, this._size);
-
-  Rect get rect => new Rect.fromLTWH(_position.dx, _position.dy, _size.width, _size.height);
-
-  @override
-  bool updateShouldNotify(InheritedWidget oldWidget) => false;
-}
-
-/// [Tween] provider to animate the [FloatingActionButton] around the Scaffold.
-class FabMotionAnimator extends InheritedWidget {
-  const FabMotionAnimator();
-
-  /// Animates the FAB around by scaling it out and in at its new location.
-  static final FabMotionAnimator scale = const FabMotionAnimator();
+  /// Moves the [FloatingActionButton] by scaling out and in at a new location.
+  factory FabMotionAnimator.scaling({Key key, Widget child}) => new _ScalingFabMotionAnimator(key: key, child: child);
 
   /// Animates the [FloatingActionButton]'s [Offset].
-  Animation<Offset> buildOffsetAnimation({@required Offset begin, @required Offset end, @required Animation<double> parent}) {
-    return new Tween<Offset>(begin: begin, end: end).chain(new CurveTween(curve: const Threshold(0.5))).animate(parent);
-  }
+  Animation<Offset> getOffsetAnimation({@required Offset begin, @required Offset end, @required Animation<double> parent});
 
   /// Animates the scale of the [FloatingActionButton].
   /// 
   /// The animation should both start and end with a value of 1.0.
-  Animation<double> buildScaleAnimation({@required Animation<double> parent}) {
-    final Animation<double> curve = new CurveTween(curve: new Interval(0.5, 1.0, curve: Curves.ease)).animate(parent);
-    final Animation<double> reverseCurve = new ReverseAnimation(new CurveTween(curve: new Interval(0.5, 1.0, curve: Curves.ease).flipped).animate(parent));
-    return new _MaxAnimation<double>(
-      reverseCurve,
-      curve,
-    );
-  }
+  Animation<double> getScaleAnimation({@required Animation<double> parent});
 
-  double evaluateOpacity({@required Animation<double> animation}) {
-    return new Tween<double>(begin: 1.0, end: 1.0).evaluate(animation);
+  /// Animates the rotation of the [FloatingActionButton].
+  /// 
+  /// The animation should both start and end with a value of 0.0 or 1.0.
+  /// 
+  /// The animation values are a fraction of a full circle, with 0.0 and 1.0
+  /// corresponding to 0 and 360 degrees, while 0.5 corresponds to 180 degrees.
+  Animation<double> getRotationAnimation({@required Animation<double> parent});
+
+  // This widget will update when it is replaced with a different implementation.
+  @override
+  bool updateShouldNotify(FabMotionAnimator oldWidget) => oldWidget.runtimeType != runtimeType;
+
+  /// Retrieves a [FabMotionAnimator].
+  /// 
+  /// This will return a scaling animator by default if no other animator
+  /// is found in the widget tree.
+  static FabMotionAnimator of(BuildContext context) {
+    final FabMotionAnimator animator = context.ancestorInheritedElementForWidgetOfExactType(FabMotionAnimator) ?? const _ScalingFabMotionAnimator();
+    print(animator.runtimeType);
+    return animator;
+  }
+}
+
+class _ScalingFabMotionAnimator extends FabMotionAnimator {
+  const _ScalingFabMotionAnimator({Key key, Widget child}) : super(key: key, child: child);
+
+  @override
+  Animation<Offset> getOffsetAnimation({Offset begin, Offset end, Animation<double> parent}) {
+    return new Tween<Offset>(begin: begin, end: end).chain(new CurveTween(curve: const Threshold(0.5))).animate(parent);
   }
 
   @override
-  bool updateShouldNotify(FabMotionAnimator oldWidget) => oldWidget != this;
+  Animation<double> getScaleAnimation({Animation<double> parent}) {
+    final Curve curve = new Interval(0.5, 1.0, curve: Curves.ease);
+    return new _MaxAnimation<double>(
+      new ReverseAnimation(new CurveTween(curve: curve.flipped).animate(parent)),
+      new CurveTween(curve: curve).animate(parent),
+    );
+  }
 
-  static FabMotionAnimator of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(FabMotionAnimator) ?? scale;
+  @override
+  Animation<double> getRotationAnimation({Animation<double> parent}) {
+    // Because we only see the last half of the rotation tween, 
+    // it needs to go twice as far.
+    final Tween<double> rotationTween = new Tween<double>(
+      begin: 1.0 - _kFloatingActionButtonTurnInterval * 2, 
+      end: 1.0,
+    );
+    // This rotation will turn on the way in, but not on the way out.
+    return new _MaxAnimation<double>(
+      rotationTween.animate(parent),
+      new ReverseAnimation(new CurveTween(curve: const Threshold(0.5)).animate(parent)),
+    );
   }
 }
 
@@ -215,6 +237,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.previousFabPosition,
     @required this.currentFabPosition,
     @required this.fabMoveAnimation,
+    @required this.fabMotionAnimator,
   }) : assert(previousFabPosition != null), assert(currentFabPosition != null);
 
   final double statusBarHeight;
@@ -225,6 +248,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final FabPositioner previousFabPosition;
   final FabPositioner currentFabPosition;
   final Animation<double> fabMoveAnimation;
+  final FabMotionAnimator fabMotionAnimator;
 
   @override
   void performLayout(Size size) {
@@ -314,7 +338,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       );
       final Offset currentFabOffset = currentFabPosition.getOffset(currentGeometry);
       final Offset previousFabOffset = previousFabPosition.getOffset(currentGeometry);
-      final Offset fabOffset = FabMotionAnimator.of(context).buildOffsetAnimation(begin: previousFabOffset, end: currentFabOffset, parent: fabMoveAnimation).value;
+      final Offset fabOffset = fabMotionAnimator.getOffsetAnimation(begin: previousFabOffset, end: currentFabOffset, parent: fabMoveAnimation).value;
       positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
     }
 
@@ -346,6 +370,15 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   }
 }
 
+/// Handler for scale and rotation animations in the FAB.
+///
+/// Currently, there are two types of FAB animations:
+/// 
+/// * Entrance/Exit animations, which this widget triggers
+///   when the FAB is added, updated, or removed
+/// 
+/// * Motion animations, which are triggered by the Scaffold
+///   when its `fabPositioner` is updated.
 class _FloatingActionButtonTransition extends StatefulWidget {
   const _FloatingActionButtonTransition({
     Key key,
@@ -447,11 +480,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     final List<Widget> children = <Widget>[];
     if (_currentAnimation.status == AnimationStatus.completed && widget.child != null) { 
       return new ScaleTransition(
-        scale: FabMotionAnimator.of(context).buildScaleAnimation(parent: widget.fabMoveAnimation),
+        scale: FabMotionAnimator.of(context).getScaleAnimation(parent: widget.fabMoveAnimation),
         child: new RotationTransition(
-          turns: _kFloatingActionButtonTurnTween.chain(
-            new CurveTween(curve: new Interval(0.5, 1.0, curve: Curves.linear))
-          ).animate(widget.fabMoveAnimation),
+          turns: FabMotionAnimator.of(context).getRotationAnimation(parent: widget.fabMoveAnimation),
           child: widget.child,
         ),
         
@@ -467,7 +498,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       children.add(new ScaleTransition(
         scale: _currentAnimation,
         child: new RotationTransition(
-          turns: _kFloatingActionButtonTurnTween.animate(_currentAnimation),
+          turns: new Tween<double>(begin: 1.0 - _kFloatingActionButtonTurnInterval, end: 1.0).animate(_currentAnimation),
           child: widget.child,
         )
       ));
@@ -511,7 +542,7 @@ class Scaffold extends StatefulWidget {
     this.appBar,
     this.body,
     this.floatingActionButton,
-    this.fabPosition,
+    this.fabPositioner,
     this.persistentFooterButtons,
     this.drawer,
     this.endDrawer,
@@ -547,7 +578,7 @@ class Scaffold extends StatefulWidget {
   /// Typically a [FloatingActionButton].
   final Widget floatingActionButton;
 
-  final FabPositioner fabPosition;
+  final FabPositioner fabPositioner;
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
@@ -971,14 +1002,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // FAB API
   AnimationController _fabMoveController;
-  FabPositioner _previousFabPosition;
-  FabPositioner _fabPosition;
+  FabPositioner _previousFabPositioner;
+  FabPositioner _fabPositioner;
 
   void _moveFab(final FabPositioner newPosition) {
     void updatePosition() {
       setState(() {
-        _previousFabPosition = _fabPosition;
-        _fabPosition = newPosition;
+        _previousFabPositioner = _fabPositioner;
+        _fabPositioner = newPosition;
       });
       _fabMoveController.forward(from: 0.0);
     }
@@ -1021,16 +1052,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _fabPosition = widget.fabPosition ?? FabPositioner.endFloat;
-    _previousFabPosition = _fabPosition;
+    _fabPositioner = widget.fabPositioner ?? FabPositioner.endFloat;
+    _previousFabPositioner = _fabPositioner;
     _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 1.0, duration: _kFloatingActionButtonSegue * 2);
     _fabMoveController.addStatusListener(_handleFabMotion);
   }
 
   @override
   void didUpdateWidget(Scaffold oldWidget) {
-    if (widget.fabPosition != oldWidget.fabPosition) {
-      _moveFab(widget.fabPosition);
+    if (widget.fabPositioner != oldWidget.fabPositioner) {
+      _moveFab(widget.fabPositioner);
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -1293,9 +1324,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 bottomViewInset: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
                 horizontalPadding: endPadding,
                 context: context,
-                previousFabPosition: _previousFabPosition,
-                currentFabPosition: _fabPosition,
+                previousFabPosition: _previousFabPositioner,
+                currentFabPosition: _fabPositioner,
                 fabMoveAnimation: _fabMoveController.view,
+                fabMotionAnimator: FabMotionAnimator.of(context),
               ),
             );
           }),
