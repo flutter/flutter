@@ -13,9 +13,9 @@ dependencies:
   xml: 2.6.0
 
 dev_dependencies:
-  test: 0.12.30+2
+  test: 0.12.30+3
 
-  async: 2.0.3 # TRANSITIVE DEPENDENCY
+  async: 2.0.4 # TRANSITIVE DEPENDENCY
   barback: 0.15.2+14 # TRANSITIVE DEPENDENCY
   boolean_selector: 1.0.2 # TRANSITIVE DEPENDENCY
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
@@ -34,7 +34,7 @@ dev_dependencies:
   js: 0.6.1 # TRANSITIVE DEPENDENCY
   logging: 0.11.3+1 # TRANSITIVE DEPENDENCY
   matcher: 0.12.1+4 # TRANSITIVE DEPENDENCY
-  meta: 1.1.1 # TRANSITIVE DEPENDENCY
+  meta: 1.1.2 # TRANSITIVE DEPENDENCY
   mime: 0.9.6 # TRANSITIVE DEPENDENCY
   multi_server_socket: 1.0.1 # TRANSITIVE DEPENDENCY
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
@@ -56,8 +56,8 @@ dev_dependencies:
   stream_channel: 1.6.3 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
-  typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
+  typed_data: 1.1.5 # TRANSITIVE DEPENDENCY
   utf: 0.9.0+4 # TRANSITIVE DEPENDENCY
   watcher: 0.9.7+7 # TRANSITIVE DEPENDENCY
-  web_socket_channel: 1.0.6 # TRANSITIVE DEPENDENCY
+  web_socket_channel: 1.0.7 # TRANSITIVE DEPENDENCY
   yaml: 2.1.13 # TRANSITIVE DEPENDENCY
