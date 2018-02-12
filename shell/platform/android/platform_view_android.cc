@@ -526,7 +526,7 @@ void PlatformViewAndroid::UpdateSemantics(
         strings.push_back(node.hint);
       }
       buffer_int32[position++] = node.textDirection;
-      buffer_int32[position++] = node.nextNodeId;
+      buffer_int32[position++] = node.previousNodeId;
       buffer_float32[position++] = node.rect.left();
       buffer_float32[position++] = node.rect.top();
       buffer_float32[position++] = node.rect.right();
