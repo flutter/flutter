@@ -254,7 +254,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
-  final bool hasFlutterPlugins = hasPlugins();
   final String previousGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
 
   updateXcodeGeneratedProperties(
@@ -264,7 +263,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     previewDart2: buildInfo.previewDart2,
   );
 
-  if (hasFlutterPlugins) {
+  if (hasPlugins()) {
     final String currentGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
     await cocoaPods.processPods(
         appIosDir: appDirectory,
