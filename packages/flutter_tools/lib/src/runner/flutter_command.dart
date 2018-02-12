@@ -170,11 +170,20 @@ abstract class FlutterCommand extends Command<Null> {
       targetPlatform = getTargetPlatformForName(argResults['target-platform']);
     }
 
+    final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation')
+        ? argResults['track-widget-creation']
+        : false;
+    if (trackWidgetCreation == true && previewDart2 == false) {
+      throw new UsageException(
+          '--track-widget-creation is valid only when --preview-dart-2 is specified.', null);
+    }
+
     return new BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
         ? argResults['flavor']
         : null,
       previewDart2: previewDart2,
+      trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
           ? argResults[FlutterOptions.kExtraFrontEndOptions]
           : null,
