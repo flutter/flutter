@@ -31,7 +31,7 @@ vars = {
   # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS.
   # You can use //tools/dart/create_updated_flutter_deps.py to produce
   # updated revision list of existing dependencies.
-  'dart_revision': '32396138ff733cbe8d9ac32178e6cffccdf80644',
+  'dart_revision': '223eeb2ebe112aaaddca206aab55cd54b4e54391',
 
   'dart_args_tag': '0.13.7',
   'dart_async_tag': 'corelib_2_2_1',
@@ -48,7 +48,7 @@ vars = {
   'dart_csslib_tag': '0.14.1',
   'dart_dart2js_info_tag': '0.5.5+1',
   'dart_dart_style_tag': '1.0.9',
-  'dart_dartdoc_tag': 'v0.15.1',
+  'dart_dartdoc_tag': 'v0.16.0',
   'dart_fixnum_tag': '0.10.5',
   'dart_glob_tag': '1.1.5',
   'dart_html_tag': '0.13.2+2',
@@ -60,12 +60,12 @@ vars = {
   'dart_intl_tag': '0.15.2',
   'dart_isolate_tag': '1.1.0',
   'dart_json_rpc_2_tag': '2.0.6',
-  'dart_linter_tag': '0.1.42',
+  'dart_linter_tag': '0.1.43',
   'dart_logging_tag': '0.11.3+1',
   'dart_markdown_tag': '1.0.0',
   'dart_matcher_tag': '0.12.1+4',
   'dart_mime_tag': '0.9.6',
-  'dart_mockito_tag': '2.0.2',
+  'dart_mockito_tag': 'a92db054fba18bc2d605be7670aee74b7cadc00a',
   'dart_mustache4dart_tag': 'v2.1.0',
   'dart_oauth2_tag': '1.1.0',
   'dart_observatory_pub_packages_rev': '4c282bb240b68f407c8c7779a65c68eeb0139dc6',
