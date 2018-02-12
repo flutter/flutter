@@ -708,21 +708,23 @@ class HotRunner extends ResidentRunner {
     const String red = '\u001B[31m';
     const String bold = '\u001B[0;1m';
     const String reset = '\u001B[0m';
+    if (details)
+      printStatus('Reloading:');
     printStatus(
-      '$fire  To hot reload your app on the fly, press "r". To restart the app entirely, press "R".',
+      '$fire  To hot reload your app on the fly, press "r"; to restart the app entirely, press "R".',
       ansiAlternative: '$red$fire$bold  To hot reload your app on the fly, '
-                       'press "r". To restart the app entirely, press "R".$reset'
+                       'press "r"; to restart the app entirely, press "R".$reset'
     );
-    for (FlutterDevice device in flutterDevices) {
-      final String dname = device.device.name;
-      for (Uri uri in device.observatoryUris)
-        printStatus('An Observatory debugger and profiler on $dname is available at: $uri');
-    }
     if (details) {
       printHelpDetails();
-      printStatus('To repeat this help message, press "h". To quit, press "q".');
+      printStatus('To repeat this help message, press "h"; to quit, press "q".');
     } else {
-      printStatus('For a more detailed help message, press "h". To quit, press "q".');
+      for (FlutterDevice device in flutterDevices) {
+        final String name = device.device.name;
+        for (Uri uri in device.observatoryUris)
+          printStatus('An Observatory debugger and profiler on $name is available at: $uri');
+      }
+      printStatus('For a more detailed help message, press "h"; to quit, press "q".');
     }
   }
 
