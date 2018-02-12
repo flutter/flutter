@@ -25,9 +25,11 @@ if [ -n "$TRAVIS" ]; then
     export ANDROID_HOME=`pwd`/android-sdk
     export PATH=`pwd`/android-sdk/tools/bin:$PATH
     mkdir -p /home/travis/.android # silence sdkmanager warning
+    set +x # Travis's env variable hiding is a bit wonky. Don't echo back this line.
     if [ -n "$ANDROID_GALLERY_UPLOAD_KEY" ]; then
-      echo $ANDROID_GALLERY_UPLOAD_KEY | base64 --decode > /home/travis/.android/debug.keystore
+      echo "$ANDROID_GALLERY_UPLOAD_KEY" | base64 --decode > /home/travis/.android/debug.keystore
     fi
+    set -x
     echo 'count=0' > /home/travis/.android/repositories.cfg # silence sdkmanager warning
     # suppressing output of sdkmanager to keep log under 4MB (travis limit)
     echo y | sdkmanager "tools" >/dev/null
@@ -46,6 +48,13 @@ if [ -n "$TRAVIS" ]; then
     ./bin/flutter doctor
   fi
 fi
+
+# rename the SDK directory to include a space
+echo "Renaming Flutter checkout directory to 'flutter sdk'"
+cd ..
+mv flutter flutter\ sdk
+cd flutter\ sdk
+echo "SDK directory is: $PWD"
 
 # disable analytics on the bots and download Flutter dependencies
 ./bin/flutter config --no-analytics
