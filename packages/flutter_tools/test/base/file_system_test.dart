@@ -21,12 +21,12 @@ void main() {
     testUsingContext('recursively creates a directory if it does not exist', () async {
       ensureDirectoryExists('foo/bar/baz.flx');
       expect(fs.isDirectorySync('foo/bar'), true);
-    }, overrides: <Type, Generator>{ FileSystem: () => fs } );
+    }, overrides: <Type, Generator>{ FileSystem: () => fs });
 
     testUsingContext('throws tool exit on failure to create', () async {
       fs.file('foo').createSync();
       expect(() => ensureDirectoryExists('foo/bar.flx'), throwsToolExit());
-    }, overrides: <Type, Generator>{ FileSystem: () => fs } );
+    }, overrides: <Type, Generator>{ FileSystem: () => fs });
   });
 
   group('copyDirectorySync', () {
@@ -34,7 +34,7 @@ void main() {
     /// Copies between 2 instances of file systems which is also supported by copyDirectorySync().
     test('test directory copy', () async {
       final MemoryFileSystem sourceMemoryFs = new MemoryFileSystem();
-      final String sourcePath = '/some/origin';
+      const String sourcePath = '/some/origin';
       final Directory sourceDirectory = await sourceMemoryFs.directory(sourcePath).create(recursive: true);
       sourceMemoryFs.currentDirectory = sourcePath;
       final File sourceFile1 = sourceMemoryFs.file('some_file.txt')..writeAsStringSync('bleh');
@@ -44,7 +44,7 @@ void main() {
 
       // Copy to another memory file system instance.
       final MemoryFileSystem targetMemoryFs = new MemoryFileSystem();
-      final String targetPath = '/some/non-existent/target';
+      const String targetPath = '/some/non-existent/target';
       final Directory targetDirectory = targetMemoryFs.directory(targetPath);
       copyDirectorySync(sourceDirectory, targetDirectory);
 

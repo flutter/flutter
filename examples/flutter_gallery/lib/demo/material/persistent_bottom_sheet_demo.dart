@@ -53,7 +53,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
     });
   }
 
-  void _showMessage()  {
+  void _showMessage() {
     showDialog<Null>(
       context: context,
       child: new AlertDialog(
@@ -76,7 +76,10 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
       floatingActionButton: new FloatingActionButton(
         onPressed: _showMessage,
         backgroundColor: Colors.redAccent,
-        child: const Icon(Icons.add)
+        child: const Icon(
+          Icons.add,
+          semanticLabel: 'Add',
+        ),
       ),
       body: new Center(
         child: new RaisedButton(

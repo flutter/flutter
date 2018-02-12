@@ -392,7 +392,6 @@ class IOSSimulator extends Device {
 
     final BuildInfo debugBuildInfo = new BuildInfo(BuildMode.debug, buildInfo.flavor,
         previewDart2: buildInfo.previewDart2,
-        strongMode: buildInfo.strongMode,
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
         extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
         preferSharedLibrary: buildInfo.preferSharedLibrary);
@@ -412,12 +411,15 @@ class IOSSimulator extends Device {
     await SimControl.instance.install(id, fs.path.absolute(bundle.path));
   }
 
-  Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) =>
-      // When running in previewDart2 mode, we still need to run compiler to
-      // produce kernel file for the application.
-      flx.build(precompiledSnapshot: !buildInfo.previewDart2,
-          previewDart2: buildInfo.previewDart2,
-          strongMode: buildInfo.strongMode);
+  Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) {
+    // When running in previewDart2 mode, we still need to run compiler to
+    // produce kernel file for the application.
+    return flx.build(
+      precompiledSnapshot: !buildInfo.previewDart2,
+      previewDart2: buildInfo.previewDart2,
+      trackWidgetCreation: buildInfo.trackWidgetCreation,
+    );
+  }
 
   @override
   Future<bool> stopApp(ApplicationPackage app) async {

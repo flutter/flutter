@@ -40,7 +40,6 @@ class HotRunner extends ResidentRunner {
     this.benchmarkMode: false,
     this.applicationBinary,
     this.previewDart2: false,
-    this.strongMode: false,
     this.hostIsIde: false,
     String projectRootPath,
     String packagesFilePath,
@@ -66,7 +65,7 @@ class HotRunner extends ResidentRunner {
   // The initial launch is from a snapshot.
   bool _runningFromSnapshot = true;
   bool previewDart2 = false;
-  bool strongMode = false;
+  DateTime firstBuildTime;
 
   void _addBenchmarkData(String name, int value) {
     benchmarkData[name] ??= <int>[];
@@ -213,6 +212,8 @@ class HotRunner extends ResidentRunner {
       return 1;
     }
 
+    firstBuildTime = new DateTime.now();
+
     for (FlutterDevice device in flutterDevices) {
       final int result = await device.runHot(
         hotRunner: this,
@@ -262,6 +263,7 @@ class HotRunner extends ResidentRunner {
       // Did not update DevFS because of a Dart source error.
       return false;
     }
+    final bool isFirstUpload = assetBundle.wasBuiltOnce() == false;
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       printTrace('Updating assets');
@@ -275,7 +277,9 @@ class HotRunner extends ResidentRunner {
         mainPath: mainPath,
         target: target,
         bundle: assetBundle,
-        bundleDirty: rebuildBundle,
+        firstBuildTime: firstBuildTime,
+        bundleFirstUpload: isFirstUpload,
+        bundleDirty: isFirstUpload == false && rebuildBundle,
         fileFilter: _dartDependencies,
         fullRestart: fullRestart
       );
@@ -446,7 +450,7 @@ class HotRunner extends ResidentRunner {
     } else {
       final bool reloadOnTopOfSnapshot = _runningFromSnapshot;
       final String progressPrefix = reloadOnTopOfSnapshot ? 'Initializing' : 'Performing';
-      final Status status =  logger.startProgress(
+      final Status status = logger.startProgress(
         '$progressPrefix hot reload...',
         progressId: 'hot.reload'
       );

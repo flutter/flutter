@@ -1052,35 +1052,35 @@ abstract class CustomClipper<T> {
 class ShapeBorderClipper extends CustomClipper<Path> {
   /// Creates a [ShapeBorder] clipper.
   ///
-  /// The [shapeBorder] argument must not be null.
+  /// The [shape] argument must not be null.
   ///
-  /// The [textDirection] argument must be provided non-null if [shapeBorder]
+  /// The [textDirection] argument must be provided non-null if [shape]
   /// has a text direction dependency (for example if it is expressed in terms
   /// of "start" and "end" instead of "left" and "right"). It may be null if
   /// the border will not need the text direction to paint itself.
   const ShapeBorderClipper({
-    @required this.shapeBorder,
+    @required this.shape,
     this.textDirection,
-  }) : assert(shapeBorder != null);
+  }) : assert(shape != null);
 
   /// The shape border whose outer path this clipper clips to.
-  final ShapeBorder shapeBorder;
+  final ShapeBorder shape;
 
-  /// The text direction to use for getting the outer path for [shapeBorder].
+  /// The text direction to use for getting the outer path for [shape].
   ///
   /// [ShapeBorder]s can depend on the text direction (e.g having a "dent"
   /// towards the start of the shape).
   final TextDirection textDirection;
 
-  /// Returns the outer path of [shapeBorder] as the clip.
+  /// Returns the outer path of [shape] as the clip.
   @override
   Path getClip(Size size) {
-    return shapeBorder.getOuterPath(Offset.zero & size, textDirection: textDirection);
+    return shape.getOuterPath(Offset.zero & size, textDirection: textDirection);
   }
 
   @override
   bool shouldReclip(covariant ShapeBorderClipper oldClipper) {
-    return oldClipper.shapeBorder != shapeBorder;
+    return oldClipper.shape != shape;
   }
 }
 
@@ -2107,7 +2107,7 @@ class RenderFittedBox extends RenderProxyBox {
   /// How to align the child within its parent's bounds.
   ///
   /// An alignment of (0.0, 0.0) aligns the child to the top-left corner of its
-  /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
+  /// parent's bounds. An alignment of (1.0, 0.5) aligns the child to the middle
   /// of the right edge of its parent's bounds.
   ///
   /// If this is set to an [AlignmentDirectional] object, then
@@ -3007,6 +3007,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     String decreasedValue,
     String hint,
     TextDirection textDirection,
+    SemanticsSortOrder sortOrder,
     VoidCallback onTap,
     VoidCallback onLongPress,
     VoidCallback onScrollLeft,
@@ -3021,6 +3022,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
     SetSelectionHandler onSetSelection,
+    VoidCallback onDidGainAccessibilityFocus,
+    VoidCallback onDidLoseAccessibilityFocus,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
@@ -3034,6 +3037,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _decreasedValue = decreasedValue,
        _hint = hint,
        _textDirection = textDirection,
+       _sortOrder = sortOrder,
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onScrollLeft = onScrollLeft,
@@ -3048,6 +3052,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
        _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
        _onSetSelection = onSetSelection,
+       _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
+       _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
@@ -3204,6 +3210,20 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (textDirection == value)
       return;
     _textDirection = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Sets the [SemanticsNode.sortOrder] to the given value.
+  ///
+  /// This defines how this node will be sorted with the other semantics nodes
+  /// to determine the order in which they are traversed by the accessibility
+  /// services on the platform (e.g. VoiceOver on iOS and TalkBack on Android).
+  SemanticsSortOrder get sortOrder => _sortOrder;
+  SemanticsSortOrder _sortOrder;
+  set sortOrder(SemanticsSortOrder value) {
+    if (sortOrder == value)
+      return;
+    _sortOrder = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3477,6 +3497,62 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handler for [SemanticsAction.didGainAccessibilityFocus].
+  ///
+  /// This handler is invoked when the node annotated with this handler gains
+  /// the accessibility focus. The accessibility focus is the
+  /// green (on Android with TalkBack) or black (on iOS with VoiceOver)
+  /// rectangle shown on screen to indicate what element an accessibility
+  /// user is currently interacting with.
+  ///
+  /// The accessibility focus is different from the input focus. The input focus
+  /// is usually held by the element that currently responds to keyboard inputs.
+  /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
+  ///    focus is removed from the node
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  VoidCallback get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
+  VoidCallback _onDidGainAccessibilityFocus;
+  set onDidGainAccessibilityFocus(VoidCallback handler) {
+    if (_onDidGainAccessibilityFocus == handler)
+      return;
+    final bool hadValue = _onDidGainAccessibilityFocus != null;
+    _onDidGainAccessibilityFocus = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
+  /// The handler for [SemanticsAction.didLoseAccessibilityFocus].
+  ///
+  /// This handler is invoked when the node annotated with this handler
+  /// loses the accessibility focus. The accessibility focus is
+  /// the green (on Android with TalkBack) or black (on iOS with VoiceOver)
+  /// rectangle shown on screen to indicate what element an accessibility
+  /// user is currently interacting with.
+  ///
+  /// The accessibility focus is different from the input focus. The input focus
+  /// is usually held by the element that currently responds to keyboard inputs.
+  /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
+  ///    accessibility focus
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  VoidCallback get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
+  VoidCallback _onDidLoseAccessibilityFocus;
+  set onDidLoseAccessibilityFocus(VoidCallback handler) {
+    if (_onDidLoseAccessibilityFocus == handler)
+      return;
+    final bool hadValue = _onDidLoseAccessibilityFocus != null;
+    _onDidLoseAccessibilityFocus = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -3503,6 +3579,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.hint = hint;
     if (textDirection != null)
       config.textDirection = textDirection;
+    if (sortOrder != null)
+      config.sortOrder = sortOrder;
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.
@@ -3534,6 +3612,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onMoveCursorBackwardByCharacter = _performMoveCursorBackwardByCharacter;
     if (onSetSelection != null)
       config.onSetSelection = _performSetSelection;
+    if (onDidGainAccessibilityFocus != null)
+      config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
+    if (onDidLoseAccessibilityFocus != null)
+      config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
   }
 
   void _performTap() {
@@ -3604,6 +3686,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   void _performSetSelection(TextSelection selection) {
     if (onSetSelection != null)
       onSetSelection(selection);
+  }
+
+  void _performDidGainAccessibilityFocus() {
+    if (onDidGainAccessibilityFocus != null)
+      onDidGainAccessibilityFocus();
+  }
+
+  void _performDidLoseAccessibilityFocus() {
+    if (onDidLoseAccessibilityFocus != null)
+      onDidLoseAccessibilityFocus();
   }
 }
 

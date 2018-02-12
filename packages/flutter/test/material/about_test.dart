@@ -55,7 +55,7 @@ void main() {
 
     LicenseRegistry.addLicense(() {
       return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        new LicenseEntryWithLineBreaks(<String>[ 'Pirate package '], 'Pirate license')
+        const LicenseEntryWithLineBreaks(const <String>[ 'Pirate package '], 'Pirate license')
       ]);
     });
 
@@ -78,13 +78,13 @@ void main() {
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        new LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB')
+        const LicenseEntryWithLineBreaks(const <String>['AAA'], 'BBB')
       ]);
     });
 
     LicenseRegistry.addLicense(() {
       return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        new LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license')
+        const LicenseEntryWithLineBreaks(const <String>['Another package'], 'Another license')
       ]);
     });
 

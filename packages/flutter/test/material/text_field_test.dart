@@ -303,7 +303,7 @@ void main() {
     expect(controller.selection.baseOffset, -1);
     expect(controller.selection.extentOffset, -1);
 
-    final String testValue = 'abc def ghi';
+    const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
 
@@ -328,7 +328,7 @@ void main() {
       )
     );
 
-    final String testValue = 'abc def ghi';
+    const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     expect(controller.value.text, testValue);
     await skipPastScrollingAnimation(tester);
@@ -358,7 +358,7 @@ void main() {
       ),
     );
 
-    final String testValue = 'abc def ghi';
+    const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
 
@@ -419,7 +419,7 @@ void main() {
       ),
     );
 
-    final String testValue = 'abc def ghi';
+    const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
 
@@ -477,7 +477,7 @@ void main() {
       ),
     );
 
-    final String testValue = 'abc def ghi';
+    const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
 
@@ -587,7 +587,7 @@ void main() {
     );
 
     final String testValue = kThreeLines;
-    final String cutValue = 'First line of stuff ';
+    const String cutValue = 'First line of stuff ';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
 
@@ -1084,7 +1084,7 @@ void main() {
       ),
     );
 
-    // Not focused.  The prefix and suffix should not appear, but the label should.
+    // Not focused. The prefix and suffix should not appear, but the label should.
     expect(getOpacity(tester, find.text('Prefix')), 0.0);
     expect(getOpacity(tester, find.text('Suffix')), 0.0);
     expect(find.text('Label'), findsOneWidget);
@@ -1603,11 +1603,11 @@ void main() {
 
   testWidgets('maxLength shows warning when maxLengthEnforced is false.', (WidgetTester tester) async {
     final TextEditingController textController = new TextEditingController();
-    final TextStyle testStyle = const TextStyle(color: Colors.deepPurpleAccent);
+    const TextStyle testStyle = const TextStyle(color: Colors.deepPurpleAccent);
 
     await tester.pumpWidget(boilerplate(
       child: new TextField(
-        decoration: new InputDecoration(errorStyle: testStyle),
+        decoration: const InputDecoration(errorStyle: testStyle),
         controller: textController,
         maxLength: 10,
         maxLengthEnforced: false,
@@ -1686,7 +1686,7 @@ void main() {
       )
     );
 
-    final String testValue = 'x';
+    const String testValue = 'x';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
     expect(controller.selection.baseOffset, -1);
@@ -1813,6 +1813,7 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1837,6 +1838,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1861,6 +1863,7 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1919,6 +1922,7 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1943,6 +1947,9 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
+            SemanticsAction.cut,
+            SemanticsAction.copy,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1989,6 +1996,7 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -2032,6 +2040,9 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
+            SemanticsAction.cut,
+            SemanticsAction.copy,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,

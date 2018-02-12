@@ -401,7 +401,7 @@ class DataTable extends StatelessWidget {
         down: sorted ? ascending : null,
         duration: _kSortArrowAnimationDuration,
       );
-      final Widget arrowPadding = const SizedBox(width: _kSortArrowPadding);
+      const Widget arrowPadding = const SizedBox(width: _kSortArrowPadding);
       label = new Row(
         textDirection: numeric ? TextDirection.rtl : null,
         children: <Widget>[ label, arrowPadding, arrow ],
@@ -453,7 +453,7 @@ class DataTable extends StatelessWidget {
   }) {
     final bool isLightTheme = Theme.of(context).brightness == Brightness.light;
     if (showEditIcon) {
-      final Widget icon = const Icon(Icons.edit, size: 18.0);
+      const Widget icon = const Icon(Icons.edit, size: 18.0);
       label = new Expanded(child: label);
       label = new Row(
         textDirection: numeric ? TextDirection.rtl : null,

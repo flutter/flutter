@@ -39,9 +39,9 @@ Future<Null> build({
   String workingDirPath,
   String packagesPath,
   bool previewDart2 : false,
-  bool strongMode : false,
   bool precompiledSnapshot: false,
-  bool reportLicensedPackages: false
+  bool reportLicensedPackages: false,
+  bool trackWidgetCreation: false,
 }) async {
   outputPath ??= defaultFlxOutputPath;
   snapshotPath ??= defaultSnapshotPath;
@@ -74,7 +74,7 @@ Future<Null> build({
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       incrementalCompilerByteStorePath: fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
       mainPath: fs.file(mainPath).absolute.path,
-      strongMode: strongMode
+      trackWidgetCreation: trackWidgetCreation,
     );
     if (kernelBinaryFilename == null) {
       throwToolExit('Compiler terminated unexpectedly on $mainPath');
@@ -90,7 +90,6 @@ Future<Null> build({
     privateKeyPath: privateKeyPath,
     workingDirPath: workingDirPath,
     packagesPath: packagesPath,
-    strongMode: strongMode,
     reportLicensedPackages: reportLicensedPackages
   ).then((_) => null);
 }
@@ -104,7 +103,6 @@ Future<List<String>> assemble({
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
   String packagesPath,
-  bool strongMode : false,
   bool includeDefaultFonts: true,
   bool reportLicensedPackages: false
 }) async {
@@ -135,9 +133,7 @@ Future<List<String>> assemble({
       .toList();
 
   if (kernelContent != null) {
-    final String platformKernelDill = strongMode ?
-        artifacts.getArtifactPath(Artifact.platformKernelStrongDill) :
-        artifacts.getArtifactPath(Artifact.platformKernelDill);
+    final String platformKernelDill = artifacts.getArtifactPath(Artifact.platformKernelDill);
     zipBuilder.entries[_kKernelKey] = kernelContent;
     zipBuilder.entries[_kPlatformKernelKey] = new DevFSFileContent(fs.file(platformKernelDill));
   }

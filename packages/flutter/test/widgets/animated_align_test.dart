@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('AnimatedAlign.debugFillProperties', (WidgetTester tester) async {
-    final AnimatedAlign box = const AnimatedAlign(
+    const AnimatedAlign box = const AnimatedAlign(
       alignment: Alignment.topCenter,
       curve: Curves.ease,
       duration: const Duration(milliseconds: 200),

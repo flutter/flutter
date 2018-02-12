@@ -7,6 +7,7 @@ import 'dart:ui' show Color, hashValues;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_theme.dart';
 import 'colors.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
@@ -90,6 +91,7 @@ class ThemeData {
     Color unselectedWidgetColor,
     Color disabledColor,
     Color buttonColor,
+    ButtonThemeData buttonTheme,
     Color secondaryHeaderColor,
     Color textSelectionColor,
     Color textSelectionHandleColor,
@@ -128,6 +130,7 @@ class ThemeData {
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
     disabledColor ??= isDark ? Colors.white30 : Colors.black26;
     buttonColor ??= isDark ? primarySwatch[600] : Colors.grey[300];
+    buttonTheme ??= const ButtonThemeData();
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
     secondaryHeaderColor ??= isDark ? Colors.grey[700] : primarySwatch[50];
     textSelectionColor ??= isDark ? accentColor : primarySwatch[200];
@@ -168,6 +171,7 @@ class ThemeData {
       unselectedWidgetColor: unselectedWidgetColor,
       disabledColor: disabledColor,
       buttonColor: buttonColor,
+      buttonTheme: buttonTheme,
       secondaryHeaderColor: secondaryHeaderColor,
       textSelectionColor: textSelectionColor,
       textSelectionHandleColor: textSelectionHandleColor,
@@ -210,6 +214,7 @@ class ThemeData {
     @required this.unselectedWidgetColor,
     @required this.disabledColor,
     @required this.buttonColor,
+    @required this.buttonTheme,
     @required this.secondaryHeaderColor,
     @required this.textSelectionColor,
     @required this.textSelectionHandleColor,
@@ -241,7 +246,7 @@ class ThemeData {
        assert(selectedRowColor != null),
        assert(unselectedWidgetColor != null),
        assert(disabledColor != null),
-       assert(buttonColor != null),
+       assert(buttonTheme != null),
        assert(secondaryHeaderColor != null),
        assert(textSelectionColor != null),
        assert(textSelectionHandleColor != null),
@@ -353,8 +358,12 @@ class ThemeData {
   /// checked or unchecked).
   final Color disabledColor;
 
-  /// The default color of the [Material] used in [RaisedButton]s.
+  /// The default fill color of the [Material] used in [RaisedButton]s.
   final Color buttonColor;
+
+  /// Defines the default configuration of button widgets, like [RaisedButton]
+  /// and [FlatButton].
+  final ButtonThemeData buttonTheme;
 
   /// The color of the header of a [PaginatedDataTable] when there are selected rows.
   // According to the spec for data tables:
@@ -432,6 +441,7 @@ class ThemeData {
     Color unselectedWidgetColor,
     Color disabledColor,
     Color buttonColor,
+    Color buttonTheme,
     Color secondaryHeaderColor,
     Color textSelectionColor,
     Color textSelectionHandleColor,
@@ -466,6 +476,7 @@ class ThemeData {
       unselectedWidgetColor: unselectedWidgetColor ?? this.unselectedWidgetColor,
       disabledColor: disabledColor ?? this.disabledColor,
       buttonColor: buttonColor ?? this.buttonColor,
+      buttonTheme: buttonTheme ?? this.buttonTheme,
       secondaryHeaderColor: secondaryHeaderColor ?? this.secondaryHeaderColor,
       textSelectionColor: textSelectionColor ?? this.textSelectionColor,
       textSelectionHandleColor: textSelectionHandleColor ?? this.textSelectionHandleColor,
@@ -583,6 +594,7 @@ class ThemeData {
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t),
       disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t),
       buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t),
+      buttonTheme: t < 0.5 ? a.buttonTheme : b.buttonTheme,
       secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t),
       textSelectionColor: Color.lerp(a.textSelectionColor, b.textSelectionColor, t),
       textSelectionHandleColor: Color.lerp(a.textSelectionHandleColor, b.textSelectionHandleColor, t),
@@ -623,6 +635,7 @@ class ThemeData {
            (otherData.unselectedWidgetColor == unselectedWidgetColor) &&
            (otherData.disabledColor == disabledColor) &&
            (otherData.buttonColor == buttonColor) &&
+           (otherData.buttonTheme == buttonTheme) &&
            (otherData.secondaryHeaderColor == secondaryHeaderColor) &&
            (otherData.textSelectionColor == textSelectionColor) &&
            (otherData.textSelectionHandleColor == textSelectionHandleColor) &&
@@ -660,12 +673,13 @@ class ThemeData {
       unselectedWidgetColor,
       disabledColor,
       buttonColor,
+      buttonTheme,
       secondaryHeaderColor,
       textSelectionColor,
       textSelectionHandleColor,
       backgroundColor,
-      accentColor,
       hashValues( // Too many values.
+        accentColor,
         accentColorBrightness,
         indicatorColor,
         dialogBackgroundColor,

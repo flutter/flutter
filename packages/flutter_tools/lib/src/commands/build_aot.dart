@@ -35,12 +35,11 @@ class BuildAotCommand extends BuildSubCommand {
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'ios']
+        allowed: <String>['android-arm', 'android-arm64', 'ios']
       )
       ..addFlag('interpreter')
       ..addFlag('quiet', defaultsTo: false)
       ..addFlag('preview-dart-2', negatable: false, hide: !verboseHelp)
-      ..addFlag('strong', negatable: false, hide: !verboseHelp)
       ..addOption(FlutterOptions.kExtraFrontEndOptions,
         allowMultiple: true,
         splitCommas: true,
@@ -82,7 +81,6 @@ class BuildAotCommand extends BuildSubCommand {
       outputPath: argResults['output-dir'],
       interpreter: argResults['interpreter'],
       previewDart2: argResults['preview-dart-2'],
-      strongMode: argResults['strong'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       preferSharedLibrary: argResults['prefer-shared-library'],
@@ -114,7 +112,6 @@ Future<String> buildAotSnapshot(
   String outputPath,
   bool interpreter: false,
   bool previewDart2: false,
-  bool strongMode: false,
   List<String> extraFrontEndOptions,
   List<String> extraGenSnapshotOptions,
   bool preferSharedLibrary: false,
@@ -128,7 +125,6 @@ Future<String> buildAotSnapshot(
       outputPath: outputPath,
       interpreter: interpreter,
       previewDart2: previewDart2,
-      strongMode: strongMode,
       extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
       preferSharedLibrary: preferSharedLibrary,
@@ -148,7 +144,6 @@ Future<String> _buildAotSnapshot(
   String outputPath,
   bool interpreter: false,
   bool previewDart2: false,
-  bool strongMode: false,
   List<String> extraFrontEndOptions,
   List<String> extraGenSnapshotOptions,
   bool preferSharedLibrary: false,
@@ -159,7 +154,9 @@ Future<String> _buildAotSnapshot(
     return null;
   }
 
-  if (platform != TargetPlatform.android_arm && platform != TargetPlatform.ios) {
+  if (!(platform == TargetPlatform.android_arm ||
+        platform == TargetPlatform.android_arm64 ||
+        platform == TargetPlatform.ios)) {
     printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
     return null;
   }
@@ -217,6 +214,7 @@ Future<String> _buildAotSnapshot(
 
   switch (platform) {
     case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       if (compileToSharedLibrary) {
@@ -287,6 +285,7 @@ Future<String> _buildAotSnapshot(
 
   switch (platform) {
     case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       if (compileToSharedLibrary) {
@@ -300,10 +299,12 @@ Future<String> _buildAotSnapshot(
           '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
         ]);
       }
-      genSnapshotCmd.addAll(<String>[
-        '--no-sim-use-hardfp',  // Android uses the softfloat ABI.
-        '--no-use-integer-division',  // Not supported by the Pixel in 32-bit mode.
-      ]);
+      if (platform == TargetPlatform.android_arm) {
+        genSnapshotCmd.addAll(<String>[
+          '--no-sim-use-hardfp', // Android uses the softfloat ABI.
+          '--no-use-integer-division', // Not supported by the Pixel in 32-bit mode.
+        ]);
+      }
       break;
     case TargetPlatform.ios:
       if (interpreter) {
@@ -340,19 +341,17 @@ Future<String> _buildAotSnapshot(
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn : true,
       aot : true,
-      strongMode: strongMode,
+      trackWidgetCreation: false,
     );
     if (mainPath == null) {
       printError('Compiler terminated unexpectedly.');
       return null;
     }
 
-    if (strongMode) {
-      genSnapshotCmd.addAll(<String>[
-        '--reify-generic-functions',
-        '--strong',
-      ]);
-    }
+    genSnapshotCmd.addAll(<String>[
+      '--reify-generic-functions',
+      '--strong',
+    ]);
   }
 
   genSnapshotCmd.add(mainPath);
@@ -443,9 +442,9 @@ Future<String> _buildAotSnapshot(
   } else {
     if (compileToSharedLibrary) {
       // A word of warning: Instead of compiling via two steps, to a .o file and
-      // then to a .so file we use only one command.  When using two commands
+      // then to a .so file we use only one command. When using two commands
       // gcc will end up putting a .eh_frame and a .debug_frame into the shared
-      // library.  Without stripping .debug_frame afterwards, unwinding tools
+      // library. Without stripping .debug_frame afterwards, unwinding tools
       // based upon libunwind use just one and ignore the contents of the other
       // (which causes it to not look into the other section and therefore not
       // find the correct unwinding information).

@@ -115,9 +115,11 @@ abstract class SliverGridLayout {
   /// The size and position of the child with the given index.
   SliverGridGeometry getGeometryForChildIndex(int index);
 
-  /// An estimate of the scroll extent needed to fully display all the tiles if
-  /// there are `childCount` children in total.
-  double estimateMaxScrollOffset(int childCount);
+  /// The scroll extent needed to fully display all the tiles if there are
+  /// `childCount` children in total.
+  ///
+  /// The child count will never be null.
+  double computeMaxScrollOffset(int childCount);
 }
 
 /// A [SliverGridLayout] that uses equally sized and spaced tiles.
@@ -221,9 +223,8 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
   }
 
   @override
-  double estimateMaxScrollOffset(int childCount) {
-    if (childCount == null)
-      return null;
+  double computeMaxScrollOffset(int childCount) {
+    assert(childCount != null);
     final int mainAxisCount = ((childCount - 1) ~/ crossAxisCount) + 1;
     final double mainAxisSpacing = mainAxisStride - childMainAxisExtent;
     return mainAxisStride * mainAxisCount - mainAxisSpacing;
@@ -539,10 +540,13 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     double trailingScrollOffset = firstChildGridGeometry.trailingScrollOffset;
 
     if (firstChild == null) {
-      if (!addInitialChild(index: firstIndex,
-          layoutOffset: firstChildGridGeometry.scrollOffset)) {
-        // There are no children.
-        geometry = SliverGeometry.zero;
+      if (!addInitialChild(index: firstIndex, layoutOffset: firstChildGridGeometry.scrollOffset)) {
+        // There are either no children, or we are past the end of all our children.
+        final double max = layout.computeMaxScrollOffset(childManager.childCount);
+        geometry = new SliverGeometry(
+          scrollExtent: max,
+          maxPaintExtent: max,
+        );
         childManager.didFinishLayout();
         return;
       }

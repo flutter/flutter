@@ -236,7 +236,7 @@ abstract class CachedArtifact {
   String get version => cache.getVersionFor(name);
 
   /// Keep track of the files we've downloaded for this execution so we
-  /// can delete them after completion.  We don't delete them right after
+  /// can delete them after completion. We don't delete them right after
   /// extraction in case [update] is interrupted, so we can restart without
   /// starting from scratch.
   final List<File> _downloadedFiles = <File>[];
@@ -387,6 +387,8 @@ class FlutterEngine extends CachedArtifact {
     <String>['darwin-x64', 'dart-sdk-darwin-x64.zip'],
     <String>['android-arm-profile/darwin-x64', 'android-arm-profile/darwin-x64.zip'],
     <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
+    <String>['android-arm64-profile/darwin-x64', 'android-arm64-profile/darwin-x64.zip'],
+    <String>['android-arm64-release/darwin-x64', 'android-arm64-release/darwin-x64.zip'],
   ];
 
   List<List<String>> get _linuxBinaryDirs => <List<String>>[
@@ -394,6 +396,8 @@ class FlutterEngine extends CachedArtifact {
     <String>['linux-x64', 'dart-sdk-linux-x64.zip'],
     <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
     <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
+    <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
+    <String>['android-arm64-release/linux-x64', 'android-arm64-release/linux-x64.zip'],
   ];
 
   List<List<String>> get _windowsBinaryDirs => <List<String>>[
@@ -401,6 +405,8 @@ class FlutterEngine extends CachedArtifact {
     <String>['windows-x64', 'dart-sdk-windows-x64.zip'],
     <String>['android-arm-profile/windows-x64', 'android-arm-profile/windows-x64.zip'],
     <String>['android-arm-release/windows-x64', 'android-arm-release/windows-x64.zip'],
+    <String>['android-arm64-profile/windows-x64', 'android-arm64-profile/windows-x64.zip'],
+    <String>['android-arm64-release/windows-x64', 'android-arm64-release/windows-x64.zip'],
   ];
 
   List<List<String>> get _androidBinaryDirs => <List<String>>[
@@ -409,6 +415,9 @@ class FlutterEngine extends CachedArtifact {
     <String>['android-arm', 'android-arm/artifacts.zip'],
     <String>['android-arm-profile', 'android-arm-profile/artifacts.zip'],
     <String>['android-arm-release', 'android-arm-release/artifacts.zip'],
+    <String>['android-arm64', 'android-arm64/artifacts.zip'],
+    <String>['android-arm64-profile', 'android-arm64-profile/artifacts.zip'],
+    <String>['android-arm64-release', 'android-arm64-release/artifacts.zip'],
   ];
 
   List<List<String>> get _iosBinaryDirs => <List<String>>[

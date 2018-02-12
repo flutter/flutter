@@ -107,7 +107,7 @@ Future<String> getCodeSigningIdentityDevelopmentTeam({BuildableIOSApp iosApp, bo
   if (!exitsHappy(const <String>['which', 'security']) || !exitsHappy(const <String>['which', 'openssl']))
     return null;
 
-  final List<String> findIdentityCommand =
+  const List<String> findIdentityCommand =
       const <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
   final List<String> validCodeSigningIdentities = runCheckedSync(findIdentityCommand)
       .split('\n')

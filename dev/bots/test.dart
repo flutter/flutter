@@ -544,7 +544,7 @@ Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
 
   for (String package in packageToRegistrants.keys) {
     final Map<File, String> fileToContent = <File, String>{};
-    for(File f in packageToRegistrants[package]) {
+    for (File f in packageToRegistrants[package]) {
       fileToContent[f] = f.readAsStringSync();
     }
     await _runCommand(flutter, <String>['inject-plugins'],

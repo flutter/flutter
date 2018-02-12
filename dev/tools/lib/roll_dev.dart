@@ -10,19 +10,17 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'archive_publisher.dart';
 
 const String kIncrement = 'increment';
 const String kX = 'x';
 const String kY = 'y';
 const String kZ = 'z';
+const String kCommit = 'commit';
 const String kHelp = 'help';
 
-void main(List<String> args) {
-  // Set the cwd to the repo root, since we know where this script is located.
-  final Directory scriptLocation = new Directory(Platform.script.toFilePath());
-  Directory.current = scriptLocation.parent.parent.parent;
+const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
 
+void main(List<String> args) {
   final ArgParser argParser = new ArgParser(allowTrailingOptions: false);
   argParser.addOption(
     kIncrement,
@@ -35,6 +33,12 @@ void main(List<String> args) {
       kZ: 'Indicates the least notable level of change. You normally want this.',
     },
   );
+  argParser.addOption(
+    kCommit,
+    help: 'Specifies which git commit to roll to the dev branch.',
+    valueHelp: 'hash',
+    defaultsTo: 'upstream/master',
+  );
   argParser.addFlag(kHelp, negatable: false, help: 'Show this help message.', hide: true);
   ArgResults argResults;
   try {
@@ -46,12 +50,19 @@ void main(List<String> args) {
   }
 
   final String level = argResults[kIncrement];
+  final bool commit = argResults[kCommit];
   final bool help = argResults[kHelp];
 
   if (help || level == null) {
-    print('roll_dev.dart --increment=x • update the version tags and roll a new dev build.\n');
+    print('roll_dev.dart --increment=level --commit=hash • update the version tags and roll a new dev build.\n');
     print(argParser.usage);
     exit(0);
+  }
+
+  if (getGitOutput('remote get-url upstream', 'check whether this is a flutter checkout') != kUpstreamRemote) {
+    print('The current directory is not a Flutter repository checkout with a correctly configured upstream remote.');
+    print('For more details see: https://github.com/flutter/flutter/wiki/Release-process');
+    exit(1);
   }
 
   runGit('checkout master', 'switch to master branch');
@@ -61,6 +72,9 @@ void main(List<String> args) {
     print('will delete files! Run with -n to find out which ones.');
     exit(1);
   }
+
+  runGit('fetch upstream', 'fetch upstream');
+  runGit('reset $commit --hard', 'check out master branch');
 
   String version = getFullTag();
   final Match match = parseFullTag(version);
@@ -97,27 +111,17 @@ void main(List<String> args) {
   }
   version = parts.join('.');
 
-  runGit('fetch upstream', 'fetch upstream');
-  runGit('reset upstream/master --hard', 'check out master branch');
+  final String hash = getGitOutput('rev-parse HEAD', 'Get git hash for $commit');
+
   runGit('tag v$version', 'tag the commit with the version label');
-  final String hash = getGitOutput('rev-parse HEAD', 'Get git hash for $version tag');
+
+  // PROMPT
 
   print('Your tree is ready to publish Flutter $version (${hash.substring(0, 10)}) '
     'to the "dev" channel.');
   stdout.write('Are you? [yes/no] ');
   if (stdin.readLineSync() != 'yes') {
     runGit('tag -d v$version', 'remove the tag you did not want to publish');
-    print('The dev roll has been aborted.');
-    exit(0);
-  }
-
-  // Publish the archive before pushing the tag so that if something fails in
-  // the publish step, we can clean up.
-  try {
-    new ArchivePublisher(hash, version, Channel.dev)..publishArchive();
-  } on ArchivePublisherException catch (e) {
-    print('Archive publishing failed.\n$e');
-    runGit('tag -d $version', 'remove the tag that was not published');
     print('The dev roll has been aborted.');
     exit(0);
   }

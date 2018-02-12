@@ -374,7 +374,6 @@ class AppDomain extends Domain {
         usesTerminalUI: false,
         applicationBinary: applicationBinary,
         previewDart2: previewDart2,
-        strongMode: strongMode,
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
         projectAssets: projectAssets,
@@ -389,7 +388,6 @@ class AppDomain extends Domain {
         usesTerminalUI: false,
         applicationBinary: applicationBinary,
         previewDart2: previewDart2,
-        strongMode: strongMode,
         ipv6: ipv6,
       );
     }
@@ -447,6 +445,8 @@ class AppDomain extends Domain {
   bool isRestartSupported(bool enableHotReload, Device device) =>
       enableHotReload && device.supportsHotMode;
 
+  Future<OperationResult> _inProgressHotReload;
+
   Future<OperationResult> restart(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
     final bool fullRestart = _getBoolArg(args, 'fullRestart') ?? false;
@@ -456,8 +456,14 @@ class AppDomain extends Domain {
     if (app == null)
       throw "app '$appId' not found";
 
-    return app._runInZone(this, () {
+    if (_inProgressHotReload != null)
+      throw 'hot restart already in progress';
+
+    _inProgressHotReload = app._runInZone(this, () {
       return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
+    });
+    return _inProgressHotReload.whenComplete(() {
+      _inProgressHotReload = null;
     });
   }
 

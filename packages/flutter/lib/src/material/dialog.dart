@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button.dart';
 import 'button_bar.dart';
+import 'button_theme.dart';
 import 'colors.dart';
 import 'ink_well.dart';
 import 'material.dart';
@@ -434,12 +434,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return new MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
-      removeBottom: true,
-      removeLeft: true,
-      removeRight: true,
+    return new SafeArea(
       child: new Builder(
         builder: (BuildContext context) {
           return theme != null ? new Theme(data: theme, child: child) : child;

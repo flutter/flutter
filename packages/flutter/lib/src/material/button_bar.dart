@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'button.dart';
+import 'button_theme.dart';
 import 'dialog.dart';
 import 'flat_button.dart';
 import 'raised_button.dart';
