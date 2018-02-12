@@ -60,17 +60,7 @@ class VideoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget fullScreenRoutePageBuilder(BuildContext context,
         Animation<double> animation, Animation<double> secondaryAnimation) {
-      return new AnimatedBuilder(
-        child: _buildFullScreenVideo(),
-        animation: animation,
-        builder: (BuildContext context, Widget child) {
-          // TODO(sigurdm): It seems we get a animation.value of 1.0
-          // at first when entering the route. Find out how to avoid
-          // this.
-          controller.setVolume(animation.value);
-          return child;
-        },
-      );
+      return _buildFullScreenVideo();
     }
 
     void pushFullScreenWidget() {
@@ -82,6 +72,8 @@ class VideoCard extends StatelessWidget {
       route.completed.then((Null _) {
         controller.setVolume(0.0);
       });
+
+      controller.setVolume(1.0);
       Navigator.of(context).push(route);
     }
 
