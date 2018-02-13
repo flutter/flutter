@@ -91,7 +91,6 @@ class _ScaffoldGeometryNotifier extends ValueNotifier<ScaffoldGeometry> {
   _ScaffoldGeometryNotifier(ScaffoldGeometry geometry)
     : super(geometry);
 
-
   @override
   ScaffoldGeometry get value{
     if (!RendererBinding.instance.pipelineOwner.debugDoingPaint)
