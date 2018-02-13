@@ -294,7 +294,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     throwToolExit('Xcode failed to clean\n${cleanResult.stderr}');
   }
 
-  final List<String> commands = <String>[
+  final List<String> buildCommands = <String>[
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
@@ -303,29 +303,25 @@ Future<XcodeBuildResult> buildXcodeProject({
     'ONLY_ACTIVE_ARCH=YES',
   ];
 
-<<<<<<< HEAD
-  if (developmentTeam != null) {
-=======
   if (logger.isVerbose) {
     // An environment variable to be passed to xcode_backend.sh determining
     // whether to echo back executed commands.
-    commands.add('VERBOSE_SCRIPT_LOGGING=YES');
+    buildCommands.add('VERBOSE_SCRIPT_LOGGING=YES');
   } else {
     // This will print warnings and errors only.
-    commands.add('-quiet');
+    buildCommands.add('-quiet');
   }
 
-  if (developmentTeam != null)
->>>>>>> Revert "Revert "Reduce xcodebuild noise #2" (#14641)"
-    commands.add('DEVELOPMENT_TEAM=$developmentTeam');
-    commands.add('-allowProvisioningUpdates');
-    commands.add('-allowProvisioningDeviceRegistration');
+  if (developmentTeam != null) {
+    buildCommands.add('DEVELOPMENT_TEAM=$developmentTeam');
+    buildCommands.add('-allowProvisioningUpdates');
+    buildCommands.add('-allowProvisioningDeviceRegistration');
   }
 
   final List<FileSystemEntity> contents = fs.directory(app.appDirectory).listSync();
   for (FileSystemEntity entity in contents) {
     if (fs.path.extension(entity.path) == '.xcworkspace') {
-      commands.addAll(<String>[
+      buildCommands.addAll(<String>[
         '-workspace', fs.path.basename(entity.path),
         '-scheme', scheme,
         'BUILD_DIR=${fs.path.absolute(getIosBuildDirectory())}',
@@ -335,13 +331,13 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   if (buildForDevice) {
-    commands.addAll(<String>['-sdk', 'iphoneos', '-arch', 'arm64']);
+    buildCommands.addAll(<String>['-sdk', 'iphoneos', '-arch', 'arm64']);
   } else {
-    commands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
+    buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
   }
 
   if (!codesign) {
-    commands.addAll(
+    buildCommands.addAll(
       <String>[
         'CODE_SIGNING_ALLOWED=NO',
         'CODE_SIGNING_REQUIRED=NO',
@@ -353,11 +349,18 @@ Future<XcodeBuildResult> buildXcodeProject({
   final Status buildStatus =
       logger.startProgress('Running Xcode build...', expectSlowOperation: true);
   final RunResult buildResult = await runAsync(
-    commands,
+    buildCommands,
     workingDirectory: app.appDirectory,
     allowReentrantFlutter: true
   );
   buildStatus.stop();
+
+  // Run -showBuildSettings again but with the exact same parameters as the build.
+  final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(
+    buildCommands..add('-showBuildSettings'),
+    workingDirectory: app.appDirectory,
+  ));
+
   if (buildResult.exitCode != 0) {
     printStatus('Failed to build iOS app');
     if (buildResult.stderr.isNotEmpty) {
@@ -373,27 +376,31 @@ Future<XcodeBuildResult> buildXcodeProject({
       stdout: buildResult.stdout,
       stderr: buildResult.stderr,
       xcodeBuildExecution: new XcodeBuildExecution(
-        commands,
-        app.appDirectory,
+        buildCommands: buildCommands,
+        appDirectory: app.appDirectory,
         buildForPhysicalDevice: buildForDevice,
+        buildSettings: buildSettings,
       ),
     );
   } else {
-    // Look for 'clean build/<configuration>-<sdk>/Runner.app'.
-    final RegExp regexp = new RegExp(r' clean (.*\.app)$', multiLine: true);
-    final Match match = regexp.firstMatch(buildResult.stdout);
+    final String expectedOutputDirectory = fs.path.join(
+      buildSettings['TARGET_BUILD_DIR'],
+      buildSettings['WRAPPER_NAME'],
+    );
+
     String outputDir;
-    if (match != null) {
-      final String actualOutputDir = match.group(1).replaceAll('\\ ', ' ');
+    if (fs.isDirectorySync(expectedOutputDirectory)) {
       // Copy app folder to a place where other tools can find it without knowing
       // the BuildInfo.
-      outputDir = actualOutputDir.replaceFirst('/$configuration-', '/');
+      outputDir = expectedOutputDirectory.replaceFirst('/$configuration-', '/');
       if (fs.isDirectorySync(outputDir)) {
         // Previous output directory might have incompatible artifacts
         // (for example, kernel binary files produced from previous `--preview-dart-2` run).
         fs.directory(outputDir).deleteSync(recursive: true);
       }
-      copyDirectorySync(fs.directory(actualOutputDir), fs.directory(outputDir));
+      copyDirectorySync(fs.directory(expectedOutputDirectory), fs.directory(outputDir));
+    } else {
+      printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
     }
     return new XcodeBuildResult(success: true, output: outputDir);
   }
@@ -408,8 +415,7 @@ String readGeneratedXcconfig(String appPath) {
   return generatedXcconfigFile.readAsStringSync();
 }
 
-Future<Null> diagnoseXcodeBuildFailure(
-    XcodeBuildResult result, BuildableIOSApp app) async {
+Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.contains('BCEROR') == true &&
@@ -423,14 +429,15 @@ Future<Null> diagnoseXcodeBuildFailure(
   // * PROVISIONING_PROFILE (manual signing)
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      app.buildSettings != null &&
-      !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(app.buildSettings.containsKey)) {
+      !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(
+        result.xcodeBuildExecution.buildSettings.containsKey)
+      ) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      app.id.contains('com.example')) {
+      result.xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'].contains('com.example')) {
     printError('');
     printError('It appears that your application still contains the default signing identifier.');
     printError("Try replacing 'com.example' with your signing id in Xcode:");
@@ -471,10 +478,11 @@ class XcodeBuildResult {
 /// Describes an invocation of a Xcode build command.
 class XcodeBuildExecution {
   XcodeBuildExecution(
-    this.buildCommands,
-    this.appDirectory,
     {
+      @required this.buildCommands,
+      @required this.appDirectory,
       @required this.buildForPhysicalDevice,
+      @required this.buildSettings,
     }
   );
 
@@ -482,6 +490,8 @@ class XcodeBuildExecution {
   final List<String> buildCommands;
   final String appDirectory;
   final bool buildForPhysicalDevice;
+  /// The build settings corresponding to the [buildCommands] invocation.
+  final Map<String, String> buildSettings;
 }
 
 final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');
