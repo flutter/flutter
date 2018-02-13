@@ -107,6 +107,7 @@ void main() {
 
     testUsingContext(
         'include Pod config in xcconfig files, if not present', () {
+      when(mockXcodeProjectInterpreter.canInterpretXcodeProjects).thenReturn(true);
       podfile..createSync()..writeAsStringSync('Existing Podfile');
       debugConfigFile..createSync(recursive: true)..writeAsStringSync('Existing debug config');
       releaseConfigFile..createSync(recursive: true)..writeAsStringSync('Existing release config');
