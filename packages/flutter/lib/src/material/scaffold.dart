@@ -101,9 +101,9 @@ class _ScaffoldGeometryNotifier extends ValueNotifier<ScaffoldGeometry> {
       final RenderObject renderObject = context.findRenderObject();
       if (renderObject == null || !renderObject.owner.debugDoingPaint)
         throw new FlutterError(
-            'Scaffold.geometryOf() must only be accessed during the paint phase.\n\n'
-                'The ScaffoldGeometry is only available during the paint phase, because\n'
-                'its value is computed during the animation and layout phases prior to painting.'
+            'Scaffold.geometryOf() must only be accessed during the paint phase.\n'
+            'The ScaffoldGeometry is only available during the paint phase, because\n'
+            'its value is computed during the animation and layout phases prior to painting.'
         );
       return true;
     }());
@@ -115,14 +115,13 @@ class _ScaffoldGeometryNotifier extends ValueNotifier<ScaffoldGeometry> {
     Rect floatingActionButtonArea,
     double floatingActionButtonScale,
   }) {
-
     final double newFloatingActionButtonScale = floatingActionButtonScale ??  super.value?.floatingActionButtonScale;
     Rect newFloatingActionButtonArea;
     if (newFloatingActionButtonScale != 0.0)
-      newFloatingActionButtonArea = floatingActionButtonArea ??  super.value?.floatingActionButtonArea;
+      newFloatingActionButtonArea = floatingActionButtonArea ?? super.value?.floatingActionButtonArea;
 
     value = new ScaffoldGeometry(
-      bottomNavigationBarTop: bottomNavigationBarTop ??  super.value?.bottomNavigationBarTop,
+      bottomNavigationBarTop: bottomNavigationBarTop ?? super.value?.bottomNavigationBarTop,
       floatingActionButtonArea: newFloatingActionButtonArea,
       floatingActionButtonScale: newFloatingActionButtonScale,
     );
