@@ -219,6 +219,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
     @required this.statusBarHeight,
     @required this.bottomViewInset,
+    @required this.textDirection,
     @required this.context,
     // for floating action button
     @required this.horizontalPadding, 
@@ -231,6 +232,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final double statusBarHeight;
   final double bottomViewInset;
   final double horizontalPadding;
+  final TextDirection textDirection;
   final BuildContext context;
 
   final FabPositioner previousFabPosition;
@@ -356,6 +358,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     return oldDelegate.statusBarHeight != statusBarHeight
         || oldDelegate.bottomViewInset != bottomViewInset
         || oldDelegate.horizontalPadding != horizontalPadding
+        || oldDelegate.textDirection != textDirection
         || oldDelegate.context != context
         || !(fabMoveAnimation.isCompleted || fabMoveAnimation.isDismissed)
         || oldDelegate.previousFabPosition != previousFabPosition
@@ -1331,6 +1334,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
                 statusBarHeight: mediaQuery.padding.top,
                 bottomViewInset: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
                 horizontalPadding: endPadding,
+                textDirection: textDirection,
                 context: context,
                 previousFabPosition: _previousFabPositioner,
                 currentFabPosition: _fabPositioner,
