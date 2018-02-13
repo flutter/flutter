@@ -103,7 +103,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('CheckBox tristate:true', (WidgetTester tester) async {
+  testWidgets('CheckBox tristate: true', (WidgetTester tester) async {
     bool checkBoxValue;
 
     await tester.pumpWidget(
@@ -133,5 +133,17 @@ void main() {
     await tester.tap(find.byType(Checkbox));
     await tester.pumpAndSettle();
     expect(checkBoxValue, true);
+
+    await tester.tap(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+    expect(checkBoxValue, null);
+
+    checkBoxValue = true;
+    await tester.pumpAndSettle();
+    expect(checkBoxValue, true);
+
+    checkBoxValue = null;
+    await tester.pumpAndSettle();
+    expect(checkBoxValue, null);
   });
 }

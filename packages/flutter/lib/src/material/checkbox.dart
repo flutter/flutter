@@ -79,8 +79,7 @@ class Checkbox extends StatefulWidget {
   ///
   /// When the checkbox is tapped, if [tristate] is false (the default) then
   /// the [onChanged] callback will be applied to `!value`. If [tristate] is
-  /// true this callback will be applied to false if the current [value]
-  /// is true, false otherwise.
+  /// true this callback cycle from false to true to null.
   ///
   /// The callback provided to [onChanged] should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
@@ -195,7 +194,7 @@ class _RenderCheckbox extends RenderToggleable {
     Color inactiveColor,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
-  }): _showDash = value == null,
+  }): _oldValue = value,
       super(
         value: value,
         tristate: tristate,
@@ -206,18 +205,54 @@ class _RenderCheckbox extends RenderToggleable {
         vsync: vsync,
       );
 
-  bool _showDash;
+  bool _oldValue;
 
   @override
   set value(bool newValue) {
-    final bool oldValue = value;
-    if (newValue == oldValue)
+    if (newValue == value)
       return;
-    _showDash = newValue == null || newValue == false && oldValue == null;
+    _oldValue = value;
     super.value = newValue;
   }
 
+  // The square outer bounds of the checkbox at t, with the specified origin.
+  // At t == 0.0, the outer rect's size is _kEdgeSize (Checkbox.width)
+  // At t == 0.5, .. is _kEdgeSize - _kStrokeWidth
+  // At t == 1.0, .. is _kEdgeSize
+  RRect _outerRectAt(Offset origin, double t) {
+    final double inset = 1.0 - (t - 0.5).abs() * 2.0;
+    final double size = _kEdgeSize - inset * _kStrokeWidth;
+    final Rect rect = new Rect.fromLTWH(origin.dx + inset, origin.dy + inset, size, size);
+    return new RRect.fromRectAndRadius(rect, _kEdgeRadius);
+  }
+
+  // The checkbox's border color if value == false, or its fill color when
+  // value == true or null.
+  Color _colorAt(double t) {
+    // As t goes from 0.0 to 0.25, animate from the inactiveColor to activeColor.
+    return onChanged == null
+      ? inactiveColor
+      : (t >= 0.25 ? activeColor : Color.lerp(inactiveColor, activeColor, t * 4.0));
+  }
+
+  // White stroke used to paint the check and dash.
+  void _initStrokePaint(Paint paint) {
+    paint
+      ..color = const Color(0xFFFFFFFF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _kStrokeWidth;
+  }
+
+  void _drawBorder(Canvas canvas, RRect outer, double t, Paint paint) {
+    assert(t >= 0.0 && t <= 0.5);
+    final double size = outer.width;
+    // As t goes from 0.0 to 1.0, gradually fill the outer RRect.
+    final RRect inner = outer.deflate(math.min(size / 2.0, _kStrokeWidth + size * t));
+    canvas.drawDRRect(outer, inner, paint);
+  }
+
   void _drawCheck(Canvas canvas, Offset origin, double t, Paint paint) {
+    assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the two checkmark strokes from the
     // mid point outwards.
     final Path path = new Path();
@@ -233,6 +268,7 @@ class _RenderCheckbox extends RenderToggleable {
   }
 
   void _drawDash(Canvas canvas, Offset origin, double t, Paint paint) {
+    assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the horizontal line from the
     // mid point outwards.
     const Offset start = const Offset(_kEdgeSize * 0.2, _kEdgeSize * 0.5);
@@ -249,33 +285,52 @@ class _RenderCheckbox extends RenderToggleable {
     paintRadialReaction(canvas, offset, size.center(Offset.zero));
 
     final Offset origin = offset + (size / 2.0 - const Size.square(_kEdgeSize) / 2.0);
-    final double t = position.value;
-    final Color borderColor = (onChanged == null)
-      ? inactiveColor
-      : (t >= 0.25 ? activeColor : Color.lerp(inactiveColor, activeColor, t * 4.0));
+    final AnimationStatus status = position.status;
+    final double tNormalized = status == AnimationStatus.forward || status == AnimationStatus.completed
+      ? position.value
+      : 1.0 - position.value;
 
-    final double inset = 1.0 - (t - 0.5).abs() * 2.0;
-    final double rectSize = _kEdgeSize - inset * _kStrokeWidth;
-    final Rect rect = new Rect.fromLTWH(origin.dx + inset, origin.dy + inset, rectSize, rectSize);
-    final RRect outer = new RRect.fromRectAndRadius(rect, _kEdgeRadius);
+    // Four cases: false to null, false to true, null to false, true to false
+    if (_oldValue == false || value == false) {
+      final double t = value == false ? 1.0 - tNormalized : tNormalized;
+      final RRect outer = _outerRectAt(origin, t);
+      final Paint paint = new Paint()..color = _colorAt(t);
 
-    final Paint paint = new Paint()
-      ..color = borderColor;
+      if (t <= 0.5) {
+        _drawBorder(canvas, outer, t, paint);
+      } else {
+        canvas.drawRRect(outer, paint);
 
-    if (t <= 0.5) {
-      final RRect inner = outer.deflate(math.min(rectSize / 2.0, _kStrokeWidth + rectSize * t));
-      canvas.drawDRRect(outer, inner, paint);
-    } else {
+        _initStrokePaint(paint);
+        final double tShrink = (t - 0.5) * 2.0;
+        if (_oldValue == null)
+          _drawDash(canvas, origin, tShrink, paint);
+        else
+          _drawCheck(canvas, origin, tShrink, paint);
+      }
+    } else { // Two cases: null to true, true to null
+      final RRect outer = _outerRectAt(origin, 1.0);
+      final Paint paint = new Paint() ..color = _colorAt(1.0);
       canvas.drawRRect(outer, paint);
-      final double t = (position.value - 0.5) * 2.0;
-      paint
-        ..color = const Color(0xFFFFFFFF)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = _kStrokeWidth;
-      if (_showDash)
-        _drawDash(canvas, origin, t, paint);
-      else
-        _drawCheck(canvas, origin, t, paint);
+
+      _initStrokePaint(paint);
+      if (tNormalized <= 0.5) {
+        final double tShrink = 1.0 - tNormalized * 2.0;
+        if (_oldValue == true)
+          _drawCheck(canvas, origin, tShrink, paint);
+        else
+          _drawDash(canvas, origin, tShrink, paint);
+      } else {
+        final double tExpand = (tNormalized - 0.5) * 2.0;
+        if (value == true)
+          _drawCheck(canvas, origin, tExpand, paint);
+        else
+          _drawDash(canvas, origin, tExpand, paint);
+      }
     }
   }
+
+  // TODO(hmuller): smooth segues for cases where the value changes
+  // in the middle of position's animation cycle.
+  // https://github.com/flutter/flutter/issues/14674
 }

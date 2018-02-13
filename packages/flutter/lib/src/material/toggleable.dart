@@ -134,10 +134,14 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     _position
       ..curve = Curves.easeIn
       ..reverseCurve = Curves.easeOut;
-    if (value == false)
-      _positionController.reverse();
-    else
-      _positionController.forward();
+    switch (_positionController.status) {
+      case AnimationStatus.forward:
+      case AnimationStatus.completed:
+        _positionController.reverse();
+        break;
+      default:
+        _positionController.forward();
+    }
   }
 
   /// If true, [value] can be true, false, or null, otherwise [value] must
@@ -250,7 +254,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   // the user dragged the toggleable: we may reach 0.0 or 1.0 without
   // seeing a tap. The Switch does this.
   void _handlePositionStateChanged(AnimationStatus status) {
-    if (isInteractive) {
+    if (isInteractive && !tristate) {
       if (status == AnimationStatus.completed && _value == false) {
         onChanged(true);
       }
@@ -268,8 +272,19 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   }
 
   void _handleTap() {
-    if (isInteractive)
-      onChanged(value == false);
+    if (!isInteractive)
+      return;
+    switch (value) {
+      case false:
+        onChanged(true);
+        break;
+      case true:
+        onChanged(tristate ? null : false);
+        break;
+      default: // case null:
+        onChanged(false);
+        break;
+    }
   }
 
   void _handleTapUp(TapUpDetails details) {
