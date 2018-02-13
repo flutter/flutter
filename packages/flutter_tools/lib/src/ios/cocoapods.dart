@@ -97,27 +97,26 @@ class CocoaPods {
     return true;
   }
 
-  /// Creates a default `Podfile` in the Flutter project at [directory],
-  /// unless one already exists at `ios/Podfile`.
-  void createPodfileIfMissing(String directory) {
-    final String iosPath = fs.path.join(directory, 'ios');
-    final String podfilePath = fs.path.join(iosPath, 'Podfile');
-    if (fs.file(podfilePath).existsSync()) {
-      return;
+  /// Ensures the `ios` sub-project of the Flutter project at [directory]
+  /// contains a suitable `Podfile` and that its `Flutter/Xxx.xcconfig` files
+  /// include pods configuration.
+  void setupPodfile(String directory) {
+    final String podfilePath = fs.path.join(directory, 'ios', 'Podfile');
+    if (!fs.file(podfilePath).existsSync()) {
+      final bool isSwift = getXcodeBuildSettings(
+        fs.path.join(directory, 'ios', 'Runner.xcodeproj'),
+        'Runner',
+      ).containsKey('SWIFT_VERSION');
+      final File podfileTemplate = fs.file(fs.path.join(
+        Cache.flutterRoot,
+        'packages',
+        'flutter_tools',
+        'templates',
+        'cocoapods',
+        isSwift ? 'Podfile-swift' : 'Podfile-objc',
+      ));
+      podfileTemplate.copySync(podfilePath);
     }
-    final bool isSwift = getXcodeBuildSettings(
-      fs.path.join(iosPath, 'Runner.xcodeproj'),
-      'Runner',
-    ).containsKey('SWIFT_VERSION');
-    final File podfileTemplate = fs.file(fs.path.join(
-      Cache.flutterRoot,
-      'packages',
-      'flutter_tools',
-      'templates',
-      'cocoapods',
-      isSwift ? 'Podfile-swift' : 'Podfile-objc',
-    ));
-    podfileTemplate.copySync(podfilePath);
     _addPodsDependencyToFlutterXcconfig(directory, 'Debug');
     _addPodsDependencyToFlutterXcconfig(directory, 'Release');
   }

@@ -26,6 +26,7 @@ void main() {
     fs = new MemoryFileSystem();
     mockProcessManager = new MockProcessManager();
     projectUnderTest = fs.directory(fs.path.join('project', 'ios'))..createSync(recursive: true);
+
     fs.file(fs.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-objc'
     ))
@@ -45,69 +46,77 @@ void main() {
     )).thenReturn(exitsHappy);
   });
 
-  testUsingContext(
-    'create objective-c Podfile when not present',
-    () async {
-      await cocoaPodsUnderTest.processPods(
-        appIosDir: projectUnderTest,
-        iosEngineDir: 'engine/path',
-      );
-      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Objective-C podfile template');
-      verify(mockProcessManager.run(
-        <String>['pod', 'install', '--verbose'],
-        workingDirectory: 'project/ios',
-        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
-      ));
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
-    },
-  );
+  group('setup Podfile', () {
+    File podfile;
+    File debugConfigFile;
+    File releaseConfigFile;
 
-  testUsingContext(
-    'create swift Podfile if swift',
-    () async {
-      await cocoaPodsUnderTest.processPods(
-        appIosDir: projectUnderTest,
-        iosEngineDir: 'engine/path',
-        isSwift: true,
-      );
-      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Swift podfile template');
-      verify(mockProcessManager.run(
-        <String>['pod', 'install', '--verbose'],
-        workingDirectory: 'project/ios',
-        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
-      ));
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
-    },
-  );
+    setUp(() {
+      debugConfigFile = fs.file(fs.path.join('project', 'ios', 'Flutter', 'Debug.xcconfig'));
+      releaseConfigFile = fs.file(fs.path.join('project', 'ios', 'Flutter', 'Release.xcconfig'));
+      podfile = fs.file(fs.path.join('project', 'ios', 'Podfile'));
+    });
 
-  testUsingContext(
-    'do not recreate Podfile when present',
-    () async {
-      fs.file(fs.path.join('project', 'ios', 'Podfile'))
-        ..createSync()
-        ..writeAsString('Existing Podfile');
-      await cocoaPodsUnderTest.processPods(
-        appIosDir: projectUnderTest,
-        iosEngineDir: 'engine/path',
-      );
-      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Existing Podfile');
-      verify(mockProcessManager.run(
-        <String>['pod', 'install', '--verbose'],
-        workingDirectory: 'project/ios',
-        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
-      ));
-    },
-    overrides: <Type, Generator>{
+    testUsingContext('create objective-c Podfile when not present', () {
+      when(mockProcessManager.runSync(
+        any,
+        workingDirectory: any,
+        environment: any,
+      )).thenReturn(exitsHappyWith(''));
+
+      cocoaPodsUnderTest.setupPodfile('project');
+
+      expect(podfile.readAsStringSync(), 'Objective-C podfile template');
+    }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => mockProcessManager,
-    },
-  );
+    });
+
+    testUsingContext('create swift Podfile if swift', () {
+      when(mockProcessManager.runSync(
+        any,
+        workingDirectory: any,
+        environment: any,
+      )).thenReturn(exitsHappyWith('SWIFT_VERSION = 4.0'));
+
+      cocoaPodsUnderTest.setupPodfile('project');
+
+      expect(podfile.readAsStringSync(), 'Swift podfile template');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('do not recreate Podfile when already present', () {
+      podfile..createSync()..writeAsStringSync('Existing Podfile');
+
+      cocoaPodsUnderTest.setupPodfile('project');
+
+      expect(podfile.readAsStringSync(), 'Existing Podfile');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
+
+    testUsingContext(
+        'include Pod config in xcconfig files, if not present', () {
+      podfile..createSync()..writeAsStringSync('Existing Podfile');
+      debugConfigFile..createSync(recursive: true)..writeAsStringSync('Existing debug config');
+      releaseConfigFile..createSync(recursive: true)..writeAsStringSync('Existing release config');
+
+      cocoaPodsUnderTest.setupPodfile('project');
+
+      final String debugContents = debugConfigFile.readAsStringSync();
+      expect(debugContents, contains(
+          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"\n'));
+      expect(debugContents, contains('Existing debug config'));
+      final String releaseContents = releaseConfigFile.readAsStringSync();
+      expect(releaseContents, contains(
+          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"\n'));
+      expect(releaseContents, contains('Existing release config'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
+  });
 
   testUsingContext(
     'missing CocoaPods throws',
@@ -209,7 +218,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
   );
 
   testUsingContext(
-    'Skip pod install if plugins and flutter framework remain unchanged.',
+    'Skip pod install if flutter framework remain unchanged.',
         () async {
       fs.file(fs.path.join('project', 'ios', 'Podfile'))
         ..createSync()
@@ -255,9 +264,11 @@ class TestCocoaPods extends CocoaPods {
   Future<bool> get isCocoaPodsInitialized => new Future<bool>.value(true);
 }
 
-final ProcessResult exitsHappy = new ProcessResult(
+final ProcessResult exitsHappy = exitsHappyWith('');
+
+ProcessResult exitsHappyWith(String stdout) => new ProcessResult(
   1, // pid
   0, // exitCode
-  '', // stdout
+  stdout,
   '', // stderr
 );
