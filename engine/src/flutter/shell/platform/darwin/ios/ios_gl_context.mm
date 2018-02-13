@@ -106,9 +106,8 @@ IOSGLContext::IOSGLContext(PlatformView::SurfaceConfig config, CAEAGLLayer* laye
   // should use iOS APIs to perform the final correction step based on the
   // device properties.  Ex: We can indicate that we have rendered in P3, and
   // the framework will do the final adjustment for us.
-  NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
   color_space_ = SkColorSpace::MakeSRGB();
-  if (version.majorVersion >= 10) {
+  if (@available(iOS 10, *)) {
     UIDisplayGamut displayGamut = [UIScreen mainScreen].traitCollection.displayGamut;
     switch (displayGamut) {
       case UIDisplayGamutP3:
