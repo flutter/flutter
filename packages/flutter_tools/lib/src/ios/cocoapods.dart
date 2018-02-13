@@ -102,8 +102,12 @@ class CocoaPods {
   /// include pods configuration.
   void setupPodfile(String directory, {XcodeProjectInterpreter interpreter}) {
     interpreter ??= const XcodeProjectInterpreter();
+    if (!interpreter.canInterpretXcodeProjects) {
+      // Don't do anything for iOS when host platform doesn't support it anyway.
+      return;
+    }
     final String podfilePath = fs.path.join(directory, 'ios', 'Podfile');
-    if (!fs.file(podfilePath).existsSync() && interpreter.canInterpretXcodeProjects) {
+    if (!fs.file(podfilePath).existsSync()) {
       final bool isSwift = interpreter.getBuildSettings(
         fs.path.join(directory, 'ios', 'Runner.xcodeproj'),
         'Runner',

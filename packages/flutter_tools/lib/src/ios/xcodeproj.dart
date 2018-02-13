@@ -62,9 +62,7 @@ void updateXcodeGeneratedProperties({
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
 
-/// Interpreter of Xcode projects.
-///
-/// Encapsulates the system tool needed to facilitate unit testing of clients.
+/// Interpreter of Xcode projects settings.
 class XcodeProjectInterpreter {
   static const String _executable = '/usr/bin/xcodebuild';
 
