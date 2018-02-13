@@ -15,11 +15,11 @@ dependencies:
   platform: 2.1.1
   process: 2.0.7
   stack_trace: 1.9.1
-  vm_service_client: 0.2.4
+  vm_service_client: 0.2.4+1
 
 dev_dependencies:
   # See packages/flutter_test/pubspec.yaml for why we're pinning this version.
-  test: 0.12.30+1
+  test: 0.12.30+2
 
   archive: 1.0.33 # TRANSITIVE DEPENDENCY
   async: 2.0.3 # TRANSITIVE DEPENDENCY
@@ -44,7 +44,7 @@ dev_dependencies:
   json_rpc_2: 2.0.7 # TRANSITIVE DEPENDENCY
   logging: 0.11.3+1 # TRANSITIVE DEPENDENCY
   matcher: 0.12.1+4 # TRANSITIVE DEPENDENCY
-  mime: 0.9.5 # TRANSITIVE DEPENDENCY
+  mime: 0.9.6 # TRANSITIVE DEPENDENCY
   multi_server_socket: 1.0.1 # TRANSITIVE DEPENDENCY
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
@@ -64,8 +64,8 @@ dev_dependencies:
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
-  utf: 0.9.0+3 # TRANSITIVE DEPENDENCY
-  watcher: 0.9.7+6 # TRANSITIVE DEPENDENCY
+  utf: 0.9.0+4 # TRANSITIVE DEPENDENCY
+  watcher: 0.9.7+7 # TRANSITIVE DEPENDENCY
   web_socket_channel: 1.0.6 # TRANSITIVE DEPENDENCY
   xml: 2.6.0 # TRANSITIVE DEPENDENCY
   yaml: 2.1.13 # TRANSITIVE DEPENDENCY

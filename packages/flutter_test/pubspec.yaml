@@ -5,7 +5,7 @@ dependencies:
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
-  test: 0.12.30+1
+  test: 0.12.30+2
 
   # We use FakeAsync and other testing utilities.
   quiver: 0.28.0
@@ -44,8 +44,8 @@ dependencies:
   logging: 0.11.3+1 # TRANSITIVE DEPENDENCY
   matcher: 0.12.1+4 # TRANSITIVE DEPENDENCY
   meta: 1.1.1 # TRANSITIVE DEPENDENCY
-  mime: 0.9.5 # TRANSITIVE DEPENDENCY
-  mockito: 2.2.1 # TRANSITIVE DEPENDENCY
+  mime: 0.9.6 # TRANSITIVE DEPENDENCY
+  mockito: 2.2.2 # TRANSITIVE DEPENDENCY
   multi_server_socket: 1.0.1 # TRANSITIVE DEPENDENCY
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
@@ -65,7 +65,7 @@ dependencies:
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
-  utf: 0.9.0+3 # TRANSITIVE DEPENDENCY
-  watcher: 0.9.7+6 # TRANSITIVE DEPENDENCY
+  utf: 0.9.0+4 # TRANSITIVE DEPENDENCY
+  watcher: 0.9.7+7 # TRANSITIVE DEPENDENCY
   web_socket_channel: 1.0.6 # TRANSITIVE DEPENDENCY
   yaml: 2.1.13 # TRANSITIVE DEPENDENCY

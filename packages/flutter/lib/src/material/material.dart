@@ -130,6 +130,10 @@ abstract class MaterialInkController {
 ///      rounded edges. The edge radii is specified by [kMaterialEdges].
 ///    - [MaterialType.transparency]: the default material shape is a rectangle.
 ///
+/// ## Border
+///
+/// If [shape] is not null, then its border will also be painted (if any).
+///
 /// ## Layout change notifications
 ///
 /// If the layout changes (e.g. because there's a list on the material, and it's
@@ -327,7 +331,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     final ShapeBorder shape = _getShape();
 
     if (widget.type == MaterialType.transparency)
-      return _clipToShape(shape: shape, contents: contents);
+      return _transparentInterior(shape: shape, contents: contents);
     
     return new _MaterialInterior(
       curve: Curves.fastOutSlowIn,
@@ -338,12 +342,14 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       shadowColor: widget.shadowColor,
       child: contents,
     );
-
   }
 
-  static Widget _clipToShape({ShapeBorder shape, Widget contents}) {
+  static Widget _transparentInterior({ShapeBorder shape, Widget contents}) {
     return new ClipPath(
-      child: contents,
+      child: new _ShapeBorderPaint(
+        child: contents,
+        shape: shape,
+      ),
       clipper: new ShapeBorderClipper(
         shape: shape,
       ),
@@ -625,15 +631,53 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
 
   @override
   Widget build(BuildContext context) {
+    final ShapeBorder shape = _border.evaluate(animation);
     return new PhysicalShape(
-      child: widget.child,
+      child: new _ShapeBorderPaint(
+        child: widget.child,
+        shape: shape,
+      ),
       clipper: new ShapeBorderClipper(
-        shape: _border.evaluate(animation),
+        shape: shape,
         textDirection: Directionality.of(context)
       ),
       elevation: _elevation.evaluate(animation),
       color: widget.color,
       shadowColor: _shadowColor.evaluate(animation),
     );
+  }
+}
+
+class _ShapeBorderPaint extends StatelessWidget {
+  const _ShapeBorderPaint({
+    @required this.child,
+    @required this.shape,
+  });
+
+  final Widget child;
+  final ShapeBorder shape;
+
+  @override
+  Widget build(BuildContext context) {
+    return new CustomPaint(
+      child: child,
+      foregroundPainter: new _ShapeBorderPainter(shape, Directionality.of(context)),
+    );
+  }
+}
+
+class _ShapeBorderPainter extends CustomPainter {
+  _ShapeBorderPainter(this.border, this.textDirection);
+  final ShapeBorder border;
+  final TextDirection textDirection;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    border.paint(canvas, Offset.zero & size, textDirection: textDirection);
+  }
+
+  @override
+  bool shouldRepaint(_ShapeBorderPainter oldDelegate) {
+    return oldDelegate.border != border;
   }
 }

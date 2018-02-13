@@ -9,7 +9,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter_test/flutter_test.dart';
 
-class FakeFrameInfo extends FrameInfo {
+class FakeFrameInfo implements FrameInfo {
   final Duration _duration;
   final Image _image;
 
@@ -23,7 +23,7 @@ class FakeFrameInfo extends FrameInfo {
   Image get image => _image;
 }
 
-class FakeImage extends Image {
+class FakeImage implements Image {
   final int _width;
   final int _height;
 

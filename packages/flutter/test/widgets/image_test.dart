@@ -473,7 +473,7 @@ class TestImageStreamCompleter extends ImageStreamCompleter {
   }
 }
 
-class TestImage extends ui.Image {
+class TestImage implements ui.Image {
   @override
   int get width => 100;
 
@@ -482,4 +482,7 @@ class TestImage extends ui.Image {
 
   @override
   void dispose() { }
+
+  @override
+  String toString() => '[$width\u00D7$height]';
 }

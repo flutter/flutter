@@ -5,6 +5,7 @@
 import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
@@ -42,7 +43,7 @@ class TestSemantics {
     this.decreasedValue: '',
     this.hint: '',
     this.textDirection,
-    this.nextNodeId,
+    this.previousNodeId,
     this.rect,
     this.transform,
     this.textSelection,
@@ -69,7 +70,7 @@ class TestSemantics {
     this.decreasedValue: '',
     this.hint: '',
     this.textDirection,
-    this.nextNodeId,
+    this.previousNodeId,
     this.transform,
     this.textSelection,
     this.children: const <TestSemantics>[],
@@ -105,7 +106,7 @@ class TestSemantics {
     this.increasedValue: '',
     this.decreasedValue: '',
     this.textDirection,
-    this.nextNodeId,
+    this.previousNodeId,
     this.rect,
     Matrix4 transform,
     this.textSelection,
@@ -172,9 +173,9 @@ class TestSemantics {
   /// is also set.
   final TextDirection textDirection;
 
-  /// The ID of the node that is next in the semantics traversal order after
+  /// The ID of the node that is previous in the semantics traversal order before
   /// this node.
-  final int nextNodeId;
+  final int previousNodeId;
 
   /// The bounding box for this node in its coordinate system.
   ///
@@ -257,8 +258,8 @@ class TestSemantics {
       return fail('expected node id $id to have hint "$hint" but found hint "${nodeData.hint}".');
     if (textDirection != null && textDirection != nodeData.textDirection)
       return fail('expected node id $id to have textDirection "$textDirection" but found "${nodeData.textDirection}".');
-    if (nextNodeId != null && nextNodeId != nodeData.nextNodeId)
-      return fail('expected node id $id to have nextNodeId "$nextNodeId" but found "${nodeData.nextNodeId}".');
+    if (previousNodeId != null && previousNodeId != nodeData.previousNodeId)
+      return fail('expected node id $id to have previousNodeId "$previousNodeId" but found "${nodeData.previousNodeId}".');
     if ((nodeData.label != '' || nodeData.value != '' || nodeData.hint != '' || node.increasedValue != '' || node.decreasedValue != '') && nodeData.textDirection == null)
       return fail('expected node id $id, which has a label, value, or hint, to have a textDirection, but it did not.');
     if (!ignoreRect && rect != nodeData.rect)
@@ -310,8 +311,8 @@ class TestSemantics {
       buf.writeln('$indent  hint: \'$hint\',');
     if (textDirection != null)
       buf.writeln('$indent  textDirection: $textDirection,');
-    if (nextNodeId != null)
-      buf.writeln('$indent  nextNodeId: $nextNodeId,');
+    if (previousNodeId != null)
+      buf.writeln('$indent  previousNodeId: $previousNodeId,');
     if (textSelection?.isValid == true)
       buf.writeln('$indent  textSelection:\n[${textSelection.start}, ${textSelection.end}],');
     if (rect != null)
@@ -369,6 +370,9 @@ class SemanticsTester {
     TextDirection textDirection,
     List<SemanticsAction> actions,
     List<SemanticsFlag> flags,
+    double scrollPosition,
+    double scrollExtentMax,
+    double scrollExtentMin,
     SemanticsNode ancestor,
   }) {
     bool checkNode(SemanticsNode node) {
@@ -390,6 +394,12 @@ class SemanticsTester {
         if (expectedFlags != actualFlags)
           return false;
       }
+      if (scrollPosition != null && !nearEqual(node.scrollPosition, scrollPosition, 0.1))
+        return false;
+      if (scrollExtentMax != null && !nearEqual(node.scrollExtentMax, scrollExtentMax, 0.1))
+        return false;
+      if (scrollExtentMin != null && !nearEqual(node.scrollExtentMin, scrollExtentMin, 0.1))
+        return false;
       return true;
     }
 
@@ -512,8 +522,8 @@ class SemanticsTester {
       buf.writeln('  hint: r\'${node.hint}\',');
     if (node.textDirection != null)
       buf.writeln('  textDirection: ${node.textDirection},');
-    if (node.nextNodeId != null)
-      buf.writeln('  nextNodeId: ${node.nextNodeId},');
+    if (node.previousNodeId != null)
+      buf.writeln('  previousNodeId: ${node.previousNodeId},');
 
     if (node.hasChildren) {
       buf.writeln('  children: <TestSemantics>[');
@@ -578,13 +588,19 @@ class _IncludesNodeWith extends Matcher {
     this.textDirection,
     this.actions,
     this.flags,
-}) : assert(label != null || value != null || actions != null || flags != null);
+    this.scrollPosition,
+    this.scrollExtentMax,
+    this.scrollExtentMin,
+}) : assert(label != null || value != null || actions != null || flags != null || scrollPosition != null || scrollExtentMax != null || scrollExtentMin != null);
 
   final String label;
   final String value;
   final TextDirection textDirection;
   final List<SemanticsAction> actions;
   final List<SemanticsFlag> flags;
+  final double scrollPosition;
+  final double scrollExtentMax;
+  final double scrollExtentMin;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -594,6 +610,9 @@ class _IncludesNodeWith extends Matcher {
       textDirection: textDirection,
       actions: actions,
       flags: flags,
+      scrollPosition: scrollPosition,
+      scrollExtentMax: scrollExtentMax,
+      scrollExtentMin: scrollExtentMin,
     ).isNotEmpty;
   }
 
@@ -619,6 +638,12 @@ class _IncludesNodeWith extends Matcher {
       strings.add('actions "${actions.join(', ')}"');
     if (flags != null)
       strings.add('flags "${flags.join(', ')}"');
+    if (scrollPosition != null)
+      strings.add('scrollPosition "$scrollPosition"');
+    if (scrollExtentMax != null)
+      strings.add('scrollExtentMax "$scrollExtentMax"');
+    if (scrollExtentMin != null)
+      strings.add('scrollExtentMin "$scrollExtentMin"');
     return strings.join(', ');
   }
 }
@@ -633,6 +658,9 @@ Matcher includesNodeWith({
   TextDirection textDirection,
   List<SemanticsAction> actions,
   List<SemanticsFlag> flags,
+  double scrollPosition,
+  double scrollExtentMax,
+  double scrollExtentMin,
 }) {
   return new _IncludesNodeWith(
     label: label,
@@ -640,5 +668,8 @@ Matcher includesNodeWith({
     textDirection: textDirection,
     actions: actions,
     flags: flags,
+    scrollPosition: scrollPosition,
+    scrollExtentMax: scrollExtentMax,
+    scrollExtentMin: scrollExtentMin,
   );
 }

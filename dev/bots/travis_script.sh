@@ -11,7 +11,7 @@ if [ "$SHARD" = "build_and_deploy_gallery" ]; then
     export ANDROID_HOME=`pwd`/android-sdk
     (cd examples/flutter_gallery; flutter build apk --release)
     echo "Android Flutter Gallery built"
-    if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then # TODO(xster): add back && [ "$TRAVIS_BRANCH" = "dev" ] after testing
+    if [[ "$TRAVIS_PULL_REQUEST" == "false" && ("$TRAVIS_BRANCH" == "dev" || "$TRAVIS_BRANCH" == "beta") ]]; then
       echo "Deploying to Play Store..."
       (cd examples/flutter_gallery/android; bundle install && bundle exec fastlane deploy_play_store)
     else
@@ -21,7 +21,7 @@ if [ "$SHARD" = "build_and_deploy_gallery" ]; then
     echo "Building Flutter Gallery for iOS..."
     (cd examples/flutter_gallery; flutter build ios --release --no-codesign)
     echo "iOS Flutter Gallery built"
-    if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then # TODO(xster): add back && [ "$TRAVIS_BRANCH" = "dev" ] after testing
+    if [[ "$TRAVIS_PULL_REQUEST" == "false" && ("$TRAVIS_BRANCH" == "dev" || "$TRAVIS_BRANCH" == "beta") ]]; then
       echo "Re-building with distribution profile and deploying to TestFlight..."
       (cd examples/flutter_gallery/ios; bundle install && bundle exec fastlane build_and_deploy_testflight)
     else

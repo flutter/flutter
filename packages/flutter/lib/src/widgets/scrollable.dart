@@ -275,7 +275,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     final ScrollPosition oldPosition = position;
     if (oldPosition != null) {
       controller?.detach(oldPosition);
-      oldPosition.removeListener(_sendSemanticsScrollEvent);
       // It's important that we not dispose the old position until after the
       // viewport has had a chance to unregister its listeners from the old
       // position. So, schedule a microtask to do it.
@@ -284,28 +283,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
     _position = controller?.createScrollPosition(_physics, this, oldPosition)
       ?? new ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: oldPosition);
-    _position.addListener(_sendSemanticsScrollEvent);
-
     assert(position != null);
     controller?.attach(position);
-  }
-
-  bool _semanticsScrollEventScheduled = false;
-
-  void _sendSemanticsScrollEvent() {
-    if (_semanticsScrollEventScheduled)
-      return;
-    SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-      final _RenderExcludableScrollSemantics render = _excludableScrollSemanticsKey.currentContext?.findRenderObject();
-      render?.sendSemanticsEvent(new ScrollCompletedSemanticsEvent(
-        axis: position.axis,
-        pixels: position.pixels,
-        minScrollExtent: position.minScrollExtent,
-        maxScrollExtent: position.maxScrollExtent,
-      ));
-      _semanticsScrollEventScheduled = false;
-    });
-    _semanticsScrollEventScheduled = true;
   }
 
   @override
@@ -529,6 +508,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       result = new _ExcludableScrollSemantics(
         key: _excludableScrollSemanticsKey,
         child: result,
+        position: position,
       );
     }
 
@@ -557,28 +537,61 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 /// node, which is annotated with the scrolling actions, will house the
 /// scrollable children.
 class _ExcludableScrollSemantics extends SingleChildRenderObjectWidget {
-  const _ExcludableScrollSemantics({ Key key, Widget child }) : super(key: key, child: child);
+  const _ExcludableScrollSemantics({
+    Key key,
+    @required this.position,
+    Widget child
+  }) : assert(position != null), super(key: key, child: child);
+
+  final ScrollPosition position;
 
   @override
-  _RenderExcludableScrollSemantics createRenderObject(BuildContext context) => new _RenderExcludableScrollSemantics();
+  _RenderExcludableScrollSemantics createRenderObject(BuildContext context) => new _RenderExcludableScrollSemantics(position: position);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderExcludableScrollSemantics renderObject) {
+    renderObject.position = position;
+  }
 }
 
 class _RenderExcludableScrollSemantics extends RenderProxyBox {
-  _RenderExcludableScrollSemantics({ RenderBox child }) : super(child);
+  _RenderExcludableScrollSemantics({
+    @required ScrollPosition position,
+    RenderBox child,
+  }) : _position = position, assert(position != null), super(child) {
+    position.addListener(markNeedsSemanticsUpdate);
+  }
+
+  /// Whether this render object is excluded from the semantic tree.
+  ScrollPosition get position => _position;
+  ScrollPosition _position;
+  set position(ScrollPosition value) {
+    assert(value != null);
+    if (value == _position)
+      return;
+    _position.removeListener(markNeedsSemanticsUpdate);
+    _position = value;
+    _position.addListener(markNeedsSemanticsUpdate);
+    markNeedsSemanticsUpdate();
+  }
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
+    if (position.haveDimensions) {
+      config
+          ..scrollPosition = _position.pixels
+          ..scrollExtentMax = _position.maxScrollExtent
+          ..scrollExtentMin = _position.minScrollExtent;
+    }
   }
 
   SemanticsNode _innerNode;
-  SemanticsNode _annotatedNode;
 
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
     if (children.isEmpty || !children.first.isTagged(RenderViewport.useTwoPaneSemantics)) {
-      _annotatedNode = node;
       super.assembleSemanticsNode(node, config, children);
       return;
     }
@@ -587,7 +600,6 @@ class _RenderExcludableScrollSemantics extends RenderProxyBox {
     _innerNode
       ..isMergedIntoParent = node.isPartOfNodeMerging
       ..rect = Offset.zero & node.rect.size;
-    _annotatedNode = _innerNode;
 
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
     final List<SemanticsNode> included = <SemanticsNode>[];
@@ -606,12 +618,5 @@ class _RenderExcludableScrollSemantics extends RenderProxyBox {
   void clearSemantics() {
     super.clearSemantics();
     _innerNode = null;
-    _annotatedNode = null;
-  }
-
-  /// Sends a [SemanticsEvent] in the context of the [SemanticsNode] that is
-  /// annotated with this object's semantics information.
-  void sendSemanticsEvent(SemanticsEvent event) {
-    _annotatedNode?.sendEvent(event);
   }
 }

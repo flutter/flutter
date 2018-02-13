@@ -260,12 +260,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('preview-dart-2')) {
             previewDart2Value = project.property('preview-dart-2')
         }
-
-        Boolean strongModeValue = false
-        if (project.hasProperty('strong')) {
-            strongModeValue = project.property('strong')
+        Boolean trackWidgetCreationValue = false
+        if (project.hasProperty('track-widget-creation')) {
+            trackWidgetCreationValue = project.property('track-widget-creation')
         }
-
         String extraFrontEndOptionsValue = null
         if (project.hasProperty('extra-front-end-options')) {
             extraFrontEndOptionsValue = project.property('extra-front-end-options')
@@ -304,7 +302,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
                 previewDart2 previewDart2Value
-                strongMode strongModeValue
+                trackWidgetCreation trackWidgetCreationValue
                 preferSharedLibrary preferSharedLibraryValue
                 targetPlatform targetPlatformValue
                 sourceDir project.file(project.flutter.source)
@@ -320,7 +318,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
                 previewDart2 previewDart2Value
-                strongMode strongModeValue
+                trackWidgetCreation trackWidgetCreationValue
                 preferSharedLibrary preferSharedLibraryValue
                 targetPlatform targetPlatformValue
                 sourceDir project.file(project.flutter.source)
@@ -357,7 +355,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     Boolean previewDart2
     @Optional @Input
-    Boolean strongMode
+    Boolean trackWidgetCreation
     @Optional @Input
     Boolean preferSharedLibrary
     @Optional @Input
@@ -401,8 +399,8 @@ abstract class BaseFlutterTask extends DefaultTask {
                 if (previewDart2) {
                     args "--preview-dart-2"
                 }
-		if (strongMode) {
-                    args "--strong"
+                if (trackWidgetCreation) {
+                    args "--track-widget-creation"
                 }
                 if (extraFrontEndOptions != null) {
                     args "--extra-front-end-options", "${extraFrontEndOptions}"
@@ -433,10 +431,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (previewDart2) {
                 args "--preview-dart-2"
             }
-            if (strongMode) {
-                args "--strong"
+            if (trackWidgetCreation) {
+                args "--track-widget-creation"
             }
-
             args "--output-file", "${intermediateDir}/app.flx"
             if (buildMode != "debug") {
                 args "--precompiled"
