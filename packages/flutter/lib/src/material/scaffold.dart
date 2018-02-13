@@ -391,33 +391,33 @@ class _FloatingActionButtonTransition extends StatefulWidget {
 }
 
 class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> with TickerProviderStateMixin {
-   AnimationController _previousController;
-   AnimationController _currentController;
-   CurvedAnimation _previousAnimation;
-   CurvedAnimation _currentAnimation;
-   Widget _previousChild;
- 	 
-   @override
-   void initState() {
-     super.initState();
+  AnimationController _previousController;
+  AnimationController _currentController;
+  CurvedAnimation _previousAnimation;
+  CurvedAnimation _currentAnimation;
+  Widget _previousChild;
+  
+  @override
+  void initState() {
+    super.initState();
 
-     _previousController = new AnimationController(
-       duration: _kFloatingActionButtonSegue,
-       vsync: this,
-     )..addStatusListener(_handleAnimationStatusChanged);
-     _previousAnimation = new CurvedAnimation(
-       parent: _previousController,
-       curve: Curves.easeIn
-     );
- 	 
-     _currentController = new AnimationController(
-     duration: _kFloatingActionButtonSegue,
-       vsync: this,
-     );
-     _currentAnimation = new CurvedAnimation(
-       parent: _currentController,
-       curve: Curves.easeIn
-     );
+    _previousController = new AnimationController(
+      duration: _kFloatingActionButtonSegue,
+      vsync: this,
+    )..addStatusListener(_handleAnimationStatusChanged);
+    _previousAnimation = new CurvedAnimation(
+      parent: _previousController,
+      curve: Curves.easeIn
+    );
+  
+    _currentController = new AnimationController(
+    duration: _kFloatingActionButtonSegue,
+      vsync: this,
+    );
+    _currentAnimation = new CurvedAnimation(
+      parent: _currentController,
+      curve: Curves.easeIn
+    );
 
     // If we start out with a child, have the child appear fully visible instead
     // of animating in.

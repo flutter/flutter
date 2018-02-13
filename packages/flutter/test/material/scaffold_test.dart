@@ -130,7 +130,10 @@ void main() {
     expect(tester.binding.transientCallbackCount, greaterThan(0));
     await tester.pumpWidget(new Container());
     expect(tester.binding.transientCallbackCount, 0);
+
     await tester.pumpWidget(new MaterialApp(home: const Scaffold()));
+    await tester.pumpAndSettle();
+    
     expect(tester.binding.transientCallbackCount, 0);
 
     await tester.pumpWidget(new MaterialApp(home: const Scaffold(
