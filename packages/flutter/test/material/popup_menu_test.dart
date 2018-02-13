@@ -217,9 +217,9 @@ void main() {
     );
     final WidgetPredicate popupMenu = (Widget widget) {
       final String widgetType = widget.runtimeType.toString();
-      // Dart 2 implements reified generic methods which means showMenu<int>(...)
-      // creates _PopupMenu<int> and not _PopupMenu<dynamic>.
-      return widgetType == '_PopupMenu' || widgetType == '_PopupMenu<int>';
+      // TODO(mraleph): Remove the old case below.
+      return widgetType == '_PopupMenu<int>' // normal case
+            || widgetType == '_PopupMenu'; // for old versions of Dart that don't reify method type arguments
     };
 
     Future<Null> openMenu(TextDirection textDirection, Alignment alignment) async {
