@@ -43,6 +43,9 @@ abstract class Logger {
   Status startProgress(String message, { String progressId, bool expectSlowOperation: false });
 }
 
+/// A [Status] object includes functionality of a [Spinner], but may also display
+/// diagnostic information like how long the spinner remained running between
+/// [start] and [stop] (or [cancel]).
 class Status extends Spinner {}
 
 typedef void _FinishCallback();
@@ -249,6 +252,9 @@ enum _LogType {
   trace
 }
 
+
+/// A [Spinner] is a simple animation that does nothing but implement an ASCII
+/// spinner.  When stopped, the animation erases itself.
 class Spinner {
   Spinner();
   /// Use this factory to generate AnsiSpinner or Spinner as necessary, and
@@ -271,7 +277,7 @@ class AnsiSpinner extends Spinner {
 
   static final List<String> _progress = <String>['-', r'\', '|', r'/', '-', r'\', '|', '/'];
 
-  void _callback(Timer timer) {
+  void _callback(Timer _) {
     stdout.write('\b${_progress[index]}');
     index = ++index % _progress.length;
   }
@@ -289,7 +295,7 @@ class AnsiSpinner extends Spinner {
       return;
     live = false;
     timer.cancel();
-    stdout.write('\b \b');
+    stdout.write('\b');
   }
 
   @override

@@ -63,12 +63,14 @@ class Doctor {
     return _validators;
   }
 
-  List<ValidatorTask> get validatorTasks {
-    final List<ValidatorTask> _validatorTasks = <ValidatorTask>[];
+  /// Return a list of [ValidatorTask] objects and starts validation on all
+  /// objects in [validators].
+  List<ValidatorTask> startValidatorTasks() {
+    final List<ValidatorTask> tasks = <ValidatorTask>[];
     for (DoctorValidator validator in validators) {
-      _validatorTasks.add(new ValidatorTask(validator, validator.validate()));
+      tasks.add(new ValidatorTask(validator, validator.validate()));
     }
-    return _validatorTasks;
+    return tasks;
   }
 
   List<Workflow> get workflows {
@@ -123,7 +125,7 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
-    for (ValidatorTask validatorTask in validatorTasks) {
+    for (ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Spinner status = new Spinner.forContextTerminal();
       await (validatorTask.result).then<void>((_) {
@@ -131,8 +133,6 @@ class Doctor {
       }).whenComplete(status.cancel);
 
       final ValidationResult result = await validatorTask.result;
-    //for (DoctorValidator validator in validators) {
-    //  final ValidationResult result = await validator.validate();
       if (result.type == ValidationType.missing) {
         doctorResult = false;
       }
