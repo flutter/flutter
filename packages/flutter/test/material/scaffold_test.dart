@@ -887,6 +887,15 @@ void main() {
         geometry.floatingActionButtonScale,
         inExclusiveRange(0.0, 1.0),
       );
+
+      await tester.pump(const Duration(seconds: 3));
+      final RenderBox floatingActionButtonBox = tester.renderObject(find.byKey(key));
+      final Rect fabRect = floatingActionButtonBox.localToGlobal(Offset.zero) & floatingActionButtonBox.size;
+
+      expect(
+        geometry.floatingActionButtonArea,
+        fabRect
+      );
     });
   });
 

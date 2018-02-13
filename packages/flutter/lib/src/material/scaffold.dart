@@ -95,6 +95,12 @@ class _ScaffoldGeometryNotifier extends ValueNotifier<ScaffoldGeometry> {
 
   final BuildContext context;
 
+  // When the floating action button scale is 0 we override the
+  // [ScaffoldGeometry.floatingActionButtonArea] with null, and keep it's value
+  // here. This allows us to publish this area in case the next partial update
+  // makes the scale non zero.
+  Rect overridenFloatingActionBarArea;
+
   @override
   ScaffoldGeometry get value {
     assert(() {
@@ -115,10 +121,18 @@ class _ScaffoldGeometryNotifier extends ValueNotifier<ScaffoldGeometry> {
     Rect floatingActionButtonArea,
     double floatingActionButtonScale,
   }) {
-    final double newFloatingActionButtonScale = floatingActionButtonScale ??  super.value?.floatingActionButtonScale;
+    final double newFloatingActionButtonScale = floatingActionButtonScale ?? super.value?.floatingActionButtonScale;
     Rect newFloatingActionButtonArea;
+    // The layout code that is updating the FAB area does not know whether
+    // there is a non null FAB set, in that case we override the area with null
+    // to make sure we don't provide values that don't make sense.
+    // We are caching the area in [overridenFloatingActionBarArea] and restore
+    // it in case the next partial update changes the scale to non-zero without
+    // providing a new FAB area.
     if (newFloatingActionButtonScale != 0.0)
-      newFloatingActionButtonArea = floatingActionButtonArea ?? super.value?.floatingActionButtonArea;
+      newFloatingActionButtonArea = floatingActionButtonArea ?? super.value?.floatingActionButtonArea ?? overridenFloatingActionBarArea;
+    else
+      overridenFloatingActionBarArea = floatingActionButtonArea ?? overridenFloatingActionBarArea;
 
     value = new ScaffoldGeometry(
       bottomNavigationBarTop: bottomNavigationBarTop ?? super.value?.bottomNavigationBarTop,
