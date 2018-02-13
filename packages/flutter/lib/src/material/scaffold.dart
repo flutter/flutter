@@ -39,6 +39,7 @@ enum _ScaffoldSlot {
 
 // Examples can assume:
 // ScaffoldGeometry scaffoldGeometry;
+
 /// Geometry information for scaffold components.
 ///
 /// To get a [ValueNotifier] for the scaffold geometry call
