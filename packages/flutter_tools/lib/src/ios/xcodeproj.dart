@@ -62,12 +62,34 @@ void updateXcodeGeneratedProperties({
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
 
-Map<String, String> getXcodeBuildSettings(String xcodeProjPath, String target) {
-  final String absProjPath = fs.path.absolute(xcodeProjPath);
-  final String out = runCheckedSync(<String>[
-    '/usr/bin/xcodebuild', '-project', absProjPath, '-target', target, '-showBuildSettings'
-  ]);
-  return parseXcodeBuildSettings(out);
+/// Interpreter of Xcode projects.
+///
+/// Encapsulates the system tool needed to facilitate unit testing of clients.
+class XcodeProjectInterpreter {
+  static const String _executable = '/usr/bin/xcodebuild';
+
+  const XcodeProjectInterpreter();
+
+  bool get canInterpretXcodeProjects => fs.isFileSync(_executable);
+
+  Map<String, String> getBuildSettings(String projectPath, String target) {
+    final String out = runCheckedSync(<String>[
+      _executable,
+      '-project',
+      fs.path.absolute(projectPath),
+      '-target',
+      target,
+      '-showBuildSettings'
+    ], workingDirectory: projectPath);
+    return parseXcodeBuildSettings(out);
+  }
+
+  XcodeProjectInfo getInfo(String projectPath) {
+    final String out = runCheckedSync(<String>[
+      _executable, '-list',
+    ], workingDirectory: projectPath);
+    return new XcodeProjectInfo.fromXcodeBuildOutput(out);
+  }
 }
 
 Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
@@ -95,13 +117,6 @@ String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettin
 /// Represents the output of `xcodebuild -list`.
 class XcodeProjectInfo {
   XcodeProjectInfo(this.targets, this.buildConfigurations, this.schemes);
-
-  factory XcodeProjectInfo.fromProjectSync(String projectPath) {
-    final String out = runCheckedSync(<String>[
-      '/usr/bin/xcodebuild', '-list',
-    ], workingDirectory: projectPath);
-    return new XcodeProjectInfo.fromXcodeBuildOutput(out);
-  }
 
   factory XcodeProjectInfo.fromXcodeBuildOutput(String output) {
     final List<String> targets = <String>[];

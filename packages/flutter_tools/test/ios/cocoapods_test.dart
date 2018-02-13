@@ -7,8 +7,9 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/ios/cocoapods.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/ios/cocoapods.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
@@ -18,6 +19,7 @@ import '../src/context.dart';
 void main() {
   FileSystem fs;
   ProcessManager mockProcessManager;
+  XcodeProjectInterpreter mockXcodeProjectInterpreter;
   Directory projectUnderTest;
   CocoaPods cocoaPodsUnderTest;
 
@@ -25,6 +27,7 @@ void main() {
     Cache.flutterRoot = 'flutter';
     fs = new MemoryFileSystem();
     mockProcessManager = new MockProcessManager();
+    mockXcodeProjectInterpreter = new MockXcodeProjectInterpreter();
     projectUnderTest = fs.directory(fs.path.join('project', 'ios'))..createSync(recursive: true);
 
     fs.file(fs.path.join(
@@ -58,41 +61,46 @@ void main() {
     });
 
     testUsingContext('create objective-c Podfile when not present', () {
-      when(mockProcessManager.runSync(
-        any,
-        workingDirectory: any,
-        environment: any,
-      )).thenReturn(exitsHappyWith(''));
+      when(mockXcodeProjectInterpreter.canInterpretXcodeProjects).thenReturn(true);
+      when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenReturn(<String, String>{});
 
-      cocoaPodsUnderTest.setupPodfile('project');
+      cocoaPodsUnderTest.setupPodfile('project', interpreter: mockXcodeProjectInterpreter);
 
       expect(podfile.readAsStringSync(), 'Objective-C podfile template');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
     });
 
     testUsingContext('create swift Podfile if swift', () {
-      when(mockProcessManager.runSync(
-        any,
-        workingDirectory: any,
-        environment: any,
-      )).thenReturn(exitsHappyWith('SWIFT_VERSION = 4.0'));
+      when(mockXcodeProjectInterpreter.canInterpretXcodeProjects).thenReturn(true);
+      when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenReturn(<String, String>{
+        'SWIFT_VERSION': '4.0',
+      });
 
-      cocoaPodsUnderTest.setupPodfile('project');
+      cocoaPodsUnderTest.setupPodfile('project', interpreter: mockXcodeProjectInterpreter);
 
       expect(podfile.readAsStringSync(), 'Swift podfile template');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
     });
 
     testUsingContext('do not recreate Podfile when already present', () {
       podfile..createSync()..writeAsStringSync('Existing Podfile');
+      when(mockXcodeProjectInterpreter.canInterpretXcodeProjects).thenReturn(true);
 
-      cocoaPodsUnderTest.setupPodfile('project');
+      cocoaPodsUnderTest.setupPodfile('project', interpreter: mockXcodeProjectInterpreter);
 
       expect(podfile.readAsStringSync(), 'Existing Podfile');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
+
+    testUsingContext('do not create Podfile when we cannot interpret Xcode projects', () {
+      when(mockXcodeProjectInterpreter.canInterpretXcodeProjects).thenReturn(false);
+
+      cocoaPodsUnderTest.setupPodfile('project', interpreter: mockXcodeProjectInterpreter);
+
+      expect(podfile.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -103,7 +111,7 @@ void main() {
       debugConfigFile..createSync(recursive: true)..writeAsStringSync('Existing debug config');
       releaseConfigFile..createSync(recursive: true)..writeAsStringSync('Existing release config');
 
-      cocoaPodsUnderTest.setupPodfile('project');
+      cocoaPodsUnderTest.setupPodfile('project', interpreter: mockXcodeProjectInterpreter);
 
       final String debugContents = debugConfigFile.readAsStringSync();
       expect(debugContents, contains(
@@ -248,6 +256,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 
 class TestCocoaPods extends CocoaPods {
   const TestCocoaPods([this._hasCocoaPods = true]);
