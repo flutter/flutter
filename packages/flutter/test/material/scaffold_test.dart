@@ -786,10 +786,10 @@ void main() {
       final RenderBox navigationBox = tester.renderObject(find.byKey(key));
       final RenderBox appBox = tester.renderObject(find.byType(MaterialApp));
       final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
-      final ValueListenable<ScaffoldGeometry> geometry = listenerState.geometryListenable;
+      final ScaffoldGeometry geometry = listenerState.cache.value;
 
       expect(
-        geometry.value.bottomNavigationBarTop,
+        geometry.bottomNavigationBarTop,
         appBox.size.height - navigationBox.size.height
       );
     });
@@ -803,10 +803,10 @@ void main() {
       )));
 
       final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
-      final ValueListenable<ScaffoldGeometry> geometry = listenerState.geometryListenable;
+      final ScaffoldGeometry geometry = listenerState.cache.value;
 
       expect(
-        geometry.value.bottomNavigationBarTop,
+        geometry.bottomNavigationBarTop,
         null
       );
     });
@@ -824,14 +824,16 @@ void main() {
 
       final RenderBox floatingActionButtonBox = tester.renderObject(find.byKey(key));
       final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
-      final ValueListenable<ScaffoldGeometry> geometry = listenerState.geometryListenable;
+      final ScaffoldGeometry geometry = listenerState.cache.value;
+
+      final Rect fabRect = floatingActionButtonBox.localToGlobal(Offset.zero) & floatingActionButtonBox.size;
 
       expect(
-        geometry.value.floatingActionButton.size,
-        floatingActionButtonBox.size
+        geometry.floatingActionButtonPosition,
+        fabRect
       );
       expect(
-        geometry.value.floatingActionButtonScale,
+        geometry.floatingActionButtonScale,
         1.0
       );
     });
@@ -845,10 +847,10 @@ void main() {
       )));
 
       final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
-      final ValueListenable<ScaffoldGeometry> geometry = listenerState.geometryListenable;
+      final ScaffoldGeometry geometry = listenerState.cache.value;
 
       expect(
-        geometry.value.floatingActionButtonScale,
+        geometry.floatingActionButtonScale,
         0.0
       );
     });
@@ -871,13 +873,13 @@ void main() {
             ),
       )));
 
-      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
-      final ValueListenable<ScaffoldGeometry> geometry = listenerState.geometryListenable;
-
       await tester.pump(const Duration(milliseconds: 50));
 
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final ScaffoldGeometry geometry = listenerState.cache.value;
+
       expect(
-        geometry.value.floatingActionButtonScale,
+        geometry.floatingActionButtonScale,
         inExclusiveRange(0.0, 1.0),
       );
     });
@@ -893,11 +895,14 @@ class GeometryListener extends StatefulWidget {
 class GeometryListenerState extends State<GeometryListener> {
   @override
   Widget build(BuildContext context) {
-    return new Container();
+    return new CustomPaint(
+      painter: cache
+    );
   }
 
   int numNotifications = 0;
   ValueListenable<ScaffoldGeometry> geometryListenable;
+  GeometryCachePainter cache;
 
   @override
   void didChangeDependencies() {
@@ -911,9 +916,30 @@ class GeometryListenerState extends State<GeometryListener> {
     
     geometryListenable = newListenable;
     geometryListenable.addListener(onGeometryChanged);
+    cache = new GeometryCachePainter(geometryListenable);
   }
 
   void onGeometryChanged() {
     numNotifications += 1;
+  }
+}
+
+// The Scaffold.geometryOf() value is only available at paint time.
+// To fetch it for the tests we implement this CustomPainter that just
+// caches the ScaffoldGeometry value in its paint method.
+class GeometryCachePainter extends CustomPainter {
+  GeometryCachePainter(this.geometryListenable);
+
+  final ValueListenable<ScaffoldGeometry> geometryListenable;
+
+  ScaffoldGeometry value;
+  @override
+  void paint(Canvas canvas, Size size) {
+    value = geometryListenable.value;
+  }
+
+  @override
+  bool shouldRepaint(GeometryCachePainter oldDelegate) {
+    return true;
   }
 }

@@ -7,6 +7,7 @@ import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
@@ -44,7 +45,7 @@ enum _ScaffoldSlot {
 class ScaffoldGeometry {
   const ScaffoldGeometry({
     this.bottomNavigationBarTop,
-    this.floatingActionButton,
+    this.floatingActionButtonPosition,
     this.floatingActionButtonScale = 1.0,
   });
 
@@ -58,25 +59,49 @@ class ScaffoldGeometry {
   /// The rectangle in which the scaffold is laying out
   /// [Scaffold.floatingActionButton].
   ///
+  /// The floating action button might be scaled inside this rectangle, to get
+  /// the bounding rectangle in which the floating action is painted scale this
+  /// value by [floatingActionButtonScale].
+  ///
   /// This can have any value when there is no [Scaffold.floatingActionButton]
   /// set.
-  final Rect floatingActionButton;
+  final Rect floatingActionButtonPosition;
 
   /// The amount by which the [Scaffold.floatingActionButton] is scaled.
+  ///
+  /// To et the bounding rectangle in shich the floating action button is
+  /// painted scale [floatingActionPosition] by this proportion. 
   final double floatingActionButtonScale;
 
-  static ScaffoldGeometry _update({
+  static ScaffoldGeometry _copyWith({
     ScaffoldGeometry previousGeometry,
     double bottomNavigationBarTop,
-    Rect floatingActionButton,
+    Rect floatingActionButtonPosition,
     double floatingActionButtonScale,
   }) {
     return new ScaffoldGeometry(
       bottomNavigationBarTop: bottomNavigationBarTop ??  previousGeometry?.bottomNavigationBarTop,
-      floatingActionButton: floatingActionButton ??  previousGeometry?.floatingActionButton,
+      floatingActionButtonPosition: floatingActionButtonPosition ??  previousGeometry?.floatingActionButtonPosition,
       floatingActionButtonScale: floatingActionButtonScale ??  previousGeometry?.floatingActionButtonScale,
     );
   }
+}
+
+class _ScaffoldGeometryNotifier extends ValueNotifier<ScaffoldGeometry> {
+  _ScaffoldGeometryNotifier(ScaffoldGeometry geometry)
+    : super(geometry);
+
+
+  @override
+  ScaffoldGeometry get value{
+    if (!RendererBinding.instance.pipelineOwner.debugDoingPaint)
+      throw new FlutterError(
+        'Scaffold.geometryOf() value was accessed not during the paint phase.'
+      );
+    return super.value;
+  }
+
+  ScaffoldGeometry get _partialValue => super.value;
 }
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
@@ -92,7 +117,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final double bottomViewInset;
   final double endPadding;
   final TextDirection textDirection;
-  final ValueNotifier<ScaffoldGeometry> geometryNotifier;
+  final _ScaffoldGeometryNotifier geometryNotifier;
 
   @override
   void performLayout(Size size) {
@@ -211,10 +236,10 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.endDrawer, Offset.zero);
     }
 
-    geometryNotifier.value = ScaffoldGeometry._update(
-      previousGeometry: geometryNotifier.value,
+    geometryNotifier.value = ScaffoldGeometry._copyWith(
+      previousGeometry: geometryNotifier._partialValue,
       bottomNavigationBarTop: bottomNavigationBarTop,
-      floatingActionButton: floatingActionButtonRect,
+      floatingActionButtonPosition: floatingActionButtonRect,
     );
   }
 
@@ -235,7 +260,7 @@ class _FloatingActionButtonTransition extends StatefulWidget {
   }) : super(key: key);
 
   final Widget child;
-  final ValueNotifier<ScaffoldGeometry> geometryNotifier;
+  final _ScaffoldGeometryNotifier geometryNotifier;
 
   @override
   _FloatingActionButtonTransitionState createState() => new _FloatingActionButtonTransitionState();
@@ -282,8 +307,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   @override
   void dispose() {
-    _previousAnimation.removeListener(_onProgressChanged);
-    _currentAnimation.removeListener(_onProgressChanged);
     _previousController.dispose();
     _currentController.dispose();
     super.dispose();
@@ -360,8 +383,8 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 
   void _updateGeometryScale(double scale) {
-    widget.geometryNotifier.value = ScaffoldGeometry._update(
-      previousGeometry: widget.geometryNotifier.value,
+    widget.geometryNotifier.value = ScaffoldGeometry._copyWith(
+      previousGeometry: widget.geometryNotifier._partialValue,
       floatingActionButtonScale: scale,
     );
   }
@@ -615,8 +638,6 @@ class Scaffold extends StatefulWidget {
   /// return value with the previous listenable, if it has changed, unregister
   /// the listener, and register a listener to the new [ScaffoldGeometry]
   /// listenable.
-  // TODO(amirh): return a ValueListenable subclass that asserts it's paint time
-  // when .value is accessed.
   static ValueListenable<ScaffoldGeometry> geometryOf(BuildContext context) {
     final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType(_ScaffoldScope);
     if (scaffoldScope == null)
@@ -673,7 +694,7 @@ class Scaffold extends StatefulWidget {
 /// the current [BuildContext] using [Scaffold.of].
 class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
-  ValueNotifier<ScaffoldGeometry> _geometryNotifier;
+  _ScaffoldGeometryNotifier _geometryNotifier;
 
   // DRAWER API
 
@@ -928,7 +949,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _geometryNotifier = new ValueNotifier<ScaffoldGeometry>(null);
+    _geometryNotifier = new _ScaffoldGeometryNotifier(null);
   }
 
   @override
@@ -937,6 +958,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _snackBarController = null;
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
+    _geometryNotifier.dispose();
     for (_PersistentBottomSheet bottomSheet in _dismissedBottomSheets)
       bottomSheet.animationController.dispose();
     if (_currentBottomSheet != null)
@@ -1303,7 +1325,7 @@ class _ScaffoldScope extends InheritedWidget {
        super(child: child);
 
   final bool hasDrawer;
-  final ValueNotifier<ScaffoldGeometry> geometryNotifier;
+  final _ScaffoldGeometryNotifier geometryNotifier;
 
   @override
   bool updateShouldNotify(_ScaffoldScope oldWidget) {
