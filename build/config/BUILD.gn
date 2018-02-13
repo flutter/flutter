@@ -87,10 +87,6 @@ config("debug") {
     "WTF_USE_DYNAMIC_ANNOTATIONS=1",
   ]
 
-  if (is_nacl) {
-    defines += [ "DYNAMIC_ANNOTATIONS_PREFIX=NACL_" ]
-  }
-
   if (is_win) {
     if (disable_iterator_debugging) {
       # Iterator debugging is enabled by the compiler on debug builds, and we
@@ -119,11 +115,7 @@ config("release") {
     ]
   } else {
     defines += [ "NVALGRIND" ]
-    if (!is_nacl) {
-      # NaCl always enables dynamic annotations. Currently this value is set to
-      # 1 for all .nexes.
-      defines += [ "DYNAMIC_ANNOTATIONS_ENABLED=0" ]
-    }
+    defines += [ "DYNAMIC_ANNOTATIONS_ENABLED=0" ]
   }
 }
 

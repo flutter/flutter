@@ -188,7 +188,6 @@ if (current_os == "win") {
   is_ios = false
   is_linux = false
   is_mac = false
-  is_nacl = false
   is_posix = false
   is_win = true
 } else if (current_os == "mac") {
@@ -200,7 +199,6 @@ if (current_os == "win") {
   is_ios = false
   is_linux = false
   is_mac = true
-  is_nacl = false
   is_posix = true
   is_win = false
 } else if (current_os == "android") {
@@ -212,7 +210,6 @@ if (current_os == "win") {
   is_ios = false
   is_linux = false
   is_mac = false
-  is_nacl = false
   is_posix = true
   is_win = false
 } else if (current_os == "chromeos") {
@@ -224,7 +221,6 @@ if (current_os == "win") {
   is_ios = false
   is_linux = true
   is_mac = false
-  is_nacl = false
   is_posix = true
   is_win = false
 } else if (current_os == "nacl") {
@@ -239,7 +235,6 @@ if (current_os == "win") {
   is_ios = false
   is_linux = false
   is_mac = false
-  is_nacl = true
   is_posix = true
   is_win = false
 } else if (current_os == "ios") {
@@ -251,7 +246,6 @@ if (current_os == "win") {
   is_ios = true
   is_linux = false
   is_mac = false
-  is_nacl = false
   is_posix = true
   is_win = false
 } else if (current_os == "linux") {
@@ -263,7 +257,6 @@ if (current_os == "win") {
   is_ios = false
   is_linux = true
   is_mac = false
-  is_nacl = false
   is_posix = true
   is_win = false
 } else if (current_os == "fuchsia") {
@@ -274,7 +267,6 @@ if (current_os == "win") {
   is_ios = false
   is_linux = true
   is_mac = false
-  is_nacl = false
   is_posix = true
   is_win = false
 }
@@ -625,12 +617,6 @@ if (is_win) {
   } else {
     set_default_toolchain("//build/toolchain/mac:ios_clang_arm")
   }
-} else if (is_nacl) {
-  # TODO(GYP): This will need to change when we get NaCl working
-  # on multiple platforms, but this whole block of code (how we define
-  # host_toolchain) needs to be reworked regardless to key off of host_os
-  # and host_cpu rather than the is_* variables.
-  host_toolchain = "//build/toolchain/linux:clang_x64"
 }
 
 # ==============================================================================

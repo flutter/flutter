@@ -624,15 +624,10 @@ if (is_win) {
   ]
 
   if (is_mac || is_ios) {
-    # TODO(abarth): Re-enable once https://github.com/domokit/mojo/issues/728
-    #               is fixed.
-    # default_warning_flags += [ "-Wnewline-eof" ]
-    if (!is_nacl) {
-      # When compiling Objective-C, warns if a method is used whose
-      # availability is newer than the deployment target. This is not
-      # required when compiling Chrome for iOS.
-      default_warning_flags += [ "-Wunguarded-availability" ]
-    }
+    # When compiling Objective-C, warns if a method is used whose
+    # availability is newer than the deployment target. This is not
+    # required when compiling Chrome for iOS.
+    default_warning_flags += [ "-Wunguarded-availability" ]
   }
 }
 
