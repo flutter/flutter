@@ -77,41 +77,59 @@ void main() {
       );
     }
 
+    const List<String> pubOutput = const <String>[
+      '.packages',
+      'pubspec.lock',
+    ];
+
+    const List<String> pluginRegistrants = const <String>[
+      'ios/Runner/GeneratedPluginRegistrant.h',
+      'ios/Runner/GeneratedPluginRegistrant.m',
+      'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+    ];
+
+    const List<String> pluginWitnesses = const <String>[
+      '.flutter-plugins',
+      'ios/Podfile',
+    ];
+
+    const Map<String, String> pluginContentWitnesses = const <String, String>{
+      'ios/Flutter/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
+      'ios/Flutter/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
+    };
+
     void expectDependenciesResolved(String projectPath) {
-      expectExists(projectPath, '.packages');
-      expectExists(projectPath, 'pubspec.lock');
+      for (String output in pubOutput) {
+        expectExists(projectPath, output);
+      }
     }
 
     void expectZeroPluginsInjected(String projectPath) {
-      expectNotExists(projectPath, '.flutter-plugins');
-      expectNotExists(projectPath, 'ios/Podfile');
-      expectExists(projectPath, 'ios/Runner/GeneratedPluginRegistrant.h');
-      expectExists(projectPath, 'ios/Runner/GeneratedPluginRegistrant.m');
-      expectExists(projectPath, 'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java');
-      expectNotContains(projectPath, 'ios/Flutter/Debug.xcconfig', '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"');
-      expectNotContains(projectPath, 'ios/Flutter/Release.xcconfig', '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"');
+      for (final String registrant in pluginRegistrants) {
+        expectExists(projectPath, registrant);
+      }
+      for (final String witness in pluginWitnesses) {
+        expectNotExists(projectPath, witness);
+      }
+      pluginContentWitnesses.forEach((String witness, String content) {
+        expectNotContains(projectPath, witness, content);
+      });
     }
 
     void expectPluginInjected(String projectPath) {
-      expectExists(projectPath, '.flutter-plugins');
-      expectExists(projectPath, 'ios/Podfile');
-      expectExists(projectPath, 'ios/Runner/GeneratedPluginRegistrant.h');
-      expectExists(projectPath, 'ios/Runner/GeneratedPluginRegistrant.m');
-      expectExists(projectPath, 'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java');
-      expectContains(projectPath, 'ios/Flutter/Debug.xcconfig', '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"');
-      expectContains(projectPath, 'ios/Flutter/Release.xcconfig', '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"');
+      for (final String registrant in pluginRegistrants) {
+        expectExists(projectPath, registrant);
+      }
+      for (final String witness in pluginWitnesses) {
+        expectExists(projectPath, witness);
+      }
+      pluginContentWitnesses.forEach((String witness, String content) {
+        expectContains(projectPath, witness, content);
+      });
     }
 
     void removeGeneratedFiles(String projectPath) {
-      for (String path in <String>[
-        '.packages',
-        'pubspec.lock',
-        '.flutter-plugins',
-        'ios/Podfile',
-        'ios/Runner/GeneratedPluginRegistrant.h',
-        'ios/Runner/GeneratedPluginRegistrant.m',
-        'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-      ]) {
+      for (String path in <String>[]..addAll(pubOutput)..addAll(pluginWitnesses)..addAll(pluginRegistrants)) {
         final File file = fs.file(fs.path.join(projectPath, path));
         if (file.existsSync())
           file.deleteSync();
