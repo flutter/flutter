@@ -362,7 +362,7 @@ class AppDomain extends Domain {
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
 
-    final FlutterDevice flutterDevice = new FlutterDevice(device);
+    final FlutterDevice flutterDevice = new FlutterDevice(device, previewDart2: previewDart2);
 
     ResidentRunner runner;
 
