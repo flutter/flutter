@@ -37,6 +37,8 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
+// Examples can assume:
+// ScaffoldGeometry scaffoldGeometry;
 /// Geometry information for scaffold components.
 ///
 /// To get a [ValueNotifier] for the scaffold geometry call
@@ -45,7 +47,7 @@ enum _ScaffoldSlot {
 class ScaffoldGeometry {
   const ScaffoldGeometry({
     this.bottomNavigationBarTop,
-    this.floatingActionButtonPosition,
+    this.floatingActionButtonArea,
     this.floatingActionButtonScale: 1.0,
   });
 
@@ -56,8 +58,6 @@ class ScaffoldGeometry {
   /// When there is no [Scaffold.bottomNavigationBar] set, this will be null.
   final double bottomNavigationBarTop;
 
-  // Examples can assume:
-  // ScaffoldGeometry scaffoldGeometry;
   /// The rectangle in which the scaffold is laying out
   /// [Scaffold.floatingActionButton].
   ///
@@ -69,15 +69,14 @@ class ScaffoldGeometry {
   ///
   /// ```dart
   ///  final Rect scaledFab = Rect.lerp(
-  ///    scaffoldGeometry.floatingActionButtonPosition.center & Size.zero,
-  ///    scaffoldGeometry.floatingActionButtonPosition,
+  ///    scaffoldGeometry.floatingActionButtonArea.center & Size.zero,
+  ///    scaffoldGeometry.floatingActionButtonArea,
   ///    scaffoldGeometry.floatingActionButtonScale
   ///  );
   /// ```
   ///
-  /// This can have any value when there is no [Scaffold.floatingActionButton]
-  /// set; in that case [floatingActionButtonScale] is 0.
-  final Rect floatingActionButtonPosition;
+  /// This is null when there is no floating action button showing.
+  final Rect floatingActionButtonArea;
 
   /// The amount by which the [Scaffold.floatingActionButton] is scaled.
   ///
@@ -97,25 +96,34 @@ class _ScaffoldGeometryNotifier extends ValueNotifier<ScaffoldGeometry> {
 
   @override
   ScaffoldGeometry get value {
-    final RenderObject renderObject = context.findRenderObject();
-    if (renderObject == null || !renderObject.owner.debugDoingPaint)
-      throw new FlutterError(
-        'Scaffold.geometryOf() must only be accessed during the paint phase.\n\n'
-        'The ScaffoldGeometry is only available during the paint phase, because\n'
-        'its value is computed during the animation and layout phases prior to painting.'
-      );
+    assert(() {
+      final RenderObject renderObject = context.findRenderObject();
+      if (renderObject == null || !renderObject.owner.debugDoingPaint)
+        throw new FlutterError(
+            'Scaffold.geometryOf() must only be accessed during the paint phase.\n\n'
+                'The ScaffoldGeometry is only available during the paint phase, because\n'
+                'its value is computed during the animation and layout phases prior to painting.'
+        );
+      return true;
+    }());
     return super.value;
   }
 
   void _updateWith({
     double bottomNavigationBarTop,
-    Rect floatingActionButtonPosition,
+    Rect floatingActionButtonArea,
     double floatingActionButtonScale,
   }) {
+
+    final double newFloatingActionButtonScale = floatingActionButtonScale ??  super.value?.floatingActionButtonScale;
+    Rect newFloatingActionButtonArea;
+    if (newFloatingActionButtonScale != 0.0)
+      newFloatingActionButtonArea = floatingActionButtonArea ??  super.value?.floatingActionButtonArea;
+
     value = new ScaffoldGeometry(
       bottomNavigationBarTop: bottomNavigationBarTop ??  super.value?.bottomNavigationBarTop,
-      floatingActionButtonPosition: floatingActionButtonPosition ??  super.value?.floatingActionButtonPosition,
-      floatingActionButtonScale: floatingActionButtonScale ??  super.value?.floatingActionButtonScale,
+      floatingActionButtonArea: newFloatingActionButtonArea,
+      floatingActionButtonScale: newFloatingActionButtonScale,
     );
   }
 }
@@ -254,7 +262,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     geometryNotifier._updateWith(
       bottomNavigationBarTop: bottomNavigationBarTop,
-      floatingActionButtonPosition: floatingActionButtonRect,
+      floatingActionButtonArea: floatingActionButtonRect,
     );
   }
 

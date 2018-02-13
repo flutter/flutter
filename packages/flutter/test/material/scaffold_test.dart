@@ -829,7 +829,7 @@ void main() {
       final Rect fabRect = floatingActionButtonBox.localToGlobal(Offset.zero) & floatingActionButtonBox.size;
 
       expect(
-        geometry.floatingActionButtonPosition,
+        geometry.floatingActionButtonArea,
         fabRect
       );
       expect(
@@ -852,6 +852,11 @@ void main() {
       expect(
         geometry.floatingActionButtonScale,
         0.0
+      );
+
+      expect(
+          geometry.floatingActionButtonArea,
+          null
       );
     });
 
