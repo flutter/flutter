@@ -417,6 +417,7 @@ void main() {
           rect: TestSemantics.fullScreen,
           actions: allActions.fold(0, (int previous, SemanticsAction action) => previous | action.index),
           previousNodeId: -1,
+          nextNodeId: -1,
         ),
       ],
     );
@@ -613,36 +614,51 @@ void main() {
     expect(semanticsUpdateCount, 1);
     expect(semantics, hasSemantics(
       new TestSemantics(
+        id: 0,
         children: <TestSemantics>[
           new TestSemantics(
+            id: 2,
+            nextNodeId: 5,
             previousNodeId: -1,
             children: <TestSemantics>[
               new TestSemantics(
+                id: 3,
                 label: r'Label 1',
                 textDirection: TextDirection.ltr,
+                nextNodeId: -1,
                 previousNodeId: 4,
               ),
               new TestSemantics(
+                id: 4,
                 label: r'Label 2',
                 textDirection: TextDirection.ltr,
+                nextNodeId: 3,
                 previousNodeId: 6,
               ),
               new TestSemantics(
+                id: 5,
+                nextNodeId: 8,
                 previousNodeId: 2,
                 children: <TestSemantics>[
                   new TestSemantics(
+                    id: 6,
                     label: r'Label 3',
                     textDirection: TextDirection.ltr,
+                    nextNodeId: 4,
                     previousNodeId: 7,
                   ),
                   new TestSemantics(
+                    id: 7,
                     label: r'Label 4',
                     textDirection: TextDirection.ltr,
+                    nextNodeId: 6,
                     previousNodeId: 8,
                   ),
                   new TestSemantics(
+                    id: 8,
                     label: r'Label 5',
                     textDirection: TextDirection.ltr,
+                    nextNodeId: 7,
                     previousNodeId: 5,
                   ),
                 ],
@@ -650,7 +666,7 @@ void main() {
             ],
           ),
         ],
-      ), ignoreTransform: true, ignoreRect: true, ignoreId: true),
+      ), ignoreTransform: true, ignoreRect: true),
     );
     semantics.dispose();
   });
@@ -713,26 +729,31 @@ void main() {
           new TestSemantics(
             label: r'Label 1',
             textDirection: TextDirection.ltr,
+            nextNodeId: -1,
             previousNodeId: 3,
           ),
           new TestSemantics(
             label: r'Label 2',
             textDirection: TextDirection.ltr,
+            nextNodeId: 2,
             previousNodeId: 4,
           ),
           new TestSemantics(
             label: r'Label 3',
             textDirection: TextDirection.ltr,
+            nextNodeId: 3,
             previousNodeId: 5,
           ),
           new TestSemantics(
             label: r'Label 4',
             textDirection: TextDirection.ltr,
+            nextNodeId: 4,
             previousNodeId: 6,
           ),
           new TestSemantics(
             label: r'Label 5',
             textDirection: TextDirection.ltr,
+            nextNodeId: 5,
             previousNodeId: -1,
           ),
         ],
@@ -802,31 +823,37 @@ void main() {
       new TestSemantics(
         children: <TestSemantics>[
           new TestSemantics(
+            nextNodeId: 5,
             previousNodeId: -1,
             children: <TestSemantics>[
               new TestSemantics(
                 label: r'Label 1',
                 textDirection: TextDirection.ltr,
+                nextNodeId: 7,
                 previousNodeId: 5,
               ),
               new TestSemantics(
                 label: r'Label 2',
                 textDirection: TextDirection.ltr,
+                nextNodeId: -1,
                 previousNodeId: 6,
               ),
               new TestSemantics(
                 label: r'Label 3',
                 textDirection: TextDirection.ltr,
+                nextNodeId: 3,
                 previousNodeId: 2,
               ),
               new TestSemantics(
                 label: r'Label 4',
                 textDirection: TextDirection.ltr,
+                nextNodeId: 4,
                 previousNodeId: 7,
               ),
               new TestSemantics(
                 label: r'Label 5',
                 textDirection: TextDirection.ltr,
+                nextNodeId: 6,
                 previousNodeId: 3,
               ),
             ],
