@@ -124,7 +124,8 @@ typedef String MessageFilter(String message);
 /// applying filtering. The pub process will not receive anything on its stdin stream.
 ///
 /// The `--trace` argument is passed to `pub` (by mutating the provided
-/// `arguments` list) unless `showTraceForErrors` is false.
+/// `arguments` list) when `showTraceForErrors` is true, and when `showTraceForErrors`
+/// is null/unset, and `isRunningOnBot` is true.
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
@@ -134,8 +135,10 @@ Future<Null> pub(List<String> arguments, {
   MessageFilter filter,
   String failureMessage: 'pub failed',
   @required bool retry,
-  bool showTraceForErrors: true,
+  bool showTraceForErrors,
 }) async {
+  showTraceForErrors ??= isRunningOnBot;
+
   if (showTraceForErrors)
     arguments.insert(0, '--trace');
   int attempts = 0;
