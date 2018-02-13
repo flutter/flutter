@@ -467,6 +467,9 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
+/// The dialog is pushed to the root navigator.
+/// Use `Navigator.of(context, rootNavigator: true)` to pop the dialog.
+///
 /// See also:
 ///  * [AlertDialog], for dialogs that have a row of buttons below a body.
 ///  * [SimpleDialog], which handles the scrolling of the contents and does
