@@ -108,7 +108,7 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 0.0)));
   });
 
-  testWidgets('Floating action animation', (WidgetTester tester) async {
+  testWidgets('Floating action entrance/exit animation', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(home: const Scaffold(
       floatingActionButton: const FloatingActionButton(
         key: const Key('one'),
@@ -144,7 +144,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, greaterThan(0));
   });
 
-  testWidgets('Floating action button position', (WidgetTester tester) async {
+  testWidgets('Floating action button directionality', (WidgetTester tester) async {
     Widget build(TextDirection textDirection) {
       return new Directionality(
         textDirection: textDirection,
@@ -167,8 +167,46 @@ void main() {
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
 
     await tester.pumpWidget(build(TextDirection.rtl));
+    expect(tester.binding.transientCallbackCount, 0);
 
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 356.0));
+  });
+
+  testWidgets('Floating action button motion', (WidgetTester tester) async {
+    Widget build(FabPositioner fabPositioner, TextDirection textDirection) {
+      return new Directionality(
+        textDirection: textDirection,
+        child: new MediaQuery(
+          data: const MediaQueryData(
+            viewInsets: const EdgeInsets.only(bottom: 200.0),
+          ),
+          child: new Scaffold(
+            fabPositioner: fabPositioner,
+            floatingActionButton: const FloatingActionButton(
+              onPressed: null,
+              child: const Text('1'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(FabPositioner.endFloat, TextDirection.ltr));
+
+    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
+    expect(tester.binding.transientCallbackCount, 0);
+
+    await tester.pumpWidget(build(FabPositioner.centerFloat, TextDirection.ltr));
+
+    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
+    expect(tester.binding.transientCallbackCount, greaterThan(0));
+
+    await tester.pumpAndSettle();
+
+    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(400.0, 356.0));
+    expect(tester.binding.transientCallbackCount, 0);
+
+
   });
 
   testWidgets('Drawer scrolling', (WidgetTester tester) async {

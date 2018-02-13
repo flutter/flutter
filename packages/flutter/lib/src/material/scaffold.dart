@@ -11,7 +11,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
-import 'arc.dart';
 import 'bottom_sheet.dart';
 import 'button_bar.dart';
 import 'button_theme.dart';
@@ -84,18 +83,6 @@ abstract class FabMotionAnimator {
   /// corresponding to 0 and 360 degrees, while 0.5 corresponds to 180 degrees.
   Animation<double> getRotationAnimation({@required Animation<double> parent});
 
-  // This widget will update when it is replaced with a different implementation.
-  @override
-  bool updateShouldNotify(FabMotionAnimator oldWidget) => oldWidget.runtimeType != runtimeType;
-
-  /// Retrieves the [Scaffold]'s [FabMotionAnimator].
-  /// 
-  /// This will return a scaling animator by default if no other animator
-  /// is found in the current scaffold.
-  static FabMotionAnimator _of(BuildContext context) {
-    final ScaffoldState scaffold = Scaffold.of(context);
-    return scaffold.widget?.fabMotionAnimator ?? FabMotionAnimator.scaling;
-  }
 }
 
 class _ScalingFabMotionAnimator extends FabMotionAnimator {
@@ -442,6 +429,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   @override
   void dispose() {
+    _previousController.dispose();
     _currentController.dispose();
     super.dispose();
   }
@@ -1039,10 +1027,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
   }
 
-  void _handleFabMotion(AnimationStatus status) {
-
-  }
-
   // iOS FEATURES - status bar tap, back gesture
 
   // On iOS, tapping the status bar scrolls the app's primary scrollable to the
@@ -1071,17 +1055,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _fabMotionAnimator = widget.fabMotionAnimator ?? FabMotionAnimator.scaling;
     _previousFabPositioner = _fabPositioner;
     _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 1.0, duration: _kFloatingActionButtonSegue * 2);
-    _fabMoveController.addStatusListener(_handleFabMotion);
   }
 
   @override
   void didUpdateWidget(Scaffold oldWidget) {
     // Update the fab animator, and then schedule the fab for repositioning.
-    setState(() {
-      _fabMotionAnimator = widget.fabMotionAnimator ?? FabMotionAnimator.scaling;
-    });
+    if (widget.fabMotionAnimator != oldWidget.fabMotionAnimator) {
+      setState(() {
+        _fabMotionAnimator = widget.fabMotionAnimator ?? FabMotionAnimator.scaling;
+      });
+    }
     if (widget.fabPositioner != oldWidget.fabPositioner) {
-      _moveFab(widget.fabPositioner);
+      _moveFab(widget.fabPositioner ?? FabPositioner.endFloat);
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -1097,7 +1082,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       bottomSheet.animationController.dispose();
     if (_currentBottomSheet != null)
       _currentBottomSheet._widget.animationController.dispose();
-    _fabMoveController?.dispose();
+    _fabMoveController.dispose();
     _fabMoveController = null;
     super.dispose();
   }
