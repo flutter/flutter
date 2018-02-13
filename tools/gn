@@ -131,6 +131,11 @@ def to_gn_args(args):
       if 'target_cpu' in gn_args:
         gn_args['target_cpu'] = cpu_for_target_arch(gn_args['target_cpu'])
 
+    if args.target_os is None:
+      if sys.platform.startswith(('cygwin', 'win')):
+        gn_args['dart_use_fallback_root_certificates'] = True
+
+
     # Make sure host_cpu matches the bit width of target_cpu.
     target_is_32_bit = gn_args['target_cpu'] == 'arm' or gn_args['target_cpu'] == 'x86'
     if target_is_32_bit:
