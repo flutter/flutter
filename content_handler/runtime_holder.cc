@@ -50,6 +50,7 @@ constexpr char kKeyEventChannel[] = "flutter/keyevent";
 constexpr char kTextInputChannel[] = "flutter/textinput";
 constexpr char kFlutterPlatformChannel[] = "flutter/platform";
 constexpr char kFuchsiaPackageResourceDirectory[] = "pkg/data";
+constexpr char kDartPkgContentsKey[] = "dart-pkg/contents";
 
 void SetThreadName(fxl::RefPtr<fxl::TaskRunner> runner, std::string name) {
   runner->PostTask([name]() {
@@ -290,11 +291,16 @@ void RuntimeHolder::CreateView(
   } else if (!kernel.empty()) {
     runtime_->dart_controller()->RunFromKernel(std::move(kernel));
   } else if (maybe_running_from_source) {
-    std::string basename = files::GetBaseName(script_uri);
-    std::string main_dart = "pkg/data/" + basename + "/lib/main.dart";
+    std::vector<uint8_t> data;
+    if (!GetAssetAsBuffer(kDartPkgContentsKey, &data)) {
+      FXL_LOG(ERROR) << "Contents file not found for " << script_uri;
+      return;
+    }
+    std::string package_name(data.begin(), data.end());
+    std::string main_dart = "pkg/data/dart-pkg/" + package_name + "/lib/main.dart";
     FXL_LOG(INFO) << "Running from source with entrypoint: '" << main_dart
                   << "'";
-    runtime_->dart_controller()->RunFromSource(main_dart, "pkg/data/.packages");
+    runtime_->dart_controller()->RunFromSource(main_dart, "pkg/data/dart-pkg/.packages");
   } else {
     runtime_->dart_controller()->RunFromScriptSnapshot(snapshot.data(),
                                                        snapshot.size());
