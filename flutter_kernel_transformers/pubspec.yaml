@@ -1,63 +1,16 @@
-name: frontend_server
-version: 0.1.1-dev
-description: Communication pipe to Dart Frontend
+name: flutter_kernel_transformers
+version: 0.0.1-dev
+description: Kernel transformers that operate on Flutter source code.
 homepage: http://flutter.io
 author: Flutter Authors <flutter-dev@googlegroups.com>
 
 dependencies:
-  args: any
-  async: any
-  charcode: any
-  collection: any
-  convert: any
-  crypto: any
-  front_end: any
-  flutter_kernel_transformers: any
   kernel: any
-  logging: any
   meta: any
-  quiver: any
-  package_config: any
-  path: any
-  source_span: any
-  typed_data: any
-  usage: any
-  vm: any
 
 dev_dependencies:
-  analyzer: any
-  barback: any
-  boolean_selector: any
-  cli_util: any
-  csslib: any
-  glob: any
-  html: any
-  http: any
-  http_multi_server: any
-  http_parser: any
-  isolate: any
-  matcher: any
-  mime: any
-  mockito: any
-  package_resolver: any
-  plugin: any
-  pool: any
-  pub_semver: any
-  shelf: any
-  shelf_packages_handler: any
-  shelf_static: any
-  shelf_web_socket: any
-  source_map_stack_trace: any
-  source_maps: any
-  stack_trace: any
-  stream_channel: any
-  string_scanner: any
   test: any
-  utf: any
-  watcher: any
-  web_socket_channel: any
   when: any
-  yaml: any
 
 dependency_overrides:
   args:
@@ -72,8 +25,6 @@ dependency_overrides:
     path: ../../third_party/dart/third_party/pkg/convert
   crypto:
     path: ../../third_party/dart/third_party/pkg/crypto
-  flutter_kernel_transformers:
-    path: ../flutter_kernel_transformers
   front_end:
     path: ../../third_party/dart/pkg/front_end/
   kernel:

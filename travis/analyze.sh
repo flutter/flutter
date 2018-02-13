@@ -32,3 +32,18 @@ if [ -n "$RESULTS" ]; then
   echo "Failed."
   exit 1;
 fi
+
+echo "Analyzing flutter_kernel_transformers..."
+pushd flutter/flutter_kernel_transformers/; pub get; popd
+RESULTS=`dartanalyzer                                                          \
+  --packages=flutter/flutter_kernel_transformers/.packages                     \
+  --options flutter/analysis_options.yaml                                      \
+  flutter/flutter_kernel_transformers                                          \
+  2>&1                                                                         \
+  | grep -Ev "No issues found!"                                                \
+  | grep -Ev "Analyzing.+flutter_kernel_transformers"`
+echo "$RESULTS"
+if [ -n "$RESULTS" ]; then
+  echo "Failed."
+  exit 1;
+fi
