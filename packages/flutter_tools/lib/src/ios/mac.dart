@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON;
+import 'dart:convert' show JSON, LineSplitter, utf8;
 
 import 'package:meta/meta.dart';
 
@@ -16,6 +16,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
@@ -346,14 +347,49 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
-  final Status buildStatus =
-      logger.startProgress('Running Xcode build...', expectSlowOperation: true);
+  final File scriptOutputStreamFile = fs.systemTempDirectory
+      .createTempSync('flutter_build_log_pipe')
+      .childFile('pipe_to_stdout')
+      ..createSync(recursive: true);
+
+  Status buildSubStatus;
+  Status initialBuildStatus;
+
+  final StreamSubscription<FileSystemEvent> scriptOutputFileSubscription =
+      scriptOutputStreamFile.watch().listen((FileSystemEvent event) {
+        print(scriptOutputStreamFile.readAsLinesSync());
+        final String lastLine = scriptOutputStreamFile.readAsLinesSync().last;
+        if (lastLine == '  done') {
+          buildSubStatus?.stop();
+          buildSubStatus = null;
+        } else {
+          initialBuildStatus.cancel();
+          buildSubStatus = logger.startProgress(
+            lastLine,
+            expectSlowOperation: true,
+            progressIndicatorPadding: 40,
+          );
+        }
+      });
+
+  buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputStreamFile.absolute.path}');
+
+  final Stopwatch buildStopwatch = new Stopwatch()..start();
+  initialBuildStatus = logger.startProgress('Running Xcode build...');
   final RunResult buildResult = await runAsync(
     buildCommands,
     workingDirectory: app.appDirectory,
     allowReentrantFlutter: true
   );
-  buildStatus.stop();
+  buildSubStatus?.stop();
+  initialBuildStatus?.cancel();
+  buildStopwatch.start();
+  scriptOutputFileSubscription.cancel();
+  printStatus(
+    'Xcode build done',
+    ansiAlternative: 'Xcode build done'.padRight(53)
+        + '${getElapsedAsSeconds(buildStopwatch.elapsed).padLeft(5)}',
+  );
 
   // Run -showBuildSettings again but with the exact same parameters as the build.
   final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(

@@ -11,6 +11,13 @@ RunCommand() {
   return $?
 }
 
+StreamOutput() {
+  if [[ -n "$SCRIPT_OUTPUT_STREAM_FILE" ]]; then
+    echo "  $1" >> $SCRIPT_OUTPUT_STREAM_FILE
+    echo "$1"
+  fi
+}
+
 EchoError() {
   echo "$@" 1>&2
 }
@@ -103,13 +110,15 @@ BuildApp() {
       aot_flags="--${build_mode}"
     fi
 
+    StreamOutput "Building Dart code..."
     RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build aot \
       --output-dir="${build_dir}/aot"                                       \
       --target-platform=ios                                                 \
       --target="${target_path}"                                             \
       ${aot_flags}                                                          \
       ${local_engine_flag}                                                  \
-      ${preview_dart_2_flag}                                                \
+      ${preview_dart_2_flag}
+    StreamOutput "done"
 
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to build ${project_path}."
@@ -133,6 +142,7 @@ BuildApp() {
     precompilation_flag="--precompiled"
   fi
 
+  StreamOutput "Assembling resources..."
   RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build flx \
     --target="${target_path}"                                             \
     --output-file="${derived_dir}/app.flx"                                \
@@ -141,7 +151,8 @@ BuildApp() {
     --working-dir="${derived_dir}/flutter_assets"                         \
     ${precompilation_flag}                                                \
     ${local_engine_flag}                                                  \
-    ${preview_dart_2_flag}                                                \
+    ${preview_dart_2_flag}
+  StreamOutput "done"
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package ${project_path}."
