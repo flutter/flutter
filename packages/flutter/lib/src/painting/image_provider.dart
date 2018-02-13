@@ -442,7 +442,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     if (response == null || response.statusCode != 200)
       throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
-    final Uint8List bytes = response.bodyBytes;
+    final Uint8List bytes = await response.readAsBytes();
     if (bytes.lengthInBytes == 0)
       throw new Exception('NetworkImage is an empty file: $resolved');
 
