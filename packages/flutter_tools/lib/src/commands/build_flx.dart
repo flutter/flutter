@@ -21,6 +21,11 @@ class BuildFlxCommand extends BuildSubCommand {
     argParser.addOption('snapshot', defaultsTo: defaultSnapshotPath);
     argParser.addOption('depfile', defaultsTo: defaultDepfilePath);
     argParser.addFlag('preview-dart-2', negatable: false, hide: !verboseHelp);
+    argParser.addFlag(
+      'track-widget-creation',
+      hide: !verboseHelp,
+      help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
+    );
     argParser.addOption('working-dir', defaultsTo: getAssetBuildDirectory());
     argParser.addFlag('report-licensed-packages', help: 'Whether to report the names of all the packages that are included in the application\'s LICENSE file.', defaultsTo: false);
     usesPubOption();
@@ -51,7 +56,8 @@ class BuildFlxCommand extends BuildSubCommand {
       workingDirPath: argResults['working-dir'],
       previewDart2: argResults['preview-dart-2'],
       precompiledSnapshot: argResults['precompiled'],
-      reportLicensedPackages: argResults['report-licensed-packages']
+      reportLicensedPackages: argResults['report-licensed-packages'],
+      trackWidgetCreation: argResults['track-widget-creation'],
     );
   }
 }

@@ -40,7 +40,8 @@ Future<Null> build({
   String packagesPath,
   bool previewDart2 : false,
   bool precompiledSnapshot: false,
-  bool reportLicensedPackages: false
+  bool reportLicensedPackages: false,
+  bool trackWidgetCreation: false,
 }) async {
   outputPath ??= defaultFlxOutputPath;
   snapshotPath ??= defaultSnapshotPath;
@@ -73,6 +74,7 @@ Future<Null> build({
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       incrementalCompilerByteStorePath: fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
       mainPath: fs.file(mainPath).absolute.path,
+      trackWidgetCreation: trackWidgetCreation,
     );
     if (kernelBinaryFilename == null) {
       throwToolExit('Compiler terminated unexpectedly on $mainPath');

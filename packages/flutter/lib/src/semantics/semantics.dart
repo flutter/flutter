@@ -92,7 +92,7 @@ class SemanticsData extends Diagnosticable {
     @required this.decreasedValue,
     @required this.hint,
     @required this.textDirection,
-    @required this.nextNodeId,
+    @required this.previousNodeId,
     @required this.rect,
     @required this.textSelection,
     @required this.scrollPosition,
@@ -151,9 +151,9 @@ class SemanticsData extends Diagnosticable {
   /// [increasedValue], and [decreasedValue].
   final TextDirection textDirection;
 
-  /// The index indicating the ID of the next node in the traversal order after
+  /// The index indicating the ID of the previous node in the traversal order before
   /// this node for the platform's accessibility services.
-  final int nextNodeId;
+  final int previousNodeId;
 
   /// The currently selected text (or the position of the cursor) within [value]
   /// if this node represents a text field.
@@ -237,7 +237,7 @@ class SemanticsData extends Diagnosticable {
     properties.add(new StringProperty('decreasedValue', decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(new IntProperty('nextNodeId', nextNodeId, defaultValue: null));
+    properties.add(new IntProperty('previousNodeId', previousNodeId, defaultValue: null));
     if (textSelection?.isValid == true)
       properties.add(new MessageProperty('textSelection', '[${textSelection.start}, ${textSelection.end}]'));
     properties.add(new DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
@@ -258,7 +258,7 @@ class SemanticsData extends Diagnosticable {
         && typedOther.decreasedValue == decreasedValue
         && typedOther.hint == hint
         && typedOther.textDirection == textDirection
-        && typedOther.nextNodeId == nextNodeId
+        && typedOther.previousNodeId == previousNodeId
         && typedOther.rect == rect
         && setEquals(typedOther.tags, tags)
         && typedOther.textSelection == textSelection
@@ -269,7 +269,7 @@ class SemanticsData extends Diagnosticable {
   }
 
   @override
-  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, nextNodeId, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform);
+  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, previousNodeId, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform);
 }
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
@@ -1067,28 +1067,28 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// The sort order for ordering the traversal of [SemanticsNode]s by the
   /// platform's accessibility services (e.g. VoiceOver on iOS and TalkBack on
-  /// Android). This is used to determine the [nextNodeId] during a semantics update.
+  /// Android). This is used to determine the [previousNodeId] during a semantics update.
   SemanticsSortOrder _sortOrder;
   SemanticsSortOrder get sortOrder => _sortOrder;
 
-  /// The ID of the next node in the traversal order after this node.
+  /// The ID of the previous node in the traversal order before this node.
   ///
   /// Only valid after at least one semantics update has been built.
   ///
   /// This is the value passed to the engine to tell it what the order
   /// should be for traversing semantics nodes.
   ///
-  /// If this is set to -1, it will indicate that there is no next node to
-  /// the engine (i.e. this is the last node in the sort order). When it is
+  /// If this is set to -1, it will indicate that there is no previous node to
+  /// the engine (i.e. this is the first node in the sort order). When it is
   /// null, it means that no semantics update has been built yet.
-  int _nextNodeId;
-  void _updateNextNodeId(int value) {
-    if (value == _nextNodeId)
+  int _previousNodeId;
+  void _updatePreviousNodeId(int value) {
+    if (value == _previousNodeId)
       return;
-    _nextNodeId = value;
+    _previousNodeId = value;
     _markDirty();
   }
-  int get nextNodeId => _nextNodeId;
+  int get previousNodeId => _previousNodeId;
 
   /// The currently selected text (or the position of the cursor) within [value]
   /// if this node represents a text field.
@@ -1194,7 +1194,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     String increasedValue = _increasedValue;
     String decreasedValue = _decreasedValue;
     TextDirection textDirection = _textDirection;
-    int nextNodeId = _nextNodeId;
+    int previousNodeId = _previousNodeId;
     Set<SemanticsTag> mergedTags = tags == null ? null : new Set<SemanticsTag>.from(tags);
     TextSelection textSelection = _textSelection;
     double scrollPosition = _scrollPosition;
@@ -1207,7 +1207,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         flags |= node._flags;
         actions |= node._actionsAsBits;
         textDirection ??= node._textDirection;
-        nextNodeId ??= node._nextNodeId;
+        previousNodeId ??= node._previousNodeId;
         textSelection ??= node._textSelection;
         scrollPosition ??= node._scrollPosition;
         scrollExtentMax ??= node._scrollExtentMax;
@@ -1247,7 +1247,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       decreasedValue: decreasedValue,
       hint: hint,
       textDirection: textDirection,
-      nextNodeId: nextNodeId,
+      previousNodeId: previousNodeId,
       rect: rect,
       transform: transform,
       tags: mergedTags,
@@ -1289,7 +1289,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       increasedValue: data.increasedValue,
       hint: data.hint,
       textDirection: data.textDirection,
-      nextNodeId: data.nextNodeId,
+      previousNodeId: data.previousNodeId,
       textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
       scrollPosition: data.scrollPosition != null ? data.scrollPosition : double.nan,
@@ -1363,7 +1363,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(new StringProperty('decreasedValue', _decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', _hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
-    properties.add(new IntProperty('nextNodeId', _nextNodeId, defaultValue: null));
+    properties.add(new IntProperty('previousNodeId', _previousNodeId, defaultValue: null));
     properties.add(new DiagnosticsProperty<SemanticsSortOrder>('sortOrder', sortOrder, defaultValue: null));
     if (_textSelection?.isValid == true)
       properties.add(new MessageProperty('text selection', '[${_textSelection.start}, ${_textSelection.end}]'));
@@ -1431,18 +1431,74 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   }
 }
 
-/// A helper class to contain a semantics node and the effective
-/// sort order of that node during the traversal of the tree. This is
-/// what is actually sorted when semantics nodes are sorted.
+/// This class defines the comparison that is used to sort [SemanticsNode]s
+/// before sending them to the platform side.
+///
+/// This is a helper class used to contain a [node], the effective
+/// [order], the globally transformed starting corner [globalStartCorner],
+/// and the containing node's [containerTextDirection] during the traversal of
+/// the semantics node tree. A null value is allowed for [containerTextDirection],
+/// because in that case we want to fall back to ordering by child insertion
+/// order for nodes that are equal after sorting from top to bottom.
 class _TraversalSortNode implements Comparable<_TraversalSortNode> {
-  _TraversalSortNode(this.node, this.order);
+  _TraversalSortNode(this.node, this.order, this.containerTextDirection, Matrix4 transform)
+    : assert(node != null) {
+    // When containerTextDirection is null, this is set to topLeft, but the x
+    // coordinate is also ignored when doing the comparison in that case, so
+    // this isn't actually expressing a directionality opinion.
+    globalStartCorner = _transformPoint(
+      containerTextDirection == TextDirection.rtl ? node.rect.topRight : node.rect.topLeft,
+      transform,
+    );
+  }
+
+  /// The node that this sort node represents.
   SemanticsNode node;
+
+  /// The effective text direction for this node is the directionality that
+  /// its container has.
+  TextDirection containerTextDirection;
+
+  /// This is the effective sort order for this node, taking into account its
+  /// parents.
   SemanticsSortOrder order;
 
+  /// The is the starting corner for the rectangle on this semantics node in
+  /// global coordinates. When the container has the directionality
+  /// [TextDirection.ltr], this is the upper left corner.  When the container
+  /// has the directionality [TextDirection.rtl], this is the upper right
+  /// corner. When the container has no directionality, this is set, but the
+  /// x coordinate is ignored.
+  Offset globalStartCorner;
+
+  static Offset _transformPoint(Offset point, Matrix4 matrix) {
+    final Vector3 result = matrix.transform3(new Vector3(point.dx, point.dy, 0.0));
+    return new Offset(result.x, result.y);
+  }
+
+  /// Compares the node's start corner with that of `other`.
+  ///
+  /// Sorts top to bottom, and then start to end.
+  ///
+  /// This takes into account the container text direction, since the
+  /// coordinate system has zero on the left, and we need to compare
+  /// differently for different text directions.
+  ///
+  /// If no text direction is available (i.e. [containerTextDirection] is
+  /// null), then we sort by vertical position first, and then by child
+  /// insertion order.
   int _compareGeometry(_TraversalSortNode other) {
-    // TODO(gspencer): Move the geometric comparison from the platform side to here.
-    // This involves calculating the globally-transformed quad for the semantics node rect
-    // and then sorting by its bounding box, based on the container's directionality.
+    final int verticalDiff = globalStartCorner.dy.compareTo(other.globalStartCorner.dy);
+    if (verticalDiff != 0) {
+      return verticalDiff;
+    }
+    switch (containerTextDirection) {
+      case TextDirection.rtl:
+        return other.globalStartCorner.dx.compareTo(globalStartCorner.dx);
+      case TextDirection.ltr:
+        return globalStartCorner.dx.compareTo(other.globalStartCorner.dx);
+    }
+    // In case containerTextDirection is null we fall back to child insertion order.
     return 0;
   }
 
@@ -1483,32 +1539,49 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
-  // Updates the nextNodeId IDs on the semantics nodes. These IDs are used
+  // Updates the previousNodeId IDs on the semantics nodes. These IDs are used
   // on the platform side to order the nodes for traversal by the accessibility
-  // services. If the nextNodeId for a node changes, the node will be marked as
+  // services. If the previousNodeId for a node changes, the node will be marked as
   // dirty.
   void _updateTraversalOrder() {
     final List<_TraversalSortNode> nodesInSemanticsTraversalOrder = <_TraversalSortNode>[];
     SemanticsSortOrder currentSortOrder = new SemanticsSortOrder(keys: <SemanticsSortKey>[]);
+    Matrix4 currentTransform = new Matrix4.identity();
+    TextDirection currentTextDirection = rootSemanticsNode.textDirection;
     bool visitor(SemanticsNode node) {
       final SemanticsSortOrder previousOrder = currentSortOrder;
+      final Matrix4 previousTransform = currentTransform.clone();
       if (node.sortOrder != null) {
         currentSortOrder = currentSortOrder.merge(node.sortOrder);
       }
-      final _TraversalSortNode traversalNode = new _TraversalSortNode(node, currentSortOrder);
+      if (node.transform != null) {
+        currentTransform.multiply(node.transform);
+      }
+      final _TraversalSortNode traversalNode = new _TraversalSortNode(
+        node,
+        currentSortOrder,
+        currentTextDirection,
+        currentTransform,
+      );
+      // The text direction in force here is the parent's text direction.
       nodesInSemanticsTraversalOrder.add(traversalNode);
       if (node.hasChildren) {
+        final TextDirection previousTextDirection = currentTextDirection;
+        currentTextDirection = node.textDirection;
+        // Now visit the children with this node's text direction in force.
         node.visitChildren(visitor);
+        currentTextDirection = previousTextDirection;
       }
       currentSortOrder = previousOrder;
+      currentTransform = previousTransform;
       return true;
     }
     rootSemanticsNode.visitChildren(visitor);
     nodesInSemanticsTraversalOrder.sort();
-    int nextNodeId = -1;
-    for (_TraversalSortNode node in nodesInSemanticsTraversalOrder.reversed) {
-      node.node._updateNextNodeId(nextNodeId);
-      nextNodeId = node.node.id;
+    int previousNodeId = -1;
+    for (_TraversalSortNode node in nodesInSemanticsTraversalOrder) {
+      node.node._updatePreviousNodeId(previousNodeId);
+      previousNodeId = node.node.id;
     }
   }
 
@@ -1516,7 +1589,7 @@ class SemanticsOwner extends ChangeNotifier {
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;
-    // Nodes that change their nextNodeId will be marked as dirty.
+    // Nodes that change their previousNodeId will be marked as dirty.
     _updateTraversalOrder();
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
@@ -2522,7 +2595,9 @@ String _concatStrings({
 /// of keys can co-exist at the same level and not interfere with each other,
 /// allowing for sorting into groups.  Keys that evaluate as equal, or when
 /// compared with Widgets that don't have [Semantics], fall back to the default
-/// upper-start-to-lower-end geometric ordering.
+/// upper-start-to-lower-end geometric ordering if a text directionality
+/// exists, and they sort from top to bottom followed by child insertion order
+/// when no directionality is present.
 ///
 /// Since widgets are globally sorted by their sort key, the order does not have
 /// to conform to the widget hierarchy.

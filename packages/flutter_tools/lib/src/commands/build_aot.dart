@@ -341,6 +341,7 @@ Future<String> _buildAotSnapshot(
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn : true,
       aot : true,
+      trackWidgetCreation: false,
     );
     if (mainPath == null) {
       printError('Compiler terminated unexpectedly.');
