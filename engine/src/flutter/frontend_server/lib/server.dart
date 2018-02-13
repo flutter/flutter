@@ -50,6 +50,12 @@ ArgParser _argParser = new ArgParser(allowTrailingOptions: true)
           ' by gen_snapshot(which needs platform embedded) vs'
           ' Flutter engine(which does not)',
       defaultsTo: true)
+  ..addOption('output-dill',
+      help: 'Output path for the generated dill',
+      defaultsTo: null)
+  ..addOption('output-incremental-dill',
+      help: 'Output path for the generated incremental dill',
+      defaultsTo: null)
   ..addOption('packages',
       help: '.packages file to use for compilation',
       defaultsTo: null)
@@ -152,8 +158,12 @@ class _FrontendCompiler implements CompilerInterface {
     IncrementalCompiler generator,
   }) async {
     final Uri filenameUri = Uri.base.resolveUri(new Uri.file(filename));
-    _kernelBinaryFilenameFull = '$filename.dill';
-    _kernelBinaryFilenameIncremental = '$filename.incremental.dill';
+    _kernelBinaryFilenameFull = options['output-dill'] ?? '$filename.dill';
+    _kernelBinaryFilenameIncremental =
+        options['output-incremental-dill'] ??
+          options['output-dill'] != null
+            ? '${options["output-dill"]}.incremental.dill'
+            : '$filename.incremental.dill';
     _kernelBinaryFilename = _kernelBinaryFilenameFull;
     final String boundaryKey = new Uuid().generateV4();
     _outputStream.writeln('result $boundaryKey');

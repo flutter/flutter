@@ -368,6 +368,36 @@ Future<int> main() async {
       streamController.close();
     });
 
+    group('compile with output path', ()
+    {
+      final CompilerInterface compiler = new _MockedCompiler();
+
+      test('compile from command line', () async {
+        final List<String> args = <String>[
+          'server.dart',
+          '--sdk-root',
+          'sdkroot',
+          '--output-dill',
+          '/foo/bar/server.dart.dill',
+          '--output-incremental-dill',
+          '/foo/bar/server.incremental.dart.dill',
+        ];
+        final int exitcode = await starter(args, compiler: compiler);
+        expect(exitcode, equals(0));
+        final List<ArgResults> capturedArgs =
+            verify(
+                compiler.compile(
+                  argThat(equals('server.dart')),
+                  captureAny,
+                  generator: any,
+                )
+            ).captured;
+        expect(capturedArgs.single['sdk-root'], equals('sdkroot'));
+        expect(capturedArgs.single['strong'], equals(false));
+      });
+    });
+
+
   });
   return 0;
 }
