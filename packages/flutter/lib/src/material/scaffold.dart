@@ -423,8 +423,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     // of animating in.
     if (widget.child != null)
       _currentController.value = 1.0;
-    else
-      _currentController.forward();
   }
 
   @override
