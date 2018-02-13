@@ -124,7 +124,8 @@ typedef String MessageFilter(String message);
 /// applying filtering. The pub process will not receive anything on its stdin stream.
 ///
 /// The `--trace` argument is passed to `pub` (by mutating the provided
-/// `arguments` list) when `isRunningOnBot`, or if `showTraceForErrors` is true.
+/// `arguments` list) when `showTraceForErrors` is true, and when `showTraceForErrors`
+/// is null/unset, and `isRunningOnBot` is true.
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
