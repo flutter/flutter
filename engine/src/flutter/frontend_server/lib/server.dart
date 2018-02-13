@@ -1,3 +1,7 @@
+// Copyright 2017 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 library frontend_server;
 
 import 'dart:async';
@@ -21,6 +25,8 @@ import 'package:kernel/target/targets.dart';
 import 'package:usage/uuid/uuid.dart';
 import 'package:vm/incremental_compiler.dart' show IncrementalCompiler;
 import 'package:vm/kernel_front_end.dart' show compileToKernel;
+
+import 'package:flutter_kernel_transformers/track_widget_constructor_locations.dart';
 
 ArgParser _argParser = new ArgParser(allowTrailingOptions: true)
   ..addFlag('train',
@@ -46,7 +52,10 @@ ArgParser _argParser = new ArgParser(allowTrailingOptions: true)
       defaultsTo: true)
   ..addOption('packages',
       help: '.packages file to use for compilation',
-      defaultsTo: null);
+      defaultsTo: null)
+  ..addFlag('track-widget-creation',
+      help: 'Run a kernel transformer to track creation locations for widgets.',
+      defaultsTo: false);
 
 String _usage = '''
 Usage: server [options] [input.dart]
@@ -115,9 +124,12 @@ class BinaryPrinterFactory {
 }
 
 class _FrontendCompiler implements CompilerInterface {
-  _FrontendCompiler(this._outputStream, {this.printerFactory}) {
+  _FrontendCompiler(this._outputStream, {this.printerFactory, this.trackWidgetCreation}) {
     _outputStream ??= stdout;
     printerFactory ??= new BinaryPrinterFactory();
+    if (trackWidgetCreation) {
+      widgetCreatorTracker = new WidgetCreatorTracker();
+    }
   }
 
   StringSink _outputStream;
@@ -130,6 +142,8 @@ class _FrontendCompiler implements CompilerInterface {
   String _kernelBinaryFilename;
   String _kernelBinaryFilenameIncremental;
   String _kernelBinaryFilenameFull;
+  final bool trackWidgetCreation;
+  WidgetCreatorTracker widgetCreatorTracker;
 
   @override
   Future<Null> compile(
@@ -171,6 +185,7 @@ class _FrontendCompiler implements CompilerInterface {
       program = await _runWithPrintRedirection(() =>
           compileToKernel(filenameUri, compilerOptions, aot: options['aot']));
     }
+    runFlutterSpecificKernelTransforms(program);
     if (program != null) {
       final IOSink sink = new File(_kernelBinaryFilename).openWrite();
       final BinaryPrinter printer = printerFactory.newBinaryPrinter(sink);
@@ -223,12 +238,23 @@ class _FrontendCompiler implements CompilerInterface {
     }
   }
 
+  void runFlutterSpecificKernelTransforms(Program program) {
+    if (program == null) {
+      return;
+    }
+
+    if (trackWidgetCreation) {
+      widgetCreatorTracker.transform(program);
+    }
+  }
+
   @override
   Future<Null> recompileDelta() async {
     final String boundaryKey = new Uuid().generateV4();
     _outputStream.writeln('result $boundaryKey');
     await invalidateIfBootstrapping();
     final Program deltaProgram = await _generator.compile();
+    runFlutterSpecificKernelTransforms(deltaProgram);
     final IOSink sink = new File(_kernelBinaryFilename).openWrite();
     final BinaryPrinter printer = printerFactory.newBinaryPrinter(sink);
     printer.writeProgramFile(deltaProgram);
@@ -266,6 +292,7 @@ class _FrontendCompiler implements CompilerInterface {
     }
     return Uri.base.resolve(uriPath);
   }
+
 
   /// Runs the given function [f] in a Zone that redirects all prints into
   /// [_outputStream].
@@ -314,8 +341,11 @@ Future<int> starter(
     return 0;
   }
 
-  compiler ??=
-      new _FrontendCompiler(output, printerFactory: binaryPrinterFactory);
+  compiler ??= new _FrontendCompiler(
+    output,
+    printerFactory: binaryPrinterFactory,
+    trackWidgetCreation: options['track-widget-creation'],
+  );
   input ??= stdin;
 
   // Has to be a directory, that won't have any of the compiled application
