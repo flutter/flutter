@@ -56,6 +56,9 @@ abstract class FabPositioner {
 
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
   Offset getOffset(ScaffoldGeometry scaffoldGeometry);
+
+  @override
+  String toString() => '$runtimeType()';
 }
 
 /// Provider of [FloatingActionButton] animations.
@@ -83,6 +86,8 @@ abstract class FabMotionAnimator {
   /// corresponding to 0 and 360 degrees, while 0.5 corresponds to 180 degrees.
   Animation<double> getRotationAnimation({@required Animation<double> parent});
 
+  @override
+  String toString() => '$runtimeType';
 }
 
 class _ScalingFabMotionAnimator extends FabMotionAnimator {
@@ -130,20 +135,8 @@ class _MaxAnimation<T> extends CompoundAnimation<T> {
 /// [FloatingActionButton].
 @immutable
 class ScaffoldGeometry {
-  /// The [Scaffold]'s [BuildContext].
-  /// 
-  /// This is used to, for example, retrieve the [Directionality] of the 
-  /// Scaffold.
-  final BuildContext context;
-
-  /// The [Size] of the whole [Scaffold].
-  final Size scaffoldSize;
-
   /// The [Size] of the Scaffold's [FloatingActionButton] (if available).
   final Size fabSize;
-
-  /// The [Size] of the Scaffold's [SnackBar] (if available).
-  final Size snackBarSize;
 
   /// The [Size] of the Scaffold's [BottomSheet] (if available).
   final Size bottomSheetSize;
@@ -154,7 +147,16 @@ class ScaffoldGeometry {
   /// The minimum horizontal padding the [FloatingActionButton] should observe.
   final double horizontalFabPadding;
 
-  const ScaffoldGeometry({this.context, this.scaffoldSize, this.fabSize, this.snackBarSize, this.bottomSheetSize, this.contentBottom, this.horizontalFabPadding});
+  /// The [Size] of the whole [Scaffold].
+  final Size scaffoldSize;
+
+  /// The [Size] of the Scaffold's [SnackBar] (if available).
+  final Size snackBarSize;
+
+  /// The [Scaffold]'s [TextDirection].
+  final TextDirection textDirection;
+
+  const ScaffoldGeometry({this.bottomSheetSize, this.contentBottom, this.fabSize, this.horizontalFabPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
 }
 
 class _CenterFloatFab extends FabPositioner {
@@ -187,10 +189,9 @@ class _EndFloatFab extends FabPositioner {
   @override
   Offset getOffset(ScaffoldGeometry scaffoldGeometry) {
     // Compute the x-axis offset.
-    final TextDirection textDirection = Directionality.of(scaffoldGeometry.context);
     double fabX;
-    assert(textDirection != null);
-    switch (textDirection) {
+    assert(scaffoldGeometry.textDirection != null);
+    switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
         fabX = _kFloatingActionButtonMargin + scaffoldGeometry.horizontalFabPadding;
         break;
@@ -323,13 +324,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       
       // To account for the FAB position being changed, we'll lerp between its old and new position.
       final ScaffoldGeometry currentGeometry = new ScaffoldGeometry(
-        context: context,
-        scaffoldSize: size,
-        fabSize: fabSize,
-        snackBarSize: snackBarSize,
         bottomSheetSize: bottomSheetSize,
         contentBottom: contentBottom,
+        fabSize: fabSize,
         horizontalFabPadding: horizontalPadding,
+        scaffoldSize: size,
+        snackBarSize: snackBarSize,
+        textDirection: textDirection,
       );
       final Offset currentFabOffset = currentFabPosition.getOffset(currentGeometry);
       final Offset previousFabOffset = previousFabPosition.getOffset(currentGeometry);
@@ -359,7 +360,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         || oldDelegate.bottomViewInset != bottomViewInset
         || oldDelegate.horizontalPadding != horizontalPadding
         || oldDelegate.textDirection != textDirection
-        || oldDelegate.context != context
         || !(fabMoveAnimation.isCompleted || fabMoveAnimation.isDismissed)
         || oldDelegate.previousFabPosition != previousFabPosition
         || oldDelegate.currentFabPosition != currentFabPosition;
