@@ -291,7 +291,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  Future<LaunchResult> startApp(
+  Future<LaunchResult> pstartAp(
     ApplicationPackage app, {
     String mainPath,
     String route,
