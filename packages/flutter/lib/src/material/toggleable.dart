@@ -22,22 +22,22 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// Creates a toggleable render object.
   ///
   /// The [activeColor], and [inactiveColor] arguments must not be
-  /// null. The [value] can only be null if triState is true.
+  /// null. The [value] can only be null if tristate is true.
   RenderToggleable({
     @required bool value,
-    bool triState: false,
+    bool tristate: false,
     Size size,
     @required Color activeColor,
     @required Color inactiveColor,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
-  }) : assert(triState != null),
-       assert(triState || value != null),
+  }) : assert(tristate != null),
+       assert(tristate || value != null),
        assert(activeColor != null),
        assert(inactiveColor != null),
        assert(vsync != null),
        _value = value,
-       _triState = triState,
+       _tristate = tristate,
        _activeColor = activeColor,
        _inactiveColor = inactiveColor,
        _onChanged = onChanged,
@@ -82,7 +82,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// The visual value of the control.
   ///
   /// When the control is inactive, the [value] is false and this animation has
-  /// the value 0.0. When the control is active, the value either true or triState
+  /// the value 0.0. When the control is active, the value either true or tristate
   /// is true and the value is null. When the control is active the animation
   /// has a value of 1.0. When the control is changing from inactive
   /// to active (or vice versa), [value] is the target value and this animation
@@ -117,7 +117,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// False if this control is "inactive" (not checked, off, or unselected).
   ///
   /// If value is true then the control "active" (checked, on, or selected). If
-  /// triState is true and value is null, then the control is considered to be
+  /// tristate is true and value is null, then the control is considered to be
   /// in its third or "indeterminate" state.
   ///
   /// When the value changes, this object starts the [positionController] and
@@ -126,7 +126,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   bool get value => _value;
   bool _value;
   set value(bool value) {
-    assert(triState || value != null);
+    assert(tristate || value != null);
     if (value == _value)
       return;
     _value = value;
@@ -143,15 +143,15 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// If true, [value] can be true, false, or null, otherwise [value] must
   /// be true or false.
   ///
-  /// When [triState] is true and [value] is null, then the control is
+  /// When [tristate] is true and [value] is null, then the control is
   /// considered to be in its third or "indeterminate" state.
-  bool get triState => _triState;
-  bool _triState;
-  set triState(bool value) {
-    assert(triState != null);
-    if (value == _triState)
+  bool get tristate => _tristate;
+  bool _tristate;
+  set tristate(bool value) {
+    assert(tristate != null);
+    if (value == _tristate)
       return;
-    _triState = value;
+    _tristate = value;
     markNeedsSemanticsUpdate();
   }
 

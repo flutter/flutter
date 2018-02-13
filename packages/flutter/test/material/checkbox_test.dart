@@ -103,7 +103,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('CheckBox triState:true', (WidgetTester tester) async {
+  testWidgets('CheckBox tristate:true', (WidgetTester tester) async {
     bool checkBoxValue;
 
     await tester.pumpWidget(
@@ -111,7 +111,7 @@ void main() {
         child: new StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return new Checkbox(
-              triState: true,
+              tristate: true,
               value: checkBoxValue,
               onChanged: (bool value) {
                 setState(() {

@@ -22,8 +22,8 @@ import 'toggleable.dart';
 /// the checkbox.
 ///
 /// The checkbox can optionally display three values - true, false, and null -
-/// if [triState] is true. When [value] is null a dash is displayed. By default
-/// triState is false and the checkbox's value must be true or false.
+/// if [tristate] is true. When [value] is null a dash is displayed. By default
+/// [tristate] is false and the checkbox's [value] must be true or false.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -47,20 +47,20 @@ class Checkbox extends StatefulWidget {
   ///
   /// The following arguments are required:
   ///
-  /// * [value], which determines whether the checkbox is checked. The value can
-  ///   only be be null if triState is true.
+  /// * [value], which determines whether the checkbox is checked. The [value]
+  ///   can only be be null if [tristate] is true.
   /// * [onChanged], which is called when the value of the checkbox should
   ///   change. It can be set to null to disable the checkbox.
   ///
-  /// The value of [triState] must not be null.
+  /// The value of [tristate] must not be null.
   const Checkbox({
     Key key,
     @required this.value,
-    this.triState: false,
+    this.tristate: false,
     @required this.onChanged,
     this.activeColor,
-  }) : assert(triState != null),
-       assert(triState || value != null),
+  }) : assert(tristate != null),
+       assert(tristate || value != null),
        super(key: key);
 
   /// Whether this checkbox is checked.
@@ -77,10 +77,10 @@ class Checkbox extends StatefulWidget {
   /// If this callback is null, the checkbox will be displayed as disabled
   /// and will not respond to input gestures.
   ///
-  /// When the checkbox is tapped, if [triState] is false (the default) then
-  /// the onChanged callback will be applied to `!value`. If [triState] is
-  /// true this callback will be applied to false if the current value is true,
-  /// false otherwise.
+  /// When the checkbox is tapped, if [tristate] is false (the default) then
+  /// the [onChanged] callback will be applied to `!value`. If [tristate] is
+  /// true this callback will be applied to false if the current [value]
+  /// is true, false otherwise.
   ///
   /// The callback provided to [onChanged] should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
@@ -112,8 +112,8 @@ class Checkbox extends StatefulWidget {
   /// Typically tri-state checkboxes are disabled (the onChanged callback is
   /// null) so they don't respond to taps.
   ///
-  /// If triState is false (the default), [value] must not be null.
-  final bool triState;
+  /// If tristate is false (the default), [value] must not be null.
+  final bool tristate;
 
   /// The width of a checkbox widget.
   static const double width = 18.0;
@@ -129,7 +129,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     final ThemeData themeData = Theme.of(context);
     return new _CheckboxRenderObjectWidget(
       value: widget.value,
-      triState: widget.triState,
+      tristate: widget.tristate,
       activeColor: widget.activeColor ?? themeData.accentColor,
       inactiveColor: widget.onChanged != null ? themeData.unselectedWidgetColor : themeData.disabledColor,
       onChanged: widget.onChanged,
@@ -142,20 +142,20 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   const _CheckboxRenderObjectWidget({
     Key key,
     @required this.value,
-    @required this.triState,
+    @required this.tristate,
     @required this.activeColor,
     @required this.inactiveColor,
     @required this.onChanged,
     @required this.vsync,
-  }) : assert(triState != null),
-       assert(triState || value != null),
+  }) : assert(tristate != null),
+       assert(tristate || value != null),
        assert(activeColor != null),
        assert(inactiveColor != null),
        assert(vsync != null),
        super(key: key);
 
   final bool value;
-  final bool triState;
+  final bool tristate;
   final Color activeColor;
   final Color inactiveColor;
   final ValueChanged<bool> onChanged;
@@ -164,7 +164,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   @override
   _RenderCheckbox createRenderObject(BuildContext context) => new _RenderCheckbox(
     value: value,
-    triState: triState,
+    tristate: tristate,
     activeColor: activeColor,
     inactiveColor: inactiveColor,
     onChanged: onChanged,
@@ -175,7 +175,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderCheckbox renderObject) {
     renderObject
       ..value = value
-      ..triState = triState
+      ..tristate = tristate
       ..activeColor = activeColor
       ..inactiveColor = inactiveColor
       ..onChanged = onChanged
@@ -190,7 +190,7 @@ const double _kStrokeWidth = 2.0;
 class _RenderCheckbox extends RenderToggleable {
   _RenderCheckbox({
     bool value,
-    bool triState,
+    bool tristate,
     Color activeColor,
     Color inactiveColor,
     ValueChanged<bool> onChanged,
@@ -198,12 +198,13 @@ class _RenderCheckbox extends RenderToggleable {
   }): _showDash = value == null,
       super(
         value: value,
-        triState: triState,
+        tristate: tristate,
         activeColor: activeColor,
         inactiveColor: inactiveColor,
         onChanged: onChanged,
         size: const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius),
-        vsync: vsync);
+        vsync: vsync,
+      );
 
   bool _showDash;
 
