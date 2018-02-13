@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
 import 'package:flutter_tools/src/ios/mac.dart';
@@ -243,15 +242,12 @@ void main() {
   });
 
   group('Diagnose Xcode build failure', () {
-    BuildableIOSApp app;
+    Map<String, String> buildSettings;
 
     setUp(() {
-      app = new BuildableIOSApp(
-        projectBundleId: 'test.app',
-        buildSettings: <String, String>{
-          'For our purposes': 'a non-empty build settings map is valid',
-        },
-      );
+      buildSettings = <String, String>{
+        'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
+      };
     });
 
     testUsingContext('No provisioning profile shows message', () async {
@@ -313,13 +309,14 @@ Could not build the precompiled application for the device.
 
 Error launching application on iPhone.''',
         xcodeBuildExecution: new XcodeBuildExecution(
-          <String>['xcrun', 'xcodebuild', 'blah'],
-          '/blah/blah',
-          buildForPhysicalDevice: true
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          buildForPhysicalDevice: true,
+          buildSettings: buildSettings,
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult, app);
+      await diagnoseXcodeBuildFailure(buildResult);
       expect(
         testLogger.errorText,
         contains('No Provisioning Profile was found for your project\'s Bundle Identifier or your device.'),
@@ -393,13 +390,14 @@ Xcode's output:
 
 Could not build the precompiled application for the device.''',
         xcodeBuildExecution: new XcodeBuildExecution(
-          <String>['xcrun', 'xcodebuild', 'blah'],
-          '/blah/blah',
-          buildForPhysicalDevice: true
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          buildForPhysicalDevice: true,
+          buildSettings: buildSettings,
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult, app);
+      await diagnoseXcodeBuildFailure(buildResult);
       expect(
         testLogger.errorText,
         contains('Building a deployable iOS app requires a selected Development Team with a Provisioning Profile'),

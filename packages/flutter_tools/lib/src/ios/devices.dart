@@ -172,7 +172,7 @@ class IOSDevice extends Device {
       );
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');
-        await diagnoseXcodeBuildFailure(buildResult, app);
+        await diagnoseXcodeBuildFailure(buildResult);
         printError('');
         return new LaunchResult.failed();
       }
@@ -189,8 +189,13 @@ class IOSDevice extends Device {
       return new LaunchResult.failed();
     }
 
+    final bool strongMode = platformArgs['strong'] ?? false;
+
     // Step 3: Attempt to install the application on the device.
     final List<String> launchArguments = <String>['--enable-dart-profiling'];
+
+    if (strongMode)
+      launchArguments.add('--strong');
 
     if (debuggingOptions.startPaused)
       launchArguments.add('--start-paused');

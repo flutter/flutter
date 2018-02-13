@@ -316,8 +316,13 @@ class IOSSimulator extends Device {
         return new LaunchResult.failed();
     }
 
+    final bool strongMode = platformArgs['strong'] ?? false;
+
     // Prepare launch arguments.
     final List<String> args = <String>['--enable-dart-profiling'];
+
+    if (strongMode)
+      args.add('--strong');
 
     if (!prebuiltApplication) {
       args.addAll(<String>[
@@ -411,11 +416,15 @@ class IOSSimulator extends Device {
     await SimControl.instance.install(id, fs.path.absolute(bundle.path));
   }
 
-  Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) =>
-      // When running in previewDart2 mode, we still need to run compiler to
-      // produce kernel file for the application.
-      flx.build(precompiledSnapshot: !buildInfo.previewDart2,
-          previewDart2: buildInfo.previewDart2);
+  Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) {
+    // When running in previewDart2 mode, we still need to run compiler to
+    // produce kernel file for the application.
+    return flx.build(
+      precompiledSnapshot: !buildInfo.previewDart2,
+      previewDart2: buildInfo.previewDart2,
+      trackWidgetCreation: buildInfo.trackWidgetCreation,
+    );
+  }
 
   @override
   Future<bool> stopApp(ApplicationPackage app) async {

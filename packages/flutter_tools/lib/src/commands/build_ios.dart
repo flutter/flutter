@@ -76,7 +76,7 @@ class BuildIOSCommand extends BuildSubCommand {
     );
 
     if (!result.success) {
-      await diagnoseXcodeBuildFailure(result, app);
+      await diagnoseXcodeBuildFailure(result);
       throwToolExit('Encountered error while building for $logTarget.');
     }
 
