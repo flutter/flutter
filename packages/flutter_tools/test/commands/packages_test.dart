@@ -29,6 +29,18 @@ void main() {
       temp.deleteSync(recursive: true);
     });
 
+    Future<String> createProjectWithPlugin(String plugin) async {
+      final String projectPath = await createProject(temp);
+      final File pubspec = fs.file(fs.path.join(projectPath, 'pubspec.yaml'));
+      String content = await pubspec.readAsString();
+      content = content.replaceFirst(
+        '\ndependencies:\n',
+        '\ndependencies:\n  $plugin:\n',
+      );
+      await pubspec.writeAsString(content, flush: true);
+      return projectPath;
+    }
+
     Future<Null> runCommandIn(String projectPath, String verb, { List<String> args }) async {
       final PackagesCommand command = new PackagesCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
@@ -45,21 +57,57 @@ void main() {
       expect(fs.isFileSync(fs.path.join(projectPath, relPath)), true);
     }
 
-    void expectDependenciesToHaveBeenResolved(String projectPath) {
+    void expectContains(String projectPath, String relPath, String substring) {
+      expectExists(projectPath, relPath);
+      expect(
+        fs.file(fs.path.join(projectPath, relPath)).readAsStringSync(),
+        contains(substring),
+      );
+    }
+
+    void expectNotExists(String projectPath, String relPath) {
+      expect(fs.isFileSync(fs.path.join(projectPath, relPath)), false);
+    }
+
+    void expectNotContains(String projectPath, String relPath, String substring) {
+      expectExists(projectPath, relPath);
+      expect(
+        fs.file(fs.path.join(projectPath, relPath)).readAsStringSync(),
+        isNot(contains(substring)),
+      );
+    }
+
+    void expectDependenciesResolved(String projectPath) {
       expectExists(projectPath, '.packages');
       expectExists(projectPath, 'pubspec.lock');
     }
 
-    void expectPluginsToHaveBeenInjected(String projectPath) {
+    void expectZeroPluginsInjected(String projectPath) {
+      expectNotExists(projectPath, '.flutter-plugins');
+      expectNotExists(projectPath, 'ios/Podfile');
       expectExists(projectPath, 'ios/Runner/GeneratedPluginRegistrant.h');
       expectExists(projectPath, 'ios/Runner/GeneratedPluginRegistrant.m');
       expectExists(projectPath, 'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java');
+      expectNotContains(projectPath, 'ios/Flutter/Debug.xcconfig', '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"');
+      expectNotContains(projectPath, 'ios/Flutter/Release.xcconfig', '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"');
     }
 
-    void removeGitIgnoredFiles(String projectPath) {
+    void expectPluginInjected(String projectPath) {
+      expectExists(projectPath, '.flutter-plugins');
+      expectExists(projectPath, 'ios/Podfile');
+      expectExists(projectPath, 'ios/Runner/GeneratedPluginRegistrant.h');
+      expectExists(projectPath, 'ios/Runner/GeneratedPluginRegistrant.m');
+      expectExists(projectPath, 'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java');
+      expectContains(projectPath, 'ios/Flutter/Debug.xcconfig', '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"');
+      expectContains(projectPath, 'ios/Flutter/Release.xcconfig', '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"');
+    }
+
+    void removeGeneratedFiles(String projectPath) {
       for (String path in <String>[
         '.packages',
         'pubspec.lock',
+        '.flutter-plugins',
+        'ios/Podfile',
         'ios/Runner/GeneratedPluginRegistrant.h',
         'ios/Runner/GeneratedPluginRegistrant.m',
         'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
@@ -70,39 +118,48 @@ void main() {
       }
     }
 
-    testUsingContext('get', () async {
+    testUsingContext('get fetches packages', () async {
       final String projectPath = await createProject(temp);
-      expectExists(projectPath, 'lib/main.dart'); // Sanity check.
-      expectExists(projectPath, 'lib/main.dart'); // Sanity check.
 
-      removeGitIgnoredFiles(projectPath);
+      removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get');
 
-      expectDependenciesToHaveBeenResolved(projectPath);
-      expectPluginsToHaveBeenInjected(projectPath);
+      expectDependenciesResolved(projectPath);
+      expectZeroPluginsInjected(projectPath);
     }, timeout: allowForRemotePubInvocation);
 
-    testUsingContext('get --offline', () async {
+    testUsingContext('get --offline fetches packages', () async {
       final String projectPath = await createProject(temp);
 
-      removeGitIgnoredFiles(projectPath);
+      removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get', args: <String>['--offline']);
 
-      expectDependenciesToHaveBeenResolved(projectPath);
-      expectPluginsToHaveBeenInjected(projectPath);
+      expectDependenciesResolved(projectPath);
+      expectZeroPluginsInjected(projectPath);
     }, timeout: allowForCreateFlutterProject);
 
-    testUsingContext('upgrade', () async {
+    testUsingContext('upgrade fetches packages', () async {
       final String projectPath = await createProject(temp);
 
-      removeGitIgnoredFiles(projectPath);
+      removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'upgrade');
 
-      expectDependenciesToHaveBeenResolved(projectPath);
-      expectPluginsToHaveBeenInjected(projectPath);
+      expectDependenciesResolved(projectPath);
+      expectZeroPluginsInjected(projectPath);
+    }, timeout: allowForRemotePubInvocation);
+
+    testUsingContext('get fetches packages and injects plugin', () async {
+      final String projectPath = await createProjectWithPlugin('path_provider');
+
+      removeGeneratedFiles(projectPath);
+
+      await runCommandIn(projectPath, 'get');
+
+      expectDependenciesResolved(projectPath);
+      expectPluginInjected(projectPath);
     }, timeout: allowForRemotePubInvocation);
   });
 

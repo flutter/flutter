@@ -99,7 +99,7 @@ class CocoaPods {
 
   /// Creates a default `Podfile` in the Flutter project at [directory],
   /// unless one already exists at `ios/Podfile`.
-  Future<Null> createPodfileIfMissing(String directory) async {
+  void createPodfileIfMissing(String directory) {
     final String iosPath = fs.path.join(directory, 'ios');
     final String podfilePath = fs.path.join(iosPath, 'Podfile');
     if (fs.file(podfilePath).existsSync()) {
@@ -118,19 +118,18 @@ class CocoaPods {
       isSwift ? 'Podfile-swift' : 'Podfile-objc',
     ));
     podfileTemplate.copySync(podfilePath);
-    await _addPodsDependencyToFlutterXcconfig(directory, 'Debug');
-    await _addPodsDependencyToFlutterXcconfig(directory, 'Release');
+    _addPodsDependencyToFlutterXcconfig(directory, 'Debug');
+    _addPodsDependencyToFlutterXcconfig(directory, 'Release');
   }
 
-  Future<Null> _addPodsDependencyToFlutterXcconfig(String directory, String mode) async {
+  void _addPodsDependencyToFlutterXcconfig(String directory, String mode) {
     final File file = fs.file(fs.path.join(directory, 'ios', 'Flutter', '$mode.xcconfig'));
-    if (await file.exists()) {
-      final String content = await file.readAsString();
+    if (file.existsSync()) {
+      final String content = file.readAsStringSync();
       final String include = '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
           .toLowerCase()}.xcconfig"';
-      if (!content.contains(include)) {
-        await file.writeAsString('$include\n$content');
-      }
+      if (!content.contains(include))
+        file.writeAsStringSync('$include\n$content');
     }
   }
 
