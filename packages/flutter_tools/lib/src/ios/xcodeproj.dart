@@ -25,7 +25,6 @@ void updateXcodeGeneratedProperties({
   @required String target,
   @required bool hasPlugins,
   @required bool previewDart2,
-  @required bool strongMode,
 }) {
   final StringBuffer localsBuffer = new StringBuffer();
 
@@ -57,9 +56,6 @@ void updateXcodeGeneratedProperties({
 
   if (previewDart2) {
     localsBuffer.writeln('PREVIEW_DART_2=true');
-  }
-  if (strongMode) {
-    localsBuffer.writeln('STRONG=true');
   }
 
   // Add dependency to CocoaPods' generated project only if plugins are used.

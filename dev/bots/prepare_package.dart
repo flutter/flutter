@@ -13,11 +13,15 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:platform/platform.dart' show Platform, LocalPlatform;
 
-const String CHROMIUM_REPO =
+const String chromiumRepo =
     'https://chromium.googlesource.com/external/github.com/flutter/flutter';
-const String GITHUB_REPO = 'https://github.com/flutter/flutter.git';
-const String MINGIT_FOR_WINDOWS_URL = 'https://storage.googleapis.com/flutter_infra/mingit/'
+const String githubRepo = 'https://github.com/flutter/flutter.git';
+const String mingitForWindowsUrl = 'https://storage.googleapis.com/flutter_infra/mingit/'
     '603511c649b00bbef0a6122a827ac419b656bc19/mingit.zip';
+const String gsBase = 'gs://flutter_infra';
+const String releaseFolder = '/releases';
+const String gsReleaseFolder = '$gsBase$releaseFolder';
+const String baseUrl = 'https://storage.googleapis.com/flutter_infra';
 
 /// Exception class for when a process fails to run, so we can catch
 /// it and provide something more readable than a stack trace.
@@ -74,11 +78,11 @@ Branch fromBranchName(String name) {
 /// properly without dropping any.
 class ProcessRunner {
   ProcessRunner({
-    this.processManager: const LocalProcessManager(),
+    ProcessManager processManager,
     this.subprocessOutput: true,
     this.defaultWorkingDirectory,
     this.platform: const LocalPlatform(),
-  }) {
+  }) : processManager = processManager ?? const LocalProcessManager() {
     environment = new Map<String, String>.from(platform.environment);
   }
 
@@ -167,6 +171,8 @@ class ProcessRunner {
   }
 }
 
+typedef Future<Uint8List> HttpReader(Uri url, {Map<String, String> headers});
+
 /// Creates a pre-populated Flutter archive from a git repo.
 class ArchiveCreator {
   /// [tempDir] is the directory to use for creating the archive.  The script
@@ -185,8 +191,10 @@ class ArchiveCreator {
     ProcessManager processManager,
     bool subprocessOutput: true,
     this.platform: const LocalPlatform(),
+    HttpReader httpReader,
   }) : assert(revision.length == 40),
        flutterRoot = new Directory(path.join(tempDir.path, 'flutter')),
+       httpReader = httpReader ?? http.readBytes,
        _processRunner = new ProcessRunner(
          processManager: processManager,
          subprocessOutput: subprocessOutput,
@@ -200,14 +208,35 @@ class ArchiveCreator {
     _processRunner.environment['PUB_CACHE'] = path.join(flutterRoot.absolute.path, '.pub-cache');
   }
 
+  /// The platform to use for the environment and determining which
+  /// platform we're running on.
   final Platform platform;
+
+  /// The branch to build the archive for.  The branch must contain [revision].
   final Branch branch;
+
+  /// The git revision hash to build the archive for. This revision has
+  /// to be available in the [branch], although it doesn't have to be
+  /// at HEAD, since we clone the branch and then reset to this revision
+  /// to create the archive.
   final String revision;
+
+  /// The flutter root directory in the [tempDir].
   final Directory flutterRoot;
+
+  /// The temporary directory used to build the archive in.
   final Directory tempDir;
+
+  /// The directory to write the output file to.
   final Directory outputDir;
-  final Uri _minGitUri = Uri.parse(MINGIT_FOR_WINDOWS_URL);
+
+  final Uri _minGitUri = Uri.parse(mingitForWindowsUrl);
   final ProcessRunner _processRunner;
+
+  /// Used to tell the [ArchiveCreator] which function to use for reading
+  /// bytes from a URL. Used in tests to inject a fake reader. Defaults to
+  /// [http.readBytes].
+  final HttpReader httpReader;
 
   File _outputFile;
   String _version;
@@ -255,12 +284,12 @@ class ArchiveCreator {
     // We want the user to start out the in the specified branch instead of a
     // detached head. To do that, we need to make sure the branch points at the
     // desired revision.
-    await _runGit(<String>['clone', '-b', branchName, CHROMIUM_REPO], workingDirectory: tempDir);
+    await _runGit(<String>['clone', '-b', branchName, chromiumRepo], workingDirectory: tempDir);
     await _runGit(<String>['reset', '--hard', revision]);
 
     // Make the origin point to github instead of the chromium mirror.
     await _runGit(<String>['remote', 'remove', 'origin']);
-    await _runGit(<String>['remote', 'add', 'origin', GITHUB_REPO]);
+    await _runGit(<String>['remote', 'add', 'origin', githubRepo]);
   }
 
   /// Retrieve the MinGit executable from storage and unpack it.
@@ -268,7 +297,7 @@ class ArchiveCreator {
     if (!platform.isWindows) {
       return;
     }
-    final Uint8List data = await http.readBytes(_minGitUri);
+    final Uint8List data = await httpReader(_minGitUri);
     final File gitFile = new File(path.join(tempDir.absolute.path, 'mingit.zip'));
     await gitFile.writeAsBytes(data, flush: true);
 
@@ -289,10 +318,7 @@ class ArchiveCreator {
     // Create each of the templates, since they will call 'pub get' on
     // themselves when created, and this will warm the cache with their
     // dependencies too.
-    // TODO(gspencer): 'package' is broken on dev branch right now!
-    // Add it back in once the following is fixed:
-    // https://github.com/flutter/flutter/issues/14448
-    for (String template in <String>['app', 'plugin']) {
+    for (String template in <String>['app', 'package', 'plugin']) {
       final String createName = path.join(tempDir.path, 'create_$template');
       await _runFlutter(
         <String>['create', '--template=$template', createName],
@@ -380,11 +406,6 @@ class ArchivePublisher {
          processManager: processManager,
          subprocessOutput: subprocessOutput,
        );
-
-  static String gsBase = 'gs://flutter_infra';
-  static String releaseFolder = '/releases';
-  static String gsReleaseFolder = '$gsBase$releaseFolder';
-  static String baseUrl = 'https://storage.googleapis.com/flutter_infra';
 
   final Platform platform;
   final String platformName;
@@ -498,13 +519,23 @@ Future<Null> main(List<String> argList) async {
   argParser.addFlag(
     'publish',
     defaultsTo: false,
-    help: 'The path to the directory where the output archive should be '
-        'written. If --output is not specified, the archive will be written to '
-        "the current directory. If the output directory doesn't exist, it, and "
-        'the path to it, will be created.',
+    help: 'If set, will publish the archive to Google Cloud Storage upon '
+        'successful creation of the archive. Will publish under this '
+        'directory: $baseUrl$releaseFolder',
+  );
+  argParser.addFlag(
+    'help',
+    defaultsTo: false,
+    negatable: false,
+    help: 'Print help for this command.',
   );
 
   final ArgResults args = argParser.parse(argList);
+
+  if (args['help']) {
+    print(argParser.usage);
+    exit(0);
+  }
 
   void errorExit(String message, {int exitCode = -1}) {
     stderr.write('Error: $message\n\n');

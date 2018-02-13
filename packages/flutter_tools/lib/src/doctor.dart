@@ -23,6 +23,7 @@ import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
 import 'version.dart';
+import 'vscode/vscode_validator.dart';
 
 Doctor get doctor => context[Doctor];
 
@@ -43,6 +44,7 @@ class Doctor {
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);
       ideValidators.addAll(IntelliJValidator.installedValidators);
+      ideValidators.addAll(VsCodeValidator.installedValidators);
       if (ideValidators.isNotEmpty)
         _validators.addAll(ideValidators);
       else

@@ -31,8 +31,6 @@ class BuildIOSCommand extends BuildSubCommand {
         help: 'Codesign the application bundle (only available on device builds).');
     argParser.addFlag('preview-dart-2', negatable: false,
         hide: !verboseHelp);
-    argParser.addFlag('strong', negatable: false,
-        hide: !verboseHelp);
   }
 
   @override

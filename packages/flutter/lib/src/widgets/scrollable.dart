@@ -214,7 +214,7 @@ class Scrollable extends StatefulWidget {
       return new Future<Null>.value();
     if (futures.length == 1)
       return futures.single;
-    return Future.wait<Null>(futures);
+    return Future.wait<Null>(futures).then((List<Null> _) => null);
   }
 }
 
