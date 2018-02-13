@@ -86,19 +86,6 @@ class ScaffoldGeometry {
   ///
   /// This will be 0 when there is no [Scaffold.floatingActionButton] set.
   final double floatingActionButtonScale;
-
-  static ScaffoldGeometry _copyWith({
-    ScaffoldGeometry previousGeometry,
-    double bottomNavigationBarTop,
-    Rect floatingActionButtonPosition,
-    double floatingActionButtonScale,
-  }) {
-    return new ScaffoldGeometry(
-      bottomNavigationBarTop: bottomNavigationBarTop ??  previousGeometry?.bottomNavigationBarTop,
-      floatingActionButtonPosition: floatingActionButtonPosition ??  previousGeometry?.floatingActionButtonPosition,
-      floatingActionButtonScale: floatingActionButtonScale ??  previousGeometry?.floatingActionButtonScale,
-    );
-  }
 }
 
 class _ScaffoldGeometryNotifier extends ValueNotifier<ScaffoldGeometry> {
@@ -120,7 +107,17 @@ class _ScaffoldGeometryNotifier extends ValueNotifier<ScaffoldGeometry> {
     return super.value;
   }
 
-  ScaffoldGeometry get _partialValue => super.value;
+  void _updateWith({
+    double bottomNavigationBarTop,
+    Rect floatingActionButtonPosition,
+    double floatingActionButtonScale,
+  }) {
+    value = new ScaffoldGeometry(
+      bottomNavigationBarTop: bottomNavigationBarTop ??  super.value?.bottomNavigationBarTop,
+      floatingActionButtonPosition: floatingActionButtonPosition ??  super.value?.floatingActionButtonPosition,
+      floatingActionButtonScale: floatingActionButtonScale ??  super.value?.floatingActionButtonScale,
+    );
+  }
 }
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
@@ -255,8 +252,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.endDrawer, Offset.zero);
     }
 
-    geometryNotifier.value = ScaffoldGeometry._copyWith(
-      previousGeometry: geometryNotifier._partialValue,
+    geometryNotifier._updateWith(
       bottomNavigationBarTop: bottomNavigationBarTop,
       floatingActionButtonPosition: floatingActionButtonRect,
     );
@@ -406,8 +402,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 
   void _updateGeometryScale(double scale) {
-    widget.geometryNotifier.value = ScaffoldGeometry._copyWith(
-      previousGeometry: widget.geometryNotifier._partialValue,
+    widget.geometryNotifier._updateWith(
       floatingActionButtonScale: scale,
     );
   }
