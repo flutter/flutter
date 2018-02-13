@@ -1,4 +1,4 @@
-Signature: 4728e5f9d4d6e0bccb12726a4f88a58c
+Signature: 057c80bad7e34289bae50bb23ed6df3e
 
 UNUSED LICENSES:
 
@@ -97,7 +97,6 @@ FILE: ../../../topaz/app/chat/modules/conversation_list/lib/widgets.dart
 FILE: ../../../topaz/app/chat/packages/chat_models/lib/src/user_model.dart
 FILE: ../../../topaz/app/chat/services/chat_content_provider.fidl
 FILE: ../../../topaz/app/chat/services/firebase_db_client.fidl
-FILE: ../../../topaz/app/color/lib/src/modular/module_model.dart
 FILE: ../../../topaz/app/color/lib/src/parse_int.dart
 FILE: ../../../topaz/app/contacts/agents/content_provider/lib/main.dart
 FILE: ../../../topaz/app/contacts/agents/content_provider/lib/src/modular/contacts_content_provider_impl.dart
@@ -394,6 +393,7 @@ FILE: ../../../topaz/public/dart/widgets/lib/src/model/spring_model.dart
 FILE: ../../../topaz/public/dart/widgets/lib/src/model/ticking_model.dart
 FILE: ../../../topaz/public/dart/widgets/lib/src/modular/device_shell_model.dart
 FILE: ../../../topaz/public/dart/widgets/lib/src/modular/device_shell_widget.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/modular/module_impl.dart
 FILE: ../../../topaz/public/dart/widgets/lib/src/modular/module_model.dart
 FILE: ../../../topaz/public/dart/widgets/lib/src/modular/module_widget.dart
 FILE: ../../../topaz/public/dart/widgets/lib/src/modular/user_shell_model.dart
@@ -419,10 +419,7 @@ FILE: ../../../topaz/public/lib/media/flutter/media_player.dart
 FILE: ../../../topaz/public/lib/media/flutter/media_player_controller.dart
 FILE: ../../../topaz/public/lib/media/flutter/progress_notifier.dart
 FILE: ../../../topaz/public/lib/module/dart/lib/module.dart
-FILE: ../../../topaz/public/lib/module/dart/lib/src/module_impl.dart
-FILE: ../../../topaz/public/lib/module/dart/lib/src/simple_module.dart
 FILE: ../../../topaz/public/lib/module_resolver/dart/daisy_builder.dart
-FILE: ../../../topaz/public/lib/story/dart/lib/src/link_watcher_impl.dart
 FILE: ../../../topaz/public/lib/story/dart/lib/story.dart
 FILE: ../../../topaz/public/lib/ui/flutter/sdk_ext/src/natives.cc
 FILE: ../../../topaz/public/lib/ui/flutter/sdk_ext/src/natives.h
@@ -639,7 +636,6 @@ FILE: ../../../topaz/app/chat/modules/conversation/lib/src/widgets/time_util.dar
 FILE: ../../../topaz/app/chat/modules/conversation_list/lib/main.dart
 FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/models/user.dart
 FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/widgets/time_util.dart
-FILE: ../../../topaz/app/color/lib/main.dart
 FILE: ../../../topaz/app/contacts/agents/content_provider/meta/sandbox
 FILE: ../../../topaz/app/contacts/modules/contacts/android/AndroidManifest.xml
 FILE: ../../../topaz/app/contacts/modules/contacts/lib/main.dart
@@ -1169,8 +1165,11 @@ FILE: ../../../topaz/app/chat/modules/conversation_info/lib/src/widgets/particip
 FILE: ../../../topaz/app/chat/modules/conversation_info/lib/src/widgets/title_section.dart
 FILE: ../../../topaz/app/chat/modules/conversation_info/lib/widgets.dart
 FILE: ../../../topaz/app/chat/packages/chat_models/lib/chat_models.dart
+FILE: ../../../topaz/app/color/lib/main.dart
+FILE: ../../../topaz/app/color/lib/src/color_model.dart
 FILE: ../../../topaz/app/documents/modules/browser/lib/src/widgets/header.dart
 FILE: ../../../topaz/app/documents/modules/browser/lib/src/widgets/multi_select_header.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/modular/video_progress.dart
 FILE: ../../../topaz/examples/mine_digger/main.dart
 FILE: ../../../topaz/public/dart/fuchsia/lib/src/fuchsia_fakes.dart
 FILE: ../../../topaz/public/dart/widgets/lib/src/modular/dank_user_shell_widget.dart
@@ -1185,9 +1184,19 @@ FILE: ../../../topaz/public/dart/zircon/lib/src/handle_wrapper.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/socket.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/socket_reader.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/vmo.dart
+FILE: ../../../topaz/public/lib/app_driver/dart/lib/module_driver.dart
 FILE: ../../../topaz/public/lib/fidl/dart/lib/src/bindings/codec2.dart
+FILE: ../../../topaz/public/lib/lifecycle/dart/lib/lifecycle.dart
+FILE: ../../../topaz/public/lib/lifecycle/dart/lib/src/lifecycle_host.dart
+FILE: ../../../topaz/public/lib/lifecycle/dart/lib/src/lifecycle_impl.dart
+FILE: ../../../topaz/public/lib/module/dart/lib/src/module_context_client.dart
+FILE: ../../../topaz/public/lib/module/dart/lib/src/module_host.dart
+FILE: ../../../topaz/public/lib/module/dart/lib/src/module_impl.dart
 FILE: ../../../topaz/public/lib/proposal/dart/lib/proposal.dart
 FILE: ../../../topaz/public/lib/proposal/dart/lib/src/proposal_factory.dart
+FILE: ../../../topaz/public/lib/story/dart/lib/src/link_client.dart
+FILE: ../../../topaz/public/lib/story/dart/lib/src/link_watcher_host.dart
+FILE: ../../../topaz/public/lib/story/dart/lib/src/link_watcher_impl.dart
 FILE: ../../../topaz/public/lib/user/dart/lib/src/dank_user_shell_impl.dart
 FILE: ../../../topaz/runtime/dart_runner/kernel/compiler.dart
 FILE: ../../../topaz/runtime/dart_runner/mapped_resource.cc
