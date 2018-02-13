@@ -357,7 +357,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   // Run -showBuildSettings again but with the exact same parameters as the build.
   final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(
-    buildCommands..add('-showBuildSettings'),
+    new List<String>.from(buildCommands)..add('-showBuildSettings'),
     workingDirectory: app.appDirectory,
   ));
 
