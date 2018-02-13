@@ -81,21 +81,25 @@ List<Plugin> _findPlugins(String directory) {
 
 /// Returns true if .flutter-plugins has changed, otherwise returns false.
 bool _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
-  final File pluginsProperties = fs.file(fs.path.join(directory, '.flutter-plugins'));
-  final String previousFlutterPlugins =
-      pluginsProperties.existsSync() ? pluginsProperties.readAsStringSync() : null;
+  final File pluginsFile = fs.file(fs.path.join(directory, '.flutter-plugins'));
+  final String oldContents = _readFlutterPluginsList(directory);
   final String pluginManifest =
       plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
   if (pluginManifest.isNotEmpty) {
-    pluginsProperties.writeAsStringSync('$pluginManifest\n');
+    pluginsFile.writeAsStringSync('$pluginManifest\n', flush: true);
   } else {
-    if (pluginsProperties.existsSync()) {
-      pluginsProperties.deleteSync();
-    }
+    if (pluginsFile.existsSync())
+      pluginsFile.deleteSync();
   }
-  final String currentFlutterPlugins =
-      pluginsProperties.existsSync() ? pluginsProperties.readAsStringSync() : null;
-  return currentFlutterPlugins != previousFlutterPlugins;
+  final String newContents = _readFlutterPluginsList(directory);
+  return oldContents != newContents;
+}
+
+/// Returns the contents of the `.flutter-plugins` file in [directory], or
+/// null if that file does not exist.
+String _readFlutterPluginsList(String directory) {
+  final File pluginsFile = fs.file(fs.path.join(directory, '.flutter-plugins'));
+  return pluginsFile.existsSync() ? pluginsFile.readAsStringSync() : null;
 }
 
 const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
@@ -252,5 +256,5 @@ void _ensurePodInstallIsExecutedOnNextIOSBuild(String directory) {
 /// has any plugin dependencies.
 bool hasPlugins({String directory}) {
   directory ??= fs.currentDirectory.path;
-  return _findPlugins(directory).isNotEmpty;
+  return _readFlutterPluginsList(directory) != null;
 }

@@ -31,7 +31,7 @@ class PluginTest {
     } catch (e) {
       return new TaskResult.failure(e.toString());
     } finally {
-      project.parent.deleteSync(recursive: true);
+      await project.delete();
     }
   }
 }
@@ -65,5 +65,9 @@ class FlutterProject {
     await inDirectory(new Directory(rootPath), () async {
       await flutter('build', options: <String>[target]);
     });
+  }
+
+  Future<Null> delete() async {
+    await parent.delete(recursive: true);
   }
 }
