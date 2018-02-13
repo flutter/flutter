@@ -1,3 +1,4 @@
+#!/bin/bash
 echo "Analyzing dart:ui library..."
 RESULTS=`dartanalyzer                                                          \
   --options flutter/analysis_options.yaml                                      \

@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e
 shopt -s nullglob
 
