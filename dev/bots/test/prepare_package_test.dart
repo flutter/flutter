@@ -211,8 +211,10 @@ void main() {
 
       test('calls the right processes', () async {
         final String releasesName = 'releases_$platformName.json';
-        final String archivePath = path.join(tempDir.absolute.path, 'output_archive');
-        final String gsArchivePath = 'gs://flutter_infra/releases/dev/$platformName/output_archive';
+        final String archiveName = platform.isWindows ? 'archive.zip' : 'archive.tar.xz';
+        final String archiveMime = platform.isWindows ? 'application/zip' : 'application/x-gtar';
+        final String archivePath = path.join(tempDir.absolute.path, archiveName);
+        final String gsArchivePath = 'gs://flutter_infra/releases/dev/$platformName/$archiveName';
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
         final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
         final String releasesJson = '''{
@@ -237,13 +239,13 @@ void main() {
 ''';
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
           'gsutil rm $gsArchivePath': null,
-          'gsutil cp $archivePath $gsArchivePath': null,
+          'gsutil cp -h Content-Type:$archiveMime $archivePath $gsArchivePath': null,
           'gsutil cat $gsJsonPath': <ProcessResult>[new ProcessResult(0, 0, releasesJson, '')],
           'gsutil rm $gsJsonPath': null,
-          'gsutil cp $jsonPath $gsJsonPath': null,
+          'gsutil cp -h Content-Type:application/json $jsonPath $gsJsonPath': null,
         };
         processManager.fakeResults = calls;
-        final File outputFile = new File(path.join(tempDir.absolute.path, 'output_archive'));
+        final File outputFile = new File(path.join(tempDir.absolute.path, archiveName));
         assert(tempDir.existsSync());
         final ArchivePublisher publisher = new ArchivePublisher(
           tempDir,
@@ -264,7 +266,7 @@ void main() {
         // Make sure new data is added.
         expect(contents, contains('"dev": "$testRef"'));
         expect(contents, contains('"$testRef": {'));
-        expect(contents, contains('"${platformName}_archive": "dev/$platformName/output_archive"'));
+        expect(contents, contains('"${platformName}_archive": "dev/$platformName/$archiveName"'));
         // Make sure existing entries are preserved.
         expect(contents, contains('"6da8ec6bd0c4801b80d666869e4069698561c043": {'));
         expect(contents, contains('"f88c60b38c3a5ef92115d24e3da4175b4890daba": {'));

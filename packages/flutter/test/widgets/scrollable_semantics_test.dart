@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'semantics_tester.dart';
@@ -204,12 +203,7 @@ void main() {
     expect(tester.getTopLeft(find.byWidget(children[1])).dy, kToolbarHeight);
   });
 
-  testWidgets('vertical scrolling sends ScrollCompletedSemanticsEvent', (WidgetTester tester) async {
-    final List<dynamic> messages = <dynamic>[];
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
-      messages.add(message);
-    });
-
+  testWidgets('correct scrollProgress', (WidgetTester tester) async {
     semantics = new SemanticsTester(tester);
 
     final List<Widget> textWidgets = <Widget>[];
@@ -220,74 +214,84 @@ void main() {
       child: new ListView(children: textWidgets),
     ));
 
+    expect(semantics, includesNodeWith(
+      scrollExtentMin: 0.0,
+      scrollPosition: 0.0,
+      scrollExtentMax: 520.0,
+      actions: <SemanticsAction>[
+        SemanticsAction.scrollUp,
+      ],
+    ));
+
     await flingUp(tester);
 
-    expect(messages, isNot(hasLength(0)));
-    expect(messages.every((dynamic message) => message['type'] == 'scroll'), isTrue);
+    expect(semantics, includesNodeWith(
+      scrollExtentMin: 0.0,
+      scrollPosition: 380.2,
+      scrollExtentMax: 520.0,
+      actions: <SemanticsAction>[
+        SemanticsAction.scrollUp,
+        SemanticsAction.scrollDown,
+      ],
+    ));
 
-    Map<Object, Object> message = messages.last['data'];
-    expect(message['axis'], 'v');
-    expect(message['pixels'], isPositive);
-    expect(message['minScrollExtent'], 0.0);
-    expect(message['maxScrollExtent'], 520.0);
+    await flingUp(tester);
 
-    messages.clear();
-    await flingDown(tester);
-
-    expect(messages, isNot(hasLength(0)));
-    expect(messages.every((dynamic message) => message['type'] == 'scroll'), isTrue);
-
-    message = messages.last['data'];
-    expect(message['axis'], 'v');
-    expect(message['pixels'], isNonNegative);
-    expect(message['minScrollExtent'], 0.0);
-    expect(message['maxScrollExtent'], 520.0);
+    expect(semantics, includesNodeWith(
+      scrollExtentMin: 0.0,
+      scrollPosition: 520.0,
+      scrollExtentMax: 520.0,
+      actions: <SemanticsAction>[
+        SemanticsAction.scrollDown,
+      ],
+    ));
   });
 
-  testWidgets('horizontal scrolling sends ScrollCompletedSemanticsEvent', (WidgetTester tester) async {
-    final List<dynamic> messages = <dynamic>[];
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
-      messages.add(message);
-    });
-
+  testWidgets('correct scrollProgress for unbound', (WidgetTester tester) async {
     semantics = new SemanticsTester(tester);
 
-    final List<Widget> children = <Widget>[];
-    for (int i = 0; i < 80; i++)
-      children.add(new Container(
-        child: new Text('$i'),
-        width: 100.0,
-      ));
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: new ListView(
-        children: children,
-        scrollDirection: Axis.horizontal,
+      child: new ListView.builder(
+        itemExtent: 20.0,
+        itemBuilder: (BuildContext context, int index) {
+          return new Text('entry $index');
+        },
       ),
     ));
 
-    await flingLeft(tester);
+    expect(semantics, includesNodeWith(
+      scrollExtentMin: 0.0,
+      scrollPosition: 0.0,
+      scrollExtentMax: double.infinity,
+      actions: <SemanticsAction>[
+        SemanticsAction.scrollUp,
+      ],
+    ));
 
-    expect(messages, isNot(hasLength(0)));
-    expect(messages.every((dynamic message) => message['type'] == 'scroll'), isTrue);
+    await flingUp(tester);
 
-    Map<Object, Object> message = messages.last['data'];
-    expect(message['axis'], 'h');
-    expect(message['pixels'], isPositive);
-    expect(message['minScrollExtent'], 0.0);
-    expect(message['maxScrollExtent'], 7200.0);
+    expect(semantics, includesNodeWith(
+      scrollExtentMin: 0.0,
+      scrollPosition: 380.2,
+      scrollExtentMax: double.infinity,
+      actions: <SemanticsAction>[
+        SemanticsAction.scrollUp,
+        SemanticsAction.scrollDown,
+      ],
+    ));
 
-    messages.clear();
-    await flingRight(tester);
+    await flingUp(tester);
 
-    expect(messages, isNot(hasLength(0)));
-    expect(messages.every((dynamic message) => message['type'] == 'scroll'), isTrue);
-
-    message = messages.last['data'];
-    expect(message['axis'], 'h');
-    expect(message['pixels'], isNonNegative);
-    expect(message['minScrollExtent'], 0.0);
-    expect(message['maxScrollExtent'], 7200.0);
+    expect(semantics, includesNodeWith(
+      scrollExtentMin: 0.0,
+      scrollPosition: 760.4,
+      scrollExtentMax: double.infinity,
+      actions: <SemanticsAction>[
+        SemanticsAction.scrollUp,
+        SemanticsAction.scrollDown,
+      ],
+    ));
   });
 
   testWidgets('Semantics tree is populated mid-scroll', (WidgetTester tester) async {
