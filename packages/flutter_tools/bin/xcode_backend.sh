@@ -4,7 +4,9 @@
 # found in the LICENSE file.
 
 RunCommand() {
-  echo "♦ $*"
+  if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
+    echo "♦ $*"
+  fi
   "$@"
   return $?
 }
