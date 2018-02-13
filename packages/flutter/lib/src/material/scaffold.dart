@@ -95,7 +95,7 @@ class _ScalingFabMotionAnimator extends FabMotionAnimator {
 
   @override
   Animation<double> getScaleAnimation({Animation<double> parent}) {
-    final Curve curve = new Interval(0.5, 1.0, curve: Curves.ease);
+    final Curve curve = const Interval(0.5, 1.0, curve: Curves.ease);
     return new _MaxAnimation<double>(
       new ReverseAnimation(new CurveTween(curve: curve.flipped).animate(parent)),
       new CurveTween(curve: curve).animate(parent),

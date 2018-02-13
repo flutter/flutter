@@ -75,7 +75,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
   }
 
   void _showSnackbar(BuildContext context) {
-    Scaffold.of(context).showSnackBar(new SnackBar(content: const Text(_explanatoryText)));
+    Scaffold.of(context).showSnackBar(const SnackBar(content: const Text(_explanatoryText)));
   }
 }
 
