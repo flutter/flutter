@@ -48,6 +48,10 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
 
   const std::shared_ptr<minikin::FontFamily>& MatchFallbackFont(uint32_t ch);
 
+  // Do not provide alternative fonts that can match characters which are
+  // missing from the requested font family.
+  void DisableFontFallback();
+
  private:
   std::deque<sk_sp<SkFontMgr>> skia_font_managers_;
   std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>
@@ -55,6 +59,7 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
   std::unordered_map<SkFontID, std::shared_ptr<minikin::FontFamily>>
       fallback_fonts_;
   std::shared_ptr<minikin::FontFamily> null_family_;
+  bool enable_font_fallback_;
 
   const std::shared_ptr<minikin::FontFamily>& GetFontFamilyForTypeface(
       const sk_sp<SkTypeface>& typeface);

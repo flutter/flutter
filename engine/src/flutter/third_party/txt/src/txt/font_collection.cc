@@ -64,7 +64,7 @@ class TxtFallbackFontProvider
   std::shared_ptr<FontCollection> font_collection_;
 };
 
-FontCollection::FontCollection() = default;
+FontCollection::FontCollection() : enable_font_fallback_(true) {}
 
 FontCollection::~FontCollection() = default;
 
@@ -86,6 +86,10 @@ void FontCollection::PushBack(sk_sp<SkFontMgr> skia_font_manager) {
   }
   UpdateFallbackFonts(skia_font_manager);
   skia_font_managers_.push_back(std::move(skia_font_manager));
+}
+
+void FontCollection::DisableFontFallback() {
+  enable_font_fallback_ = false;
 }
 
 std::shared_ptr<minikin::FontCollection>
@@ -132,14 +136,18 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
     std::vector<std::shared_ptr<minikin::FontFamily>> minikin_families = {
         minikin_family,
     };
-    for (const auto& fallback : fallback_fonts_)
-      minikin_families.push_back(fallback.second);
+    if (enable_font_fallback_) {
+      for (const auto& fallback : fallback_fonts_)
+        minikin_families.push_back(fallback.second);
+    }
 
     // Create the minikin font collection.
     auto font_collection =
         std::make_shared<minikin::FontCollection>(std::move(minikin_families));
-    font_collection->set_fallback_font_provider(
-        std::make_unique<TxtFallbackFontProvider>(shared_from_this()));
+    if (enable_font_fallback_) {
+      font_collection->set_fallback_font_provider(
+          std::make_unique<TxtFallbackFontProvider>(shared_from_this()));
+    }
 
     // Cache the font collection for future queries.
     font_collections_cache_[family] = font_collection;

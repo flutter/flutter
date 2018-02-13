@@ -122,6 +122,8 @@ void FontCollection::RegisterTestFonts() {
 
   collection_->PushFront(sk_make_sp<txt::TestFontManager>(
       std::move(asset_data_provider), GetTestFontFamilyName()));
+
+  collection_->DisableFontFallback();
 }
 
 }  // namespace blink
