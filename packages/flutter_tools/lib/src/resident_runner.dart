@@ -844,13 +844,14 @@ abstract class ResidentRunner {
     printStatus("- 't': dump the rendering tree of the app (debugDumpRenderTree)");
     if (isRunningDebug)
       printStatus("- 'L': dump the layer tree (debugDumpLayerTree)");
-    printStatus("- 'S': dump accessibility in geometric order; 'U' for inverse hit test order (debugDumpSemantics)");
+    printStatus("- 'S': dump accessibility in geometric order (debugDumpSemantics)");
+    printStatus("- 'U': dump accessibility in inverse hit test order");
     printStatus('');
-    printStatus('Flutter toggles and other:');
+    printStatus('Flutter framework toggles:');
     if (isRunningDebug)
       printStatus("- 'p': toggle the display of construction lines (debugPaintSizeEnabled)");
     if (isRunningDebug)
-      printStatus("- 'o': simulate different operating systems, (defaultTargetPlatform)");
+      printStatus("- 'o': simulate different operating systems (defaultTargetPlatform)");
     printStatus("- 's': take a screenshot (saved to flutter_XX.png)");
     printStatus('');
   }

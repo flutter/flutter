@@ -140,9 +140,9 @@ class ColdRunner extends ResidentRunner {
             printStatus('An Observatory debugger and profiler on $name is available at $uri');
         }
       }
-      printStatus('For a more detailed help message, press "h". To quit, press "q".');
+      printStatus("For a more detailed help message, press 'h'; to quit, press 'q'.");
     } else {
-      printStatus('To repeat this help message, press "h". To quit, press "q".');
+      printStatus("To repeat this help message, press 'h'; to quit, press 'q'.");
     }
   }
 

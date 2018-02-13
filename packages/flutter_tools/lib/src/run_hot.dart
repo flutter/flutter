@@ -711,20 +711,20 @@ class HotRunner extends ResidentRunner {
     if (details)
       printStatus('Reloading:');
     printStatus(
-      '$fire  To hot reload your app on the fly, press "r"; to restart the app entirely, press "R".',
+      "$fire  To hot reload your app on the fly, press 'r'; to restart the app entirely, press 'R'.",
       ansiAlternative: '$red$fire$bold  To hot reload your app on the fly, '
-                       'press "r"; to restart the app entirely, press "R".$reset'
+                       "press 'r'; to restart the app entirely, press 'R'.$reset"
     );
     if (details) {
       printHelpDetails();
-      printStatus('To repeat this help message, press "h"; to quit, press "q".');
+      printStatus("To repeat this help message, press 'h'; to quit, press 'q'.");
     } else {
       for (FlutterDevice device in flutterDevices) {
         final String name = device.device.name;
         for (Uri uri in device.observatoryUris)
           printStatus('An Observatory debugger and profiler on $name is available at: $uri');
       }
-      printStatus('For a more detailed help message, press "h"; to quit, press "q".');
+      printStatus("For a more detailed help message, press 'h'; to quit, press 'q'.");
     }
   }
 
