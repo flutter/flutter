@@ -46,7 +46,7 @@ class ScaffoldGeometry {
   const ScaffoldGeometry({
     this.bottomNavigationBarTop,
     this.floatingActionButtonPosition,
-    this.floatingActionButtonScale = 1.0,
+    this.floatingActionButtonScale: 1.0,
   });
 
   /// The distance from the scaffold's top edge to the top edge of the
@@ -56,6 +56,8 @@ class ScaffoldGeometry {
   /// When there is no [Scaffold.bottomNavigationBar] set, this will be null.
   final double bottomNavigationBarTop;
 
+  // Examples can assume:
+  // ScaffoldGeometry scaffoldGeometry;
   /// The rectangle in which the scaffold is laying out
   /// [Scaffold.floatingActionButton].
   ///
@@ -63,14 +65,26 @@ class ScaffoldGeometry {
   /// the bounding rectangle in which the floating action is painted scale this
   /// value by [floatingActionButtonScale].
   ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  ///  final Rect scaledFab = Rect.lerp(
+  ///    scaffoldGeometry.floatingActionButtonPosition.center & Size.zero,
+  ///    scaffoldGeometry.floatingActionButtonPosition,
+  ///    scaffoldGeometry.floatingActionButtonScale
+  ///  );
+  /// ```
+  ///
   /// This can have any value when there is no [Scaffold.floatingActionButton]
-  /// set.
+  /// set; in that case [floatingActionButtonScale] is 0.
   final Rect floatingActionButtonPosition;
 
   /// The amount by which the [Scaffold.floatingActionButton] is scaled.
   ///
-  /// To et the bounding rectangle in shich the floating action button is
-  /// painted scale [floatingActionPosition] by this proportion. 
+  /// To get the bounding rectangle in which the floating action button is
+  /// painted scaled [floatingActionPosition] by this proportion. 
+  ///
+  /// This will be 0 when there is no [Scaffold.floatingActionButton] set.
   final double floatingActionButtonScale;
 
   static ScaffoldGeometry _copyWith({
@@ -88,14 +102,20 @@ class ScaffoldGeometry {
 }
 
 class _ScaffoldGeometryNotifier extends ValueNotifier<ScaffoldGeometry> {
-  _ScaffoldGeometryNotifier(ScaffoldGeometry geometry)
-    : super(geometry);
+  _ScaffoldGeometryNotifier(ScaffoldGeometry geometry, this.context)
+    : assert (context != null),
+      super(geometry);
+
+  final BuildContext context;
 
   @override
-  ScaffoldGeometry get value{
-    if (!RendererBinding.instance.pipelineOwner.debugDoingPaint)
+  ScaffoldGeometry get value {
+    final RenderObject renderObject = context.findRenderObject();
+    if (renderObject == null || !renderObject.owner.debugDoingPaint)
       throw new FlutterError(
-        'Scaffold.geometryOf() value was accessed not during the paint phase.'
+        'Scaffold.geometryOf() must only be accessed during the paint phase.\n\n'
+        'The ScaffoldGeometry is only available during the paint phase, because\n'
+        'its value is computed during the animation and layout phases prior to painting.'
       );
     return super.value;
   }
@@ -296,12 +316,16 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     );
     _currentAnimation.addListener(_onProgressChanged);
 
-    // If we start out with a child, have the child appear fully visible instead
-    // of animating in.
-    if (widget.child != null)
+    if (widget.child != null) {
+      // If we start out with a child, have the child appear fully visible instead
+      // of animating in.
       _currentController.value = 1.0;
-    else
-      _updateGeometryScale(_previousAnimation.value);
+    }
+    else {
+      // If we start without a child we update the geometry object with a
+      // floating action button scale of 0, as it is not showing on the screen.
+      _updateGeometryScale(0.0);
+    }
   }
 
   @override
@@ -693,8 +717,6 @@ class Scaffold extends StatefulWidget {
 /// the current [BuildContext] using [Scaffold.of].
 class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
-  _ScaffoldGeometryNotifier _geometryNotifier;
-
   // DRAWER API
 
   final GlobalKey<DrawerControllerState> _drawerKey = new GlobalKey<DrawerControllerState>();
@@ -945,10 +967,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // INTERNALS
 
+  _ScaffoldGeometryNotifier _geometryNotifier;
+
   @override
   void initState() {
     super.initState();
-    _geometryNotifier = new _ScaffoldGeometryNotifier(null);
+    _geometryNotifier = new _ScaffoldGeometryNotifier(null, context);
   }
 
   @override
