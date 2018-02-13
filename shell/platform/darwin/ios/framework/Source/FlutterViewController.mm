@@ -78,9 +78,6 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   fml::scoped_nsprotocol<FlutterBasicMessageChannel*> _settingsChannel;
   fml::scoped_nsprotocol<UIView*> _launchView;
   int64_t _nextTextureId;
-  bool _platformSupportsTouchTypes;
-  bool _platformSupportsTouchPressure;
-  bool _platformSupportsTouchOrientationAndTilt;
   BOOL _initialized;
   BOOL _connected;
 }
@@ -125,10 +122,6 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
     return;
 
   _initialized = YES;
-
-  _platformSupportsTouchTypes = fml::IsPlatformVersionAtLeast(9);
-  _platformSupportsTouchPressure = fml::IsPlatformVersionAtLeast(9);
-  _platformSupportsTouchOrientationAndTilt = fml::IsPlatformVersionAtLeast(9, 1);
 
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
@@ -438,18 +431,17 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(UITouc
   return PointerChangeMapperPhase(blink::PointerData::Change::kCancel, MapperPhase::Accessed);
 }
 
-static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch,
-                                                                     bool touchTypeSupported) {
-  if (!touchTypeSupported) {
+static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) {
+  if (@available(iOS 9, *)) {
+    switch (touch.type) {
+      case UITouchTypeDirect:
+      case UITouchTypeIndirect:
+        return blink::PointerData::DeviceKind::kTouch;
+      case UITouchTypeStylus:
+        return blink::PointerData::DeviceKind::kStylus;
+    }
+  } else {
     return blink::PointerData::DeviceKind::kTouch;
-  }
-
-  switch (touch.type) {
-    case UITouchTypeDirect:
-    case UITouchTypeIndirect:
-      return blink::PointerData::DeviceKind::kTouch;
-    case UITouchTypeStylus:
-      return blink::PointerData::DeviceKind::kStylus;
   }
 
   return blink::PointerData::DeviceKind::kTouch;
@@ -492,7 +484,7 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
 
     pointer_data.change = eventTypePhase.first;
 
-    pointer_data.kind = DeviceKindFromTouchType(touch, _platformSupportsTouchTypes);
+    pointer_data.kind = DeviceKindFromTouchType(touch);
 
     pointer_data.device = device_id;
 
@@ -500,7 +492,7 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
     pointer_data.physical_y = windowCoordinates.y * scale;
 
     // pressure_min is always 0.0
-    if (_platformSupportsTouchPressure) {
+    if (@available(iOS 9, *)) {
       // These properties were introduced in iOS 9.0.
       pointer_data.pressure = touch.force;
       pointer_data.pressure_max = touch.maximumPossibleForce;
@@ -515,7 +507,7 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
     pointer_data.radius_max = touch.majorRadius + touch.majorRadiusTolerance;
 
     // These properties were introduced in iOS 9.1
-    if (_platformSupportsTouchOrientationAndTilt) {
+    if (@available(iOS 9.1, *)) {
       // iOS Documentation: altitudeAngle
       // A value of 0 radians indicates that the stylus is parallel to the surface. The value of
       // this property is Pi/2 when the stylus is perpendicular to the surface.
