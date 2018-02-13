@@ -16,6 +16,11 @@ struct DartConverter<blink::TextBox> {
   static Dart_Handle ToDart(const blink::TextBox& val);
 };
 
+template <>
+struct DartListFactory<blink::TextBox> {
+  static Dart_Handle NewList(intptr_t length);
+};
+
 }  // namespace tonic
 
 #endif  // FLUTTER_LIB_UI_TEXT_TEXT_BOX_H_

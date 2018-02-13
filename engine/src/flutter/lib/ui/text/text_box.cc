@@ -13,13 +13,21 @@ using namespace blink;
 
 namespace tonic {
 
-Dart_Handle DartConverter<TextBox>::ToDart(const TextBox& val) {
-  if (val.is_null)
-    return Dart_Null();
+namespace {
+
+Dart_Handle GetTextBoxType() {
   DartClassLibrary& class_library = DartState::Current()->class_library();
   Dart_Handle type =
       Dart_HandleFromPersistent(class_library.GetClass("ui", "TextBox"));
   FXL_DCHECK(!LogIfError(type));
+  return type;
+}
+
+}  // anonymous namespace
+
+Dart_Handle DartConverter<TextBox>::ToDart(const TextBox& val) {
+  if (val.is_null)
+    return Dart_Null();
   constexpr int argc = 5;
   Dart_Handle argv[argc] = {
       tonic::ToDart(val.sk_rect.fLeft),
@@ -28,7 +36,11 @@ Dart_Handle DartConverter<TextBox>::ToDart(const TextBox& val) {
       tonic::ToDart(val.sk_rect.fBottom),
       tonic::ToDart(static_cast<int>(val.direction)),
   };
-  return Dart_New(type, tonic::ToDart("_"), argc, argv);
+  return Dart_New(GetTextBoxType(), tonic::ToDart("_"), argc, argv);
+}
+
+Dart_Handle DartListFactory<TextBox>::NewList(intptr_t length) {
+  return Dart_NewListOfType(GetTextBoxType(), length);
 }
 
 }  // namespace tonic
