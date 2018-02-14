@@ -25,6 +25,7 @@ const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be de
 const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 200);
 // The fraction of a circle the FAB should turn when it enters.
 const double _kFloatingActionButtonTurnInterval = 0.125;
+const FabPositioner _kDefaultFabPositioner = FabPositioner.endFloat;
 
 enum _ScaffoldSlot {
   body,
@@ -1223,7 +1224,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // Listens to the _fabMoveController and schedules new fab animations if necessary
   // when the animation completes.
-  void _fabMoveHandler(AnimationStatus status) {
+  void _onFabMoveStatus(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
       _animateFabToNextPositioner();
     }
@@ -1263,11 +1264,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _geometryNotifier = new _ScaffoldGeometryNotifier(null, context);
-    _fabPositioner = widget.fabPositioner ?? FabPositioner.endFloat;
+    _fabPositioner = widget.fabPositioner ?? _kDefaultFabPositioner;
     _fabMotionAnimator = widget.fabMotionAnimator ?? FabMotionAnimator.scaling;
     _previousFabPositioner = _fabPositioner;
     _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 1.0, duration: _kFloatingActionButtonSegue * 2);
-    _fabMoveController.addStatusListener(_fabMoveHandler);
+    _fabMoveController.addStatusListener(_onFabMoveStatus);
   }
 
   @override
@@ -1279,7 +1280,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       });
     }
     if (widget.fabPositioner != oldWidget.fabPositioner) {
-      _moveFab(widget.fabPositioner ?? FabPositioner.endFloat);
+      _moveFab(widget.fabPositioner ?? _kDefaultFabPositioner);
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -1296,7 +1297,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       bottomSheet.animationController.dispose();
     if (_currentBottomSheet != null)
       _currentBottomSheet._widget.animationController.dispose();
-    _fabMoveController.removeStatusListener(_fabMoveHandler);
+    _fabMoveController.removeStatusListener(_onFabMoveStatus);
     _fabMoveController.dispose();
     _fabMoveController = null;
     super.dispose();
