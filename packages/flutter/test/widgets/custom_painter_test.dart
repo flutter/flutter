@@ -316,6 +316,89 @@ void _defineTests() {
     semantics.dispose();
   });
 
+  testWidgets('Supports all actions', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    final List<SemanticsAction> performedActions = <SemanticsAction>[];
+
+    await tester.pumpWidget(new CustomPaint(
+      painter: new _PainterWithSemantics(
+        semantics: new CustomPainterSemantics(
+          key: const ValueKey<int>(1),
+          rect: new Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
+          properties: new SemanticsProperties(
+            onTap: () => performedActions.add(SemanticsAction.tap),
+            onLongPress: () => performedActions.add(SemanticsAction.longPress),
+            onScrollLeft: () => performedActions.add(SemanticsAction.scrollLeft),
+            onScrollRight: () => performedActions.add(SemanticsAction.scrollRight),
+            onScrollUp: () => performedActions.add(SemanticsAction.scrollUp),
+            onScrollDown: () => performedActions.add(SemanticsAction.scrollDown),
+            onIncrease: () => performedActions.add(SemanticsAction.increase),
+            onDecrease: () => performedActions.add(SemanticsAction.decrease),
+            onCopy: () => performedActions.add(SemanticsAction.copy),
+            onCut: () => performedActions.add(SemanticsAction.cut),
+            onPaste: () => performedActions.add(SemanticsAction.paste),
+            onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
+            onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
+            onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
+            onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
+            onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
+          ),
+        ),
+      ),
+    ));
+
+    debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest);
+
+    final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
+      ..remove(SemanticsAction.showOnScreen); // showOnScreen is non user-exposed.
+
+    const int expectedId = 2;
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 1,
+          previousNodeId: -1,
+          nextNodeId: expectedId,
+          children: <TestSemantics>[
+            new TestSemantics.rootChild(
+              id: expectedId,
+              rect: TestSemantics.fullScreen,
+              actions: allActions.fold(0, (int previous, SemanticsAction action) => previous | action.index),
+              previousNodeId: 1,
+              nextNodeId: -1,
+            ),
+          ]
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
+
+    // Do the actions work?
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    int expectedLength = 1;
+    for (SemanticsAction action in allActions) {
+      switch (action) {
+        case SemanticsAction.moveCursorBackwardByCharacter:
+        case SemanticsAction.moveCursorForwardByCharacter:
+          semanticsOwner.performAction(expectedId, action, true);
+          break;
+        case SemanticsAction.setSelection:
+          semanticsOwner.performAction(expectedId, action, <String, int>{
+            'base': 4,
+            'extent': 5,
+          });
+          break;
+        default:
+          semanticsOwner.performAction(expectedId, action);
+      }
+      expect(performedActions.length, expectedLength);
+      expect(performedActions.last, action);
+      expectedLength += 1;
+    }
+
+    semantics.dispose();
+  });
+
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = new SemanticsTester(tester);
