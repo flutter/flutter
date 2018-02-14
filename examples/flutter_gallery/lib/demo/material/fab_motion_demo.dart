@@ -19,7 +19,7 @@ class FabMotionDemo extends StatefulWidget {
 
 
 class _FabMotionDemoState extends State<FabMotionDemo> {
-  static const List<FabPositioner> _fabValues = const <FabPositioner>[FabPositioner.endFloat, FabPositioner.centerFloat];
+  static const List<FabPositioner> _fabValues = const <FabPositioner>[FabPositioner.endFloat, FabPositioner.centerFloat, const _TopStartFabPositioner()];
 
   FabPositioner _fabPositioner = FabPositioner.endFloat;
   bool _slideFab = false;
@@ -34,13 +34,14 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
   @override
   Widget build(BuildContext context) {
     final Widget scaffold = new Scaffold(
-      appBar: new AppBar(title: const Text('FAB Positioner')),
+      appBar: new AppBar(title: const Text('FAB Positioner'), bottom: const PreferredSize(preferredSize: const Size.fromHeight(48.0), child: const SizedBox())),
       fabPositioner: _fabPositioner,
-      fabMotionAnimator: _slideFab ? _slidingFabMotionAnimator : FabMotionAnimator.scaling,
+      fabMotionAnimator: _slideFab ? _kSlidingFabMotionAnimator : FabMotionAnimator.scaling,
       floatingActionButton: new Builder(builder: (BuildContext context) {
         // We use a widget builder here so that this inner context can find the Scaffold.
         // This makes it possible to show the snackbar.
         return new FloatingActionButton(
+          backgroundColor: Colors.yellow.shade900,
           onPressed: () => _showSnackbar(context),
           child: new Icon(Icons.add), 
         );
@@ -79,7 +80,27 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
   }
 }
 
-const _SlidingFabMotionAnimator _slidingFabMotionAnimator = const _SlidingFabMotionAnimator();
+class _TopStartFabPositioner extends FabPositioner {
+  const _TopStartFabPositioner();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    double fabX;
+    assert(scaffoldGeometry.textDirection != null);
+    switch (scaffoldGeometry.textDirection) {
+      case TextDirection.ltr:
+        fabX = 16.0 + scaffoldGeometry.horizontalFabPadding;
+        break;
+      case TextDirection.rtl:
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.fabSize.width - 16.0 - scaffoldGeometry.horizontalFabPadding;
+      break;
+    }
+    final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.fabSize.height / 2.0);
+    return new Offset(fabX, fabY);
+  }
+}
+
+const _SlidingFabMotionAnimator _kSlidingFabMotionAnimator = const _SlidingFabMotionAnimator();
 
 /// Custom [FabMotionAnimator] that will slide the fab instead of scaling it.
 class _SlidingFabMotionAnimator extends FabMotionAnimator {

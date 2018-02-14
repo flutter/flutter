@@ -144,6 +144,9 @@ class ScaffoldPrelayoutGeometry {
   /// The height from the [Scaffold]'s top where its body ends.
   final double contentBottom;
 
+  /// The height from the [Scaffold]'s top where its body starts.
+  final double contentTop;
+
   /// The minimum horizontal padding the [FloatingActionButton] should observe.
   final double horizontalFabPadding;
 
@@ -156,7 +159,7 @@ class ScaffoldPrelayoutGeometry {
   /// The [Scaffold]'s [TextDirection].
   final TextDirection textDirection;
 
-  const ScaffoldPrelayoutGeometry({this.bottomSheetSize, this.contentBottom, this.fabSize, this.horizontalFabPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
+  const ScaffoldPrelayoutGeometry({this.bottomSheetSize, this.contentBottom, this.contentTop, this.fabSize, this.horizontalFabPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
 }
 
 class _CenterFloatFab extends FabPositioner {
@@ -419,6 +422,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       final ScaffoldPrelayoutGeometry currentGeometry = new ScaffoldPrelayoutGeometry(
         bottomSheetSize: bottomSheetSize,
         contentBottom: contentBottom,
+        contentTop: contentTop,
         fabSize: fabSize,
         horizontalFabPadding: horizontalPadding,
         scaffoldSize: size,

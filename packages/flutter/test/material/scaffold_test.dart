@@ -175,43 +175,6 @@ void main() {
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 356.0));
   });
 
-  testWidgets('Floating action button motion', (WidgetTester tester) async {
-    Widget build(FabPositioner fabPositioner, TextDirection textDirection) {
-      return new Directionality(
-        textDirection: textDirection,
-        child: new MediaQuery(
-          data: const MediaQueryData(
-            viewInsets: const EdgeInsets.only(bottom: 200.0),
-          ),
-          child: new Scaffold(
-            fabPositioner: fabPositioner,
-            floatingActionButton: const FloatingActionButton(
-              onPressed: null,
-              child: const Text('1'),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(build(FabPositioner.endFloat, TextDirection.ltr));
-
-    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
-    expect(tester.binding.transientCallbackCount, 0);
-
-    await tester.pumpWidget(build(FabPositioner.centerFloat, TextDirection.ltr));
-
-    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
-    expect(tester.binding.transientCallbackCount, greaterThan(0));
-
-    await tester.pumpAndSettle();
-
-    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(400.0, 356.0));
-    expect(tester.binding.transientCallbackCount, 0);
-
-
-  });
-
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
     final Key drawerKey = new UniqueKey();
     const double appBarHeight = 256.0;
@@ -811,6 +774,96 @@ void main() {
     semantics.dispose();
   });
 
+  group('Floating action button positioner', () {
+    Widget build(FloatingActionButton fab, FabPositioner fabPositioner) {
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: const MediaQueryData(
+            viewInsets: const EdgeInsets.only(bottom: 200.0),
+          ),
+          child: new Scaffold(
+            appBar: new AppBar(title: const Text('FabPositioner Test')),
+            fabPositioner: fabPositioner,
+            floatingActionButton: fab,
+          ),
+        ),
+      );
+    }
+
+    const FloatingActionButton fab1 = const FloatingActionButton(
+        onPressed: null,
+        child: const Text('1'),
+      );
+
+    testWidgets('does nothing when the floating action button is null', (WidgetTester tester) async {
+      await tester.pumpWidget(build(null, null));
+
+      expect(find.byType(FloatingActionButton), findsNothing);
+      expect(tester.binding.transientCallbackCount, 0);
+
+      await tester.pumpWidget(build(null, FabPositioner.endFloat));
+
+      expect(find.byType(FloatingActionButton), findsNothing);
+      expect(tester.binding.transientCallbackCount, 0);
+
+      await tester.pumpWidget(build(null, FabPositioner.centerFloat));
+
+      expect(find.byType(FloatingActionButton), findsNothing);
+      expect(tester.binding.transientCallbackCount, 0);
+    });
+
+    testWidgets('moves fab from center to end and back', (WidgetTester tester) async {
+      await tester.pumpWidget(build(fab1, FabPositioner.endFloat));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
+      expect(tester.binding.transientCallbackCount, 0);
+
+      await tester.pumpWidget(build(fab1, FabPositioner.centerFloat));
+
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
+
+      await tester.pumpAndSettle();
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(400.0, 356.0));
+      expect(tester.binding.transientCallbackCount, 0);
+
+      await tester.pumpWidget(build(fab1, FabPositioner.endFloat));
+      
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
+
+      await tester.pumpAndSettle();
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
+      expect(tester.binding.transientCallbackCount, 0);
+    });
+
+    testWidgets('moves to and from custom-defined positions', (WidgetTester tester) async {
+      await tester.pumpWidget(build(fab1, _kTopStartFabPositioner));
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 56.0));
+
+      await tester.pumpWidget(build(fab1, FabPositioner.centerFloat));
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
+
+      await tester.pumpAndSettle();
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(400.0, 356.0));
+      expect(tester.binding.transientCallbackCount, 0);
+
+      await tester.pumpWidget(build(fab1, _kTopStartFabPositioner));
+      
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
+
+      await tester.pumpAndSettle();
+
+      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 56.0));
+      expect(tester.binding.transientCallbackCount, 0);
+
+    });
+
+  });
+
   group('ScaffoldGeometry', () {
     testWidgets('bottomNavigationBar', (WidgetTester tester) async {
       final GlobalKey key = new GlobalKey();
@@ -900,7 +953,7 @@ void main() {
       );
     });
 
-    testWidgets('floatingActionButton animation', (WidgetTester tester) async {
+    testWidgets('floatingActionButton entrance/exit animation', (WidgetTester tester) async {
       final GlobalKey key = new GlobalKey();
       await tester.pumpWidget(new MaterialApp(home: new Scaffold(
             body: new ConstrainedBox(
@@ -986,5 +1039,18 @@ class GeometryCachePainter extends CustomPainter {
   @override
   bool shouldRepaint(GeometryCachePainter oldDelegate) {
     return true;
+  }
+}
+
+const _TopStartFabPositioner _kTopStartFabPositioner = const _TopStartFabPositioner();
+
+class _TopStartFabPositioner extends FabPositioner {
+  const _TopStartFabPositioner();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final double fabX = 16.0 + scaffoldGeometry.horizontalFabPadding;
+    final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.fabSize.height / 2.0);
+    return new Offset(fabX, fabY);
   }
 }
