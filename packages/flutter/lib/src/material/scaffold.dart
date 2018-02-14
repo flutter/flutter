@@ -137,7 +137,7 @@ class _MaxAnimation<T> extends CompoundAnimation<T> {
 @immutable
 class ScaffoldPrelayoutGeometry {
   const ScaffoldPrelayoutGeometry({this.bottomSheetSize, this.contentBottom, this.contentTop, this.fabSize, this.horizontalFabPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
-  
+
   /// The [Size] of the [Scaffold]'s [FloatingActionButton] (if available).
   /// 
   /// The Scaffold will determine the fabSize if 
@@ -479,14 +479,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   }
 }
 
-/// Handler for scale and rotation animations in the FAB.
+/// Handler for scale and rotation animations in the [FloatingActionButton].
 ///
 /// Currently, there are two types of FAB animations:
 /// 
 /// * Entrance/Exit animations, which this widget triggers
-///   when the FAB is added, updated, or removed
-/// 
-/// * Motion animations, which are triggered by the Scaffold
+///   when the FAB is added, updated, or removed.
+/// * Motion animations, which are triggered by the [Scaffold]
 ///   when its `fabPositioner` is updated.
 class _FloatingActionButtonTransition extends StatefulWidget {
   const _FloatingActionButtonTransition({
@@ -514,7 +513,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   CurvedAnimation _previousAnimation;
   CurvedAnimation _currentAnimation;
   Widget _previousChild;
-  
+
   @override
   void initState() {
     super.initState();
