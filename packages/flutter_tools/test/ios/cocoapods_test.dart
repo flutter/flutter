@@ -19,7 +19,7 @@ import '../src/context.dart';
 void main() {
   FileSystem fs;
   ProcessManager mockProcessManager;
-  XcodeProjectInterpreter mockXcodeProjectInterpreter;
+  MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
   Directory projectUnderTest;
   CocoaPods cocoaPodsUnderTest;
 
@@ -61,10 +61,7 @@ void main() {
     });
 
     testUsingContext('create objective-c Podfile when not present', () {
-      when(mockXcodeProjectInterpreter.canInterpretXcodeProjects).thenReturn(true);
-      when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenReturn(<String, String>{});
-
-      cocoaPodsUnderTest.setupPodfile('project', interpreter: mockXcodeProjectInterpreter);
+      cocoaPodsUnderTest.setupPodfile('project');
 
       expect(podfile.readAsStringSync(), 'Objective-C podfile template');
     }, overrides: <Type, Generator>{
@@ -77,18 +74,18 @@ void main() {
         'SWIFT_VERSION': '4.0',
       });
 
-      cocoaPodsUnderTest.setupPodfile('project', interpreter: mockXcodeProjectInterpreter);
+      cocoaPodsUnderTest.setupPodfile('project');
 
       expect(podfile.readAsStringSync(), 'Swift podfile template');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });
 
     testUsingContext('do not recreate Podfile when already present', () {
       podfile..createSync()..writeAsStringSync('Existing Podfile');
-      when(mockXcodeProjectInterpreter.canInterpretXcodeProjects).thenReturn(true);
 
-      cocoaPodsUnderTest.setupPodfile('project', interpreter: mockXcodeProjectInterpreter);
+      cocoaPodsUnderTest.setupPodfile('project');
 
       expect(podfile.readAsStringSync(), 'Existing Podfile');
     }, overrides: <Type, Generator>{
@@ -98,21 +95,20 @@ void main() {
     testUsingContext('do not create Podfile when we cannot interpret Xcode projects', () {
       when(mockXcodeProjectInterpreter.canInterpretXcodeProjects).thenReturn(false);
 
-      cocoaPodsUnderTest.setupPodfile('project', interpreter: mockXcodeProjectInterpreter);
+      cocoaPodsUnderTest.setupPodfile('project');
 
       expect(podfile.existsSync(), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });
 
-    testUsingContext(
-        'include Pod config in xcconfig files, if not present', () {
-      when(mockXcodeProjectInterpreter.canInterpretXcodeProjects).thenReturn(true);
+    testUsingContext('include Pod config in xcconfig files, if not present', () {
       podfile..createSync()..writeAsStringSync('Existing Podfile');
       debugConfigFile..createSync(recursive: true)..writeAsStringSync('Existing debug config');
       releaseConfigFile..createSync(recursive: true)..writeAsStringSync('Existing release config');
 
-      cocoaPodsUnderTest.setupPodfile('project', interpreter: mockXcodeProjectInterpreter);
+      cocoaPodsUnderTest.setupPodfile('project');
 
       final String debugContents = debugConfigFile.readAsStringSync();
       expect(debugContents, contains(
