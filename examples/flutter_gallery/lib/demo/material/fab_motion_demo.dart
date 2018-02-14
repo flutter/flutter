@@ -19,7 +19,7 @@ class FabMotionDemo extends StatefulWidget {
 
 
 class _FabMotionDemoState extends State<FabMotionDemo> {
-  static const List<FabPositioner> _fabValues = const <FabPositioner>[FabPositioner.endFloat, FabPositioner.centerFloat, const _TopStartFabPositioner()];
+  static const List<FabPositioner> _fabPositioners = const <FabPositioner>[FabPositioner.endFloat, FabPositioner.centerFloat, const _TopStartFabPositioner()];
 
   FabPositioner _fabPositioner = FabPositioner.endFloat;
   bool _slideFab = false;
@@ -71,7 +71,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
 
   void _moveFab() {
     setState(() {
-      _fabPositioner = _fabValues[(_fabValues.indexOf(_fabPositioner) + 1) % _fabValues.length];
+      _fabPositioner = _fabPositioners[(_fabPositioners.indexOf(_fabPositioner) + 1) % _fabPositioners.length];
     });
   }
 
