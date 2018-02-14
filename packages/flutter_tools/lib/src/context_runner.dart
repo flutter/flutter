@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/utils.dart';
 import 'package:process/process.dart';
 
 import 'base/config.dart';
@@ -14,6 +13,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/utils.dart';
 import 'cache.dart';
 import 'disabled_usage.dart';
 import 'usage.dart';

@@ -11,7 +11,6 @@ import '../lib/src/base/common.dart';
 import '../lib/src/base/file_system.dart';
 import '../lib/src/base/io.dart';
 import '../lib/src/base/platform.dart';
-import '../lib/src/base/utils.dart';
 import '../lib/src/cache.dart';
 import '../lib/src/context_runner.dart';
 import '../lib/src/flx.dart';
