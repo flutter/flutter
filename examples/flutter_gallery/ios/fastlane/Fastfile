@@ -31,6 +31,8 @@ platform :ios do
 
     update_app_identifier(
       plist_path: 'Runner/Info.plist',
+      # Let the checked-in bundle ID be different so users don't collide on
+      # provisioning profile creation when building locally.
       app_identifier: 'io.flutter.demo.gallery'
     )
 
