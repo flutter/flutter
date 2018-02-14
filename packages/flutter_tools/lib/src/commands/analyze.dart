@@ -63,7 +63,8 @@ class AnalyzeCommand extends FlutterCommand {
       ).analyze();
     } else {
       return new AnalyzeOnce(
-        argResults, runner.getRepoPackages(),
+        argResults,
+        runner.getRepoPackages(),
         workingDirectory: workingDirectory,
         previewDart2: argResults['preview-dart-2'],
       ).analyze();

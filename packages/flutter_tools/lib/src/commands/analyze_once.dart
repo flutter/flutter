@@ -25,7 +25,7 @@ typedef bool FileFilter(FileSystemEntity entity);
 class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(ArgResults argResults, this.repoPackages, {
     this.workingDirectory,
-    this.previewDart2,
+    this.previewDart2: false,
   }) : super(argResults);
 
   final List<Directory> repoPackages;
