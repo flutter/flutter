@@ -5,21 +5,16 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
-import 'package:process/process.dart';
 
+import '../lib/src/asset.dart';
 import '../lib/src/base/common.dart';
-import '../lib/src/base/config.dart';
-import '../lib/src/base/context.dart';
 import '../lib/src/base/file_system.dart';
 import '../lib/src/base/io.dart';
-import '../lib/src/base/logger.dart';
-import '../lib/src/base/os.dart';
 import '../lib/src/base/platform.dart';
 import '../lib/src/cache.dart';
-import '../lib/src/disabled_usage.dart';
+import '../lib/src/context_runner.dart';
 import '../lib/src/flx.dart';
 import '../lib/src/globals.dart';
-import '../lib/src/usage.dart';
 
 const String _kOptionPackages = 'packages';
 const String _kOptionOutput = 'output-file';
@@ -40,22 +35,7 @@ const List<String> _kRequiredOptions = const <String>[
 ];
 
 Future<Null> main(List<String> args) async {
-  final AppContext executableContext = new AppContext();
-  executableContext.setVariable(Logger, new StdoutLogger());
-  await executableContext.runInZone(() {
-    // Initialize the context with some defaults.
-    // This list must be kept in sync with lib/executable.dart.
-    context.putIfAbsent(Stdio, () => const Stdio());
-    context.putIfAbsent(Platform, () => const LocalPlatform());
-    context.putIfAbsent(FileSystem, () => const LocalFileSystem());
-    context.putIfAbsent(ProcessManager, () => const LocalProcessManager());
-    context.putIfAbsent(Logger, () => new StdoutLogger());
-    context.putIfAbsent(Cache, () => new Cache());
-    context.putIfAbsent(Config, () => new Config());
-    context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
-    context.putIfAbsent(Usage, () => new DisabledUsage());
-    return run(args);
-  });
+  await runInContext(args, run);
 }
 
 Future<Null> run(List<String> args) async {
@@ -81,15 +61,23 @@ Future<Null> run(List<String> args) async {
   try {
     final String snapshotPath = argResults[_kOptionSnapshot];
     final String dylibPath = argResults[_kOptionDylib];
+    final AssetBundle assets = await buildAssets(
+      manifestPath: argResults[_kOptionManifest] ?? defaultManifestPath,
+      workingDirPath: argResults[_kOptionWorking],
+      packagesPath: argResults[_kOptionPackages],
+      includeDefaultFonts: false,
+    );
+    if (assets == null)
+      throwToolExit('Error building assets for $outputPath', exitCode: 1);
+
     final List<String> dependencies = await assemble(
+      assetBundle: assets,
       outputPath: outputPath,
       snapshotFile: snapshotPath == null ? null : fs.file(snapshotPath),
       dylibFile: dylibPath == null ? null : fs.file(dylibPath),
       workingDirPath: argResults[_kOptionWorking],
-      packagesPath: argResults[_kOptionPackages],
-      manifestPath: argResults[_kOptionManifest] ?? defaultManifestPath,
-      includeDefaultFonts: false,
     );
+
     final String depFilePath = argResults[_kOptionDepFile];
     final int depFileResult = _createDepfile(
         depFilePath,
