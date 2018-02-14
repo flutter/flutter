@@ -1188,8 +1188,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         _fabPositioner = newPosition;
       });
       // Only animate if there is a Floating Action Button to animate with.
+      // Otherwise, simply make sure the fab's position is fully updated in 
+      // case it is added.
       if (widget.floatingActionButton != null) {
         _fabMoveController.forward(from: 0.0);
+      } else {
+        _fabMoveController.value = _fabMoveController.upperBound;
       }
     }
 
