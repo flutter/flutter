@@ -1195,33 +1195,45 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   FabMotionAnimator _fabMotionAnimator;
   FabPositioner _previousFabPositioner;
   FabPositioner _fabPositioner;
+  FabPositioner _nextFabPositioner;
 
-  void _moveFab(final FabPositioner newPosition) {
-    void updatePosition() {
-      setState(() {
-        _previousFabPositioner = _fabPositioner;
-        _fabPositioner = newPosition;
-      });
-      // Only animate if there is a Floating Action Button to animate with.
-      // Otherwise, simply make sure the fab's position is fully updated in 
-      // case it is added.
-      if (widget.floatingActionButton != null) {
-        _fabMoveController.forward(from: 0.0);
-      } else {
-        _fabMoveController.value = _fabMoveController.upperBound;
-      }
-    }
+  // Moves the FAB to the _nextFabPositioner if the _nextFabPositioner is valid.
+  void _animateFabToNextPositioner() {
+    // If there is no next position to move to, don't animate.
+    if (_nextFabPositioner == null)
+      return;
+    // If the FAB is moving right now, we don't need to start an animation.
+    if (_fabMoveController.isAnimating)
+      return;
+    setState(() {
+      _previousFabPositioner = _fabPositioner;
+      _fabPositioner = _nextFabPositioner;
+      _nextFabPositioner = null;
+    });
 
-    // If the FAB is not moving right now, start the new move animation immediately.
-    // Otherwise, schedule the new transition for the end of the current animation
-    // to avoid jank.
-    if (!_fabMoveController.isAnimating) {
-      updatePosition();
+    // Only animate if there is a Floating Action Button to animate with.
+    // Otherwise, simply make sure the fab's position is fully updated in 
+    // case it is added.
+    if (widget.floatingActionButton != null) {
+      _fabMoveController.forward(from: 0.0);
     } else {
-      new Future<Null>.delayed((_fabMoveController.duration - _fabMoveController.lastElapsedDuration) * (timeDilation)).then((_) {
-        updatePosition();
-      });
+      _fabMoveController.value = _fabMoveController.upperBound;
     }
+  }
+
+  // Listens to the _fabMoveController and schedules new fab animations if necessary
+  // when the animation completes.
+  void _fabMoveHandler(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _animateFabToNextPositioner();
+    }
+  }
+
+  void _moveFab(final FabPositioner newPositioner) {
+    setState(() {
+      _nextFabPositioner = newPositioner;
+    });
+    _animateFabToNextPositioner();
   }
 
   // iOS FEATURES - status bar tap, back gesture
@@ -1255,6 +1267,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _fabMotionAnimator = widget.fabMotionAnimator ?? FabMotionAnimator.scaling;
     _previousFabPositioner = _fabPositioner;
     _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 1.0, duration: _kFloatingActionButtonSegue * 2);
+    _fabMoveController.addStatusListener(_fabMoveHandler);
   }
 
   @override
@@ -1283,6 +1296,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       bottomSheet.animationController.dispose();
     if (_currentBottomSheet != null)
       _currentBottomSheet._widget.animationController.dispose();
+    _fabMoveController.removeStatusListener(_fabMoveHandler);
     _fabMoveController.dispose();
     _fabMoveController = null;
     super.dispose();
