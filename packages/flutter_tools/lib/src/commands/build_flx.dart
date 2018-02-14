@@ -20,6 +20,7 @@ class BuildFlxCommand extends BuildSubCommand {
     argParser.addOption('output-file', abbr: 'o', defaultsTo: defaultFlxOutputPath);
     argParser.addOption('snapshot', defaultsTo: defaultSnapshotPath);
     argParser.addOption('depfile', defaultsTo: defaultDepfilePath);
+    argParser.addOption('kernel-file', defaultsTo: defaultApplicationKernelPath);
     argParser.addFlag('preview-dart-2', negatable: false, hide: !verboseHelp);
     argParser.addFlag(
       'track-widget-creation',
@@ -51,6 +52,7 @@ class BuildFlxCommand extends BuildSubCommand {
       manifestPath: argResults['manifest'],
       outputPath: outputPath,
       snapshotPath: argResults['snapshot'],
+      applicationKernelFilePath: argResults['kernel-file'],
       depfilePath: argResults['depfile'],
       privateKeyPath: argResults['private-key'],
       workingDirPath: argResults['working-dir'],

@@ -18,18 +18,18 @@ FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
 
 DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 DART_SDK_PATH_OLD="$DART_SDK_PATH.old"
-DART_SDK_STAMP_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk.stamp"
-DART_SDK_VERSION=`cat "$FLUTTER_ROOT/bin/internal/dart-sdk.version"`
+ENGINE_STAMP="$FLUTTER_ROOT/bin/cache/engine-dart-sdk.stamp"
+ENGINE_VERSION=`cat "$FLUTTER_ROOT/bin/internal/engine.version"`
 
-if [ ! -f "$DART_SDK_STAMP_PATH" ] || [ "$DART_SDK_VERSION" != `cat "$DART_SDK_STAMP_PATH"` ]; then
-  echo "Downloading Dart SDK $DART_SDK_VERSION..."
+if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; then
+  echo "Downloading Dart SDK from Flutter engine $ENGINE_VERSION..."
 
   case "$(uname -s)" in
     Darwin)
-      DART_ZIP_NAME="dartsdk-macos-x64-release.zip"
+      DART_ZIP_NAME="dart-sdk-darwin-x64.zip"
       ;;
     Linux)
-      DART_ZIP_NAME="dartsdk-linux-x64-release.zip"
+      DART_ZIP_NAME="dart-sdk-linux-x64.zip"
       ;;
     *)
       echo "Unknown operating system. Cannot install Dart SDK."
@@ -37,18 +37,8 @@ if [ ! -f "$DART_SDK_STAMP_PATH" ] || [ "$DART_SDK_VERSION" != `cat "$DART_SDK_S
       ;;
   esac
 
-  DART_CHANNEL="stable"
-
-  if [[ $DART_SDK_VERSION == *"-dev."* ]]
-  then
-    DART_CHANNEL="dev"
-  elif [[ $DART_SDK_VERSION == "hash/"* ]]
-  then
-    DART_CHANNEL="be"
-  fi
-
   DART_SDK_BASE_URL="${FLUTTER_STORAGE_BASE_URL:-https://storage.googleapis.com}"
-  DART_SDK_URL="$DART_SDK_BASE_URL/dart-archive/channels/$DART_CHANNEL/raw/$DART_SDK_VERSION/sdk/$DART_ZIP_NAME"
+  DART_SDK_URL="$DART_SDK_BASE_URL/flutter_infra/flutter/$ENGINE_VERSION/$DART_ZIP_NAME"
 
   # if the sdk path exists, copy it to a temporary location
   if [ -d "$DART_SDK_PATH" ]; then
@@ -59,7 +49,7 @@ if [ ! -f "$DART_SDK_STAMP_PATH" ] || [ "$DART_SDK_VERSION" != `cat "$DART_SDK_S
   # install the new sdk
   rm -rf -- "$DART_SDK_PATH"
   mkdir -p -- "$DART_SDK_PATH"
-  DART_SDK_ZIP="$FLUTTER_ROOT/bin/cache/dart-sdk.zip"
+  DART_SDK_ZIP="$FLUTTER_ROOT/bin/cache/$DART_ZIP_NAME"
 
   curl --continue-at - --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1
   unzip -o -q "$DART_SDK_ZIP" -d "$FLUTTER_ROOT/bin/cache" || {
@@ -72,7 +62,7 @@ if [ ! -f "$DART_SDK_STAMP_PATH" ] || [ "$DART_SDK_VERSION" != `cat "$DART_SDK_S
     exit 1
   }
   rm -f -- "$DART_SDK_ZIP"
-  echo "$DART_SDK_VERSION" > "$DART_SDK_STAMP_PATH"
+  echo "$ENGINE_VERSION" > "$ENGINE_STAMP"
 
   # delete any temporary sdk path
   if [ -d "$DART_SDK_PATH_OLD" ]; then
