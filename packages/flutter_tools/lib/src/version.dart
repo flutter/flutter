@@ -83,7 +83,6 @@ class FlutterVersion {
   String get frameworkDate => frameworkCommitDate;
 
   String get dartSdkVersion => Cache.instance.dartSdkVersion.split(' ')[0];
-  String get engineDartVersion => Cache.instance.engineDartVersion.split(' ')[0];
 
   String get engineRevision => Cache.instance.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
