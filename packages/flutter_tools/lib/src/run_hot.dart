@@ -562,7 +562,7 @@ class HotRunner extends ResidentRunner {
         printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
         reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
       }
-    } catch (error, st) {
+    } on Map<String, dynamic> catch (error, st) {
       printError('Hot reload failed: $error\n$st');
       final int errorCode = error['code'];
       final String errorMessage = error['message'];
@@ -576,6 +576,9 @@ class HotRunner extends ResidentRunner {
 
       printError('Hot reload failed:\ncode = $errorCode\nmessage = $errorMessage\n$st');
       return new OperationResult(errorCode, errorMessage);
+    } catch (error, st) {
+      printError('Hot reload failed: $error\n$st');
+      return new OperationResult(1, '$error');
     }
     // Record time it took for the VM to reload the sources.
     _addBenchmarkData('hotReloadVMReloadMilliseconds',
