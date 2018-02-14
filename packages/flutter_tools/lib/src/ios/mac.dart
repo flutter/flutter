@@ -347,50 +347,48 @@ Future<XcodeBuildResult> buildXcodeProject({
       ]
     );
   }
-  final File scriptOutputStreamFile = fs.systemTempDirectory
+  final File scriptOutputPipeFile = fs.systemTempDirectory
       .createTempSync('flutter_build_log_pipe')
       .childFile('pipe_to_stdout');
-  os.makePipe(scriptOutputStreamFile.path);
+  os.makePipe(scriptOutputPipeFile.path);
+
+  final Stream<String> scriptOutputLineStream = scriptOutputPipeFile
+      .openRead()
+      .transform(utf8.decoder)
+      .transform(const LineSplitter());
 
   Status buildSubStatus;
   Status initialBuildStatus;
+  StreamSubscription<String> scriptOutputLineStreamSubscription;
 
-  final StreamSubscription<String> scriptOutputStreamSubscription =
-      scriptOutputStreamFile.openRead()
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen((String line) {
-            if (line == '  done') {
-              buildSubStatus?.stop();
-              buildSubStatus = null;
-            } else {
-              initialBuildStatus.cancel();
-              buildSubStatus = logger.startProgress(
-                line,
-                expectSlowOperation: true,
-                progressIndicatorPadding: 40,
-              );
-            }
-          });
+  void listenToScriptOutputLineStream() {
+    print('listening');
+    scriptOutputLineStreamSubscription?.cancel();
+    scriptOutputLineStreamSubscription = scriptOutputLineStream.listen(
+      (String line) {
+        // if (line == 'done') {
+        //   buildSubStatus?.stop();
+        //   buildSubStatus = null;
+        // } else {
+        //   initialBuildStatus.cancel();
+        //   buildSubStatus = logger.startProgress(
+        //     line,
+        //     expectSlowOperation: true,
+        //     progressIndicatorPadding: 40,
+        //   );
+        // }
+      },
+      onDone: listenToScriptOutputLineStream,
+    );
+  }
 
-  // final StreamSubscription<FileSystemEvent> scriptOutputFileSubscription =
-  //     scriptOutputStreamFile.watch().listen((FileSystemEvent event) {
-  //       print(scriptOutputStreamFile.readAsLinesSync());
-  //       final String lastLine = scriptOutputStreamFile.readAsLinesSync().last;
-  //       if (lastLine == '  done') {
-  //         buildSubStatus?.stop();
-  //         buildSubStatus = null;
-  //       } else {
-  //         initialBuildStatus.cancel();
-  //         buildSubStatus = logger.startProgress(
-  //           lastLine,
-  //           expectSlowOperation: true,
-  //           progressIndicatorPadding: 40,
-  //         );
-  //       }
-  //     });
+  listenToScriptOutputLineStream();
 
-  buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputStreamFile.absolute.path}');
+  scriptOutputPipeFile.writeAsString('line 1');
+  scriptOutputPipeFile.writeAsString('line 2');
+
+
+  buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
 
   final Stopwatch buildStopwatch = new Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Running Xcode build...');
@@ -401,8 +399,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
   buildSubStatus?.stop();
   initialBuildStatus?.cancel();
-  buildStopwatch.start();
-  scriptOutputStreamSubscription.cancel();
+  buildStopwatch.stop();
+  scriptOutputLineStreamSubscription?.cancel();
   printStatus(
     'Xcode build done',
     ansiAlternative: 'Xcode build done'.padRight(53)

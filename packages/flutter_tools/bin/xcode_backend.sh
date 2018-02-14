@@ -13,8 +13,7 @@ RunCommand() {
 
 StreamOutput() {
   if [[ -n "$SCRIPT_OUTPUT_STREAM_FILE" ]]; then
-    echo "  $1" >> $SCRIPT_OUTPUT_STREAM_FILE
-    echo "$1"
+    echo "$1" > $SCRIPT_OUTPUT_STREAM_FILE
   fi
 }
 
@@ -44,6 +43,10 @@ BuildApp() {
   if [[ -n "$FLUTTER_TARGET" ]]; then
     target_path="${FLUTTER_TARGET}"
   fi
+
+  # if [[ -n "$SCRIPT_OUTPUT_STREAM_FILE" ]]; then
+  #   exec 3>$SCRIPT_OUTPUT_STREAM_FILE
+  # fi
 
   # Archive builds (ACTION=install) should always run in release mode.
   if [[ "$ACTION" == "install" && "$FLUTTER_BUILD_MODE" != "release" ]]; then
@@ -110,7 +113,7 @@ BuildApp() {
       aot_flags="--${build_mode}"
     fi
 
-    StreamOutput "Building Dart code..."
+    StreamOutput " ├─Building Dart code..."
     RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build aot \
       --output-dir="${build_dir}/aot"                                       \
       --target-platform=ios                                                 \
@@ -142,7 +145,7 @@ BuildApp() {
     precompilation_flag="--precompiled"
   fi
 
-  StreamOutput "Assembling resources..."
+  StreamOutput " └─Assembling resources..."
   RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build flx \
     --target="${target_path}"                                             \
     --output-file="${derived_dir}/app.flx"                                \
