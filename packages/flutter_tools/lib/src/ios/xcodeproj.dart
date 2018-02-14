@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
@@ -61,6 +62,11 @@ void updateXcodeGeneratedProperties({
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
+
+XcodeProjectInterpreter get xcodeProjectInterpreter => context.putIfAbsent(
+  XcodeProjectInterpreter,
+  () => const XcodeProjectInterpreter(),
+);
 
 /// Interpreter of Xcode projects settings.
 class XcodeProjectInterpreter {

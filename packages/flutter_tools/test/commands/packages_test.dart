@@ -90,15 +90,15 @@ void main() {
       'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
     ];
 
-    final List<String> pluginWitnesses = <String>['.flutter-plugins'];
-    final Map<String, String> pluginContentWitnesses = <String, String>{};
-    if (const XcodeProjectInterpreter().canInterpretXcodeProjects) {
-      pluginWitnesses.add('ios/Podfile');
-      pluginContentWitnesses['ios/Flutter/Debug.xcconfig']
-        = '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"';
-      pluginContentWitnesses['ios/Flutter/Release.xcconfig']
-        = '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"';
-    }
+    const List<String> pluginWitnesses = const <String>[
+      '.flutter-plugins',
+      'ios/Podfile',
+    ];
+
+    const Map<String, String> pluginContentWitnesses = const <String, String>{
+      'ios/Flutter/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
+      'ios/Flutter/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
+    };
 
     void expectDependenciesResolved(String projectPath) {
       for (String output in pubOutput) {

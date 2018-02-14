@@ -217,7 +217,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return new XcodeBuildResult(success: false);
   }
 
-  final XcodeProjectInfo projectInfo = const XcodeProjectInterpreter().getInfo(app.appDirectory);
+  final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(app.appDirectory);
   if (!projectInfo.targets.contains('Runner')) {
     printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
     printError('Open Xcode to fix the problem:');
