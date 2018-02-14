@@ -37,9 +37,6 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
-// Examples can assume:
-// ScaffoldGeometry scaffoldGeometry;
-
 /// Geometry information for scaffold components.
 ///
 /// To get a [ValueNotifier] for the scaffold geometry call
@@ -49,7 +46,6 @@ class ScaffoldGeometry {
   const ScaffoldGeometry({
     this.bottomNavigationBarTop,
     this.floatingActionButtonArea,
-    this.floatingActionButtonScale: 1.0,
   });
 
   /// The distance from the scaffold's top edge to the top edge of the
@@ -62,44 +58,35 @@ class ScaffoldGeometry {
   /// The rectangle in which the scaffold is laying out
   /// [Scaffold.floatingActionButton].
   ///
-  /// The floating action button might be scaled inside this rectangle, to get
-  /// the bounding rectangle in which the floating action is painted scale this
-  /// value by [floatingActionButtonScale].
-  ///
-  /// ## Sample code
-  ///
-  /// ```dart
-  ///  final Rect scaledFab = Rect.lerp(
-  ///    scaffoldGeometry.floatingActionButtonArea.center & Size.zero,
-  ///    scaffoldGeometry.floatingActionButtonArea,
-  ///    scaffoldGeometry.floatingActionButtonScale
-  ///  );
-  /// ```
-  ///
   /// This is null when there is no floating action button showing.
   final Rect floatingActionButtonArea;
 
-  /// The amount by which the [Scaffold.floatingActionButton] is scaled.
-  ///
-  /// To get the bounding rectangle in which the floating action button is
-  /// painted scaled [floatingActionPosition] by this proportion. 
-  ///
-  /// This will be 0 when there is no [Scaffold.floatingActionButton] set.
-  final double floatingActionButtonScale;
+  ScaffoldGeometry _scaleFab(double scaleFactor) {
+    if (scaleFactor == 1.0)
+      return this;
+
+    if (scaleFactor == 0.0)
+      return new ScaffoldGeometry(bottomNavigationBarTop: bottomNavigationBarTop);
+
+    final Rect scaledFab = Rect.lerp(
+      floatingActionButtonArea.center & Size.zero,
+      floatingActionButtonArea,
+      scaleFactor
+    );
+    return new ScaffoldGeometry(
+      bottomNavigationBarTop: bottomNavigationBarTop,
+      floatingActionButtonArea: scaledFab,
+    );
+  }
 }
 
-class _ScaffoldGeometryNotifier extends ValueNotifier<ScaffoldGeometry> {
-  _ScaffoldGeometryNotifier(ScaffoldGeometry geometry, this.context)
-    : assert (context != null),
-      super(geometry);
+class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenable<ScaffoldGeometry> {
+  _ScaffoldGeometryNotifier(this.geometry, this.context)
+    : assert (context != null);
 
   final BuildContext context;
-
-  // When the floating action button scale is 0 we override the
-  // [ScaffoldGeometry.floatingActionButtonArea] with null, and keep it's value
-  // here. This allows us to publish this area in case the next partial update
-  // makes the scale non zero.
-  Rect overridenFloatingActionBarArea;
+  double fabScale;
+  ScaffoldGeometry geometry;
 
   @override
   ScaffoldGeometry get value {
@@ -113,7 +100,7 @@ class _ScaffoldGeometryNotifier extends ValueNotifier<ScaffoldGeometry> {
         );
       return true;
     }());
-    return super.value;
+    return geometry._scaleFab(fabScale);
   }
 
   void _updateWith({
@@ -121,24 +108,12 @@ class _ScaffoldGeometryNotifier extends ValueNotifier<ScaffoldGeometry> {
     Rect floatingActionButtonArea,
     double floatingActionButtonScale,
   }) {
-    final double newFloatingActionButtonScale = floatingActionButtonScale ?? super.value?.floatingActionButtonScale;
-    Rect newFloatingActionButtonArea;
-    // The layout code that is updating the FAB area does not know whether
-    // there is a non null FAB set, in that case we override the area with null
-    // to make sure we don't provide values that don't make sense.
-    // We are caching the area in [overridenFloatingActionBarArea] and restore
-    // it in case the next partial update changes the scale to non-zero without
-    // providing a new FAB area.
-    if (newFloatingActionButtonScale != 0.0)
-      newFloatingActionButtonArea = floatingActionButtonArea ?? super.value?.floatingActionButtonArea ?? overridenFloatingActionBarArea;
-    else
-      overridenFloatingActionBarArea = floatingActionButtonArea ?? overridenFloatingActionBarArea;
-
-    value = new ScaffoldGeometry(
-      bottomNavigationBarTop: bottomNavigationBarTop ?? super.value?.bottomNavigationBarTop,
-      floatingActionButtonArea: newFloatingActionButtonArea,
-      floatingActionButtonScale: newFloatingActionButtonScale,
+    fabScale = floatingActionButtonScale ?? fabScale;
+    geometry = new ScaffoldGeometry(
+      bottomNavigationBarTop: bottomNavigationBarTop ?? geometry?.bottomNavigationBarTop,
+      floatingActionButtonArea: floatingActionButtonArea ?? geometry?.floatingActionButtonArea,
     );
+    notifyListeners();
   }
 }
 
