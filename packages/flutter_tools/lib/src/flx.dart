@@ -50,6 +50,7 @@ Future<Null> build({
   depfilePath ??= defaultDepfilePath;
   workingDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
+  applicationKernelFilePath ??= defaultApplicationKernelPath;
   File snapshotFile;
 
   if (!precompiledSnapshot && !previewDart2) {
