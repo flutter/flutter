@@ -104,7 +104,7 @@ void main () {
       painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<dynamic>[
+      verifyInOrder(<void>[
         generatedPaths[0].moveTo(0.0, 0.0),
         generatedPaths[0].lineTo(48.0, 0.0),
         generatedPaths[0].lineTo(48.0, 10.0),
@@ -126,7 +126,7 @@ void main () {
       painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<dynamic>[
+      verifyInOrder(<void>[
         generatedPaths[0].moveTo(0.0, 38.0),
         generatedPaths[0].lineTo(48.0, 38.0),
         generatedPaths[0].lineTo(48.0, 48.0),
@@ -148,7 +148,7 @@ void main () {
       painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<dynamic>[
+      verifyInOrder(<void>[
         generatedPaths[0].moveTo(0.0, 38.0),
         generatedPaths[0].lineTo(48.0, 38.0),
         generatedPaths[0].lineTo(48.0, 48.0),
@@ -181,7 +181,7 @@ void main () {
         uiPathFactory: pathFactory
       );
       painter.paint(mockCanvas, size);
-      verifyInOrder(<dynamic>[
+      verifyInOrder(<void>[
         mockCanvas.rotate(math.pi),
         mockCanvas.translate(-48.0, -48.0)
       ]);
@@ -199,7 +199,7 @@ void main () {
       painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<dynamic>[
+      verifyInOrder(<void>[
         generatedPaths[0].moveTo(0.0, 19.0),
         generatedPaths[0].lineTo(48.0, 19.0),
         generatedPaths[0].lineTo(48.0, 29.0),
@@ -221,7 +221,7 @@ void main () {
       painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<dynamic>[
+      verifyInOrder(<void>[
         generatedPaths[0].moveTo(0.0, 24.0),
         generatedPaths[0].cubicTo(16.0, 48.0, 32.0, 48.0, 48.0, 24.0),
         generatedPaths[0].lineTo(0.0, 24.0),
@@ -241,7 +241,7 @@ void main () {
       painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<dynamic>[
+      verifyInOrder(<void>[
         generatedPaths[0].moveTo(0.0, 24.0),
         generatedPaths[0].cubicTo(16.0, 17.0, 32.0, 17.0, 48.0, 24.0),
         generatedPaths[0].lineTo(0.0, 24.0),

@@ -22,8 +22,8 @@ SET snapshot_path=%cache_dir%\flutter_tools.snapshot
 SET stamp_path=%cache_dir%\flutter_tools.stamp
 SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
 SET dart_sdk_path=%cache_dir%\dart-sdk
-SET dart_stamp_path=%cache_dir%\dart-sdk.stamp
-SET dart_version_path=%FLUTTER_ROOT%\bin\internal\dart-sdk.version
+SET engine_stamp=%cache_dir%\engine-dart-sdk.stamp
+SET engine_version_path=%FLUTTER_ROOT%\bin\internal\engine.version
 SET pub_cache_path=%FLUTTER_ROOT%\.pub-cache
 
 SET dart=%dart_sdk_path%\bin\dart.exe
@@ -63,9 +63,9 @@ GOTO :after_subroutine
   REM The following IF conditions are all linked with a logical OR. However,
   REM there is no OR operator in batch and a GOTO construct is used as replacement.
 
-  IF NOT EXIST "%dart_stamp_path%" GOTO do_sdk_update_and_snapshot
-  SET /P dart_required_version=<"%dart_version_path%"
-  SET /P dart_installed_version=<"%dart_stamp_path%"
+  IF NOT EXIST "%engine_stamp%" GOTO do_sdk_update_and_snapshot
+  SET /P dart_required_version=<"%engine_version_path%"
+  SET /P dart_installed_version=<"%engine_stamp%"
   IF !dart_required_version! NEQ !dart_installed_version! GOTO do_sdk_update_and_snapshot
   IF NOT EXIST "%snapshot_path%" GOTO do_snapshot
   IF NOT EXIST "%stamp_path%" GOTO do_snapshot
