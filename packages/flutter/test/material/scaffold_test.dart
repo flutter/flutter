@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -770,4 +771,180 @@ void main() {
     semantics.dispose();
   });
 
+  group('ScaffoldGeometry', () {
+    testWidgets('bottomNavigationBar', (WidgetTester tester) async {
+      final GlobalKey key = new GlobalKey();
+      await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+            body: new Container(),
+            bottomNavigationBar: new ConstrainedBox(
+              key: key,
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+      )));
+
+      final RenderBox navigationBox = tester.renderObject(find.byKey(key));
+      final RenderBox appBox = tester.renderObject(find.byType(MaterialApp));
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final ScaffoldGeometry geometry = listenerState.cache.value;
+
+      expect(
+        geometry.bottomNavigationBarTop,
+        appBox.size.height - navigationBox.size.height
+      );
+    });
+
+    testWidgets('no bottomNavigationBar', (WidgetTester tester) async {
+      await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+            body: new ConstrainedBox(
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+      )));
+
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final ScaffoldGeometry geometry = listenerState.cache.value;
+
+      expect(
+        geometry.bottomNavigationBarTop,
+        null
+      );
+    });
+
+    testWidgets('floatingActionButton', (WidgetTester tester) async {
+      final GlobalKey key = new GlobalKey();
+      await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+            body: new Container(),
+            floatingActionButton: new FloatingActionButton(
+              key: key,
+              child: new GeometryListener(),
+              onPressed: () {},
+            ),
+      )));
+
+      final RenderBox floatingActionButtonBox = tester.renderObject(find.byKey(key));
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final ScaffoldGeometry geometry = listenerState.cache.value;
+
+      final Rect fabRect = floatingActionButtonBox.localToGlobal(Offset.zero) & floatingActionButtonBox.size;
+
+      expect(
+        geometry.floatingActionButtonArea,
+        fabRect
+      );
+      expect(
+        geometry.floatingActionButtonScale,
+        1.0
+      );
+    });
+
+    testWidgets('no floatingActionButton', (WidgetTester tester) async {
+      await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+            body: new ConstrainedBox(
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+      )));
+
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final ScaffoldGeometry geometry = listenerState.cache.value;
+
+      expect(
+        geometry.floatingActionButtonScale,
+        0.0
+      );
+
+      expect(
+          geometry.floatingActionButtonArea,
+          null
+      );
+    });
+
+    testWidgets('floatingActionButton animation', (WidgetTester tester) async {
+      final GlobalKey key = new GlobalKey();
+      await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+            body: new ConstrainedBox(
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+      )));
+
+      await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+            body: new Container(),
+            floatingActionButton: new FloatingActionButton(
+              key: key,
+              child: new GeometryListener(),
+              onPressed: () {},
+            ),
+      )));
+
+      await tester.pump(const Duration(milliseconds: 50));
+
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final ScaffoldGeometry geometry = listenerState.cache.value;
+
+      expect(
+        geometry.floatingActionButtonScale,
+        inExclusiveRange(0.0, 1.0),
+      );
+    });
+  });
+
+}
+
+class GeometryListener extends StatefulWidget {
+  @override
+  State createState() => new GeometryListenerState();
+}
+
+class GeometryListenerState extends State<GeometryListener> {
+  @override
+  Widget build(BuildContext context) {
+    return new CustomPaint(
+      painter: cache
+    );
+  }
+
+  int numNotifications = 0;
+  ValueListenable<ScaffoldGeometry> geometryListenable;
+  GeometryCachePainter cache;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ValueListenable<ScaffoldGeometry> newListenable = Scaffold.geometryOf(context);
+    if (geometryListenable == newListenable)
+      return;
+
+    if (geometryListenable != null)
+      geometryListenable.removeListener(onGeometryChanged);
+    
+    geometryListenable = newListenable;
+    geometryListenable.addListener(onGeometryChanged);
+    cache = new GeometryCachePainter(geometryListenable);
+  }
+
+  void onGeometryChanged() {
+    numNotifications += 1;
+  }
+}
+
+// The Scaffold.geometryOf() value is only available at paint time.
+// To fetch it for the tests we implement this CustomPainter that just
+// caches the ScaffoldGeometry value in its paint method.
+class GeometryCachePainter extends CustomPainter {
+  GeometryCachePainter(this.geometryListenable);
+
+  final ValueListenable<ScaffoldGeometry> geometryListenable;
+
+  ScaffoldGeometry value;
+  @override
+  void paint(Canvas canvas, Size size) {
+    value = geometryListenable.value;
+  }
+
+  @override
+  bool shouldRepaint(GeometryCachePainter oldDelegate) {
+    return true;
+  }
 }

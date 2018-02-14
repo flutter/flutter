@@ -176,6 +176,7 @@ class _RenderRadio extends RenderToggleable {
     @required TickerProvider vsync,
   }): super(
     value: value,
+    tristate: false,
     activeColor: activeColor,
     inactiveColor: inactiveColor,
     onChanged: onChanged,

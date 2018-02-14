@@ -21,20 +21,23 @@ final Tween<double> _kRadialReactionRadiusTween = new Tween<double>(begin: 0.0, 
 abstract class RenderToggleable extends RenderConstrainedBox {
   /// Creates a toggleable render object.
   ///
-  /// The [value], [activeColor], and [inactiveColor] arguments must not be
-  /// null.
+  /// The [activeColor], and [inactiveColor] arguments must not be
+  /// null. The [value] can only be null if tristate is true.
   RenderToggleable({
     @required bool value,
+    bool tristate: false,
     Size size,
     @required Color activeColor,
     @required Color inactiveColor,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
-  }) : assert(value != null),
+  }) : assert(tristate != null),
+       assert(tristate || value != null),
        assert(activeColor != null),
        assert(inactiveColor != null),
        assert(vsync != null),
        _value = value,
+       _tristate = tristate,
        _activeColor = activeColor,
        _inactiveColor = inactiveColor,
        _onChanged = onChanged,
@@ -47,7 +50,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
       ..onTapCancel = _handleTapCancel;
     _positionController = new AnimationController(
       duration: _kToggleDuration,
-      value: value ? 1.0 : 0.0,
+      value: value == false ? 0.0 : 1.0,
       vsync: vsync,
     );
     _position = new CurvedAnimation(
@@ -79,8 +82,9 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   /// The visual value of the control.
   ///
   /// When the control is inactive, the [value] is false and this animation has
-  /// the value 0.0. When the control is active, the value is true and this
-  /// animation has the value 1.0. When the control is changing from inactive
+  /// the value 0.0. When the control is active, the value either true or tristate
+  /// is true and the value is null. When the control is active the animation
+  /// has a value of 1.0. When the control is changing from inactive
   /// to active (or vice versa), [value] is the target value and this animation
   /// gradually updates from 0.0 to 1.0 (or vice versa).
   CurvedAnimation get position => _position;
@@ -110,7 +114,11 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     reactionController.resync(vsync);
   }
 
-  /// Whether this control is current "active" (checked, on, selected) or "inactive" (unchecked, off, not selected).
+  /// False if this control is "inactive" (not checked, off, or unselected).
+  ///
+  /// If value is true then the control "active" (checked, on, or selected). If
+  /// tristate is true and value is null, then the control is considered to be
+  /// in its third or "indeterminate" state.
   ///
   /// When the value changes, this object starts the [positionController] and
   /// [position] animations to animate the visual appearance of the control to
@@ -118,7 +126,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   bool get value => _value;
   bool _value;
   set value(bool value) {
-    assert(value != null);
+    assert(tristate || value != null);
     if (value == _value)
       return;
     _value = value;
@@ -126,10 +134,29 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     _position
       ..curve = Curves.easeIn
       ..reverseCurve = Curves.easeOut;
-    if (value)
-      _positionController.forward();
-    else
-      _positionController.reverse();
+    switch (_positionController.status) {
+      case AnimationStatus.forward:
+      case AnimationStatus.completed:
+        _positionController.reverse();
+        break;
+      default:
+        _positionController.forward();
+    }
+  }
+
+  /// If true, [value] can be true, false, or null, otherwise [value] must
+  /// be true or false.
+  ///
+  /// When [tristate] is true and [value] is null, then the control is
+  /// considered to be in its third or "indeterminate" state.
+  bool get tristate => _tristate;
+  bool _tristate;
+  set tristate(bool value) {
+    assert(tristate != null);
+    if (value == _tristate)
+      return;
+    _tristate = value;
+    markNeedsSemanticsUpdate();
   }
 
   /// The color that should be used in the active state (i.e., when [value] is true).
@@ -196,10 +223,10 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    if (value)
-      _positionController.forward();
-    else
+    if (value == false)
       _positionController.reverse();
+    else
+      _positionController.forward();
     if (isInteractive) {
       switch (_reactionController.status) {
         case AnimationStatus.forward:
@@ -223,12 +250,17 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     super.detach();
   }
 
+  // Handle the case where the _positionController's value changes because
+  // the user dragged the toggleable: we may reach 0.0 or 1.0 without
+  // seeing a tap. The Switch does this.
   void _handlePositionStateChanged(AnimationStatus status) {
-    if (isInteractive) {
-      if (status == AnimationStatus.completed && !_value)
+    if (isInteractive && !tristate) {
+      if (status == AnimationStatus.completed && _value == false) {
         onChanged(true);
-      else if (status == AnimationStatus.dismissed && _value)
+      }
+      else if (status == AnimationStatus.dismissed && _value != false) {
         onChanged(false);
+      }
     }
   }
 
@@ -240,8 +272,19 @@ abstract class RenderToggleable extends RenderConstrainedBox {
   }
 
   void _handleTap() {
-    if (isInteractive)
-      onChanged(!_value);
+    if (!isInteractive)
+      return;
+    switch (value) {
+      case false:
+        onChanged(true);
+        break;
+      case true:
+        onChanged(tristate ? null : false);
+        break;
+      default: // case null:
+        onChanged(false);
+        break;
+    }
   }
 
   void _handleTapUp(TapUpDetails details) {
@@ -290,7 +333,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     config.isEnabled = isInteractive;
     if (isInteractive)
       config.onTap = _handleTap;
-    config.isChecked = _value;
+    config.isChecked = _value != false;
   }
 
   @override

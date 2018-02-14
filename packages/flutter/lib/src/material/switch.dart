@@ -247,6 +247,7 @@ class _RenderSwitch extends RenderToggleable {
        _textDirection = textDirection,
        super(
          value: value,
+         tristate: false,
          activeColor: activeColor,
          inactiveColor: inactiveColor,
          onChanged: onChanged,

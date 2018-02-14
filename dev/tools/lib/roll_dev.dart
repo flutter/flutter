@@ -16,6 +16,8 @@ const String kX = 'x';
 const String kY = 'y';
 const String kZ = 'z';
 const String kCommit = 'commit';
+const String kOrigin = 'origin';
+const String kYes = 'yes';
 const String kHelp = 'help';
 
 const String kUpstreamRemote = 'git@github.com:flutter/flutter.git';
@@ -39,6 +41,13 @@ void main(List<String> args) {
     valueHelp: 'hash',
     defaultsTo: 'upstream/master',
   );
+  argParser.addOption(
+    kOrigin,
+    help: 'Specifies the name of the upstream repository',
+    valueHelp: 'repository',
+    defaultsTo: 'upstream',
+  );
+  argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');
   argParser.addFlag(kHelp, negatable: false, help: 'Show this help message.', hide: true);
   ArgResults argResults;
   try {
@@ -50,7 +59,9 @@ void main(List<String> args) {
   }
 
   final String level = argResults[kIncrement];
-  final bool commit = argResults[kCommit];
+  final String commit = argResults[kCommit];
+  final String origin = argResults[kOrigin];
+  final bool autoApprove = argResults[kYes];
   final bool help = argResults[kHelp];
 
   if (help || level == null) {
@@ -59,7 +70,7 @@ void main(List<String> args) {
     exit(0);
   }
 
-  if (getGitOutput('remote get-url upstream', 'check whether this is a flutter checkout') != kUpstreamRemote) {
+  if (getGitOutput('remote get-url $origin', 'check whether this is a flutter checkout') != kUpstreamRemote) {
     print('The current directory is not a Flutter repository checkout with a correctly configured upstream remote.');
     print('For more details see: https://github.com/flutter/flutter/wiki/Release-process');
     exit(1);
@@ -73,7 +84,7 @@ void main(List<String> args) {
     exit(1);
   }
 
-  runGit('fetch upstream', 'fetch upstream');
+  runGit('fetch $origin', 'fetch $origin');
   runGit('reset $commit --hard', 'check out master branch');
 
   String version = getFullTag();
@@ -117,17 +128,21 @@ void main(List<String> args) {
 
   // PROMPT
 
-  print('Your tree is ready to publish Flutter $version (${hash.substring(0, 10)}) '
-    'to the "dev" channel.');
-  stdout.write('Are you? [yes/no] ');
-  if (stdin.readLineSync() != 'yes') {
-    runGit('tag -d v$version', 'remove the tag you did not want to publish');
-    print('The dev roll has been aborted.');
-    exit(0);
+  if (autoApprove) {
+    print('Publishing Flutter $version (${hash.substring(0, 10)}) to the "dev" channel.');
+  } else {
+    print('Your tree is ready to publish Flutter $version (${hash.substring(0, 10)}) '
+      'to the "dev" channel.');
+    stdout.write('Are you? [yes/no] ');
+    if (stdin.readLineSync() != 'yes') {
+      runGit('tag -d v$version', 'remove the tag you did not want to publish');
+      print('The dev roll has been aborted.');
+      exit(0);
+    }
   }
 
-  runGit('push upstream v$version', 'publish the version');
-  runGit('push upstream HEAD:dev', 'land the new version on the "dev" branch');
+  runGit('push $origin v$version', 'publish the version');
+  runGit('push $origin HEAD:dev', 'land the new version on the "dev" branch');
   print('Flutter version $version has been rolled to the "dev" channel!');
 }
 
