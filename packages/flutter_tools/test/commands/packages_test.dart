@@ -7,8 +7,10 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 
@@ -88,15 +90,15 @@ void main() {
       'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
     ];
 
-    const List<String> pluginWitnesses = const <String>[
-      '.flutter-plugins',
-      'ios/Podfile',
-    ];
-
-    const Map<String, String> pluginContentWitnesses = const <String, String>{
-      'ios/Flutter/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
-      'ios/Flutter/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
-    };
+    final List<String> pluginWitnesses = <String>['.flutter-plugins'];
+    final Map<String, String> pluginContentWitnesses = <String, String>{};
+    if (const XcodeProjectInterpreter().canInterpretXcodeProjects) {
+      pluginWitnesses.add('ios/Podfile');
+      pluginContentWitnesses['ios/Flutter/Debug.xcconfig']
+        = '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"';
+      pluginContentWitnesses['ios/Flutter/Release.xcconfig']
+        = '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"';
+    }
 
     void expectDependenciesResolved(String projectPath) {
       for (String output in pubOutput) {
@@ -129,7 +131,12 @@ void main() {
     }
 
     void removeGeneratedFiles(String projectPath) {
-      for (String path in <String>[]..addAll(pubOutput)..addAll(pluginWitnesses)..addAll(pluginRegistrants)) {
+      final Iterable<String> allFiles = <List<String>>[
+        pubOutput,
+        pluginRegistrants,
+        pluginWitnesses,
+      ].expand((List<String> list) => list);
+      for (String path in allFiles) {
         final File file = fs.file(fs.path.join(projectPath, path));
         if (file.existsSync())
           file.deleteSync();
