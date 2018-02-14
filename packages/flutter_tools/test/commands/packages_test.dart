@@ -7,10 +7,8 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
-import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 
