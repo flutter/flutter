@@ -30,7 +30,7 @@ dev_dependencies:
   matcher: 0.12.1+4 # TRANSITIVE DEPENDENCY
   meta: 1.1.1 # TRANSITIVE DEPENDENCY
   mime: 0.9.6 # TRANSITIVE DEPENDENCY
-  mockito: 2.2.2 # TRANSITIVE DEPENDENCY
+  mockito: 2.2.3 # TRANSITIVE DEPENDENCY
   multi_server_socket: 1.0.1 # TRANSITIVE DEPENDENCY
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
