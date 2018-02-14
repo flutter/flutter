@@ -1895,7 +1895,7 @@ class RenderTransform extends RenderProxyBox {
     this.origin = origin;
   }
 
-  /// The origin of the coordinate system (relative to the upper left corder of
+  /// The origin of the coordinate system (relative to the upper left corner of
   /// this render object) in which to apply the matrix.
   ///
   /// Setting an origin is equivalent to conjugating the transform matrix by a
@@ -1907,6 +1907,7 @@ class RenderTransform extends RenderProxyBox {
       return;
     _origin = value;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// The alignment of the origin, relative to the size of the box.
@@ -1927,6 +1928,7 @@ class RenderTransform extends RenderProxyBox {
       return;
     _alignment = value;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// The text direction with which to resolve [alignment].
@@ -1940,6 +1942,7 @@ class RenderTransform extends RenderProxyBox {
       return;
     _textDirection = value;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// When set to true, hit tests are performed based on the position of the
@@ -1960,42 +1963,49 @@ class RenderTransform extends RenderProxyBox {
       return;
     _transform = new Matrix4.copy(value);
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// Sets the transform to the identity matrix.
   void setIdentity() {
     _transform.setIdentity();
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a rotation about the x axis into the transform.
   void rotateX(double radians) {
     _transform.rotateX(radians);
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a rotation about the y axis into the transform.
   void rotateY(double radians) {
     _transform.rotateY(radians);
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a rotation about the z axis into the transform.
   void rotateZ(double radians) {
     _transform.rotateZ(radians);
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a translation by (x, y, z) into the transform.
   void translate(double x, [double y = 0.0, double z = 0.0]) {
     _transform.translate(x, y, z);
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a scale into the transform.
   void scale(double x, [double y, double z]) {
     _transform.scale(x, y, z);
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   Matrix4 get _effectiveTransform {

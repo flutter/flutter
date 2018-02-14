@@ -210,7 +210,11 @@ class BuildableIOSApp extends IOSApp {
 
   final String appDirectory;
 
-  /// Build settings of the app's XCode project.
+  /// Build settings of the app's Xcode project.
+  ///
+  /// These are the build settings as specified in the Xcode project files.
+  ///
+  /// Build settings may change depending on the parameters passed while building.
   final Map<String, String> buildSettings;
 
   @override
