@@ -133,14 +133,21 @@ class _MaxAnimation<T> extends CompoundAnimation<T> {
 
 /// The geometry of the [Scaffold] before it finishes laying out.
 /// 
-/// The Scaffold passes this geometry to [FabPositioner]s for them to
-/// place the [FloatingActionButton].
+/// The Scaffold passes this geometry to its [FabPositioner].
 @immutable
 class ScaffoldPrelayoutGeometry {
-  /// The [Size] of the Scaffold's [FloatingActionButton] (if available).
+  const ScaffoldPrelayoutGeometry({this.bottomSheetSize, this.contentBottom, this.contentTop, this.fabSize, this.horizontalFabPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
+  
+  /// The [Size] of the [Scaffold]'s [FloatingActionButton] (if available).
+  /// 
+  /// The Scaffold will determine the fabSize if 
+  /// `Scaffold.floatingActionButton` is not null.
   final Size fabSize;
 
-  /// The [Size] of the Scaffold's [BottomSheet] (if available).
+  /// The [Size] of the [Scaffold]'s [BottomSheet] (if available).
+  /// 
+  /// The Scaffold will determine the bottomSheetSize if the Scaffold
+  /// is currently showing a [BottomSheet].
   final Size bottomSheetSize;
 
   /// The height from the [Scaffold]'s top where its body ends.
@@ -155,13 +162,14 @@ class ScaffoldPrelayoutGeometry {
   /// The [Size] of the whole [Scaffold].
   final Size scaffoldSize;
 
-  /// The [Size] of the Scaffold's [SnackBar] (if available).
+  /// The [Size] of the [Scaffold]'s [SnackBar] (if available).
+  /// 
+  /// The Scaffold will determine the snackBarSize if the Scaffold
+  /// is currently showing a [SnackBar].
   final Size snackBarSize;
 
   /// The [Scaffold]'s [TextDirection].
   final TextDirection textDirection;
-
-  const ScaffoldPrelayoutGeometry({this.bottomSheetSize, this.contentBottom, this.contentTop, this.fabSize, this.horizontalFabPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
 }
 
 class _CenterFloatFab extends FabPositioner {
