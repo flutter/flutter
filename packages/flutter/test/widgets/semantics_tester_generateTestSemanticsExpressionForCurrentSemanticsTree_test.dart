@@ -105,17 +105,14 @@ void _tests() {
         new TestSemantics(
           children: <TestSemantics>[
             new TestSemantics(
-              nextNodeId: 4,
               previousNodeId: -1,
               children: <TestSemantics>[
                 new TestSemantics(
-                  nextNodeId: 2,
                   previousNodeId: 1,
                   children: <TestSemantics>[
                     new TestSemantics(
                       label: r'Plain text',
                       textDirection: TextDirection.ltr,
-                      nextNodeId: 3,
                       previousNodeId: 4,
                     ),
                     new TestSemantics(
@@ -127,7 +124,6 @@ void _tests() {
                       decreasedValue: r'test-decreasedValue',
                       hint: r'test-hint',
                       textDirection: TextDirection.rtl,
-                      nextNodeId: -1,
                       previousNodeId: 2,
                     ),
                   ],
