@@ -327,4 +327,7 @@ class CurveTween extends Animatable<double> {
     }
     return curve.transform(t);
   }
+
+  @override
+  String toString() => '$runtimeType(curve: $curve)';
 }
