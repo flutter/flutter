@@ -395,6 +395,12 @@ class FlutterEngine extends CachedArtifact {
     <String>['ios-release', 'ios-release/artifacts.zip'],
   ];
 
+  List<List<String>> get _dartSdks => <List<String>> [
+    <String>['darwin-x64', 'dart-sdk-darwin-x64.zip'],
+    <String>['linux-x64', 'dart-sdk-linux-x64.zip'],
+    <String>['windows-x64', 'dart-sdk-windows-x64.zip'],
+  ];
+
   @override
   bool isUpToDateInner() {
     final Directory pkgDir = cache.getCacheDir('pkg');
