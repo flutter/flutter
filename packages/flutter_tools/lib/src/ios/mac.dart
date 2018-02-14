@@ -357,7 +357,18 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   // Run -showBuildSettings again but with the exact same parameters as the build.
   final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(
-    new List<String>.from(buildCommands)..add('-showBuildSettings'),
+    (new List<String>
+        .from(buildCommands)
+        ..add('-showBuildSettings'))
+        // Undocumented behaviour: xcodebuild craps out if -showBuildSettings
+        // is used together with -allowProvisioningUpdates or
+        // -allowProvisioningDeviceRegistration and freezes forever.
+        .where((String buildCommand) {
+          return !const <String>[
+            '-allowProvisioningUpdates',
+            '-allowProvisioningDeviceRegistration',
+          ].contains(buildCommand);
+        }),
     workingDirectory: app.appDirectory,
   ));
 
