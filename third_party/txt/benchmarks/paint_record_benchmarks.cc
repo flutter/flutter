@@ -26,6 +26,7 @@ namespace txt {
 
 static void BM_PaintRecordInit(benchmark::State& state) {
   TextStyle style;
+  style.font_family = "Roboto";
 
   SkPaint paint;
   paint.setAntiAlias(true);
