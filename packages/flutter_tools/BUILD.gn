@@ -49,6 +49,16 @@ dart_tool("fuchsia_builder") {
   ]
 }
 
+dart_tool("fuchsia_asset_builder") {
+  main_dart = "bin/fuchsia_asset_builder.dart"
+
+  disable_analysis = true
+
+  deps = [
+    ":flutter_tools",
+  ]
+}
+
 dart_tool("fuchsia_tester") {
   main_dart = "bin/fuchsia_tester.dart"
 
