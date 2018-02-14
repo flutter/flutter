@@ -43,6 +43,7 @@ static void BM_ParagraphShortLayout(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
 
   txt::TextStyle text_style;
+  text_style.font_family = "Roboto";
   text_style.color = SK_ColorBLACK;
   txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
@@ -83,6 +84,7 @@ static void BM_ParagraphLongLayout(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
 
   txt::TextStyle text_style;
+  text_style.font_family = "Roboto";
   text_style.color = SK_ColorBLACK;
 
   txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
@@ -125,6 +127,7 @@ static void BM_ParagraphJustifyLayout(benchmark::State& state) {
   paragraph_style.text_align = TextAlign::justify;
 
   txt::TextStyle text_style;
+  text_style.font_family = "Roboto";
   text_style.color = SK_ColorBLACK;
 
   txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
@@ -149,6 +152,7 @@ static void BM_ParagraphManyStylesLayout(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
 
   txt::TextStyle text_style;
+  text_style.font_family = "Roboto";
   text_style.color = SK_ColorBLACK;
   txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
   for (int i = 0; i < 1000; ++i) {
@@ -173,6 +177,7 @@ static void BM_ParagraphTextBigO(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
 
   txt::TextStyle text_style;
+  text_style.font_family = "Roboto";
   text_style.color = SK_ColorBLACK;
 
   txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
@@ -201,6 +206,7 @@ static void BM_ParagraphStylesBigO(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
 
   txt::TextStyle text_style;
+  text_style.font_family = "Roboto";
   text_style.color = SK_ColorBLACK;
 
   txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
@@ -230,6 +236,7 @@ static void BM_ParagraphPaintSimple(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
 
   txt::TextStyle text_style;
+  text_style.font_family = "Roboto";
   text_style.color = SK_ColorBLACK;
   txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
   builder.PushStyle(text_style);
@@ -276,6 +283,7 @@ static void BM_ParagraphPaintLarge(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
 
   txt::TextStyle text_style;
+  text_style.font_family = "Roboto";
   text_style.color = SK_ColorBLACK;
   txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
   builder.PushStyle(text_style);
@@ -306,6 +314,7 @@ static void BM_ParagraphPaintDecoration(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
 
   txt::TextStyle text_style;
+  text_style.font_family = "Roboto";
   text_style.decoration = TextDecoration(0x1 | 0x2 | 0x4);
   text_style.decoration_style = TextDecorationStyle(kSolid);
   text_style.color = SK_ColorBLACK;
