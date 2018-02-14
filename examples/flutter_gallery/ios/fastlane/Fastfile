@@ -29,6 +29,13 @@ platform :ios do
     raw_version = File.read('../../../../version')
     puts "Building and deploying version #{raw_version}..."
 
+    update_app_identifier(
+      plist_path: 'Runner/Info.plist',
+      # Let the checked-in bundle ID be different so users don't collide on
+      # provisioning profile creation when building locally.
+      app_identifier: 'io.flutter.demo.gallery'
+    )
+
     increment_version_number(
       # Only major, minor, patch digits and dots.
       version_number: /\d+\.\d+\.\d+/.match(raw_version)[0]
