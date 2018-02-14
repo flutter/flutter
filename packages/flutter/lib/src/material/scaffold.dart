@@ -1187,7 +1187,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         _previousFabPositioner = _fabPositioner;
         _fabPositioner = newPosition;
       });
-      _fabMoveController.forward(from: 0.0);
+      // Only animate if there is a Floating Action Button to animate with.
+      if (widget.floatingActionButton != null) {
+        _fabMoveController.forward(from: 0.0);
+      }
     }
 
     // If the fab is moved while still animating, schedule the new transition for the end of the current animation.
