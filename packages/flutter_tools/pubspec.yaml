@@ -13,16 +13,16 @@ dependencies:
   cli_util: 0.1.2+1
   coverage: 0.10.0
   crypto: 2.0.2+1
-  file: 2.3.5
+  file: 2.3.6
   http: 0.11.3+16
   intl: 0.15.2
   json_rpc_2: 2.0.7
   json_schema: 1.0.8
   linter: 0.1.43
-  meta: 1.1.1
+  meta: 1.1.2
   mustache: 1.0.0
   package_config: 1.0.3
-  platform: 2.1.1
+  platform: 2.1.2
   plugin: 0.2.0+2
   process: 2.0.7
   quiver: 0.28.0
@@ -30,14 +30,14 @@ dependencies:
   stream_channel: 1.6.3
   usage: 3.3.0
   vm_service_client: 0.2.4+1
-  web_socket_channel: 1.0.6
+  web_socket_channel: 1.0.7
   xml: 2.6.0
   yaml: 2.1.13
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
-  test: 0.12.30+2
+  test: 0.12.30+3
 
   # Version from the vended Dart SDK as defined in `dependency_overrides`.
   analyzer: any
@@ -45,9 +45,9 @@ dependencies:
 
 dev_dependencies:
   collection: 1.14.5
-  mockito: 2.2.2
+  mockito: 2.2.3
 
-  async: 2.0.3 # TRANSITIVE DEPENDENCY
+  async: 2.0.4 # TRANSITIVE DEPENDENCY
   barback: 0.15.2+14 # TRANSITIVE DEPENDENCY
   boolean_selector: 1.0.2 # TRANSITIVE DEPENDENCY
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
@@ -79,7 +79,7 @@ dev_dependencies:
   source_span: 1.4.0 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
-  typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
+  typed_data: 1.1.5 # TRANSITIVE DEPENDENCY
   utf: 0.9.0+4 # TRANSITIVE DEPENDENCY
   watcher: 0.9.7+7 # TRANSITIVE DEPENDENCY
 
