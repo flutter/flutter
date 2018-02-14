@@ -146,7 +146,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
     }
 
     // Check for licenses.
-    switch(await licensesAccepted) {
+    switch (await licensesAccepted) {
       case LicensesAccepted.all:
         messages.add(new ValidationMessage('All Android licenses accepted.'));
         break;
