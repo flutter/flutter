@@ -358,13 +358,6 @@ Future<int> starter(
   );
   input ??= stdin;
 
-  // Has to be a directory, that won't have any of the compiled application
-  // sources, so that no relative paths could show up in the kernel file.
-  Directory.current = Directory.systemTemp;
-  final Directory workingDirectory = new Directory('flutter_frontend_server');
-  workingDirectory.createSync();
-  Directory.current = workingDirectory;
-
   if (options.rest.isNotEmpty) {
     await compiler.compile(options.rest[0], options, generator: generator);
     return 0;
