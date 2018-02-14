@@ -186,7 +186,7 @@ class _WidgetCallSiteTransformer extends Transformer {
   bool _isSubclassOfWidget(Class clazz) {
     // TODO(jacobr): use hierarchy.isSubclassOf once we are using the
     // non-deprecated ClassHierarchy constructor.
-    return _hierarchy.getClassAsInstanceOf(clazz, _widgetClass) != null;
+    return _hierarchy.isSubclassOf(clazz, _widgetClass);
   }
 
   @override
@@ -236,7 +236,7 @@ class _WidgetCallSiteTransformer extends Transformer {
     // TODO(jacobr): use hierarchy.isSubclassOf once we are using the
     // non-deprecated ClassHierarchy constructor.
     if (_currentFactory != null &&
-        _hierarchy.getClassAsInstanceOf(constructedClass, _currentFactory.enclosingClass) != null) {
+        _hierarchy.isSubclassOf(constructedClass, _currentFactory.enclosingClass)) {
       final VariableDeclaration creationLocationParameter = _getNamedParameter(
         _currentFactory.function,
         _creationLocationParameterName,
@@ -277,6 +277,7 @@ class _WidgetCallSiteTransformer extends Transformer {
     );
   }
 }
+
 
 /// Rewrites all widget constructors and constructor invocations to add a
 /// parameter specifying the location the constructor was called from.
@@ -414,7 +415,25 @@ class WidgetCreatorTracker {
 
     // Add named parameters to all constructors.
     clazz.constructors.forEach(handleConstructor);
-    hierarchy.applyChanges(<Class>[clazz]);
+  }
+
+  Program _computeFullProgram(Program deltaProgram) {
+    final Set<Library> libraries = new Set<Library>();
+    final List<Library> workList = <Library>[];
+    for (Library library in deltaProgram.libraries) {
+      if (libraries.add(library)) {
+        workList.add(library);
+      }
+    }
+    while (workList.isNotEmpty) {
+      final Library library = workList.removeLast();
+      for (LibraryDependency dependency in library.dependencies) {
+        if (libraries.add(dependency.targetLibrary)) {
+          workList.add(dependency.targetLibrary);
+        }
+      }
+    }
+    return new Program()..libraries.addAll(libraries);
   }
 
   /// Transform the given [program].
@@ -423,10 +442,6 @@ class WidgetCreatorTracker {
   /// performing a hot reload.
   void transform(Program program) {
     final List<Library> libraries = program.libraries;
-    // TODO(jacobr): switch to the non-deprecated ClassHierarchy constructor
-    // once https://github.com/dart-lang/sdk/issues/32079 is fixed.
-    // ignore: deprecated_member_use
-    hierarchy = new ClassHierarchy.deprecated_incremental(program);
 
     if (libraries.isEmpty) {
       return;
@@ -438,6 +453,14 @@ class WidgetCreatorTracker {
       // This application doesn't actually use the package:flutter library.
       return;
     }
+
+    // TODO(jacobr): once there is a working incremental ClassHierarchy
+    // constructor switch to using it instead of building a ClassHierarchy off
+    // the full program.
+    hierarchy = new ClassHierarchy(
+      _computeFullProgram(program),
+      onAmbiguousSupertypes: (Class cls, Supertype a, Supertype b) { },
+    );
 
     final Set<Class> transformedClasses = new Set<Class>.identity();
     final Set<Library> librariesToTransform = new Set<Library>.identity()
@@ -455,9 +478,6 @@ class WidgetCreatorTracker {
         );
       }
     }
-    // Given the hierarchy we are using and the transforms we are applying,
-    // calling this method probably isn't really necessary.
-    hierarchy.applyChanges(transformedClasses);
 
     // Transform call sites to pass the location parameter.
     final _WidgetCallSiteTransformer callsiteTransformer =
@@ -481,7 +501,7 @@ class WidgetCreatorTracker {
     }
     // TODO(jacobr): use hierarchy.isSubclassOf once we are using the
     // non-deprecated ClassHierarchy constructor.
-    return hierarchy.getClassAsInstanceOf(clazz, _widgetClass) != null;
+    return hierarchy.isSubclassOf(clazz, _widgetClass);
   }
 
   void _transformWidgetConstructors(Set<Library> librariesToBeTransformed,
