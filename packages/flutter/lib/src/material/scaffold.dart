@@ -133,7 +133,10 @@ class _MaxAnimation<T> extends CompoundAnimation<T> {
 
 /// The geometry of the [Scaffold] before it finishes laying out.
 /// 
-/// The Scaffold passes this geometry to its [FabPositioner].
+/// The Scaffold passes this prelayout geometry to its [FabPositioner].
+/// 
+/// For a description of the Scaffold's geometry after it has
+/// finished laying out, see the [ScaffoldGeometry].
 @immutable
 class ScaffoldPrelayoutGeometry {
   const ScaffoldPrelayoutGeometry({this.bottomSheetSize, this.contentBottom, this.contentTop, this.fabSize, this.horizontalFabPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
@@ -231,10 +234,13 @@ class _EndFloatFab extends FabPositioner {
 // Examples can assume:
 // ScaffoldGeometry scaffoldGeometry;
 
-/// Geometry information for scaffold components.
+/// Geometry information for [Scaffold] components after layout is finished.
 ///
 /// To get a [ValueNotifier] for the scaffold geometry call
 /// [Scaffold.geometryOf].
+/// 
+/// For information about the Scaffold's geometry that is used as part of
+/// the layout process, see [ScaffoldPrelayoutGeometry].
 @immutable
 class ScaffoldGeometry {
   const ScaffoldGeometry({
@@ -719,7 +725,7 @@ class Scaffold extends StatefulWidget {
   /// Responsible for determining where the `floatingActionButton` should go.
   final FabPositioner fabPositioner;
 
-  /// Provider for how the `floatingActionButton` changes `fabPositioner`s.
+  /// Animator to move the `floatingActionButton` between `fabPositioner`s.
   final FabMotionAnimator fabMotionAnimator;
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
