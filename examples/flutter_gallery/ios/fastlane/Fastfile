@@ -29,6 +29,11 @@ platform :ios do
     raw_version = File.read('../../../../version')
     puts "Building and deploying version #{raw_version}..."
 
+    update_app_identifier(
+      plist_path: 'Runner/Info.plist',
+      app_identifier: 'io.flutter.demo.gallery'
+    )
+
     increment_version_number(
       # Only major, minor, patch digits and dots.
       version_number: /\d+\.\d+\.\d+/.match(raw_version)[0]
