@@ -352,46 +352,33 @@ Future<XcodeBuildResult> buildXcodeProject({
       .childFile('pipe_to_stdout');
   os.makePipe(scriptOutputPipeFile.path);
 
-  final Stream<String> scriptOutputLineStream = scriptOutputPipeFile
-      .openRead()
-      .transform(utf8.decoder)
-      .transform(const LineSplitter());
-
   Status buildSubStatus;
   Status initialBuildStatus;
-  StreamSubscription<String> scriptOutputLineStreamSubscription;
 
-  void listenToScriptOutputLineStream() {
-    print('listening');
-    scriptOutputLineStreamSubscription?.cancel();
-    scriptOutputLineStreamSubscription = scriptOutputLineStream.listen(
-      (String line) {
-        // if (line == 'done') {
-        //   buildSubStatus?.stop();
-        //   buildSubStatus = null;
-        // } else {
-        //   initialBuildStatus.cancel();
-        //   buildSubStatus = logger.startProgress(
-        //     line,
-        //     expectSlowOperation: true,
-        //     progressIndicatorPadding: 40,
-        //   );
-        // }
-      },
-      onDone: listenToScriptOutputLineStream,
-    );
+  Future<void> listenToScriptOutputLine() async {
+    final List<String> lines = await scriptOutputPipeFile.readAsLines();
+    for (String line in lines) {
+      if (line == 'done') {
+        buildSubStatus?.stop();
+        buildSubStatus = null;
+      } else {
+        initialBuildStatus.cancel();
+        buildSubStatus = logger.startProgress(
+          line,
+          expectSlowOperation: true,
+          progressIndicatorPadding: 40,
+        );
+      }
+    }
+    return listenToScriptOutputLine();
   }
 
-  listenToScriptOutputLineStream();
-
-  scriptOutputPipeFile.writeAsString('line 1');
-  scriptOutputPipeFile.writeAsString('line 2');
-
+  listenToScriptOutputLine();
 
   buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
 
   final Stopwatch buildStopwatch = new Stopwatch()..start();
-  initialBuildStatus = logger.startProgress('Running Xcode build...');
+  initialBuildStatus = logger.startProgress('Starting Xcode build...');
   final RunResult buildResult = await runAsync(
     buildCommands,
     workingDirectory: app.appDirectory,
@@ -400,7 +387,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   buildSubStatus?.stop();
   initialBuildStatus?.cancel();
   buildStopwatch.stop();
-  scriptOutputLineStreamSubscription?.cancel();
   printStatus(
     'Xcode build done',
     ansiAlternative: 'Xcode build done'.padRight(53)

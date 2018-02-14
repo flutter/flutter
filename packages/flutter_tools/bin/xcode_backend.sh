@@ -145,7 +145,7 @@ BuildApp() {
     precompilation_flag="--precompiled"
   fi
 
-  StreamOutput " └─Assembling resources..."
+  StreamOutput " ├─Assembling Flutter resources..."
   RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build flx \
     --target="${target_path}"                                             \
     --output-file="${derived_dir}/app.flx"                                \
@@ -165,6 +165,7 @@ BuildApp() {
   RunCommand popd > /dev/null
 
   echo "Project ${project_path} built and packaged successfully."
+  StreamOutput " └─Compiling, linking and signing..."
   return 0
 }
 
