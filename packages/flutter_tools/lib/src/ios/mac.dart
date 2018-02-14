@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON, LineSplitter, utf8;
+import 'dart:convert' show JSON;
 
 import 'package:meta/meta.dart';
 
@@ -347,35 +347,38 @@ Future<XcodeBuildResult> buildXcodeProject({
       ]
     );
   }
-  final File scriptOutputPipeFile = fs.systemTempDirectory
-      .createTempSync('flutter_build_log_pipe')
-      .childFile('pipe_to_stdout');
-  os.makePipe(scriptOutputPipeFile.path);
 
   Status buildSubStatus;
   Status initialBuildStatus;
 
-  Future<void> listenToScriptOutputLine() async {
-    final List<String> lines = await scriptOutputPipeFile.readAsLines();
-    for (String line in lines) {
-      if (line == 'done') {
-        buildSubStatus?.stop();
-        buildSubStatus = null;
-      } else {
-        initialBuildStatus.cancel();
-        buildSubStatus = logger.startProgress(
-          line,
-          expectSlowOperation: true,
-          progressIndicatorPadding: 45,
-        );
+  if (logger.supportsColor) {
+    final File scriptOutputPipeFile = fs.systemTempDirectory
+        .createTempSync('flutter_build_log_pipe')
+        .childFile('pipe_to_stdout');
+    os.makePipe(scriptOutputPipeFile.path);
+
+    Future<void> listenToScriptOutputLine() async {
+      final List<String> lines = await scriptOutputPipeFile.readAsLines();
+      for (String line in lines) {
+        if (line == 'done') {
+          buildSubStatus?.stop();
+          buildSubStatus = null;
+        } else {
+          initialBuildStatus.cancel();
+          buildSubStatus = logger.startProgress(
+            line,
+            expectSlowOperation: true,
+            progressIndicatorPadding: 45,
+          );
+        }
       }
+      return listenToScriptOutputLine();
     }
-    return listenToScriptOutputLine();
+
+    listenToScriptOutputLine();
+
+    buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }
-
-  listenToScriptOutputLine();
-
-  buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
 
   final Stopwatch buildStopwatch = new Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Starting Xcode build...');

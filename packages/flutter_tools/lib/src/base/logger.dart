@@ -40,6 +40,9 @@ abstract class Logger {
   ///
   /// [message] is the message to display to the user; [progressId] provides an ID which can be
   /// used to identify this type of progress (`hot.reload`, `hot.restart`, ...).
+  ///
+  /// [progressIndicatorPadding] can optionally be used to specify spacing
+  /// between the [message] and the progress indicator.
   Status startProgress(
     String message, {
     String progressId,

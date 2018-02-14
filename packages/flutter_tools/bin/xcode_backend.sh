@@ -11,6 +11,8 @@ RunCommand() {
   return $?
 }
 
+# When provided with a pipe by the host Flutter build process, output to the
+# pipe goes to stdout of the Flutter build process directly.
 StreamOutput() {
   if [[ -n "$SCRIPT_OUTPUT_STREAM_FILE" ]]; then
     echo "$1" > $SCRIPT_OUTPUT_STREAM_FILE
