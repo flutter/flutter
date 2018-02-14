@@ -42,7 +42,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
         // This makes it possible to show the snackbar.
         return new FloatingActionButton(
           onPressed: () => _showSnackbar(context),
-          child: new Icon(Icons.add_circle_outline), 
+          child: new Icon(Icons.add), 
         );
       }),
       body: new Center(
