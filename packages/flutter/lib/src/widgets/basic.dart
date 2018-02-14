@@ -4869,6 +4869,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
     SetSelectionHandler onSetSelection,
+    VoidCallback onDidGainAccessibilityFocus,
+    VoidCallback onDidLoseAccessibilityFocus,
   }) : this.fromProperties(
     key: key,
     child: child,
@@ -4899,6 +4901,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       onPaste: onPaste,
       onMoveCursorForwardByCharacter: onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
+      onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
+      onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
     onSetSelection: onSetSelection,),
   );
 
@@ -4977,6 +4981,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
       onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
       onSetSelection: properties.onSetSelection,
+      onDidGainAccessibilityFocus: properties.onDidGainAccessibilityFocus,
+      onDidLoseAccessibilityFocus: properties.onDidLoseAccessibilityFocus,
     );
   }
 
@@ -5020,7 +5026,9 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onPaste = properties.onPaste
       ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
       ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter
-      ..onSetSelection = properties.onSetSelection;
+      ..onSetSelection = properties.onSetSelection
+      ..onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus
+      ..onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus;
   }
 
   @override

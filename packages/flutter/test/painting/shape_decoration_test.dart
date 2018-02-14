@@ -112,7 +112,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 }
 
-class TestImage extends ui.Image {
+class TestImage implements ui.Image {
   @override
   int get width => 100;
 
