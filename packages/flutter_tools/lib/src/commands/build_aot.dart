@@ -282,6 +282,7 @@ Future<String> _buildAotSnapshot(
   final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
   final String kVmSnapshotDataO = fs.path.join(outputDir.path, '$kVmSnapshotData.o');
   final String kIsolateSnapshotDataO = fs.path.join(outputDir.path, '$kIsolateSnapshotData.o');
+  final String kApplicationKernelPath = fs.path.join(getBuildDirectory(), 'app.dill');
 
   switch (platform) {
     case TargetPlatform.android_arm:
@@ -338,6 +339,7 @@ Future<String> _buildAotSnapshot(
     mainPath = await compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
+      outputFilePath: kApplicationKernelPath,
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn : true,
       aot : true,
