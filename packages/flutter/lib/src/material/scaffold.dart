@@ -1212,13 +1212,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       }
     }
 
-    // If the fab is moved while still animating, schedule the new transition for the end of the current animation.
-    if (_fabMoveController.isAnimating) {
+    // If the FAB is not moving right now, start the new move animation immediately.
+    // Otherwise, schedule the new transition for the end of the current animation
+    // to avoid jank.
+    if (!_fabMoveController.isAnimating) {
+      updatePosition();
+    } else {
       new Future<Null>.delayed((_fabMoveController.duration - _fabMoveController.lastElapsedDuration) * (timeDilation)).then((_) {
         updatePosition();
       });
-    } else {
-      updatePosition();
     }
   }
 
