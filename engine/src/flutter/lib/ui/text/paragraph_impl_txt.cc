@@ -74,7 +74,7 @@ std::vector<TextBox> ParagraphImplTxt::getRectsForRange(unsigned start,
 }
 
 Dart_Handle ParagraphImplTxt::getPositionForOffset(double dx, double dy) {
-  Dart_Handle result = Dart_NewList(2);
+  Dart_Handle result = Dart_NewListOf(Dart_CoreType_Int, 2);
   txt::Paragraph::PositionWithAffinity pos =
       m_paragraph->GetGlyphPositionAtCoordinate(dx, dy);
   Dart_ListSetAt(result, 0, ToDart(pos.position));
@@ -84,7 +84,7 @@ Dart_Handle ParagraphImplTxt::getPositionForOffset(double dx, double dy) {
 
 Dart_Handle ParagraphImplTxt::getWordBoundary(unsigned offset) {
   txt::Paragraph::Range<size_t> point = m_paragraph->GetWordBoundary(offset);
-  Dart_Handle result = Dart_NewList(2);
+  Dart_Handle result = Dart_NewListOf(Dart_CoreType_Int, 2);
   Dart_ListSetAt(result, 0, ToDart(point.start));
   Dart_ListSetAt(result, 1, ToDart(point.end));
   return result;

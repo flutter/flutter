@@ -145,7 +145,7 @@ int ParagraphImplBlink::absoluteOffsetForPosition(
 Dart_Handle ParagraphImplBlink::getPositionForOffset(double dx, double dy) {
   LayoutPoint point(dx, dy);
   PositionWithAffinity position = m_renderView->positionForPoint(point);
-  Dart_Handle result = Dart_NewList(2);
+  Dart_Handle result = Dart_NewListOf(Dart_CoreType_Int, 2);
   Dart_ListSetAt(result, 0, ToDart(absoluteOffsetForPosition(position)));
   Dart_ListSetAt(result, 1, ToDart(static_cast<int>(position.affinity())));
   return result;
@@ -171,7 +171,7 @@ Dart_Handle ParagraphImplBlink::getWordBoundary(unsigned offset) {
     start = it->previous();
   }
 
-  Dart_Handle result = Dart_NewList(2);
+  Dart_Handle result = Dart_NewListOf(Dart_CoreType_Int, 2);
   Dart_ListSetAt(result, 0, ToDart(start));
   Dart_ListSetAt(result, 1, ToDart(end));
   return result;
