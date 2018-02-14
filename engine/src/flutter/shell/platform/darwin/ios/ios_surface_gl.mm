@@ -36,6 +36,13 @@ intptr_t IOSSurfaceGL::GLContextFBO() const {
   return IsValid() ? context_.framebuffer() : GL_NONE;
 }
 
+bool IOSSurfaceGL::UseOffscreenSurface() const {
+  // The onscreen surface wraps a GL renderbuffer, which is extremely slow to read.
+  // Certain filter effects require making a copy of the current destination, so we
+  // always render to an offscreen surface, which will be much quicker to read/copy.
+  return true;
+}
+
 bool IOSSurfaceGL::GLContextMakeCurrent() {
   return IsValid() ? context_.MakeCurrent() : false;
 }
