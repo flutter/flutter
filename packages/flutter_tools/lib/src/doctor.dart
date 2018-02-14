@@ -13,6 +13,7 @@ import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
@@ -26,6 +27,12 @@ import 'version.dart';
 import 'vscode/vscode_validator.dart';
 
 Doctor get doctor => context[Doctor];
+
+class ValidatorTask {
+  ValidatorTask(this.validator, this.result);
+  final DoctorValidator validator;
+  final Future<ValidationResult> result;
+}
 
 class Doctor {
   List<DoctorValidator> _validators;
@@ -54,6 +61,16 @@ class Doctor {
         _validators.add(new DeviceValidator());
     }
     return _validators;
+  }
+
+  /// Return a list of [ValidatorTask] objects and starts validation on all
+  /// objects in [validators].
+  List<ValidatorTask> startValidatorTasks() {
+    final List<ValidatorTask> tasks = <ValidatorTask>[];
+    for (DoctorValidator validator in validators) {
+      tasks.add(new ValidatorTask(validator, validator.validate()));
+    }
+    return tasks;
   }
 
   List<Workflow> get workflows {
@@ -108,9 +125,14 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
-    for (DoctorValidator validator in validators) {
-      final ValidationResult result = await validator.validate();
+    for (ValidatorTask validatorTask in startValidatorTasks()) {
+      final DoctorValidator validator = validatorTask.validator;
+      final Spinner status = new Spinner.forContextTerminal();
+      await (validatorTask.result).then<void>((_) {
+        status.stop();
+      }).whenComplete(status.cancel);
 
+      final ValidationResult result = await validatorTask.result;
       if (result.type == ValidationType.missing) {
         doctorResult = false;
       }

@@ -907,6 +907,9 @@ class _AppLoggerStatus implements Status {
   final String progressId;
 
   @override
+  void start() {}
+
+  @override
   void stop() {
     logger._status = null;
     _sendFinished();
