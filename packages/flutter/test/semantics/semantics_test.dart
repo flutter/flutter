@@ -348,7 +348,7 @@ void main() {
 
     expect(
       minimalProperties.toStringDeep(minLevel: DiagnosticLevel.hidden),
-      'SemanticsNode#1(owner: null, isMergedIntoParent: false, mergeAllDescendantsIntoThisNode: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), actions: [], isInMutuallyExcusiveGroup: false, isSelected: false, isFocused: false, isButton: false, isTextField: false, invisible, label: "", value: "", increasedValue: "", decreasedValue: "", hint: "", textDirection: null, nextNodeId: null, previousNodeId: null, sortOrder: null, scrollExtentMin: null, scrollPosition: null, scrollExtentMax: null)\n'
+      'SemanticsNode#1(owner: null, isMergedIntoParent: false, mergeAllDescendantsIntoThisNode: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), actions: [], isInMutuallyExcusiveGroup: false, isSelected: false, isFocused: false, isButton: false, isTextField: false, invisible, label: "", value: "", increasedValue: "", decreasedValue: "", hint: "", textDirection: null, previousNodeId: null, sortOrder: null, scrollExtentMin: null, scrollPosition: null, scrollExtentMax: null)\n'
     );
 
     final SemanticsConfiguration config = new SemanticsConfiguration()

@@ -92,7 +92,6 @@ class SemanticsData extends Diagnosticable {
     @required this.decreasedValue,
     @required this.hint,
     @required this.textDirection,
-    @required this.nextNodeId,
     @required this.previousNodeId,
     @required this.rect,
     @required this.textSelection,
@@ -151,10 +150,6 @@ class SemanticsData extends Diagnosticable {
   /// The reading direction for the text in [label], [value], [hint],
   /// [increasedValue], and [decreasedValue].
   final TextDirection textDirection;
-
-  /// The index indicating the ID of the next node in the traversal order after
-  /// this node for the platform's accessibility services.
-  final int nextNodeId;
 
   /// The index indicating the ID of the previous node in the traversal order before
   /// this node for the platform's accessibility services.
@@ -242,7 +237,6 @@ class SemanticsData extends Diagnosticable {
     properties.add(new StringProperty('decreasedValue', decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    properties.add(new IntProperty('nextNodeId', nextNodeId, defaultValue: null));
     properties.add(new IntProperty('previousNodeId', previousNodeId, defaultValue: null));
     if (textSelection?.isValid == true)
       properties.add(new MessageProperty('textSelection', '[${textSelection.start}, ${textSelection.end}]'));
@@ -264,7 +258,6 @@ class SemanticsData extends Diagnosticable {
         && typedOther.decreasedValue == decreasedValue
         && typedOther.hint == hint
         && typedOther.textDirection == textDirection
-        && typedOther.nextNodeId == nextNodeId
         && typedOther.previousNodeId == previousNodeId
         && typedOther.rect == rect
         && setEquals(typedOther.tags, tags)
@@ -276,7 +269,7 @@ class SemanticsData extends Diagnosticable {
   }
 
   @override
-  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, nextNodeId, previousNodeId, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform);
+  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, previousNodeId, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform);
 }
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
@@ -1074,29 +1067,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// The sort order for ordering the traversal of [SemanticsNode]s by the
   /// platform's accessibility services (e.g. VoiceOver on iOS and TalkBack on
-  /// Android). This is used to determine the [nextNodeId] and [previousNodeId]
-  /// during a semantics update.
+  /// Android). This is used to determine the [previousNodeId] during a semantics update.
   SemanticsSortOrder _sortOrder;
   SemanticsSortOrder get sortOrder => _sortOrder;
-
-  /// The ID of the next node in the traversal order after this node.
-  ///
-  /// Only valid after at least one semantics update has been built.
-  ///
-  /// This is the value passed to the engine to tell it what the order
-  /// should be for traversing semantics nodes.
-  ///
-  /// If this is set to -1, it will indicate that there is no next node to
-  /// the engine (i.e. this is the last node in the sort order). When it is
-  /// null, it means that no semantics update has been built yet.
-  int _nextNodeId;
-  void _updateNextNodeId(int value) {
-    if (value == _nextNodeId)
-      return;
-    _nextNodeId = value;
-    _markDirty();
-  }
-  int get nextNodeId => _nextNodeId;
 
   /// The ID of the previous node in the traversal order before this node.
   ///
@@ -1221,7 +1194,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     String increasedValue = _increasedValue;
     String decreasedValue = _decreasedValue;
     TextDirection textDirection = _textDirection;
-    int nextNodeId = _nextNodeId;
     int previousNodeId = _previousNodeId;
     Set<SemanticsTag> mergedTags = tags == null ? null : new Set<SemanticsTag>.from(tags);
     TextSelection textSelection = _textSelection;
@@ -1235,7 +1207,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         flags |= node._flags;
         actions |= node._actionsAsBits;
         textDirection ??= node._textDirection;
-        nextNodeId ??= node._nextNodeId;
         previousNodeId ??= node._previousNodeId;
         textSelection ??= node._textSelection;
         scrollPosition ??= node._scrollPosition;
@@ -1276,7 +1247,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       decreasedValue: decreasedValue,
       hint: hint,
       textDirection: textDirection,
-      nextNodeId: nextNodeId,
       previousNodeId: previousNodeId,
       rect: rect,
       transform: transform,
@@ -1319,7 +1289,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       increasedValue: data.increasedValue,
       hint: data.hint,
       textDirection: data.textDirection,
-      nextNodeId: data.nextNodeId,
       previousNodeId: data.previousNodeId,
       textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
@@ -1394,7 +1363,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(new StringProperty('decreasedValue', _decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', _hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
-    properties.add(new IntProperty('nextNodeId', _nextNodeId, defaultValue: null));
     properties.add(new IntProperty('previousNodeId', _previousNodeId, defaultValue: null));
     properties.add(new DiagnosticsProperty<SemanticsSortOrder>('sortOrder', sortOrder, defaultValue: null));
     if (_textSelection?.isValid == true)
@@ -1571,10 +1539,10 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
-  // Updates the nextNodeId and previousNodeId IDs on the semantics nodes. These
-  // IDs are used on the platform side to order the nodes for traversal by the
-  // accessibility services. If the nextNodeId or previousNodeId for a node
-  // changes, the node will be marked as dirty.
+  // Updates the previousNodeId IDs on the semantics nodes. These IDs are used
+  // on the platform side to order the nodes for traversal by the accessibility
+  // services. If the previousNodeId for a node changes, the node will be marked as
+  // dirty.
   void _updateTraversalOrder() {
     final List<_TraversalSortNode> nodesInSemanticsTraversalOrder = <_TraversalSortNode>[];
     SemanticsSortOrder currentSortOrder = new SemanticsSortOrder(keys: <SemanticsSortKey>[]);
@@ -1609,20 +1577,12 @@ class SemanticsOwner extends ChangeNotifier {
       return true;
     }
     rootSemanticsNode.visitChildren(visitor);
-
-    if (nodesInSemanticsTraversalOrder.isEmpty)
-      return;
-
     nodesInSemanticsTraversalOrder.sort();
-    _TraversalSortNode node = nodesInSemanticsTraversalOrder.removeLast();
-    node.node._updateNextNodeId(-1);
-    while (nodesInSemanticsTraversalOrder.isNotEmpty) {
-      final _TraversalSortNode previousNode = nodesInSemanticsTraversalOrder.removeLast();
-      node.node._updatePreviousNodeId(previousNode.node.id);
-      previousNode.node._updateNextNodeId(node.node.id);
-      node = previousNode;
+    int previousNodeId = -1;
+    for (_TraversalSortNode node in nodesInSemanticsTraversalOrder) {
+      node.node._updatePreviousNodeId(previousNodeId);
+      previousNodeId = node.node.id;
     }
-    node.node._updatePreviousNodeId(-1);
   }
 
   /// Update the semantics using [Window.updateSemantics].
