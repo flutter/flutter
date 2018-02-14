@@ -43,7 +43,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
         return new FloatingActionButton(
           backgroundColor: Colors.yellow.shade900,
           onPressed: () => _showSnackbar(context),
-          child: new Icon(Icons.add), 
+          child: const Icon(Icons.add), 
         );
       }),
       body: new Center(
