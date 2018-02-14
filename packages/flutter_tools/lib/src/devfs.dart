@@ -499,7 +499,8 @@ class DevFS {
         generator.reset();
       }
       final String compiledBinary =
-          await generator.recompile(mainPath, invalidatedFiles);
+          await generator.recompile(mainPath, invalidatedFiles,
+              outputPath: fs.path.join(getBuildDirectory(), 'app.dill'));
       if (compiledBinary != null && compiledBinary.isNotEmpty)
         dirtyEntries.putIfAbsent(
           Uri.parse(target + '.dill'),
