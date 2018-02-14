@@ -44,10 +44,6 @@ BuildApp() {
     target_path="${FLUTTER_TARGET}"
   fi
 
-  # if [[ -n "$SCRIPT_OUTPUT_STREAM_FILE" ]]; then
-  #   exec 3>$SCRIPT_OUTPUT_STREAM_FILE
-  # fi
-
   # Archive builds (ACTION=install) should always run in release mode.
   if [[ "$ACTION" == "install" && "$FLUTTER_BUILD_MODE" != "release" ]]; then
     EchoError "========================================================================"

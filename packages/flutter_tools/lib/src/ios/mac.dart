@@ -366,7 +366,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         buildSubStatus = logger.startProgress(
           line,
           expectSlowOperation: true,
-          progressIndicatorPadding: 40,
+          progressIndicatorPadding: 45,
         );
       }
     }
