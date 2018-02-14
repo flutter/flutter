@@ -8,6 +8,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
@@ -46,12 +47,12 @@ enum _ScaffoldSlot {
 abstract class FabPositioner {
   const FabPositioner();
 
-  /// End-aligned FAB, floating at the bottom of the screen.
+  /// End-aligned [FloatingActionButton], floating at the bottom of the screen.
   /// 
   /// This is the default alignment of FABs in Material apps.
   static const FabPositioner endFloat = const _EndFloatFab();
 
-  /// Centered FAB, floating at the bottom of the screen.
+  /// Centered [FloatingActionButton], floating at the bottom of the screen.
   static const FabPositioner centerFloat = const _CenterFloatFab();
 
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
@@ -125,6 +126,7 @@ class _ScalingFabMotionAnimator extends FabMotionAnimator {
 
 class _MaxAnimation<T> extends CompoundAnimation<T> {
   _MaxAnimation(Animation<T> first, Animation<T> next): super(first: first, next: next);
+
   @override
   T get value => math.max(first.value, next.value);
 }
@@ -1199,7 +1201,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     // If the fab is moved while still animating, schedule the new transition for the end of the current animation.
     if (_fabMoveController.isAnimating) {
-      new Future<Null>.delayed(_fabMoveController.duration - _fabMoveController.lastElapsedDuration).then((_) {
+      new Future<Null>.delayed((_fabMoveController.duration - _fabMoveController.lastElapsedDuration) * (timeDilation)).then((_) {
         updatePosition();
       });
     } else {
