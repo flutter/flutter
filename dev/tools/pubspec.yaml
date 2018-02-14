@@ -6,15 +6,15 @@ dependencies:
   args: 1.3.0
   http: 0.11.3+16
   intl: 0.15.2
-  meta: 1.1.1
+  meta: 1.1.2
   path: 1.5.1
   process: 2.0.7
 
 dev_dependencies:
-  test: 0.12.30+2
-  mockito: 2.2.2
+  test: 0.12.30+3
+  mockito: 2.2.3
 
-  async: 2.0.3 # TRANSITIVE DEPENDENCY
+  async: 2.0.4 # TRANSITIVE DEPENDENCY
   barback: 0.15.2+14 # TRANSITIVE DEPENDENCY
   boolean_selector: 1.0.2 # TRANSITIVE DEPENDENCY
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
@@ -23,7 +23,7 @@ dev_dependencies:
   convert: 2.0.1 # TRANSITIVE DEPENDENCY
   crypto: 2.0.2+1 # TRANSITIVE DEPENDENCY
   csslib: 0.14.1 # TRANSITIVE DEPENDENCY
-  file: 2.3.5 # TRANSITIVE DEPENDENCY
+  file: 2.3.6 # TRANSITIVE DEPENDENCY
   glob: 1.1.5 # TRANSITIVE DEPENDENCY
   html: 0.13.2+2 # TRANSITIVE DEPENDENCY
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
@@ -38,7 +38,7 @@ dev_dependencies:
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
-  platform: 2.1.1 # TRANSITIVE DEPENDENCY
+  platform: 2.1.2 # TRANSITIVE DEPENDENCY
   plugin: 0.2.0+2 # TRANSITIVE DEPENDENCY
   pool: 1.3.4 # TRANSITIVE DEPENDENCY
   pub_semver: 1.3.2 # TRANSITIVE DEPENDENCY
@@ -53,8 +53,8 @@ dev_dependencies:
   stream_channel: 1.6.3 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
-  typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
+  typed_data: 1.1.5 # TRANSITIVE DEPENDENCY
   utf: 0.9.0+4 # TRANSITIVE DEPENDENCY
   watcher: 0.9.7+7 # TRANSITIVE DEPENDENCY
-  web_socket_channel: 1.0.6 # TRANSITIVE DEPENDENCY
+  web_socket_channel: 1.0.7 # TRANSITIVE DEPENDENCY
   yaml: 2.1.13 # TRANSITIVE DEPENDENCY

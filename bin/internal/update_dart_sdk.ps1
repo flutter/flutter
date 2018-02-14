@@ -18,23 +18,22 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 
 $cachePath = "$flutterRoot\bin\cache"
 $dartSdkPath = "$cachePath\dart-sdk"
-$dartSdkStampPath = "$cachePath\dart-sdk.stamp"
-$dartSdkVersion = (Get-Content "$flutterRoot\bin\internal\dart-sdk.version")
+$engineStamp = "$cachePath\engine-dart-sdk.stamp"
+$engineVersion = (Get-Content "$flutterRoot\bin\internal\engine.version")
 
 $oldDartSdkPrefix = "dart-sdk.old"
 
-if ((Test-Path $dartSdkStampPath) -and ($dartSdkVersion -eq (Get-Content $dartSdkStampPath))) {
+if ((Test-Path $engineStamp) -and ($engineVersion -eq (Get-Content $engineStamp))) {
     return
 }
 
-Write-Host "Downloading Dart SDK $dartSdkVersion..."
+Write-Host "Downloading Dart SDK from Flutter engine $engineVersion..."
 $dartSdkBaseUrl = $Env:FLUTTER_STORAGE_BASE_URL
 if (-not $dartSdkBaseUrl) {
     $dartSdkBaseUrl = "https://storage.googleapis.com"
 }
-$dartZipName = "dartsdk-windows-x64-release.zip"
-$dartChannel = if ($dartSdkVersion.Contains("-dev.")) {"dev"} else {if ($dartSdkVersion.Contains("hash/")) {"be"} else {"stable"}}
-$dartSdkUrl = "$dartSdkBaseUrl/dart-archive/channels/$dartChannel/raw/$dartSdkVersion/sdk/$dartZipName"
+$dartZipName = "dart-sdk-windows-x64.zip"
+$dartSdkUrl = "$dartSdkBaseUrl/flutter_infra/flutter/$engineVersion/$dartZipName"
 
 if (Test-Path $dartSdkPath) {
     # Move old SDK to a new location instead of deleting it in case it is still in use (e.g. by IntelliJ).
@@ -43,7 +42,7 @@ if (Test-Path $dartSdkPath) {
     Rename-Item $dartSdkPath "$oldDartSdkPrefix$oldDartSdkSuffix"
 }
 New-Item $dartSdkPath -force -type directory | Out-Null
-$dartSdkZip = "$cachePath\dart-sdk.zip"
+$dartSdkZip = "$cachePath\$dartZipName"
 Import-Module BitsTransfer
 Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
 
@@ -67,7 +66,7 @@ If (Get-Command 7z -errorAction SilentlyContinue) {
 }
 
 Remove-Item $dartSdkZip
-$dartSdkVersion | Out-File $dartSdkStampPath -Encoding ASCII
+$engineVersion | Out-File $engineStamp -Encoding ASCII
 
 # Try to delete all old SDKs.
 Get-ChildItem -Path $cachePath | Where {$_.BaseName.StartsWith($oldDartSdkPrefix)} | Remove-Item -Recurse -ErrorAction SilentlyContinue
