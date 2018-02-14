@@ -44,7 +44,6 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
 
   TabController _controller;
   _Page _selectedPage;
-  PersistentBottomSheetController<Null> bottomSheetController;
 
   @override
   void initState() {
@@ -67,11 +66,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   }
 
   void _showExplanatoryText() {
-    if (bottomSheetController != null) {
-      bottomSheetController.close();
-      return;
-    }
-    bottomSheetController ??= _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
+    _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
       return new Container(
         decoration: new BoxDecoration(
           border: new Border(top: new BorderSide(color: Theme.of(context).dividerColor))
@@ -81,8 +76,6 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
           child: new Text(_explanatoryText, style: Theme.of(context).textTheme.subhead)
         )
       );
-    })..closed.then((Object _) {
-      setState(() {bottomSheetController = null;});
     });
   }
 
