@@ -9,7 +9,6 @@ import 'package:yaml/yaml.dart';
 import 'base/file_system.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
-import 'ios/cocoapods.dart';
 
 class Plugin {
   final String name;
@@ -81,25 +80,21 @@ List<Plugin> _findPlugins(String directory) {
 
 /// Returns true if .flutter-plugins has changed, otherwise returns false.
 bool _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
-  final File pluginsFile = fs.file(fs.path.join(directory, '.flutter-plugins'));
-  final String oldContents = _readFlutterPluginsList(directory);
+  final File pluginsProperties = fs.file(fs.path.join(directory, '.flutter-plugins'));
+  final String previousFlutterPlugins =
+      pluginsProperties.existsSync() ? pluginsProperties.readAsStringSync() : null;
   final String pluginManifest =
       plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
   if (pluginManifest.isNotEmpty) {
-    pluginsFile.writeAsStringSync('$pluginManifest\n', flush: true);
+    pluginsProperties.writeAsStringSync('$pluginManifest\n');
   } else {
-    if (pluginsFile.existsSync())
-      pluginsFile.deleteSync();
+    if (pluginsProperties.existsSync()) {
+      pluginsProperties.deleteSync();
+    }
   }
-  final String newContents = _readFlutterPluginsList(directory);
-  return oldContents != newContents;
-}
-
-/// Returns the contents of the `.flutter-plugins` file in [directory], or
-/// null if that file does not exist.
-String _readFlutterPluginsList(String directory) {
-  final File pluginsFile = fs.file(fs.path.join(directory, '.flutter-plugins'));
-  return pluginsFile.existsSync() ? pluginsFile.readAsStringSync() : null;
+  final String currentFlutterPlugins =
+      pluginsProperties.existsSync() ? pluginsProperties.readAsStringSync() : null;
+  return currentFlutterPlugins != previousFlutterPlugins;
 }
 
 const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
@@ -133,7 +128,7 @@ public final class GeneratedPluginRegistrant {
 }
 ''';
 
-void _writeAndroidPluginRegistrant(String directory, List<Plugin> plugins) {
+void _writeAndroidPluginRegistry(String directory, List<Plugin> plugins) {
   final List<Map<String, dynamic>> androidPlugins = plugins
       .where((Plugin p) => p.androidPackage != null && p.pluginClass != null)
       .map((Plugin p) => <String, dynamic>{
@@ -192,7 +187,7 @@ const String _iosPluginRegistryImplementationTemplate = '''//
 @end
 ''';
 
-void _writeIOSPluginRegistrant(String directory, List<Plugin> plugins) {
+void _writeIOSPluginRegistry(String directory, List<Plugin> plugins) {
   final List<Map<String, dynamic>> iosPlugins = plugins
       .where((Plugin p) => p.pluginClass != null)
       .map((Plugin p) => <String, dynamic>{
@@ -215,6 +210,7 @@ void _writeIOSPluginRegistrant(String directory, List<Plugin> plugins) {
   registryHeaderFile.writeAsStringSync(pluginRegistryHeader);
   final File registryImplementationFile = registryDirectory.childFile('GeneratedPluginRegistrant.m');
   registryImplementationFile.writeAsStringSync(pluginRegistryImplementation);
+
 }
 
 class InjectPluginsResult{
@@ -228,30 +224,17 @@ class InjectPluginsResult{
   final bool hasChanged;
 }
 
-/// Injects plugins found in `pubspec.yaml` into the platform-specific projects.
-void injectPlugins({String directory}) {
+/// Finds Flutter plugins in the pubspec.yaml, creates platform injection
+/// registries classes and add them to the build dependencies.
+///
+/// Returns whether any Flutter plugins are added and whether they changed.
+InjectPluginsResult injectPlugins({String directory}) {
   directory ??= fs.currentDirectory.path;
-  if (fs.file(fs.path.join(directory, 'example', 'pubspec.yaml')).existsSync()) {
-    // Switch to example app if in plugin project template.
-    directory = fs.path.join(directory, 'example');
-  }
   final List<Plugin> plugins = _findPlugins(directory);
-  final bool changed = _writeFlutterPluginsList(directory, plugins);
+  final bool hasPluginsChanged = _writeFlutterPluginsList(directory, plugins);
   if (fs.isDirectorySync(fs.path.join(directory, 'android')))
-    _writeAndroidPluginRegistrant(directory, plugins);
-  if (fs.isDirectorySync(fs.path.join(directory, 'ios'))) {
-    _writeIOSPluginRegistrant(directory, plugins);
-    final CocoaPods cocoaPods = const CocoaPods();
-    if (plugins.isNotEmpty)
-      cocoaPods.setupPodfile(directory);
-    if (changed)
-      cocoaPods.invalidatePodInstallOutput(directory);
-  }
-}
-
-/// Returns whether the Flutter project at the specified [directory]
-/// has any plugin dependencies.
-bool hasPlugins({String directory}) {
-  directory ??= fs.currentDirectory.path;
-  return _readFlutterPluginsList(directory) != null;
+    _writeAndroidPluginRegistry(directory, plugins);
+  if (fs.isDirectorySync(fs.path.join(directory, 'ios')))
+    _writeIOSPluginRegistry(directory, plugins);
+  return new InjectPluginsResult(hasPlugin: plugins.isNotEmpty, hasChanged: hasPluginsChanged);
 }

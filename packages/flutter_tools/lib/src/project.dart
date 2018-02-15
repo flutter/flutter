@@ -4,11 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-
 import 'base/file_system.dart';
-import 'ios/xcodeproj.dart';
-import 'plugins.dart';
-
 
 /// Represents the contents of a Flutter project at the specified [directory].
 class FlutterProject {
@@ -47,25 +43,8 @@ class FlutterProject {
   /// The Android sub project of this project.
   AndroidProject get android => new AndroidProject(directory.childDirectory('android'));
 
-  /// Returns true if this project is a plugin project.
-  bool get isPluginProject => directory.childDirectory('example').childFile('pubspec.yaml').existsSync();
-
   /// The example sub project of this (plugin) project.
   FlutterProject get example => new FlutterProject(directory.childDirectory('example'));
-
-  /// Generates project files necessary to make Gradle builds work on Android
-  /// and CocoaPods+Xcode work on iOS.
-  void ensureReadyForPlatformSpecificTooling() {
-    if (!directory.existsSync()) {
-      return;
-    }
-    if (isPluginProject) {
-      example.ensureReadyForPlatformSpecificTooling();
-    } else {
-      injectPlugins(directory: directory.path);
-      generateXcodeProperties(directory.path);
-    }
-  }
 }
 
 /// Represents the contents of the ios/ folder of a Flutter project.
