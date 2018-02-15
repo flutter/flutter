@@ -1,0 +1,141 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+
+import 'material.dart';
+import 'scaffold.dart';
+
+// Examples can assume:
+// Widget bottomAppBarContents;
+
+/// A container that s typically ised with [Scaffold.bottomNavigationBar], and
+/// can have a notch along the top that makes room for an overlapping
+/// [FloatingActionButton].
+///
+/// Typically used with a [Scaffold] and a [FloatingActionButton].
+///
+/// ## Sample code
+///
+/// ```dart
+/// new Scaffold(
+///   bottomNavigationBar: new BottomAppBar(
+///     color: Colors.white,
+///     child: bottomAppBarContents,
+///   ),
+///   floatingActionButton: new FloatingActionButton(onPressed: null),
+/// )
+/// ```
+///
+/// See also:
+///
+///  * [NotchMaker] a closure used for creating a notch in a shape.
+///  * [ScaffoldGeometry.floatingActionBarNotchMaker] the [NotchMaker] used to
+///  make a notch for the [FloatingActionButton]
+///  * [FloatingActionButton] which the [BottomAppBar] makes a notch for.
+///  * [AppBar] for a toolbar that is shown at the top of the screen.
+class BottomAppBar extends StatefulWidget {
+  /// Creates a bottom application bar.
+  ///
+  /// The [color] and [elevation] arguments must not be null.
+  const BottomAppBar({
+    Key key,
+    this.child,
+    // TODO(amirh): use a default color from the theme.
+    @required this.color,
+    this.elevation: 8.0,
+  }) : assert(color != null),
+       assert(elevation != null),
+       super(key: key);
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
+
+  /// The color to paint the material.
+  final Color color;
+
+  /// The z-coordinate at which to place this bottom app bar. This controls the
+  /// size of the shadow below the bottom app bar.
+  ///
+  /// Defaults to 8, the appropriate elevation for bottom app bars.
+  final double elevation;
+
+  @override
+  State createState() => new _BottomAppBarState();
+}
+
+class _BottomAppBarState extends State<BottomAppBar> {
+  ValueListenable<ScaffoldGeometry> geometryListenable;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    geometryListenable = Scaffold.geometryOf(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new PhysicalShape(
+      child: new Material(
+        type: MaterialType.transparency,
+        child: widget.child,
+      ),
+      clipper: new _BottomAppBarClipper(geometry: geometryListenable),
+      elevation: widget.elevation,
+      color: widget.color,
+    );
+  }
+}
+
+class _BottomAppBarClipper extends CustomClipper<Path> {
+  const _BottomAppBarClipper({
+    @required this.geometry
+  }) : assert(geometry != null),
+       super(reclip: geometry);
+
+  final ValueListenable<ScaffoldGeometry> geometry;
+
+  @override
+  Path getClip(Size size) {
+    final Rect appBar = Offset.zero & size;
+    if (geometry.value.floatingActionButtonArea == null ||
+        geometry.value.floatingActionButtonNotchMaker == null) {
+      return new Path()..addRect(appBar);
+    }
+
+    final Rect button = geometry.value.floatingActionButtonArea
+      .translate(0.0, geometry.value.bottomNavigationBarTop * -1);
+
+    final Rect intersect = appBar.intersect(button);
+    if (intersect.width < 0.0 || intersect.height < 0.0) {
+      return new Path()..addRect(appBar);
+    }
+
+    final NotchMaker notchMaker = geometry.value.floatingActionButtonNotchMaker;
+    return new Path()
+      ..moveTo(appBar.left, appBar.top)
+      ..addPath(
+        notchMaker(
+          appBar,
+          button,
+          new Offset(appBar.left, appBar.top),
+          new Offset(appBar.right, appBar.top)
+        ),
+        Offset.zero
+      )
+      ..lineTo(appBar.right, appBar.top)
+      ..lineTo(appBar.right, appBar.bottom)
+      ..lineTo(appBar.left, appBar.bottom)
+      ..close();
+  }
+
+  @override
+  bool shouldReclip(covariant _BottomAppBarClipper oldClipper) {
+    return oldClipper.geometry != geometry;
+  }
+}

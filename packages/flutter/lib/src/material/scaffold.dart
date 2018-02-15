@@ -468,6 +468,8 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///
 ///  * [AppBar], which is a horizontal bar typically shown at the top of an app
 ///    using the [appBar] property.
+///  * [BottomAppBar], which is a horizontal bar typically shown at the bottom
+///    of an app using the [bottomNavigationBar] property.
 ///  * [FloatingActionButton], which is a circular button typically shown in the
 ///    bottom right corner of the app using the [floatingActionButton] property.
 ///  * [Drawer], which is a vertical panel that is typically displayed to the
