@@ -146,13 +146,13 @@ class _MaxAnimation<T> extends CompoundAnimation<T> {
 class ScaffoldPrelayoutGeometry {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const ScaffoldPrelayoutGeometry({this.bottomSheetSize, this.contentBottom, this.contentTop, this.fabSize, this.horizontalFabPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
+  const ScaffoldPrelayoutGeometry({this.bottomSheetSize, this.contentBottom, this.contentTop, this.floatingActionButtonSize, this.horizontalFabPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
 
   /// The [Size] of the [Scaffold]'s [FloatingActionButton] (if available).
   /// 
   /// The Scaffold will determine the fabSize if 
   /// `Scaffold.floatingActionButton` is not null.
-  final Size fabSize;
+  final Size floatingActionButtonSize;
 
   /// The [Size] of the [Scaffold]'s [BottomSheet] (if available).
   /// 
@@ -188,12 +188,12 @@ class _CenterFloatFab extends FabPositioner {
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     // Compute the x-axis offset.
-    final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.fabSize.width) / 2;
+    final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2;
 
     // Compute the y-axis offset.
     final double contentBottom = scaffoldGeometry.contentBottom;
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
-    final double fabHeight = scaffoldGeometry.fabSize.height;
+    final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
     final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
     double fabY = contentBottom - fabHeight - _kFloatingActionButtonMargin;
     if (snackBarHeight > 0.0)
@@ -218,14 +218,14 @@ class _EndFloatFab extends FabPositioner {
         fabX = _kFloatingActionButtonMargin + scaffoldGeometry.horizontalFabPadding;
         break;
       case TextDirection.ltr:
-        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.fabSize.width - _kFloatingActionButtonMargin - scaffoldGeometry.horizontalFabPadding;
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - _kFloatingActionButtonMargin - scaffoldGeometry.horizontalFabPadding;
       break;
     }
 
     // Compute the y-axis offset.
     final double contentBottom = scaffoldGeometry.contentBottom;
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
-    final double fabHeight = scaffoldGeometry.fabSize.height;
+    final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
     final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
 
     double fabY = contentBottom - fabHeight - _kFloatingActionButtonMargin;
@@ -439,7 +439,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         bottomSheetSize: bottomSheetSize,
         contentBottom: contentBottom,
         contentTop: contentTop,
-        fabSize: fabSize,
+        floatingActionButtonSize: fabSize,
         horizontalFabPadding: horizontalPadding,
         scaffoldSize: size,
         snackBarSize: snackBarSize,
