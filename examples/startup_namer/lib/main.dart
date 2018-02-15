@@ -22,9 +22,9 @@ class RandomWords extends StatefulWidget {
 }
 
 class RandomWordsState extends State<RandomWords> {
-  // Dart lets you define lists in different ways
-  final _suggestions = <WordPair>[];  
-  final List<WordPair> _saved = [];
+  final _suggestions = <WordPair>[];
+
+  final _saved = new Set<WordPair>();
 
   final TextStyle _biggerFont = new TextStyle(fontSize: 18.0);
 
@@ -57,7 +57,11 @@ class RandomWordsState extends State<RandomWords> {
       ),
       onTap: () {
         setState(() {
-          alreadySaved ? _saved.remove(pair) : _saved.add(pair);
+          if (alreadySaved) {
+            _saved.remove(pair);
+          } else {
+            _saved.add(pair);
+          }
         });
       },
     );
@@ -82,13 +86,13 @@ class RandomWordsState extends State<RandomWords> {
     Navigator.of(context).push(
       new MaterialPageRoute(
         builder: (context) {
-          final tiles = _saved.map(
-            (pair) => new ListTile(
-                    title: new Text(
-                  pair.asPascalCase,
-                  style: _biggerFont,
-                )),
-          );
+          final tiles = _saved.map((pair) {
+            return new ListTile(
+                title: new Text(
+              pair.asPascalCase,
+              style: _biggerFont,
+            ));
+          });
           final divided = ListTile
               .divideTiles(
                 context: context,
