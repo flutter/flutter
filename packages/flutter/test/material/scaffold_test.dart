@@ -939,6 +939,44 @@ void main() {
       expect(listenerState.numNotifications, greaterThan(numNotificationsAtLastFrame));
       numNotificationsAtLastFrame = listenerState.numNotifications;
     });
+
+    testWidgets('set floatingActionButtonNotchMaker', (WidgetTester tester) async {
+      final NotchMaker notchMaker = (Rect container, Rect notch, Offset start, Offset end) => null;
+      await tester.pumpWidget(new MaterialApp(
+          home: new Scaffold(
+            body: new ConstrainedBox(
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+            floatingActionButton: new NotchMakerSetter(notchMaker),
+          )
+      ));
+
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      ScaffoldGeometry geometry = listenerState.cache.value;
+
+      expect(
+        geometry.floatingActionButtonNotchMaker,
+        notchMaker,
+      );
+
+      await tester.pumpWidget(new MaterialApp(
+          home: new Scaffold(
+            body: new ConstrainedBox(
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+            floatingActionButton: const NotchMakerSetter(null),
+          )
+      ));
+
+      geometry = listenerState.cache.value;
+
+      expect(
+        geometry.floatingActionButtonNotchMaker,
+        null,
+      );
+    });
   });
 }
 
@@ -983,7 +1021,7 @@ class GeometryListenerState extends State<GeometryListener> {
 // To fetch it for the tests we implement this CustomPainter that just
 // caches the ScaffoldGeometry value in its paint method.
 class GeometryCachePainter extends CustomPainter {
-  GeometryCachePainter(this.geometryListenable);
+  GeometryCachePainter(this.geometryListenable) : super(repaint: geometryListenable);
 
   final ValueListenable<ScaffoldGeometry> geometryListenable;
 
@@ -996,5 +1034,17 @@ class GeometryCachePainter extends CustomPainter {
   @override
   bool shouldRepaint(GeometryCachePainter oldDelegate) {
     return true;
+  }
+}
+
+class NotchMakerSetter extends StatelessWidget {
+  const NotchMakerSetter(this.notchMaker);
+
+  final NotchMaker notchMaker;
+
+  @override
+  Widget build(BuildContext context) {
+    Scaffold.setFloatingActionButtonNotchMakerFor(context, notchMaker);
+    return new Container();
   }
 }
