@@ -39,6 +39,7 @@ class CupertinoPicker extends StatefulWidget {
     @required this.children,
   }) : assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
+       assert(backgroundColor != null),
        assert(itemExtent != null),
        assert(itemExtent > 0),
        super(key: key);
@@ -131,8 +132,8 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   /// Makes the magnifier lens look so that the colors are normal through
   /// the lens and partially grayed out around it.
   Widget _buildMagnifierScreen() {
-    final Color foreground = widget.backgroundColor?.withAlpha(
-      (widget.backgroundColor?.alpha * _kForegroundScreenOpacityFraction).toInt()
+    final Color foreground = widget.backgroundColor.withAlpha(
+      (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt()
     );
 
     return new IgnorePointer(
