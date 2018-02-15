@@ -906,6 +906,41 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///
 /// Animating an opacity is relatively expensive because it requires painting
 /// the child into an intermediate buffer.
+///
+/// ## Sample code
+///
+/// ```dart
+/// class LogoFade extends StatefulWidget {
+///   @override
+///   createState() => new LogoFadeState();
+/// }
+///
+/// class LogoFadeState extends State<LogoFade> {
+///   double opacityLevel = 1.0;
+/// 
+///   _changeOpacity() {
+///     setState(() => opacityLevel = opacityLevel == 0 ? 1.0 : 0.0);
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new Column(
+///       mainAxisAlignment: MainAxisAlignment.center,
+///       children: [
+///         new AnimatedOpacity(
+///           opacity: opacityLevel,
+///           duration: new Duration(seconds: 3),
+///           child: new FlutterLogo(),
+///         ),
+///         new RaisedButton(
+///           child: new Text('Fade Logo'),
+///           onPressed: _changeOpacity,
+///         ),
+///       ],
+///     );
+///   }
+/// }
+/// ```
 class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates its opacity implicitly.
   ///
