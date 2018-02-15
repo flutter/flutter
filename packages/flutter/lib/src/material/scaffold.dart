@@ -140,7 +140,7 @@ class _MaxAnimation<T> extends CompoundAnimation<T> {
 /// 
 /// The Scaffold passes this prelayout geometry to its [FabPositioner].
 /// 
-/// For a description of the Scaffold's geometry after it has
+/// For a description of the [Scaffold]'s geometry after it has
 /// finished laying out, see the [ScaffoldGeometry].
 @immutable
 class ScaffoldPrelayoutGeometry {
@@ -251,7 +251,7 @@ class _EndFloatFab extends FabPositioner {
 /// To get a [ValueNotifier] for the scaffold geometry call
 /// [Scaffold.geometryOf].
 /// 
-/// For information about the Scaffold's geometry that is used as part of
+/// For information about the [Scaffold]'s geometry that is used as part of
 /// the layout process, see [ScaffoldPrelayoutGeometry].
 @immutable
 class ScaffoldGeometry {
@@ -262,14 +262,14 @@ class ScaffoldGeometry {
     this.floatingActionButtonArea,
   });
 
-  /// The distance from the scaffold's top edge to the top edge of the
+  /// The distance from the [Scaffold]'s top edge to the top edge of the
   /// rectangle in which the [Scaffold.bottomNavigationBar] bar is being laid
   /// out.
   ///
   /// When there is no [Scaffold.bottomNavigationBar] set, this will be null.
   final double bottomNavigationBarTop;
 
-  /// The rectangle in which the scaffold is laying out
+  /// The rectangle in which the [Scaffold] is laying out
   /// [Scaffold.floatingActionButton].
   ///
   /// This is null when there is no floating action button showing.
