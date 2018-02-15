@@ -140,7 +140,9 @@ TEST_F(ParagraphTest, RainbowParagraph) {
   text_style2.font_weight = txt::FontWeight::w600;
   text_style2.color = SK_ColorGREEN;
   text_style2.font_family = "Roboto";
-  text_style2.decoration = txt::TextDecoration(0x1 | 0x2 | 0x4);
+  text_style2.decoration = TextDecoration::kUnderline |
+                           TextDecoration::kOverline |
+                           TextDecoration::kLineThrough;
   text_style2.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style2);
 
@@ -156,7 +158,9 @@ TEST_F(ParagraphTest, RainbowParagraph) {
   text_style4.font_size = 14;
   text_style4.color = SK_ColorBLUE;
   text_style4.font_family = "Roboto";
-  text_style4.decoration = txt::TextDecoration(0x1 | 0x2 | 0x4);
+  text_style4.decoration = TextDecoration::kUnderline |
+                           TextDecoration::kOverline |
+                           TextDecoration::kLineThrough;
   text_style4.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style4);
 
@@ -291,7 +295,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(LeftAlignParagraph)) {
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
   text_style.height = 1;
-  text_style.decoration = txt::TextDecoration(0x1);
+  text_style.decoration = TextDecoration::kUnderline;
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
 
@@ -388,7 +392,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(RightAlignParagraph)) {
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
   text_style.height = 1;
-  text_style.decoration = txt::TextDecoration(0x1);
+  text_style.decoration = TextDecoration::kUnderline;
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
 
@@ -492,7 +496,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(CenterAlignParagraph)) {
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
   text_style.height = 1;
-  text_style.decoration = txt::TextDecoration(0x1);
+  text_style.decoration = TextDecoration::kUnderline;
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
 
@@ -598,7 +602,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(JustifyAlignParagraph)) {
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
   text_style.height = 1;
-  text_style.decoration = txt::TextDecoration(0x1);
+  text_style.decoration = TextDecoration::kUnderline;
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
 
@@ -665,7 +669,9 @@ TEST_F(ParagraphTest, DecorationsParagraph) {
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
   text_style.height = 2;
-  text_style.decoration = txt::TextDecoration(0x1 | 0x2 | 0x4);
+  text_style.decoration = TextDecoration::kUnderline |
+                          TextDecoration::kOverline |
+                          TextDecoration::kLineThrough;
   text_style.decoration_style = txt::TextDecorationStyle::kSolid;
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
@@ -705,7 +711,8 @@ TEST_F(ParagraphTest, DecorationsParagraph) {
 
   for (size_t i = 0; i < 6; ++i) {
     ASSERT_EQ(paragraph->records_[i].style().decoration,
-              txt::TextDecoration(0x1 | 0x2 | 0x4));
+              TextDecoration::kUnderline | TextDecoration::kOverline |
+                  TextDecoration::kLineThrough);
   }
 
   ASSERT_EQ(paragraph->records_[0].style().decoration_style,
@@ -782,7 +789,9 @@ TEST_F(ParagraphTest, ChineseParagraph) {
   text_style.font_size = 35;
   text_style.letter_spacing = 2;
   text_style.font_family = "Source Han Serif CN";
-  text_style.decoration = txt::TextDecoration(0x1 | 0x2 | 0x4);
+  text_style.decoration = TextDecoration::kUnderline |
+                          TextDecoration::kOverline |
+                          TextDecoration::kLineThrough;
   text_style.decoration_style = txt::TextDecorationStyle::kSolid;
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
@@ -825,7 +834,9 @@ TEST_F(ParagraphTest, DISABLED_ArabicParagraph) {
   text_style.font_size = 35;
   text_style.letter_spacing = 2;
   text_style.font_family = "Katibeh";
-  text_style.decoration = txt::TextDecoration(0x1 | 0x2 | 0x4);
+  text_style.decoration = TextDecoration::kUnderline |
+                          TextDecoration::kOverline |
+                          TextDecoration::kLineThrough;
   text_style.decoration_style = txt::TextDecorationStyle::kSolid;
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);

@@ -300,10 +300,7 @@ class Paragraph {
   double GetLineXOffset(size_t line);
 
   // Creates and draws the decorations onto the canvas.
-  void PaintDecorations(SkCanvas* canvas,
-                        double x,
-                        double y,
-                        size_t record_index);
+  void PaintDecorations(SkCanvas* canvas, const PaintRecord& record);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(Paragraph);
 };
