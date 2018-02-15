@@ -150,20 +150,19 @@ class ScaffoldPrelayoutGeometry {
 
   /// The [Size] of the [Scaffold]'s [FloatingActionButton] (if available).
   /// 
-  /// The [Scaffold] will determine the floatingActionButtonSize if 
+  /// The [Scaffold] will determine the [floatingActionButtonSize] if 
   /// [Scaffold.floatingActionButton] is not null.
   /// 
-  /// If [Scaffold.floatingActionButton] is null, this should be null as
-  /// well.
+  /// If [Scaffold.floatingActionButton] is null, this should be [Size.zero].
   final Size floatingActionButtonSize;
 
   /// The [Size] of the [Scaffold]'s [BottomSheet] (if available).
   /// 
-  /// The Scaffold will determine the bottomSheetSize if the Scaffold
+  /// The [Scaffold] will determine the [bottomSheetSize] if the [Scaffold]
   /// is currently showing a [BottomSheet].
   /// 
-  /// If the Scaffold is not currently showing a [BottomSheet],
-  /// this should be null.
+  /// If the [Scaffold] is not currently showing a [BottomSheet],
+  /// this should be [Size.zero].
   final Size bottomSheetSize;
 
   /// The height from the [Scaffold]'s top where its body ends.
@@ -180,11 +179,11 @@ class ScaffoldPrelayoutGeometry {
 
   /// The [Size] of the [Scaffold]'s [SnackBar] (if available).
   /// 
-  /// The [Scaffold] will determine the `snackBarSize` if the Scaffold
+  /// The [Scaffold] will determine the [snackBarSize] if the [Scaffold]
   /// is currently showing a [SnackBar].
   /// 
   /// If the [Scaffold] is not showing a [SnackBar],
-  /// this should be null.
+  /// this should be [Size.zero].
   final Size snackBarSize;
 
   /// The [TextDirection] of the [Scaffold]'s [BuildContext].
