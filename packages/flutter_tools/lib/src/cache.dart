@@ -8,12 +8,10 @@ import 'package:meta/meta.dart';
 
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
-import 'base/process_manager.dart';
 import 'globals.dart';
 
 /// A wrapper around the `bin/cache/` directory.
@@ -116,32 +114,6 @@ class Cache {
   String get engineRevision {
     _engineRevision ??= getVersionFor('engine');
     return _engineRevision;
-  }
-
-  String _engineDartVersion;
-
-  String get engineDartVersion {
-    if (_engineDartVersion == null) {
-      final Directory engineDirectory = getArtifactDirectory('engine');
-
-      List<String> dartSdkBinParts;
-      if (platform.isLinux) {
-        dartSdkBinParts = <String>['linux-x64', 'dart-sdk', 'bin', 'dart'];
-      } else if (platform.isMacOS) {
-        dartSdkBinParts = <String>['darwin-x64', 'dart-sdk', 'bin', 'dart'];
-      } else if (platform.isWindows) {
-        dartSdkBinParts = <String>['windows-x64', 'dart-sdk', 'bin', 'dart.exe'];
-      } else {
-        // Unknown platform, we can't derive version.
-        return null;
-      }
-      final File dartSdkBin = engineDirectory.childFile(fs.path.joinAll(dartSdkBinParts));
-      final ProcessResult result = processManager.runSync(<String>[dartSdkBin.path, '--version']);
-      // https://github.com/dart-lang/sdk/issues/31481
-      // We can use the process utils directly when this is fixed instead of parsing stderr.
-      _engineDartVersion = result.stderr.trim().replaceAll('Dart VM version: ', '');
-    }
-    return _engineDartVersion;
   }
 
   static Cache get instance => context[Cache];
@@ -364,7 +336,8 @@ class FlutterEngine extends CachedArtifact {
         ..addAll(_linuxBinaryDirs)
         ..addAll(_windowsBinaryDirs)
         ..addAll(_androidBinaryDirs)
-        ..addAll(_iosBinaryDirs);
+        ..addAll(_iosBinaryDirs)
+        ..addAll(_dartSdks);
     else if (platform.isLinux)
       binaryDirs
         ..addAll(_linuxBinaryDirs)
@@ -384,7 +357,6 @@ class FlutterEngine extends CachedArtifact {
 
   List<List<String>> get _osxBinaryDirs => <List<String>>[
     <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
-    <String>['darwin-x64', 'dart-sdk-darwin-x64.zip'],
     <String>['android-arm-profile/darwin-x64', 'android-arm-profile/darwin-x64.zip'],
     <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
     <String>['android-arm64-profile/darwin-x64', 'android-arm64-profile/darwin-x64.zip'],
@@ -393,7 +365,6 @@ class FlutterEngine extends CachedArtifact {
 
   List<List<String>> get _linuxBinaryDirs => <List<String>>[
     <String>['linux-x64', 'linux-x64/artifacts.zip'],
-    <String>['linux-x64', 'dart-sdk-linux-x64.zip'],
     <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
     <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
     <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
@@ -402,7 +373,6 @@ class FlutterEngine extends CachedArtifact {
 
   List<List<String>> get _windowsBinaryDirs => <List<String>>[
     <String>['windows-x64', 'windows-x64/artifacts.zip'],
-    <String>['windows-x64', 'dart-sdk-windows-x64.zip'],
     <String>['android-arm-profile/windows-x64', 'android-arm-profile/windows-x64.zip'],
     <String>['android-arm-release/windows-x64', 'android-arm-release/windows-x64.zip'],
     <String>['android-arm64-profile/windows-x64', 'android-arm64-profile/windows-x64.zip'],
@@ -424,6 +394,12 @@ class FlutterEngine extends CachedArtifact {
     <String>['ios', 'ios/artifacts.zip'],
     <String>['ios-profile', 'ios-profile/artifacts.zip'],
     <String>['ios-release', 'ios-release/artifacts.zip'],
+  ];
+
+  List<List<String>> get _dartSdks => <List<String>> [
+    <String>['darwin-x64', 'dart-sdk-darwin-x64.zip'],
+    <String>['linux-x64', 'dart-sdk-linux-x64.zip'],
+    <String>['windows-x64', 'dart-sdk-windows-x64.zip'],
   ];
 
   @override

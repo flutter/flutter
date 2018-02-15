@@ -24,7 +24,6 @@ enum Artifact {
   platformLibrariesJson,
   flutterPatchedSdkPath,
   frontendServerSnapshotForEngineDartSdk,
-  engineDartSdkPath,
 }
 
 String _artifactToFileName(Artifact artifact) {
@@ -52,8 +51,6 @@ String _artifactToFileName(Artifact artifact) {
     case Artifact.flutterPatchedSdkPath:
       assert(false, 'No filename for sdk path, should not be invoked');
       return null;
-    case Artifact.engineDartSdkPath:
-      return 'dart-sdk';
     case Artifact.frontendServerSnapshotForEngineDartSdk:
       return 'frontend_server.dart.snapshot';
   }
@@ -164,7 +161,6 @@ class CachedArtifacts extends Artifacts {
       case Artifact.vmSnapshotData:
       case Artifact.isolateSnapshotData:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
-      case Artifact.engineDartSdkPath:
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
@@ -248,8 +244,6 @@ class LocalEngineArtifacts extends Artifacts {
         return _getFlutterPatchedSdkPath();
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return fs.path.join(_hostEngineOutPath, 'gen', _artifactToFileName(artifact));
-      case Artifact.engineDartSdkPath:
-        return fs.path.join(_hostEngineOutPath, 'dart-sdk');
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;
