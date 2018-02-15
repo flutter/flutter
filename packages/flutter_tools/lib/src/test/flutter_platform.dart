@@ -211,6 +211,11 @@ class _FlutterPlatform extends PlatformPlugin {
           packagesPath: PackageMap.globalPackagesPath,
         );
 
+        if (mainDart == null) {
+          controller.sink.addError(_getErrorMessage('Compilation failed', testPath, shellPath));
+          return null;
+        }
+
         // bundlePath needs to point to a folder with `platform.dill` file.
         final Directory tempBundleDirectory = fs.systemTempDirectory
             .createTempSync('flutter_bundle_directory');
