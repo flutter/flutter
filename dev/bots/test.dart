@@ -49,11 +49,13 @@ Future<Null> main(List<String> args) async {
   if (shard != null) {
     if (!_kShards.containsKey(shard))
       throw new ArgumentError('Invalid shard: $shard');
+    print('${bold}SHARD=$shard$reset');
     await _kShards[shard]();
   } else {
     for (String currentShard in _kShards.keys) {
       print('${bold}SHARD=$currentShard$reset');
       await _kShards[currentShard]();
+      print('');
     }
   }
 }
@@ -91,6 +93,7 @@ Future<Null> _verifyInternationalizations() async {
       ..writeln('Did you forget to run gen_localizations.dart after updating a .arb file?');
     exit(1);
   }
+  print('Contents of $localizationsFile matches output of gen_localizations.dart script.');
 }
 
 Future<Null> _analyzeRepo() async {
@@ -541,7 +544,7 @@ Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
 
   for (String package in packageToRegistrants.keys) {
     final Map<File, String> fileToContent = <File, String>{};
-    for(File f in packageToRegistrants[package]) {
+    for (File f in packageToRegistrants[package]) {
       fileToContent[f] = f.readAsStringSync();
     }
     await _runCommand(flutter, <String>['inject-plugins'],

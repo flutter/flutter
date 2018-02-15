@@ -45,7 +45,7 @@ void main() {
     });
 
     test('test blacklisting formatter', () {
-      final TextEditingValue actualValue = 
+      final TextEditingValue actualValue =
           new BlacklistingTextInputFormatter(new RegExp(r'[a-z]'))
               .formatEditUpdate(testOldValue, testNewValue);
 
@@ -62,7 +62,7 @@ void main() {
     });
 
     test('test single line formatter', () {
-      final TextEditingValue actualValue = 
+      final TextEditingValue actualValue =
           BlacklistingTextInputFormatter.singleLineFormatter
               .formatEditUpdate(testOldValue, testNewValue);
 
@@ -78,7 +78,7 @@ void main() {
     });
 
     test('test whitelisting formatter', () {
-      final TextEditingValue actualValue = 
+      final TextEditingValue actualValue =
           new WhitelistingTextInputFormatter(new RegExp(r'[a-c]'))
               .formatEditUpdate(testOldValue, testNewValue);
 
@@ -94,7 +94,7 @@ void main() {
     });
 
     test('test digits only formatter', () {
-      final TextEditingValue actualValue = 
+      final TextEditingValue actualValue =
           WhitelistingTextInputFormatter.digitsOnly
               .formatEditUpdate(testOldValue, testNewValue);
 
@@ -173,7 +173,7 @@ void main() {
 
 
     test('test length limiting formatter with complex Unicode characters', () {
-      // TODO(gspencer): Test additional strings.  We can do this once the
+      // TODO(gspencer): Test additional strings. We can do this once the
       // formatter supports Unicode grapheme clusters.
       //
       // A formatter with max length 1 should accept:

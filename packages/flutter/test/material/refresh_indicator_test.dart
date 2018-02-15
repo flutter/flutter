@@ -58,7 +58,7 @@ void main() {
             scrollDirection: Axis.horizontal,
             child: new Container(
               width: 600.0,
-              child:new ListView(
+              child: new ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
                   return new SizedBox(

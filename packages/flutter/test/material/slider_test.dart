@@ -188,7 +188,7 @@ void main() {
 
   testWidgets('Slider has a customizable active color',
       (WidgetTester tester) async {
-    final Color customColor = const Color(0xFF4CD964);
+    const Color customColor = const Color(0xFF4CD964);
     final ThemeData theme = new ThemeData(platform: TargetPlatform.android);
     Widget buildApp(Color activeColor) {
       return new Directionality(
@@ -226,7 +226,7 @@ void main() {
 
   testWidgets('Slider has a customizable inactive color',
       (WidgetTester tester) async {
-    final Color customColor = const Color(0xFF4CD964);
+    const Color customColor = const Color(0xFF4CD964);
     final ThemeData theme = new ThemeData(platform: TargetPlatform.android);
     Widget buildApp(Color inactiveColor) {
       return new Directionality(

@@ -202,7 +202,7 @@ void main() {
   });
 
   testWidgets('Localizations.localeFor in a WidgetsApp with an explicit locale', (WidgetTester tester) async {
-    final Locale locale = const Locale('en', 'US');
+    const Locale locale = const Locale('en', 'US');
     BuildContext pageContext;
 
     await tester.pumpWidget(

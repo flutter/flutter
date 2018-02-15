@@ -77,6 +77,8 @@ class GalleryHome extends StatefulWidget {
     this.checkerboardOffscreenLayers,
     this.onCheckerboardOffscreenLayersChanged,
     this.onPlatformChanged,
+    this.overrideDirection: TextDirection.ltr,
+    this.onOverrideDirectionChanged,
     this.onSendFeedback,
   }) : assert(onThemeChanged != null),
        assert(onTimeDilationChanged != null),
@@ -101,6 +103,9 @@ class GalleryHome extends StatefulWidget {
   final ValueChanged<bool> onCheckerboardOffscreenLayersChanged;
 
   final ValueChanged<TargetPlatform> onPlatformChanged;
+
+  final TextDirection overrideDirection;
+  final ValueChanged<TextDirection> onOverrideDirectionChanged;
 
   final VoidCallback onSendFeedback;
 
@@ -177,6 +182,8 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
         onCheckerboardOffscreenLayersChanged: widget.onCheckerboardOffscreenLayersChanged,
         onPlatformChanged: widget.onPlatformChanged,
+        overrideDirection: widget.overrideDirection,
+        onOverrideDirectionChanged: widget.onOverrideDirectionChanged,
         onSendFeedback: widget.onSendFeedback,
       ),
       body: new CustomScrollView(

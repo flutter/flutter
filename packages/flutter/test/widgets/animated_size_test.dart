@@ -188,7 +188,7 @@ void main() {
       // Make sure animation proceeds at child's pace, with AnimatedSize
       // tightly tracking the child's size.
       verify(state: RenderAnimatedSizeState.stable);
-      await pumpMillis(1);  // register change
+      await pumpMillis(1); // register change
       verify(state: RenderAnimatedSizeState.changed);
       await pumpMillis(49);
       verify(size: 150.0, state: RenderAnimatedSizeState.unstable);
@@ -215,7 +215,7 @@ void main() {
       );
 
       verify(size: 200.0, state: RenderAnimatedSizeState.stable);
-      await pumpMillis(1);  // register change
+      await pumpMillis(1); // register change
       verify(state: RenderAnimatedSizeState.changed);
       await pumpMillis(100);
       verify(size: 150.0, state: RenderAnimatedSizeState.stable);

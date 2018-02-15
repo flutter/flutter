@@ -27,17 +27,17 @@ class _DragHandler extends Drag {
   final GestureDragEndCallback onEnd;
 
   @override
-  void update(DragUpdateDetails details)  {
+  void update(DragUpdateDetails details) {
     onUpdate(details);
   }
 
   @override
-  void cancel()  {
+  void cancel() {
     onCancel();
   }
 
   @override
-  void end(DragEndDetails details)  {
+  void end(DragEndDetails details) {
     onEnd(details);
   }
 }
@@ -152,7 +152,7 @@ class _PointDemoState extends State<_PointDemo> {
     return new _DragHandler(_handleDragUpdate, _handleDragCancel, _handleDragEnd);
   }
 
-  void _handleDragUpdate(DragUpdateDetails details)  {
+  void _handleDragUpdate(DragUpdateDetails details) {
     switch (_dragTarget) {
       case _DragTarget.start:
         setState(() {
@@ -167,12 +167,12 @@ class _PointDemoState extends State<_PointDemo> {
     }
   }
 
-  void _handleDragCancel()  {
+  void _handleDragCancel() {
     _dragTarget = null;
     widget.controller.value = 0.0;
   }
 
-  void _handleDragEnd(DragEndDetails details)  {
+  void _handleDragEnd(DragEndDetails details) {
     _dragTarget = null;
   }
 
@@ -319,7 +319,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
     return new _DragHandler(_handleDragUpdate, _handleDragCancel, _handleDragEnd);
   }
 
-  void _handleDragUpdate(DragUpdateDetails details)  {
+  void _handleDragUpdate(DragUpdateDetails details) {
     switch (_dragTarget) {
       case _DragTarget.start:
         setState(() {
@@ -334,12 +334,12 @@ class _RectangleDemoState extends State<_RectangleDemo> {
     }
   }
 
-  void _handleDragCancel()  {
+  void _handleDragCancel() {
     _dragTarget = null;
     widget.controller.value = 0.0;
   }
 
-  void _handleDragEnd(DragEndDetails details)  {
+  void _handleDragEnd(DragEndDetails details) {
     _dragTarget = null;
   }
 

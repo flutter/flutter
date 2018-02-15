@@ -170,7 +170,7 @@ class InkSplash extends InteractiveInkFeature {
 
   @override
   void cancel() {
-    _alphaController.forward();
+    _alphaController?.forward();
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
@@ -182,6 +182,7 @@ class InkSplash extends InteractiveInkFeature {
   void dispose() {
     _radiusController.dispose();
     _alphaController.dispose();
+    _alphaController = null;
     super.dispose();
   }
 

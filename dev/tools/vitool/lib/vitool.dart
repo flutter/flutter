@@ -267,7 +267,7 @@ class FrameData {
   final List<SvgPath> paths;
 
   @override
-  bool operator ==(Object other){
+  bool operator ==(Object other) {
     if (runtimeType != other.runtimeType)
       return false;
     final FrameData typedOther = other;
@@ -464,7 +464,7 @@ const String _transformCommandAtom = ' *([^(]+)\\(([^)]*)\\)';
 final RegExp _transformValidator = new RegExp('^($_transformCommandAtom)*\$');
 final RegExp _transformCommand = new RegExp(_transformCommandAtom);
 
-Matrix3 _parseSvgTransform(String transform){
+Matrix3 _parseSvgTransform(String transform) {
   if (!_transformValidator.hasMatch(transform))
     throw new Exception('illegal or unsupported transform: $transform');
   final Iterable<Match> matches =_transformCommand.allMatches(transform).toList().reversed;

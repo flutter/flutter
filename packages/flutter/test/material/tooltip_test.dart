@@ -602,4 +602,57 @@ void main() {
     feedback.dispose();
   });
 
+  testWidgets('Semantics included', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Center(
+          child: const Tooltip(
+            message: 'Foo',
+            child: const Text('Bar'),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'Foo\nBar',
+          textDirection: TextDirection.ltr,
+        ),
+      ],
+    ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Semantics excluded', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Center(
+          child: const Tooltip(
+            message: 'Foo',
+            child: const Text('Bar'),
+            excludeFromSemantics: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'Bar',
+          textDirection: TextDirection.ltr,
+        ),
+      ],
+    ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
+
+    semantics.dispose();
+  });
+
 }

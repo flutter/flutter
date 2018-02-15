@@ -396,7 +396,7 @@ void main() {
     expect(controller.value, 1.0);
   });
 
-  test('resetting animation works at all phases', (){
+  test('resetting animation works at all phases', () {
     final List<AnimationStatus> statusLog = <AnimationStatus>[];
     final AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100),

@@ -186,7 +186,7 @@ void main() {
     });
 
     testUsingContext('add new package with double slashes in URI', () async {
-      final String packageName = 'doubleslashpkg';
+      const String packageName = 'doubleslashpkg';
       await _createPackage(fs, packageName, 'somefile.txt', doubleSlash: true);
 
       final Set<String> fileFilter = new Set<String>();
@@ -477,7 +477,7 @@ Future<Null> _createPackage(FileSystem fs, String pkgName, String pkgFileName, {
   if (doubleSlash) {
     // Force two separators into the path.
     final String doubleSlash = fs.path.separator + fs.path.separator;
-    pkgFilePath = pkgTempDir.path + doubleSlash  + fs.path.join(pkgName, 'lib', pkgFileName);
+    pkgFilePath = pkgTempDir.path + doubleSlash + fs.path.join(pkgName, 'lib', pkgFileName);
   }
   final File pkgFile = fs.file(pkgFilePath);
   await pkgFile.parent.create(recursive: true);

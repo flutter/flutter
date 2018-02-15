@@ -453,7 +453,4 @@ void main() {
     expect(tester.getTopLeft(find.byKey(target)), const Offset(600.0, 0.0));
     expect(tester.getBottomRight(find.byKey(target)), const Offset(800.0, 200.0));
   });
-
-  // TODO(ianh): can you tap a grid cell that is slightly off the bottom of the screen?
-  // (try it with the flutter_gallery Grid demo)
 }

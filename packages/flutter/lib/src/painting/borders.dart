@@ -445,7 +445,7 @@ abstract class ShapeBorder {
   /// to this object the path returned from [getInnerPath] (using
   /// [Path.addPath]).
   ///
-  /// The `textDirection` argument must be provided  non-null if the border
+  /// The `textDirection` argument must be provided non-null if the border
   /// has a text direction dependency (for example if it is expressed in terms
   /// of "start" and "end" instead of "left" and "right"). It may be null if
   /// the border will not need the text direction to paint itself.

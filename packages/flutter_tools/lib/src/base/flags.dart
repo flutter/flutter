@@ -44,7 +44,7 @@ class Flags {
   }
 
   /// `true` iff the given flag/option was either explicitly specified by the
-  /// user at  the command-line or it was defined to have a default value.
+  /// user at the command-line or it was defined to have a default value.
   bool contains(String key) {
     final ArgResults commandResults = _globalResults.command;
     final Iterable<String> options = commandResults?.options;

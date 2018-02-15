@@ -22,14 +22,14 @@ void main() {
 
   // Tests https://github.com/flutter/flutter/issues/5522
   testWidgets('GridView displays correct children with nonzero padding', (WidgetTester tester) async {
-    final EdgeInsets padding = const EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
+    const EdgeInsets padding = const EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
 
     final Widget testWidget = new Directionality(
       textDirection: TextDirection.ltr,
       child: new Align(
         child: new SizedBox(
           height: 800.0,
-          width: 300.0,  // forces the grid children to be 300..300
+          width: 300.0, // forces the grid children to be 300..300
           child: new GridView.count(
             crossAxisCount: 1,
             padding: padding,

@@ -53,29 +53,33 @@ typedef String GenerateAppTitle(BuildContext context);
 /// See also: [CheckedModeBanner], [DefaultTextStyle], [MediaQuery],
 /// [Localizations], [Title], [Navigator], [Overlay], [SemanticsDebugger] (the
 /// widgets wrapped by this one).
-///
-/// The [onGenerateRoute] argument is required, and corresponds to
-/// [Navigator.onGenerateRoute].
 class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
   ///
-  /// The boolean arguments, [color], [navigatorObservers], and
-  /// [onGenerateRoute] must not be null.
+  /// The boolean arguments, [color], and [navigatorObservers] must not be null.
+  ///
+  /// If the [builder] is null, the [onGenerateRoute] argument is required, and
+  /// corresponds to [Navigator.onGenerateRoute]. If the [builder] is non-null
+  /// and the [onGenerateRoute] argument is null, then the [builder] will not be
+  /// provided with a [Navigator]. If [onGenerateRoute] is not provided,
+  /// [navigatorKey], [onUnknownRoute], [navigatorObservers], and [initialRoute]
+  /// must have their default values, as they will have no effect.
   ///
   /// The `supportedLocales` argument must be a list of one or more elements.
   /// By default supportedLocales is `[const Locale('en', 'US')]`.
   WidgetsApp({ // can't be const because the asserts use methods on Iterable :-(
     Key key,
     this.navigatorKey,
-    @required this.onGenerateRoute,
+    this.onGenerateRoute,
     this.onUnknownRoute,
+    this.navigatorObservers: const <NavigatorObserver>[],
+    this.initialRoute,
+    this.builder,
     this.title: '',
     this.onGenerateTitle,
     this.textStyle,
     @required this.color,
-    this.navigatorObservers: const <NavigatorObserver>[],
-    this.initialRoute,
     this.locale,
     this.localizationsDelegates,
     this.localeResolutionCallback,
@@ -87,10 +91,14 @@ class WidgetsApp extends StatefulWidget {
     this.debugShowWidgetInspector: false,
     this.debugShowCheckedModeBanner: true,
     this.inspectorSelectButtonBuilder,
-  }) : assert(title != null),
-       assert(onGenerateRoute != null),
+  }) : assert(navigatorObservers != null),
+       assert(onGenerateRoute != null || navigatorKey == null),
+       assert(onGenerateRoute != null || onUnknownRoute == null),
+       assert(onGenerateRoute != null || navigatorObservers == const <NavigatorObserver>[]),
+       assert(onGenerateRoute != null || initialRoute == null),
+       assert(onGenerateRoute != null || builder != null),
+       assert(title != null),
        assert(color != null),
-       assert(navigatorObservers != null),
        assert(supportedLocales != null && supportedLocales.isNotEmpty),
        assert(showPerformanceOverlay != null),
        assert(checkerboardRasterCacheImages != null),
@@ -111,7 +119,108 @@ class WidgetsApp extends StatefulWidget {
   /// application state in the process; in that case, the [navigatorObservers]
   /// must also be changed, since the previous observers will be attached to the
   /// previous navigator.
+  ///
+  /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
+  /// null, [navigatorKey] must also be null.
   final GlobalKey<NavigatorState> navigatorKey;
+
+  /// The route generator callback used when the app is navigated to a
+  /// named route.
+  ///
+  /// If this returns null when building the routes to handle the specified
+  /// [initialRoute], then all the routes are discarded and
+  /// [Navigator.defaultRouteName] is used instead (`/`). See [initialRoute].
+  ///
+  /// During normal app operation, the [onGenerateRoute] callback will only be
+  /// applied to route names pushed by the application, and so should never
+  /// return null.
+  ///
+  /// The [Navigator] is only built if [onGenerateRoute] is not null. If
+  /// [onGenerateRoute] is null, the [builder] must be non-null.
+  final RouteFactory onGenerateRoute;
+
+  /// Called when [onGenerateRoute] fails to generate a route.
+  ///
+  /// This callback is typically used for error handling. For example, this
+  /// callback might always generate a "not found" page that describes the route
+  /// that wasn't found.
+  ///
+  /// Unknown routes can arise either from errors in the app or from external
+  /// requests to push routes, such as from Android intents.
+  ///
+  /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
+  /// null, [onUnknownRoute] must also be null.
+  final RouteFactory onUnknownRoute;
+
+  /// The name of the first route to show.
+  ///
+  /// Defaults to [Window.defaultRouteName], which may be overridden by the code
+  /// that launched the application.
+  ///
+  /// If the route contains slashes, then it is treated as a "deep link", and
+  /// before this route is pushed, the routes leading to this one are pushed
+  /// also. For example, if the route was `/a/b/c`, then the app would start
+  /// with the three routes `/a`, `/a/b`, and `/a/b/c` loaded, in that order.
+  ///
+  /// If any part of this process fails to generate routes, then the
+  /// [initialRoute] is ignored and [Navigator.defaultRouteName] is used instead
+  /// (`/`). This can happen if the app is started with an intent that specifies
+  /// a non-existent route.
+  ///
+  /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
+  /// null, [initialRoute] must also be null.
+  ///
+  /// See also:
+  ///
+  ///  * [Navigator.initialRoute], which is used to implement this property.
+  ///  * [Navigator.push], for pushing additional routes.
+  ///  * [Navigator.pop], for removing a route from the stack.
+  final String initialRoute;
+
+  /// The list of observers for the [Navigator] created for this app.
+  ///
+  /// This list must be replaced by a list of newly-created observers if the
+  /// [navigatorKey] is changed.
+  ///
+  /// The [Navigator] is only built if [onGenerateRoute] is not null; if it is
+  /// null, [navigatorObservers] must be left to its default value, the empty
+  /// list.
+  final List<NavigatorObserver> navigatorObservers;
+
+  /// A builder for inserting widgets above the [Navigator] but below the other
+  /// widgets created by the [WidgetsApp] widget, or for replacing the
+  /// [Navigator] entirely.
+  ///
+  /// For example, from the [BuildContext] passed to this method, the
+  /// [Directionality], [Localizations], [DefaultTextStyle], [MediaQuery], etc,
+  /// are all available. They can also be overridden in a way that impacts all
+  /// the routes in the [Navigator].
+  ///
+  /// This is rarely useful, but can be used in applications that wish to
+  /// override those defaults, e.g. to force the application into right-to-left
+  /// mode despite being in English, or to override the [MediaQuery] metrics
+  /// (e.g. to leave a gap for advertisements shown by a plugin from OEM code).
+  ///
+  /// The [builder] callback is passed two arguments, the [BuildContext] (as
+  /// `context`) and a [Navigator] widget (as `child`).
+  ///
+  /// If [onGenerateRoute] is null, the `child` will be null, and it is the
+  /// responsibility of the [builder] to provide the application's routing
+  /// machinery.
+  ///
+  /// If [onGenerateRoute] is not null, then `child` is not null, and the
+  /// returned value should include the `child` in the widget subtree; if it
+  /// does not, then the application will have no navigator and the
+  /// [navigatorKey], [onGenerateRoute], [onUnknownRoute], [initialRoute], and
+  /// [navigatorObservers] properties will have no effect.
+  ///
+  /// If [builder] is null, it is as if a builder was specified that returned
+  /// the `child` directly. At least one of either [onGenerateRoute] or
+  /// [builder] must be non-null.
+  ///
+  /// For specifically overriding the [title] with a value based on the
+  /// [Localizations], consider [onGenerateTitle] instead.
+  final TransitionBuilder builder;
 
   /// A one-line description used by the device to identify the app for the user.
   ///
@@ -145,50 +254,6 @@ class WidgetsApp extends StatefulWidget {
   /// For example, on Android this is the color used for the application in the
   /// application switcher.
   final Color color;
-
-  /// The route generator callback used when the app is navigated to a
-  /// named route.
-  ///
-  /// If this returns null when building the routes to handle the specified
-  /// [initialRoute], then all the routes are discarded and
-  /// [Navigator.defaultRouteName] is used instead (`/`). See [initialRoute].
-  ///
-  /// During normal app operation, the [onGenerateRoute] callback will only be
-  /// applied to route names pushed by the application, and so should never
-  /// return null.
-  final RouteFactory onGenerateRoute;
-
-  /// Called when [onGenerateRoute] fails to generate a route.
-  ///
-  /// This callback is typically used for error handling. For example, this
-  /// callback might always generate a "not found" page that describes the route
-  /// that wasn't found.
-  ///
-  /// Unknown routes can arise either from errors in the app or from external
-  /// requests to push routes, such as from Android intents.
-  final RouteFactory onUnknownRoute;
-
-  /// The name of the first route to show.
-  ///
-  /// Defaults to [Window.defaultRouteName], which may be overridden by the code
-  /// that launched the application.
-  ///
-  /// If the route contains slashes, then it is treated as a "deep link", and
-  /// before this route is pushed, the routes leading to this one are pushed
-  /// also. For example, if the route was `/a/b/c`, then the app would start
-  /// with the three routes `/a`, `/a/b`, and `/a/b/c` loaded, in that order.
-  ///
-  /// If any part of this process fails to generate routes, then the
-  /// [initialRoute] is ignored and [Navigator.defaultRouteName] is used instead
-  /// (`/`). This can happen if the app is started with an intent that specifies
-  /// a non-existent route.
-  ///
-  /// See also:
-  ///
-  ///  * [Navigator.initialRoute], which is used to implement this property.
-  ///  * [Navigator.push], for pushing additional routes.
-  ///  * [Navigator.pop], for removing a route from the stack.
-  final String initialRoute;
 
   /// The initial locale for this app's [Localizations] widget.
   ///
@@ -298,12 +363,6 @@ class WidgetsApp extends StatefulWidget {
   /// representative of what will happen in release mode.
   final bool debugShowCheckedModeBanner;
 
-  /// The list of observers for the [Navigator] created for this app.
-  ///
-  /// This list must be replaced by a list of newly-created observers if the
-  /// [navigatorKey] is changed.
-  final List<NavigatorObserver> navigatorObservers;
-
   /// If true, forces the performance overlay to be visible in all instances.
   ///
   /// Used by the `showPerformanceOverlay` observatory extension.
@@ -332,7 +391,72 @@ class WidgetsApp extends StatefulWidget {
 }
 
 class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserver {
+
+  // STATE LIFECYCLE
+
+  @override
+  void initState() {
+    super.initState();
+    _updateNavigator();
+    _locale = _resolveLocale(ui.window.locale, widget.supportedLocales);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didUpdateWidget(WidgetsApp oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.navigatorKey != oldWidget.navigatorKey)
+      _updateNavigator();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) { }
+
+  @override
+  void didHaveMemoryPressure() { }
+
+
+  // NAVIGATOR
+
   GlobalKey<NavigatorState> _navigator;
+
+  void _updateNavigator() {
+    if (widget.onGenerateRoute == null) {
+      _navigator = null;
+    } else {
+      _navigator = widget.navigatorKey ?? new GlobalObjectKey<NavigatorState>(this);
+    }
+  }
+
+  // On Android: the user has pressed the back button.
+  @override
+  Future<bool> didPopRoute() async {
+    assert(mounted);
+    final NavigatorState navigator = _navigator?.currentState;
+    if (navigator == null)
+      return false;
+    return await navigator.maybePop();
+  }
+
+  @override
+  Future<bool> didPushRoute(String route) async {
+    assert(mounted);
+    final NavigatorState navigator = _navigator?.currentState;
+    if (navigator == null)
+      return false;
+    navigator.pushNamed(route);
+    return true;
+  }
+
+
+  // LOCALIZATION
+
   Locale _locale;
 
   Locale _resolveLocale(Locale newLocale, Iterable<Locale> supportedLocales) {
@@ -350,66 +474,6 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         matchesLanguageCode ??= locale;
     }
     return matchesLanguageCode ?? supportedLocales.first;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _updateNavigator();
-    _locale = _resolveLocale(ui.window.locale, widget.supportedLocales);
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didUpdateWidget(WidgetsApp oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.navigatorKey != oldWidget.navigatorKey)
-      _updateNavigator();
-  }
-
-  void _updateNavigator() {
-    _navigator = widget.navigatorKey ?? new GlobalObjectKey<NavigatorState>(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  // On Android: the user has pressed the back button.
-  @override
-  Future<bool> didPopRoute() async {
-    assert(mounted);
-    final NavigatorState navigator = _navigator.currentState;
-    assert(navigator != null);
-    return await navigator.maybePop();
-  }
-
-  @override
-  Future<bool> didPushRoute(String route) async {
-    assert(mounted);
-    final NavigatorState navigator = _navigator.currentState;
-    assert(navigator != null);
-    navigator.pushNamed(route);
-    return true;
-  }
-
-  @override
-  void didChangeMetrics() {
-    setState(() {
-      // The properties of ui.window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
-  }
-
-  @override
-  void didChangeTextScaleFactor() {
-    setState(() {
-      // The textScaleFactor property of ui.window has changed. We reference
-      // ui.window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
   }
 
   @override
@@ -435,21 +499,53 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     yield DefaultWidgetsLocalizations.delegate;
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) { }
+
+  // METRICS
 
   @override
-  void didHaveMemoryPressure() { }
+  void didChangeMetrics() {
+    setState(() {
+      // The properties of ui.window have changed. We use them in our build
+      // function, so we need setState(), but we don't cache anything locally.
+    });
+  }
+
+  @override
+  void didChangeTextScaleFactor() {
+    setState(() {
+      // The textScaleFactor property of ui.window has changed. We reference
+      // ui.window in our build function, so we need to call setState(), but
+      // we don't need to cache anything locally.
+    });
+  }
+
+
+  // BUILDER
 
   @override
   Widget build(BuildContext context) {
-    Widget result = new Navigator(
-      key: _navigator,
-      initialRoute: widget.initialRoute ?? ui.window.defaultRouteName,
-      onGenerateRoute: widget.onGenerateRoute,
-      onUnknownRoute: widget.onUnknownRoute,
-      observers: widget.navigatorObservers,
-    );
+    Widget navigator;
+    if (_navigator != null) {
+      navigator = new Navigator(
+        key: _navigator,
+        initialRoute: widget.initialRoute ?? ui.window.defaultRouteName,
+        onGenerateRoute: widget.onGenerateRoute,
+        onUnknownRoute: widget.onUnknownRoute,
+        observers: widget.navigatorObservers,
+      );
+    }
+
+    Widget result;
+    if (widget.builder != null) {
+      result = new Builder(
+        builder: (BuildContext context) {
+          return widget.builder(context, navigator);
+        },
+      );
+    } else {
+      assert(navigator != null);
+      result = navigator;
+    }
 
     if (widget.textStyle != null) {
       result = new DefaultTextStyle(
@@ -502,28 +598,36 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       return true;
     }());
 
+    Widget title;
+    if (widget.onGenerateTitle != null) {
+      title = new Builder(
+        // This Builder exists to provide a context below the Localizations widget.
+        // The onGenerateCallback() can refer to Localizations via its context
+        // parameter.
+        builder: (BuildContext context) {
+          final String title = widget.onGenerateTitle(context);
+          assert(title != null, 'onGenerateTitle must return a non-null String');
+          return new Title(
+            title: title,
+            color: widget.color,
+            child: result,
+          );
+        },
+      );
+    } else {
+      title = new Title(
+        title: widget.title,
+        color: widget.color,
+        child: result,
+      );
+    }
+
     return new MediaQuery(
       data: new MediaQueryData.fromWindow(ui.window),
       child: new Localizations(
         locale: widget.locale ?? _locale,
         delegates: _localizationsDelegates.toList(),
-        // This Builder exists to provide a context below the Localizations widget.
-        // The onGenerateCallback() can refer to Localizations via its context
-        // parameter.
-        child: new Builder(
-          builder: (BuildContext context) {
-            String title = widget.title;
-            if (widget.onGenerateTitle != null) {
-              title = widget.onGenerateTitle(context);
-              assert(title != null, 'onGenerateTitle must return a non-null String');
-            }
-            return new Title(
-              title: title,
-              color: widget.color,
-              child: result,
-            );
-          },
-        ),
+        child: title,
       ),
     );
   }

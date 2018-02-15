@@ -154,7 +154,7 @@ void main() {
       mockProcessManager = new MockProcessManager();
       // Let everything else return exit code 0 so process.dart doesn't crash.
       when(
-        mockProcessManager.run(any, environment: null, workingDirectory:  null)
+        mockProcessManager.run(any, environment: null, workingDirectory: null)
       ).thenAnswer((Invocation invocation) =>
         new Future<ProcessResult>.value(new ProcessResult(2, 0, '', ''))
       );

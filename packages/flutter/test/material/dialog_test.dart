@@ -240,7 +240,7 @@ void main() {
         DefaultWidgetsLocalizations.delegate,
         DefaultMaterialLocalizations.delegate,
       ],
-      child:  new MediaQuery(
+      child: new MediaQuery(
         data: const MediaQueryData(
           padding: const EdgeInsets.all(50.0),
         ),

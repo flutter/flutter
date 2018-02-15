@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/port_scanner.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -42,7 +41,6 @@ typedef void ContextInitializer(AppContext testContext);
 
 void _defaultInitializeContext(AppContext testContext) {
   testContext
-    ..putIfAbsent(AnsiTerminal, () => new AnsiTerminal())
     ..putIfAbsent(DeviceManager, () => new MockDeviceManager())
     ..putIfAbsent(DevFSConfig, () => new DevFSConfig())
     ..putIfAbsent(Doctor, () => new MockDoctor())

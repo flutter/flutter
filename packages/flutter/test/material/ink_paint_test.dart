@@ -10,8 +10,8 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
-    final Color highlightColor = const Color(0xAAFF0000);
-    final Color splashColor = const Color(0xAA0000FF);
+    const Color highlightColor = const Color(0xAAFF0000);
+    const Color splashColor = const Color(0xAA0000FF);
     final BorderRadius borderRadius = new BorderRadius.circular(6.0);
 
     await tester.pumpWidget(
@@ -52,8 +52,8 @@ void main() {
   });
 
   testWidgets('The InkWell widget renders an ink ripple', (WidgetTester tester) async {
-    final Color highlightColor = const Color(0xAAFF0000);
-    final Color splashColor = const Color(0xB40000FF);
+    const Color highlightColor = const Color(0xAAFF0000);
+    const Color splashColor = const Color(0xB40000FF);
     final BorderRadius borderRadius = new BorderRadius.circular(6.0);
 
     await tester.pumpWidget(
@@ -101,7 +101,7 @@ void main() {
     }));
 
     // The ripple fades in for 75ms. During that time its alpha is eased from
-    // 0 to  the splashColor's alpha value and its center moves towards the
+    // 0 to the splashColor's alpha value and its center moves towards the
     // center of the ink well.
     await tester.pump(const Duration(milliseconds: 50));
     expect(box, paints..something((Symbol method, List<dynamic> arguments) {
@@ -111,7 +111,7 @@ void main() {
       final double radius = arguments[1];
       final Paint paint = arguments[2];
       final Offset expectedCenter = tapDownOffset + const Offset(17.0, 17.0);
-      final double expectedRadius = 56.0;
+      const double expectedRadius = 56.0;
       if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 120)
         return true;
       throw '''
@@ -129,7 +129,7 @@ void main() {
       final double radius = arguments[1];
       final Paint paint = arguments[2];
       final Offset expectedCenter = tapDownOffset + const Offset(29.0, 29.0);
-      final double expectedRadius = 73.0;
+      const double expectedRadius = 73.0;
       if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 180)
         return true;
       throw '''
@@ -149,7 +149,7 @@ void main() {
       final double radius = arguments[1];
       final Paint paint = arguments[2];
       final Offset expectedCenter = inkWellCenter;
-      final double expectedRadius = 105.0;
+      const double expectedRadius = 105.0;
       if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 180)
         return true;
       throw '''
@@ -166,7 +166,7 @@ void main() {
       final double radius = arguments[1];
       final Paint paint = arguments[2];
       final Offset expectedCenter = inkWellCenter;
-      final double expectedRadius = 105.0;
+      const double expectedRadius = 105.0;
       if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius) && paint.color.alpha == 0)
         return true;
       throw '''
@@ -247,5 +247,35 @@ void main() {
     expect(box, isNot(paints..circle()));
 
     await gesture.up();
+  });
+
+  testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/14391
+    await tester.pumpWidget(
+      new Material(
+        child: new Center(
+          child: new Container(
+            width: 100.0,
+            height: 100.0,
+            child: new InkWell(
+              onTap: () { },
+              radius: 100.0,
+              splashFactory: InkRipple.splashFactory,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset tapDownOffset = tester.getTopLeft(find.byType(InkWell));
+    await tester.tapAt(tapDownOffset);
+    await tester.pump(); // start splash
+    await tester.pump(const Duration(milliseconds: 375)); // _kFadeOutDuration, in_ripple.dart
+
+    final TestGesture gesture = await tester.startGesture(tapDownOffset);
+    await tester.pump(); // start gesture
+    await gesture.moveTo(const Offset(0.0, 0.0));
+    await gesture.up(); // generates a tap cancel
+    await tester.pumpAndSettle();
   });
 }

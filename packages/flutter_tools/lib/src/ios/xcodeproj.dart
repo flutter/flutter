@@ -12,7 +12,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
 
-final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(\S+)');
+final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = new RegExp(r'\$\((.*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
@@ -25,7 +25,6 @@ void updateXcodeGeneratedProperties({
   @required String target,
   @required bool hasPlugins,
   @required bool previewDart2,
-  @required bool strongMode,
 }) {
   final StringBuffer localsBuffer = new StringBuffer();
 
@@ -58,9 +57,6 @@ void updateXcodeGeneratedProperties({
   if (previewDart2) {
     localsBuffer.writeln('PREVIEW_DART_2=true');
   }
-  if (strongMode) {
-    localsBuffer.writeln('STRONG=true');
-  }
 
   // Add dependency to CocoaPods' generated project only if plugins are used.
   if (hasPlugins)
@@ -76,10 +72,15 @@ Map<String, String> getXcodeBuildSettings(String xcodeProjPath, String target) {
   final String out = runCheckedSync(<String>[
     '/usr/bin/xcodebuild', '-project', absProjPath, '-target', target, '-showBuildSettings'
   ]);
+  return parseXcodeBuildSettings(out);
+}
+
+Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
   final Map<String, String> settings = <String, String>{};
-  for (String line in out.split('\n').where(_settingExpr.hasMatch)) {
-    final Match match = _settingExpr.firstMatch(line);
-    settings[match[1]] = match[2];
+  for (Match match in showBuildSettingsOutput.split('\n').map(_settingExpr.firstMatch)) {
+    if (match != null) {
+      settings[match[1]] = match[2];
+    }
   }
   return settings;
 }

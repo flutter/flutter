@@ -940,7 +940,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint);
 
     assert(() {
-      // Only set this if it's null to save work.  It gets reset to null if the
+      // Only set this if it's null to save work. It gets reset to null if the
       // _direction changes.
       final String debugOverflowHints =
         'The overflowing $runtimeType has an orientation of $_direction.\n'

@@ -269,7 +269,7 @@ bool _isServiceMap(Map<String, dynamic> m) {
   return (m != null) && (m['type'] != null);
 }
 bool _hasRef(String type) => (type != null) && type.startsWith('@');
-String _stripRef(String type) => (_hasRef(type) ? type.substring(1) : type);
+String _stripRef(String type) => _hasRef(type) ? type.substring(1) : type;
 
 /// Given a raw response from the service protocol and a [ServiceObjectOwner],
 /// recursively walk the response and replace values that are service maps with
@@ -345,7 +345,7 @@ abstract class ServiceObject {
     // fallback return a ServiceMap object.
     serviceObject ??= new ServiceMap._empty(owner);
     // We have now constructed an empty service object, call update to populate it.
-    serviceObject.update(map);
+    serviceObject.updateFromMap(map);
     return serviceObject;
   }
 
@@ -420,7 +420,7 @@ abstract class ServiceObject {
           // An object may have been collected.
           completer.complete(new ServiceObject._fromMap(owner, response));
         } else {
-          update(response);
+          updateFromMap(response);
           completer.complete(this);
         }
       } catch (e, st) {
@@ -433,7 +433,7 @@ abstract class ServiceObject {
   }
 
   /// Update [this] using [map] as a source. [map] can be a service reference.
-  void update(Map<String, dynamic> map) {
+  void updateFromMap(Map<String, dynamic> map) {
     // Don't allow the type to change on an object update.
     final bool mapIsRef = _hasRef(map['type']);
     final String mapType = _stripRef(map['type']);
@@ -522,13 +522,13 @@ class ServiceEvent extends ServiceObject {
   }
 
   bool get isPauseEvent {
-    return (kind == kPauseStart ||
-            kind == kPauseExit ||
-            kind == kPauseBreakpoint ||
-            kind == kPauseInterrupted ||
-            kind == kPauseException ||
-            kind == kPausePostRequest ||
-            kind == kNone);
+    return kind == kPauseStart ||
+           kind == kPauseExit ||
+           kind == kPauseBreakpoint ||
+           kind == kPauseInterrupted ||
+           kind == kPauseException ||
+           kind == kPausePostRequest ||
+           kind == kNone;
   }
 }
 
@@ -547,7 +547,7 @@ abstract class ServiceObjectOwner extends ServiceObject {
   VMService get vmService => null;
 
   /// Builds a [ServiceObject] corresponding to the [id] from [map].
-  /// The result may come from the cache.  The result will not necessarily
+  /// The result may come from the cache. The result will not necessarily
   /// be [loaded].
   ServiceObject getFromMap(Map<String, dynamic> map);
 }
@@ -662,7 +662,7 @@ class VM extends ServiceObjectOwner {
     final String type = _stripRef(map['type']);
     if (type == 'VM') {
       // Update this VM object.
-      update(map);
+      updateFromMap(map);
       return this;
     }
 
@@ -684,7 +684,7 @@ class VM extends ServiceObjectOwner {
           });
         } else {
           // Existing isolate, update data.
-          isolate.update(map);
+          isolate.updateFromMap(map);
         }
         return isolate;
       }
@@ -696,7 +696,7 @@ class VM extends ServiceObjectOwner {
           view = new ServiceObject._fromMap(this, map);
           _viewCache[mapId] = view;
         } else {
-          view.update(map);
+          view.updateFromMap(map);
         }
         return view;
       }
@@ -965,7 +965,7 @@ class Isolate extends ServiceObjectOwner {
     final String mapId = map['id'];
     ServiceObject serviceObject = (mapId != null) ? _cache[mapId] : null;
     if (serviceObject != null) {
-      serviceObject.update(map);
+      serviceObject.updateFromMap(map);
       return serviceObject;
     }
     // Build the object from the map directly.
@@ -1045,7 +1045,7 @@ class Isolate extends ServiceObjectOwner {
       }
       final Map<String, dynamic> response = await invokeRpcRaw('_reloadSources', params: arguments);
       return response;
-    } on rpc.RpcException catch(e) {
+    } on rpc.RpcException catch (e) {
       return new Future<Map<String, dynamic>>.error(<String, dynamic>{
         'code': e.code,
         'message': e.message,
@@ -1146,8 +1146,8 @@ class Isolate extends ServiceObjectOwner {
     return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpLayerTree', timeout: kLongRequestTimeout);
   }
 
-  Future<Map<String, dynamic>> flutterDebugDumpSemanticsTreeInTraversalOrder() {
-    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpSemanticsTreeInTraversalOrder', timeout: kLongRequestTimeout);
+  Future<Map<String, dynamic>> flutterDebugDumpSemanticsTreeInGeometricOrder() {
+    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpSemanticsTreeInGeometricOrder', timeout: kLongRequestTimeout);
   }
 
   Future<Map<String, dynamic>> flutterDebugDumpSemanticsTreeInInverseHitTestOrder() {
@@ -1171,7 +1171,7 @@ class Isolate extends ServiceObjectOwner {
 
   Future<Map<String, dynamic>> flutterTogglePerformanceOverlayOverride() => _flutterToggle('showPerformanceOverlay');
 
-  Future<Map<String, dynamic>> flutterToggleWidgetInspector()  => _flutterToggle('debugWidgetInspector');
+  Future<Map<String, dynamic>> flutterToggleWidgetInspector() => _flutterToggle('debugWidgetInspector');
 
   Future<Null> flutterDebugAllowBanner(bool show) async {
     await invokeFlutterExtensionRpcRaw(
@@ -1192,7 +1192,7 @@ class Isolate extends ServiceObjectOwner {
   }
 
   Future<bool> flutterFrameworkPresent() async {
-    return (await invokeFlutterExtensionRpcRaw('ext.flutter.frameworkPresent') != null);
+    return await invokeFlutterExtensionRpcRaw('ext.flutter.frameworkPresent') != null;
   }
 
   Future<Map<String, dynamic>> uiWindowScheduleFrame() async {
@@ -1276,6 +1276,31 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   int get length => _map.length;
   @override
   String toString() => _map.toString();
+  // TODO(tvolkert): Remove these ignores once dev.22 SDK is everywhere
+  @override
+  // ignore: undefined_method, override_on_non_overriding_method, non_type_as_type_argument
+  void addEntries(Iterable<MapEntry<String, dynamic>> entries) => _map.addEntries(entries);
+  @override
+  // ignore: undefined_method, override_on_non_overriding_method
+  Map<RK, RV> cast<RK, RV>() => _map.cast<RK, RV>();
+  @override
+  // ignore: undefined_method, override_on_non_overriding_method
+  void removeWhere(bool test(String key, dynamic value)) => _map.removeWhere(test);
+  @override
+  // ignore: undefined_class, undefined_method, override_on_non_overriding_method
+  Map<K2, V2> map<K2, V2>(MapEntry<K2, V2> transform(String key, dynamic value)) => _map.map(transform);
+  @override
+  // ignore: undefined_getter, override_on_non_overriding_getter, non_type_as_type_argument
+  Iterable<MapEntry<String, dynamic>> get entries => _map.entries;
+  @override
+  // ignore: undefined_method, override_on_non_overriding_method
+  void updateAll(dynamic update(String key, dynamic value)) => _map.updateAll(update);
+  @override
+  // ignore: undefined_method, override_on_non_overriding_method
+  Map<RK, RV> retype<RK, RV>() => _map.retype<RK, RV>();
+  @override
+  // ignore: undefined_method, override_on_non_overriding_method
+  dynamic update(String key, dynamic update(dynamic value), {dynamic ifAbsent()}) => _map.update(key, update, ifAbsent: ifAbsent);
 }
 
 /// Peered to a Android/iOS FlutterView widget on a device.

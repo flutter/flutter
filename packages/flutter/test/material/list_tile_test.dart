@@ -311,7 +311,7 @@ void main() {
 
     // If the item is disabled it's rendered with the theme's disabled color.
     await(tester.pumpWidget(buildFrame(enabled: false)));
-    await(tester.pump(const Duration(milliseconds: 300)));  // DefaultTextStyle changes animate
+    await(tester.pump(const Duration(milliseconds: 300))); // DefaultTextStyle changes animate
     expect(iconColor(leadingKey), theme.disabledColor);
     expect(iconColor(trailingKey), theme.disabledColor);
     expect(textColor(titleKey), theme.disabledColor);
@@ -320,7 +320,7 @@ void main() {
     // If the item is disabled it's rendered with the theme's disabled color.
     // Even if it's selected.
     await(tester.pumpWidget(buildFrame(enabled: false, selected: true)));
-    await(tester.pump(const Duration(milliseconds: 300)));  // DefaultTextStyle changes animate
+    await(tester.pump(const Duration(milliseconds: 300))); // DefaultTextStyle changes animate
     expect(iconColor(leadingKey), theme.disabledColor);
     expect(iconColor(trailingKey), theme.disabledColor);
     expect(textColor(titleKey), theme.disabledColor);

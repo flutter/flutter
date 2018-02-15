@@ -39,7 +39,7 @@ class DevicesCommand extends FlutterCommand {
         printStatus('');
         for (String diagnostic in diagnostics) {
           printStatus('• ${diagnostic.replaceAll('\n', '\n  ')}');
-        }        
+        }
       }
     } else {
       printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');

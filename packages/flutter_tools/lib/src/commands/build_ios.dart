@@ -31,8 +31,6 @@ class BuildIOSCommand extends BuildSubCommand {
         help: 'Codesign the application bundle (only available on device builds).');
     argParser.addFlag('preview-dart-2', negatable: false,
         hide: !verboseHelp);
-    argParser.addFlag('strong', negatable: false,
-        hide: !verboseHelp);
   }
 
   @override
@@ -78,7 +76,7 @@ class BuildIOSCommand extends BuildSubCommand {
     );
 
     if (!result.success) {
-      await diagnoseXcodeBuildFailure(result, app);
+      await diagnoseXcodeBuildFailure(result);
       throwToolExit('Encountered error while building for $logTarget.');
     }
 

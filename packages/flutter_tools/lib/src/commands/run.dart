@@ -34,6 +34,11 @@ abstract class RunCommandBase extends FlutterCommand {
               'forwards the host port to a device port.');
     argParser.addOption('route',
         help: 'Which route to load when running the app.');
+    argParser.addOption('target-platform',
+        defaultsTo: 'default',
+        allowed: <String>['default', 'android-arm', 'android-arm64'],
+        help: 'Specify the target platform when building the app for an '
+              'Android device.\nIgnored on iOS.');
     usesTargetOption();
     usesPortOptions();
     usesPubOption();
@@ -109,6 +114,9 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Turn on strong mode semantics.\n'
               'Valid only when --preview-dart-2 is also specified');
+    argParser.addFlag('track-widget-creation',
+        hide: !verboseHelp,
+        help: 'Track widget creation locations. Requires Dart 2.0 functionality.');
     argParser.addOption('project-root',
         hide: !verboseHelp,
         help: 'Specify the project root directory.');
@@ -254,7 +262,6 @@ class RunCommand extends RunCommandBase {
           _createDebuggingOptions(), hotMode,
           applicationBinary: argResults['use-application-binary'],
           previewDart2: argResults['preview-dart-2'],
-          strongMode: argResults['strong'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: globalResults['packages'],
           projectAssets: argResults['project-assets'],
@@ -293,9 +300,11 @@ class RunCommand extends RunCommandBase {
     }
 
     final List<FlutterDevice> flutterDevices = devices.map((Device device) {
-      return new FlutterDevice(device,
-                               previewDart2: argResults['preview-dart-2'],
-                               strongMode : argResults['strong']);
+      return new FlutterDevice(
+        device,
+        previewDart2: argResults['preview-dart-2'],
+        trackWidgetCreation: argResults['track-widget-creation'],
+      );
     }).toList();
 
     ResidentRunner runner;
@@ -307,7 +316,6 @@ class RunCommand extends RunCommandBase {
         benchmarkMode: argResults['benchmark'],
         applicationBinary: argResults['use-application-binary'],
         previewDart2: argResults['preview-dart-2'],
-        strongMode: argResults['strong'],
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
         projectAssets: argResults['project-assets'],
@@ -322,7 +330,6 @@ class RunCommand extends RunCommandBase {
         traceStartup: traceStartup,
         applicationBinary: argResults['use-application-binary'],
         previewDart2: argResults['preview-dart-2'],
-        strongMode: argResults['strong'],
         stayResident: stayResident,
         ipv6: ipv6,
       );

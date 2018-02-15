@@ -256,8 +256,8 @@ class TestCocoaPods extends CocoaPods {
 }
 
 final ProcessResult exitsHappy = new ProcessResult(
-  1,     // pid
-  0,     // exitCode
-  '',    // stdout
-  '',    // stderr
+  1, // pid
+  0, // exitCode
+  '', // stdout
+  '', // stderr
 );

@@ -9,7 +9,7 @@ void main() {
   testWidgets('TrackingScrollController saves offset',
       (WidgetTester tester) async {
     final TrackingScrollController controller = new TrackingScrollController();
-    final double listItemHeight = 100.0;
+    const double listItemHeight = 100.0;
 
     await tester.pumpWidget(
       new Directionality(

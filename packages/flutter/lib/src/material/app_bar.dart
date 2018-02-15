@@ -403,7 +403,7 @@ class _AppBarState extends State<AppBar> {
         icon: const Icon(Icons.menu),
         onPressed: _handleDrawerButtonEnd,
         tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-      );      
+      );
     }
 
     final Widget toolbar = new Padding(

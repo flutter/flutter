@@ -23,12 +23,17 @@ typedef bool FileFilter(FileSystemEntity entity);
 
 /// An aspect of the [AnalyzeCommand] to perform once time analysis.
 class AnalyzeOnce extends AnalyzeBase {
-  AnalyzeOnce(ArgResults argResults, this.repoPackages, { this.workingDirectory }) : super(argResults);
+  AnalyzeOnce(ArgResults argResults, this.repoPackages, {
+    this.workingDirectory,
+    this.previewDart2: false,
+  }) : super(argResults);
 
   final List<Directory> repoPackages;
 
   /// The working directory for testing analysis using dartanalyzer
   final Directory workingDirectory;
+
+  final bool previewDart2;
 
   @override
   Future<Null> analyze() async {
@@ -80,6 +85,10 @@ class AnalyzeOnce extends AnalyzeBase {
       if (packagesFile != null) {
         arguments.insert(0, '--packages');
         arguments.insert(1, packagesFile.path);
+      }
+
+      if (previewDart2) {
+        arguments.add('--preview-dart-2');
       }
 
       final String dartanalyzer = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartanalyzer');

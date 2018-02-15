@@ -83,7 +83,6 @@ class FlutterVersion {
   String get frameworkDate => frameworkCommitDate;
 
   String get dartSdkVersion => Cache.instance.dartSdkVersion.split(' ')[0];
-  String get engineDartVersion => Cache.instance.engineDartVersion.split(' ')[0];
 
   String get engineRevision => Cache.instance.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
@@ -162,7 +161,7 @@ class FlutterVersion {
   static Future<Null> _removeVersionCheckRemoteIfExists() async {
     final List<String> remotes = (await _run(<String>['git', 'remote']))
         .split('\n')
-        .map((String name) => name.trim())  // to account for OS-specific line-breaks
+        .map((String name) => name.trim()) // to account for OS-specific line-breaks
         .toList();
     if (remotes.contains(_kVersionCheckRemote))
       await _run(<String>['git', 'remote', 'remove', _kVersionCheckRemote]);

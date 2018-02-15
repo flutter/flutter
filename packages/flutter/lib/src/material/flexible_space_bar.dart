@@ -122,7 +122,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     // background image
     if (widget.background != null) {
       final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
-      final double fadeEnd = 1.0;
+      const double fadeEnd = 1.0;
       assert(fadeStart <= fadeEnd);
       final double opacity = 1.0 - new Interval(fadeStart, fadeEnd).transform(t);
       final double parallax = new Tween<double>(begin: 0.0, end: deltaExtent / 4.0).lerp(t);

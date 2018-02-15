@@ -33,9 +33,9 @@ void main() {
   });
 
   testWidgets('Minimum size parameter', (WidgetTester tester) async {
-    final double minSize = 60.0;
+    const double minSize = 60.0;
     await tester.pumpWidget(
-      boilerplate(child: new CupertinoButton(
+      boilerplate(child: const CupertinoButton(
         child: const Text('X', style: testStyle),
         onPressed: null,
         minSize: minSize,
@@ -45,7 +45,7 @@ void main() {
     expect(
       buttonBox.size,
       // 1 10px character + 16px * 2 is smaller than defined 60.0px minimum
-      new Size.square(minSize),
+      const Size.square(minSize),
     );
   });
 
@@ -150,7 +150,7 @@ void main() {
   });
 
   testWidgets('pressedOpacity parameter', (WidgetTester tester) async {
-    final double pressedOpacity = 0.5;
+    const double pressedOpacity = 0.5;
     await tester.pumpWidget(boilerplate(child: new CupertinoButton(
       pressedOpacity: pressedOpacity,
       child: const Text('Tap me'),

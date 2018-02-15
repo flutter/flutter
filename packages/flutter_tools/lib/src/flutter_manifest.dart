@@ -12,7 +12,7 @@ import 'base/file_system.dart';
 import 'cache.dart';
 import 'globals.dart';
 
-/// A wrapper around the `flutter` section in the  `pubspec.yaml` file.
+/// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
   FlutterManifest._();
 

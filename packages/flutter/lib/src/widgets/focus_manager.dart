@@ -453,7 +453,7 @@ class FocusManager {
   @override
   String toString() {
     final String status = _haveScheduledUpdate ? ' UPDATE SCHEDULED' : '';
-    final String indent = '  ';
+    const String indent = '  ';
     return '${describeIdentity(this)}$status\n'
       '${indent}currentFocus: $_currentFocus\n'
       '${rootScope.toStringDeep(prefixLineOne: indent, prefixOtherLines: indent)}';

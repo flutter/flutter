@@ -24,7 +24,7 @@ enum ListTileStyle {
   drawer,
 }
 
-/// An inherited widget that defines  color and style parameters for [ListTile]s
+/// An inherited widget that defines color and style parameters for [ListTile]s
 /// in this widget's subtree.
 ///
 /// Values specified here are used for [ListTile] properties that are not given

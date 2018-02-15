@@ -96,7 +96,7 @@ class IdeConfigCommand extends FlutterCommand {
       return false;
     }
 
-    // Test byte by byte.  We're assuming that these are small files.
+    // Test byte by byte. We're assuming that these are small files.
     final List<int> srcBytes = src.readAsBytesSync();
     final List<int> destBytes = dest.readAsBytesSync();
     for (int i = 0; i < srcBytes.length; ++i) {

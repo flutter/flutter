@@ -42,7 +42,7 @@ import 'recording_canvas.dart';
 /// To match something which asserts instead of painting, see [paintsAssertion].
 PaintPattern get paints => new _TestRecordingCanvasPatternMatcher();
 
-/// Matches objects or functions that paint an empty display list.
+/// Matches objects or functions that does not paint anything on the canvas.
 Matcher get paintsNothing => new _TestRecordingCanvasPaintsNothingMatcher();
 
 /// Matches objects or functions that assert when they try to paint.
@@ -147,6 +147,18 @@ abstract class PaintPattern {
   /// Any calls made between the last matched call (if any) and the
   /// [Canvas.clipRect] call are ignored.
   void clipRect({ Rect rect });
+
+  /// Indicates that a path clip is expected next.
+  ///
+  /// The next path clip is examined.
+  /// The path that is passed to the actual [Canvas.clipPath] call is matched
+  /// using [pathMatcher].
+  ///
+  /// If no call to [Canvas.clipPath] was made, then this results in failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.clipPath] call are ignored.
+  void clipPath({Matcher pathMatcher});
 
   /// Indicates that a rectangle is expected next.
   ///
@@ -527,13 +539,26 @@ class _TestRecordingCanvasPaintsNothingMatcher extends _TestRecordingCanvasMatch
 
   @override
   bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description) {
-    if (calls.isEmpty)
+    final Iterable<RecordedInvocation> paintingCalls = _filterCanvasCalls(calls);
+    if (paintingCalls.isEmpty)
       return true;
     description.write(
       'painted something, the first call having the following stack:\n'
-      '${calls.first.stackToString(indent: "  ")}\n'
+      '${paintingCalls.first.stackToString(indent: "  ")}\n'
     );
     return false;
+  }
+
+  static const List<Symbol> _nonPaintingOperations = const <Symbol> [
+    #save,
+    #restore,
+  ];
+
+  // Filters out canvas calls that are not painting anything.
+  static Iterable<RecordedInvocation> _filterCanvasCalls(Iterable<RecordedInvocation> canvasCalls) {
+    return canvasCalls.where((RecordedInvocation canvasCall) =>
+      !_nonPaintingOperations.contains(canvasCall.invocation.memberName)
+    );
   }
 }
 
@@ -627,6 +652,11 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   @override
   void clipRect({ Rect rect }) {
     _predicates.add(new _FunctionPaintPredicate(#clipRect, <dynamic>[rect]));
+  }
+
+  @override
+  void clipPath({Matcher pathMatcher}) {
+    _predicates.add(new _FunctionPaintPredicate(#clipPath, <dynamic>[pathMatcher]));
   }
 
   @override

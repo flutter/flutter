@@ -23,7 +23,7 @@ Future<Null> main(List<String> rawArgs) async {
   ArgResults args;
   try {
     args = _argParser.parse(rawArgs);
-  } on FormatException catch(error) {
+  } on FormatException catch (error) {
     stderr.writeln('${error.message}\n');
     stderr.writeln('Usage:\n');
     stderr.writeln(_argParser.usage);

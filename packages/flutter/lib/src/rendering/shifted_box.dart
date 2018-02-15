@@ -586,7 +586,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 /// This allows a child to render at the size it would render if it were alone
 /// on an infinite canvas with no constraints. This box will then expand
 /// as much as it can within its own constraints and align the child based on
-/// [alignment].  If the box cannot expand enough to accommodate the entire
+/// [alignment]. If the box cannot expand enough to accommodate the entire
 /// child, the child will be clipped.
 ///
 /// In debug mode, if the child overflows the box, a warning will be printed on
@@ -620,7 +620,7 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
   /// The axis to retain constraints on, if any.
   ///
   /// If not set, or set to null (the default), neither axis will retain its
-  /// constraints.  If set to [Axis.vertical], then vertical constraints will
+  /// constraints. If set to [Axis.vertical], then vertical constraints will
   /// be retained, and if set to [Axis.horizontal], then horizontal constraints
   /// will be retained.
   Axis get constrainedAxis => _constrainedAxis;
@@ -632,7 +632,7 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
     _constrainedAxis = value;
     markNeedsLayout();
   }
-  
+
   Rect _overflowContainerRect = Rect.zero;
   Rect _overflowChildRect = Rect.zero;
   bool _isOverflowing = false;
@@ -815,7 +815,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// If non-null, the factor of the incoming width to use.
   ///
   /// If non-null, the child is given a tight width constraint that is the max
-  /// incoming width constraint multiplied by this factor.  If null, the child is
+  /// incoming width constraint multiplied by this factor. If null, the child is
   /// given the incoming width constraints.
   double get widthFactor => _widthFactor;
   double _widthFactor;
@@ -830,7 +830,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// If non-null, the factor of the incoming height to use.
   ///
   /// If non-null, the child is given a tight height constraint that is the max
-  /// incoming width constraint multiplied by this factor.  If null, the child is
+  /// incoming width constraint multiplied by this factor. If null, the child is
   /// given the incoming width constraints.
   double get heightFactor => _heightFactor;
   double _heightFactor;

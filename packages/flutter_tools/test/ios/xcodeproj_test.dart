@@ -6,7 +6,7 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 void main() {
   group('Xcode project properties', () {
     test('properties from default project can be parsed', () {
-      final String output = '''
+      const String output = '''
 Information about project "Runner":
     Targets:
         Runner
@@ -27,7 +27,7 @@ Information about project "Runner":
       expect(info.buildConfigurations, <String>['Debug', 'Release']);
     });
     test('properties from project with custom schemes can be parsed', () {
-      final String output = '''
+      const String output = '''
 Information about project "Runner":
     Targets:
         Runner

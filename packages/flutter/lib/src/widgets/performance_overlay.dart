@@ -40,12 +40,11 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
                                   this.rasterizerThreshold: 0,
                                   this.checkerboardRasterCacheImages: false,
                                   this.checkerboardOffscreenLayers: false })
-    : optionsMask = (
+    : optionsMask =
         1 << PerformanceOverlayOption.displayRasterizerStatistics.index |
         1 << PerformanceOverlayOption.visualizeRasterizerStatistics.index |
         1 << PerformanceOverlayOption.displayEngineStatistics.index |
-        1 << PerformanceOverlayOption.visualizeEngineStatistics.index
-      ),
+        1 << PerformanceOverlayOption.visualizeEngineStatistics.index,
       super(key: key);
 
   /// The mask is created by shifting 1 by the index of the specific

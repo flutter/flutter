@@ -238,7 +238,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final List<_DependencyLink> paths = <_DependencyLink>[];
 
     traversalQueue.addFirst(new _DependencyLink(from: null, to: from));
-    while(traversalQueue.isNotEmpty) {
+    while (traversalQueue.isNotEmpty) {
       final _DependencyLink link = traversalQueue.removeLast();
       if (link.to == to)
         paths.add(link);

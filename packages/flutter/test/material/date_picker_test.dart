@@ -573,13 +573,21 @@ void _tests() {
             ],
           ),
           new TestSemantics(
-            flags: <SemanticsFlag>[SemanticsFlag.isButton],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+            ],
             actions: <SemanticsAction>[SemanticsAction.tap],
             label: r'Previous month December 2015',
             textDirection: TextDirection.ltr,
           ),
           new TestSemantics(
-            flags: <SemanticsFlag>[SemanticsFlag.isButton],
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isButton,
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isEnabled,
+            ],
             actions: <SemanticsAction>[SemanticsAction.tap],
             label: r'Next month February 2016',
             textDirection: TextDirection.ltr,

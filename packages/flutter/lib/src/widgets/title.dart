@@ -28,7 +28,7 @@ class Title extends StatelessWidget {
   /// Must not be null.
   final String title;
 
-  /// A color that the window manager should use to identify this app.  Must be
+  /// A color that the window manager should use to identify this app. Must be
   /// an opaque color (i.e. color.alpha must be 255 (0xFF)), and must not be
   /// null.
   final Color color;

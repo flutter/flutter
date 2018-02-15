@@ -48,12 +48,14 @@ class Tooltip extends StatefulWidget {
     this.padding: const EdgeInsets.symmetric(horizontal: 16.0),
     this.verticalOffset: 24.0,
     this.preferBelow: true,
+    this.excludeFromSemantics: false,
     this.child,
   }) : assert(message != null),
        assert(height != null),
        assert(padding != null),
        assert(verticalOffset != null),
        assert(preferBelow != null),
+       assert(excludeFromSemantics != null),
        super(key: key);
 
   /// The text to display in the tooltip.
@@ -76,6 +78,10 @@ class Tooltip extends StatefulWidget {
   /// the preferred direction, the tooltip will be displayed in the opposite
   /// direction.
   final bool preferBelow;
+
+  /// Whether the tooltip's [message] should be excluded from the semantics
+  /// tree.
+  final bool excludeFromSemantics;
 
   /// The widget below this widget in the tree.
   ///
@@ -191,7 +197,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       onLongPress: _handleLongPress,
       excludeFromSemantics: true,
       child: new Semantics(
-        label: widget.message,
+        label: widget.excludeFromSemantics ? null : widget.message,
         child: widget.child,
       ),
     );

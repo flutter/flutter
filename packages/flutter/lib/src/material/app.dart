@@ -51,13 +51,16 @@ const TextStyle _errorTextStyle = const TextStyle(
 ///
 ///  4. Finally if all else fails [onUnknownRoute] is called.
 ///
-/// At least one of these options must handle the `/` route, since it is used
-/// when an invalid [initialRoute] is specified on startup (e.g. by another
-/// application launching this one with an intent on Android; see
-/// [Window.defaultRouteName]).
+/// If a [Navigator] is created, at least one of these options must handle the
+/// `/` route, since it is used when an invalid [initialRoute] is specified on
+/// startup (e.g. by another application launching this one with an intent on
+/// Android; see [Window.defaultRouteName]).
 ///
-/// This widget also configures the top-level [Navigator]'s observer to perform
-/// [Hero] animations.
+/// This widget also configures the observer of the top-level [Navigator] (if
+/// any) to perform [Hero] animations.
+///
+/// If [home], [routes], [onGenerateRoute], and [onUnknownRoute] are all null,
+/// and [builder] is not null, then no [Navigator] is created.
 ///
 /// See also:
 ///
@@ -68,8 +71,8 @@ const TextStyle _errorTextStyle = const TextStyle(
 class MaterialApp extends StatefulWidget {
   /// Creates a MaterialApp.
   ///
-  /// At least one of [home], [routes], or [onGenerateRoute] must be given. If
-  /// only [routes] is given, it must include an entry for the
+  /// At least one of [home], [routes], [onGenerateRoute], or [builder] must be
+  /// non-null. If only [routes] is given, it must include an entry for the
   /// [Navigator.defaultRouteName] (`/`), since that is the route used when the
   /// application is launched with an intent that specifies an otherwise
   /// unsupported route.
@@ -80,35 +83,29 @@ class MaterialApp extends StatefulWidget {
   MaterialApp({ // can't be const because the asserts use methods on Map :-(
     Key key,
     this.navigatorKey,
-    this.title: '',
-    this.onGenerateTitle,
-    this.color,
-    this.theme,
     this.home,
     this.routes: const <String, WidgetBuilder>{},
     this.initialRoute,
     this.onGenerateRoute,
     this.onUnknownRoute,
+    this.navigatorObservers: const <NavigatorObserver>[],
+    this.builder,
+    this.title: '',
+    this.onGenerateTitle,
+    this.color,
+    this.theme,
     this.locale,
     this.localizationsDelegates,
     this.localeResolutionCallback,
     this.supportedLocales: const <Locale>[const Locale('en', 'US')],
-    this.navigatorObservers: const <NavigatorObserver>[],
     this.debugShowMaterialGrid: false,
     this.showPerformanceOverlay: false,
     this.checkerboardRasterCacheImages: false,
     this.checkerboardOffscreenLayers: false,
     this.showSemanticsDebugger: false,
-    this.debugShowCheckedModeBanner: true
-  }) : assert(title != null),
-       assert(routes != null),
+    this.debugShowCheckedModeBanner: true,
+  }) : assert(routes != null),
        assert(navigatorObservers != null),
-       assert(debugShowMaterialGrid != null),
-       assert(showPerformanceOverlay != null),
-       assert(checkerboardRasterCacheImages != null),
-       assert(checkerboardOffscreenLayers != null),
-       assert(showSemanticsDebugger != null),
-       assert(debugShowCheckedModeBanner != null),
        assert(
          home == null ||
          !routes.containsKey(Navigator.defaultRouteName),
@@ -116,6 +113,7 @@ class MaterialApp extends StatefulWidget {
          'cannot include an entry for "/", since it would be redundant.'
        ),
        assert(
+         builder != null ||
          home != null ||
          routes.containsKey(Navigator.defaultRouteName) ||
          onGenerateRoute != null ||
@@ -124,9 +122,35 @@ class MaterialApp extends StatefulWidget {
          'or the routes table must include an entry for "/", '
          'or there must be on onGenerateRoute callback specified, '
          'or there must be an onUnknownRoute callback specified, '
+         'or the builder property must be specified, '
          'because otherwise there is nothing to fall back on if the '
          'app is started with an intent that specifies an unknown route.'
        ),
+       assert(
+         (home != null ||
+          routes.isNotEmpty ||
+          onGenerateRoute != null ||
+          onUnknownRoute != null)
+         ||
+         (builder != null &&
+          navigatorKey == null &&
+          initialRoute == null &&
+          navigatorObservers.isEmpty),
+         'If no route is provided using '
+         'home, routes, onGenerateRoute, or onUnknownRoute, '
+         'a non-null callback for the builder property must be provided, '
+         'and the other navigator-related properties, '
+         'navigatorKey, initialRoute, and navigatorObservers, '
+         'must have their initial values '
+         '(null, null, and the empty list, respectively).'
+       ),
+       assert(title != null),
+       assert(debugShowMaterialGrid != null),
+       assert(showPerformanceOverlay != null),
+       assert(checkerboardRasterCacheImages != null),
+       assert(checkerboardOffscreenLayers != null),
+       assert(showSemanticsDebugger != null),
+       assert(debugShowCheckedModeBanner != null),
        super(key: key);
 
   /// A key to use when building the [Navigator].
@@ -140,7 +164,172 @@ class MaterialApp extends StatefulWidget {
   /// application state in the process; in that case, the [navigatorObservers]
   /// must also be changed, since the previous observers will be attached to the
   /// previous navigator.
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [navigatorKey] must be null and [builder] must not be null.
   final GlobalKey<NavigatorState> navigatorKey;
+
+  /// The widget for the default route of the app ([Navigator.defaultRouteName],
+  /// which is `/`).
+  ///
+  /// This is the route that is displayed first when the application is started
+  /// normally, unless [initialRoute] is specified. It's also the route that's
+  /// displayed if the [initialRoute] can't be displayed.
+  ///
+  /// To be able to directly call [Theme.of], [MediaQuery.of], etc, in the code
+  /// that sets the [home] argument in the constructor, you can use a [Builder]
+  /// widget to get a [BuildContext].
+  ///
+  /// If [home] is specified, then [routes] must not include an entry for `/`,
+  /// as [home] takes its place.
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [builder] must not be null.
+  ///
+  /// The difference between using [home] and using [builder] is that the [home]
+  /// subtree is inserted into the application below a [Navigator] (and thus
+  /// below an [Overlay], which [Navigator] uses). With [home], therefore,
+  /// dialog boxes will work automatically, [Tooltip]s will work, the [routes]
+  /// table will be used, and APIs such as [Navigator.push] and [Navigator.pop]
+  /// will work as expected. In contrast, the widget returned from [builder] is
+  /// inserted _above_ the [MaterialApp]'s [Navigator] (if any).
+  final Widget home;
+
+  /// The application's top-level routing table.
+  ///
+  /// When a named route is pushed with [Navigator.pushNamed], the route name is
+  /// looked up in this map. If the name is present, the associated
+  /// [WidgetBuilder] is used to construct a [MaterialPageRoute] that performs
+  /// an appropriate transition, including [Hero] animations, to the new route.
+  ///
+  /// If the app only has one page, then you can specify it using [home] instead.
+  ///
+  /// If [home] is specified, then it implies an entry in this table for the
+  /// [Navigator.defaultRouteName] route (`/`), and it is an error to
+  /// redundantly provide such a route in the [routes] table.
+  ///
+  /// If a route is requested that is not specified in this table (or by
+  /// [home]), then the [onGenerateRoute] callback is called to build the page
+  /// instead.
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [builder] must not be null.
+  final Map<String, WidgetBuilder> routes;
+
+  /// The name of the first route to show, if a [Navigator] is built.
+  ///
+  /// Defaults to [Window.defaultRouteName], which may be overridden by the code
+  /// that launched the application.
+  ///
+  /// If the route contains slashes, then it is treated as a "deep link", and
+  /// before this route is pushed, the routes leading to this one are pushed
+  /// also. For example, if the route was `/a/b/c`, then the app would start
+  /// with the three routes `/a`, `/a/b`, and `/a/b/c` loaded, in that order.
+  ///
+  /// If any part of this process fails to generate routes, then the
+  /// [initialRoute] is ignored and [Navigator.defaultRouteName] is used instead
+  /// (`/`). This can happen if the app is started with an intent that specifies
+  /// a non-existent route.
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [initialRoute] must be null and [builder] must not be null.
+  ///
+  /// See also:
+  ///
+  ///  * [Navigator.initialRoute], which is used to implement this property.
+  ///  * [Navigator.push], for pushing additional routes.
+  ///  * [Navigator.pop], for removing a route from the stack.
+  final String initialRoute;
+
+  /// The route generator callback used when the app is navigated to a
+  /// named route.
+  ///
+  /// This is used if [routes] does not contain the requested route.
+  ///
+  /// If this returns null when building the routes to handle the specified
+  /// [initialRoute], then all the routes are discarded and
+  /// [Navigator.defaultRouteName] is used instead (`/`). See [initialRoute].
+  ///
+  /// During normal app operation, the [onGenerateRoute] callback will only be
+  /// applied to route names pushed by the application, and so should never
+  /// return null.
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [builder] must not be null.
+  final RouteFactory onGenerateRoute;
+
+  /// Called when [onGenerateRoute] fails to generate a route, except for the
+  /// [initialRoute].
+  ///
+  /// This callback is typically used for error handling. For example, this
+  /// callback might always generate a "not found" page that describes the route
+  /// that wasn't found.
+  ///
+  /// The default implementation pushes a route that displays an ugly error
+  /// message.
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [builder] must not be null.
+  final RouteFactory onUnknownRoute;
+
+  /// The list of observers for the [Navigator] created for this app.
+  ///
+  /// This list must be replaced by a list of newly-created observers if the
+  /// [navigatorKey] is changed.
+  ///
+  /// The [Navigator] is only built if routes are provided (either via [home],
+  /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
+  /// [navigatorObservers] must be the empty list and [builder] must not be null.
+  final List<NavigatorObserver> navigatorObservers;
+
+  /// A builder for inserting widgets above the [Navigator] but below the other
+  /// widgets created by the [MaterialApp] widget, or for replacing the
+  /// [Navigator] entirely.
+  ///
+  /// For example, from the [BuildContext] passed to this method, the
+  /// [Directionality], [Localizations], [DefaultTextStyle], [MediaQuery], etc,
+  /// are all available. They can also be overridden in a way that impacts all
+  /// the routes in the [Navigator].
+  ///
+  /// This is rarely useful, but can be used in applications that wish to
+  /// override those defaults, e.g. to force the application into right-to-left
+  /// mode despite being in English, or to override the [MediaQuery] metrics
+  /// (e.g. to leave a gap for advertisements shown by a plugin from OEM code).
+  ///
+  /// The [builder] callback is passed two arguments, the [BuildContext] (as
+  /// `context`) and a [Navigator] widget (as `child`).
+  ///
+  /// If no routes are provided using [home], [routes], [onGenerateRoute], or
+  /// [onUnknownRoute], the `child` will be null, and it is the responsibility
+  /// of the [builder] to provide the application's routing machinery.
+  ///
+  /// If routes _are_ provided using one or more of those properties, then
+  /// `child` is not null, and the returned value should include the `child` in
+  /// the widget subtree; if it does not, then the application will have no
+  /// navigator and the [navigatorKey], [home], [routes], [onGenerateRoute],
+  /// [onUnknownRoute], [initialRoute], and [navigatorObservers] properties will
+  /// have no effect.
+  ///
+  /// If [builder] is null, it is as if a builder was specified that returned
+  /// the `child` directly. If it is null, routes must be provided using one of
+  /// the other properties listed above.
+  ///
+  /// Unless a [Navigator] is provided, either implicitly from [builder] being
+  /// null, or by a [builder] including its `child` argument, or by a [builder]
+  /// explicitly providing a [Navigator] of its own, features such as
+  /// [showDialog] and [showMenu], widgets such as [Tooltip], [PopupMenuButton],
+  /// or [Hero], and APIs such as [Navigator.push] and [Navigator.pop], will not
+  /// function.
+  ///
+  /// For specifically overriding the [title] with a value based on the
+  /// [Localizations], consider [onGenerateTitle] instead.
+  final TransitionBuilder builder;
 
   /// A one-line description used by the device to identify the app for the user.
   ///
@@ -172,92 +361,12 @@ class MaterialApp extends StatefulWidget {
   /// The colors to use for the application's widgets.
   final ThemeData theme;
 
-  /// The widget for the default route of the app ([Navigator.defaultRouteName],
-  /// which is `/`).
-  ///
-  /// This is the route that is displayed first when the application is started
-  /// normally, unless [initialRoute] is specified. It's also the route that's
-  /// displayed if the [initialRoute] can't be displayed.
-  ///
-  /// To be able to directly call [Theme.of], [MediaQuery.of], etc, in the code
-  /// that sets the [home] argument in the constructor, you can use a [Builder]
-  /// widget to get a [BuildContext].
-  ///
-  /// If [home] is specified, then [routes] must not include an entry for `/`,
-  /// as [home] takes its place.
-  final Widget home;
-
   /// The primary color to use for the application in the operating system
   /// interface.
   ///
   /// For example, on Android this is the color used for the application in the
   /// application switcher.
   final Color color;
-
-  /// The application's top-level routing table.
-  ///
-  /// When a named route is pushed with [Navigator.pushNamed], the route name is
-  /// looked up in this map. If the name is present, the associated
-  /// [WidgetBuilder] is used to construct a [MaterialPageRoute] that performs
-  /// an appropriate transition, including [Hero] animations, to the new route.
-  ///
-  /// If the app only has one page, then you can specify it using [home] instead.
-  ///
-  /// If [home] is specified, then it implies an entry in this table for the
-  /// [Navigator.defaultRouteName] route (`/`), and it is an error to
-  /// redundantly provide such a route in the [routes] table.
-  ///
-  /// If a route is requested that is not specified in this table (or by
-  /// [home]), then the [onGenerateRoute] callback is called to build the page
-  /// instead.
-  final Map<String, WidgetBuilder> routes;
-
-  /// The name of the first route to show.
-  ///
-  /// Defaults to [Window.defaultRouteName], which may be overridden by the code
-  /// that launched the application.
-  ///
-  /// If the route contains slashes, then it is treated as a "deep link", and
-  /// before this route is pushed, the routes leading to this one are pushed
-  /// also. For example, if the route was `/a/b/c`, then the app would start
-  /// with the three routes `/a`, `/a/b`, and `/a/b/c` loaded, in that order.
-  ///
-  /// If any part of this process fails to generate routes, then the
-  /// [initialRoute] is ignored and [Navigator.defaultRouteName] is used instead
-  /// (`/`). This can happen if the app is started with an intent that specifies
-  /// a non-existent route.
-  ///
-  /// See also:
-  ///
-  ///  * [Navigator.initialRoute], which is used to implement this property.
-  ///  * [Navigator.push], for pushing additional routes.
-  ///  * [Navigator.pop], for removing a route from the stack.
-  final String initialRoute;
-
-  /// The route generator callback used when the app is navigated to a
-  /// named route.
-  ///
-  /// This is used if [routes] does not contain the requested route.
-  ///
-  /// If this returns null when building the routes to handle the specified
-  /// [initialRoute], then all the routes are discarded and
-  /// [Navigator.defaultRouteName] is used instead (`/`). See [initialRoute].
-  ///
-  /// During normal app operation, the [onGenerateRoute] callback will only be
-  /// applied to route names pushed by the application, and so should never
-  /// return null.
-  final RouteFactory onGenerateRoute;
-
-  /// Called when [onGenerateRoute] fails to generate a route, except for the
-  /// [initialRoute].
-  ///
-  /// This callback is typically used for error handling. For example, this
-  /// callback might always generate a "not found" page that describes the route
-  /// that wasn't found.
-  ///
-  /// The default implementation pushes a route that displays an ugly error
-  /// message.
-  final RouteFactory onUnknownRoute;
 
   /// The initial locale for this app's [Localizations] widget.
   ///
@@ -417,12 +526,6 @@ class MaterialApp extends StatefulWidget {
   /// representative of what will happen in release mode.
   final bool debugShowCheckedModeBanner;
 
-  /// The list of observers for the [Navigator] created for this app.
-  ///
-  /// This list must be replaced by a list of newly-created observers if the
-  /// [navigatorKey] is changed.
-  final List<NavigatorObserver> navigatorObservers;
-
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps.
   ///
@@ -469,6 +572,7 @@ class _MaterialAppState extends State<MaterialApp> {
   void initState() {
     super.initState();
     _heroController = new HeroController(createRectTween: _createRectTween);
+    _updateNavigator();
   }
 
   @override
@@ -481,17 +585,19 @@ class _MaterialAppState extends State<MaterialApp> {
       // Navigator has a GlobalKey).
       _heroController = new HeroController(createRectTween: _createRectTween);
     }
+    _updateNavigator();
   }
 
-  // Combine the Localizations for Material with the ones contributed
-  // by the localizationsDelegates parameter, if any. Only the first delegate
-  // of a particular LocalizationsDelegate.type is loaded so the
-  // localizationsDelegate parameter can be used to override
-  // _MaterialLocalizationsDelegate.
-  Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
-    if (widget.localizationsDelegates != null)
-      yield* widget.localizationsDelegates;
-    yield DefaultMaterialLocalizations.delegate;
+  bool _haveNavigator;
+  List<NavigatorObserver> _navigatorObservers;
+
+  void _updateNavigator() {
+    _haveNavigator = widget.home != null ||
+                     widget.routes.isNotEmpty ||
+                     widget.onGenerateRoute != null ||
+                     widget.onUnknownRoute != null;
+    _navigatorObservers = new List<NavigatorObserver>.from(widget.navigatorObservers)
+      ..add(_heroController);
   }
 
   RectTween _createRectTween(Rect begin, Rect end) {
@@ -548,6 +654,17 @@ class _MaterialAppState extends State<MaterialApp> {
     return result;
   }
 
+  // Combine the Localizations for Material with the ones contributed
+  // by the localizationsDelegates parameter, if any. Only the first delegate
+  // of a particular LocalizationsDelegate.type is loaded so the
+  // localizationsDelegate parameter can be used to override
+  // _MaterialLocalizationsDelegate.
+  Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
+    if (widget.localizationsDelegates != null)
+      yield* widget.localizationsDelegates;
+    yield DefaultMaterialLocalizations.delegate;
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = widget.theme ?? new ThemeData.fallback();
@@ -557,17 +674,16 @@ class _MaterialAppState extends State<MaterialApp> {
       child: new WidgetsApp(
         key: new GlobalObjectKey(this),
         navigatorKey: widget.navigatorKey,
+        navigatorObservers: _haveNavigator ? _navigatorObservers : null,
+        initialRoute: widget.initialRoute,
+        onGenerateRoute: _haveNavigator ? _onGenerateRoute : null,
+        onUnknownRoute: _haveNavigator ? _onUnknownRoute : null,
+        builder: widget.builder,
         title: widget.title,
         onGenerateTitle: widget.onGenerateTitle,
         textStyle: _errorTextStyle,
         // blue is the primary color of the default theme
         color: widget.color ?? theme?.primaryColor ?? Colors.blue,
-        navigatorObservers:
-            new List<NavigatorObserver>.from(widget.navigatorObservers)
-              ..add(_heroController),
-        initialRoute: widget.initialRoute,
-        onGenerateRoute: _onGenerateRoute,
-        onUnknownRoute: _onUnknownRoute,
         locale: widget.locale,
         localizationsDelegates: _localizationsDelegates,
         localeResolutionCallback: widget.localeResolutionCallback,

@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:mockito/mockito.dart';
 
 import 'semantics_tester.dart';
 
@@ -16,8 +17,12 @@ void main() {
   final TextEditingController controller = new TextEditingController();
   final FocusNode focusNode = new FocusNode();
   final FocusScopeNode focusScopeNode = new FocusScopeNode();
-  final TextStyle textStyle = const TextStyle();
-  final Color cursorColor = const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+  const TextStyle textStyle = const TextStyle();
+  const Color cursorColor = const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+
+  setUp(() {
+    debugResetSemanticsIdCounter();
+  });
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(new Directionality(
@@ -347,14 +352,14 @@ void main() {
     final EditableTextState textState = tester.state(find.byType(EditableText));
 
     expect(textState.selectionOverlay.handlesAreVisible, isTrue);
-    expect(textState.selectionOverlay.textEditingValue.selection, const TextSelection.collapsed(offset: 4));
+    expect(textState.selectionOverlay.selectionDelegate.textEditingValue.selection, const TextSelection.collapsed(offset: 4));
 
     // Simulate selection change via keyboard and expect handles to disappear.
     render.onSelectionChanged(const TextSelection.collapsed(offset: 10), render, SelectionChangedCause.keyboard);
     await tester.pumpAndSettle();
 
     expect(textState.selectionOverlay.handlesAreVisible, isFalse);
-    expect(textState.selectionOverlay.textEditingValue.selection, const TextSelection.collapsed(offset: 10));
+    expect(textState.selectionOverlay.selectionDelegate.textEditingValue.selection, const TextSelection.collapsed(offset: 10));
   });
 
   testWidgets('exposes correct cursor movement semantics', (WidgetTester tester) async {
@@ -565,4 +570,151 @@ void main() {
 
     semantics.dispose();
   });
+
+  group('a11y copy/cut/paste', () {
+    Future<Null> _buildApp(MockTextSelectionControls controls, WidgetTester tester) {
+      return tester.pumpWidget(new MaterialApp(
+        home: new EditableText(
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: controls,
+        ),
+      ));
+    }
+
+    MockTextSelectionControls controls;
+
+    setUp(() {
+      controller.text = 'test';
+      controller.selection = new TextSelection.collapsed(offset: controller.text.length);
+
+      controls = new MockTextSelectionControls();
+      when(controls.buildHandle(typed(any), typed(any), typed(any))).thenReturn(new Container());
+      when(controls.buildToolbar(typed(any), typed(any), typed(any), typed(any))).thenReturn(new Container());
+    });
+
+    testWidgets('are exposed', (WidgetTester tester) async {
+      final SemanticsTester semantics = new SemanticsTester(tester);
+
+      when(controls.canCopy(typed(any))).thenReturn(false);
+      when(controls.canCut(typed(any))).thenReturn(false);
+      when(controls.canPaste(typed(any))).thenReturn(false);
+
+      await _buildApp(controls, tester);
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+
+      expect(semantics, includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.setSelection,
+        ],
+      ));
+
+      when(controls.canCopy(typed(any))).thenReturn(true);
+      await _buildApp(controls, tester);
+      expect(semantics, includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.setSelection,
+          SemanticsAction.copy,
+        ],
+      ));
+
+      when(controls.canCopy(typed(any))).thenReturn(false);
+      when(controls.canPaste(typed(any))).thenReturn(true);
+      await _buildApp(controls, tester);
+      expect(semantics, includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.setSelection,
+          SemanticsAction.paste,
+        ],
+      ));
+
+      when(controls.canPaste(typed(any))).thenReturn(false);
+      when(controls.canCut(typed(any))).thenReturn(true);
+      await _buildApp(controls, tester);
+      expect(semantics, includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.setSelection,
+          SemanticsAction.cut,
+        ],
+      ));
+
+      when(controls.canCopy(typed(any))).thenReturn(true);
+      when(controls.canCut(typed(any))).thenReturn(true);
+      when(controls.canPaste(typed(any))).thenReturn(true);
+      await _buildApp(controls, tester);
+      expect(semantics, includesNodeWith(
+        value: 'test',
+        actions: <SemanticsAction>[
+          SemanticsAction.moveCursorBackwardByCharacter,
+          SemanticsAction.setSelection,
+          SemanticsAction.cut,
+          SemanticsAction.copy,
+          SemanticsAction.paste,
+        ],
+      ));
+
+      semantics.dispose();
+    });
+
+    testWidgets('can copy/cut/paste with a11y', (WidgetTester tester) async {
+      final SemanticsTester semantics = new SemanticsTester(tester);
+
+      when(controls.canCopy(typed(any))).thenReturn(true);
+      when(controls.canCut(typed(any))).thenReturn(true);
+      when(controls.canPaste(typed(any))).thenReturn(true);
+      await _buildApp(controls, tester);
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+
+      final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner;
+      const int expectedNodeId = 3;
+
+      expect(semantics, hasSemantics(new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: expectedNodeId,
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isTextField,
+              SemanticsFlag.isFocused
+            ],
+            actions: <SemanticsAction>[
+              SemanticsAction.moveCursorBackwardByCharacter,
+              SemanticsAction.setSelection,
+              SemanticsAction.copy,
+              SemanticsAction.cut,
+              SemanticsAction.paste
+            ],
+            value: 'test',
+            textSelection: new TextSelection.collapsed(offset: controller.text.length),
+            textDirection: TextDirection.ltr,
+          ),
+        ],
+      ), ignoreRect: true, ignoreTransform: true));
+
+      owner.performAction(expectedNodeId, SemanticsAction.copy);
+      verify(controls.handleCopy(typed(any))).called(1);
+
+      owner.performAction(expectedNodeId, SemanticsAction.cut);
+      verify(controls.handleCut(typed(any))).called(1);
+
+      owner.performAction(expectedNodeId, SemanticsAction.paste);
+      verify(controls.handlePaste(typed(any))).called(1);
+
+      semantics.dispose();
+    });
+  });
+
 }
+
+class MockTextSelectionControls extends Mock implements TextSelectionControls {}

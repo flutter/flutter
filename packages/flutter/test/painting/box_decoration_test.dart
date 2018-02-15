@@ -9,7 +9,7 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   test('BoxDecoration with BorderRadiusDirectional', () {
-    final BoxDecoration decoration = const BoxDecoration(
+    const BoxDecoration decoration = const BoxDecoration(
       color: const Color(0xFF000000),
       borderRadius: const BorderRadiusDirectional.only(topStart: const Radius.circular(100.0)),
     );

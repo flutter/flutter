@@ -100,7 +100,7 @@ void main() {
 
     await tester.pumpWidget(buildBlock(reverse: true));
 
-    final Offset target = const Offset(200.0, 200.0);
+    const Offset target = const Offset(200.0, 200.0);
     await tester.tapAt(target);
     expect(first, equals(0));
     expect(second, equals(1));

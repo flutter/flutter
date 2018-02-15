@@ -165,10 +165,14 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       child: new Container(
         width: widget.mini ? _kSizeMini : _kSize,
         height: widget.mini ? _kSizeMini : _kSize,
-        child: new InkWell(
-          onTap: widget.onPressed,
-          onHighlightChanged: _handleHighlightChanged,
-          child: result,
+        child: new Semantics(
+          button: true,
+          enabled: widget.onPressed != null,
+          child: new InkWell(
+            onTap: widget.onPressed,
+            onHighlightChanged: _handleHighlightChanged,
+            child: result,
+          ),
         ),
       ),
     );

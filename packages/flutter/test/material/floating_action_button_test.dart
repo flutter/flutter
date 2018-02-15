@@ -2,8 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Floating Action Button control test', (WidgetTester tester) async {
@@ -131,5 +136,69 @@ void main() {
     ));
     await tester.pump();
     expect(tester.takeException().toString(), contains('xyzzy'));
+  });
+
+  testWidgets('Floating Action Button semantics (enabled)', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new FloatingActionButton(
+            onPressed: () { },
+            child: const Icon(Icons.add, semanticLabel: 'Add'),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'Add',
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
+          ],
+          actions: <SemanticsAction>[
+            SemanticsAction.tap
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Floating Action Button semantics (disabled)', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const FloatingActionButton(
+            onPressed: null,
+            child: const Icon(Icons.add, semanticLabel: 'Add'),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'Add',
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
+            SemanticsFlag.hasEnabledState,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+
+    semantics.dispose();
   });
 }
