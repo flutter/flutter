@@ -274,8 +274,6 @@ class FlutterDevice {
     }
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
-    if (hotRunner.previewDart2 != null)
-      platformArgs['strong'] = hotRunner.previewDart2;
 
     startEchoingDeviceLog();
 
@@ -337,8 +335,6 @@ class FlutterDevice {
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
     if (coldRunner.traceStartup != null)
       platformArgs['trace-startup'] = coldRunner.traceStartup;
-    if (coldRunner.previewDart2 != null)
-      platformArgs['strong'] = coldRunner.previewDart2;
 
     startEchoingDeviceLog();
 

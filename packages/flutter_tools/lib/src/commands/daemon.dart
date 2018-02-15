@@ -348,7 +348,6 @@ class AppDomain extends Domain {
     DebuggingOptions options, bool enableHotReload, {
     String applicationBinary,
     bool previewDart2: false,
-    bool strongMode: false,
     String projectRootPath,
     String packagesFilePath,
     String projectAssets,
