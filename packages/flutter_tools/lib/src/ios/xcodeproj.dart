@@ -11,6 +11,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../flx.dart' as flx;
 import '../globals.dart';
 
 final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
@@ -20,7 +21,25 @@ String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
 }
 
-void updateXcodeGeneratedProperties({
+String _generatedXcodePropertiesPath(String projectPath) {
+  return fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig');
+}
+
+/// Writes default Xcode properties files in the Flutter project at
+/// [projectPath], if such files do not already exist.
+void generateXcodeProperties(String projectPath) {
+  if (fs.file(_generatedXcodePropertiesPath(projectPath)).existsSync())
+    return;
+  updateGeneratedXcodeProperties(
+      projectPath: projectPath,
+      buildInfo: BuildInfo.debug,
+      target: flx.defaultMainPath,
+      previewDart2: false,
+  );
+}
+
+/// Writes or rewrites Xcode property files with the specified information.
+void updateGeneratedXcodeProperties({
   @required String projectPath,
   @required BuildInfo buildInfo,
   @required String target,
@@ -58,7 +77,7 @@ void updateXcodeGeneratedProperties({
     localsBuffer.writeln('PREVIEW_DART_2=true');
   }
 
-  final File localsFile = fs.file(fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
+  final File localsFile = fs.file(_generatedXcodePropertiesPath(projectPath));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
 }

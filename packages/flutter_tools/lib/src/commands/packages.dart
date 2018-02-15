@@ -5,9 +5,10 @@
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/os.dart';
 import '../dart/pub.dart';
-import '../plugins.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class PackagesCommand extends FlutterCommand {
@@ -76,7 +77,7 @@ class PackagesGetCommand extends FlutterCommand {
       offline: argResults['offline'],
       checkLastModified: false,
     );
-    injectPlugins(directory: target);
+    new FlutterProject(fs.directory(target)).ensureReadyForPlatformSpecificTooling();
   }
 }
 

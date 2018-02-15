@@ -241,19 +241,12 @@ void injectPlugins({String directory}) {
     _writeAndroidPluginRegistrant(directory, plugins);
   if (fs.isDirectorySync(fs.path.join(directory, 'ios'))) {
     _writeIOSPluginRegistrant(directory, plugins);
+    final CocoaPods cocoaPods = const CocoaPods();
     if (plugins.isNotEmpty)
-      const CocoaPods().setupPodfile(directory);
+      cocoaPods.setupPodfile(directory);
     if (changed)
-      _ensurePodInstallIsExecutedOnNextIOSBuild(directory);
+      cocoaPods.invalidatePodInstallOutput(directory);
   }
-}
-
-void _ensurePodInstallIsExecutedOnNextIOSBuild(String directory) {
-  final File manifest = fs.file(
-    fs.path.join(directory, 'ios', 'Pods', 'Manifest.lock'),
-  );
-  if (manifest.existsSync())
-    manifest.deleteSync();
 }
 
 /// Returns whether the Flutter project at the specified [directory]
