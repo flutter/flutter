@@ -40,7 +40,7 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
-/// Responsible for placing the [FloatingActionButton] in the [Scaffold].
+/// Interface for objects that place the [FloatingActionButton] in the [Scaffold].
 /// 
 /// Flutter provides [FabPositioner]s for the common FAB placements in
 /// Material Design apps, whose implementations are available as static
