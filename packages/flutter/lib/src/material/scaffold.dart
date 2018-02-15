@@ -150,14 +150,20 @@ class ScaffoldPrelayoutGeometry {
 
   /// The [Size] of the [Scaffold]'s [FloatingActionButton] (if available).
   /// 
-  /// The Scaffold will determine the fabSize if 
-  /// `Scaffold.floatingActionButton` is not null.
+  /// The [Scaffold] will determine the floatingActionButtonSize if 
+  /// [Scaffold.floatingActionButton] is not null.
+  /// 
+  /// If [Scaffold.floatingActionButton] is null, this should be null as
+  /// well.
   final Size floatingActionButtonSize;
 
   /// The [Size] of the [Scaffold]'s [BottomSheet] (if available).
   /// 
   /// The Scaffold will determine the bottomSheetSize if the Scaffold
   /// is currently showing a [BottomSheet].
+  /// 
+  /// If the Scaffold is not currently showing a [BottomSheet],
+  /// this should be null.
   final Size bottomSheetSize;
 
   /// The height from the [Scaffold]'s top where its body ends.
@@ -174,11 +180,14 @@ class ScaffoldPrelayoutGeometry {
 
   /// The [Size] of the [Scaffold]'s [SnackBar] (if available).
   /// 
-  /// The Scaffold will determine the snackBarSize if the Scaffold
+  /// The [Scaffold] will determine the `snackBarSize` if the Scaffold
   /// is currently showing a [SnackBar].
+  /// 
+  /// If the [Scaffold] is not showing a [SnackBar],
+  /// this should be null.
   final Size snackBarSize;
 
-  /// The [Scaffold]'s [TextDirection].
+  /// The [TextDirection] of the [Scaffold]'s [BuildContext].
   final TextDirection textDirection;
 }
 
