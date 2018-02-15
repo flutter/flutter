@@ -119,12 +119,12 @@ BuildApp() {
       ${aot_flags}                                                          \
       ${local_engine_flag}                                                  \
       ${preview_dart_2_flag}
-    StreamOutput "done"
 
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to build ${project_path}."
       exit -1
     fi
+    StreamOutput "done"
 
     RunCommand cp -r -- "${build_dir}/aot/App.framework" "${derived_dir}"
   else
@@ -153,13 +153,13 @@ BuildApp() {
     ${precompilation_flag}                                                \
     ${local_engine_flag}                                                  \
     ${preview_dart_2_flag}
-  StreamOutput "done"
-  StreamOutput " └─Compiling, linking and signing..."
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package ${project_path}."
     exit -1
   fi
+  StreamOutput "done"
+  StreamOutput " └─Compiling, linking and signing..."
 
   RunCommand popd > /dev/null
 
