@@ -212,7 +212,7 @@ class _FlutterPlatform extends PlatformPlugin {
         );
 
         if (mainDart == null) {
-          controller.sink.addError(_getErrorMessage('Compilation failed', testPath, shellPath))
+          controller.sink.addError(_getErrorMessage('Compilation failed', testPath, shellPath));
           return;
         }
 
