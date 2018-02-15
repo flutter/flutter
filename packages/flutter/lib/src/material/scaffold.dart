@@ -46,6 +46,8 @@ enum _ScaffoldSlot {
 /// Material Design apps, whose implementations are available as static
 /// members of this class.
 abstract class FabPositioner {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const FabPositioner();
 
   /// End-aligned [FloatingActionButton], floating at the bottom of the screen.
@@ -65,6 +67,8 @@ abstract class FabPositioner {
 
 /// Provider of [FloatingActionButton] animations.
 abstract class FabMotionAnimator {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const FabMotionAnimator();
 
   /// Moves the [FloatingActionButton] by scaling out and in at a new location.
@@ -140,6 +144,8 @@ class _MaxAnimation<T> extends CompoundAnimation<T> {
 /// finished laying out, see the [ScaffoldGeometry].
 @immutable
 class ScaffoldPrelayoutGeometry {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const ScaffoldPrelayoutGeometry({this.bottomSheetSize, this.contentBottom, this.contentTop, this.fabSize, this.horizontalFabPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
 
   /// The [Size] of the [Scaffold]'s [FloatingActionButton] (if available).
@@ -200,7 +206,6 @@ class _CenterFloatFab extends FabPositioner {
 }
 
 class _EndFloatFab extends FabPositioner {
-
   const _EndFloatFab();
 
   @override
@@ -244,6 +249,8 @@ class _EndFloatFab extends FabPositioner {
 /// the layout process, see [ScaffoldPrelayoutGeometry].
 @immutable
 class ScaffoldGeometry {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const ScaffoldGeometry({
     this.bottomNavigationBarTop,
     this.floatingActionButtonArea,
