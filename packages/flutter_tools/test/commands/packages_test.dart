@@ -29,9 +29,19 @@ void main() {
       temp.deleteSync(recursive: true);
     });
 
-    Future<String> runCommand(String verb, { List<String> args }) async {
+    Future<String> createProjectWithPlugin(String plugin) async {
       final String projectPath = await createProject(temp);
+      final File pubspec = fs.file(fs.path.join(projectPath, 'pubspec.yaml'));
+      String content = await pubspec.readAsString();
+      content = content.replaceFirst(
+        '\ndependencies:\n',
+        '\ndependencies:\n  $plugin:\n',
+      );
+      await pubspec.writeAsString(content, flush: true);
+      return projectPath;
+    }
 
+    Future<Null> runCommandIn(String projectPath, String verb, { List<String> args }) async {
       final PackagesCommand command = new PackagesCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
@@ -41,31 +51,138 @@ void main() {
       commandArgs.add(projectPath);
 
       await runner.run(commandArgs);
-
-      return projectPath;
     }
 
     void expectExists(String projectPath, String relPath) {
       expect(fs.isFileSync(fs.path.join(projectPath, relPath)), true);
     }
 
-    // Verify that we create a project that is well-formed.
-    testUsingContext('get', () async {
-      final String projectPath = await runCommand('get');
-      expectExists(projectPath, 'lib/main.dart');
-      expectExists(projectPath, '.packages');
+    void expectContains(String projectPath, String relPath, String substring) {
+      expectExists(projectPath, relPath);
+      expect(
+        fs.file(fs.path.join(projectPath, relPath)).readAsStringSync(),
+        contains(substring),
+      );
+    }
+
+    void expectNotExists(String projectPath, String relPath) {
+      expect(fs.isFileSync(fs.path.join(projectPath, relPath)), false);
+    }
+
+    void expectNotContains(String projectPath, String relPath, String substring) {
+      expectExists(projectPath, relPath);
+      expect(
+        fs.file(fs.path.join(projectPath, relPath)).readAsStringSync(),
+        isNot(contains(substring)),
+      );
+    }
+
+    const List<String> pubOutput = const <String>[
+      '.packages',
+      'pubspec.lock',
+    ];
+
+    const List<String> pluginRegistrants = const <String>[
+      'ios/Runner/GeneratedPluginRegistrant.h',
+      'ios/Runner/GeneratedPluginRegistrant.m',
+      'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+    ];
+
+    const List<String> pluginWitnesses = const <String>[
+      '.flutter-plugins',
+      'ios/Podfile',
+    ];
+
+    const Map<String, String> pluginContentWitnesses = const <String, String>{
+      'ios/Flutter/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
+      'ios/Flutter/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
+    };
+
+    void expectDependenciesResolved(String projectPath) {
+      for (String output in pubOutput) {
+        expectExists(projectPath, output);
+      }
+    }
+
+    void expectZeroPluginsInjected(String projectPath) {
+      for (final String registrant in pluginRegistrants) {
+        expectExists(projectPath, registrant);
+      }
+      for (final String witness in pluginWitnesses) {
+        expectNotExists(projectPath, witness);
+      }
+      pluginContentWitnesses.forEach((String witness, String content) {
+        expectNotContains(projectPath, witness, content);
+      });
+    }
+
+    void expectPluginInjected(String projectPath) {
+      for (final String registrant in pluginRegistrants) {
+        expectExists(projectPath, registrant);
+      }
+      for (final String witness in pluginWitnesses) {
+        expectExists(projectPath, witness);
+      }
+      pluginContentWitnesses.forEach((String witness, String content) {
+        expectContains(projectPath, witness, content);
+      });
+    }
+
+    void removeGeneratedFiles(String projectPath) {
+      final Iterable<String> allFiles = <List<String>>[
+        pubOutput,
+        pluginRegistrants,
+        pluginWitnesses,
+      ].expand((List<String> list) => list);
+      for (String path in allFiles) {
+        final File file = fs.file(fs.path.join(projectPath, path));
+        if (file.existsSync())
+          file.deleteSync();
+      }
+    }
+
+    testUsingContext('get fetches packages', () async {
+      final String projectPath = await createProject(temp);
+
+      removeGeneratedFiles(projectPath);
+
+      await runCommandIn(projectPath, 'get');
+
+      expectDependenciesResolved(projectPath);
+      expectZeroPluginsInjected(projectPath);
     }, timeout: allowForRemotePubInvocation);
 
-    testUsingContext('get --offline', () async {
-      final String projectPath = await runCommand('get', args: <String>['--offline']);
-      expectExists(projectPath, 'lib/main.dart');
-      expectExists(projectPath, '.packages');
-    });
+    testUsingContext('get --offline fetches packages', () async {
+      final String projectPath = await createProject(temp);
 
-    testUsingContext('upgrade', () async {
-      final String projectPath = await runCommand('upgrade');
-      expectExists(projectPath, 'lib/main.dart');
-      expectExists(projectPath, '.packages');
+      removeGeneratedFiles(projectPath);
+
+      await runCommandIn(projectPath, 'get', args: <String>['--offline']);
+
+      expectDependenciesResolved(projectPath);
+      expectZeroPluginsInjected(projectPath);
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('upgrade fetches packages', () async {
+      final String projectPath = await createProject(temp);
+
+      removeGeneratedFiles(projectPath);
+
+      await runCommandIn(projectPath, 'upgrade');
+
+      expectDependenciesResolved(projectPath);
+      expectZeroPluginsInjected(projectPath);
+    }, timeout: allowForRemotePubInvocation);
+
+    testUsingContext('get fetches packages and injects plugin', () async {
+      final String projectPath = await createProjectWithPlugin('path_provider');
+
+      removeGeneratedFiles(projectPath);
+
+      await runCommandIn(projectPath, 'get');
+
+      expectDependenciesResolved(projectPath);
+      expectPluginInjected(projectPath);
     }, timeout: allowForRemotePubInvocation);
   });
 
