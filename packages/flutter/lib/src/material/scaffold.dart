@@ -37,12 +37,13 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
-/// Geometry information for scaffold components.
+/// Geometry information for [Scaffold] components.
 ///
-/// To get a [ValueNotifier] for the scaffold geometry call
-/// [Scaffold.geometryOf].
+/// To get a [ValueNotifier] for the scaffold geometry of a given
+/// [BuildContext], use [Scaffold.geometryOf].
 @immutable
 class ScaffoldGeometry {
+  /// Create an object that describes the geometry of a [Scaffold].
   const ScaffoldGeometry({
     this.bottomNavigationBarTop,
     this.floatingActionButtonArea,
