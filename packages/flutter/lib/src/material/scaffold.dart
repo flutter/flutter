@@ -146,7 +146,7 @@ class _MaxAnimation<T> extends CompoundAnimation<T> {
 class ScaffoldPrelayoutGeometry {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const ScaffoldPrelayoutGeometry({this.bottomSheetSize, this.contentBottom, this.contentTop, this.floatingActionButtonSize, this.horizontalFabPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
+  const ScaffoldPrelayoutGeometry({this.bottomSheetSize, this.contentBottom, this.contentTop, this.floatingActionButtonSize, this.horizontalFloatingActionButtonPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
 
   /// The [Size] of the [Scaffold]'s [FloatingActionButton] (if available).
   /// 
@@ -172,7 +172,7 @@ class ScaffoldPrelayoutGeometry {
   final double contentTop;
 
   /// The minimum horizontal padding the [FloatingActionButton] should observe.
-  final double horizontalFabPadding;
+  final double horizontalFloatingActionButtonPadding;
 
   /// The [Size] of the whole [Scaffold].
   final Size scaffoldSize;
@@ -223,10 +223,10 @@ class _EndFloatFab extends FabPositioner {
     assert(scaffoldGeometry.textDirection != null);
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
-        fabX = _kFloatingActionButtonMargin + scaffoldGeometry.horizontalFabPadding;
+        fabX = _kFloatingActionButtonMargin + scaffoldGeometry.horizontalFloatingActionButtonPadding;
         break;
       case TextDirection.ltr:
-        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - _kFloatingActionButtonMargin - scaffoldGeometry.horizontalFabPadding;
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - _kFloatingActionButtonMargin - scaffoldGeometry.horizontalFloatingActionButtonPadding;
       break;
     }
 
@@ -446,7 +446,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         contentBottom: contentBottom,
         contentTop: contentTop,
         floatingActionButtonSize: fabSize,
-        horizontalFabPadding: horizontalPadding,
+        horizontalFloatingActionButtonPadding: horizontalPadding,
         scaffoldSize: size,
         snackBarSize: snackBarSize,
         textDirection: textDirection,
@@ -1280,9 +1280,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   void didUpdateWidget(Scaffold oldWidget) {
     // Update the fab animator, and then schedule the fab for repositioning.
     if (widget.fabMotionAnimator != oldWidget.fabMotionAnimator) {
-      setState(() {
-        _fabMotionAnimator = widget.fabMotionAnimator ?? FabMotionAnimator.scaling;
-      });
+      _fabMotionAnimator = widget.fabMotionAnimator ?? FabMotionAnimator.scaling;
     }
     if (widget.fabPositioner != oldWidget.fabPositioner) {
       _moveFab(widget.fabPositioner ?? _kDefaultFabPositioner);

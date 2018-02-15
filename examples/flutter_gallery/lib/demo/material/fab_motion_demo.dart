@@ -89,10 +89,10 @@ class _TopStartFabPositioner extends FabPositioner {
     assert(scaffoldGeometry.textDirection != null);
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.ltr:
-        fabX = 16.0 + scaffoldGeometry.horizontalFabPadding;
+        fabX = 16.0 + scaffoldGeometry.horizontalFloatingActionButtonPadding;
         break;
       case TextDirection.rtl:
-        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - 16.0 - scaffoldGeometry.horizontalFabPadding;
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - 16.0 - scaffoldGeometry.horizontalFloatingActionButtonPadding;
       break;
     }
     final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
