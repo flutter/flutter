@@ -185,7 +185,7 @@ abstract class IOSApp extends ApplicationPackage {
     id = substituteXcodeVariables(id, buildSettings);
 
     return new BuildableIOSApp(
-      appDirectory: fs.path.join('ios'),
+      appDirectory: 'ios',
       projectBundleId: id,
       buildSettings: buildSettings,
     );

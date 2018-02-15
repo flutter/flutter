@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/strings.dart';
 
@@ -275,7 +276,7 @@ abstract class FlutterCommand extends Command<Null> {
 
     if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name));
-      injectPlugins();
+      new FlutterProject(fs.currentDirectory).ensureReadyForPlatformSpecificTooling();
     }
 
     setupApplicationPackages();

@@ -63,6 +63,9 @@ class CocoaPods {
     bool isSwift: false,
     bool flutterPodChanged: true,
   }) async {
+    if (!(await appIosDir.childFile('Podfile').exists())) {
+      throwToolExit('Podfile missing');
+    }
     if (await _checkPodCondition()) {
       if (_shouldRunPodInstall(appIosDir.path, flutterPodChanged))
         await _runPodInstall(appIosDir, iosEngineDir);
@@ -134,6 +137,15 @@ class CocoaPods {
       if (!content.contains(include))
         file.writeAsStringSync('$include\n$content', flush: true);
     }
+  }
+
+  /// Ensures that pod install is deemed needed on next check.
+  void invalidatePodInstallOutput(String directory) {
+    final File manifest = fs.file(
+      fs.path.join(directory, 'ios', 'Pods', 'Manifest.lock'),
+    );
+    if (manifest.existsSync())
+      manifest.deleteSync();
   }
 
   // Check if you need to run pod install.
