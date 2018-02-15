@@ -245,8 +245,6 @@ class _EndFloatFab extends FabPositioner {
     return new Offset(fabX, fabY);
   }
 }
-// Examples can assume:
-// ScaffoldGeometry scaffoldGeometry;
 
 /// Geometry information for [Scaffold] components after layout is finished.
 ///
