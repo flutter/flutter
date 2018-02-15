@@ -1292,7 +1292,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   @override
   void dispose() {
     _snackBarController?.dispose();
-    _snackBarController = null;
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
     _geometryNotifier.dispose();
@@ -1300,9 +1299,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       bottomSheet.animationController.dispose();
     if (_currentBottomSheet != null)
       _currentBottomSheet._widget.animationController.dispose();
-    _fabMoveController.removeStatusListener(_onFabMoveStatus);
     _fabMoveController.dispose();
-    _fabMoveController = null;
     super.dispose();
   }
 
