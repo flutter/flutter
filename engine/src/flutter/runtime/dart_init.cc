@@ -599,18 +599,6 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
               arraysize(kDartWriteProtectCodeArgs));
 #endif
 
-  if (settings.dart_strong_mode) {
-    // In strong mode we enable all the strong mode options and if running
-    // debug product mode we also enable asserts.
-    PushBackAll(&args, kDartStrongModeArgs, arraysize(kDartStrongModeArgs));
-    if (use_checked_mode) {
-      PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
-    }
-  } else if (use_checked_mode) {
-    PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
-    PushBackAll(&args, kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
-  }
-
   if (settings.start_paused)
     PushBackAll(&args, kDartStartPausedArgs, arraysize(kDartStartPausedArgs));
 
@@ -640,6 +628,24 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
           platform_data.data(), platform_data.size(), ReleaseFetchedBytes);
       FXL_DCHECK(kernel_platform != nullptr);
     }
+  }
+  if ((kernel_platform != nullptr) ||
+      Dart_IsDart2Snapshot(g_default_isolate_snapshot_data)) {
+    // The presence of the kernel platform file or a snapshot that was generated
+    // for Dart2 indicates we are running in preview-dart-2 mode and in this
+    // mode enable strong mode options by default.
+    // Note: When we start using core snapshots instead of the platform file
+    // in the engine just sniffing the snapshot file should be sufficient.
+    PushBackAll(&args, kDartStrongModeArgs, arraysize(kDartStrongModeArgs));
+    // In addition if we are running in debug mode we also enable asserts.
+    if (use_checked_mode) {
+      PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
+    }
+  } else if (use_checked_mode) {
+    // In non preview-dart-2 mode we enable checked mode and asserts if
+    // we are running in debug mode.
+    PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
+    PushBackAll(&args, kDartCheckedModeArgs, arraysize(kDartCheckedModeArgs));
   }
 
   for (size_t i = 0; i < settings.dart_flags.size(); i++)
