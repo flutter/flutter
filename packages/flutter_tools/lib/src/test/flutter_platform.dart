@@ -213,7 +213,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
         if (mainDart == null) {
           controller.sink.addError(_getErrorMessage('Compilation failed', testPath, shellPath));
-          return;
+          return null;
         }
 
         // bundlePath needs to point to a folder with `platform.dill` file.
