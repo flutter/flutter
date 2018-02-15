@@ -301,9 +301,6 @@ public final class FlutterActivityDelegate
         if (intent.getBooleanExtra("trace-skia", false)) {
             args.add("--trace-skia");
         }
-        if (intent.getBooleanExtra("strong", false)) {
-            args.add("--strong");
-        }
         if (!args.isEmpty()) {
             String[] argsArray = new String[args.size()];
             return args.toArray(argsArray);
