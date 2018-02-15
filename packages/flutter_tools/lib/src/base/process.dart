@@ -17,6 +17,10 @@ typedef String StringConverter(String string);
 typedef Future<dynamic> ShutdownHook();
 
 // TODO(ianh): We have way too many ways to run subprocesses in this project.
+// Convert most of these into one or more lightweight wrappers around the
+// [ProcessManager] API using named parameters for the various options.
+// See [here](https://github.com/flutter/flutter/pull/14535#discussion_r167041161)
+// for more details.
 
 /// The stage in which a [ShutdownHook] will be run. All shutdown hooks within
 /// a given stage will be started in parallel and will be guaranteed to run to
@@ -209,6 +213,16 @@ Future<Process> runDetached(List<String> cmd) {
     mode: ProcessStartMode.DETACHED,
   );
   return proc;
+}
+
+Future<Process> runDetachedWithIO(List<String> cmd, {
+  Map<String, String> environment
+}) async {
+  _traceCommand(cmd);
+  return await processManager.start(
+    cmd,
+    mode: ProcessStartMode.DETACHED_WITH_STDIO,
+  );
 }
 
 Future<RunResult> runAsync(List<String> cmd, {
