@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 const String _explanatoryText =
-  "When the Scaffold's floating action button positioner changes,"
+  "When the Scaffold's floating action button positioner changes, "
   'the floating action button animates to its new position';
 
 class FabMotionDemo extends StatefulWidget {
