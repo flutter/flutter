@@ -350,11 +350,13 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   Status buildSubStatus;
   Status initialBuildStatus;
+  Directory scriptOutputPipeTempDirectory;
 
   if (logger.supportsColor) {
-    final File scriptOutputPipeFile = fs.systemTempDirectory
-        .createTempSync('flutter_build_log_pipe')
-        .childFile('pipe_to_stdout');
+    scriptOutputPipeTempDirectory = fs.systemTempDirectory
+        .createTempSync('flutter_build_log_pipe');
+    final File scriptOutputPipeFile =
+        scriptOutputPipeTempDirectory.childFile('pipe_to_stdout');
     os.makePipe(scriptOutputPipeFile.path);
 
     Future<void> listenToScriptOutputLine() async {
@@ -375,7 +377,8 @@ Future<XcodeBuildResult> buildXcodeProject({
       return listenToScriptOutputLine();
     }
 
-    listenToScriptOutputLine();
+    // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
+    listenToScriptOutputLine(); // ignore: unawaited_futures
 
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }
@@ -390,6 +393,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   buildSubStatus?.stop();
   initialBuildStatus?.cancel();
   buildStopwatch.stop();
+  // Free pipe file.
+  scriptOutputPipeTempDirectory?.deleteSync(recursive: true);
   printStatus(
     'Xcode build done',
     ansiAlternative: 'Xcode build done'.padRight(53)
