@@ -8,6 +8,7 @@ import 'dart:convert';
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/port_scanner.dart';
 import '../base/process.dart';
@@ -239,6 +240,8 @@ class IOSDevice extends Device {
     int installationResult = -1;
     Uri localObservatoryUri;
 
+    final Status installStatus =
+        logger.startProgress('Installing and launching...', expectSlowOperation: true);
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
       printTrace('Debugging is not enabled');
@@ -247,6 +250,7 @@ class IOSDevice extends Device {
         mapFunction: monitorInstallationFailure,
         trace: true,
       );
+      installStatus.stop();
     } else {
       // Debugging is enabled, look for the observatory server port post launch.
       printTrace('Debugging is enabled, connecting to observatory');
@@ -282,6 +286,7 @@ class IOSDevice extends Device {
         observatoryDiscovery.cancel();
       });
     }
+    installStatus.stop();
 
     if (installationResult != 0) {
       printError('Could not install ${bundle.path} on $id.');
