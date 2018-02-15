@@ -347,8 +347,6 @@ void _defineTests() {
       ),
     ));
 
-    debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest);
-
     final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
       ..remove(SemanticsAction.showOnScreen); // showOnScreen is non user-exposed.
 
@@ -656,8 +654,9 @@ class _DiffTester {
       firstChild.visitChildren((SemanticsNode node) {
         if (node.key != null && idAssignments[node.key] != null) {
           expect(idAssignments[node.key], node.id, reason:
-            'Node with key ${node.key} was previously assigned id ${idAssignments[node.key]}. '
-            'After diffing the child list, its id changed to ${node.id}. Ids must be stable.');
+            'Node with key ${node.key} was previously assigned ID ${idAssignments[node.key]}. '
+            'After diffing the child list, its ID changed to ${node.id}. IDs must be stable.'
+          );
         }
         return true;
       });
