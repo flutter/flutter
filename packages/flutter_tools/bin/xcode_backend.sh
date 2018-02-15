@@ -154,6 +154,7 @@ BuildApp() {
     ${local_engine_flag}                                                  \
     ${preview_dart_2_flag}
   StreamOutput "done"
+  StreamOutput " └─Compiling, linking and signing..."
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package ${project_path}."
@@ -163,7 +164,6 @@ BuildApp() {
   RunCommand popd > /dev/null
 
   echo "Project ${project_path} built and packaged successfully."
-  StreamOutput " └─Compiling, linking and signing..."
   return 0
 }
 
