@@ -30,6 +30,8 @@ import 'ticker_provider.dart';
 ///
 /// Created automatically by [ScrollBehavior.buildViewportChrome] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication.
+///
+/// In a [MaterialApp], the edge glow color is the [ThemeData.accentColor].
 class GlowingOverscrollIndicator extends StatefulWidget {
   /// Creates a visual indication that a scroll view has overscrolled.
   ///
