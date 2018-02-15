@@ -13,9 +13,11 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
@@ -346,14 +348,58 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
-  final Status buildStatus =
-      logger.startProgress('Running Xcode build...', expectSlowOperation: true);
+  Status buildSubStatus;
+  Status initialBuildStatus;
+  Directory scriptOutputPipeTempDirectory;
+
+  if (logger.supportsColor) {
+    scriptOutputPipeTempDirectory = fs.systemTempDirectory
+        .createTempSync('flutter_build_log_pipe');
+    final File scriptOutputPipeFile =
+        scriptOutputPipeTempDirectory.childFile('pipe_to_stdout');
+    os.makePipe(scriptOutputPipeFile.path);
+
+    Future<void> listenToScriptOutputLine() async {
+      final List<String> lines = await scriptOutputPipeFile.readAsLines();
+      for (String line in lines) {
+        if (line == 'done') {
+          buildSubStatus?.stop();
+          buildSubStatus = null;
+        } else {
+          initialBuildStatus.cancel();
+          buildSubStatus = logger.startProgress(
+            line,
+            expectSlowOperation: true,
+            progressIndicatorPadding: 45,
+          );
+        }
+      }
+      return listenToScriptOutputLine();
+    }
+
+    // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
+    listenToScriptOutputLine(); // ignore: unawaited_futures
+
+    buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
+  }
+
+  final Stopwatch buildStopwatch = new Stopwatch()..start();
+  initialBuildStatus = logger.startProgress('Starting Xcode build...');
   final RunResult buildResult = await runAsync(
     buildCommands,
     workingDirectory: app.appDirectory,
     allowReentrantFlutter: true
   );
-  buildStatus.stop();
+  buildSubStatus?.stop();
+  initialBuildStatus?.cancel();
+  buildStopwatch.stop();
+  // Free pipe file.
+  scriptOutputPipeTempDirectory?.deleteSync(recursive: true);
+  printStatus(
+    'Xcode build done',
+    ansiAlternative: 'Xcode build done'.padRight(53)
+        + '${getElapsedAsSeconds(buildStopwatch.elapsed).padLeft(5)}',
+  );
 
   // Run -showBuildSettings again but with the exact same parameters as the build.
   final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(
