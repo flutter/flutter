@@ -336,7 +336,8 @@ class FlutterEngine extends CachedArtifact {
         ..addAll(_linuxBinaryDirs)
         ..addAll(_windowsBinaryDirs)
         ..addAll(_androidBinaryDirs)
-        ..addAll(_iosBinaryDirs);
+        ..addAll(_iosBinaryDirs)
+        ..addAll(_dartSdks);
     else if (platform.isLinux)
       binaryDirs
         ..addAll(_linuxBinaryDirs)
