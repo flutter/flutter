@@ -1100,7 +1100,7 @@ class _TopStartFabPositioner extends FabPositioner {
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     final double fabX = 16.0 + scaffoldGeometry.horizontalFabPadding;
-    final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.fabSize.height / 2.0);
+    final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
     return new Offset(fabX, fabY);
   }
 }
