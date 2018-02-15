@@ -440,7 +440,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     if (hasChild(_ScaffoldSlot.floatingActionButton)) {
       final Size fabSize = layoutChild(_ScaffoldSlot.floatingActionButton, looseConstraints);
       
-      // To account for the FAB position being changed, we'll lerp between its old and new position.
+      // To account for the FAB position being changed, we'll animate between
+      // the old and new positions.
       final ScaffoldPrelayoutGeometry currentGeometry = new ScaffoldPrelayoutGeometry(
         bottomSheetSize: bottomSheetSize,
         contentBottom: contentBottom,
