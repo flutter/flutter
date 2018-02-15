@@ -217,7 +217,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return new XcodeBuildResult(success: false);
   }
 
-  final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(app.appDirectory);
+  final XcodeProjectInfo projectInfo = new XcodeProjectInfo.fromProjectSync(app.appDirectory);
   if (!projectInfo.targets.contains('Runner')) {
     printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
     printError('Open Xcode to fix the problem:');
@@ -254,22 +254,26 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
+  final InjectPluginsResult injectPluginsResult = injectPlugins();
+  final bool hasFlutterPlugins = injectPluginsResult.hasPlugin;
   final String previousGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
 
-  updateGeneratedXcodeProperties(
+  updateXcodeGeneratedProperties(
     projectPath: fs.currentDirectory.path,
     buildInfo: buildInfo,
     target: target,
+    hasPlugins: hasFlutterPlugins,
     previewDart2: buildInfo.previewDart2,
   );
 
-  if (hasPlugins()) {
+  if (hasFlutterPlugins) {
     final String currentGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
     await cocoaPods.processPods(
-      appIosDir: appDirectory,
-      iosEngineDir: flutterFrameworkDir(buildInfo.mode),
-      isSwift: app.isSwift,
-      flutterPodChanged: (previousGeneratedXcconfig != currentGeneratedXcconfig),
+        appIosDir: appDirectory,
+        iosEngineDir: flutterFrameworkDir(buildInfo.mode),
+        isSwift: app.isSwift,
+        pluginOrFlutterPodChanged: (injectPluginsResult.hasChanged
+            || previousGeneratedXcconfig != currentGeneratedXcconfig),
     );
   }
 
@@ -415,7 +419,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
 String readGeneratedXcconfig(String appPath) {
   final String generatedXcconfigPath =
-      fs.path.join(fs.currentDirectory.path, appPath, 'Flutter', 'Generated.xcconfig');
+      fs.path.join(fs.currentDirectory.path, appPath, 'Flutter','Generated.xcconfig');
   final File generatedXcconfigFile = fs.file(generatedXcconfigPath);
   if (!generatedXcconfigFile.existsSync())
     return null;

@@ -16,6 +16,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
+import '../plugins.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
@@ -93,6 +94,7 @@ Future<GradleProject> _gradleProject() async {
 Future<GradleProject> _readGradleProject() async {
   final String gradle = await _ensureGradle();
   updateLocalProperties();
+  injectPlugins();
   try {
     final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
     final RunResult runResult = await runCheckedAsync(

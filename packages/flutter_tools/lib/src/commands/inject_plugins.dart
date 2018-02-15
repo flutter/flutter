@@ -24,8 +24,7 @@ class InjectPluginsCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
-    injectPlugins();
-    final bool result = hasPlugins();
+    final bool result = injectPlugins().hasPlugin;
     if (result) {
       printStatus('GeneratedPluginRegistrants successfully written.');
     } else {
