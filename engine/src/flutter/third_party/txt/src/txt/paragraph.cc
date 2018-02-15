@@ -49,15 +49,24 @@ const sk_sp<SkTypeface>& GetTypefaceForGlyph(const minikin::Layout& layout,
   return font->GetSkTypeface();
 }
 
-// Return the number of glyphs until the typeface changes.
-size_t GetBlobLength(const minikin::Layout& layout, size_t blob_start) {
-  const size_t glyph_count = layout.nGlyphs();
-  const sk_sp<SkTypeface>& typeface = GetTypefaceForGlyph(layout, blob_start);
-  for (size_t blob_end = blob_start + 1; blob_end < glyph_count; ++blob_end) {
-    if (GetTypefaceForGlyph(layout, blob_end).get() != typeface.get())
-      return blob_end - blob_start;
+// Return ranges of text that have the same typeface in the layout.
+std::vector<Paragraph::Range<size_t>> GetLayoutTypefaceRuns(
+    const minikin::Layout& layout) {
+  std::vector<Paragraph::Range<size_t>> result;
+  if (layout.nGlyphs() == 0)
+    return result;
+  size_t run_start = 0;
+  const SkTypeface* run_typeface = GetTypefaceForGlyph(layout, run_start).get();
+  for (size_t i = 1; i < layout.nGlyphs(); ++i) {
+    const SkTypeface* typeface = GetTypefaceForGlyph(layout, i).get();
+    if (typeface != run_typeface) {
+      result.emplace_back(run_start, i);
+      run_start = i;
+      run_typeface = typeface;
+    }
   }
-  return glyph_count - blob_start;
+  result.emplace_back(run_start, layout.nGlyphs());
+  return result;
 }
 
 int GetWeight(const FontWeight weight) {
@@ -498,12 +507,7 @@ void Paragraph::Layout(double width, bool force) {
         continue;
 
       // Break the layout into blobs that share the same SkPaint parameters.
-      std::vector<Range<size_t>> glyph_blobs;
-      for (size_t blob_start = 0; blob_start < layout.nGlyphs();) {
-        size_t blob_len = GetBlobLength(layout, blob_start);
-        glyph_blobs.emplace_back(blob_start, blob_start + blob_len);
-        blob_start += blob_len;
-      }
+      std::vector<Range<size_t>> glyph_blobs = GetLayoutTypefaceRuns(layout);
 
       grapheme_breaker_->setText(
           icu::UnicodeString(false, text_ptr + text_start, text_count));
@@ -765,20 +769,15 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
   SkAutoCanvasRestore canvas_restore(canvas, true);
   canvas->translate(x, y);
   SkPaint paint;
-  for (size_t index = 0; index < records_.size(); ++index) {
-    PaintRecord& record = records_[index];
+  for (const PaintRecord& record : records_) {
     paint.setColor(record.style().color);
     SkPoint offset = record.offset();
     canvas->drawTextBlob(record.text(), offset.x(), offset.y(), paint);
-    PaintDecorations(canvas, offset.x(), offset.y(), index);
+    PaintDecorations(canvas, record);
   }
 }
 
-void Paragraph::PaintDecorations(SkCanvas* canvas,
-                                 double x,
-                                 double y,
-                                 size_t record_index) {
-  PaintRecord& record = records_[record_index];
+void Paragraph::PaintDecorations(SkCanvas* canvas, const PaintRecord& record) {
   if (record.style().decoration == TextDecoration::kNone)
     return;
 
@@ -818,6 +817,9 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
   }
   paint.setStrokeWidth(underline_thickness *
                        record.style().decoration_thickness_multiplier);
+
+  SkScalar x = record.offset().x();
+  SkScalar y = record.offset().y();
 
   // Setup the decorations.
   switch (record.style().decoration_style) {
@@ -878,7 +880,7 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
     double y_offset = i * underline_thickness * kDoubleDecorationSpacing;
     double y_offset_original = y_offset;
     // Underline
-    if (record.style().decoration & 0x1) {
+    if (record.style().decoration & TextDecoration::kUnderline) {
       y_offset += (metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
                                         kUnderlinePositionIsValid_Flag)
                       ? metrics.fUnderlinePosition
@@ -893,7 +895,7 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
       y_offset = y_offset_original;
     }
     // Overline
-    if (record.style().decoration & 0x2) {
+    if (record.style().decoration & TextDecoration::kOverline) {
       // We subtract fAscent here because for double overlines, we want the
       // second line to be above, not below the first.
       y_offset -= metrics.fAscent;
@@ -907,7 +909,7 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
       y_offset = y_offset_original;
     }
     // Strikethrough
-    if (record.style().decoration & 0x4) {
+    if (record.style().decoration & TextDecoration::kLineThrough) {
       if (metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
                                kStrikeoutThicknessIsValid_Flag)
         paint.setStrokeWidth(metrics.fStrikeoutThickness *

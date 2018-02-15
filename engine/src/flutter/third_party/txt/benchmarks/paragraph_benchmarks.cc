@@ -175,6 +175,7 @@ static void BM_ParagraphTextBigO(benchmark::State& state) {
   std::u16string u16_text(text.data(), text.data() + text.size());
 
   txt::ParagraphStyle paragraph_style;
+  paragraph_style.font_family = "Roboto";
 
   txt::TextStyle text_style;
   text_style.font_family = "Roboto";
@@ -315,7 +316,9 @@ static void BM_ParagraphPaintDecoration(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.font_family = "Roboto";
-  text_style.decoration = TextDecoration(0x1 | 0x2 | 0x4);
+  text_style.decoration = TextDecoration::kUnderline |
+                          TextDecoration::kOverline |
+                          TextDecoration::kLineThrough;
   text_style.decoration_style = TextDecorationStyle(kSolid);
   text_style.color = SK_ColorBLACK;
 
