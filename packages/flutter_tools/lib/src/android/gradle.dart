@@ -299,7 +299,6 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   }
   if (buildInfo.previewDart2) {
     command.add('-Ppreview-dart-2=true');
-    command.add('-Pstrong=true');
     if (buildInfo.trackWidgetCreation)
       command.add('-Ptrack-widget-creation=true');
     if (buildInfo.extraFrontEndOptions != null)
