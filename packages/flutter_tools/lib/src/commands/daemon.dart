@@ -350,7 +350,6 @@ class AppDomain extends Domain {
     bool previewDart2: false,
     String projectRootPath,
     String packagesFilePath,
-    String projectAssets,
     bool ipv6: false,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
@@ -375,7 +374,6 @@ class AppDomain extends Domain {
         previewDart2: previewDart2,
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
-        projectAssets: projectAssets,
         ipv6: ipv6,
         hostIsIde: true,
       );

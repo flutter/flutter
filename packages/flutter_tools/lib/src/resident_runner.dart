@@ -413,7 +413,6 @@ abstract class ResidentRunner {
     this.usesTerminalUI: true,
     String projectRootPath,
     String packagesFilePath,
-    String projectAssets,
     this.stayResident,
     this.ipv6,
   }) {
@@ -421,10 +420,7 @@ abstract class ResidentRunner {
     _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
     _packagesFilePath =
         packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath);
-    if (projectAssets != null)
-      _assetBundle = new AssetBundle.fixed(_projectRootPath, projectAssets);
-    else
-      _assetBundle = AssetBundleFactory.instance.createBundle();
+    _assetBundle = AssetBundleFactory.instance.createBundle();
   }
 
   final List<FlutterDevice> flutterDevices;
