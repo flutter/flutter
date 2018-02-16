@@ -194,7 +194,7 @@ Future<Null> _runTests({List<String> options}) async {
   await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
 
-  await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'));
+  await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'), options: options);
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), options: options);
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), options: options);
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: options);
@@ -372,8 +372,13 @@ Future<Null> _runFlutterTest(String workingDirectory, {
 
 Future<Null> _runAllDartTests(String workingDirectory, {
   Map<String, String> environment,
+  List<String> options,
 }) {
-  final List<String> args = <String>['--checked', path.join('test', 'all.dart')];
+  final List<String> args = <String>['--checked'];
+  if (options != null) {
+    args.addAll(options);
+  }
+  args.add(path.join('test', 'all.dart'));
   return _runCommand(dart, args,
     workingDirectory: workingDirectory,
     environment: environment,
