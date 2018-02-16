@@ -122,12 +122,13 @@ class TimelineEvent {
 }
 
 List<TimelineEvent> _parseEvents(Map<String, dynamic> json) {
-  final List<Map<String, dynamic>> jsonEvents = json['traceEvents'];
+  final List<dynamic> jsonEvents = json['traceEvents'];
 
   if (jsonEvents == null)
     return null;
 
-  return jsonEvents
+  // TODO(vegorov) use instance method version of castFrom when it is available.
+  return Iterable.castFrom<dynamic, Map<String, dynamic>>(jsonEvents)
     .map((Map<String, dynamic> eventJson) => new TimelineEvent(eventJson))
     .toList();
 }
