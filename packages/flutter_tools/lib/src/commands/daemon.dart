@@ -348,7 +348,6 @@ class AppDomain extends Domain {
     DebuggingOptions options, bool enableHotReload, {
     String applicationBinary,
     bool previewDart2: false,
-    bool strongMode: false,
     String projectRootPath,
     String packagesFilePath,
     String projectAssets,
@@ -763,7 +762,12 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
+  Status startProgress(
+    String message, {
+    String progressId,
+    bool expectSlowOperation: false,
+    int progressIndicatorPadding: 52,
+  }) {
     printStatus(message);
     return new Status();
   }
@@ -863,7 +867,12 @@ class _AppRunLogger extends Logger {
   Status _status;
 
   @override
-  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
+  Status startProgress(
+    String message, {
+    String progressId,
+    bool expectSlowOperation: false,
+    int progressIndicatorPadding: 52,
+  }) {
     // Ignore nested progresses; return a no-op status object.
     if (_status != null)
       return new Status();
