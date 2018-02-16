@@ -178,7 +178,7 @@ class TestCommand extends FlutterCommand {
                 'Test files must be in that directory and end with the pattern "_test.dart".'
         );
       }
-      files = files.sublist(0:15);
+      files = files.sublist(0, (files.length > 15? 14: files.length));
     }
 
     CoverageCollector collector;
