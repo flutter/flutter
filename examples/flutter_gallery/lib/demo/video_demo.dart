@@ -399,7 +399,7 @@ class _VideoDemoState extends State<VideoDemo>
       appBar: new AppBar(
         title: const Text('Videos'),
       ),
-      body: (isSupported)
+      body: isSupported
           ? new ConnectivityOverlay(
               child: new ListView(
                 children: <Widget>[

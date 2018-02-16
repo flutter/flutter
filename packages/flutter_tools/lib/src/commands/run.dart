@@ -116,9 +116,6 @@ class RunCommand extends RunCommandBase {
     argParser.addOption('project-root',
         hide: !verboseHelp,
         help: 'Specify the project root directory.');
-    argParser.addOption('project-assets',
-        hide: !verboseHelp,
-        help: 'Specify the project assets relative to the root directory.');
     argParser.addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
@@ -260,7 +257,6 @@ class RunCommand extends RunCommandBase {
           previewDart2: argResults['preview-dart-2'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: globalResults['packages'],
-          projectAssets: argResults['project-assets'],
           ipv6: ipv6,
         );
       } catch (error) {
@@ -314,7 +310,6 @@ class RunCommand extends RunCommandBase {
         previewDart2: argResults['preview-dart-2'],
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
-        projectAssets: argResults['project-assets'],
         stayResident: stayResident,
         ipv6: ipv6,
       );

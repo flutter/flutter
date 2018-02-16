@@ -125,10 +125,10 @@ class FlutterDriverExtension {
     });
 
     _finders.addAll(<String, FinderConstructor>{
-      'ByText': _createByTextFinder,
-      'ByTooltipMessage': _createByTooltipMessageFinder,
-      'ByValueKey': _createByValueKeyFinder,
-      'ByType': _createByTypeFinder,
+      'ByText': (SerializableFinder finder) => _createByTextFinder(finder),
+      'ByTooltipMessage': (SerializableFinder finder) => _createByTooltipMessageFinder(finder),
+      'ByValueKey': (SerializableFinder finder) => _createByValueKeyFinder(finder),
+      'ByType': (SerializableFinder finder) => _createByTypeFinder(finder),
     });
   }
 
