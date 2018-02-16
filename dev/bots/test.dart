@@ -136,7 +136,7 @@ Future<Null> _runTestsDart2() async {
     // load of dart2 testing.
     return;
   }
-  _runTests(options: <String>['--preview-dart-2']);
+  _runTests(options: <String>['--preview-dart-2', '-vv']);
 }
 
 Future<Null> _runTests({List<String> options: const <String>[]}) async {
