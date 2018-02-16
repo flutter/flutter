@@ -143,7 +143,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   /// the lens and partially grayed out around it.
   Widget _buildMagnifierScreen() {
     final Color foreground = widget.backgroundColor?.withAlpha(
-      (widget.backgroundColor?.alpha * _kForegroundScreenOpacityFraction).toInt()
+      (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt()
     );
 
     return new IgnorePointer(
