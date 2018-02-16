@@ -21,6 +21,7 @@ import '../device.dart';
 import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../project.dart';
 import '../usage.dart';
 import 'flutter_command_runner.dart';
 
@@ -272,8 +273,10 @@ abstract class FlutterCommand extends Command<Null> {
     if (shouldUpdateCache)
       await cache.updateAll();
 
-    if (shouldRunPub)
+    if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name));
+      new FlutterProject(fs.currentDirectory).ensureReadyForPlatformSpecificTooling();
+    }
 
     setupApplicationPackages();
 
