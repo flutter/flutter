@@ -54,7 +54,11 @@ void main() {
     }
 
     void expectExists(String projectPath, String relPath) {
-      expect(fs.isFileSync(fs.path.join(projectPath, relPath)), true);
+      expect(
+        fs.isFileSync(fs.path.join(projectPath, relPath)),
+        true,
+        reason: '$projectPath/$relPath should exist, but does not',
+      );
     }
 
     void expectContains(String projectPath, String relPath, String substring) {
@@ -62,11 +66,16 @@ void main() {
       expect(
         fs.file(fs.path.join(projectPath, relPath)).readAsStringSync(),
         contains(substring),
+        reason: '$projectPath/$relPath has unexpected content'
       );
     }
 
     void expectNotExists(String projectPath, String relPath) {
-      expect(fs.isFileSync(fs.path.join(projectPath, relPath)), false);
+      expect(
+        fs.isFileSync(fs.path.join(projectPath, relPath)),
+        false,
+        reason: '$projectPath/$relPath should not exist, but does',
+      );
     }
 
     void expectNotContains(String projectPath, String relPath, String substring) {
@@ -74,6 +83,7 @@ void main() {
       expect(
         fs.file(fs.path.join(projectPath, relPath)).readAsStringSync(),
         isNot(contains(substring)),
+        reason: '$projectPath/$relPath has unexpected content',
       );
     }
 
