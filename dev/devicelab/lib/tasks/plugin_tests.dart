@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 /// Defines task that creates new Flutter project, adds a plugin, and then
@@ -19,7 +20,10 @@ class PluginTest {
   Future<TaskResult> call() async {
     section('Create Flutter project');
     final Directory tmp = await Directory.systemTemp.createTemp('plugin');
-    final FlutterProject project = await FlutterProject.create(tmp, 'hello');
+    final FlutterProject project = await FlutterProject.create(tmp);
+    if (buildTarget == 'ios') {
+      await prepareProvisioningCertificates(project.rootPath);
+    }
     try {
       section('Add plugin');
       await project.addPlugin('path_provider');
@@ -42,11 +46,11 @@ class FlutterProject {
   final Directory parent;
   final String name;
 
-  static Future<FlutterProject> create(Directory directory, String name) async {
+  static Future<FlutterProject> create(Directory directory) async {
     await inDirectory(directory, () async {
-      await flutter('create', options: <String>[name]);
+      await flutter('create', options: <String>['--org', 'io.flutter.devicelab', 'plugintest']);
     });
-    return new FlutterProject(directory, name);
+    return new FlutterProject(directory, 'plugintest');
   }
 
   String get rootPath => path.join(parent.path, name);
