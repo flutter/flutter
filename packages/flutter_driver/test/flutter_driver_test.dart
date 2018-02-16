@@ -56,7 +56,7 @@ void main() {
 
     test('connects to isolate paused at start', () async {
       final List<String> connectionLog = <String>[];
-      when(mockPeer.sendRequest('streamListen', typed(any))).thenAnswer((Invocation invocation) {
+      when(mockPeer.sendRequest('streamListen', any)).thenAnswer((Invocation invocation) {
         connectionLog.add('streamListen');
         return null;
       });
