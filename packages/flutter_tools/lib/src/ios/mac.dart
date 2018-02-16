@@ -274,8 +274,8 @@ Future<XcodeBuildResult> buildXcodeProject({
         appIosDir: appDirectory,
         iosEngineDir: flutterFrameworkDir(buildInfo.mode),
         isSwift: app.isSwift,
-        pluginOrFlutterPodChanged: (injectPluginsResult.hasChanged
-            || previousGeneratedXcconfig != currentGeneratedXcconfig),
+        pluginOrFlutterPodChanged: injectPluginsResult.hasChanged
+            || previousGeneratedXcconfig != currentGeneratedXcconfig,
     );
   }
 
