@@ -39,7 +39,7 @@ class AccessibilityBridge;
  * The parent of this node in the node tree. Will be nil for the root node and
  * during transient state changes.
  */
-@property(nonatomic, strong) SemanticsObject* parent;
+@property(nonatomic, assign) SemanticsObject* parent;
 
 /**
  * The accessibility bridge that this semantics object is attached to. This
@@ -66,7 +66,7 @@ class AccessibilityBridge;
  * Direct children of this semantics object. Each child's `parent` property must
  * be equal to this object.
  */
-@property(nonatomic, readonly) std::vector<SemanticsObject*>* children;
+@property(nonatomic, strong) NSMutableArray<SemanticsObject*>* children;
 
 - (BOOL)nodeWillCauseLayoutChange:(const blink::SemanticsNode*)node;
 

@@ -40,14 +40,13 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   return blink::SemanticsAction::kScrollUp;
 }
 
-bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
-  // Should a go before b?
-  CGRect rectA = [a accessibilityFrame];
-  CGRect rectB = [b accessibilityFrame];
-  CGFloat top = rectA.origin.y - rectB.origin.y;
-  if (top == 0.0)
-    return rectA.origin.x - rectB.origin.x < 0.0;
-  return top < 0.0;
+NSComparisonResult intToComparisonResult(int32_t value) {
+  if (value > 0)
+    return (NSComparisonResult)NSOrderedDescending;
+  if (value < 0)
+    return (NSComparisonResult)NSOrderedAscending;
+
+  return (NSComparisonResult)NSOrderedSame;
 }
 
 }  // namespace
@@ -95,7 +94,6 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
 
 @implementation SemanticsObject {
   SemanticsObjectContainer* _container;
-  std::vector<SemanticsObject*> _children;
 }
 
 #pragma mark - Override base class designated initializers
@@ -117,6 +115,7 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
   if (self) {
     _bridge = bridge;
     _uid = uid;
+    self.children = [[[NSMutableArray alloc] init] autorelease];
   }
 
   return self;
@@ -124,9 +123,14 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
 
 - (void)dealloc {
   _bridge = nullptr;
-  _children.clear();
-  [_parent release];
+  for (SemanticsObject* child in _children) {
+    child.parent = nil;
+  }
+  [_children removeAllObjects];
+  [_children dealloc];
+  _parent = nil;
   [_container release];
+  _container = nil;
   [super dealloc];
 }
 
@@ -151,12 +155,8 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
          [self node].scrollPosition != node->scrollPosition;
 }
 
-- (std::vector<SemanticsObject*>*)children {
-  return &_children;
-}
-
 - (BOOL)hasChildren {
-  return _children.size() != 0;
+  return [self.children count] != 0;
 }
 
 #pragma mark - UIAccessibility overrides
@@ -222,7 +222,12 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
           [[SemanticsObjectContainer alloc] initWithSemanticsObject:self bridge:[self bridge]];
     return _container;
   }
-  NSAssert([self parent] != nil, @"Illegal access to non-existent parent of root semantics node");
+  if ([self parent] == nil) {
+    // This can happen when we have released the accessibility tree but iOS is
+    // still holding onto our objects. iOS can take some time before it
+    // realizes that the tree has changed.
+    return nil;
+  }
   return [[self parent] accessibilityContainer];
 }
 
@@ -261,13 +266,15 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
 
 - (void)accessibilityElementDidBecomeFocused {
   if ([self node].HasAction(blink::SemanticsAction::kDidGainAccessibilityFocus)) {
-    [self bridge] -> DispatchSemanticsAction([self uid], blink::SemanticsAction::kDidGainAccessibilityFocus);
+    [self bridge] -> DispatchSemanticsAction([self uid],
+                                             blink::SemanticsAction::kDidGainAccessibilityFocus);
   }
 }
 
 - (void)accessibilityElementDidLoseFocus {
   if ([self node].HasAction(blink::SemanticsAction::kDidLoseAccessibilityFocus)) {
-    [self bridge] -> DispatchSemanticsAction([self uid], blink::SemanticsAction::kDidLoseAccessibilityFocus);
+    [self bridge] -> DispatchSemanticsAction([self uid],
+                                             blink::SemanticsAction::kDidLoseAccessibilityFocus);
   }
 }
 
@@ -337,16 +344,23 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
 
   if (self) {
     _semanticsObject = semanticsObject;
+    // The pointer is managed manually.
+    [_semanticsObject retain];
     _bridge = bridge;
   }
 
   return self;
 }
 
+- (void)dealloc {
+  [_semanticsObject release];
+  [super dealloc];
+}
+
 #pragma mark - UIAccessibilityContainer overrides
 
 - (NSInteger)accessibilityElementCount {
-  return (NSInteger)[_semanticsObject children]->size() + 1;
+  return [[_semanticsObject children] count] + 1;
 }
 
 - (nullable id)accessibilityElementAtIndex:(NSInteger)index {
@@ -354,7 +368,7 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
     return nil;
   if (index == 0)
     return _semanticsObject;
-  SemanticsObject* child = (*[_semanticsObject children])[index - 1];
+  SemanticsObject* child = [_semanticsObject children][index - 1];
   if ([child hasChildren])
     return [child accessibilityContainer];
   return child;
@@ -363,9 +377,9 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
 - (NSInteger)indexOfAccessibilityElement:(id)element {
   if (element == _semanticsObject)
     return 0;
-  std::vector<SemanticsObject*>* children = [_semanticsObject children];
-  for (size_t i = 0; i < children->size(); i++) {
-    SemanticsObject* child = (*children)[i];
+  NSMutableArray<SemanticsObject*>* children = [_semanticsObject children];
+  for (size_t i = 0; i < [children count]; i++) {
+    SemanticsObject* child = children[i];
     if ((![child hasChildren] && child == element) ||
         ([child hasChildren] && [child accessibilityContainer] == element))
       return i + 1;
@@ -424,7 +438,7 @@ UIView<UITextInput>* AccessibilityBridge::textInputView() {
 void AccessibilityBridge::UpdateSemantics(blink::SemanticsNodeUpdates nodes) {
   // Children are received in paint order (inverse hit testing order). We need to bring them into
   // traversal order (top left to bottom right, with hit testing order as tie breaker).
-  NSMutableSet<SemanticsObject*>* childOrdersToUpdate = [[[NSMutableSet alloc] init] autorelease];
+  NSMutableSet<SemanticsObject*>* childOrdersToUpdate = [[NSMutableSet alloc] init];
   BOOL layoutChanged = NO;
   BOOL scrollOccured = NO;
 
@@ -434,14 +448,18 @@ void AccessibilityBridge::UpdateSemantics(blink::SemanticsNodeUpdates nodes) {
     layoutChanged = layoutChanged || [object nodeWillCauseLayoutChange:&node];
     scrollOccured = scrollOccured || [object nodeWillCauseScroll:&node];
     [object setSemanticsNode:&node];
-    const size_t childrenCount = node.children.size();
-    auto& children = *[object children];
-    children.resize(childrenCount);
-    for (size_t i = 0; i < childrenCount; ++i) {
+    const NSUInteger newChildCount = node.children.size();
+    NSMutableArray* newChildren =
+        [[[NSMutableArray alloc] initWithCapacity:newChildCount] autorelease];
+    for (NSUInteger i = 0; i < newChildCount; i++) {
+      [newChildren addObject:[NSNull null]];
+    }
+    object.children = newChildren;
+    for (NSUInteger i = 0; i < newChildCount; ++i) {
       SemanticsObject* child = GetOrCreateObject(node.children[i], nodes);
       child.parent = object;
       // Reverting to get hit testing order (as tie breaker for sorting below).
-      children[childrenCount - i - 1] = child;
+      newChildren[newChildCount - i - 1] = child;
     }
 
     [childOrdersToUpdate addObject:object];
@@ -451,9 +469,18 @@ void AccessibilityBridge::UpdateSemantics(blink::SemanticsNodeUpdates nodes) {
 
   // Bring children into traversal order.
   for (SemanticsObject* object in childOrdersToUpdate) {
-    std::vector<SemanticsObject*>* children = [object children];
-    std::stable_sort(children->begin(), children->end(), GeometryComparator);
+    [object.children sortUsingComparator:^(SemanticsObject* a, SemanticsObject* b) {
+      // Should a go before b?
+      CGRect rectA = [a accessibilityFrame];
+      CGRect rectB = [b accessibilityFrame];
+      CGFloat top = rectA.origin.y - rectB.origin.y;
+      if (top == 0.0)
+        return intToComparisonResult(rectA.origin.x - rectB.origin.x < 0.0);
+      return intToComparisonResult(top);
+    }];
   }
+
+  [childOrdersToUpdate release];
 
   SemanticsObject* root = objects_.get()[@(kRootNodeId)];
 
@@ -513,8 +540,7 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
         // The node changed its type from text field to something else, or vice versa. In this
         // case, we cannot reuse the existing SemanticsObject implementation. Instead, we replace
         // it with a new instance.
-        auto positionInChildlist =
-            std::find(object.parent.children->begin(), object.parent.children->end(), object);
+        NSUInteger positionInChildlist = [object.parent.children indexOfObject:object];
         [objects_ removeObjectForKey:@(node.id)];
         if (isTextField) {
           // Text fields are backed by objects that implement UITextInput.
@@ -522,7 +548,7 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
         } else {
           object = [[[FlutterSemanticsObject alloc] initWithBridge:this uid:uid] autorelease];
         }
-        *positionInChildlist = object;
+        [object.parent.children replaceObjectAtIndex:positionInChildlist withObject:object];
         objects_.get()[@(node.id)] = object;
       }
     }
@@ -533,7 +559,7 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
 void AccessibilityBridge::VisitObjectsRecursivelyAndRemove(SemanticsObject* object,
                                                            NSMutableArray<NSNumber*>* doomed_uids) {
   [doomed_uids removeObject:@(object.uid)];
-  for (SemanticsObject* child : *[object children])
+  for (SemanticsObject* child in [object children])
     VisitObjectsRecursivelyAndRemove(child, doomed_uids);
 }
 
