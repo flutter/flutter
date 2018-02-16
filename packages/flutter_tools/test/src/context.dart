@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -50,6 +51,7 @@ void _defaultInitializeContext(AppContext testContext) {
     ..putIfAbsent(OperatingSystemUtils, () => new MockOperatingSystemUtils())
     ..putIfAbsent(PortScanner, () => new MockPortScanner())
     ..putIfAbsent(Xcode, () => new Xcode())
+    ..putIfAbsent(XcodeProjectInterpreter, () => new MockXcodeProjectInterpreter())
     ..putIfAbsent(IOSSimulatorUtils, () {
       final MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
       when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
@@ -260,6 +262,25 @@ class MockUsage implements Usage {
 
   @override
   void printWelcome() { }
+}
+
+class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
+  @override
+  bool get canInterpretXcodeProjects => true;
+
+  @override
+  Map<String, String> getBuildSettings(String projectPath, String target) {
+    return <String, String>{};
+  }
+
+  @override
+  XcodeProjectInfo getInfo(String projectPath) {
+    return new XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['Debug', 'Release'],
+      <String>['Runner'],
+    );
+  }
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
