@@ -30,9 +30,6 @@ abstract class AssetBundleFactory {
 }
 
 abstract class AssetBundle {
-  factory AssetBundle.fixed(String projectRoot, String projectAssets) =>
-      new _ManifestAssetBundle.fixed(projectRoot, projectAssets);
-
   Map<String, DevFSContent> get entries;
 
   bool wasBuiltOnce();
@@ -66,38 +63,17 @@ class _ManifestAssetBundle implements AssetBundle {
   static const String _kFontSetMaterial = 'material';
   static const String _kLICENSE = 'LICENSE';
 
-  bool _fixed = false;
   DateTime _lastBuildTimestamp;
 
   /// Constructs an [_ManifestAssetBundle] that gathers the set of assets from the
   /// pubspec.yaml manifest.
   _ManifestAssetBundle();
 
-  /// Constructs an [_ManifestAssetBundle] with a fixed set of assets.
-  /// [projectRoot] The absolute path to the project root.
-  /// [projectAssets] comma separated list of assets.
-  _ManifestAssetBundle.fixed(String projectRoot, String projectAssets) {
-    _fixed = true;
-    if ((projectRoot == null) || (projectAssets == null))
-      return;
-
-    final List<String> assets = projectAssets.split(',');
-    for (String asset in assets) {
-      if (asset == '')
-        continue;
-      final String assetPath = fs.path.join(projectRoot, asset);
-      final String archivePath = asset;
-      entries[archivePath] = new DevFSFileContent(fs.file(assetPath));
-    }
-  }
-
   @override
   bool wasBuiltOnce() => _lastBuildTimestamp != null;
 
   @override
   bool needsBuild({String manifestPath: defaultManifestPath}) {
-    if (_fixed)
-      return false;
     if (_lastBuildTimestamp == null)
       return true;
 
