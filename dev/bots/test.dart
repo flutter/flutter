@@ -139,7 +139,7 @@ Future<Null> _runTestsDart2() async {
   _runTests(options: <String>['--preview-dart-2']);
 }
 
-Future<Null> _runTests({List<String> options}) async {
+Future<Null> _runTests({List<String> options: const <String>[]}) async {
   // Verify that the tests actually return failure on failure and success on success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
   await _runFlutterTest(automatedTests,
