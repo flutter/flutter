@@ -142,6 +142,8 @@ class FloatingActionButton extends StatefulWidget {
 class _FloatingActionButtonState extends State<FloatingActionButton> {
   bool _highlight = false;
 
+  VoidCallback _clearNotchMaker;
+
   void _handleHighlightChanged(bool value) {
     setState(() {
       _highlight = value;
@@ -208,12 +210,13 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    Scaffold.setFloatingActionButtonNotchMakerFor(context, _notchMaker);
+    _clearNotchMaker = Scaffold.setFloatingActionButtonNotchMakerFor(context, _notchMaker);
   }
 
   @override
   void deactivate() {
-    Scaffold.setFloatingActionButtonNotchMakerFor(context, null);
+    if (_clearNotchMaker != null)
+      _clearNotchMaker();
     super.deactivate();
   }
 

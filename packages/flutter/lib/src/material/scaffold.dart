@@ -120,6 +120,20 @@ class ScaffoldGeometry {
   }
 }
 
+
+class _Closeable {
+  _Closeable(this.closeCallback) : assert(closeCallback != null);
+
+  VoidCallback closeCallback;
+
+  void close() {
+    if (closeCallback == null)
+      return;
+    closeCallback();
+    closeCallback = null;
+  }
+}
+
 class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenable<ScaffoldGeometry> {
   _ScaffoldGeometryNotifier(this.geometry, this.context)
     : assert (context != null);
@@ -127,6 +141,7 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
   final BuildContext context;
   double fabScale;
   ScaffoldGeometry geometry;
+  _Closeable notchMakerCloseable;
 
   @override
   ScaffoldGeometry get value {
@@ -158,7 +173,14 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
     notifyListeners();
   }
 
-  void _updateFloatingActionButtonNotchMaker(NotchMaker fabNotchMaker) {
+  VoidCallback _updateFloatingActionButtonNotchMaker(NotchMaker fabNotchMaker) {
+    notchMakerCloseable?.close();
+    _setFloatingActionButtonNotchMakerAndNotify(fabNotchMaker);
+    notchMakerCloseable = new _Closeable(() { _setFloatingActionButtonNotchMakerAndNotify(null); });
+    return notchMakerCloseable.close;
+  }
+
+  void _setFloatingActionButtonNotchMakerAndNotify(NotchMaker fabNotchMaker) {
     geometry = new ScaffoldGeometry(
       bottomNavigationBarTop: geometry.bottomNavigationBarTop,
       floatingActionButtonArea: geometry.floatingActionButtonArea,
@@ -737,15 +759,21 @@ class Scaffold extends StatefulWidget {
   /// will be to the left of the floating action button's bounds, and the end
   /// offset will be to the right of the floating action button's bounds.
   ///
-  /// Returns true if the [ScaffoldGeometry.floatingActionButtonNotchMaker] was
+  /// Returns null if there was no [Scaffold] ancestor.
+  /// Otherwise, returns a [VoidCallback] that clears the notch maker that was
   /// set.
-  /// Returns false if there as no [Scaffold] ancestor.
-  static bool setFloatingActionButtonNotchMakerFor(BuildContext context, NotchMaker notchMaker) {
+  ///
+  /// Callers must invoke the callback when the notch is no longer required.
+  /// This method is typically called from [State.didChangeDependencies] and the
+  /// callback should then be invoked from [State.deactivate].
+  ///
+  /// If there was a previously set [ScaffoldGeometry.floatingActionButtonNotchMaker]
+  /// it will be overriden.
+  static VoidCallback setFloatingActionButtonNotchMakerFor(BuildContext context, NotchMaker notchMaker) {
     final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType(_ScaffoldScope);
     if (scaffoldScope == null)
-      return false;
-    scaffoldScope.geometryNotifier._updateFloatingActionButtonNotchMaker(notchMaker);
-    return true;
+      return null;
+    return scaffoldScope.geometryNotifier._updateFloatingActionButtonNotchMaker(notchMaker);
   }
 
   /// Whether the Scaffold that most tightly encloses the given context has a
