@@ -39,6 +39,8 @@ Future<Null> main() async {
         // ignore this line
       } else if (entry.startsWith('Analyzing ')) {
         // ignore this line
+      } else if (entry.startsWith('No analyzer warnings!')) {
+        // ignore this line
       } else {
         otherLines += 1;
       }
