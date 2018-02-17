@@ -268,7 +268,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (hasPlugins()) {
     final String currentGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
     await cocoaPods.processPods(
-      appIosDir: appDirectory,
+      appIosDirectory: appDirectory,
       iosEngineDir: flutterFrameworkDir(buildInfo.mode),
       isSwift: app.isSwift,
       flutterPodChanged: (previousGeneratedXcconfig != currentGeneratedXcconfig),
