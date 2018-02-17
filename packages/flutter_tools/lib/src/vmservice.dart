@@ -427,6 +427,7 @@ abstract class ServiceObject {
         completer.completeError(e, st);
       }
       _inProgressReload = null;
+      return await completer.future;
     }
 
     return await _inProgressReload;
