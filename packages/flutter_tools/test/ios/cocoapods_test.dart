@@ -129,7 +129,7 @@ void main() {
       projectUnderTest.childFile('Podfile').createSync();
       cocoaPodsUnderTest = const TestCocoaPods(false);
       await cocoaPodsUnderTest.processPods(
-        appIosDir: projectUnderTest,
+        appIosDirectory: projectUnderTest,
         iosEngineDir: 'engine/path',
       );
       verifyNever(mockProcessManager.run(
@@ -148,7 +148,7 @@ void main() {
       cocoaPodsUnderTest = const TestCocoaPods(true);
       try {
         await cocoaPodsUnderTest.processPods(
-          appIosDir: projectUnderTest,
+          appIosDirectory: projectUnderTest,
           iosEngineDir: 'engine/path',
         );
         fail('ToolExit expected');
@@ -198,7 +198,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       ));
       try {
         await cocoaPodsUnderTest.processPods(
-          appIosDir: projectUnderTest,
+          appIosDirectory: projectUnderTest,
           iosEngineDir: 'engine/path',
         );
         fail('ToolExit expected');
@@ -222,7 +222,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..createSync(recursive: true)
         ..writeAsString('Existing lock file.');
       await cocoaPodsUnderTest.processPods(
-        appIosDir: projectUnderTest,
+        appIosDirectory: projectUnderTest,
         iosEngineDir: 'engine/path',
         flutterPodChanged: false,
       );
@@ -244,7 +244,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..createSync()
         ..writeAsString('Existing lock file.');
       await cocoaPodsUnderTest.processPods(
-        appIosDir: projectUnderTest,
+        appIosDirectory: projectUnderTest,
         iosEngineDir: 'engine/path',
         flutterPodChanged: false,
       );
@@ -272,7 +272,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..createSync(recursive: true)
         ..writeAsString('Different lock file.');
       await cocoaPodsUnderTest.processPods(
-        appIosDir: projectUnderTest,
+        appIosDirectory: projectUnderTest,
         iosEngineDir: 'engine/path',
         flutterPodChanged: false,
       );
@@ -300,7 +300,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..createSync(recursive: true)
         ..writeAsString('Existing lock file.');
       await cocoaPodsUnderTest.processPods(
-        appIosDir: projectUnderTest,
+        appIosDirectory: projectUnderTest,
         iosEngineDir: 'engine/path',
         flutterPodChanged: true,
       );
@@ -328,7 +328,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..createSync(recursive: true)
         ..writeAsString('Existing lock file.');
       await cocoaPodsUnderTest.processPods(
-        appIosDir: projectUnderTest,
+        appIosDirectory: projectUnderTest,
         iosEngineDir: 'engine/path',
         flutterPodChanged: false,
       );
@@ -337,6 +337,41 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         workingDirectory: any,
         environment: typed<Map<String, String>>(any, named: 'environment'),
       ));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('a failed pod install deletes Pods/Manifest.lock', () async {
+      projectUnderTest.childFile('Podfile')
+        ..createSync()
+        ..writeAsString('Existing Podfile');
+      projectUnderTest.childFile('Podfile.lock')
+        ..createSync()
+        ..writeAsString('Existing lock file.');
+      projectUnderTest.childFile('Pods/Manifest.lock')
+        ..createSync(recursive: true)
+        ..writeAsString('Existing lock file.');
+
+      when(mockProcessManager.run(
+        <String>['pod', 'install', '--verbose'],
+        workingDirectory: 'project/ios',
+        environment: <String, String>{
+          'FLUTTER_FRAMEWORK_DIR': 'engine/path',
+          'COCOAPODS_DISABLE_STATS': 'true',
+        },
+      )).thenReturn(new ProcessResult(1, 1, 'fails for some reason', ''));
+
+      try {
+        await cocoaPodsUnderTest.processPods(
+          appIosDirectory: projectUnderTest,
+          iosEngineDir: 'engine/path',
+          flutterPodChanged: true,
+        );
+        fail('Tool throw expected when pod install fails');
+      } on ToolExit {
+        expect(projectUnderTest.childFile('Pods/Manifest.lock').existsSync(), isFalse);
+      }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => mockProcessManager,
