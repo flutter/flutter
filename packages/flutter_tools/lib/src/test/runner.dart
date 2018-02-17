@@ -30,6 +30,7 @@ Future<int> runTests(
     bool machine: false,
     bool previewDart2: false,
     TestWatcher watcher,
+    int concurrency,
     }) async {
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
@@ -40,16 +41,9 @@ Future<int> runTests(
     testArgs.addAll(<String>['-r', 'json']);
   }
 
-//  if (enableObservatory) {
-//    // (In particular, for collecting code coverage.)
-//
-//    // Turn on concurrency, but just barely. This is a trade-off between running
-//    // too many tests such that they all time out, and too few tests such that
-//    // the tests overall take too much time. The current number is empirically
-//    // based on what our infrastructure can handle, which isn't ideal...
-//    testArgs.add('--concurrency=2');
-//  }
-  testArgs.add('--concurrency=1');
+  if (concurrency != null) {
+    testArgs.add('--concurrency=$concurrency');
+  }
 
   for (String name in names) {
     testArgs..add('--name')..add(name);

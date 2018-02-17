@@ -203,7 +203,6 @@ class _FlutterPlatform extends PlatformPlugin {
       String bundlePath;
 
       if (previewDart2) {
-        printTrace('test $ourTestCount: sdkRoot:${artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath)} mainPath:${listenerFile.path} packagesPath:${PackageMap.globalPackagesPath}');
         mainDart = await compile(
           sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
           incrementalCompilerByteStorePath: '' /* not null is enough */,
