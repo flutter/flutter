@@ -192,6 +192,24 @@ void main() {
       // TODO(mravn): This test fails on the Chrome windows bot only.
       // Skipping until resolved.
     }, timeout: allowForRemotePubInvocation, skip: true);
+    testUsingContext('get fetches packages and injects plugin in plugin project', () async {
+      final String projectPath = await createProject(
+        temp,
+        arguments: <String>['-t', 'plugin', '--no-pub'],
+      );
+      final String exampleProjectPath = fs.path.join(projectPath, 'example');
+      removeGeneratedFiles(projectPath);
+      removeGeneratedFiles(exampleProjectPath);
+
+      await runCommandIn(projectPath, 'get');
+
+      expectDependenciesResolved(projectPath);
+
+      await runCommandIn(exampleProjectPath, 'get');
+
+      expectDependenciesResolved(exampleProjectPath);
+      expectPluginInjected(exampleProjectPath);
+    }, timeout: allowForRemotePubInvocation);
   });
 
   group('packages test/pub', () {
