@@ -692,6 +692,8 @@ void RuntimeHolder::OnEvent(mozart::InputEventPtr event,
     pointer_data.device = pointer->pointer_id;
     pointer_data.physical_x = pointer->x * viewport_metrics_.device_pixel_ratio;
     pointer_data.physical_y = pointer->y * viewport_metrics_.device_pixel_ratio;
+    // Buttons are single bit values starting with kMousePrimaryButton = 1.
+    pointer_data.buttons = static_cast<uint64_t>(pointer->buttons);
 
     switch (pointer_data.change) {
       case blink::PointerData::Change::kDown:
