@@ -204,7 +204,7 @@ class TestCommand extends FlutterCommand {
     if (argResults['preview-dart-2']) {
       // Empirically chosen value so that travis bots can handle this many
       // simultaneously running frontend compilers.
-      concurrency = 4;
+      concurrency = 8;
     }
     final bool enableObservatory = collector != null || startPaused;
     if (enableObservatory) {
