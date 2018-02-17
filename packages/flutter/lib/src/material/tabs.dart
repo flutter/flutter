@@ -22,7 +22,6 @@ import 'theme.dart';
 
 const double _kTabHeight = 46.0;
 const double _kTextAndIconTabHeight = 72.0;
-const double _kMinTabWidth = 72.0;
 
 /// Defines the bounds of a [TabBar] tab for the sake of its selected tab
 /// indicator.
@@ -118,7 +117,6 @@ class Tab extends StatelessWidget {
       child: new Center(
         child: label,
         widthFactor: 1.0,
-        heightFactor: 1.0
       ),
     );
   }
@@ -858,15 +856,17 @@ class _TabBarState extends State<TabBar> {
 
     final List<Widget> wrappedTabs = new List<Widget>(widget.tabs.length);
     for (int i = 0; i < widget.tabs.length; i += 1) {
-      wrappedTabs[i] = new Container(
-        alignment: Alignment.center,
-        padding: kTabLabelPadding,
-        constraints: const BoxConstraints(minWidth: _kMinTabWidth),
-        child: new KeyedSubtree(
-          key: _tabKeys[i],
-          child: widget.tabs[i],
+      wrappedTabs[i] = new Center(
+        heightFactor: 1.0,
+        child: new Padding(
+          padding: kTabLabelPadding,
+          child: new KeyedSubtree(
+            key: _tabKeys[i],
+            child: widget.tabs[i],
+          ),
         ),
       );
+
     }
 
     // If the controller was provided by DefaultTabController and we're part
@@ -899,9 +899,9 @@ class _TabBarState extends State<TabBar> {
       }
     }
 
-    // Add the tap handler to each tab. If the tab bar is scrollable
-    // then give all of the tabs equal flexibility so that their widths
-    // reflect the intrinsic width of their labels.
+    // Add the tap handler to each tab. If the tab bar is not scrollable
+    // then give all of the tabs equal flexibility so that they each occupy
+    // the same share of the tab bar's overall width.
     final int tabCount = widget.tabs.length;
     for (int index = 0; index < tabCount; index += 1) {
       wrappedTabs[index] = new InkWell(
