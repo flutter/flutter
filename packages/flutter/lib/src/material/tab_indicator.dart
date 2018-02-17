@@ -15,11 +15,11 @@ import 'colors.dart';
 /// The [TabBar.indicatorSize] property can be used to define the
 /// tab's boundary in terms of its (centered) widget, [TabIndicatorSize.label],
 /// or the the entire tab, [TabIndicatorSize.tab].
-class DefaultTabIndicator extends ShapeBorder {
-  /// Create a underline style tab indicator.
+class UnderlineTabIndicator extends ShapeBorder {
+  /// Create an underline style tab indicator.
   ///
   /// The [borderSide] and [padding] arguments must not be null.
-  const DefaultTabIndicator({
+  const UnderlineTabIndicator({
     this.borderSide: const BorderSide(width: 2.0, color: Colors.white),
     this.padding: EdgeInsets.zero,
   }) : assert(borderSide != null), assert(padding != null);
@@ -32,7 +32,7 @@ class DefaultTabIndicator extends ShapeBorder {
   ///
   /// The [TabBar.indicatorSize] property can be used to define the
   /// tab's boundary in terms of its (centered) widget, [TabIndicatorSize.label],
-  /// or the the entire tab,  [TabIndicatorSize.tab].
+  /// or the the entire tab, [TabIndicatorSize.tab].
   final EdgeInsetsGeometry padding;
 
   @override
@@ -41,8 +41,8 @@ class DefaultTabIndicator extends ShapeBorder {
   }
 
   @override
-  DefaultTabIndicator scale(double t) {
-    return new DefaultTabIndicator(
+  UnderlineTabIndicator scale(double t) {
+    return new UnderlineTabIndicator(
       borderSide: borderSide.scale(t),
       padding: padding * t,
     );
@@ -53,10 +53,10 @@ class DefaultTabIndicator extends ShapeBorder {
     assert(textDirection != null);
     final Rect indicator = padding.resolve(textDirection).deflateRect(rect);
     return new Rect.fromLTWH(
-        indicator.left,
-        indicator.bottom - borderSide.width,
-        indicator.width,
-        borderSide.width,
+      indicator.left,
+      indicator.bottom - borderSide.width,
+      indicator.width,
+      borderSide.width,
     );
   }
 
@@ -74,8 +74,8 @@ class DefaultTabIndicator extends ShapeBorder {
 
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
-    if (a is DefaultTabIndicator) {
-      return new DefaultTabIndicator(
+    if (a is UnderlineTabIndicator) {
+      return new UnderlineTabIndicator(
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
         padding: EdgeInsetsGeometry.lerp(a.padding, padding, t),
       );
@@ -85,8 +85,8 @@ class DefaultTabIndicator extends ShapeBorder {
 
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
-    if (b is DefaultTabIndicator) {
-      return new DefaultTabIndicator(
+    if (b is UnderlineTabIndicator) {
+      return new UnderlineTabIndicator(
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
         padding: EdgeInsetsGeometry.lerp(padding, b.padding, t),
       );
@@ -102,11 +102,9 @@ class DefaultTabIndicator extends ShapeBorder {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final DefaultTabIndicator typedOther = other;
+    final UnderlineTabIndicator typedOther = other;
     return typedOther.borderSide == borderSide && typedOther.padding == padding;
   }
 

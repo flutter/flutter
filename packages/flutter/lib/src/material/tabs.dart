@@ -574,7 +574,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// and [indicatorPadding] properties are ignored.
   ///
   /// The default, underline-style, selected tab indicator can be defined with
-  /// [DefaultTabIndicator].
+  /// [UnderlineTabIndicator].
   ///
   /// The indicator is painted relative to the tab's bounds. If [indicatorSize]
   /// is [TabBarIndicatorSize.tab] the tab's bounds are as wide as the space
@@ -670,7 +670,7 @@ class _TabBarState extends State<TabBar> {
     if (color == Material.of(context).color)
       color = Colors.white;
 
-    return new DefaultTabIndicator(
+    return new UnderlineTabIndicator(
       padding: widget.indicatorPadding,
       borderSide: new BorderSide(
         width: widget.indicatorWeight,
