@@ -23,6 +23,12 @@ void main() {
         project.ensureReadyForPlatformSpecificTooling();
         expect(project.directory.existsSync(), isFalse);
       });
+      testInMemory('does nothing in plugin root project', () async {
+        final FlutterProject project = aPluginProject();
+        project.ensureReadyForPlatformSpecificTooling();
+        expect(project.example.ios.directory.childFile('Runner/GeneratedPluginRegistrant.h').existsSync(), isFalse);
+        expect(project.example.ios.directory.childFile('Flutter/Generated.xcconfig').existsSync(), isFalse);
+      });
       testInMemory('injects plugins', () async {
         final FlutterProject project = aProjectWithIos();
         project.ensureReadyForPlatformSpecificTooling();
@@ -32,12 +38,6 @@ void main() {
         final FlutterProject project = aProjectWithIos();
         project.ensureReadyForPlatformSpecificTooling();
         expect(project.ios.directory.childFile('Flutter/Generated.xcconfig').existsSync(), isTrue);
-      });
-      testInMemory('generates files in plugin example project', () async {
-        final FlutterProject project = aPluginProject();
-        project.ensureReadyForPlatformSpecificTooling();
-        expect(project.example.ios.directory.childFile('Runner/GeneratedPluginRegistrant.h').existsSync(), isTrue);
-        expect(project.example.ios.directory.childFile('Flutter/Generated.xcconfig').existsSync(), isTrue);
       });
     });
     group('organization names set', () {
