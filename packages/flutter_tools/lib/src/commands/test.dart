@@ -201,6 +201,11 @@ class TestCommand extends FlutterCommand {
     Cache.releaseLockEarly();
 
     int concurrency;
+    if (argResults['preview-dart-2']) {
+      // Empirically chosen value so that travis bots can handle this many
+      // simultaneously running frontend compilers.
+      concurrency = 4;
+    }
     final bool enableObservatory = collector != null || startPaused;
     if (enableObservatory) {
       // (In particular, for collecting code coverage.)
@@ -210,11 +215,6 @@ class TestCommand extends FlutterCommand {
       // the tests overall take too much time. The current number is empirically
       // based on what our infrastructure can handle, which isn't ideal...
       concurrency = 2;
-    }
-    if (argResults['preview-dart-2']) {
-      // Empirically chosen value so that travis bots can handle this many
-      // simultaneously running frontend compilers.
-      concurrency = 4;
     }
     final int result = await runTests(files,
         workDir: workDir,
