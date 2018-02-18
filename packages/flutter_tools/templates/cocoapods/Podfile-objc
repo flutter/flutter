@@ -50,8 +50,8 @@ target 'Runner' do
   plugin_pods = parse_KV_file('../.flutter-plugins')
   plugin_pods.map { |p|
     symlink = File.join('Symlinks', 'Plugins', File.basename(p[:path]))
-    File.symlink(File.join(p[:path], 'ios'), symlink)
-    pod p[:name], :path => symlink
+    File.symlink(p[:path], symlink)
+    pod p[:name], :path => File.join(symlink, 'ios')
   }
 end
 
