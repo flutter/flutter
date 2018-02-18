@@ -64,7 +64,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     @required Widget child,
   }) {
     assert(currentExtent != null);
-    return new _FlexibleSpaceBarSettings(
+    return new FlexibleSpaceBarSettings(
       toolbarOpacity: toolbarOpacity ?? 1.0,
       minExtent: minExtent ?? currentExtent,
       maxExtent: maxExtent ?? currentExtent,
@@ -108,7 +108,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
   @override
   Widget build(BuildContext context) {
-    final _FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(_FlexibleSpaceBarSettings);
+    final FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(FlexibleSpaceBarSettings);
     assert(settings != null, 'A FlexibleSpaceBar must be wrapped in the widget returned by FlexibleSpaceBar.createSettings().');
 
     final List<Widget> children = <Widget>[];
@@ -174,8 +174,8 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   }
 }
 
-class _FlexibleSpaceBarSettings extends InheritedWidget {
-  const _FlexibleSpaceBarSettings({
+class FlexibleSpaceBarSettings extends InheritedWidget {
+  const FlexibleSpaceBarSettings({
     Key key,
     this.toolbarOpacity,
     this.minExtent,
@@ -190,7 +190,7 @@ class _FlexibleSpaceBarSettings extends InheritedWidget {
   final double currentExtent;
 
   @override
-  bool updateShouldNotify(_FlexibleSpaceBarSettings oldWidget) {
+  bool updateShouldNotify(FlexibleSpaceBarSettings oldWidget) {
     return toolbarOpacity != oldWidget.toolbarOpacity
         || minExtent != oldWidget.minExtent
         || maxExtent != oldWidget.maxExtent
