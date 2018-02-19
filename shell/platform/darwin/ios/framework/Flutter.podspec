@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
 Flutter provides an easy and productive way to build and deploy high-performance mobile apps for Android and iOS.
                        DESC
   s.homepage         = 'https://flutter.io'
-  s.license          = { :type => 'MIT', :file => '../../../../../LICENSE' }
+  s.license          = { :type => 'MIT' }
   s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
   s.ios.deployment_target = '7.0'
