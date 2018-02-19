@@ -25,10 +25,8 @@ bool DirectoryAssetBundle::GetAsBuffer(const std::string& asset_name,
     return false;
 #else
     fxl::UniqueFD asset_file(openat(fd_.get(), asset_name.c_str(), O_RDONLY));
-    if (!asset_file.is_valid()) {
-      FXL_LOG(ERROR) << "Could not load asset " << asset_name;
+    if (!asset_file.is_valid())
       return false;
-    }
 
     constexpr size_t kBufferSize = 1 << 16;
     size_t offset = 0;
