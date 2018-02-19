@@ -213,6 +213,16 @@ copy("copy_framework_podspec") {
   ]
 }
 
+copy("copy_license") {
+  visibility = [ ":*" ]
+  sources = [
+    "//LICENSE",
+  ]
+  outputs = [
+    "$root_out_dir/LICENSE",
+  ]
+}
+
 shared_library("copy_and_verify_framework_headers") {
   visibility = [ ":*" ]
   include_dirs = [ "$_flutter_framework_headers_copy_dir" ]
@@ -232,5 +242,6 @@ group("flutter_framework") {
     ":copy_framework_info_plist",
     ":copy_framework_module_map",
     ":copy_framework_podspec",
+    ":copy_license",
   ]
 }
