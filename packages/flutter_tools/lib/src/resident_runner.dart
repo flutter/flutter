@@ -834,7 +834,7 @@ abstract class ResidentRunner {
       return;
     }
 
-    printStatus('On device UI:');
+    printStatus('Inspectors:');
     if (isRunningDebug)
       printStatus("- 'i': toggle the widget inspector (showWidgetInspector)");
     printStatus("- 'P': display the performance overlay (showPerformanceOverlay)");
@@ -844,14 +844,16 @@ abstract class ResidentRunner {
     printStatus("- 't': dump the rendering tree of the app (debugDumpRenderTree)");
     if (isRunningDebug)
       printStatus("- 'L': dump the layer tree (debugDumpLayerTree)");
-    printStatus("- 'S': dump accessibility in geometric order (debugDumpSemantics)");
-    printStatus("- 'U': dump accessibility in inverse hit test order");
+    printStatus("- 'S': dump accessibility tree in geometric order (debugDumpSemantics)");
+    printStatus("- 'U': dump accessibility tree in inverse hit test order");
     printStatus('');
-    printStatus('Flutter framework toggles:');
-    if (isRunningDebug)
-      printStatus("- 'p': toggle the display of construction lines (debugPaintSizeEnabled)");
-    if (isRunningDebug)
-      printStatus("- 'o': simulate different operating systems (defaultTargetPlatform)");
+    printStatus('Framework toggles and utilities:');
+    if (isRunningDebug) {
+      printStatus(
+          "- 'p': toggle the display of construction lines (debugPaintSizeEnabled)");
+      printStatus(
+          "- 'o': simulate different operating systems (defaultTargetPlatform)");
+    }
     printStatus("- 's': take a screenshot (saved to flutter_XX.png)");
     printStatus('');
   }

@@ -710,10 +710,10 @@ class HotRunner extends ResidentRunner {
     const String reset = '\u001B[0m';
     if (details)
       printStatus('Reloading:');
-    printStatus(
-      "$fire  To hot reload your app on the fly, press 'r'; to restart the app entirely, press 'R'.",
-      ansiAlternative: '$red$fire$bold  To hot reload your app on the fly, '
-                       "press 'r'; to restart the app entirely, press 'R'.$reset"
+      printStatus(
+        "$fire  To hot reload your app on the fly, press 'r'; to restart the app entirely, press 'R'.",
+        ansiAlternative: '$red$fire$bold  To hot reload your app on the fly, '
+          "press 'r'; to restart the app entirely, press 'R'.$reset"
     );
     if (details) {
       printHelpDetails();
