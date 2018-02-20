@@ -185,7 +185,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       }
     }
 
-    final Process process = await runDetachedWithIO(<String>[androidSdk.sdkManagerPath, '--licenses']);
+    final Process process = await runCommand(<String>[androidSdk.sdkManagerPath, '--licenses'], environment: androidSdk.sdkManagerEnv);
     process.stdin.write('n\n');
     final Future<void> output = process.stdout.transform(const Utf8Decoder(allowMalformed: true)).transform(const LineSplitter()).listen(_onLine).asFuture<void>(null);
     final Future<void> errors = process.stderr.transform(const Utf8Decoder(allowMalformed: true)).transform(const LineSplitter()).listen(_onLine).asFuture<void>(null);

@@ -127,7 +127,7 @@ class Doctor {
 
     for (ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
-      final Spinner status = new Spinner.forContextTerminal();
+      final Status status = new Status.withSpinner();
       await (validatorTask.result).then<void>((_) {
         status.stop();
       }).whenComplete(status.cancel);

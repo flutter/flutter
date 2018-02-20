@@ -899,7 +899,7 @@ class _AppRunLogger extends Logger {
   }
 }
 
-class _AppLoggerStatus implements Status {
+class _AppLoggerStatus extends Status {
   _AppLoggerStatus(this.logger, this.id, this.progressId);
 
   final _AppRunLogger logger;

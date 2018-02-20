@@ -331,7 +331,7 @@ class AndroidSdk {
   Map<String, String> get sdkManagerEnv {
     if (_sdkManagerEnv == null) {
       // If we can locate Java, then add it to the path used to run the Android SDK manager.
-      final Map<String, String> _sdkManagerEnv = <String, String>{};
+      _sdkManagerEnv = <String, String>{};
       final String javaBinary = findJavaBinary();
       if (javaBinary != null) {
         _sdkManagerEnv['PATH'] =
@@ -345,7 +345,7 @@ class AndroidSdk {
   String get sdkManagerVersion {
     if (!processManager.canRun(sdkManagerPath))
       throwToolExit('Android sdkmanager not found. Update to the latest Android SDK to resolve this.');
-    final ProcessResult result = processManager.runSync(<String>[sdkManagerPath, '--version']);
+    final ProcessResult result = processManager.runSync(<String>[sdkManagerPath, '--version'], environment: sdkManagerEnv);
     if (result.exitCode != 0) {
       throwToolExit('sdkmanager --version failed: ${result.exitCode}', exitCode: result.exitCode);
     }

@@ -43,11 +43,6 @@ abstract class Logger {
   Status startProgress(String message, { String progressId, bool expectSlowOperation: false });
 }
 
-/// A [Status] object includes functionality of a [Spinner], but may also display
-/// diagnostic information like how long the spinner remained running between
-/// [start] and [stop] (or [cancel]).
-class Status extends Spinner {}
-
 typedef void _FinishCallback();
 
 class StdoutLogger extends Logger {
@@ -99,16 +94,12 @@ class StdoutLogger extends Logger {
   Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
     if (_status != null) {
       // Ignore nested progresses; return a no-op status object.
-      return new Status();
-    } else {
-      if (supportsColor) {
-        _status = new _AnsiStatus(message, expectSlowOperation, () { _status = null; });
-        return _status;
-      } else {
-        printStatus(message);
-        return new Status();
-      }
+      return new Status()..start();
     }
+    if (terminal.supportsColor) {
+      _status = new AnsiStatus(message, expectSlowOperation, () { _status = null; })..start();
+    }
+    return _status;
   }
 }
 
@@ -124,6 +115,7 @@ class WindowsStdoutLogger extends StdoutLogger {
 
   @override
   void writeToStdOut(String message) {
+    // TODO(jcollins-g): wrong abstraction layer for this, move to [Stdio].
     stdout.write(message
         .replaceAll('✗', 'X')
         .replaceAll('✓', '√')
@@ -252,91 +244,135 @@ enum _LogType {
   trace
 }
 
+/// A [Status] class begins when start is called, and may produce progress
+/// information asynchronously.
+///
+/// When stop is called, summary information supported by this class is printed.
+/// If cancel is called, no summary information is displayed.
+/// The base class displays nothing at all.
+class Status {
+  Status();
 
-/// A [Spinner] is a simple animation that does nothing but implement an ASCII
-/// spinner.  When stopped, the animation erases itself.
-class Spinner {
-  Spinner();
-  /// Use this factory to generate AnsiSpinner or Spinner as necessary, and
-  /// start them.
-  factory Spinner.forContextTerminal() {
+  bool _isStarted = false;
+
+  factory Status.withSpinner() {
     if (terminal.supportsColor)
       return new AnsiSpinner()..start();
-    return new Spinner()..start();
+    return new Status()..start();
   }
-  void start() {}
-  void stop() {}
-  void cancel() {}
+
+  /// Display summary information for this spinner; called by [stop].
+  void summaryInformation() {}
+
+  /// Call to start spinning.  Call this method via super at the beginning
+  /// of a subclass [start] method.
+  void start() {
+    _isStarted = true;
+  }
+
+  /// Call to stop spinning and delete the spinner.  Print summary information,
+  /// if applicable to the spinner.
+  void stop() {
+    if (_isStarted) {
+      cancel();
+      summaryInformation();
+    }
+  }
+
+  /// Call to cancel the spinner without printing any summary output.  Call
+  /// this method via super at the end of a subclass [cancel] method.
+  void cancel() {
+    _isStarted = false;
+  }
 }
 
-/// Just a spinner, nothing more, nothing less.
-class AnsiSpinner extends Spinner {
-  int index = 0;
-  bool live = true;
+/// An [AnsiSpinner] is a simple animation that does nothing but implement an
+/// ASCII spinner.  When stopped or canceled, the animation erases itself.
+class AnsiSpinner extends Status {
+  int ticks = 0;
   Timer timer;
 
-  static final List<String> _progress = <String>['-', r'\', '|', r'/', '-', r'\', '|', '/'];
+  static final List<String> _progress = <String>['-', r'\', '|', r'/'];
 
   void _callback(Timer _) {
-    stdout.write('\b${_progress[index]}');
-    index = ++index % _progress.length;
+    stdout.write('\b${_progress[ticks++ % _progress.length]}');
   }
 
   @override
   void start() {
+    super.start();
     stdout.write(' ');
     _callback(null);
     timer = new Timer.periodic(const Duration(milliseconds: 100), _callback);
   }
 
   @override
-  void stop() {
-    if (!live)
-      return;
-    live = false;
-    timer.cancel();
-    stdout.write('\b');
+  /// Clears the spinner.  After cancel, the cursor will be one space right
+  /// of where it was when [start] was called (assuming no other input).
+  void cancel() {
+    if (timer?.isActive == true) {
+      timer.cancel();
+      // Many terminals do not interpret backspace as deleting a character,
+      // but rather just moving the cursor back one.
+      stdout.write('\b ');
+    }
+    super.cancel();
   }
-
-  @override
-  void cancel() => stop();
 }
 
-class _AnsiStatus extends Status with AnsiSpinner {
-  _AnsiStatus(this.message, this.expectSlowOperation, this.onFinish) {
-    stopwatch = new Stopwatch()..start();
-    stdout.write('${message.padRight(52)}     ');
-    start();
-  }
+/// Constructor writes [message] to [stdout] with padding, then starts as an
+/// [AnsiSpinner].  On [cancel] or [stop], will call [onFinish].
+/// On [stop], will additionally print out summary information in
+/// milliseconds if [expectSlowOperation] is false, as seconds otherwise.
+class AnsiStatus extends AnsiSpinner {
+  AnsiStatus(this.message, this.expectSlowOperation, this.onFinish);
 
   Stopwatch stopwatch;
   final String message;
   final bool expectSlowOperation;
   final _FinishCallback onFinish;
+  bool _finished = false;
 
   @override
+  /// Writes [message] to [stdout] with padding, then begins spinning.
+  void start() {
+    stopwatch = new Stopwatch()..start();
+    stdout.write('${message.padRight(52)}     ');
+    assert(!_finished);
+    super.start();
+  }
+
+  @override
+  /// Calls onFinish.
   void stop() {
-    onFinish();
-
-    if (!live)
-      return;
+    if (!_finished) {
+      onFinish();
+      _finished = true;
+    }
     super.stop();
+  }
 
+  @override
+  /// Backs up 5 characters and prints a (minimum) 5 character padded time.  If
+  /// [expectSlowOperation] is true, the time is in seconds; otherwise,
+  /// milliseconds.
+  ///
+  /// Example: '\b\b\b\b\b 0.5s', '\b\b\b\b\b150ms', '\b\b\b\b\b1600ms'
+  void summaryInformation() {
     if (expectSlowOperation) {
-      print('\b\b\b\b\b${getElapsedAsSeconds(stopwatch.elapsed).padLeft(5)}');
+      stdout.writeln('\b\b\b\b\b${getElapsedAsSeconds(stopwatch.elapsed).padLeft(5)}');
     } else {
-      print('\b\b\b\b\b${getElapsedAsMilliseconds(stopwatch.elapsed).padLeft(5)}');
+      stdout.writeln('\b\b\b\b\b${getElapsedAsMilliseconds(stopwatch.elapsed).padLeft(5)}');
     }
   }
 
   @override
+  /// Calls [onFinish].
   void cancel() {
-    onFinish();
-
-    if (!live)
-      return;
+    if (!_finished) {
+      onFinish();
+      _finished = true;
+    }
     super.cancel();
-
-    print(' ');
   }
 }
