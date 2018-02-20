@@ -29,7 +29,7 @@ const double _kTextAndIconTabHeight = 72.0;
 /// See also:
 ///  * [TabBar], which displays a row of tabs.
 ///  * [TabBarView], which displays a widget for the currently selected tab.
-///  * [TabBar.indicatorShape], which defines the appearance of the selected tab
+///  * [TabBar.indicator], which defines the appearance of the selected tab
 ///    indicator relative to the tab's bounds.
 enum TabBarIndicatorSize {
   /// The tab's bounds are as wide as the space occupied by the tab in the tab
@@ -287,25 +287,34 @@ double _indexChangeProgress(TabController controller) {
 class _IndicatorPainter extends CustomPainter {
   _IndicatorPainter({
     @required this.controller,
-    @required this.indicatorShape,
+    @required this.indicator,
     @required this.indicatorSize,
     @required this.tabKeys,
     _IndicatorPainter old,
   }) : assert(controller != null),
-       assert(indicatorShape != null),
+       assert(indicator != null),
        super(repaint: controller.animation) {
     if (old != null)
       saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);
   }
 
   final TabController controller;
-  final ShapeBorder indicatorShape;
+  final Decoration indicator;
   final TabBarIndicatorSize indicatorSize;
   final List<GlobalKey> tabKeys;
 
   List<double> _currentTabOffsets;
   TextDirection _currentTextDirection;
   Rect _currentRect;
+  BoxPainter _painter;
+  bool _needsPaint = false;
+  void markNeedsPaint() {
+    _needsPaint = true;
+  }
+
+  void dispose() {
+    _painter?.dispose();
+  }
 
   void saveTabOffsets(List<double> tabOffsets, TextDirection textDirection) {
     _currentTabOffsets = tabOffsets;
@@ -354,6 +363,9 @@ class _IndicatorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    _needsPaint = false;
+    _painter ??= indicator.createBoxPainter(markNeedsPaint);
+
     if (controller.indexIsChanging) {
       // The user tapped on a tab, the tab controller's animation is running.
       final Rect targetRect = indicatorRect(size, controller.index);
@@ -378,7 +390,12 @@ class _IndicatorPainter extends CustomPainter {
         _currentRect = next == null ? middle : Rect.lerp(middle, next, value - index);
     }
     assert(_currentRect != null);
-    indicatorShape.paint(canvas, _currentRect, textDirection: _currentTextDirection);
+
+    final ImageConfiguration configuration = new ImageConfiguration(
+      size: _currentRect.size,
+      textDirection: _currentTextDirection,
+    );
+    _painter.paint(canvas, _currentRect.topLeft, configuration);
   }
 
   static bool _tabOffsetsEqual(List<double> a, List<double> b) {
@@ -393,8 +410,9 @@ class _IndicatorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_IndicatorPainter old) {
-    return controller != old.controller
-        || indicatorShape != old.indicatorShape
+    return _needsPaint
+        || controller != old.controller
+        || indicator != old.indicator
         || tabKeys.length != old.tabKeys.length
         || (!_tabOffsetsEqual(_currentTabOffsets, old._currentTabOffsets))
         || _currentTextDirection != old._currentTextDirection;
@@ -511,7 +529,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.indicatorColor,
     this.indicatorWeight: 2.0,
     this.indicatorPadding: EdgeInsets.zero,
-    this.indicatorShape,
+    this.indicator, // TBD indicator
     this.indicatorSize,
     this.labelColor,
     this.labelStyle,
@@ -519,8 +537,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.unselectedLabelStyle,
   }) : assert(tabs != null),
        assert(isScrollable != null),
-       assert(indicatorShape != null || (indicatorWeight != null && indicatorWeight > 0.0)),
-       assert(indicatorShape != null || (indicatorPadding != null)),
+       assert(indicator != null || (indicatorWeight != null && indicatorWeight > 0.0)),
+       assert(indicator != null || (indicatorPadding != null)),
        super(key: key);
 
   /// Typically a list of two or more [Tab] widgets.
@@ -544,7 +562,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The color of the line that appears below the selected tab. If this parameter
   /// is null then the value of the Theme's indicatorColor property is used.
   ///
-  /// If [indicatorShape] is specified, this property is ignored.
+  /// If [indicator] is specified, this property is ignored.
   final Color indicatorColor;
 
   /// The thickness of the line that appears below the selected tab. The value
@@ -552,7 +570,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The default value of [indicatorWeight] is 2.0.
   ///
-  /// If [indicatorShape] is specified, this property is ignored.
+  /// If [indicator] is specified, this property is ignored.
   final double indicatorWeight;
 
   /// The horizontal padding for the line that appears below the selected tab.
@@ -565,12 +583,12 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The default value of [indicatorPadding] is [EdgeInsets.zero].
   ///
-  /// If [indicatorShape] is specified, this property is ignored.
+  /// If [indicator] is specified, this property is ignored.
   final EdgeInsetsGeometry indicatorPadding;
 
   /// Defines the appearance of the selected tab indicator.
   ///
-  /// If [indicatorShape] is specified, the [indicatorColor], [indicatorWeight],
+  /// If [indicator] is specified, the [indicatorColor], [indicatorWeight],
   /// and [indicatorPadding] properties are ignored.
   ///
   /// The default, underline-style, selected tab indicator can be defined with
@@ -581,7 +599,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// occupied by the tab in the tab bar. If [indicatorSize] is
   /// [TabBarIndicatorSize.label] then the tab's bounds are only as wide as
   /// the tab widget itself.
-  final ShapeBorder indicatorShape;
+  final Decoration indicator;
 
   /// The location of the selected tab indicator is defined relative to the
   /// tab's overall bounds if [indicatorSize] is [TabBarIndicatorSize.tab]
@@ -590,7 +608,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The selected tab's location appearance can be refined further with
   /// the [indicatorColor], [indicatorWeight], [indicatorPadding], and
-  /// [indicatorShape] properties.
+  /// [indicator] properties.
   final TabBarIndicatorSize indicatorSize;
 
   /// The color of selected tab labels.
@@ -655,9 +673,9 @@ class _TabBarState extends State<TabBar> {
     _tabKeys = widget.tabs.map((Widget tab) => new GlobalKey()).toList();
   }
 
-  ShapeBorder get _indicatorShape {
-    if (widget.indicatorShape != null)
-      return widget.indicatorShape;
+  Decoration get _indicator {
+    if (widget.indicator != null)
+      return widget.indicator;
 
     Color color = widget.indicatorColor ?? Theme.of(context).indicatorColor;
     // ThemeData tries to avoid this by having indicatorColor avoid being the
@@ -671,7 +689,7 @@ class _TabBarState extends State<TabBar> {
       color = Colors.white;
 
     return new UnderlineTabIndicator(
-      padding: widget.indicatorPadding,
+      insets: widget.indicatorPadding,
       borderSide: new BorderSide(
         width: widget.indicatorWeight,
         color: color,
@@ -707,7 +725,7 @@ class _TabBarState extends State<TabBar> {
       _currentIndex = _controller.index;
       _indicatorPainter = new _IndicatorPainter(
         controller: _controller,
-        indicatorShape: _indicatorShape,
+        indicator: _indicator,
         indicatorSize: widget.indicatorSize,
         tabKeys: _tabKeys,
         old: _indicatorPainter,
@@ -728,7 +746,7 @@ class _TabBarState extends State<TabBar> {
         widget.indicatorColor != oldWidget.indicatorColor ||
         widget.indicatorWeight != oldWidget.indicatorWeight ||
         widget.indicatorSize != oldWidget.indicatorSize ||
-        widget.indicatorShape != oldWidget.indicatorShape)
+        widget.indicator != oldWidget.indicator)
       _updateTabController();
 
     if (widget.tabs.length > oldWidget.tabs.length) {
@@ -741,6 +759,7 @@ class _TabBarState extends State<TabBar> {
 
   @override
   void dispose() {
+    _indicatorPainter.dispose();
     if (_controller != null) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
       _controller.removeListener(_handleTabControllerTick);

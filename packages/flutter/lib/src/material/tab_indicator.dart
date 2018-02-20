@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
-/// Used with [TabBar.indicatorShape] to draw a horizontal line below the
+/// Used with [TabBar.indicator] to draw a horizontal line below the
 /// selected tab
 ///
 /// The line is inset from the tab's boundary by [padding]. The [borderSide]
@@ -15,14 +15,14 @@ import 'colors.dart';
 /// The [TabBar.indicatorSize] property can be used to define the
 /// tab's boundary in terms of its (centered) widget, [TabIndicatorSize.label],
 /// or the the entire tab, [TabIndicatorSize.tab].
-class UnderlineTabIndicator extends ShapeBorder {
+class UnderlineTabIndicator extends Decoration {
   /// Create an underline style tab indicator.
   ///
-  /// The [borderSide] and [padding] arguments must not be null.
+  /// The [borderSide] and [insets] arguments must not be null.
   const UnderlineTabIndicator({
     this.borderSide: const BorderSide(width: 2.0, color: Colors.white),
-    this.padding: EdgeInsets.zero,
-  }) : assert(borderSide != null), assert(padding != null);
+    this.insets: EdgeInsets.zero,
+  }) : assert(borderSide != null), assert(insets != null);
 
   /// The color and weight of the line drawn below the selected tab.
   final BorderSide borderSide;
@@ -33,25 +33,49 @@ class UnderlineTabIndicator extends ShapeBorder {
   /// The [TabBar.indicatorSize] property can be used to define the
   /// tab's boundary in terms of its (centered) widget, [TabIndicatorSize.label],
   /// or the the entire tab, [TabIndicatorSize.tab].
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry insets;
 
   @override
-  EdgeInsetsGeometry get dimensions {
-    return padding.subtract(new EdgeInsets.only(bottom: borderSide.width));
+  Decoration lerpFrom(Decoration a, double t) {
+    if (a is UnderlineTabIndicator) {
+      return new UnderlineTabIndicator(
+        borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
+        insets: EdgeInsetsGeometry.lerp(a.insets, insets, t),
+      );
+    }
+    return super.lerpFrom(a, t);
   }
 
   @override
-  UnderlineTabIndicator scale(double t) {
-    return new UnderlineTabIndicator(
-      borderSide: borderSide.scale(t),
-      padding: padding * t,
-    );
+  Decoration lerpTo(Decoration b, double t) {
+    if (b is UnderlineTabIndicator) {
+      return new UnderlineTabIndicator(
+        borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
+        insets: EdgeInsetsGeometry.lerp(insets, b.insets, t),
+      );
+    }
+    return super.lerpTo(b, t);
   }
+
+  @override
+  _UnderlinePainter createBoxPainter([VoidCallback onChanged]) {
+    return new _UnderlinePainter(this, onChanged);
+  }
+}
+
+class _UnderlinePainter extends BoxPainter {
+  _UnderlinePainter(this.decoration, VoidCallback onChanged)
+    : assert(decoration != null), super(onChanged);
+
+  final UnderlineTabIndicator decoration;
+
+  BorderSide get borderSide => decoration.borderSide;
+  EdgeInsetsGeometry get insets => decoration.insets;
 
   Rect _indicatorRectFor(Rect rect, TextDirection textDirection) {
     assert(rect != null);
     assert(textDirection != null);
-    final Rect indicator = padding.resolve(textDirection).deflateRect(rect);
+    final Rect indicator = insets.resolve(textDirection).deflateRect(rect);
     return new Rect.fromLTWH(
       indicator.left,
       indicator.bottom - borderSide.width,
@@ -61,53 +85,12 @@ class UnderlineTabIndicator extends ShapeBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()
-      ..addRect(_indicatorRectFor(rect, textDirection).deflate(borderSide.width));
-  }
-
-  @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()
-      ..addRect(_indicatorRectFor(rect, textDirection));
-  }
-
-  @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
-    if (a is UnderlineTabIndicator) {
-      return new UnderlineTabIndicator(
-        borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
-        padding: EdgeInsetsGeometry.lerp(a.padding, padding, t),
-      );
-    }
-    return super.lerpFrom(a, t);
-  }
-
-  @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
-    if (b is UnderlineTabIndicator) {
-      return new UnderlineTabIndicator(
-        borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
-        padding: EdgeInsetsGeometry.lerp(padding, b.padding, t),
-      );
-    }
-    return super.lerpTo(b, t);
-  }
-
-  @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    assert(configuration != null);
+    assert(configuration.size != null);
+    final Rect rect = offset & configuration.size;
+    final TextDirection textDirection = configuration.textDirection;
     final Rect indicator = _indicatorRectFor(rect, textDirection).deflate(borderSide.width / 2.0);
     canvas.drawLine(indicator.bottomLeft, indicator.bottomRight, borderSide.toPaint());
   }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
-      return false;
-    final UnderlineTabIndicator typedOther = other;
-    return typedOther.borderSide == borderSide && typedOther.padding == padding;
-  }
-
-  @override
-  int get hashCode => hashValues(borderSide, padding);
 }
