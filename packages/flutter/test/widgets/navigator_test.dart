@@ -633,5 +633,46 @@ void main() {
     navigator.removeRoute(routes['/A']); // stack becomes /, pageValue will not complete
   });
 
+  testWidgets('Navigator.current returns the current Route', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
+       '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.pushNamed(context, '/B'); }),
+      '/B': (BuildContext context) => const OnTapPage(id: 'B'),
+    };
+    final Map<String, Route<String>> routes = <String, Route<String>>{};
+
+    await tester.pumpWidget(new MaterialApp(
+      onGenerateRoute: (RouteSettings settings) {
+        routes[settings.name] = new PageRouteBuilder<String>(
+          settings: settings,
+          pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+            return pageBuilders[settings.name](context);
+          },
+        );
+        return routes[settings.name];
+      }
+    ));
+
+    final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
+
+    expect(navigator.current, routes['/']);
+
+    await tester.tap(find.text('/')); // pushNamed('/A'), stack becomes /, /A
+    await tester.pumpAndSettle();
+    expect(navigator.current, routes['/A']);
+
+    await tester.tap(find.text('A')); // pushNamed('/B'), stack becomes /, /A, /B
+    await tester.pumpAndSettle();
+    expect(navigator.current, routes['/B']);
+
+    navigator.pop(); // stack becomes /, /A
+    await tester.pump();
+    expect(navigator.current, routes['/A']);
+
+    navigator.pop(); // stack becomes /
+    await tester.pump();
+    expect(navigator.current, routes['/']);
+
+  });
 
 }
