@@ -17,7 +17,8 @@ class DartLibraryNatives;
 
 namespace blink {
 
-static_assert(SkShader::kTileModeCount == 3, "Need to update tile mode enum");
+// TODO: update this if/when Skia adds Decal mode skbug.com/7638
+static_assert(SkShader::kTileModeCount >= 3, "Need to update tile mode enum");
 
 class CanvasGradient : public Shader {
   DEFINE_WRAPPERTYPEINFO();
