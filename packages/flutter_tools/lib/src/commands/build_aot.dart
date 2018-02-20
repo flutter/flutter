@@ -352,15 +352,11 @@ Future<String> _buildAotSnapshot(
       if (oldFingerprint == newFingerprint) {
         printStatus('Skipping AOT snapshot build. Fingerprint match.');
         return outputPath;
-      } else {
-        printStatus("Fingerprint mismatch - rebuilding");
       }
     } catch (e) {
       // Log exception and continue, this step is a performance improvement only.
       printTrace('Rebuilding snapshot due to fingerprint check error: $e');
     }
-  } else {
-    printTrace("not every file is present - rebuilding");
   }
 
   if (previewDart2) {
