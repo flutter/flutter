@@ -111,7 +111,7 @@ void main() {
       final FuchsiaRemoteConnection connection =
           await FuchsiaRemoteConnection.connectWithSshCommandRunner(mockRunner);
 
-      // `mockPortForwardingFunction` will have returned three different
+      // [mockPortForwardingFunction] will have returned three different
       // forwarded ports, incrementing the port each time by one. (Just a sanity
       // check that the forwarding port was called).
       expect(forwardedPorts.length, 3);

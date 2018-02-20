@@ -37,7 +37,7 @@ typedef Future<PortForwarder> PortForwardingFunction(
 /// Defaults to using SSH port forwarding.
 PortForwardingFunction fuchsiaPortForwardingFunction = _SshPortForwarder.start;
 
-/// Sets `fuchsiaPortForwardingFunction` back to the default SSH port forwarding
+/// Sets [fuchsiaPortForwardingFunction] back to the default SSH port forwarding
 /// implementation.
 void restoreFuchsiaPortForwardingFunction() {
   fuchsiaPortForwardingFunction = _SshPortForwarder.start;
@@ -61,8 +61,8 @@ class FuchsiaRemoteConnection {
 
   FuchsiaRemoteConnection._(this._useIpV6Loopback, this._sshCommandRunner);
 
-  /// Same as `FuchsiaRemoteConnection.connect` albeit with a provided
-  /// `SshCommandRunner` instance.
+  /// Same as [FuchsiaRemoteConnection.connect] albeit with a provided
+  /// [SshCommandRunner] instance.
   @visibleForTesting
   static Future<FuchsiaRemoteConnection> connectWithSshCommandRunner(
       SshCommandRunner commandRunner) async {
@@ -74,19 +74,18 @@ class FuchsiaRemoteConnection {
 
   /// Opens a connection to a Fuchsia device.
   ///
-  /// Accepts an `address` to a Fuchsia device, and requires a root
-  /// directory in which the Fuchsia Device was built (along with the
-  /// `buildType`) in order to open the associated ssh_config for port
-  /// forwarding. Will throw an `ArgumentError` if the address is malformed.
+  /// Accepts an `address` to a Fuchsia device, and optionally a `sshConfigPath` in order to open the
+  /// associated ssh_config for port forwarding.
+  /// Will throw an [ArgumentError] if `address` is malformed.
   ///
-  /// Once this function is called, the instance of `FuchsiaRemoteConnection`
+  /// Once this function is called, the instance of [FuchsiaRemoteConnection]
   /// returned will keep all associated DartVM connections opened over the
   /// lifetime of the object.
   ///
   /// At its current state Dart VM connections will not be added or removed over
   /// the lifetime of this object.
   ///
-  /// Throws an `ArgumentError` if the supplied `address` is not valid IPv6 or
+  /// Throws an [ArgumentError] if the supplied `address` is not valid IPv6 or
   /// IPv4.
   ///
   /// Note that if `address` is ipv6 link local (usually starts with fe80::),
@@ -120,7 +119,7 @@ class FuchsiaRemoteConnection {
     _forwardedVmServicePorts.clear();
   }
 
-  /// Returns a list of `FlutterView` objects.
+  /// Returns a list of [FlutterView] objects.
   ///
   /// This is run across all connected DartVM connections that this class is
   /// managing.
@@ -139,7 +138,7 @@ class FuchsiaRemoteConnection {
   Future<DartVm> _getDartVm(int port) async {
     if (!_dartVmCache.containsKey(port)) {
       // While the IPv4 loopback can be used for the initial port forwarding
-      // (see `PortForwarder.start`), the address is actually bound to the IPv6
+      // (see [PortForwarder.start]), the address is actually bound to the IPv6
       // loopback device, so connecting to the IPv4 loopback would fail when the
       // target address is IPv6 link-local.
       final String addr = _useIpV6Loopback
@@ -152,11 +151,10 @@ class FuchsiaRemoteConnection {
     return _dartVmCache[port];
   }
 
-  /// Forwards a series of local device ports to the `deviceIpv4Address` using
-  /// SSH port forwarding.
+  /// Forwards a series of local device ports to the.
   ///
   /// When this function is run, all existing forwarded ports and connections
-  /// are reset, similar to running `stop`.
+  /// are reset by way of [stop].
   Future<Null> _forwardLocalPortsToDeviceServicePorts() async {
     await stop();
     final List<int> servicePorts = await getDeviceServicePorts();
@@ -201,12 +199,12 @@ class FuchsiaRemoteConnection {
   }
 }
 
-/// Defines a `PortForwarder` interface.
+/// Defines an interface for port forwarding.
 ///
-/// When a PortForwarder is initialized, it is intended to save a port through
+/// When a port forwarder is initialized, it is intended to save a port through
 /// which a connection is persisted along the lifetime of this object.
 ///
-/// When a PortForwarder is shut down it must use its `stop` function to clean
+/// When a port forwarder is shut down it must use its `stop` function to clean
 /// up.
 abstract class PortForwarder {
   /// Determines the port which is being forwarded from the local machine.
@@ -222,8 +220,6 @@ abstract class PortForwarder {
 /// Instances of this class represent a running ssh tunnel.
 ///
 /// The SSH tunnel is from the host to a VM service running on a Fuchsia device.
-/// `process` is the ssh process running the tunnel and `port` is the local
-/// port.
 class _SshPortForwarder extends PortForwarder {
   final String _remoteAddress;
   final int _remotePort;
@@ -250,7 +246,7 @@ class _SshPortForwarder extends PortForwarder {
   int get remotePort => _remotePort;
 
   /// Starts SSH forwarding through a subprocess, and returns an instance of
-  /// `_SshPortForwarder`.
+  /// [_SshPortForwarder].
   static Future<_SshPortForwarder> start(String address, int remotePort,
       [String interface, String sshConfigPath]) async {
     final int localPort = await _potentiallyAvailablePort();
@@ -298,7 +294,7 @@ class _SshPortForwarder extends PortForwarder {
   Future<Null> stop() async {
     // Kill the original ssh process if it is still around.
     _process?.kill();
-    // Cancel the forwarding request. See `start` for commentary about why this
+    // Cancel the forwarding request. See [start] for commentary about why this
     // uses the IPv4 loopback.
     final String formattedForwardingUrl =
         '$_localPort:$_ipv4Loopback:$_remotePort';

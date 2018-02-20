@@ -4,6 +4,6 @@
 
 import 'package:test/test.dart';
 
-/// Wrapper for catching an `ArgumentError` being thrown.
+/// Wrapper for catching an [ArgumentError] being thrown.
 final Matcher throwsArgumentError =
     throwsA(const isInstanceOf<ArgumentError>());

@@ -12,35 +12,59 @@ enum LoggingLevel {
   /// Logs no logs.
   none,
 
-  /// Logs severe logs at the most.
+  /// Logs severe messages at the most (note that severe messages are always
+  /// logged).
+  ///
+  /// Severe means that the process has
+  /// encountered a critical level of failure in which it cannot recover and
+  /// will terminate as a result.
   severe,
 
-  /// Logs warning logs at the most.
+  /// Logs warning messages at the most.
+  ///
+  /// Warning implies that an error was encountered, but the process will
+  /// attempt to continue, and may/may not succeed.
   warning,
 
-  /// Logs info logs at the most.
+  /// Logs info messages at the most.
+  ///
+  /// An info message is for determining information about the state of the
+  /// application as it runs through execution.
   info,
 
   /// Logs fine logs at the most.
+  ///
+  /// A fine message is one that is not important for logging outside of
+  /// debugging potential issues in the application.
   fine,
 
   /// Logs everything.
   all,
 }
 
-/// Synchronously logs a `Log.`
-typedef void LoggingFunction(Log log);
-LoggingFunction _defaultFormatter = (Log log) {
-  print('[${log.levelName}] -- ${log.time}: ${log.message}');
+/// Signature of a function that logs a [LogMessage].
+typedef void LoggingFunction(LogMessage log);
+
+/// The default logging function.
+///
+/// Runs the [print] function using the format string:
+///   '[${log.levelName}]::${log.tag}--${log.time}: ${log.message}'
+///
+/// Exits with status code 1 if the `log` is [LoggingLevel.severe].
+LoggingFunction defaultLoggingFunction = (LogMessage log) {
+  print('[${log.levelName}]::${log.tag}--${log.time}: ${log.message}');
+  if (log.level == LoggingLevel.severe) {
+    exit(1);
+  }
 };
 
-/// Represents a Log created by the logger.
+/// Represents a logging message created by the logger.
 ///
 /// Includes a message, the time the message was created, the level of the log
 /// as an enum, the name of the level as a string, and a tag. This class is used
 /// to print from the global logging function defined in
-/// `Logger.loggingFunction` (a function that can be user-defined).
-class Log {
+/// [Logger.loggingFunction] (a function that can be user-defined).
+class LogMessage {
   /// The actual log message.
   final String message;
 
@@ -53,74 +77,72 @@ class Log {
   /// The human readable level of this log.
   final String levelName;
 
-  /// The tag associated with the message.
+  /// The tag associated with the message. This is set to [Logger.tag] when
+  /// emitted by a [Logger] object.
   final String tag;
 
   /// Creates a log, including the level of the log, the time it was created,
   /// and the actual log message.
-  Log(this.message, this.tag, this.time, this.level)
+  ///
+  /// When this message is created, it sets its [time] to [DateTime.now].
+  LogMessage(this.message, this.tag, this.level)
       : this.levelName =
-            level.toString().substring(level.toString().indexOf('.') + 1);
+            level.toString().substring(level.toString().indexOf('.') + 1),
+        this.time = new DateTime.now();
 }
 
-/// Very barebones logging class. Prints using the global LoggingFunction and
-/// logging level.
+/// Logs messages using the global [LoggingFunction] and logging level.
 ///
-/// Example of setting log level to `LoggingLevel.warning` and creating a
-/// logging function.
+/// Example of setting log level to [LoggingLevel.warning] and creating a
+/// logging function:
+///
+/// Logger.globalLevel = LoggingLevel.warning;
 class Logger {
-  /// Determines the tag included with the logging when chosen in the formatter
-  /// function.
+  /// The tag associated with the log message (usable in the logging function).
+  /// [LogMessage] objects emitted by this class will have [LogMessage.tag] set
+  /// to this value.
   final String tag;
 
-  /// Determines what to do when the Logger creates and attempts to log a `Log`
-  /// object.
-  ///
-  /// The default format for this is to run the print function using the format
-  /// string:
-  ///   '[${log.levelName}] -- ${log.time}: ${log.message}'
+  /// Determines what to do when the [Logger] creates and attempts to log a
+  /// [LogMessage] object.
   ///
   /// This function can be reassigned to whatever functionality of your
-  /// choosing, so long as it has the same signature of `LoggingFunction` (it
-  /// can also be redefined as an async function, if doing file I/O, for
+  /// choosing, so long as it has the same signature of [LoggingFunction] (it
+  /// can also be an asynchronous function, if doing file I/O, for
   /// example).
-  static LoggingFunction loggingFunction = _defaultFormatter;
+  static LoggingFunction loggingFunction = defaultLoggingFunction;
 
-  /// Determines the global logging level.
+  /// Determines the logging level all [Logger] instances use.
   static LoggingLevel globalLevel = LoggingLevel.none;
 
-  /// Creates a logger with the given tag.
+  /// Creates a logger with the given [tag].
   Logger(this.tag);
 
-  /// Logs an severe level log.
+  /// Logs a [LoggingLevel.severe] level `message`.
+  ///
+  /// Note that severe messages are always logged.
   void severe(String message) {
-    if (globalLevel.index >= LoggingLevel.severe.index) {
-      loggingFunction(
-          new Log(message, tag, new DateTime.now(), LoggingLevel.severe));
-    }
+    loggingFunction(new LogMessage(message, tag, LoggingLevel.severe));
   }
 
-  /// Logs a warning level log.
+  /// Logs a [LoggingLevel.warning] level `message`.
   void warning(String message) {
     if (globalLevel.index >= LoggingLevel.warning.index) {
-      loggingFunction(
-          new Log(message, tag, new DateTime.now(), LoggingLevel.warning));
+      loggingFunction(new LogMessage(message, tag, LoggingLevel.warning));
     }
   }
 
-  /// Logs a info level log.
+  /// Logs a [LoggingLevel.info] level `message`.
   void info(String message) {
     if (globalLevel.index >= LoggingLevel.info.index) {
-      loggingFunction(
-          new Log(message, tag, new DateTime.now(), LoggingLevel.info));
+      loggingFunction(new LogMessage(message, tag, LoggingLevel.info));
     }
   }
 
-  /// Logs a fine level log.
+  /// Logs a [LoggingLevel.fine] level `message`.
   void fine(String message) {
     if (globalLevel.index >= LoggingLevel.fine.index) {
-      loggingFunction(
-          new Log(message, tag, new DateTime.now(), LoggingLevel.fine));
+      loggingFunction(new LogMessage(message, tag, LoggingLevel.fine));
     }
   }
 }

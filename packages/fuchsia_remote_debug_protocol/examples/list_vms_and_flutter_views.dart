@@ -20,9 +20,9 @@ import 'package:fuchsia_remote_debug_protocol/logging.dart';
 ///     fe80::8eae:4cff:fef4:9247 eno1
 Future<Null> main(List<String> args) async {
   // Log only at info level within the library. If issues arise, this can be
-  // changed to `LoggingLevel.all` or `LoggingLevel.fine` to see more
+  // changed to [LoggingLevel.all] or [LoggingLevel.fine] to see more
   // information.
-  Logger.globalLevel = LoggingLevel.info;
+  Logger.globalLevel = LoggingLevel.all;
   final String address = args[0];
   final String interface = args.length > 1 ? args[1] : '';
   // Example ssh config path for the Fuchsia device after having made a local

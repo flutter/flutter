@@ -11,7 +11,7 @@ import 'package:process/process.dart';
 import '../common/logging.dart';
 import '../common/network.dart';
 
-/// An error raised when a command fails to run within the `SshCommandRunner`.
+/// An error raised when a command fails to run within the [SshCommandRunner].
 ///
 /// Note that this occurs for both connection failures, and for failure to
 /// running the command on the remote device. This error is raised when the
@@ -54,7 +54,7 @@ class SshCommandRunner {
   /// If the SSH config path is supplied as an empty string, behavior is
   /// undefined.
   ///
-  /// `ArgumentError` is thrown in the event that `address` is neither valid
+  /// [ArgumentError] is thrown in the event that `address` is neither valid
   /// IPv4 nor IPv6. Note that when connecting to a link local address (fe80::
   /// is usually at the start of the address), then an interface should be
   /// supplied.
@@ -73,7 +73,7 @@ class SshCommandRunner {
   /// Runs a command on a Fuchsia device through an SSH tunnel.
   ///
   /// If the subprocess creating the SSH tunnel returns a nonzero exit status,
-  /// then an `SshCommandError` is raised.
+  /// then an [SshCommandError] is raised.
   Future<List<String>> run(String command) async {
     final List<String> args = <String>['ssh'];
     if (sshConfigPath != null) {

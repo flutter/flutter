@@ -18,14 +18,13 @@ const Duration _kRpcTimeout = const Duration(seconds: 5);
 
 final Logger _log = new Logger('DartVm');
 
-/// Definition of an asynchronous function for connecting to a `Uri`.
-///
-/// Creates a JSON RPC-2 connection.
+/// Signature of an asynchronous function for astablishing a JSON RPC-2
+/// connection to a [Uri].
 typedef Future<json_rpc.Peer> RpcPeerConnectionFunction(Uri uri);
 
-/// `DartVm` uses this function to connect to the Dart VM on Fuchsia.
+/// [DartVm] uses this function to connect to the Dart VM on Fuchsia.
 ///
-/// This function can be assigned to a different one out in the event that a
+/// This function can be assigned to a different one in the event that a
 /// custom connection function is needed.
 RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 
@@ -60,19 +59,21 @@ Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
   return attemptConnection(uri);
 }
 
-/// Restores the VM service connection function to the original state.
+/// Restores the VM service connection function to the default implementation.
 void restoreVmServiceConnectionFunction() {
   fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 }
 
-/// Simple JSON RPC peer with a Fuchsia Dart VM service instance. Wraps most
-/// methods around a JSON RPC peer class.
+/// Handles JSON RPC-2 communication with a Dart VM service.
+///
+/// Either wraps existing RPC calls to the Dart VM service, or runs raw RPC
+/// function calls via [invokeRpc].
 class DartVm {
   final json_rpc.Peer _peer;
 
   DartVm._(this._peer);
 
-  /// Attempts to connect to the given `Uri`.
+  /// Attempts to connect to the given [Uri].
   ///
   /// Throws an error if unable to connect.
   static Future<DartVm> connect(Uri uri) async {
@@ -88,7 +89,7 @@ class DartVm {
 
   /// Invokes a raw JSON RPC command with the VM service.
   ///
-  /// When `timeout` is set and reached, throws a `TimeoutException`.
+  /// When `timeout` is set and reached, throws a [TimeoutException].
   ///
   /// If the function returns, it is with a raw JSON response.
   Future<Map<String, dynamic>> invokeRpc(String function,
@@ -104,7 +105,7 @@ class DartVm {
     });
   }
 
-  /// Returns a list of `FlutterView`s running across all Dart VM's.
+  /// Returns a list of [FlutterView] objects running across all Dart VM's.
   ///
   /// If there is no associated isolate with the flutter view (used to determine
   /// the flutter view's name), then the flutter view's ID will be added
@@ -141,13 +142,13 @@ class FlutterView {
   /// The ID of the Flutter view.
   final String _id;
 
-  /// Attempts to construct a `FlutterView` from a json representation.
+  /// Attempts to construct a [FlutterView] from a json representation.
   ///
   /// If there is no isolate and no ID for the view, returns null. If there is
   /// an associated isolate, and there is name for said isolate, also returns
   /// null.
   ///
-  /// All other cases return a `FlutterView` instance. The name of the
+  /// All other cases return a [FlutterView] instance. The name of the
   /// view may be null, but the id will always be set.
   factory FlutterView._fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> isolate = json['isolate'];
@@ -172,10 +173,10 @@ class FlutterView {
 
   FlutterView._(this._name, this._id);
 
-  /// The ID of the `FlutterView`.
+  /// The ID of the [FlutterView].
   String get id => _id;
 
-  /// Returns the name of the `FlutterView`.
+  /// Returns the name of the [FlutterView].
   ///
   /// May be null if there is no associated isolate.
   String get name => _name;
