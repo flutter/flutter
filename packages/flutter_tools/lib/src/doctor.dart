@@ -250,7 +250,7 @@ class _FlutterValidator extends DoctorValidator {
     }
 
     return new ValidationResult(valid, messages,
-      statusInfo: 'on ${os.name}, locale ${platform.localeName}, channel ${version.channel}, v${version.frameworkVersion}'
+      statusInfo: 'Channel ${version.channel}, v${version.frameworkVersion}, on ${os.name}, locale ${platform.localeName}'
     );
   }
 }
