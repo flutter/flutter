@@ -109,7 +109,7 @@ class GestureDemoState extends State<GestureDemo> {
 
   void _handleScaleUpdate(ScaleUpdateDetails details) {
     setState(() {
-      _zoom = (_previousZoom * details.scale);
+      _zoom = _previousZoom * details.scale;
 
       // Ensure that item under the focal point stays in the same place despite zooming
       final Offset normalizedOffset = (_startingFocalPoint - _previousOffset) / _previousZoom;

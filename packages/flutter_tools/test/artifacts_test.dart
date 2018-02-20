@@ -89,6 +89,10 @@ void main() {
           artifacts.getArtifactPath(Artifact.flutterTester),
           fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'flutter_tester')
       );
+      expect(
+        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        fs.path.join(tempDir.path, 'out', 'host_debug_unopt', 'dart-sdk')
+      );
     }, overrides: <Type, Generator> {
       Platform: () => new FakePlatform(operatingSystem: 'linux')
     });

@@ -40,7 +40,15 @@ abstract class Logger {
   ///
   /// [message] is the message to display to the user; [progressId] provides an ID which can be
   /// used to identify this type of progress (`hot.reload`, `hot.restart`, ...).
-  Status startProgress(String message, { String progressId, bool expectSlowOperation: false });
+  ///
+  /// [progressIndicatorPadding] can optionally be used to specify spacing
+  /// between the [message] and the progress indicator.
+  Status startProgress(
+    String message, {
+    String progressId,
+    bool expectSlowOperation: false,
+    int progressIndicatorPadding: 52,
+  });
 }
 
 typedef void _FinishCallback();
@@ -91,13 +99,18 @@ class StdoutLogger extends Logger {
   void printTrace(String message) { }
 
   @override
-  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
+  Status startProgress(
+    String message, {
+    String progressId,
+    bool expectSlowOperation: false,
+    int progressIndicatorPadding: 52,
+  }) {
     if (_status != null) {
       // Ignore nested progresses; return a no-op status object.
       return new Status()..start();
     }
     if (terminal.supportsColor) {
-      _status = new AnsiStatus(message, expectSlowOperation, () { _status = null; })..start();
+      _status = new AnsiStatus(message, expectSlowOperation, () { _status = null; }, progressIndicatorPadding)..start();
     }
     return _status;
   }
@@ -155,7 +168,12 @@ class BufferLogger extends Logger {
   void printTrace(String message) => _trace.writeln(message);
 
   @override
-  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
+  Status startProgress(
+    String message, {
+    String progressId,
+    bool expectSlowOperation: false,
+    int progressIndicatorPadding: 52,
+  }) {
     printStatus(message);
     return new Status();
   }
@@ -200,7 +218,12 @@ class VerboseLogger extends Logger {
   }
 
   @override
-  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
+  Status startProgress(
+    String message, {
+    String progressId,
+    bool expectSlowOperation: false,
+    int progressIndicatorPadding: 52,
+  }) {
     printStatus(message);
     return new Status();
   }
@@ -325,19 +348,21 @@ class AnsiSpinner extends Status {
 /// On [stop], will additionally print out summary information in
 /// milliseconds if [expectSlowOperation] is false, as seconds otherwise.
 class AnsiStatus extends AnsiSpinner {
-  AnsiStatus(this.message, this.expectSlowOperation, this.onFinish);
+  AnsiStatus(this.message, this.expectSlowOperation, this.onFinish, this.padding);
 
-  Stopwatch stopwatch;
   final String message;
   final bool expectSlowOperation;
   final _FinishCallback onFinish;
+  final int padding;
+
+  Stopwatch stopwatch;
   bool _finished = false;
 
   @override
   /// Writes [message] to [stdout] with padding, then begins spinning.
   void start() {
     stopwatch = new Stopwatch()..start();
-    stdout.write('${message.padRight(52)}     ');
+    stdout.write('${message.padRight(padding)}     ');
     assert(!_finished);
     super.start();
   }

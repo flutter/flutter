@@ -40,7 +40,7 @@ void main() {
       mockStdio = new MockStdio();
       ansiSpinner = new AnsiSpinner();
       called = 0;
-      ansiStatus = new AnsiStatus('Hello world', true, () => called++);
+      ansiStatus = new AnsiStatus('Hello world', true, () => called++, 52);
     });
 
     List<String> outputLines() => mockStdio.writtenToStdout.join('').split('\n');
