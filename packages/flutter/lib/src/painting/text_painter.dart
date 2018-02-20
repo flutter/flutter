@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle;
 import 'dart:math' as math show max;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -380,7 +380,7 @@ class TextPainter {
       }
       final double maxBoxWidth = lineWidths.values.fold(
         0.0,
-        (prev, elem) => math.max(prev, elem),
+        (double previous, double element) => math.max(previous, element),
       );
       if (maxBoxWidth > 0.0 && maxBoxWidth != width) {
         _paragraph.layout(new ui.ParagraphConstraints(width: maxBoxWidth));
