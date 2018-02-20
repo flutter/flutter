@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle;
+import 'dart:math' as math show max;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -369,6 +370,21 @@ class TextPainter {
       final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth);
       if (newWidth != width)
         _paragraph.layout(new ui.ParagraphConstraints(width: newWidth));
+      final List<TextBox> boxes = _paragraph.getBoxesForRange(0, text.toPlainText().length);
+      final Map<double, double> lineWidths = <double, double>{};
+      for (final TextBox box in boxes) {
+        if (lineWidths[box.top] == null) {
+          lineWidths[box.top] = 0.0;
+        }
+        lineWidths[box.top] += box.end - box.start;
+      }
+      final double maxBoxWidth = lineWidths.values.fold(
+        0.0,
+        (prev, elem) => math.max(prev, elem),
+      );
+      if (maxBoxWidth > 0.0 && maxBoxWidth != width) {
+        _paragraph.layout(new ui.ParagraphConstraints(width: maxBoxWidth));
+      }
     }
   }
 
