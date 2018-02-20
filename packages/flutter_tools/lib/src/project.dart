@@ -56,15 +56,11 @@ class FlutterProject {
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS.
   void ensureReadyForPlatformSpecificTooling() {
-    if (!directory.existsSync()) {
+    if (!directory.existsSync() || isPluginProject) {
       return;
     }
-    if (isPluginProject) {
-      example.ensureReadyForPlatformSpecificTooling();
-    } else {
-      injectPlugins(directory: directory.path);
-      generateXcodeProperties(directory.path);
-    }
+    injectPlugins(directory: directory.path);
+    generateXcodeProperties(directory.path);
   }
 }
 

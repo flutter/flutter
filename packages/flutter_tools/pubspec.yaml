@@ -1,6 +1,6 @@
 name: flutter_tools
 description: Tools for building Flutter applications
-homepage: http://flutter.io
+homepage: https://flutter.io
 author: Flutter Authors <flutter-dev@googlegroups.com>
 
 environment:
