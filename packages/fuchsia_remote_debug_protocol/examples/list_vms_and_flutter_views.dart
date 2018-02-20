@@ -5,19 +5,27 @@
 import 'dart:async';
 import 'dart:core';
 
-import '../lib/fuchsia_remote_debug_protocol.dart';
-import '../lib/lib_logging.dart' as lib_logging;
+import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart';
+import 'package:fuchsia_remote_debug_protocol/logging.dart';
 
 /// Runs through a simple usage of the fuchsia_remote_debug_protocol library:
 /// connects to a remote machine at the address in argument 1 (interface
 /// optional for argument 2) to list all active flutter views and Dart VM's
-/// running on said device.
+/// running on said device. Note that this uses an SSH config file (optional,
+/// depending on your setup).
+///
+/// Example usage:
+///
+/// $ dart examples/list_vms_and_flutter_views.dart \
+///     fe80::8eae:4cff:fef4:9247 eno1
 Future<Null> main(List<String> args) async {
-  // Log only at info level within the library.
-  lib_logging.Logger.globalLevel = lib_logging.LoggingLevel.info;
+  // Log only at info level within the library. If issues arise, this can be
+  // changed to `LoggingLevel.all` or `LoggingLevel.fine` to see more
+  // information.
+  Logger.globalLevel = LoggingLevel.info;
   final String address = args[0];
   final String interface = args.length > 1 ? args[1] : '';
-  // Example ssh config path for the fuchsia device after having made a local
+  // Example ssh config path for the Fuchsia device after having made a local
   // build.
   final String sshConfigPath = '../../out/release-x86-64/ssh-keys/ssh_config';
   final FuchsiaRemoteConnection connection =

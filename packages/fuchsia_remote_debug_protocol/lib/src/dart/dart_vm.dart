@@ -124,7 +124,9 @@ class DartVm {
     return views;
   }
 
-  /// Shuts down all active connections.
+  /// Disconnects from the Dart VM Service.
+  ///
+  /// After this function completes this object is no longer usable.
   Future<Null> stop() async {
     await _peer?.close();
   }
@@ -132,8 +134,8 @@ class DartVm {
 
 /// Represents an instance of a Flutter view running on a Fuchsia device.
 class FlutterView {
-  /// Determines the name of the Isolate associated with this view. If there is
-  /// no associated Isolate, this will be set to the view's ID.
+  /// Determines the name of the isolate associated with this view. If there is
+  /// no associated isolate, this will be set to the view's ID.
   final String _name;
 
   /// The ID of the Flutter view.
@@ -141,7 +143,7 @@ class FlutterView {
 
   /// Attempts to construct a `FlutterView` from a json representation.
   ///
-  /// If there is no Isolate and no id for the view, returns null. If there is
+  /// If there is no isolate and no ID for the view, returns null. If there is
   /// an associated isolate, and there is name for said isolate, also returns
   /// null.
   ///
@@ -173,7 +175,7 @@ class FlutterView {
   /// The ID of the `FlutterView`.
   String get id => _id;
 
-  /// Returns the name of the `FucshiaFlutterView`.
+  /// Returns the name of the `FlutterView`.
   ///
   /// May be null if there is no associated isolate.
   String get name => _name;
