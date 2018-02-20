@@ -11,6 +11,8 @@ import 'io.dart';
 import 'terminal.dart';
 import 'utils.dart';
 
+const int kDefaultStatusPadding = 59;
+
 abstract class Logger {
   bool get isVerbose => false;
 
@@ -47,7 +49,7 @@ abstract class Logger {
     String message, {
     String progressId,
     bool expectSlowOperation: false,
-    int progressIndicatorPadding: 52,
+    int progressIndicatorPadding: kDefaultStatusPadding,
   });
 }
 
@@ -103,7 +105,7 @@ class StdoutLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation: false,
-    int progressIndicatorPadding: 52,
+    int progressIndicatorPadding: 59,
   }) {
     if (_status != null) {
       // Ignore nested progresses; return a no-op status object.
@@ -172,7 +174,7 @@ class BufferLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation: false,
-    int progressIndicatorPadding: 52,
+    int progressIndicatorPadding: kDefaultStatusPadding,
   }) {
     printStatus(message);
     return new Status();
@@ -222,7 +224,7 @@ class VerboseLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation: false,
-    int progressIndicatorPadding: 52,
+    int progressIndicatorPadding: kDefaultStatusPadding,
   }) {
     printStatus(message);
     return new Status();
@@ -337,7 +339,7 @@ class AnsiSpinner extends Status {
       timer.cancel();
       // Many terminals do not interpret backspace as deleting a character,
       // but rather just moving the cursor back one.
-      stdout.write('\b ');
+      stdout.write('\b \b');
     }
     super.cancel();
   }
@@ -378,16 +380,17 @@ class AnsiStatus extends AnsiSpinner {
   }
 
   @override
-  /// Backs up 5 characters and prints a (minimum) 5 character padded time.  If
+  /// Backs up 4 characters and prints a (minimum) 5 character padded time.  If
   /// [expectSlowOperation] is true, the time is in seconds; otherwise,
-  /// milliseconds.
+  /// milliseconds. Only backs up 4 because [AnsiSpinner.cancel] backs up one
+  /// for us.
   ///
-  /// Example: '\b\b\b\b\b 0.5s', '\b\b\b\b\b150ms', '\b\b\b\b\b1600ms'
+  /// Example: '\b\b\b\b 0.5s', '\b\b\b\b150ms', '\b\b\b\b1600ms'
   void summaryInformation() {
     if (expectSlowOperation) {
-      stdout.writeln('\b\b\b\b\b${getElapsedAsSeconds(stopwatch.elapsed).padLeft(5)}');
+      stdout.writeln('\b\b\b\b${getElapsedAsSeconds(stopwatch.elapsed).padLeft(5)}');
     } else {
-      stdout.writeln('\b\b\b\b\b${getElapsedAsMilliseconds(stopwatch.elapsed).padLeft(5)}');
+      stdout.writeln('\b\b\b\b${getElapsedAsMilliseconds(stopwatch.elapsed).padLeft(5)}');
     }
   }
 

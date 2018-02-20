@@ -764,7 +764,7 @@ class NotifyingLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation: false,
-    int progressIndicatorPadding: 52,
+    int progressIndicatorPadding: kDefaultStatusPadding,
   }) {
     printStatus(message);
     return new Status();
