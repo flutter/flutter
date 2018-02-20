@@ -427,7 +427,7 @@ class DevFS {
     if (bundle != null) {
       printTrace('Scanning asset files');
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        _scanBundleEntry(archivePath, content, bundleDirty);
+        _scanBundleEntry(archivePath, content);
       });
     }
 
@@ -541,7 +541,7 @@ class DevFS {
     content._exists = true;
   }
 
-  void _scanBundleEntry(String archivePath, DevFSContent content, bool bundleDirty) {
+  void _scanBundleEntry(String archivePath, DevFSContent content) {
     // We write the assets into the AssetBundle working dir so that they
     // are in the same location in DevFS and the iOS simulator.
     final Uri deviceUri = fs.path.toUri(fs.path.join(getAssetBuildDirectory(), archivePath));
