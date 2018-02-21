@@ -35,7 +35,7 @@ import 'scaffold.dart';
 ///
 ///  * [ComputeNotch] a function used for creating a notch in a shape.
 ///  * [ScaffoldGeometry.floatingActionBarComputeNotch] the [ComputeNotch] used to
-///  make a notch for the [FloatingActionButton]
+///    make a notch for the [FloatingActionButton]
 ///  * [FloatingActionButton] which the [BottomAppBar] makes a notch for.
 ///  * [AppBar] for a toolbar that is shown at the top of the screen.
 class BottomAppBar extends StatefulWidget {
@@ -48,6 +48,7 @@ class BottomAppBar extends StatefulWidget {
     this.elevation: 8.0,
     this.child,
   }) : assert(elevation != null),
+       assert(elevation >= 0.0),
        super(key: key);
 
   /// The widget below this widget in the tree.
