@@ -134,7 +134,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   Widget build(BuildContext context) {
     final List<Widget> stacked = <Widget>[];
 
-    Widget content = new _TabView(
+    Widget content = new _TabSwitchingView(
       currentTabIndex: _currentPage,
       tabNumber: widget.tabBar.items.length,
       tabBuilder: widget.tabBuilder,
@@ -197,10 +197,10 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   }
 }
 
-/// An widget laying out multiple tabs with only one active tab being built
+/// A widget laying out multiple tabs with only one active tab being built
 /// at a time and on stage. Off stage tabs' animations are stopped.
-class _TabView extends StatefulWidget {
-  const _TabView({
+class _TabSwitchingView extends StatefulWidget {
+  const _TabSwitchingView({
     @required this.currentTabIndex,
     @required this.tabNumber,
     @required this.tabBuilder,
@@ -213,16 +213,45 @@ class _TabView extends StatefulWidget {
   final IndexedWidgetBuilder tabBuilder;
 
   @override
-  _TabViewState createState() => new _TabViewState();
+  _TabSwitchingViewState createState() => new _TabSwitchingViewState();
 }
 
-class _TabViewState extends State<_TabView> {
+class _TabSwitchingViewState extends State<_TabSwitchingView> {
   List<Widget> tabs;
+  List<FocusScopeNode> tabFocusNodes;
 
   @override
   void initState() {
     super.initState();
     tabs = new List<Widget>(widget.tabNumber);
+    tabFocusNodes = new List<FocusScopeNode>.generate(
+      widget.tabNumber,
+      (int index) => new FocusScopeNode(),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _focusActiveTab();
+  }
+
+  @override
+  void didUpdateWidget(_TabSwitchingView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _focusActiveTab();
+  }
+
+  void _focusActiveTab() {
+    FocusScope.of(context).setFirstFocus(tabFocusNodes[widget.currentTabIndex]);
+  }
+
+  @override
+  void dispose() {
+    for (FocusScopeNode focusScopeNode in tabFocusNodes) {
+      focusScopeNode.detach();
+    }
+    super.dispose();
   }
 
   @override
@@ -232,14 +261,18 @@ class _TabViewState extends State<_TabView> {
       children: new List<Widget>.generate(widget.tabNumber, (int index) {
         final bool active = index == widget.currentTabIndex;
 
-        if (active || tabs[index] != null)
+        if (active || tabs[index] != null) {
           tabs[index] = widget.tabBuilder(context, index);
+        }
 
         return new Offstage(
           offstage: !active,
           child: new TickerMode(
             enabled: active,
-            child: tabs[index] ?? new Container(),
+            child: new FocusScope(
+              node: tabFocusNodes[index],
+              child: tabs[index] ?? new Container(),
+            ),
           ),
         );
       }),
