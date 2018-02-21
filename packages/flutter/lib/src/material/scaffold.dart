@@ -110,6 +110,11 @@ abstract class FabMotionAnimator {
   /// corresponding to 0 and 360 degrees, while 0.5 corresponds to 180 degrees.
   Animation<double> getRotationAnimation({@required Animation<double> parent});
 
+  /// Gets the value to restart a motion animation at if it's interrupted.
+  /// 
+  /// Defaults to 0.0, which is the same as restarting the animation from the beginning.
+  double getAnimationRestart(double previousValue) => 0.0;
+
   @override
   String toString() => '$runtimeType';
 }
@@ -149,6 +154,11 @@ class _ScalingFabMotionAnimator extends FabMotionAnimator {
       new ReverseAnimation(new CurveTween(curve: const Threshold(0.5)).animate(parent)),
     );
   }
+
+  // If the animation was just starting, we'll continue from where we left off.
+  // If the animation was finishing, we'll treat it as if we were starting at that point in reverse.
+  @override
+  double getAnimationRestart(double previousValue) => math.min(1.0 - previousValue, previousValue);
 }
 
 class _MaxAnimation<T> extends CompoundAnimation<T> {
@@ -265,6 +275,27 @@ class _EndFloatFab extends FabPositioner {
       fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
 
     return new Offset(fabX, fabY);
+  }
+}
+
+// A snapshot of a transition between two FabPositioners.
+@immutable
+class _TransitionSnapshotFab extends FabPositioner {
+  
+  const _TransitionSnapshotFab(this.begin, this.end, this.animator, this.progress);
+
+  final FabPositioner begin;
+  final FabPositioner end;
+  final FabMotionAnimator animator;
+  final double progress;
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    return animator.getOffset(
+      begin: begin.getOffset(scaffoldGeometry), 
+      end: end.getOffset(scaffoldGeometry), 
+      progress: progress,
+    );
   }
 }
 
@@ -1313,11 +1344,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     // If there is no next position to move to, don't animate.
     if (_nextFabPositioner == null)
       return;
-    // If the FAB is moving right now, we don't need to start an animation.
-    if (_fabMoveController.isAnimating)
-      return;
+    // If the FAB is moving right now, we need to start from a snapshot of the current transition.
+    FabPositioner previousPositioner = _fabPositioner;
+    double restartAnimationFrom = 0.0;
+    if (_fabMoveController.isAnimating) {
+      previousPositioner = new _TransitionSnapshotFab(_previousFabPositioner, _fabPositioner, _fabMotionAnimator, _fabMoveController.value);
+      restartAnimationFrom = _fabMotionAnimator.getAnimationRestart(_fabMoveController.value);
+    }
     setState(() {
-      _previousFabPositioner = _fabPositioner;
+      _previousFabPositioner = previousPositioner;
       _fabPositioner = _nextFabPositioner;
       _nextFabPositioner = null;
     });
@@ -1326,7 +1361,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     // Otherwise, simply make sure the fab's position is fully updated in 
     // case it is added.
     if (widget.floatingActionButton != null) {
-      _fabMoveController.forward(from: 0.0);
+      _fabMoveController.forward(from: restartAnimationFrom);
     } else {
       _fabMoveController.value = _fabMoveController.upperBound;
     }
