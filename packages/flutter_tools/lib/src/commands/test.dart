@@ -95,7 +95,7 @@ class TestCommand extends FlutterCommand {
       ..writeAsStringSync(coverageData, flush: true);
     printTrace('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
-    final String baseCoverageData = 'coverage/lcov.base.info';
+    const String baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
       if (!platform.isLinux) {
         printError(

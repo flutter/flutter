@@ -141,7 +141,7 @@ bool _isBundleDirectory(FileSystemEntity entity) =>
     entity is Directory && entity.path.endsWith('.app');
 
 abstract class IOSApp extends ApplicationPackage {
-  IOSApp({String projectBundleId}) : super(id: projectBundleId);
+  IOSApp({@required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new IOSApp from an existing IPA.
   factory IOSApp.fromIpa(String applicationBinary) {
@@ -181,11 +181,11 @@ abstract class IOSApp extends ApplicationPackage {
     if (id == null)
       return null;
     final String projectPath = fs.path.join('ios', 'Runner.xcodeproj');
-    final Map<String, String> buildSettings = getXcodeBuildSettings(projectPath, 'Runner');
+    final Map<String, String> buildSettings = xcodeProjectInterpreter.getBuildSettings(projectPath, 'Runner');
     id = substituteXcodeVariables(id, buildSettings);
 
     return new BuildableIOSApp(
-      appDirectory: fs.path.join('ios'),
+      appDirectory: 'ios',
       projectBundleId: id,
       buildSettings: buildSettings,
     );
@@ -210,7 +210,11 @@ class BuildableIOSApp extends IOSApp {
 
   final String appDirectory;
 
-  /// Build settings of the app's XCode project.
+  /// Build settings of the app's Xcode project.
+  ///
+  /// These are the build settings as specified in the Xcode project files.
+  ///
+  /// Build settings may change depending on the parameters passed while building.
   final Map<String, String> buildSettings;
 
   @override
@@ -239,7 +243,7 @@ class PrebuiltIOSApp extends IOSApp {
     this.ipaPath,
     this.bundleDir,
     this.bundleName,
-    String projectBundleId,
+    @required String projectBundleId,
   }) : super(projectBundleId: projectBundleId);
 
   @override
@@ -259,6 +263,7 @@ Future<ApplicationPackage> getApplicationPackageForPlatform(TargetPlatform platf
 }) async {
   switch (platform) {
     case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       return applicationBinary == null
@@ -287,6 +292,7 @@ class ApplicationPackageStore {
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
     switch (platform) {
       case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         android ??= await AndroidApk.fromCurrentDirectory();

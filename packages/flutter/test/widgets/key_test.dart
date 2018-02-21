@@ -19,21 +19,18 @@ class NotEquals {
 
 void main() {
   testWidgets('Keys', (WidgetTester tester) async {
-    final int int3 = 3; // we want these instances to be separate instances so that we're not just checking with a single object
-    expect(new ValueKey<int>(int3) == new ValueKey<int>(int3), isTrue);
-    expect(new ValueKey<num>(int3) == new ValueKey<int>(int3), isFalse);
-    final int int2 = 2; // we want these instances to be separate instances so that we're not just checking with a single object
-    expect(new ValueKey<int>(int3) == new ValueKey<int>(int2), isFalse);
+    expect(new ValueKey<int>(nonconst(3)) == new ValueKey<int>(nonconst(3)), isTrue);
+    expect(new ValueKey<num>(nonconst(3)) == new ValueKey<int>(nonconst(3)), isFalse);
+    expect(new ValueKey<int>(nonconst(3)) == new ValueKey<int>(nonconst(2)), isFalse);
     expect(const ValueKey<double>(double.NAN) == const ValueKey<double>(double.NAN), isFalse);
 
-    final String empty = ''; // we want these instances to be separate instances so that we're not just checking with a single object
-    expect(new Key(empty) == new ValueKey<String>(empty), isTrue);
-    expect(new ValueKey<String>(empty) == new ValueKey<String>(empty), isTrue);
-    expect(new TestValueKey<String>(empty) == new ValueKey<String>(empty), isFalse);
-    expect(new TestValueKey<String>(empty) == new TestValueKey<String>(empty), isTrue);
+    expect(new Key(nonconst('')) == new ValueKey<String>(nonconst('')), isTrue);
+    expect(new ValueKey<String>(nonconst('')) == new ValueKey<String>(nonconst('')), isTrue);
+    expect(new TestValueKey<String>(nonconst('')) == new ValueKey<String>(nonconst('')), isFalse);
+    expect(new TestValueKey<String>(nonconst('')) == new TestValueKey<String>(nonconst('')), isTrue);
 
-    expect(new ValueKey<String>(empty) == new ValueKey<dynamic>(empty), isFalse);
-    expect(new TestValueKey<String>(empty) == new TestValueKey<dynamic>(empty), isFalse);
+    expect(new ValueKey<String>(nonconst('')) == new ValueKey<dynamic>(nonconst('')), isFalse);
+    expect(new TestValueKey<String>(nonconst('')) == new TestValueKey<dynamic>(nonconst('')), isFalse);
 
     expect(new UniqueKey() == new UniqueKey(), isFalse);
     final LocalKey k = new UniqueKey();
@@ -44,11 +41,11 @@ void main() {
     expect(new ValueKey<LocalKey>(k) == new ValueKey<UniqueKey>(k), isFalse);
     expect(new ObjectKey(k) == new ObjectKey(k), isTrue);
 
-    final NotEquals constNotEquals = const NotEquals(); // we want these instances to be separate instances so that we're not just checking with a single object
+    final NotEquals constNotEquals = nonconst(const NotEquals());
     expect(new ValueKey<NotEquals>(constNotEquals) == new ValueKey<NotEquals>(constNotEquals), isFalse);
     expect(new ObjectKey(constNotEquals) == new ObjectKey(constNotEquals), isTrue);
 
-    final Object constObject = const Object(); // we want these instances to be separate instances so that we're not just checking with a single object
+    final Object constObject = nonconst(const Object());
     expect(new ObjectKey(constObject) == new ObjectKey(constObject), isTrue);
     expect(new ObjectKey(new Object()) == new ObjectKey(new Object()), isFalse);
 

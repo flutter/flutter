@@ -356,9 +356,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         if (element.widget.key is ValueKey<dynamic>) {
           final ValueKey<dynamic> key = element.widget.key;
           String keyLabel;
-          if ((key is ValueKey<int> ||
-               key is ValueKey<double> ||
-               key is ValueKey<bool>)) {
+          if (key is ValueKey<int> ||
+              key is ValueKey<double> ||
+              key is ValueKey<bool>) {
             keyLabel = 'const ${element.widget.key.runtimeType}(${key.value})';
           } else if (key is ValueKey<String>) {
             keyLabel = 'const Key(\'${key.value}\')';

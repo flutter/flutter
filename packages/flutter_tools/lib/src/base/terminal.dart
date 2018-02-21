@@ -15,7 +15,7 @@ import 'platform.dart';
 final AnsiTerminal _kAnsiTerminal = new AnsiTerminal();
 
 AnsiTerminal get terminal {
-  return context == null
+  return (context == null || context[AnsiTerminal] == null)
       ? _kAnsiTerminal
       : context[AnsiTerminal];
 }

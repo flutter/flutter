@@ -40,7 +40,7 @@ void main() {
   });
 
   test('ColorSwatch test', () {
-    final int color = 0xFF027223;
+    final int color = nonconst(0xFF027223);
     final ColorSwatch<String> greens1 = new ColorSwatch<String>(
       color, const <String, Color>{
         '2259 C': const Color(0xFF027223),

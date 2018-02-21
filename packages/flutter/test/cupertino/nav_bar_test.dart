@@ -395,6 +395,92 @@ void main() {
 
     expect(find.text('Home page'), findsOneWidget);
   });
+
+  testWidgets('Border should be displayed by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return const CupertinoNavigationBar(
+                middle: const Text('Title'),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNotNull);
+
+    final BorderSide side = decoration.border.bottom;
+    expect(side, isNotNull);
+  });
+
+  testWidgets('Overrides border color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return const CupertinoNavigationBar(
+                middle: const Text('Title'),
+                border: const Border(
+                  bottom: const BorderSide(
+                    color: const Color(0xFFAABBCC),
+                    width: 0.0,
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNotNull);
+
+    final BorderSide side = decoration.border.bottom;
+    expect(side, isNotNull);
+    expect(side.color, const Color(0xFFAABBCC));
+  });
+
+  testWidgets('Border should not be displayed when null', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return const CupertinoNavigationBar(
+                middle: const Text('Title'),
+                border: null,
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNull);
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {

@@ -42,7 +42,7 @@ import 'recording_canvas.dart';
 /// To match something which asserts instead of painting, see [paintsAssertion].
 PaintPattern get paints => new _TestRecordingCanvasPatternMatcher();
 
-/// Matches objects or functions that paint an empty display list.
+/// Matches objects or functions that does not paint anything on the canvas.
 Matcher get paintsNothing => new _TestRecordingCanvasPaintsNothingMatcher();
 
 /// Matches objects or functions that assert when they try to paint.
@@ -147,6 +147,18 @@ abstract class PaintPattern {
   /// Any calls made between the last matched call (if any) and the
   /// [Canvas.clipRect] call are ignored.
   void clipRect({ Rect rect });
+
+  /// Indicates that a path clip is expected next.
+  ///
+  /// The next path clip is examined.
+  /// The path that is passed to the actual [Canvas.clipPath] call is matched
+  /// using [pathMatcher].
+  ///
+  /// If no call to [Canvas.clipPath] was made, then this results in failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.clipPath] call are ignored.
+  void clipPath({Matcher pathMatcher});
 
   /// Indicates that a rectangle is expected next.
   ///
@@ -258,8 +270,8 @@ abstract class PaintPattern {
   /// Indicates that a line is expected next.
   ///
   /// The next line is examined. Any arguments that are passed to this method
-  /// are compared to the actual [Canvas.drawLine] call's `paint` argument, and
-  /// any mismatches result in failure.
+  /// are compared to the actual [Canvas.drawLine] call's `p1`, `p2`, and
+  /// `paint` arguments, and any mismatches result in failure.
   ///
   /// If no call to [Canvas.drawLine] was made, then this results in failure.
   ///
@@ -271,7 +283,7 @@ abstract class PaintPattern {
   /// painting has completed, not at the time of the call. If the same [Paint]
   /// object is reused multiple times, then this may not match the actual
   /// arguments as they were seen by the method.
-  void line({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
+  void line({ Offset p1, Offset p2, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
 
   /// Indicates that an arc is expected next.
   ///
@@ -527,13 +539,26 @@ class _TestRecordingCanvasPaintsNothingMatcher extends _TestRecordingCanvasMatch
 
   @override
   bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description) {
-    if (calls.isEmpty)
+    final Iterable<RecordedInvocation> paintingCalls = _filterCanvasCalls(calls);
+    if (paintingCalls.isEmpty)
       return true;
     description.write(
       'painted something, the first call having the following stack:\n'
-      '${calls.first.stackToString(indent: "  ")}\n'
+      '${paintingCalls.first.stackToString(indent: "  ")}\n'
     );
     return false;
+  }
+
+  static const List<Symbol> _nonPaintingOperations = const <Symbol> [
+    #save,
+    #restore,
+  ];
+
+  // Filters out canvas calls that are not painting anything.
+  static Iterable<RecordedInvocation> _filterCanvasCalls(Iterable<RecordedInvocation> canvasCalls) {
+    return canvasCalls.where((RecordedInvocation canvasCall) =>
+      !_nonPaintingOperations.contains(canvasCall.invocation.memberName)
+    );
   }
 }
 
@@ -630,6 +655,11 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
+  void clipPath({Matcher pathMatcher}) {
+    _predicates.add(new _FunctionPaintPredicate(#clipPath, <dynamic>[pathMatcher]));
+  }
+
+  @override
   void rect({ Rect rect, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
     _predicates.add(new _RectPaintPredicate(rect: rect, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
@@ -660,8 +690,8 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
-  void line({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
-    _predicates.add(new _LinePaintPredicate(color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
+  void line({ Offset p1, Offset p2, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _LinePaintPredicate(p1: p1, p2: p2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
@@ -1043,11 +1073,38 @@ class _PathPaintPredicate extends _DrawCommandPaintPredicate {
   }
 }
 
-// TODO(ianh): add arguments to test the points, length, angle, that kind of thing
+// TODO(ianh): add arguments to test the length, angle, that kind of thing
 class _LinePaintPredicate extends _DrawCommandPaintPredicate {
-  _LinePaintPredicate({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
+  _LinePaintPredicate({ this.p1, this.p2, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawLine, 'a line', 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
   );
+
+  final Offset p1;
+  final Offset p2;
+
+  @override
+  void verifyArguments(List<dynamic> arguments) {
+    super.verifyArguments(arguments); // Checks the 3rd argument, a Paint
+    if (arguments.length != 3)
+      throw 'It called $methodName with ${arguments.length} arguments; expected 3.';
+    final Offset p1Argument = arguments[0];
+    final Offset p2Argument = arguments[1];
+    if (p1 != null && p1Argument != p1) {
+        throw 'It called $methodName with p1 endpoint, $p1Argument, which was not exactly the expected endpoint ($p1).';
+    }
+    if (p2 != null && p2Argument != p2) {
+        throw 'It called $methodName with p2 endpoint, $p2Argument, which was not exactly the expected endpoint ($p2).';
+    }
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (p1 != null)
+      description.add('end point p1: $p1');
+    if (p2 != null)
+      description.add('end point p2: $p2');
+  }
 }
 
 class _ArcPaintPredicate extends _DrawCommandPaintPredicate {

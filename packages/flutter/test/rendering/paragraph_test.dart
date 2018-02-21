@@ -225,7 +225,7 @@ void main() {
   });
 
   test('nested TextSpans in paragraph handle textScaleFactor correctly.', () {
-    final TextSpan testSpan = const TextSpan(
+    const TextSpan testSpan = const TextSpan(
       text: 'a',
       style: const TextStyle(
         fontSize: 10.0,

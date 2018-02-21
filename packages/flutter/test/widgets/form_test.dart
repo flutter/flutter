@@ -124,7 +124,7 @@ void main() {
     final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
     final GlobalKey<FormFieldState<String>> fieldKey = new GlobalKey<FormFieldState<String>>();
     // Input 2's validator depends on a input 1's value.
-    String errorText(String input) => fieldKey.currentState.value?.toString() + '/error';
+    String errorText(String input) => '${fieldKey.currentState.value}/error';
 
     Widget builder() {
       return new Directionality(
@@ -166,7 +166,7 @@ void main() {
   });
 
   testWidgets('Provide initial value to input when no controller is specified', (WidgetTester tester) async {
-    final String initialValue = 'hello';
+    const String initialValue = 'hello';
     final GlobalKey<FormFieldState<String>> inputKey = new GlobalKey<FormFieldState<String>>();
 
     Widget builder() {
@@ -206,7 +206,7 @@ void main() {
 
   testWidgets('Provide initial value to input when controller is specified', (WidgetTester tester) async {
     final TextEditingController controller = new TextEditingController();
-    final String initialValue = 'hello';
+    const String initialValue = 'hello';
     final GlobalKey<FormFieldState<String>> inputKey = new GlobalKey<FormFieldState<String>>();
 
     Widget builder() {

@@ -78,7 +78,7 @@ enum TextInputAction {
 class TextInputConfiguration {
   /// Creates configuration information for a text input control.
   ///
-  /// All arguments have default values, except [actionLabel].  Only
+  /// All arguments have default values, except [actionLabel]. Only
   /// [actionLabel] may be null.
   const TextInputConfiguration({
     this.inputType: TextInputType.text,
@@ -337,7 +337,7 @@ class _TextInputClientHandler {
       return;
     _hidePending = true;
 
-    // Schedule a deferred task that hides the text input.  If someone else
+    // Schedule a deferred task that hides the text input. If someone else
     // shows the keyboard during this update cycle, then the task will do
     // nothing.
     scheduleMicrotask(() {

@@ -69,7 +69,7 @@ void main() {
     expect(newTextSize, equals(origTextSize));
 
     // Scroll to the bottom of the menu.
-    await tester.drag(find.text('Small'), const Offset(0.0, -450.0));
+    await tester.drag(find.text('Small'), const Offset(0.0, -1000.0));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
 

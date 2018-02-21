@@ -69,7 +69,7 @@ abstract class AnimatedIconData {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const AnimatedIconData();
-  
+
   /// Whether this icon should be mirrored horizontally when text direction is
   /// right-to-left.
   ///

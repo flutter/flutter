@@ -168,7 +168,7 @@ class AndroidSdk {
       return null;
     }
 
-    // Try to find the NDK compiler.  If we can't find it, it's also ok.
+    // Try to find the NDK compiler. If we can't find it, it's also ok.
     final String ndkDir = findNdk(androidHomeDir);
     String ndkCompiler;
     List<String> ndkCompilerArgs;

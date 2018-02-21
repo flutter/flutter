@@ -17,6 +17,11 @@ import 'package:flutter/painting.dart';
 ///  * [Colors], which defines all of the standard material colors.
 class MaterialColor extends ColorSwatch<int> {
   /// Creates a color swatch with a variety of shades.
+  ///
+  /// The `primary` argument should be the 32 bit ARGB value of one of the
+  /// values in the swatch, as would be passed to the [new Color] constructor
+  /// for that same color, and as is exposed by [value]. (This is distinct from
+  /// the specific index of the color in the swatch.)
   const MaterialColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
 
   /// The lightest shade.
@@ -199,7 +204,7 @@ class Colors {
   ///    are variants on this color but with different opacities.
   ///  * [white], a solid white color.
   ///  * [transparent], a fully-transparent color.
-  static const Color black   = const Color(0xFF000000);
+  static const Color black = const Color(0xFF000000);
 
   /// Black with 87% opacity.
   ///
@@ -299,7 +304,7 @@ class Colors {
   ///    but with different opacities.
   ///  * [black], a solid black color.
   ///  * [transparent], a fully-transparent color.
-  static const Color white   = const Color(0xFFFFFFFF);
+  static const Color white = const Color(0xFFFFFFFF);
 
   /// White with 70% opacity.
   ///
@@ -330,6 +335,18 @@ class Colors {
   ///  * [white, white70, white12, white10], which are variants on this color
   ///    but with different opacities.
   static const Color white30 = const Color(0x4DFFFFFF);
+
+  /// White with 24% opacity.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.whites.png)
+  ///
+  /// Used for the splash color for filled buttons.
+  ///
+  /// See also:
+  ///
+  ///  * [white, white70, white30, white10], which are variants on this color
+  ///    but with different opacities.
+  static const Color white24 = const Color(0x3DFFFFFF);
 
   /// White with 12% opacity.
   ///

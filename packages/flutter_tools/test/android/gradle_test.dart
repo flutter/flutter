@@ -8,6 +8,28 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('gradle build', () {
+    test('regexp should only match lines without the error message', () {
+      final List<String> nonMatchingLines = <String>[
+        'NDK is missing a "platforms" directory.',
+        'If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to /usr/local/company/home/username/Android/Sdk/ndk-bundle.',
+        'If you are not using NDK, unset the NDK variable from ANDROID_NDK_HOME or local.properties to remove this warning.',
+      ];
+      final List<String> matchingLines = <String>[
+        ':app:preBuild UP-TO-DATE',
+        'BUILD SUCCESSFUL in 0s',
+        '',
+        'Something NDK related mentioning ANDROID_NDK_HOME',
+      ];
+      for (String m in nonMatchingLines) {
+        expect(ndkMessageFilter.hasMatch(m), isFalse);
+      }
+      for (String m in matchingLines) {
+        expect(ndkMessageFilter.hasMatch(m), isTrue);
+      }
+    });
+  });
+
   group('gradle project', () {
     GradleProject projectFrom(String properties) => new GradleProject.fromAppProperties(properties);
 

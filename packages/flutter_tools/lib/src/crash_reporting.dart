@@ -87,7 +87,7 @@ class CrashReportSender {
       req.fields['product'] = _kProductId;
       req.fields['version'] = flutterVersion;
       req.fields['osName'] = platform.operatingSystem;
-      req.fields['osVersion'] = os.name;  // this actually includes version
+      req.fields['osVersion'] = os.name; // this actually includes version
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
 

@@ -13,9 +13,11 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
@@ -217,7 +219,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return new XcodeBuildResult(success: false);
   }
 
-  final XcodeProjectInfo projectInfo = new XcodeProjectInfo.fromProjectSync(app.appDirectory);
+  final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(app.appDirectory);
   if (!projectInfo.targets.contains('Runner')) {
     printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
     printError('Open Xcode to fix the problem:');
@@ -254,47 +256,70 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
-  final InjectPluginsResult injectPluginsResult = injectPlugins();
-  final bool hasFlutterPlugins = injectPluginsResult.hasPlugin;
   final String previousGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
 
-  updateXcodeGeneratedProperties(
+  updateGeneratedXcodeProperties(
     projectPath: fs.currentDirectory.path,
     buildInfo: buildInfo,
     target: target,
-    hasPlugins: hasFlutterPlugins,
     previewDart2: buildInfo.previewDart2,
-    strongMode: buildInfo.strongMode,
   );
 
-  if (hasFlutterPlugins) {
+  if (hasPlugins()) {
     final String currentGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
     await cocoaPods.processPods(
-        appIosDir: appDirectory,
-        iosEngineDir: flutterFrameworkDir(buildInfo.mode),
-        isSwift: app.isSwift,
-        pluginOrFlutterPodChanged: (injectPluginsResult.hasChanged
-            || previousGeneratedXcconfig != currentGeneratedXcconfig),
+      appIosDirectory: appDirectory,
+      iosEngineDir: flutterFrameworkDir(buildInfo.mode),
+      isSwift: app.isSwift,
+      flutterPodChanged: (previousGeneratedXcconfig != currentGeneratedXcconfig),
     );
   }
 
-  final List<String> commands = <String>[
+  final Status cleanStatus =
+      logger.startProgress('Running Xcode clean...', expectSlowOperation: true);
+  final RunResult cleanResult = await runAsync(
+    <String>[
+      '/usr/bin/env',
+      'xcrun',
+      'xcodebuild',
+      'clean',
+      '-configuration', configuration,
+    ],
+    workingDirectory: app.appDirectory,
+  );
+  cleanStatus.stop();
+  if (cleanResult.exitCode != 0) {
+    throwToolExit('Xcode failed to clean\n${cleanResult.stderr}');
+  }
+
+  final List<String> buildCommands = <String>[
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
-    'clean',
     'build',
     '-configuration', configuration,
     'ONLY_ACTIVE_ARCH=YES',
   ];
 
-  if (developmentTeam != null)
-    commands.add('DEVELOPMENT_TEAM=$developmentTeam');
+  if (logger.isVerbose) {
+    // An environment variable to be passed to xcode_backend.sh determining
+    // whether to echo back executed commands.
+    buildCommands.add('VERBOSE_SCRIPT_LOGGING=YES');
+  } else {
+    // This will print warnings and errors only.
+    buildCommands.add('-quiet');
+  }
+
+  if (developmentTeam != null) {
+    buildCommands.add('DEVELOPMENT_TEAM=$developmentTeam');
+    buildCommands.add('-allowProvisioningUpdates');
+    buildCommands.add('-allowProvisioningDeviceRegistration');
+  }
 
   final List<FileSystemEntity> contents = fs.directory(app.appDirectory).listSync();
   for (FileSystemEntity entity in contents) {
     if (fs.path.extension(entity.path) == '.xcworkspace') {
-      commands.addAll(<String>[
+      buildCommands.addAll(<String>[
         '-workspace', fs.path.basename(entity.path),
         '-scheme', scheme,
         'BUILD_DIR=${fs.path.absolute(getIosBuildDirectory())}',
@@ -304,13 +329,13 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   if (buildForDevice) {
-    commands.addAll(<String>['-sdk', 'iphoneos', '-arch', 'arm64']);
+    buildCommands.addAll(<String>['-sdk', 'iphoneos', '-arch', 'arm64']);
   } else {
-    commands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
+    buildCommands.addAll(<String>['-sdk', 'iphonesimulator', '-arch', 'x86_64']);
   }
 
   if (!codesign) {
-    commands.addAll(
+    buildCommands.addAll(
       <String>[
         'CODE_SIGNING_ALLOWED=NO',
         'CODE_SIGNING_REQUIRED=NO',
@@ -319,49 +344,116 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
-  final Status status = logger.startProgress('Running Xcode build...', expectSlowOperation: true);
-  final RunResult result = await runAsync(
-    commands,
+  Status buildSubStatus;
+  Status initialBuildStatus;
+  Directory scriptOutputPipeTempDirectory;
+
+  if (logger.supportsColor) {
+    scriptOutputPipeTempDirectory = fs.systemTempDirectory
+        .createTempSync('flutter_build_log_pipe');
+    final File scriptOutputPipeFile =
+        scriptOutputPipeTempDirectory.childFile('pipe_to_stdout');
+    os.makePipe(scriptOutputPipeFile.path);
+
+    Future<void> listenToScriptOutputLine() async {
+      final List<String> lines = await scriptOutputPipeFile.readAsLines();
+      for (String line in lines) {
+        if (line == 'done') {
+          buildSubStatus?.stop();
+          buildSubStatus = null;
+        } else {
+          initialBuildStatus.cancel();
+          buildSubStatus = logger.startProgress(
+            line,
+            expectSlowOperation: true,
+            progressIndicatorPadding: 45,
+          );
+        }
+      }
+      return listenToScriptOutputLine();
+    }
+
+    // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
+    listenToScriptOutputLine(); // ignore: unawaited_futures
+
+    buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
+  }
+
+  final Stopwatch buildStopwatch = new Stopwatch()..start();
+  initialBuildStatus = logger.startProgress('Starting Xcode build...');
+  final RunResult buildResult = await runAsync(
+    buildCommands,
     workingDirectory: app.appDirectory,
     allowReentrantFlutter: true
   );
-  status.stop();
-  if (result.exitCode != 0) {
+  buildSubStatus?.stop();
+  initialBuildStatus?.cancel();
+  buildStopwatch.stop();
+  // Free pipe file.
+  scriptOutputPipeTempDirectory?.deleteSync(recursive: true);
+  printStatus(
+    'Xcode build done',
+    ansiAlternative: 'Xcode build done'.padRight(53)
+        + '${getElapsedAsSeconds(buildStopwatch.elapsed).padLeft(5)}',
+  );
+
+  // Run -showBuildSettings again but with the exact same parameters as the build.
+  final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(
+    (new List<String>
+        .from(buildCommands)
+        ..add('-showBuildSettings'))
+        // Undocumented behaviour: xcodebuild craps out if -showBuildSettings
+        // is used together with -allowProvisioningUpdates or
+        // -allowProvisioningDeviceRegistration and freezes forever.
+        .where((String buildCommand) {
+          return !const <String>[
+            '-allowProvisioningUpdates',
+            '-allowProvisioningDeviceRegistration',
+          ].contains(buildCommand);
+        }),
+    workingDirectory: app.appDirectory,
+  ));
+
+  if (buildResult.exitCode != 0) {
     printStatus('Failed to build iOS app');
-    if (result.stderr.isNotEmpty) {
+    if (buildResult.stderr.isNotEmpty) {
       printStatus('Error output from Xcode build:\n↳');
-      printStatus(result.stderr, indent: 4);
+      printStatus(buildResult.stderr, indent: 4);
     }
-    if (result.stdout.isNotEmpty) {
+    if (buildResult.stdout.isNotEmpty) {
       printStatus('Xcode\'s output:\n↳');
-      printStatus(result.stdout, indent: 4);
+      printStatus(buildResult.stdout, indent: 4);
     }
     return new XcodeBuildResult(
       success: false,
-      stdout: result.stdout,
-      stderr: result.stderr,
+      stdout: buildResult.stdout,
+      stderr: buildResult.stderr,
       xcodeBuildExecution: new XcodeBuildExecution(
-        commands,
-        app.appDirectory,
+        buildCommands: buildCommands,
+        appDirectory: app.appDirectory,
         buildForPhysicalDevice: buildForDevice,
+        buildSettings: buildSettings,
       ),
     );
   } else {
-    // Look for 'clean build/<configuration>-<sdk>/Runner.app'.
-    final RegExp regexp = new RegExp(r' clean (.*\.app)$', multiLine: true);
-    final Match match = regexp.firstMatch(result.stdout);
+    final String expectedOutputDirectory = fs.path.join(
+      buildSettings['TARGET_BUILD_DIR'],
+      buildSettings['WRAPPER_NAME'],
+    );
+
     String outputDir;
-    if (match != null) {
-      final String actualOutputDir = match.group(1).replaceAll('\\ ', ' ');
+    if (fs.isDirectorySync(expectedOutputDirectory)) {
       // Copy app folder to a place where other tools can find it without knowing
       // the BuildInfo.
-      outputDir = actualOutputDir.replaceFirst('/$configuration-', '/');
+      outputDir = expectedOutputDirectory.replaceFirst('/$configuration-', '/');
       if (fs.isDirectorySync(outputDir)) {
         // Previous output directory might have incompatible artifacts
         // (for example, kernel binary files produced from previous `--preview-dart-2` run).
         fs.directory(outputDir).deleteSync(recursive: true);
       }
-      copyDirectorySync(fs.directory(actualOutputDir), fs.directory(outputDir));
+      copyDirectorySync(fs.directory(expectedOutputDirectory), fs.directory(outputDir));
+    } else {
+      printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
     }
     return new XcodeBuildResult(success: true, output: outputDir);
   }
@@ -369,15 +461,14 @@ Future<XcodeBuildResult> buildXcodeProject({
 
 String readGeneratedXcconfig(String appPath) {
   final String generatedXcconfigPath =
-      fs.path.join(fs.currentDirectory.path, appPath, 'Flutter','Generated.xcconfig');
+      fs.path.join(fs.currentDirectory.path, appPath, 'Flutter', 'Generated.xcconfig');
   final File generatedXcconfigFile = fs.file(generatedXcconfigPath);
   if (!generatedXcconfigFile.existsSync())
     return null;
   return generatedXcconfigFile.readAsStringSync();
 }
 
-Future<Null> diagnoseXcodeBuildFailure(
-    XcodeBuildResult result, BuildableIOSApp app) async {
+Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.contains('BCEROR') == true &&
@@ -386,19 +477,20 @@ Future<Null> diagnoseXcodeBuildFailure(
     printError(noProvisioningProfileInstruction, emphasis: true);
     return;
   }
+  // Make sure the user has specified one of:
+  // * DEVELOPMENT_TEAM (automatic signing)
+  // * PROVISIONING_PROFILE (manual signing)
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      // Make sure the user has specified one of:
-      // DEVELOPMENT_TEAM (automatic signing)
-      // PROVISIONING_PROFILE (manual signing)
-      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true
-          || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
+      !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(
+        result.xcodeBuildExecution.buildSettings.containsKey)
+      ) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      app.id?.contains('com.example') ?? false) {
+      result.xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'].contains('com.example')) {
     printError('');
     printError('It appears that your application still contains the default signing identifier.');
     printError("Try replacing 'com.example' with your signing id in Xcode:");
@@ -439,10 +531,11 @@ class XcodeBuildResult {
 /// Describes an invocation of a Xcode build command.
 class XcodeBuildExecution {
   XcodeBuildExecution(
-    this.buildCommands,
-    this.appDirectory,
     {
+      @required this.buildCommands,
+      @required this.appDirectory,
       @required this.buildForPhysicalDevice,
+      @required this.buildSettings,
     }
   );
 
@@ -450,6 +543,8 @@ class XcodeBuildExecution {
   final List<String> buildCommands;
   final String appDirectory;
   final bool buildForPhysicalDevice;
+  /// The build settings corresponding to the [buildCommands] invocation.
+  final Map<String, String> buildSettings;
 }
 
 final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');
@@ -528,14 +623,14 @@ Future<bool> upgradePbxProjWithFlutterAssets(String app) async {
   if (lines.any((String line) => line.contains('path = Flutter/flutter_assets')))
     return true;
 
-  final String l1 = '		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };';
-  final String l2 = '		2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */ = {isa = PBXBuildFile; fileRef = 2D5378251FAA1A9400D5DBA9 /* flutter_assets */; };';
-  final String l3 = '		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };';
-  final String l4 = '		2D5378251FAA1A9400D5DBA9 /* flutter_assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = flutter_assets; path = Flutter/flutter_assets; sourceTree = SOURCE_ROOT; };';
-  final String l5 = '				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,';
-  final String l6 = '				2D5378251FAA1A9400D5DBA9 /* flutter_assets */,';
-  final String l7 = '				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,';
-  final String l8 = '				2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */,';
+  const String l1 = '		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };';
+  const String l2 = '		2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */ = {isa = PBXBuildFile; fileRef = 2D5378251FAA1A9400D5DBA9 /* flutter_assets */; };';
+  const String l3 = '		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };';
+  const String l4 = '		2D5378251FAA1A9400D5DBA9 /* flutter_assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = flutter_assets; path = Flutter/flutter_assets; sourceTree = SOURCE_ROOT; };';
+  const String l5 = '				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,';
+  const String l6 = '				2D5378251FAA1A9400D5DBA9 /* flutter_assets */,';
+  const String l7 = '				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,';
+  const String l8 = '				2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */,';
 
 
   printStatus("Upgrading project.pbxproj of $app' to include the "
@@ -561,10 +656,10 @@ Future<bool> upgradePbxProjWithFlutterAssets(String app) async {
   lines.insert(lines.indexOf(l5) + 1, l6);
   lines.insert(lines.indexOf(l7) + 1, l8);
 
-  final String l9 = '		9740EEBB1CF902C7004384FC /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9740EEB71CF902C7004384FC /* app.flx */; };';
-  final String l10 = '		9740EEB71CF902C7004384FC /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; name = app.flx; path = Flutter/app.flx; sourceTree = "<group>"; };';
-  final String l11 = '				9740EEB71CF902C7004384FC /* app.flx */,';
-  final String l12 = '				9740EEBB1CF902C7004384FC /* app.flx in Resources */,';
+  const String l9 = '		9740EEBB1CF902C7004384FC /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9740EEB71CF902C7004384FC /* app.flx */; };';
+  const String l10 = '		9740EEB71CF902C7004384FC /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; name = app.flx; path = Flutter/app.flx; sourceTree = "<group>"; };';
+  const String l11 = '				9740EEB71CF902C7004384FC /* app.flx */,';
+  const String l12 = '				9740EEBB1CF902C7004384FC /* app.flx in Resources */,';
 
   if (lines.contains(l9)) {
     printStatus('Removing app.flx from project.pbxproj since it has been '

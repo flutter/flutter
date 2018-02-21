@@ -19,7 +19,7 @@ bool _checkVelocity(Velocity actual, Offset expected) {
 }
 
 void main() {
-  final List<Offset> expected = const <Offset>[
+  const List<Offset> expected = const <Offset>[
     const Offset(219.5762939453125, 1304.6705322265625),
     const Offset(355.6900939941406, 967.1700439453125),
     const Offset(12.651158332824707, -36.9227180480957),
@@ -49,8 +49,8 @@ void main() {
   });
 
   test('Velocity control test', () {
-    final Velocity velocity1 = const Velocity(pixelsPerSecond: const Offset(7.0, 0.0));
-    final Velocity velocity2 = const Velocity(pixelsPerSecond: const Offset(12.0, 0.0));
+    const Velocity velocity1 = const Velocity(pixelsPerSecond: const Offset(7.0, 0.0));
+    const Velocity velocity2 = const Velocity(pixelsPerSecond: const Offset(12.0, 0.0));
     expect(velocity1, equals(const Velocity(pixelsPerSecond: const Offset(7.0, 0.0))));
     expect(velocity1, isNot(equals(velocity2)));
     expect(velocity2 - velocity1, equals(const Velocity(pixelsPerSecond: const Offset(5.0, 0.0))));

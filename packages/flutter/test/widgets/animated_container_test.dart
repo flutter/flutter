@@ -27,11 +27,11 @@ void main() {
   testWidgets('AnimatedContainer control test', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
 
-    final BoxDecoration decorationA = const BoxDecoration(
+    const BoxDecoration decorationA = const BoxDecoration(
       color: const Color(0xFF00FF00),
     );
 
-    final BoxDecoration decorationB = const BoxDecoration(
+    const BoxDecoration decorationB = const BoxDecoration(
       color: const Color(0xFF0000FF),
     );
 

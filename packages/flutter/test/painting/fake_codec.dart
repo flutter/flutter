@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart';
 ///
 /// This is useful for running in the test Zone, where it is tricky to receive
 /// callbacks originating from the IO thread.
-class FakeCodec extends ui.Codec {
+class FakeCodec implements ui.Codec {
   final int _frameCount;
   final int _repetitionCount;
   final List<ui.FrameInfo> _frameInfos;
@@ -28,7 +28,7 @@ class FakeCodec extends ui.Codec {
     final ui.Codec codec = await ui.instantiateImageCodec(data);
     final int frameCount = codec.frameCount;
     final List<ui.FrameInfo> frameInfos = new List<ui.FrameInfo>(frameCount);
-    for (int i = 0; i < frameCount;  i += 1)
+    for (int i = 0; i < frameCount; i += 1)
       frameInfos[i] = await codec.getNextFrame();
     return new FakeCodec._(frameCount, codec.repetitionCount, frameInfos);
   }
@@ -46,4 +46,7 @@ class FakeCodec extends ui.Codec {
     _nextFrame = (_nextFrame + 1) % _frameCount;
     return result;
   }
+
+  @override
+  void dispose() { }
 }

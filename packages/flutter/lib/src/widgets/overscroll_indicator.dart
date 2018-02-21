@@ -30,6 +30,8 @@ import 'ticker_provider.dart';
 ///
 /// Created automatically by [ScrollBehavior.buildViewportChrome] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication.
+///
+/// In a [MaterialApp], the edge glow color is the [ThemeData.accentColor].
 class GlowingOverscrollIndicator extends StatefulWidget {
   /// Creates a visual indication that a scroll view has overscrolled.
   ///
@@ -198,7 +200,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         }
       }
     } else if (notification is ScrollEndNotification || notification is ScrollUpdateNotification) {
-      if (notification.dragDetails != null) { // ignore: undefined_getter
+      if ((notification as dynamic).dragDetails != null) {
         _leadingController.scrollEnd();
         _trailingController.scrollEnd();
       }
@@ -362,7 +364,7 @@ class _GlowController extends ChangeNotifier {
     _glowOpacityTween.end = math.min(_glowOpacity.value + overscroll / extent * _pullOpacityGlowFactor, _maxOpacity);
     final double height = math.min(extent, crossExtent * _kWidthToHeightFactor);
     _glowSizeTween.begin = _glowSize.value;
-    _glowSizeTween.end = math.max((1.0 - 1.0 / (0.7 * math.sqrt(_pullDistance * height))), _glowSize.value);
+    _glowSizeTween.end = math.max(1.0 - 1.0 / (0.7 * math.sqrt(_pullDistance * height)), _glowSize.value);
     _displacementTarget = crossAxisOffset / crossExtent;
     if (_displacementTarget != _displacement) {
       if (!_displacementTicker.isTicking) {

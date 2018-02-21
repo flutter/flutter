@@ -100,24 +100,24 @@ void main() {
     test('shape change triggers repaint', () {
       final RenderPhysicalShape root = new RenderPhysicalShape(
         color: const Color(0xffff00ff),
-        clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
+        clipper: const ShapeBorderClipper(shape: const CircleBorder()),
       );
       layout(root, phase: EnginePhase.composite);
       expect(root.debugNeedsPaint, isFalse);
 
       // Same shape, no repaint.
-      root.clipper = const ShapeBorderClipper(shapeBorder: const CircleBorder());
+      root.clipper = const ShapeBorderClipper(shape: const CircleBorder());
       expect(root.debugNeedsPaint, isFalse);
 
       // Different shape triggers repaint.
-      root.clipper = const ShapeBorderClipper(shapeBorder: const StadiumBorder());
+      root.clipper = const ShapeBorderClipper(shape: const StadiumBorder());
       expect(root.debugNeedsPaint, isTrue);
     });
 
     test('compositing on non-Fuchsia', () {
       final RenderPhysicalShape root = new RenderPhysicalShape(
         color: const Color(0xffff00ff),
-        clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
+        clipper: const ShapeBorderClipper(shape: const CircleBorder()),
       );
       layout(root, phase: EnginePhase.composite);
       expect(root.needsCompositing, isFalse);

@@ -58,9 +58,10 @@ class _StdoutHandler {
 Future<String> compile(
     {String sdkRoot,
     String mainPath,
+    String outputFilePath,
     bool linkPlatformKernelIn: false,
     bool aot: false,
-    bool strongMode: false,
+    bool trackWidgetCreation: false,
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath,
     String packagesPath}) async {
@@ -76,20 +77,23 @@ Future<String> compile(
     frontendServer,
     '--sdk-root',
     sdkRoot,
+    '--strong',
   ];
+  if (trackWidgetCreation)
+    command.add('--track-widget-creation');
   if (!linkPlatformKernelIn)
     command.add('--no-link-platform');
   if (aot) {
     command.add('--aot');
-  }
-  if (strongMode) {
-    command.add('--strong');
   }
   if (incrementalCompilerByteStorePath != null) {
     command.add('--incremental');
   }
   if (packagesPath != null) {
     command.addAll(<String>['--packages', packagesPath]);
+  }
+  if (outputFilePath != null) {
+    command.addAll(<String>['--output-dill', outputFilePath]);
   }
 
   if (extraFrontEndOptions != null)
@@ -121,16 +125,16 @@ Future<String> compile(
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
 class ResidentCompiler {
-  ResidentCompiler(this._sdkRoot, {bool strongMode: false})
-    : assert(_sdkRoot != null) {
+  ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation: false})
+    : assert(_sdkRoot != null),
+      _trackWidgetCreation = trackWidgetCreation {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
-    _strongMode = strongMode;
   }
 
+  final bool _trackWidgetCreation;
   String _sdkRoot;
-  bool _strongMode;
   Process _server;
   final _StdoutHandler stdoutHandler = new _StdoutHandler();
 
@@ -140,13 +144,14 @@ class ResidentCompiler {
   /// into new binary.
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
-  Future<String> recompile(String mainPath, List<String> invalidatedFiles) async {
+  Future<String> recompile(String mainPath, List<String> invalidatedFiles,
+      {String outputPath}) async {
     stdoutHandler.reset();
 
     // First time recompile is called we actually have to compile the app from
     // scratch ignoring list of invalidated files.
     if (_server == null)
-      return _compile(mainPath);
+      return _compile(mainPath, outputPath);
 
     final String inputKey = new Uuid().generateV4();
     _server.stdin.writeln('recompile $inputKey');
@@ -156,7 +161,7 @@ class ResidentCompiler {
     return stdoutHandler.outputFilename.future;
   }
 
-  Future<String> _compile(String scriptFilename) async {
+  Future<String> _compile(String scriptFilename, String outputPath) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
@@ -165,10 +170,14 @@ class ResidentCompiler {
       frontendServer,
       '--sdk-root',
       _sdkRoot,
-      '--incremental'
+      '--incremental',
+      '--strong'
     ];
-    if (_strongMode) {
-      args.add('--strong');
+    if (outputPath != null) {
+      args.addAll(<String>['--output-dill', outputPath]);
+    }
+    if (_trackWidgetCreation) {
+      args.add('--track-widget-creation');
     }
     _server = await processManager.start(args);
     _server.stdout

@@ -218,14 +218,20 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           new IconButton(
-            icon: const Icon(Icons.thumb_up),
+            icon: const Icon(
+              Icons.thumb_up,
+              semanticLabel: 'Thumbs up',
+            ),
             onPressed: () {
               setState(() => iconButtonToggle = !iconButtonToggle);
             },
             color: iconButtonToggle ? Theme.of(context).primaryColor : null,
           ),
           const IconButton(
-            icon: const Icon(Icons.thumb_up),
+            icon: const Icon(
+              Icons.thumb_up,
+              semanticLabel: 'Thumbs up',
+            ),
             onPressed: null,
           )
         ]

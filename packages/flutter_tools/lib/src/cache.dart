@@ -8,12 +8,10 @@ import 'package:meta/meta.dart';
 
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
-import 'base/process_manager.dart';
 import 'globals.dart';
 
 /// A wrapper around the `bin/cache/` directory.
@@ -118,32 +116,6 @@ class Cache {
     return _engineRevision;
   }
 
-  String _engineDartVersion;
-
-  String get engineDartVersion {
-    if (_engineDartVersion == null) {
-      final Directory engineDirectory = getArtifactDirectory('engine');
-
-      List<String> dartSdkBinParts;
-      if (platform.isLinux) {
-        dartSdkBinParts = <String>['linux-x64', 'dart-sdk', 'bin', 'dart'];
-      } else if (platform.isMacOS) {
-        dartSdkBinParts = <String>['darwin-x64', 'dart-sdk', 'bin', 'dart'];
-      } else if (platform.isWindows) {
-        dartSdkBinParts = <String>['windows-x64', 'dart-sdk', 'bin', 'dart.exe'];
-      } else {
-        // Unknown platform, we can't derive version.
-        return null;
-      }
-      final File dartSdkBin = engineDirectory.childFile(fs.path.joinAll(dartSdkBinParts));
-      final ProcessResult result = processManager.runSync(<String>[dartSdkBin.path, '--version']);
-      // https://github.com/dart-lang/sdk/issues/31481
-      // We can use the process utils directly when this is fixed instead of parsing stderr.
-      _engineDartVersion = result.stderr.trim().replaceAll('Dart VM version: ', '');
-    }
-    return _engineDartVersion;
-  }
-
   static Cache get instance => context[Cache];
 
   /// Return the top-level directory in the cache; this is `bin/cache`.
@@ -236,7 +208,7 @@ abstract class CachedArtifact {
   String get version => cache.getVersionFor(name);
 
   /// Keep track of the files we've downloaded for this execution so we
-  /// can delete them after completion.  We don't delete them right after
+  /// can delete them after completion. We don't delete them right after
   /// extraction in case [update] is interrupted, so we can restart without
   /// starting from scratch.
   final List<File> _downloadedFiles = <File>[];
@@ -364,7 +336,8 @@ class FlutterEngine extends CachedArtifact {
         ..addAll(_linuxBinaryDirs)
         ..addAll(_windowsBinaryDirs)
         ..addAll(_androidBinaryDirs)
-        ..addAll(_iosBinaryDirs);
+        ..addAll(_iosBinaryDirs)
+        ..addAll(_dartSdks);
     else if (platform.isLinux)
       binaryDirs
         ..addAll(_linuxBinaryDirs)
@@ -384,23 +357,26 @@ class FlutterEngine extends CachedArtifact {
 
   List<List<String>> get _osxBinaryDirs => <List<String>>[
     <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
-    <String>['darwin-x64', 'dart-sdk-darwin-x64.zip'],
     <String>['android-arm-profile/darwin-x64', 'android-arm-profile/darwin-x64.zip'],
     <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
+    <String>['android-arm64-profile/darwin-x64', 'android-arm64-profile/darwin-x64.zip'],
+    <String>['android-arm64-release/darwin-x64', 'android-arm64-release/darwin-x64.zip'],
   ];
 
   List<List<String>> get _linuxBinaryDirs => <List<String>>[
     <String>['linux-x64', 'linux-x64/artifacts.zip'],
-    <String>['linux-x64', 'dart-sdk-linux-x64.zip'],
     <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
     <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
+    <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
+    <String>['android-arm64-release/linux-x64', 'android-arm64-release/linux-x64.zip'],
   ];
 
   List<List<String>> get _windowsBinaryDirs => <List<String>>[
     <String>['windows-x64', 'windows-x64/artifacts.zip'],
-    <String>['windows-x64', 'dart-sdk-windows-x64.zip'],
     <String>['android-arm-profile/windows-x64', 'android-arm-profile/windows-x64.zip'],
     <String>['android-arm-release/windows-x64', 'android-arm-release/windows-x64.zip'],
+    <String>['android-arm64-profile/windows-x64', 'android-arm64-profile/windows-x64.zip'],
+    <String>['android-arm64-release/windows-x64', 'android-arm64-release/windows-x64.zip'],
   ];
 
   List<List<String>> get _androidBinaryDirs => <List<String>>[
@@ -409,6 +385,9 @@ class FlutterEngine extends CachedArtifact {
     <String>['android-arm', 'android-arm/artifacts.zip'],
     <String>['android-arm-profile', 'android-arm-profile/artifacts.zip'],
     <String>['android-arm-release', 'android-arm-release/artifacts.zip'],
+    <String>['android-arm64', 'android-arm64/artifacts.zip'],
+    <String>['android-arm64-profile', 'android-arm64-profile/artifacts.zip'],
+    <String>['android-arm64-release', 'android-arm64-release/artifacts.zip'],
   ];
 
   List<List<String>> get _iosBinaryDirs => <List<String>>[
@@ -416,6 +395,20 @@ class FlutterEngine extends CachedArtifact {
     <String>['ios-profile', 'ios-profile/artifacts.zip'],
     <String>['ios-release', 'ios-release/artifacts.zip'],
   ];
+
+  List<List<String>> get _dartSdks => <List<String>> [
+    <String>['darwin-x64', 'dart-sdk-darwin-x64.zip'],
+    <String>['linux-x64', 'dart-sdk-linux-x64.zip'],
+    <String>['windows-x64', 'dart-sdk-windows-x64.zip'],
+  ];
+
+  // A list of cache directory paths to which the LICENSE file should be copied.
+  List<String> _getLicenseDirs() {
+    if (cache.includeAllPlatforms || platform.isMacOS) {
+      return const <String>['ios', 'ios-profile', 'ios-release'];
+    }
+    return const <String>[];
+  }
 
   @override
   bool isUpToDateInner() {
@@ -429,6 +422,12 @@ class FlutterEngine extends CachedArtifact {
     for (List<String> toolsDir in _getBinaryDirs()) {
       final Directory dir = fs.directory(fs.path.join(location.path, toolsDir[0]));
       if (!dir.existsSync())
+        return false;
+    }
+
+    for (String licenseDir in _getLicenseDirs()) {
+      final File file = fs.file(fs.path.join(location.path, licenseDir, 'LICENSE'));
+      if (!file.existsSync())
         return false;
     }
     return true;
@@ -461,6 +460,12 @@ class FlutterEngine extends CachedArtifact {
         framework.createSync();
         os.unzip(frameworkZip, framework);
       }
+    }
+
+    final File licenseSource = fs.file(fs.path.join(Cache.flutterRoot, 'LICENSE'));
+    for (String licenseDir in _getLicenseDirs()) {
+      final String licenseDestinationPath = fs.path.join(location.path, licenseDir, 'LICENSE');
+      await licenseSource.copy(licenseDestinationPath);
     }
   }
 

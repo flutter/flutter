@@ -219,19 +219,19 @@ void main() {
 
     listenableUnderTest = new Listenable.merge(<Listenable>[source1]);
     expect(
-      listenableUnderTest.toString(), 
+      listenableUnderTest.toString(),
       "Listenable.merge([Instance of 'TestNotifier'])",
     );
 
     listenableUnderTest = new Listenable.merge(<Listenable>[source1, source2]);
     expect(
-      listenableUnderTest.toString(), 
+      listenableUnderTest.toString(),
       "Listenable.merge([Instance of 'TestNotifier', Instance of 'TestNotifier'])",
     );
 
     listenableUnderTest = new Listenable.merge(<Listenable>[null, source2]);
     expect(
-      listenableUnderTest.toString(), 
+      listenableUnderTest.toString(),
       "Listenable.merge([null, Instance of 'TestNotifier'])",
     );
   });

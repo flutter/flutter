@@ -627,7 +627,7 @@ void main() {
     expect(appBarIsVisible(tester), true);
     expect(appBarHeight(tester), 128.0);
 
-    final double initialAppBarHeight = 128.0;
+    const double initialAppBarHeight = 128.0;
     final double initialTabBarHeight = tabBarHeight(tester);
 
     // Scroll the not-pinned appbar, collapsing the expanded height. At this
@@ -660,7 +660,7 @@ void main() {
     expect(appBarIsVisible(tester), true);
     expect(appBarHeight(tester), 128.0);
 
-    final double initialAppBarHeight = 128.0;
+    const double initialAppBarHeight = 128.0;
     final double initialTabBarHeight = tabBarHeight(tester);
 
     // Scroll the floating-pinned appbar, collapsing the expanded height. At this

@@ -65,8 +65,7 @@ void main() {
 
   testWidgets('Directionality can\'t be null', (WidgetTester tester) async {
     expect(() {
-      final TextDirection textDirection = null; // we don't want this instance to be const because otherwise it would throw at compile time.
-      new Directionality(textDirection: textDirection, child: const Placeholder());
+      new Directionality(textDirection: nonconst(null), child: const Placeholder());
     }, throwsAssertionError);
   });
 }

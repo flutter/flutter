@@ -23,7 +23,7 @@ class StockArrowPainter extends CustomPainter {
     final double centerY = padding + r;
 
     // Draw the arrow.
-    final double w = 8.0;
+    const double w = 8.0;
     double h = 5.0;
     double arrowY;
     if (percentChange < 0.0) {
@@ -58,7 +58,7 @@ class StockArrow extends StatelessWidget {
   final double percentChange;
 
   int _colorIndexForPercentChange(double percentChange) {
-    final double maxPercent = 10.0;
+    const double maxPercent = 10.0;
     final double normalizedPercentChange = math.min(percentChange.abs(), maxPercent) / maxPercent;
     return 100 + (normalizedPercentChange * 8.0).floor() * 100;
   }

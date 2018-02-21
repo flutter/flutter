@@ -100,7 +100,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                   package: _kGalleryAssetsPackage,
                 ),
               ),
-              otherAccountsPictures:  <Widget>[
+              otherAccountsPictures: <Widget>[
                 new GestureDetector(
                   onTap: () {
                     _onOtherAccountsTap(context);

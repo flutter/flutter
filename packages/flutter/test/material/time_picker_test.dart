@@ -388,7 +388,7 @@ void _tests() {
     dynamic dialPaint = tester.widget(findDialPaint);
     expect('${dialPaint.painter.activeRing}', '_DialRing.inner');
 
-    await tester.pumpWidget(new Container());  // make sure previous state isn't reused
+    await tester.pumpWidget(new Container()); // make sure previous state isn't reused
 
     await mediaQueryBoilerplate(tester, true, initialTime: const TimeOfDay(hour: 0, minute: 0));
     dialPaint = tester.widget(findDialPaint);
@@ -433,7 +433,7 @@ void _tests() {
       action: SemanticsAction.decrease,
       finalValue: '12',
     );
-    await tester.pumpWidget(new Container());  // clear old boilerplate
+    await tester.pumpWidget(new Container()); // clear old boilerplate
 
     // 24-hour format
     await mediaQueryBoilerplate(tester, true, initialTime: const TimeOfDay(hour: 23, minute: 0));

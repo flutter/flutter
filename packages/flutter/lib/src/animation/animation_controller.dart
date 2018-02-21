@@ -227,7 +227,7 @@ class AnimationController extends Animation<double>
     notifyListeners();
     _checkStatusChanged();
   }
-  
+
   /// Sets the controller's value to [lowerBound], stopping the animation (if
   /// in progress), and resetting to its beginning point, or dismissed state.
   ///

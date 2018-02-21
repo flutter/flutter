@@ -36,7 +36,7 @@ void main() {
       test(testDescription, () {
         try {
           loadTaskManifest(yaml);
-        } on ManifestError catch(error) {
+        } on ManifestError catch (error) {
           expect(error.message, errorMessage);
         }
       });

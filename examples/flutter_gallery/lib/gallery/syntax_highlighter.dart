@@ -109,7 +109,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
       return new TextSpan(style: _style.baseStyle, children: formattedText);
     } else {
       // Parsing failed, return with only basic formatting
-      return new TextSpan(style:_style.baseStyle, text: src);
+      return new TextSpan(style: _style.baseStyle, text: src);
     }
   }
 

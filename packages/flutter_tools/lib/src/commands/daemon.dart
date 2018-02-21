@@ -348,10 +348,8 @@ class AppDomain extends Domain {
     DebuggingOptions options, bool enableHotReload, {
     String applicationBinary,
     bool previewDart2: false,
-    bool strongMode: false,
     String projectRootPath,
     String packagesFilePath,
-    String projectAssets,
     bool ipv6: false,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
@@ -362,7 +360,7 @@ class AppDomain extends Domain {
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
 
-    final FlutterDevice flutterDevice = new FlutterDevice(device);
+    final FlutterDevice flutterDevice = new FlutterDevice(device, previewDart2: previewDart2);
 
     ResidentRunner runner;
 
@@ -374,10 +372,8 @@ class AppDomain extends Domain {
         usesTerminalUI: false,
         applicationBinary: applicationBinary,
         previewDart2: previewDart2,
-        strongMode: strongMode,
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
-        projectAssets: projectAssets,
         ipv6: ipv6,
         hostIsIde: true,
       );
@@ -389,7 +385,6 @@ class AppDomain extends Domain {
         usesTerminalUI: false,
         applicationBinary: applicationBinary,
         previewDart2: previewDart2,
-        strongMode: strongMode,
         ipv6: ipv6,
       );
     }
@@ -447,6 +442,8 @@ class AppDomain extends Domain {
   bool isRestartSupported(bool enableHotReload, Device device) =>
       enableHotReload && device.supportsHotMode;
 
+  Future<OperationResult> _inProgressHotReload;
+
   Future<OperationResult> restart(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
     final bool fullRestart = _getBoolArg(args, 'fullRestart') ?? false;
@@ -456,8 +453,14 @@ class AppDomain extends Domain {
     if (app == null)
       throw "app '$appId' not found";
 
-    return app._runInZone(this, () {
+    if (_inProgressHotReload != null)
+      throw 'hot restart already in progress';
+
+    _inProgressHotReload = app._runInZone(this, () {
       return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
+    });
+    return _inProgressHotReload.whenComplete(() {
+      _inProgressHotReload = null;
     });
   }
 
@@ -757,7 +760,12 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
+  Status startProgress(
+    String message, {
+    String progressId,
+    bool expectSlowOperation: false,
+    int progressIndicatorPadding: 52,
+  }) {
     printStatus(message);
     return new Status();
   }
@@ -857,7 +865,12 @@ class _AppRunLogger extends Logger {
   Status _status;
 
   @override
-  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
+  Status startProgress(
+    String message, {
+    String progressId,
+    bool expectSlowOperation: false,
+    int progressIndicatorPadding: 52,
+  }) {
     // Ignore nested progresses; return a no-op status object.
     if (_status != null)
       return new Status();

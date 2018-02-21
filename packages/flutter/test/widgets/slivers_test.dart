@@ -114,4 +114,85 @@ void main() {
       const Offset(0.0, 600.0),
     ], <bool>[false, false, true, true, false]);
   });
+
+  testWidgets('Multiple grids and lists', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new SizedBox(
+          width: 44.4,
+          height: 60.0,
+          child: new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new CustomScrollView(
+              slivers: <Widget>[
+                new SliverList(
+                  delegate: new SliverChildListDelegate(
+                    <Widget>[
+                      new Container(height: 22.2, child: const Text('TOP')),
+                      new Container(height: 22.2),
+                      new Container(height: 22.2),
+                    ],
+                  ),
+                ),
+                new SliverFixedExtentList(
+                  itemExtent: 22.2,
+                  delegate: new SliverChildListDelegate(
+                    <Widget>[
+                      new Container(),
+                      new Container(child: const Text('A')),
+                      new Container(),
+                    ],
+                  ),
+                ),
+                new SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                  ),
+                  delegate: new SliverChildListDelegate(
+                    <Widget>[
+                      new Container(),
+                      new Container(child: const Text('B')),
+                      new Container(),
+                    ],
+                  ),
+                ),
+                new SliverList(
+                  delegate: new SliverChildListDelegate(
+                    <Widget>[
+                      new Container(height: 22.2),
+                      new Container(height: 22.2),
+                      new Container(height: 22.2, child: const Text('BOTTOM')),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final TestGesture gesture = await tester.startGesture(const Offset(400.0, 300.0));
+    expect(find.text('TOP'), findsOneWidget);
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('BOTTOM'), findsNothing);
+    await gesture.moveBy(const Offset(0.0, -70.0));
+    await tester.pump();
+    expect(find.text('TOP'), findsNothing);
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('BOTTOM'), findsNothing);
+    await gesture.moveBy(const Offset(0.0, -70.0));
+    await tester.pump();
+    expect(find.text('TOP'), findsNothing);
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('BOTTOM'), findsNothing);
+    await gesture.moveBy(const Offset(0.0, -70.0));
+    await tester.pump();
+    expect(find.text('TOP'), findsNothing);
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('BOTTOM'), findsOneWidget);
+  });
 }

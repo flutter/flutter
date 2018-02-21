@@ -144,7 +144,7 @@ flutter shell. To run the tests, ensure that no devices are connected,
 then navigate to `flutter_tools` and execute:
 
 ```shell
-../../bin/cache/dart-sdk/bin/pub run test
+../../bin/cache/dart-sdk/bin/pub run test -j1
 ```
 
 The pre-built flutter tool runs in release mode with the observatory off by default.
@@ -286,7 +286,7 @@ few steps:
    see the new dependency. As part of landing this change, you should make
    whatever other changes are needed in this repository to account for your
    breaking change.
-   
+
 API docs for master branch
 --------------------------
 

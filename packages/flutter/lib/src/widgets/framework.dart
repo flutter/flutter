@@ -312,7 +312,17 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   int get hashCode => identityHashCode(value);
 
   @override
-  String toString() => '[$runtimeType ${describeIdentity(value)}]';
+  String toString() {
+    String selfType = runtimeType.toString();
+    // const GlobalObjectKey().runtimeType.toString() returns 'GlobalObjectKey<State<StatefulWidget>>'
+    // because GlobalObjectKey is instantiated to its bounds. To avoid cluttering the output
+    // we remove the suffix.
+    const String suffix = '<State<StatefulWidget>>';
+    if (selfType.endsWith(suffix)) {
+      selfType = selfType.substring(0, selfType.length - suffix.length);
+    }
+    return '[$selfType ${describeIdentity(value)}]';
+  }
 }
 
 /// This class is a work-around for the "is" operator not accepting a variable value as its right operand
@@ -1210,13 +1220,13 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   ///
   /// For example, [AnimatedWidget] is a subclass of [StatefulWidget] that
   /// introduces an abstract `Widget build(BuildContext context)` method for its
-  /// subclasses to implement.  If [StatefulWidget] already had a [build] method
+  /// subclasses to implement. If [StatefulWidget] already had a [build] method
   /// that took a [State] argument, [AnimatedWidget] would be forced to provide
   /// its [State] object to subclasses even though its [State] object is an
   /// internal implementation detail of [AnimatedWidget].
   ///
   /// Conceptually, [StatelessWidget] could also be implemented as a subclass of
-  /// [StatefulWidget] in a similar manner.  If the [build] method were on
+  /// [StatefulWidget] in a similar manner. If the [build] method were on
   /// [StatefulWidget] rather than [State], that would not be possible anymore.
   ///
   /// Putting the [build] function on [State] rather than [StatefulWidget] also
@@ -1239,8 +1249,8 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// ```
   ///
   /// For example, suppose the parent builds `MyButton` with `color` being blue,
-  /// the `$color` in the print function refers to blue, as expected.  Now,
-  /// suppose the parent rebuilds `MyButton` with green.  The closure created by
+  /// the `$color` in the print function refers to blue, as expected. Now,
+  /// suppose the parent rebuilds `MyButton` with green. The closure created by
   /// the first build still implicitly refers to the original widget and the
   /// `$color` still prints blue even through the widget has been updated to
   /// green.
@@ -1859,10 +1869,11 @@ abstract class BuildContext {
   /// (directly or indirectly) from build methods, layout and paint callbacks, or
   /// from [State.didChangeDependencies].
   ///
-  /// This method should not be called from [State.deactivate] or [State.dispose]
-  /// because the element tree is no longer stable at that time. To refer to
-  /// an ancestor from one of those methods, save a reference to the ancestor
-  /// in [State.didChangeDependencies].
+  /// This method should not be called from [State.dispose] because the element
+  /// tree is no longer stable at that time. To refer to an ancestor from that
+  /// method, save a reference to the ancestor in [State.didChangeDependencies].
+  /// It is safe to use this method from [State.deactivate], which is called
+  /// whenever the widget is removed from the tree.
   ///
   /// It is also possible to call this from interaction event handlers (e.g.
   /// gesture callbacks) or timers, to obtain a value once, if that value is not
@@ -1886,10 +1897,12 @@ abstract class BuildContext {
   /// This method does not establish a relationship with the target in the way
   /// that [inheritFromWidgetOfExactType] does.
   ///
-  /// This method should not be called from [State.deactivate] or [State.dispose]
-  /// because the element tree is no longer stable at that time. To refer to
-  /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  /// This method should not be called from [State.dispose] because the element
+  /// tree is no longer stable at that time. To refer to an ancestor from that
+  /// method, save a reference to the ancestor by calling
+  /// [inheritFromWidgetOfExactType] in [State.didChangeDependencies]. It is
+  /// safe to use this method from [State.deactivate], which is called whenever
+  /// the widget is removed from the tree.
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
 
   /// Returns the nearest ancestor widget of the given type, which must be the
@@ -1908,7 +1921,7 @@ abstract class BuildContext {
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  /// by calling [ancestorWidgetOfExactType] in [State.didChangeDependencies].
   Widget ancestorWidgetOfExactType(Type targetType);
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
@@ -1934,12 +1947,14 @@ abstract class BuildContext {
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  /// by calling [ancestorStateOfType] in [State.didChangeDependencies].
   ///
-  /// Example:
+  /// ## Sample code
   ///
   /// ```dart
-  /// context.ancestorStateOfType(const TypeMatcher<ScrollableState>());
+  /// ScrollableState scrollable = context.ancestorStateOfType(
+  ///   const TypeMatcher<ScrollableState>(),
+  /// );
   /// ```
   State ancestorStateOfType(TypeMatcher matcher);
 
@@ -1965,14 +1980,14 @@ abstract class BuildContext {
   /// it is used by [Material] so that [InkWell] widgets can trigger the ink
   /// splash on the [Material]'s actual render object.
   ///
-  /// This method should not be called from [State.deactivate] or [State.dispose]
-  /// because the widget tree is no longer stable at that time. To refer to
-  /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
-  ///
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the
   /// desired ancestor is known to be small and bounded.
+  ///
+  /// This method should not be called from [State.deactivate] or [State.dispose]
+  /// because the widget tree is no longer stable at that time. To refer to
+  /// an ancestor from one of those methods, save a reference to the ancestor
+  /// by calling [ancestorRenderObjectOfType] in [State.didChangeDependencies].
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher);
 
   /// Walks the ancestor chain, starting with the parent of this build context's
@@ -1988,7 +2003,7 @@ abstract class BuildContext {
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the element tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  /// by calling [visitAncestorElements] in [State.didChangeDependencies].
   void visitAncestorElements(bool visitor(Element element));
 
   /// Walks the children of this widget.
@@ -2965,7 +2980,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(owner != null);
     assert(depth != null);
     assert(!_active);
-    final bool hadDependencies = ((_dependencies != null && _dependencies.isNotEmpty) || _hadUnsatisfiedDependencies);
+    final bool hadDependencies = (_dependencies != null && _dependencies.isNotEmpty) || _hadUnsatisfiedDependencies;
     _active = true;
     // We unregistered our dependencies in deactivate, but never cleared the list.
     // Since we're going to be reused, let's clear our list now.
@@ -3556,6 +3571,14 @@ typedef Widget WidgetBuilder(BuildContext context);
 ///
 /// Used by [ListView.builder] and other APIs that use lazily-generated widgets.
 typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
+
+/// A builder that builds a widget given a child.
+///
+/// The child should typically be part of the returned widget tree.
+///
+/// Used by [AnimatedBuilder.builder], as well as [WidgetsApp.builder] and
+/// [MaterialApp.builder].
+typedef Widget TransitionBuilder(BuildContext context, Widget child);
 
 /// An [Element] that composes other [Element]s.
 ///

@@ -11,9 +11,8 @@ import 'debug.dart';
 import 'theme.dart';
 import 'toggleable.dart';
 
-const double _kDiameter = 16.0;
-const double _kOuterRadius = _kDiameter / 2.0;
-const double _kInnerRadius = 5.0;
+const double _kOuterRadius = 8.0;
+const double _kInnerRadius = 4.5;
 
 /// A material design radio button.
 ///
@@ -177,6 +176,7 @@ class _RenderRadio extends RenderToggleable {
     @required TickerProvider vsync,
   }): super(
     value: value,
+    tristate: false,
     activeColor: activeColor,
     inactiveColor: inactiveColor,
     onChanged: onChanged,

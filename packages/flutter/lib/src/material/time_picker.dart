@@ -10,8 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button.dart';
 import 'button_bar.dart';
+import 'button_theme.dart';
 import 'colors.dart';
 import 'dialog.dart';
 import 'feedback.dart';
@@ -248,7 +248,7 @@ class _DayPeriodControl extends StatelessWidget {
             child: new Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle),
           ),
         ),
-        const SizedBox(width: 0.0, height: 4.0),  // Vertical spacer
+        const SizedBox(width: 0.0, height: 4.0), // Vertical spacer
         new GestureDetector(
           excludeFromSemantics: true,
           onTap: Feedback.wrapForTap(() {

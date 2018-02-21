@@ -295,12 +295,12 @@ class CardCollectionState extends State<CardCollection> {
     }
 
     // TODO(abarth): This icon is wrong in RTL.
-    Widget leftArrowIcon =  const Icon(Icons.arrow_back, size: 36.0);
+    Widget leftArrowIcon = const Icon(Icons.arrow_back, size: 36.0);
     if (_dismissDirection == DismissDirection.startToEnd)
       leftArrowIcon = new Opacity(opacity: 0.1, child: leftArrowIcon);
 
       // TODO(abarth): This icon is wrong in RTL.
-    Widget rightArrowIcon =  const Icon(Icons.arrow_forward, size: 36.0);
+    Widget rightArrowIcon = const Icon(Icons.arrow_forward, size: 36.0);
     if (_dismissDirection == DismissDirection.endToStart)
       rightArrowIcon = new Opacity(opacity: 0.1, child: rightArrowIcon);
 

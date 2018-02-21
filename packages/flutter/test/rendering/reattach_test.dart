@@ -148,7 +148,7 @@ void main() {
     expect(semanticsUpdateCount, 0);
     // Lay out, composite, paint, and update semantics again
     layout(testTree.root, phase: EnginePhase.flushSemantics);
-    expect(semanticsUpdateCount, 0);  // no semantics have changed.
+    expect(semanticsUpdateCount, 0); // no semantics have changed.
     semanticsHandle.dispose();
   });
   test('objects can be detached and re-attached: semantics (with change)', () {
@@ -172,7 +172,7 @@ void main() {
     expect(semanticsUpdateCount, 0);
     // Lay out, composite, paint, and update semantics again
     layout(testTree.root, phase: EnginePhase.flushSemantics);
-    expect(semanticsUpdateCount, 1);  // semantics have changed.
+    expect(semanticsUpdateCount, 1); // semantics have changed.
     semanticsHandle.dispose();
   });
 }

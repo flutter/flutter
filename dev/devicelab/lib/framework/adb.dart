@@ -170,7 +170,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
         // TODO(yjbanov): check battery level
         await device._getWakefulness();
         results['android-device-$deviceId'] = new HealthCheckResult.success();
-      } catch(e, s) {
+      } catch (e, s) {
         results['android-device-$deviceId'] = new HealthCheckResult.error(e, s);
       }
     }

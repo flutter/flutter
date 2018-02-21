@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
@@ -119,21 +122,21 @@ void main() {
 
     expect(semantics, hasSemantics(
       new TestSemantics.root(
-          children: <TestSemantics>[
-            new TestSemantics.rootChild(
-                label: 'test1',
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            label: 'test1',
+            children: <TestSemantics>[
+              new TestSemantics(
+                label: 'middle',
                 children: <TestSemantics>[
                   new TestSemantics(
-                    label: 'middle',
-                    children: <TestSemantics>[
-                      new TestSemantics(
-                        label: 'test2b',
-                      ),
-                    ],
-                  )
-                ]
-            )
-          ]
+                    label: 'test2b',
+                  ),
+                ],
+              )
+            ]
+          )
+        ]
       ),
       ignoreId: true,
       ignoreRect: true,
@@ -205,12 +208,12 @@ void main() {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = new TestSemantics.root(
-        children: <TestSemantics>[
-          new TestSemantics.rootChild(
-            label: 'test1',
-            textDirection: TextDirection.rtl,
-          )
-        ]
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'test1',
+          textDirection: TextDirection.rtl,
+        )
+      ]
     );
 
     await tester.pumpWidget(
@@ -243,14 +246,14 @@ void main() {
     );
 
     final TestSemantics expectedSemantics = new TestSemantics.root(
-        children: <TestSemantics>[
-          new TestSemantics.rootChild(
-            label: 'label',
-            hint: 'hint',
-            value: 'value',
-            textDirection: TextDirection.ltr,
-          )
-        ]
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'label',
+          hint: 'hint',
+          value: 'value',
+          textDirection: TextDirection.ltr,
+        )
+      ]
     );
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
@@ -280,12 +283,12 @@ void main() {
     );
 
     final TestSemantics expectedSemantics = new TestSemantics.root(
-        children: <TestSemantics>[
-          new TestSemantics.rootChild(
-            hint: 'hint one\nhint two',
-            textDirection: TextDirection.ltr,
-          )
-        ]
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          hint: 'hint one\nhint two',
+          textDirection: TextDirection.ltr,
+        )
+      ]
     );
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
@@ -364,13 +367,13 @@ void main() {
     );
 
     final TestSemantics expectedSemantics = new TestSemantics.root(
-        children: <TestSemantics>[
-          new TestSemantics.rootChild(
-            hint: 'hint',
-            value: 'value',
-            textDirection: TextDirection.ltr,
-          )
-        ]
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          hint: 'hint',
+          value: 'value',
+          textDirection: TextDirection.ltr,
+        )
+      ]
     );
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
@@ -398,6 +401,8 @@ void main() {
         onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
         onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
         onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
+        onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
+        onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
       )
     );
 
@@ -410,7 +415,9 @@ void main() {
         new TestSemantics.rootChild(
           id: expectedId,
           rect: TestSemantics.fullScreen,
-          actions: allActions.fold(0, (int previous, SemanticsAction action) => previous | action.index)
+          actions: allActions.fold(0, (int previous, SemanticsAction action) => previous | action.index),
+          previousNodeId: -1,
+          nextNodeId: -1,
         ),
       ],
     );
@@ -569,4 +576,526 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Semantics widgets built in a widget tree are sorted properly', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    int semanticsUpdateCount = 0;
+    tester.binding.pipelineOwner.ensureSemantics(
+      listener: () {
+        semanticsUpdateCount += 1;
+      }
+    );
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Semantics(
+          sortKey: const CustomSortKey(0.0),
+          explicitChildNodes: true,
+          child: new Column(
+            children: <Widget>[
+              new Semantics(sortKey: const CustomSortKey(3.0), child: const Text('Label 1')),
+              new Semantics(sortKey: const CustomSortKey(2.0), child: const Text('Label 2')),
+              new Semantics(
+                sortKey: const CustomSortKey(1.0),
+                explicitChildNodes: true,
+                child: new Row(
+                  children: <Widget>[
+                    new Semantics(sortKey: const OrdinalSortKey(3.0), child: const Text('Label 3')),
+                    new Semantics(sortKey: const OrdinalSortKey(2.0), child: const Text('Label 4')),
+                    new Semantics(sortKey: const OrdinalSortKey(1.0), child: const Text('Label 5')),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(semanticsUpdateCount, 1);
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        id: 0,
+        children: <TestSemantics>[
+          new TestSemantics(
+            id: 2,
+            nextNodeId: 5,
+            previousNodeId: -1,
+            children: <TestSemantics>[
+              new TestSemantics(
+                id: 3,
+                label: r'Label 1',
+                textDirection: TextDirection.ltr,
+                nextNodeId: -1,
+                previousNodeId: 4,
+              ),
+              new TestSemantics(
+                id: 4,
+                label: r'Label 2',
+                textDirection: TextDirection.ltr,
+                nextNodeId: 3,
+                previousNodeId: 6,
+              ),
+              new TestSemantics(
+                id: 5,
+                nextNodeId: 8,
+                previousNodeId: 2,
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    id: 6,
+                    label: r'Label 3',
+                    textDirection: TextDirection.ltr,
+                    nextNodeId: 4,
+                    previousNodeId: 7,
+                  ),
+                  new TestSemantics(
+                    id: 7,
+                    label: r'Label 4',
+                    textDirection: TextDirection.ltr,
+                    nextNodeId: 6,
+                    previousNodeId: 8,
+                  ),
+                  new TestSemantics(
+                    id: 8,
+                    label: r'Label 5',
+                    textDirection: TextDirection.ltr,
+                    nextNodeId: 7,
+                    previousNodeId: 5,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ), ignoreTransform: true, ignoreRect: true),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('Semantics widgets built with explicit sort orders are sorted properly', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    int semanticsUpdateCount = 0;
+    tester.binding.pipelineOwner.ensureSemantics(
+      listener: () {
+        semanticsUpdateCount += 1;
+      }
+    );
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Column(
+          children: <Widget>[
+            new Semantics(
+              sortOrder: new SemanticsSortOrder(
+                keys: <SemanticsSortKey>[const CustomSortKey(3.0), const OrdinalSortKey(5.0)],
+              ),
+              child: const Text('Label 1'),
+            ),
+            new Semantics(
+              sortOrder: new SemanticsSortOrder(
+                keys: <SemanticsSortKey>[const CustomSortKey(2.0), const OrdinalSortKey(4.0)],
+              ),
+              child: const Text('Label 2'),
+            ),
+            new Row(
+              children: <Widget>[
+                new Semantics(
+                  sortOrder: new SemanticsSortOrder(
+                    keys: <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(3.0)],
+                  ),
+                  child: const Text('Label 3'),
+                ),
+                new Semantics(
+                  sortOrder: new SemanticsSortOrder(
+                    keys: <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(2.0)],
+                  ),
+                  child: const Text('Label 4'),
+                ),
+                new Semantics(
+                  sortOrder: new SemanticsSortOrder(
+                    keys: <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(1.0)],
+                  ),
+                  child: const Text('Label 5'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(semanticsUpdateCount, 1);
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        children: <TestSemantics>[
+          new TestSemantics(
+            label: r'Label 1',
+            textDirection: TextDirection.ltr,
+            nextNodeId: -1,
+            previousNodeId: 3,
+          ),
+          new TestSemantics(
+            label: r'Label 2',
+            textDirection: TextDirection.ltr,
+            nextNodeId: 2,
+            previousNodeId: 4,
+          ),
+          new TestSemantics(
+            label: r'Label 3',
+            textDirection: TextDirection.ltr,
+            nextNodeId: 3,
+            previousNodeId: 5,
+          ),
+          new TestSemantics(
+            label: r'Label 4',
+            textDirection: TextDirection.ltr,
+            nextNodeId: 4,
+            previousNodeId: 6,
+          ),
+          new TestSemantics(
+            label: r'Label 5',
+            textDirection: TextDirection.ltr,
+            nextNodeId: 5,
+            previousNodeId: -1,
+          ),
+        ],
+      ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+    semantics.dispose();
+  });
+
+  testWidgets('Semantics widgets built with some discarded sort orders are sorted properly', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    int semanticsUpdateCount = 0;
+    tester.binding.pipelineOwner.ensureSemantics(
+      listener: () {
+        semanticsUpdateCount += 1;
+      }
+    );
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Semantics(
+          sortKey: const OrdinalSortKey(0.0),
+          explicitChildNodes: true,
+          child: new Column(
+            children: <Widget>[
+              new Semantics(
+                sortOrder: new SemanticsSortOrder(
+                  keys: <SemanticsSortKey>[const CustomSortKey(3.0), const OrdinalSortKey(5.0)],
+                  discardParentOrder: true,  // Replace this one.
+                ),
+                child: const Text('Label 1'),
+              ),
+              new Semantics(
+                sortOrder: new SemanticsSortOrder(
+                  keys: <SemanticsSortKey>[const CustomSortKey(2.0), const OrdinalSortKey(4.0)],
+                ),
+                child: const Text('Label 2'),
+              ),
+              new Row(
+                children: <Widget>[
+                  new Semantics(
+                    sortOrder: new SemanticsSortOrder(
+                      keys: <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(3.0)],
+                      discardParentOrder: true,  // Replace this one.
+                    ),
+                    child: const Text('Label 3'),
+                  ),
+                  new Semantics(
+                    sortOrder: new SemanticsSortOrder(
+                      keys: <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(2.0)],
+                    ),
+                    child: const Text('Label 4'),
+                  ),
+                  new Semantics(
+                    sortOrder: new SemanticsSortOrder(
+                      keys: <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(1.0)],
+                    ),
+                    child: const Text('Label 5'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(semanticsUpdateCount, 1);
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        children: <TestSemantics>[
+          new TestSemantics(
+            nextNodeId: 5,
+            previousNodeId: -1,
+            children: <TestSemantics>[
+              new TestSemantics(
+                label: r'Label 1',
+                textDirection: TextDirection.ltr,
+                nextNodeId: 7,
+                previousNodeId: 5,
+              ),
+              new TestSemantics(
+                label: r'Label 2',
+                textDirection: TextDirection.ltr,
+                nextNodeId: -1,
+                previousNodeId: 6,
+              ),
+              new TestSemantics(
+                label: r'Label 3',
+                textDirection: TextDirection.ltr,
+                nextNodeId: 3,
+                previousNodeId: 2,
+              ),
+              new TestSemantics(
+                label: r'Label 4',
+                textDirection: TextDirection.ltr,
+                nextNodeId: 4,
+                previousNodeId: 7,
+              ),
+              new TestSemantics(
+                label: r'Label 5',
+                textDirection: TextDirection.ltr,
+                nextNodeId: 6,
+                previousNodeId: 3,
+              ),
+            ],
+          ),
+        ],
+      ), ignoreTransform: true, ignoreRect: true, ignoreId: true),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('Semantics widgets without sort orders are sorted properly', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    int semanticsUpdateCount = 0;
+    tester.binding.pipelineOwner.ensureSemantics(
+      listener: () {
+        semanticsUpdateCount += 1;
+      }
+    );
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Column(
+          children: <Widget>[
+            const Text('Label 1'),
+            const Text('Label 2'),
+            new Row(
+              children: <Widget>[
+                const Text('Label 3'),
+                const Text('Label 4'),
+                const Text('Label 5'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(semanticsUpdateCount, 1);
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        children: <TestSemantics>[
+          new TestSemantics(
+            label: r'Label 1',
+            textDirection: TextDirection.ltr,
+            previousNodeId: -1,
+          ),
+          new TestSemantics(
+            label: r'Label 2',
+            textDirection: TextDirection.ltr,
+            previousNodeId: 2,
+          ),
+          new TestSemantics(
+            label: r'Label 3',
+            textDirection: TextDirection.ltr,
+            previousNodeId: 3,
+          ),
+          new TestSemantics(
+            label: r'Label 4',
+            textDirection: TextDirection.ltr,
+            previousNodeId: 4,
+          ),
+          new TestSemantics(
+            label: r'Label 5',
+            textDirection: TextDirection.ltr,
+            previousNodeId: 5,
+          ),
+        ],
+      ), ignoreTransform: true, ignoreRect: true, ignoreId: true),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('Semantics widgets that are transformed are sorted properly', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    int semanticsUpdateCount = 0;
+    tester.binding.pipelineOwner.ensureSemantics(
+      listener: () {
+        semanticsUpdateCount += 1;
+      }
+    );
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Column(
+          children: <Widget>[
+            const Text('Label 1'),
+            const Text('Label 2'),
+            new Transform.rotate(
+              angle: pi / 2.0,
+              child: new Row(
+                children: <Widget>[
+                  const Text('Label 3'),
+                  const Text('Label 4'),
+                  const Text('Label 5'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(semanticsUpdateCount, 1);
+    expect(semantics, hasSemantics(
+      new TestSemantics(
+        children: <TestSemantics>[
+          new TestSemantics(
+            label: r'Label 1',
+            textDirection: TextDirection.ltr,
+            previousNodeId: 6,
+          ),
+          new TestSemantics(
+            label: r'Label 2',
+            textDirection: TextDirection.ltr,
+            previousNodeId: 2,
+          ),
+          new TestSemantics(
+            label: r'Label 3',
+            textDirection: TextDirection.ltr,
+            previousNodeId: -1,
+          ),
+          new TestSemantics(
+            label: r'Label 4',
+            textDirection: TextDirection.ltr,
+            previousNodeId: 4,
+          ),
+          new TestSemantics(
+            label: r'Label 5',
+            textDirection: TextDirection.ltr,
+            previousNodeId: 5,
+          ),
+        ],
+      ), ignoreTransform: true, ignoreRect: true, ignoreId: true),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets(
+      'Semantics widgets without sort orders are sorted properly when no Directionality is present',
+      (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    int semanticsUpdateCount = 0;
+    tester.binding.pipelineOwner.ensureSemantics(listener: () {
+      semanticsUpdateCount += 1;
+    });
+    await tester.pumpWidget(
+      new Stack(
+        alignment: Alignment.center,
+        children: <Widget>[
+          // Set this up so that the placeholder takes up the whole screen,
+          // and place the positioned boxes so that if we traverse in the
+          // geometric order, we would go from box [4, 3, 2, 1, 0], but if we
+          // go in child order, then we go from box [4, 1, 2, 3, 0]. We're verifying
+          // that we go in child order here, not geometric order, since there
+          // is no directionality, so we don't have a geometric opinion about
+          // horizontal order. We do still want to sort vertically, however,
+          // which is why the order isn't [0, 1, 2, 3, 4].
+          new Semantics(
+            button: true,
+            child: const Placeholder(),
+          ),
+          new Positioned(
+            top: 200.0,
+            left: 100.0,
+            child: new Semantics( // Box 0
+              button: true,
+              child: const SizedBox(width: 30.0, height: 30.0),
+            ),
+          ),
+          new Positioned(
+            top: 100.0,
+            left: 200.0,
+            child: new Semantics( // Box 1
+              button: true,
+              child: const SizedBox(width: 30.0, height: 30.0),
+            ),
+          ),
+          new Positioned(
+            top: 100.0,
+            left: 100.0,
+            child: new Semantics( // Box 2
+              button: true,
+              child: const SizedBox(width: 30.0, height: 30.0),
+            ),
+          ),
+          new Positioned(
+            top: 100.0,
+            left: 0.0,
+            child: new Semantics( // Box 3
+              button: true,
+              child: const SizedBox(width: 30.0, height: 30.0),
+            ),
+          ),
+          new Positioned(
+            top: 10.0,
+            left: 100.0,
+            child: new Semantics( // Box 4
+              button: true,
+              child: const SizedBox(width: 30.0, height: 30.0),
+            ),
+          ),
+        ],
+      ),
+    );
+    expect(semanticsUpdateCount, 1);
+    expect(
+      semantics,
+      hasSemantics(
+        new TestSemantics(
+          children: <TestSemantics>[
+            new TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.isButton],
+              previousNodeId: -1,
+            ),
+            new TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.isButton],
+              previousNodeId: 6,
+            ),
+            new TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.isButton],
+              previousNodeId: 7,
+            ),
+            new TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.isButton],
+              previousNodeId: 4,
+            ),
+            new TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.isButton],
+              previousNodeId: 5,
+            ),
+            new TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.isButton],
+              previousNodeId: 2,
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true),
+    );
+    semantics.dispose();
+  });
+}
+
+class CustomSortKey extends OrdinalSortKey {
+  const CustomSortKey(double order, {String name}) : super(order, name: name);
 }

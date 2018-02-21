@@ -375,7 +375,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
 
   @override
   _SnappingScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new _SnappingScrollPhysics(parent: buildParent(ancestor),  midScrollOffset: midScrollOffset);
+    return new _SnappingScrollPhysics(parent: buildParent(ancestor), midScrollOffset: midScrollOffset);
   }
 
   Simulation _toMidScrollOffsetSimulation(double offset, double dragVelocity) {
@@ -411,7 +411,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
       // snap to midScrollOffset if they're more than halfway there,
       // otherwise snap to zero.
       final double snapThreshold = midScrollOffset / 2.0;
-      if (offset >=  snapThreshold && offset < midScrollOffset)
+      if (offset >= snapThreshold && offset < midScrollOffset)
         return _toMidScrollOffsetSimulation(offset, dragVelocity);
       if (offset > 0.0 && offset < snapThreshold)
         return _toZeroScrollOffsetSimulation(offset, dragVelocity);

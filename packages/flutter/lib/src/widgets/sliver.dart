@@ -41,7 +41,8 @@ abstract class SliverChildDelegate {
   /// Returns the child with the given index.
   ///
   /// Should return null if asked to build a widget with a greater index than
-  /// exists.
+  /// exists. If this returns null, [estimatedChildCount] must subsequently
+  /// return a precise non-null value.
   ///
   /// Subclasses typically override this function and wrap their children in
   /// [AutomaticKeepAlive] and [RepaintBoundary] widgets.
@@ -54,6 +55,8 @@ abstract class SliverChildDelegate {
   ///
   /// Return null if there are an unbounded number of children or if it would
   /// be too difficult to estimate the number of children.
+  ///
+  /// This must return a precise number once [build] has returned null.
   int get estimatedChildCount => null;
 
   /// Returns an estimate of the max scroll extent for all the children.
@@ -336,8 +339,11 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
   /// Subclasses should override this function if they have additional
   /// information about their max scroll extent.
   ///
-  /// The default implementation returns calls
-  /// [SliverChildDelegate.estimateMaxScrollOffset].
+  /// This is used by [SliverMultiBoxAdaptorElement] to implement part of the
+  /// [RenderSliverBoxChildManager] API.
+  ///
+  /// The default implementation defers to [delegate] via its
+  /// [SliverChildDelegate.estimateMaxScrollOffset] method.
   double estimateMaxScrollOffset(
     SliverConstraints constraints,
     int firstIndex,
@@ -592,7 +598,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
       lastIndex,
       leadingScrollOffset,
       trailingScrollOffset,
-    ) ?? gridDelegate.getLayout(constraints).estimateMaxScrollOffset(delegate.estimatedChildCount);
+    ) ?? gridDelegate.getLayout(constraints).computeMaxScrollOffset(delegate.estimatedChildCount);
   }
 }
 
@@ -765,7 +771,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     double leadingScrollOffset,
     double trailingScrollOffset,
   ) {
-    final int childCount = widget.delegate.estimatedChildCount;
+    final int childCount = this.childCount;
     if (childCount == null)
       return double.INFINITY;
     if (lastIndex == childCount - 1)
@@ -796,6 +802,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       trailingScrollOffset,
     );
   }
+
+  @override
+  int get childCount => widget.delegate.estimatedChildCount;
 
   @override
   void didStartLayout() {

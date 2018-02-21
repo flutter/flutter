@@ -31,7 +31,7 @@ class TestLayout {
 }
 
 void main() {
-  final ViewConfiguration testConfiguration = const ViewConfiguration(
+  const ViewConfiguration testConfiguration = const ViewConfiguration(
     size: const Size(800.0, 600.0),
     devicePixelRatio: 1.0
   );

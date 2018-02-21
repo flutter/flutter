@@ -22,6 +22,7 @@ class CupertinoPageScaffold extends StatelessWidget {
   const CupertinoPageScaffold({
     Key key,
     this.navigationBar,
+    this.backgroundColor: CupertinoColors.white,
     @required this.child,
   }) : assert(child != null),
        super(key: key);
@@ -32,7 +33,7 @@ class CupertinoPageScaffold extends StatelessWidget {
   /// If translucent, the main content may slide behind it.
   /// Otherwise, the main content's top margin will be offset by its height.
   ///
-  /// The scaffold assumes the nav bar will consume the [MediaQuery] top padding.
+  /// The scaffold assumes the navigation bar will consume the [MediaQuery] top padding.
   // TODO(xster): document its page transition animation when ready
   final ObstructingPreferredSizeWidget navigationBar;
 
@@ -43,6 +44,11 @@ class CupertinoPageScaffold extends StatelessWidget {
   /// top padding indicating the area of obstructing overlap from the
   /// [navigationBar].
   final Widget child;
+
+  /// The color of the widget that underlies the entire scaffold.
+  ///
+  /// By default uses [CupertinoColors.white] color.
+  final Color backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +63,8 @@ class CupertinoPageScaffold extends StatelessWidget {
       final double topPadding = navigationBar.preferredSize.height
           + existingMediaQuery.padding.top;
 
-      // If nav bar is opaquely obstructing, directly shift the main content
-      // down. If translucent, let main content draw behind nav bar but hint the
+      // If navigation bar is opaquely obstructing, directly shift the main content
+      // down. If translucent, let main content draw behind navigation bar but hint the
       // obstructed area.
       if (navigationBar.fullObstruction) {
         paddedContent = new Padding(
@@ -90,7 +96,7 @@ class CupertinoPageScaffold extends StatelessWidget {
     }
 
     return new DecoratedBox(
-      decoration: const BoxDecoration(color: CupertinoColors.white),
+      decoration: new BoxDecoration(color: backgroundColor),
       child: new Stack(
         children: stacked,
       ),

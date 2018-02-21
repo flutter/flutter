@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button.dart';
+import 'button_theme.dart';
 import 'flat_button.dart';
 import 'material.dart';
 import 'scaffold.dart';

@@ -7,13 +7,14 @@ import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
-import 'arc.dart';
 import 'bottom_sheet.dart';
-import 'button.dart';
 import 'button_bar.dart';
+import 'button_theme.dart';
 import 'drawer.dart';
 import 'flexible_space_bar.dart';
 import 'material.dart';
@@ -22,7 +23,27 @@ import 'theme.dart';
 
 const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be device dependent
 const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 200);
-final Tween<double> _kFloatingActionButtonTurnTween = new Tween<double>(begin: -0.125, end: 0.0);
+// The fraction of a circle the FAB should turn when it enters.
+const double _kFloatingActionButtonTurnInterval = 0.125;
+const FabPositioner _kDefaultFabPositioner = FabPositioner.endFloat;
+
+/// Returns a path for a notch in the outline of a shape.
+///
+/// The path makes a notch in the host shape that can contain the guest shape.
+///
+/// The `host` is the bounding rectangle for the shape into which the notch will
+/// be applied. The `guest` is the bounding rectangle of the shape for which we
+/// are creating a notch in the host.
+///
+/// The `start` and `end` arguments are points on the outline of the host shape
+/// that will be connected by the returned path.
+///
+/// The returned path may pass anywhere, including inside the guest bounds area,
+/// and may contain multiple subpaths. The returned path ends at `end` and does
+/// not end with a [Path.close]. The returned [Path] is built under the
+/// assumption it will be added to an existing path that is at the `start`
+/// coordinates using [Path.addPath].
+typedef Path ComputeNotch(Rect host, Rect guest, Offset start, Offset end);
 
 enum _ScaffoldSlot {
   body,
@@ -37,70 +58,352 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
-/// A position that the [FloatingActionButton] can dock to in a [Scaffold].
+/// Interface for objects that place the [FloatingActionButton] in the [Scaffold].
 /// 
-/// [getOffset] 
-class FabPosition {
-  /// End-aligned FAB, floating at the bottom of the screen.
+/// Flutter provides [FabPositioner]s for the common FAB placements in
+/// Material Design apps, whose implementations are available as static
+/// members of this class.
+abstract class FabPositioner {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const FabPositioner();
+
+  /// End-aligned [FloatingActionButton], floating at the bottom of the screen.
   /// 
   /// This is the default alignment of FABs in Material apps.
-  static const FabPosition endFloat = const _EndFloatFab();
+  static const FabPositioner endFloat = const _EndFloatFab();
 
-  /// Centered FAB, floating at the bottom of the screen.
-  static const FabPosition centerFloat = const _CenterFloatFab();
+  /// Centered [FloatingActionButton], floating at the bottom of the screen.
+  static const FabPositioner centerFloat = const _CenterFloatFab();
 
-  const FabPosition(this.getOffset);
+  /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry);
 
-  /// Places the FAB with the layout parameters of the [Scaffold].
-  /// 
-  /// [scaffoldSize] is the size of the whole [Scaffold].
-  /// [fabSize] is the size of the [FloatingActionButton] to be placed.
-  /// [snackBarSize] is the size of the Scaffold's [SnackBar] (if available).
-  /// [bottomSheetSize] is the size of the [BottomSheet] (if available).
-  /// [textDirection] is the direction used by the Scaffold (either RTL or LTR).
-  /// [contentBottom] is the height from the top where the Scaffold's body ends.
-  /// [horizontalPadding] is padding the Scaffold would like the FAB to observe.
-  final Offset Function(Size scaffoldSize, Size fabSize, Size snackBarSize, Size bottomSheetSize, TextDirection textDirection, double contentBottom, double horizontalPadding) getOffset;
+  @override
+  String toString() => '$runtimeType()';
 }
 
-class _CenterFloatFab extends FabPosition {
-  const _CenterFloatFab() : super(_getOffset);
+/// Provider of [FloatingActionButton] animations.
+abstract class FabMotionAnimator {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const FabMotionAnimator();
 
-  static Offset _getOffset(Size scaffoldSize, Size fabSize, Size snackBarSize, Size bottomSheetSize, TextDirection textDirection, double contentBottom, double endPadding) {
-    final double fabX = (scaffoldSize.width - fabSize.width) / 2;
-    double fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
-    if (snackBarSize.height > 0.0)
-      fabY = math.min(fabY, contentBottom - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
-    if (bottomSheetSize.height > 0.0)
-      fabY = math.min(fabY, contentBottom - bottomSheetSize.height - fabSize.height / 2.0);
+  /// Moves the [FloatingActionButton] by scaling out and in at a new location.
+  /// 
+  /// This is the default fab motion animation.
+  static const FabMotionAnimator scaling = const _ScalingFabMotionAnimator();
+
+  /// Gets the [FloatingActionButton]'s [Offset] based on a [progress].
+  Offset getOffset({@required Offset begin, @required Offset end, @required double progress});
+
+  /// Animates the scale of the [FloatingActionButton].
+  /// 
+  /// The animation should both start and end with a value of 1.0.
+  Animation<double> getScaleAnimation({@required Animation<double> parent});
+
+  /// Animates the rotation of the [FloatingActionButton].
+  /// 
+  /// The animation should both start and end with a value of 0.0 or 1.0.
+  /// 
+  /// The animation values are a fraction of a full circle, with 0.0 and 1.0
+  /// corresponding to 0 and 360 degrees, while 0.5 corresponds to 180 degrees.
+  Animation<double> getRotationAnimation({@required Animation<double> parent});
+
+  @override
+  String toString() => '$runtimeType';
+}
+
+class _ScalingFabMotionAnimator extends FabMotionAnimator {
+  const _ScalingFabMotionAnimator();
+
+  @override
+  Offset getOffset({Offset begin, Offset end, double progress}) {
+    if (progress < 0.5) {
+      return begin;
+    } else {
+      return end;
+    }
+  }
+
+  @override
+  Animation<double> getScaleAnimation({Animation<double> parent}) {
+    final Curve curve = const Interval(0.5, 1.0, curve: Curves.ease);
+    return new _MaxAnimation<double>(
+      new ReverseAnimation(new CurveTween(curve: curve.flipped).animate(parent)),
+      new CurveTween(curve: curve).animate(parent),
+    );
+  }
+
+  @override
+  Animation<double> getRotationAnimation({Animation<double> parent}) {
+    // Because we only see the last half of the rotation tween, 
+    // it needs to go twice as far.
+    final Tween<double> rotationTween = new Tween<double>(
+      begin: 1.0 - _kFloatingActionButtonTurnInterval * 2, 
+      end: 1.0,
+    );
+    // This rotation will turn on the way in, but not on the way out.
+    return new _MaxAnimation<double>(
+      rotationTween.animate(parent),
+      new ReverseAnimation(new CurveTween(curve: const Threshold(0.5)).animate(parent)),
+    );
+  }
+}
+
+class _MaxAnimation<T> extends CompoundAnimation<T> {
+  _MaxAnimation(Animation<T> first, Animation<T> next): super(first: first, next: next);
+
+  @override
+  T get value => math.max(first.value, next.value);
+}
+
+/// The geometry of the [Scaffold] before it finishes laying out.
+/// 
+/// The Scaffold passes this prelayout geometry to its [FabPositioner].
+/// 
+/// For a description of the [Scaffold]'s geometry after it has
+/// finished laying out, see the [ScaffoldGeometry].
+@immutable
+class ScaffoldPrelayoutGeometry {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const ScaffoldPrelayoutGeometry({this.bottomSheetSize, this.contentBottom, this.contentTop, this.floatingActionButtonSize, this.horizontalFloatingActionButtonPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
+
+  /// The [Size] of the [Scaffold]'s [FloatingActionButton] (if available).
+  /// 
+  /// The [Scaffold] will determine the [floatingActionButtonSize] if 
+  /// [Scaffold.floatingActionButton] is not null.
+  /// 
+  /// If [Scaffold.floatingActionButton] is null, this should be [Size.zero].
+  final Size floatingActionButtonSize;
+
+  /// The [Size] of the [Scaffold]'s [BottomSheet] (if available).
+  /// 
+  /// The [Scaffold] will determine the [bottomSheetSize] if the [Scaffold]
+  /// is currently showing a [BottomSheet].
+  /// 
+  /// If the [Scaffold] is not currently showing a [BottomSheet],
+  /// this should be [Size.zero].
+  final Size bottomSheetSize;
+
+  /// The height from the [Scaffold]'s top where its body ends.
+  final double contentBottom;
+
+  /// The height from the [Scaffold]'s top where its body starts.
+  final double contentTop;
+
+  /// The minimum horizontal padding the [FloatingActionButton] should observe.
+  final double horizontalFloatingActionButtonPadding;
+
+  /// The [Size] of the whole [Scaffold].
+  final Size scaffoldSize;
+
+  /// The [Size] of the [Scaffold]'s [SnackBar] (if available).
+  /// 
+  /// The [Scaffold] will determine the [snackBarSize] if the [Scaffold]
+  /// is currently showing a [SnackBar].
+  /// 
+  /// If the [Scaffold] is not showing a [SnackBar],
+  /// this should be [Size.zero].
+  final Size snackBarSize;
+
+  /// The [TextDirection] of the [Scaffold]'s [BuildContext].
+  final TextDirection textDirection;
+}
+
+class _CenterFloatFab extends FabPositioner {
+  const _CenterFloatFab();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    // Compute the x-axis offset.
+    final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2;
+
+    // Compute the y-axis offset.
+    final double contentBottom = scaffoldGeometry.contentBottom;
+    final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
+    final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
+    final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
+    double fabY = contentBottom - fabHeight - _kFloatingActionButtonMargin;
+    if (snackBarHeight > 0.0)
+      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - _kFloatingActionButtonMargin);
+    if (bottomSheetHeight > 0.0)
+      fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
 
     return new Offset(fabX, fabY);
   }
 }
 
-class _EndFloatFab extends FabPosition {
+class _EndFloatFab extends FabPositioner {
+  const _EndFloatFab();
 
-  const _EndFloatFab() : super(_getOffset);
-
-  static Offset _getOffset(Size scaffoldSize, Size fabSize, Size snackBarSize, Size bottomSheetSize, TextDirection textDirection, double contentBottom, double endPadding) {
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    // Compute the x-axis offset.
     double fabX;
-    assert(textDirection != null);
-    switch (textDirection) {
+    assert(scaffoldGeometry.textDirection != null);
+    switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
-        fabX = _kFloatingActionButtonMargin + endPadding;
+        fabX = _kFloatingActionButtonMargin + scaffoldGeometry.horizontalFloatingActionButtonPadding;
         break;
       case TextDirection.ltr:
-        fabX = scaffoldSize.width - fabSize.width - _kFloatingActionButtonMargin - endPadding;
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - _kFloatingActionButtonMargin - scaffoldGeometry.horizontalFloatingActionButtonPadding;
       break;
     }
 
-    double fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
-    if (snackBarSize.height > 0.0)
-      fabY = math.min(fabY, contentBottom - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
-    if (bottomSheetSize.height > 0.0)
-      fabY = math.min(fabY, contentBottom - bottomSheetSize.height - fabSize.height / 2.0);
+    // Compute the y-axis offset.
+    final double contentBottom = scaffoldGeometry.contentBottom;
+    final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
+    final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
+    final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
+
+    double fabY = contentBottom - fabHeight - _kFloatingActionButtonMargin;
+    if (snackBarHeight > 0.0)
+      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - _kFloatingActionButtonMargin);
+    if (bottomSheetHeight > 0.0)
+      fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
 
     return new Offset(fabX, fabY);
+  }
+}
+
+/// Geometry information for [Scaffold] components after layout is finished.
+///
+/// To get a [ValueNotifier] for the scaffold geometry call
+/// [Scaffold.geometryOf].
+/// 
+/// For information about the [Scaffold]'s geometry that is used as part of
+/// the layout process, see [ScaffoldPrelayoutGeometry].
+@immutable
+class ScaffoldGeometry {
+  /// Create an object that describes the geometry of a [Scaffold].
+  const ScaffoldGeometry({
+    this.bottomNavigationBarTop,
+    this.floatingActionButtonArea,
+    this.floatingActionButtonNotch,
+  });
+
+  /// The distance from the [Scaffold]'s top edge to the top edge of the
+  /// rectangle in which the [Scaffold.bottomNavigationBar] bar is being laid
+  /// out.
+  ///
+  /// When there is no [Scaffold.bottomNavigationBar] set, this will be null.
+  final double bottomNavigationBarTop;
+
+  /// The rectangle in which the [Scaffold] is laying out
+  /// [Scaffold.floatingActionButton].
+  ///
+  /// This is null when there is no floating action button showing.
+  final Rect floatingActionButtonArea;
+
+  /// A [ComputeNotch] for the floating action button.
+  /// 
+  /// The contract for this [ComputeNotch] is described in [ComputeNotch] and
+  /// [Scaffold.setFloatingActionButtonNotchFor].
+  final ComputeNotch floatingActionButtonNotch;
+
+  ScaffoldGeometry _scaleFloatingActionButton(double scaleFactor) {
+    if (scaleFactor == 1.0)
+      return this;
+
+    if (scaleFactor == 0.0) {
+      return new ScaffoldGeometry(
+        bottomNavigationBarTop: bottomNavigationBarTop,
+        floatingActionButtonNotch: floatingActionButtonNotch,
+      );
+    }
+
+    final Rect scaledButton = Rect.lerp(
+      floatingActionButtonArea.center & Size.zero,
+      floatingActionButtonArea,
+      scaleFactor
+    );
+    return copyWith(floatingActionButtonArea: scaledButton);
+  }
+
+  /// Creates a copy of this [ScaffoldGeometry] but with the given fields replaced with
+  /// the new values.
+  ScaffoldGeometry copyWith({
+    double bottomNavigationBarTop,
+    Rect floatingActionButtonArea,
+    ComputeNotch floatingActionButtonNotch,
+  }) {
+    return new ScaffoldGeometry(
+      bottomNavigationBarTop: bottomNavigationBarTop ?? this.bottomNavigationBarTop,
+      floatingActionButtonArea: floatingActionButtonArea ?? this.floatingActionButtonArea,
+      floatingActionButtonNotch: floatingActionButtonNotch ?? this.floatingActionButtonNotch,
+    );
+  }
+}
+
+
+class _Closeable {
+  _Closeable(this.closeCallback) : assert(closeCallback != null);
+
+  VoidCallback closeCallback;
+
+  void close() {
+    if (closeCallback == null)
+      return;
+    closeCallback();
+    closeCallback = null;
+  }
+}
+
+class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenable<ScaffoldGeometry> {
+  _ScaffoldGeometryNotifier(this.geometry, this.context)
+    : assert (context != null);
+
+  final BuildContext context;
+  double fabScale;
+  ScaffoldGeometry geometry;
+  _Closeable computeNotchCloseable;
+
+  @override
+  ScaffoldGeometry get value {
+    assert(() {
+      final RenderObject renderObject = context.findRenderObject();
+      if (renderObject == null || !renderObject.owner.debugDoingPaint)
+        throw new FlutterError(
+            'Scaffold.geometryOf() must only be accessed during the paint phase.\n'
+            'The ScaffoldGeometry is only available during the paint phase, because\n'
+            'its value is computed during the animation and layout phases prior to painting.'
+        );
+      return true;
+    }());
+    return geometry._scaleFloatingActionButton(fabScale);
+  }
+
+  void _updateWith({
+    double bottomNavigationBarTop,
+    Rect floatingActionButtonArea,
+    double floatingActionButtonScale,
+    ComputeNotch floatingActionButtonNotch,
+  }) {
+    fabScale = floatingActionButtonScale ?? fabScale;
+    geometry = geometry.copyWith(
+      bottomNavigationBarTop: bottomNavigationBarTop,
+      floatingActionButtonArea: floatingActionButtonArea,
+      floatingActionButtonNotch: floatingActionButtonNotch,
+    );
+    notifyListeners();
+  }
+
+  VoidCallback _updateFloatingActionButtonNotch(ComputeNotch fabComputeNotch) {
+    computeNotchCloseable?.close();
+    _setFloatingActionButtonNotchAndNotify(fabComputeNotch);
+    computeNotchCloseable = new _Closeable(() { _setFloatingActionButtonNotchAndNotify(null); });
+    return computeNotchCloseable.close;
+  }
+
+  void _setFloatingActionButtonNotchAndNotify(ComputeNotch fabComputeNotch) {
+    geometry = new ScaffoldGeometry(
+      bottomNavigationBarTop: geometry.bottomNavigationBarTop,
+      floatingActionButtonArea: geometry.floatingActionButtonArea,
+      floatingActionButtonNotch: fabComputeNotch,
+    );
+    notifyListeners();
   }
 }
 
@@ -109,21 +412,25 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.statusBarHeight,
     @required this.bottomViewInset,
     @required this.textDirection,
+    @required this.geometryNotifier,
     // for floating action button
-    @required this.endPadding, 
+    @required this.horizontalPadding, 
     @required this.previousFabPosition,
     @required this.currentFabPosition,
-    @required this.fabMoveProgress,
+    @required this.fabMoveAnimationProgress,
+    @required this.fabMotionAnimator,
   }) : assert(previousFabPosition != null), assert(currentFabPosition != null);
 
   final double statusBarHeight;
   final double bottomViewInset;
-  final double endPadding;
+  final double horizontalPadding;
   final TextDirection textDirection;
+  final _ScaffoldGeometryNotifier geometryNotifier;
 
-  final FabPosition previousFabPosition;
-  final FabPosition currentFabPosition;
-  final double fabMoveProgress;
+  final FabPositioner previousFabPosition;
+  final FabPositioner currentFabPosition;
+  final double fabMoveAnimationProgress;
+  final FabMotionAnimator fabMotionAnimator;
 
   @override
   void performLayout(Size size) {
@@ -135,30 +442,37 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // so the app bar's shadow is drawn on top of the body.
 
     final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
-    final double bottom = math.max(0.0, size.height - bottomViewInset);
+    final double bottom = size.height;
     double contentTop = 0.0;
-    double contentBottom = bottom;
+    double bottomWidgetsHeight = 0.0;
 
     if (hasChild(_ScaffoldSlot.appBar)) {
       contentTop = layoutChild(_ScaffoldSlot.appBar, fullWidthConstraints).height;
       positionChild(_ScaffoldSlot.appBar, Offset.zero);
     }
 
+    double bottomNavigationBarTop;
     if (hasChild(_ScaffoldSlot.bottomNavigationBar)) {
       final double bottomNavigationBarHeight = layoutChild(_ScaffoldSlot.bottomNavigationBar, fullWidthConstraints).height;
-      contentBottom -= bottomNavigationBarHeight;
-      positionChild(_ScaffoldSlot.bottomNavigationBar, new Offset(0.0, contentBottom));
+      bottomWidgetsHeight += bottomNavigationBarHeight;
+      bottomNavigationBarTop = math.max(0.0, bottom - bottomWidgetsHeight);
+      positionChild(_ScaffoldSlot.bottomNavigationBar, new Offset(0.0, bottomNavigationBarTop));
     }
 
     if (hasChild(_ScaffoldSlot.persistentFooter)) {
       final BoxConstraints footerConstraints = new BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
-        maxHeight: math.max(0.0, contentBottom - contentTop),
+        maxHeight: math.max(0.0, bottom - bottomWidgetsHeight - contentTop),
       );
       final double persistentFooterHeight = layoutChild(_ScaffoldSlot.persistentFooter, footerConstraints).height;
-      contentBottom -= persistentFooterHeight;
-      positionChild(_ScaffoldSlot.persistentFooter, new Offset(0.0, contentBottom));
+      bottomWidgetsHeight += persistentFooterHeight;
+      positionChild(_ScaffoldSlot.persistentFooter, new Offset(0.0, math.max(0.0, bottom - bottomWidgetsHeight)));
     }
+
+    // Set the content bottom to account for the greater of the height of any
+    // bottom-anchored material widgets or of the keyboard or other
+    // bottom-anchored system UI.
+    final double contentBottom = math.max(0.0, bottom - math.max(bottomViewInset, bottomWidgetsHeight));
 
     if (hasChild(_ScaffoldSlot.body)) {
       final BoxConstraints bodyConstraints = new BoxConstraints(
@@ -190,7 +504,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         maxHeight: math.max(0.0, contentBottom - contentTop),
       );
       bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, bottomSheetConstraints);
-      positionChild(_ScaffoldSlot.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, bottom - bottomSheetSize.height));
+      positionChild(_ScaffoldSlot.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, contentBottom - bottomSheetSize.height));
     }
 
     if (hasChild(_ScaffoldSlot.snackBar)) {
@@ -198,14 +512,27 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.snackBar, new Offset(0.0, contentBottom - snackBarSize.height));
     }
 
+    Rect floatingActionButtonRect;
     if (hasChild(_ScaffoldSlot.floatingActionButton)) {
       final Size fabSize = layoutChild(_ScaffoldSlot.floatingActionButton, looseConstraints);
       
-      // To account for the FAB position being changed, we'll lerp between its old and new position.
-      final Offset currentFabOffset = currentFabPosition.getOffset(size, fabSize, snackBarSize, bottomSheetSize, textDirection, contentBottom, endPadding);
-      final Offset previousFabOffset = previousFabPosition.getOffset(size, fabSize, snackBarSize, bottomSheetSize, textDirection, contentBottom, endPadding);
-      final Offset fabOffset = new MaterialPointArcTween(begin: previousFabOffset, end: currentFabOffset).lerp(fabMoveProgress);
+      // To account for the FAB position being changed, we'll animate between
+      // the old and new positions.
+      final ScaffoldPrelayoutGeometry currentGeometry = new ScaffoldPrelayoutGeometry(
+        bottomSheetSize: bottomSheetSize,
+        contentBottom: contentBottom,
+        contentTop: contentTop,
+        floatingActionButtonSize: fabSize,
+        horizontalFloatingActionButtonPadding: horizontalPadding,
+        scaffoldSize: size,
+        snackBarSize: snackBarSize,
+        textDirection: textDirection,
+      );
+      final Offset currentFabOffset = currentFabPosition.getOffset(currentGeometry);
+      final Offset previousFabOffset = previousFabPosition.getOffset(currentGeometry);
+      final Offset fabOffset = fabMotionAnimator.getOffset(begin: previousFabOffset, end: currentFabOffset, progress: fabMoveAnimationProgress);
       positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
+      floatingActionButtonRect = fabOffset & fabSize;
     }
 
     if (hasChild(_ScaffoldSlot.statusBar)) {
@@ -222,28 +549,48 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       layoutChild(_ScaffoldSlot.endDrawer, new BoxConstraints.tight(size));
       positionChild(_ScaffoldSlot.endDrawer, Offset.zero);
     }
+
+    geometryNotifier._updateWith(
+      bottomNavigationBarTop: bottomNavigationBarTop,
+      floatingActionButtonArea: floatingActionButtonRect,
+    );
   }
 
   @override
   bool shouldRelayout(_ScaffoldLayout oldDelegate) {
     return oldDelegate.statusBarHeight != statusBarHeight
         || oldDelegate.bottomViewInset != bottomViewInset
-        || oldDelegate.endPadding != endPadding
+        || oldDelegate.horizontalPadding != horizontalPadding
         || oldDelegate.textDirection != textDirection
-        || oldDelegate.fabMoveProgress != fabMoveProgress
+        || oldDelegate.fabMoveAnimationProgress != fabMoveAnimationProgress
         || oldDelegate.previousFabPosition != previousFabPosition
         || oldDelegate.currentFabPosition != currentFabPosition;
   }
 }
 
-/// Handles fab entrance and exit, but not fab motions within a page.
+/// Handler for scale and rotation animations in the [FloatingActionButton].
+///
+/// Currently, there are two types of FAB animations:
+/// 
+/// * Entrance/Exit animations, which this widget triggers
+///   when the FAB is added, updated, or removed.
+/// * Motion animations, which are triggered by the [Scaffold]
+///   when its `fabPositioner` is updated.
 class _FloatingActionButtonTransition extends StatefulWidget {
   const _FloatingActionButtonTransition({
     Key key,
-    this.child,
-  }) : super(key: key);
+    @required this.child,
+    @required this.fabMoveAnimation,
+    @required this.fabMotionAnimator,
+    @required this.geometryNotifier,
+  }) : assert(fabMoveAnimation != null), 
+       assert(fabMotionAnimator != null),
+       super(key: key);
 
   final Widget child;
+  final Animation<double> fabMoveAnimation;
+  final FabMotionAnimator fabMotionAnimator;
+  final _ScaffoldGeometryNotifier geometryNotifier;
 
   @override
   _FloatingActionButtonTransitionState createState() => new _FloatingActionButtonTransitionState();
@@ -268,20 +615,28 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       parent: _previousController,
       curve: Curves.easeIn
     );
+    _previousAnimation.addListener(_onProgressChanged);
 
     _currentController = new AnimationController(
-      duration: _kFloatingActionButtonSegue,
+    duration: _kFloatingActionButtonSegue,
       vsync: this,
     );
     _currentAnimation = new CurvedAnimation(
       parent: _currentController,
       curve: Curves.easeIn
     );
+    _currentAnimation.addListener(_onProgressChanged);
 
-    // If we start out with a child, have the child appear fully visible instead
-    // of animating in.
-    if (widget.child != null)
+    if (widget.child != null) {
+      // If we start out with a child, have the child appear fully visible instead
+      // of animating in.
       _currentController.value = 1.0;
+    }
+    else {
+      // If we start without a child we update the geometry object with a
+      // floating action button scale of 0, as it is not showing on the screen.
+      _updateGeometryScale(0.0);
+    }
   }
 
   @override
@@ -332,6 +687,16 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
+    if (_currentAnimation.status == AnimationStatus.completed && widget.child != null) { 
+      return new ScaleTransition(
+        scale: widget.fabMotionAnimator.getScaleAnimation(parent: widget.fabMoveAnimation),
+        child: new RotationTransition(
+          turns: widget.fabMotionAnimator.getRotationAnimation(parent: widget.fabMoveAnimation),
+          child: widget.child,
+        ),
+        
+      );
+    }
     if (_previousAnimation.status != AnimationStatus.dismissed) {
       children.add(new ScaleTransition(
         scale: _previousAnimation,
@@ -342,12 +707,29 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       children.add(new ScaleTransition(
         scale: _currentAnimation,
         child: new RotationTransition(
-          turns: _kFloatingActionButtonTurnTween.animate(_currentAnimation),
+          turns: new Tween<double>(begin: 1.0 - _kFloatingActionButtonTurnInterval, end: 1.0).animate(_currentAnimation),
           child: widget.child,
         )
       ));
     }
     return new Stack(children: children);
+  }
+
+  void _onProgressChanged() {
+    if (_previousAnimation.status != AnimationStatus.dismissed) {
+      _updateGeometryScale(_previousAnimation.value);
+      return;
+    }
+    if (_currentAnimation.status != AnimationStatus.dismissed) {
+      _updateGeometryScale(_currentAnimation.value);
+      return;
+    }
+  }
+
+  void _updateGeometryScale(double scale) {
+    widget.geometryNotifier._updateWith(
+      floatingActionButtonScale: scale,
+    );
   }
 }
 
@@ -363,6 +745,8 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///
 ///  * [AppBar], which is a horizontal bar typically shown at the top of an app
 ///    using the [appBar] property.
+///  * [BottomAppBar], which is a horizontal bar typically shown at the bottom
+///    of an app using the [bottomNavigationBar] property.
 ///  * [FloatingActionButton], which is a circular button typically shown in the
 ///    bottom right corner of the app using the [floatingActionButton] property.
 ///  * [Drawer], which is a vertical panel that is typically displayed to the
@@ -386,7 +770,8 @@ class Scaffold extends StatefulWidget {
     this.appBar,
     this.body,
     this.floatingActionButton,
-    this.fabPosition,
+    this.fabPositioner,
+    this.fabMotionAnimator,
     this.persistentFooterButtons,
     this.drawer,
     this.endDrawer,
@@ -422,7 +807,11 @@ class Scaffold extends StatefulWidget {
   /// Typically a [FloatingActionButton].
   final Widget floatingActionButton;
 
-  final FabPosition fabPosition;
+  /// Responsible for determining where the `floatingActionButton` should go.
+  final FabPositioner fabPositioner;
+
+  /// Animator to move the `floatingActionButton` between `fabPositioner`s.
+  final FabMotionAnimator fabMotionAnimator;
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
@@ -580,6 +969,74 @@ class Scaffold extends StatefulWidget {
       'The context used was:\n'
       '  $context'
     );
+  }
+
+  /// Returns a [ValueListenable] for the [ScaffoldGeometry] for the closest
+  /// [Scaffold] ancestor of the given context.
+  ///
+  /// The [ValueListenable.value] is only available at paint time.
+  ///
+  /// Notifications are guaranteed to be sent before the first paint pass
+  /// with the new geometry, but there is no guarantee whether a build or
+  /// layout passes are going to happen between the notification and the next
+  /// paint pass.
+  ///
+  /// The closest [Scaffold] ancestor for the context might change, e.g when
+  /// an element is moved from one scaffold to another. For [StatefulWidget]s
+  /// using this listenable, a change of the [Scaffold] ancestor will
+  /// trigger a [State.didChangeDependencies].
+  ///
+  /// A typical pattern for listening to the scaffold geometry would be to
+  /// call [Scaffold.geometryOf] in [State.didChangeDependencies], compare the
+  /// return value with the previous listenable, if it has changed, unregister
+  /// the listener, and register a listener to the new [ScaffoldGeometry]
+  /// listenable.
+  static ValueListenable<ScaffoldGeometry> geometryOf(BuildContext context) {
+    final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType(_ScaffoldScope);
+    if (scaffoldScope == null)
+      throw new FlutterError(
+        'Scaffold.geometryOf() called with a context that does not contain a Scaffold.\n'
+        'This usually happens when the context provided is from the same StatefulWidget as that '
+        'whose build function actually creates the Scaffold widget being sought.\n'
+        'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
+        'context that is "under" the Scaffold. For an example of this, please see the '
+        'documentation for Scaffold.of():\n'
+        '  https://docs.flutter.io/flutter/material/Scaffold/of.html\n'
+        'A more efficient solution is to split your build function into several widgets. This '
+        'introduces a new context from which you can obtain the Scaffold. In this solution, '
+        'you would have an outer widget that creates the Scaffold populated by instances of '
+        'your new inner widgets, and then in these inner widgets you would use Scaffold.geometryOf().\n'
+        'The context used was:\n'
+        '  $context'
+      );
+
+    return scaffoldScope.geometryNotifier;
+  }
+
+  /// Sets the [ScaffoldGeometry.floatingActionButtonNotch] for the closest
+  /// [Scaffold] ancestor of the given context, if one exists.
+  ///
+  /// It is guaranteed that `computeNotch` will only be used for making notches
+  /// in the top edge of the [bottomNavigationBar], the start and end offsets given to
+  /// it will always be on the top edge of the [bottomNavigationBar], the start offset
+  /// will be to the left of the floating action button's bounds, and the end
+  /// offset will be to the right of the floating action button's bounds.
+  ///
+  /// Returns null if there was no [Scaffold] ancestor.
+  /// Otherwise, returns a [VoidCallback] that clears the notch maker that was
+  /// set.
+  ///
+  /// Callers must invoke the callback when the notch is no longer required.
+  /// This method is typically called from [State.didChangeDependencies] and the
+  /// callback should then be invoked from [State.deactivate].
+  ///
+  /// If there was a previously set [ScaffoldGeometry.floatingActionButtonNotch]
+  /// it will be overriden.
+  static VoidCallback setFloatingActionButtonNotchFor(BuildContext context, ComputeNotch computeNotch) {
+    final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType(_ScaffoldScope);
+    if (scaffoldScope == null)
+      return null;
+    return scaffoldScope.geometryNotifier._updateFloatingActionButtonNotch(computeNotch);
   }
 
   /// Whether the Scaffold that most tightly encloses the given context has a
@@ -846,33 +1303,48 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // FAB API
   AnimationController _fabMoveController;
-  FabPosition _previousFabPosition;
-  FabPosition _fabPosition;
+  FabMotionAnimator _fabMotionAnimator;
+  FabPositioner _previousFabPositioner;
+  FabPositioner _fabPositioner;
+  FabPositioner _nextFabPositioner;
 
-  void _moveFab(final FabPosition newPosition) {
-    void updatePosition() {
-      setState(() {
-        _previousFabPosition = _fabPosition;
-        _fabPosition = newPosition;
-        print(
-          'Moving fab from $_previousFabPosition to $_fabPosition'
-        );
-      });
+  // Moves the FAB to the _nextFabPositioner if the _nextFabPositioner is valid.
+  void _animateFabToNextPositioner() {
+    // If there is no next position to move to, don't animate.
+    if (_nextFabPositioner == null)
+      return;
+    // If the FAB is moving right now, we don't need to start an animation.
+    if (_fabMoveController.isAnimating)
+      return;
+    setState(() {
+      _previousFabPositioner = _fabPositioner;
+      _fabPositioner = _nextFabPositioner;
+      _nextFabPositioner = null;
+    });
+
+    // Only animate if there is a Floating Action Button to animate with.
+    // Otherwise, simply make sure the fab's position is fully updated in 
+    // case it is added.
+    if (widget.floatingActionButton != null) {
       _fabMoveController.forward(from: 0.0);
-    }
-
-    // If the fab is moved while still animating, schedule the new transition for the end of the current animation.
-    if (_fabMoveController.isAnimating) {
-      new Future<Null>.delayed(_fabMoveController.duration - _fabMoveController.lastElapsedDuration).then((_) {
-        updatePosition();
-      });
     } else {
-      updatePosition();
+      _fabMoveController.value = _fabMoveController.upperBound;
     }
   }
 
-  void _handleFabMotion(AnimationStatus status) {
+  // Listens to the _fabMoveController and schedules new fab animations if necessary
+  // when the animation completes.
+  void _onFabMoveStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _animateFabToNextPositioner();
+    }
+  }
 
+  void _moveFab(final FabPositioner newPositioner) {
+    setState(() {
+      _nextFabPositioner = newPositioner;
+    });
+    _animateFabToNextPositioner();
   }
 
   // iOS FEATURES - status bar tap, back gesture
@@ -896,20 +1368,27 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   // INTERNALS
 
+  _ScaffoldGeometryNotifier _geometryNotifier;
+
   @override
   void initState() {
     super.initState();
-    _fabPosition = widget.fabPosition ?? FabPosition.endFloat;
-    _previousFabPosition = _fabPosition;
-    _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 0.0, duration: _kFloatingActionButtonSegue * 2);
-    _fabMoveController.addStatusListener(_handleFabMotion);
-    _fabMoveController.addListener(() {print('fab status');});
+    _geometryNotifier = new _ScaffoldGeometryNotifier(const ScaffoldGeometry(), context);
+    _fabPositioner = widget.fabPositioner ?? _kDefaultFabPositioner;
+    _fabMotionAnimator = widget.fabMotionAnimator ?? FabMotionAnimator.scaling;
+    _previousFabPositioner = _fabPositioner;
+    _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 1.0, duration: _kFloatingActionButtonSegue * 2);
+    _fabMoveController.addStatusListener(_onFabMoveStatus);
   }
 
   @override
   void didUpdateWidget(Scaffold oldWidget) {
-    if (widget.fabPosition != oldWidget.fabPosition) {
-      _moveFab(widget.fabPosition);
+    // Update the fab animator, and then schedule the fab for repositioning.
+    if (widget.fabMotionAnimator != oldWidget.fabMotionAnimator) {
+      _fabMotionAnimator = widget.fabMotionAnimator ?? FabMotionAnimator.scaling;
+    }
+    if (widget.fabPositioner != oldWidget.fabPositioner) {
+      _moveFab(widget.fabPositioner ?? _kDefaultFabPositioner);
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -918,15 +1397,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   @override
   void dispose() {
     _snackBarController?.dispose();
-    _snackBarController = null;
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
+    _geometryNotifier.dispose();
     for (_PersistentBottomSheet bottomSheet in _dismissedBottomSheets)
       bottomSheet.animationController.dispose();
     if (_currentBottomSheet != null)
       _currentBottomSheet._widget.animationController.dispose();
-    _fabMoveController?.dispose();
-    _fabMoveController = null;
+    _fabMoveController.dispose();
     super.dispose();
   }
 
@@ -985,7 +1463,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeLeftPadding: false,
       removeTopPadding: widget.appBar != null,
       removeRightPadding: false,
-      removeBottomPadding: widget.bottomNavigationBar != null,
+      removeBottomPadding: widget.bottomNavigationBar != null || widget.persistentFooterButtons != null,
     );
 
     if (widget.appBar != null) {
@@ -1010,6 +1488,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
 
     if (_snackBars.isNotEmpty) {
+      final bool removeBottomPadding = widget.persistentFooterButtons != null || widget.bottomNavigationBar != null;
       _addIfNonNull(
         children,
         _snackBars.first._widget,
@@ -1017,7 +1496,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
-        removeBottomPadding: false,
+        removeBottomPadding: removeBottomPadding,
       );
     }
 
@@ -1034,8 +1513,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           ),
           child: new SafeArea(
             child: new ButtonTheme.bar(
-              child: new ButtonBar(
-                children: widget.persistentFooterButtons
+              child: new SafeArea(
+                top: false,
+                child: new ButtonBar(
+                  children: widget.persistentFooterButtons
+                ),
               ),
             ),
           ),
@@ -1044,7 +1526,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
-        removeBottomPadding: widget.resizeToAvoidBottomPadding,
+        removeBottomPadding: false,
       );
     }
 
@@ -1085,6 +1567,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       children,
       new _FloatingActionButtonTransition(
         child: widget.floatingActionButton,
+        fabMoveAnimation: _fabMoveController,
+        fabMotionAnimator: _fabMotionAnimator,
+        geometryNotifier: _geometryNotifier,
       ),
       _ScaffoldSlot.floatingActionButton,
       removeLeftPadding: true,
@@ -1159,6 +1644,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     return new _ScaffoldScope(
       hasDrawer: hasDrawer,
+      geometryNotifier: _geometryNotifier,
       child: new PrimaryScrollController(
         controller: _primaryScrollController,
         child: new Material(
@@ -1167,13 +1653,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             return new CustomMultiChildLayout(
               children: children,
               delegate: new _ScaffoldLayout(
-                statusBarHeight: mediaQuery.padding.top,
                 bottomViewInset: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
-                endPadding: endPadding,
+                currentFabPosition: _fabPositioner,
+                fabMoveAnimationProgress: _fabMoveController.value,
+                fabMotionAnimator: _fabMotionAnimator,
+                geometryNotifier: _geometryNotifier,
+                horizontalPadding: endPadding,
+                previousFabPosition: _previousFabPositioner,
+                statusBarHeight: mediaQuery.padding.top,
                 textDirection: textDirection,
-                previousFabPosition: _previousFabPosition,
-                currentFabPosition: _fabPosition,
-                fabMoveProgress: new CurveTween(curve: Curves.ease).evaluate(_fabMoveController),
               ),
             );
           }),
@@ -1281,11 +1769,13 @@ class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_Pers
 class _ScaffoldScope extends InheritedWidget {
   const _ScaffoldScope({
     @required this.hasDrawer,
+    @required this.geometryNotifier,
     @required Widget child,
   }) : assert(hasDrawer != null),
        super(child: child);
 
   final bool hasDrawer;
+  final _ScaffoldGeometryNotifier geometryNotifier;
 
   @override
   bool updateShouldNotify(_ScaffoldScope oldWidget) {

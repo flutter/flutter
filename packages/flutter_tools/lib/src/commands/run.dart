@@ -34,6 +34,11 @@ abstract class RunCommandBase extends FlutterCommand {
               'forwards the host port to a device port.');
     argParser.addOption('route',
         help: 'Which route to load when running the app.');
+    argParser.addOption('target-platform',
+        defaultsTo: 'default',
+        allowed: <String>['default', 'android-arm', 'android-arm64'],
+        help: 'Specify the target platform when building the app for an '
+              'Android device.\nIgnored on iOS.');
     usesTargetOption();
     usesPortOptions();
     usesPubOption();
@@ -85,6 +90,10 @@ class RunCommand extends RunCommandBase {
               'when testing Flutter on emulators. By default, Flutter will\n'
               'attempt to either use OpenGL or Vulkan and fall back to software\n'
               'when neither is available.');
+    argParser.addFlag('skia-deterministic-rendering',
+        negatable: false,
+        help: 'When combined with --enable-software-rendering, provides 100%\n'
+              'deterministic Skia rendering.');
     argParser.addFlag('trace-skia',
         negatable: false,
         help: 'Enable tracing of Skia code. This is useful when debugging\n'
@@ -105,16 +114,12 @@ class RunCommand extends RunCommandBase {
     argParser.addFlag('preview-dart-2',
         hide: !verboseHelp,
         help: 'Preview Dart 2.0 functionality.');
-    argParser.addFlag('strong',
+    argParser.addFlag('track-widget-creation',
         hide: !verboseHelp,
-        help: 'Turn on strong mode semantics.\n'
-              'Valid only when --preview-dart-2 is also specified');
+        help: 'Track widget creation locations. Requires Dart 2.0 functionality.');
     argParser.addOption('project-root',
         hide: !verboseHelp,
         help: 'Specify the project root directory.');
-    argParser.addOption('project-assets',
-        hide: !verboseHelp,
-        help: 'Specify the project assets relative to the root directory.');
     argParser.addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
@@ -228,6 +233,7 @@ class RunCommand extends RunCommandBase {
         startPaused: argResults['start-paused'],
         useTestFonts: argResults['use-test-fonts'],
         enableSoftwareRendering: argResults['enable-software-rendering'],
+        skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
         traceSkia: argResults['trace-skia'],
         observatoryPort: observatoryPort,
       );
@@ -254,10 +260,8 @@ class RunCommand extends RunCommandBase {
           _createDebuggingOptions(), hotMode,
           applicationBinary: argResults['use-application-binary'],
           previewDart2: argResults['preview-dart-2'],
-          strongMode: argResults['strong'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: globalResults['packages'],
-          projectAssets: argResults['project-assets'],
           ipv6: ipv6,
         );
       } catch (error) {
@@ -293,9 +297,11 @@ class RunCommand extends RunCommandBase {
     }
 
     final List<FlutterDevice> flutterDevices = devices.map((Device device) {
-      return new FlutterDevice(device,
-                               previewDart2: argResults['preview-dart-2'],
-                               strongMode : argResults['strong']);
+      return new FlutterDevice(
+        device,
+        previewDart2: argResults['preview-dart-2'],
+        trackWidgetCreation: argResults['track-widget-creation'],
+      );
     }).toList();
 
     ResidentRunner runner;
@@ -307,10 +313,8 @@ class RunCommand extends RunCommandBase {
         benchmarkMode: argResults['benchmark'],
         applicationBinary: argResults['use-application-binary'],
         previewDart2: argResults['preview-dart-2'],
-        strongMode: argResults['strong'],
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
-        projectAssets: argResults['project-assets'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -322,7 +326,6 @@ class RunCommand extends RunCommandBase {
         traceStartup: traceStartup,
         applicationBinary: argResults['use-application-binary'],
         previewDart2: argResults['preview-dart-2'],
-        strongMode: argResults['strong'],
         stayResident: stayResident,
         ipv6: ipv6,
       );

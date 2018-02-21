@@ -201,7 +201,6 @@ class _FlutterPlatform extends PlatformPlugin {
 
       String mainDart = listenerFile.path;
       String bundlePath;
-      bool strongMode = false;
 
       if (previewDart2) {
         mainDart = await compile(
@@ -209,8 +208,12 @@ class _FlutterPlatform extends PlatformPlugin {
           incrementalCompilerByteStorePath: '' /* not null is enough */,
           mainPath: listenerFile.path,
           packagesPath: PackageMap.globalPackagesPath,
-          strongMode: true,
         );
+
+        if (mainDart == null) {
+          controller.sink.addError(_getErrorMessage('Compilation failed', testPath, shellPath));
+          return null;
+        }
 
         // bundlePath needs to point to a folder with `platform.dill` file.
         final Directory tempBundleDirectory = fs.systemTempDirectory
@@ -222,7 +225,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
         // copy 'vm_platform_strong.dill' into 'platform.dill'
         final File vmPlatformStrongDill = fs.file(
-          artifacts.getArtifactPath(Artifact.platformKernelStrongDill),
+          artifacts.getArtifactPath(Artifact.platformKernelDill),
         );
         final File platformDill = vmPlatformStrongDill.copySync(
           tempBundleDirectory.childFile('platform.dill').path,
@@ -232,7 +235,6 @@ class _FlutterPlatform extends PlatformPlugin {
         }
 
         bundlePath = tempBundleDirectory.path;
-        strongMode = true;
       }
 
       final Process process = await _startProcess(
@@ -242,7 +244,6 @@ class _FlutterPlatform extends PlatformPlugin {
         enableObservatory: enableObservatory,
         startPaused: startPaused,
         bundlePath: bundlePath,
-        strongMode: strongMode,
         observatoryPort: explicitObservatoryPort,
       );
       subprocessActive = true;
@@ -479,7 +480,10 @@ void main() {
     return test.main;
   });
   WebSocket.connect(server).then((WebSocket socket) {
-    socket.map(JSON.decode).pipe(channel.sink);
+    socket.map((dynamic x) {
+      assert(x is String);
+      return JSON.decode(x);
+    }).pipe(channel.sink);
     socket.addStream(channel.stream.map(JSON.encode));
   });
 }
@@ -514,7 +518,6 @@ void main() {
     String bundlePath,
     bool enableObservatory: false,
     bool startPaused: false,
-    bool strongMode: false,
     int observatoryPort,
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
@@ -542,13 +545,10 @@ void main() {
     if (bundlePath != null) {
       command.add('--flutter-assets-dir=$bundlePath');
     }
-    if (strongMode) {
-      command.add('--strong');
-    }
+    command.add('--enable-checked-mode');
     command.addAll(<String>[
       '--enable-dart-profiling',
       '--non-interactive',
-      '--enable-checked-mode',
       '--use-test-fonts',
       // '--enable-txt', // enable this to test libtxt rendering
       '--packages=$packages',
@@ -567,7 +567,7 @@ void main() {
     void startTimeoutTimer(),
     void reportObservatoryUri(Uri uri),
   }) {
-    final String observatoryString = 'Observatory listening on ';
+    const String observatoryString = 'Observatory listening on ';
 
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
