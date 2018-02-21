@@ -237,14 +237,14 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
 
     final Rect intersection = host.intersect(guest);
     assert(() {
-      if (intersection.width < 0 || intersection.height < 0)
+      if (intersection.width < 0.0 || intersection.height < 0.0)
         throw new FlutterError('Notch host must intersect with its guest');
       return true;
     }());
 
     // The FAB's shape is a circle bound by the guest rectangle.
     // So the FAB's radius is half the guest width.
-    final double fabRadius = guest.width / 2;
+    final double fabRadius = guest.width / 2.0;
 
     final double notchRadius = fabRadius + widget.notchMargin;
     assert(() {
@@ -266,7 +266,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     // center of the notch and the intersection of the notch's circle and the host's
     // top edge.
     //
-    // The hypotenuse of this triangle equals to the notch's radius, and one side
+    // The hypotenuse of this triangle equals the notch's radius, and one side
     // (a) is the distance from the notch's center to the top edge.
     //
     // The other side (b) would be the distance on the horizontal axis between the

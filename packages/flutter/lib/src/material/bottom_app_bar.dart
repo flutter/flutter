@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'material.dart';
 import 'scaffold.dart';
 
@@ -44,11 +45,9 @@ class BottomAppBar extends StatefulWidget {
   const BottomAppBar({
     Key key,
     this.child,
-    // TODO(amirh): use a default color from the theme.
-    @required this.color,
+    this.color,
     this.elevation: 8.0,
-  }) : assert(color != null),
-       assert(elevation != null),
+  }) : assert(elevation != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -56,7 +55,7 @@ class BottomAppBar extends StatefulWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  /// The color to paint the material.
+  /// The bottom app bar's background color.
   final Color color;
 
   /// The z-coordinate at which to place this bottom app bar. This controls the
@@ -87,7 +86,8 @@ class _BottomAppBarState extends State<BottomAppBar> {
       ),
       clipper: new _BottomAppBarClipper(geometry: geometryListenable),
       elevation: widget.elevation,
-      color: widget.color,
+      // TODO(amirh): use a default color from the theme.
+      color: widget.color ?? Colors.white,
     );
   }
 }
@@ -109,7 +109,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
     }
 
     final Rect button = geometry.value.floatingActionButtonArea
-      .translate(0.0, geometry.value.bottomNavigationBarTop * -1);
+      .translate(0.0, geometry.value.bottomNavigationBarTop * -1.0);
 
     final Rect intersect = appBar.intersect(button);
     if (intersect.width < 0.0 || intersect.height < 0.0) {

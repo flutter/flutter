@@ -751,7 +751,7 @@ class Scaffold extends StatefulWidget {
   }
 
   /// Sets the [ScaffoldGeometry.floatingActionButtonNotch] for the closest
-  /// [Scaffold] ancestor of the given context if one exist.
+  /// [Scaffold] ancestor of the given context, if one exist.
   ///
   /// It is guaranteed that `computeNotch` will only be used for making notches
   /// in the top edge of the [bottomNavigationBar], the start and end offsets given to
