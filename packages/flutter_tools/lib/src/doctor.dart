@@ -276,7 +276,9 @@ class NoIdeValidator extends DoctorValidator {
 }
 
 abstract class IntelliJValidator extends DoctorValidator {
-  IntelliJValidator(String title) : super(title);
+  final String installPath;
+
+  IntelliJValidator(String title, this.installPath) : super(title);
 
   String get version;
   String get pluginsPath;
@@ -300,6 +302,8 @@ abstract class IntelliJValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
+
+    messages.add(new ValidationMessage('IntelliJ at $installPath'));
 
     _validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
         'Flutter', minVersion: kMinFlutterPluginVersion);
@@ -397,12 +401,10 @@ abstract class IntelliJValidator extends DoctorValidator {
 }
 
 class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
-  IntelliJValidatorOnLinuxAndWindows(String title, this.version, this.installPath, this.pluginsPath) : super(title);
+  IntelliJValidatorOnLinuxAndWindows(String title, this.version, String installPath, this.pluginsPath) : super(title, installPath);
 
   @override
   String version;
-
-  final String installPath;
 
   @override
   String pluginsPath;
@@ -451,10 +453,9 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
 }
 
 class IntelliJValidatorOnMac extends IntelliJValidator {
-  IntelliJValidatorOnMac(String title, this.id, this.installPath) : super(title);
+  IntelliJValidatorOnMac(String title, this.id, String installPath) : super(title, installPath);
 
   final String id;
-  final String installPath;
 
   static final Map<String, String> _dirNameToId = <String, String>{
     'IntelliJ IDEA.app' : 'IntelliJIdea',
