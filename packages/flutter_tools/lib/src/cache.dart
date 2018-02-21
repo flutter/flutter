@@ -402,6 +402,14 @@ class FlutterEngine extends CachedArtifact {
     <String>['windows-x64', 'dart-sdk-windows-x64.zip'],
   ];
 
+  // A list of cache directory paths to which the LICENSE file should be copied.
+  List<String> _getLicenseDirs() {
+    if (cache.includeAllPlatforms || platform.isMacOS) {
+      return const <String>['ios', 'ios-profile', 'ios-release'];
+    }
+    return const <String>[];
+  }
+
   @override
   bool isUpToDateInner() {
     final Directory pkgDir = cache.getCacheDir('pkg');
@@ -414,6 +422,12 @@ class FlutterEngine extends CachedArtifact {
     for (List<String> toolsDir in _getBinaryDirs()) {
       final Directory dir = fs.directory(fs.path.join(location.path, toolsDir[0]));
       if (!dir.existsSync())
+        return false;
+    }
+
+    for (String licenseDir in _getLicenseDirs()) {
+      final File file = fs.file(fs.path.join(location.path, licenseDir, 'LICENSE'));
+      if (!file.existsSync())
         return false;
     }
     return true;
@@ -446,6 +460,12 @@ class FlutterEngine extends CachedArtifact {
         framework.createSync();
         os.unzip(frameworkZip, framework);
       }
+    }
+
+    final File licenseSource = fs.file(fs.path.join(Cache.flutterRoot, 'LICENSE'));
+    for (String licenseDir in _getLicenseDirs()) {
+      final String licenseDestinationPath = fs.path.join(location.path, licenseDir, 'LICENSE');
+      await licenseSource.copy(licenseDestinationPath);
     }
   }
 

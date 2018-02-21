@@ -14,9 +14,6 @@ matrix:
     env: SHARD=analyze
   - os: osx
     env: SHARD=docs
-  # TODO(xster): remove this when we know it works on Travis.
-  allow_failures:
-  - env: SHARD=build_and_deploy_gallery
 sudo: false
 filter_secrets: false
 

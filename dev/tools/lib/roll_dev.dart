@@ -17,6 +17,7 @@ const String kY = 'y';
 const String kZ = 'z';
 const String kCommit = 'commit';
 const String kOrigin = 'origin';
+const String kJustPrint = 'just-print';
 const String kYes = 'yes';
 const String kHelp = 'help';
 
@@ -47,6 +48,13 @@ void main(List<String> args) {
     valueHelp: 'repository',
     defaultsTo: 'upstream',
   );
+  argParser.addFlag(
+    kJustPrint,
+    negatable: false,
+    help:
+        'Don\'t actually roll the dev channel; '
+        'just print the would-be version and quit.',
+  );
   argParser.addFlag(kYes, negatable: false, abbr: 'y', help: 'Skip the confirmation prompt.');
   argParser.addFlag(kHelp, negatable: false, help: 'Show this help message.', hide: true);
   ArgResults argResults;
@@ -61,6 +69,7 @@ void main(List<String> args) {
   final String level = argResults[kIncrement];
   final String commit = argResults[kCommit];
   final String origin = argResults[kOrigin];
+  final bool justPrint = argResults[kJustPrint];
   final bool autoApprove = argResults[kYes];
   final bool help = argResults[kHelp];
 
@@ -121,6 +130,11 @@ void main(List<String> args) {
       exit(1);
   }
   version = parts.join('.');
+
+  if (justPrint) {
+    print(version);
+    exit(0);
+  }
 
   final String hash = getGitOutput('rev-parse HEAD', 'Get git hash for $commit');
 

@@ -8,14 +8,22 @@ import 'dart:convert';
 import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process_manager.dart';
-import 'dart/sdk.dart';
 import 'globals.dart';
 
 String _dartExecutable() {
-  return fs.path.join(dartSdkPath, 'bin', 'dart');
+  final String engineDartSdkPath = artifacts.getArtifactPath(
+    Artifact.engineDartSdkPath
+  );
+  if (!fs.isDirectorySync(engineDartSdkPath)) {
+    throwToolExit('No dart sdk Flutter host engine build found at $engineDartSdkPath.\n'
+      'Note that corresponding host engine build is required even when targeting particular device platforms.',
+      exitCode: 2);
+  }
+  return fs.path.join(engineDartSdkPath, 'bin', 'dart');
 }
 
 class _StdoutHandler {

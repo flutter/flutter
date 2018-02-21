@@ -13,9 +13,11 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
@@ -217,7 +219,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return new XcodeBuildResult(success: false);
   }
 
-  final XcodeProjectInfo projectInfo = new XcodeProjectInfo.fromProjectSync(app.appDirectory);
+  final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(app.appDirectory);
   if (!projectInfo.targets.contains('Runner')) {
     printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
     printError('Open Xcode to fix the problem:');
@@ -254,26 +256,22 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
-  final InjectPluginsResult injectPluginsResult = injectPlugins();
-  final bool hasFlutterPlugins = injectPluginsResult.hasPlugin;
   final String previousGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
 
-  updateXcodeGeneratedProperties(
+  updateGeneratedXcodeProperties(
     projectPath: fs.currentDirectory.path,
     buildInfo: buildInfo,
     target: target,
-    hasPlugins: hasFlutterPlugins,
     previewDart2: buildInfo.previewDart2,
   );
 
-  if (hasFlutterPlugins) {
+  if (hasPlugins()) {
     final String currentGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
     await cocoaPods.processPods(
-        appIosDir: appDirectory,
-        iosEngineDir: flutterFrameworkDir(buildInfo.mode),
-        isSwift: app.isSwift,
-        pluginOrFlutterPodChanged: (injectPluginsResult.hasChanged
-            || previousGeneratedXcconfig != currentGeneratedXcconfig),
+      appIosDirectory: appDirectory,
+      iosEngineDir: flutterFrameworkDir(buildInfo.mode),
+      isSwift: app.isSwift,
+      flutterPodChanged: (previousGeneratedXcconfig != currentGeneratedXcconfig),
     );
   }
 
@@ -346,14 +344,58 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
-  final Status buildStatus =
-      logger.startProgress('Running Xcode build...', expectSlowOperation: true);
+  Status buildSubStatus;
+  Status initialBuildStatus;
+  Directory scriptOutputPipeTempDirectory;
+
+  if (logger.supportsColor) {
+    scriptOutputPipeTempDirectory = fs.systemTempDirectory
+        .createTempSync('flutter_build_log_pipe');
+    final File scriptOutputPipeFile =
+        scriptOutputPipeTempDirectory.childFile('pipe_to_stdout');
+    os.makePipe(scriptOutputPipeFile.path);
+
+    Future<void> listenToScriptOutputLine() async {
+      final List<String> lines = await scriptOutputPipeFile.readAsLines();
+      for (String line in lines) {
+        if (line == 'done') {
+          buildSubStatus?.stop();
+          buildSubStatus = null;
+        } else {
+          initialBuildStatus.cancel();
+          buildSubStatus = logger.startProgress(
+            line,
+            expectSlowOperation: true,
+            progressIndicatorPadding: 45,
+          );
+        }
+      }
+      return listenToScriptOutputLine();
+    }
+
+    // Trigger the start of the pipe -> stdout loop. Ignore exceptions.
+    listenToScriptOutputLine(); // ignore: unawaited_futures
+
+    buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
+  }
+
+  final Stopwatch buildStopwatch = new Stopwatch()..start();
+  initialBuildStatus = logger.startProgress('Starting Xcode build...');
   final RunResult buildResult = await runAsync(
     buildCommands,
     workingDirectory: app.appDirectory,
     allowReentrantFlutter: true
   );
-  buildStatus.stop();
+  buildSubStatus?.stop();
+  initialBuildStatus?.cancel();
+  buildStopwatch.stop();
+  // Free pipe file.
+  scriptOutputPipeTempDirectory?.deleteSync(recursive: true);
+  printStatus(
+    'Xcode build done',
+    ansiAlternative: 'Xcode build done'.padRight(53)
+        + '${getElapsedAsSeconds(buildStopwatch.elapsed).padLeft(5)}',
+  );
 
   // Run -showBuildSettings again but with the exact same parameters as the build.
   final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(
@@ -419,7 +461,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
 String readGeneratedXcconfig(String appPath) {
   final String generatedXcconfigPath =
-      fs.path.join(fs.currentDirectory.path, appPath, 'Flutter','Generated.xcconfig');
+      fs.path.join(fs.currentDirectory.path, appPath, 'Flutter', 'Generated.xcconfig');
   final File generatedXcconfigFile = fs.file(generatedXcconfigPath);
   if (!generatedXcconfigFile.existsSync())
     return null;

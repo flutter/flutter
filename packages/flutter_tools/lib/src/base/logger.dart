@@ -40,7 +40,15 @@ abstract class Logger {
   ///
   /// [message] is the message to display to the user; [progressId] provides an ID which can be
   /// used to identify this type of progress (`hot.reload`, `hot.restart`, ...).
-  Status startProgress(String message, { String progressId, bool expectSlowOperation: false });
+  ///
+  /// [progressIndicatorPadding] can optionally be used to specify spacing
+  /// between the [message] and the progress indicator.
+  Status startProgress(
+    String message, {
+    String progressId,
+    bool expectSlowOperation: false,
+    int progressIndicatorPadding: 52,
+  });
 }
 
 class Status {
@@ -96,13 +104,23 @@ class StdoutLogger extends Logger {
   void printTrace(String message) { }
 
   @override
-  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
+  Status startProgress(
+    String message, {
+    String progressId,
+    bool expectSlowOperation: false,
+    int progressIndicatorPadding: 52,
+  }) {
     if (_status != null) {
       // Ignore nested progresses; return a no-op status object.
       return new Status();
     } else {
       if (supportsColor) {
-        _status = new _AnsiStatus(message, expectSlowOperation, () { _status = null; });
+        _status = new _AnsiStatus(
+          message,
+          expectSlowOperation,
+          () { _status = null; },
+          progressIndicatorPadding,
+        );
         return _status;
       } else {
         printStatus(message);
@@ -163,7 +181,12 @@ class BufferLogger extends Logger {
   void printTrace(String message) => _trace.writeln(message);
 
   @override
-  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
+  Status startProgress(
+    String message, {
+    String progressId,
+    bool expectSlowOperation: false,
+    int progressIndicatorPadding: 52,
+  }) {
     printStatus(message);
     return new Status();
   }
@@ -208,7 +231,12 @@ class VerboseLogger extends Logger {
   }
 
   @override
-  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
+  Status startProgress(
+    String message, {
+    String progressId,
+    bool expectSlowOperation: false,
+    int progressIndicatorPadding: 52,
+  }) {
     printStatus(message);
     return new Status();
   }
@@ -253,10 +281,10 @@ enum _LogType {
 }
 
 class _AnsiStatus extends Status {
-  _AnsiStatus(this.message, this.expectSlowOperation, this.onFinish) {
+  _AnsiStatus(this.message, this.expectSlowOperation, this.onFinish, int padding) {
     stopwatch = new Stopwatch()..start();
 
-    stdout.write('${message.padRight(52)}     ');
+    stdout.write('${message.padRight(padding)}     ');
     stdout.write('${_progress[0]}');
 
     timer = new Timer.periodic(const Duration(milliseconds: 100), _callback);

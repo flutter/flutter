@@ -181,11 +181,11 @@ abstract class IOSApp extends ApplicationPackage {
     if (id == null)
       return null;
     final String projectPath = fs.path.join('ios', 'Runner.xcodeproj');
-    final Map<String, String> buildSettings = getXcodeBuildSettings(projectPath, 'Runner');
+    final Map<String, String> buildSettings = xcodeProjectInterpreter.getBuildSettings(projectPath, 'Runner');
     id = substituteXcodeVariables(id, buildSettings);
 
     return new BuildableIOSApp(
-      appDirectory: fs.path.join('ios'),
+      appDirectory: 'ios',
       projectBundleId: id,
       buildSettings: buildSettings,
     );
