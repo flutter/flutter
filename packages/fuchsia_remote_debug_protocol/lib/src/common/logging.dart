@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:core';
+import 'dart:io';
 
 /// Determines the level of logging.
 ///

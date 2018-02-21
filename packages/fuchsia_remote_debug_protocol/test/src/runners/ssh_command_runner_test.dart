@@ -40,7 +40,7 @@ void main() {
     setUp(() {
       mockProcessManager = new MockProcessManager();
       mockProcessResult = new MockProcessResult();
-      when(mockProcessManager.run(any)).thenReturn(mockProcessResult);
+      when(mockProcessManager.run(typed(any))).thenReturn(mockProcessResult);
     });
 
     test('verify interface is appended to ipv6 address', () async {
@@ -52,7 +52,7 @@ void main() {
         interface: interface,
         sshConfigPath: '/whatever',
       );
-      when(mockProcessResult.stdout).thenReturn('somestuff');
+      when<String>(mockProcessResult.stdout).thenReturn('somestuff');
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
@@ -67,7 +67,7 @@ void main() {
         mockProcessManager,
         address: ipV6Addr,
       );
-      when(mockProcessResult.stdout).thenReturn('somestuff');
+      when<String>(mockProcessResult.stdout).thenReturn('somestuff');
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
@@ -79,7 +79,7 @@ void main() {
       final String addr = '192.168.1.1';
       runner = new SshCommandRunner.withProcessManager(mockProcessManager,
           address: addr);
-      when(mockProcessResult.stdout).thenReturn('''this
+      when<String>(mockProcessResult.stdout).thenReturn('''this
           has
           four
           lines''');
@@ -92,7 +92,7 @@ void main() {
       final String addr = '192.168.1.1';
       runner = new SshCommandRunner.withProcessManager(mockProcessManager,
           address: addr);
-      when(mockProcessResult.stdout).thenReturn('whatever');
+      when<String>(mockProcessResult.stdout).thenReturn('whatever');
       when(mockProcessResult.exitCode).thenReturn(1);
       Future<Null> failingFunction() async {
         await runner.run('oihaw');
@@ -109,7 +109,7 @@ void main() {
         address: addr,
         sshConfigPath: config,
       );
-      when(mockProcessResult.stdout).thenReturn('somestuff');
+      when<String>(mockProcessResult.stdout).thenReturn('somestuff');
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
@@ -126,7 +126,7 @@ void main() {
         mockProcessManager,
         address: addr,
       );
-      when(mockProcessResult.stdout).thenReturn('somestuff');
+      when<String>(mockProcessResult.stdout).thenReturn('somestuff');
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
