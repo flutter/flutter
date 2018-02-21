@@ -877,6 +877,12 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.onSetSelection != null) {
       config.onSetSelection = properties.onSetSelection;
     }
+    if (properties.onDidGainAccessibilityFocus != null) {
+      config.onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus;
+    }
+    if (properties.onDidLoseAccessibilityFocus != null) {
+      config.onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus;
+    }
 
     newChild.updateWith(
       config: config,

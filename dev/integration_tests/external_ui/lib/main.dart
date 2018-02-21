@@ -153,11 +153,11 @@ Press play to produce texture frames.''';
             ],
           ),
         ),
-        floatingActionButton: (_icon == null ? null : new FloatingActionButton(
+        floatingActionButton: _icon == null ? null : new FloatingActionButton(
           key: const ValueKey<String>('fab'),
           child: new Icon(_icon),
           onPressed: _nextState,
-        )),
+        ),
       ),
     );
   }

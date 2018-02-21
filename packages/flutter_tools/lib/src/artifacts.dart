@@ -9,6 +9,7 @@ import 'base/file_system.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
 import 'build_info.dart';
+import 'dart/sdk.dart';
 import 'globals.dart';
 
 enum Artifact {
@@ -164,10 +165,11 @@ class CachedArtifacts extends Artifacts {
       case Artifact.vmSnapshotData:
       case Artifact.isolateSnapshotData:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
-      case Artifact.engineDartSdkPath:
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
+      case Artifact.engineDartSdkPath:
+        return dartSdkPath;
       case Artifact.platformKernelDill:
         return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:

@@ -206,7 +206,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       brewStatus = ValidationType.missing;
       messages.add(new ValidationMessage.error(
         'Brew not installed; use this to install tools for iOS device development.\n'
-        'Download brew at http://brew.sh/.'
+        'Download brew at https://brew.sh/.'
       ));
     }
 

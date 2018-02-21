@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -201,4 +202,194 @@ void main() {
 
     semantics.dispose();
   });
+
+  group('ComputeNotch', () {
+    testWidgets('host and guest must intersect', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null));
+      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      final Rect guest = new Rect.fromLTWH(50.0, 50.0, 10.0, 10.0);
+      final Offset start = const Offset(10.0, 100.0);
+      final Offset end = const Offset(60.0, 100.0);
+      expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
+    });
+
+    testWidgets('start/end must be on top edge', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null));
+      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
+
+      Offset start = const Offset(180.0, 100.0);
+      Offset end = const Offset(220.0, 110.0);
+      expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
+
+      start = const Offset(180.0, 110.0);
+      end = const Offset(220.0, 100.0);
+      expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
+    });
+
+    testWidgets('start must be to the left of the notch', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null));
+      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
+
+      final Offset start = const Offset(191.0, 100.0);
+      final Offset end = const Offset(220.0, 100.0);
+      expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
+    });
+
+    testWidgets('end must be to the right of the notch', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null));
+      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
+
+      final Offset start = const Offset(180.0, 100.0);
+      final Offset end = const Offset(209.0, 100.0);
+      expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
+    });
+
+    testWidgets('notch no margin', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null, notchMargin: 0.0));
+      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
+      final Offset start = const Offset(180.0, 100.0);
+      final Offset end = const Offset(220.0, 100.0);
+
+      final Path actualNotch = computeNotch(host, guest, start, end);
+      final Path expectedNotch = new Path()
+        ..lineTo(190.0, 100.0)
+        ..arcToPoint(
+          const Offset(210.0, 100.0),
+          radius: const Radius.circular(10.0),
+          clockwise: false
+        )
+        ..lineTo(220.0, 100.0);
+
+      expect(
+        createNotchedRectangle(host, start.dx, end.dx, actualNotch),
+        coversSameAreaAs(
+          createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
+          areaToCompare: host.inflate(10.0)
+        )
+      );
+
+      expect(
+        createNotchedRectangle(host, start.dx, end.dx, actualNotch),
+        coversSameAreaAs(
+          createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
+          areaToCompare: guest.inflate(10.0),
+          sampleSize: 50,
+        )
+      );
+    });
+
+    testWidgets('notch with margin', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester,
+        const FloatingActionButton(onPressed: null, notchMargin: 4.0)
+      );
+      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
+      final Offset start = const Offset(180.0, 100.0);
+      final Offset end = const Offset(220.0, 100.0);
+
+      final Path actualNotch = computeNotch(host, guest, start, end);
+      final Path expectedNotch = new Path()
+        ..lineTo(186.0, 100.0)
+        ..arcToPoint(
+          const Offset(214.0, 100.0),
+          radius: const Radius.circular(14.0),
+          clockwise: false
+        )
+        ..lineTo(220.0, 100.0);
+
+      expect(
+        createNotchedRectangle(host, start.dx, end.dx, actualNotch),
+        coversSameAreaAs(
+          createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
+          areaToCompare: host.inflate(10.0)
+        )
+      );
+
+      expect(
+        createNotchedRectangle(host, start.dx, end.dx, actualNotch),
+        coversSameAreaAs(
+          createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
+          areaToCompare: guest.inflate(10.0),
+          sampleSize: 50,
+        )
+      );
+    });
+  });
+}
+
+Path createNotchedRectangle(Rect container, double startX, double endX, Path notch) {
+  return new Path()
+    ..moveTo(container.left, container.top)
+    ..lineTo(startX, container.top)
+    ..addPath(notch, Offset.zero)
+    ..lineTo(container.right, container.top)
+    ..lineTo(container.right, container.bottom)
+    ..lineTo(container.left, container.bottom)
+    ..close();
+}
+Future<ComputeNotch> fetchComputeNotch(WidgetTester tester, FloatingActionButton fab) async {
+      await tester.pumpWidget(new MaterialApp(
+          home: new Scaffold(
+            body: new ConstrainedBox(
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+            floatingActionButton: fab,
+          )
+      ));
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      return listenerState.cache.value.floatingActionButtonNotch;
+}
+
+class GeometryListener extends StatefulWidget {
+  @override
+  State createState() => new GeometryListenerState();
+}
+
+class GeometryListenerState extends State<GeometryListener> {
+  @override
+  Widget build(BuildContext context) {
+    return new CustomPaint(
+      painter: cache
+    );
+  }
+
+  ValueListenable<ScaffoldGeometry> geometryListenable;
+  GeometryCachePainter cache;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ValueListenable<ScaffoldGeometry> newListenable = Scaffold.geometryOf(context);
+    if (geometryListenable == newListenable)
+      return;
+    
+    geometryListenable = newListenable;
+    cache = new GeometryCachePainter(geometryListenable);
+  }
+
+}
+
+// The Scaffold.geometryOf() value is only available at paint time.
+// To fetch it for the tests we implement this CustomPainter that just
+// caches the ScaffoldGeometry value in its paint method.
+class GeometryCachePainter extends CustomPainter {
+  GeometryCachePainter(this.geometryListenable) : super(repaint: geometryListenable);
+
+  final ValueListenable<ScaffoldGeometry> geometryListenable;
+
+  ScaffoldGeometry value;
+  @override
+  void paint(Canvas canvas, Size size) {
+    value = geometryListenable.value;
+  }
+
+  @override
+  bool shouldRepaint(GeometryCachePainter oldDelegate) {
+    return true;
+  }
 }

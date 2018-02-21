@@ -218,6 +218,7 @@ tasks:
       Builds sample catalog markdown pages and Android screenshots
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+    flaky: true
 
   complex_layout_semantics_perf:
     description: >
@@ -237,6 +238,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  plugin_test:
+    description: >
+      Checks that the project template works and supports plugins.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   flutter_gallery_instrumentation_test:
     description: >
       Same as flutter_gallery__transition_perf but uses Android instrumentation
@@ -250,6 +257,12 @@ tasks:
   flavors_test_ios:
     description: >
       Checks that flavored builds work on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  plugin_test_ios:
+    description: >
+      Checks that the project template works and supports plugins on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
@@ -344,6 +357,12 @@ tasks:
   channels_integration_test_win:
     description: >
       Checks that platform channels work when app is launched from Windows.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows/android"]
+
+  plugin_test_win:
+    description: >
+      Checks that the project template works and supports plugins on Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 

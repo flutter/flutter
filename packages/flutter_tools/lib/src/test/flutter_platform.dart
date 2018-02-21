@@ -201,7 +201,6 @@ class _FlutterPlatform extends PlatformPlugin {
 
       String mainDart = listenerFile.path;
       String bundlePath;
-      bool strongMode = false;
 
       if (previewDart2) {
         mainDart = await compile(
@@ -210,6 +209,11 @@ class _FlutterPlatform extends PlatformPlugin {
           mainPath: listenerFile.path,
           packagesPath: PackageMap.globalPackagesPath,
         );
+
+        if (mainDart == null) {
+          controller.sink.addError(_getErrorMessage('Compilation failed', testPath, shellPath));
+          return null;
+        }
 
         // bundlePath needs to point to a folder with `platform.dill` file.
         final Directory tempBundleDirectory = fs.systemTempDirectory
@@ -231,7 +235,6 @@ class _FlutterPlatform extends PlatformPlugin {
         }
 
         bundlePath = tempBundleDirectory.path;
-        strongMode = true;
       }
 
       final Process process = await _startProcess(
@@ -241,7 +244,6 @@ class _FlutterPlatform extends PlatformPlugin {
         enableObservatory: enableObservatory,
         startPaused: startPaused,
         bundlePath: bundlePath,
-        strongMode: strongMode,
         observatoryPort: explicitObservatoryPort,
       );
       subprocessActive = true;
@@ -516,7 +518,6 @@ void main() {
     String bundlePath,
     bool enableObservatory: false,
     bool startPaused: false,
-    bool strongMode: false,
     int observatoryPort,
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
@@ -544,11 +545,7 @@ void main() {
     if (bundlePath != null) {
       command.add('--flutter-assets-dir=$bundlePath');
     }
-    if (strongMode) {
-      command.add('--strong');
-    } else {
-      command.add('--enable-checked-mode');
-    }
+    command.add('--enable-checked-mode');
     command.addAll(<String>[
       '--enable-dart-profiling',
       '--non-interactive',

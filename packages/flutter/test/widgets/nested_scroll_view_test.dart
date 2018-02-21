@@ -229,7 +229,7 @@ void main() {
 
     // Fully expand the appbar by scrolling (no animation) to 0.0.
     controller.jumpTo(0.0);
-    await(tester.pumpAndSettle());
+    await tester.pumpAndSettle();
     expect(scrollOffset, 0.0);
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
 
@@ -291,12 +291,12 @@ void main() {
 
     // A scroll collapses Page0's appbar to 150.0.
     controller.jumpTo(50.0);
-    await(tester.pumpAndSettle());
+    await tester.pumpAndSettle();
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 150.0);
 
     // Fling to Page1. Page1's appbar height is the same as the appbar for Page0.
     await tester.fling(find.text('Page0'), const Offset(-100.0, 0.0), 10000.0);
-    await(tester.pumpAndSettle());
+    await tester.pumpAndSettle();
     expect(find.text('Page0'), findsNothing);
     expect(find.text('Page1'), findsOneWidget);
     expect(find.text('Page2'), findsNothing);
@@ -305,10 +305,10 @@ void main() {
     // Expand Page1's appbar and then fling to Page2. Page2's appbar appears
     // fully expanded.
     controller.jumpTo(0.0);
-    await(tester.pumpAndSettle());
+    await tester.pumpAndSettle();
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
     await tester.fling(find.text('Page1'), const Offset(-100.0, 0.0), 10000.0);
-    await(tester.pumpAndSettle());
+    await tester.pumpAndSettle();
     expect(find.text('Page0'), findsNothing);
     expect(find.text('Page1'), findsNothing);
     expect(find.text('Page2'), findsOneWidget);
@@ -566,4 +566,84 @@ void main() {
     expect(buildCount, expectedBuildCount);
     expect(find.byType(NestedScrollView), isNot(paints..shadow()));
   });
+
+  testWidgets('NestedScrollView and iOS bouncing', (WidgetTester tester) async {
+    // This verifies that overscroll bouncing works correctly on iOS. For
+    // example, this checks that if you pull to overscroll, friction is applied;
+    // it also makes sure that if you scroll back the other way, the scroll
+    // positions of the inner and outer list don't have a discontinuity.
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    const Key key1 = const ValueKey<int>(1);
+    const Key key2 = const ValueKey<int>(2);
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new DefaultTabController(
+            length: 1,
+            child: new NestedScrollView(
+              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[
+                  const SliverPersistentHeader(
+                    delegate: const TestHeader(key: key1),
+                  ),
+                ];
+              },
+              body: new SingleChildScrollView(
+                child: new Container(
+                  height: 1000.0,
+                  child: const Placeholder(key: key2),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getRect(find.byKey(key1)), new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)), new Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(10.0, 10.0));
+    await gesture.moveBy(const Offset(0.0, -10.0)); // scroll up
+    await tester.pump();
+    expect(tester.getRect(find.byKey(key1)), new Rect.fromLTWH(0.0, -10.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)), new Rect.fromLTWH(0.0, 90.0, 800.0, 1000.0));
+    await gesture.moveBy(const Offset(0.0, 10.0)); // scroll back to origin
+    await tester.pump();
+    expect(tester.getRect(find.byKey(key1)), new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)), new Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0));
+    await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
+    await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
+    await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
+    await tester.pump();
+    expect(tester.getRect(find.byKey(key1)), new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)).top, greaterThan(100.0));
+    expect(tester.getRect(find.byKey(key2)).top, lessThan(130.0));
+    await gesture.moveBy(const Offset(0.0, -1.0)); // scroll back a little
+    await tester.pump();
+    expect(tester.getRect(find.byKey(key1)), new Rect.fromLTWH(0.0, -1.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)).top, greaterThan(100.0));
+    expect(tester.getRect(find.byKey(key2)).top, lessThan(129.0));
+    await gesture.moveBy(const Offset(0.0, -10.0)); // scroll back a lot
+    await tester.pump();
+    expect(tester.getRect(find.byKey(key1)), new Rect.fromLTWH(0.0, -11.0, 800.0, 100.0));
+    await gesture.moveBy(const Offset(0.0, 20.0)); // overscroll again
+    await tester.pump();
+    expect(tester.getRect(find.byKey(key1)), new Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    await gesture.up();
+    debugDefaultTargetPlatformOverride = null;
+  });
+}
+
+class TestHeader extends SliverPersistentHeaderDelegate {
+  const TestHeader({ this.key });
+  final Key key;
+  @override
+  double get minExtent => 100.0;
+  @override
+  double get maxExtent => 100.0;
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return new Placeholder(key: key);
+  }
+  @override
+  bool shouldRebuild(TestHeader oldDelegate) => false;
 }

@@ -306,7 +306,7 @@ class ThemeData {
   /// icons placed on top of the primary color (e.g. toolbar text).
   final Brightness primaryColorBrightness;
 
-  /// The foreground color for widgets (knobs, text, etc)
+  /// The foreground color for widgets (knobs, text, overscroll edge effect, etc).
   final Color accentColor;
 
   /// The brightness of the [accentColor]. Used to determine the color of text

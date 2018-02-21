@@ -236,8 +236,7 @@ class _FlutterValidator extends DoctorValidator {
       '(${version.frameworkAge}), ${version.frameworkDate}'
     ));
     messages.add(new ValidationMessage('Engine revision ${version.engineRevisionShort}'));
-    messages.add(new ValidationMessage('Tools Dart version ${version.dartSdkVersion}'));
-    messages.add(new ValidationMessage('Engine Dart version ${version.engineDartVersion}'));
+    messages.add(new ValidationMessage('Dart version ${version.dartSdkVersion}'));
     final String genSnapshotPath =
       artifacts.getArtifactPath(Artifact.genSnapshot);
 
@@ -251,7 +250,7 @@ class _FlutterValidator extends DoctorValidator {
     }
 
     return new ValidationResult(valid, messages,
-      statusInfo: 'on ${os.name}, locale ${platform.localeName}, channel ${version.channel}'
+      statusInfo: 'Channel ${version.channel}, v${version.frameworkVersion}, on ${os.name}, locale ${platform.localeName}'
     );
   }
 }

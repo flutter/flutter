@@ -13,12 +13,14 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/port_scanner.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -50,6 +52,7 @@ void _defaultInitializeContext(AppContext testContext) {
     ..putIfAbsent(OperatingSystemUtils, () => new MockOperatingSystemUtils())
     ..putIfAbsent(PortScanner, () => new MockPortScanner())
     ..putIfAbsent(Xcode, () => new Xcode())
+    ..putIfAbsent(XcodeProjectInterpreter, () => new MockXcodeProjectInterpreter())
     ..putIfAbsent(IOSSimulatorUtils, () {
       final MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
       when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
@@ -89,6 +92,7 @@ void testUsingContext(String description, dynamic testMethod(), {
 
     // The context always starts with these value since others depend on them.
     testContext
+      ..putIfAbsent(BotDetector, () => const BotDetector())
       ..putIfAbsent(Stdio, () => const Stdio())
       ..putIfAbsent(Platform, () => const LocalPlatform())
       ..putIfAbsent(FileSystem, () => const LocalFileSystem())
@@ -260,6 +264,25 @@ class MockUsage implements Usage {
 
   @override
   void printWelcome() { }
+}
+
+class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
+  @override
+  bool get canInterpretXcodeProjects => true;
+
+  @override
+  Map<String, String> getBuildSettings(String projectPath, String target) {
+    return <String, String>{};
+  }
+
+  @override
+  XcodeProjectInfo getInfo(String projectPath) {
+    return new XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['Debug', 'Release'],
+      <String>['Runner'],
+    );
+  }
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}

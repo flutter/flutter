@@ -320,6 +320,7 @@ class DebuggingOptions {
   DebuggingOptions.enabled(this.buildInfo, {
     this.startPaused: false,
     this.enableSoftwareRendering: false,
+    this.skiaDeterministicRendering: false,
     this.traceSkia: false,
     this.useTestFonts: false,
     this.observatoryPort,
@@ -330,6 +331,7 @@ class DebuggingOptions {
     useTestFonts = false,
     startPaused = false,
     enableSoftwareRendering = false,
+    skiaDeterministicRendering = false,
     traceSkia = false,
     observatoryPort = null;
 
@@ -338,6 +340,7 @@ class DebuggingOptions {
   final BuildInfo buildInfo;
   final bool startPaused;
   final bool enableSoftwareRendering;
+  final bool skiaDeterministicRendering;
   final bool traceSkia;
   final bool useTestFonts;
   final int observatoryPort;

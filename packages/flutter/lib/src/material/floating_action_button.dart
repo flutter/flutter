@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'scaffold.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
@@ -22,6 +25,7 @@ class _DefaultHeroTag {
   String toString() => '<default FloatingActionButton tag>';
 }
 
+// TODO(amirh): update the documentation once the BAB notch can be disabled.
 /// A material design floating action button.
 ///
 /// A floating action button is a circular icon button that hovers over content
@@ -34,6 +38,12 @@ class _DefaultHeroTag {
 ///
 /// If the [onPressed] callback is null, then the button will be disabled and
 /// will not react to touch.
+///
+/// If the floating action button is a descendant of a [Scaffold] that also has a
+/// [BottomAppBar], the [BottomAppBar] will show a notch to accomodate the
+/// [FloatingActionButton] when it overlaps the [BottomAppBar]. The notch's
+/// shape is an arc for a circle whose radius is the floating action button's
+/// radius plus [FloatingActionButton.notchMargin].
 ///
 /// See also:
 ///
@@ -54,7 +64,8 @@ class FloatingActionButton extends StatefulWidget {
     this.elevation: 6.0,
     this.highlightElevation: 12.0,
     @required this.onPressed,
-    this.mini: false
+    this.mini: false,
+    this.notchMargin: 4.0,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -117,12 +128,27 @@ class FloatingActionButton extends StatefulWidget {
   /// and width of 40.0 logical pixels.
   final bool mini;
 
+  /// The margin to keep around the floating action button when creating a
+  /// notch for it.
+  ///
+  /// The notch is an arc of a circle with radius r+[notchMargin] where r is the
+  /// radius of the floating action button. This expanded radius leaves a margin
+  /// around the floating action button.
+  ///
+  /// See also:
+  ///
+  ///  * [BottomAppBar], a material design elements that shows a notch for the
+  ///    floating action button.
+  final double notchMargin;
+
   @override
   _FloatingActionButtonState createState() => new _FloatingActionButtonState();
 }
 
 class _FloatingActionButtonState extends State<FloatingActionButton> {
   bool _highlight = false;
+
+  VoidCallback _clearComputeNotch;
 
   void _handleHighlightChanged(bool value) {
     setState(() {
@@ -185,5 +211,81 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     }
 
     return result;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _clearComputeNotch = Scaffold.setFloatingActionButtonNotchFor(context, _computeNotch);
+  }
+
+  @override
+  void deactivate() {
+    if (_clearComputeNotch != null)
+      _clearComputeNotch();
+    super.deactivate();
+  }
+
+  Path _computeNotch(Rect host, Rect guest, Offset start, Offset end) {
+    assert(() {
+      if (end.dy != host.top)
+        throw new FlutterError(
+          'The floating action button\'s notch maker must only be used for a notch in the top edge of the host.\n'
+          'The notch\'s path end point: $end is not in the top edge of $host'
+        );
+      if (start.dy != host.top)
+        throw new FlutterError(
+          'The floating action button\'s notch maker must only be used for a notch in the top edge the host.\n'
+          'The notch\'s path start point: $start is not in the top edge of $host'
+        );
+      return true;
+    }());
+
+    assert(() {
+      if (!host.overlaps(guest))
+        throw new FlutterError('Notch host must intersect with its guest');
+      return true;
+    }());
+
+    // The FAB's shape is a circle bounded by the guest rectangle.
+    // So the FAB's radius is half the guest width.
+    final double fabRadius = guest.width / 2.0;
+
+    final double notchRadius = fabRadius + widget.notchMargin;
+    assert(() {
+      if (guest.center.dx - notchRadius < start.dx)
+        throw new FlutterError(
+          'The notch\'s path start point must be to the left of the notch.\n'
+          'Start point was $start, guest was $guest, notchMargin was ${widget.notchMargin}.'
+        );
+      if (guest.center.dx + notchRadius > end.dx)
+        throw new FlutterError(
+          'The notch\'s end point must be to the right of the guest.\n'
+          'End point was $start, notch was $guest, notchMargin was ${widget.notchMargin}.'
+        );
+      return true;
+    }());
+
+    // We find the intersection of the notch's circle with the top edge of the host
+    // using the Pythagorean theorem for the right triangle that connects the
+    // center of the notch and the intersection of the notch's circle and the host's
+    // top edge.
+    //
+    // The hypotenuse of this triangle equals the notch's radius, and one side
+    // (a) is the distance from the notch's center to the top edge.
+    //
+    // The other side (b) would be the distance on the horizontal axis between the
+    // notch's center and the intersection points with it's top edge.
+    final double a = host.top - guest.center.dy;
+    final double b = math.sqrt(notchRadius * notchRadius - a * a);
+
+    return new Path()
+      ..lineTo(guest.center.dx - b, host.top)
+      ..arcToPoint(
+        new Offset(guest.center.dx + b, host.top),
+        radius: new Radius.circular(notchRadius),
+        clockwise: false,
+      )
+      ..lineTo(end.dx, end.dy);
   }
 }
