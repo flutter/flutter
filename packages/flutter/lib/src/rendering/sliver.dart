@@ -521,8 +521,9 @@ class SliverGeometry extends Diagnosticable {
   /// offset will be adjusted by the parent and then the entire layout of the
   /// parent will be rerun.
   ///
-  /// If a parent does not consume this value by making layout corrections,
-  /// this value must be propagated up it its own [SliverGeometry].
+  /// If the parent is also a [RenderSliver], it must propagate this value
+  /// in its own [RenderSliver.geometry] property until a viewport which adjusts
+  /// its offset based on this value.
   final double scrollOffsetCorrection;
 
   /// Asserts that this geometry is internally consistent.
