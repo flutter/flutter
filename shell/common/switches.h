@@ -58,6 +58,13 @@ DEF_SWITCH(EnableSoftwareRendering,
            "Enable rendering using the Skia software backend. This is useful"
            "when testing Flutter on emulators. By default, Flutter will"
            "attempt to either use OpenGL or Vulkan.")
+DEF_SWITCH(SkiaDeterministicRendering,
+           "skia-deterministic-rendering",
+           "Skips the call to SkGraphics::Init(), thus avoiding swapping out"
+           "some Skia function pointers based on available CPU features. This"
+           "is used to obtain 100% deterministic behavior in Skia rendering."
+           "This flag is ignored when the runtime mode is anything other than"
+           "debug.")
 DEF_SWITCH(EnableTxt,
            "enable-txt",
            "Enable libtxt as the text shaping library instead of Blink.")

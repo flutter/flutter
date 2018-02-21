@@ -84,7 +84,13 @@ void Shell::InitStandalone(fxl::CommandLine command_line,
 
   fml::icu::InitializeICU(icu_data_path);
 
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+  if (!command_line.HasOption(FlagForSwitch(Switch::SkiaDeterministicRendering))) {
+    SkGraphics::Init();
+  }
+#else
   SkGraphics::Init();
+#endif
 
   blink::Settings settings;
   settings.application_library_path = application_library_path;
