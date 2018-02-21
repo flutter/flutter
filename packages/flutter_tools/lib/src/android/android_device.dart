@@ -420,6 +420,8 @@ class AndroidDevice extends Device {
       cmd.addAll(<String>['--es', 'route', route]);
     if (debuggingOptions.enableSoftwareRendering)
       cmd.addAll(<String>['--ez', 'enable-software-rendering', 'true']);
+    if (debuggingOptions.skiaDeterministicRendering)
+      cmd.addAll(<String>['--ez', 'skia-deterministic-rendering', 'true']);
     if (debuggingOptions.traceSkia)
       cmd.addAll(<String>['--ez', 'trace-skia', 'true']);
     if (debuggingOptions.debuggingEnabled) {
