@@ -113,6 +113,8 @@ class StdoutLogger extends Logger {
     }
     if (terminal.supportsColor) {
       _status = new AnsiStatus(message, expectSlowOperation, () { _status = null; }, progressIndicatorPadding)..start();
+    } else {
+      _status = new Status()..start();
     }
     return _status;
   }
