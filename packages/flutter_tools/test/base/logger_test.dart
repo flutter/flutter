@@ -49,7 +49,7 @@ void main() {
       return Future.doWhile(() async {
         // Future.doWhile() isn't enough by itself, because the VM never gets
         // around to scheduling the other tasks for some reason.
-        await new Future<void>.delayed(new Duration(milliseconds: 0));
+        await new Future<void>.delayed(const Duration(milliseconds: 0));
         return doThis();
       });
     }
