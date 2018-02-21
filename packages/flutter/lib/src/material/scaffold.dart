@@ -1337,24 +1337,20 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   FabMotionAnimator _fabMotionAnimator;
   FabPositioner _previousFabPositioner;
   FabPositioner _fabPositioner;
-  FabPositioner _nextFabPositioner;
 
-  // Moves the FAB to the _nextFabPositioner if the _nextFabPositioner is valid.
-  void _animateFabToNextPositioner() {
-    // If there is no next position to move to, don't animate.
-    if (_nextFabPositioner == null)
-      return;
-    // If the FAB is moving right now, we need to start from a snapshot of the current transition.
+  // Moves the FAB to the newPositioner.
+  void _moveFab(final FabPositioner newPositioner) {
     FabPositioner previousPositioner = _fabPositioner;
     double restartAnimationFrom = 0.0;
+    // If the FAB is moving right now, we need to start from a snapshot of the current transition.
     if (_fabMoveController.isAnimating) {
       previousPositioner = new _TransitionSnapshotFab(_previousFabPositioner, _fabPositioner, _fabMotionAnimator, _fabMoveController.value);
       restartAnimationFrom = _fabMotionAnimator.getAnimationRestart(_fabMoveController.value);
     }
+
     setState(() {
       _previousFabPositioner = previousPositioner;
-      _fabPositioner = _nextFabPositioner;
-      _nextFabPositioner = null;
+      _fabPositioner = newPositioner;
     });
 
     // Only animate if there is a Floating Action Button to animate with.
@@ -1365,21 +1361,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     } else {
       _fabMoveController.value = _fabMoveController.upperBound;
     }
-  }
-
-  // Listens to the _fabMoveController and schedules new fab animations if necessary
-  // when the animation completes.
-  void _onFabMoveStatus(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
-      _animateFabToNextPositioner();
-    }
-  }
-
-  void _moveFab(final FabPositioner newPositioner) {
-    setState(() {
-      _nextFabPositioner = newPositioner;
-    });
-    _animateFabToNextPositioner();
   }
 
   // iOS FEATURES - status bar tap, back gesture
@@ -1400,7 +1381,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
   }
 
-
   // INTERNALS
 
   _ScaffoldGeometryNotifier _geometryNotifier;
@@ -1413,7 +1393,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _fabMotionAnimator = widget.fabMotionAnimator ?? FabMotionAnimator.scaling;
     _previousFabPositioner = _fabPositioner;
     _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 1.0, duration: _kFloatingActionButtonSegue * 2);
-    _fabMoveController.addStatusListener(_onFabMoveStatus);
   }
 
   @override
