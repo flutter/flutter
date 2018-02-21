@@ -210,6 +210,9 @@ class IOSDevice extends Device {
     if (debuggingOptions.enableSoftwareRendering)
       launchArguments.add('--enable-software-rendering');
 
+    if (debuggingOptions.skiaDeterministicRendering)
+      launchArguments.add('--skia-deterministic-rendering');
+
     if (debuggingOptions.traceSkia)
       launchArguments.add('--trace-skia');
 
