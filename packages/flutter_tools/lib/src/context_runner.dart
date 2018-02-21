@@ -13,6 +13,7 @@ import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/utils.dart';
 import 'cache.dart';
 import 'disabled_usage.dart';
 import 'usage.dart';
@@ -25,6 +26,7 @@ Future<Null> runInContext(List<String> args, Runner runner) {
   return executableContext.runInZone(() {
     // Initialize the context with some defaults.
     // This list must be kept in sync with lib/executable.dart.
+    context.putIfAbsent(BotDetector, () => const BotDetector());
     context.putIfAbsent(Stdio, () => const Stdio());
     context.putIfAbsent(Platform, () => const LocalPlatform());
     context.putIfAbsent(FileSystem, () => const LocalFileSystem());

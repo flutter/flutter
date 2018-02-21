@@ -332,6 +332,8 @@ class IOSSimulator extends Device {
         args.add('--enable-checked-mode');
       if (debuggingOptions.startPaused)
         args.add('--start-paused');
+      if (debuggingOptions.skiaDeterministicRendering)
+        args.add('--skia-deterministic-rendering');
       if (debuggingOptions.useTestFonts)
         args.add('--use-test-fonts');
 

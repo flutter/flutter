@@ -81,6 +81,7 @@ export 'src/material/stepper.dart';
 export 'src/material/switch.dart';
 export 'src/material/switch_list_tile.dart';
 export 'src/material/tab_controller.dart';
+export 'src/material/tab_indicator.dart';
 export 'src/material/tabs.dart';
 export 'src/material/text_field.dart';
 export 'src/material/text_form_field.dart';
