@@ -94,8 +94,8 @@ abstract class FabMotionAnimator {
   /// This is the default fab motion animation.
   static const FabMotionAnimator scaling = const _ScalingFabMotionAnimator();
 
-  /// Animates the [FloatingActionButton]'s [Offset].
-  Animation<Offset> getOffsetAnimation({@required Offset begin, @required Offset end, @required Animation<double> parent});
+  /// Gets the [FloatingActionButton]'s [Offset] based on a [progress].
+  Offset getOffset({@required Offset begin, @required Offset end, @required double progress});
 
   /// Animates the scale of the [FloatingActionButton].
   /// 
@@ -118,8 +118,12 @@ class _ScalingFabMotionAnimator extends FabMotionAnimator {
   const _ScalingFabMotionAnimator();
 
   @override
-  Animation<Offset> getOffsetAnimation({Offset begin, Offset end, Animation<double> parent}) {
-    return new Tween<Offset>(begin: begin, end: end).chain(new CurveTween(curve: const Threshold(0.5))).animate(parent);
+  Offset getOffset({Offset begin, Offset end, double progress}) {
+    if (progress < 0.5) {
+      return begin;
+    } else {
+      return end;
+    }
   }
 
   @override
@@ -413,7 +417,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.horizontalPadding, 
     @required this.previousFabPosition,
     @required this.currentFabPosition,
-    @required this.fabMoveAnimation,
+    @required this.fabMoveAnimationProgress,
     @required this.fabMotionAnimator,
   }) : assert(previousFabPosition != null), assert(currentFabPosition != null);
 
@@ -425,7 +429,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   final FabPositioner previousFabPosition;
   final FabPositioner currentFabPosition;
-  final Animation<double> fabMoveAnimation;
+  final double fabMoveAnimationProgress;
   final FabMotionAnimator fabMotionAnimator;
 
   @override
@@ -526,7 +530,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       );
       final Offset currentFabOffset = currentFabPosition.getOffset(currentGeometry);
       final Offset previousFabOffset = previousFabPosition.getOffset(currentGeometry);
-      final Offset fabOffset = fabMotionAnimator.getOffsetAnimation(begin: previousFabOffset, end: currentFabOffset, parent: fabMoveAnimation).value;
+      final Offset fabOffset = fabMotionAnimator.getOffset(begin: previousFabOffset, end: currentFabOffset, progress: fabMoveAnimationProgress);
       positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
       floatingActionButtonRect = fabOffset & fabSize;
     }
@@ -558,7 +562,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         || oldDelegate.bottomViewInset != bottomViewInset
         || oldDelegate.horizontalPadding != horizontalPadding
         || oldDelegate.textDirection != textDirection
-        || !(fabMoveAnimation.isCompleted || fabMoveAnimation.isDismissed)
+        || oldDelegate.fabMoveAnimationProgress != fabMoveAnimationProgress
         || oldDelegate.previousFabPosition != previousFabPosition
         || oldDelegate.currentFabPosition != currentFabPosition;
   }
@@ -1651,7 +1655,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
               delegate: new _ScaffoldLayout(
                 bottomViewInset: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
                 currentFabPosition: _fabPositioner,
-                fabMoveAnimation: _fabMoveController.view,
+                fabMoveAnimationProgress: _fabMoveController.value,
                 fabMotionAnimator: _fabMotionAnimator,
                 geometryNotifier: _geometryNotifier,
                 horizontalPadding: endPadding,

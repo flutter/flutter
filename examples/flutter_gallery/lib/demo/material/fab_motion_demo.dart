@@ -107,8 +107,9 @@ class _SlidingFabMotionAnimator extends FabMotionAnimator {
   const _SlidingFabMotionAnimator();
 
   @override
-  Animation<Offset> getOffsetAnimation({Offset begin, Offset end, Animation<double> parent}) {
-    return new Tween<Offset>(begin: begin, end: end).chain(new CurveTween(curve: Curves.decelerate)).animate(parent);
+  Offset getOffset({Offset begin, Offset end, double progress}) {
+    final double curvedProgress = Curves.decelerate.transform(progress);
+    return new Tween<Offset>(begin: begin, end: end).lerp(curvedProgress);
   }
 
   @override
