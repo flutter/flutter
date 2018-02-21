@@ -40,7 +40,7 @@ final Tween<double> _kFloatingActionButtonTurnTween = new Tween<double>(begin: -
 /// not end with a [Path.close]. The returned [Path] is built under the
 /// assumption it will be added to an existing path that is at the `start`
 /// coordinates using [Path.addPath].
-typedef Path NotchMaker(Rect host, Rect guest, Offset start, Offset end);
+typedef Path ComputeNotch(Rect host, Rect guest, Offset start, Offset end);
 
 enum _ScaffoldSlot {
   body,
@@ -64,7 +64,7 @@ class ScaffoldGeometry {
   const ScaffoldGeometry({
     this.bottomNavigationBarTop,
     this.floatingActionButtonArea,
-    this.floatingActionButtonNotchMaker,
+    this.floatingActionButtonNotch,
   });
 
   /// The distance from the scaffold's top edge to the top edge of the
@@ -80,11 +80,11 @@ class ScaffoldGeometry {
   /// This is null when there is no floating action button showing.
   final Rect floatingActionButtonArea;
 
-  /// A [NotchMaker] for the floating action button.
+  /// A [ComputeNotch] for the floating action button.
   /// 
-  /// The contract for this [NotchMaker] is described in [NotchMaker] and
-  /// [Scaffold.setFloatingActionButtonNotchMakerFor].
-  final NotchMaker floatingActionButtonNotchMaker;
+  /// The contract for this [ComputeNotch] is described in [ComputeNotch] and
+  /// [Scaffold.setFloatingActionButtonNotchFor].
+  final ComputeNotch floatingActionButtonNotch;
 
   ScaffoldGeometry _scaleFloatingActionButton(double scaleFactor) {
     if (scaleFactor == 1.0)
@@ -93,7 +93,7 @@ class ScaffoldGeometry {
     if (scaleFactor == 0.0) {
       return new ScaffoldGeometry(
         bottomNavigationBarTop: bottomNavigationBarTop,
-        floatingActionButtonNotchMaker: floatingActionButtonNotchMaker,
+        floatingActionButtonNotch: floatingActionButtonNotch,
       );
     }
 
@@ -110,12 +110,12 @@ class ScaffoldGeometry {
   ScaffoldGeometry copyWith({
     double bottomNavigationBarTop,
     Rect floatingActionButtonArea,
-    NotchMaker floatingActionButtonNotchMaker,
+    ComputeNotch floatingActionButtonNotch,
   }) {
     return new ScaffoldGeometry(
       bottomNavigationBarTop: bottomNavigationBarTop ?? this.bottomNavigationBarTop,
       floatingActionButtonArea: floatingActionButtonArea ?? this.floatingActionButtonArea,
-      floatingActionButtonNotchMaker: floatingActionButtonNotchMaker ?? this.floatingActionButtonNotchMaker,
+      floatingActionButtonNotch: floatingActionButtonNotch ?? this.floatingActionButtonNotch,
     );
   }
 }
@@ -141,7 +141,7 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
   final BuildContext context;
   double fabScale;
   ScaffoldGeometry geometry;
-  _Closeable notchMakerCloseable;
+  _Closeable computeNotchCloseable;
 
   @override
   ScaffoldGeometry get value {
@@ -162,29 +162,29 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
     double bottomNavigationBarTop,
     Rect floatingActionButtonArea,
     double floatingActionButtonScale,
-    NotchMaker floatingActionButtonNotchMaker,
+    ComputeNotch floatingActionButtonNotch,
   }) {
     fabScale = floatingActionButtonScale ?? fabScale;
     geometry = geometry.copyWith(
       bottomNavigationBarTop: bottomNavigationBarTop,
       floatingActionButtonArea: floatingActionButtonArea,
-      floatingActionButtonNotchMaker: floatingActionButtonNotchMaker,
+      floatingActionButtonNotch: floatingActionButtonNotch,
     );
     notifyListeners();
   }
 
-  VoidCallback _updateFloatingActionButtonNotchMaker(NotchMaker fabNotchMaker) {
-    notchMakerCloseable?.close();
-    _setFloatingActionButtonNotchMakerAndNotify(fabNotchMaker);
-    notchMakerCloseable = new _Closeable(() { _setFloatingActionButtonNotchMakerAndNotify(null); });
-    return notchMakerCloseable.close;
+  VoidCallback _updateFloatingActionButtonNotch(ComputeNotch fabComputeNotch) {
+    computeNotchCloseable?.close();
+    _setFloatingActionButtonNotchAndNotify(fabComputeNotch);
+    computeNotchCloseable = new _Closeable(() { _setFloatingActionButtonNotchAndNotify(null); });
+    return computeNotchCloseable.close;
   }
 
-  void _setFloatingActionButtonNotchMakerAndNotify(NotchMaker fabNotchMaker) {
+  void _setFloatingActionButtonNotchAndNotify(ComputeNotch fabComputeNotch) {
     geometry = new ScaffoldGeometry(
       bottomNavigationBarTop: geometry.bottomNavigationBarTop,
       floatingActionButtonArea: geometry.floatingActionButtonArea,
-      floatingActionButtonNotchMaker: fabNotchMaker,
+      floatingActionButtonNotch: fabComputeNotch,
     );
     notifyListeners();
   }
@@ -750,10 +750,10 @@ class Scaffold extends StatefulWidget {
     return scaffoldScope.geometryNotifier;
   }
 
-  /// Sets the [ScaffoldGeometry.floatingActionButtonNotchMaker] for the closest
+  /// Sets the [ScaffoldGeometry.floatingActionButtonNotch] for the closest
   /// [Scaffold] ancestor of the given context if one exist.
   ///
-  /// It is guaranteed that `notchMaker` will only be used for making notches
+  /// It is guaranteed that `computeNotch` will only be used for making notches
   /// in the top edge of the [bottomNavigationBar], the start and end offsets given to
   /// it will always be on the top edge of the [bottomNavigationBar], the start offset
   /// will be to the left of the floating action button's bounds, and the end
@@ -767,13 +767,13 @@ class Scaffold extends StatefulWidget {
   /// This method is typically called from [State.didChangeDependencies] and the
   /// callback should then be invoked from [State.deactivate].
   ///
-  /// If there was a previously set [ScaffoldGeometry.floatingActionButtonNotchMaker]
+  /// If there was a previously set [ScaffoldGeometry.floatingActionButtonNotch]
   /// it will be overriden.
-  static VoidCallback setFloatingActionButtonNotchMakerFor(BuildContext context, NotchMaker notchMaker) {
+  static VoidCallback setFloatingActionButtonNotchFor(BuildContext context, ComputeNotch computeNotch) {
     final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType(_ScaffoldScope);
     if (scaffoldScope == null)
       return null;
-    return scaffoldScope.geometryNotifier._updateFloatingActionButtonNotchMaker(notchMaker);
+    return scaffoldScope.geometryNotifier._updateFloatingActionButtonNotch(computeNotch);
   }
 
   /// Whether the Scaffold that most tightly encloses the given context has a

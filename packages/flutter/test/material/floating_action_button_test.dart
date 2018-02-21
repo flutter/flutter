@@ -203,58 +203,58 @@ void main() {
     semantics.dispose();
   });
 
-  group('NotchMaker', () {
+  group('ComputeNotch', () {
     testWidgets('host and guest must intersect', (WidgetTester tester) async {
-      final NotchMaker notchMaker = await fetchNotchMaker(tester, const FloatingActionButton(onPressed: null));
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null));
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTWH(50.0, 50.0, 10.0, 10.0);
       final Offset start = const Offset(10.0, 100.0);
       final Offset end = const Offset(60.0, 100.0);
-      expect(() {notchMaker(host, guest, start, end);}, throwsFlutterError);
+      expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
     });
 
     testWidgets('start/end must be on top edge', (WidgetTester tester) async {
-      final NotchMaker notchMaker = await fetchNotchMaker(tester, const FloatingActionButton(onPressed: null));
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null));
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
 
       Offset start = const Offset(180.0, 100.0);
       Offset end = const Offset(220.0, 110.0);
-      expect(() {notchMaker(host, guest, start, end);}, throwsFlutterError);
+      expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
 
       start = const Offset(180.0, 110.0);
       end = const Offset(220.0, 100.0);
-      expect(() {notchMaker(host, guest, start, end);}, throwsFlutterError);
+      expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
     });
 
     testWidgets('start must be to the left of the notch', (WidgetTester tester) async {
-      final NotchMaker notchMaker = await fetchNotchMaker(tester, const FloatingActionButton(onPressed: null));
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null));
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
 
       final Offset start = const Offset(191.0, 100.0);
       final Offset end = const Offset(220.0, 100.0);
-      expect(() {notchMaker(host, guest, start, end);}, throwsFlutterError);
+      expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
     });
 
     testWidgets('end must be to the right of the notch', (WidgetTester tester) async {
-      final NotchMaker notchMaker = await fetchNotchMaker(tester, const FloatingActionButton(onPressed: null));
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null));
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
 
       final Offset start = const Offset(180.0, 100.0);
       final Offset end = const Offset(209.0, 100.0);
-      expect(() {notchMaker(host, guest, start, end);}, throwsFlutterError);
+      expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
     });
 
     testWidgets('notch no margin', (WidgetTester tester) async {
-      final NotchMaker notchMaker = await fetchNotchMaker(tester, const FloatingActionButton(onPressed: null, notchMargin: 0.0));
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null, notchMargin: 0.0));
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
       final Offset start = const Offset(180.0, 100.0);
       final Offset end = const Offset(220.0, 100.0);
 
-      final Path actualNotch = notchMaker(host, guest, start, end);
+      final Path actualNotch = computeNotch(host, guest, start, end);
       final Path expectedNotch = new Path()
         ..lineTo(190.0, 100.0)
         ..arcToPoint(
@@ -283,7 +283,7 @@ void main() {
     });
 
     testWidgets('notch with margin', (WidgetTester tester) async {
-      final NotchMaker notchMaker = await fetchNotchMaker(tester,
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester,
         const FloatingActionButton(onPressed: null, notchMargin: 4.0)
       );
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
@@ -291,7 +291,7 @@ void main() {
       final Offset start = const Offset(180.0, 100.0);
       final Offset end = const Offset(220.0, 100.0);
 
-      final Path actualNotch = notchMaker(host, guest, start, end);
+      final Path actualNotch = computeNotch(host, guest, start, end);
       final Path expectedNotch = new Path()
         ..lineTo(186.0, 100.0)
         ..arcToPoint(
@@ -331,7 +331,7 @@ Path createNotchedRectangle(Rect container, double startX, double endX, Path not
     ..lineTo(container.left, container.bottom)
     ..close();
 }
-Future<NotchMaker> fetchNotchMaker(WidgetTester tester, FloatingActionButton fab) async {
+Future<ComputeNotch> fetchComputeNotch(WidgetTester tester, FloatingActionButton fab) async {
       await tester.pumpWidget(new MaterialApp(
           home: new Scaffold(
             body: new ConstrainedBox(
@@ -342,7 +342,7 @@ Future<NotchMaker> fetchNotchMaker(WidgetTester tester, FloatingActionButton fab
           )
       ));
       final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
-      return listenerState.cache.value.floatingActionButtonNotchMaker;
+      return listenerState.cache.value.floatingActionButtonNotch;
 }
 
 class GeometryListener extends StatefulWidget {

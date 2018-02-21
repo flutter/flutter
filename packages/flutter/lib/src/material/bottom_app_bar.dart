@@ -32,8 +32,8 @@ import 'scaffold.dart';
 ///
 /// See also:
 ///
-///  * [NotchMaker] a closure used for creating a notch in a shape.
-///  * [ScaffoldGeometry.floatingActionBarNotchMaker] the [NotchMaker] used to
+///  * [ComputeNotch] a closure used for creating a notch in a shape.
+///  * [ScaffoldGeometry.floatingActionBarComputeNotch] the [ComputeNotch] used to
 ///  make a notch for the [FloatingActionButton]
 ///  * [FloatingActionButton] which the [BottomAppBar] makes a notch for.
 ///  * [AppBar] for a toolbar that is shown at the top of the screen.
@@ -104,7 +104,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     final Rect appBar = Offset.zero & size;
     if (geometry.value.floatingActionButtonArea == null ||
-        geometry.value.floatingActionButtonNotchMaker == null) {
+        geometry.value.floatingActionButtonNotch == null) {
       return new Path()..addRect(appBar);
     }
 
@@ -116,11 +116,11 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
       return new Path()..addRect(appBar);
     }
 
-    final NotchMaker notchMaker = geometry.value.floatingActionButtonNotchMaker;
+    final ComputeNotch computeNotch = geometry.value.floatingActionButtonNotch;
     return new Path()
       ..moveTo(appBar.left, appBar.top)
       ..addPath(
-        notchMaker(
+        computeNotch(
           appBar,
           button,
           new Offset(appBar.left, appBar.top),

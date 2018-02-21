@@ -940,15 +940,15 @@ void main() {
       numNotificationsAtLastFrame = listenerState.numNotifications;
     });
 
-    testWidgets('set floatingActionButtonNotchMaker', (WidgetTester tester) async {
-      final NotchMaker notchMaker = (Rect container, Rect notch, Offset start, Offset end) => null;
+    testWidgets('set floatingActionButtonNotch', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = (Rect container, Rect notch, Offset start, Offset end) => null;
       await tester.pumpWidget(new MaterialApp(
           home: new Scaffold(
             body: new ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
               child: new GeometryListener(),
             ),
-            floatingActionButton: new NotchMakerSetter(notchMaker),
+            floatingActionButton: new ComputeNotchSetter(computeNotch),
           )
       ));
 
@@ -956,8 +956,8 @@ void main() {
       ScaffoldGeometry geometry = listenerState.cache.value;
 
       expect(
-        geometry.floatingActionButtonNotchMaker,
-        notchMaker,
+        geometry.floatingActionButtonNotch,
+        computeNotch,
       );
 
       await tester.pumpWidget(new MaterialApp(
@@ -974,37 +974,37 @@ void main() {
       geometry = listenerState.cache.value;
 
       expect(
-        geometry.floatingActionButtonNotchMaker,
+        geometry.floatingActionButtonNotch,
         null,
       );
     });
 
-    testWidgets('closing an inactive floatingActionButtonNotchMaker is a no-op', (WidgetTester tester) async {
-      final NotchMaker notchMaker = (Rect container, Rect notch, Offset start, Offset end) => null;
+    testWidgets('closing an inactive floatingActionButtonNotch is a no-op', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = (Rect container, Rect notch, Offset start, Offset end) => null;
       await tester.pumpWidget(new MaterialApp(
           home: new Scaffold(
             body: new ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
               child: new GeometryListener(),
             ),
-            floatingActionButton: new NotchMakerSetter(notchMaker),
+            floatingActionButton: new ComputeNotchSetter(computeNotch),
           )
       ));
 
-      final NotchMakerSetterState notchMakerSetterState = tester.state(find.byType(NotchMakerSetter));
+      final ComputeNotchSetterState computeNotchSetterState = tester.state(find.byType(ComputeNotchSetter));
 
-      final VoidCallback clearFirstNotchMaker = notchMakerSetterState.clearNotchMaker;
+      final VoidCallback clearFirstComputeNotch = computeNotchSetterState.clearComputeNotch;
 
-      final NotchMaker notchMaker2 = (Rect container, Rect notch, Offset start, Offset end) => null;
+      final ComputeNotch computeNotch2 = (Rect container, Rect notch, Offset start, Offset end) => null;
       await tester.pumpWidget(new MaterialApp(
           home: new Scaffold(
             body: new ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
               child: new GeometryListener(),
             ),
-            floatingActionButton: new NotchMakerSetter(
-              notchMaker2,
-              // We're setting a key to make sure a new NotchMakerSetterState is
+            floatingActionButton: new ComputeNotchSetter(
+              computeNotch2,
+              // We're setting a key to make sure a new ComputeNotchSetterState is
               // created.
               key: new GlobalKey(),
             ),
@@ -1017,14 +1017,14 @@ void main() {
       // We call the clear callback for the first notch maker and verify that
       // the second notch maker is still set.
 
-      clearFirstNotchMaker();
+      clearFirstComputeNotch();
 
       final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
       final ScaffoldGeometry geometry = listenerState.cache.value;
 
       expect(
-        geometry.floatingActionButtonNotchMaker,
-        notchMaker2,
+        geometry.floatingActionButtonNotch,
+        computeNotch2,
       );
     });
   });
@@ -1087,27 +1087,27 @@ class GeometryCachePainter extends CustomPainter {
   }
 }
 
-class NotchMakerSetter extends StatefulWidget {
-  const NotchMakerSetter(this.notchMaker, {Key key}): super(key: key);
+class ComputeNotchSetter extends StatefulWidget {
+  const ComputeNotchSetter(this.computeNotch, {Key key}): super(key: key);
 
-  final NotchMaker notchMaker;
+  final ComputeNotch computeNotch;
 
   @override
-  State createState() => new NotchMakerSetterState();
+  State createState() => new ComputeNotchSetterState();
 }
 
-class NotchMakerSetterState extends State<NotchMakerSetter> {
+class ComputeNotchSetterState extends State<ComputeNotchSetter> {
 
-  VoidCallback clearNotchMaker;
+  VoidCallback clearComputeNotch;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    clearNotchMaker = Scaffold.setFloatingActionButtonNotchMakerFor(context, widget.notchMaker);
+    clearComputeNotch = Scaffold.setFloatingActionButtonNotchFor(context, widget.computeNotch);
   }
 
   @override
   void deactivate() {
-    clearNotchMaker();
+    clearComputeNotch();
     super.deactivate();
   }
 

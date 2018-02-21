@@ -142,7 +142,7 @@ class FloatingActionButton extends StatefulWidget {
 class _FloatingActionButtonState extends State<FloatingActionButton> {
   bool _highlight = false;
 
-  VoidCallback _clearNotchMaker;
+  VoidCallback _clearComputeNotch;
 
   void _handleHighlightChanged(bool value) {
     setState(() {
@@ -210,17 +210,17 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _clearNotchMaker = Scaffold.setFloatingActionButtonNotchMakerFor(context, _notchMaker);
+    _clearComputeNotch = Scaffold.setFloatingActionButtonNotchFor(context, _computeNotch);
   }
 
   @override
   void deactivate() {
-    if (_clearNotchMaker != null)
-      _clearNotchMaker();
+    if (_clearComputeNotch != null)
+      _clearComputeNotch();
     super.deactivate();
   }
 
-  Path _notchMaker(Rect host, Rect guest, Offset start, Offset end) {
+  Path _computeNotch(Rect host, Rect guest, Offset start, Offset end) {
     assert(() {
       if (end.dy != host.top)
         throw new FlutterError(
