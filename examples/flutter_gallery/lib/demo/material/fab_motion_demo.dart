@@ -22,21 +22,12 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
   static const List<FabPositioner> _fabPositioners = const <FabPositioner>[FabPositioner.endFloat, FabPositioner.centerFloat, const _TopStartFabPositioner()];
 
   FabPositioner _fabPositioner = FabPositioner.endFloat;
-  bool _slideFab = false;
-
-  void _toggleSlideFab(bool newSlideFabValue) {
-    setState(() {
-      _slideFab = newSlideFabValue;
-      
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     final Widget scaffold = new Scaffold(
       appBar: new AppBar(title: const Text('FAB Positioner'), bottom: const PreferredSize(preferredSize: const Size.fromHeight(48.0), child: const SizedBox())),
       fabPositioner: _fabPositioner,
-      fabMotionAnimator: _slideFab ? _kSlidingFabMotionAnimator : FabMotionAnimator.scaling,
       floatingActionButton: new Builder(builder: (BuildContext context) {
         // We use a widget builder here so that this inner context can find the Scaffold.
         // This makes it possible to show the snackbar.
@@ -47,22 +38,9 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
         );
       }),
       body: new Center(
-        child: new Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            new RaisedButton(
-              onPressed: _moveFab,
-              child: const Text('MOVE FAB'),
-            ),
-            new Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text('Slide the FAB'),
-                const SizedBox(width: 8.0, height: 24.0),
-                new Switch(value: _slideFab, onChanged: _toggleSlideFab),
-              ],
-            ),
-          ],
+        child: new RaisedButton(
+          onPressed: _moveFab,
+          child: const Text('MOVE FAB'),
         ),
       ),
     );
@@ -97,28 +75,5 @@ class _TopStartFabPositioner extends FabPositioner {
     }
     final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
     return new Offset(fabX, fabY);
-  }
-}
-
-const _SlidingFabMotionAnimator _kSlidingFabMotionAnimator = const _SlidingFabMotionAnimator();
-
-/// Custom [FabMotionAnimator] that will slide the fab instead of scaling it.
-class _SlidingFabMotionAnimator extends FabMotionAnimator {
-  const _SlidingFabMotionAnimator();
-
-  @override
-  Offset getOffset({Offset begin, Offset end, double progress}) {
-    final double curvedProgress = Curves.decelerate.transform(progress);
-    return new Tween<Offset>(begin: begin, end: end).lerp(curvedProgress);
-  }
-
-  @override
-  Animation<double> getRotationAnimation({Animation<double> parent}) {
-    return new Tween<double>(begin: 0.0, end: 0.0).animate(parent);
-  }
-
-  @override
-  Animation<double> getScaleAnimation({Animation<double> parent}) {
-    return new Tween<double>(begin: 1.0, end: 1.0).animate(parent);
   }
 }
