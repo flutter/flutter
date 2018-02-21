@@ -65,7 +65,6 @@ Future<int> run(
     // in those locations as well to see if you need a similar update there.
 
     // Seed these context entries first since others depend on them
-    context.putIfAbsent(BotDetector, () => const BotDetector());
     context.putIfAbsent(Stdio, () => const Stdio());
     context.putIfAbsent(Platform, () => const LocalPlatform());
     context.putIfAbsent(FileSystem, () => const LocalFileSystem());
@@ -74,6 +73,7 @@ Future<int> run(
     context.putIfAbsent(Config, () => new Config());
 
     // Order-independent context entries
+    context.putIfAbsent(BotDetector, () => const BotDetector());
     context.putIfAbsent(DeviceManager, () => new DeviceManager());
     context.putIfAbsent(DevFSConfig, () => new DevFSConfig());
     context.putIfAbsent(Doctor, () => new Doctor());
