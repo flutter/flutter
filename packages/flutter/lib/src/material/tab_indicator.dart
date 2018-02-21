@@ -14,7 +14,7 @@ import 'colors.dart';
 ///
 /// The [TabBar.indicatorSize] property can be used to define the indicator's
 /// bounds in terms of its (centered) widget with [TabIndicatorSize.label],
-/// or the the entire tab with [TabIndicatorSize.tab].
+/// or the entire tab with [TabIndicatorSize.tab].
 class UnderlineTabIndicator extends Decoration {
   /// Create an underline style selected tab indicator.
   ///
