@@ -9,14 +9,14 @@ import 'colors.dart';
 /// Used with [TabBar.indicator] to draw a horizontal line below the
 /// selected tab.
 ///
-/// The line is inset from the tab's boundary by [padding]. The [borderSide]
-/// defines the line's color and weight.
+/// The selected tab underline is inset from the tab's boundary by [insets].
+/// The [borderSide] defines the line's color and weight.
 ///
-/// The [TabBar.indicatorSize] property can be used to define the
-/// tab's boundary in terms of its (centered) widget, [TabIndicatorSize.label],
-/// or the the entire tab, [TabIndicatorSize.tab].
+/// The [TabBar.indicatorSize] property can be used to define the indicator's
+/// bounds in terms of its (centered) widget with [TabIndicatorSize.label],
+/// or the the entire tab with [TabIndicatorSize.tab].
 class UnderlineTabIndicator extends Decoration {
-  /// Create an underline style tab indicator.
+  /// Create an underline style selected tab indicator.
   ///
   /// The [borderSide] and [insets] arguments must not be null.
   const UnderlineTabIndicator({
@@ -24,14 +24,14 @@ class UnderlineTabIndicator extends Decoration {
     this.insets: EdgeInsets.zero,
   }) : assert(borderSide != null), assert(insets != null);
 
-  /// The color and weight of the line drawn below the selected tab.
+  /// The color and weight of the horizontal line drawn below the selected tab.
   final BorderSide borderSide;
 
   /// Locates the selected tab's underline relative to the tab's boundary.
   ///
   /// The [TabBar.indicatorSize] property can be used to define the
-  /// tab indicator's bounds in terms of its (centered) tab widget,
-  /// [TabIndicatorSize.label], or the entire tab, [TabIndicatorSize.tab].
+  /// tab indicator's bounds in terms of its (centered) tab widget with
+  /// [TabIndicatorSize.label], or the entire tab with [TabIndicatorSize.tab].
   final EdgeInsetsGeometry insets;
 
   @override
