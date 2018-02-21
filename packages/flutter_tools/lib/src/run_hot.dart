@@ -43,7 +43,6 @@ class HotRunner extends ResidentRunner {
     this.hostIsIde: false,
     String projectRootPath,
     String packagesFilePath,
-    String projectAssets,
     bool stayResident: true,
     bool ipv6: false,
   }) : super(devices,
@@ -52,7 +51,6 @@ class HotRunner extends ResidentRunner {
              usesTerminalUI: usesTerminalUI,
              projectRootPath: projectRootPath,
              packagesFilePath: packagesFilePath,
-             projectAssets: projectAssets,
              stayResident: stayResident,
              ipv6: ipv6);
 

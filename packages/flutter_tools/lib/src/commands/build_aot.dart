@@ -282,6 +282,7 @@ Future<String> _buildAotSnapshot(
   final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
   final String kVmSnapshotDataO = fs.path.join(outputDir.path, '$kVmSnapshotData.o');
   final String kIsolateSnapshotDataO = fs.path.join(outputDir.path, '$kIsolateSnapshotData.o');
+  final String kApplicationKernelPath = fs.path.join(getBuildDirectory(), 'app.dill');
 
   switch (platform) {
     case TargetPlatform.android_arm:
@@ -334,10 +335,35 @@ Future<String> _buildAotSnapshot(
     ]);
   }
 
+  final String genSnapshotInputFile = previewDart2 ? kApplicationKernelPath : mainPath;
+  final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
+  final File fingerprintFile = fs.file('$dependencies.fingerprint');
+  final List<File> fingerprintFiles = <File>[fingerprintFile, fs.file(dependencies)]
+    ..addAll(inputPaths.map(fs.file))
+    ..addAll(outputPaths.map(fs.file));
+  if (fingerprintFiles.every((File file) => file.existsSync())) {
+    try {
+      final String json = await fingerprintFile.readAsString();
+      final Fingerprint oldFingerprint = new Fingerprint.fromJson(json);
+      final Set<String> snapshotInputPaths = await readDepfile(dependencies)
+        ..add(genSnapshotInputFile)
+        ..addAll(outputPaths);
+      final Fingerprint newFingerprint = Snapshotter.createFingerprint(snapshotType, genSnapshotInputFile, snapshotInputPaths);
+      if (oldFingerprint == newFingerprint) {
+        printStatus('Skipping AOT snapshot build. Fingerprint match.');
+        return outputPath;
+      }
+    } catch (e) {
+      // Log exception and continue, this step is a performance improvement only.
+      printTrace('Rebuilding snapshot due to fingerprint check error: $e');
+    }
+  }
+
   if (previewDart2) {
     mainPath = await compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
+      outputFilePath: kApplicationKernelPath,
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn : true,
       aot : true,
@@ -355,29 +381,6 @@ Future<String> _buildAotSnapshot(
   }
 
   genSnapshotCmd.add(mainPath);
-
-  final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
-  final File fingerprintFile = fs.file('$dependencies.fingerprint');
-  final List<File> fingerprintFiles = <File>[fingerprintFile, fs.file(dependencies)]
-      ..addAll(inputPaths.map(fs.file))
-      ..addAll(outputPaths.map(fs.file));
-  if (fingerprintFiles.every((File file) => file.existsSync())) {
-    try {
-      final String json = await fingerprintFile.readAsString();
-      final Fingerprint oldFingerprint = new Fingerprint.fromJson(json);
-      final Set<String> snapshotInputPaths = await readDepfile(dependencies)
-        ..add(mainPath)
-        ..addAll(outputPaths);
-      final Fingerprint newFingerprint = Snapshotter.createFingerprint(snapshotType, mainPath, snapshotInputPaths);
-      if (oldFingerprint == newFingerprint) {
-        printStatus('Skipping AOT snapshot build. Fingerprint match.');
-        return outputPath;
-      }
-    } catch (e) {
-      // Log exception and continue, this step is a performance improvement only.
-      printTrace('Rebuilding snapshot due to fingerprint check error: $e');
-    }
-  }
 
   final RunResult results = await runAsync(genSnapshotCmd);
   if (results.exitCode != 0) {

@@ -20,9 +20,10 @@ import '../globals.dart';
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
-  AnalyzeContinuously(ArgResults argResults, this.repoPackages) : super(argResults);
+  AnalyzeContinuously(ArgResults argResults, this.repoPackages, { this.previewDart2: false }) : super(argResults);
 
   final List<Directory> repoPackages;
+  final bool previewDart2;
 
   String analysisTarget;
   bool firstAnalysis = true;
@@ -52,7 +53,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisTarget = fs.currentDirectory.path;
     }
 
-    final AnalysisServer server = new AnalysisServer(dartSdkPath, directories);
+    final AnalysisServer server = new AnalysisServer(dartSdkPath, directories, previewDart2: previewDart2);
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
 
@@ -150,10 +151,11 @@ class AnalyzeContinuously extends AnalyzeBase {
 }
 
 class AnalysisServer {
-  AnalysisServer(this.sdk, this.directories);
+  AnalysisServer(this.sdk, this.directories, { this.previewDart2: false });
 
   final String sdk;
   final List<String> directories;
+  final bool previewDart2;
 
   Process _process;
   final StreamController<bool> _analyzingController = new StreamController<bool>.broadcast();
@@ -169,6 +171,10 @@ class AnalysisServer {
       '--sdk',
       sdk,
     ];
+
+    if (previewDart2) {
+      command.add('--preview-dart-2');
+    }
 
     printTrace('dart ${command.skip(1).join(' ')}');
     _process = await processManager.start(command);

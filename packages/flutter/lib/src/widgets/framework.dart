@@ -1869,10 +1869,11 @@ abstract class BuildContext {
   /// (directly or indirectly) from build methods, layout and paint callbacks, or
   /// from [State.didChangeDependencies].
   ///
-  /// This method should not be called from [State.deactivate] or [State.dispose]
-  /// because the element tree is no longer stable at that time. To refer to
-  /// an ancestor from one of those methods, save a reference to the ancestor
-  /// in [State.didChangeDependencies].
+  /// This method should not be called from [State.dispose] because the element
+  /// tree is no longer stable at that time. To refer to an ancestor from that
+  /// method, save a reference to the ancestor in [State.didChangeDependencies].
+  /// It is safe to use this method from [State.deactivate], which is called
+  /// whenever the widget is removed from the tree.
   ///
   /// It is also possible to call this from interaction event handlers (e.g.
   /// gesture callbacks) or timers, to obtain a value once, if that value is not
@@ -1896,10 +1897,12 @@ abstract class BuildContext {
   /// This method does not establish a relationship with the target in the way
   /// that [inheritFromWidgetOfExactType] does.
   ///
-  /// This method should not be called from [State.deactivate] or [State.dispose]
-  /// because the element tree is no longer stable at that time. To refer to
-  /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  /// This method should not be called from [State.dispose] because the element
+  /// tree is no longer stable at that time. To refer to an ancestor from that
+  /// method, save a reference to the ancestor by calling
+  /// [inheritFromWidgetOfExactType] in [State.didChangeDependencies]. It is
+  /// safe to use this method from [State.deactivate], which is called whenever
+  /// the widget is removed from the tree.
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
 
   /// Returns the nearest ancestor widget of the given type, which must be the
@@ -1918,7 +1921,7 @@ abstract class BuildContext {
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  /// by calling [ancestorWidgetOfExactType] in [State.didChangeDependencies].
   Widget ancestorWidgetOfExactType(Type targetType);
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
@@ -1944,12 +1947,14 @@ abstract class BuildContext {
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  /// by calling [ancestorStateOfType] in [State.didChangeDependencies].
   ///
-  /// Example:
+  /// ## Sample code
   ///
   /// ```dart
-  /// context.ancestorStateOfType(const TypeMatcher<ScrollableState>());
+  /// ScrollableState scrollable = context.ancestorStateOfType(
+  ///   const TypeMatcher<ScrollableState>(),
+  /// );
   /// ```
   State ancestorStateOfType(TypeMatcher matcher);
 
@@ -1975,14 +1980,14 @@ abstract class BuildContext {
   /// it is used by [Material] so that [InkWell] widgets can trigger the ink
   /// splash on the [Material]'s actual render object.
   ///
-  /// This method should not be called from [State.deactivate] or [State.dispose]
-  /// because the widget tree is no longer stable at that time. To refer to
-  /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
-  ///
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the
   /// desired ancestor is known to be small and bounded.
+  ///
+  /// This method should not be called from [State.deactivate] or [State.dispose]
+  /// because the widget tree is no longer stable at that time. To refer to
+  /// an ancestor from one of those methods, save a reference to the ancestor
+  /// by calling [ancestorRenderObjectOfType] in [State.didChangeDependencies].
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher);
 
   /// Walks the ancestor chain, starting with the parent of this build context's
@@ -1998,7 +2003,7 @@ abstract class BuildContext {
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the element tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  /// by calling [visitAncestorElements] in [State.didChangeDependencies].
   void visitAncestorElements(bool visitor(Element element));
 
   /// Walks the children of this widget.

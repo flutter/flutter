@@ -110,19 +110,12 @@ class RunCommand extends RunCommandBase {
     argParser.addFlag('preview-dart-2',
         hide: !verboseHelp,
         help: 'Preview Dart 2.0 functionality.');
-    argParser.addFlag('strong',
-        hide: !verboseHelp,
-        help: 'Turn on strong mode semantics.\n'
-              'Valid only when --preview-dart-2 is also specified');
     argParser.addFlag('track-widget-creation',
         hide: !verboseHelp,
         help: 'Track widget creation locations. Requires Dart 2.0 functionality.');
     argParser.addOption('project-root',
         hide: !verboseHelp,
         help: 'Specify the project root directory.');
-    argParser.addOption('project-assets',
-        hide: !verboseHelp,
-        help: 'Specify the project assets relative to the root directory.');
     argParser.addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
@@ -264,7 +257,6 @@ class RunCommand extends RunCommandBase {
           previewDart2: argResults['preview-dart-2'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: globalResults['packages'],
-          projectAssets: argResults['project-assets'],
           ipv6: ipv6,
         );
       } catch (error) {
@@ -318,7 +310,6 @@ class RunCommand extends RunCommandBase {
         previewDart2: argResults['preview-dart-2'],
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
-        projectAssets: argResults['project-assets'],
         stayResident: stayResident,
         ipv6: ipv6,
       );

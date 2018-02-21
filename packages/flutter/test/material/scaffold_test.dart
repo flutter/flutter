@@ -832,10 +832,6 @@ void main() {
         geometry.floatingActionButtonArea,
         fabRect
       );
-      expect(
-        geometry.floatingActionButtonScale,
-        1.0
-      );
     });
 
     testWidgets('no floatingActionButton', (WidgetTester tester) async {
@@ -848,11 +844,6 @@ void main() {
 
       final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
       final ScaffoldGeometry geometry = listenerState.cache.value;
-
-      expect(
-        geometry.floatingActionButtonScale,
-        0.0
-      );
 
       expect(
           geometry.floatingActionButtonArea,
@@ -878,18 +869,77 @@ void main() {
             ),
       )));
 
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
       await tester.pump(const Duration(milliseconds: 50));
 
-      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
-      final ScaffoldGeometry geometry = listenerState.cache.value;
+      ScaffoldGeometry geometry = listenerState.cache.value;
+
+      final Rect transitioningFabRect = geometry.floatingActionButtonArea;
+
+      await tester.pump(const Duration(seconds: 3));
+      geometry = listenerState.cache.value;
+      final RenderBox floatingActionButtonBox = tester.renderObject(find.byKey(key));
+      final Rect fabRect = floatingActionButtonBox.localToGlobal(Offset.zero) & floatingActionButtonBox.size;
 
       expect(
-        geometry.floatingActionButtonScale,
-        inExclusiveRange(0.0, 1.0),
+        geometry.floatingActionButtonArea,
+        fabRect
+      );
+
+      expect(
+        geometry.floatingActionButtonArea.center,
+        transitioningFabRect.center
+      );
+
+      expect(
+        geometry.floatingActionButtonArea.width,
+        greaterThan(transitioningFabRect.width)
+      );
+
+      expect(
+        geometry.floatingActionButtonArea.height,
+        greaterThan(transitioningFabRect.height)
       );
     });
-  });
 
+    testWidgets('change notifications', (WidgetTester tester) async {
+      final GlobalKey key = new GlobalKey();
+      int numNotificationsAtLastFrame = 0;
+      await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+            body: new ConstrainedBox(
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+      )));
+
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+
+      expect(listenerState.numNotifications, greaterThan(numNotificationsAtLastFrame));
+      numNotificationsAtLastFrame = listenerState.numNotifications;
+
+      await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+            body: new Container(),
+            floatingActionButton: new FloatingActionButton(
+              key: key,
+              child: new GeometryListener(),
+              onPressed: () {},
+            ),
+      )));
+
+      expect(listenerState.numNotifications, greaterThan(numNotificationsAtLastFrame));
+      numNotificationsAtLastFrame = listenerState.numNotifications;
+
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(listenerState.numNotifications, greaterThan(numNotificationsAtLastFrame));
+      numNotificationsAtLastFrame = listenerState.numNotifications;
+
+      await tester.pump(const Duration(seconds: 3));
+
+      expect(listenerState.numNotifications, greaterThan(numNotificationsAtLastFrame));
+      numNotificationsAtLastFrame = listenerState.numNotifications;
+    });
+  });
 }
 
 class GeometryListener extends StatefulWidget {
