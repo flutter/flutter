@@ -23,8 +23,7 @@ import 'theme.dart';
 const double _kTabHeight = 46.0;
 const double _kTextAndIconTabHeight = 72.0;
 
-/// Defines the bounds of a [TabBar] tab for the sake of its selected tab
-/// indicator.
+/// Defines how the bounds of the selected tab indicator are computed.
 ///
 /// See also:
 ///  * [TabBar], which displays a row of tabs.
@@ -32,12 +31,12 @@ const double _kTextAndIconTabHeight = 72.0;
 ///  * [TabBar.indicator], which defines the appearance of the selected tab
 ///    indicator relative to the tab's bounds.
 enum TabBarIndicatorSize {
-  /// The tab's bounds are as wide as the space occupied by the tab in the tab
-  /// bar: from the right edge of the previous tab to the left edge of the next
-  /// tab.
+  /// The tab indicator's bounds are as wide as the space occupied by the tab
+  /// in the tab bar: from the right edge of the previous tab to the left edge
+  /// of the next tab.
   tab,
 
-  /// The tab's bounds are only as wide as (centered) tab widget itself.
+  /// The tab's bounds are only as wide as the (centered) tab widget itself.
   ///
   /// This value is used to align the tab's label, typically a [Tab]
   /// widget's text or icon, with the selected tab indicator.
@@ -521,6 +520,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The [indicatorWeight] parameter defaults to 2, and must not be null.
   ///
   /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero], and must not be null.
+  ///
+  /// If [indicator] is not null, then [indicatorWeight], [indicatorPadding], and
+  /// [indicatorColor] are ignored.
   const TabBar({
     Key key,
     @required this.tabs,
@@ -529,7 +531,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.indicatorColor,
     this.indicatorWeight: 2.0,
     this.indicatorPadding: EdgeInsets.zero,
-    this.indicator, // TBD indicator
+    this.indicator,
     this.indicatorSize,
     this.labelColor,
     this.labelStyle,
@@ -594,14 +596,16 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The default, underline-style, selected tab indicator can be defined with
   /// [UnderlineTabIndicator].
   ///
-  /// The indicator is painted relative to the tab's bounds. If [indicatorSize]
+  /// The indicator's size is based on the tab's bounds. If [indicatorSize]
   /// is [TabBarIndicatorSize.tab] the tab's bounds are as wide as the space
   /// occupied by the tab in the tab bar. If [indicatorSize] is
   /// [TabBarIndicatorSize.label] then the tab's bounds are only as wide as
   /// the tab widget itself.
   final Decoration indicator;
 
-  /// The location of the selected tab indicator is defined relative to the
+  /// Defines how the selected tab indicator's size is computed.
+  ///
+  /// The size of the selected tab indicator is defined relative to the
   /// tab's overall bounds if [indicatorSize] is [TabBarIndicatorSize.tab]
   /// (the default) or relative to the bounds of the tab's widget if
   /// [indicatorSize] is [TabBarIndicatorSize.label].
@@ -670,6 +674,8 @@ class _TabBarState extends State<TabBar> {
   @override
   void initState() {
     super.initState();
+    // If indicatorSize is TabIndicatorSize.label, _tabKeys[i] is used to find
+    // the width of tab widget i. See _IndicatorPainter.indicatorRect().
     _tabKeys = widget.tabs.map((Widget tab) => new GlobalKey()).toList();
   }
 
@@ -723,31 +729,37 @@ class _TabBarState extends State<TabBar> {
       _controller.animation.addListener(_handleTabControllerAnimationTick);
       _controller.addListener(_handleTabControllerTick);
       _currentIndex = _controller.index;
-      _indicatorPainter = new _IndicatorPainter(
-        controller: _controller,
-        indicator: _indicator,
-        indicatorSize: widget.indicatorSize,
-        tabKeys: _tabKeys,
-        old: _indicatorPainter,
-      );
     }
+  }
+
+  void _initIndicatorPainter() {
+    _indicatorPainter = _controller == null ? null : new _IndicatorPainter(
+      controller: _controller,
+      indicator: _indicator,
+      indicatorSize: widget.indicatorSize,
+      tabKeys: _tabKeys,
+      old: _indicatorPainter,
+    );
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateTabController();
+    _initIndicatorPainter();
   }
 
   @override
   void didUpdateWidget(TabBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller ||
-        widget.indicatorColor != oldWidget.indicatorColor ||
+    if (widget.controller != oldWidget.controller)
+      _updateTabController();
+
+    if (widget.indicatorColor != oldWidget.indicatorColor ||
         widget.indicatorWeight != oldWidget.indicatorWeight ||
         widget.indicatorSize != oldWidget.indicatorSize ||
         widget.indicator != oldWidget.indicator)
-      _updateTabController();
+      _initIndicatorPainter();
 
     if (widget.tabs.length > oldWidget.tabs.length) {
       final int delta = widget.tabs.length - oldWidget.tabs.length;

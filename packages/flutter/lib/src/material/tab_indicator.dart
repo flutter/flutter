@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 
 /// Used with [TabBar.indicator] to draw a horizontal line below the
-/// selected tab
+/// selected tab.
 ///
 /// The line is inset from the tab's boundary by [padding]. The [borderSide]
 /// defines the line's color and weight.
@@ -27,12 +27,11 @@ class UnderlineTabIndicator extends Decoration {
   /// The color and weight of the line drawn below the selected tab.
   final BorderSide borderSide;
 
-  /// Locates the [borderSide] style selected tab underline relative to the
-  /// tab's boundary.
+  /// Locates the selected tab's underline relative to the tab's boundary.
   ///
   /// The [TabBar.indicatorSize] property can be used to define the
-  /// tab's boundary in terms of its (centered) widget, [TabIndicatorSize.label],
-  /// or the the entire tab, [TabIndicatorSize.tab].
+  /// tab indicator's bounds in terms of its (centered) tab widget,
+  /// [TabIndicatorSize.label], or the entire tab, [TabIndicatorSize.tab].
   final EdgeInsetsGeometry insets;
 
   @override

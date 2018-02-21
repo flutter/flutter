@@ -1056,6 +1056,73 @@ void main() {
     ));
   });
 
+  testWidgets('TabBar changes indicator attributes', (WidgetTester tester) async {
+    final List<Widget> tabs = new List<Widget>.generate(4, (int index) {
+      return new Tab(text: 'Tab $index');
+    });
+
+    final TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Color indicatorColor = const Color(0xFF00FF00);
+    double indicatorWeight = 8.0;
+    double padLeft = 8.0;
+    double padRight = 4.0;
+
+    Widget buildFrame() {
+      return boilerplate(
+        child: new Container(
+          alignment: Alignment.topLeft,
+          child: new TabBar(
+            indicatorWeight: indicatorWeight,
+            indicatorColor: indicatorColor,
+            indicatorPadding: new EdgeInsets.only(left: padLeft, right: padRight),
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox.size.height, 54.0); // 54 = _kTabHeight(46) + indicatorWeight(8.0)
+
+    double indicatorY = 54.0 - indicatorWeight / 2.0;
+    double indicatorLeft = padLeft + indicatorWeight / 2.0;
+    double indicatorRight = 200.0 - (padRight + indicatorWeight / 2.0);
+
+    expect(tabBarBox, paints..line(
+      color: indicatorColor,
+      strokeWidth: indicatorWeight,
+      p1: new Offset(indicatorLeft, indicatorY),
+      p2: new Offset(indicatorRight, indicatorY),
+    ));
+
+    indicatorColor = const Color(0xFF0000FF);
+    indicatorWeight = 4.0;
+    padLeft = 4.0;
+    padRight = 8.0;
+
+    await tester.pumpWidget(buildFrame());
+
+    expect(tabBarBox.size.height, 50.0); // 54 = _kTabHeight(46) + indicatorWeight(4.0)
+
+    indicatorY = 50.0 - indicatorWeight / 2.0;
+    indicatorLeft = padLeft + indicatorWeight / 2.0;
+    indicatorRight = 200.0 - (padRight + indicatorWeight / 2.0);
+
+    expect(tabBarBox, paints..line(
+      color: indicatorColor,
+      strokeWidth: indicatorWeight,
+      p1: new Offset(indicatorLeft, indicatorY),
+      p2: new Offset(indicatorRight, indicatorY),
+    ));
+  });
+
   testWidgets('TabBar with directional indicatorPadding (LTR)', (WidgetTester tester) async {
     final List<Widget> tabs = <Widget>[
       new SizedBox(key: new UniqueKey(), width: 130.0, height: 30.0),
