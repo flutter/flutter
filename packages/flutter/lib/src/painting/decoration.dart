@@ -188,7 +188,7 @@ abstract class Decoration extends Diagnosticable {
 abstract class BoxPainter {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  BoxPainter([this.onChanged]);
+  const BoxPainter([this.onChanged]);
 
   /// Paints the [Decoration] for which this object was created on the
   /// given canvas using the given configuration.

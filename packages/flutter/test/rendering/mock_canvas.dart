@@ -270,8 +270,8 @@ abstract class PaintPattern {
   /// Indicates that a line is expected next.
   ///
   /// The next line is examined. Any arguments that are passed to this method
-  /// are compared to the actual [Canvas.drawLine] call's `paint` argument, and
-  /// any mismatches result in failure.
+  /// are compared to the actual [Canvas.drawLine] call's `p1`, `p2`, and
+  /// `paint` arguments, and any mismatches result in failure.
   ///
   /// If no call to [Canvas.drawLine] was made, then this results in failure.
   ///
@@ -283,7 +283,7 @@ abstract class PaintPattern {
   /// painting has completed, not at the time of the call. If the same [Paint]
   /// object is reused multiple times, then this may not match the actual
   /// arguments as they were seen by the method.
-  void line({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
+  void line({ Offset p1, Offset p2, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
 
   /// Indicates that an arc is expected next.
   ///
@@ -690,8 +690,8 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
-  void line({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
-    _predicates.add(new _LinePaintPredicate(color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
+  void line({ Offset p1, Offset p2, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _LinePaintPredicate(p1: p1, p2: p2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
@@ -1073,11 +1073,38 @@ class _PathPaintPredicate extends _DrawCommandPaintPredicate {
   }
 }
 
-// TODO(ianh): add arguments to test the points, length, angle, that kind of thing
+// TODO(ianh): add arguments to test the length, angle, that kind of thing
 class _LinePaintPredicate extends _DrawCommandPaintPredicate {
-  _LinePaintPredicate({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
+  _LinePaintPredicate({ this.p1, this.p2, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawLine, 'a line', 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
   );
+
+  final Offset p1;
+  final Offset p2;
+
+  @override
+  void verifyArguments(List<dynamic> arguments) {
+    super.verifyArguments(arguments); // Checks the 3rd argument, a Paint
+    if (arguments.length != 3)
+      throw 'It called $methodName with ${arguments.length} arguments; expected 3.';
+    final Offset p1Argument = arguments[0];
+    final Offset p2Argument = arguments[1];
+    if (p1 != null && p1Argument != p1) {
+        throw 'It called $methodName with p1 endpoint, $p1Argument, which was not exactly the expected endpoint ($p1).';
+    }
+    if (p2 != null && p2Argument != p2) {
+        throw 'It called $methodName with p2 endpoint, $p2Argument, which was not exactly the expected endpoint ($p2).';
+    }
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (p1 != null)
+      description.add('end point p1: $p1');
+    if (p2 != null)
+      description.add('end point p2: $p2');
+  }
 }
 
 class _ArcPaintPredicate extends _DrawCommandPaintPredicate {
