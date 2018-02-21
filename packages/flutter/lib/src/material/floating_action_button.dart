@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -39,9 +39,11 @@ class _DefaultHeroTag {
 /// If the [onPressed] callback is null, then the button will be disabled and
 /// will not react to touch.
 ///
-/// If the floating action bar is a descendant of a [Scaffold] that also has a
+/// If the floating action button is a descendant of a [Scaffold] that also has a
 /// [BottomAppBar], the [BottomAppBar] will show a notch to accomodate the
-/// [FloatingActionButton] when it overlaps the [BottomAppBar].
+/// [FloatingActionButton] when it overlaps the [BottomAppBar]. The notch's
+/// shape is an arc for a circle whose radius is the floating action button's
+/// radius plus [FloatingActionButton.notchMargin].
 ///
 /// See also:
 ///
@@ -129,10 +131,14 @@ class FloatingActionButton extends StatefulWidget {
   /// The margin to keep around the floating action button when creating a
   /// notch for it.
   ///
+  /// The notch is an arc of a circle with radius r+[notchMargin] where r is the
+  /// radius of the floating action button. This expanded radius leaves a margin
+  /// around the floating action button.
+  ///
   /// See also:
   ///
-  ///   * [BottomAppBar], a material design elements that shows a notch for the
-  ///   floating action button.
+  ///  * [BottomAppBar], a material design elements that shows a notch for the
+  ///    floating action button.
   final double notchMargin;
 
   @override
@@ -224,25 +230,24 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     assert(() {
       if (end.dy != host.top)
         throw new FlutterError(
-          'The floating action button\'s notch maker must only be used for a notch in the top edge.\n'
+          'The floating action button\'s notch maker must only be used for a notch in the top edge of the host.\n'
           'The notch\'s path end point: $end is not in the top edge of $host'
         );
       if (start.dy != host.top)
         throw new FlutterError(
-          'The floating action button\'s notch maker must only be used for a notch in the top edge.\n'
+          'The floating action button\'s notch maker must only be used for a notch in the top edge the host.\n'
           'The notch\'s path start point: $start is not in the top edge of $host'
         );
       return true;
     }());
 
-    final Rect intersection = host.intersect(guest);
     assert(() {
-      if (intersection.width < 0.0 || intersection.height < 0.0)
+      if (!host.overlaps(guest))
         throw new FlutterError('Notch host must intersect with its guest');
       return true;
     }());
 
-    // The FAB's shape is a circle bound by the guest rectangle.
+    // The FAB's shape is a circle bounded by the guest rectangle.
     // So the FAB's radius is half the guest width.
     final double fabRadius = guest.width / 2.0;
 
@@ -272,7 +277,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     // The other side (b) would be the distance on the horizontal axis between the
     // notch's center and the intersection points with it's top edge.
     final double a = host.top - guest.center.dy;
-    final double b = sqrt(notchRadius * notchRadius - a * a);
+    final double b = math.sqrt(notchRadius * notchRadius - a * a);
 
     return new Path()
       ..lineTo(guest.center.dx - b, host.top)

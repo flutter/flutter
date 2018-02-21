@@ -33,7 +33,7 @@ import 'scaffold.dart';
 ///
 /// See also:
 ///
-///  * [ComputeNotch] a closure used for creating a notch in a shape.
+///  * [ComputeNotch] a function used for creating a notch in a shape.
 ///  * [ScaffoldGeometry.floatingActionBarComputeNotch] the [ComputeNotch] used to
 ///  make a notch for the [FloatingActionButton]
 ///  * [FloatingActionButton] which the [BottomAppBar] makes a notch for.
@@ -44,15 +44,18 @@ class BottomAppBar extends StatefulWidget {
   /// The [color] and [elevation] arguments must not be null.
   const BottomAppBar({
     Key key,
-    this.child,
     this.color,
     this.elevation: 8.0,
+    this.child,
   }) : assert(elevation != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
+  ///
+  /// Typically this the child will be a [Row], with the first child
+  /// being an [IconButton] with the [Icons.menu] icon.
   final Widget child;
 
   /// The bottom app bar's background color.
@@ -80,14 +83,14 @@ class _BottomAppBarState extends State<BottomAppBar> {
   @override
   Widget build(BuildContext context) {
     return new PhysicalShape(
-      child: new Material(
-        type: MaterialType.transparency,
-        child: widget.child,
-      ),
       clipper: new _BottomAppBarClipper(geometry: geometryListenable),
       elevation: widget.elevation,
       // TODO(amirh): use a default color from the theme.
       color: widget.color ?? Colors.white,
+      child: new Material(
+        type: MaterialType.transparency,
+        child: widget.child,
+      ),
     );
   }
 }
@@ -108,11 +111,12 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
       return new Path()..addRect(appBar);
     }
 
+    // button is the floating action button's bounding rectangle in the
+    // coordinate system that origins at the appBar's top left corner.
     final Rect button = geometry.value.floatingActionButtonArea
       .translate(0.0, geometry.value.bottomNavigationBarTop * -1.0);
 
-    final Rect intersect = appBar.intersect(button);
-    if (intersect.width < 0.0 || intersect.height < 0.0) {
+    if (appBar.overlaps(button)) {
       return new Path()..addRect(appBar);
     }
 
