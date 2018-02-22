@@ -40,7 +40,7 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   return blink::SemanticsAction::kScrollUp;
 }
 
-NSComparisonResult intToComparisonResult(int32_t value) {
+NSComparisonResult IntToComparisonResult(int32_t value) {
   if (value > 0)
     return (NSComparisonResult)NSOrderedDescending;
   if (value < 0)
@@ -475,8 +475,8 @@ void AccessibilityBridge::UpdateSemantics(blink::SemanticsNodeUpdates nodes) {
       CGRect rectB = [b accessibilityFrame];
       CGFloat top = rectA.origin.y - rectB.origin.y;
       if (top == 0.0)
-        return intToComparisonResult(rectA.origin.x - rectB.origin.x < 0.0);
-      return intToComparisonResult(top);
+        return IntToComparisonResult(rectA.origin.x - rectB.origin.x < 0.0);
+      return IntToComparisonResult(top);
     }];
   }
 
