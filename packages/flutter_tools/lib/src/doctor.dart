@@ -542,7 +542,12 @@ class DeviceValidator extends DoctorValidator {
       messages = await Device.descriptions(devices)
           .map((String msg) => new ValidationMessage(msg)).toList();
     }
-    return new ValidationResult(devices.isEmpty ? ValidationType.partial : ValidationType.installed, messages);
+
+    if (devices.isEmpty) {
+      return new ValidationResult(ValidationType.partial, messages);
+    } else {
+      return new ValidationResult(ValidationType.installed, messages, statusInfo: '${devices.length} available');
+    }
   }
 }
 
