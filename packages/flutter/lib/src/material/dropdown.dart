@@ -581,7 +581,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   void _handleTap() {
     final RenderBox itemBox = context.findRenderObject();
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
-    final TextDirection textDirection = Direcionality.of(context);
+    final TextDirection textDirection = Directionality.of(context);
     final Rect buttonRect = widget.menuMargin.resolve(textDirection).inflateRect(itemRect);
 
     assert(_dropdownRoute == null);
