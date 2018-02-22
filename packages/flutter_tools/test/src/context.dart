@@ -241,6 +241,9 @@ class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
 
   @override
   String get name => 'fake OS name and version';
+
+  @override
+  String get pathVarSeparator => ';';
 }
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
