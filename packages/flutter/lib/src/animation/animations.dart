@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' show VoidCallback;
 
 import 'package:flutter/foundation.dart';
@@ -544,6 +545,10 @@ class TrainHoppingAnimation extends Animation<double>
 ///
 /// For example, to create an animation that is the sum of two others, subclass
 /// this class and define `T get value = first.value + second.value;`
+/// 
+/// By default, the [status] of a [CompoundAnimation] is the status of the 
+/// [next] animation if [next] is moving, and the status of the [first] 
+/// animation otherwise.
 abstract class CompoundAnimation<T> extends Animation<T>
   with AnimationLazyListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
   /// Creates a CompoundAnimation. Both arguments must be non-null. Either can
@@ -577,10 +582,12 @@ abstract class CompoundAnimation<T> extends Animation<T>
     next.removeStatusListener(_maybeNotifyStatusListeners);
   }
 
+  /// Gets the status of this animation based on the [first] and [next] status.
+  /// 
+  /// The default is that if the [next] animation is moving, use its status.
+  /// Otherwise, default to [first].
   @override
   AnimationStatus get status {
-    // If one of the sub-animations is moving, use that status. Otherwise,
-    // default to `first`.
     if (next.status == AnimationStatus.forward || next.status == AnimationStatus.reverse)
       return next.status;
     return first.status;
@@ -624,4 +631,26 @@ class AnimationMean extends CompoundAnimation<double> {
 
   @override
   double get value => (first.value + next.value) / 2.0;
+}
+
+/// An animation that tracks the maximum of two other animations.
+///
+/// The [value] of this animation is the maximum of the values of 
+/// [first] and [next].
+class AnimationMax<T extends num> extends CompoundAnimation<T> {
+  AnimationMax(Animation<T> first, Animation<T> next): super(first: first, next: next);
+
+  @override
+  T get value => math.max(first.value, next.value);
+}
+
+/// An animation that tracks the minimum of two other animations.
+///
+/// The [value] of this animation is the maximum of the values of 
+/// [first] and [next].
+class AnimationMin<T extends num> extends CompoundAnimation<T> {
+  AnimationMin(Animation<T> first, Animation<T> next): super(first: first, next: next);
+
+  @override
+  T get value => math.min(first.value, next.value);
 }
