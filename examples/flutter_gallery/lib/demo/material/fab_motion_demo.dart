@@ -19,15 +19,19 @@ class FabMotionDemo extends StatefulWidget {
 
 
 class _FabMotionDemoState extends State<FabMotionDemo> {
-  static const List<FabPositioner> _fabPositioners = const <FabPositioner>[FabPositioner.endFloat, FabPositioner.centerFloat, const _TopStartFabPositioner()];
+  static const List<FloatingActionButtonPositioner> _floatingActionButtonPositioners = const <FloatingActionButtonPositioner>[
+    FloatingActionButtonPositioner.endFloat, 
+    FloatingActionButtonPositioner.centerFloat, 
+    const _TopStartFloatingActionButtonPositioner(),
+  ];
 
-  FabPositioner _fabPositioner = FabPositioner.endFloat;
+  FloatingActionButtonPositioner _floatingActionButtonPositioner = FloatingActionButtonPositioner.endFloat;
 
   @override
   Widget build(BuildContext context) {
     final Widget scaffold = new Scaffold(
       appBar: new AppBar(title: const Text('FAB Positioner'), bottom: const PreferredSize(preferredSize: const Size.fromHeight(48.0), child: const SizedBox())),
-      fabPositioner: _fabPositioner,
+      floatingActionButtonPositioner: _floatingActionButtonPositioner,
       floatingActionButton: new Builder(builder: (BuildContext context) {
         // We use a widget builder here so that this inner context can find the Scaffold.
         // This makes it possible to show the snackbar.
@@ -49,7 +53,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
 
   void _moveFab() {
     setState(() {
-      _fabPositioner = _fabPositioners[(_fabPositioners.indexOf(_fabPositioner) + 1) % _fabPositioners.length];
+      _floatingActionButtonPositioner = _floatingActionButtonPositioners[(_floatingActionButtonPositioners.indexOf(_floatingActionButtonPositioner) + 1) % _floatingActionButtonPositioners.length];
     });
   }
 
@@ -58,8 +62,8 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
   }
 }
 
-class _TopStartFabPositioner extends FabPositioner {
-  const _TopStartFabPositioner();
+class _TopStartFloatingActionButtonPositioner extends FloatingActionButtonPositioner {
+  const _TopStartFloatingActionButtonPositioner();
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
