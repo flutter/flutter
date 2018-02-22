@@ -17,8 +17,6 @@ void main() {
           bottomNavigationBar: const ShapeListener(const BottomAppBar()),
         ),
       ),
-      Duration.zero,
-      EnginePhase.paint
     );
 
     final ShapeListenerState shapeListenerState = tester.state(find.byType(ShapeListener));
@@ -39,7 +37,7 @@ void main() {
 
 // The bottom app bar clip path computation is only available at paint time.
 // In order to examine the notch path we implement this caching painter which
-// looks for at paint time for a descendant PhysicalShape and caches the
+// at paint time looks for for a descendant PhysicalShape and caches the
 // clip path it is using.
 class ClipCachePainter extends CustomPainter {
   ClipCachePainter(this.context);
