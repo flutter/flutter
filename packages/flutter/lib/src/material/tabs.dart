@@ -752,14 +752,15 @@ class _TabBarState extends State<TabBar> {
   @override
   void didUpdateWidget(TabBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller)
+    if (widget.controller != oldWidget.controller) {
       _updateTabController();
-
-    if (widget.indicatorColor != oldWidget.indicatorColor ||
+      _initIndicatorPainter();
+    } else if (widget.indicatorColor != oldWidget.indicatorColor ||
         widget.indicatorWeight != oldWidget.indicatorWeight ||
         widget.indicatorSize != oldWidget.indicatorSize ||
-        widget.indicator != oldWidget.indicator)
+        widget.indicator != oldWidget.indicator) {
       _initIndicatorPainter();
+    }
 
     if (widget.tabs.length > oldWidget.tabs.length) {
       final int delta = widget.tabs.length - oldWidget.tabs.length;
