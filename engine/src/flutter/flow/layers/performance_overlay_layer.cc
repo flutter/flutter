@@ -106,11 +106,11 @@ void PerformanceOverlayLayer::Paint(PaintContext& context) const {
   VisualizeStopWatch(context.canvas, context.frame_time, x, y, width,
                      height - padding,
                      options_ & kVisualizeRasterizerStatistics,
-                     options_ & kDisplayRasterizerStatistics, "Rasterizer");
+                     options_ & kDisplayRasterizerStatistics, "GPU");
 
   VisualizeStopWatch(context.canvas, context.engine_time, x, y + height, width,
                      height - padding, options_ & kVisualizeEngineStatistics,
-                     options_ & kDisplayEngineStatistics, "Engine");
+                     options_ & kDisplayEngineStatistics, "UI");
 
   VisualizeCounterValuesBytes(
       context.canvas, context.memory_usage, x, y + (2 * height), width,
