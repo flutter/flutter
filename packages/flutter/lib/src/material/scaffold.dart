@@ -62,9 +62,17 @@ enum _ScaffoldSlot {
 
 /// Interface for objects that place the [FloatingActionButton] in the [Scaffold].
 /// 
-/// Flutter provides [FloatingActionButtonPositioner]s for the common [FloatingActionButton] placements in
-/// Material Design apps, whose implementations are available as static
-/// members of this class.
+/// Flutter provides [FloatingActionButtonPositioner]s for the common
+/// [FloatingActionButton] placements in Material Design apps. These
+/// positioners are available as static members of this class.
+/// 
+/// See also:
+/// 
+///  * [FloatingActionButton], which is a circular button typically shown in the
+///    bottom right corner of the app.
+///  * [FloatingActionButtonAnimator], which is used to animate the
+///    [Scaffold.floatingActionButton] from one [FloatingActionButtonPositioner] to 
+///    another.
 abstract class FloatingActionButtonPositioner {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -85,7 +93,22 @@ abstract class FloatingActionButtonPositioner {
   String toString() => '$runtimeType';
 }
 
-/// Provider of [FloatingActionButton] animations.
+/// Provider of animations to move the [FloatingActionButton] between [FloatingActionButtonPositioner]s.
+/// 
+/// The [Scaffold] uses [Scaffold.floatingActionButtonAnimator] to define:
+///
+///  * The [Offset] of the [FloatingActionButton] between the old and new 
+///    [FloatingActionButtonPositioner]s as part of the transition animation
+///  * An [Animation] to scale the [FloatingActionButton] during the transition
+///  * An [Animation] to rotate the [FloatingActionButton] during the transition
+///  * Where to start a new animation from if an animation is interrupted
+/// 
+/// See also:
+/// 
+///  * [FloatingActionButton], which is a circular button typically shown in the
+///    bottom right corner of the app.
+///  * [FloatingActionButtonPositioner], which the [Scaffold] uses to place the 
+///    [Scaffold.floatingActionButton] within the [Scaffold]'s layout. 
 abstract class FloatingActionButtonAnimator {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -97,6 +120,12 @@ abstract class FloatingActionButtonAnimator {
   static const FloatingActionButtonAnimator scaling = const _ScalingFabMotionAnimator();
 
   /// Gets the [FloatingActionButton]'s [Offset] based on a [progress].
+  /// 
+  /// [begin] is the [Offset] provided by the previous [FloatingActionButtonPositioner].
+  /// 
+  /// [end] is the [Offset] provided by the new [FloatingActionButtonPositioner].
+  /// 
+  /// [progress] is the current progress of the transition animation.
   Offset getOffset({@required Offset begin, @required Offset end, @required double progress});
 
   /// Animates the scale of the [FloatingActionButton].
@@ -104,7 +133,7 @@ abstract class FloatingActionButtonAnimator {
   /// The animation should both start and end with a value of 1.0.
   Animation<double> getScaleAnimation({@required Animation<double> parent});
 
-  /// Animates the rotation of the [FloatingActionButton].
+  /// Animates the rotation of [Scaffold.floatingActionButton].
   /// 
   /// The animation should both start and end with a value of 0.0 or 1.0.
   /// 
@@ -306,6 +335,11 @@ class _TransitionSnapshotFabPositioner extends FloatingActionButtonPositioner {
       end: end.getOffset(scaffoldGeometry), 
       progress: progress,
     );
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType(begin: $begin, end: $end, progress: $progress)';
   }
 }
 
@@ -790,6 +824,11 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///    of an app using the [bottomNavigationBar] property.
 ///  * [FloatingActionButton], which is a circular button typically shown in the
 ///    bottom right corner of the app using the [floatingActionButton] property.
+///  * [FloatingActionButtonPositioner], which is used to place the 
+///    [floatingActionButton] within the [Scaffold]'s layout.
+///  * [FloatingActionButtonAnimator], which is used to animate the
+///    [floatingActionButton] from one [floatingActionButtonPositioner] to 
+///    another.
 ///  * [Drawer], which is a vertical panel that is typically displayed to the
 ///    left of the body (and often hidden on phones) using the [drawer]
 ///    property.
@@ -849,9 +888,13 @@ class Scaffold extends StatefulWidget {
   final Widget floatingActionButton;
 
   /// Responsible for determining where the [floatingActionButton] should go.
+  /// 
+  /// If null, the [ScaffoldState] will use the default positioner, [FloatingActionButtonPositioner.endFloat].
   final FloatingActionButtonPositioner floatingActionButtonPositioner;
 
   /// Animator to move the [floatingActionButton] to a new [floatingActionButtonPositioner].
+  /// 
+  /// If null, the [ScaffoldState] will use the default animator, [FloatingActionButtonAnimator.scaling].
   final FloatingActionButtonAnimator floatingActionButtonAnimator;
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
