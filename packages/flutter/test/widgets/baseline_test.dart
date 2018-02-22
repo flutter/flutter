@@ -38,6 +38,8 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
-    expect(tester.renderObject<RenderBox>(find.byType(Baseline)).size, const Size(100.0, 200.0));
+    final Size size = tester.renderObject<RenderBox>(find.byType(Baseline)).size;
+    expect(size.width, closeTo(100.0, 0.001));
+    expect(size.height, closeTo(200.0, 0.001));
   });
 }

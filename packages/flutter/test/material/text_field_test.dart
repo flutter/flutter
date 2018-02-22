@@ -1746,8 +1746,8 @@ void main() {
     //  ---------   rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
-    expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 4.0);
-    expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 2.0);
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, closeTo(rowBottomY - 4.0, 0.001));
+    expect(tester.getBottomLeft(find.text('abc')).dy, closeTo(rowBottomY - 2.0, 0.001));
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
