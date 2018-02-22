@@ -487,14 +487,13 @@ class ArchivePublisher {
     if (dest.endsWith('.json')) {
       mimeType = 'application/json';
     }
-    final List<String> args = <String>['cp'];
+    final List<String> args = <String>[];
     // Use our preferred MIME type for the files we care about
     // and let gsutil figure it out for anything else.
     if (mimeType != null) {
       args.addAll(<String>['-h', 'Content-Type:$mimeType']);
     }
-    args.add(src);
-    args.add(dest);
+    args.addAll(<String>['cp', src, dest]);
     return _runGsUtil(args);
   }
 }
