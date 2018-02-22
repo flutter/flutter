@@ -73,10 +73,10 @@ abstract class FloatingActionButtonPositioner {
   /// End-aligned [FloatingActionButton], floating at the bottom of the screen.
   /// 
   /// This is the default alignment of [FloatingActionButton]s in Material apps.
-  static const FloatingActionButtonPositioner endFloat = const _EndFloatFab();
+  static const FloatingActionButtonPositioner endFloat = const _EndFloatFabPositioner();
 
   /// Centered [FloatingActionButton], floating at the bottom of the screen.
-  static const FloatingActionButtonPositioner centerFloat = const _CenterFloatFab();
+  static const FloatingActionButtonPositioner centerFloat = const _CenterFloatFabPositioner();
 
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry);
@@ -229,8 +229,8 @@ class ScaffoldPrelayoutGeometry {
   final TextDirection textDirection;
 }
 
-class _CenterFloatFab extends FloatingActionButtonPositioner {
-  const _CenterFloatFab();
+class _CenterFloatFabPositioner extends FloatingActionButtonPositioner {
+  const _CenterFloatFabPositioner();
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
@@ -252,8 +252,8 @@ class _CenterFloatFab extends FloatingActionButtonPositioner {
   }
 }
 
-class _EndFloatFab extends FloatingActionButtonPositioner {
-  const _EndFloatFab();
+class _EndFloatFabPositioner extends FloatingActionButtonPositioner {
+  const _EndFloatFabPositioner();
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
@@ -290,9 +290,9 @@ class _EndFloatFab extends FloatingActionButtonPositioner {
 /// [ScaffoldState] uses this to seamlessly change transition animations
 /// when a running [FloatingActionButtonPositioner] transition is interrupted by a new transition.
 @immutable
-class _TransitionSnapshotFab extends FloatingActionButtonPositioner {
+class _TransitionSnapshotFabPositioner extends FloatingActionButtonPositioner {
   
-  const _TransitionSnapshotFab(this.begin, this.end, this.animator, this.progress);
+  const _TransitionSnapshotFabPositioner(this.begin, this.end, this.animator, this.progress);
 
   final FloatingActionButtonPositioner begin;
   final FloatingActionButtonPositioner end;
@@ -611,12 +611,12 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
 /// Handler for scale and rotation animations in the [FloatingActionButton].
 ///
-/// Currently, there are two types of FAB animations:
+/// Currently, there are two types of [FloatingActionButton] animations:
 /// 
 /// * Entrance/Exit animations, which this widget triggers
-///   when the FAB is added, updated, or removed.
+///   when the [FloatingActionButton] is added, updated, or removed.
 /// * Motion animations, which are triggered by the [Scaffold]
-///   when its `fabPositioner` is updated.
+///   when its [FloatingActionButtonPositioner] is updated.
 class _FloatingActionButtonTransition extends StatefulWidget {
   const _FloatingActionButtonTransition({
     Key key,
@@ -811,8 +811,8 @@ class Scaffold extends StatefulWidget {
     this.appBar,
     this.body,
     this.floatingActionButton,
-    this.fabPositioner,
-    this.fabMotionAnimator,
+    this.floatingActionButtonPositioner,
+    this.floatingActionButtonAnimator,
     this.persistentFooterButtons,
     this.drawer,
     this.endDrawer,
@@ -848,11 +848,11 @@ class Scaffold extends StatefulWidget {
   /// Typically a [FloatingActionButton].
   final Widget floatingActionButton;
 
-  /// Responsible for determining where the `floatingActionButton` should go.
-  final FloatingActionButtonPositioner fabPositioner;
+  /// Responsible for determining where the [floatingActionButton] should go.
+  final FloatingActionButtonPositioner floatingActionButtonPositioner;
 
-  /// Animator to move the `floatingActionButton` between `fabPositioner`s.
-  final FloatingActionButtonAnimator fabMotionAnimator;
+  /// Animator to move the [floatingActionButton] to a new [floatingActionButtonPositioner].
+  final FloatingActionButtonAnimator floatingActionButtonAnimator;
 
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
@@ -1342,34 +1342,34 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     return _currentBottomSheet;
   }
 
-  // FAB API
-  AnimationController _fabMoveController;
-  FloatingActionButtonAnimator _fabMotionAnimator;
-  FloatingActionButtonPositioner _previousFabPositioner;
-  FloatingActionButtonPositioner _fabPositioner;
+  // Floating Action Button API
+  AnimationController _floatingActionButtonMoveController;
+  FloatingActionButtonAnimator _floatingActionButtonAnimator;
+  FloatingActionButtonPositioner _previousFloatingActionButtonPositioner;
+  FloatingActionButtonPositioner _floatingActionButtonPositioner;
 
-  // Moves the FAB to the newPositioner.
-  void _moveFab(final FloatingActionButtonPositioner newPositioner) {
-    FloatingActionButtonPositioner previousPositioner = _fabPositioner;
+  // Moves the Floating Action Button to the new Floating Action Button Positioner.
+  void _moveFloatingActionButton(final FloatingActionButtonPositioner newPositioner) {
+    FloatingActionButtonPositioner previousPositioner = _floatingActionButtonPositioner;
     double restartAnimationFrom = 0.0;
-    // If the FAB is moving right now, we need to start from a snapshot of the current transition.
-    if (_fabMoveController.isAnimating) {
-      previousPositioner = new _TransitionSnapshotFab(_previousFabPositioner, _fabPositioner, _fabMotionAnimator, _fabMoveController.value);
-      restartAnimationFrom = _fabMotionAnimator.getAnimationRestart(_fabMoveController.value);
+    // If the Floating Action Button is moving right now, we need to start from a snapshot of the current transition.
+    if (_floatingActionButtonMoveController.isAnimating) {
+      previousPositioner = new _TransitionSnapshotFabPositioner(_previousFloatingActionButtonPositioner, _floatingActionButtonPositioner, _floatingActionButtonAnimator, _floatingActionButtonMoveController.value);
+      restartAnimationFrom = _floatingActionButtonAnimator.getAnimationRestart(_floatingActionButtonMoveController.value);
     }
 
     setState(() {
-      _previousFabPositioner = previousPositioner;
-      _fabPositioner = newPositioner;
+      _previousFloatingActionButtonPositioner = previousPositioner;
+      _floatingActionButtonPositioner = newPositioner;
     });
 
     // Only animate if there is a Floating Action Button to animate with.
-    // Otherwise, simply make sure the fab's position is fully updated in 
-    // case it is added.
+    // Otherwise, simply make sure the animation is at the end in 
+    // case a new Floating Action Button is added.
     if (widget.floatingActionButton != null) {
-      _fabMoveController.forward(from: restartAnimationFrom);
+      _floatingActionButtonMoveController.forward(from: restartAnimationFrom);
     } else {
-      _fabMoveController.value = _fabMoveController.upperBound;
+      _floatingActionButtonMoveController.value = _floatingActionButtonMoveController.upperBound;
     }
   }
 
@@ -1399,20 +1399,20 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _geometryNotifier = new _ScaffoldGeometryNotifier(const ScaffoldGeometry(), context);
-    _fabPositioner = widget.fabPositioner ?? _kDefaultFloatingActionButtonPositioner;
-    _fabMotionAnimator = widget.fabMotionAnimator ?? _kDefaultFloatingActionButtonAnimator;
-    _previousFabPositioner = _fabPositioner;
-    _fabMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 1.0, duration: _kFloatingActionButtonSegue * 2);
+    _floatingActionButtonPositioner = widget.floatingActionButtonPositioner ?? _kDefaultFloatingActionButtonPositioner;
+    _floatingActionButtonAnimator = widget.floatingActionButtonAnimator ?? _kDefaultFloatingActionButtonAnimator;
+    _previousFloatingActionButtonPositioner = _floatingActionButtonPositioner;
+    _floatingActionButtonMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 1.0, duration: _kFloatingActionButtonSegue * 2);
   }
 
   @override
   void didUpdateWidget(Scaffold oldWidget) {
-    // Update the fab animator, and then schedule the fab for repositioning.
-    if (widget.fabMotionAnimator != oldWidget.fabMotionAnimator) {
-      _fabMotionAnimator = widget.fabMotionAnimator ?? _kDefaultFloatingActionButtonAnimator;
+    // Update the Floating Action Button Animator, and then schedule the Floating Action Button for repositioning.
+    if (widget.floatingActionButtonAnimator != oldWidget.floatingActionButtonAnimator) {
+      _floatingActionButtonAnimator = widget.floatingActionButtonAnimator ?? _kDefaultFloatingActionButtonAnimator;
     }
-    if (widget.fabPositioner != oldWidget.fabPositioner) {
-      _moveFab(widget.fabPositioner ?? _kDefaultFloatingActionButtonPositioner);
+    if (widget.floatingActionButtonPositioner != oldWidget.floatingActionButtonPositioner) {
+      _moveFloatingActionButton(widget.floatingActionButtonPositioner ?? _kDefaultFloatingActionButtonPositioner);
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -1428,7 +1428,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       bottomSheet.animationController.dispose();
     if (_currentBottomSheet != null)
       _currentBottomSheet._widget.animationController.dispose();
-    _fabMoveController.dispose();
+    _floatingActionButtonMoveController.dispose();
     super.dispose();
   }
 
@@ -1591,8 +1591,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       children,
       new _FloatingActionButtonTransition(
         child: widget.floatingActionButton,
-        fabMoveAnimation: _fabMoveController,
-        fabMotionAnimator: _fabMotionAnimator,
+        fabMoveAnimation: _floatingActionButtonMoveController,
+        fabMotionAnimator: _floatingActionButtonAnimator,
         geometryNotifier: _geometryNotifier,
       ),
       _ScaffoldSlot.floatingActionButton,
@@ -1673,17 +1673,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         controller: _primaryScrollController,
         child: new Material(
           color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
-          child: new AnimatedBuilder(animation: _fabMoveController, builder: (BuildContext context, _) {
+          child: new AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, _) {
             return new CustomMultiChildLayout(
               children: children,
               delegate: new _ScaffoldLayout(
                 bottomViewInset: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
-                currentFloatingActionButtonPositioner: _fabPositioner,
-                floatingActionButtonMoveAnimationProgress: _fabMoveController.value,
-                floatingActionButtonMotionAnimator: _fabMotionAnimator,
+                currentFloatingActionButtonPositioner: _floatingActionButtonPositioner,
+                floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
+                floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
                 geometryNotifier: _geometryNotifier,
                 horizontalPadding: endPadding,
-                previousFloatingActionButtonPositioner: _previousFabPositioner,
+                previousFloatingActionButtonPositioner: _previousFloatingActionButtonPositioner,
                 statusBarHeight: mediaQuery.padding.top,
                 textDirection: textDirection,
               ),

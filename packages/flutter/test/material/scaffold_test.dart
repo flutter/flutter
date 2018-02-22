@@ -784,7 +784,7 @@ void main() {
           ),
           child: new Scaffold(
             appBar: new AppBar(title: const Text('FabPositioner Test')),
-            fabPositioner: fabPositioner,
+            floatingActionButtonPositioner: fabPositioner,
             floatingActionButton: fab,
           ),
         ),
