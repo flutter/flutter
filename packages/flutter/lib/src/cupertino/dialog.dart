@@ -130,6 +130,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     this.title,
     this.content,
     this.actions,
+    this.scrollController, //TODO: removing breaks tests
   }) : super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -150,11 +151,20 @@ class CupertinoAlertDialog extends StatelessWidget {
   /// Typically this is a list of [CupertinoDialogAction] widgets.
   final List<Widget> actions;
 
+  /// A scroll controller that can be used to control the scrolling of the message
+  /// in the dialog.
+  ///
+  /// Defaults to null, and is typically not needed, since most alert messages are short.
+  final ScrollController scrollController;
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
 
-    final Widget titleSection = new _CupertinoAlertTitleSection(title: title, content: content);
+    final Widget titleSection = new _CupertinoAlertTitleSection(title: title,
+      content: content,
+      scrollController: scrollController,
+    );
     if (titleSection != null) {
       children.add(titleSection);
     }
@@ -162,7 +172,9 @@ class CupertinoAlertDialog extends StatelessWidget {
     //add padding between the sections
     children.add(const Padding(padding: const EdgeInsets.only(top: 8.0)));
     
-    final Widget actionSection = new _CupertinoAlertActionSection(children: actions);
+    final Widget actionSection = new _CupertinoAlertActionSection(children: actions,
+      scrollController: scrollController,
+    );
     if (actionSection != null) {
       children.add(actionSection);
     }
