@@ -13,6 +13,7 @@ export 'src/controller.dart';
 export 'src/finders.dart';
 export 'src/matchers.dart';
 export 'src/nonconst.dart';
+export 'src/platform.dart';
 export 'src/stack_manipulation.dart';
 export 'src/test_async_utils.dart';
 export 'src/test_pointer.dart';
