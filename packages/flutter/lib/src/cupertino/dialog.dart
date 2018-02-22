@@ -130,7 +130,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     this.title,
     this.content,
     this.actions,
-    this.scrollController, //TODO: removing breaks tests
+    this.scrollController,
   }) : super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -338,10 +338,13 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
 
     return new Flexible(flex: 3,
       child: new CupertinoScrollbar(
-        child: new ListView(
+        child: new SingleChildScrollView(
           controller: scrollController,
-          shrinkWrap: true,
-          children: titleContentGroup,
+          child: new Column(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: titleContentGroup,
+          ),
         ),
       ),
     );
@@ -387,22 +390,19 @@ class _CupertinoAlertActionSection extends StatelessWidget {
     if (_shouldLayoutActionsVertical(children.length)) {
       return new Flexible (flex: 1,
           child: new CupertinoScrollbar(
-            child: new ListView(
-              controller: scrollController, //TODO(ekbiker): disable scroll when all content is shown
-              shrinkWrap: true,
-              children: <Widget>[
-                new CustomPaint(
-                  painter: new _CupertinoVerticalActionPainter(buttons.length),
-                  child: new ConstrainedBox(
-                    constraints: new BoxConstraints(maxHeight: _kButtonBarHeight * buttons.length),
-                    child: new Column(
+            child: new SingleChildScrollView(
+              controller: scrollController,
+              child: new CustomPaint(
+                painter: new _CupertinoVerticalActionPainter(buttons.length),
+                child: new ConstrainedBox(
+                  constraints: new BoxConstraints(maxHeight: _kButtonBarHeight * buttons.length),
+                  child: new Column(
                       mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: buttons
-                    ),
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         );
