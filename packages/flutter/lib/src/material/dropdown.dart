@@ -91,10 +91,12 @@ class _DropdownScrollBehavior extends ScrollBehavior {
 class _DropdownMenu<T> extends StatefulWidget {
   const _DropdownMenu({
     Key key,
+    this.padding,
     this.route,
   }) : super(key: key);
 
   final _DropdownRoute<T> route;
+  final EdgeInsets padding;
 
   @override
   _DropdownMenuState<T> createState() => new _DropdownMenuState<T>();
@@ -149,7 +151,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
         opacity: opacity,
         child: new InkWell(
           child: new Container(
-            padding: _kMenuHorizontalPadding,
+            padding: widget.padding,//_kMenuHorizontalPadding,
             child: route.items[itemIndex],
           ),
           onTap: () => Navigator.pop(
@@ -279,6 +281,7 @@ class _DropdownRouteResult<T> {
 class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   _DropdownRoute({
     this.items,
+    this.padding,
     this.buttonRect,
     this.selectedIndex,
     this.elevation: 8,
@@ -288,6 +291,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   }) : assert(style != null);
 
   final List<DropdownMenuItem<T>> items;
+  final EdgeInsetsGeometry padding;
   final Rect buttonRect;
   final int selectedIndex;
   final int elevation;
@@ -336,7 +340,12 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       scrollController = new ScrollController(initialScrollOffset: scrollOffset);
     }
 
-    Widget menu = new _DropdownMenu<T>(route: this);
+    final TextDirection textDirection = Directionality.of(context);
+    Widget menu = new _DropdownMenu<T>(
+      route: this,
+      padding: padding.resolve(textDirection),
+    );
+
     if (theme != null)
       menu = new Theme(data: theme, child: menu);
 
@@ -353,7 +362,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
               buttonRect: buttonRect,
               menuTop: menuTop,
               menuHeight: menuHeight,
-              textDirection: Directionality.of(context),
+              textDirection: textDirection,
             ),
             child: menu,
           );
@@ -464,6 +473,8 @@ class DropdownButton<T> extends StatefulWidget {
     this.style,
     this.iconSize: 24.0,
     this.isDense: false,
+    this.padding: EdgeInsets.zero,
+    this.menuMargin: const EdgeInsets.symmetric(horizontal: 16.0),
   }) : assert(items != null),
        assert(value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
       super(key: key);
@@ -508,6 +519,10 @@ class DropdownButton<T> extends StatefulWidget {
   /// can be useful when the button is embedded in a container that adds
   /// its own decorations, like [InputDecorator].
   final bool isDense;
+
+  final EdgeInsetsGeometry padding;
+
+  final EdgeInsetsGeometry menuMargin;
 
   @override
   _DropdownButtonState<T> createState() => new _DropdownButtonState<T>();
@@ -566,11 +581,16 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   void _handleTap() {
     final RenderBox itemBox = context.findRenderObject();
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
+    final TextDirection textDirection = Direcionality.of(context);
+    final Rect buttonRect = widget.menuMargin.resolve(textDirection).inflateRect(itemRect);
 
     assert(_dropdownRoute == null);
     _dropdownRoute = new _DropdownRoute<T>(
       items: widget.items,
-      buttonRect: _kMenuHorizontalPadding.inflateRect(itemRect),
+      // TODO: maybe buttonRect should be computed (from itemRect, and menuMargin)
+      // in _DropdownRoute, because directionality could be different there?
+      buttonRect: buttonRect,
+      padding: widget.padding,
       selectedIndex: _selectedIndex ?? 0,
       elevation: widget.elevation,
       theme: Theme.of(context, shadowThemeOnly: true),
@@ -615,7 +635,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     Widget result = new DefaultTextStyle(
       style: _textStyle,
-      child: new SizedBox(
+      child: new Container(//new SizedBox(
+        padding: widget.padding,
         height: widget.isDense ? _denseButtonHeight : null,
         child: new Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
