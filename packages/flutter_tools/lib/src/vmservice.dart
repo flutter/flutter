@@ -427,6 +427,7 @@ abstract class ServiceObject {
         completer.completeError(e, st);
       }
       _inProgressReload = null;
+      return await completer.future;
     }
 
     return await _inProgressReload;
@@ -1276,30 +1277,21 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   int get length => _map.length;
   @override
   String toString() => _map.toString();
-  // TODO(tvolkert): Remove these ignores once dev.22 SDK is everywhere
   @override
-  // ignore: undefined_method, override_on_non_overriding_method, non_type_as_type_argument
   void addEntries(Iterable<MapEntry<String, dynamic>> entries) => _map.addEntries(entries);
   @override
-  // ignore: undefined_method, override_on_non_overriding_method
   Map<RK, RV> cast<RK, RV>() => _map.cast<RK, RV>();
   @override
-  // ignore: undefined_method, override_on_non_overriding_method
   void removeWhere(bool test(String key, dynamic value)) => _map.removeWhere(test);
   @override
-  // ignore: undefined_class, undefined_method, override_on_non_overriding_method
   Map<K2, V2> map<K2, V2>(MapEntry<K2, V2> transform(String key, dynamic value)) => _map.map(transform);
   @override
-  // ignore: undefined_getter, override_on_non_overriding_getter, non_type_as_type_argument
   Iterable<MapEntry<String, dynamic>> get entries => _map.entries;
   @override
-  // ignore: undefined_method, override_on_non_overriding_method
   void updateAll(dynamic update(String key, dynamic value)) => _map.updateAll(update);
   @override
-  // ignore: undefined_method, override_on_non_overriding_method
   Map<RK, RV> retype<RK, RV>() => _map.retype<RK, RV>();
   @override
-  // ignore: undefined_method, override_on_non_overriding_method
   dynamic update(String key, dynamic update(dynamic value), {dynamic ifAbsent()}) => _map.update(key, update, ifAbsent: ifAbsent);
 }
 

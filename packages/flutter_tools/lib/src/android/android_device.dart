@@ -388,7 +388,6 @@ class AndroidDevice extends Device {
       return new LaunchResult.failed();
 
     final bool traceStartup = platformArgs['trace-startup'] ?? false;
-    final bool strongMode = platformArgs['strong'] ?? false;
     final AndroidApk apk = package;
     printTrace('$this startApp');
 
@@ -417,13 +416,12 @@ class AndroidDevice extends Device {
 
     if (traceStartup)
       cmd.addAll(<String>['--ez', 'trace-startup', 'true']);
-    if (strongMode) {
-      cmd.addAll(<String>['--ez', 'strong', 'true']);
-    }
     if (route != null)
       cmd.addAll(<String>['--es', 'route', route]);
     if (debuggingOptions.enableSoftwareRendering)
       cmd.addAll(<String>['--ez', 'enable-software-rendering', 'true']);
+    if (debuggingOptions.skiaDeterministicRendering)
+      cmd.addAll(<String>['--ez', 'skia-deterministic-rendering', 'true']);
     if (debuggingOptions.traceSkia)
       cmd.addAll(<String>['--ez', 'trace-skia', 'true']);
     if (debuggingOptions.debuggingEnabled) {

@@ -17,6 +17,29 @@ void main() {
       final Directory directory = fs.directory('myproject');
       expect(new FlutterProject(directory).directory, directory);
     });
+    group('ensure ready for platform-specific tooling', () {
+      testInMemory('does nothing, if project is not created', () async {
+        final FlutterProject project = someProject();
+        project.ensureReadyForPlatformSpecificTooling();
+        expect(project.directory.existsSync(), isFalse);
+      });
+      testInMemory('does nothing in plugin root project', () async {
+        final FlutterProject project = aPluginProject();
+        project.ensureReadyForPlatformSpecificTooling();
+        expect(project.example.ios.directory.childFile('Runner/GeneratedPluginRegistrant.h').existsSync(), isFalse);
+        expect(project.example.ios.directory.childFile('Flutter/Generated.xcconfig').existsSync(), isFalse);
+      });
+      testInMemory('injects plugins', () async {
+        final FlutterProject project = aProjectWithIos();
+        project.ensureReadyForPlatformSpecificTooling();
+        expect(project.ios.directory.childFile('Runner/GeneratedPluginRegistrant.h').existsSync(), isTrue);
+      });
+      testInMemory('generates Xcode configuration', () async {
+        final FlutterProject project = aProjectWithIos();
+        project.ensureReadyForPlatformSpecificTooling();
+        expect(project.ios.directory.childFile('Flutter/Generated.xcconfig').existsSync(), isTrue);
+      });
+    });
     group('organization names set', () {
       testInMemory('is empty, if project not created', () async {
         final FlutterProject project = someProject();
@@ -71,8 +94,23 @@ void main() {
   });
 }
 
-FlutterProject someProject() =>
-    new FlutterProject(fs.directory('some_project'));
+FlutterProject someProject() => new FlutterProject(fs.directory('some_project'));
+
+FlutterProject aProjectWithIos() {
+  final Directory directory = fs.directory('ios_project');
+  directory.childFile('pubspec.yaml').createSync(recursive: true);
+  directory.childFile('.packages').createSync(recursive: true);
+  directory.childDirectory('ios').createSync(recursive: true);
+  return new FlutterProject(directory);
+}
+
+FlutterProject aPluginProject() {
+  final Directory directory = fs.directory('plugin_project/example');
+  directory.childFile('pubspec.yaml').createSync(recursive: true);
+  directory.childFile('.packages').createSync(recursive: true);
+  directory.childDirectory('ios').createSync(recursive: true);
+  return new FlutterProject(directory.parent);
+}
 
 void testInMemory(String description, Future<Null> testMethod()) {
   testUsingContext(
@@ -82,6 +120,13 @@ void testInMemory(String description, Future<Null> testMethod()) {
       FileSystem: () => new MemoryFileSystem(),
     },
   );
+}
+
+void addPubPackages(Directory directory) {
+  directory.childFile('pubspec.yaml')
+    ..createSync(recursive: true);
+  directory.childFile('.packages')
+    ..createSync(recursive: true);
 }
 
 void addIosWithBundleId(Directory directory, String id) {

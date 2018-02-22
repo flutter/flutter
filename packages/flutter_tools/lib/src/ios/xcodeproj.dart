@@ -5,11 +5,13 @@
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../flx.dart' as flx;
 import '../globals.dart';
 
 final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
@@ -19,11 +21,28 @@ String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
 }
 
-void updateXcodeGeneratedProperties({
+String _generatedXcodePropertiesPath(String projectPath) {
+  return fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig');
+}
+
+/// Writes default Xcode properties files in the Flutter project at
+/// [projectPath], if such files do not already exist.
+void generateXcodeProperties(String projectPath) {
+  if (fs.file(_generatedXcodePropertiesPath(projectPath)).existsSync())
+    return;
+  updateGeneratedXcodeProperties(
+      projectPath: projectPath,
+      buildInfo: BuildInfo.debug,
+      target: flx.defaultMainPath,
+      previewDart2: false,
+  );
+}
+
+/// Writes or rewrites Xcode property files with the specified information.
+void updateGeneratedXcodeProperties({
   @required String projectPath,
   @required BuildInfo buildInfo,
   @required String target,
-  @required bool hasPlugins,
   @required bool previewDart2,
 }) {
   final StringBuffer localsBuffer = new StringBuffer();
@@ -58,21 +77,42 @@ void updateXcodeGeneratedProperties({
     localsBuffer.writeln('PREVIEW_DART_2=true');
   }
 
-  // Add dependency to CocoaPods' generated project only if plugins are used.
-  if (hasPlugins)
-    localsBuffer.writeln('#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"');
-
-  final File localsFile = fs.file(fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
+  final File localsFile = fs.file(_generatedXcodePropertiesPath(projectPath));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
 
-Map<String, String> getXcodeBuildSettings(String xcodeProjPath, String target) {
-  final String absProjPath = fs.path.absolute(xcodeProjPath);
-  final String out = runCheckedSync(<String>[
-    '/usr/bin/xcodebuild', '-project', absProjPath, '-target', target, '-showBuildSettings'
-  ]);
-  return parseXcodeBuildSettings(out);
+XcodeProjectInterpreter get xcodeProjectInterpreter => context.putIfAbsent(
+  XcodeProjectInterpreter,
+  () => const XcodeProjectInterpreter(),
+);
+
+/// Interpreter of Xcode projects settings.
+class XcodeProjectInterpreter {
+  static const String _executable = '/usr/bin/xcodebuild';
+
+  const XcodeProjectInterpreter();
+
+  bool get canInterpretXcodeProjects => fs.isFileSync(_executable);
+
+  Map<String, String> getBuildSettings(String projectPath, String target) {
+    final String out = runCheckedSync(<String>[
+      _executable,
+      '-project',
+      fs.path.absolute(projectPath),
+      '-target',
+      target,
+      '-showBuildSettings'
+    ], workingDirectory: projectPath);
+    return parseXcodeBuildSettings(out);
+  }
+
+  XcodeProjectInfo getInfo(String projectPath) {
+    final String out = runCheckedSync(<String>[
+      _executable, '-list',
+    ], workingDirectory: projectPath);
+    return new XcodeProjectInfo.fromXcodeBuildOutput(out);
+  }
 }
 
 Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
@@ -100,13 +140,6 @@ String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettin
 /// Represents the output of `xcodebuild -list`.
 class XcodeProjectInfo {
   XcodeProjectInfo(this.targets, this.buildConfigurations, this.schemes);
-
-  factory XcodeProjectInfo.fromProjectSync(String projectPath) {
-    final String out = runCheckedSync(<String>[
-      '/usr/bin/xcodebuild', '-list',
-    ], workingDirectory: projectPath);
-    return new XcodeProjectInfo.fromXcodeBuildOutput(out);
-  }
 
   factory XcodeProjectInfo.fromXcodeBuildOutput(String output) {
     final List<String> targets = <String>[];

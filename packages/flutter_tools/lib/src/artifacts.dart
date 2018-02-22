@@ -9,6 +9,7 @@ import 'base/file_system.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
 import 'build_info.dart';
+import 'dart/sdk.dart';
 import 'globals.dart';
 
 enum Artifact {
@@ -24,6 +25,7 @@ enum Artifact {
   platformLibrariesJson,
   flutterPatchedSdkPath,
   frontendServerSnapshotForEngineDartSdk,
+  engineDartSdkPath,
 }
 
 String _artifactToFileName(Artifact artifact) {
@@ -51,6 +53,8 @@ String _artifactToFileName(Artifact artifact) {
     case Artifact.flutterPatchedSdkPath:
       assert(false, 'No filename for sdk path, should not be invoked');
       return null;
+    case Artifact.engineDartSdkPath:
+      return 'dart-sdk';
     case Artifact.frontendServerSnapshotForEngineDartSdk:
       return 'frontend_server.dart.snapshot';
   }
@@ -164,6 +168,8 @@ class CachedArtifacts extends Artifacts {
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
+      case Artifact.engineDartSdkPath:
+        return dartSdkPath;
       case Artifact.platformKernelDill:
         return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
@@ -244,6 +250,8 @@ class LocalEngineArtifacts extends Artifacts {
         return _getFlutterPatchedSdkPath();
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return fs.path.join(_hostEngineOutPath, 'gen', _artifactToFileName(artifact));
+      case Artifact.engineDartSdkPath:
+        return fs.path.join(_hostEngineOutPath, 'dart-sdk');
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

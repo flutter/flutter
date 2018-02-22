@@ -229,7 +229,7 @@ void main() {
 
     // Fully expand the appbar by scrolling (no animation) to 0.0.
     controller.jumpTo(0.0);
-    await(tester.pumpAndSettle());
+    await tester.pumpAndSettle();
     expect(scrollOffset, 0.0);
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
 
@@ -291,12 +291,12 @@ void main() {
 
     // A scroll collapses Page0's appbar to 150.0.
     controller.jumpTo(50.0);
-    await(tester.pumpAndSettle());
+    await tester.pumpAndSettle();
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 150.0);
 
     // Fling to Page1. Page1's appbar height is the same as the appbar for Page0.
     await tester.fling(find.text('Page0'), const Offset(-100.0, 0.0), 10000.0);
-    await(tester.pumpAndSettle());
+    await tester.pumpAndSettle();
     expect(find.text('Page0'), findsNothing);
     expect(find.text('Page1'), findsOneWidget);
     expect(find.text('Page2'), findsNothing);
@@ -305,10 +305,10 @@ void main() {
     // Expand Page1's appbar and then fling to Page2. Page2's appbar appears
     // fully expanded.
     controller.jumpTo(0.0);
-    await(tester.pumpAndSettle());
+    await tester.pumpAndSettle();
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
     await tester.fling(find.text('Page1'), const Offset(-100.0, 0.0), 10000.0);
-    await(tester.pumpAndSettle());
+    await tester.pumpAndSettle();
     expect(find.text('Page0'), findsNothing);
     expect(find.text('Page1'), findsNothing);
     expect(find.text('Page2'), findsOneWidget);

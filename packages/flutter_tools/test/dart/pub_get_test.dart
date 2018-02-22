@@ -32,12 +32,12 @@ void main() {
 
     new FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironmment, isNull);
+      expect(testLogger.statusText, '');
       pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
       });
-      expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 500));
       expect(testLogger.statusText,
         'Running "flutter packages get" in /...\n'

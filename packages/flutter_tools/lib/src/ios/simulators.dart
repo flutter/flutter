@@ -316,13 +316,8 @@ class IOSSimulator extends Device {
         return new LaunchResult.failed();
     }
 
-    final bool strongMode = platformArgs['strong'] ?? false;
-
     // Prepare launch arguments.
     final List<String> args = <String>['--enable-dart-profiling'];
-
-    if (strongMode)
-      args.add('--strong');
 
     if (!prebuiltApplication) {
       args.addAll(<String>[
@@ -337,6 +332,8 @@ class IOSSimulator extends Device {
         args.add('--enable-checked-mode');
       if (debuggingOptions.startPaused)
         args.add('--start-paused');
+      if (debuggingOptions.skiaDeterministicRendering)
+        args.add('--skia-deterministic-rendering');
       if (debuggingOptions.useTestFonts)
         args.add('--use-test-fonts');
 

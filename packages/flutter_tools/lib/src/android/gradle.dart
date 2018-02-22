@@ -16,7 +16,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
-import '../plugins.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
@@ -94,7 +93,6 @@ Future<GradleProject> _gradleProject() async {
 Future<GradleProject> _readGradleProject() async {
   final String gradle = await _ensureGradle();
   updateLocalProperties();
-  injectPlugins();
   try {
     final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
     final RunResult runResult = await runCheckedAsync(
@@ -299,7 +297,6 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   }
   if (buildInfo.previewDart2) {
     command.add('-Ppreview-dart-2=true');
-    command.add('-Pstrong=true');
     if (buildInfo.trackWidgetCreation)
       command.add('-Ptrack-widget-creation=true');
     if (buildInfo.extraFrontEndOptions != null)

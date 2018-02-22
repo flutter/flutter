@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/mocks_for_image_cache.dart';
@@ -34,7 +35,7 @@ void main() {
                       onPaint: () { tabsPainted.add(index); }
                     )
                   );
-                }
+                },
               );
             },
           );
@@ -88,11 +89,11 @@ void main() {
             settings: settings,
             builder: (BuildContext context) {
               return new CupertinoTabScaffold(
-                  tabBar: _buildTabBar(),
-                  tabBuilder: (BuildContext context, int index) {
-                    tabsBuilt.add(index);
-                    return new Text('Page ${index + 1}');
-                  }
+                tabBar: _buildTabBar(),
+                tabBuilder: (BuildContext context, int index) {
+                  tabsBuilt.add(index);
+                  return new Text('Page ${index + 1}');
+                },
               );
             },
           );
@@ -118,6 +119,121 @@ void main() {
     expect(tabsBuilt, <int>[0, 0, 1, 0, 1]);
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2', skipOffstage: false), isOffstage);
+  });
+
+  testWidgets('Last tab gets focus', (WidgetTester tester) async {
+    // 2 nodes for 2 tabs
+    final List<FocusNode> focusNodes = <FocusNode>[new FocusNode(), new FocusNode()];
+
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoTabScaffold(
+                tabBar: _buildTabBar(),
+                tabBuilder: (BuildContext context, int index) {
+                  return new TextField(
+                    focusNode: focusNodes[index],
+                    autofocus: true,
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    expect(focusNodes[0].hasFocus, isTrue);
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pump();
+
+    expect(focusNodes[0].hasFocus, isFalse);
+    expect(focusNodes[1].hasFocus, isTrue);
+
+    await tester.tap(find.text('Tab 1'));
+    await tester.pump();
+
+    expect(focusNodes[0].hasFocus, isTrue);
+    expect(focusNodes[1].hasFocus, isFalse);
+  });
+
+  testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
+    final List<FocusNode> focusNodes = <FocusNode>[
+      new FocusNode(), new FocusNode(), new FocusNode(), new FocusNode(),
+    ];
+
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new Material(
+                child: new CupertinoTabScaffold(
+                  tabBar: _buildTabBar(),
+                  tabBuilder: (BuildContext context, int index) {
+                    return new Column(
+                      children: <Widget>[
+                        new TextField(
+                          focusNode: focusNodes[index * 2],
+                          decoration: const InputDecoration(
+                            hintText: 'TextField 1',
+                          ),
+                        ),
+                        new TextField(
+                          focusNode: focusNodes[index * 2 + 1],
+                          decoration: const InputDecoration(
+                            hintText: 'TextField 2',
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    expect(
+      focusNodes.any((FocusNode node) => node.hasFocus),
+      isFalse,
+    );
+
+    await tester.tap(find.widgetWithText(TextField, 'TextField 2'));
+
+    expect(
+      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      1,
+    );
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pump();
+
+    await tester.tap(find.widgetWithText(TextField, 'TextField 1'));
+
+    expect(
+      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      2,
+    );
+
+    await tester.tap(find.text('Tab 1'));
+    await tester.pump();
+
+    // Upon going back to tab 1, the item it tab 1 that previously had the focus
+    // (TextField 2) gets it back.
+    expect(
+      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      1,
+    );
   });
 }
 

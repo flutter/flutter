@@ -124,7 +124,7 @@ void main() {
     final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
     final GlobalKey<FormFieldState<String>> fieldKey = new GlobalKey<FormFieldState<String>>();
     // Input 2's validator depends on a input 1's value.
-    String errorText(String input) => fieldKey.currentState.value?.toString() + '/error';
+    String errorText(String input) => '${fieldKey.currentState.value}/error';
 
     Widget builder() {
       return new Directionality(
