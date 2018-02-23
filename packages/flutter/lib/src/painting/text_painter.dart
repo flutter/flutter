@@ -375,7 +375,7 @@ class TextPainter {
   }
 
   void _shrinkToWidestRow(double minWidth) {
-    final List<TextBox> boxes = _paragraph.getBoxesForRange(0, -1);
+    final List<TextBox> boxes = _paragraph.getBoxesForRange(0, 0x7FFFFFFF);
     if (boxes.isEmpty)
       return;
 
