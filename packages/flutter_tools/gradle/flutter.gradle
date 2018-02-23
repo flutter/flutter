@@ -508,6 +508,12 @@ class FlutterTask extends BaseFlutterTask {
             if (snapshotter != null) {
                 sources = sources.plus(snapshotter)
             }
+            if (previewDart2) {
+                FileCollection frontendServer = readDependencies(project.file("${intermediateDir}/frontend_server.d"))
+                if (frontendServer != null) {
+                    sources = sources.plus(frontendServer)
+                }
+            }
             if (localEngineSrcPath != null) {
                 sources = sources.plus(project.files("$localEngineSrcPath/$localEngine"))
             }

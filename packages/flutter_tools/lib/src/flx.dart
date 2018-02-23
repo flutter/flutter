@@ -86,6 +86,9 @@ Future<Null> build({
     if (kernelBinaryFilename == null) {
       throwToolExit('Compiler terminated unexpectedly on $mainPath');
     }
+    await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
+        .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
+
     kernelContent = new DevFSFileContent(fs.file(kernelBinaryFilename));
   }
 

@@ -374,6 +374,10 @@ Future<String> _buildAotSnapshot(
       printError('Compiler terminated unexpectedly.');
       return null;
     }
+    // Write path to frontend_server, since things need to be re-generated when
+    // that changes.
+    await outputDir.childFile('frontend_server.d')
+        .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
 
     genSnapshotCmd.addAll(<String>[
       '--reify-generic-functions',
