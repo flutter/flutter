@@ -256,13 +256,15 @@ void main() {
 
       final Path actualNotch = computeNotch(host, guest, start, end);
       final Path expectedNotch = new Path()
-        ..lineTo(190.0, 100.0)
-        ..arcToPoint(
-          const Offset(210.0, 100.0),
-          radius: const Radius.circular(10.0),
-          clockwise: false
-        )
-        ..lineTo(220.0, 100.0);
+	..lineTo(174.0, 100.0)
+	..quadraticBezierTo(189.0, 100.0, 190.9090909090909, 104.16597790450531)
+	..arcToPoint(
+	  const Offset(209.1, 104.2),
+	  radius: const Radius.circular(10.0),
+	  clockwise: false,
+	)
+	..quadraticBezierTo(211.0, 100.0, 226.0, 100.0)
+	..lineTo(220.0, 100.0);
 
       expect(
         createNotchedRectangle(host, start.dx, end.dx, actualNotch),
@@ -284,7 +286,7 @@ void main() {
 
     testWidgets('notch with margin', (WidgetTester tester) async {
       final ComputeNotch computeNotch = await fetchComputeNotch(tester,
-        const FloatingActionButton(onPressed: null, notchMargin: 4.0)
+	const FloatingActionButton(onPressed: null, notchMargin: 4.0)
       );
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
@@ -293,32 +295,145 @@ void main() {
 
       final Path actualNotch = computeNotch(host, guest, start, end);
       final Path expectedNotch = new Path()
-        ..lineTo(186.0, 100.0)
-        ..arcToPoint(
-          const Offset(214.0, 100.0),
-          radius: const Radius.circular(14.0),
-          clockwise: false
-        )
-        ..lineTo(220.0, 100.0);
+	..lineTo(170.0, 100.0)
+	..quadraticBezierTo(185.0, 100.0, 186.93333333333334, 105.0261538199922)
+	..arcToPoint(
+	  const Offset(213.1, 105.0),
+	  radius: const Radius.circular(14.0),
+	  clockwise: false,
+	)
+	..quadraticBezierTo(215.0, 100.0, 230.0, 100.0)
+	..lineTo(220.0, 100.0);
 
       expect(
-        createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-        coversSameAreaAs(
-          createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-          areaToCompare: host.inflate(10.0)
-        )
+	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
+	coversSameAreaAs(
+	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
+	  areaToCompare: host.inflate(10.0)
+	)
       );
 
       expect(
-        createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-        coversSameAreaAs(
-          createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-          areaToCompare: guest.inflate(10.0),
-          sampleSize: 50,
-        )
+	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
+	coversSameAreaAs(
+	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
+	  areaToCompare: guest.inflate(10.0),
+	  sampleSize: 50,
+	)
       );
     });
+
+    testWidgets('notch circle center above BAB', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester,
+	const FloatingActionButton(onPressed: null, notchMargin: 4.0)
+      );
+      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      final Rect guest = new Rect.fromLTRB(190.0, 85.0, 210.0, 105.0);
+      final Offset start = const Offset(180.0, 100.0);
+      final Offset end = const Offset(220.0, 100.0);
+
+      final Path actualNotch = computeNotch(host, guest, start, end);
+      final Path expectedNotch = new Path()
+	..lineTo(170.0, 100.0)
+	..quadraticBezierTo(185.0, 100.0, 190.29757138393788, 105.09271415181361)
+	..arcToPoint(
+	  const Offset(209.7, 105.1),
+	  radius: const Radius.circular(14.0),
+	  clockwise: false,
+	)
+	..quadraticBezierTo(215.0, 100.0, 230.0, 100.0)
+	..lineTo(220.0, 100.0);
+
+      expect(
+	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
+	coversSameAreaAs(
+	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
+	  areaToCompare: host.inflate(10.0)
+	)
+      );
+
+      expect(
+	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
+	coversSameAreaAs(
+	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
+	  areaToCompare: guest.inflate(10.0),
+	  sampleSize: 50,
+	)
+      );
+    });
+
+    testWidgets('notch circle center below BAB', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester,
+	const FloatingActionButton(onPressed: null, notchMargin: 4.0)
+      );
+      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      final Rect guest = new Rect.fromLTRB(190.0, 95.0, 210.0, 115.0);
+      final Offset start = const Offset(180.0, 100.0);
+      final Offset end = const Offset(220.0, 100.0);
+
+      final Path actualNotch = computeNotch(host, guest, start, end);
+      final Path expectedNotch = new Path()
+	..lineTo(170.0, 100.0)
+	..quadraticBezierTo(185.0, 100.0, 186.18242861606214, 107.2527141518136)
+	..arcToPoint(
+	  const Offset(213.8, 107.3),
+	  radius: const Radius.circular(14.0),
+	  clockwise: false,
+	)
+	..quadraticBezierTo(215.0, 100.0, 230.0, 100.0)
+	..lineTo(220.0, 100.0);
+
+      expect(
+	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
+	coversSameAreaAs(
+	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
+	  areaToCompare: host.inflate(10.0)
+	)
+      );
+
+      expect(
+	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
+	coversSameAreaAs(
+	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
+	  areaToCompare: guest.inflate(10.0),
+	  sampleSize: 50,
+	)
+      );
+    });
+
+    testWidgets('no notch when there is no overlap', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester,
+	const FloatingActionButton(onPressed: null, notchMargin: 4.0)
+      );
+      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      final Rect guest = new Rect.fromLTRB(190.0, 50.0, 210.0, 60.0);
+      final Offset start = const Offset(180.0, 100.0);
+      final Offset end = const Offset(220.0, 100.0);
+
+      final Path actualNotch = computeNotch(host, guest, start, end);
+      final Path expectedNotch = new Path()
+	..lineTo(220.0, 100.0);
+
+      expect(
+	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
+	coversSameAreaAs(
+	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
+	  areaToCompare: host.inflate(10.0)
+	)
+      );
+
+      expect(
+	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
+	coversSameAreaAs(
+	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
+	  areaToCompare: guest.inflate(10.0),
+	  sampleSize: 50,
+	)
+      );
+    });
+
   });
+
 }
 
 Path createNotchedRectangle(Rect container, double startX, double endX, Path notch) {
