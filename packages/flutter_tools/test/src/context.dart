@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/port_scanner.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -91,6 +92,7 @@ void testUsingContext(String description, dynamic testMethod(), {
 
     // The context always starts with these value since others depend on them.
     testContext
+      ..putIfAbsent(BotDetector, () => const BotDetector())
       ..putIfAbsent(Stdio, () => const Stdio())
       ..putIfAbsent(Platform, () => const LocalPlatform())
       ..putIfAbsent(FileSystem, () => const LocalFileSystem())

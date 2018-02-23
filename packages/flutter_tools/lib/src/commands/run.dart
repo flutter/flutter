@@ -90,6 +90,10 @@ class RunCommand extends RunCommandBase {
               'when testing Flutter on emulators. By default, Flutter will\n'
               'attempt to either use OpenGL or Vulkan and fall back to software\n'
               'when neither is available.');
+    argParser.addFlag('skia-deterministic-rendering',
+        negatable: false,
+        help: 'When combined with --enable-software-rendering, provides 100%\n'
+              'deterministic Skia rendering.');
     argParser.addFlag('trace-skia',
         negatable: false,
         help: 'Enable tracing of Skia code. This is useful when debugging\n'
@@ -229,6 +233,7 @@ class RunCommand extends RunCommandBase {
         startPaused: argResults['start-paused'],
         useTestFonts: argResults['use-test-fonts'],
         enableSoftwareRendering: argResults['enable-software-rendering'],
+        skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
         traceSkia: argResults['trace-skia'],
         observatoryPort: observatoryPort,
       );
