@@ -38,7 +38,7 @@ void SessionConnection::OnSessionError() {
   FXL_CHECK(false) << "Session connection was terminated.";
 }
 
-void SessionConnection::OnSessionEvents(fidl::Array<scenic::EventPtr> events) {
+void SessionConnection::OnSessionEvents(f1dl::Array<scenic::EventPtr> events) {
   scenic::MetricsPtr new_metrics;
   for (const auto& event : events) {
     if (event->is_metrics() &&

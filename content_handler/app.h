@@ -29,7 +29,7 @@ class App : public app::ApplicationRunner {
   void StartApplication(
       app::ApplicationPackagePtr application,
       app::ApplicationStartupInfoPtr startup_info,
-      fidl::InterfaceRequest<app::ApplicationController> controller) override;
+      f1dl::InterfaceRequest<app::ApplicationController> controller) override;
 
   void Destroy(ApplicationControllerImpl* controller);
 
@@ -50,7 +50,7 @@ class App : public app::ApplicationRunner {
   std::unique_ptr<app::ApplicationContext> context_;
   std::unique_ptr<fsl::Thread> gpu_thread_;
   std::unique_ptr<fsl::Thread> io_thread_;
-  fidl::BindingSet<app::ApplicationRunner> runner_bindings_;
+  f1dl::BindingSet<app::ApplicationRunner> runner_bindings_;
   std::unordered_map<ApplicationControllerImpl*,
                      std::unique_ptr<ApplicationControllerImpl>>
       controllers_;

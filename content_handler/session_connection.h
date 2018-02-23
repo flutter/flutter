@@ -57,7 +57,7 @@ class SessionConnection {
   fxl::Closure metrics_changed_callback_;
 
   void OnSessionError();
-  void OnSessionEvents(fidl::Array<scenic::EventPtr> events);
+  void OnSessionEvents(f1dl::Array<scenic::EventPtr> events);
 
   void EnqueueClearOps();
 

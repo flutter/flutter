@@ -47,11 +47,11 @@ class RuntimeHolder : public blink::RuntimeDelegate,
 
   void Init(fdio_ns_t* namespc,
             std::unique_ptr<app::ApplicationContext> context,
-            fidl::InterfaceRequest<app::ServiceProvider> outgoing_services,
+            f1dl::InterfaceRequest<app::ServiceProvider> outgoing_services,
             std::vector<char> bundle);
   void CreateView(const std::string& script_uri,
-                  fidl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-                  fidl::InterfaceRequest<app::ServiceProvider> services);
+                  f1dl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
+                  f1dl::InterfaceRequest<app::ServiceProvider> services);
 
   Dart_Port GetUIIsolateMainPort();
   std::string GetUIIsolateName();
@@ -111,7 +111,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   fdio_ns_t* namespc_;
   int dirfd_;
   std::unique_ptr<app::ApplicationContext> context_;
-  fidl::InterfaceRequest<app::ServiceProvider> outgoing_services_;
+  f1dl::InterfaceRequest<app::ServiceProvider> outgoing_services_;
   std::vector<char> root_bundle_data_;
   // TODO(zarah): Remove asset_store_ when flx is completely removed
   fxl::RefPtr<blink::ZipAssetStore> asset_store_;
@@ -121,13 +121,13 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   std::unique_ptr<blink::RuntimeController> runtime_;
   blink::ViewportMetrics viewport_metrics_;
   mozart::ViewManagerPtr view_manager_;
-  fidl::Binding<mozart::ViewListener> view_listener_binding_;
-  fidl::Binding<mozart::InputListener> input_listener_binding_;
+  f1dl::Binding<mozart::ViewListener> view_listener_binding_;
+  f1dl::Binding<mozart::InputListener> input_listener_binding_;
   mozart::InputConnectionPtr input_connection_;
   mozart::ViewPtr view_;
   std::unordered_set<int> down_pointers_;
   mozart::InputMethodEditorPtr input_method_editor_;
-  fidl::Binding<mozart::InputMethodEditorClient> text_input_binding_;
+  f1dl::Binding<mozart::InputMethodEditorClient> text_input_binding_;
   int current_text_input_client_ = 0;
   fxl::TimePoint last_begin_frame_time_;
   bool frame_outstanding_ = false;

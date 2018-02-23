@@ -31,7 +31,7 @@ class ApplicationControllerImpl : public app::ApplicationController,
       App* app,
       app::ApplicationPackagePtr application,
       app::ApplicationStartupInfoPtr startup_info,
-      fidl::InterfaceRequest<app::ApplicationController> controller);
+      f1dl::InterfaceRequest<app::ApplicationController> controller);
 
   ~ApplicationControllerImpl() override;
 
@@ -44,8 +44,8 @@ class ApplicationControllerImpl : public app::ApplicationController,
   // |mozart::ViewProvider| implementation
 
   void CreateView(
-      fidl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-      fidl::InterfaceRequest<app::ServiceProvider> services) override;
+      f1dl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
+      f1dl::InterfaceRequest<app::ServiceProvider> services) override;
 
   Dart_Port GetUIIsolateMainPort();
   std::string GetUIIsolateName();
@@ -57,11 +57,11 @@ class ApplicationControllerImpl : public app::ApplicationController,
   fdio_ns_t* SetupNamespace(const app::FlatNamespacePtr& flat);
 
   App* app_;
-  fidl::Binding<app::ApplicationController> binding_;
+  f1dl::Binding<app::ApplicationController> binding_;
 
   app::ServiceProviderBridge service_provider_bridge_;
 
-  fidl::BindingSet<mozart::ViewProvider> view_provider_bindings_;
+  f1dl::BindingSet<mozart::ViewProvider> view_provider_bindings_;
 
   std::string url_;
   std::unique_ptr<RuntimeHolder> runtime_holder_;

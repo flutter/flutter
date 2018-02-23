@@ -111,7 +111,7 @@ RuntimeHolder::~RuntimeHolder() {
 void RuntimeHolder::Init(
     fdio_ns_t* namespc,
     std::unique_ptr<app::ApplicationContext> context,
-    fidl::InterfaceRequest<app::ServiceProvider> outgoing_services,
+    f1dl::InterfaceRequest<app::ServiceProvider> outgoing_services,
     std::vector<char> bundle) {
   FXL_DCHECK(!rasterizer_);
   rasterizer_ = Rasterizer::Create();
@@ -193,8 +193,8 @@ void RuntimeHolder::Init(
 
 void RuntimeHolder::CreateView(
     const std::string& script_uri,
-    fidl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-    fidl::InterfaceRequest<app::ServiceProvider> services) {
+    f1dl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
+    f1dl::InterfaceRequest<app::ServiceProvider> services) {
   if (view_listener_binding_.is_bound()) {
     // TODO(jeffbrown): Refactor this to support multiple view instances
     // sharing the same underlying root bundle (but with different runtimes).
@@ -238,7 +238,7 @@ void RuntimeHolder::CreateView(
   input_connection_->SetEventListener(std::move(input_listener));
 
   // Setup the session.
-  fidl::InterfaceHandle<scenic::SceneManager> scene_manager;
+  f1dl::InterfaceHandle<scenic::SceneManager> scene_manager;
   view_manager_->GetSceneManager(scene_manager.NewRequest());
 
   blink::Threads::Gpu()->PostTask(fxl::MakeCopyable([
@@ -444,7 +444,7 @@ void RuntimeHolder::InitDartIoInternal() {
 }
 
 void RuntimeHolder::InitFuchsia() {
-  fidl::InterfaceHandle<app::ApplicationEnvironment> environment;
+  f1dl::InterfaceHandle<app::ApplicationEnvironment> environment;
   context_->ConnectToEnvironmentService(environment.NewRequest());
   fuchsia::dart::Initialize(std::move(environment),
                             std::move(outgoing_services_));
@@ -467,7 +467,7 @@ void RuntimeHolder::InitZircon() {
 }
 
 void RuntimeHolder::InitMozartInternal() {
-  fidl::InterfaceHandle<mozart::ViewContainer> view_container;
+  f1dl::InterfaceHandle<mozart::ViewContainer> view_container;
   view_->GetContainer(view_container.NewRequest());
 
   Dart_Handle mozart_internal =
@@ -558,7 +558,7 @@ bool RuntimeHolder::HandleFlutterPlatformMessage(
     clipboard_->Push(text);
     response->CompleteEmpty();
   } else if (method->value == "Clipboard.getData") {
-    clipboard_->Peek([response](const ::fidl::String& text) {
+    clipboard_->Peek([response](const ::f1dl::String& text) {
       rapidjson::StringBuffer json_buffer;
       rapidjson::Writer<rapidjson::StringBuffer> writer(json_buffer);
       writer.StartArray();

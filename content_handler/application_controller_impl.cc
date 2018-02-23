@@ -21,7 +21,7 @@ ApplicationControllerImpl::ApplicationControllerImpl(
     App* app,
     app::ApplicationPackagePtr application,
     app::ApplicationStartupInfoPtr startup_info,
-    fidl::InterfaceRequest<app::ApplicationController> controller)
+    f1dl::InterfaceRequest<app::ApplicationController> controller)
     : app_(app), binding_(this) {
   if (controller.is_valid()) {
     binding_.Bind(std::move(controller));
@@ -48,7 +48,7 @@ ApplicationControllerImpl::ApplicationControllerImpl(
   }
 
   service_provider_bridge_.AddService<mozart::ViewProvider>(
-      [this](fidl::InterfaceRequest<mozart::ViewProvider> request) {
+      [this](f1dl::InterfaceRequest<mozart::ViewProvider> request) {
         view_provider_bindings_.AddBinding(this, std::move(request));
       });
 
@@ -124,8 +124,8 @@ void ApplicationControllerImpl::SendReturnCode(int32_t return_code) {
 }
 
 void ApplicationControllerImpl::CreateView(
-    fidl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-    fidl::InterfaceRequest<app::ServiceProvider> services) {
+    f1dl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
+    f1dl::InterfaceRequest<app::ServiceProvider> services) {
   runtime_holder_->CreateView(url_, std::move(view_owner_request),
                               std::move(services));
 }
