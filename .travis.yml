@@ -15,7 +15,6 @@ matrix:
     env: SHARD=analyze
   - os: osx
     env: SHARD=docs
-  # TODO(xster): remove this when we know it works on Travis.
   allow_failures:
   - env: SHARD=tests_dart2
 sudo: false

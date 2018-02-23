@@ -83,6 +83,13 @@ enum _InitialResult { crashed, timedOut, connected }
 enum _TestResult { crashed, harnessBailed, testBailed }
 typedef Future<Null> _Finalizer();
 
+class CompilationRequest {
+  String path;
+  Completer<String> result;
+
+  CompilationRequest(this.path, this.result);
+}
+
 class _FlutterPlatform extends PlatformPlugin {
   _FlutterPlatform({
     @required this.shellPath,
@@ -93,7 +100,16 @@ class _FlutterPlatform extends PlatformPlugin {
     this.explicitObservatoryPort,
     this.host,
     this.previewDart2,
-  }) : assert(shellPath != null);
+  }) : assert(shellPath != null) {
+    compilerController.stream.listen((CompilationRequest request) {
+        request.result.complete(compile(
+          sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+          incrementalCompilerByteStorePath: '' /* not null is enough */,
+          mainPath: request.path,
+          packagesPath: PackageMap.globalPackagesPath,
+        ));
+    });
+  }
 
   final String shellPath;
   final TestWatcher watcher;
@@ -103,6 +119,8 @@ class _FlutterPlatform extends PlatformPlugin {
   final int explicitObservatoryPort;
   final InternetAddress host;
   final bool previewDart2;
+  final StreamController<CompilationRequest> compilerController =
+      new StreamController<CompilationRequest>();
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
@@ -203,12 +221,9 @@ class _FlutterPlatform extends PlatformPlugin {
       String bundlePath;
 
       if (previewDart2) {
-        mainDart = await compile(
-          sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-          incrementalCompilerByteStorePath: '' /* not null is enough */,
-          mainPath: listenerFile.path,
-          packagesPath: PackageMap.globalPackagesPath,
-        );
+        final Completer<String> completer = new Completer<String>();
+        compilerController.add(new CompilationRequest(listenerFile.path, completer));
+        mainDart = await completer.future;
 
         if (mainDart == null) {
           controller.sink.addError(_getErrorMessage('Compilation failed', testPath, shellPath));
