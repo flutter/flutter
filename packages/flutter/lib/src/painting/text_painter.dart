@@ -369,21 +369,28 @@ class TextPainter {
       final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth);
       if (newWidth != width)
         _paragraph.layout(new ui.ParagraphConstraints(width: newWidth));
-      if (!didExceedMaxLines) {
-        final List<TextBox> boxes = _paragraph.getBoxesForRange(0, text.toPlainText().length);
-        double startMost = double.maxFinite;
-        double endMost = 0.0;
-        for (final TextBox box in boxes) {
-          if (startMost > box.start)
-            startMost = box.start;
-          if (endMost < box.end)
-            endMost = box.end;
-        }
-        final double maxBoxWidth = endMost - startMost;
-        if (maxBoxWidth > 0.0 && maxBoxWidth >= minWidth && maxBoxWidth != width) {
-          _paragraph.layout(new ui.ParagraphConstraints(width: maxBoxWidth));
-        }
-      }
+      if (!didExceedMaxLines)
+        _shrinkToWidestRow(minWidth);
+    }
+  }
+
+  void _shrinkToWidestRow(double minWidth) {
+    final List<TextBox> boxes = _paragraph.getBoxesForRange(0, -1);
+    if (boxes.isEmpty)
+      return;
+
+    double startMost = double.maxFinite;
+    double endMost = 0.0;
+    for (final TextBox box in boxes) {
+      if (startMost > box.start)
+        startMost = box.start;
+      if (endMost < box.end)
+        endMost = box.end;
+    }
+
+    final double maxBoxWidth = endMost - startMost;
+    if (maxBoxWidth > 0.0 && maxBoxWidth >= minWidth && maxBoxWidth != width) {
+      _paragraph.layout(new ui.ParagraphConstraints(width: maxBoxWidth));
     }
   }
 
