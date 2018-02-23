@@ -234,8 +234,8 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
 
     assert(_notchAssertions(host, guest, start, end, fabRadius, notchRadius));
 
-    // If there's no overlap between the notch circle and the host, don't
-    // make a notch, just return a straight line from start to end.
+    // If there's no overlap between the guest's margin boundary and the host,
+    // don't make a notch, just return a straight line from start to end.
     if (!host.overlaps(guest.inflate(widget.notchMargin)))
       return new Path()..lineTo(end.dx, end.dy);
 
@@ -294,25 +294,25 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     double fabRadius, double notchRadius) {
     if (end.dy != host.top)
       throw new FlutterError(
-        'The floating action button\'s notch maker must only be used for a notch in the top edge of the host.\n'
+        'The notch of the floating action button must end at the top edge of the host.\n'
         'The notch\'s path end point: $end is not in the top edge of $host'
       );
 
     if (start.dy != host.top)
       throw new FlutterError(
-        'The floating action button\'s notch maker must only be used for a notch in the top edge the host.\n'
+        'The notch of the floating action button must start at the top edge of the host.\n'
         'The notch\'s path start point: $start is not in the top edge of $host'
       );
 
     if (guest.center.dx - notchRadius < start.dx)
       throw new FlutterError(
-        'The notch\'s path start point must be to the left of the notch.\n'
+        'The notch\'s path start point must be to the left of the floating action button.\n'
         'Start point was $start, guest was $guest, notchMargin was ${widget.notchMargin}.'
       );
 
     if (guest.center.dx + notchRadius > end.dx)
       throw new FlutterError(
-        'The notch\'s end point must be to the right of the guest.\n'
+        'The notch\'s end point must be to the right of the floating action button.\n'
         'End point was $start, notch was $guest, notchMargin was ${widget.notchMargin}.'
       );
 
