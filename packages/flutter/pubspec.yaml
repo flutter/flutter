@@ -58,7 +58,7 @@ dev_dependencies:
   stream_channel: 1.6.3 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
-  test: 0.12.30+3 # TRANSITIVE DEPENDENCY
+  test: 0.12.30+4 # TRANSITIVE DEPENDENCY
   utf: 0.9.0+4 # TRANSITIVE DEPENDENCY
   watcher: 0.9.7+7 # TRANSITIVE DEPENDENCY
   web_socket_channel: 1.0.7 # TRANSITIVE DEPENDENCY
