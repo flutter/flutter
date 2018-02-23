@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -255,33 +256,10 @@ void main() {
       final Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
-      final Path expectedNotch = new Path()
-	..lineTo(174.0, 100.0)
-	..quadraticBezierTo(189.0, 100.0, 190.9090909090909, 104.16597790450531)
-	..arcToPoint(
-	  const Offset(209.1, 104.2),
-	  radius: const Radius.circular(10.0),
-	  clockwise: false,
-	)
-	..quadraticBezierTo(211.0, 100.0, 226.0, 100.0)
-	..lineTo(220.0, 100.0);
+      final Path notchedRectangle =
+        createNotchedRectangle(host, start.dx, end.dx, actualNotch);
 
-      expect(
-        createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-        coversSameAreaAs(
-          createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-          areaToCompare: host.inflate(10.0)
-        )
-      );
-
-      expect(
-        createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-        coversSameAreaAs(
-          createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-          areaToCompare: guest.inflate(10.0),
-          sampleSize: 50,
-        )
-      );
+      expect(pathDoesNotContainCircle(notchedRectangle, guest), isTrue);
     });
 
     testWidgets('notch with margin', (WidgetTester tester) async {
@@ -294,33 +272,9 @@ void main() {
       final Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
-      final Path expectedNotch = new Path()
-	..lineTo(170.0, 100.0)
-	..quadraticBezierTo(185.0, 100.0, 186.93333333333334, 105.0261538199922)
-	..arcToPoint(
-	  const Offset(213.1, 105.0),
-	  radius: const Radius.circular(14.0),
-	  clockwise: false,
-	)
-	..quadraticBezierTo(215.0, 100.0, 230.0, 100.0)
-	..lineTo(220.0, 100.0);
-
-      expect(
-	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-	coversSameAreaAs(
-	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-	  areaToCompare: host.inflate(10.0)
-	)
-      );
-
-      expect(
-	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-	coversSameAreaAs(
-	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-	  areaToCompare: guest.inflate(10.0),
-	  sampleSize: 50,
-	)
-      );
+      final Path notchedRectangle =
+        createNotchedRectangle(host, start.dx, end.dx, actualNotch);
+      expect(pathDoesNotContainCircle(notchedRectangle, guest.inflate(4.0)), isTrue);
     });
 
     testWidgets('notch circle center above BAB', (WidgetTester tester) async {
@@ -333,33 +287,9 @@ void main() {
       final Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
-      final Path expectedNotch = new Path()
-	..lineTo(170.0, 100.0)
-	..quadraticBezierTo(185.0, 100.0, 190.29757138393788, 105.09271415181361)
-	..arcToPoint(
-	  const Offset(209.7, 105.1),
-	  radius: const Radius.circular(14.0),
-	  clockwise: false,
-	)
-	..quadraticBezierTo(215.0, 100.0, 230.0, 100.0)
-	..lineTo(220.0, 100.0);
-
-      expect(
-	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-	coversSameAreaAs(
-	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-	  areaToCompare: host.inflate(10.0)
-	)
-      );
-
-      expect(
-	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-	coversSameAreaAs(
-	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-	  areaToCompare: guest.inflate(10.0),
-	  sampleSize: 50,
-	)
-      );
+      final Path notchedRectangle =
+        createNotchedRectangle(host, start.dx, end.dx, actualNotch);
+      expect(pathDoesNotContainCircle(notchedRectangle, guest.inflate(4.0)), isTrue);
     });
 
     testWidgets('notch circle center below BAB', (WidgetTester tester) async {
@@ -372,33 +302,9 @@ void main() {
       final Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
-      final Path expectedNotch = new Path()
-	..lineTo(170.0, 100.0)
-	..quadraticBezierTo(185.0, 100.0, 186.18242861606214, 107.2527141518136)
-	..arcToPoint(
-	  const Offset(213.8, 107.3),
-	  radius: const Radius.circular(14.0),
-	  clockwise: false,
-	)
-	..quadraticBezierTo(215.0, 100.0, 230.0, 100.0)
-	..lineTo(220.0, 100.0);
-
-      expect(
-	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-	coversSameAreaAs(
-	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-	  areaToCompare: host.inflate(10.0)
-	)
-      );
-
-      expect(
-	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-	coversSameAreaAs(
-	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-	  areaToCompare: guest.inflate(10.0),
-	  sampleSize: 50,
-	)
-      );
+      final Path notchedRectangle =
+        createNotchedRectangle(host, start.dx, end.dx, actualNotch);
+      expect(pathDoesNotContainCircle(notchedRectangle, guest.inflate(4.0)), isTrue);
     });
 
     testWidgets('no notch when there is no overlap', (WidgetTester tester) async {
@@ -411,25 +317,9 @@ void main() {
       final Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
-      final Path expectedNotch = new Path()
-	..lineTo(220.0, 100.0);
-
-      expect(
-	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-	coversSameAreaAs(
-	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-	  areaToCompare: host.inflate(10.0)
-	)
-      );
-
-      expect(
-	createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-	coversSameAreaAs(
-	  createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-	  areaToCompare: guest.inflate(10.0),
-	  sampleSize: 50,
-	)
-      );
+      final Path notchedRectangle =
+        createNotchedRectangle(host, start.dx, end.dx, actualNotch);
+      expect(pathDoesNotContainCircle(notchedRectangle, guest.inflate(4.0)), isTrue);
     });
 
   });
@@ -507,4 +397,19 @@ class GeometryCachePainter extends CustomPainter {
   bool shouldRepaint(GeometryCachePainter oldDelegate) {
     return true;
   }
+}
+
+bool pathDoesNotContainCircle(Path path, Rect circleBounds) {
+  assert(circleBounds.width == circleBounds.height);
+  final double radius = circleBounds.width / 2.0;
+
+  for (double theta = 0.0; theta <= 2.0 * math.PI; theta += math.PI / 20.0) {
+    for (double i = 0.0; i < 1; i += 0.01) {
+      final double x = i * radius * math.cos(theta);
+      final double y = i * radius * math.sin(theta);
+      if (path.contains(new Offset(x,y) + circleBounds.center))
+        return false;
+    }
+  }
+  return true;
 }
