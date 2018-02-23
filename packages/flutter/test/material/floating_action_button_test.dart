@@ -312,7 +312,7 @@ void main() {
 	const FloatingActionButton(onPressed: null, notchMargin: 4.0)
       );
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
-      final Rect guest = new Rect.fromLTRB(190.0, 50.0, 210.0, 60.0);
+      final Rect guest = new Rect.fromLTRB(190.0, 40.0, 210.0, 60.0);
       final Offset start = const Offset(180.0, 100.0);
       final Offset end = const Offset(220.0, 100.0);
 
