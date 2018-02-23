@@ -117,10 +117,6 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
     final Rect button = geometry.value.floatingActionButtonArea
       .translate(0.0, geometry.value.bottomNavigationBarTop * -1.0);
 
-    if (!appBar.overlaps(button)) {
-      return new Path()..addRect(appBar);
-    }
-
     final ComputeNotch computeNotch = geometry.value.floatingActionButtonNotch;
     return new Path()
       ..moveTo(appBar.left, appBar.top)
