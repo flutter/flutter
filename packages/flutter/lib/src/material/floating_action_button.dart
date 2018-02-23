@@ -227,65 +227,95 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
   }
 
   Path _computeNotch(Rect host, Rect guest, Offset start, Offset end) {
-    assert(() {
-      if (end.dy != host.top)
-        throw new FlutterError(
-          'The floating action button\'s notch maker must only be used for a notch in the top edge of the host.\n'
-          'The notch\'s path end point: $end is not in the top edge of $host'
-        );
-      if (start.dy != host.top)
-        throw new FlutterError(
-          'The floating action button\'s notch maker must only be used for a notch in the top edge the host.\n'
-          'The notch\'s path start point: $start is not in the top edge of $host'
-        );
-      return true;
-    }());
-
-    assert(() {
-      if (!host.overlaps(guest))
-        throw new FlutterError('Notch host must intersect with its guest');
-      return true;
-    }());
-
     // The FAB's shape is a circle bounded by the guest rectangle.
     // So the FAB's radius is half the guest width.
     final double fabRadius = guest.width / 2.0;
-
     final double notchRadius = fabRadius + widget.notchMargin;
-    assert(() {
-      if (guest.center.dx - notchRadius < start.dx)
-        throw new FlutterError(
-          'The notch\'s path start point must be to the left of the notch.\n'
-          'Start point was $start, guest was $guest, notchMargin was ${widget.notchMargin}.'
-        );
-      if (guest.center.dx + notchRadius > end.dx)
-        throw new FlutterError(
-          'The notch\'s end point must be to the right of the guest.\n'
-          'End point was $start, notch was $guest, notchMargin was ${widget.notchMargin}.'
-        );
-      return true;
-    }());
 
-    // We find the intersection of the notch's circle with the top edge of the host
-    // using the Pythagorean theorem for the right triangle that connects the
-    // center of the notch and the intersection of the notch's circle and the host's
-    // top edge.
+    assert(_notchAssertions(host, guest, start, end, fabRadius, notchRadius));
+
+    // If there's no overlap between the guest's margin boundary and the host,
+    // don't make a notch, just return a straight line from start to end.
+    if (!host.overlaps(guest.inflate(widget.notchMargin)))
+      return new Path()..lineTo(end.dx, end.dy);
+
+    // We build a path for the notch from 3 segments:
+    // Segment A - a Bezier curve from the host's top edge to segment B.
+    // Segment B - an arc with radius notchRadius.
+    // Segment C - a Bezier curver from segment B back to the host's top edge.
     //
-    // The hypotenuse of this triangle equals the notch's radius, and one side
-    // (a) is the distance from the notch's center to the top edge.
-    //
-    // The other side (b) would be the distance on the horizontal axis between the
-    // notch's center and the intersection points with it's top edge.
-    final double a = host.top - guest.center.dy;
-    final double b = math.sqrt(notchRadius * notchRadius - a * a);
+    // A detailed explanation and the derivation of the formulas below is
+    // available at: https://goo.gl/Ufzrqn
+
+    const double s1 = 15.0;
+    const double s2 = 1.0;
+
+    final double r = notchRadius;
+    final double a = -1.0 * r - s2;
+    final double b = host.top - guest.center.dy;
+
+    final double n2 = math.sqrt(b * b * r * r * (a * a + b * b - r * r));
+    final double p2xA = ((a * r * r) - n2) / (a * a + b * b);
+    final double p2xB = ((a * r * r) + n2) / (a * a + b * b);
+    final double p2yA = math.sqrt(r * r - p2xA * p2xA);
+    final double p2yB = math.sqrt(r * r - p2xB * p2xB);
+
+    final List<Offset> p = new List<Offset>(6);
+
+    // p0, p1, and p2 are the control points for segment A.
+    p[0] = new Offset(a - s1, b);
+    p[1] = new Offset(a, b);
+    final double cmp = b < 0 ? -1.0 : 1.0;
+    p[2] = cmp * p2yA > cmp * p2yB ? new Offset(p2xA, p2yA) : new Offset(p2xB, p2yB);
+
+    // p3, p4, and p5 are the control points for segment B, which is a mirror
+    // of segment A around the y axis.
+    p[3] = new Offset(-1.0 * p[2].dx, p[2].dy);
+    p[4] = new Offset(-1.0 * p[1].dx, p[1].dy);
+    p[5] = new Offset(-1.0 * p[0].dx, p[0].dy);
+
+    // translate all points back to the absolute coordinate system.
+    for (int i = 0; i < p.length; i += 1)
+      p[i] += guest.center;
 
     return new Path()
-      ..lineTo(guest.center.dx - b, host.top)
+      ..lineTo(p[0].dx, p[0].dy)
+      ..quadraticBezierTo(p[1].dx, p[1].dy, p[2].dx, p[2].dy)
       ..arcToPoint(
-        new Offset(guest.center.dx + b, host.top),
+        p[3],
         radius: new Radius.circular(notchRadius),
         clockwise: false,
       )
+      ..quadraticBezierTo(p[4].dx, p[4].dy, p[5].dx, p[5].dy)
       ..lineTo(end.dx, end.dy);
+  }
+
+  bool _notchAssertions(Rect host, Rect guest, Offset start, Offset end,
+    double fabRadius, double notchRadius) {
+    if (end.dy != host.top)
+      throw new FlutterError(
+        'The notch of the floating action button must end at the top edge of the host.\n'
+        'The notch\'s path end point: $end is not in the top edge of $host'
+      );
+
+    if (start.dy != host.top)
+      throw new FlutterError(
+        'The notch of the floating action button must start at the top edge of the host.\n'
+        'The notch\'s path start point: $start is not in the top edge of $host'
+      );
+
+    if (guest.center.dx - notchRadius < start.dx)
+      throw new FlutterError(
+        'The notch\'s path start point must be to the left of the floating action button.\n'
+        'Start point was $start, guest was $guest, notchMargin was ${widget.notchMargin}.'
+      );
+
+    if (guest.center.dx + notchRadius > end.dx)
+      throw new FlutterError(
+        'The notch\'s end point must be to the right of the floating action button.\n'
+        'End point was $start, notch was $guest, notchMargin was ${widget.notchMargin}.'
+      );
+
+    return true;
   }
 }
