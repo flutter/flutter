@@ -105,7 +105,8 @@ class _FlutterPlatform extends PlatformPlugin {
       bool isEmpty = compilationQueue.isEmpty;
       compilationQueue.add(request);
       // Only trigger processing if queue was empty - i.e. no other requests
-      // we being processed. This effectively enforces "one compilation request at a time".
+      // are currently being processed. This effectively enforces "one
+      // compilation request at a time".
       if (isEmpty) {
         while (!compilationQueue.isEmpty) {
           CompilationRequest request = compilationQueue.first;
