@@ -124,9 +124,6 @@ class _FlutterPlatform extends PlatformPlugin {
     });
   }
 
-//  void processCompilationQueue() async {
-//  }
-
   final String shellPath;
   final TestWatcher watcher;
   final bool enableObservatory;
