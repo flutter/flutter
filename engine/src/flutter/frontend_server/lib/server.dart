@@ -74,7 +74,7 @@ instructions from stdin.
 
 Instructions:
 - compile <input.dart>
-- recompile <boundary-key>
+- recompile [<input.dart>] <boundary-key>
 <path/to/updated/file1.dart>
 <path/to/updated/file2.dart>
 ...
@@ -107,7 +107,7 @@ abstract class CompilerInterface {
 
   /// Assuming some Dart program was previously compiled, recompile it again
   /// taking into account some changed(invalidated) sources.
-  Future<Null> recompileDelta();
+  Future<Null> recompileDelta({String filename});
 
   /// Accept results of previous compilation so that next recompilation cycle
   /// won't recompile sources that were previously reported as changed.
@@ -144,6 +144,7 @@ class _FrontendCompiler implements CompilerInterface {
 
   CompilerOptions _compilerOptions;
   Uri _entryPoint;
+  ArgResults _options;
 
   IncrementalCompiler _generator;
   String _kernelBinaryFilename;
@@ -152,20 +153,26 @@ class _FrontendCompiler implements CompilerInterface {
   final bool trackWidgetCreation;
   WidgetCreatorTracker widgetCreatorTracker;
 
+  void setEntrypointFilename(String filename) {
+    final Uri filenameUri = Uri.base.resolveUri(new Uri.file(filename));
+    _kernelBinaryFilenameFull = _options['output-dill'] ?? '$filename.dill';
+    _kernelBinaryFilenameIncremental =
+    _options['output-incremental-dill'] ??
+        _options['output-dill'] != null
+        ? '${_options["output-dill"]}.incremental.dill'
+        : '$filename.incremental.dill';
+    _kernelBinaryFilename = _kernelBinaryFilenameFull;
+    _entryPoint = filenameUri;
+  }
+
   @override
   Future<Null> compile(
     String filename,
     ArgResults options, {
     IncrementalCompiler generator,
   }) async {
-    final Uri filenameUri = Uri.base.resolveUri(new Uri.file(filename));
-    _kernelBinaryFilenameFull = options['output-dill'] ?? '$filename.dill';
-    _kernelBinaryFilenameIncremental =
-        options['output-incremental-dill'] ??
-          options['output-dill'] != null
-            ? '${options["output-dill"]}.incremental.dill'
-            : '$filename.incremental.dill';
-    _kernelBinaryFilename = _kernelBinaryFilenameFull;
+    _options = options;
+    setEntrypointFilename(filename);
     final String boundaryKey = new Uuid().generateV4();
     _outputStream.writeln('result $boundaryKey');
     final Uri sdkRoot = _ensureFolderPath(options['sdk-root']);
@@ -178,7 +185,6 @@ class _FrontendCompiler implements CompilerInterface {
 
     Program program;
     if (options['incremental']) {
-      _entryPoint = filenameUri;
       _compilerOptions = compilerOptions;
       _generator = generator ?? _createGenerator(new Uri.file(_kernelBinaryFilenameFull));
       await invalidateIfBootstrapping();
@@ -194,7 +200,7 @@ class _FrontendCompiler implements CompilerInterface {
         ];
       }
       program = await _runWithPrintRedirection(() =>
-          compileToKernel(filenameUri, compilerOptions, aot: options['aot']));
+          compileToKernel(_entryPoint, compilerOptions, aot: options['aot']));
     }
     runFlutterSpecificKernelTransforms(program);
     if (program != null) {
@@ -260,11 +266,14 @@ class _FrontendCompiler implements CompilerInterface {
   }
 
   @override
-  Future<Null> recompileDelta() async {
+  Future<Null> recompileDelta({String filename}) async {
     final String boundaryKey = new Uuid().generateV4();
     _outputStream.writeln('result $boundaryKey');
     await invalidateIfBootstrapping();
-    final Program deltaProgram = await _generator.compile();
+    if (filename != null) {
+      setEntrypointFilename(filename);
+    }
+    final Program deltaProgram = await _generator.compile(entryPoint: _entryPoint);
     runFlutterSpecificKernelTransforms(deltaProgram);
     final IOSink sink = new File(_kernelBinaryFilename).openWrite();
     final BinaryPrinter printer = printerFactory.newBinaryPrinter(sink);
@@ -378,6 +387,7 @@ Future<int> starter(
 
   _State state = _State.READY_FOR_INSTRUCTION;
   String boundaryKey;
+  String recompileFilename;
   input
       .transform(UTF8.decoder)
       .transform(const LineSplitter())
@@ -391,7 +401,16 @@ Future<int> starter(
               string.substring(COMPILE_INSTRUCTION_SPACE.length);
           await compiler.compile(filename, options, generator: generator);
         } else if (string.startsWith(RECOMPILE_INSTRUCTION_SPACE)) {
-          boundaryKey = string.substring(RECOMPILE_INSTRUCTION_SPACE.length);
+          // 'recompile [<filename>] <boundarykey>'
+          //   where <boundarykey> can't have spaces
+          final String remainder = string.substring(RECOMPILE_INSTRUCTION_SPACE.length);
+          final int spaceDelim = remainder.lastIndexOf(' ');
+          if (spaceDelim > -1) {
+            recompileFilename = remainder.substring(0, spaceDelim);
+            boundaryKey = remainder.substring(spaceDelim + 1);
+          } else {
+            boundaryKey = remainder;
+          }
           state = _State.RECOMPILE_LIST;
         } else if (string == 'accept') {
           compiler.acceptLastDelta();
@@ -403,7 +422,7 @@ Future<int> starter(
         break;
       case _State.RECOMPILE_LIST:
         if (string == boundaryKey) {
-          compiler.recompileDelta();
+          compiler.recompileDelta(filename: recompileFilename);
           state = _State.READY_FOR_INSTRUCTION;
         } else
           compiler.invalidate(Uri.base.resolve(string));
