@@ -151,7 +151,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
         opacity: opacity,
         child: new InkWell(
           child: new Container(
-            padding: widget.padding,//_kMenuHorizontalPadding,
+            padding: widget.padding,
             child: route.items[itemIndex],
           ),
           onTap: () => Navigator.pop(
@@ -635,7 +635,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     Widget result = new DefaultTextStyle(
       style: _textStyle,
-      child: new Container(//new SizedBox(
+      child: new Container(
         padding: widget.padding,
         height: widget.isDense ? _denseButtonHeight : null,
         child: new Row(
