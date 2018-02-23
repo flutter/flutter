@@ -33,6 +33,12 @@ void main() {
       )
     );
   });
+
+  // TODO(amirh): test a BottomAppBar with hasNotch=false and an overlapping
+  // FAB.
+  //
+  // Cannot test this before https://github.com/flutter/flutter/pull/14368
+  // as there is no way to make the FAB and BAB overlap.
 }
 
 // The bottom app bar clip path computation is only available at paint time.
