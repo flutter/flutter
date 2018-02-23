@@ -880,7 +880,7 @@ void main() {
             const Text('Label 1'),
             const Text('Label 2'),
             new Row(
-              children: <Widget>[
+              children: const <Widget>[
                 const Text('Label 3'),
                 const Text('Label 4'),
                 const Text('Label 5'),
@@ -943,7 +943,7 @@ void main() {
             new Transform.rotate(
               angle: pi / 2.0,
               child: new Row(
-                children: <Widget>[
+                children: const <Widget>[
                   const Text('Label 3'),
                   const Text('Label 4'),
                   const Text('Label 5'),

@@ -360,7 +360,7 @@ void main() {
         ),
         child: new Scaffold(
           bottomNavigationBar: new BottomNavigationBar(
-            items: <BottomNavigationBarItem>[
+            items: const <BottomNavigationBarItem>[
               const BottomNavigationBarItem(icon: const Icon(Icons.favorite), title: const Text('Animutation')),
               const BottomNavigationBarItem(icon: const Icon(Icons.block), title: const Text('Zombo.com')),
             ],
