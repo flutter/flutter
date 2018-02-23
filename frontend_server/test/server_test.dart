@@ -229,7 +229,7 @@ Future<int> main() async {
         new StreamController<List<int>>();
       final ReceivePort recompileCalled = new ReceivePort();
 
-      when(compiler.recompileDelta()).thenAnswer((Invocation invocation) {
+      when(compiler.recompileDelta(filename: null)).thenAnswer((Invocation invocation) {
         recompileCalled.sendPort.send(true);
       });
       final int exitcode = await starter(args, compiler: compiler,
@@ -243,8 +243,33 @@ Future<int> main() async {
         <void>[
           compiler.invalidate(Uri.base.resolve('file1.dart')),
           compiler.invalidate(Uri.base.resolve('file2.dart')),
-          await compiler.recompileDelta(),
+          await compiler.recompileDelta(filename: null),
         ]
+      );
+      streamController.close();
+    });
+
+    test('recompile few files with new entrypoint', () async {
+      final StreamController<List<int>> streamController =
+      new StreamController<List<int>>();
+      final ReceivePort recompileCalled = new ReceivePort();
+
+      when(compiler.recompileDelta(filename: 'file2.dart')).thenAnswer((Invocation invocation) {
+        recompileCalled.sendPort.send(true);
+      });
+      final int exitcode = await starter(args, compiler: compiler,
+        input: streamController.stream,
+      );
+      expect(exitcode, equals(0));
+      streamController.add('recompile file2.dart abc\nfile1.dart\nfile2.dart\nabc\n'.codeUnits);
+      await recompileCalled.first;
+
+      verifyInOrder(
+          <void>[
+            compiler.invalidate(Uri.base.resolve('file1.dart')),
+            compiler.invalidate(Uri.base.resolve('file2.dart')),
+            await compiler.recompileDelta(filename: 'file2.dart'),
+          ]
       );
       streamController.close();
     });
@@ -286,7 +311,7 @@ Future<int> main() async {
         new StreamController<List<int>>();
       final ReceivePort recompileCalled = new ReceivePort();
 
-      when(compiler.recompileDelta()).thenAnswer((Invocation invocation) {
+      when(compiler.recompileDelta(filename: null)).thenAnswer((Invocation invocation) {
         recompileCalled.sendPort.send(true);
       });
       final int exitcode = await starter(args, compiler: compiler,
@@ -303,7 +328,7 @@ Future<int> main() async {
         compiler.acceptLastDelta(),
         compiler.invalidate(Uri.base.resolve('file2.dart')),
         compiler.invalidate(Uri.base.resolve('file3.dart')),
-        await compiler.recompileDelta(),
+        await compiler.recompileDelta(filename: null),
       ]);
       streamController.close();
     });
