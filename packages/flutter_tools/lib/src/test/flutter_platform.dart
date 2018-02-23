@@ -101,15 +101,31 @@ class _FlutterPlatform extends PlatformPlugin {
     this.host,
     this.previewDart2,
   }) : assert(shellPath != null) {
-    compilerController.stream.listen((CompilationRequest request) {
-        request.result.complete(compile(
-          sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-          incrementalCompilerByteStorePath: '' /* not null is enough */,
-          mainPath: request.path,
-          packagesPath: PackageMap.globalPackagesPath,
-        ));
+    compilerController.stream.listen((CompilationRequest request) async {
+      bool isEmpty = compilationQueue.isEmpty;
+      compilationQueue.add(request);
+      // Only trigger processing if queue was empty - i.e. no other requests
+      // we being processed. This effectively enforces "one compilation request at a time".
+      if (isEmpty) {
+        while (!compilationQueue.isEmpty) {
+          CompilationRequest request = compilationQueue.first;
+          print("Compiling ${request.path}");
+          String outputPath = await compiler.recompile(request.path,
+            <String>[request.path]
+          );
+          print("Finished compilation of ${request.path} into $outputPath");
+          compiler.accept();
+          compiler.reset();
+          request.result.complete(outputPath);
+          // Only remove now when we finished processing the element
+          compilationQueue.removeAt(0);
+        }
+      }
     });
   }
+
+//  void processCompilationQueue() async {
+//  }
 
   final String shellPath;
   final TestWatcher watcher;
@@ -121,6 +137,11 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool previewDart2;
   final StreamController<CompilationRequest> compilerController =
       new StreamController<CompilationRequest>();
+  ResidentCompiler compiler =
+      new ResidentCompiler(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+          packagesPath: PackageMap.globalPackagesPath);
+  final List<CompilationRequest> compilationQueue =
+      new List<CompilationRequest>();
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
