@@ -364,6 +364,7 @@ Future<String> _buildAotSnapshot(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
       outputFilePath: kApplicationKernelPath,
+      depFilePath: dependencies,
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn : true,
       aot : true,

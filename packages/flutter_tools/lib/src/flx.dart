@@ -80,6 +80,7 @@ Future<Null> build({
       incrementalCompilerByteStorePath: fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
       mainPath: fs.file(mainPath).absolute.path,
       outputFilePath: applicationKernelFilePath,
+      depFilePath: depfilePath,
       trackWidgetCreation: trackWidgetCreation,
     );
     if (kernelBinaryFilename == null) {
