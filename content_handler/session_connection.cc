@@ -22,7 +22,7 @@ SessionConnection::SessionConnection(scenic::SceneManagerPtr scene_manager,
 
   root_node_.Bind(std::move(import_token));
   root_node_.SetEventMask(scenic::kMetricsEventMask);
-  session_.Present(0, [](scenic::PresentationInfoPtr info) {});
+  session_.Present(0, [](ui_mozart::PresentationInfoPtr info) {});
 
   present_callback_ =
       std::bind(&SessionConnection::OnPresent, this, std::placeholders::_1);
@@ -80,7 +80,7 @@ void SessionConnection::Present(flow::CompositorContext::ScopedFrame& frame,
   EnqueueClearOps();
 }
 
-void SessionConnection::OnPresent(scenic::PresentationInfoPtr info) {
+void SessionConnection::OnPresent(ui_mozart::PresentationInfoPtr info) {
   ASSERT_IS_GPU_THREAD;
   auto callback = pending_on_present_callback_;
   pending_on_present_callback_ = nullptr;

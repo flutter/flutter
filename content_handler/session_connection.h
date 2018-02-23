@@ -61,7 +61,7 @@ class SessionConnection {
 
   void EnqueueClearOps();
 
-  void OnPresent(scenic::PresentationInfoPtr info);
+  void OnPresent(ui_mozart::PresentationInfoPtr info);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(SessionConnection);
 };
