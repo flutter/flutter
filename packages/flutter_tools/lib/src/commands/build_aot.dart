@@ -337,7 +337,7 @@ Future<String> _buildAotSnapshot(
 
   final String entryPoint = mainPath;
   final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
-  Fingerprint makeFingerprint() async {
+  Future<Fingerprint> makeFingerprint() async {
     final Set<String> snapshotInputPaths = await readDepfile(dependencies)
       ..add(entryPoint)
       ..addAll(outputPaths);
