@@ -34,11 +34,7 @@ class EmbedderState {
   EmbedderState(std::string icu_data_path,
                 std::string application_library_path,
                 std::string bundle_path) {
-#if TARGET_OS_IPHONE
-    // This calls crashes on MacOS because we haven't run Dart_Initialize yet.
-    // See https://github.com/flutter/flutter/issues/4006
     blink::engine_main_enter_ts = Dart_TimelineGetMicros();
-#endif
     FXL_DCHECK([NSThread isMainThread])
         << "Embedder initialization must occur on the main platform thread";
 
