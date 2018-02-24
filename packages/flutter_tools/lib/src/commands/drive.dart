@@ -73,6 +73,9 @@ class DriveCommand extends RunCommandBase {
       valueHelp:
         'path'
     );
+
+    argParser.addFlag('preview-dart-2',
+        help: 'Preview Dart 2.0 functionality.');
   }
 
   @override
