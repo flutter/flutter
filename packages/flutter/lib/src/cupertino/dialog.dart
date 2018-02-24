@@ -48,15 +48,15 @@ const BoxDecoration _kCupertinoDialogBackFill = const BoxDecoration(
   color: const Color(0x77FFFFFFF),
 );
 
-const double _edgePadding = 20.0;
+const double _kEdgePadding = 20.0;
 
-const double _kButtonBarHeight = 45.0;
+const double _kButtonHeight = 45.0;
 
 // This color isn't correct. Instead, we should carve a hole in the dialog and
 // show more of the background.
 const Color _kButtonDividerColor = const Color(0xFFD5D5D5);
 
-bool _shouldLayoutActionsVertical(int count) {
+bool _shouldLayoutActionsVertically(int count) {
   return (count > 2);
 }
 
@@ -130,7 +130,8 @@ class CupertinoAlertDialog extends StatelessWidget {
     this.title,
     this.content,
     this.actions,
-    this.scrollController,
+    this.scrollController, //TODO(ekbiker): Perhaps rename this to "titleScrollController", but will be breaking change.
+    this.actionScrollController,
   }) : super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
@@ -157,30 +158,38 @@ class CupertinoAlertDialog extends StatelessWidget {
   /// Defaults to null, and is typically not needed, since most alert messages are short.
   final ScrollController scrollController;
 
+  /// A scroll controller that can be used to control the scrolling of the actions
+  /// in the dialog.
+  ///
+  /// Defaults to null, and is typically not needed.
+  final ScrollController actionScrollController;
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
 
-    final Widget titleSection = new _CupertinoAlertTitleSection(title: title,
-      content: content,
+    final Widget titleSection = new _CupertinoAlertTitleSection(
+      title: title,
+      message: content,
       scrollController: scrollController,
     );
     if (titleSection != null) {
       children.add(titleSection);
     }
     
-    //add padding between the sections
+    // Add padding between the sections.
     children.add(const Padding(padding: const EdgeInsets.only(top: 8.0)));
     
-    final Widget actionSection = new _CupertinoAlertActionSection(children: actions,
-      scrollController: scrollController,
+    final Widget actionSection = new _CupertinoAlertActionSection(
+      children: actions,
+      scrollController: actionScrollController,
     );
     if (actionSection != null) {
       children.add(actionSection);
     }
 
     return new Padding(
-      padding: const EdgeInsets.symmetric(vertical: _edgePadding),
+      padding: const EdgeInsets.symmetric(vertical: _kEdgePadding),
       child: new CupertinoDialog(
         child: new Column(
           mainAxisSize: MainAxisSize.min,
@@ -253,7 +262,7 @@ class CupertinoDialogAction extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: new Container(
         alignment: Alignment.center,
-        padding: new EdgeInsets.all(10.0 * textScaleFactor),
+        padding: new EdgeInsets.all(8.0 * textScaleFactor),
         child: new DefaultTextStyle(
           style: style,
           child: child,
@@ -266,14 +275,14 @@ class CupertinoDialogAction extends StatelessWidget {
 
 /// Constructs a text content section typically used in a [CupertinoAlertDialog].
 ///
-/// If Title is missing, then only message is added.  If Message is
-/// missing, then only Title is added. If both are missing, then it returns
+/// If [title] is missing, then only [message] is added.  If [message] is
+/// missing, then only [title] is added. If both are missing, then it returns
 /// null.
 class _CupertinoAlertTitleSection extends StatelessWidget {
   const _CupertinoAlertTitleSection({
     Key key,
     this.title,
-    this.content,
+    this.message,
     this.scrollController,
   }) : super(key: key);
 
@@ -287,7 +296,7 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
   /// dialog in a lighter font.
   ///
   /// Typically a [Text] widget.
-  final Widget content;
+  final Widget message;
 
   /// A scroll controller that can be used to control the scrolling of the message
   /// in the dialog.
@@ -301,10 +310,10 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
     if (title != null) {
       titleContentGroup.add(new Padding(
         padding: new EdgeInsets.only(
-          left: _edgePadding,
-          right: _edgePadding,
-          bottom: content == null ? _edgePadding : 1.0,
-          top: _edgePadding,
+          left: _kEdgePadding,
+          right: _kEdgePadding,
+          bottom: message == null ? _kEdgePadding : 1.0,
+          top: _kEdgePadding,
         ),
         child: new DefaultTextStyle(
           style: _kCupertinoDialogTitleStyle,
@@ -314,19 +323,19 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
       ));
     }
 
-    if (content != null) {
+    if (message != null) {
       titleContentGroup.add(
         new Padding(
           padding: new EdgeInsets.only(
-            left: _edgePadding,
-            right: _edgePadding,
-            bottom: _edgePadding,
-            top: title == null ? _edgePadding : 1.0,
+            left: _kEdgePadding,
+            right: _kEdgePadding,
+            bottom: _kEdgePadding,
+            top: title == null ? _kEdgePadding : 1.0,
           ),
           child: new DefaultTextStyle(
             style: _kCupertinoDialogContentStyle,
             textAlign: TextAlign.center,
-            child: content,
+            child: message,
           ),
         ),
       );
@@ -336,7 +345,13 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
       return null;
     }
 
-    return new Flexible(flex: 3,
+    // Add padding between the widgets if necessary.
+    if (titleContentGroup.length > 1) {
+      titleContentGroup.insert(1, const Padding(padding: const EdgeInsets.only(top: 8.0)));
+    }
+
+    return new Flexible(
+      flex: 3,
       child: new CupertinoScrollbar(
         child: new SingleChildScrollView(
           controller: scrollController,
@@ -354,11 +369,10 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
 
 /// A Action Items section typically used in a [CupertinoAlertDialog].
 ///
-/// If only two or less action are present, they are laid out horizontally. If
-/// more than two actions are present, they are laid out vertically in a single
-/// column. If there isn't enough room to show all the buttons, they are
-/// wrapped in a [CupertinoScrollbar] widget. If children is null or empty,
-/// it returns null.
+/// If _shouldLayoutActionsVertically(_) is true, they are laid out vertically
+/// in a column; else they are laid out horizontally in a row. If there isn't
+/// enough room to show all the [children] vertically, they are wrapped in a
+/// [CupertinoScrollbar] widget. If [children] is null or empty, it returns null.
 class _CupertinoAlertActionSection extends StatelessWidget {
   const _CupertinoAlertActionSection({
     Key key,
@@ -387,32 +401,35 @@ class _CupertinoAlertActionSection extends StatelessWidget {
       buttons.add(new Expanded(child: child));
     }
 
-    if (_shouldLayoutActionsVertical(children.length)) {
-      return new Flexible (flex: 1,
-          child: new CupertinoScrollbar(
-            child: new SingleChildScrollView(
-              controller: scrollController,
-              child: new CustomPaint(
-                painter: new _CupertinoVerticalActionPainter(buttons.length),
-                child: new ConstrainedBox(
-                  constraints: new BoxConstraints(maxHeight: _kButtonBarHeight * buttons.length),
-                  child: new Column(
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: buttons
-                  ),
+    if (_shouldLayoutActionsVertically(children.length)) {
+      final double textScaleFactor = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
+      final double maxHeight = _kButtonHeight * buttons.length * textScaleFactor;
+      return new Flexible (
+        flex: 1,
+        child: new CupertinoScrollbar(
+          child: new SingleChildScrollView(
+            controller: scrollController,
+            child: new CustomPaint(
+              painter: new _CupertinoVerticalDividerPainter(buttons.length),
+              child: new ConstrainedBox(
+                constraints: new BoxConstraints(maxHeight: maxHeight),
+                child: new Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: buttons
                 ),
               ),
             ),
           ),
-        );
+        ),
+      );
     } else {
       return new CustomPaint(
-        painter: new _CupertinoHorizontalActionPainter(children.length),
+        painter: new _CupertinoHorizontalDividerPainter(children.length),
         child: new UnconstrainedBox(
           constrainedAxis: Axis.horizontal,
           child: new ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: _kButtonBarHeight),
+            constraints: const BoxConstraints(minHeight: _kButtonHeight),
             child: new Row(children: buttons),
           ),
         ),
@@ -423,9 +440,9 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
 /// A CustomPainter to draw the divider lines.
 ///
-/// Draws the divider lines, used when the layout is horizontal.
-class _CupertinoHorizontalActionPainter extends CustomPainter {
-  _CupertinoHorizontalActionPainter(this.count);
+/// Draws the cross-axis divider lines, used when the layout is horizontal.
+class _CupertinoHorizontalDividerPainter extends CustomPainter {
+  _CupertinoHorizontalDividerPainter(this.count);
 
   final int count;
 
@@ -444,14 +461,14 @@ class _CupertinoHorizontalActionPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_CupertinoHorizontalActionPainter other) => count != other.count;
+  bool shouldRepaint(_CupertinoHorizontalDividerPainter other) => count != other.count;
 }
 
 /// A CustomPainter to draw the divider lines.
 ///
-/// Draws the divider lines, used when the layout is vertical.
-class _CupertinoVerticalActionPainter extends CustomPainter {
-  _CupertinoVerticalActionPainter(this.count);
+/// Draws the cross-axis divider lines, used when the layout is vertical.
+class _CupertinoVerticalDividerPainter extends CustomPainter {
+  _CupertinoVerticalDividerPainter(this.count);
 
   final int count;
 
@@ -460,7 +477,7 @@ class _CupertinoVerticalActionPainter extends CustomPainter {
     final Paint paint = new Paint()
       ..color = _kButtonDividerColor;
 
-    //skip the last one so there's no divider at the very top of the list
+    // Skip the last divider so there's no divider at the very top of the list.
     for (int i = 1; i < count; ++i) {
       final double y = size.height * i / count;
       canvas.drawLine(new Offset(0.0, y), new Offset(size.width, y), paint);
@@ -468,5 +485,5 @@ class _CupertinoVerticalActionPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_CupertinoVerticalActionPainter other) => count != other.count;
+  bool shouldRepaint(_CupertinoVerticalDividerPainter other) => count != other.count;
 }

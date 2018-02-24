@@ -146,6 +146,8 @@ void main() {
     expect(scrollController.offset, 0.0);
     scrollController.jumpTo(100.0);
     expect(scrollController.offset, 100.0);
+    // Set the scroll position back to zero.
+    scrollController.jumpTo(0.0);
 
     // Find the actual dialog box. The first decorated box is the popup barrier.
     expect(tester.getSize(find.byType(DecoratedBox).at(1)), equals(const Size(270.0, 560.0)));
@@ -160,6 +162,77 @@ void main() {
     // wrapping (as it should with large text sizes like this).
     expect(tester.getTopLeft(find.text('Cancel')), equals(const Offset(295.0, 250.0)));
     expect(tester.getTopLeft(find.text('OK')), equals(const Offset(430.0, 350.0)));
+  });
+
+  testWidgets('Button list is scrollable, has correct position with large text sizes.',
+      (WidgetTester tester) async {
+    const double textScaleFactor = 3.0;
+    final ScrollController scrollController = new ScrollController(keepScrollOffset: true);
+    await tester.pumpWidget(
+      new MaterialApp(home: new Material(
+        child: new Center(
+          child: new Builder(builder: (BuildContext context) {
+            return new RaisedButton(
+              onPressed: () {
+                showDialog<Null>(
+                  context: context,
+                  child: new Builder(builder: (BuildContext context) {
+                    return new MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                      child: new CupertinoAlertDialog(
+                        title: const Text('The title'),
+                        content: const Text('The content.'),
+                        actions: <Widget>[
+                          const CupertinoDialogAction(
+                            child: const Text('One'),
+                          ),
+                          const CupertinoDialogAction(
+                            child: const Text('Two'),
+                          ),
+                          const CupertinoDialogAction(
+                            child: const Text('Three'),
+                          ),
+                          const CupertinoDialogAction(
+                            child: const Text('Four'),
+                          ),
+                          const CupertinoDialogAction(
+                            isDestructiveAction: true,
+                            child: const Text('Cancel'),
+                          ),
+                        ],
+                        actionScrollController: scrollController,
+                      ),
+                    );
+                  }),
+                );
+              },
+              child: const Text('Go'),
+            );
+          }),
+        ),
+      )),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Check the action buttons list is scrollable.
+    expect(scrollController.offset, 0.0);
+    scrollController.jumpTo(100.0);
+    expect(scrollController.offset, 100.0);
+    scrollController.jumpTo(0.0);
+
+    // Check that the action buttons are aligned vertically and their heights
+    // are proportional with the text scale factor.
+    const double buttonHeight = 45.0 * textScaleFactor;
+    const double initialPos = 500.0;
+    expect(tester.getCenter(find.text('One')), equals(const Offset(400.0, initialPos)));
+    expect(tester.getCenter(find.text('Two')), equals(const Offset(400.0, initialPos + buttonHeight)));
+    expect(tester.getCenter(find.text('Three')), equals(const Offset(400.0, initialPos + (2 * buttonHeight))));
+    expect(tester.getCenter(find.text('Four')), equals(const Offset(400.0, initialPos + (3 * buttonHeight))));
+    expect(tester.getCenter(find.text('Cancel')), equals(const Offset(400.0, initialPos + (4 * buttonHeight))));
   });
 }
 
