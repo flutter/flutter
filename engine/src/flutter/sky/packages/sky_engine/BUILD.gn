@@ -158,7 +158,7 @@ if (is_fuchsia) {
   dart_library("sky_engine_dart") {
     package_name = "sky_engine"
 
-    source_dir = rebase_path("$root_gen_dir/dart-pkg/sky_engine/lib")
+    package_root = "$root_gen_dir/dart-pkg/sky_engine"
 
     disable_analysis = true
 
