@@ -153,9 +153,9 @@ dart_pkg("sky_engine") {
 }
 
 if (is_fuchsia) {
-  import("//build/dart/dart_package.gni")
+  import("//build/dart/dart_library.gni")
 
-  dart_package("sky_engine_dart") {
+  dart_library("sky_engine_dart") {
     package_name = "sky_engine"
 
     source_dir = rebase_path("$root_gen_dir/dart-pkg/sky_engine/lib")
