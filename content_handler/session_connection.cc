@@ -7,9 +7,9 @@
 
 namespace flutter_runner {
 
-SessionConnection::SessionConnection(scenic::SceneManagerPtr scene_manager,
+SessionConnection::SessionConnection(ui_mozart::MozartPtr mozart,
                                      zx::eventpair import_token)
-    : session_(scene_manager.get()),
+    : session_(mozart.get()),
       root_node_(&session_),
       surface_producer_(std::make_unique<VulkanSurfaceProducer>(&session_)),
       scene_update_context_(&session_, surface_producer_.get()) {
@@ -38,12 +38,13 @@ void SessionConnection::OnSessionError() {
   FXL_CHECK(false) << "Session connection was terminated.";
 }
 
-void SessionConnection::OnSessionEvents(f1dl::Array<scenic::EventPtr> events) {
+void SessionConnection::OnSessionEvents(
+    f1dl::Array<ui_mozart::EventPtr> events) {
   scenic::MetricsPtr new_metrics;
   for (const auto& event : events) {
-    if (event->is_metrics() &&
-        event->get_metrics()->node_id == root_node_.id()) {
-      new_metrics = std::move(event->get_metrics()->metrics);
+    if (event->is_scenic() && event->get_scenic()->is_metrics() &&
+        event->get_scenic()->get_metrics()->node_id == root_node_.id()) {
+      new_metrics = std::move(event->get_scenic()->get_metrics()->metrics);
     }
   }
   if (!new_metrics)

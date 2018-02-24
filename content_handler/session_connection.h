@@ -20,8 +20,7 @@ namespace flutter_runner {
 
 class SessionConnection {
  public:
-  SessionConnection(scenic::SceneManagerPtr scene_manager,
-                    zx::eventpair import_token);
+  SessionConnection(ui_mozart::MozartPtr mozart, zx::eventpair import_token);
 
   ~SessionConnection();
 
@@ -57,7 +56,7 @@ class SessionConnection {
   fxl::Closure metrics_changed_callback_;
 
   void OnSessionError();
-  void OnSessionEvents(f1dl::Array<scenic::EventPtr> events);
+  void OnSessionEvents(f1dl::Array<ui_mozart::EventPtr> events);
 
   void EnqueueClearOps();
 

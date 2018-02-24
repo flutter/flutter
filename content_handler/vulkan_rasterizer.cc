@@ -53,15 +53,13 @@ bool VulkanRasterizer::IsValid() const {
   return valid_;
 }
 
-void VulkanRasterizer::SetScene(
-    f1dl::InterfaceHandle<scenic::SceneManager> scene_manager,
-    zx::eventpair import_token,
-    fxl::Closure metrics_changed_callback) {
+void VulkanRasterizer::SetScene(f1dl::InterfaceHandle<ui_mozart::Mozart> mozart,
+                                zx::eventpair import_token,
+                                fxl::Closure metrics_changed_callback) {
   ASSERT_IS_GPU_THREAD;
   FXL_DCHECK(valid_ && !session_connection_);
   session_connection_ = std::make_unique<SessionConnection>(
-      scene_manager.Bind(),
-      std::move(import_token));
+      mozart.Bind(), std::move(import_token));
   session_connection_->set_metrics_changed_callback(
       std::move(metrics_changed_callback));
 }

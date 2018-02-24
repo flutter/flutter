@@ -238,18 +238,18 @@ void RuntimeHolder::CreateView(
   input_connection_->SetEventListener(std::move(input_listener));
 
   // Setup the session.
-  f1dl::InterfaceHandle<scenic::SceneManager> scene_manager;
-  view_manager_->GetSceneManager(scene_manager.NewRequest());
+  f1dl::InterfaceHandle<ui_mozart::Mozart> mozart;
+  view_manager_->GetMozart(mozart.NewRequest());
 
   blink::Threads::Gpu()->PostTask(fxl::MakeCopyable([
     rasterizer = rasterizer_.get(),            //
-    scene_manager = std::move(scene_manager),  //
+    mozart = std::move(mozart),  //
     import_token = std::move(import_token),    //
     weak_runtime_holder = GetWeakPtr()
   ]() mutable {
     ASSERT_IS_GPU_THREAD;
     rasterizer->SetScene(
-        std::move(scene_manager), std::move(import_token),
+        std::move(mozart), std::move(import_token),
         // TODO(MZ-222): Ideally we would immediately redraw the previous layer
         // tree when the metrics change since there's no need to rerecord it.
         // However, we want to make sure there's only one outstanding frame.
