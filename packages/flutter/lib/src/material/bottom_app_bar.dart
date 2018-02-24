@@ -46,6 +46,7 @@ class BottomAppBar extends StatefulWidget {
     Key key,
     this.color,
     this.elevation: 8.0,
+    this.hasNotch: true,
     this.child,
   }) : assert(elevation != null),
        assert(elevation >= 0.0),
@@ -68,6 +69,17 @@ class BottomAppBar extends StatefulWidget {
   /// Defaults to 8, the appropriate elevation for bottom app bars.
   final double elevation;
 
+  /// Whether to make a notch in the bottom app bar's shape for the floating
+  /// action button.
+  ///
+  /// When true, the bottom app bar uses
+  /// [ScaffoldGeometry.floatingActionButtonNotch] to make a notch along its
+  /// top edge, where it is overlapped by the
+  /// [ScaffoldGeometry.floatingActionButtonArea].
+  ///
+  /// When false, the shape of the bottom app bar is a rectangle.
+  final bool hasNotch;
+
   @override
   State createState() => new _BottomAppBarState();
 }
@@ -83,8 +95,11 @@ class _BottomAppBarState extends State<BottomAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    final CustomClipper<Path> clipper = widget.hasNotch
+      ? new _BottomAppBarClipper(geometry: geometryListenable)
+      : const ShapeBorderClipper(shape: const RoundedRectangleBorder());
     return new PhysicalShape(
-      clipper: new _BottomAppBarClipper(geometry: geometryListenable),
+      clipper: clipper,
       elevation: widget.elevation,
       // TODO(amirh): use a default color from the theme.
       color: widget.color ?? Colors.white,
