@@ -73,8 +73,9 @@ class BottomAppBar extends StatefulWidget {
   /// action button.
   ///
   /// When true, the bottom app bar uses
-  /// [ScaffoldGeometry.floatingActionButtonNotch] to make a notch in its
-  /// outline. This is typically done to accomodate a [FloatingActionButton].
+  /// [ScaffoldGeometry.floatingActionButtonNotch] to make a notch along its
+  /// top edge, where it is overlapped by the
+  /// [ScaffoldGeometry.floatingActionButtonArea].
   ///
   /// When false, the shape of the bottom app bar is a rectangle.
   final bool hasNotch;
