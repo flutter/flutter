@@ -154,14 +154,14 @@ void main() {
 
     // Check sizes/locations of the text.
     expect(tester.getSize(find.text('The Title')), equals(const Size(230.0, 198.0)));
-    expect(tester.getSize(find.text('Cancel')), equals(const Size(75.0, 300.0)));
-    expect(tester.getSize(find.text('OK')), equals(const Size(75.0, 100.0)));
+    expect(tester.getSize(find.text('Cancel')), equals(const Size(87.0, 300.0)));
+    expect(tester.getSize(find.text('OK')), equals(const Size(87.0, 100.0)));
     expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(285.0, 40.0)));
 
     // The Cancel and OK buttons have different Y values because "Cancel" is
     // wrapping (as it should with large text sizes like this).
-    expect(tester.getTopLeft(find.text('Cancel')), equals(const Offset(295.0, 250.0)));
-    expect(tester.getTopLeft(find.text('OK')), equals(const Offset(430.0, 350.0)));
+    expect(tester.getTopLeft(find.text('Cancel')), equals(const Offset(289.0, 256.0)));
+    expect(tester.getTopLeft(find.text('OK')), equals(const Offset(424.0, 356.0)));
   });
 
   testWidgets('Button list is scrollable, has correct position with large text sizes.',
@@ -193,7 +193,7 @@ void main() {
                             child: const Text('Three'),
                           ),
                           const CupertinoDialogAction(
-                            child: const Text('Four'),
+                            child: const Text('Chocolate Brownies'),
                           ),
                           const CupertinoDialogAction(
                             isDestructiveAction: true,
@@ -218,21 +218,18 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // Check the action buttons list is scrollable.
+    // Check that the action buttons list is scrollable.
     expect(scrollController.offset, 0.0);
     scrollController.jumpTo(100.0);
     expect(scrollController.offset, 100.0);
     scrollController.jumpTo(0.0);
 
-    // Check that the action buttons are aligned vertically and their heights
-    // are proportional with the text scale factor.
-    const double buttonHeight = 45.0 * textScaleFactor;
-    const double initialPos = 500.0;
-    expect(tester.getCenter(find.text('One')), equals(const Offset(400.0, initialPos)));
-    expect(tester.getCenter(find.text('Two')), equals(const Offset(400.0, initialPos + buttonHeight)));
-    expect(tester.getCenter(find.text('Three')), equals(const Offset(400.0, initialPos + (2 * buttonHeight))));
-    expect(tester.getCenter(find.text('Four')), equals(const Offset(400.0, initialPos + (3 * buttonHeight))));
-    expect(tester.getCenter(find.text('Cancel')), equals(const Offset(400.0, initialPos + (4 * buttonHeight))));
+    // Check that the action buttons are aligned vertically.
+    expect(tester.getCenter(find.widgetWithText(CupertinoDialogAction, 'One')).dx, equals(400.0));
+    expect(tester.getCenter(find.widgetWithText(CupertinoDialogAction, 'Two')).dx, equals(400.0));
+    expect(tester.getCenter(find.widgetWithText(CupertinoDialogAction, 'Three')).dx, equals(400.0));
+    expect(tester.getCenter(find.widgetWithText(CupertinoDialogAction, 'Chocolate Brownies')).dx, equals(400.0));
+    expect(tester.getCenter(find.widgetWithText(CupertinoDialogAction, 'Cancel')).dx, equals(400.0));
   });
 }
 

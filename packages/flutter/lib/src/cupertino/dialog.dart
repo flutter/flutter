@@ -130,7 +130,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     this.title,
     this.content,
     this.actions,
-    this.scrollController, //TODO(ekbiker): Perhaps rename this to "titleScrollController", but will be breaking change.
+    this.scrollController, //TODO(ekbiker): Perhaps rename this to "titleScrollController".
     this.actionScrollController,
   }) : super(key: key);
 
@@ -396,30 +396,33 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
     final List<Widget> buttons = <Widget>[];
 
-    for (Widget child in children) {
-      // TODO(abarth): Listen for the buttons being highlighted.
-      buttons.add(new Expanded(child: child));
+    Widget getActionWidgetForIndex(int index) {
+      if (_shouldLayoutActionsVertically(children.length)) {
+        // Skip the first divider for vertical layout.
+        if (index==0) {
+          return children[index];
+        }
+        return new CustomPaint(
+          painter: new _CupertinoVerticalDividerPainter(),
+          child: children[index],
+        );
+      }
+      return new Expanded(child: children[index]);
+    }
+
+    for (int i = 0; i < children.length; ++i) {
+      buttons.add(getActionWidgetForIndex(i));
     }
 
     if (_shouldLayoutActionsVertically(children.length)) {
-      final double textScaleFactor = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
-      final double maxHeight = _kButtonHeight * buttons.length * textScaleFactor;
       return new Flexible (
         flex: 1,
-        child: new CupertinoScrollbar(
-          child: new SingleChildScrollView(
-            controller: scrollController,
-            child: new CustomPaint(
-              painter: new _CupertinoVerticalDividerPainter(buttons.length),
-              child: new ConstrainedBox(
-                constraints: new BoxConstraints(maxHeight: maxHeight),
-                child: new Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: buttons
-                ),
-              ),
-            ),
+        child: new SingleChildScrollView(
+          controller: scrollController,
+          child: new Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: buttons
           ),
         ),
       );
@@ -468,22 +471,15 @@ class _CupertinoHorizontalDividerPainter extends CustomPainter {
 ///
 /// Draws the cross-axis divider lines, used when the layout is vertical.
 class _CupertinoVerticalDividerPainter extends CustomPainter {
-  _CupertinoVerticalDividerPainter(this.count);
-
-  final int count;
+  _CupertinoVerticalDividerPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = new Paint()
       ..color = _kButtonDividerColor;
-
-    // Skip the last divider so there's no divider at the very top of the list.
-    for (int i = 1; i < count; ++i) {
-      final double y = size.height * i / count;
-      canvas.drawLine(new Offset(0.0, y), new Offset(size.width, y), paint);
-    }
+    canvas.drawLine(const Offset(0.0, 0.0), new Offset(size.width, 0.0), paint);
   }
 
   @override
-  bool shouldRepaint(_CupertinoVerticalDividerPainter other) => count != other.count;
+  bool shouldRepaint(_CupertinoVerticalDividerPainter other) => true;
 }
