@@ -242,7 +242,7 @@ void main() {
       expectExists(intelliJSdkMetadataPath);
       final String sdkMetaContents = fs.file(fs.path.join(projectDir.path, intelliJSdkMetadataPath)).readAsStringSync();
       expect(sdkMetaContents, contains('<root url="file:/'));
-      expect(sdkMetaContents, contains('/flutter/bin/cache/dart-sdk/lib/core"'));
+      expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
     }, overrides: <Type, Generator>{
       FlutterVersion: () => mockFlutterVersion,
     }, timeout: allowForCreateFlutterProject);
