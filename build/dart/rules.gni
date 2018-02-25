@@ -77,6 +77,7 @@ template("dart_pkg_helper") {
     # $root_gen_dir somewhere.
     outputs = [
       "$root_gen_dir/dart-pkg/${package_name}",
+      "$root_gen_dir/dart-pkg/${package_name}/pubspec.yaml",
       "$root_gen_dir/dart-pkg/packages/${package_name}",
       stamp_file,
     ]
@@ -177,7 +178,7 @@ template("dart_pkg") {
   }
 
   group(target_name) {
-    deps = [
+    public_deps = [
       ":$dart_pkg_target_name",
     ]
     if (defined(invoker.apps)) {
