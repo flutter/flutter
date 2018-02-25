@@ -239,10 +239,10 @@ void main() {
 ''';
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
           'gsutil rm $gsArchivePath': null,
-          'gsutil cp -h Content-Type:$archiveMime $archivePath $gsArchivePath': null,
+          'gsutil -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
           'gsutil cat $gsJsonPath': <ProcessResult>[new ProcessResult(0, 0, releasesJson, '')],
           'gsutil rm $gsJsonPath': null,
-          'gsutil cp -h Content-Type:application/json $jsonPath $gsJsonPath': null,
+          'gsutil -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
         };
         processManager.fakeResults = calls;
         final File outputFile = new File(path.join(tempDir.absolute.path, archiveName));
