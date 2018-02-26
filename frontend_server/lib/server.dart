@@ -57,6 +57,8 @@ ArgParser _argParser = new ArgParser(allowTrailingOptions: true)
   ..addOption('output-incremental-dill',
       help: 'Output path for the generated incremental dill',
       defaultsTo: null)
+  ..addOption('depfile',
+      help: 'Path to output Ninja depfile. Only used in batch mode.')
   ..addOption('packages',
       help: '.packages file to use for compilation',
       defaultsTo: null)
@@ -209,6 +211,12 @@ class _FrontendCompiler implements CompilerInterface {
       printer.writeProgramFile(program);
       await sink.close();
       _outputStream.writeln('$boundaryKey $_kernelBinaryFilename');
+
+      final String depfile = options['depfile'];
+      if (depfile != null) {
+        await _writeDepfile(program, _kernelBinaryFilename, depfile);
+      }
+
       _kernelBinaryFilename = _kernelBinaryFilenameIncremental;
     } else
       _outputStream.writeln(boundaryKey);
@@ -322,6 +330,23 @@ class _FrontendCompiler implements CompilerInterface {
             print: (Zone self, ZoneDelegate parent, Zone zone, String line) =>
                 _outputStream.writeln(line)));
   }
+}
+
+String _escapePath(String path) {
+  return path.replaceAll(r'\', r'\\').replaceAll(r' ', r'\ ');
+}
+
+// https://ninja-build.org/manual.html#_depfile
+Future<void> _writeDepfile(Program program, String output, String depfile) async {
+  final IOSink file = new File(depfile).openWrite();
+  file.write(_escapePath(output));
+  file.write(':');
+  for (Uri dep in program.uriToSource.keys) {
+    file.write(' ');
+    file.write(_escapePath(dep.toFilePath()));
+  }
+  file.write('\n');
+  await file.close();
 }
 
 /// Entry point for this module, that creates `_FrontendCompiler` instance and
