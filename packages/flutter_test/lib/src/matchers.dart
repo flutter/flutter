@@ -622,6 +622,7 @@ const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = const <Type, 
   int: _intDistance,
   double: _doubleDistance,
   Rect: _rectDistance,
+  Size: _sizeDistance,
 };
 
 int _intDistance(int a, int b) => (b - a).abs();
@@ -640,6 +641,11 @@ double _rectDistance(Rect a, Rect b) {
   delta = math.max<double>(delta, (a.right - b.right).abs());
   delta = math.max<double>(delta, (a.bottom - b.bottom).abs());
   return delta;
+}
+
+double _sizeDistance(Size a, Size b) {
+  final Offset delta = b - a;
+  return math.sqrt(delta.dx * delta.dx + delta.dy * delta.dy);
 }
 
 /// Asserts that two values are within a certain distance from each other.
