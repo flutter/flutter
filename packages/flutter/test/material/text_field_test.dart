@@ -737,8 +737,8 @@ void main() {
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
   },
-  // This test does not run as expected in the MacOS environment on Travis
-  skip: runningOnTravis && Platform.isMacOS);
+  // This test fails on some Mac environments when libtxt is enabled.
+  skip: Platform.isMacOS);
 
   testWidgets('TextField smoke test', (WidgetTester tester) async {
     String textFieldValue;

@@ -320,8 +320,8 @@ void main() {
       ],
     );
   },
-  // Ahem-based tests don't yet quite work on Windows or the MacOS environment in Travis
-  skip: Platform.isWindows || (runningOnTravis && Platform.isMacOS));
+  // Ahem-based tests don't yet quite work on Windows or some MacOS environments
+  skip: Platform.isWindows || Platform.isMacOS);
 
   test('TextPainter - line wrap mid-word', () {
     final TextPainter painter = new TextPainter()
