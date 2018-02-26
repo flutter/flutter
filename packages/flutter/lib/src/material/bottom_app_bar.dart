@@ -6,9 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'material.dart';
 import 'scaffold.dart';
+import 'theme.dart';
 
 // Examples can assume:
 // Widget bottomAppBarContents;
@@ -61,6 +61,8 @@ class BottomAppBar extends StatefulWidget {
   final Widget child;
 
   /// The bottom app bar's background color.
+  ///
+  /// When null defaults to [ThemeData.bottomAppBarColor].
   final Color color;
 
   /// The z-coordinate at which to place this bottom app bar. This controls the
@@ -101,8 +103,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
     return new PhysicalShape(
       clipper: clipper,
       elevation: widget.elevation,
-      // TODO(amirh): use a default color from the theme.
-      color: widget.color ?? Colors.white,
+      color: widget.color ?? Theme.of(context).bottomAppBarColor,
       child: new Material(
         type: MaterialType.transparency,
         child: widget.child,
