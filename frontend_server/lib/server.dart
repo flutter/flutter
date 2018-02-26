@@ -337,7 +337,8 @@ String _escapePath(String path) {
 }
 
 // https://ninja-build.org/manual.html#_depfile
-Future<void> _writeDepfile(Program program, String output, String depfile) async {
+// TODO(dartbug.com/32320) Clean up analyzer directive below once that is fixed.
+Future<void> _writeDepfile(Program program, String output, String depfile) async { // ignore: missing_return
   final IOSink file = new File(depfile).openWrite();
   file.write(_escapePath(output));
   file.write(':');
