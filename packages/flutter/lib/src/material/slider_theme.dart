@@ -36,16 +36,15 @@ class SliderTheme extends InheritedWidget {
     Key key,
     @required this.data,
     @required Widget child,
-  })
-      : assert(child != null),
-        assert(data != null),
-        super(key: key, child: child);
+  }) : assert(child != null),
+       assert(data != null),
+       super(key: key, child: child);
 
   /// Specifies the color and shape values for descendant slider widgets.
   final SliderThemeData data;
 
-  /// The data from the closest [SliderTheme] instance that encloses the given
-  /// context.
+  /// Returns the data from the closest [SliderTheme] instance that encloses
+  /// the given context.
   ///
   /// Defaults to the ambient [ThemeData.sliderTheme] if there is no
   /// [SliderTheme] in the given build context.
@@ -105,11 +104,13 @@ enum ShowValueIndicator {
   never,
 }
 
-/// Holds the color and typography values for a material design slider theme.
+/// Holds the color, shape, and typography values for a material design slider
+/// theme.
 ///
-/// Use this class to configure a [SliderTheme] widget.
+/// Use this class to configure a [SliderTheme] widget, or to set the
+/// [ThemeData.sliderTheme] for a [Theme] widget.
 ///
-/// To obtain the current slider theme, use [SliderTheme.of].
+/// To obtain the current ambient slider theme, use [SliderTheme.of].
 ///
 /// The parts of a slider are:
 ///
@@ -127,7 +128,8 @@ enum ShowValueIndicator {
 ///
 /// The thumb and the value indicator may have their shapes and behavior
 /// customized by creating your own [SliderComponentShape] that does what
-/// you want.
+/// you want. See [DefaultSliderThumbShape] and
+/// [DefaultSliderValueIndicatorShape] for examples.
 ///
 /// See also:
 ///
@@ -159,26 +161,25 @@ class SliderThemeData {
     @required this.thumbShape,
     @required this.valueIndicatorShape,
     @required this.showValueIndicator,
-  })
-      : assert(activeRailColor != null),
-        assert(inactiveRailColor != null),
-        assert(disabledActiveRailColor != null),
-        assert(disabledInactiveRailColor != null),
-        assert(activeTickMarkColor != null),
-        assert(inactiveTickMarkColor != null),
-        assert(disabledActiveTickMarkColor != null),
-        assert(disabledInactiveTickMarkColor != null),
-        assert(thumbColor != null),
-        assert(disabledThumbColor != null),
-        assert(overlayColor != null),
-        assert(valueIndicatorColor != null),
-        assert(thumbShape != null),
-        assert(valueIndicatorShape != null),
-        assert(showValueIndicator != null);
+  }) : assert(activeRailColor != null),
+       assert(inactiveRailColor != null),
+       assert(disabledActiveRailColor != null),
+       assert(disabledInactiveRailColor != null),
+       assert(activeTickMarkColor != null),
+       assert(inactiveTickMarkColor != null),
+       assert(disabledActiveTickMarkColor != null),
+       assert(disabledInactiveTickMarkColor != null),
+       assert(thumbColor != null),
+       assert(disabledThumbColor != null),
+       assert(overlayColor != null),
+       assert(valueIndicatorColor != null),
+       assert(thumbShape != null),
+       assert(valueIndicatorShape != null),
+       assert(showValueIndicator != null);
 
   /// Generates a SliderThemeData from three main colors.
   ///
-  /// Generally, these are the primary, dark and light colors from
+  /// Usually these are the primary, dark and light colors from
   /// a [ThemeData].
   ///
   /// The opacities of these colors will be ignored when assigning
@@ -466,7 +467,7 @@ class DefaultSliderValueIndicatorShape extends SliderComponentShape {
       const Size.fromHeight(_distanceBetweenTopBottomCenters + _topLobeRadius + _bottomLobeRadius);
 
   static final Tween<double> _slideUpTween = new Tween<double>(begin: 0.0, end: 1.0);
-  static final Path _bottomLobePath = _generateBottomLobe();
+  static Path _bottomLobePath; // Initialized by _generateBottomLobe
   static Offset _bottomLobeEnd; // Initialized by _generateBottomLobe
 
   @override
@@ -481,7 +482,7 @@ class DefaultSliderValueIndicatorShape extends SliderComponentShape {
 
   // Generates the bottom lobe path, which is the same for all instances of
   // the value indicator, so we reuse it for each one.
-  static Path _generateBottomLobe() {
+  static void _generateBottomLobe() {
     const double bottomNeckRadius = 4.5;
     const double bottomNeckStartAngle = _bottomLobeEndAngle - pi;
     const double bottomNeckEndAngle = 0.0;
@@ -504,11 +505,6 @@ class DefaultSliderValueIndicatorShape extends SliderComponentShape {
       bottomNeckRightCenter.dx - bottomNeckRadius,
       bottomNeckRightCenter.dy,
     );
-    _bottomLobeEnd = new Offset(
-      -bottomNeckStartRight.dx,
-      bottomNeckStartRight.dy,
-    );
-
     path.moveTo(bottomNeckStartRight.dx, bottomNeckStartRight.dy);
     _addArc(
       path,
@@ -531,7 +527,21 @@ class DefaultSliderValueIndicatorShape extends SliderComponentShape {
       bottomNeckStartAngle,
       bottomNeckEndAngle,
     );
-    return path;
+
+    _bottomLobeEnd = new Offset(
+      -bottomNeckStartRight.dx,
+      bottomNeckStartRight.dy,
+    );
+    _bottomLobePath = path;
+  }
+
+  Offset _addBottomLobe(Path path) {
+    if (_bottomLobePath == null || _bottomLobeEnd == null) {
+      // Generate this lazily so as to not slow down app startup.
+      _generateBottomLobe();
+    }
+    path.extendWithPath(_bottomLobePath, Offset.zero);
+    return _bottomLobeEnd;
   }
 
   void _drawValueIndicator(Canvas canvas, Offset center, Paint paint, double scale,
@@ -550,14 +560,15 @@ class DefaultSliderValueIndicatorShape extends SliderComponentShape {
         max(0.0, inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding));
 
     final Path path = new Path();
-    path.extendWithPath(_bottomLobePath, Offset.zero);
+    final Offset bottomLobeEnd = _addBottomLobe(path);
     // The base of the triangle between the top lobe center and the centers of
     // the two top neck arcs.
-    final double neckTriangleBase = _topNeckRadius - _bottomLobeEnd.dx;
+    final double neckTriangleBase = _topNeckRadius - bottomLobeEnd.dx;
     // The parameter that describes how far along the transition from round to
     // stretched we are.
     final double t = max(0.0, min(1.0, halfWidthNeeded / neckTriangleBase));
-    // The angle between the top neck arc's center and the top lobe's center and vertical.
+    // The angle between the top neck arc's center and the top lobe's center
+    // and vertical.
     final double theta = (1.0 - t) * _thirtyDegrees;
     // The center of the top left neck arc.
     final Offset neckLeftCenter =

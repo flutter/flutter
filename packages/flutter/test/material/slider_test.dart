@@ -199,12 +199,17 @@ void main() {
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
     double value = 0.45;
-    Widget buildApp({Color activeColor, Color inactiveColor, int divisions, bool enabled: true}) {
-      final ValueChanged<double> onChanged = enabled
-          ? (double d) {
+    Widget buildApp({
+      Color activeColor,
+      Color inactiveColor,
+      int divisions,
+      bool enabled: true,
+    }) {
+      final ValueChanged<double> onChanged = !enabled
+          ? null
+          : (double d) {
               value = d;
-            }
-          : null;
+            };
       return new Directionality(
         textDirection: TextDirection.ltr,
         child: new Material(
@@ -357,7 +362,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     await tester
-      .pump(const Duration(milliseconds: 500)); // wait for value indicator animation to finish.
+        .pump(const Duration(milliseconds: 500)); // wait for value indicator animation to finish.
 
     // Testing the custom colors are used for the indicator.
     await tester.pumpWidget(buildApp(
@@ -516,65 +521,105 @@ void main() {
         const Size(144.0 + 2.0 * 16.0, 32.0));
   });
 
-//  testWidgets('discrete Slider respects textScaleFactor', (WidgetTester tester) async {
-//    final Key sliderKey = new UniqueKey();
-//    double value = 0.0;
-//
-//    Widget buildSlider({double textScaleFactor}) {
-//      return new Directionality(
-//        textDirection: TextDirection.ltr,
-//        child: new StatefulBuilder(
-//          builder: (BuildContext context, StateSetter setState) {
-//            return new MediaQuery(
-//              data: new MediaQueryData(textScaleFactor: textScaleFactor),
-//              child: new Material(
-//                child: new Center(
-//                  child: new OverflowBox(
-//                    maxWidth: double.INFINITY,
-//                    maxHeight: double.INFINITY,
-//                    child: new Slider(
-//                      key: sliderKey,
-//                      min: 0.0,
-//                      max: 100.0,
-//                      divisions: 10,
-//                      label: '${value.round()}',
-//                      value: value,
-//                      onChanged: (double newValue) {
-//                        setState(() {
-//                          value = newValue;
-//                        });
-//                      },
-//                    ),
-//                  ),
-//                ),
-//              ),
-//            );
-//          },
-//        ),
-//      );
-//    }
-//
-//    await tester.pumpWidget(buildSlider(textScaleFactor: 1.0));
-//    Offset center = tester.getCenter(find.byType(Slider));
-//    TestGesture gesture = await tester.startGesture(center);
-//    await gesture.moveBy(const Offset(10.0, 0.0));
-//
-//    expect(tester.renderObject(find.byType(Slider)), paints..circle(radius: 6.0, x: 16.0, y: 44.0));
-//
-//    await gesture.up();
-//    await tester.pump(const Duration(seconds: 1));
-//
-//    await tester.pumpWidget(buildSlider(textScaleFactor: 2.0));
-//    center = tester.getCenter(find.byType(Slider));
-//    gesture = await tester.startGesture(center);
-//    await gesture.moveBy(const Offset(10.0, 0.0));
-//
-//    expect(
-//        tester.renderObject(find.byType(Slider)), paints..circle(radius: 12.0, x: 16.0, y: 44.0));
-//
-//    await gesture.up();
-//    await tester.pump(const Duration(seconds: 1));
-//  });
+  testWidgets('Slider respects textScaleFactor', (WidgetTester tester) async {
+    final Key sliderKey = new UniqueKey();
+    double value = 0.0;
+
+    Widget buildSlider(
+        {double textScaleFactor,
+        bool isDiscrete: true,
+        ShowValueIndicator show: ShowValueIndicator.onlyForDiscrete}) {
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new MediaQuery(
+              data: new MediaQueryData(textScaleFactor: textScaleFactor),
+              child: new Material(
+                child: new Theme(
+                  data: Theme.of(context).copyWith(
+                      sliderTheme:
+                          Theme.of(context).sliderTheme.copyWith(showValueIndicator: show)),
+                  child: new Center(
+                    child: new OverflowBox(
+                      maxWidth: double.INFINITY,
+                      maxHeight: double.INFINITY,
+                      child: new Slider(
+                        key: sliderKey,
+                        min: 0.0,
+                        max: 100.0,
+                        divisions: isDiscrete ? 10 : null,
+                        label: '${value.round()}',
+                        value: value,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSlider(textScaleFactor: 1.0));
+    Offset center = tester.getCenter(find.byType(Slider));
+    TestGesture gesture = await tester.startGesture(center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(tester.renderObject(find.byType(Slider)), paints..scale(x: 1.0, y: 1.0));
+
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.pumpWidget(buildSlider(textScaleFactor: 2.0));
+    center = tester.getCenter(find.byType(Slider));
+    gesture = await tester.startGesture(center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(tester.renderObject(find.byType(Slider)), paints..scale(x: 2.0, y: 2.0));
+
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Check continuous
+    await tester.pumpWidget(buildSlider(
+      textScaleFactor: 1.0,
+      isDiscrete: false,
+      show: ShowValueIndicator.onlyForContinuous,
+    ));
+    center = tester.getCenter(find.byType(Slider));
+    gesture = await tester.startGesture(center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(tester.renderObject(find.byType(Slider)), paints..scale(x: 1.0, y: 1.0));
+
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.pumpWidget(buildSlider(
+      textScaleFactor: 2.0,
+      isDiscrete: false,
+      show: ShowValueIndicator.onlyForContinuous,
+    ));
+    center = tester.getCenter(find.byType(Slider));
+    gesture = await tester.startGesture(center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(tester.renderObject(find.byType(Slider)), paints..scale(x: 2.0, y: 2.0));
+
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+  });
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
@@ -622,5 +667,83 @@ void main() {
         ));
 
     semantics.dispose();
+  });
+
+  testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
+    final ThemeData baseTheme = new ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.blue,
+    );
+    SliderThemeData theme = baseTheme.sliderTheme;
+    double value = 0.45;
+    Widget buildApp({SliderThemeData sliderTheme, int divisions, bool enabled: true}) {
+      final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new Theme(
+              data: baseTheme,
+              child: new SliderTheme(
+                data: sliderTheme,
+                child: new Slider(
+                  value: value,
+                  label: '$value',
+                  divisions: divisions,
+                  onChanged: onChanged,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future<Null> expectValueIndicator(
+        {bool isVisible, SliderThemeData theme, int divisions, bool enabled: true}) async {
+      // discrete enabled widget.
+      await tester.pumpWidget(buildApp(sliderTheme: theme, divisions: divisions, enabled: enabled));
+      final Offset center = tester.getCenter(find.byType(Slider));
+      final TestGesture gesture = await tester.startGesture(center);
+      await tester.pump();
+      await tester
+          .pump(const Duration(milliseconds: 500)); // wait for value indicator animation to finish.
+
+      final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+      expect(
+        sliderBox,
+        isVisible
+            ? (paints..path(color: theme.valueIndicatorColor))
+            : isNot(paints..path(color: theme.valueIndicatorColor)),
+      );
+      await gesture.up();
+    }
+
+    // Default (showValueIndicator set to onlyForDiscrete).
+    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
+
+    // With showValueIndicator set to onlyForContinuous.
+    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onlyForContinuous);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
+    await expectValueIndicator(isVisible: true, theme: theme, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
+
+    // discrete enabled widget with showValueIndicator set to always.
+    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.always);
+    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
+    await expectValueIndicator(isVisible: true, theme: theme, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
+
+    // discrete enabled widget with showValueIndicator set to never.
+    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.never);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
   });
 }

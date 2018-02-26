@@ -78,14 +78,12 @@ class Slider extends StatefulWidget {
     this.label,
     this.activeColor,
     this.inactiveColor,
-  })
-      : assert(value != null),
-        assert(min != null),
-        assert(max != null),
-        assert(min <= max),
-        assert(value >= min && value <= max),
-        assert(divisions == null || divisions > 0),
-        super(key: key);
+  }) : assert(value != null),       assert(min != null),
+       assert(max != null),
+       assert(min <= max),
+       assert(value >= min && value <= max),
+       assert(divisions == null || divisions > 0),
+       super(key: key);
 
   /// The currently selected value for this slider.
   ///
@@ -267,8 +265,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.reactionController,
     this.enableController,
     this.positionController,
-  })
-      : super(key: key);
+  }) : super(key: key);
 
   final double value;
   final int divisions;
@@ -338,17 +335,16 @@ class _RenderSlider extends RenderBox {
     @required AnimationController reactionController,
     @required AnimationController enableController,
     @required AnimationController positionController,
-  })
-      : assert(value != null && value >= 0.0 && value <= 1.0),
-        assert(textDirection != null),
-        _label = label,
-        _value = value,
-        _divisions = divisions,
-        _sliderTheme = sliderTheme,
-        _theme = theme,
-        _textScaleFactor = textScaleFactor,
-        _onChanged = onChanged,
-        _textDirection = textDirection {
+  }) : assert(value != null && value >= 0.0 && value <= 1.0),
+       assert(textDirection != null),
+       _label = label,
+       _value = value,
+       _divisions = divisions,
+       _sliderTheme = sliderTheme,
+       _theme = theme,
+       _textScaleFactor = textScaleFactor,
+       _onChanged = onChanged,
+       _textDirection = textDirection {
     _updateLabelPainter();
     final GestureArenaTeam team = new GestureArenaTeam();
     _drag = new HorizontalDragGestureRecognizer()
