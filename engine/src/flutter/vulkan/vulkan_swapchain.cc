@@ -199,7 +199,7 @@ sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(GrContext* gr_context,
 
   const GrVkImageInfo image_info = {
       .fImage = image,
-      .fAlloc = {VK_NULL_HANDLE, 0, 0, 0},
+      .fAlloc = GrVkAlloc(),
       .fImageTiling = VK_IMAGE_TILING_OPTIMAL,
       .fImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
       .fFormat = surface_format_.format,
