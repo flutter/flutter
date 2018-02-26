@@ -197,6 +197,7 @@ void main() {
       }
 
       expectExists('lib/main.dart');
+
       for (FileSystemEntity file in projectDir.listSync(recursive: true)) {
         if (file is File && file.path.endsWith('.dart')) {
           final String original = file.readAsStringSync();
@@ -235,11 +236,16 @@ void main() {
       expect(version, contains('version:'));
       expect(version, contains('revision: 12345678'));
       expect(version, contains('channel: omega'));
-    },
-    overrides: <Type, Generator>{
+
+      // IntelliJ metadata
+      final String intelliJSdkMetadataPath = fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
+      expectExists(intelliJSdkMetadataPath);
+      final String sdkMetaContents = fs.file(fs.path.join(projectDir.path, intelliJSdkMetadataPath)).readAsStringSync();
+      expect(sdkMetaContents, contains('<root url="file:/'));
+      expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
+    }, overrides: <Type, Generator>{
       FlutterVersion: () => mockFlutterVersion,
-    },
-    timeout: allowForCreateFlutterProject);
+    }, timeout: allowForCreateFlutterProject);
 
     // Verify that we can regenerate over an existing project.
     testUsingContext('can re-gen over existing project', () async {
