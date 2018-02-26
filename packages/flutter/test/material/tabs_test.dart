@@ -1650,4 +1650,71 @@ void main() {
     expect(() => new Tab(icon: new Container(), text: 'foo', child: new Container()), throwsAssertionError);
     expect(() => new Tab(text: 'foo', child: new Container()), throwsAssertionError);
   });
+
+
+  testWidgets('TabController changes', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/14812
+
+    Widget buildFrame(TabController controller) {
+      return boilerplate(
+        child: new Container(
+          alignment: Alignment.topLeft,
+          child: new TabBar(
+            controller: controller,
+            tabs: <Tab>[
+              const Tab(text: 'LEFT'),
+              const Tab(text: 'RIGHT'),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final TabController controller1 = new TabController(
+      vsync: const TestVSync(),
+      length: 2,
+      initialIndex: 0,
+    );
+
+    final TabController controller2 = new TabController(
+      vsync: const TestVSync(),
+      length: 2,
+      initialIndex: 0,
+    );
+
+    await tester.pumpWidget(buildFrame(controller1));
+    await tester.pumpWidget(buildFrame(controller2));
+    expect(controller1.index, 0);
+    expect(controller2.index, 0);
+
+    const double indicatorWeight = 2.0;
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox.size.height, 48.0); // 48 = _kTabHeight(46) + indicatorWeight(2.0)
+
+    final double indicatorY = 48.0 - indicatorWeight / 2.0;
+    double indicatorLeft = indicatorWeight / 2.0;
+    double indicatorRight = 400.0 - indicatorWeight / 2.0; // 400 = screen_width / 2
+    expect(tabBarBox, paints..line(
+      strokeWidth: indicatorWeight,
+      p1: new Offset(indicatorLeft, indicatorY),
+      p2: new Offset(indicatorRight, indicatorY),
+    ));
+
+    await tester.tap(find.text('RIGHT'));
+    await tester.pumpAndSettle();
+    expect(controller1.index, 0);
+    expect(controller2.index, 1);
+
+    // Verify that the TabBar's _IndicatorPainter is now listening to
+    // tabController2.
+
+    indicatorLeft = 400.0 + indicatorWeight / 2.0;
+    indicatorRight = 800.0 - indicatorWeight / 2.0;
+    expect(tabBarBox, paints..line(
+      strokeWidth: indicatorWeight,
+      p1: new Offset(indicatorLeft, indicatorY),
+      p2: new Offset(indicatorRight, indicatorY),
+    ));
+  });
+
 }

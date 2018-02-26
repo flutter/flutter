@@ -13,7 +13,7 @@ dependencies:
   xml: 2.6.0
 
 dev_dependencies:
-  test: 0.12.30+3
+  test: 0.12.30+4
 
   async: 2.0.4 # TRANSITIVE DEPENDENCY
   barback: 0.15.2+14 # TRANSITIVE DEPENDENCY
