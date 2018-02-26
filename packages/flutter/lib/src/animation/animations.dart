@@ -545,9 +545,9 @@ class TrainHoppingAnimation extends Animation<double>
 ///
 /// For example, to create an animation that is the sum of two others, subclass
 /// this class and define `T get value = first.value + second.value;`
-/// 
-/// By default, the [status] of a [CompoundAnimation] is the status of the 
-/// [next] animation if [next] is moving, and the status of the [first] 
+///
+/// By default, the [status] of a [CompoundAnimation] is the status of the
+/// [next] animation if [next] is moving, and the status of the [first]
 /// animation otherwise.
 abstract class CompoundAnimation<T> extends Animation<T>
   with AnimationLazyListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
@@ -583,7 +583,7 @@ abstract class CompoundAnimation<T> extends Animation<T>
   }
 
   /// Gets the status of this animation based on the [first] and [next] status.
-  /// 
+  ///
   /// The default is that if the [next] animation is moving, use its status.
   /// Otherwise, default to [first].
   @override
@@ -635,9 +635,13 @@ class AnimationMean extends CompoundAnimation<double> {
 
 /// An animation that tracks the maximum of two other animations.
 ///
-/// The [value] of this animation is the maximum of the values of 
+/// The [value] of this animation is the maximum of the values of
 /// [first] and [next].
 class AnimationMax<T extends num> extends CompoundAnimation<T> {
+  /// Creates an [AnimationMax].
+  ///
+  /// Both arguments must be non-null. Either can be an [AnimationMax] itself
+  /// to combine multiple animations.
   AnimationMax(Animation<T> first, Animation<T> next): super(first: first, next: next);
 
   @override
@@ -646,9 +650,13 @@ class AnimationMax<T extends num> extends CompoundAnimation<T> {
 
 /// An animation that tracks the minimum of two other animations.
 ///
-/// The [value] of this animation is the maximum of the values of 
+/// The [value] of this animation is the maximum of the values of
 /// [first] and [next].
 class AnimationMin<T extends num> extends CompoundAnimation<T> {
+  /// Creates an [AnimationMin].
+  ///
+  /// Both arguments must be non-null. Either can be an [AnimationMin] itself
+  /// to combine multiple animations.
   AnimationMin(Animation<T> first, Animation<T> next): super(first: first, next: next);
 
   @override
