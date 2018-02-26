@@ -33,7 +33,7 @@ Future<Null> _parseExampleCode(AssetBundle bundle) async {
       if (line.startsWith(_kStartTag)) {
         // Starting a new code block.
         codeBlock = <String>[];
-        codeTag = line.substring(_kStartTag.length);
+        codeTag = line.substring(_kStartTag.length).trim();
       } else {
         // Just skipping the line.
       }
