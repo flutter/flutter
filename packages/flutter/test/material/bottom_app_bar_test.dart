@@ -34,6 +34,58 @@ void main() {
     );
   });
 
+  testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Builder(
+          builder: (BuildContext context) {
+            return new Theme(
+              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              child: const Scaffold(
+                floatingActionButton: const FloatingActionButton(
+                  onPressed: null,
+                ),
+                bottomNavigationBar: const BottomAppBar(),
+              ),
+            );
+          }
+        ),
+      ),
+    );
+
+    final PhysicalShape physicalShape =
+      tester.widget(find.byType(PhysicalShape).at(0));
+
+    expect(physicalShape.color, const Color(0xffffff00));
+  });
+
+  testWidgets('color overrides theme color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Builder(
+          builder: (BuildContext context) {
+            return new Theme(
+              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              child: const Scaffold(
+                floatingActionButton: const FloatingActionButton(
+                  onPressed: null,
+                ),
+                bottomNavigationBar: const BottomAppBar(
+                  color: const Color(0xff0000ff)
+                ),
+              ),
+            );
+          }
+        ),
+      ),
+    );
+
+    final PhysicalShape physicalShape =
+      tester.widget(find.byType(PhysicalShape).at(0));
+
+    expect(physicalShape.color, const Color(0xff0000ff));
+  });
+
   // TODO(amirh): test a BottomAppBar with hasNotch=false and an overlapping
   // FAB.
   //
