@@ -479,5 +479,5 @@ class SemanticsUpdate extends NativeFieldWrapperClass2 {
   ///
   /// After calling this function, the semantics update is cannot be used
   /// further.
-  void dispose() native 'SemanticsUpdateBuilder_dispose';
+  void dispose() native 'SemanticsUpdate_dispose';
 }
