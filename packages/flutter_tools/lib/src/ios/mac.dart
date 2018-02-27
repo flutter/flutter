@@ -366,7 +366,7 @@ Future<XcodeBuildResult> buildXcodeProject({
           buildSubStatus = logger.startProgress(
             line,
             expectSlowOperation: true,
-            progressIndicatorPadding: 45,
+            progressIndicatorPadding: kDefaultStatusPadding - 7,
           );
         }
       }
@@ -393,7 +393,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   scriptOutputPipeTempDirectory?.deleteSync(recursive: true);
   printStatus(
     'Xcode build done',
-    ansiAlternative: 'Xcode build done'.padRight(53)
+    ansiAlternative: 'Xcode build done'.padRight(kDefaultStatusPadding + 1)
         + '${getElapsedAsSeconds(buildStopwatch.elapsed).padLeft(5)}',
   );
 

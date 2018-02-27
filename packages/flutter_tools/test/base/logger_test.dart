@@ -34,7 +34,7 @@ void main() {
     AnsiSpinner ansiSpinner;
     AnsiStatus ansiStatus;
     int called;
-    final RegExp secondDigits = new RegExp(r'[0-9]+[.][0-9]+(?:s|ms)');
+    final RegExp secondDigits = new RegExp(r'\b\b\b\b\b[0-9]+[.][0-9]+(?:s|ms)');
 
     setUp(() {
       mockStdio = new MockStdio();
@@ -70,9 +70,11 @@ void main() {
       ansiSpinner.stop();
       lines = outputLines();
       expect(lines[0].endsWith('\b \b '), isFalse);
+      expect(lines.length, equals(1));
       ansiSpinner.cancel();
       lines = outputLines();
       expect(lines[0].endsWith('\b \b '), isFalse);
+      expect(lines.length, equals(1));
     }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
     testUsingContext('AnsiStatus works when cancelled', () async {
@@ -85,14 +87,17 @@ void main() {
       ansiStatus.cancel();
       lines = outputLines();
       expect(lines[0], endsWith('\b \b'));
+      expect(lines.length, equals(2));
       expect(called, equals(1));
       ansiStatus.cancel();
       lines = outputLines();
       expect(lines[0].endsWith('\b \b\b \b'), isFalse);
+      expect(lines.length, equals(2));
       expect(called, equals(1));
       ansiStatus.stop();
       lines = outputLines();
       expect(lines[0].endsWith('\b \b\b \b'), isFalse);
+      expect(lines.length, equals(2));
       expect(called, equals(1));
     }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
@@ -135,7 +140,7 @@ void main() {
       expect(lines[0], startsWith('Hello world               \b-\b\\\b|\b/\b-\b\\\b|\b/\b-'));
       expect(lines.length, equals(1));
 
-      // Verify a cancel does _not_ print the time.
+      // Verify a cancel does _not_ print the time and prints a newline.
       ansiStatus.cancel();
       lines = outputLines();
       List<Match> matches = secondDigits.allMatches(lines[0]).toList();
@@ -144,7 +149,7 @@ void main() {
       expect(called, equals(1));
       // TODO(jcollins-g): Consider having status objects print the newline
       // when canceled, or never printing a newline at all.
-      expect(lines.length, equals(1));
+      expect(lines.length, equals(2));
 
       // Verifying calling stop after cancel doesn't print anything weird.
       ansiStatus.stop();
@@ -154,7 +159,7 @@ void main() {
       expect(lines[0], endsWith('\b \b'));
       expect(called, equals(1));
       expect(lines[0], isNot(endsWith('\b \b\b \b')));
-      expect(lines.length, equals(1));
+      expect(lines.length, equals(2));
     }, overrides: <Type, Generator>{Stdio: () => mockStdio});
 
   });

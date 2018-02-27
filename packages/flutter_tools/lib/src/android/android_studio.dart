@@ -182,10 +182,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       for (FileSystemEntity entity in fs.directory(homeDirPath).listSync()) {
         if (entity is Directory && entity.basename.startsWith('.AndroidStudio')) {
           final AndroidStudio studio = new AndroidStudio.fromHomeDot(entity);
-          if (studio != null &&
-              !_hasStudioAt(studio.directory, newerThan: studio.version)) {
-            studios.removeWhere(
-                    (AndroidStudio other) => other.directory == studio.directory);
+          if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
+            studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
             studios.add(studio);
           }
         }
