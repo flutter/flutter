@@ -20,41 +20,46 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
       ),
       child: new DecoratedBox(
         decoration: const BoxDecoration(color: const Color(0xFFEFEFF4)),
-        child: new CupertinoRefreshControl(
-          child: new ListView(
-            children: <Widget>[
-              const Padding(padding: const EdgeInsets.only(top: 32.0)),
-              new GestureDetector(
-                onTap: () {
-                },
-                child: new Container(
-                  decoration: const BoxDecoration(
-                    color: CupertinoColors.white,
-                    border: const Border(
-                      top: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
-                      bottom: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
-                    ),
-                  ),
-                  height: 44.0,
-                  child: new Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                    child: new SafeArea(
-                      top: false,
-                      bottom: false,
-                      child: new Row(
-                        children: const <Widget>[
-                          const Text(
-                            'Sign in',
-                            style: const TextStyle(color: CupertinoColors.activeBlue),
-                          )
-                        ],
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new CupertinoRefreshControl(),
+            new SliverList(
+              delegate: new SliverChildListDelegate(
+                <Widget>[
+                  const Padding(padding: const EdgeInsets.only(top: 32.0)),
+                  new GestureDetector(
+                    onTap: () {
+                    },
+                    child: new Container(
+                      decoration: const BoxDecoration(
+                        color: CupertinoColors.white,
+                        border: const Border(
+                          top: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
+                          bottom: const BorderSide(color: const Color(0xFFBCBBC1), width: 0.0),
+                        ),
+                      ),
+                      height: 44.0,
+                      child: new Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        child: new SafeArea(
+                          top: false,
+                          bottom: false,
+                          child: new Row(
+                            children: const <Widget>[
+                              const Text(
+                                'Sign in',
+                                style: const TextStyle(color: CupertinoColors.activeBlue),
+                              )
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ]
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
