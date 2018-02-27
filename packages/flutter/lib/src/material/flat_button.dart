@@ -50,6 +50,7 @@ class FlatButton extends StatelessWidget {
   const FlatButton({
     Key key,
     @required this.onPressed,
+    this.onHighlightChanged,
     this.textTheme,
     this.textColor,
     this.disabledTextColor,
@@ -73,6 +74,7 @@ class FlatButton extends StatelessWidget {
   FlatButton.icon({
     Key key,
     @required this.onPressed,
+    this.onHighlightChanged,
     this.textTheme,
     this.textColor,
     this.disabledTextColor,
@@ -101,6 +103,10 @@ class FlatButton extends StatelessWidget {
   ///
   /// If this is set to null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
+
+  /// Called by the underying [InkWell] widget's [InkWell.onHighlightChanged]
+  /// callback.
+  final ValueChanged<bool> onHighlightChanged;
 
   /// Defines the button's base colors, and the defaults for the button's minimum
   /// size, internal padding, and shape.
@@ -276,6 +282,7 @@ class FlatButton extends StatelessWidget {
 
     return new RawMaterialButton(
       onPressed: onPressed,
+      onHighlightChanged: onHighlightChanged,
       fillColor: fillColor,
       textStyle: theme.textTheme.button.copyWith(color: textColor),
       highlightColor: _getHighlightColor(theme, buttonTheme),
