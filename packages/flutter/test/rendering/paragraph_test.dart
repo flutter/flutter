@@ -69,9 +69,7 @@ void main() {
 
     expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
     expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
-  },
-  // Ahem-based tests don't yet quite work on Windows or the MacOS environment in Travis
-  skip: Platform.isWindows || (runningOnTravis && Platform.isMacOS));
+  }, skip: Platform.isWindows); // Ahem-based tests don't yet quite work on Windows
 
   test('getWordBoundary control test', () {
     final RenderParagraph paragraph = new RenderParagraph(

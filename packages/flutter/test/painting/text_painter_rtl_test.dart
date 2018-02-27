@@ -319,9 +319,7 @@ void main() {
         const TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
       ],
     );
-  },
-  // Ahem-based tests don't yet quite work on Windows or the MacOS environment in Travis
-  skip: Platform.isWindows || (runningOnTravis && Platform.isMacOS));
+  }, skip: Platform.isWindows); // Ahem-based tests don't yet quite work on Windows
 
   test('TextPainter - line wrap mid-word', () {
     final TextPainter painter = new TextPainter()
