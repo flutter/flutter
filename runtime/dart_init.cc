@@ -120,9 +120,10 @@ static const char* kDartCheckedModeArgs[] = {
 
 static const char* kDartStrongModeArgs[] = {
     // clang-format off
-    "--strong",
-    "--reify_generic_functions",
     "--limit_ints_to_64_bits",
+    "--reify_generic_functions",
+    "--strong",
+    "--sync_async",
     // clang-format on
 };
 
