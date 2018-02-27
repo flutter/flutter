@@ -48,7 +48,7 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
                 playSystemSound((String) arguments);
                 result.success(null);
             } else if (method.equals("HapticFeedback.vibrate")) {
-                vibrateHapticFeedback();
+                vibrateHapticFeedback((String) arguments);
                 result.success(null);
             } else if (method.equals("SystemChrome.setPreferredOrientations")) {
                 setSystemChromePreferredOrientations((JSONArray) arguments);
@@ -85,9 +85,20 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
         }
     }
 
-    private void vibrateHapticFeedback() {
+    private void vibrateHapticFeedback(String feedbackType) {
         View view = mActivity.getWindow().getDecorView();
-        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        if (feedbackType == null) {
+            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        } else if (feedbackType.equals("HapticFeedbackType.lightImpact")) {
+            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+        } else if (feedbackType.equals("HapticFeedbackType.mediumImpact")) {
+            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+        } else if (feedbackType.equals("HapticFeedbackType.heavyImpact")) {
+            // HapticFeedbackConstants.CONTEXT_CLICK from API level 23.
+            view.performHapticFeedback(6);
+        } else if (feedbackType.equals("HapticFeedbackType.selectionClick")) {
+            view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+        }
     }
 
     private void setSystemChromePreferredOrientations(JSONArray orientations) throws JSONException {
