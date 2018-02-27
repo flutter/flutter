@@ -153,6 +153,76 @@ void main() {
     expect(log, isEmpty);
   });
 
+  test('AnimationMax control test', () {
+    final AnimationController first = new AnimationController(
+      value: 0.5,
+      vsync: const TestVSync(),
+    );
+    final AnimationController second = new AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    final AnimationMax<double> max = new AnimationMax<double>(first, second);
+
+    expect(max, hasOneLineDescription);
+    expect(max.value, equals(0.5));
+
+    final List<double> log = <double>[];
+    void logValue() {
+      log.add(max.value);
+    }
+
+    max.addListener(logValue);
+
+    second.value = 1.0;
+
+    expect(max.value, equals(1.0));
+    expect(log, equals(<double>[1.0]));
+    log.clear();
+
+    max.removeListener(logValue);
+
+    first.value = 0.0;
+
+    expect(max.value, equals(1.0));
+    expect(log, isEmpty);
+  });
+
+  test('AnimationMin control test', () {
+    final AnimationController first = new AnimationController(
+      value: 0.5,
+      vsync: const TestVSync(),
+    );
+    final AnimationController second = new AnimationController(
+      vsync: const TestVSync(),
+    );
+
+    final AnimationMin<double> min = new AnimationMin<double>(first, second);
+
+    expect(min, hasOneLineDescription);
+    expect(min.value, equals(0.0));
+
+    final List<double> log = <double>[];
+    void logValue() {
+      log.add(min.value);
+    }
+
+    min.addListener(logValue);
+
+    second.value = 1.0;
+
+    expect(min.value, equals(0.5));
+    expect(log, equals(<double>[0.5]));
+    log.clear();
+
+    min.removeListener(logValue);
+
+    first.value = 0.25;
+
+    expect(min.value, equals(0.25));
+    expect(log, isEmpty);
+  });
+
   test('CurvedAnimation with bogus curve', () {
     final AnimationController controller = new AnimationController(
       vsync: const TestVSync(),

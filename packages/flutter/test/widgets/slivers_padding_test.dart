@@ -357,4 +357,69 @@ void main() {
     );
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).afterPadding, 1.0);
   });
+
+  testWidgets('SliverPadding propagates geometry offset corrections', (WidgetTester tester) async {
+    Widget listBuilder(IndexedWidgetBuilder sliverChildBuilder) {
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new SliverPadding(
+              padding: EdgeInsets.zero,
+              sliver: new SliverList(
+                delegate: new SliverChildBuilderDelegate(
+                  sliverChildBuilder,
+                  childCount: 10,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      listBuilder(
+        (BuildContext context, int index) {
+          return new Container(
+            height: 200.0,
+            child: new Center(
+              child: new Text(index.toString()),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.drag(find.text('2'), const Offset(0.0, -300.0));
+    await tester.pump();
+
+    expect(
+      tester.getRect(find.widgetWithText(Container, '2')),
+      new Rect.fromLTRB(0.0, 100.0, 800.0, 300.0),
+    );
+
+    // Now item 0 is 400.0px and going back will underflow.
+    await tester.pumpWidget(
+      listBuilder(
+        (BuildContext context, int index) {
+          return new Container(
+            height: index == 0 ? 400.0 : 200.0,
+            child: new Center(
+              child: new Text(index.toString()),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.drag(find.text('2'), const Offset(0.0, 300.0));
+    // On this one frame, the scroll correction must properly propagate.
+    await tester.pump();
+
+    expect(
+      tester.getRect(find.widgetWithText(Container, '0')),
+      new Rect.fromLTRB(0.0, -200.0, 800.0, 200.0),
+    );
+  });
 }
