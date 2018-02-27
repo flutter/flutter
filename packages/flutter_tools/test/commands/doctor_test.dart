@@ -15,12 +15,17 @@ import '../src/context.dart';
 void main() {
   group('doctor', () {
     testUsingContext('intellij validator', () async {
-      final ValidationResult result = await new IntelliJValidatorTestTarget('Test').validate();
+      final String installPath = '/path/to/intelliJ';
+      final ValidationResult result = await new IntelliJValidatorTestTarget('Test', installPath).validate();
       expect(result.type, ValidationType.partial);
       expect(result.statusInfo, 'version test.test.test');
-      expect(result.messages, hasLength(3));
+      expect(result.messages, hasLength(4));
 
       ValidationMessage message = result.messages
+          .firstWhere((ValidationMessage m) => m.message.startsWith('IntelliJ '));
+      expect(message.message, 'IntelliJ at $installPath');
+
+      message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Dart '));
       expect(message.message, 'Dart plugin version 162.2485');
 
@@ -148,7 +153,7 @@ void main() {
 }
 
 class IntelliJValidatorTestTarget extends IntelliJValidator {
-  IntelliJValidatorTestTarget(String title) : super(title);
+  IntelliJValidatorTestTarget(String title, String installPath) : super(title, installPath);
 
   @override
   String get pluginsPath => fs.path.join('test', 'data', 'intellij', 'plugins');
