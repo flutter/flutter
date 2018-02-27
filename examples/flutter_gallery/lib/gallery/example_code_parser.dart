@@ -46,7 +46,7 @@ Future<Null> _parseExampleCode(AssetBundle bundle) async {
         codeTag = null;
       } else {
         // Add to the current block
-        codeBlock.add(line);
+        codeBlock.add(line.trimRight());
       }
     }
   }
