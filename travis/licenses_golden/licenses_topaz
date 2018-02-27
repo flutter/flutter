@@ -1,4 +1,4 @@
-Signature: 057c80bad7e34289bae50bb23ed6df3e
+Signature: 597710f90d5b8794763d889b25f6036c
 
 UNUSED LICENSES:
 
@@ -195,10 +195,6 @@ FILE: ../../../topaz/app/maxwell/agents/mi_dashboard/webroot/index.html
 FILE: ../../../topaz/app/maxwell/agents/module_suggester_dart/main.dart
 FILE: ../../../topaz/app/maxwell/agents/usage_log/main.dart
 FILE: ../../../topaz/app/maxwell/modules/resolution_failed/lib/src/module_data_module_model.dart
-FILE: ../../../topaz/app/moterm/history.cc
-FILE: ../../../topaz/app/moterm/history.h
-FILE: ../../../topaz/app/moterm/ledger_helpers.cc
-FILE: ../../../topaz/app/moterm/ledger_helpers.h
 FILE: ../../../topaz/app/music/agents/concert_agent/lib/main.dart
 FILE: ../../../topaz/app/music/agents/last_fm_agent/lib/main.dart
 FILE: ../../../topaz/app/music/agents/music_artist_agent/lib/main.dart
@@ -430,6 +426,8 @@ FILE: ../../../topaz/runtime/dart_runner/integration/main.dart
 FILE: ../../../topaz/runtime/web_runner/lib/dart/web_view.dart
 FILE: ../../../topaz/runtime/web_runner/services/web_view.fidl
 FILE: ../../../topaz/runtime/web_view/schema_org_context.h
+FILE: ../../../topaz/runtime/web_view/test_webview.cpp
+FILE: ../../../topaz/runtime/web_view/test_webview_link.cpp
 FILE: ../../../topaz/runtime/web_view/web_view_impl.cpp
 FILE: ../../../topaz/runtime/web_view/web_view_impl.h
 FILE: ../../../topaz/runtime/web_view/web_view_provider.cpp
@@ -703,20 +701,6 @@ FILE: ../../../topaz/app/maxwell/agents/mi_dashboard/webroot/dashboard.js
 FILE: ../../../topaz/app/maxwell/agents/mi_dashboard/webroot/logo.png
 FILE: ../../../topaz/app/maxwell/modules/basic_text_reporter/lib/main.dart
 FILE: ../../../topaz/app/maxwell/modules/resolution_failed/lib/main.dart
-FILE: ../../../topaz/app/moterm/command.cc
-FILE: ../../../topaz/app/moterm/command.h
-FILE: ../../../topaz/app/moterm/key_util.cc
-FILE: ../../../topaz/app/moterm/key_util.h
-FILE: ../../../topaz/app/moterm/main.cc
-FILE: ../../../topaz/app/moterm/meta/sandbox
-FILE: ../../../topaz/app/moterm/moterm_model.cc
-FILE: ../../../topaz/app/moterm/moterm_model.h
-FILE: ../../../topaz/app/moterm/moterm_params.cc
-FILE: ../../../topaz/app/moterm/moterm_params.h
-FILE: ../../../topaz/app/moterm/moterm_view.cc
-FILE: ../../../topaz/app/moterm/moterm_view.h
-FILE: ../../../topaz/app/moterm/shell_controller.cc
-FILE: ../../../topaz/app/moterm/shell_controller.h
 FILE: ../../../topaz/app/music/agents/last_fm_agent/meta/sandbox
 FILE: ../../../topaz/app/music/agents/music_artist_agent/meta/sandbox
 FILE: ../../../topaz/app/music/packages/concert_widgets/lib/res/concert_bg.jpg
@@ -742,6 +726,17 @@ FILE: ../../../topaz/app/perspective/lib/res/module-b-gallery-photos/8.png
 FILE: ../../../topaz/app/perspective/lib/res/module-b-gallery-photos/9.png
 FILE: ../../../topaz/app/perspective/lib/res/module-c-video/1-vid.png
 FILE: ../../../topaz/app/spinning_cube/lib/main.dart
+FILE: ../../../topaz/app/term/config/term.config
+FILE: ../../../topaz/app/term/key_util.cc
+FILE: ../../../topaz/app/term/key_util.h
+FILE: ../../../topaz/app/term/main.cc
+FILE: ../../../topaz/app/term/meta/sandbox
+FILE: ../../../topaz/app/term/term_model.cc
+FILE: ../../../topaz/app/term/term_model.h
+FILE: ../../../topaz/app/term/term_params.cc
+FILE: ../../../topaz/app/term/term_params.h
+FILE: ../../../topaz/app/term/view_controller.cc
+FILE: ../../../topaz/app/term/view_controller.h
 FILE: ../../../topaz/app/todo/agents/content_provider/Cargo.toml
 FILE: ../../../topaz/app/video/modules/video/assets/video-background.png
 FILE: ../../../topaz/app/video/modules/video/assets/video-thumbnail.png
@@ -797,6 +792,7 @@ FILE: ../../../topaz/examples/media/media_player/media_player_params.h
 FILE: ../../../topaz/examples/media/media_player/media_player_view.cc
 FILE: ../../../topaz/examples/media/media_player/media_player_view.h
 FILE: ../../../topaz/examples/media/media_player_flutter/media_player_flutter.config
+FILE: ../../../topaz/examples/media/media_player_flutter/meta/sandbox
 FILE: ../../../topaz/examples/media/vu_meter/main.cc
 FILE: ../../../topaz/examples/media/vu_meter/vu_meter_params.cc
 FILE: ../../../topaz/examples/media/vu_meter/vu_meter_params.h
@@ -849,6 +845,8 @@ FILE: ../../../topaz/packages/bluetooth_settings
 FILE: ../../../topaz/packages/chat
 FILE: ../../../topaz/packages/color
 FILE: ../../../topaz/packages/config.json
+FILE: ../../../topaz/packages/config/ermine_user_shell
+FILE: ../../../topaz/packages/config/term
 FILE: ../../../topaz/packages/contacts
 FILE: ../../../topaz/packages/curl
 FILE: ../../../topaz/packages/dart
@@ -860,10 +858,12 @@ FILE: ../../../topaz/packages/dashboard
 FILE: ../../../topaz/packages/default
 FILE: ../../../topaz/packages/doc_checker
 FILE: ../../../topaz/packages/documents
+FILE: ../../../topaz/packages/ermine_user_shell
 FILE: ../../../topaz/packages/examples
 FILE: ../../../topaz/packages/file_explorer
 FILE: ../../../topaz/packages/flutter
 FILE: ../../../topaz/packages/git
+FILE: ../../../topaz/packages/google_auth_provider
 FILE: ../../../topaz/packages/image
 FILE: ../../../topaz/packages/infinite_scroller
 FILE: ../../../topaz/packages/latin-ime
@@ -874,7 +874,6 @@ FILE: ../../../topaz/packages/maxwell
 FILE: ../../../topaz/packages/mods
 FILE: ../../../topaz/packages/modular_examples
 FILE: ../../../topaz/packages/mondrian
-FILE: ../../../topaz/packages/moterm
 FILE: ../../../topaz/packages/music
 FILE: ../../../topaz/packages/oauth_token_manager
 FILE: ../../../topaz/packages/perspective
@@ -882,6 +881,7 @@ FILE: ../../../topaz/packages/speccpu2000
 FILE: ../../../topaz/packages/spinning_cube
 FILE: ../../../topaz/packages/sqlite
 FILE: ../../../topaz/packages/sysui
+FILE: ../../../topaz/packages/term
 FILE: ../../../topaz/packages/todo
 FILE: ../../../topaz/packages/tools
 FILE: ../../../topaz/packages/ui_examples
@@ -949,7 +949,6 @@ FILE: ../../../topaz/runtime/flutter_runner/meta/source_runtime
 FILE: ../../../topaz/runtime/web_runner/web_view_component.json
 FILE: ../../../topaz/runtime/web_view/extract_schema_org.js
 FILE: ../../../topaz/runtime/web_view/schema_org_context.cpp
-FILE: ../../../topaz/runtime/web_view/test_webview.cpp
 FILE: ../../../topaz/shell/Armadillo.png
 FILE: ../../../topaz/shell/agents/home_work_agent/assets/1-portugal-the-man.jpeg
 FILE: ../../../topaz/shell/agents/home_work_agent/assets/9-hotel.jpg
@@ -1089,12 +1088,14 @@ FILE: ../../../topaz/shell/armadillo_user_shell/lib/main.dart
 FILE: ../../../topaz/shell/armadillo_user_shell/lib/story_provider_story_generator.dart
 FILE: ../../../topaz/shell/armadillo_user_shell/lib/story_provider_watcher_impl.dart
 FILE: ../../../topaz/shell/armadillo_user_shell/lib/suggestion_provider_suggestion_model.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/meta/sandbox
 FILE: ../../../topaz/shell/capybara_user_shell/lib/res/background.jpg
 FILE: ../../../topaz/shell/docs/buttons.png
 FILE: ../../../topaz/shell/docs/profiling.patch
 FILE: ../../../topaz/shell/docs/profiling.png
 FILE: ../../../topaz/shell/docs/timeline_settings.png
 FILE: ../../../topaz/shell/docs/vm.png
+FILE: ../../../topaz/shell/ermine_user_shell/config/ermine_user_shell.config
 FILE: ../../../topaz/shell/keyboard/lib/keyboard.dart
 FILE: ../../../topaz/shell/keyboard/lib/keys.dart
 FILE: ../../../topaz/shell/keyboard/lib/res/ArrowDown.png
@@ -1110,6 +1111,7 @@ FILE: ../../../topaz/shell/userpicker_device_shell/lib/res/Fuchsia_Logo_40dp_Acc
 FILE: ../../../topaz/shell/userpicker_device_shell/lib/res/bg.jpg
 FILE: ../../../topaz/shell/userpicker_device_shell/lib/res/fuchsia.png
 FILE: ../../../topaz/shell/userpicker_device_shell/lib/res/screen_config.json
+FILE: ../../../topaz/shell/userpicker_device_shell/meta/sandbox
 FILE: ../../../topaz/shell/widgets/lib/default_bundle.dart
 FILE: ../../../topaz/shell/widgets/lib/key_mappings.dart
 FILE: ../../../topaz/shell/widgets/lib/three_column_aligned_layout_delegate.dart
@@ -1169,10 +1171,28 @@ FILE: ../../../topaz/app/color/lib/main.dart
 FILE: ../../../topaz/app/color/lib/src/color_model.dart
 FILE: ../../../topaz/app/documents/modules/browser/lib/src/widgets/header.dart
 FILE: ../../../topaz/app/documents/modules/browser/lib/src/widgets/multi_select_header.dart
-FILE: ../../../topaz/app/video/modules/video/lib/src/modular/video_progress.dart
+FILE: ../../../topaz/app/term/app.cc
+FILE: ../../../topaz/app/term/app.h
+FILE: ../../../topaz/app/term/pty_server.cc
+FILE: ../../../topaz/app/term/pty_server.h
+FILE: ../../../topaz/app/video/modules/video/lib/src/widgets/video_progress.dart
+FILE: ../../../topaz/auth_providers/google/constants.h
+FILE: ../../../topaz/auth_providers/google/factory_impl.cc
+FILE: ../../../topaz/auth_providers/google/factory_impl.h
+FILE: ../../../topaz/auth_providers/google/google_auth_provider_impl.cc
+FILE: ../../../topaz/auth_providers/google/google_auth_provider_impl.h
+FILE: ../../../topaz/auth_providers/google/google_auth_provider_impl_unittest.cc
+FILE: ../../../topaz/auth_providers/google/main.cc
+FILE: ../../../topaz/auth_providers/oauth/oauth_request_builder.cc
+FILE: ../../../topaz/auth_providers/oauth/oauth_request_builder.h
+FILE: ../../../topaz/auth_providers/oauth/oauth_request_builder_unittest.cc
+FILE: ../../../topaz/auth_providers/oauth/oauth_response.cc
+FILE: ../../../topaz/auth_providers/oauth/oauth_response.h
+FILE: ../../../topaz/auth_providers/oauth/oauth_response_unittest.cc
 FILE: ../../../topaz/examples/mine_digger/main.dart
 FILE: ../../../topaz/public/dart/fuchsia/lib/src/fuchsia_fakes.dart
 FILE: ../../../topaz/public/dart/widgets/lib/src/modular/dank_user_shell_widget.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/widgets/maybe.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/channel.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/channel_reader.dart
 FILE: ../../../topaz/public/dart/zircon/lib/src/constants.dart
@@ -1201,6 +1221,17 @@ FILE: ../../../topaz/public/lib/user/dart/lib/src/dank_user_shell_impl.dart
 FILE: ../../../topaz/runtime/dart_runner/kernel/compiler.dart
 FILE: ../../../topaz/runtime/dart_runner/mapped_resource.cc
 FILE: ../../../topaz/runtime/dart_runner/mapped_resource.h
+FILE: ../../../topaz/runtime/dart_runner/service_isolate.cc
+FILE: ../../../topaz/runtime/dart_runner/service_isolate.h
+FILE: ../../../topaz/shell/armadillo/lib/src/now/wifi_settings.dart
+FILE: ../../../topaz/shell/ermine_user_shell/app.cc
+FILE: ../../../topaz/shell/ermine_user_shell/app.h
+FILE: ../../../topaz/shell/ermine_user_shell/find_unique_ptr.h
+FILE: ../../../topaz/shell/ermine_user_shell/main.cc
+FILE: ../../../topaz/shell/ermine_user_shell/tile.cc
+FILE: ../../../topaz/shell/ermine_user_shell/tile.h
+FILE: ../../../topaz/shell/ermine_user_shell/view_controller.cc
+FILE: ../../../topaz/shell/ermine_user_shell/view_controller.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Fuchsia Authors. All rights reserved.
 
