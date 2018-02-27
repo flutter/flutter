@@ -536,6 +536,11 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     }
   }
 
+  static final Animatable<double> _entranceTurnTween = Tween<double>(
+    begin: 1.0 - kFloatingActionButtonTurnInterval,
+    end: 1.0,
+  ).chain(CurveTween(curve: Curves.easeIn));
+
   void _updateAnimations() {
     // Get the animations for exit and entrance.
     final CurvedAnimation previousExitScaleAnimation = CurvedAnimation(
@@ -553,15 +558,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       parent: _currentController,
       curve: Curves.easeIn,
     );
-    final Animation<double> currentEntranceRotationAnimation = Tween<double>(
-      begin: 1.0 - kFloatingActionButtonTurnInterval,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _currentController,
-        curve: Curves.easeIn
-      ),
-    );
+    final Animation<double> currentEntranceRotationAnimation = _currentController.drive(_entranceTurnTween);
 
     // Get the animations for when the FAB is moving.
     final Animation<double> moveScaleAnimation = widget.fabMotionAnimator.getScaleAnimation(parent: widget.fabMoveAnimation);
@@ -570,10 +567,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     // Aggregate the animations.
     _previousScaleAnimation = AnimationMin<double>(moveScaleAnimation, previousExitScaleAnimation);
     _currentScaleAnimation = AnimationMin<double>(moveScaleAnimation, currentEntranceScaleAnimation);
-    _extendedCurrentScaleAnimation = CurvedAnimation(
-      parent: _currentScaleAnimation,
-      curve: const Interval(0.0, 0.1),
-    );
+    _extendedCurrentScaleAnimation = _currentScaleAnimation.drive(CurveTween(curve: const Interval(0.0, 0.1)));
 
     _previousRotationAnimation = TrainHoppingAnimation(previousExitRotationAnimation, moveRotationAnimation);
     _currentRotationAnimation = TrainHoppingAnimation(currentEntranceRotationAnimation, moveRotationAnimation);
