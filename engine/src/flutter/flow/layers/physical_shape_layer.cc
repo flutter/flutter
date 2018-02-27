@@ -108,15 +108,25 @@ void PhysicalShapeLayer::DrawShadow(SkCanvas* canvas,
                                     float elevation,
                                     bool transparentOccluder,
                                     SkScalar dpr) {
+  const SkScalar kAmbientAlpha = 0.039f;
+  const SkScalar kSpotAlpha = 0.25f;
+  const SkScalar kLightHeight = 600;
+  const SkScalar kLightRadius = 800;
+
   SkShadowFlags flags = transparentOccluder
                             ? SkShadowFlags::kTransparentOccluder_ShadowFlag
                             : SkShadowFlags::kNone_ShadowFlag;
   const SkRect& bounds = path.getBounds();
   SkScalar shadow_x = (bounds.left() + bounds.right()) / 2;
   SkScalar shadow_y = bounds.top() - 600.0f;
-  SkShadowUtils::DrawShadow(canvas, path, dpr * elevation,
-                            SkPoint3::Make(shadow_x, shadow_y, dpr * 600.0f),
-                            dpr * 800.0f, 0.039f, 0.25f, color, flags);
+  SkColor inAmbient = SkColorSetA(color, kAmbientAlpha * SkColorGetA(color));
+  SkColor inSpot = SkColorSetA(color, kSpotAlpha * SkColorGetA(color));
+  SkColor ambientColor, spotColor;
+  SkShadowUtils::ComputeTonalColors(inAmbient, inSpot,
+                                    &ambientColor, &spotColor);
+  SkShadowUtils::DrawShadow(canvas, path, SkPoint3::Make(0, 0, dpr * elevation),
+                            SkPoint3::Make(shadow_x, shadow_y, dpr * kLightHeight),
+                            dpr * kLightRadius, ambientColor, spotColor, flags);
 }
 
 }  // namespace flow
