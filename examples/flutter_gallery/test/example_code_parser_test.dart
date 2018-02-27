@@ -18,6 +18,9 @@ void main() {
 
     final String codeSnippet1 = await getExampleCode('test_1', bundle);
     expect(codeSnippet1, 'test 1 0\ntest 1 1');
+
+    final String codeSnippet3 = await getExampleCode('test_2_windows_breaks', bundle);
+    expect(codeSnippet3, 'windows test 2 0\nwindows test 2 1');
   });
 }
 
@@ -32,6 +35,8 @@ test 0 1
 test 1 0
 test 1 1
 // END
+
+// START test_2_windows_breaks\r\nwindows test 2 0\r\nwindows test 2 1\r\n// END
 ''';
 
 class TestAssetBundle extends AssetBundle {
