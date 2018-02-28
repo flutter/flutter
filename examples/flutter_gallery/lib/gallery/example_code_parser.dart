@@ -46,6 +46,8 @@ Future<Null> _parseExampleCode(AssetBundle bundle) async {
         codeTag = null;
       } else {
         // Add to the current block
+        // trimRight() to remove any \r on Windows
+        // without removing any useful indentation
         codeBlock.add(line.trimRight());
       }
     }
