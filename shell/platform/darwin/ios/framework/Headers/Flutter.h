@@ -8,6 +8,9 @@
 /**
  BREAKING CHANGES:
 
+ February 28, 2018: Removed "initWithFLXArchive" and
+ "initWithFLXArchiveWithScriptSnapshot".
+
  January 15, 2018: Marked "initWithFLXArchive" and
  "initWithFLXArchiveWithScriptSnapshot" as unavailable following the
  deprecation from December 11, 2017. Scheduled to be removed on February
