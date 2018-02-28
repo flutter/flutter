@@ -13,6 +13,7 @@ import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
@@ -26,6 +27,12 @@ import 'version.dart';
 import 'vscode/vscode_validator.dart';
 
 Doctor get doctor => context[Doctor];
+
+class ValidatorTask {
+  ValidatorTask(this.validator, this.result);
+  final DoctorValidator validator;
+  final Future<ValidationResult> result;
+}
 
 class Doctor {
   List<DoctorValidator> _validators;
@@ -54,6 +61,16 @@ class Doctor {
         _validators.add(new DeviceValidator());
     }
     return _validators;
+  }
+
+  /// Return a list of [ValidatorTask] objects and starts validation on all
+  /// objects in [validators].
+  List<ValidatorTask> startValidatorTasks() {
+    final List<ValidatorTask> tasks = <ValidatorTask>[];
+    for (DoctorValidator validator in validators) {
+      tasks.add(new ValidatorTask(validator, validator.validate()));
+    }
+    return tasks;
   }
 
   List<Workflow> get workflows {
@@ -108,9 +125,14 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
-    for (DoctorValidator validator in validators) {
-      final ValidationResult result = await validator.validate();
+    for (ValidatorTask validatorTask in startValidatorTasks()) {
+      final DoctorValidator validator = validatorTask.validator;
+      final Status status = new Status.withSpinner();
+      await (validatorTask.result).then<void>((_) {
+        status.stop();
+      }).whenComplete(status.cancel);
 
+      final ValidationResult result = await validatorTask.result;
       if (result.type == ValidationType.missing) {
         doctorResult = false;
       }
@@ -276,7 +298,9 @@ class NoIdeValidator extends DoctorValidator {
 }
 
 abstract class IntelliJValidator extends DoctorValidator {
-  IntelliJValidator(String title) : super(title);
+  final String installPath;
+
+  IntelliJValidator(String title, this.installPath) : super(title);
 
   String get version;
   String get pluginsPath;
@@ -300,6 +324,8 @@ abstract class IntelliJValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
+
+    messages.add(new ValidationMessage('IntelliJ at $installPath'));
 
     _validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
         'Flutter', minVersion: kMinFlutterPluginVersion);
@@ -397,12 +423,10 @@ abstract class IntelliJValidator extends DoctorValidator {
 }
 
 class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
-  IntelliJValidatorOnLinuxAndWindows(String title, this.version, this.installPath, this.pluginsPath) : super(title);
+  IntelliJValidatorOnLinuxAndWindows(String title, this.version, String installPath, this.pluginsPath) : super(title, installPath);
 
   @override
   String version;
-
-  final String installPath;
 
   @override
   String pluginsPath;
@@ -451,10 +475,9 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
 }
 
 class IntelliJValidatorOnMac extends IntelliJValidator {
-  IntelliJValidatorOnMac(String title, this.id, this.installPath) : super(title);
+  IntelliJValidatorOnMac(String title, this.id, String installPath) : super(title, installPath);
 
   final String id;
-  final String installPath;
 
   static final Map<String, String> _dirNameToId = <String, String>{
     'IntelliJ IDEA.app' : 'IntelliJIdea',
@@ -542,7 +565,12 @@ class DeviceValidator extends DoctorValidator {
       messages = await Device.descriptions(devices)
           .map((String msg) => new ValidationMessage(msg)).toList();
     }
-    return new ValidationResult(devices.isEmpty ? ValidationType.partial : ValidationType.installed, messages);
+
+    if (devices.isEmpty) {
+      return new ValidationResult(ValidationType.partial, messages);
+    } else {
+      return new ValidationResult(ValidationType.installed, messages, statusInfo: '${devices.length} available');
+    }
   }
 }
 

@@ -189,6 +189,12 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
       parentUsesSize: true,
     );
     final SliverGeometry childLayoutGeometry = child.geometry;
+    if (childLayoutGeometry.scrollOffsetCorrection != null) {
+      geometry = new SliverGeometry(
+        scrollOffsetCorrection: childLayoutGeometry.scrollOffsetCorrection,
+      );
+      return;
+    }
     final double beforePaddingPaintExtent = calculatePaintOffset(
       constraints,
       from: 0.0,

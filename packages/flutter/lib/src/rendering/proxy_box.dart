@@ -34,7 +34,7 @@ export 'package:flutter/gestures.dart' show
 /// the proxy box with its child. However, RenderProxyBox is a useful base class
 /// for render objects that wish to mimic most, but not all, of the properties
 /// of their child.
-class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin {
+class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
   /// Creates a proxy render box.
   ///
   /// Proxy render boxes are rarely created directly because they simply proxy
@@ -1080,8 +1080,11 @@ class ShapeBorderClipper extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(covariant ShapeBorderClipper oldClipper) {
-    return oldClipper.shape != shape;
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    if (oldClipper.runtimeType != ShapeBorderClipper)
+      return true;
+    final ShapeBorderClipper typedOldClipper = oldClipper;
+    return typedOldClipper.shape != shape;
   }
 }
 

@@ -407,7 +407,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
         return _toZeroScrollOffsetSimulation(offset, dragVelocity);
     } else {
       // The user ended the drag with little or no velocity. If they
-      // didn't leave the the offset above midScrollOffset, then
+      // didn't leave the offset above midScrollOffset, then
       // snap to midScrollOffset if they're more than halfway there,
       // otherwise snap to zero.
       final double snapThreshold = midScrollOffset / 2.0;

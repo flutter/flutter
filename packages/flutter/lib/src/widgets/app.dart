@@ -344,7 +344,7 @@ class WidgetsApp extends StatefulWidget {
   /// inspect modes.
   ///
   /// This lets [MaterialApp] to use a material button to toggle the inspector
-  /// select mode without requiring [WidgetInspector] to depend on the the
+  /// select mode without requiring [WidgetInspector] to depend on the
   /// material package.
   final InspectorSelectButtonBuilder inspectorSelectButtonBuilder;
 

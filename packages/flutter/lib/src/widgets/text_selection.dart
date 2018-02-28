@@ -130,7 +130,7 @@ abstract class TextSelectionControls {
     return true;
   }
 
-  /// Whether the the current selection of the text field managed by the given
+  /// Whether the current selection of the text field managed by the given
   /// `delegate` can be extended to include the entire content of the text
   /// field.
   ///
