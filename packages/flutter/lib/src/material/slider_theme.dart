@@ -123,8 +123,8 @@ enum ShowValueIndicator {
 ///    minimum value.
 ///  * The "inactive" side of the slider is the side between the thumb and the
 ///    maximum value.
-///  * The [Slider] is disabled when it is not accepting user input. See [Slider]
-///    for details on when this happens.
+///  * The [Slider] is disabled when it is not accepting user input. See
+///    [Slider] for details on when this happens.
 ///
 /// The thumb and the value indicator may have their shapes and behavior
 /// customized by creating your own [SliderComponentShape] that does what
@@ -139,7 +139,7 @@ enum ShowValueIndicator {
 ///    but for overall themes.
 ///  * [ThemeData], which has a default [SliderThemeData].
 ///  * [SliderComponentShape], to define custom slider component shapes.
-class SliderThemeData {
+class SliderThemeData extends Diagnosticable {
   /// Create a [SliderThemeData] given a set of exact values. All the values
   /// must be specified.
   ///
@@ -283,7 +283,6 @@ class SliderThemeData {
     Color valueIndicatorColor,
     SliderComponentShape thumbShape,
     SliderComponentShape valueIndicatorShape,
-    TextStyle textStyle,
     ShowValueIndicator showValueIndicator,
   }) {
     return new SliderThemeData(
@@ -348,8 +347,90 @@ class SliderThemeData {
   }
 
   @override
-  String toString() =>
-      '$runtimeType(activeRail: $activeRailColor, thumbShape: ${thumbShape.runtimeType} etc...)';
+  int get hashCode {
+    return hashValues(
+      activeRailColor,
+      inactiveRailColor,
+      disabledActiveRailColor,
+      disabledInactiveRailColor,
+      activeTickMarkColor,
+      inactiveTickMarkColor,
+      disabledActiveTickMarkColor,
+      disabledInactiveTickMarkColor,
+      thumbColor,
+      disabledThumbColor,
+      overlayColor,
+      valueIndicatorColor,
+      thumbShape,
+      valueIndicatorShape,
+      showValueIndicator,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    final SliderThemeData otherData = other;
+    return otherData.activeRailColor == activeRailColor &&
+        otherData.inactiveRailColor == inactiveRailColor &&
+        otherData.disabledActiveRailColor == disabledActiveRailColor &&
+        otherData.disabledInactiveRailColor == disabledInactiveRailColor &&
+        otherData.activeTickMarkColor == activeTickMarkColor &&
+        otherData.inactiveTickMarkColor == inactiveTickMarkColor &&
+        otherData.disabledActiveTickMarkColor == disabledActiveTickMarkColor &&
+        otherData.disabledInactiveTickMarkColor == disabledInactiveTickMarkColor &&
+        otherData.thumbColor == thumbColor &&
+        otherData.disabledThumbColor == disabledThumbColor &&
+        otherData.overlayColor == overlayColor &&
+        otherData.valueIndicatorColor == valueIndicatorColor &&
+        otherData.thumbShape == thumbShape &&
+        otherData.valueIndicatorShape == valueIndicatorShape &&
+        otherData.showValueIndicator == showValueIndicator;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    final SliderThemeData defaultData = new SliderThemeData.fromTheme();
+    description.add(new DiagnosticsProperty<Color>('activeRailColor', activeRailColor,
+        defaultValue: defaultData.activeRailColor));
+    description.add(new DiagnosticsProperty<Color>('inactiveRailColor', inactiveRailColor,
+        defaultValue: defaultData.inactiveRailColor));
+    description.add(new DiagnosticsProperty<Color>(
+        'disabledActiveRailColor', disabledActiveRailColor,
+        defaultValue: defaultData.disabledActiveRailColor));
+    description.add(new DiagnosticsProperty<Color>(
+        'disabledInactiveRailColor', disabledInactiveRailColor,
+        defaultValue: defaultData.disabledInactiveRailColor));
+    description.add(new DiagnosticsProperty<Color>('activeTickMarkColor', activeTickMarkColor,
+        defaultValue: defaultData.activeTickMarkColor));
+    description.add(new DiagnosticsProperty<Color>('inactiveTickMarkColor', inactiveTickMarkColor,
+        defaultValue: defaultData.inactiveTickMarkColor));
+    description.add(new DiagnosticsProperty<Color>(
+        'disabledActiveTickMarkColor', disabledActiveTickMarkColor,
+        defaultValue: defaultData.disabledActiveTickMarkColor));
+    description.add(new DiagnosticsProperty<Color>(
+        'disabledInactiveTickMarkColor', disabledInactiveTickMarkColor,
+        defaultValue: defaultData.disabledInactiveTickMarkColor));
+    description.add(new DiagnosticsProperty<Color>('thumbColor', thumbColor,
+        defaultValue: defaultData.thumbColor));
+    description.add(new DiagnosticsProperty<Color>('disabledThumbColor', disabledThumbColor,
+        defaultValue: defaultData.disabledThumbColor));
+    description.add(new DiagnosticsProperty<Color>('overlayColor', overlayColor,
+        defaultValue: defaultData.overlayColor));
+    description.add(new DiagnosticsProperty<Color>('valueIndicatorColor', valueIndicatorColor,
+        defaultValue: defaultData.valueIndicatorColor));
+    description.add(new DiagnosticsProperty<SliderComponentShape>('thumbShape', thumbShape,
+        defaultValue: defaultData.thumbShape));
+    description.add(new DiagnosticsProperty<SliderComponentShape>(
+        'valueIndicatorShape', valueIndicatorShape,
+        defaultValue: defaultData.valueIndicatorShape));
+    description.add(new DiagnosticsProperty<ShowValueIndicator>(
+        'showValueIndicator', showValueIndicator,
+        defaultValue: defaultData.showValueIndicator));
+  }
 }
 
 /// Base class for slider thumb and value indicator shapes.

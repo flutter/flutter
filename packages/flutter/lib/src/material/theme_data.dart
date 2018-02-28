@@ -112,6 +112,7 @@ class ThemeData extends Diagnosticable {
     IconThemeData iconTheme,
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
+    SliderThemeData sliderTheme,
     TargetPlatform platform,
   }) {
     brightness ??= Brightness.light;
@@ -208,6 +209,7 @@ class ThemeData extends Diagnosticable {
       iconTheme: iconTheme,
       primaryIconTheme: primaryIconTheme,
       accentIconTheme: accentIconTheme,
+      sliderTheme: sliderTheme,
       platform: platform,
     );
   }
@@ -254,6 +256,7 @@ class ThemeData extends Diagnosticable {
     @required this.iconTheme,
     @required this.primaryIconTheme,
     @required this.accentIconTheme,
+    @required this.sliderTheme,
     @required this.platform,
   }) : assert(brightness != null),
        assert(primaryColor != null),
@@ -753,8 +756,10 @@ class ThemeData extends Diagnosticable {
           inputDecorationTheme,
           primaryIconTheme,
           accentIconTheme,
+          sliderTheme,
           platform,
-        ));
+        ),
+    );
   }
 
   @override
@@ -822,6 +827,7 @@ class ThemeData extends Diagnosticable {
     description.add(new DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme));
     description.add(new DiagnosticsProperty<IconThemeData>('primaryIconTheme', primaryIconTheme));
     description.add(new DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
+    description.add(new DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
   }
 }
 
