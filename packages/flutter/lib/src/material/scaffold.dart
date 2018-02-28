@@ -745,7 +745,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 
   void _updateAnimations() {
-    // Get the animations for entrance and exit.
+    // Get the animations for exit and entrance.
     final CurvedAnimation previousExitScaleAnimation = new CurvedAnimation(
       parent: _previousController,
       curve: Curves.easeIn,
@@ -813,9 +813,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 
   void _onProgressChanged() {
-    final double scale = math.max(_previousScaleAnimation.value, _currentScaleAnimation.value);
-    print('Updating scale to $scale');
-    _updateGeometryScale(scale);
+    _updateGeometryScale(math.max(_previousScaleAnimation.value, _currentScaleAnimation.value));
   }
 
   void _updateGeometryScale(double scale) {
@@ -823,25 +821,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       floatingActionButtonScale: scale,
     );
   }
-}
-
-// Animation that gets the value of its next animation if and only if its
-// first animation is dismissed.
-//
-// Requires the owner of the first and second animations to start and end
-// those animations appropriately.
-class _ChainedAnimation extends CompoundAnimation<double> {
-  _ChainedAnimation(Animation<double> first, Animation<double> next) : super(first: first, next: next);
-  
-  @override
-  double get value {
-    if (!first.isDismissed) {
-      return first.value;
-    } else {
-      return next.value;
-    }
-  }
-
 }
 
 /// Implements the basic material design visual layout structure.
