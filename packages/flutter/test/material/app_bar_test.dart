@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap: false }) {
@@ -1181,5 +1182,55 @@ void main() {
     expect(tester.getRect(find.byType(AppBar)), new Rect.fromLTRB(0.0, 0.0, 800.00, 100.0 + 56.0));
     expect(tester.getRect(find.byKey(leadingKey)), new Rect.fromLTRB(800.0 - 56.0, 100.0, 800.0, 100.0 + 56.0));
     expect(tester.getRect(find.byKey(trailingKey)), new Rect.fromLTRB(4.0, 100.0, 400.0 + 4.0, 100.0 + 56.0));
+  });
+
+  testWidgets('AppBar changes system chrome overlay color', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          appBar: new AppBar(title: const Text('Page 1')),
+          body: new Builder(
+            builder: (BuildContext context) {
+              return new Center(
+                child: new RaisedButton(
+                  child: const Text('Next Page'),
+                  onPressed: () {
+                    Navigator.push<void>(context, new MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return new Theme(
+                          data: new ThemeData.light(),
+                          child: new Scaffold(
+                            appBar: new AppBar(title: const Text('Page 2')),
+                          ),
+                        );
+                      },
+                    ));
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.idle();
+
+    await tester.tap(find.text('Next Page'));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.idle();
+
+    expect(
+      log.last,
+      isMethodCall(
+        'SystemChrome.setSystemUIOverlayStyle',
+        arguments: <String>['SystemUiOverlayStyle.light'],
+      ),
+    );
   });
 }
