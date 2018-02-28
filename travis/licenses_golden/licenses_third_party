@@ -1,4 +1,4 @@
-Signature: ea8a5adcf8a823cfb2c960d0bab0ac0f
+Signature: 090869981061784e1c33cafa6307eeaa
 
 UNUSED LICENSES:
 
@@ -4611,6 +4611,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_number.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_string.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/math_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/mirrors_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/mirrors_patch_cfe.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/native_helper.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/regexp_helper.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/string_helper.dart
@@ -5359,8 +5360,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../third_party/dart/sdk/lib/typed_data/unmodifiable_typed_data.dart + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/runtime/vm/finalizable_data.h + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/dart/runtime/vm/finalizable_data.h
 FILE: ../../../third_party/dart/sdk/lib/typed_data/unmodifiable_typed_data.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
