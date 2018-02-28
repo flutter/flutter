@@ -52,8 +52,8 @@ const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 ///
 /// To obtain the current theme, use [Theme.of].
 @immutable
-class ThemeData {
-  /// Create a ThemeData given a set of preferred values.
+class ThemeData extends Diagnosticable {
+  /// Create a [ThemeData] given a set of preferred values.
   ///
   /// Default values will be derived for arguments that are omitted.
   ///
@@ -109,7 +109,7 @@ class ThemeData {
     IconThemeData iconTheme,
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
-    TargetPlatform platform
+    TargetPlatform platform,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -143,9 +143,15 @@ class ThemeData {
     hintColor ??= isDark ? const Color(0x42FFFFFF) : const Color(0x4C000000);
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
-    iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
-    primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
-    accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
+    iconTheme ??= isDark
+        ? const IconThemeData(color: Colors.white)
+        : const IconThemeData(color: Colors.black);
+    primaryIconTheme ??= primaryIsDark
+        ? const IconThemeData(color: Colors.white)
+        : const IconThemeData(color: Colors.black);
+    accentIconTheme ??= accentIsDark
+        ? const IconThemeData(color: Colors.white)
+        : const IconThemeData(color: Colors.black);
     platform ??= defaultTargetPlatform;
     final Typography typography = new Typography(platform: platform);
     textTheme ??= isDark ? typography.white : typography.black;
@@ -190,7 +196,7 @@ class ThemeData {
       iconTheme: iconTheme,
       primaryIconTheme: primaryIconTheme,
       accentIconTheme: accentIconTheme,
-      platform: platform
+      platform: platform,
     );
   }
 
@@ -234,7 +240,7 @@ class ThemeData {
     @required this.iconTheme,
     @required this.primaryIconTheme,
     @required this.accentIconTheme,
-    @required this.platform
+    @required this.platform,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -352,7 +358,7 @@ class ThemeData {
   ///
   ///  * [InkSplash.splashFactory], which defines the default splash.
   ///  * [InkRipple.splashFactory], which defines a splash that spreads out
-  ///    more aggresively than the default.
+  ///    more aggressively than the default.
   final InteractiveInkFeatureFactory splashFactory;
 
   /// The color used to highlight selected rows.
@@ -515,7 +521,8 @@ class ThemeData {
   static const int _localizedThemeDataCacheSize = 5;
 
   /// Caches localized themes to speed up the [localize] method.
-  static final _FifoCache<_IdentityThemeDataCacheKey, ThemeData> _localizedThemeDataCache = new _FifoCache<_IdentityThemeDataCacheKey, ThemeData>(_localizedThemeDataCacheSize);
+  static final _FifoCache<_IdentityThemeDataCacheKey, ThemeData> _localizedThemeDataCache =
+      new _FifoCache<_IdentityThemeDataCacheKey, ThemeData>(_localizedThemeDataCacheSize);
 
   /// Returns a new theme built by merging the text geometry provided by the
   /// [localTextGeometry] theme with the [baseTheme].
@@ -567,7 +574,7 @@ class ThemeData {
     // Design spec shows for its color palette on
     // <https://material.io/guidelines/style/color.html#color-color-palette>.
     const double kThreshold = 0.15;
-    if ((relativeLuminance + 0.05) * (relativeLuminance + 0.05) > kThreshold )
+    if ((relativeLuminance + 0.05) * (relativeLuminance + 0.05) > kThreshold)
       return Brightness.light;
     return Brightness.dark;
   }
@@ -673,47 +680,110 @@ class ThemeData {
   @override
   int get hashCode {
     return hashValues(
-      brightness,
-      primaryColor,
-      primaryColorBrightness,
-      canvasColor,
-      scaffoldBackgroundColor,
-      bottomAppBarColor,
-      cardColor,
-      dividerColor,
-      highlightColor,
-      splashColor,
-      splashFactory,
-      selectedRowColor,
-      unselectedWidgetColor,
-      disabledColor,
-      buttonColor,
-      buttonTheme,
-      secondaryHeaderColor,
-      textSelectionColor,
-      textSelectionHandleColor,
-      hashValues( // Too many values.
-        backgroundColor,
-        accentColor,
-        accentColorBrightness,
-        indicatorColor,
-        dialogBackgroundColor,
-        hintColor,
-        errorColor,
-        textTheme,
-        primaryTextTheme,
-        accentTextTheme,
-        iconTheme,
-        inputDecorationTheme,
-        primaryIconTheme,
-        accentIconTheme,
-        platform,
-      )
-    );
+        brightness,
+        primaryColor,
+        primaryColorBrightness,
+        canvasColor,
+        scaffoldBackgroundColor,
+        bottomAppBarColor,
+        cardColor,
+        dividerColor,
+        highlightColor,
+        splashColor,
+        splashFactory,
+        selectedRowColor,
+        unselectedWidgetColor,
+        disabledColor,
+        buttonColor,
+        buttonTheme,
+        secondaryHeaderColor,
+        textSelectionColor,
+        textSelectionHandleColor,
+        hashValues( // Too many values.
+          backgroundColor,
+          accentColor,
+          accentColorBrightness,
+          indicatorColor,
+          dialogBackgroundColor,
+          hintColor,
+          errorColor,
+          textTheme,
+          primaryTextTheme,
+          accentTextTheme,
+          iconTheme,
+          inputDecorationTheme,
+          primaryIconTheme,
+          accentIconTheme,
+          platform,
+        ));
   }
 
   @override
-  String toString() => '$runtimeType(${ platform != defaultTargetPlatform ? "$platform " : ''}$brightness $primaryColor etc...)';
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    final ThemeData defaultData = new ThemeData.fallback();
+    description.add(new EnumProperty<TargetPlatform>('platform', platform,
+        defaultValue: defaultTargetPlatform));
+    description.add(new EnumProperty<Brightness>('brightness', brightness,
+        defaultValue: defaultData.brightness));
+    description.add(new DiagnosticsProperty<Color>('primaryColor', primaryColor,
+        defaultValue: defaultData.primaryColor));
+    description.add(new EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness,
+        defaultValue: defaultData.primaryColorBrightness));
+    description.add(new DiagnosticsProperty<Color>('accentColor', accentColor,
+        defaultValue: defaultData.accentColor));
+    description.add(new EnumProperty<Brightness>('accentColorBrightness', accentColorBrightness,
+        defaultValue: defaultData.accentColorBrightness));
+    description.add(new DiagnosticsProperty<Color>('canvasColor', canvasColor,
+        defaultValue: defaultData.canvasColor));
+    description.add(new DiagnosticsProperty<Color>(
+        'scaffoldBackgroundColor', scaffoldBackgroundColor,
+        defaultValue: defaultData.scaffoldBackgroundColor));
+    description.add(new DiagnosticsProperty<Color>('bottomAppBarColor', bottomAppBarColor,
+        defaultValue: defaultData.bottomAppBarColor));
+    description.add(new DiagnosticsProperty<Color>('cardColor', cardColor,
+        defaultValue: defaultData.cardColor));
+    description.add(new DiagnosticsProperty<Color>('dividerColor', dividerColor,
+        defaultValue: defaultData.dividerColor));
+    description.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor,
+        defaultValue: defaultData.highlightColor));
+    description.add(new DiagnosticsProperty<Color>('splashColor', splashColor,
+        defaultValue: defaultData.splashColor));
+    description.add(new DiagnosticsProperty<Color>('selectedRowColor', selectedRowColor,
+        defaultValue: defaultData.selectedRowColor));
+    description.add(new DiagnosticsProperty<Color>('unselectedWidgetColor', unselectedWidgetColor,
+        defaultValue: defaultData.unselectedWidgetColor));
+    description.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor,
+        defaultValue: defaultData.disabledColor));
+    description.add(new DiagnosticsProperty<Color>('buttonColor', buttonColor,
+        defaultValue: defaultData.buttonColor));
+    description.add(new DiagnosticsProperty<Color>('secondaryHeaderColor', secondaryHeaderColor,
+        defaultValue: defaultData.secondaryHeaderColor));
+    description.add(new DiagnosticsProperty<Color>('textSelectionColor', textSelectionColor,
+        defaultValue: defaultData.textSelectionColor));
+    description.add(new DiagnosticsProperty<Color>(
+        'textSelectionHandleColor', textSelectionHandleColor,
+        defaultValue: defaultData.textSelectionHandleColor));
+    description.add(new DiagnosticsProperty<Color>('backgroundColor', backgroundColor,
+        defaultValue: defaultData.backgroundColor));
+    description.add(new DiagnosticsProperty<Color>('dialogBackgroundColor', dialogBackgroundColor,
+        defaultValue: defaultData.dialogBackgroundColor));
+    description.add(new DiagnosticsProperty<Color>('indicatorColor', indicatorColor,
+        defaultValue: defaultData.indicatorColor));
+    description.add(new DiagnosticsProperty<Color>('hintColor', hintColor,
+        defaultValue: defaultData.hintColor));
+    description.add(new DiagnosticsProperty<Color>('errorColor', errorColor,
+        defaultValue: defaultData.errorColor));
+    description.add(new DiagnosticsProperty<ButtonThemeData>('buttonTheme', buttonTheme));
+    description.add(new DiagnosticsProperty<TextTheme>('textTheme', textTheme));
+    description.add(new DiagnosticsProperty<TextTheme>('primaryTextTheme', primaryTextTheme));
+    description.add(new DiagnosticsProperty<TextTheme>('accentTextTheme', accentTextTheme));
+    description.add(new DiagnosticsProperty<InputDecorationTheme>(
+        'inputDecorationTheme', inputDecorationTheme));
+    description.add(new DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme));
+    description.add(new DiagnosticsProperty<IconThemeData>('primaryIconTheme', primaryIconTheme));
+    description.add(new DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
+  }
 }
 
 class _IdentityThemeDataCacheKey {
@@ -732,7 +802,8 @@ class _IdentityThemeDataCacheKey {
     // We are explicitly ignoring the possibility that the types might not
     // match in the interests of speed.
     final _IdentityThemeDataCacheKey otherKey = other;
-    return identical(baseTheme, otherKey.baseTheme) && identical(localTextGeometry, otherKey.localTextGeometry);
+    return identical(baseTheme, otherKey.baseTheme) &&
+        identical(localTextGeometry, otherKey.localTextGeometry);
   }
 }
 
@@ -742,8 +813,7 @@ class _IdentityThemeDataCacheKey {
 /// The key that was inserted before all other keys is evicted first, i.e. the
 /// one inserted least recently.
 class _FifoCache<K, V> {
-  _FifoCache(this._maximumSize)
-    : assert(_maximumSize != null && _maximumSize > 0);
+  _FifoCache(this._maximumSize) : assert(_maximumSize != null && _maximumSize > 0);
 
   /// In Dart the map literal uses a linked hash-map implementation, whose keys
   /// are stored such that [Map.keys] returns them in the order they were
