@@ -169,7 +169,7 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
   @override
   Animation<double> getScaleAnimation({Animation<double> parent}) {
     final Curve curve = const Interval(0.5, 1.0, curve: Curves.ease);
-    return new _MaxAnimation<double>(
+    return new AnimationMax<double>(
       new ReverseAnimation(new CurveTween(curve: curve.flipped).animate(parent)),
       new CurveTween(curve: curve).animate(parent),
     );
@@ -184,7 +184,7 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
       end: 1.0,
     );
     // This rotation will turn on the way in, but not on the way out.
-    return new _MaxAnimation<double>(
+    return new AnimationMax<double>(
       rotationTween.animate(parent),
       new ReverseAnimation(new CurveTween(curve: const Threshold(0.5)).animate(parent)),
     );
@@ -195,13 +195,6 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
   // This avoids a size jump during the animation.
   @override
   double getAnimationRestart(double previousValue) => math.min(1.0 - previousValue, previousValue);
-}
-
-class _MaxAnimation<T> extends CompoundAnimation<T> {
-  _MaxAnimation(Animation<T> first, Animation<T> next): super(first: first, next: next);
-
-  @override
-  T get value => math.max(first.value, next.value);
 }
 
 /// The geometry of the [Scaffold] before it finishes laying out.
@@ -672,10 +665,12 @@ class _FloatingActionButtonTransition extends StatefulWidget {
 }
 
 class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> with TickerProviderStateMixin {
+  // The animations applied to the Floating Action Button when it is entering or exiting.
   AnimationController _previousController;
   AnimationController _currentController;
-  CurvedAnimation _previousAnimation;
-  CurvedAnimation _currentAnimation;
+  // The animations to run, considering the widget's fabMoveAnimation and the current/previous entrance/exit animations.
+  Animation<double> _aggregateScaleAnimation;
+  Animation<double> _aggregateRotationAnimation;
   Widget _previousChild;
 
   @override
@@ -685,22 +680,13 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     _previousController = new AnimationController(
       duration: _kFloatingActionButtonSegue,
       vsync: this,
-    )..addStatusListener(_handleAnimationStatusChanged);
-    _previousAnimation = new CurvedAnimation(
-      parent: _previousController,
-      curve: Curves.easeIn
-    );
-    _previousAnimation.addListener(_onProgressChanged);
-
+    )..addStatusListener(_handlePreviousAnimationStatusChanged);
     _currentController = new AnimationController(
-    duration: _kFloatingActionButtonSegue,
+      duration: _kFloatingActionButtonSegue,
       vsync: this,
     );
-    _currentAnimation = new CurvedAnimation(
-      parent: _currentController,
-      curve: Curves.easeIn
-    );
-    _currentAnimation.addListener(_onProgressChanged);
+
+    _updateAnimations();
 
     if (widget.child != null) {
       // If we start out with a child, have the child appear fully visible instead
@@ -728,6 +714,10 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     final bool newChildIsNull = widget.child == null;
     if (oldChildIsNull == newChildIsNull && oldWidget.child?.key == widget.child?.key)
       return;
+    if (oldWidget.fabMotionAnimator != widget.fabMotionAnimator || oldWidget.fabMoveAnimation != oldWidget.fabMoveAnimation) {
+      // Get the right scale and rotation animations to use for this widget.
+      _updateAnimations();
+    }
     if (_previousController.status == AnimationStatus.dismissed) {
       final double currentValue = _currentController.value;
       if (currentValue == 0.0 || oldWidget.child == null) {
@@ -749,7 +739,42 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     }
   }
 
-  void _handleAnimationStatusChanged(AnimationStatus status) {
+  void _updateAnimations() {
+    // Get the animations for entrance and exit.
+    final CurvedAnimation previousScaleAnimation = new CurvedAnimation(
+      parent: _previousController,
+      curve: Curves.easeIn,
+    );
+    final Animation<double> previousRotationAnimation = new Tween<double>(begin: 1.0, end: 1.0).animate(
+      new CurvedAnimation(parent: _previousController, curve: Curves.easeIn),
+    );
+
+
+    final CurvedAnimation currentScaleAnimation = new CurvedAnimation(
+      parent: _currentController,
+      curve: Curves.easeIn,
+    );
+    final Animation<double> currentRotationAnimation = new Tween<double>(
+      begin: 1.0 - _kFloatingActionButtonTurnInterval, 
+      end: 1.0,
+    ).animate(
+      new CurvedAnimation(parent: _previousController, curve: Curves.easeIn),
+    );
+
+    // Get the motion and scale animations.
+    final Animation<double> moveScaleAnimation = widget.fabMotionAnimator.getScaleAnimation(parent: widget.fabMoveAnimation);
+    final Animation<double> moveRotationAnimation = widget.fabMotionAnimator.getRotationAnimation(parent: widget.fabMoveAnimation);
+    
+    // Aggregate all the animations.
+    _aggregateScaleAnimation?.removeListener(_onProgressChanged);
+    
+    _aggregateScaleAnimation = new AnimationMin<double>(moveScaleAnimation, new _ChainedAnimation(previousScaleAnimation, currentScaleAnimation));
+    _aggregateScaleAnimation.addListener(_onProgressChanged);
+
+    _aggregateRotationAnimation = new AnimationMin<double>(moveRotationAnimation, new AnimationMax<double>(previousRotationAnimation, currentRotationAnimation));
+  }
+
+  void _handlePreviousAnimationStatusChanged(AnimationStatus status) {
     setState(() {
       if (status == AnimationStatus.dismissed) {
         assert(_currentController.status == AnimationStatus.dismissed);
@@ -761,44 +786,17 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[];
-    if (_currentAnimation.status == AnimationStatus.completed && widget.child != null) { 
-      return new ScaleTransition(
-        scale: widget.fabMotionAnimator.getScaleAnimation(parent: widget.fabMoveAnimation),
-        child: new RotationTransition(
-          turns: widget.fabMotionAnimator.getRotationAnimation(parent: widget.fabMoveAnimation),
-          child: widget.child,
-        ),
-        
-      );
-    }
-    if (_previousAnimation.status != AnimationStatus.dismissed) {
-      children.add(new ScaleTransition(
-        scale: _previousAnimation,
-        child: _previousChild,
-      ));
-    }
-    if (_currentAnimation.status != AnimationStatus.dismissed) {
-      children.add(new ScaleTransition(
-        scale: _currentAnimation,
-        child: new RotationTransition(
-          turns: new Tween<double>(begin: 1.0 - _kFloatingActionButtonTurnInterval, end: 1.0).animate(_currentAnimation),
-          child: widget.child,
-        )
-      ));
-    }
-    return new Stack(children: children);
+    return new ScaleTransition(
+      scale: _aggregateScaleAnimation,
+      child: new RotationTransition(
+        turns: _aggregateRotationAnimation,
+        child: widget.child ?? _previousChild,
+      ),
+    );
   }
 
   void _onProgressChanged() {
-    if (_previousAnimation.status != AnimationStatus.dismissed) {
-      _updateGeometryScale(_previousAnimation.value);
-      return;
-    }
-    if (_currentAnimation.status != AnimationStatus.dismissed) {
-      _updateGeometryScale(_currentAnimation.value);
-      return;
-    }
+    _updateGeometryScale(_aggregateScaleAnimation.value);
   }
 
   void _updateGeometryScale(double scale) {
@@ -806,6 +804,25 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       floatingActionButtonScale: scale,
     );
   }
+}
+
+// Animation that gets the value of its next animation if and only if its
+// first animation is dismissed.
+//
+// Requires the owner of the first and second animations to start and end
+// those animations appropriately.
+class _ChainedAnimation extends CompoundAnimation<double> {
+  _ChainedAnimation(Animation<double> first, Animation<double> next) : super(first: first, next: next);
+  
+  @override
+  double get value {
+    if (!first.isDismissed) {
+      return first.value;
+    } else {
+      return next.value;
+    }
+  }
+
 }
 
 /// Implements the basic material design visual layout structure.
