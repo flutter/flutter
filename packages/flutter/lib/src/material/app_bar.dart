@@ -209,7 +209,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will
-  /// be the same as the the app bar's overall height.
+  /// be the same as the app bar's overall height.
   ///
   /// A flexible space isn't actually flexible unless the [AppBar]'s container
   /// changes the [AppBar]'s size. A [SliverAppBar] in a [CustomScrollView]
@@ -795,7 +795,7 @@ class SliverAppBar extends StatefulWidget {
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will
-  /// be the same as the the app bar's overall height.
+  /// be the same as the app bar's overall height.
   ///
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
   final Widget flexibleSpace;

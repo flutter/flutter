@@ -1061,7 +1061,7 @@ const TextStyle _messageStyle = const TextStyle(
 /// constructor was called from.
 ///
 /// A [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
-/// adds this interface to the [Widget] class when the the
+/// adds this interface to the [Widget] class when the
 /// `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
 /// required as injecting creation locations requires a
 /// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).

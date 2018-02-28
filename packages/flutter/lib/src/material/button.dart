@@ -229,7 +229,7 @@ class MaterialButton extends StatelessWidget {
   /// The color to use for this button's text.
   final Color textColor;
 
-  /// The the button's fill color, displayed by its [Material], while the button
+  /// The button's fill color, displayed by its [Material], while the button
   /// is in its default (unpressed, enabled) state.
   ///
   /// Defaults to null, meaning that the color is automatically derived from the [Theme].
