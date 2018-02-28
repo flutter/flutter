@@ -764,7 +764,7 @@ class NotifyingLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation: false,
-    int progressIndicatorPadding: 52,
+    int progressIndicatorPadding: kDefaultStatusPadding,
   }) {
     printStatus(message);
     return new Status();
@@ -906,12 +906,15 @@ class _AppRunLogger extends Logger {
   }
 }
 
-class _AppLoggerStatus implements Status {
+class _AppLoggerStatus extends Status {
   _AppLoggerStatus(this.logger, this.id, this.progressId);
 
   final _AppRunLogger logger;
   final int id;
   final String progressId;
+
+  @override
+  void start() {}
 
   @override
   void stop() {
