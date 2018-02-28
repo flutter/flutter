@@ -2,12 +2,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("$flutter_root/common/config.gni")
+
 group("flutter") {
   testonly = true
 
   public_deps = [
-    "$flutter_root/lib/snapshot:kernel_platform_files",
     "$flutter_root/lib/snapshot:generate_snapshot_bin",
+    "$flutter_root/lib/snapshot:kernel_platform_files",
     "$flutter_root/sky",
     "$flutter_root/third_party/txt",
   ]
@@ -65,28 +67,61 @@ if (is_fuchsia) {
     deps = [
       "$flutter_root/content_handler:aot",
     ]
+    if (flutter_runtime_mode != "release") {
+      deps += [
+        "//third_party/dart/runtime/observatory:embedded_observatory_archive",
+      ]
+    }
 
     binary = "flutter_aot_runner"
 
-    meta = [ {
-      path = rebase_path("content_handler/meta/sandbox")
-      dest = "sandbox"
-    } ]
+    if (flutter_runtime_mode != "release") {
+      resources = [
+        {
+          path = rebase_path(
+                  "$root_gen_dir/observatory/embedded_archive_observatory.tar")
+          dest = "observatory.tar"
+        },
+      ]
+    }
+
+    meta = [
+      {
+        path = rebase_path("content_handler/meta/sandbox")
+        dest = "sandbox"
+      },
+    ]
   }
 
   package("flutter_jit_runner") {
     deps = [
       "$flutter_root/content_handler:jit",
     ]
+    if (flutter_runtime_mode != "release") {
+      deps += [
+        "//third_party/dart/runtime/observatory:embedded_observatory_archive",
+      ]
+    }
 
     binary = "flutter_jit_runner"
 
-    meta = [ {
-      path = rebase_path("content_handler/meta/sandbox")
-      dest = "sandbox"
-    } ]
-  }
+    if (flutter_runtime_mode != "release") {
+      resources = [
+        {
+          path = rebase_path(
+                  "$root_gen_dir/observatory/embedded_archive_observatory.tar")
+          dest = "observatory.tar"
+        },
+      ]
+    }
 
+    meta = [
+      {
+        path = rebase_path("content_handler/meta/sandbox")
+        dest = "sandbox"
+      },
+    ]
+  }
 } else {
   group("dist") {
     testonly = true

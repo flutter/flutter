@@ -45,6 +45,7 @@
 #include "lib/fxl/arraysize.h"
 #include "lib/fxl/build_config.h"
 #include "lib/fxl/files/path.h"
+#include "lib/fxl/files/file.h"
 #include "lib/fxl/logging.h"
 #include "lib/fxl/time/time_delta.h"
 #include "lib/tonic/converter/dart_converter.h"
@@ -68,7 +69,7 @@ using tonic::ToDart;
 namespace dart {
 namespace observatory {
 
-#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
+#if !OS(FUCHSIA) && FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
 
 // These two symbols are defined in |observatory_archive.cc| which is generated
 // by the |//third_party/dart/runtime/observatory:archive_observatory| rule.
@@ -427,11 +428,21 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 Dart_Handle GetVMServiceAssetsArchiveCallback() {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
   return nullptr;
-#else   // FLUTTER_RUNTIME_MODE
+#elif OS(FUCHSIA)
+  std::vector<uint8_t> observatory_assets_archive;
+  if (!files::ReadFileToVector("pkg/data/observatory.tar",
+                               &observatory_assets_archive)) {
+    FXL_LOG(ERROR) << "Fail to load Observatory archive";
+    return nullptr;
+  }
+  return tonic::DartConverter<tonic::Uint8List>::ToDart(
+      observatory_assets_archive.data(),
+      observatory_assets_archive.size());
+#else
   return tonic::DartConverter<tonic::Uint8List>::ToDart(
       ::dart::observatory::observatory_assets_archive,
       ::dart::observatory::observatory_assets_archive_len);
-#endif  // FLUTTER_RUNTIME_MODE
+#endif
 }
 
 static const char kStdoutStreamId[] = "Stdout";
