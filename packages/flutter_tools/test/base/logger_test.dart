@@ -34,7 +34,7 @@ void main() {
     AnsiSpinner ansiSpinner;
     AnsiStatus ansiStatus;
     int called;
-    final RegExp secondDigits = new RegExp(r'\b\b\b\b\b[0-9]+[.][0-9]+(?:s|ms)');
+    final RegExp secondDigits = new RegExp(r'[^\b]\b\b\b\b\b[0-9]+[.][0-9]+(?:s|ms)');
 
     setUp(() {
       mockStdio = new MockStdio();
@@ -161,6 +161,5 @@ void main() {
       expect(lines[0], isNot(endsWith('\b \b\b \b')));
       expect(lines.length, equals(2));
     }, overrides: <Type, Generator>{Stdio: () => mockStdio});
-
   });
 }

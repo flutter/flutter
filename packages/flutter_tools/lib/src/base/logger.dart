@@ -114,6 +114,7 @@ class StdoutLogger extends Logger {
     if (terminal.supportsColor) {
       _status = new AnsiStatus(message, expectSlowOperation, () { _status = null; }, progressIndicatorPadding)..start();
     } else {
+      printStatus(message);
       _status = new Status()..start();
     }
     return _status;
@@ -377,21 +378,23 @@ class AnsiStatus extends AnsiSpinner {
     if (!_finished) {
       onFinish();
       _finished = true;
-      super.stop();
+      super.cancel();
+      summaryInformation();
     }
   }
 
   @override
-  /// Backs up 5 characters and prints a (minimum) 5 character padded time.  If
+  /// Backs up 4 characters and prints a (minimum) 5 character padded time.  If
   /// [expectSlowOperation] is true, the time is in seconds; otherwise,
-  /// milliseconds.
+  /// milliseconds.  Only backs up 4 characters because [super.cancel] backs
+  /// up one.
   ///
   /// Example: '\b\b\b\b 0.5s', '\b\b\b\b150ms', '\b\b\b\b1600ms'
   void summaryInformation() {
     if (expectSlowOperation) {
-      stdout.writeln('\b\b\b\b\b${getElapsedAsSeconds(stopwatch.elapsed).padLeft(5)}');
+      stdout.writeln('\b\b\b\b${getElapsedAsSeconds(stopwatch.elapsed).padLeft(5)}');
     } else {
-      stdout.writeln('\b\b\b\b\b${getElapsedAsMilliseconds(stopwatch.elapsed).padLeft(5)}');
+      stdout.writeln('\b\b\b\b${getElapsedAsMilliseconds(stopwatch.elapsed).padLeft(5)}');
     }
   }
 
