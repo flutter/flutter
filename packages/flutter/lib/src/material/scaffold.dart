@@ -1421,14 +1421,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _floatingActionButtonPositioner = newPositioner;
     });
 
-    // Only animate if there is a Floating Action Button to animate with.
-    // Otherwise, simply make sure the animation is at the end in 
-    // case a new Floating Action Button is added.
-    if (widget.floatingActionButton != null) {
-      _floatingActionButtonMoveController.forward(from: restartAnimationFrom);
-    } else {
-      _floatingActionButtonMoveController.value = _floatingActionButtonMoveController.upperBound;
-    }
+    // Animate the motion even when the fab is null so that if the exit animation is running,
+    // the old fab will start the motion transition while it exits instead of jumping to the
+    // new position.
+    _floatingActionButtonMoveController.forward(from: restartAnimationFrom);
   }
 
   // iOS FEATURES - status bar tap, back gesture
