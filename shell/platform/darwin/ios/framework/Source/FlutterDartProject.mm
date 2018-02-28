@@ -60,16 +60,6 @@ static NSURL* URLForSwitch(const fxl::StringView name) {
   return self;
 }
 
-- (instancetype)initWithFLXArchive:(NSURL*)archiveURL
-                          dartMain:(NSURL*)dartMainURL
-                          packages:(NSURL*)dartPackages {
-  return nil;
-}
-
-- (instancetype)initWithFLXArchiveWithScriptSnapshot:(NSURL*)archiveURL {
-  return nil;
-}
-
 - (instancetype)initWithFlutterAssets:(NSURL*)flutterAssetsURL
                              dartMain:(NSURL*)dartMainURL
                              packages:(NSURL*)dartPackages {
