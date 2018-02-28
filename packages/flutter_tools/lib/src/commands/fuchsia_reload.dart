@@ -129,7 +129,11 @@ class FuchsiaReloadCommand extends FlutterCommand {
       ).toList();
       final FuchsiaDevice device = new FuchsiaDevice(
           fullAddresses[0], name: _address);
-      final FlutterDevice flutterDevice = new FlutterDevice(device);
+      final FlutterDevice flutterDevice = new FlutterDevice(
+        device,
+        trackWidgetCreation: false,
+        previewDart2: false,
+      );
       flutterDevice.observatoryUris = observatoryUris;
       final HotRunner hotRunner = new HotRunner(
         <FlutterDevice>[flutterDevice],
