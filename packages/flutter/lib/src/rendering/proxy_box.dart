@@ -1080,8 +1080,11 @@ class ShapeBorderClipper extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(covariant ShapeBorderClipper oldClipper) {
-    return oldClipper.shape != shape;
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    if (oldClipper.runtimeType != ShapeBorderClipper)
+      return true;
+    final ShapeBorderClipper typedOldClipper = oldClipper;
+    return typedOldClipper.shape != shape;
   }
 }
 
