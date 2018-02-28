@@ -29,6 +29,7 @@ const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
   'docs': _generateDocs,
   'analyze': _analyzeRepo,
   'tests': _runTests,
+  'tests_dart2': _runTestsDart2,
   'coverage': _runCoverage,
 };
 
@@ -129,35 +130,50 @@ Future<Null> _analyzeRepo() async {
   print('${bold}DONE: Analysis successful.$reset');
 }
 
-Future<Null> _runTests() async {
+Future<Null> _runTestsDart2() async {
+  if (Platform.isWindows) {
+    // AppVeyor platform is overloaded, won't be able to handle additional
+    // load of dart2 testing.
+    return;
+  }
+  _runTests(options: <String>['--preview-dart-2']);
+}
+
+Future<Null> _runTests({List<String> options: const <String>[]}) async {
   // Verify that the tests actually return failure on failure and success on success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'fail_test.dart'),
+    options: options,
     expectFailure: true,
     printOutput: false,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'pass_test.dart'),
+    options: options,
     printOutput: false,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'crash1_test.dart'),
+    options: options,
     expectFailure: true,
     printOutput: false,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'crash2_test.dart'),
+    options: options,
     expectFailure: true,
     printOutput: false,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
+    options: options,
     expectFailure: true,
     printOutput: false,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
+    options: options,
     expectFailure: true,
     printOutput: false,
   );
@@ -171,21 +187,21 @@ Future<Null> _runTests() async {
   await _verifyVersion(path.join(flutterRoot, 'version'));
 
   // Run tests.
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: options);
   await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
 
-  await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'));
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'));
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'));
+  await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), options: options);
 
   print('${bold}DONE: All tests successful.$reset');
 }
@@ -356,8 +372,13 @@ Future<Null> _runFlutterTest(String workingDirectory, {
 
 Future<Null> _runAllDartTests(String workingDirectory, {
   Map<String, String> environment,
+  List<String> options,
 }) {
-  final List<String> args = <String>['--checked', path.join('test', 'all.dart')];
+  final List<String> args = <String>['--checked'];
+  if (options != null) {
+    args.addAll(options);
+  }
+  args.add(path.join('test', 'all.dart'));
   return _runCommand(dart, args,
     workingDirectory: workingDirectory,
     environment: environment,
