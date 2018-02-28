@@ -597,7 +597,7 @@ class _DiffTester {
 
   /// Creates an initial semantics list using the `from` list, then updates the
   /// list to the `to` list. This causes [RenderCustomPaint] to diff the two
-  /// lists and apply the changes. This method asserts the the changes were
+  /// lists and apply the changes. This method asserts the changes were
   /// applied correctly, specifically:
   ///
   /// - checks that initial and final configurations are in the desired states.
