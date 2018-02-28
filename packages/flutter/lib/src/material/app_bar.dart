@@ -347,6 +347,8 @@ class _AppBarState extends State<AppBar> {
 
     final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
 
+    // TODO(xster): remove once https://github.com/flutter/flutter/issues/4630
+    // is fixed.
     if (parentRoute?.isCurrent == true) {
       SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
         ? SystemUiOverlayStyle.light
