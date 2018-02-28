@@ -205,9 +205,9 @@ class _FlutterPlatform extends PlatformPlugin {
       if (previewDart2) {
         mainDart = await compile(
           sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-          incrementalCompilerByteStorePath: '' /* not null is enough */,
           mainPath: listenerFile.path,
           packagesPath: PackageMap.globalPackagesPath,
+          linkPlatformKernelIn: true
         );
 
         if (mainDart == null) {
