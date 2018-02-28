@@ -232,6 +232,25 @@ class OutlineButton extends StatefulWidget {
 
   @override
   _OutlineButtonState createState() => new _OutlineButtonState();
+
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    description.add(new DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: 2.0));
+    description.add(new DiagnosticsProperty<BorderSide>('borderSide', borderSide, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('disabledBorderColor', disabledBorderColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('highlightedBorderColor', highlightedBorderColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+  }
 }
 
 class _OutlineButtonState extends State<OutlineButton> with SingleTickerProviderStateMixin {
