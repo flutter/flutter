@@ -1203,10 +1203,10 @@ void main() {
                   onPressed: () {
                     Navigator.push<void>(context, new MaterialPageRoute<void>(
                       builder: (BuildContext context) {
-                        return new Theme(
-                          data: new ThemeData.light(),
-                          child: new Scaffold(
-                            appBar: new AppBar(title: const Text('Page 2')),
+                        return new Scaffold(
+                          appBar: new AppBar(
+                            title: const Text('Page 2'),
+                            brightness: Brightness.light,
                           ),
                         );
                       },
@@ -1220,16 +1220,43 @@ void main() {
       ),
     );
     await tester.idle();
+    // The default chrome style is light. Setting it to light again via the
+    // first default dark blue AppBar is redundant.
+    expect(
+      log,
+      isNot(
+        contains(
+          isMethodCall(
+            'SystemChrome.setSystemUIOverlayStyle',
+            arguments: 'SystemUiOverlayStyle.light',
+          ),
+        ),
+      ),
+    );
 
     await tester.tap(find.text('Next Page'));
     await tester.pump(const Duration(seconds: 1));
     await tester.idle();
 
+    // The first AppBar shouldn't call setSystemUIOverlayStyle (and end up
+    // setting it back to light) at all.
+    expect(
+      log,
+      isNot(
+        contains(
+          isMethodCall(
+            'SystemChrome.setSystemUIOverlayStyle',
+            arguments: 'SystemUiOverlayStyle.light',
+          ),
+        ),
+      ),
+    );
+    // The second AppBar sets chrome style to dark.
     expect(
       log.last,
       isMethodCall(
         'SystemChrome.setSystemUIOverlayStyle',
-        arguments: <String>['SystemUiOverlayStyle.light'],
+        arguments: 'SystemUiOverlayStyle.dark',
       ),
     );
   });
