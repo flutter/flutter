@@ -44,6 +44,10 @@ ArgParser _argParser = new ArgParser(allowTrailingOptions: true)
   ..addFlag('strong',
       help: 'Run compiler in strong mode (uses strong mode semantics)',
       defaultsTo: false)
+  ..addFlag('tfa',
+      help:
+          'Enable global type flow analysis and related transformations in AOT mode.',
+      defaultsTo: false)
   ..addFlag('link-platform',
       help:
           'When in batch mode, link platform kernel file into result kernel file.'
@@ -145,7 +149,7 @@ class _FrontendCompiler implements CompilerInterface {
   BinaryPrinterFactory printerFactory;
 
   CompilerOptions _compilerOptions;
-  Uri _entryPoint;
+  Uri _mainSource;
   ArgResults _options;
 
   IncrementalCompiler _generator;
@@ -155,7 +159,7 @@ class _FrontendCompiler implements CompilerInterface {
   final bool trackWidgetCreation;
   WidgetCreatorTracker widgetCreatorTracker;
 
-  void setEntrypointFilename(String filename) {
+  void setMainSourceFilename(String filename) {
     final Uri filenameUri = Uri.base.resolveUri(new Uri.file(filename));
     _kernelBinaryFilenameFull = _options['output-dill'] ?? '$filename.dill';
     _kernelBinaryFilenameIncremental =
@@ -164,7 +168,7 @@ class _FrontendCompiler implements CompilerInterface {
         ? '${_options["output-dill"]}.incremental.dill'
         : '$filename.incremental.dill';
     _kernelBinaryFilename = _kernelBinaryFilenameFull;
-    _entryPoint = filenameUri;
+    _mainSource = filenameUri;
   }
 
   @override
@@ -174,7 +178,7 @@ class _FrontendCompiler implements CompilerInterface {
     IncrementalCompiler generator,
   }) async {
     _options = options;
-    setEntrypointFilename(filename);
+    setMainSourceFilename(filename);
     final String boundaryKey = new Uuid().generateV4();
     _outputStream.writeln('result $boundaryKey');
     final Uri sdkRoot = _ensureFolderPath(options['sdk-root']);
@@ -201,8 +205,21 @@ class _FrontendCompiler implements CompilerInterface {
           sdkRoot.resolve(platformKernelDill)
         ];
       }
-      program = await _runWithPrintRedirection(() =>
-          compileToKernel(_entryPoint, compilerOptions, aot: options['aot']));
+      final bool aot = options['aot'];
+      final List<String> entryPoints = <String>[];
+      if (aot) {
+        for (String entryPointsFile in <String>[
+          'entry_points.json',
+          'entry_points_extra.json',
+        ]) {
+          entryPoints.add(sdkRoot.resolve(entryPointsFile).toFilePath());
+        }
+      }
+      program = await _runWithPrintRedirection(() => compileToKernel(
+          _mainSource, compilerOptions,
+          aot: aot,
+          useGlobalTypeFlowAnalysis: options['tfa'],
+          entryPoints: entryPoints));
     }
     runFlutterSpecificKernelTransforms(program);
     if (program != null) {
@@ -279,9 +296,10 @@ class _FrontendCompiler implements CompilerInterface {
     _outputStream.writeln('result $boundaryKey');
     await invalidateIfBootstrapping();
     if (filename != null) {
-      setEntrypointFilename(filename);
+      setMainSourceFilename(filename);
     }
-    final Program deltaProgram = await _generator.compile(entryPoint: _entryPoint);
+    final Program deltaProgram =
+        await _generator.compile(entryPoint: _mainSource);
     runFlutterSpecificKernelTransforms(deltaProgram);
     final IOSink sink = new File(_kernelBinaryFilename).openWrite();
     final BinaryPrinter printer = printerFactory.newBinaryPrinter(sink);
@@ -309,7 +327,7 @@ class _FrontendCompiler implements CompilerInterface {
   }
 
   IncrementalCompiler _createGenerator(Uri bootstrapDill) {
-    return new IncrementalCompiler(_compilerOptions, _entryPoint,
+    return new IncrementalCompiler(_compilerOptions, _mainSource,
         bootstrapDill: bootstrapDill);
   }
 

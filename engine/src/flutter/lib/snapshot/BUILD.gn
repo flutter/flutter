@@ -4,6 +4,7 @@
 
 import("$flutter_root/lib/ui/dart_ui.gni")
 import("//third_party/dart/utils/compile_platform.gni")
+import("//third_party/dart/utils/generate_entry_points_json.gni")
 
 if (is_fuchsia) {
   import("//build/dart/toolchain.gni")
@@ -291,5 +292,41 @@ group("kernel_platform_files") {
   public_deps = [
     ":non_strong_platform",
     ":strong_platform",
+  ]
+}
+
+generate_entry_points_json_with_gen_snapshot("entry_points_json") {
+  input = "$flutter_root/lib/snapshot/snapshot.dart"
+  output = "$root_out_dir/flutter_patched_sdk/entry_points.json"
+  dart_ui = "$flutter_root/lib/ui/ui.dart"
+  vmservice_io = "//third_party/dart/runtime/bin/vmservice/vmservice_io.dart"
+  dart_vm_entry_points_txt = "$flutter_root/runtime/dart_vm_entry_points.txt"
+  dart_io_entries_txt = "//third_party/dart/runtime/bin/dart_io_entries.txt"
+
+  extra_inputs = [
+    dart_ui,
+    vmservice_io,
+    dart_vm_entry_points_txt,
+    dart_io_entries_txt,
+  ]
+
+  extra_args = [
+    "--await_is_keyword",
+    "--url_mapping=dart:ui," + rebase_path(dart_ui),
+    "--url_mapping=dart:vmservice_io," + rebase_path(vmservice_io),
+    "--causal_async_stacks",
+    "--embedder_entry_points_manifest=" + rebase_path(dart_vm_entry_points_txt),
+    "--embedder_entry_points_manifest=" + rebase_path(dart_io_entries_txt),
+  ]
+}
+
+copy_entry_points_extra_json("entry_points_extra_json") {
+  output = "$root_out_dir/flutter_patched_sdk/entry_points_extra.json"
+}
+
+group("entry_points_json_files") {
+  public_deps = [
+    ":entry_points_json",
+    ":entry_points_extra_json",
   ]
 }
