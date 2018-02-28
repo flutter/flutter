@@ -20,7 +20,6 @@ import java.util.Map;
 
 public class FlutterPluginRegistry
   implements PluginRegistry,
-             PluginRegistry.RequestPermissionResultListener,
              PluginRegistry.RequestPermissionsResultListener,
              PluginRegistry.ActivityResultListener,
              PluginRegistry.NewIntentListener,
@@ -118,17 +117,14 @@ public class FlutterPluginRegistry
             return this;
         }
 
-        @Override
-        @Deprecated
-        public Registrar addRequestPermissionResultListener(
-                final RequestPermissionResultListener listener) {
-            return addRequestPermissionsResultListener(new RequestPermissionsResultListener() {
-                @Override
-                public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-                    return listener.onRequestPermissionResult(requestCode, permissions, grantResults);
-                }
-            });
-        }
+       /*
+        * Method addRequestPermissionResultListener(RequestPermissionResultListener)
+        * was made unavailable on 2018-02-28, following deprecation.
+        * This comment is left as a temporary tombstone for reference, to be removed
+        * on 2018-03-28 (or at least four weeks after release of unavailability).
+        *
+        * https://github.com/flutter/flutter/wiki/Changelog#typo-fixed-in-flutter-engine-android-api
+        */
 
         @Override
         public Registrar addRequestPermissionsResultListener(
@@ -172,11 +168,14 @@ public class FlutterPluginRegistry
         return false;
     }
 
-    @Deprecated
-    @Override
-    public boolean onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) {
-      return onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
+    /*
+     * Method onRequestPermissionResult(int, String[], int[]) was made
+     * unavailable on 2018-02-28, following deprecation. This comment is left as
+     * a temporary tombstone for reference, to be removed on 2018-03-28 (or at
+     * least four weeks after release of unavailability).
+     *
+     * https://github.com/flutter/flutter/wiki/Changelog#typo-fixed-in-flutter-engine-android-api
+     */
 
     @Override
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
