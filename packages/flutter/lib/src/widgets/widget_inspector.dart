@@ -1101,6 +1101,9 @@ class _Location {
       'line': line,
       'column': column,
     };
+    if (name != null) {
+      json['name'] = name;
+    }
     if (parameterLocations != null) {
       json['parameterLocations'] = parameterLocations.map<Map<String, Object>>(
           (_Location location) => location.toJsonMap()).toList();
