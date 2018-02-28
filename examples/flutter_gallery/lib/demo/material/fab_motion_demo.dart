@@ -21,18 +21,18 @@ class FabMotionDemo extends StatefulWidget {
 class _FabMotionDemoState extends State<FabMotionDemo> {
   static const List<FloatingActionButtonPositioner> _floatingActionButtonPositioners = const <FloatingActionButtonPositioner>[
     FloatingActionButtonPositioner.endFloat, 
-    FloatingActionButtonPositioner.centerFloat, 
+    FloatingActionButtonPositioner.centerFloat,
+    const _DockedFloatingActionButton(),
     const _TopStartFloatingActionButtonPositioner(),
   ];
 
+  bool _showFab = true;
   FloatingActionButtonPositioner _floatingActionButtonPositioner = FloatingActionButtonPositioner.endFloat;
 
   @override
   Widget build(BuildContext context) {
-    final Widget scaffold = new Scaffold(
-      appBar: new AppBar(title: const Text('FAB Positioner'), bottom: const PreferredSize(preferredSize: const Size.fromHeight(48.0), child: const SizedBox())),
-      floatingActionButtonPositioner: _floatingActionButtonPositioner,
-      floatingActionButton: new Builder(builder: (BuildContext context) {
+    final Widget floatingActionButton = _showFab 
+      ? new Builder(builder: (BuildContext context) {
         // We use a widget builder here so that this inner context can find the Scaffold.
         // This makes it possible to show the snackbar.
         return new FloatingActionButton(
@@ -40,11 +40,29 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
           onPressed: () => _showSnackbar(context),
           child: const Icon(Icons.add), 
         );
-      }),
+      }) 
+      : null;
+    final Widget scaffold = new Scaffold(
+      appBar: new AppBar(title: const Text('FAB Positioner'), bottom: const PreferredSize(preferredSize: const Size.fromHeight(48.0), child: const SizedBox())),
+      floatingActionButtonPositioner: _floatingActionButtonPositioner,
+      floatingActionButton: floatingActionButton, 
+      bottomNavigationBar: new BottomAppBar(color: Theme.of(context).primaryColor, child: const SizedBox(height: 56.0)),
       body: new Center(
-        child: new RaisedButton(
-          onPressed: _moveFab,
-          child: const Text('MOVE FAB'),
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            new RaisedButton(
+              onPressed: _moveFab,
+              child: const Text('MOVE FAB'),
+            ),
+            new Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text('Toggle FAB'),
+                new Switch(value: _showFab, onChanged: _toggleFab),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -54,6 +72,12 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
   void _moveFab() {
     setState(() {
       _floatingActionButtonPositioner = _floatingActionButtonPositioners[(_floatingActionButtonPositioners.indexOf(_floatingActionButtonPositioner) + 1) % _floatingActionButtonPositioners.length];
+    });
+  }
+
+  void _toggleFab(bool showFab) {
+    setState(() {
+      _showFab = showFab;
     });
   }
 
@@ -78,6 +102,17 @@ class _TopStartFloatingActionButtonPositioner extends FloatingActionButtonPositi
       break;
     }
     final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
+    return new Offset(fabX, fabY);
+  }
+}
+
+class _DockedFloatingActionButton extends FloatingActionButtonPositioner {
+  const _DockedFloatingActionButton();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final double fabX = scaffoldGeometry.scaffoldSize.width / 2.0 - scaffoldGeometry.floatingActionButtonSize.width / 2.0;
+    final double fabY = scaffoldGeometry.contentBottom - scaffoldGeometry.floatingActionButtonSize.height / 2.0;
     return new Offset(fabX, fabY);
   }
 }

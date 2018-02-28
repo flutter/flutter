@@ -666,11 +666,15 @@ class _FloatingActionButtonTransition extends StatefulWidget {
 
 class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTransition> with TickerProviderStateMixin {
   // The animations applied to the Floating Action Button when it is entering or exiting.
+  // Controls the previous widget.child as it exits
   AnimationController _previousController;
+  Animation<double> _previousScaleAnimation;
+  Animation<double> _previousRotationAnimation;
+  // Controls the current child widget.child as it exits
   AnimationController _currentController;
   // The animations to run, considering the widget's fabMoveAnimation and the current/previous entrance/exit animations.
-  Animation<double> _aggregateScaleAnimation;
-  Animation<double> _aggregateRotationAnimation;
+  Animation<double> _currentScaleAnimation;
+  Animation<double> _currentRotationAnimation;
   Widget _previousChild;
 
   @override
@@ -681,6 +685,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       duration: _kFloatingActionButtonSegue,
       vsync: this,
     )..addStatusListener(_handlePreviousAnimationStatusChanged);
+    
     _currentController = new AnimationController(
       duration: _kFloatingActionButtonSegue,
       vsync: this,
@@ -741,37 +746,38 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   void _updateAnimations() {
     // Get the animations for entrance and exit.
-    final CurvedAnimation previousScaleAnimation = new CurvedAnimation(
+    final CurvedAnimation previousExitScaleAnimation = new CurvedAnimation(
       parent: _previousController,
       curve: Curves.easeIn,
     );
-    final Animation<double> previousRotationAnimation = new Tween<double>(begin: 1.0, end: 1.0).animate(
+    final Animation<double> previousExitRotationAnimation = new Tween<double>(begin: 1.0, end: 1.0).animate(
       new CurvedAnimation(parent: _previousController, curve: Curves.easeIn),
     );
 
-
-    final CurvedAnimation currentScaleAnimation = new CurvedAnimation(
+    final CurvedAnimation currentEntranceScaleAnimation = new CurvedAnimation(
       parent: _currentController,
       curve: Curves.easeIn,
     );
-    final Animation<double> currentRotationAnimation = new Tween<double>(
+    final Animation<double> currentEntranceRotationAnimation = new Tween<double>(
       begin: 1.0 - _kFloatingActionButtonTurnInterval, 
       end: 1.0,
     ).animate(
-      new CurvedAnimation(parent: _previousController, curve: Curves.easeIn),
+      new CurvedAnimation(parent: _currentController, curve: Curves.easeIn),
     );
 
-    // Get the motion and scale animations.
+    // Get the animations for when the FAB is moving.
     final Animation<double> moveScaleAnimation = widget.fabMotionAnimator.getScaleAnimation(parent: widget.fabMoveAnimation);
     final Animation<double> moveRotationAnimation = widget.fabMotionAnimator.getRotationAnimation(parent: widget.fabMoveAnimation);
     
-    // Aggregate all the animations.
-    _aggregateScaleAnimation?.removeListener(_onProgressChanged);
-    
-    _aggregateScaleAnimation = new AnimationMin<double>(moveScaleAnimation, new _ChainedAnimation(previousScaleAnimation, currentScaleAnimation));
-    _aggregateScaleAnimation.addListener(_onProgressChanged);
+    // Aggregate the animations.
+    _previousScaleAnimation = new AnimationMin<double>(moveScaleAnimation, previousExitScaleAnimation);
+    _currentScaleAnimation = new AnimationMin<double>(moveScaleAnimation, currentEntranceScaleAnimation);
 
-    _aggregateRotationAnimation = new AnimationMin<double>(moveRotationAnimation, new AnimationMax<double>(previousRotationAnimation, currentRotationAnimation));
+    _previousRotationAnimation = new TrainHoppingAnimation(previousExitRotationAnimation, moveRotationAnimation);
+    _currentRotationAnimation = new TrainHoppingAnimation(currentEntranceRotationAnimation, moveRotationAnimation);
+
+    _currentScaleAnimation.addListener(_onProgressChanged);
+    _previousScaleAnimation.addListener(_onProgressChanged);
   }
 
   void _handlePreviousAnimationStatusChanged(AnimationStatus status) {
@@ -786,17 +792,30 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   @override
   Widget build(BuildContext context) {
-    return new ScaleTransition(
-      scale: _aggregateScaleAnimation,
+     final List<Widget> children = <Widget>[];
+    if (_previousController.status != AnimationStatus.dismissed) {
+      children.add(new ScaleTransition(
+        scale: _previousScaleAnimation,
+        child: new RotationTransition(
+          turns: _previousRotationAnimation,
+          child: _previousChild,
+        ),
+      ));
+    }
+    children.add(new ScaleTransition(
+      scale: _currentScaleAnimation,
       child: new RotationTransition(
-        turns: _aggregateRotationAnimation,
-        child: widget.child ?? _previousChild,
+        turns: _currentRotationAnimation,
+        child: widget.child,
       ),
-    );
+    ));
+    return new Stack(children: children);
   }
 
   void _onProgressChanged() {
-    _updateGeometryScale(_aggregateScaleAnimation.value);
+    final double scale = math.max(_previousScaleAnimation.value, _currentScaleAnimation.value);
+    print('Updating scale to $scale');
+    _updateGeometryScale(scale);
   }
 
   void _updateGeometryScale(double scale) {
