@@ -73,6 +73,7 @@ Future<int> run(
     context.putIfAbsent(Config, () => new Config());
 
     // Order-independent context entries
+    context.putIfAbsent(BotDetector, () => const BotDetector());
     context.putIfAbsent(DeviceManager, () => new DeviceManager());
     context.putIfAbsent(DevFSConfig, () => new DevFSConfig());
     context.putIfAbsent(Doctor, () => new Doctor());

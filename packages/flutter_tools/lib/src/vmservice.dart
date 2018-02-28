@@ -248,6 +248,8 @@ class VMService {
   }
 
   Future<Null> waitForViews({int attempts = 5, int attemptSeconds = 1}) async {
+    if (!vm.isFlutterEngine)
+      return;
     await vm.refreshViews();
     for (int i = 0; (vm.firstView == null) && (i < attempts); i++) {
       // If the VM doesn't yet have a view, wait for one to show up.
@@ -587,6 +589,7 @@ class VM extends ServiceObjectOwner {
       _heapAllocatedMemoryUsage = map['_heapAllocatedMemoryUsage'];
     }
     _maxRSS = map['_maxRSS'];
+    _embedder = map['_embedder'];
 
     // Remove any isolates which are now dead from the isolate cache.
     _removeDeadIsolates(map['isolates']);
@@ -614,6 +617,12 @@ class VM extends ServiceObjectOwner {
   /// The peak resident set size for the process.
   int _maxRSS;
   int get maxRSS => _maxRSS == null ? 0 : _maxRSS;
+
+  // The embedder's name, Flutter or dart_runner.
+  String _embedder;
+  String get embedder => _embedder;
+  bool get isFlutterEngine => embedder == 'Flutter';
+  bool get isDartRunner => embedder == 'dart_runner';
 
   int _compareIsolates(Isolate a, Isolate b) {
     final DateTime aStart = a.startTime;
@@ -850,6 +859,8 @@ class VM extends ServiceObjectOwner {
   }
 
   Future<Null> refreshViews() async {
+    if (!isFlutterEngine)
+      return;
     _viewCache.clear();
     await vmService.vm.invokeRpc('_flutter.listViews', timeout: kLongRequestTimeout);
   }

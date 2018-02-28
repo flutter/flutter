@@ -939,6 +939,94 @@ void main() {
       expect(listenerState.numNotifications, greaterThan(numNotificationsAtLastFrame));
       numNotificationsAtLastFrame = listenerState.numNotifications;
     });
+
+    testWidgets('set floatingActionButtonNotch', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = (Rect container, Rect notch, Offset start, Offset end) => null;
+      await tester.pumpWidget(new MaterialApp(
+          home: new Scaffold(
+            body: new ConstrainedBox(
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+            floatingActionButton: new ComputeNotchSetter(computeNotch),
+          )
+      ));
+
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      ScaffoldGeometry geometry = listenerState.cache.value;
+
+      expect(
+        geometry.floatingActionButtonNotch,
+        computeNotch,
+      );
+
+      await tester.pumpWidget(new MaterialApp(
+          home: new Scaffold(
+            body: new ConstrainedBox(
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+          )
+      ));
+
+      await tester.pump(const Duration(seconds: 3));
+
+      geometry = listenerState.cache.value;
+
+      expect(
+        geometry.floatingActionButtonNotch,
+        null,
+      );
+    });
+
+    testWidgets('closing an inactive floatingActionButtonNotch is a no-op', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = (Rect container, Rect notch, Offset start, Offset end) => null;
+      await tester.pumpWidget(new MaterialApp(
+          home: new Scaffold(
+            body: new ConstrainedBox(
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+            floatingActionButton: new ComputeNotchSetter(computeNotch),
+          )
+      ));
+
+      final ComputeNotchSetterState computeNotchSetterState = tester.state(find.byType(ComputeNotchSetter));
+
+      final VoidCallback clearFirstComputeNotch = computeNotchSetterState.clearComputeNotch;
+
+      final ComputeNotch computeNotch2 = (Rect container, Rect notch, Offset start, Offset end) => null;
+      await tester.pumpWidget(new MaterialApp(
+          home: new Scaffold(
+            body: new ConstrainedBox(
+              constraints: const BoxConstraints.expand(height: 80.0),
+              child: new GeometryListener(),
+            ),
+            floatingActionButton: new ComputeNotchSetter(
+              computeNotch2,
+              // We're setting a key to make sure a new ComputeNotchSetterState is
+              // created.
+              key: new GlobalKey(),
+            ),
+          )
+      ));
+
+      await tester.pump(const Duration(seconds: 3));
+
+      // At this point the first notch maker was replaced by the second one.
+      // We call the clear callback for the first notch maker and verify that
+      // the second notch maker is still set.
+
+      clearFirstComputeNotch();
+
+      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final ScaffoldGeometry geometry = listenerState.cache.value;
+
+      expect(
+        geometry.floatingActionButtonNotch,
+        computeNotch2,
+      );
+    });
   });
 }
 
@@ -983,7 +1071,7 @@ class GeometryListenerState extends State<GeometryListener> {
 // To fetch it for the tests we implement this CustomPainter that just
 // caches the ScaffoldGeometry value in its paint method.
 class GeometryCachePainter extends CustomPainter {
-  GeometryCachePainter(this.geometryListenable);
+  GeometryCachePainter(this.geometryListenable) : super(repaint: geometryListenable);
 
   final ValueListenable<ScaffoldGeometry> geometryListenable;
 
@@ -996,5 +1084,35 @@ class GeometryCachePainter extends CustomPainter {
   @override
   bool shouldRepaint(GeometryCachePainter oldDelegate) {
     return true;
+  }
+}
+
+class ComputeNotchSetter extends StatefulWidget {
+  const ComputeNotchSetter(this.computeNotch, {Key key}): super(key: key);
+
+  final ComputeNotch computeNotch;
+
+  @override
+  State createState() => new ComputeNotchSetterState();
+}
+
+class ComputeNotchSetterState extends State<ComputeNotchSetter> {
+
+  VoidCallback clearComputeNotch;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    clearComputeNotch = Scaffold.setFloatingActionButtonNotchFor(context, widget.computeNotch);
+  }
+
+  @override
+  void deactivate() {
+    clearComputeNotch();
+    super.deactivate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container();
   }
 }
