@@ -20,30 +20,24 @@ void main() {
   });
 
   test('Haptic feedback variation tests', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    Future<void> callAndVerifyHapticFunction(Function hapticFunction, String platformMethodArgument) async {
+      final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-      log.add(methodCall);
-    });
+      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+        log.add(methodCall);
+      });
 
-    const List<Function> hapticFunctions = const <Function>[
-      HapticFeedback.lightImpact,
-      HapticFeedback.mediumImpact,
-      HapticFeedback.heavyImpact,
-      HapticFeedback.selectionClick,
-    ];
-    final RegExp functionName = new RegExp(r".*\'(\w+)\'");
-
-    for (int i = 0; i < hapticFunctions.length; i++) {
-      await Function.apply(hapticFunctions[i], null);
-      expect(log, hasLength(i + 1));
+      await Function.apply(hapticFunction, null);
+      expect(log, hasLength(1));
       expect(
         log.last,
-        isMethodCall(
-          'HapticFeedback.vibrate',
-          arguments: 'HapticFeedbackType.${functionName.firstMatch(hapticFunctions[i].toString()).group(1)}',
-        ),
+        isMethodCall('HapticFeedback.vibrate', arguments: platformMethodArgument),
       );
     }
+
+    await callAndVerifyHapticFunction(HapticFeedback.lightImpact, 'HapticFeedbackType.lightImpact');
+    await callAndVerifyHapticFunction(HapticFeedback.mediumImpact, 'HapticFeedbackType.mediumImpact');
+    await callAndVerifyHapticFunction(HapticFeedback.heavyImpact, 'HapticFeedbackType.heavyImpact');
+    await callAndVerifyHapticFunction(HapticFeedback.selectionClick, 'HapticFeedbackType.selectionClick');
   });
 }
