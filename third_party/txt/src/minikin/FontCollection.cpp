@@ -292,6 +292,14 @@ const std::shared_ptr<FontFamily>& FontCollection::getFamilyForChar(
     uint32_t langListId,
     int variant) const {
   if (ch >= mMaxChar) {
+    // libtxt: check if the fallback font provider can match this character
+    if (mFallbackFontProvider) {
+      const std::shared_ptr<FontFamily>& fallback =
+          mFallbackFontProvider->matchFallbackFont(ch);
+      if (fallback) {
+        return fallback;
+      }
+    }
     return mFamilies[0];
   }
 

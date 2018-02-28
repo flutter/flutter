@@ -32,15 +32,6 @@ namespace txt {
 
 namespace {
 
-// Example characters representing character classes that may require a
-// fallback font.
-const std::vector<SkUnichar> fallback_characters{
-    0x1f600,  // emoji
-    0x4e00,   // CJK
-    0x5d0,    // Hebrew
-    0x627,    // Arabic
-};
-
 // Font families that will be used as a last resort if no font manager provides
 // a font matching a particular character.
 const std::vector<std::string> last_resort_fonts{
@@ -201,19 +192,6 @@ FontCollection::GetFontFamilyForTypeface(const sk_sp<SkTypeface>& typeface) {
 }
 
 void FontCollection::UpdateFallbackFonts(sk_sp<SkFontMgr> manager) {
-  // Prepopulate the fallback font cache with fonts matching some widely
-  // used character classes.
-  for (SkUnichar fallback_char : fallback_characters) {
-    sk_sp<SkTypeface> typeface(manager->matchFamilyStyleCharacter(
-        0, SkFontStyle(), nullptr, 0, fallback_char));
-    if (typeface) {
-      // Create a Minikin font family for this typeface if one does not already
-      // exist.
-      GetFontFamilyForTypeface(typeface);
-    }
-  }
-
-  // Add additional font families to be used if nothing else matches.
   for (const std::string& family : last_resort_fonts) {
     sk_sp<SkTypeface> typeface(
         manager->matchFamilyStyle(family.c_str(), SkFontStyle()));
