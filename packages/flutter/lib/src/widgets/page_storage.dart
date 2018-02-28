@@ -20,7 +20,7 @@ import 'framework.dart';
 ///
 /// For example, to ensure that the scroll offsets for the scrollable within
 /// each `MyScrollableTabView` below are restored when the [TabBarView]
-/// is recreated, we've specified [PageStorageKey]s whose values are the the
+/// is recreated, we've specified [PageStorageKey]s whose values are the
 /// tabs' string labels.
 ///
 /// ```dart

@@ -700,7 +700,7 @@ void main() {
     expect(appBarTop(tester), lessThanOrEqualTo(-128.0));
 
     // Drag the scrollable up and down. The app bar should not snap open, its
-    // height should just track the the drag offset.
+    // height should just track the drag offset.
     TestGesture gesture = await tester.startGesture(const Offset(50.0, 256.0));
     await gesture.moveBy(const Offset(0.0, 128.0)); // drag the appbar all the way open
     await tester.pump();
