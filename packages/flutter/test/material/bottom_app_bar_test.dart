@@ -86,6 +86,40 @@ void main() {
     expect(physicalShape.color, const Color(0xff0000ff));
   });
 
+  // This is a regression test for a bug we had where toggling hasNotch
+  // will crash, as the shouldReclip method of ShapeBorderClipper or
+  // _BottomAppBarClipper will try an illegal downcast.
+  testWidgets('toggle hasNotch', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          bottomNavigationBar: const BottomAppBar(
+            hasNotch: true,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          bottomNavigationBar: const BottomAppBar(
+            hasNotch: false,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          bottomNavigationBar: const BottomAppBar(
+            hasNotch: true,
+          ),
+        ),
+      ),
+    );
+  });
   // TODO(amirh): test a BottomAppBar with hasNotch=false and an overlapping
   // FAB.
   //
