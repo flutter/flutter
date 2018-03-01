@@ -48,6 +48,9 @@ ArgParser _argParser = new ArgParser(allowTrailingOptions: true)
       help:
           'Enable global type flow analysis and related transformations in AOT mode.',
       defaultsTo: false)
+  ..addOption('entry-points',
+      help: 'Path to JSON file with the list of entry points',
+      allowMultiple: true)
   ..addFlag('link-platform',
       help:
           'When in batch mode, link platform kernel file into result kernel file.'
@@ -206,21 +209,11 @@ class _FrontendCompiler implements CompilerInterface {
           sdkRoot.resolve(platformKernelDill)
         ];
       }
-      final bool aot = options['aot'];
-      final List<String> entryPoints = <String>[];
-      if (aot) {
-        for (String entryPointsFile in <String>[
-          'entry_points.json',
-          'entry_points_extra.json',
-        ]) {
-          entryPoints.add(sdkRoot.resolve(entryPointsFile).toFilePath());
-        }
-      }
       program = await _runWithPrintRedirection(() => compileToKernel(
           _mainSource, compilerOptions,
-          aot: aot,
+          aot: options['aot'],
           useGlobalTypeFlowAnalysis: options['tfa'],
-          entryPoints: entryPoints));
+          entryPoints: options['entry-points']));
     }
     runFlutterSpecificKernelTransforms(program);
     if (program != null) {
