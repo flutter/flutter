@@ -36,7 +36,8 @@ const Duration _kElevationDuration = const Duration(milliseconds: 75);
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
 ///
-/// Outline buttons will expand to fit the child widget, if necessary.
+/// Outline buttons have a minimum size of 88.0 by 36.0 which can be overidden
+/// with [ButtonTheme.minWidth] and [ButtonTheme.minHeight].
 ///
 /// See also:
 ///

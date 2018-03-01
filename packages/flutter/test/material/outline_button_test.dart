@@ -38,8 +38,9 @@ void main() {
     await tester.pumpWidget(
       buildFrame(null),
     );
-    expect(tester.widget<OutlineButton>(find.byType(OutlineButton)).enabled, false);
-    await tester.tap(find.byType(OutlineButton));
+    final Finder outlineButton = find.byType(OutlineButton);
+    expect(tester.widget<OutlineButton>(outlineButton).enabled, false);
+    await tester.tap(outlineButton);
     await tester.pumpAndSettle();
     expect(pressedCount, 1);
   });

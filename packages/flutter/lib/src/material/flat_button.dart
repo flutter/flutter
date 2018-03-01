@@ -34,7 +34,8 @@ import 'theme.dart';
 /// trying to change the button's [color] and it is not having any effect, check
 /// that you are passing a non-null [onPressed] handler.
 ///
-/// Flat buttons will expand to fit the child widget, if necessary.
+/// Flat buttons have a minimum size of 88.0 by 36.0 which can be overidden
+/// with [ButtonTheme.minWidth] and [ButtonTheme.minHeight].
 ///
 /// See also:
 ///
@@ -43,7 +44,7 @@ import 'theme.dart';
 ///  * [SimpleDialogOption], which is used in [SimpleDialog]s.
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
-//// * [RawMaterialButton], the widget this widget is based on.
+///  * [RawMaterialButton], the widget this widget is based on.
 ///  * <https://material.google.com/components/buttons.html>
 class FlatButton extends StatelessWidget {
   /// Create a simple text button.

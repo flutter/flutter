@@ -28,7 +28,8 @@ import 'theme.dart';
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
 ///
-/// Raised buttons will expand to fit the child widget, if necessary.
+/// Raised buttons have a minimum size of 88.0 by 36.0 which can be overidden
+/// with [ButtonTheme.minWidth] and [ButtonTheme.minHeight].
 ///
 /// See also:
 ///
@@ -37,7 +38,7 @@ import 'theme.dart';
 ///  * [FloatingActionButton], the round button in material applications.
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
-//// * [RawMaterialButton], the widget this widget is based on.
+///  * [RawMaterialButton], the widget this widget is based on.
 ///  * <https://material.google.com/components/buttons.html>
 class RaisedButton extends StatelessWidget {
   /// Create a filled button.
