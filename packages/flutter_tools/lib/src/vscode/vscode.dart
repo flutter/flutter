@@ -148,8 +148,8 @@ class VsCode {
   //   $HOME/.vscode-insiders/extensions
   static List<VsCode> _installedLinux() {
     return _findInstalled(<_VsCodeInstallLocation>[
-      new _VsCodeInstallLocation('/usr/share/code', '.vscode'),
-      new _VsCodeInstallLocation('/usr/share/code-insiders', '.vscode-insiders', isInsiders: true)
+      const _VsCodeInstallLocation('/usr/share/code', '.vscode'),
+      const _VsCodeInstallLocation('/usr/share/code-insiders', '.vscode-insiders', isInsiders: true)
     ]);
   }
 
@@ -191,6 +191,6 @@ class _VsCodeInstallLocation {
   final String extensionsFolder;
   final String edition;
   final bool isInsiders;
-  _VsCodeInstallLocation(this.installPath, this.extensionsFolder, { this.edition, bool isInsiders })
+  const _VsCodeInstallLocation(this.installPath, this.extensionsFolder, { this.edition, bool isInsiders })
     : this.isInsiders = isInsiders ?? false;
 }
