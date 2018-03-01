@@ -136,7 +136,7 @@ class TestRecordingPaintingContext implements PaintingContext {
   }
 
   @override
-  void noSuchMethod(Invocation invocation) { print('Method ${invocation.memberName} not implemented.'); }
+  void noSuchMethod(Invocation invocation) { }
 }
 
 class _MethodCall implements Invocation {

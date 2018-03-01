@@ -125,35 +125,10 @@ void main() {
     expect(sliderTheme.disabledThumbColor, equals(customColor2.withAlpha(0x52)));
     expect(sliderTheme.overlayColor, equals(customColor1.withAlpha(0x29)));
     expect(sliderTheme.valueIndicatorColor, equals(customColor1.withAlpha(0xff)));
-    expect(sliderTheme.thumbShape, equals(const isInstanceOf<DefaultSliderThumbShape>()));
+    expect(sliderTheme.thumbShape, equals(const isInstanceOf<RoundSliderThumbShape>()));
     expect(sliderTheme.valueIndicatorShape,
-        equals(const isInstanceOf<DefaultSliderValueIndicatorShape>()));
+        equals(const isInstanceOf<PaddleSliderValueIndicatorShape>()));
     expect(sliderTheme.showValueIndicator, equals(ShowValueIndicator.onlyForDiscrete));
-  });
-
-  testWidgets('SliderThemeData generates correct opacities when generated from a theme',
-      (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
-      platform: TargetPlatform.android,
-      primarySwatch: Colors.red,
-    );
-
-    final SliderThemeData sliderTheme = new SliderThemeData.fromTheme(theme: theme);
-
-    expect(sliderTheme.activeRailColor, equals(theme.primaryColor.withAlpha(0xff)));
-    expect(sliderTheme.inactiveRailColor, equals(theme.primaryColor.withAlpha(0x3d)));
-    expect(sliderTheme.disabledActiveRailColor, equals(theme.primaryColorDark.withAlpha(0x52)));
-    expect(sliderTheme.disabledInactiveRailColor, equals(theme.primaryColorDark.withAlpha(0x1f)));
-    expect(sliderTheme.activeTickMarkColor, equals(theme.primaryColorLight.withAlpha(0x8a)));
-    expect(sliderTheme.inactiveTickMarkColor, equals(theme.primaryColor.withAlpha(0x8a)));
-    expect(
-        sliderTheme.disabledActiveTickMarkColor, equals(theme.primaryColorLight.withAlpha(0x1f)));
-    expect(
-        sliderTheme.disabledInactiveTickMarkColor, equals(theme.primaryColorDark.withAlpha(0x1f)));
-    expect(sliderTheme.thumbColor, equals(theme.primaryColor.withAlpha(0xff)));
-    expect(sliderTheme.disabledThumbColor, equals(theme.primaryColorDark.withAlpha(0x52)));
-    expect(sliderTheme.overlayColor, equals(theme.primaryColor.withAlpha(0x29)));
-    expect(sliderTheme.valueIndicatorColor, equals(theme.primaryColor.withAlpha(0xff)));
   });
 
   testWidgets('SliderThemeData lerps correctly', (WidgetTester tester) async {

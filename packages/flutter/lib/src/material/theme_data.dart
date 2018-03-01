@@ -337,12 +337,10 @@ class ThemeData extends Diagnosticable {
   /// icons placed on top of the primary color (e.g. toolbar text).
   final Brightness primaryColorBrightness;
 
-  /// A lighter version of the primary color, used for showing subtle differences
-  /// in the parts of components.
+  /// A lighter version of the [primaryColor].
   final Color primaryColorLight;
 
-  /// A darker version of the primary color, used for showing subtle differences
-  /// in the parts of components.
+  /// A darker version of the [primaryColor].
   final Color primaryColorDark;
 
   /// The foreground color for widgets (knobs, text, overscroll edge effect, etc).
@@ -462,8 +460,9 @@ class ThemeData extends Diagnosticable {
   /// An icon theme that contrasts with the accent color.
   final IconThemeData accentIconTheme;
 
-  /// A slider theme that describes the colors and shapes used in
-  /// application sliders.
+  /// The colors and shapes used to render [Slider].
+  ///
+  /// This is the value returned from [SliderTheme.of].
   final SliderThemeData sliderTheme;
 
   /// The platform the material widgets should adapt to target.

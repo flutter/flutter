@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
+import 'dart:math' as math;
 import 'dart:ui' show Path;
 
 import 'package:flutter/foundation.dart';
@@ -16,11 +16,11 @@ import 'theme_data.dart';
 /// Applies a slider theme to descendant [Slider] widgets.
 ///
 /// A slider theme describes the colors and shape choices of the slider
-/// components in an application.
+/// components.
 ///
 /// Descendant widgets obtain the current theme's [SliderThemeData] object using
 /// [SliderTheme.of]. When a widget uses [SliderTheme.of], it is automatically
-/// rebuilt if the theme later changes, so that the changes can be applied.
+/// rebuilt if the theme later changes.
 ///
 /// See also:
 ///
@@ -80,8 +80,7 @@ class SliderTheme extends InheritedWidget {
 }
 
 /// Describes the conditions under which the value indicator on a [Slider]
-/// will be shown. Used to set the [SliderThemeData.showValueIndicator]
-/// field in a [SliderThemeData].
+/// will be shown. Used with [SliderThemeData.showValueIndicator].
 ///
 /// See also:
 ///
@@ -97,7 +96,7 @@ enum ShowValueIndicator {
   /// where [Slider.divisions] is null).
   onlyForContinuous,
 
-  /// The value indicator will be show for all types of sliders.
+  /// The value indicator will be shown for all types of sliders.
   always,
 
   /// The value indicator will never be shown.
@@ -128,8 +127,8 @@ enum ShowValueIndicator {
 ///
 /// The thumb and the value indicator may have their shapes and behavior
 /// customized by creating your own [SliderComponentShape] that does what
-/// you want. See [DefaultSliderThumbShape] and
-/// [DefaultSliderValueIndicatorShape] for examples.
+/// you want. See [RoundSliderThumbShape] and
+/// [PaddleSliderValueIndicatorShape] for examples.
 ///
 /// See also:
 ///
@@ -145,6 +144,10 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes.
+  ///
+  /// The simplest way to create a SliderThemeData is to use
+  /// [copyWith] on the one you get from [SliderTheme.of], or create an
+  /// entirely new one with [SliderThemeData.materialDefaults].
   const SliderThemeData({
     @required this.activeRailColor,
     @required this.inactiveRailColor,
@@ -182,8 +185,8 @@ class SliderThemeData extends Diagnosticable {
   /// Usually these are the primary, dark and light colors from
   /// a [ThemeData].
   ///
-  /// The opacities of these colors will be ignored when assigning
-  /// opacities for the theme component colors.
+  /// The opacities of these colors will be overridden with the Material Design
+  /// defaults when assigning them to the slider theme component colors.
   ///
   /// This is used to generate the default slider theme for a [ThemeData].
   factory SliderThemeData.materialDefaults({
@@ -229,20 +232,9 @@ class SliderThemeData extends Diagnosticable {
       disabledThumbColor: primaryColorDark.withAlpha(disabledThumbAlpha),
       overlayColor: primaryColor.withAlpha(overlayLightAlpha),
       valueIndicatorColor: primaryColor.withAlpha(valueIndicatorAlpha),
-      thumbShape: const DefaultSliderThumbShape(),
-      valueIndicatorShape: const DefaultSliderValueIndicatorShape(),
+      thumbShape: const RoundSliderThumbShape(),
+      valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
       showValueIndicator: ShowValueIndicator.onlyForDiscrete,
-    );
-  }
-
-  /// A slider theme created from the given theme, with Material Design defaults for
-  /// opacity and text style.
-  factory SliderThemeData.fromTheme({ThemeData theme}) {
-    final ThemeData fallbackTheme = new ThemeData.fallback();
-    return new SliderThemeData.materialDefaults(
-      primaryColor: theme?.primaryColor ?? fallbackTheme.primaryColor,
-      primaryColorLight: theme?.primaryColorLight ?? fallbackTheme.primaryColorLight,
-      primaryColorDark: theme?.primaryColorDark ?? fallbackTheme.primaryColorDark,
     );
   }
 
@@ -393,7 +385,12 @@ class SliderThemeData extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    final SliderThemeData defaultData = new SliderThemeData.fromTheme();
+    final ThemeData defaultTheme = new ThemeData.fallback();
+    final SliderThemeData defaultData = new SliderThemeData.materialDefaults(
+      primaryColor: defaultTheme.primaryColor,
+      primaryColorDark: defaultTheme.primaryColorDark,
+      primaryColorLight: defaultTheme.primaryColorLight,
+    );
     description.add(new DiagnosticsProperty<Color>('activeRailColor', activeRailColor,
         defaultValue: defaultData.activeRailColor));
     description.add(new DiagnosticsProperty<Color>('inactiveRailColor', inactiveRailColor,
@@ -440,8 +437,8 @@ class SliderThemeData extends Diagnosticable {
 ///
 /// See also:
 ///
-///  * [DefaultSliderThumbShape] for a simple example of a thumb shape.
-///  * [DefaultSliderValueIndicatorShape], for a complex example of a value
+///  * [RoundSliderThumbShape] for a simple example of a thumb shape.
+///  * [PaddleSliderValueIndicatorShape], for a complex example of a value
 ///    indicator shape.
 abstract class SliderComponentShape {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -476,8 +473,16 @@ abstract class SliderComponentShape {
   );
 }
 
-class DefaultSliderThumbShape extends SliderComponentShape {
-  const DefaultSliderThumbShape();
+/// This is the default shape to a [Slider]'s thumb if no
+/// other shape is specified.
+///
+/// See also:
+///
+///  * [Slider] for the component that this is meant to display this shape.
+///  * [SliderThemeData] where an instance of this class is set to inform the
+///    slider of the shape of the its thumb.
+class RoundSliderThumbShape extends SliderComponentShape {
+  const RoundSliderThumbShape();
   static const double _thumbRadius = 6.0;
   static const double _disabledThumbRadius = 4.0;
 
@@ -512,8 +517,16 @@ class DefaultSliderThumbShape extends SliderComponentShape {
   }
 }
 
-class DefaultSliderValueIndicatorShape extends SliderComponentShape {
-  const DefaultSliderValueIndicatorShape();
+/// This is the default shape to a [Slider]'s value indicator if no
+/// other shape is specified.
+///
+/// See also:
+///
+///  * [Slider] for the component that this is meant to display this shape.
+///  * [SliderThemeData] where an instance of this class is set to inform the
+///    slider of the shape of the its value indicator.
+class PaddleSliderValueIndicatorShape extends SliderComponentShape {
+  const PaddleSliderValueIndicatorShape();
 
   // These constants define the shape of the default value indicator.
   // The value indicator changes shape based on the size of
@@ -527,10 +540,10 @@ class DefaultSliderValueIndicatorShape extends SliderComponentShape {
   static const double _bottomLobeRadius = 6.0;
   // The starting angle for the bottom lobe. Picked to get the desired
   // thickness for the neck.
-  static const double _bottomLobeStartAngle = -1.1 * pi / 4.0;
+  static const double _bottomLobeStartAngle = -1.1 * math.pi / 4.0;
   // The ending angle for the bottom lobe. Picked to get the desired
   // thickness for the neck.
-  static const double _bottomLobeEndAngle = 1.1 * 5 * pi / 4.0;
+  static const double _bottomLobeEndAngle = 1.1 * 5 * math.pi / 4.0;
   // The padding on either side of the label.
   static const double _labelPadding = 8.0;
   static const double _distanceBetweenTopBottomCenters = 40.0;
@@ -541,9 +554,9 @@ class DefaultSliderValueIndicatorShape extends SliderComponentShape {
   // Used to calculate the position of the center of the arc.
   static const double _neckTriangleHypotenuse = _topLobeRadius + _topNeckRadius;
   // Some convenience values to help readability.
-  static const double _twoSeventyDegrees = 3.0 * pi / 2.0;
-  static const double _ninetyDegrees = pi / 2.0;
-  static const double _thirtyDegrees = pi / 6.0;
+  static const double _twoSeventyDegrees = 3.0 * math.pi / 2.0;
+  static const double _ninetyDegrees = math.pi / 2.0;
+  static const double _thirtyDegrees = math.pi / 6.0;
   static const Size preferredSize =
       const Size.fromHeight(_distanceBetweenTopBottomCenters + _topLobeRadius + _bottomLobeRadius);
 
@@ -565,18 +578,18 @@ class DefaultSliderValueIndicatorShape extends SliderComponentShape {
   // the value indicator, so we reuse it for each one.
   static void _generateBottomLobe() {
     const double bottomNeckRadius = 4.5;
-    const double bottomNeckStartAngle = _bottomLobeEndAngle - pi;
+    const double bottomNeckStartAngle = _bottomLobeEndAngle - math.pi;
     const double bottomNeckEndAngle = 0.0;
 
     final Path path = new Path();
     final Offset bottomKnobStart = new Offset(
-      _bottomLobeRadius * cos(_bottomLobeStartAngle),
-      _bottomLobeRadius * sin(_bottomLobeStartAngle),
+      _bottomLobeRadius * math.cos(_bottomLobeStartAngle),
+      _bottomLobeRadius * math.sin(_bottomLobeStartAngle),
     );
     final Offset bottomNeckRightCenter = bottomKnobStart +
         new Offset(
-          bottomNeckRadius * cos(bottomNeckStartAngle),
-          -bottomNeckRadius * sin(bottomNeckStartAngle),
+          bottomNeckRadius * math.cos(bottomNeckStartAngle),
+          -bottomNeckRadius * math.sin(bottomNeckStartAngle),
         );
     final Offset bottomNeckLeftCenter = new Offset(
       -bottomNeckRightCenter.dx,
@@ -591,8 +604,8 @@ class DefaultSliderValueIndicatorShape extends SliderComponentShape {
       path,
       bottomNeckRightCenter,
       bottomNeckRadius,
-      pi - bottomNeckEndAngle,
-      pi - bottomNeckStartAngle,
+      math.pi - bottomNeckEndAngle,
+      math.pi - bottomNeckStartAngle,
     );
     _addArc(
       path,
@@ -638,7 +651,7 @@ class DefaultSliderValueIndicatorShape extends SliderComponentShape {
     // This is the needed extra width for the label.  It is only positive when
     // the label exceeds the minimum size contained by the round top lobe.
     final double halfWidthNeeded =
-        max(0.0, inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding));
+        math.max(0.0, inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding));
 
     final Path path = new Path();
     final Offset bottomLobeEnd = _addBottomLobe(path);
@@ -647,13 +660,13 @@ class DefaultSliderValueIndicatorShape extends SliderComponentShape {
     final double neckTriangleBase = _topNeckRadius - bottomLobeEnd.dx;
     // The parameter that describes how far along the transition from round to
     // stretched we are.
-    final double t = max(0.0, min(1.0, halfWidthNeeded / neckTriangleBase));
+    final double t = math.max(0.0, math.min(1.0, halfWidthNeeded / neckTriangleBase));
     // The angle between the top neck arc's center and the top lobe's center
     // and vertical.
     final double theta = (1.0 - t) * _thirtyDegrees;
     // The center of the top left neck arc.
-    final Offset neckLeftCenter =
-        new Offset(-neckTriangleBase, _topLobeCenter.dy + cos(theta) * _neckTriangleHypotenuse);
+    final Offset neckLeftCenter = new Offset(
+        -neckTriangleBase, _topLobeCenter.dy + math.cos(theta) * _neckTriangleHypotenuse);
     final Offset topLobeShift = new Offset(halfWidthNeeded, 0.0);
     final double neckArcAngle = _ninetyDegrees - theta;
     _addArc(
@@ -666,14 +679,14 @@ class DefaultSliderValueIndicatorShape extends SliderComponentShape {
     _addArc(path, _topLobeCenter - topLobeShift, _topLobeRadius, _ninetyDegrees + theta,
         _twoSeventyDegrees);
     _addArc(path, _topLobeCenter + topLobeShift, _topLobeRadius, _twoSeventyDegrees,
-        _twoSeventyDegrees + pi - theta);
+        _twoSeventyDegrees + math.pi - theta);
     final Offset neckRightCenter = new Offset(-neckLeftCenter.dx, neckLeftCenter.dy);
     _addArc(
       path,
       neckRightCenter,
       _topNeckRadius,
-      pi + neckArcAngle,
-      pi,
+      math.pi + neckArcAngle,
+      math.pi,
     );
     canvas.drawPath(path, paint);
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -20,19 +20,32 @@ import 'theme.dart';
 /// Used to select from a range of values.
 ///
 /// A slider can be used to select from either a continuous or a discrete set of
-/// values. The default is use a continuous range of values from [min] to [max].
-/// To use discrete values, use a non-null value for [divisions], which
+/// values. The default is to use a continuous range of values from [min] to
+/// [max]. To use discrete values, use a non-null value for [divisions], which
 /// indicates the number of discrete intervals. For example, if [min] is 0.0 and
 /// [max] is 50.0 and [divisions] is 5, then the slider can take on the
 /// discrete values 0.0, 10.0, 20.0, 30.0, 40.0, and 50.0.
+///
+/// The terms for the parts of a slider are:
+///
+///  * The "thumb", which is a shape that slides horizontally when the user
+///    drags it.
+///  * The "rail", which is the line that the slider thumb slides along.
+///  * The "value indicator", which is a shape that pops up when the user
+///    is dragging the thumb to indicate the value being selected.
+///  * The "active" side of the slider is the side between the thumb and the
+///    minimum value.
+///  * The "inactive" side of the slider is the side between the thumb and the
+///    maximum value.
 ///
 /// The slider will be disabled if [onChanged] is null or if the range given by
 /// [min]..[max] is empty (i.e. if [min] is equal to [max]).
 ///
 /// The slider widget itself does not maintain any state. Instead, when the state
-/// of the slider changes, the widget calls the [onChanged] callback. Most widgets
-/// that use a slider will listen for the [onChanged] callback and rebuild the
-/// slider with a new [value] to update the visual appearance of the slider.
+/// of the slider changes, the widget calls the [onChanged] callback. Most
+/// widgets that use a slider will listen for the [onChanged] callback and
+/// rebuild the slider with a new [value] to update the visual appearance of the
+/// slider.
 ///
 /// By default, a slider will be as wide as possible, centered vertically. When
 /// given unbounded constraints, it will attempt to make the rail 144 pixels
@@ -78,7 +91,8 @@ class Slider extends StatefulWidget {
     this.label,
     this.activeColor,
     this.inactiveColor,
-  }) : assert(value != null),       assert(min != null),
+  }) : assert(value != null),
+       assert(min != null),
        assert(max != null),
        assert(min <= max),
        assert(value >= min && value <= max),
@@ -141,16 +155,24 @@ class Slider extends StatefulWidget {
 
   /// A label to show above the slider when the slider is active.
   ///
-  /// Typically used to display the value of a discrete slider.
+  /// It is used to display the value of a discrete slider, and it is displayed
+  /// as part of the value indicator shape.
   ///
   /// The label is rendered using the active [ThemeData]'s
   /// [ThemeData.accentTextTheme.body2] text style.
   ///
   /// If null, then the value indicator will not be displayed.
+  ///
+  /// See also:
+  ///
+  ///  * [SliderComponentShape] for how to create a custom value indicator
+  ///    shape.
   final String label;
 
-  /// The color to use for the portion of the slider rail that has been
-  /// selected.
+  /// The color to use for the portion of the slider rail that is active.
+  ///
+  /// The "active" side of the slider is the side between the thumb and the
+  /// minimum value.
   ///
   /// Defaults to [SliderTheme.activeRailColor] of the current [SliderTheme].
   ///
@@ -158,7 +180,10 @@ class Slider extends StatefulWidget {
   /// appearance of various components of the slider.
   final Color activeColor;
 
-  /// The color for the unselected portion of the slider rail.
+  /// The color for the inactive portion of the slider rail.
+  ///
+  /// The "inactive" side of the slider is the side between the thumb and the
+  /// maximum value.
   ///
   /// Defaults to the [SliderTheme.inactiveRailColor] of the current
   /// [SliderTheme].
@@ -180,40 +205,58 @@ class Slider extends StatefulWidget {
 }
 
 class _SliderState extends State<Slider> with TickerProviderStateMixin {
-  _SliderState() {
-    _reactionController = new AnimationController(
+  static const Duration enableAnimationDuration = const Duration(milliseconds: 75);
+  static const Duration positionAnimationDuration = const Duration(milliseconds: 75);
+
+  AnimationController reactionController;
+  AnimationController enableController;
+  AnimationController positionController;
+
+  @override
+  void initState() {
+    super.initState();
+    reactionController = new AnimationController(
       duration: kRadialReactionDuration,
       vsync: this,
     );
-    _enableController = new AnimationController(
-      duration: const Duration(milliseconds: 75),
+    enableController = new AnimationController(
+      duration: enableAnimationDuration,
       vsync: this,
     );
-    _positionController = new AnimationController(
-      duration: const Duration(milliseconds: 75),
+    positionController = new AnimationController(
+      duration: positionAnimationDuration,
       vsync: this,
     );
-  }
-
-  void _handleChanged(double value) {
-    assert(widget.onChanged != null);
-    final double transformedValue = value * (widget.max - widget.min) + widget.min;
-    widget.onChanged(transformedValue);
   }
 
   @override
   void dispose() {
-    _reactionController?.dispose();
-    _enableController?.dispose();
-    _positionController?.dispose();
+    reactionController.dispose();
+    enableController.dispose();
+    positionController.dispose();
     super.dispose();
   }
 
-  // Have to keep the animation controllers here so that we may dispose of
-  // them properly.
-  AnimationController _reactionController;
-  AnimationController _enableController;
-  AnimationController _positionController;
+  void _handleChanged(double value) {
+    assert(widget.onChanged != null);
+    final double transformedValue = _lerp(value);
+    widget.onChanged(transformedValue);
+  }
+
+  // Returns a number between min and max, proportional to value, which must
+  // be between 0.0 and 1.0.
+  double _lerp(double value) {
+    assert(value >= 0.0);
+    assert(value <= 1.0);
+    return value * (widget.max - widget.min) + widget.min;
+  }
+
+  // Returns a number between 0.0 and 1.0, given a value between min and max.
+  double _unlerp(double value) {
+    assert(value <= widget.max);
+    assert(value >= widget.min);
+    return widget.max > widget.min ? (widget.value - widget.min) / (widget.max - widget.min) : 0.0;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -237,17 +280,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     }
 
     return new _SliderRenderObjectWidget(
-      value:
-          widget.max > widget.min ? (widget.value - widget.min) / (widget.max - widget.min) : 0.0,
+      value: _unlerp(widget.value),
       divisions: widget.divisions,
       label: widget.label,
       sliderTheme: sliderTheme,
       textScaleFactor: MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
       onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
-      vsync: this,
-      reactionController: _reactionController,
-      enableController: _enableController,
-      positionController: _positionController,
+      state: this,
     );
   }
 }
@@ -261,10 +300,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.sliderTheme,
     this.textScaleFactor,
     this.onChanged,
-    this.vsync,
-    this.reactionController,
-    this.enableController,
-    this.positionController,
+    this.state,
   }) : super(key: key);
 
   final double value;
@@ -273,10 +309,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final SliderThemeData sliderTheme;
   final double textScaleFactor;
   final ValueChanged<double> onChanged;
-  final TickerProvider vsync;
-  final AnimationController reactionController;
-  final AnimationController enableController;
-  final AnimationController positionController;
+  final _SliderState state;
 
   @override
   _RenderSlider createRenderObject(BuildContext context) {
@@ -288,10 +321,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       theme: Theme.of(context),
       textScaleFactor: textScaleFactor,
       onChanged: onChanged,
-      vsync: vsync,
-      reactionController: reactionController,
-      enableController: enableController,
-      positionController: positionController,
+      state: state,
       textDirection: Directionality.of(context),
     );
   }
@@ -314,9 +344,9 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
 
 const double _overlayRadius = 16.0;
 const double _overlayDiameter = _overlayRadius * 2.0;
-const double _trackHeight = 2.0;
-const double _preferredTrackWidth = 144.0;
-const double _preferredTotalWidth = _preferredTrackWidth + _overlayDiameter;
+const double _railHeight = 2.0;
+const double _preferredRailWidth = 144.0;
+const double _preferredTotalWidth = _preferredRailWidth + _overlayDiameter;
 
 const double _adjustmentUnit = 0.1; // Matches iOS implementation of material slider.
 final Tween<double> _overlayRadiusTween = new Tween<double>(begin: 0.0, end: _overlayRadius);
@@ -330,12 +360,10 @@ class _RenderSlider extends RenderBox {
     ThemeData theme,
     double textScaleFactor,
     ValueChanged<double> onChanged,
-    TickerProvider vsync,
+    @required _SliderState state,
     @required TextDirection textDirection,
-    @required AnimationController reactionController,
-    @required AnimationController enableController,
-    @required AnimationController positionController,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
+       assert(state != null),
        assert(textDirection != null),
        _label = label,
        _value = value,
@@ -344,6 +372,7 @@ class _RenderSlider extends RenderBox {
        _theme = theme,
        _textScaleFactor = textScaleFactor,
        _onChanged = onChanged,
+       _state = state,
        _textDirection = textDirection {
     _updateLabelPainter();
     final GestureArenaTeam team = new GestureArenaTeam();
@@ -357,19 +386,18 @@ class _RenderSlider extends RenderBox {
       ..onTapCancel = _endInteraction
       ..onTapDown = _handleTapDown
       ..onTapUp = _handleTapUp;
-    _reactionController = reactionController;
-    _enableController = enableController;
-    _positionController = positionController;
-    _reaction = new CurvedAnimation(parent: _reactionController, curve: Curves.fastOutSlowIn)
+    _reaction = new CurvedAnimation(parent: state.reactionController, curve: Curves.fastOutSlowIn)
       ..addListener(markNeedsPaint);
-    _enableController.value = isInteractive ? 1.0 : 0.0;
-    _enableAnimation = new CurvedAnimation(parent: _enableController, curve: Curves.easeInOut)
+    state.enableController.value = isInteractive ? 1.0 : 0.0;
+    _enableAnimation = new CurvedAnimation(parent: state.enableController, curve: Curves.easeInOut)
       ..addListener(markNeedsPaint);
-    _positionController.value = _value;
+    state.positionController.value = _value;
   }
 
   double get value => _value;
   double _value;
+
+  _SliderState _state;
 
   set value(double newValue) {
     assert(newValue != null && newValue >= 0.0 && newValue <= 1.0);
@@ -379,9 +407,9 @@ class _RenderSlider extends RenderBox {
     }
     _value = convertedValue;
     if (isDiscrete) {
-      _positionController.animateTo(convertedValue, curve: Curves.easeInOut);
+      _state.positionController.animateTo(convertedValue, curve: Curves.easeInOut);
     } else {
-      _positionController.value = convertedValue;
+      _state.positionController.value = convertedValue;
     }
   }
 
@@ -438,7 +466,6 @@ class _RenderSlider extends RenderBox {
     }
     _textScaleFactor = value;
     _updateLabelPainter();
-    markNeedsPaint();
   }
 
   ValueChanged<double> get onChanged => _onChanged;
@@ -452,9 +479,9 @@ class _RenderSlider extends RenderBox {
     _onChanged = value;
     if (wasInteractive != isInteractive) {
       if (isInteractive) {
-        _enableController.forward();
+        _state.enableController.forward();
       } else {
-        _enableController.reverse();
+        _state.enableController.reverse();
       }
       markNeedsPaint();
       markNeedsSemanticsUpdate();
@@ -495,9 +522,6 @@ class _RenderSlider extends RenderBox {
 
   Animation<double> _reaction;
   Animation<double> _enableAnimation;
-  AnimationController _reactionController;
-  AnimationController _enableController;
-  AnimationController _positionController;
   final TextPainter _labelPainter = new TextPainter();
   HorizontalDragGestureRecognizer _drag;
   TapGestureRecognizer _tap;
@@ -536,7 +560,7 @@ class _RenderSlider extends RenderBox {
       _active = true;
       _currentDragValue = _getValueFromGlobalPosition(globalPosition);
       onChanged(_discretize(_currentDragValue));
-      _reactionController.forward();
+      _state.reactionController.forward();
     }
   }
 
@@ -544,7 +568,7 @@ class _RenderSlider extends RenderBox {
     if (_active) {
       _active = false;
       _currentDragValue = 0.0;
-      _reactionController.reverse();
+      _state.reactionController.reverse();
     }
   }
 
@@ -586,7 +610,7 @@ class _RenderSlider extends RenderBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return max(_overlayDiameter,
+    return math.max(_overlayDiameter,
         _sliderTheme.thumbShape.getPreferredSize(isInteractive, isDiscrete).width);
   }
 
@@ -618,11 +642,11 @@ class _RenderSlider extends RenderBox {
       Canvas canvas, Rect railLeft, Rect railRight, Paint leftPaint, Paint rightPaint) {
     if (isDiscrete) {
       // The ticks are tiny circles that are the same height as the rail.
-      const double tickRadius = _trackHeight / 2.0;
+      const double tickRadius = _railHeight / 2.0;
       final double railWidth = railRight.right - railLeft.left;
-      final double dx = (railWidth - _trackHeight) / divisions;
+      final double dx = (railWidth - _railHeight) / divisions;
       // If the ticks would be too dense, don't bother painting them.
-      if (dx >= 3.0 * _trackHeight) {
+      if (dx >= 3.0 * _railHeight) {
         for (int i = 0; i <= divisions; i += 1) {
           final double left = railLeft.left + i * dx;
           final Offset center = new Offset(left + tickRadius, railLeft.top + tickRadius);
@@ -654,7 +678,7 @@ class _RenderSlider extends RenderBox {
     final Canvas canvas = context.canvas;
 
     final double railLength = size.width - 2 * _overlayRadius;
-    final double value = _positionController.value;
+    final double value = _state.positionController.value;
     final ColorTween activeRailEnableColor = new ColorTween(
         begin: _sliderTheme.disabledActiveRailColor, end: _sliderTheme.activeRailColor);
     final ColorTween inactiveRailEnableColor = new ColorTween(
@@ -695,7 +719,7 @@ class _RenderSlider extends RenderBox {
         break;
     }
 
-    const double railRadius = _trackHeight / 2.0;
+    const double railRadius = _railHeight / 2.0;
     const double thumbGap = 2.0;
 
     final double railVerticalCenter = offset.dy + (size.height) / 2.0;
@@ -707,9 +731,9 @@ class _RenderSlider extends RenderBox {
     final double thumbRadius =
         _sliderTheme.thumbShape.getPreferredSize(isInteractive, isDiscrete).width / 2.0;
     final double railActiveLeft =
-        max(0.0, railActive - thumbRadius - thumbGap * (1.0 - _enableAnimation.value));
+        math.max(0.0, railActive - thumbRadius - thumbGap * (1.0 - _enableAnimation.value));
     final double railActiveRight =
-        min(railActive + thumbRadius + thumbGap * (1.0 - _enableAnimation.value), railRight);
+        math.min(railActive + thumbRadius + thumbGap * (1.0 - _enableAnimation.value), railRight);
     final Rect railLeftRect = new Rect.fromLTRB(railLeft, railTop, railActiveLeft, railBottom);
     final Rect railRightRect = new Rect.fromLTRB(railActiveRight, railTop, railRight, railBottom);
 
@@ -737,18 +761,10 @@ class _RenderSlider extends RenderBox {
       bool showValueIndicator;
       switch (_sliderTheme.showValueIndicator) {
         case ShowValueIndicator.onlyForDiscrete:
-          if (isDiscrete) {
-            showValueIndicator = true;
-          } else {
-            showValueIndicator = false;
-          }
+          showValueIndicator = isDiscrete;
           break;
         case ShowValueIndicator.onlyForContinuous:
-          if (isDiscrete) {
-            showValueIndicator = false;
-          } else {
-            showValueIndicator = true;
-          }
+          showValueIndicator = !isDiscrete;
           break;
         case ShowValueIndicator.always:
           showValueIndicator = true;
