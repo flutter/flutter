@@ -241,8 +241,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
 
         result.setSelected(object.hasFlag(Flag.IS_SELECTED));
         result.setText(object.getValueLabelHint());
-        result.setTraversalAfter(mOwner,
-            object.previousNodeId == -1 ? View.NO_ID : object.previousNodeId);
+        if (object.previousNodeId != -1)
+            result.setTraversalAfter(mOwner, object.previousNodeId);
 
         // Accessibility Focus
         if (mA11yFocusedObject != null && mA11yFocusedObject.id == virtualViewId) {
