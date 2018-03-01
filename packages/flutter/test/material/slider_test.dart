@@ -150,8 +150,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgets('Slider can be given zero values',
-      (WidgetTester tester) async {
+  testWidgets('Slider can be given zero values', (WidgetTester tester) async {
     final List<double> log = <double>[];
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
@@ -160,7 +159,9 @@ void main() {
           value: 0.0,
           min: 0.0,
           max: 1.0,
-          onChanged: (double newValue) { log.add(newValue); },
+          onChanged: (double newValue) {
+            log.add(newValue);
+          },
         ),
       ),
     ));
@@ -176,7 +177,9 @@ void main() {
           value: 0.0,
           min: 0.0,
           max: 0.0,
-          onChanged: (double newValue) { log.add(newValue); },
+          onChanged: (double newValue) {
+            log.add(newValue);
+          },
         ),
       ),
     ));
@@ -186,11 +189,27 @@ void main() {
     log.clear();
   });
 
-  testWidgets('Slider has a customizable active color',
+  testWidgets('Slider uses the right theme colors for the right components',
       (WidgetTester tester) async {
-    const Color customColor = const Color(0xFF4CD964);
-    final ThemeData theme = new ThemeData(platform: TargetPlatform.android);
-    Widget buildApp(Color activeColor) {
+    const Color customColor1 = const Color(0xcafefeed);
+    const Color customColor2 = const Color(0xdeadbeef);
+    final ThemeData theme = new ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.blue,
+    );
+    final SliderThemeData sliderTheme = theme.sliderTheme;
+    double value = 0.45;
+    Widget buildApp({
+      Color activeColor,
+      Color inactiveColor,
+      int divisions,
+      bool enabled: true,
+    }) {
+      final ValueChanged<double> onChanged = !enabled
+          ? null
+          : (double d) {
+              value = d;
+            };
       return new Directionality(
         textDirection: TextDirection.ltr,
         child: new Material(
@@ -198,47 +217,12 @@ void main() {
             child: new Theme(
               data: theme,
               child: new Slider(
-                value: 0.5,
+                value: value,
+                label: '$value',
+                divisions: divisions,
                 activeColor: activeColor,
-                onChanged: (double newValue) {},
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildApp(null));
-
-    final RenderBox sliderBox =
-        tester.firstRenderObject<RenderBox>(find.byType(Slider));
-
-    expect(sliderBox, paints..rect(color: theme.accentColor)..rect(color: theme.unselectedWidgetColor));
-    expect(sliderBox, paints..circle(color: theme.accentColor));
-    expect(sliderBox, isNot(paints..circle(color: customColor)));
-    expect(sliderBox, isNot(paints..circle(color: theme.unselectedWidgetColor)));
-    await tester.pumpWidget(buildApp(customColor));
-    expect(sliderBox, paints..rect(color: customColor)..rect(color: theme.unselectedWidgetColor));
-    expect(sliderBox, paints..circle(color: customColor));
-    expect(sliderBox, isNot(paints..circle(color: theme.accentColor)));
-    expect(sliderBox, isNot(paints..circle(color: theme.unselectedWidgetColor)));
-  });
-
-  testWidgets('Slider has a customizable inactive color',
-      (WidgetTester tester) async {
-    const Color customColor = const Color(0xFF4CD964);
-    final ThemeData theme = new ThemeData(platform: TargetPlatform.android);
-    Widget buildApp(Color inactiveColor) {
-      return new Directionality(
-      textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Theme(
-              data: theme,
-              child: new Slider(
-                value: 0.5,
                 inactiveColor: inactiveColor,
-                onChanged: (double newValue) {},
+                onChanged: onChanged,
               ),
             ),
           ),
@@ -246,78 +230,168 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildApp(null));
+    await tester.pumpWidget(buildApp());
 
-    final RenderBox sliderBox =
-        tester.firstRenderObject<RenderBox>(find.byType(Slider));
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
-    expect(sliderBox, paints..rect(color: theme.accentColor)..rect(color: theme.unselectedWidgetColor));
-    expect(sliderBox, paints..circle(color: theme.accentColor));
-    await tester.pumpWidget(buildApp(customColor));
-    expect(sliderBox, paints..rect(color: theme.accentColor)..rect(color: customColor));
-    expect(sliderBox, paints..circle(color: theme.accentColor));
+    // Check default theme for enabled widget.
+    expect(
+        sliderBox,
+        paints
+          ..rect(color: sliderTheme.activeRailColor)
+          ..rect(color: sliderTheme.inactiveRailColor));
+    expect(sliderBox, paints..circle(color: sliderTheme.thumbColor));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveRailColor)));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
+
+    // Test setting only the activeColor.
+    await tester.pumpWidget(buildApp(activeColor: customColor1));
+    expect(
+        sliderBox, paints..rect(color: customColor1)..rect(color: sliderTheme.inactiveRailColor));
+    expect(sliderBox, paints..circle(color: customColor1));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveRailColor)));
+
+    // Test setting only the inactiveColor.
+    await tester.pumpWidget(buildApp(inactiveColor: customColor1));
+    expect(sliderBox, paints..rect(color: sliderTheme.activeRailColor)..rect(color: customColor1));
+    expect(sliderBox, paints..circle(color: sliderTheme.thumbColor));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveRailColor)));
+
+    // Test setting both activeColor and inactiveColor.
+    await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2));
+    expect(sliderBox, paints..rect(color: customColor1)..rect(color: customColor2));
+    expect(sliderBox, paints..circle(color: customColor1));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveRailColor)));
+
+    // Test colors for discrete slider.
+    await tester.pumpWidget(buildApp(divisions: 3));
+    expect(
+        sliderBox,
+        paints
+          ..rect(color: sliderTheme.activeRailColor)
+          ..rect(color: sliderTheme.inactiveRailColor));
+    expect(
+        sliderBox,
+        paints
+          ..circle(color: sliderTheme.activeTickMarkColor)
+          ..circle(color: sliderTheme.activeTickMarkColor)
+          ..circle(color: sliderTheme.inactiveTickMarkColor)
+          ..circle(color: sliderTheme.inactiveTickMarkColor)
+          ..circle(color: sliderTheme.thumbColor));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveRailColor)));
+
+    // Test colors for discrete slider with inactiveColor and activeColor set.
+    await tester
+        .pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, divisions: 3));
+    expect(sliderBox, paints..rect(color: customColor1)..rect(color: customColor2));
+    expect(
+        sliderBox,
+        paints
+          ..circle(color: customColor2)
+          ..circle(color: customColor2)
+          ..circle(color: customColor1)
+          ..circle(color: customColor1)
+          ..circle(color: customColor1));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveRailColor)));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
+
+    // Test default theme for disabled widget.
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pump(const Duration(seconds: 1)); // wait for disable animation to finish.
+    expect(
+        sliderBox,
+        paints
+          ..rect(color: sliderTheme.disabledActiveRailColor)
+          ..rect(color: sliderTheme.disabledInactiveRailColor));
+    expect(sliderBox, paints..circle(color: sliderTheme.disabledThumbColor));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveRailColor)));
+
+    // Test setting the activeColor and inactiveColor for disabled widget.
+    await tester.pumpWidget(
+        buildApp(activeColor: customColor1, inactiveColor: customColor2, enabled: false));
+    expect(
+        sliderBox,
+        paints
+          ..rect(color: sliderTheme.disabledActiveRailColor)
+          ..rect(color: sliderTheme.disabledInactiveRailColor));
+    expect(sliderBox, paints..circle(color: sliderTheme.disabledThumbColor));
+    expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveRailColor)));
+
+    // Test that the default value indicator has the right colors.
+    await tester.pumpWidget(buildApp(divisions: 3));
+    Offset center = tester.getCenter(find.byType(Slider));
+    TestGesture gesture = await tester.startGesture(center);
+    await tester.pump();
+    await tester
+        .pump(const Duration(milliseconds: 500)); // wait for value indicator animation to finish.
+    expect(value, equals(2.0 / 3.0));
+    expect(
+      sliderBox,
+      paints
+        ..rect(color: sliderTheme.activeRailColor)
+        ..rect(color: sliderTheme.inactiveRailColor)
+        ..circle(color: sliderTheme.overlayColor)
+        ..circle(color: sliderTheme.activeTickMarkColor)
+        ..circle(color: sliderTheme.activeTickMarkColor)
+        ..circle(color: sliderTheme.inactiveTickMarkColor)
+        ..circle(color: sliderTheme.inactiveTickMarkColor)
+        ..path(color: sliderTheme.valueIndicatorColor)
+        ..circle(color: sliderTheme.thumbColor),
+    );
+    await gesture.up();
+    await tester.pump();
+    await tester
+        .pump(const Duration(milliseconds: 500)); // wait for value indicator animation to finish.
+
+    // Testing the custom colors are used for the indicator.
+    await tester.pumpWidget(buildApp(
+      divisions: 3,
+      activeColor: customColor1,
+      inactiveColor: customColor2,
+    ));
+    center = tester.getCenter(find.byType(Slider));
+    gesture = await tester.startGesture(center);
+    await tester.pump();
+    await tester
+        .pump(const Duration(milliseconds: 500)); // wait for value indicator animation to finish.
+    expect(value, equals(2.0 / 3.0));
+    expect(
+      sliderBox,
+      paints
+        ..rect(color: customColor1)
+        ..rect(color: customColor2)
+        ..circle(color: customColor1.withAlpha(0x29))
+        ..circle(color: customColor2)
+        ..circle(color: customColor2)
+        ..circle(color: customColor1)
+        ..path(color: customColor1)
+        ..circle(color: customColor1),
+    );
+    await gesture.up();
   });
 
-  testWidgets('Slider can draw an open thumb at min (LTR)',
-      (WidgetTester tester) async {
-    Widget buildApp(bool thumbOpenAtMin) {
-      return new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Slider(
-              value: 0.0,
-              thumbOpenAtMin: thumbOpenAtMin,
-              onChanged: (double newValue) {},
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildApp(false));
-
-    final RenderBox sliderBox =
-        tester.firstRenderObject<RenderBox>(find.byType(Slider));
-
-    expect(sliderBox, paints..circle(style: PaintingStyle.fill));
-    expect(sliderBox, isNot(paints..circle()..circle()));
-    await tester.pumpWidget(buildApp(true));
-    expect(sliderBox, paints..circle(style: PaintingStyle.stroke));
-    expect(sliderBox, isNot(paints..circle()..circle()));
-  });
-
-  testWidgets('Slider can draw an open thumb at min (RTL)',
-      (WidgetTester tester) async {
-    Widget buildApp(bool thumbOpenAtMin) {
-      return new Directionality(
-        textDirection: TextDirection.rtl,
-        child: new Material(
-          child: new Center(
-            child: new Slider(
-              value: 0.0,
-              thumbOpenAtMin: thumbOpenAtMin,
-              onChanged: (double newValue) {},
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildApp(false));
-
-    final RenderBox sliderBox =
-        tester.firstRenderObject<RenderBox>(find.byType(Slider));
-
-    expect(sliderBox, paints..circle(style: PaintingStyle.fill));
-    expect(sliderBox, isNot(paints..circle()..circle()));
-    await tester.pumpWidget(buildApp(true));
-    expect(sliderBox, paints..circle(style: PaintingStyle.stroke));
-    expect(sliderBox, isNot(paints..circle()..circle()));
-  });
-
-  testWidgets('Slider can tap in vertical scroller',
-      (WidgetTester tester) async {
+  testWidgets('Slider can tap in vertical scroller', (WidgetTester tester) async {
     double value = 0.0;
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
@@ -425,7 +499,8 @@ void main() {
         ),
       ),
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 16.0, 600.0));
+    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size,
+        const Size(144.0 + 2.0 * 16.0, 600.0));
 
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
@@ -442,14 +517,18 @@ void main() {
         ),
       ),
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 16.0, 32.0));
+    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size,
+        const Size(144.0 + 2.0 * 16.0, 32.0));
   });
 
-  testWidgets('discrete Slider respects textScaleFactor', (WidgetTester tester) async {
+  testWidgets('Slider respects textScaleFactor', (WidgetTester tester) async {
     final Key sliderKey = new UniqueKey();
     double value = 0.0;
 
-    Widget buildSlider({ double textScaleFactor }) {
+    Widget buildSlider(
+        {double textScaleFactor,
+        bool isDiscrete: true,
+        ShowValueIndicator show: ShowValueIndicator.onlyForDiscrete}) {
       return new Directionality(
         textDirection: TextDirection.ltr,
         child: new StatefulBuilder(
@@ -457,22 +536,27 @@ void main() {
             return new MediaQuery(
               data: new MediaQueryData(textScaleFactor: textScaleFactor),
               child: new Material(
-                child: new Center(
-                  child: new OverflowBox(
-                    maxWidth: double.INFINITY,
-                    maxHeight: double.INFINITY,
-                    child: new Slider(
-                      key: sliderKey,
-                      min: 0.0,
-                      max: 100.0,
-                      divisions: 10,
-                      label: '${value.round()}',
-                      value: value,
-                      onChanged: (double newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      },
+                child: new Theme(
+                  data: Theme.of(context).copyWith(
+                      sliderTheme:
+                          Theme.of(context).sliderTheme.copyWith(showValueIndicator: show)),
+                  child: new Center(
+                    child: new OverflowBox(
+                      maxWidth: double.INFINITY,
+                      maxHeight: double.INFINITY,
+                      child: new Slider(
+                        key: sliderKey,
+                        min: 0.0,
+                        max: 100.0,
+                        divisions: isDiscrete ? 10 : null,
+                        label: '${value.round()}',
+                        value: value,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -486,12 +570,10 @@ void main() {
     await tester.pumpWidget(buildSlider(textScaleFactor: 1.0));
     Offset center = tester.getCenter(find.byType(Slider));
     TestGesture gesture = await tester.startGesture(center);
-    await gesture.moveBy(const Offset(10.0, 0.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
-    expect(
-      tester.renderObject(find.byType(Slider)),
-      paints..circle(radius: 6.0, x: 16.0, y: 44.0)
-    );
+    expect(tester.renderObject(find.byType(Slider)), paints..scale(x: 1.0, y: 1.0));
 
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
@@ -499,12 +581,41 @@ void main() {
     await tester.pumpWidget(buildSlider(textScaleFactor: 2.0));
     center = tester.getCenter(find.byType(Slider));
     gesture = await tester.startGesture(center);
-    await gesture.moveBy(const Offset(10.0, 0.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
-    expect(
-      tester.renderObject(find.byType(Slider)),
-      paints..circle(radius: 12.0, x: 16.0, y: 44.0)
-    );
+    expect(tester.renderObject(find.byType(Slider)), paints..scale(x: 2.0, y: 2.0));
+
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Check continuous
+    await tester.pumpWidget(buildSlider(
+      textScaleFactor: 1.0,
+      isDiscrete: false,
+      show: ShowValueIndicator.onlyForContinuous,
+    ));
+    center = tester.getCenter(find.byType(Slider));
+    gesture = await tester.startGesture(center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(tester.renderObject(find.byType(Slider)), paints..scale(x: 1.0, y: 1.0));
+
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.pumpWidget(buildSlider(
+      textScaleFactor: 2.0,
+      isDiscrete: false,
+      show: ShowValueIndicator.onlyForContinuous,
+    ));
+    center = tester.getCenter(find.byType(Slider));
+    gesture = await tester.startGesture(center);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(tester.renderObject(find.byType(Slider)), paints..scale(x: 2.0, y: 2.0));
 
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
@@ -523,18 +634,18 @@ void main() {
       ),
     ));
 
-    expect(semantics, hasSemantics(
-      new TestSemantics.root(
-          children: <TestSemantics>[
+    expect(
+        semantics,
+        hasSemantics(
+          new TestSemantics.root(children: <TestSemantics>[
             new TestSemantics.rootChild(
               id: 1,
               actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
             ),
-          ]
-      ),
-      ignoreRect: true,
-      ignoreTransform: true,
-    ));
+          ]),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ));
 
     // Disable slider
     await tester.pumpWidget(const Directionality(
@@ -547,12 +658,92 @@ void main() {
       ),
     ));
 
-    expect(semantics, hasSemantics(
-      new TestSemantics.root(),
-      ignoreRect: true,
-      ignoreTransform: true,
-    ));
+    expect(
+        semantics,
+        hasSemantics(
+          new TestSemantics.root(),
+          ignoreRect: true,
+          ignoreTransform: true,
+        ));
 
     semantics.dispose();
+  });
+
+  testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
+    final ThemeData baseTheme = new ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.blue,
+    );
+    SliderThemeData theme = baseTheme.sliderTheme;
+    double value = 0.45;
+    Widget buildApp({SliderThemeData sliderTheme, int divisions, bool enabled: true}) {
+      final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new Theme(
+              data: baseTheme,
+              child: new SliderTheme(
+                data: sliderTheme,
+                child: new Slider(
+                  value: value,
+                  label: '$value',
+                  divisions: divisions,
+                  onChanged: onChanged,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Future<Null> expectValueIndicator(
+        {bool isVisible, SliderThemeData theme, int divisions, bool enabled: true}) async {
+      // discrete enabled widget.
+      await tester.pumpWidget(buildApp(sliderTheme: theme, divisions: divisions, enabled: enabled));
+      final Offset center = tester.getCenter(find.byType(Slider));
+      final TestGesture gesture = await tester.startGesture(center);
+      await tester.pump();
+      await tester
+          .pump(const Duration(milliseconds: 500)); // wait for value indicator animation to finish.
+
+      final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+      expect(
+        sliderBox,
+        isVisible
+            ? (paints..path(color: theme.valueIndicatorColor))
+            : isNot(paints..path(color: theme.valueIndicatorColor)),
+      );
+      await gesture.up();
+    }
+
+    // Default (showValueIndicator set to onlyForDiscrete).
+    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
+
+    // With showValueIndicator set to onlyForContinuous.
+    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.onlyForContinuous);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
+    await expectValueIndicator(isVisible: true, theme: theme, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
+
+    // discrete enabled widget with showValueIndicator set to always.
+    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.always);
+    await expectValueIndicator(isVisible: true, theme: theme, divisions: 3, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
+    await expectValueIndicator(isVisible: true, theme: theme, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
+
+    // discrete enabled widget with showValueIndicator set to never.
+    theme = theme.copyWith(showValueIndicator: ShowValueIndicator.never);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, divisions: 3, enabled: false);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: true);
+    await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
   });
 }

@@ -312,7 +312,7 @@ class InkResponse extends StatefulWidget {
   ///  * [highlightColor], the color of the highlight.
   ///  * [InkSplash.splashFactory], which defines the default splash.
   ///  * [InkRipple.splashFactory], which defines a splash that spreads out
-  ///    more aggresively than the default.
+  ///    more aggressively than the default.
   final InteractiveInkFeatureFactory splashFactory;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
