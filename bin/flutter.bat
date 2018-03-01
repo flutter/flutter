@@ -38,6 +38,9 @@ where /q git || ECHO Error: Unable to find git in your PATH. && EXIT /B 1
 REM  Test if the flutter directory is a git clone, otherwise git rev-parse HEAD would fail
 IF NOT EXIST "%flutter_root%\.git" (
   ECHO Error: The Flutter directory is not a clone of the GitHub project.
+  ECHO        The flutter tool requires Git in order to operate properly;
+  ECHO        to set up Flutter, run the following command:
+  ECHO        git clone -b beta https://github.com/flutter/flutter.git
   EXIT /B 1
 )
 
