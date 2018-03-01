@@ -133,9 +133,9 @@ class VsCode {
           edition: '32-bit edition'),
       new _VsCodeInstallLocation(fs.path.join(progFiles, 'Microsoft VS Code'), '.vscode',
           edition: '64-bit edition'),
-      new _VsCodeInstallLocation(fs.path.join(progFiles86 , 'Microsoft VS Code Insiders'), '.vscode',
+      new _VsCodeInstallLocation(fs.path.join(progFiles86 , 'Microsoft VS Code Insiders'), '.vscode-insiders',
           edition: '32-bit edition', isInsiders: true),
-      new _VsCodeInstallLocation(fs.path.join(progFiles, 'Microsoft VS Code Insiders'), '.vscode',
+      new _VsCodeInstallLocation(fs.path.join(progFiles, 'Microsoft VS Code Insiders'), '.vscode-insiders',
           edition: '64-bit edition', isInsiders: true),
     ]);
   }
