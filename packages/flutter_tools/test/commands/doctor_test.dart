@@ -50,6 +50,22 @@ void main() {
       expect(message.message, 'Dart Code extension version 4.5.6');
     });
 
+    testUsingContext('vs code validator when 64bit installed', () async {
+      expect(VsCodeValidatorTestTargets.installedWithExtension64bit.title, 'VS Code, 64-bit edition');
+      final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension64bit.validate();
+      expect(result.type, ValidationType.installed);
+      expect(result.statusInfo, 'version 1.2.3');
+      expect(result.messages, hasLength(2));
+
+      ValidationMessage message = result.messages
+          .firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
+      expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
+
+      message = result.messages
+          .firstWhere((ValidationMessage m) => m.message.startsWith('Dart Code '));
+      expect(message.message, 'Dart Code extension version 4.5.6');
+    });
+
     testUsingContext('vs code validator when extension missing', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithoutExtension.validate();
       expect(result.type, ValidationType.partial);
@@ -279,11 +295,14 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String validInstall = fs.path.join('test', 'data', 'vscode', 'application');
   static final String validExtensions = fs.path.join('test', 'data', 'vscode', 'extensions');
   static final String missingExtensions = fs.path.join('test', 'data', 'vscode', 'notExtensions');
-  VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory) 
-    : super(new VsCode.fromDirectory(installDirectory, extensionDirectory));
+  VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition}) 
+    : super(new VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>
     new VsCodeValidatorTestTargets._(validInstall, validExtensions);
+
+    static VsCodeValidatorTestTargets get installedWithExtension64bit =>
+    new VsCodeValidatorTestTargets._(validInstall, validExtensions, edition: '64-bit edition');
 
   static VsCodeValidatorTestTargets get installedWithoutExtension =>
     new VsCodeValidatorTestTargets._(validInstall, missingExtensions);
