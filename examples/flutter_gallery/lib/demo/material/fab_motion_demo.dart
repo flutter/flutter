@@ -22,7 +22,6 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
   static const List<FloatingActionButtonPositioner> _floatingActionButtonPositioners = const <FloatingActionButtonPositioner>[
     FloatingActionButtonPositioner.endFloat, 
     FloatingActionButtonPositioner.centerFloat,
-    const _DockedFloatingActionButton(),
     const _TopStartFloatingActionButtonPositioner(),
   ];
 
@@ -45,8 +44,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
     final Widget scaffold = new Scaffold(
       appBar: new AppBar(title: const Text('FAB Positioner'), bottom: const PreferredSize(preferredSize: const Size.fromHeight(48.0), child: const SizedBox())),
       floatingActionButtonPositioner: _floatingActionButtonPositioner,
-      floatingActionButton: floatingActionButton, 
-      bottomNavigationBar: new BottomAppBar(color: Theme.of(context).primaryColor, child: const SizedBox(height: 56.0)),
+      floatingActionButton: floatingActionButton,
       body: new Center(
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -102,17 +100,6 @@ class _TopStartFloatingActionButtonPositioner extends FloatingActionButtonPositi
       break;
     }
     final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
-    return new Offset(fabX, fabY);
-  }
-}
-
-class _DockedFloatingActionButton extends FloatingActionButtonPositioner {
-  const _DockedFloatingActionButton();
-
-  @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    final double fabX = scaffoldGeometry.scaffoldSize.width / 2.0 - scaffoldGeometry.floatingActionButtonSize.width / 2.0;
-    final double fabY = scaffoldGeometry.contentBottom - scaffoldGeometry.floatingActionButtonSize.height / 2.0;
     return new Offset(fabX, fabY);
   }
 }
