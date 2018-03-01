@@ -212,9 +212,6 @@ class AndroidSdk {
     if(latestVersion == null)
       return <String>['No latest version of Android SDK found (check SDK for standard layout).'];
 
-    if (sdkVersions.isEmpty || latestVersion == null)
-      return <String>['Android SDK is missing command line tools; download from https://goo.gl/XxQghQ'];
-
     return latestVersion.validateSdkWellFormed();
   }
 
