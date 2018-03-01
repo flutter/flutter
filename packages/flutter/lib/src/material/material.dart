@@ -108,10 +108,10 @@ abstract class MaterialInkController {
 ///
 /// In general, the features of a [Material] should not change over time (e.g. a
 /// [Material] should not change its [color], [shadowColor] or [type]).
-/// Changes to [elevation] and [shadowColor] are animated for [duration].
+/// Changes to [elevation] and [shadowColor] are animated for [animationDuration].
 /// Changes to [shape] are animated if [type] is not [MaterialType.transparency]
 /// and [ShapeBorder.lerp] between the previous and next [shape] values is
-/// supported. Shape changes are also animated for [duration].
+/// supported. Shape changes are also animated for [animationDuration].
 ///
 ///
 /// ## Shape
@@ -154,8 +154,8 @@ abstract class MaterialInkController {
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
-  /// The [type], [elevation], [shadowColor], and [duration] arguments must not
-  /// be null.
+  /// The [type], [elevation], [shadowColor], and [animationDuration] arguments
+  /// must not be null.
   ///
   /// If a [shape] is specified, then the [borderRadius] property must be
   /// null and the [type] property must not be [MaterialType.circle]. If the
@@ -171,13 +171,13 @@ class Material extends StatefulWidget {
     this.textStyle,
     this.borderRadius,
     this.shape,
-    this.duration: kThemeChangeDuration,
+    this.animationDuration: kThemeChangeDuration,
     this.child,
   }) : assert(type != null),
        assert(elevation != null),
        assert(shadowColor != null),
        assert(!(shape != null && borderRadius != null)),
-       assert(duration != null),
+       assert(animationDuration != null),
        assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
        super(key: key);
 
@@ -198,7 +198,7 @@ class Material extends StatefulWidget {
   /// widget conceptually defines an independent printed piece of material.
   ///
   /// Defaults to 0. Changing this value will cause the shadow to animate over
-  /// [kThemeChangeDuration].
+  /// [animationDuration].
   final double elevation;
 
   /// The color to paint the material.
@@ -230,7 +230,7 @@ class Material extends StatefulWidget {
   /// and [shadowColor].
   ///
   /// The default value is [kThemeChangeDuration].
-  final Duration duration;
+  final Duration animationDuration;
 
   /// If non-null, the corners of this box are rounded by this [BorderRadius].
   /// Otherwise, the corners specified for the current [type] of material are
@@ -297,7 +297,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     if (contents != null) {
       contents = new AnimatedDefaultTextStyle(
         style: widget.textStyle ?? Theme.of(context).textTheme.body1,
-        duration: widget.duration,
+        duration: widget.animationDuration,
         child: contents
       );
     }
@@ -327,7 +327,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     if (widget.type == MaterialType.canvas && widget.shape == null && widget.borderRadius == null) {
       return new AnimatedPhysicalModel(
         curve: Curves.fastOutSlowIn,
-        duration: widget.duration,
+        duration: widget.animationDuration,
         shape: BoxShape.rectangle,
         borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
@@ -345,7 +345,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 
     return new _MaterialInterior(
       curve: Curves.fastOutSlowIn,
-      duration: widget.duration,
+      duration: widget.animationDuration,
       shape: shape,
       elevation: widget.elevation,
       color: backgroundColor,

@@ -74,12 +74,13 @@ void main() {
       ),
     );
 
-    expect(tester.widget<OutlineButton>(find.byType(OutlineButton)).enabled, true);
+    final Finder outlineButton = find.byType(OutlineButton);
+    expect(tester.widget<OutlineButton>(outlineButton).enabled, true);
 
     final Rect clipRect = new Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
     final Path clipPath = new Path()..addRect(clipRect);
     expect(
-      find.byType(OutlineButton),
+      outlineButton,
       paints
         // initially the interior of the button is transparent
         ..path(color: fillColor.withAlpha(0x00))
@@ -87,14 +88,14 @@ void main() {
         ..path(color: borderColor, strokeWidth: borderWidth)
     );
 
-    final Offset center = tester.getCenter(find.byType(OutlineButton));
+    final Offset center = tester.getCenter(outlineButton);
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start gesture
     // Wait for the border's color to change to highlightedBorderColor and
     // the fillColor to become opaque.
     await tester.pump(const Duration(milliseconds: 200));
     expect(
-      find.byType(OutlineButton),
+      outlineButton,
       paints
         ..path(color: fillColor.withAlpha(0xFF))
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))
@@ -105,7 +106,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(
-      find.byType(OutlineButton),
+      outlineButton,
       paints
         ..path(color: fillColor.withAlpha(0x00))
         ..clipPath(pathMatcher: coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)))

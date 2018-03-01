@@ -61,12 +61,12 @@ class RaisedButton extends StatelessWidget {
     this.disabledElevation: 0.0,
     this.padding,
     this.shape,
-    this.duration: kThemeChangeDuration,
+    this.animationDuration: kThemeChangeDuration,
     this.child,
   }) : assert(elevation != null),
        assert(highlightElevation != null),
        assert(disabledElevation != null),
-       assert(duration != null),
+       assert(animationDuration != null),
        super(key: key);
 
   /// Create a filled button from a pair of widgets that serve as the button's
@@ -93,7 +93,7 @@ class RaisedButton extends StatelessWidget {
     this.highlightElevation: 8.0,
     this.disabledElevation: 0.0,
     this.shape,
-    this.duration: kThemeChangeDuration,
+    this.animationDuration: kThemeChangeDuration,
     @required Widget icon,
     @required Widget label,
   }) : assert(elevation != null),
@@ -101,7 +101,7 @@ class RaisedButton extends StatelessWidget {
        assert(disabledElevation != null),
        assert(icon != null),
        assert(label != null),
-       assert(duration != null),
+       assert(animationDuration != null),
        padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
        child = new Row(
          mainAxisSize: MainAxisSize.min,
@@ -118,7 +118,7 @@ class RaisedButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
 
-  /// Called by the underying [InkWell] widget's [InkWell.onHighlightChanged]
+  /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
   final ValueChanged<bool> onHighlightChanged;
 
@@ -286,7 +286,7 @@ class RaisedButton extends StatelessWidget {
   /// Defines the duration of animated changes for [shape] and [elevation].
   ///
   /// The default value is [kThemeChangeDuration].
-  final Duration duration;
+  final Duration animationDuration;
 
   Brightness _getBrightness(ThemeData theme) {
     return colorBrightness ?? theme.brightness;
@@ -377,7 +377,7 @@ class RaisedButton extends StatelessWidget {
       padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints,
       shape: shape ?? buttonTheme.shape,
-      duration: duration,
+      animationDuration: animationDuration,
       child: child,
     );
   }

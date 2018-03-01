@@ -41,7 +41,7 @@ class RawMaterialButton extends StatefulWidget {
     this.padding: EdgeInsets.zero,
     this.constraints: const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape: const RoundedRectangleBorder(),
-    this.duration: kThemeChangeDuration,
+    this.animationDuration: kThemeChangeDuration,
     this.child,
   }) : assert(shape != null),
        assert(elevation != null),
@@ -49,7 +49,7 @@ class RawMaterialButton extends StatefulWidget {
        assert(disabledElevation != null),
        assert(padding != null),
        assert(constraints != null),
-       assert(duration != null),
+       assert(animationDuration != null),
        super(key: key);
 
   /// Called when the button is tapped or otherwise activated.
@@ -57,7 +57,7 @@ class RawMaterialButton extends StatefulWidget {
   /// If this is set to null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
 
-  /// Called by the underying [InkWell] widget's [InkWell.onHighlightChanged]
+  /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
   /// callback.
   final ValueChanged<bool> onHighlightChanged;
 
@@ -122,7 +122,7 @@ class RawMaterialButton extends StatefulWidget {
   /// Defines the duration of animated changes for [shape] and [elevation].
   ///
   /// The default value is [kThemeChangeDuration].
-  final Duration duration;
+  final Duration animationDuration;
 
   /// Typically the button's label.
   final Widget child;
@@ -165,7 +165,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           shape: widget.shape,
           color: widget.fillColor,
           type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
-          duration: widget.duration,
+          animationDuration: widget.animationDuration,
           child: new InkWell(
             onHighlightChanged: _handleHighlightChanged,
             splashColor: widget.splashColor,

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,14 +19,14 @@ const Duration _kPressDuration = const Duration(milliseconds: 150);
 const Duration _kElevationDuration = const Duration(milliseconds: 75);
 
 /// A cross between [RaisedButton] and [FlatButton]: a bordered button whose
-/// elevation incrases and whose background becomes opaque when the button
+/// elevation increases and whose background becomes opaque when the button
 /// is pressed.
 ///
 /// An outline button's elevation is initially 0.0 and its background [color]
 /// is transparent. When the button is pressed its background becomes opaque
 /// and then its elevation increases to [highlightElevation].
 ///
-/// The outline button's has a border whose shape is defined by [shape]
+/// The outline button has a border whose shape is defined by [shape]
 /// and whose appearance is defined by [borderSide], [disabledBorderColor],
 /// and [highlightedBorderColor].
 ///
@@ -255,8 +255,8 @@ class OutlineButton extends StatefulWidget {
 
 class _OutlineButtonState extends State<OutlineButton> with SingleTickerProviderStateMixin {
   AnimationController _controller;
-  Animation<double> _fillController;
-  Animation<double> _elevationController;
+  Animation<double> _fillAnimation;
+  Animation<double> _elevationAnimation;
   bool _pressed = false;
 
   @override
@@ -274,13 +274,13 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
       duration: _kPressDuration,
       vsync: this
     );
-    _fillController = new CurvedAnimation(
+    _fillAnimation = new CurvedAnimation(
       parent: _controller,
       curve: const Interval(0.0, 0.5,
         curve: Curves.fastOutSlowIn,
       ),
     );
-    _elevationController = new CurvedAnimation(
+    _elevationAnimation = new CurvedAnimation(
       parent: _controller,
       curve: const Interval(0.5, 0.5),
       reverseCurve: const Interval(1.0, 1.0),
@@ -330,7 +330,7 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
       begin: color.withAlpha(0x00),
       end: color.withAlpha(0xFF),
     );
-    return colorTween.evaluate(_fillController);
+    return colorTween.evaluate(_fillAnimation);
   }
 
   // TODO(hmuller): this method is the same as FlatButton
@@ -373,22 +373,24 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
     return new Tween<double>(
       begin: 0.0,
       end: widget.highlightElevation ?? 2.0,
-    ).evaluate(_elevationController);
+    ).evaluate(_elevationAnimation);
   }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
+    final Color textColor = _getTextColor(theme, buttonTheme);
+    final Color splashColor = _getSplashColor(theme, buttonTheme);
 
     return new AnimatedBuilder(
       animation: _controller,
       builder: (BuildContext context, Widget child) {
         return new RaisedButton(
-          textColor: _getTextColor(theme, buttonTheme),
+          textColor: textColor,
           disabledTextColor: widget.disabledTextColor,
           color: _getFillColor(theme),
-          splashColor: _getSplashColor(theme, buttonTheme),
+          splashColor: splashColor,
           highlightColor: widget.highlightColor,
           disabledColor: Colors.transparent,
           onPressed: widget.onPressed,
@@ -409,7 +411,7 @@ class _OutlineButtonState extends State<OutlineButton> with SingleTickerProvider
             shape: widget.shape ?? buttonTheme.shape,
             side: _getOutline(theme, buttonTheme),
           ),
-          duration: _kElevationDuration,
+          animationDuration: _kElevationDuration,
           child: widget.child,
         );
       },
