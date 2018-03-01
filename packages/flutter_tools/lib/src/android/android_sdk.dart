@@ -207,10 +207,10 @@ class AndroidSdk {
       return <String>['Android SDK file not found: $adbPath.'];
 
     if (sdkVersions.isEmpty)
-      return <String>['No Android SDK version found.'];
+      return <String>['No Android SDK version found (check SDK for standard layout).'];
     
     if(latestVersion == null)
-      return <String>['No latest version of Android SDK found.'];
+      return <String>['No latest version of Android SDK found (check SDK for standard layout).'];
 
     if (sdkVersions.isEmpty || latestVersion == null)
       return <String>['Android SDK is missing command line tools; download from https://goo.gl/XxQghQ'];
