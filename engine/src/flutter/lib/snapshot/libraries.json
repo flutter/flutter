@@ -12,6 +12,7 @@
           "../../../third_party/dart/runtime/lib/array.dart",
           "../../../third_party/dart/runtime/lib/array_patch.dart",
           "../../../third_party/dart/runtime/lib/bigint.dart",
+          "../../../third_party/dart/runtime/lib/bigint_patch.dart",
           "../../../third_party/dart/runtime/lib/bool_patch.dart",
           "../../../third_party/dart/runtime/lib/date_patch.dart",
           "../../../third_party/dart/runtime/lib/double.dart",
