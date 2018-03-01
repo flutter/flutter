@@ -158,7 +158,7 @@ class VsCode {
     final List<_VsCodeInstallLocation> searchLocations = 
       _includeInsiders
         ? allLocations
-        : allLocations.where((_VsCodeInstallLocation p) => !p.isInsiders);
+        : allLocations.where((_VsCodeInstallLocation p) => p.isInsiders != true).toList();
 
     final List<VsCode> results = <VsCode>[];
 
@@ -191,5 +191,6 @@ class _VsCodeInstallLocation {
   final String extensionsFolder;
   final String edition;
   final bool isInsiders;
-  _VsCodeInstallLocation(this.installPath, this.extensionsFolder, { this.edition, this.isInsiders });
+  _VsCodeInstallLocation(this.installPath, this.extensionsFolder, { this.edition, bool isInsiders })
+    : this.isInsiders = isInsiders ?? false;
 }
