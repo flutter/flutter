@@ -347,7 +347,8 @@ class AndroidSdk {
       throwToolExit('Android sdkmanager not found. Update to the latest Android SDK to resolve this.');
     final ProcessResult result = processManager.runSync(<String>[sdkManagerPath, '--version'], environment: sdkManagerEnv);
     if (result.exitCode != 0) {
-      throwToolExit('sdkmanager --version failed: ${result.exitCode}', exitCode: result.exitCode);
+      printTrace('sdkmanager --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');
+      return null;
     }
     return result.stdout.trim();
   }

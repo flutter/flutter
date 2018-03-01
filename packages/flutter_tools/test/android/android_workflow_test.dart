@@ -132,7 +132,21 @@ void main() {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn('25.0.0');
 
-    expect(AndroidWorkflow.runLicenseManager(), throwsToolExit());
+    expect(AndroidWorkflow.runLicenseManager(), throwsToolExit(message: 'To update, run'));
+  }, overrides: <Type, Generator>{
+    AndroidSdk: () => sdk,
+    FileSystem: () => fs,
+    Platform: () => new FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    ProcessManager: () => processManager,
+    Stdio: () => stdio,
+  });
+
+  testUsingContext('runLicenseManager errors correctly for null version', () async {
+    MockAndroidSdk.createSdkDirectory();
+    when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
+    when(sdk.sdkManagerVersion).thenReturn(null);
+
+    expect(AndroidWorkflow.runLicenseManager(), throwsToolExit(message: 'To update, run'));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
