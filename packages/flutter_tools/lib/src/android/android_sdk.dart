@@ -206,6 +206,12 @@ class AndroidSdk {
     if (!processManager.canRun(adbPath))
       return <String>['Android SDK file not found: $adbPath.'];
 
+    if (sdkVersions.isEmpty)
+      return <String>['No Android SDK version found.'];
+    
+    if(latestVersion == null)
+      return <String>['No latest version of Android SDK found.'];
+
     if (sdkVersions.isEmpty || latestVersion == null)
       return <String>['Android SDK is missing command line tools; download from https://goo.gl/XxQghQ'];
 
