@@ -96,21 +96,21 @@ class VsCode {
     return _findInstalled(<_VsCodeInstallLocation>[
       new _VsCodeInstallLocation(
         fs.path.join('/Applications', 'Visual Studio Code.app', 'Contents'),
-        '.vscode'
+        '.vscode',
       ),
       new _VsCodeInstallLocation(
         fs.path.join(homeDirPath, 'Applications', 'Visual Studio Code.app', 'Contents'),
-        '.vscode'
+        '.vscode',
       ),
       new _VsCodeInstallLocation(
         fs.path.join('/Applications', 'Visual Studio Code - Insiders.app', 'Contents'),
         '.vscode-insiders',
-        isInsiders: true
+        isInsiders: true,
       ),
       new _VsCodeInstallLocation(
         fs.path.join(homeDirPath, 'Applications', 'Visual Studio Code - Insiders.app', 'Contents'),
         '.vscode-insiders',
-        isInsiders: true
+        isInsiders: true,
       )
     ]);
   }
@@ -149,7 +149,7 @@ class VsCode {
   static List<VsCode> _installedLinux() {
     return _findInstalled(<_VsCodeInstallLocation>[
       const _VsCodeInstallLocation('/usr/share/code', '.vscode'),
-      const _VsCodeInstallLocation('/usr/share/code-insiders', '.vscode-insiders', isInsiders: true)
+      const _VsCodeInstallLocation('/usr/share/code-insiders', '.vscode-insiders', isInsiders: true),
     ]);
   }
 
