@@ -81,7 +81,7 @@ void main() {
       ProcessManager: () => processManager,
     });
 
-    testUsingContext('throws on sdkmanager version check failure', () {
+    testUsingContext('does not throw on sdkmanager version check failure', () {
       sdkDir = MockAndroidSdk.createSdkDirectory();
       Config.instance.setValue('android-sdk', sdkDir.path);
 
@@ -89,7 +89,7 @@ void main() {
       when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
       when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'], environment: argThat(isNotNull)))
           .thenReturn(new ProcessResult(1, 1, '26.1.1\n', 'Mystery error'));
-      expect(() => sdk.sdkManagerVersion, throwsToolExit(exitCode: 1));
+      expect(sdk.sdkManagerVersion, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => processManager,
