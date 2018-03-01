@@ -29,7 +29,7 @@ import 'theme.dart';
 /// consider using [InkWell] directly.
 ///
 /// Raised buttons have a minimum size of 88.0 by 36.0 which can be overidden
-/// with [ButtonTheme.minWidth] and [ButtonTheme.minHeight].
+/// with [ButtonTheme].
 ///
 /// See also:
 ///

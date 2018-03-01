@@ -37,7 +37,7 @@ const Duration _kElevationDuration = const Duration(milliseconds: 75);
 /// consider using [InkWell] directly.
 ///
 /// Outline buttons have a minimum size of 88.0 by 36.0 which can be overidden
-/// with [ButtonTheme.minWidth] and [ButtonTheme.minHeight].
+/// with [ButtonTheme].
 ///
 /// See also:
 ///
