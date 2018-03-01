@@ -297,7 +297,7 @@ group("kernel_platform_files") {
 
 generate_entry_points_json_with_gen_snapshot("entry_points_json") {
   input = "$flutter_root/lib/snapshot/snapshot.dart"
-  output = "$root_out_dir/flutter_patched_sdk/entry_points.json"
+  output = "$root_out_dir/dart_entry_points/entry_points.json"
   dart_ui = "$flutter_root/lib/ui/ui.dart"
   vmservice_io = "//third_party/dart/runtime/bin/vmservice/vmservice_io.dart"
   dart_vm_entry_points_txt = "$flutter_root/runtime/dart_vm_entry_points.txt"
@@ -321,7 +321,7 @@ generate_entry_points_json_with_gen_snapshot("entry_points_json") {
 }
 
 copy_entry_points_extra_json("entry_points_extra_json") {
-  output = "$root_out_dir/flutter_patched_sdk/entry_points_extra.json"
+  output = "$root_out_dir/dart_entry_points/entry_points_extra.json"
 }
 
 group("entry_points_json_files") {
