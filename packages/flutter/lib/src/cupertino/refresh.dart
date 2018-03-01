@@ -1,6 +1,7 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -14,7 +15,9 @@ class CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
   RenderObject createRenderObject(BuildContext context) => new _RenderCupertinoRefreshSliver();
 }
 
-class _RenderCupertinoRefreshSliver extends RenderSliver with RenderObjectWithChildMixin<RenderBox> {
+class _RenderCupertinoRefreshSliver
+    extends RenderSliver
+    with RenderObjectWithChildMixin<RenderBox> {
   _RenderCupertinoRefreshSliver({RenderBox child}) {
     this.child = child;
   }
@@ -23,10 +26,29 @@ class _RenderCupertinoRefreshSliver extends RenderSliver with RenderObjectWithCh
   void performLayout() {
     assert(constraints.axisDirection == AxisDirection.down);
     assert(constraints.growthDirection == GrowthDirection.forward);
-    print('remaining paint extent ${constraints.remainingPaintExtent}');
     print('scrollOffset ${constraints.scrollOffset}');
+    print('overlapping ${constraints.overlap}');
     print('viewportMainAxisExtent ${constraints.viewportMainAxisExtent}');
-    geometry = SliverGeometry.zero;
+    print('remaining paint extent ${constraints.remainingPaintExtent}');
+    if (constraints.overlap >= 0.0) {
+      geometry = SliverGeometry.zero;
+    } else {
+      geometry = new SliverGeometry(
+        scrollExtent: constraints.remainingPaintExtent,
+        paintOrigin: constraints.overlap,
+        paintExtent: constraints.overlap.abs(),
+        maxPaintExtent: constraints.remainingPaintExtent,
+        layoutExtent: 0.0,
+      );
+    }
+  }
+
+  @override
+  void paint(PaintingContext paintContext, Offset offset) {
+    if (constraints.overlap < 0.0) {
+      paintContext.paintChild(child, offset + new Offset(0.0, constraints.overlap));
+    }
+    print('paint time child $child');
   }
 }
 
