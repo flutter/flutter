@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -199,6 +200,11 @@ class MockDeviceManager implements DeviceManager {
   Future<List<String>> getDeviceDiagnostics() async => <String>[];
 }
 
+class MockAndroidWorkflowValidator extends AndroidWorkflow {
+  @override
+  Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
+}
+
 class MockDoctor extends Doctor {
   // True for testing.
   @override
@@ -207,6 +213,20 @@ class MockDoctor extends Doctor {
   // True for testing.
   @override
   bool get canLaunchAnything => true;
+
+  @override
+  /// Replaces the android workflow with a version that overrides licensesAccepted,
+  /// to prevent individual tests from having to mock out the process for
+  /// the Doctor.
+  List<DoctorValidator> get validators {
+    final List<DoctorValidator> superValidators = super.validators;
+    return superValidators.map((DoctorValidator v) {
+      if (v is AndroidWorkflow) {
+        return new MockAndroidWorkflowValidator();
+      }
+      return v;
+    }).toList();
+  }
 }
 
 class MockSimControl extends Mock implements SimControl {
@@ -221,6 +241,9 @@ class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
 
   @override
   String get name => 'fake OS name and version';
+
+  @override
+  String get pathVarSeparator => ';';
 }
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}

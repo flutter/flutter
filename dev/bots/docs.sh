@@ -21,7 +21,7 @@ if [ -d "$FLUTTER_PUB_CACHE" ]; then
 fi
 
 # Install dartdoc.
-bin/cache/dart-sdk/bin/pub global activate dartdoc 0.16.0
+bin/cache/dart-sdk/bin/pub global activate dartdoc 0.17.0
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc.
@@ -35,7 +35,7 @@ cp dev/docs/google2ed1af765c529f57.html dev/docs/doc
 # Upload new API docs when on Travis
 if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   echo "This is not a pull request; considering whether to upload docs... (branch=$TRAVIS_BRANCH)"
-  if [ "$TRAVIS_BRANCH" == "master" -o "$TRAVIS_BRANCH" == "dev" ]; then
+  if [ "$TRAVIS_BRANCH" == "master" -o "$TRAVIS_BRANCH" == "beta" ]; then
     cd dev/docs
 
     if [ "$TRAVIS_BRANCH" == "master" ]; then
