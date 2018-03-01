@@ -102,19 +102,19 @@ class _FlutterPlatform extends PlatformPlugin {
     this.previewDart2,
   }) : assert(shellPath != null) {
     compilerController.stream.listen((CompilationRequest request) async {
-      bool isEmpty = compilationQueue.isEmpty;
+      final bool isEmpty = compilationQueue.isEmpty;
       compilationQueue.add(request);
       // Only trigger processing if queue was empty - i.e. no other requests
       // are currently being processed. This effectively enforces "one
       // compilation request at a time".
       if (isEmpty) {
-        while (!compilationQueue.isEmpty) {
-          CompilationRequest request = compilationQueue.first;
-          print("Compiling ${request.path}");
-          String outputPath = await compiler.recompile(request.path,
+        while (compilationQueue.isNotEmpty) {
+          final CompilationRequest request = compilationQueue.first;
+          printTrace('Compiling ${request.path}');
+          final String outputPath = await compiler.recompile(request.path,
             <String>[request.path]
           );
-          print("Finished compilation of ${request.path} into $outputPath");
+          print('Finished compilation of ${request.path} into $outputPath');
           compiler.accept();
           compiler.reset();
           request.result.complete(outputPath);
@@ -138,8 +138,7 @@ class _FlutterPlatform extends PlatformPlugin {
   ResidentCompiler compiler =
       new ResidentCompiler(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
           packagesPath: PackageMap.globalPackagesPath);
-  final List<CompilationRequest> compilationQueue =
-      new List<CompilationRequest>();
+  final List<CompilationRequest> compilationQueue = <CompilationRequest>[];
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
