@@ -83,6 +83,13 @@ enum _InitialResult { crashed, timedOut, connected }
 enum _TestResult { crashed, harnessBailed, testBailed }
 typedef Future<Null> _Finalizer();
 
+class CompilationRequest {
+  String path;
+  Completer<String> result;
+
+  CompilationRequest(this.path, this.result);
+}
+
 class _FlutterPlatform extends PlatformPlugin {
   _FlutterPlatform({
     @required this.shellPath,
@@ -93,7 +100,30 @@ class _FlutterPlatform extends PlatformPlugin {
     this.explicitObservatoryPort,
     this.host,
     this.previewDart2,
-  }) : assert(shellPath != null);
+  }) : assert(shellPath != null) {
+    compilerController.stream.listen((CompilationRequest request) async {
+      final bool isEmpty = compilationQueue.isEmpty;
+      compilationQueue.add(request);
+      // Only trigger processing if queue was empty - i.e. no other requests
+      // are currently being processed. This effectively enforces "one
+      // compilation request at a time".
+      if (isEmpty) {
+        while (compilationQueue.isNotEmpty) {
+          final CompilationRequest request = compilationQueue.first;
+          printTrace('Compiling ${request.path}');
+          final String outputPath = await compiler.recompile(request.path,
+            <String>[request.path]
+          );
+          print('Finished compilation of ${request.path} into $outputPath');
+          compiler.accept();
+          compiler.reset();
+          request.result.complete(outputPath);
+          // Only remove now when we finished processing the element
+          compilationQueue.removeAt(0);
+        }
+      }
+    });
+  }
 
   final String shellPath;
   final TestWatcher watcher;
@@ -103,6 +133,12 @@ class _FlutterPlatform extends PlatformPlugin {
   final int explicitObservatoryPort;
   final InternetAddress host;
   final bool previewDart2;
+  final StreamController<CompilationRequest> compilerController =
+      new StreamController<CompilationRequest>();
+  ResidentCompiler compiler =
+      new ResidentCompiler(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+          packagesPath: PackageMap.globalPackagesPath);
+  final List<CompilationRequest> compilationQueue = <CompilationRequest>[];
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
@@ -203,12 +239,9 @@ class _FlutterPlatform extends PlatformPlugin {
       String bundlePath;
 
       if (previewDart2) {
-        mainDart = await compile(
-          sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-          mainPath: listenerFile.path,
-          packagesPath: PackageMap.globalPackagesPath,
-          linkPlatformKernelIn: true
-        );
+        final Completer<String> completer = new Completer<String>();
+        compilerController.add(new CompilationRequest(listenerFile.path, completer));
+        mainDart = await completer.future;
 
         if (mainDart == null) {
           controller.sink.addError(_getErrorMessage('Compilation failed', testPath, shellPath));

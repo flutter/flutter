@@ -125,23 +125,27 @@ Future<String> compile(
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
 class ResidentCompiler {
-  ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation: false})
+  ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation: false,
+      String packagesPath})
     : assert(_sdkRoot != null),
-      _trackWidgetCreation = trackWidgetCreation {
+      _trackWidgetCreation = trackWidgetCreation,
+      _packagesPath = packagesPath {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
   }
 
   final bool _trackWidgetCreation;
+  final String _packagesPath;
   String _sdkRoot;
   Process _server;
   final _StdoutHandler stdoutHandler = new _StdoutHandler();
 
   /// If invoked for the first time, it compiles Dart script identified by
   /// [mainPath], [invalidatedFiles] list is ignored.
-  /// Otherwise, [mainPath] is ignored, but [invalidatedFiles] is recompiled
-  /// into new binary.
+  /// On successive runs [invalidatedFiles] indicates which files need to be
+  /// recompiled. If [mainPath] is [null], previously used [mainPath] entry
+  /// point that is used for recompilation.
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
   Future<String> recompile(String mainPath, List<String> invalidatedFiles,
@@ -154,7 +158,7 @@ class ResidentCompiler {
       return _compile(mainPath, outputPath);
 
     final String inputKey = new Uuid().generateV4();
-    _server.stdin.writeln('recompile $inputKey');
+    _server.stdin.writeln('recompile ${mainPath != null ? mainPath + " ": ""}$inputKey');
     invalidatedFiles.forEach(_server.stdin.writeln);
     _server.stdin.writeln(inputKey);
 
@@ -178,6 +182,9 @@ class ResidentCompiler {
     }
     if (_trackWidgetCreation) {
       args.add('--track-widget-creation');
+    }
+    if (_packagesPath != null) {
+      args.addAll(<String>['--packages', _packagesPath]);
     }
     _server = await processManager.start(args);
     _server.stdout
