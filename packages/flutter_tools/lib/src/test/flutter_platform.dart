@@ -61,6 +61,7 @@ void installHook({
   bool previewDart2: false,
   int port: 0,
   String precompiledDillPath,
+  bool trackWidgetCreation: false,
   int observatoryPort,
   InternetAddressType serverType: InternetAddressType.IP_V4,
 }) {
@@ -79,6 +80,7 @@ void installHook({
       previewDart2: previewDart2,
       port: port,
       precompiledDillPath: precompiledDillPath,
+      trackWidgetCreation: trackWidgetCreation,
     ),
   );
 }
@@ -97,7 +99,7 @@ class _CompilationRequest {
 // This class is a wrapper around compiler that allows multiple isolates to
 // enqueue compilation requests, but ensures only one compilation at a time.
 class _Compiler {
-  _Compiler() {
+  _Compiler(bool trackWidgetCreation) {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -135,7 +137,8 @@ class _Compiler {
 
     compiler = new ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        packagesPath: PackageMap.globalPackagesPath);
+        packagesPath: PackageMap.globalPackagesPath,
+        trackWidgetCreation: trackWidgetCreation);
   }
 
   final StreamController<_CompilationRequest> compilerController =
@@ -162,6 +165,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.previewDart2,
     this.port,
     this.precompiledDillPath,
+    this.trackWidgetCreation,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -174,6 +178,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool previewDart2;
   final int port;
   final String precompiledDillPath;
+  final bool trackWidgetCreation;
 
   _Compiler compiler;
 
@@ -269,7 +274,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
       if (previewDart2 && precompiledDillPath == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= new _Compiler();
+        compiler ??= new _Compiler(trackWidgetCreation);
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {

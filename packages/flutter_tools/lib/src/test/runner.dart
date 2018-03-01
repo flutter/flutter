@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
 // ignore: implementation_imports
 import 'package:test/src/executable.dart' as test;
 
@@ -29,8 +30,16 @@ Future<int> runTests(
     bool ipv6: false,
     bool machine: false,
     bool previewDart2: false,
+    bool trackWidgetCreation: false,
     TestWatcher watcher,
     }) async {
+  if (trackWidgetCreation && !previewDart2) {
+    throw new UsageException(
+      '--track-widget-creation is valid only when --preview-dart-2 is specified.',
+      null,
+    );
+  }
+
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
   if (!terminal.supportsColor)
@@ -77,6 +86,7 @@ Future<int> runTests(
     startPaused: startPaused,
     serverType: serverType,
     previewDart2: previewDart2,
+    trackWidgetCreation: trackWidgetCreation,
   );
 
   // Make the global packages path absolute.
