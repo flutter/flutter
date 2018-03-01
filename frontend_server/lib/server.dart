@@ -182,10 +182,13 @@ class _FrontendCompiler implements CompilerInterface {
     final String boundaryKey = new Uuid().generateV4();
     _outputStream.writeln('result $boundaryKey');
     final Uri sdkRoot = _ensureFolderPath(options['sdk-root']);
+    final String platformKernelDill =
+        options['strong'] ? 'platform_strong.dill' : 'platform.dill';
     final CompilerOptions compilerOptions = new CompilerOptions()
       ..sdkRoot = sdkRoot
       ..packagesFileUri = options['packages'] != null ? Uri.base.resolveUri(new Uri.file(options['packages'])) : null
       ..strongMode = options['strong']
+      ..sdkSummary = sdkRoot.resolve(platformKernelDill)
       ..target = new FlutterTarget(new TargetFlags(strongMode: options['strong']))
       ..reportMessages = true;
 
@@ -199,8 +202,6 @@ class _FrontendCompiler implements CompilerInterface {
       if (options['link-platform']) {
         // TODO(aam): Remove linkedDependencies once platform is directly embedded
         // into VM snapshot and http://dartbug.com/30111 is fixed.
-        final String platformKernelDill =
-            options['strong'] ? 'platform_strong.dill' : 'platform.dill';
         compilerOptions.linkedDependencies = <Uri>[
           sdkRoot.resolve(platformKernelDill)
         ];
