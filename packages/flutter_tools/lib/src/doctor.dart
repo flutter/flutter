@@ -264,10 +264,15 @@ class _FlutterValidator extends DoctorValidator {
 
     // Check that the binaries we downloaded for this platform actually run on it.
     if (!_genSnapshotRuns(genSnapshotPath)) {
-      messages.add(new ValidationMessage.error(
-        'Downloaded executables cannot execute '
-        'on host (see https://github.com/flutter/flutter/issues/6207 for more information)'
-      ));
+      final StringBuffer buf = new StringBuffer();
+      buf.writeln('Downloaded executables cannot execute on host.');
+      buf.writeln('See https://github.com/flutter/flutter/issues/6207 for more information');
+      if (platform.isLinux) {
+        buf.writeln('On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6');
+        buf.writeln('On Fedora: dnf install libstdc++.i686');
+        buf.writeln('On Arch: pacman -S lib32-libstdc++5');
+      }
+      messages.add(new ValidationMessage.error(buf.toString()));
       valid = ValidationType.partial;
     }
 
