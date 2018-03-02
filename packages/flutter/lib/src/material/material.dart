@@ -88,7 +88,7 @@ abstract class MaterialInkController {
 /// The Material widget is responsible for:
 ///
 /// 1. Clipping: Material clips its widget sub-tree to the shape specified by
-///    [type] and [borderRadius].
+///    [shape], [type], and [borderRadius].
 /// 2. Elevation: Material elevates its widget sub-tree on the Z axis by
 ///    [elevation] pixels, and draws the appropriate shadow.
 /// 3. Ink effects: Material shows ink effects implemented by [InkFeature]s
@@ -108,14 +108,15 @@ abstract class MaterialInkController {
 ///
 /// In general, the features of a [Material] should not change over time (e.g. a
 /// [Material] should not change its [color], [shadowColor] or [type]).
-/// Changes to [elevation] and [shadowColor] are animated. Changes to [shape] are
-/// animated if [type] is not [MaterialType.transparency] and [ShapeBorder.lerp]
-/// between the previous and next [shape] values is supported.
+/// Changes to [elevation] and [shadowColor] are animated for [animationDuration].
+/// Changes to [shape] are animated if [type] is not [MaterialType.transparency]
+/// and [ShapeBorder.lerp] between the previous and next [shape] values is
+/// supported. Shape changes are also animated for [animationDuration].
 ///
 ///
 /// ## Shape
 ///
-/// The shape for material is determined by [type] and [borderRadius].
+/// The shape for material is determined by [shape], [type], and [borderRadius].
 ///
 ///  - If [shape] is non null, it determines the shape.
 ///  - If [shape] is null and [borderRadius] is non null, the shape is a
@@ -153,9 +154,10 @@ abstract class MaterialInkController {
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
-  /// The [type], [elevation] and [shadowColor] arguments must not be null.
+  /// The [type], [elevation], [shadowColor], and [animationDuration] arguments
+  /// must not be null.
   ///
-  /// If a [shape] is specified, then the [borderRadius] property must not be
+  /// If a [shape] is specified, then the [borderRadius] property must be
   /// null and the [type] property must not be [MaterialType.circle]. If the
   /// [borderRadius] is specified, then the [type] property must not be
   /// [MaterialType.circle]. In both cases, these restrictions are intended to
@@ -169,11 +171,13 @@ class Material extends StatefulWidget {
     this.textStyle,
     this.borderRadius,
     this.shape,
+    this.animationDuration: kThemeChangeDuration,
     this.child,
   }) : assert(type != null),
        assert(elevation != null),
        assert(shadowColor != null),
        assert(!(shape != null && borderRadius != null)),
+       assert(animationDuration != null),
        assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
        super(key: key);
 
@@ -194,7 +198,7 @@ class Material extends StatefulWidget {
   /// widget conceptually defines an independent printed piece of material.
   ///
   /// Defaults to 0. Changing this value will cause the shadow to animate over
-  /// [kThemeChangeDuration].
+  /// [animationDuration].
   final double elevation;
 
   /// The color to paint the material.
@@ -221,6 +225,12 @@ class Material extends StatefulWidget {
   /// A shadow is only displayed if the [elevation] is greater than
   /// zero.
   final ShapeBorder shape;
+
+  /// Defines the duration of animated changes for [shape], [elevation],
+  /// and [shadowColor].
+  ///
+  /// The default value is [kThemeChangeDuration].
+  final Duration animationDuration;
 
   /// If non-null, the corners of this box are rounded by this [BorderRadius].
   /// Otherwise, the corners specified for the current [type] of material are
@@ -287,7 +297,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     if (contents != null) {
       contents = new AnimatedDefaultTextStyle(
         style: widget.textStyle ?? Theme.of(context).textTheme.body1,
-        duration: kThemeChangeDuration,
+        duration: widget.animationDuration,
         child: contents
       );
     }
@@ -317,7 +327,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     if (widget.type == MaterialType.canvas && widget.shape == null && widget.borderRadius == null) {
       return new AnimatedPhysicalModel(
         curve: Curves.fastOutSlowIn,
-        duration: kThemeChangeDuration,
+        duration: widget.animationDuration,
         shape: BoxShape.rectangle,
         borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
@@ -332,10 +342,10 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 
     if (widget.type == MaterialType.transparency)
       return _transparentInterior(shape: shape, contents: contents);
-    
+
     return new _MaterialInterior(
       curve: Curves.fastOutSlowIn,
-      duration: kThemeChangeDuration,
+      duration: widget.animationDuration,
       shape: shape,
       elevation: widget.elevation,
       color: backgroundColor,
