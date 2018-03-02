@@ -59,6 +59,7 @@ Future<String> compile(
     {String sdkRoot,
     String mainPath,
     String outputFilePath,
+    String depFilePath,
     bool linkPlatformKernelIn: false,
     bool aot: false,
     bool trackWidgetCreation: false,
@@ -95,6 +96,9 @@ Future<String> compile(
   }
   if (outputFilePath != null) {
     command.addAll(<String>['--output-dill', outputFilePath]);
+  }
+  if (depFilePath != null) {
+    command.addAll(<String>['--depfile', depFilePath]);
   }
 
   if (extraFrontEndOptions != null)
