@@ -645,7 +645,7 @@ double _rectDistance(Rect a, Rect b) {
 
 double _sizeDistance(Size a, Size b) {
   final Offset delta = b - a;
-  return math.sqrt(delta.dx * delta.dx + delta.dy * delta.dy);
+  return delta.distance;
 }
 
 /// Asserts that two values are within a certain distance from each other.
@@ -659,6 +659,9 @@ double _sizeDistance(Size a, Size b) {
 ///  * [Color], whose distance is the maximum component-wise delta.
 ///  * [Offset], whose distance is the Euclidean distance computed using the
 ///    method [Offset.distance].
+///  * [Rect], whose distance is the maximum component-wise delta.
+///  * [Size], whose distance is the [Offset.distance] of the offset computed as
+///    the difference between two sizes.
 ///  * [int], whose distance is the absolute difference between two integers.
 ///  * [double], whose distance is the absolute difference between two doubles.
 ///
