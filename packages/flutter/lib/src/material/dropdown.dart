@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_theme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
@@ -21,7 +22,11 @@ import 'theme.dart';
 const Duration _kDropdownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
 const double _kDenseButtonHeight = 24.0;
-const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 16.0);
+const EdgeInsets _kMenuItemPadding = const EdgeInsets.symmetric(horizontal: 16.0);
+const EdgeInsetsGeometry _kAlignedButtonPadding = const EdgeInsetsDirectional.only(start: 16.0, end: 4.0);
+const EdgeInsets _kUnalignedButtonPadding = EdgeInsets.zero;
+const EdgeInsets _kAlignedMenuMargin = EdgeInsets.zero;
+const EdgeInsetsGeometry _kUnalignedMenuMargin = const EdgeInsetsDirectional.only(start: 16.0, end: 24.0);
 
 class _DropdownMenuPainter extends CustomPainter {
   _DropdownMenuPainter({
@@ -214,7 +219,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     final double maxHeight = math.max(0.0, constraints.maxHeight - 2 * _kMenuItemHeight);
     // The width of a menu should be at most the view width. This ensures that
     // the menu does not extend past the left and right edges of the screen.
-    final double width = math.min(constraints.maxWidth, buttonRect.width + 8.0);
+    final double width = math.min(constraints.maxWidth, buttonRect.width);
     return new BoxConstraints(
       minWidth: width,
       maxWidth: width,
@@ -473,8 +478,6 @@ class DropdownButton<T> extends StatefulWidget {
     this.style,
     this.iconSize: 24.0,
     this.isDense: false,
-    this.padding: EdgeInsets.zero,
-    this.menuMargin: const EdgeInsets.symmetric(horizontal: 16.0),
   }) : assert(items != null),
        assert(value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
       super(key: key);
@@ -519,10 +522,6 @@ class DropdownButton<T> extends StatefulWidget {
   /// can be useful when the button is embedded in a container that adds
   /// its own decorations, like [InputDecorator].
   final bool isDense;
-
-  final EdgeInsetsGeometry padding;
-
-  final EdgeInsetsGeometry menuMargin;
 
   @override
   _DropdownButtonState<T> createState() => new _DropdownButtonState<T>();
@@ -582,15 +581,15 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     final RenderBox itemBox = context.findRenderObject();
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
     final TextDirection textDirection = Directionality.of(context);
-    final Rect buttonRect = widget.menuMargin.resolve(textDirection).inflateRect(itemRect);
+    final EdgeInsetsGeometry menuMargin = ButtonTheme.of(context).alignedDropdown
+      ?_kAlignedMenuMargin
+      : _kUnalignedMenuMargin;
 
     assert(_dropdownRoute == null);
     _dropdownRoute = new _DropdownRoute<T>(
       items: widget.items,
-      // TODO: maybe buttonRect should be computed (from itemRect, and menuMargin)
-      // in _DropdownRoute, because directionality could be different there?
-      buttonRect: buttonRect,
-      padding: widget.padding,
+      buttonRect: menuMargin.resolve(textDirection).inflateRect(itemRect),
+      padding: _kMenuItemPadding.resolve(textDirection),
       selectedIndex: _selectedIndex ?? 0,
       elevation: widget.elevation,
       theme: Theme.of(context, shadowThemeOnly: true),
@@ -633,10 +632,14 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       ));
     }
 
+    final EdgeInsetsGeometry padding = ButtonTheme.of(context).alignedDropdown
+      ? _kAlignedButtonPadding
+      : _kUnalignedButtonPadding;
+
     Widget result = new DefaultTextStyle(
       style: _textStyle,
       child: new Container(
-        padding: widget.padding,
+        padding: padding.resolve(Directionality.of(context)),
         height: widget.isDense ? _denseButtonHeight : null,
         child: new Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
