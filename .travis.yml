@@ -6,6 +6,7 @@ osx_image: xcode9.2
 env:
   - SHARD=analyze
   - SHARD=tests
+  - SHARD=tests_dart2
   - SHARD=docs
   - SHARD=build_and_deploy_gallery
 matrix:
@@ -14,6 +15,8 @@ matrix:
     env: SHARD=analyze
   - os: osx
     env: SHARD=docs
+  allow_failures:
+  - env: SHARD=tests_dart2
 sudo: false
 filter_secrets: false
 

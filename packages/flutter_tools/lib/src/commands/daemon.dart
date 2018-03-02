@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
 import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -333,6 +335,8 @@ class AppDomain extends Domain {
       route,
       options,
       enableHotReload,
+      previewDart2: _getBoolArg(args, 'preview-dart-2'),
+      trackWidgetCreation: _getBoolArg(args, 'track-widget-creation'),
     );
 
     return <String, dynamic>{
@@ -347,7 +351,8 @@ class AppDomain extends Domain {
     Device device, String projectDirectory, String target, String route,
     DebuggingOptions options, bool enableHotReload, {
     String applicationBinary,
-    bool previewDart2: false,
+    @required bool previewDart2,
+    @required bool trackWidgetCreation,
     String projectRootPath,
     String packagesFilePath,
     bool ipv6: false,
@@ -360,7 +365,11 @@ class AppDomain extends Domain {
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
 
-    final FlutterDevice flutterDevice = new FlutterDevice(device, previewDart2: previewDart2);
+    final FlutterDevice flutterDevice = new FlutterDevice(
+      device,
+      previewDart2: previewDart2,
+      trackWidgetCreation: trackWidgetCreation,
+    );
 
     ResidentRunner runner;
 
@@ -764,7 +773,7 @@ class NotifyingLogger extends Logger {
     String message, {
     String progressId,
     bool expectSlowOperation: false,
-    int progressIndicatorPadding: 52,
+    int progressIndicatorPadding: kDefaultStatusPadding,
   }) {
     printStatus(message);
     return new Status();
@@ -906,12 +915,15 @@ class _AppRunLogger extends Logger {
   }
 }
 
-class _AppLoggerStatus implements Status {
+class _AppLoggerStatus extends Status {
   _AppLoggerStatus(this.logger, this.id, this.progressId);
 
   final _AppRunLogger logger;
   final int id;
   final String progressId;
+
+  @override
+  void start() {}
 
   @override
   void stop() {

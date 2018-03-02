@@ -113,10 +113,12 @@ void main() {
           'git clean -f -X **/.packages': null,
         });
         final String archiveName = path.join(tmpDir.absolute.path,
-            'flutter_${platformName}_v1.2.3-dev${platform.isWindows ? '.zip' : '.tar.xz'}');
+            'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
         if (platform.isWindows) {
           calls['7za a -tzip -mx=9 $archiveName flutter'] = null;
-        } else {
+        } else if (platform.isMacOS) {
+          calls['zip -r -9 $archiveName flutter'] = null;
+        } else if (platform.isLinux) {
           calls['tar cJf $archiveName flutter'] = null;
         }
         processManager.fakeResults = calls;
@@ -156,10 +158,12 @@ void main() {
           'git clean -f -X **/.packages': null,
         });
         final String archiveName = path.join(tmpDir.absolute.path,
-            'flutter_${platformName}_v1.2.3-dev${platform.isWindows ? '.zip' : '.tar.xz'}');
+            'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
         if (platform.isWindows) {
           calls['7za a -tzip -mx=9 $archiveName flutter'] = null;
-        } else {
+        } else if (platform.isMacOS) {
+          calls['zip -r -9 $archiveName flutter'] = null;
+        } else if (platform.isLinux) {
           calls['tar cJf $archiveName flutter'] = null;
         }
         processManager.fakeResults = calls;
@@ -211,8 +215,8 @@ void main() {
 
       test('calls the right processes', () async {
         final String releasesName = 'releases_$platformName.json';
-        final String archiveName = platform.isWindows ? 'archive.zip' : 'archive.tar.xz';
-        final String archiveMime = platform.isWindows ? 'application/zip' : 'application/x-gtar';
+        final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
+        final String archiveMime = platform.isLinux ? 'application/x-gtar' : 'application/zip';
         final String archivePath = path.join(tempDir.absolute.path, archiveName);
         final String gsArchivePath = 'gs://flutter_infra/releases/dev/$platformName/$archiveName';
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
@@ -225,12 +229,12 @@ void main() {
     },
     "releases": {
         "6da8ec6bd0c4801b80d666869e4069698561c043": {
-            "${platformName}_archive": "dev/linux/flutter_${platformName}_0.21.0-beta.tar.xz",
+            "${platformName}_archive": "dev/linux/flutter_${platformName}_0.21.0-beta.zip",
             "release_date": "2017-12-19T10:30:00,847287019-08:00",
             "version": "0.21.0-beta"
         },
         "f88c60b38c3a5ef92115d24e3da4175b4890daba": {
-            "${platformName}_archive": "dev/linux/flutter_${platformName}_0.22.0-dev.tar.xz",
+            "${platformName}_archive": "dev/linux/flutter_${platformName}_0.22.0-dev.zip",
             "release_date": "2018-01-19T13:30:09,728487019-08:00",
             "version": "0.22.0-dev"
         }

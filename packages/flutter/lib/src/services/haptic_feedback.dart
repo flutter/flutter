@@ -13,14 +13,70 @@ import 'system_channels.dart';
 class HapticFeedback {
   HapticFeedback._();
 
-  /// Provides haptic feedback to the user for a short duration.
+  /// Provides vibration haptic feedback to the user for a short duration.
   ///
   /// On iOS devices that support haptic feedback, this uses the default system
   /// vibration value (`kSystemSoundID_Vibrate`).
   ///
   /// On Android, this uses the platform haptic feedback API to simulate a
-  /// short tap on a virtual keyboard.
+  /// response to a long press (`HapticFeedbackConstants.LONG_PRESS`).
   static Future<Null> vibrate() async {
     await SystemChannels.platform.invokeMethod('HapticFeedback.vibrate');
+  }
+
+  /// Provides a haptic feedback corresponding a collision impact with a light mass.
+  ///
+  /// On iOS versions 10 and above, this uses a `UIImpactFeedbackGenerator` with
+  /// `UIImpactFeedbackStyleLight`. This call has no effects on iOS versions
+  /// below 10.
+  ///
+  /// On Android, this uses `HapticFeedbackConstants.VIRTUAL_KEY`.
+  static Future<Null> lightImpact() async {
+    await SystemChannels.platform.invokeMethod(
+      'HapticFeedback.vibrate',
+      'HapticFeedbackType.lightImpact',
+    );
+  }
+
+  /// Provides a haptic feedback corresponding a collision impact with a medium mass.
+  ///
+  /// On iOS versions 10 and above, this uses a `UIImpactFeedbackGenerator` with
+  /// `UIImpactFeedbackStyleMedium`. This call has no effects on iOS versions
+  /// below 10.
+  ///
+  /// On Android, this uses `HapticFeedbackConstants.KEYBOARD_TAP`.
+  static Future<Null> mediumImpact() async {
+    await SystemChannels.platform.invokeMethod(
+      'HapticFeedback.vibrate',
+      'HapticFeedbackType.mediumImpact',
+    );
+  }
+
+  /// Provides a haptic feedback corresponding a collision impact with a heavy mass.
+  ///
+  /// On iOS versions 10 and above, this uses a `UIImpactFeedbackGenerator` with
+  /// `UIImpactFeedbackStyleHeavy`. This call has no effects on iOS versions
+  /// below 10.
+  ///
+  /// On Android, this uses `HapticFeedbackConstants.CONTEXT_CLICK` on API levels
+  /// 23 and above. This call has no effects on Android API levels below 23.
+  static Future<Null> heavyImpact() async {
+    await SystemChannels.platform.invokeMethod(
+      'HapticFeedback.vibrate',
+      'HapticFeedbackType.heavyImpact',
+    );
+  }
+
+  /// Provides a haptic feedback indication selection changing through discrete values.
+  ///
+  /// On iOS versions 10 and above, this uses a `UISelectionFeedbackGenerator`.
+  /// This call has no effects on iOS versions below 10.
+  ///
+  /// On Android, this uses `HapticFeedbackConstants.CLOCK_TICK`.
+  static Future<Null> selectionClick() async {
+    await SystemChannels.platform.invokeMethod(
+      'HapticFeedback.vibrate',
+      'HapticFeedbackType.selectionClick',
+    );
   }
 }

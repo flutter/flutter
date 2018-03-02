@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -255,36 +256,15 @@ void main() {
       final Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
-      final Path expectedNotch = new Path()
-        ..lineTo(190.0, 100.0)
-        ..arcToPoint(
-          const Offset(210.0, 100.0),
-          radius: const Radius.circular(10.0),
-          clockwise: false
-        )
-        ..lineTo(220.0, 100.0);
+      final Path notchedRectangle =
+        createNotchedRectangle(host, start.dx, end.dx, actualNotch);
 
-      expect(
-        createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-        coversSameAreaAs(
-          createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-          areaToCompare: host.inflate(10.0)
-        )
-      );
-
-      expect(
-        createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-        coversSameAreaAs(
-          createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-          areaToCompare: guest.inflate(10.0),
-          sampleSize: 50,
-        )
-      );
+      expect(pathDoesNotContainCircle(notchedRectangle, guest), isTrue);
     });
 
     testWidgets('notch with margin', (WidgetTester tester) async {
       final ComputeNotch computeNotch = await fetchComputeNotch(tester,
-        const FloatingActionButton(onPressed: null, notchMargin: 4.0)
+	const FloatingActionButton(onPressed: null, notchMargin: 4.0)
       );
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
@@ -292,33 +272,58 @@ void main() {
       final Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
-      final Path expectedNotch = new Path()
-        ..lineTo(186.0, 100.0)
-        ..arcToPoint(
-          const Offset(214.0, 100.0),
-          radius: const Radius.circular(14.0),
-          clockwise: false
-        )
-        ..lineTo(220.0, 100.0);
-
-      expect(
-        createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-        coversSameAreaAs(
-          createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-          areaToCompare: host.inflate(10.0)
-        )
-      );
-
-      expect(
-        createNotchedRectangle(host, start.dx, end.dx, actualNotch),
-        coversSameAreaAs(
-          createNotchedRectangle(host, start.dx, end.dx, expectedNotch),
-          areaToCompare: guest.inflate(10.0),
-          sampleSize: 50,
-        )
-      );
+      final Path notchedRectangle =
+        createNotchedRectangle(host, start.dx, end.dx, actualNotch);
+      expect(pathDoesNotContainCircle(notchedRectangle, guest.inflate(4.0)), isTrue);
     });
+
+    testWidgets('notch circle center above BAB', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester,
+	const FloatingActionButton(onPressed: null, notchMargin: 4.0)
+      );
+      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      final Rect guest = new Rect.fromLTRB(190.0, 85.0, 210.0, 105.0);
+      final Offset start = const Offset(180.0, 100.0);
+      final Offset end = const Offset(220.0, 100.0);
+
+      final Path actualNotch = computeNotch(host, guest, start, end);
+      final Path notchedRectangle =
+        createNotchedRectangle(host, start.dx, end.dx, actualNotch);
+      expect(pathDoesNotContainCircle(notchedRectangle, guest.inflate(4.0)), isTrue);
+    });
+
+    testWidgets('notch circle center below BAB', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester,
+	const FloatingActionButton(onPressed: null, notchMargin: 4.0)
+      );
+      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      final Rect guest = new Rect.fromLTRB(190.0, 95.0, 210.0, 115.0);
+      final Offset start = const Offset(180.0, 100.0);
+      final Offset end = const Offset(220.0, 100.0);
+
+      final Path actualNotch = computeNotch(host, guest, start, end);
+      final Path notchedRectangle =
+        createNotchedRectangle(host, start.dx, end.dx, actualNotch);
+      expect(pathDoesNotContainCircle(notchedRectangle, guest.inflate(4.0)), isTrue);
+    });
+
+    testWidgets('no notch when there is no overlap', (WidgetTester tester) async {
+      final ComputeNotch computeNotch = await fetchComputeNotch(tester,
+	const FloatingActionButton(onPressed: null, notchMargin: 4.0)
+      );
+      final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
+      final Rect guest = new Rect.fromLTRB(190.0, 40.0, 210.0, 60.0);
+      final Offset start = const Offset(180.0, 100.0);
+      final Offset end = const Offset(220.0, 100.0);
+
+      final Path actualNotch = computeNotch(host, guest, start, end);
+      final Path notchedRectangle =
+        createNotchedRectangle(host, start.dx, end.dx, actualNotch);
+      expect(pathDoesNotContainCircle(notchedRectangle, guest.inflate(4.0)), isTrue);
+    });
+
   });
+
 }
 
 Path createNotchedRectangle(Rect container, double startX, double endX, Path notch) {
@@ -392,4 +397,19 @@ class GeometryCachePainter extends CustomPainter {
   bool shouldRepaint(GeometryCachePainter oldDelegate) {
     return true;
   }
+}
+
+bool pathDoesNotContainCircle(Path path, Rect circleBounds) {
+  assert(circleBounds.width == circleBounds.height);
+  final double radius = circleBounds.width / 2.0;
+
+  for (double theta = 0.0; theta <= 2.0 * math.PI; theta += math.PI / 20.0) {
+    for (double i = 0.0; i < 1; i += 0.01) {
+      final double x = i * radius * math.cos(theta);
+      final double y = i * radius * math.sin(theta);
+      if (path.contains(new Offset(x,y) + circleBounds.center))
+        return false;
+    }
+  }
+  return true;
 }

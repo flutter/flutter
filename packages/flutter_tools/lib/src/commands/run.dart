@@ -260,6 +260,7 @@ class RunCommand extends RunCommandBase {
           _createDebuggingOptions(), hotMode,
           applicationBinary: argResults['use-application-binary'],
           previewDart2: argResults['preview-dart-2'],
+          trackWidgetCreation: argResults['track-widget-creation'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: globalResults['packages'],
           ipv6: ipv6,

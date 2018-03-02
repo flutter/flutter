@@ -135,7 +135,7 @@ class BorderSide {
   ///
   /// The `t` argument represents the multiplicand, or the position on the
   /// timeline for an interpolation from nothing to `this`, with 0.0 meaning
-  /// that the the object returned should be the nil variant of this object, 1.0
+  /// that the object returned should be the nil variant of this object, 1.0
   /// meaning that no change should be applied, returning `this` (or something
   /// equivalent to `this`), and other values meaning that the object should be
   /// multiplied by `t`. Negative values are treated like zero.
@@ -328,7 +328,7 @@ abstract class ShapeBorder {
   ///
   /// The `t` argument represents the multiplicand, or the position on the
   /// timeline for an interpolation from nothing to `this`, with 0.0 meaning
-  /// that the the object returned should be the nil variant of this object, 1.0
+  /// that the object returned should be the nil variant of this object, 1.0
   /// meaning that no change should be applied, returning `this` (or something
   /// equivalent to `this`), and other values meaning that the object should be
   /// multiplied by `t`. Negative values are allowed but may be meaningless

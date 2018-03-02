@@ -15,12 +15,17 @@ import '../src/context.dart';
 void main() {
   group('doctor', () {
     testUsingContext('intellij validator', () async {
-      final ValidationResult result = await new IntelliJValidatorTestTarget('Test').validate();
+      final String installPath = '/path/to/intelliJ';
+      final ValidationResult result = await new IntelliJValidatorTestTarget('Test', installPath).validate();
       expect(result.type, ValidationType.partial);
       expect(result.statusInfo, 'version test.test.test');
-      expect(result.messages, hasLength(3));
+      expect(result.messages, hasLength(4));
 
       ValidationMessage message = result.messages
+          .firstWhere((ValidationMessage m) => m.message.startsWith('IntelliJ '));
+      expect(message.message, 'IntelliJ at $installPath');
+
+      message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Dart '));
       expect(message.message, 'Dart plugin version 162.2485');
 
@@ -32,6 +37,22 @@ void main() {
 
     testUsingContext('vs code validator when both installed', () async {
       final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension.validate();
+      expect(result.type, ValidationType.installed);
+      expect(result.statusInfo, 'version 1.2.3');
+      expect(result.messages, hasLength(2));
+
+      ValidationMessage message = result.messages
+          .firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
+      expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
+
+      message = result.messages
+          .firstWhere((ValidationMessage m) => m.message.startsWith('Dart Code '));
+      expect(message.message, 'Dart Code extension version 4.5.6');
+    });
+
+    testUsingContext('vs code validator when 64bit installed', () async {
+      expect(VsCodeValidatorTestTargets.installedWithExtension64bit.title, 'VS Code, 64-bit edition');
+      final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension64bit.validate();
       expect(result.type, ValidationType.installed);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
@@ -148,7 +169,7 @@ void main() {
 }
 
 class IntelliJValidatorTestTarget extends IntelliJValidator {
-  IntelliJValidatorTestTarget(String title) : super(title);
+  IntelliJValidatorTestTarget(String title, String installPath) : super(title, installPath);
 
   @override
   String get pluginsPath => fs.path.join('test', 'data', 'intellij', 'plugins');
@@ -274,11 +295,14 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
   static final String validInstall = fs.path.join('test', 'data', 'vscode', 'application');
   static final String validExtensions = fs.path.join('test', 'data', 'vscode', 'extensions');
   static final String missingExtensions = fs.path.join('test', 'data', 'vscode', 'notExtensions');
-  VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory) 
-    : super(new VsCode.fromDirectory(installDirectory, extensionDirectory));
+  VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String edition}) 
+    : super(new VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>
     new VsCodeValidatorTestTargets._(validInstall, validExtensions);
+
+    static VsCodeValidatorTestTargets get installedWithExtension64bit =>
+    new VsCodeValidatorTestTargets._(validInstall, validExtensions, edition: '64-bit edition');
 
   static VsCodeValidatorTestTargets get installedWithoutExtension =>
     new VsCodeValidatorTestTargets._(validInstall, missingExtensions);

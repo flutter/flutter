@@ -33,6 +33,98 @@ void main() {
       )
     );
   });
+
+  testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Builder(
+          builder: (BuildContext context) {
+            return new Theme(
+              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              child: const Scaffold(
+                floatingActionButton: const FloatingActionButton(
+                  onPressed: null,
+                ),
+                bottomNavigationBar: const BottomAppBar(),
+              ),
+            );
+          }
+        ),
+      ),
+    );
+
+    final PhysicalShape physicalShape =
+      tester.widget(find.byType(PhysicalShape).at(0));
+
+    expect(physicalShape.color, const Color(0xffffff00));
+  });
+
+  testWidgets('color overrides theme color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Builder(
+          builder: (BuildContext context) {
+            return new Theme(
+              data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
+              child: const Scaffold(
+                floatingActionButton: const FloatingActionButton(
+                  onPressed: null,
+                ),
+                bottomNavigationBar: const BottomAppBar(
+                  color: const Color(0xff0000ff)
+                ),
+              ),
+            );
+          }
+        ),
+      ),
+    );
+
+    final PhysicalShape physicalShape =
+      tester.widget(find.byType(PhysicalShape).at(0));
+
+    expect(physicalShape.color, const Color(0xff0000ff));
+  });
+
+  // This is a regression test for a bug we had where toggling hasNotch
+  // will crash, as the shouldReclip method of ShapeBorderClipper or
+  // _BottomAppBarClipper will try an illegal downcast.
+  testWidgets('toggle hasNotch', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          bottomNavigationBar: const BottomAppBar(
+            hasNotch: true,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          bottomNavigationBar: const BottomAppBar(
+            hasNotch: false,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          bottomNavigationBar: const BottomAppBar(
+            hasNotch: true,
+          ),
+        ),
+      ),
+    );
+  });
+  // TODO(amirh): test a BottomAppBar with hasNotch=false and an overlapping
+  // FAB.
+  //
+  // Cannot test this before https://github.com/flutter/flutter/pull/14368
+  // as there is no way to make the FAB and BAB overlap.
 }
 
 // The bottom app bar clip path computation is only available at paint time.

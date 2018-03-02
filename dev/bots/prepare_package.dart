@@ -248,7 +248,14 @@ class ArchiveCreator {
   /// Used when an output filename is not given.
   String get _archiveName {
     final String os = platform.operatingSystem.toLowerCase();
-    final String suffix = platform.isWindows ? 'zip' : 'tar.xz';
+    // We don't use .tar.xz on Mac because although it can unpack them
+    // on the command line (with tar), the "Archive Utility" that runs
+    // when you double-click on them just does some crazy behavior (it
+    // converts it to a compressed cpio archive, and when you double
+    // click on that, it converts it back to .tar.xz, without ever
+    // unpacking it!) So, we use .zip for Mac, and the files are about
+    // 220MB larger than they need to be. :-(
+    final String suffix = platform.isLinux ? 'tar.xz' : 'zip';
     return 'flutter_${os}_$_version-$branchName.$suffix';
   }
 
@@ -364,15 +371,25 @@ class ArchiveCreator {
   ///
   /// May only be run on Windows (since 7Zip is not available on other platforms).
   Future<String> _createZipArchive(File output, Directory source) {
-    assert(platform.isWindows); // 7Zip is only available on Windows.
-    final List<String> commandLine = <String>[
-      '7za',
-      'a',
-      '-tzip',
-      '-mx=9',
-      output.absolute.path,
-      path.basename(source.path),
-    ];
+    List<String> commandLine;
+    if (platform.isWindows) {
+      commandLine = <String>[
+        '7za',
+        'a',
+        '-tzip',
+        '-mx=9',
+        output.absolute.path,
+        path.basename(source.path),
+      ];
+    } else {
+      commandLine = <String>[
+        'zip',
+        '-r',
+        '-9',
+        output.absolute.path,
+        path.basename(source.path),
+      ];
+    }
     return _processRunner.runProcess(commandLine,
         workingDirectory: new Directory(path.dirname(source.absolute.path)));
   }

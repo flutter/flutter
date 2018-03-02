@@ -78,7 +78,7 @@ class ScrollController extends ChangeNotifier {
   /// See also:
   ///
   ///  * [PageStorageKey], which should be used when more than one
-  ////   scrollable appears in the same route, to distinguish the [PageStorage]
+  ///   scrollable appears in the same route, to distinguish the [PageStorage]
   ///    locations used to save scroll offsets.
   final bool keepScrollOffset;
 

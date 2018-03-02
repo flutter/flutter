@@ -49,10 +49,10 @@ Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
 Write-Host "Unzipping Dart SDK..."
 If (Get-Command 7z -errorAction SilentlyContinue) {
     # The built-in unzippers are painfully slow. Use 7-Zip, if available.
-    & 7z x $dartSdkZip -o"$cachePath" -bd | Out-Null
+    & 7z x $dartSdkZip "-o$cachePath" -bd | Out-Null
 } ElseIf (Get-Command 7za -errorAction SilentlyContinue) {
     # Use 7-Zip's standalone version 7za.exe, if available.
-    & 7za x $dartSdkZip -o"$cachePath" -bd | Out-Null
+    & 7za x $dartSdkZip "-o$cachePath" -bd | Out-Null
 } ElseIf (Get-Command Expand-Archive -errorAction SilentlyContinue) {
     # Use PowerShell's built-in unzipper, if available (requires PowerShell 5+).
     Expand-Archive $dartSdkZip -DestinationPath $cachePath

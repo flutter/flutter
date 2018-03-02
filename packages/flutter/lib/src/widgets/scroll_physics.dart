@@ -241,7 +241,7 @@ class ScrollPhysics {
 ///
 /// See also:
 ///
-///  * [ScrollConfiguration], which uses this to provide the the default
+///  * [ScrollConfiguration], which uses this to provide the default
 ///    scroll behavior on iOS.
 ///  * [ClampingScrollPhysics], which is the analogous physics for Android's
 ///    clamping behavior.
@@ -356,7 +356,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
 ///
 /// See also:
 ///
-///  * [ScrollConfiguration], which uses this to provide the the default
+///  * [ScrollConfiguration], which uses this to provide the default
 ///    scroll behavior on Android.
 ///  * [BouncingScrollPhysics], which is the analogous physics for iOS' bouncing
 ///    behavior.

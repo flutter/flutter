@@ -79,7 +79,7 @@ class Velocity {
 /// A two dimensional velocity estimate.
 ///
 /// VelocityEstimates are computed by [VelocityTracker.getVelocityEstimate]. An
-/// estimate's [confidence] measures how well the the velocity tracker's position
+/// estimate's [confidence] measures how well the velocity tracker's position
 /// data fit a straight line, [duration] is the time that elapsed between the
 /// first and last position sample used to compute the velocity, and [offset]
 /// is similarly the difference between the first and last positions.

@@ -39,8 +39,8 @@ class FlutterDevice {
   StreamSubscription<String> _loggingSubscription;
 
   FlutterDevice(this.device, {
-    bool previewDart2: false,
-    bool trackWidgetCreation: false,
+    @required bool previewDart2,
+    @required bool trackWidgetCreation,
   }) {
     if (previewDart2) {
       generator = new ResidentCompiler(
