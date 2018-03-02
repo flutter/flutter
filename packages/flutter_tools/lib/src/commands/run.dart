@@ -259,7 +259,6 @@ class RunCommand extends RunCommandBase {
           devices.first, fs.currentDirectory.path, targetFile, route,
           _createDebuggingOptions(), hotMode,
           applicationBinary: argResults['use-application-binary'],
-          previewDart2: argResults['preview-dart-2'],
           trackWidgetCreation: argResults['track-widget-creation'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: globalResults['packages'],
@@ -313,7 +312,6 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: _createDebuggingOptions(),
         benchmarkMode: argResults['benchmark'],
         applicationBinary: argResults['use-application-binary'],
-        previewDart2: argResults['preview-dart-2'],
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
         stayResident: stayResident,
@@ -326,7 +324,6 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: _createDebuggingOptions(),
         traceStartup: traceStartup,
         applicationBinary: argResults['use-application-binary'],
-        previewDart2: argResults['preview-dart-2'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
