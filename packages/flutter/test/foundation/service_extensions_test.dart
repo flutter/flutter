@@ -34,7 +34,7 @@ class TestServiceExtensionsBinding extends BindingBase
     extensions[name] = callback;
   }
 
-  Future<Map<String, String>> testExtension(String name, Map<String, String> arguments) {
+  Future<Map<String, dynamic>> testExtension(String name, Map<String, String> arguments) {
     expect(extensions.containsKey(name), isTrue);
     return extensions[name](arguments);
   }
