@@ -264,9 +264,17 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrContext> context,
     return false;
   }
 
+  // TODO: Once flutter rolls Skia, just use the GrVkAlloc ctor directly in the
+  // GrVkImageInfo struct.
+  GrVkAlloc gr_vk_alloc;
+  gr_vk_alloc.fMemory = vk_memory_;
+  gr_vk_alloc.fOffset = 0;
+  gr_vk_alloc.fSize = memory_reqs.size;
+  gr_vk_alloc.fFlags = 0;
+  
   const GrVkImageInfo image_info = {
       .fImage = vk_image_,
-      .fAlloc = {vk_memory_, 0, memory_reqs.size, 0},
+      .fAlloc = gr_vk_alloc,
       .fImageTiling = image_create_info.tiling,
       .fImageLayout = image_create_info.initialLayout,
       .fFormat = image_create_info.format,
