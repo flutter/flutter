@@ -493,7 +493,7 @@ void _loadDateIntlDataIfNotLoaded() {
 class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   const _MaterialLocalizationsDelegate();
 
-  static const List<String> _supportedLanguages = const <String>[
+static const List<String> _supportedLanguages = const <String>[
     'ar', // Arabic
     'de', // German
     'en', // English
@@ -503,13 +503,19 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'he', // Hebrew
     'it', // Italian
     'ja', // Japanese
+    'ko', // Korean
+    'nl', // Dutch
+    'pl', // Polish
     'ps', // Pashto
-    'pt', // Portugese
+    'pt', // Portuguese
     'ro', // Romanian
     'ru', // Russian
+    'th', // Thai
+    'tr', // Turkish
     'ur', // Urdu
-    'zh', // Simplified Chinese
+    'zh'  // Simplified Chinese
   ];
+
 
   @override
   bool isSupported(Locale locale) => _supportedLanguages.contains(locale.languageCode);
