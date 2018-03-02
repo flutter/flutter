@@ -74,8 +74,9 @@ class FuchsiaRemoteConnection {
 
   /// Opens a connection to a Fuchsia device.
   ///
-  /// Accepts an `address` to a Fuchsia device, and optionally a `sshConfigPath` in order to open the
-  /// associated ssh_config for port forwarding.
+  /// Accepts an `address` to a Fuchsia device, and optionally a `sshConfigPath`
+  /// in order to open the associated ssh_config for port forwarding.
+  ///
   /// Will throw an [ArgumentError] if `address` is malformed.
   ///
   /// Once this function is called, the instance of [FuchsiaRemoteConnection]
@@ -132,7 +133,7 @@ class FuchsiaRemoteConnection {
       final DartVm vmService = await _getDartVm(fp.port);
       views.addAll(await vmService.getAllFlutterViews());
     }
-    return views;
+    return new List<FlutterView>.unmodifiable(views);
   }
 
   Future<DartVm> _getDartVm(int port) async {
@@ -151,7 +152,7 @@ class FuchsiaRemoteConnection {
     return _dartVmCache[port];
   }
 
-  /// Forwards a series of local device ports to the.
+  /// Forwards a series of local device ports to the remote device.
   ///
   /// When this function is run, all existing forwarded ports and connections
   /// are reset by way of [stop].
@@ -204,8 +205,7 @@ class FuchsiaRemoteConnection {
 /// When a port forwarder is initialized, it is intended to save a port through
 /// which a connection is persisted along the lifetime of this object.
 ///
-/// When a port forwarder is shut down it must use its `stop` function to clean
-/// up.
+/// To shut down a port forwarder you must call the [stop] function.
 abstract class PortForwarder {
   /// Determines the port which is being forwarded from the local machine.
   int get port;
@@ -217,10 +217,10 @@ abstract class PortForwarder {
   Future<Null> stop();
 }
 
-/// Instances of this class represent a running ssh tunnel.
+/// Instances of this class represent a running SSH tunnel.
 ///
 /// The SSH tunnel is from the host to a VM service running on a Fuchsia device.
-class _SshPortForwarder extends PortForwarder {
+class _SshPortForwarder implements PortForwarder {
   final String _remoteAddress;
   final int _remotePort;
   final int _localPort;
@@ -289,11 +289,11 @@ class _SshPortForwarder extends PortForwarder {
   }
 
   /// Kills the SSH forwarding command, then to ensure no ports are forwarded,
-  /// runs the ssh 'cancel' command to shut down port forwarding completely.
+  /// runs the SSH 'cancel' command to shut down port forwarding completely.
   @override
   Future<Null> stop() async {
-    // Kill the original ssh process if it is still around.
-    _process?.kill();
+    // Kill the original SSH process if it is still around.
+    _process.kill();
     // Cancel the forwarding request. See [start] for commentary about why this
     // uses the IPv4 loopback.
     final String formattedForwardingUrl =
@@ -312,25 +312,31 @@ class _SshPortForwarder extends PortForwarder {
       formattedForwardingUrl,
       targetAddress,
     ]);
+    _log.fine(
+        'Shutting down SSH forwarding with command: ${command.join(' ')}');
     final ProcessResult result = await _processManager.run(command);
-    _log.fine(command.join(' '));
     if (result.exitCode != 0) {
       _log.warning(
           'Command failed:\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
     }
   }
 
+  /// Attempts to find an available port.
+  ///
+  /// Finds the port by binding a socket to zero on the loopback interface, and
+  /// then unbinding. If this action could not be run for whatever reason, will
+  /// log a warning and return zero.
   static Future<int> _potentiallyAvailablePort() async {
     int port = 0;
     ServerSocket s;
     try {
       s = await ServerSocket.bind(_ipv4Loopback, 0);
       port = s.port;
+      s.close();
     } catch (e) {
       // Failures are signaled by a return value of 0 from this function.
       _log.warning('_potentiallyAvailablePort failed: $e');
     }
-    await s?.close();
     return port;
   }
 }

@@ -19,7 +19,7 @@ void main() {
     });
 
     tearDown(() {
-      /// Most functions will mock out the port forwarding and connection
+      /// Most tests will mock out the port forwarding and connection
       /// functions.
       restoreFuchsiaPortForwardingFunction();
       restoreVmServiceConnectionFunction();

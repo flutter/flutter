@@ -13,8 +13,8 @@ import '../common/network.dart';
 
 /// An error raised when a command fails to run within the [SshCommandRunner].
 ///
-/// Note that this occurs for both connection failures, and for failure to
-/// running the command on the remote device. This error is raised when the
+/// This occurs for both connection failures, and for failure to
+/// run the command on the remote device. This error is raised when the
 /// subprocess running the SSH command returns a nonzero exit code.
 class SshCommandError extends Error {
   /// The reason for the command failure.
@@ -26,13 +26,14 @@ class SshCommandError extends Error {
 
   @override
   String toString() {
-    return 'SshCommandError: $message\n${super.stackTrace}';
+    return '$SshCommandError: $message\n${super.stackTrace}';
   }
 }
 
-/// Runs a command remotely on a Fuchsia device. Requires a fuchsia root and
-/// build type (to load the ssh config), and the address of the fuchsia
-/// device.
+/// Runs commands remotely on a Fuchsia device.
+///
+/// Requires a Fuchsia root and build type (to load the ssh config),
+/// and the address of the Fuchsia device.
 class SshCommandRunner {
   final Logger _log = new Logger('SshCommandRunner');
 
@@ -87,13 +88,13 @@ class SshCommandRunner {
       args.add(address);
     }
     args.add(command);
-    _log.fine(args.join(' '));
+    _log.fine('Running command through SSH: ${args.join(' ')}');
     final ProcessResult result = await _processManager.run(args);
     if (result.exitCode != 0) {
       throw new SshCommandError(
           'Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
     }
-    _log.fine(result.stdout);
+    _log.fine('SSH command stdout in brackets:[${result.stdout}]');
     return result.stdout.split('\n');
   }
 }

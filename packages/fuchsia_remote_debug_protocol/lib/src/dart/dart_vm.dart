@@ -145,7 +145,7 @@ class FlutterView {
   /// Attempts to construct a [FlutterView] from a json representation.
   ///
   /// If there is no isolate and no ID for the view, returns null. If there is
-  /// an associated isolate, and there is name for said isolate, also returns
+  /// an associated isolate, and there is no name for said isolate, also returns
   /// null.
   ///
   /// All other cases return a [FlutterView] instance. The name of the

@@ -57,7 +57,7 @@ void main() {
       await runner.run('ls /whatever');
       final List<String> passedCommand =
           verify(mockProcessManager.run(captureAny)).captured.single;
-      expect(passedCommand.indexOf('$ipV6Addr%$interface'), isNot(-1));
+      expect(passedCommand, contains('$ipV6Addr%$interface'));
     });
 
     test('verify no percentage symbol is added when no ipv6 interface',
@@ -72,7 +72,7 @@ void main() {
       await runner.run('ls /whatever');
       final List<String> passedCommand =
           verify(mockProcessManager.run(captureAny)).captured.single;
-      expect(passedCommand.indexOf(ipV6Addr), isNot(-1));
+      expect(passedCommand, contains(ipV6Addr));
     });
 
     test('verify commands are split into multiple lines', () async {
@@ -85,7 +85,7 @@ void main() {
           lines''');
       when(mockProcessResult.exitCode).thenReturn(0);
       final List<String> result = await runner.run('oihaw');
-      expect(result.length, 4);
+      expect(result, hasLength(4));
     });
 
     test('verify exception on nonzero process result exit code', () async {
@@ -114,9 +114,9 @@ void main() {
       await runner.run('ls /whatever');
       final List<String> passedCommand =
           verify(mockProcessManager.run(captureAny)).captured.single;
+      expect(passedCommand, contains('-F'));
       final int indexOfFlag = passedCommand.indexOf('-F');
       final String passedConfig = passedCommand[indexOfFlag + 1];
-      expect(indexOfFlag, isNot(-1));
       expect(passedConfig, config);
     });
 
