@@ -1,6 +1,7 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -33,11 +34,16 @@ class _RenderCupertinoRefreshSliver
     if (constraints.overlap >= 0.0) {
       geometry = SliverGeometry.zero;
     } else {
+      child.layout(
+        constraints.asBoxConstraints(maxExtent: constraints.overlap.abs()),
+        parentUsesSize: true,
+      );
+      print('child size ${child.size}');
       geometry = new SliverGeometry(
-        scrollExtent: constraints.remainingPaintExtent,
+        scrollExtent: child.size.height,// constraints.remainingPaintExtent,
         paintOrigin: constraints.overlap,
-        paintExtent: constraints.overlap.abs(),
-        maxPaintExtent: constraints.remainingPaintExtent,
+        paintExtent: child.size.height,// constraints.overlap.abs(),
+        maxPaintExtent: child.size.height, //constraints.remainingPaintExtent,
         layoutExtent: 0.0,
       );
     }
@@ -46,17 +52,66 @@ class _RenderCupertinoRefreshSliver
   @override
   void paint(PaintingContext paintContext, Offset offset) {
     if (constraints.overlap < 0.0) {
-      paintContext.paintChild(child, offset + new Offset(0.0, constraints.overlap));
+      paintContext.paintChild(child, offset);
+      print('paint time child $child');
     }
-    print('paint time child $child');
   }
 }
 
+// The state machine moves through these modes only when the scrollable
+// identified by scrollableKey has been scrolled to its min or max limit.
+enum RefreshIndicatorMode {
+  drag,     // Pointer is down.
+  armed,    // Dragged far enough that an up event will run the onRefresh callback.
+  snap,     // Animating to the indicator's final "displacement".
+  refresh,  // Running the refresh callback.
+  done,     // Animating the indicator's fade-out after refreshing.
+  canceled, // Animating the indicator's fade-out after not arming.
+}
+
+typedef Widget RefreshControlIndicatorBuilder(
+  BuildContext context,
+  RefreshIndicatorMode refreshState,
+  double pulledExtent,
+  double refreshTriggerPullDistance,
+);
+
+typedef Future<Null> RefreshCallback();
+
 class CupertinoRefreshControl extends StatelessWidget {
+  const CupertinoRefreshControl({
+    this.refreshTriggerPullDistance: _kRefreshTriggerPullDistance,
+    this.builder: buildDefaultRefreshIndicator,
+    this.onRefresh,
+  }) : assert(refreshTriggerPullDistance != null && refreshTriggerPullDistance > 0);
+
+  static const double _kRefreshTriggerPullDistance = 100.0;
+
+  final double refreshTriggerPullDistance;
+  final RefreshControlIndicatorBuilder builder;
+  final RefreshCallback onRefresh;
+
+  static Widget buildDefaultRefreshIndicator(BuildContext context,
+    RefreshIndicatorMode refreshState,
+    double pulledExtent,
+    double refreshTriggerPullDistance,
+  ) {
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return new CupertinoRefreshSliver(
-      child: const CupertinoActivityIndicator(),
+      child: new LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constairs) {
+          if (contrains.maxHegiht > triggerRatio) onRefresh();
+        },
+      )
+
+       const Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: const CupertinoActivityIndicator(),
+      ),
     );
   }
 }
