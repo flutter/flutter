@@ -78,6 +78,7 @@ Future<String> compile(
     '--sdk-root',
     sdkRoot,
     '--strong',
+    '--target=flutter',
   ];
   if (trackWidgetCreation)
     command.add('--track-widget-creation');
@@ -175,7 +176,8 @@ class ResidentCompiler {
       '--sdk-root',
       _sdkRoot,
       '--incremental',
-      '--strong'
+      '--strong',
+      '--target=flutter',
     ];
     if (outputPath != null) {
       args.addAll(<String>['--output-dill', outputPath]);
