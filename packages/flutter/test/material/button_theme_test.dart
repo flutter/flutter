@@ -178,48 +178,53 @@ void main() {
   });
 
   testWidgets('ButtonTheme alignedDropdown', (WidgetTester tester) async {
+    final Key dropdownKey = new UniqueKey();
 
     Widget buildFrame({ bool alignedDropdown, TextDirection textDirection }) {
       return new MaterialApp(
-        home: new Directionality(
-          textDirection: textDirection,
-          child: new ButtonTheme(
-            alignedDropdown: alignedDropdown,
-            child: new Material(
-              child: new Builder(
-                builder: (BuildContext context) {
-                  return new Container(
-                    alignment: Alignment.center,
-                    child: new DropdownButtonHideUnderline(
-                      child: new Container(
-                        width: 200.0,
-                        child: new DropdownButton(
-                          onChanged: (String value) { },
-                          value: 'foo',
-                          items: const <DropdownMenuItem<String>>[
-                            const DropdownMenuItem<String>(
-                              value: 'foo',
-                              child: const Text('foo'),
-                            ),
-                            const DropdownMenuItem<String>(
-                              value: 'bar',
-                              child: const Text('bar'),
-                            ),
-                          ],
-                        ),
+        builder: (BuildContext context, Widget child) {
+          return new Directionality(
+            textDirection: textDirection,
+            child: child,
+          );
+        },
+        home: new ButtonTheme(
+          alignedDropdown: alignedDropdown,
+          child: new Material(
+            child: new Builder(
+              builder: (BuildContext context) {
+                return new Container(
+                  alignment: Alignment.center,
+                  child: new DropdownButtonHideUnderline(
+                    child: new Container(
+                      width: 200.0,
+                      child: new DropdownButton<String>(
+                        key: dropdownKey,
+                        onChanged: (String value) { },
+                        value: 'foo',
+                        items: const <DropdownMenuItem<String>>[
+                          const DropdownMenuItem<String>(
+                            value: 'foo',
+                            child: const Text('foo'),
+                          ),
+                          const DropdownMenuItem<String>(
+                            value: 'bar',
+                            child: const Text('bar'),
+                          ),
+                        ],
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
           ),
         ),
       );
     }
 
-    final Finder button = find.byType(DropdownButton);
-    final Finder menu = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DropdownMenu');
+    final Finder button = find.byKey(dropdownKey);
+    final Finder menu = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DropdownMenu<String>');
 
     await tester.pumpWidget(
       buildFrame(
@@ -256,7 +261,7 @@ void main() {
     // down button's label. The should both appear at the same location.
     final Finder fooText = find.text('foo');
     expect(fooText, findsNWidgets(2));
-    expect(tester.getTopLeft(fooText.at(0)), tester.getTopLeft(fooText.at(1)));
+    expect(tester.getRect(fooText.at(0)), tester.getRect(fooText.at(1)));
 
 
     // Dismiss the menu.
@@ -275,6 +280,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(fooText, findsNWidgets(2));
-    expect(tester.getTopRight(fooText.at(0)), tester.getTopRight(fooText.at(1)));
+    expect(tester.getRect(fooText.at(0)), tester.getRect(fooText.at(1)));
   });
 }

@@ -245,7 +245,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     double left;
     switch (textDirection) {
       case TextDirection.rtl:
-        left = buttonRect.right.clamp(0.0, size.width - childSize.width) - childSize.width;
+      left = buttonRect.right.clamp(0.0, size.width) - childSize.width;
         break;
       case TextDirection.ltr:
         left = buttonRect.left.clamp(0.0, size.width - childSize.width);
