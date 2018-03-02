@@ -64,6 +64,23 @@ void restoreVmServiceConnectionFunction() {
   fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 }
 
+/// An error raised when a malformed RPC response is received from the Dart VM.
+///
+/// A more detailed description of the error is found within the [message]
+/// field.
+class RpcFormatError extends Error {
+  /// The reason for format error.
+  final String message;
+
+  /// Basic constructor outlining the reason for the format error.
+  RpcFormatError(this.message);
+
+  @override
+  String toString() {
+    return '$RpcFormatError: $message\n${super.stackTrace}';
+  }
+}
+
 /// Handles JSON RPC-2 communication with a Dart VM service.
 ///
 /// Either wraps existing RPC calls to the Dart VM service, or runs raw RPC
@@ -144,9 +161,9 @@ class FlutterView {
 
   /// Attempts to construct a [FlutterView] from a json representation.
   ///
-  /// If there is no isolate and no ID for the view, returns null. If there is
-  /// an associated isolate, and there is no name for said isolate, also returns
-  /// null.
+  /// If there is no isolate and no ID for the view, throws an [RpcFormatError].
+  /// If there is an associated isolate, and there is no name for said isolate,
+  /// also throws an [RpcFormatError].
   ///
   /// All other cases return a [FlutterView] instance. The name of the
   /// view may be null, but the id will always be set.
@@ -157,17 +174,13 @@ class FlutterView {
     if (isolate != null) {
       name = isolate['name'];
       if (name == null) {
-        _log.warning('Unable to find name for isolate "$isolate"');
-        return null;
+        throw new RpcFormatError('Unable to find name for isolate "$isolate"');
       }
     }
-
     if (id == null) {
-      _log.warning('Unable to find view name for the following JSON structure '
-          '"$json"');
-      return null;
+      throw new RpcFormatError(
+          'Unable to find view name for the following JSON structure "$json"');
     }
-
     return new FlutterView._(name, id);
   }
 

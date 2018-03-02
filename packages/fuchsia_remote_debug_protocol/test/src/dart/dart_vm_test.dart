@@ -106,14 +106,53 @@ void main() {
       expect(views[2].name, 'file://flutterBinary2');
     });
 
-    test('invalid flutter view parsing', () async {
-      final Map<String, dynamic> flutterViewCannedResponses = <String, dynamic>{
+    test('invalid flutter view missing ID', () async {
+      final Map<String, dynamic> flutterViewCannedResponseMissingId =
+          <String, dynamic>{
         'views': <Map<String, dynamic>>[
+          // Valid flutter view.
+          <String, dynamic>{
+            'type': 'FlutterView',
+            'id': 'flutterView1',
+            'isolate': <String, dynamic>{
+              'type': '@Isolate',
+              'name': 'IsolateThing',
+              'fixedId': 'true',
+              'id': 'isolates/1',
+              'number': '1',
+            },
+          },
+
           // Missing ID.
           <String, dynamic>{
             'type': 'FlutterView',
           },
+        ]
+      };
 
+      Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
+        when(mockPeer.sendRequest(any, any)).thenReturn(
+            new Future<Map<String, dynamic>>(
+                () => flutterViewCannedResponseMissingId));
+        return new Future<json_rpc.Peer>(() => mockPeer);
+      }
+
+      fuchsiaVmServiceConnectionFunction = mockVmConnectionFunction;
+      final DartVm vm =
+          await DartVm.connect(Uri.parse('http://whatever.com/ws'));
+      expect(vm, isNot(null));
+      Future<Null> failingFunction() async {
+        await vm.getAllFlutterViews();
+      }
+
+      // Both views should be invalid as they were missing required fields.
+      expect(failingFunction, throwsA(const isInstanceOf<RpcFormatError>()));
+    });
+
+    test('invalid flutter view missing ID', () async {
+      final Map<String, dynamic> flutterViewCannedResponseMissingIsolateName =
+          <String, dynamic>{
+        'views': <Map<String, dynamic>>[
           // Missing isolate name.
           <String, dynamic>{
             'type': 'FlutterView',
@@ -130,7 +169,8 @@ void main() {
 
       Future<json_rpc.Peer> mockVmConnectionFunction(Uri uri) {
         when(mockPeer.sendRequest(any, any)).thenReturn(
-            new Future<Map<String, dynamic>>(() => flutterViewCannedResponses));
+            new Future<Map<String, dynamic>>(
+                () => flutterViewCannedResponseMissingIsolateName));
         return new Future<json_rpc.Peer>(() => mockPeer);
       }
 
@@ -138,10 +178,12 @@ void main() {
       final DartVm vm =
           await DartVm.connect(Uri.parse('http://whatever.com/ws'));
       expect(vm, isNot(null));
-      final List<FlutterView> views = await vm.getAllFlutterViews();
+      Future<Null> failingFunction() async {
+        await vm.getAllFlutterViews();
+      }
 
       // Both views should be invalid as they were missing required fields.
-      expect(views.isEmpty, true);
+      expect(failingFunction, throwsA(const isInstanceOf<RpcFormatError>()));
     });
   });
 
