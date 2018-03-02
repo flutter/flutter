@@ -167,6 +167,7 @@ FileType identifyFile(String name, Reader reader) {
     case '.wbmp': return FileType.binary; // Wireless bitmap format
     case '.webp': return FileType.binary; // WEBP
     case '.pdf': return FileType.binary; // PDF
+    case '.emf': return FileType.binary; // Windows enhanced metafile format
     // Videos
     case '.ogg': return FileType.binary; // Ogg media
     case '.mp4': return FileType.binary; // MPEG media
