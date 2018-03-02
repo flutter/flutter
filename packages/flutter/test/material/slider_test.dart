@@ -12,6 +12,36 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
+// A thumb shape that also logs its repaint center.
+class LoggingThumbShape extends SliderComponentShape {
+  LoggingThumbShape(this.log);
+
+  final List<Offset> log;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    return const Size(10.0, 10.0);
+  }
+
+  @override
+  void paint(
+    RenderBox parentBox,
+    PaintingContext context,
+    bool isDiscrete,
+    Offset thumbCenter,
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    TextPainter labelPainter,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+  ) {
+    log.add(thumbCenter);
+    final Paint thumbPaint = new Paint()..color = Colors.red;
+    context.canvas.drawCircle(thumbCenter, 5.0, thumbPaint);
+  }
+}
+
 void main() {
   testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = new UniqueKey();
@@ -97,6 +127,111 @@ void main() {
     expect(value, closeTo(0.75, 0.05));
     await tester.pump(); // No animation should start.
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+  });
+
+  testWidgets("Slider doesn't send duplicate change events if tapped on the same value", (WidgetTester tester) async {
+    final Key sliderKey = new UniqueKey();
+    double value = 0.0;
+    int updates = 0;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new Material(
+              child: new Center(
+                child: new Slider(
+                  key: sliderKey,
+                  value: value,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      updates++;
+                      value = newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(value, equals(0.0));
+    await tester.tap(find.byKey(sliderKey));
+    expect(value, equals(0.5));
+    await tester.pump();
+    await tester.tap(find.byKey(sliderKey));
+    expect(value, equals(0.5));
+    await tester.pump();
+    expect(updates, equals(1));
+  });
+
+  testWidgets('discrete Slider repaints when dragged', (WidgetTester tester) async {
+    final Key sliderKey = new UniqueKey();
+    double value = 0.0;
+    final List<Offset> log = <Offset>[];
+    final LoggingThumbShape loggingThumb = new LoggingThumbShape(log);
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(thumbShape: loggingThumb);
+            return new Material(
+              child: new Center(
+                child: new SliderTheme(
+                  data: sliderTheme,
+                  child: new Slider(
+                    key: sliderKey,
+                    value: value,
+                    divisions: 4,
+                    onChanged: (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final List<Offset> expectedLog = <Offset>[
+      const Offset(16.0, 300.0),
+      const Offset(16.0, 300.0),
+      const Offset(400.0, 300.0),
+    ];
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(value, equals(0.5));
+    expect(log.length, 3);
+    expect(log, orderedEquals(expectedLog));
+    await gesture.moveBy(const Offset(-500.0, 0.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(value, equals(0.0));
+    expect(log.length, 5);
+    expect(log.last.dx, closeTo(343.3, 0.1));
+    // With no more gesture or value changes, the thumb position should still
+    // be redrawn in the animated position.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(value, equals(0.0));
+    expect(log.length, 7);
+    expect(log.last.dx, closeTo(185.5, 0.1));
+    // Final position.
+    await tester.pump(const Duration(milliseconds: 80));
+    expectedLog.add(const Offset(16.0, 300.0));
+    expect(value, equals(0.0));
+    expect(log.length, 8);
+    expect(log.last.dx, closeTo(16.0, 0.1));
+    await gesture.up();
   });
 
   testWidgets('Slider take on discrete values', (WidgetTester tester) async {
@@ -189,8 +324,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('Slider uses the right theme colors for the right components',
-      (WidgetTester tester) async {
+  testWidgets('Slider uses the right theme colors for the right components', (WidgetTester tester) async {
     const Color customColor1 = const Color(0xcafefeed);
     const Color customColor2 = const Color(0xdeadbeef);
     final ThemeData theme = new ThemeData(
@@ -235,11 +369,7 @@ void main() {
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     // Check default theme for enabled widget.
-    expect(
-        sliderBox,
-        paints
-          ..rect(color: sliderTheme.activeRailColor)
-          ..rect(color: sliderTheme.inactiveRailColor));
+    expect(sliderBox, paints..rect(color: sliderTheme.activeRailColor)..rect(color: sliderTheme.inactiveRailColor));
     expect(sliderBox, paints..circle(color: sliderTheme.thumbColor));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveRailColor)));
@@ -249,8 +379,7 @@ void main() {
 
     // Test setting only the activeColor.
     await tester.pumpWidget(buildApp(activeColor: customColor1));
-    expect(
-        sliderBox, paints..rect(color: customColor1)..rect(color: sliderTheme.inactiveRailColor));
+    expect(sliderBox, paints..rect(color: customColor1)..rect(color: sliderTheme.inactiveRailColor));
     expect(sliderBox, paints..circle(color: customColor1));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
@@ -276,11 +405,7 @@ void main() {
 
     // Test colors for discrete slider.
     await tester.pumpWidget(buildApp(divisions: 3));
-    expect(
-        sliderBox,
-        paints
-          ..rect(color: sliderTheme.activeRailColor)
-          ..rect(color: sliderTheme.inactiveRailColor));
+    expect(sliderBox, paints..rect(color: sliderTheme.activeRailColor)..rect(color: sliderTheme.inactiveRailColor));
     expect(
         sliderBox,
         paints
@@ -294,8 +419,7 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveRailColor)));
 
     // Test colors for discrete slider with inactiveColor and activeColor set.
-    await tester
-        .pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, divisions: 3));
+    await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, divisions: 3));
     expect(sliderBox, paints..rect(color: customColor1)..rect(color: customColor2));
     expect(
         sliderBox,
@@ -326,8 +450,7 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveRailColor)));
 
     // Test setting the activeColor and inactiveColor for disabled widget.
-    await tester.pumpWidget(
-        buildApp(activeColor: customColor1, inactiveColor: customColor2, enabled: false));
+    await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, enabled: false));
     expect(
         sliderBox,
         paints
@@ -343,8 +466,8 @@ void main() {
     Offset center = tester.getCenter(find.byType(Slider));
     TestGesture gesture = await tester.startGesture(center);
     await tester.pump();
-    await tester
-        .pump(const Duration(milliseconds: 500)); // wait for value indicator animation to finish.
+    // Wait for value indicator animation to finish.
+    await tester.pump(const Duration(milliseconds: 500));
     expect(value, equals(2.0 / 3.0));
     expect(
       sliderBox,
@@ -361,8 +484,8 @@ void main() {
     );
     await gesture.up();
     await tester.pump();
-    await tester
-        .pump(const Duration(milliseconds: 500)); // wait for value indicator animation to finish.
+    // Wait for value indicator animation to finish.
+    await tester.pump(const Duration(milliseconds: 500));
 
     // Testing the custom colors are used for the indicator.
     await tester.pumpWidget(buildApp(
@@ -373,8 +496,8 @@ void main() {
     center = tester.getCenter(find.byType(Slider));
     gesture = await tester.startGesture(center);
     await tester.pump();
-    await tester
-        .pump(const Duration(milliseconds: 500)); // wait for value indicator animation to finish.
+    // Wait for value indicator animation to finish.
+    await tester.pump(const Duration(milliseconds: 500));
     expect(value, equals(2.0 / 3.0));
     expect(
       sliderBox,
@@ -499,8 +622,7 @@ void main() {
         ),
       ),
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size,
-        const Size(144.0 + 2.0 * 16.0, 600.0));
+    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 16.0, 600.0));
 
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
@@ -517,18 +639,18 @@ void main() {
         ),
       ),
     ));
-    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size,
-        const Size(144.0 + 2.0 * 16.0, 32.0));
+    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 16.0, 32.0));
   });
 
   testWidgets('Slider respects textScaleFactor', (WidgetTester tester) async {
     final Key sliderKey = new UniqueKey();
     double value = 0.0;
 
-    Widget buildSlider(
-        {double textScaleFactor,
-        bool isDiscrete: true,
-        ShowValueIndicator show: ShowValueIndicator.onlyForDiscrete}) {
+    Widget buildSlider({
+      double textScaleFactor,
+      bool isDiscrete: true,
+      ShowValueIndicator show: ShowValueIndicator.onlyForDiscrete,
+    }) {
       return new Directionality(
         textDirection: TextDirection.ltr,
         child: new StatefulBuilder(
@@ -538,8 +660,8 @@ void main() {
               child: new Material(
                 child: new Theme(
                   data: Theme.of(context).copyWith(
-                      sliderTheme:
-                          Theme.of(context).sliderTheme.copyWith(showValueIndicator: show)),
+                        sliderTheme: Theme.of(context).sliderTheme.copyWith(showValueIndicator: show),
+                      ),
                   child: new Center(
                     child: new OverflowBox(
                       maxWidth: double.INFINITY,
@@ -699,15 +821,19 @@ void main() {
       );
     }
 
-    Future<Null> expectValueIndicator(
-        {bool isVisible, SliderThemeData theme, int divisions, bool enabled: true}) async {
-      // discrete enabled widget.
+    Future<Null> expectValueIndicator({
+      bool isVisible,
+      SliderThemeData theme,
+      int divisions,
+      bool enabled: true,
+    }) async {
+      // Discrete enabled widget.
       await tester.pumpWidget(buildApp(sliderTheme: theme, divisions: divisions, enabled: enabled));
       final Offset center = tester.getCenter(find.byType(Slider));
       final TestGesture gesture = await tester.startGesture(center);
       await tester.pump();
-      await tester
-          .pump(const Duration(milliseconds: 500)); // wait for value indicator animation to finish.
+      // Wait for value indicator animation to finish.
+      await tester.pump(const Duration(milliseconds: 500));
 
       final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
       expect(

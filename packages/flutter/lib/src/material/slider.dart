@@ -208,8 +208,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   static const Duration enableAnimationDuration = const Duration(milliseconds: 75);
   static const Duration positionAnimationDuration = const Duration(milliseconds: 75);
 
+  /// Animation controller that is run when interactions occur (taps, drags,
+  /// etc.).
   AnimationController reactionController;
+  /// Animation controller that is run when enabling/disabling the slider.
   AnimationController enableController;
+  /// Animation controller that is run when transitioning between one value
+  /// and the next on a discrete slider.
   AnimationController positionController;
 
   @override
@@ -286,7 +291,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       divisions: widget.divisions,
       label: widget.label,
       sliderTheme: sliderTheme,
-      textScaleFactor: MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
+      mediaQueryData: MediaQuery.of(context, nullOk: true),
       onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
       state: this,
     );
@@ -300,7 +305,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.divisions,
     this.label,
     this.sliderTheme,
-    this.textScaleFactor,
+    this.mediaQueryData,
     this.onChanged,
     this.state,
   }) : super(key: key);
@@ -309,7 +314,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final int divisions;
   final String label;
   final SliderThemeData sliderTheme;
-  final double textScaleFactor;
+  final MediaQueryData mediaQueryData;
   final ValueChanged<double> onChanged;
   final _SliderState state;
 
@@ -321,7 +326,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       label: label,
       sliderTheme: sliderTheme,
       theme: Theme.of(context),
-      textScaleFactor: textScaleFactor,
+      mediaQueryData: mediaQueryData,
       onChanged: onChanged,
       state: state,
       textDirection: Directionality.of(context),
@@ -336,7 +341,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..label = label
       ..sliderTheme = sliderTheme
       ..theme = Theme.of(context)
-      ..textScaleFactor = textScaleFactor
+      ..mediaQueryData = mediaQueryData
       ..onChanged = onChanged
       ..textDirection = Directionality.of(context);
     // Ticker provider cannot change since there's a 1:1 relationship between
@@ -360,7 +365,7 @@ class _RenderSlider extends RenderBox {
     String label,
     SliderThemeData sliderTheme,
     ThemeData theme,
-    double textScaleFactor,
+    MediaQueryData mediaQueryData,
     ValueChanged<double> onChanged,
     @required _SliderState state,
     @required TextDirection textDirection,
@@ -372,7 +377,7 @@ class _RenderSlider extends RenderBox {
        _divisions = divisions,
        _sliderTheme = sliderTheme,
        _theme = theme,
-       _textScaleFactor = textScaleFactor,
+       _mediaQueryData = mediaQueryData,
        _onChanged = onChanged,
        _state = state,
        _textDirection = textDirection {
@@ -389,12 +394,21 @@ class _RenderSlider extends RenderBox {
       ..onTapDown = _handleTapDown
       ..onTapUp = _handleTapUp
       ..onTapCancel = _endInteraction;
-    _reaction = new CurvedAnimation(parent: state.reactionController, curve: Curves.fastOutSlowIn)
-      ..addListener(markNeedsPaint);
+
+    // Don't need to call removeListener on these because this object and the
+    // state have a 1:1 relationship, and state has a more finite lifetime, so
+    // the animation controllers will be disposed of before these are.
+    _reaction = new CurvedAnimation(
+      parent: state.reactionController,
+      curve: Curves.fastOutSlowIn,
+    )..addListener(markNeedsPaint);
     state.enableController.value = isInteractive ? 1.0 : 0.0;
-    _enableAnimation = new CurvedAnimation(parent: state.enableController, curve: Curves.easeInOut)
-      ..addListener(markNeedsPaint);
+    _enableAnimation = new CurvedAnimation(
+      parent: state.enableController,
+      curve: Curves.easeInOut,
+    )..addListener(markNeedsPaint);
     state.positionController.value = _value;
+    state.positionController.addListener(markNeedsPaint);
   }
 
   double get value => _value;
@@ -460,14 +474,16 @@ class _RenderSlider extends RenderBox {
     markNeedsPaint();
   }
 
-  double get textScaleFactor => _textScaleFactor;
-  double _textScaleFactor;
+  MediaQueryData get mediaQueryData => _mediaQueryData;
+  MediaQueryData _mediaQueryData;
 
-  set textScaleFactor(double value) {
-    if (value == _textScaleFactor) {
+  set mediaQueryData(MediaQueryData value) {
+    if (value == _mediaQueryData) {
       return;
     }
-    _textScaleFactor = value;
+    _mediaQueryData = value;
+    // Media query data includes the textScaleFactor, so we need to update the
+    // label painter.
     _updateLabelPainter();
   }
 
@@ -505,12 +521,10 @@ class _RenderSlider extends RenderBox {
 
   void _updateLabelPainter() {
     if (label != null) {
-      // We have to account for the text scale factor in the supplied theme.
-      final TextStyle style = _theme.accentTextTheme.body2
-          .copyWith(fontSize: _theme.accentTextTheme.body2.fontSize * _textScaleFactor);
       _labelPainter
-        ..text = new TextSpan(style: style, text: label)
+        ..text = new TextSpan(style: _theme.accentTextTheme.body2, text: label)
         ..textDirection = textDirection
+        ..textScaleFactor = _mediaQueryData?.textScaleFactor ?? 1.0
         ..layout();
     } else {
       _labelPainter.text = null;
@@ -589,7 +603,6 @@ class _RenderSlider extends RenderBox {
           break;
       }
       onChanged(_discretize(_currentDragValue));
-      markNeedsPaint();
     }
   }
 
@@ -614,8 +627,10 @@ class _RenderSlider extends RenderBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return math.max(_overlayDiameter,
-        _sliderTheme.thumbShape.getPreferredSize(isInteractive, isDiscrete).width);
+    return math.max(
+      _overlayDiameter,
+      _sliderTheme.thumbShape.getPreferredSize(isInteractive, isDiscrete).width,
+    );
   }
 
   @override
@@ -643,7 +658,12 @@ class _RenderSlider extends RenderBox {
   }
 
   void _paintTickMarks(
-      Canvas canvas, Rect railLeft, Rect railRight, Paint leftPaint, Paint rightPaint) {
+    Canvas canvas,
+    Rect railLeft,
+    Rect railRight,
+    Paint leftPaint,
+    Paint rightPaint,
+  ) {
     if (isDiscrete) {
       // The ticks are tiny circles that are the same height as the rail.
       const double tickRadius = _railHeight / 2.0;
@@ -683,23 +703,15 @@ class _RenderSlider extends RenderBox {
 
     final double railLength = size.width - 2 * _overlayRadius;
     final double value = _state.positionController.value;
-    final ColorTween activeRailEnableColor = new ColorTween(
-        begin: _sliderTheme.disabledActiveRailColor, end: _sliderTheme.activeRailColor);
-    final ColorTween inactiveRailEnableColor = new ColorTween(
-        begin: _sliderTheme.disabledInactiveRailColor, end: _sliderTheme.inactiveRailColor);
-    final ColorTween activeTickMarkEnableColor = new ColorTween(
-        begin: _sliderTheme.disabledActiveTickMarkColor, end: _sliderTheme.activeTickMarkColor);
-    final ColorTween inactiveTickMarkEnableColor = new ColorTween(
-        begin: _sliderTheme.disabledInactiveTickMarkColor, end: _sliderTheme.inactiveTickMarkColor);
+    final ColorTween activeRailEnableColor = new ColorTween(begin: _sliderTheme.disabledActiveRailColor, end: _sliderTheme.activeRailColor);
+    final ColorTween inactiveRailEnableColor = new ColorTween(begin: _sliderTheme.disabledInactiveRailColor, end: _sliderTheme.inactiveRailColor);
+    final ColorTween activeTickMarkEnableColor = new ColorTween(begin: _sliderTheme.disabledActiveTickMarkColor, end: _sliderTheme.activeTickMarkColor);
+    final ColorTween inactiveTickMarkEnableColor = new ColorTween(begin: _sliderTheme.disabledInactiveTickMarkColor, end: _sliderTheme.inactiveTickMarkColor);
 
-    final Paint activeRailPaint = new Paint()
-      ..color = activeRailEnableColor.evaluate(_enableAnimation);
-    final Paint inactiveRailPaint = new Paint()
-      ..color = inactiveRailEnableColor.evaluate(_enableAnimation);
-    final Paint activeTickMarkPaint = new Paint()
-      ..color = activeTickMarkEnableColor.evaluate(_enableAnimation);
-    final Paint inactiveTickMarkPaint = new Paint()
-      ..color = inactiveTickMarkEnableColor.evaluate(_enableAnimation);
+    final Paint activeRailPaint = new Paint()..color = activeRailEnableColor.evaluate(_enableAnimation);
+    final Paint inactiveRailPaint = new Paint()..color = inactiveRailEnableColor.evaluate(_enableAnimation);
+    final Paint activeTickMarkPaint = new Paint()..color = activeTickMarkEnableColor.evaluate(_enableAnimation);
+    final Paint inactiveTickMarkPaint = new Paint()..color = inactiveTickMarkEnableColor.evaluate(_enableAnimation);
 
     double visualPosition;
     Paint leftRailPaint;
@@ -732,12 +744,9 @@ class _RenderSlider extends RenderBox {
     final double railBottom = railVerticalCenter + railRadius;
     final double railRight = railLeft + railLength;
     final double railActive = railLeft + railLength * visualPosition;
-    final double thumbRadius =
-        _sliderTheme.thumbShape.getPreferredSize(isInteractive, isDiscrete).width / 2.0;
-    final double railActiveLeft =
-        math.max(0.0, railActive - thumbRadius - thumbGap * (1.0 - _enableAnimation.value));
-    final double railActiveRight =
-        math.min(railActive + thumbRadius + thumbGap * (1.0 - _enableAnimation.value), railRight);
+    final double thumbRadius = _sliderTheme.thumbShape.getPreferredSize(isInteractive, isDiscrete).width / 2.0;
+    final double railActiveLeft = math.max(0.0, railActive - thumbRadius - thumbGap * (1.0 - _enableAnimation.value));
+    final double railActiveRight = math.min(railActive + thumbRadius + thumbGap * (1.0 - _enableAnimation.value), railRight);
     final Rect railLeftRect = new Rect.fromLTRB(railLeft, railTop, railActiveLeft, railBottom);
     final Rect railRightRect = new Rect.fromLTRB(railActiveRight, railTop, railRight, railBottom);
 
@@ -779,6 +788,7 @@ class _RenderSlider extends RenderBox {
       }
       if (showValueIndicator) {
         _sliderTheme.valueIndicatorShape.paint(
+          this,
           context,
           isDiscrete,
           thumbCenter,
@@ -787,13 +797,13 @@ class _RenderSlider extends RenderBox {
           _labelPainter,
           _sliderTheme,
           _textDirection,
-          _textScaleFactor,
           value,
         );
       }
     }
 
     _sliderTheme.thumbShape.paint(
+      this,
       context,
       isDiscrete,
       thumbCenter,
@@ -802,7 +812,6 @@ class _RenderSlider extends RenderBox {
       label != null ? _labelPainter : null,
       _sliderTheme,
       _textDirection,
-      _textScaleFactor,
       value,
     );
   }
