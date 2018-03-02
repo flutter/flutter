@@ -55,10 +55,10 @@ class SliderTheme extends InheritedWidget {
   ///   @override
   ///   State createState() => new LaunchState();
   /// }
-  /// 
+  ///
   /// class LaunchState extends State<Launch> {
   ///   double _rocketThrust;
-  /// 
+  ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return new SliderTheme(
@@ -621,6 +621,11 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   static const double _thirtyDegrees = math.pi / 6.0;
   static const Size _preferredSize =
       const Size.fromHeight(_distanceBetweenTopBottomCenters + _topLobeRadius + _bottomLobeRadius);
+  // Set to true if you want a rectangle to be drawn around the label bubble.
+  // This helps with building tests that check that the label draws in the right
+  // place (because it prints the rect in the failed test output). It should not
+  // be checked in while set to "true".
+  static const bool _debuggingLabelLocation = false;
 
   static Path _bottomLobePath; // Initialized by _generateBottomLobe
   static Offset _bottomLobeEnd; // Initialized by _generateBottomLobe
@@ -767,6 +772,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
 
     final Path path = new Path();
     final Offset bottomLobeEnd = _addBottomLobe(path);
+
     // The base of the triangle between the top lobe center and the centers of
     // the two top neck arcs.
     final double neckTriangleBase = _topNeckRadius - bottomLobeEnd.dx;
@@ -789,31 +795,54 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     );
     final double leftNeckArcAngle = _ninetyDegrees - leftTheta;
     final double rightNeckArcAngle = math.pi + _ninetyDegrees - rightTheta;
+    // The distance between the end of the bottom neck arc and the beginning of
+    // the top neck arc. We use this to shrink/expand it based on the scale
+    // factor of the value indicator.
+    final double neckStretchBaseline = bottomLobeEnd.dy - math.max(neckLeftCenter.dy, neckRightCenter.dy);
+    final double t = math.pow(inverseTextScale, 3.0);
+    final double stretch = (neckStretchBaseline * t).clamp(0.0, 10.0 * neckStretchBaseline);
+    final Offset neckStretch = new Offset(0.0, neckStretchBaseline - stretch);
+
+    assert(!_debuggingLabelLocation || () {
+      final Offset leftCenter = _topLobeCenter - new Offset(leftWidthNeeded, 0.0) + neckStretch;
+      final Offset rightCenter = _topLobeCenter + new Offset(rightWidthNeeded, 0.0) + neckStretch;
+      final Rect valueRect = new Rect.fromLTRB(
+        leftCenter.dx - _topLobeRadius,
+        leftCenter.dy - _topLobeRadius,
+        rightCenter.dx + _topLobeRadius,
+        rightCenter.dy + _topLobeRadius,
+      );
+      final Paint outlinePaint = new Paint()
+        ..color = const Color(0xffff0000)
+        ..style = PaintingStyle.stroke..strokeWidth = 1.0;
+      canvas.drawRect(valueRect, outlinePaint);
+      return true;
+    }());
 
     _addArc(
       path,
-      neckLeftCenter,
+      neckLeftCenter + neckStretch,
       _topNeckRadius,
       0.0,
       -leftNeckArcAngle,
     );
     _addArc(
       path,
-      _topLobeCenter - new Offset(leftWidthNeeded, 0.0),
+      _topLobeCenter - new Offset(leftWidthNeeded, 0.0) + neckStretch,
       _topLobeRadius,
       _ninetyDegrees + leftTheta,
       _twoSeventyDegrees,
     );
     _addArc(
       path,
-      _topLobeCenter + new Offset(rightWidthNeeded, 0.0),
+      _topLobeCenter + new Offset(rightWidthNeeded, 0.0) + neckStretch,
       _topLobeRadius,
       _twoSeventyDegrees,
       _twoSeventyDegrees + math.pi - rightTheta,
     );
     _addArc(
       path,
-      neckRightCenter,
+      neckRightCenter + neckStretch,
       _topNeckRadius,
       rightNeckArcAngle,
       math.pi,
@@ -822,7 +851,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
 
     // Draw the label.
     canvas.save();
-    canvas.translate(shift, -_distanceBetweenTopBottomCenters);
+    canvas.translate(shift, -_distanceBetweenTopBottomCenters + neckStretch.dy);
     canvas.scale(inverseTextScale, inverseTextScale);
     labelPainter.paint(canvas, Offset.zero - new Offset(labelHalfWidth, labelPainter.height / 2.0));
     canvas.restore();
