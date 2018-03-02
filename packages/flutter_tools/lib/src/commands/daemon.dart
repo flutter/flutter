@@ -316,7 +316,11 @@ class AppDomain extends Domain {
     if (!fs.isDirectorySync(projectDirectory))
       throw "'$projectDirectory' does not exist";
 
-    final BuildInfo buildInfo = new BuildInfo(getBuildModeForName(mode) ?? BuildMode.debug, flavor);
+    final BuildInfo buildInfo = new BuildInfo(
+      getBuildModeForName(mode) ?? BuildMode.debug,
+      flavor,
+      previewDart2: _getBoolArg(args, 'preview-dart-2'),
+    );
     DebuggingOptions options;
     if (buildInfo.isRelease) {
       options = new DebuggingOptions.disabled(buildInfo);
@@ -335,7 +339,6 @@ class AppDomain extends Domain {
       route,
       options,
       enableHotReload,
-      previewDart2: _getBoolArg(args, 'preview-dart-2'),
       trackWidgetCreation: _getBoolArg(args, 'track-widget-creation'),
     );
 
@@ -351,7 +354,6 @@ class AppDomain extends Domain {
     Device device, String projectDirectory, String target, String route,
     DebuggingOptions options, bool enableHotReload, {
     String applicationBinary,
-    @required bool previewDart2,
     @required bool trackWidgetCreation,
     String projectRootPath,
     String packagesFilePath,
@@ -367,7 +369,7 @@ class AppDomain extends Domain {
 
     final FlutterDevice flutterDevice = new FlutterDevice(
       device,
-      previewDart2: previewDart2,
+      previewDart2: options.buildInfo.previewDart2,
       trackWidgetCreation: trackWidgetCreation,
     );
 
@@ -380,7 +382,6 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         usesTerminalUI: false,
         applicationBinary: applicationBinary,
-        previewDart2: previewDart2,
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
         ipv6: ipv6,
@@ -393,7 +394,6 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         usesTerminalUI: false,
         applicationBinary: applicationBinary,
-        previewDart2: previewDart2,
         ipv6: ipv6,
       );
     }
