@@ -17,7 +17,7 @@ set -e
 function follow_links() {
   cd -P "${1%/*}"
   local file="$PWD/${1##*/}"
-  while [ -h "$file" ]; do
+  while [[ -h "$file" ]]; do
     # On Mac OS, readlink -f doesn't work.
     cd -P "${file%/*}"
     file="$(readlink "$file")"
@@ -82,19 +82,19 @@ function upgrade_flutter () {
     trap _rmlock EXIT
   fi
 
-  local revision=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
-  if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -s "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != "$revision" ] || [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
+  local revision="$(cd "$FLUTTER_ROOT"; git rev-parse HEAD)"
+  if [[ ! -f "$SNAPSHOT_PATH" ]] || [[ ! -s "$STAMP_PATH" ]] || [[ "$(cat "$STAMP_PATH")" != "$revision" ]] || [[ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
     rm -f "$FLUTTER_ROOT/version"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
 
     echo Building flutter tool...
-    if [ "$TRAVIS" == "true" ] || [ "$BOT" == "true" ] || [ "$CONTINUOUS_INTEGRATION" == "true" ] || [ "$CHROME_HEADLESS" == "1" ] || [ "$APPVEYOR" == "true" ] || [ "$CI" == "true" ]; then
+    if [[ "$TRAVIS" == "true" ]] || [[ "$BOT" == "true" ]] || [[ "$CONTINUOUS_INTEGRATION" == "true" ]] || [[ "$CHROME_HEADLESS" == "1" ]] || [[ "$APPVEYOR" == "true" ]] || [[ "$CI" == "true" ]]; then
       PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_bot"
     fi
     export PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_install"
 
-    if [ -d "$FLUTTER_ROOT/.pub-cache" ]; then
+    if [[ -d "$FLUTTER_ROOT/.pub-cache" ]]; then
       export PUB_CACHE="${PUB_CACHE:-"$FLUTTER_ROOT/.pub-cache"}"
     fi
 
@@ -141,7 +141,7 @@ if ! hash git 2>/dev/null; then
   exit 1
 fi
 # Test if the flutter directory is a git clone (otherwise git rev-parse HEAD would fail)
-if [ ! -e "$FLUTTER_ROOT/.git" ]; then
+if [[ ! -e "$FLUTTER_ROOT/.git" ]]; then
   echo "Error: The Flutter directory is not a clone of the GitHub project."
   echo "       The flutter tool requires Git in order to operate properly;"
   echo "       to set up Flutter, run the following command:"
@@ -161,7 +161,7 @@ set +e
 # The VM exits with code 253 if the snapshot version is out-of-date.
 # If it is, we need to snapshot it again.
 EXIT_CODE=$?
-if [ $EXIT_CODE != 253 ]; then
+if [[ $EXIT_CODE -ne 253 ]]; then
   exit $EXIT_CODE
 fi
 
