@@ -438,9 +438,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (buildMode != "debug") {
                 args "--precompiled"
             } else {
+                args "--depfile", "${intermediateDir}/snapshot_blob.bin.d"
                 if (!previewDart2) {
                     args "--snapshot", "${intermediateDir}/snapshot_blob.bin"
-                    args "--depfile", "${intermediateDir}/snapshot_blob.bin.d"
                 }
             }
             args "--working-dir", "${intermediateDir}/flutter_assets"
@@ -507,6 +507,12 @@ class FlutterTask extends BaseFlutterTask {
             FileCollection snapshotter = readDependencies(project.file("${intermediateDir}/gen_snapshot.d"))
             if (snapshotter != null) {
                 sources = sources.plus(snapshotter)
+            }
+            if (previewDart2) {
+                FileCollection frontendServer = readDependencies(project.file("${intermediateDir}/frontend_server.d"))
+                if (frontendServer != null) {
+                    sources = sources.plus(frontendServer)
+                }
             }
             if (localEngineSrcPath != null) {
                 sources = sources.plus(project.files("$localEngineSrcPath/$localEngine"))
