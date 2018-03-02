@@ -519,7 +519,7 @@ class _TheatreElement extends RenderObjectElement {
 // children of its primary subtree's stack can be moved to this object's list
 // of zombie children without changing their parent data objects.
 class _RenderTheatre extends RenderBox
-  with RenderObjectWithChildMixin<RenderStack>, RenderProxyBoxMixin<RenderBox>,
+  with RenderObjectWithChildMixin<RenderStack>, RenderProxyBoxMixin<RenderStack>,
        ContainerRenderObjectMixin<RenderBox, StackParentData> {
 
   @override
