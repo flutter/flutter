@@ -10,13 +10,14 @@ import 'globals.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
-  const BuildInfo(this.mode, this.flavor,
-      {this.previewDart2: false,
-      this.trackWidgetCreation,
-      this.extraFrontEndOptions,
-      this.extraGenSnapshotOptions,
-      this.preferSharedLibrary,
-      this.targetPlatform});
+  const BuildInfo(this.mode, this.flavor, {
+    this.previewDart2: false,
+    this.trackWidgetCreation,
+    this.extraFrontEndOptions,
+    this.extraGenSnapshotOptions,
+    this.preferSharedLibrary,
+    this.targetPlatform,
+  });
 
   final BuildMode mode;
 
