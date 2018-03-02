@@ -239,8 +239,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
   void _handleChanged(double value) {
     assert(widget.onChanged != null);
-    final double transformedValue = _lerp(value);
-    widget.onChanged(transformedValue);
+    final double lerpValue = _lerp(value);
+    if (lerpValue != widget.value) {
+      widget.onChanged(lerpValue);
+    }
   }
 
   // Returns a number between min and max, proportional to value, which must
@@ -255,7 +257,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   double _unlerp(double value) {
     assert(value <= widget.max);
     assert(value >= widget.min);
-    return widget.max > widget.min ? (widget.value - widget.min) / (widget.max - widget.min) : 0.0;
+    return widget.max > widget.min ? (value - widget.min) / (widget.max - widget.min) : 0.0;
   }
 
   @override
@@ -380,12 +382,13 @@ class _RenderSlider extends RenderBox {
       ..team = team
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate
-      ..onEnd = _handleDragEnd;
+      ..onEnd = _handleDragEnd
+      ..onCancel = _endInteraction;
     _tap = new TapGestureRecognizer()
       ..team = team
-      ..onTapCancel = _endInteraction
       ..onTapDown = _handleTapDown
-      ..onTapUp = _handleTapUp;
+      ..onTapUp = _handleTapUp
+      ..onTapCancel = _endInteraction;
     _reaction = new CurvedAnimation(parent: state.reactionController, curve: Curves.fastOutSlowIn)
       ..addListener(markNeedsPaint);
     state.enableController.value = isInteractive ? 1.0 : 0.0;
@@ -586,6 +589,7 @@ class _RenderSlider extends RenderBox {
           break;
       }
       onChanged(_discretize(_currentDragValue));
+      markNeedsPaint();
     }
   }
 
