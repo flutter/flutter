@@ -12,6 +12,7 @@ library track_widget_constructor_locations;
 import 'package:kernel/ast.dart';
 import 'package:kernel/class_hierarchy.dart';
 import 'package:meta/meta.dart';
+import 'package:vm/frontend_server.dart' show ProgramTransformer;
 
 // Parameter name used to track were widget constructor calls were made from.
 //
@@ -285,7 +286,7 @@ class _WidgetCallSiteTransformer extends Transformer {
 /// The creation location is stored as a private field named `_location`
 /// on the base widget class and flowed through the constructors using a named
 /// parameter.
-class WidgetCreatorTracker {
+class WidgetCreatorTracker implements ProgramTransformer {
   Class _widgetClass;
   Class _locationClass;
 
@@ -440,6 +441,7 @@ class WidgetCreatorTracker {
   ///
   /// It is safe to call this method on a delta program generated as part of
   /// performing a hot reload.
+  @override
   void transform(Program program) {
     final List<Library> libraries = program.libraries;
 
