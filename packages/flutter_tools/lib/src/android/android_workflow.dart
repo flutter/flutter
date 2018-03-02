@@ -213,7 +213,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       );
 
     final Version sdkManagerVersion = new Version.parse(androidSdk.sdkManagerVersion);
-    if (sdkManagerVersion.major < 26)
+    if (sdkManagerVersion == null || sdkManagerVersion.major < 26)
       // SDK manager is found, but needs to be updated.
       throwToolExit(
         'A newer version of the Android SDK is required. To update, run:\n'

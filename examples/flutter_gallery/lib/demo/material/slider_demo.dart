@@ -31,7 +31,6 @@ class _SliderDemoState extends State<SliderDemo> {
                   value: _value,
                   min: 0.0,
                   max: 100.0,
-                  thumbOpenAtMin: true,
                   onChanged: (double value) {
                     setState(() {
                       _value = value;
@@ -44,7 +43,7 @@ class _SliderDemoState extends State<SliderDemo> {
             new Column(
               mainAxisSize: MainAxisSize.min,
               children: const <Widget> [
-                const Slider(value: 0.25, thumbOpenAtMin: true, onChanged: null),
+                const Slider(value: 0.25, onChanged: null),
                 const Text('Disabled'),
               ]
             ),
@@ -57,7 +56,6 @@ class _SliderDemoState extends State<SliderDemo> {
                   max: 100.0,
                   divisions: 5,
                   label: '${_discreteValue.round()}',
-                  thumbOpenAtMin: true,
                   onChanged: (double value) {
                     setState(() {
                       _discreteValue = value;
