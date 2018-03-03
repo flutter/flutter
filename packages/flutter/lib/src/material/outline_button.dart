@@ -129,6 +129,7 @@ class OutlineButton extends StatefulWidget {
   /// [ButtonThemeData.textTheme].
   ///
   /// See also:
+  ///
   ///   * [disabledTextColor], the text color to use when the button has been
   ///     disabled.
   final Color textColor;
@@ -142,7 +143,9 @@ class OutlineButton extends StatefulWidget {
   /// [ThemeData.disabledColor].
   ///
   /// See also:
-  ///  * [textColor] - The color to use for this button's text when the button is [enabled].
+  ///
+  ///  * [textColor], which specifies the color to use for this button's text
+  ///    when the button is [enabled].
   final Color disabledTextColor;
 
   /// The button's opaque fill color when it's [enabled] and has been pressed.
