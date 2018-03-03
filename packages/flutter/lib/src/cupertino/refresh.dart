@@ -12,12 +12,15 @@ import 'activity_indicator.dart';
 import 'colors.dart';
 import 'icons.dart';
 
-class CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
-  const CupertinoRefreshSliver({
+class _CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
+  const _CupertinoRefreshSliver({
     this.layoutExtent: 0.0,
     Widget child,
   }) : super(child: child);
 
+  /// _RenderCupertinoRefreshSliver will paint the child in the available
+  /// space either way but this instructs the _RenderCupertinoRefreshSliver
+  /// on whether to also occupy any layoutExtent space or not.
   final double layoutExtent;
 
   @override
@@ -33,6 +36,12 @@ class CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
   }
 }
 
+/// RenderSliver object that gives its child RenderBox object space to paint
+/// in the overscrolled gap and may or may not fill that overscrolled gap
+/// around the RenderBox depending on whether [layoutExtent] is set.
+///
+/// The [layoutExtentOffsetCompensation] field keeps internal accounting to
+/// prevent scroll position jumps.
 class _RenderCupertinoRefreshSliver
     extends RenderSliver
     with RenderObjectWithChildMixin<RenderBox> {
@@ -59,6 +68,7 @@ class _RenderCupertinoRefreshSliver
     assert(constraints.axisDirection == AxisDirection.down);
     assert(constraints.growthDirection == GrowthDirection.forward);
     print('layout scrollOffset ${constraints.scrollOffset} overlapping ${constraints.overlap} viewportMainAxisExtent ${constraints.viewportMainAxisExtent} remaining paint extent ${constraints.remainingPaintExtent}');
+
     final double offsetCompensationToApply =
         _layoutExtent == layoutExtentOffsetCompensation
             ? null
@@ -98,8 +108,8 @@ class _RenderCupertinoRefreshSliver
   }
 }
 
-// The state machine moves through these modes only when the scrollable
-// identified by scrollableKey has been scrolled to its min or max limit.
+/// The state machine moves through these modes only when the scrollable
+/// identified by scrollableKey has been scrolled to its min or max limit.
 enum RefreshIndicatorMode {
   inactive, // Initial state, when not being overscrolled into, and after done or canceled.
   drag,     // Pointer is down.
@@ -110,6 +120,12 @@ enum RefreshIndicatorMode {
   done,     // Animating the indicator's fade-out after refreshing.
 }
 
+/// A builder function that can create a different widget to show in the refresh
+/// indicator spacing depending on the current state of the refresh control and
+/// the space available.
+///
+/// The `refreshTriggerPullDistance`, `refreshIndicatorExtent` parameters are
+/// the same values passed into the [CupertinoRefreshControl].
 typedef Widget RefreshControlIndicatorBuilder(
   BuildContext context,
   RefreshIndicatorMode refreshState,
@@ -118,6 +134,10 @@ typedef Widget RefreshControlIndicatorBuilder(
   double refreshIndicatorExtent,
 );
 
+/// A callback function that's invoked when the [CupertinoRefreshControl] is
+/// pulled a `refreshTriggerPullDistance`. Must return a [Future]. Upon
+/// completion of the [Future], the [CupertinoRefreshControl] enters the
+/// [RefreshIndicatorMode.done] state and will start to go away.
 typedef Future<void> RefreshCallback();
 
 class CupertinoRefreshControl extends StatefulWidget {
@@ -154,7 +174,7 @@ class CupertinoRefreshControl extends StatefulWidget {
       );
     } else {
       return new Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.only(top: 12.0),
         child: new Opacity(
           opacity: opacityCurve.transform(min(pulledExtent / refreshIndicatorExtent, 1.0)),
           child: const CupertinoActivityIndicator(),
@@ -206,7 +226,7 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
           SchedulerBinding.instance.addPostFrameCallback((Duration timestamp){
             if (widget.onRefresh != null) {
               print('onRefresh');
-              // HapticFeedback.
+              HapticFeedback.mediumImpact();
               refreshTask = widget.onRefresh()..then((_) {
                 setState(() => refreshTask = null);
                 // refreshTask = null;
@@ -215,7 +235,6 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
                 // calls to [transitionNextState] will occur anymore and the
                 // state may be stuck in a non-inactive state.
                 print('transitioning again');
-                // refreshState = transitionNextState();
               });
               setState(() => layoutExtent = widget.refreshIndicatorExtent);
             }
@@ -275,7 +294,7 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
   @override
   Widget build(BuildContext context) {
     print('rebuilding the whole thing');
-    return new CupertinoRefreshSliver(
+    return new _CupertinoRefreshSliver(
       layoutExtent: layoutExtent,
       child: new LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
