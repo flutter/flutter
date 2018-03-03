@@ -1,6 +1,7 @@
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:async';
 import 'dart:math' show Random;
 
 import 'package:flutter/cupertino.dart';
@@ -47,7 +48,9 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
               const CupertinoSliverNavigationBar(
                 largeTitle: const Text('Cupertino Refresh'),
               ),
-              const CupertinoRefreshControl(),
+              new CupertinoRefreshControl(
+                onRefresh: () async => new Future<void>.delayed(const Duration(seconds: 3)),
+              ),
               new SliverSafeArea(
                 top: false, // Top safe area is consumed by the navigation bar.
                 sliver: new SliverList(
