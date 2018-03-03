@@ -49,7 +49,11 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
                 largeTitle: const Text('Cupertino Refresh'),
               ),
               new CupertinoRefreshControl(
-                onRefresh: () async => new Future<void>.delayed(const Duration(seconds: 3)),
+                refreshIndicatorAlignment: RefreshIndicatorAlignment.trailing,
+                onRefresh: () async {
+                  return new Future<void>.delayed(const Duration(seconds: 3))
+                      ..then((_) => setState(() => repopulateList()));
+                },
               ),
               new SliverSafeArea(
                 top: false, // Top safe area is consumed by the navigation bar.

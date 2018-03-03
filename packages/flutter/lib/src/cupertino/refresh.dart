@@ -14,25 +14,35 @@ import 'icons.dart';
 
 class _CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
   const _CupertinoRefreshSliver({
-    this.layoutExtent: 0.0,
+    this.refreshIndicatorExtent: 0.0,
+    this.refreshIndicatorAlignment,
+    this.hasLayoutExtent,
     Widget child,
   }) : super(child: child);
 
   /// _RenderCupertinoRefreshSliver will paint the child in the available
   /// space either way but this instructs the _RenderCupertinoRefreshSliver
   /// on whether to also occupy any layoutExtent space or not.
-  final double layoutExtent;
+  final double refreshIndicatorExtent;
+  final RefreshIndicatorAlignment refreshIndicatorAlignment;
+  final bool hasLayoutExtent;
 
   @override
   _RenderCupertinoRefreshSliver createRenderObject(BuildContext context) {
-    return new _RenderCupertinoRefreshSliver(layoutExtent: layoutExtent);
+    return new _RenderCupertinoRefreshSliver(
+      refreshIndicatorExtent: refreshIndicatorExtent,
+      refreshIndicatorAlignment: refreshIndicatorAlignment,
+      hasLayoutExtent: hasLayoutExtent,
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, covariant _RenderCupertinoRefreshSliver renderObject) {
-    print('updating sliver to layoutExtent $layoutExtent');
+    print('updating sliver to layoutExtent $refreshIndicatorExtent');
     renderObject
-        ..layoutExtent = layoutExtent;
+        ..refreshIndicatorExtent = refreshIndicatorExtent
+        ..refreshIndicatorAlignment = refreshIndicatorAlignment
+        ..hasLayoutExtent = hasLayoutExtent;
   }
 }
 
@@ -46,18 +56,40 @@ class _RenderCupertinoRefreshSliver
     extends RenderSliver
     with RenderObjectWithChildMixin<RenderBox> {
   _RenderCupertinoRefreshSliver({
-    double layoutExtent,
+    double refreshIndicatorExtent,
+    RefreshIndicatorAlignment refreshIndicatorAlignment,
+    bool hasLayoutExtent,
     RenderBox child,
-  }) : _layoutExtent = layoutExtent {
+  }) : _refreshIndicatorExtent = refreshIndicatorExtent,
+       _refreshIndicatorAlignment = refreshIndicatorAlignment,
+       _hasLayoutExtent = hasLayoutExtent {
     this.child = child;
   }
 
-  double get layoutExtent => _layoutExtent;
-  double _layoutExtent;
-  set layoutExtent(double value) {
-    if (value == _layoutExtent)
+  double get refreshIndicatorExtent => _refreshIndicatorExtent;
+  double _refreshIndicatorExtent;
+  set refreshIndicatorExtent(double value) {
+    if (value == _refreshIndicatorExtent)
       return;
-    _layoutExtent = value;
+    _refreshIndicatorExtent = value;
+    markNeedsLayout();
+  }
+
+  RefreshIndicatorAlignment get refreshIndicatorAlignment => _refreshIndicatorAlignment;
+  RefreshIndicatorAlignment _refreshIndicatorAlignment;
+  set refreshIndicatorAlignment(RefreshIndicatorAlignment value) {
+    if (value == _refreshIndicatorAlignment)
+      return;
+    _refreshIndicatorAlignment = value;
+    markNeedsLayout();
+  }
+
+  bool get hasLayoutExtent => _hasLayoutExtent;
+  bool _hasLayoutExtent;
+  set hasLayoutExtent(bool value) {
+    if (value == _hasLayoutExtent)
+      return;
+    _hasLayoutExtent = value;
     markNeedsLayout();
   }
 
@@ -69,40 +101,52 @@ class _RenderCupertinoRefreshSliver
     assert(constraints.growthDirection == GrowthDirection.forward);
     print('layout scrollOffset ${constraints.scrollOffset} overlapping ${constraints.overlap} viewportMainAxisExtent ${constraints.viewportMainAxisExtent} remaining paint extent ${constraints.remainingPaintExtent}');
 
-    final double offsetCompensationToApply =
-        _layoutExtent == layoutExtentOffsetCompensation
-            ? null
-            : _layoutExtent - layoutExtentOffsetCompensation;
+    final double layoutExtent = _hasLayoutExtent ? 1.0 : 0.0 * _refreshIndicatorExtent;
+    // If the new _layoutExtent instructive changed, the SliverGeometry's
+    // layoutExtent will take that value (on the next performLayout run). Shift
+    // the scroll offset first so it doesn't make the scroll position suddenly jump.
+    if (layoutExtent != layoutExtentOffsetCompensation) {
+      geometry = new SliverGeometry(
+        scrollOffsetCorrection: layoutExtent - layoutExtentOffsetCompensation,
+      );
+      layoutExtentOffsetCompensation = layoutExtent;
+      // Return so we don't have to do temporary accounting and adjusting the
+      // child's constraints accounting for existing layout extent, new layout
+      // extent change and the overlay.
+      return;
+    }
 
-    if (constraints.overlap > 0.0) {
+    // If we never started overscrolling, short circuit out.
+    if (constraints.overlap > 0.0 && layoutExtent == 0.0) {
       geometry = SliverGeometry.zero;
     } else {
-      print('incoming max height ${max(constraints.overlap.abs() + layoutExtentOffsetCompensation, offsetCompensationToApply ?? 0 * -1.0)}');
+      print('incoming max height ${constraints.overlap.abs() + layoutExtentOffsetCompensation}');
+      // Layout the child giving it the space of the currently dragged overscroll
+      // which may or may not include a sliver layout extent space that it will
+      // keep after the user lets go during the refresh process.
       child.layout(
         constraints.asBoxConstraints(
-          maxExtent: max(constraints.overlap.abs() + layoutExtentOffsetCompensation, offsetCompensationToApply ?? 0 * -1.0),
+          maxExtent: constraints.overlap.abs() + layoutExtentOffsetCompensation,
         ),
         parentUsesSize: true,
       );
       // print('child size ${child.size}');
-      print('layoutExtent $_layoutExtent layoutExtentOffsetCompensation $layoutExtentOffsetCompensation, offsetCompensationToApply $offsetCompensationToApply');
+      print('layoutExtent $layoutExtent layoutExtentOffsetCompensation $layoutExtentOffsetCompensation');
       geometry = new SliverGeometry(
-        scrollExtent: max(child.size.height, _layoutExtent),
-        paintOrigin: constraints.overlap,
-        paintExtent: max(child.size.height, _layoutExtent), // constraints.overlap.abs(),
-        maxPaintExtent: max(child.size.height, _layoutExtent), //constraints.remainingPaintExtent,
-        layoutExtent: _layoutExtent,
-        scrollOffsetCorrection: offsetCompensationToApply,
+        scrollExtent: max(child.size.height, layoutExtent),
+        paintOrigin: refreshIndicatorAlignment == RefreshIndicatorAlignment.leading
+            ? constraints.overlap
+            : max(constraints.overlap, -_refreshIndicatorExtent),
+        paintExtent: max(child.size.height, layoutExtent), // constraints.overlap.abs(),
+        maxPaintExtent: max(child.size.height, layoutExtent), //constraints.remainingPaintExtent,
+        layoutExtent: layoutExtent,
       );
-      if (offsetCompensationToApply != null) {
-        layoutExtentOffsetCompensation += offsetCompensationToApply;
-      }
     }
   }
 
   @override
   void paint(PaintingContext paintContext, Offset offset) {
-    if (constraints.overlap < 0.0) {
+    if (constraints.overlap < 0.0 || hasLayoutExtent) {
       paintContext.paintChild(child, offset);
     }
   }
@@ -118,6 +162,11 @@ enum RefreshIndicatorMode {
             // resting state.
   refresh,  // Running the refresh callback.
   done,     // Animating the indicator's fade-out after refreshing.
+}
+
+enum RefreshIndicatorAlignment {
+  leading,
+  trailing,
 }
 
 /// A builder function that can create a different widget to show in the refresh
@@ -144,6 +193,7 @@ class CupertinoRefreshControl extends StatefulWidget {
   const CupertinoRefreshControl({
     this.refreshTriggerPullDistance: _kDefaultRefreshTriggerPullDistance,
     this.refreshIndicatorExtent: _kDefaultRefreshIndicatorExtent,
+    this.refreshIndicatorAlignment: RefreshIndicatorAlignment.leading,
     this.builder: buildDefaultRefreshIndicator,
     this.onRefresh,
   }) : assert(refreshTriggerPullDistance != null && refreshTriggerPullDistance > 0),
@@ -151,6 +201,7 @@ class CupertinoRefreshControl extends StatefulWidget {
 
   final double refreshTriggerPullDistance;
   final double refreshIndicatorExtent;
+  final RefreshIndicatorAlignment refreshIndicatorAlignment;
   final RefreshControlIndicatorBuilder builder;
   final RefreshCallback onRefresh;
 
@@ -165,11 +216,14 @@ class CupertinoRefreshControl extends StatefulWidget {
   ) {
     const Curve opacityCurve = const Interval(0.3, 0.8, curve: Curves.easeInOut);
     if (refreshState == RefreshIndicatorMode.drag) {
-      return new Padding(
-        padding: const EdgeInsets.only(top: 8.0),
-        child: new Opacity(
-          opacity: opacityCurve.transform(min(pulledExtent / refreshTriggerPullDistance, 1.0)),
-          child: new Icon(CupertinoIcons.down_arrow, color: CupertinoColors.inactiveGray),
+      return new Align(
+        alignment: Alignment.bottomCenter,
+        child: new Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: new Opacity(
+            opacity: opacityCurve.transform(min(pulledExtent / refreshTriggerPullDistance, 1.0)),
+            child: new Icon(CupertinoIcons.down_arrow, color: CupertinoColors.inactiveGray),
+          ),
         ),
       );
     } else {
@@ -193,7 +247,7 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
   RefreshIndicatorMode refreshState;
   Future<void> refreshTask;
   double lastScrollExtent = 0.0;
-  double layoutExtent = 0.0;
+  bool hasSliverLayoutExtent = false;
 
   @override
   void initState() {
@@ -228,15 +282,18 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
               print('onRefresh');
               HapticFeedback.mediumImpact();
               refreshTask = widget.onRefresh()..then((_) {
-                setState(() => refreshTask = null);
-                // refreshTask = null;
-                // Trigger one more transition because by this time, BoxConstraint's
-                // maxHeight might already be resting at 0 in which case no
-                // calls to [transitionNextState] will occur anymore and the
-                // state may be stuck in a non-inactive state.
-                print('transitioning again');
+                if (mounted) {
+                  refreshTask = null;
+                  // Trigger one more transition because by this time, BoxConstraint's
+                  // maxHeight might already be resting at 0 in which case no
+                  // calls to [transitionNextState] will occur anymore and the
+                  // state may be stuck in a non-inactive state.
+                  print('transitioning again');
+                  refreshState = transitionNextState();
+                }
+                // setState(() => refreshTask = null);
               });
-              setState(() => layoutExtent = widget.refreshIndicatorExtent);
+              setState(() => hasSliverLayoutExtent = true);
             }
           });
           return RefreshIndicatorMode.armed;
@@ -249,7 +306,7 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
         if (refreshState == RefreshIndicatorMode.armed && refreshTask == null) {
           nextState = RefreshIndicatorMode.done;
           SchedulerBinding.instance.addPostFrameCallback((Duration timestamp){
-            setState(() => layoutExtent = 0.0);
+            setState(() => hasSliverLayoutExtent = false);
           });
           print('done');
           continue done;
@@ -270,7 +327,7 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
         } else {
           nextState = RefreshIndicatorMode.done;
           SchedulerBinding.instance.addPostFrameCallback((Duration timestamp){
-            setState(() => layoutExtent = 0.0);
+            setState(() => hasSliverLayoutExtent = false);
           });
           print('done');
         }
@@ -295,14 +352,15 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
   Widget build(BuildContext context) {
     print('rebuilding the whole thing');
     return new _CupertinoRefreshSliver(
-      layoutExtent: layoutExtent,
+      refreshIndicatorExtent: widget.refreshIndicatorExtent,
+      refreshIndicatorAlignment: widget.refreshIndicatorAlignment,
+      hasLayoutExtent: hasSliverLayoutExtent,
       child: new LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           lastScrollExtent = constraints.maxHeight;
-          final RefreshIndicatorMode nextState = transitionNextState();
-          refreshState = nextState;
+          refreshState = transitionNextState();
 
-          if (widget.builder != null) {
+          if (widget.builder != null && refreshState != RefreshIndicatorMode.inactive) {
             // print('rebuilding');
             return widget.builder(
               context,
