@@ -4,45 +4,89 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'activity_indicator.dart';
+import 'colors.dart';
+import 'icons.dart';
 
 class CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
-  const CupertinoRefreshSliver({Widget child}) : super(child: child);
+  const CupertinoRefreshSliver({
+    this.layoutExtent: 0.0,
+    Widget child,
+  }) : super(child: child);
+
+  final double layoutExtent;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => new _RenderCupertinoRefreshSliver();
+  _RenderCupertinoRefreshSliver createRenderObject(BuildContext context) {
+    return new _RenderCupertinoRefreshSliver(layoutExtent: layoutExtent);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, covariant _RenderCupertinoRefreshSliver renderObject) {
+    print('updating sliver to layoutExtent $layoutExtent');
+    renderObject
+        ..layoutExtent = layoutExtent;
+  }
 }
 
 class _RenderCupertinoRefreshSliver
     extends RenderSliver
     with RenderObjectWithChildMixin<RenderBox> {
-  _RenderCupertinoRefreshSliver({RenderBox child}) {
+  _RenderCupertinoRefreshSliver({
+    double layoutExtent,
+    RenderBox child,
+  }) : _layoutExtent = layoutExtent {
     this.child = child;
   }
+
+  double get layoutExtent => _layoutExtent;
+  double _layoutExtent;
+  set layoutExtent(double value) {
+    if (value == _layoutExtent)
+      return;
+    _layoutExtent = value;
+    markNeedsLayout();
+  }
+
+  double layoutExtentOffsetCompensation = 0.0;
 
   @override
   void performLayout() {
     assert(constraints.axisDirection == AxisDirection.down);
     assert(constraints.growthDirection == GrowthDirection.forward);
-    // print('layout scrollOffset ${constraints.scrollOffset} overlapping ${constraints.overlap} viewportMainAxisExtent ${constraints.viewportMainAxisExtent} remaining paint extent ${constraints.remainingPaintExtent}');
+    print('layout scrollOffset ${constraints.scrollOffset} overlapping ${constraints.overlap} viewportMainAxisExtent ${constraints.viewportMainAxisExtent} remaining paint extent ${constraints.remainingPaintExtent}');
+    final double offsetCompensationToApply =
+        _layoutExtent == layoutExtentOffsetCompensation
+            ? null
+            : _layoutExtent - layoutExtentOffsetCompensation;
+
     if (constraints.overlap > 0.0) {
       geometry = SliverGeometry.zero;
     } else {
+      print('incoming max height ${max(constraints.overlap.abs() + layoutExtentOffsetCompensation, offsetCompensationToApply ?? 0 * -1.0)}');
       child.layout(
-        constraints.asBoxConstraints(maxExtent: constraints.overlap.abs()),
+        constraints.asBoxConstraints(
+          maxExtent: max(constraints.overlap.abs() + layoutExtentOffsetCompensation, offsetCompensationToApply ?? 0 * -1.0),
+        ),
         parentUsesSize: true,
       );
       // print('child size ${child.size}');
+      print('layoutExtent $_layoutExtent layoutExtentOffsetCompensation $layoutExtentOffsetCompensation, offsetCompensationToApply $offsetCompensationToApply');
       geometry = new SliverGeometry(
-        scrollExtent: child.size.height,// constraints.remainingPaintExtent,
+        scrollExtent: max(child.size.height, _layoutExtent),
         paintOrigin: constraints.overlap,
-        paintExtent: child.size.height,// constraints.overlap.abs(),
-        maxPaintExtent: child.size.height, //constraints.remainingPaintExtent,
-        layoutExtent: 0.0,
+        paintExtent: max(child.size.height, _layoutExtent), // constraints.overlap.abs(),
+        maxPaintExtent: max(child.size.height, _layoutExtent), //constraints.remainingPaintExtent,
+        layoutExtent: _layoutExtent,
+        scrollOffsetCorrection: offsetCompensationToApply,
       );
+      if (offsetCompensationToApply != null) {
+        layoutExtentOffsetCompensation += offsetCompensationToApply;
+      }
     }
   }
 
@@ -71,6 +115,7 @@ typedef Widget RefreshControlIndicatorBuilder(
   RefreshIndicatorMode refreshState,
   double pulledExtent,
   double refreshTriggerPullDistance,
+  double refreshIndicatorExtent,
 );
 
 typedef Future<void> RefreshCallback();
@@ -96,11 +141,26 @@ class CupertinoRefreshControl extends StatefulWidget {
     RefreshIndicatorMode refreshState,
     double pulledExtent,
     double refreshTriggerPullDistance,
+    double refreshIndicatorExtent,
   ) {
-    return const Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: const CupertinoActivityIndicator(),
-    );
+    const Curve opacityCurve = const Interval(0.3, 0.8, curve: Curves.easeInOut);
+    if (refreshState == RefreshIndicatorMode.drag) {
+      return new Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: new Opacity(
+          opacity: opacityCurve.transform(min(pulledExtent / refreshTriggerPullDistance, 1.0)),
+          child: new Icon(CupertinoIcons.down_arrow, color: CupertinoColors.inactiveGray),
+        ),
+      );
+    } else {
+      return new Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: new Opacity(
+          opacity: opacityCurve.transform(min(pulledExtent / refreshIndicatorExtent, 1.0)),
+          child: const CupertinoActivityIndicator(),
+        ),
+      );
+    }
   }
 
   @override
@@ -112,7 +172,8 @@ class CupertinoRefreshControl extends StatefulWidget {
 class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
   RefreshIndicatorMode refreshState;
   Future<void> refreshTask;
-  double lastExtent;
+  double lastScrollExtent = 0.0;
+  double layoutExtent = 0.0;
 
   @override
   void initState() {
@@ -120,12 +181,12 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
     refreshState = RefreshIndicatorMode.inactive;
   }
 
-  RefreshIndicatorMode computeNextState() {
+  RefreshIndicatorMode transitionNextState() {
     RefreshIndicatorMode nextState;
     switch (refreshState) {
       case RefreshIndicatorMode.inactive:
-        print('checking inactive max height $lastExtent');
-        if (lastExtent <= 0) {
+        print('checking inactive max height $lastScrollExtent');
+        if (lastScrollExtent <= 0) {
           return RefreshIndicatorMode.inactive;
         } else {
           nextState = RefreshIndicatorMode.drag;
@@ -134,27 +195,48 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
         continue drag;
       drag:
       case RefreshIndicatorMode.drag:
-        print('checking drag max height $lastExtent');
-        if (lastExtent == 0) {
+        print('checking drag max height $lastScrollExtent');
+        if (lastScrollExtent == 0) {
           print('inactive');
           return RefreshIndicatorMode.inactive;
-        } else if (lastExtent < widget.refreshTriggerPullDistance) {
+        } else if (lastScrollExtent < widget.refreshTriggerPullDistance) {
           return RefreshIndicatorMode.drag;
         } else {
-          nextState = RefreshIndicatorMode.armed;
           print('armed');
+          SchedulerBinding.instance.addPostFrameCallback((Duration timestamp){
+            if (widget.onRefresh != null) {
+              print('onRefresh');
+              // HapticFeedback.
+              refreshTask = widget.onRefresh()..then((_) {
+                setState(() => refreshTask = null);
+                // refreshTask = null;
+                // Trigger one more transition because by this time, BoxConstraint's
+                // maxHeight might already be resting at 0 in which case no
+                // calls to [transitionNextState] will occur anymore and the
+                // state may be stuck in a non-inactive state.
+                print('transitioning again');
+                // refreshState = transitionNextState();
+              });
+              setState(() => layoutExtent = widget.refreshIndicatorExtent);
+            }
+          });
+          return RefreshIndicatorMode.armed;
         }
-        continue armed;
-      armed:
+        // Don't continue here. We can never possibly call onRefresh and
+        // progress to the next state in one [computeNextState] call.
+        break;
       case RefreshIndicatorMode.armed:
-        print('checking armed max height $lastExtent refresh task $refreshTask');
+        print('checking armed max height $lastScrollExtent refresh task $refreshTask');
         if (refreshState == RefreshIndicatorMode.armed && refreshTask == null) {
           nextState = RefreshIndicatorMode.done;
+          SchedulerBinding.instance.addPostFrameCallback((Duration timestamp){
+            setState(() => layoutExtent = 0.0);
+          });
           print('done');
           continue done;
         }
 
-        if (lastExtent > widget.refreshIndicatorExtent) {
+        if (lastScrollExtent > widget.refreshIndicatorExtent) {
           return RefreshIndicatorMode.armed;
         } else {
           nextState = RefreshIndicatorMode.refresh;
@@ -163,18 +245,21 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
         continue refresh;
       refresh:
       case RefreshIndicatorMode.refresh:
-        print('checking refresh max height $lastExtent refresh task $refreshTask');
+        print('checking refresh max height $lastScrollExtent refresh task $refreshTask');
         if (refreshTask != null) {
           return RefreshIndicatorMode.refresh;
         } else {
           nextState = RefreshIndicatorMode.done;
+          SchedulerBinding.instance.addPostFrameCallback((Duration timestamp){
+            setState(() => layoutExtent = 0.0);
+          });
           print('done');
         }
         continue done;
       done:
       case RefreshIndicatorMode.done:
-        print('checking done max height $lastExtent');
-        if (lastExtent > 0) {
+        print('checking done max height $lastScrollExtent');
+        if (lastScrollExtent > 0) {
           return RefreshIndicatorMode.done;
         } else {
           nextState = RefreshIndicatorMode.inactive;
@@ -189,20 +274,13 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
 
   @override
   Widget build(BuildContext context) {
+    print('rebuilding the whole thing');
     return new CupertinoRefreshSliver(
+      layoutExtent: layoutExtent,
       child: new LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
-          lastExtent = constraints.maxHeight;
-          final RefreshIndicatorMode nextState = computeNextState();
-          if (widget.onRefresh != null
-              && (refreshState == RefreshIndicatorMode.inactive
-                  || refreshState == RefreshIndicatorMode.drag)
-              && nextState == RefreshIndicatorMode.armed) {
-            refreshTask = widget.onRefresh()..then((_) {
-              refreshTask = null;
-              refreshState = computeNextState();
-            });
-          }
+          lastScrollExtent = constraints.maxHeight;
+          final RefreshIndicatorMode nextState = transitionNextState();
           refreshState = nextState;
 
           if (widget.builder != null) {
@@ -210,8 +288,9 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
             return widget.builder(
               context,
               refreshState,
-              lastExtent,
-              widget.refreshTriggerPullDistance
+              lastScrollExtent,
+              widget.refreshTriggerPullDistance,
+              widget.refreshIndicatorExtent,
             );
           } else {
             return new Container();

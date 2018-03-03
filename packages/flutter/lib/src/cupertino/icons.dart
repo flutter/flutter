@@ -96,4 +96,7 @@ class CupertinoIcons {
 
   /// A phone handset.
   static const IconData phone_solid = const IconData(0xf4b9, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A solid down arrow.
+  static const IconData down_arrow = const IconData(0xf35d, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
