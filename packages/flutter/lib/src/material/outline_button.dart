@@ -144,7 +144,7 @@ class OutlineButton extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [textColor] - which specifies the color to use for this button's text
+  ///  * [textColor], which specifies the color to use for this button's text
   ///    when the button is [enabled].
   final Color disabledTextColor;
 
