@@ -253,7 +253,7 @@ void main() {
     await tester.tap(button);
     await tester.pumpAndSettle();
 
-    // alignedDropdown: true means the button and menu widths match
+    // Aligneddropdown: true means the button and menu widths match
     expect(tester.getSize(button).width, 200.0);
     expect(tester.getSize(menu).width, 200.0);
 
@@ -262,7 +262,6 @@ void main() {
     final Finder fooText = find.text('foo');
     expect(fooText, findsNWidgets(2));
     expect(tester.getRect(fooText.at(0)), tester.getRect(fooText.at(1)));
-
 
     // Dismiss the menu.
     await tester.tapAt(Offset.zero);

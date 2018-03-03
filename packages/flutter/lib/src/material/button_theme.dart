@@ -241,7 +241,7 @@ class ButtonThemeData extends Diagnosticable {
   /// width.
   ///
   /// If false (the default), then the dropdown's menu will be wider than
-  /// its button. In either case dropdown button will line up the leading
+  /// its button. In either case the dropdown button will line up the leading
   /// edge of the menu's value with the leading edge of the values
   /// displayed by the menu items.
   final bool alignedDropdown;
