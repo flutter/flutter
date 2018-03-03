@@ -15,7 +15,6 @@ import 'icons.dart';
 class _CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
   const _CupertinoRefreshSliver({
     this.refreshIndicatorExtent: 0.0,
-    this.refreshIndicatorAlignment,
     this.hasLayoutExtent,
     Widget child,
   }) : super(child: child);
@@ -24,14 +23,12 @@ class _CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
   /// space either way but this instructs the _RenderCupertinoRefreshSliver
   /// on whether to also occupy any layoutExtent space or not.
   final double refreshIndicatorExtent;
-  final RefreshIndicatorAlignment refreshIndicatorAlignment;
   final bool hasLayoutExtent;
 
   @override
   _RenderCupertinoRefreshSliver createRenderObject(BuildContext context) {
     return new _RenderCupertinoRefreshSliver(
       refreshIndicatorExtent: refreshIndicatorExtent,
-      refreshIndicatorAlignment: refreshIndicatorAlignment,
       hasLayoutExtent: hasLayoutExtent,
     );
   }
@@ -41,7 +38,6 @@ class _CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
     print('updating sliver to layoutExtent $refreshIndicatorExtent');
     renderObject
         ..refreshIndicatorExtent = refreshIndicatorExtent
-        ..refreshIndicatorAlignment = refreshIndicatorAlignment
         ..hasLayoutExtent = hasLayoutExtent;
   }
 }
@@ -57,11 +53,9 @@ class _RenderCupertinoRefreshSliver
     with RenderObjectWithChildMixin<RenderBox> {
   _RenderCupertinoRefreshSliver({
     double refreshIndicatorExtent,
-    RefreshIndicatorAlignment refreshIndicatorAlignment,
     bool hasLayoutExtent,
     RenderBox child,
   }) : _refreshIndicatorExtent = refreshIndicatorExtent,
-       _refreshIndicatorAlignment = refreshIndicatorAlignment,
        _hasLayoutExtent = hasLayoutExtent {
     this.child = child;
   }
@@ -72,15 +66,6 @@ class _RenderCupertinoRefreshSliver
     if (value == _refreshIndicatorExtent)
       return;
     _refreshIndicatorExtent = value;
-    markNeedsLayout();
-  }
-
-  RefreshIndicatorAlignment get refreshIndicatorAlignment => _refreshIndicatorAlignment;
-  RefreshIndicatorAlignment _refreshIndicatorAlignment;
-  set refreshIndicatorAlignment(RefreshIndicatorAlignment value) {
-    if (value == _refreshIndicatorAlignment)
-      return;
-    _refreshIndicatorAlignment = value;
     markNeedsLayout();
   }
 
@@ -101,7 +86,7 @@ class _RenderCupertinoRefreshSliver
     assert(constraints.growthDirection == GrowthDirection.forward);
     print('layout scrollOffset ${constraints.scrollOffset} overlapping ${constraints.overlap} viewportMainAxisExtent ${constraints.viewportMainAxisExtent} remaining paint extent ${constraints.remainingPaintExtent}');
 
-    final double layoutExtent = _hasLayoutExtent ? 1.0 : 0.0 * _refreshIndicatorExtent;
+    final double layoutExtent = (_hasLayoutExtent ? 1.0 : 0.0) * _refreshIndicatorExtent;
     // If the new _layoutExtent instructive changed, the SliverGeometry's
     // layoutExtent will take that value (on the next performLayout run). Shift
     // the scroll offset first so it doesn't make the scroll position suddenly jump.
@@ -133,10 +118,8 @@ class _RenderCupertinoRefreshSliver
       // print('child size ${child.size}');
       print('layoutExtent $layoutExtent layoutExtentOffsetCompensation $layoutExtentOffsetCompensation');
       geometry = new SliverGeometry(
-        scrollExtent: max(child.size.height, layoutExtent),
-        paintOrigin: refreshIndicatorAlignment == RefreshIndicatorAlignment.leading
-            ? constraints.overlap
-            : max(constraints.overlap, -_refreshIndicatorExtent),
+        scrollExtent: layoutExtent,
+        paintOrigin: constraints.overlap,
         paintExtent: max(child.size.height, layoutExtent), // constraints.overlap.abs(),
         maxPaintExtent: max(child.size.height, layoutExtent), //constraints.remainingPaintExtent,
         layoutExtent: layoutExtent,
@@ -164,11 +147,6 @@ enum RefreshIndicatorMode {
   done,     // Animating the indicator's fade-out after refreshing.
 }
 
-enum RefreshIndicatorAlignment {
-  leading,
-  trailing,
-}
-
 /// A builder function that can create a different widget to show in the refresh
 /// indicator spacing depending on the current state of the refresh control and
 /// the space available.
@@ -193,7 +171,6 @@ class CupertinoRefreshControl extends StatefulWidget {
   const CupertinoRefreshControl({
     this.refreshTriggerPullDistance: _kDefaultRefreshTriggerPullDistance,
     this.refreshIndicatorExtent: _kDefaultRefreshIndicatorExtent,
-    this.refreshIndicatorAlignment: RefreshIndicatorAlignment.leading,
     this.builder: buildDefaultRefreshIndicator,
     this.onRefresh,
   }) : assert(refreshTriggerPullDistance != null && refreshTriggerPullDistance > 0),
@@ -201,12 +178,11 @@ class CupertinoRefreshControl extends StatefulWidget {
 
   final double refreshTriggerPullDistance;
   final double refreshIndicatorExtent;
-  final RefreshIndicatorAlignment refreshIndicatorAlignment;
   final RefreshControlIndicatorBuilder builder;
   final RefreshCallback onRefresh;
 
   static const double _kDefaultRefreshTriggerPullDistance = 100.0;
-  static const double _kDefaultRefreshIndicatorExtent = 80.0;
+  static const double _kDefaultRefreshIndicatorExtent = 65.0;
 
   static Widget buildDefaultRefreshIndicator(BuildContext context,
     RefreshIndicatorMode refreshState,
@@ -214,27 +190,30 @@ class CupertinoRefreshControl extends StatefulWidget {
     double refreshTriggerPullDistance,
     double refreshIndicatorExtent,
   ) {
-    const Curve opacityCurve = const Interval(0.3, 0.8, curve: Curves.easeInOut);
-    if (refreshState == RefreshIndicatorMode.drag) {
-      return new Align(
-        alignment: Alignment.bottomCenter,
-        child: new Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: new Opacity(
-            opacity: opacityCurve.transform(min(pulledExtent / refreshTriggerPullDistance, 1.0)),
-            child: new Icon(CupertinoIcons.down_arrow, color: CupertinoColors.inactiveGray),
-          ),
-        ),
-      );
-    } else {
-      return new Padding(
-        padding: const EdgeInsets.only(top: 12.0),
-        child: new Opacity(
-          opacity: opacityCurve.transform(min(pulledExtent / refreshIndicatorExtent, 1.0)),
-          child: const CupertinoActivityIndicator(),
-        ),
-      );
-    }
+    const Curve opacityCurve = const Interval(0.4, 0.8, curve: Curves.easeInOut);
+    return new Align(
+      alignment: Alignment.bottomCenter,
+      child: new Padding(
+        padding: const EdgeInsets.only(bottom: 16.0),
+        child: refreshState == RefreshIndicatorMode.drag
+            ? new Opacity(
+                opacity: opacityCurve.transform(
+                  min(pulledExtent / refreshTriggerPullDistance, 1.0)
+                ),
+                child: new Icon(
+                  CupertinoIcons.down_arrow,
+                  color: CupertinoColors.inactiveGray,
+                  size: 36.0,
+                ),
+              )
+            : new Opacity(
+                opacity: opacityCurve.transform(
+                  min(pulledExtent / refreshIndicatorExtent, 1.0)
+                ),
+                child: const CupertinoActivityIndicator(radius: 14.0),
+              ),
+      ),
+    );
   }
 
   @override
@@ -353,7 +332,6 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
     print('rebuilding the whole thing');
     return new _CupertinoRefreshSliver(
       refreshIndicatorExtent: widget.refreshIndicatorExtent,
-      refreshIndicatorAlignment: widget.refreshIndicatorAlignment,
       hasLayoutExtent: hasSliverLayoutExtent,
       child: new LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {

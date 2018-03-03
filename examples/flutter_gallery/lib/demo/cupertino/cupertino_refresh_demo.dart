@@ -49,7 +49,6 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
                 largeTitle: const Text('Cupertino Refresh'),
               ),
               new CupertinoRefreshControl(
-                refreshIndicatorAlignment: RefreshIndicatorAlignment.trailing,
                 onRefresh: () async {
                   return new Future<void>.delayed(const Duration(seconds: 3))
                       ..then((_) => setState(() => repopulateList()));
