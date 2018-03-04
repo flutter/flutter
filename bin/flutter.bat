@@ -88,7 +88,10 @@ GOTO :after_subroutine
 
   :do_sdk_update_and_snapshot
     ECHO Checking Dart SDK version...
-    CALL PowerShell.exe -ExecutionPolicy Bypass -Command "& '%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1'"
+    SET update_dart_bin=%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1
+    REM Escape apostrophes from the executable path
+    SET "update_dart_bin=!update_dart_bin:'=''!"
+    CALL PowerShell.exe -ExecutionPolicy Bypass -Command "& '%update_dart_bin%'"
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to update Dart SDK. Retrying...
       timeout /t 5 /nobreak
