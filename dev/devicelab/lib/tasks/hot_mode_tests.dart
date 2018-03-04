@@ -88,7 +88,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
 
           twoReloadsData = JSON.decode(benchmarkFile.readAsStringSync());
         }
-
+        benchmarkFile.deleteSync();
 
         // start `flutter run` again to make sure it loads from the previous state
         // (in case of --preview-dart-2 frontend loads up from previously generated kernel files).
