@@ -95,6 +95,9 @@ class XcodeProjectInterpreter {
   static final RegExp _versionRegex = new RegExp(r'Xcode ([0-9.]+)');
 
   void _updateVersion() {
+    if (!fs.file(_executable).existsSync()) {
+      return;
+    }
     try {
       final ProcessResult result = processManager.runSync(<String>[_executable, '-version']);
       if (result.exitCode != 0) {
