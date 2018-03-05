@@ -45,13 +45,13 @@ void main() {
   testWidgets('async onInit throws FlutterError', (WidgetTester tester) async {
     await tester.pumpWidget(const InvalidOnInitLifecycleWidget());
 
-    expect(tester.takeException(), const isInstanceOf<FlutterError>());
+    expect(tester.takeException(), isFlutterError);
   });
 
   testWidgets('async didUpdateWidget throws FlutterError', (WidgetTester tester) async {
     await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(id: 1));
     await tester.pumpWidget( const InvalidDidUpdateWidgetLifecycleWidget(id: 2));
 
-    expect(tester.takeException(), const isInstanceOf<FlutterError>());
+    expect(tester.takeException(), isFlutterError);
   });
 }
