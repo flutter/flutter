@@ -8,6 +8,7 @@ import '../artifacts.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
@@ -95,7 +96,7 @@ class XcodeProjectInterpreter {
   static final RegExp _versionRegex = new RegExp(r'Xcode ([0-9.]+)');
 
   void _updateVersion() {
-    if (!fs.file(_executable).existsSync()) {
+    if (!platform.isMacOS || !fs.file(_executable).existsSync()) {
       return;
     }
     try {
