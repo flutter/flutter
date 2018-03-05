@@ -3731,7 +3731,17 @@ class StatefulElement extends ComponentElement {
     assert(_state._debugLifecycleState == _StateLifecycle.created);
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
-      _state.initState();
+      final void _debugCheckForReturnedFuture = _state.initState();
+      assert(() {
+        if ((_debugCheckForReturnedFuture  as dynamic) is Future) {
+          throw new FlutterError(
+              '${_state.runtimeType}.didUpdateWidget returned a Future.\n'
+              'State.didUpdateWidget must be a void method without an `async` keyword.\n'
+              'Async lifecycle methods violate the State contract.\n'
+          );
+        }
+        return true;
+      }());
     } finally {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }
@@ -3753,7 +3763,17 @@ class StatefulElement extends ComponentElement {
     _state._widget = widget;
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
-      _state.didUpdateWidget(oldWidget);
+      final void _debugCheckForReturnedFuture = _state.didUpdateWidget(oldWidget);
+      assert(() {
+        if ((_debugCheckForReturnedFuture as dynamic) is Future) {
+          throw new FlutterError(
+              '${_state.runtimeType}.didUpdateWidget returned a Future.\n'
+              'State.didUpdateWidget must be a void method without an `async` keyword.\n'
+              'Async lifecycle methods violate the State contract.\n'
+          );
+        }
+        return true;
+      }());
     } finally {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }
