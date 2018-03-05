@@ -13,6 +13,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,48 +48,39 @@ class ResourceExtractor {
             }
 
             final AssetManager manager = mContext.getResources().getAssets();
-            try {
-                byte[] buffer = null;
-                final String[] assets = manager.list("");
-                LinkedList<String> assetList = new LinkedList<>(Arrays.asList(assets));
-                while(!assetList.isEmpty()) {
-                    String asset = assetList.pop();
-                    if (!mResources.contains(asset))
-                        continue;
 
-		    if (manager.list(asset).length > 0) {
-			// The asset is a directory
-			for (String a: manager.list(asset)) {
-			    assetList.add(asset + File.separator + a);
-			    mResources.add(asset + File.separator + a);
-			}
-			continue;
-		    }
-
+            byte[] buffer = null;
+            for (String asset : mResources) {
+                try {
                     final File output = new File(dataDir, asset);
-                    if (output.exists())
+
+                    if (output.exists()) {
                         continue;
+                    }
                     if (output.getParentFile() != null) {
                         output.getParentFile().mkdirs();
                     }
+
                     try (InputStream is = manager.open(asset)) {
                         try (OutputStream os = new FileOutputStream(output)) {
                             if (buffer == null) {
                                 buffer = new byte[BUFFER_SIZE];
-                             }
+                            }
 
                             int count = 0;
                             while ((count = is.read(buffer, 0, BUFFER_SIZE)) != -1) {
                                 os.write(buffer, 0, count);
                             }
                             os.flush();
-			}
-		    }
+                        }
+                    }
+                } catch (FileNotFoundException fnfe) {
+                    continue;
+                } catch (IOException ioe) {
+                    Log.w(TAG, "Exception unpacking resources: " + ioe.getMessage());
+                    deleteFiles();
+                    return;
                 }
-            } catch (IOException e) {
-                Log.w(TAG, "Exception unpacking resources: " + e.getMessage());
-                deleteFiles();
-                return;
             }
 
             if (timestamp != null) {
@@ -184,18 +176,10 @@ class ResourceExtractor {
 
     private void deleteFiles() {
         final File dataDir = new File(PathUtils.getDataDirectory(mContext));
-        LinkedList<String> files = new LinkedList<>(mResources);
-        while (!files.isEmpty()) {
-            String resource = files.pop();
+        for (String resource : mResources) {
             final File file = new File(dataDir, resource);
             if (file.exists()) {
-                if (file.isFile()) {
-                    file.delete();
-                } else {
-		    for (String f : file.list()) {
-			files.add(resource + File.separator + f);
-		    }
-                }
+                file.delete();
             }
         }
         for (String timestamp : getExistingTimestamps(dataDir)) {

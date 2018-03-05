@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "flutter/assets/asset_provider.h"
 #include "flutter/flow/texture.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/shell/common/engine.h"
@@ -64,6 +65,8 @@ class PlatformView : public std::enable_shared_from_this<PlatformView> {
   virtual void HandlePlatformMessage(
       fxl::RefPtr<blink::PlatformMessage> message);
 
+  virtual fxl::RefPtr<blink::AssetProvider> GetAssetProvider();
+
   // Called once per texture, on the platform thread.
   void RegisterTexture(std::shared_ptr<flow::Texture> texture);
 
@@ -97,6 +100,8 @@ class PlatformView : public std::enable_shared_from_this<PlatformView> {
   flow::TextureRegistry texture_registry_;
   std::unique_ptr<Engine> engine_;
   std::unique_ptr<VsyncWaiter> vsync_waiter_;
+  fxl::RefPtr<blink::AssetProvider> asset_provider_;
+
   SkISize size_;
 
  private:

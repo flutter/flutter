@@ -24,7 +24,7 @@ class AssetFontSelector : public FontSelector {
 
   ~AssetFontSelector() override;
 
-  static void Install(fxl::RefPtr<DirectoryAssetBundle> directory_asset_bundle);
+  static void Install(fxl::RefPtr<AssetProvider> asset_provider);
 
   // TODO(zarah): Remove this and related code using asset_store once flx is
   // removed.
@@ -45,7 +45,7 @@ class AssetFontSelector : public FontSelector {
   struct TypefaceAsset;
 
   explicit AssetFontSelector(
-      fxl::RefPtr<DirectoryAssetBundle> directory_asset_bundle);
+      fxl::RefPtr<AssetProvider> asset_provider);
 
   explicit AssetFontSelector(fxl::RefPtr<ZipAssetStore> asset_store);
 
@@ -54,7 +54,7 @@ class AssetFontSelector : public FontSelector {
   sk_sp<SkTypeface> getTypefaceAsset(const FontDescription& font_description,
                                      const AtomicString& family_name);
 
-  fxl::RefPtr<DirectoryAssetBundle> directory_asset_bundle_;
+  fxl::RefPtr<AssetProvider> asset_provider_;
 
   fxl::RefPtr<ZipAssetStore> asset_store_;
 

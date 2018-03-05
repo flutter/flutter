@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "flutter/assets/asset_provider.h"
 #include "lib/fxl/files/unique_fd.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/ref_counted.h"
@@ -15,14 +16,14 @@
 namespace blink {
 
 class DirectoryAssetBundle
-    : public fxl::RefCountedThreadSafe<DirectoryAssetBundle> {
+    : public AssetProvider {
  public:
   explicit DirectoryAssetBundle(std::string directory);
   // Expects fd to be valid, otherwise the file descriptor is ignored.
   explicit DirectoryAssetBundle(fxl::UniqueFD fd);
-  ~DirectoryAssetBundle();
+  virtual ~DirectoryAssetBundle();
 
-  bool GetAsBuffer(const std::string& asset_name, std::vector<uint8_t>* data);
+  virtual bool GetAsBuffer(const std::string& asset_name, std::vector<uint8_t>* data);
 
   std::string GetPathForAsset(const std::string& asset_name);
 

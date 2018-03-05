@@ -32,6 +32,7 @@
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
+#include "flutter/assets/asset_provider.h"
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/glue/trace_event.h"
@@ -288,7 +289,6 @@ void Engine::Init(const std::string& bundle_path) {
 #else
 #error Unknown OS
 #endif
-
   blink::InitRuntime(vm_snapshot_data, vm_snapshot_instr,
                      default_isolate_snapshot_data,
                      default_isolate_snapshot_instr, bundle_path);
@@ -302,7 +302,6 @@ void Engine::RunBundle(const std::string& bundle_path,
   TRACE_EVENT0("flutter", "Engine::RunBundle");
   ConfigureAssetBundle(bundle_path);
   ConfigureRuntime(GetScriptUriFromPath(bundle_path), reuse_runtime_controller);
-
   if (blink::IsRunningPrecompiledCode()) {
     runtime_->dart_controller()->RunFromPrecompiledSnapshot(entrypoint);
   } else {
@@ -573,6 +572,12 @@ void Engine::SetSemanticsEnabled(bool enabled) {
 }
 
 void Engine::ConfigureAssetBundle(const std::string& path) {
+  auto platform_view = platform_view_.lock();
+  asset_provider_ = platform_view->GetAssetProvider();
+  if (!asset_provider_) {
+    asset_provider_ = fxl::MakeRefCounted<blink::DirectoryAssetBundle>(path);
+  }
+
   struct stat stat_result = {};
 
   // TODO(abarth): We should reset directory_asset_bundle_, but that might break
@@ -585,8 +590,6 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
 
   std::string flx_path;
   if (S_ISDIR(stat_result.st_mode)) {
-    directory_asset_bundle_ =
-        fxl::MakeRefCounted<blink::DirectoryAssetBundle>(path);
     flx_path = files::GetDirectoryName(path) + "/app.flx";
   } else if (S_ISREG(stat_result.st_mode)) {
     flx_path = path;
@@ -618,11 +621,11 @@ void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
     blink::TestFontSelector::Install();
     if (!blink::Settings::Get().using_blink)
       blink::FontCollection::ForProcess().RegisterTestFonts();
-  } else if (directory_asset_bundle_) {
-    blink::AssetFontSelector::Install(directory_asset_bundle_);
+  } else if (asset_provider_) {
+    blink::AssetFontSelector::Install(asset_provider_);
     if (!blink::Settings::Get().using_blink) {
-      blink::FontCollection::ForProcess().RegisterFontsFromDirectoryAssetBundle(
-          directory_asset_bundle_);
+      blink::FontCollection::ForProcess().RegisterFontsFromAssetProvider(
+          asset_provider_);
     }
   }
 }
@@ -693,7 +696,6 @@ void Engine::HandleAssetPlatformMessage(
   const auto& data = message->data();
   std::string asset_name(reinterpret_cast<const char*>(data.data()),
                          data.size());
-
   std::vector<uint8_t> asset_data;
   if (GetAssetAsBuffer(asset_name, &asset_data)) {
     response->Complete(std::move(asset_data));
@@ -704,9 +706,9 @@ void Engine::HandleAssetPlatformMessage(
 
 bool Engine::GetAssetAsBuffer(const std::string& name,
                               std::vector<uint8_t>* data) {
-  return (directory_asset_bundle_ &&
-          directory_asset_bundle_->GetAsBuffer(name, data)) ||
-         (asset_store_ && asset_store_->GetAsBuffer(name, data));
+  return ((asset_provider_ &&
+           asset_provider_->GetAsBuffer(name, data)) ||
+          (asset_store_ && asset_store_->GetAsBuffer(name, data)));
 }
 
 }  // namespace shell

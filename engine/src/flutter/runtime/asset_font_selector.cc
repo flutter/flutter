@@ -81,9 +81,9 @@ struct FontMatcher {
 }  // namespace
 
 void AssetFontSelector::Install(
-    fxl::RefPtr<DirectoryAssetBundle> directory_asset_bundle) {
+    fxl::RefPtr<AssetProvider> asset_provider) {
   RefPtr<AssetFontSelector> font_selector =
-      adoptRef(new AssetFontSelector(std::move(directory_asset_bundle)));
+      adoptRef(new AssetFontSelector(std::move(asset_provider)));
   font_selector->parseFontManifest();
   UIDartState::Current()->set_font_selector(font_selector);
 }
@@ -96,8 +96,8 @@ void AssetFontSelector::Install(fxl::RefPtr<ZipAssetStore> asset_store) {
 }
 
 AssetFontSelector::AssetFontSelector(
-    fxl::RefPtr<DirectoryAssetBundle> directory_asset_bundle)
-    : directory_asset_bundle_(std::move(directory_asset_bundle)) {}
+    fxl::RefPtr<AssetProvider> asset_provider)
+    : asset_provider_(std::move(asset_provider)) {}
 
 AssetFontSelector::AssetFontSelector(fxl::RefPtr<ZipAssetStore> asset_store)
     : asset_store_(std::move(asset_store)) {}
@@ -118,9 +118,9 @@ AssetFontSelector::FlutterFontAttributes::~FlutterFontAttributes() {}
 
 void AssetFontSelector::parseFontManifest() {
   std::vector<uint8_t> font_manifest_data;
-  if (!directory_asset_bundle_ ||
-      !directory_asset_bundle_->GetAsBuffer(kFontManifestAssetPath,
-                                            &font_manifest_data)) {
+  if (!asset_provider_ ||
+      !asset_provider_->GetAsBuffer(kFontManifestAssetPath,
+                                    &font_manifest_data)) {
     if (!asset_store_ ||
         !asset_store_->GetAsBuffer(kFontManifestAssetPath, &font_manifest_data))
       return;
@@ -239,8 +239,8 @@ sk_sp<SkTypeface> AssetFontSelector::getTypefaceAsset(
   }
 
   std::unique_ptr<TypefaceAsset> typeface_asset(new TypefaceAsset);
-  if (!directory_asset_bundle_ || !directory_asset_bundle_->GetAsBuffer(
-                                      asset_path, &typeface_asset->data)) {
+  if (!asset_provider_ || !asset_provider_->GetAsBuffer(
+                              asset_path, &typeface_asset->data)) {
     if (!asset_store_ ||
         !asset_store_->GetAsBuffer(asset_path, &typeface_asset->data)) {
       typeface_cache_.insert(std::make_pair(asset_path, nullptr));
