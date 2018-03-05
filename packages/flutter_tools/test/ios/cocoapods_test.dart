@@ -70,7 +70,7 @@ void main() {
     });
 
     testUsingContext('creates swift Podfile if swift', () {
-      when(mockXcodeProjectInterpreter.canInterpretXcodeProjects).thenReturn(true);
+      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
       when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenReturn(<String, String>{
         'SWIFT_VERSION': '4.0',
       });
@@ -94,7 +94,7 @@ void main() {
     });
 
     testUsingContext('does not create Podfile when we cannot interpret Xcode projects', () {
-      when(mockXcodeProjectInterpreter.canInterpretXcodeProjects).thenReturn(false);
+      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
       cocoaPodsUnderTest.setupPodfile('project');
 

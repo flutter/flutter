@@ -79,7 +79,7 @@ void main() {
 
     testUsingContext('Emits partial status when Xcode version too low', () async {
       when(xcode.isInstalled).thenReturn(true);
-      when(xcode.xcodeVersionText)
+      when(xcode.versionText)
           .thenReturn('Xcode 7.0.1\nBuild version 7C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
       when(xcode.eulaSigned).thenReturn(true);
@@ -94,7 +94,7 @@ void main() {
 
     testUsingContext('Emits partial status when Xcode EULA not signed', () async {
       when(xcode.isInstalled).thenReturn(true);
-      when(xcode.xcodeVersionText)
+      when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(false);
@@ -109,7 +109,7 @@ void main() {
 
     testUsingContext('Emits partial status when Mac dev mode was never enabled', () async {
       when(xcode.isInstalled).thenReturn(true);
-      when(xcode.xcodeVersionText)
+      when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
@@ -124,7 +124,7 @@ void main() {
 
     testUsingContext('Emits partial status when python six not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
-      when(xcode.xcodeVersionText)
+      when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
@@ -139,7 +139,7 @@ void main() {
 
     testUsingContext('Emits partial status when homebrew not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
-      when(xcode.xcodeVersionText)
+      when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
@@ -154,7 +154,7 @@ void main() {
 
     testUsingContext('Emits partial status when libimobiledevice is not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
-      when(xcode.xcodeVersionText)
+      when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
@@ -169,7 +169,7 @@ void main() {
 
     testUsingContext('Emits partial status when libimobiledevice is installed but not working', () async {
       when(xcode.isInstalled).thenReturn(true);
-      when(xcode.xcodeVersionText)
+      when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
@@ -184,7 +184,7 @@ void main() {
 
     testUsingContext('Emits partial status when ios-deploy is not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
-      when(xcode.xcodeVersionText)
+      when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
@@ -199,7 +199,7 @@ void main() {
 
     testUsingContext('Emits partial status when ios-deploy version is too low', () async {
       when(xcode.isInstalled).thenReturn(true);
-      when(xcode.xcodeVersionText)
+      when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
@@ -214,7 +214,7 @@ void main() {
 
     testUsingContext('Emits partial status when CocoaPods is not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
-      when(xcode.xcodeVersionText)
+      when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
@@ -231,7 +231,7 @@ void main() {
 
     testUsingContext('Emits partial status when CocoaPods version is too low', () async {
       when(xcode.isInstalled).thenReturn(true);
-      when(xcode.xcodeVersionText)
+      when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
@@ -249,7 +249,7 @@ void main() {
 
     testUsingContext('Emits partial status when CocoaPods is not initialized', () async {
       when(xcode.isInstalled).thenReturn(true);
-      when(xcode.xcodeVersionText)
+      when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
@@ -269,7 +269,7 @@ void main() {
 
     testUsingContext('Succeeds when all checks pass', () async {
       when(xcode.isInstalled).thenReturn(true);
-      when(xcode.xcodeVersionText)
+      when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
