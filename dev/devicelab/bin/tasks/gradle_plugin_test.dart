@@ -249,7 +249,7 @@ class _Dependencies {
     // Depfile format:
     // outfile1 outfile2 : file1.dart file2.dart file3.dart
     final String contents = new File(depfilePath).readAsStringSync();
-    List<String> colonSeparated = contents.split(': ');
+    final List<String> colonSeparated = contents.split(': ');
     target = colonSeparated[0].trim();
     dependencies = colonSeparated[1]
         .replaceAllMapped(
@@ -265,9 +265,9 @@ class _Dependencies {
 
 /// returns [null] if target matches [expectedTarget, returns [error] otherwise.
 String _validateSnapshotDependency(FlutterProject project, String expectedTarget) {
-  _Dependencies deps = new _Dependencies(
-      project.rootPath + "/build/app/intermediates/flutter/debug/snapshot_blob.bin.d");
+  final _Dependencies deps = new _Dependencies(
+      path.join(project.rootPath, 'build', 'app', 'intermediates',
+          'flutter', 'debug', 'snapshot_blob.bin.d'));
   return deps.target == expectedTarget ? null :
-    'Dependency file should have $expectedTarget as target. Instead has ${deps
-        .target}';
+    'Dependency file should have $expectedTarget as target. Instead has ${deps.target}';
 }
