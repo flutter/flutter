@@ -20,7 +20,7 @@ void main() {
     });
 
     testUsingContext('xcodeVersionText returns null when xcodebuild is not installed', () {
-      when(mockProcessManager.runSync(<String>['xcodebuild', '-version']))
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
           .thenThrow(const ProcessException('xcodebuild', const <String>['-version']));
       expect(xcodeProjectInterpreter.versionText, isNull);
     }, overrides: <Type, Generator>{
@@ -28,7 +28,7 @@ void main() {
     });
 
     testUsingContext('xcodeVersionText returns null when xcodebuild is not installed', () {
-      when(mockProcessManager.runSync(<String>['xcodebuild', '-version'])).thenReturn(
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version'])).thenReturn(
         new ProcessResult(
           0,
           1,
@@ -44,7 +44,7 @@ void main() {
     });
 
     testUsingContext('versionText returns formatted version text', () {
-      when(mockProcessManager.runSync(<String>['xcodebuild', '-version']))
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
           .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.versionText, 'Xcode 8.3.3, Build version 8E3004b');
     }, overrides: <Type, Generator>{
@@ -52,7 +52,7 @@ void main() {
     });
 
     testUsingContext('versionText handles Xcode version string with unexpected format', () {
-      when(mockProcessManager.runSync(<String>['xcodebuild', '-version']))
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
           .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.versionText, 'Xcode Ultra5000, Build version 8E3004b');
     }, overrides: <Type, Generator>{
@@ -60,7 +60,7 @@ void main() {
     });
 
     testUsingContext('majorVersion returns major version', () {
-      when(mockProcessManager.runSync(<String>['xcodebuild', '-version']))
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
           .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.majorVersion, 8);
     }, overrides: <Type, Generator>{
@@ -68,7 +68,7 @@ void main() {
     });
 
     testUsingContext('majorVersion is null when version has unexpected format', () {
-      when(mockProcessManager.runSync(<String>['xcodebuild', '-version']))
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
           .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.majorVersion, isNull);
     }, overrides: <Type, Generator>{
@@ -76,7 +76,7 @@ void main() {
     });
 
     testUsingContext('minorVersion returns minor version', () {
-      when(mockProcessManager.runSync(<String>['xcodebuild', '-version']))
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
           .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.minorVersion, 3);
     }, overrides: <Type, Generator>{
@@ -84,7 +84,7 @@ void main() {
     });
 
     testUsingContext('minorVersion returns 0 when minor version is unspecified', () {
-      when(mockProcessManager.runSync(<String>['xcodebuild', '-version']))
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
           .thenReturn(new ProcessResult(1, 0, 'Xcode 8\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.minorVersion, 0);
     }, overrides: <Type, Generator>{
@@ -92,7 +92,7 @@ void main() {
     });
 
     testUsingContext('minorVersion is null when version has unexpected format', () {
-      when(mockProcessManager.runSync(<String>['xcodebuild', '-version']))
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
           .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.minorVersion, isNull);
     }, overrides: <Type, Generator>{
@@ -100,7 +100,7 @@ void main() {
     });
 
     testUsingContext('isInstalled is false when version check fails', () {
-      when(mockProcessManager.runSync(<String>['xcodebuild', '-version'])).thenReturn(
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version'])).thenReturn(
         new ProcessResult(
           0,
           1,
@@ -116,7 +116,7 @@ void main() {
     });
 
     testUsingContext('isInstalled is false when version has unexpected format', () {
-      when(mockProcessManager.runSync(<String>['xcodebuild', '-version']))
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
           .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.isInstalled, isFalse);
     }, overrides: <Type, Generator>{
@@ -124,7 +124,7 @@ void main() {
     });
 
     testUsingContext('isInstalled is true when version has expected format', () {
-      when(mockProcessManager.runSync(<String>['xcodebuild', '-version']))
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
           .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.isInstalled, isTrue);
     }, overrides: <Type, Generator>{
