@@ -2812,7 +2812,7 @@ abstract class SemanticsSortKey extends Diagnosticable implements Comparable<Sem
 ///
 /// The ordinal value `order` is typically a whole number, though it can be
 /// fractional, e.g. in order to fit between two other consecutive whole
-/// numbers. The value must be finite (it cannot be a [double.nan],
+/// numbers. The value must be finite (it cannot be [double.nan],
 /// [double.infinity], or [double.negativeInfinity]).
 ///
 /// See also:
