@@ -6,6 +6,7 @@
 #define SHELL_COMMON_ENGINE_H_
 
 #include "flutter/assets/zip_asset_store.h"
+#include "flutter/assets/asset_provider.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/runtime/runtime_controller.h"
@@ -109,6 +110,7 @@ class Engine : public blink::RuntimeDelegate {
 
   static const std::string main_entrypoint_;
 
+  fxl::RefPtr<blink::AssetProvider> asset_provider_;
   std::weak_ptr<PlatformView> platform_view_;
   std::unique_ptr<Animator> animator_;
   std::unique_ptr<blink::RuntimeController> runtime_;

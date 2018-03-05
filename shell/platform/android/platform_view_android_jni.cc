@@ -160,12 +160,15 @@ static void RunBundleAndSnapshot(JNIEnv* env,
                                  jstring bundlePath,
                                  jstring snapshotOverride,
                                  jstring entrypoint,
-                                 jboolean reuse_runtime_controller) {
+                                 jboolean reuse_runtime_controller,
+                                 jobject assetManager) {
   return PLATFORM_VIEW->RunBundleAndSnapshot(
+      env,
       fml::jni::JavaStringToString(env, bundlePath),        //
       fml::jni::JavaStringToString(env, snapshotOverride),  //
       fml::jni::JavaStringToString(env, entrypoint),        //
-      reuse_runtime_controller                              //
+      reuse_runtime_controller,                             //
+      assetManager
   );
 }
 
@@ -351,7 +354,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
       {
           .name = "nativeRunBundleAndSnapshot",
           .signature =
-              "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V",
+              "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLandroid/content/res/AssetManager;)V",
           .fnPtr = reinterpret_cast<void*>(&shell::RunBundleAndSnapshot),
       },
       {

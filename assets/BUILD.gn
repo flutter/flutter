@@ -4,6 +4,7 @@
 
 source_set("assets") {
   sources = [
+    "asset_provider.h",
     "directory_asset_bundle.cc",
     "directory_asset_bundle.h",
     "unzipper_provider.cc",

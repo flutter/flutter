@@ -13,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.HashMap;
 import java.util.Map;
+import android.content.res.AssetManager;
 
 public class FlutterNativeView implements BinaryMessenger {
     private static final String TAG = "FlutterNativeView";
@@ -24,8 +25,10 @@ public class FlutterNativeView implements BinaryMessenger {
     private final FlutterPluginRegistry mPluginRegistry;
     private long mNativePlatformView;
     private FlutterView mFlutterView;
+    private final Context mContext;
 
     public FlutterNativeView(Context context) {
+        mContext = context;
         mPluginRegistry = new FlutterPluginRegistry(this, context);
         attach(this);
         assertAttached();
@@ -68,7 +71,7 @@ public class FlutterNativeView implements BinaryMessenger {
 
     public void runFromBundle(String bundlePath, String snapshotOverride, String entrypoint, boolean reuseRuntimeController) {
         assertAttached();
-        nativeRunBundleAndSnapshot(mNativePlatformView, bundlePath, snapshotOverride, entrypoint, reuseRuntimeController);
+        nativeRunBundleAndSnapshot(mNativePlatformView, bundlePath, snapshotOverride, entrypoint, reuseRuntimeController, mContext.getResources().getAssets());
     }
 
     public void runFromSource(final String assetsDirectory, final String main, final String packages) {
@@ -194,7 +197,8 @@ public class FlutterNativeView implements BinaryMessenger {
         String bundlePath,
         String snapshotOverride,
         String entrypoint,
-        boolean reuseRuntimeController);
+        boolean reuseRuntimeController,
+        AssetManager manager);
 
     private static native void nativeRunBundleAndSource(long nativePlatformViewAndroid,
         String bundlePath,

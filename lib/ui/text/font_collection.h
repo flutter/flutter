@@ -7,7 +7,7 @@
 
 #include <memory>
 #include <vector>
-#include "flutter/assets/directory_asset_bundle.h"
+#include "flutter/assets/asset_provider.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/ref_ptr.h"
 #include "txt/asset_data_provider.h"
@@ -21,9 +21,7 @@ class FontCollection {
 
   std::shared_ptr<txt::FontCollection> GetFontCollection() const;
 
-  void RegisterFontsFromDirectoryAssetBundle(
-      fxl::RefPtr<blink::DirectoryAssetBundle> directory_asset_bundle);
-
+  void RegisterFontsFromAssetProvider(fxl::RefPtr<blink::AssetProvider> asset_provider);
   void RegisterTestFonts();
 
  private:

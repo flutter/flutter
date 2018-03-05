@@ -38,10 +38,11 @@ class PlatformViewAndroid : public PlatformView {
 
   void SurfaceDestroyed();
 
-  void RunBundleAndSnapshot(std::string bundle_path,
+  void RunBundleAndSnapshot(JNIEnv* env, std::string bundle_path,
                             std::string snapshot_override,
                             std::string entrypoint,
-                            bool reuse_isolate);
+                            bool reuse_isolate,
+                            jobject assetManager);
 
   void RunBundleAndSource(std::string bundle_path,
                           std::string main,

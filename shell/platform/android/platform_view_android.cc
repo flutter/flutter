@@ -21,6 +21,7 @@
 #include "flutter/shell/platform/android/android_external_texture_gl.h"
 #include "flutter/shell/platform/android/android_surface_gl.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
+#include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
 #include "lib/fxl/functional/make_copyable.h"
@@ -207,10 +208,16 @@ void PlatformViewAndroid::SurfaceDestroyed() {
   ReleaseSurface();
 }
 
-void PlatformViewAndroid::RunBundleAndSnapshot(std::string bundle_path,
+void PlatformViewAndroid::RunBundleAndSnapshot(JNIEnv* env, std::string bundle_path,
                                                std::string snapshot_override,
                                                std::string entrypoint,
-                                               bool reuse_runtime_controller) {
+                                               bool reuse_runtime_controller,
+                                               jobject assetManager) {
+  // The flutter assets directory name is the last directory of the bundle_path and the path into the APK
+  size_t last_slash_idx = bundle_path.rfind("/", bundle_path.size());
+  std::string flutter_assets_dir = bundle_path.substr(last_slash_idx+1, bundle_path.size()-last_slash_idx);
+
+  asset_provider_ = fxl::MakeRefCounted<blink::APKAssetProvider>(env, assetManager, flutter_assets_dir);
   blink::Threads::UI()->PostTask([
     engine = engine_->GetWeakPtr(), bundle_path = std::move(bundle_path),
     snapshot_override = std::move(snapshot_override),

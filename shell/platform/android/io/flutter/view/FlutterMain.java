@@ -66,9 +66,15 @@ public class FlutterMain {
     private static final String DEFAULT_AOT_ISOLATE_SNAPSHOT_INSTR = "isolate_snapshot_instr";
     private static final String DEFAULT_FLX = "app.flx";
     private static final String DEFAULT_SNAPSHOT_BLOB = "snapshot_blob.bin";
+    private static final String DEFAULT_KERNEL_BLOB = "kernel_blob.bin";
+    private static final String DEFAULT_PLATFORM_DILL = "platform.dill";
     private static final String DEFAULT_FLUTTER_ASSETS_DIR = "flutter_assets";
 
     private static final String MANIFEST = "flutter.yaml";
+
+    private static String fromFlutterAssets(String filePath) {
+        return sFlutterAssetsDir + "/" + filePath;
+    }
 
     private static final Set<String> SKY_RESOURCES = ImmutableSetBuilder.<String>newInstance()
         .add("icudtl.dat")
@@ -244,8 +250,10 @@ public class FlutterMain {
         new ResourceCleaner(context).start();
         sResourceExtractor = new ResourceExtractor(context)
             .addResources(SKY_RESOURCES)
-            .addResource(sFlx)
-            .addResource(sFlutterAssetsDir);
+            .addResource(fromFlutterAssets(sFlx))
+            .addResource(fromFlutterAssets(sSnapshotBlob))
+            .addResource(fromFlutterAssets(DEFAULT_KERNEL_BLOB))
+            .addResource(fromFlutterAssets(DEFAULT_PLATFORM_DILL));
         if (sIsPrecompiledAsSharedLibrary) {
           sResourceExtractor
             .addResource(sAotSharedLibraryPath);
