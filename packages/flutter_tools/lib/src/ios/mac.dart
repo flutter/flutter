@@ -241,7 +241,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     <String>[
       '/usr/bin/env',
       'xcrun',
-      XcodeProjectInterpreter.executable,
+      'xcodebuild',
       'clean',
       '-configuration', configuration,
     ],
@@ -255,7 +255,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   final List<String> buildCommands = <String>[
     '/usr/bin/env',
     'xcrun',
-    XcodeProjectInterpreter.executable,
+    'xcodebuild',
     'build',
     '-configuration', configuration,
     'ONLY_ACTIVE_ARCH=YES',
@@ -513,7 +513,7 @@ bool _checkXcodeVersion() {
   if (!platform.isMacOS)
     return false;
   if (!xcodeProjectInterpreter.isInstalled) {
-    printError('Cannot find "${XcodeProjectInterpreter.executable}". $_xcodeRequirement');
+    printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
   if (!xcode.isVersionSatisfactory) {

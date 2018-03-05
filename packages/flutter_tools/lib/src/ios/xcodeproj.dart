@@ -91,12 +91,12 @@ XcodeProjectInterpreter get xcodeProjectInterpreter => context.putIfAbsent(
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
-  static const String executable = 'xcodebuild';
+  static const String _executable = '/usr/bin/xcodebuild';
   static final RegExp _versionRegex = new RegExp(r'Xcode ([0-9.]+)');
 
   void _updateVersion() {
     try {
-      final ProcessResult result = processManager.runSync(<String>[executable, '-version']);
+      final ProcessResult result = processManager.runSync(<String>[_executable, '-version']);
       if (result.exitCode != 0) {
         return;
       }
@@ -138,7 +138,7 @@ class XcodeProjectInterpreter {
 
   Map<String, String> getBuildSettings(String projectPath, String target) {
     final String out = runCheckedSync(<String>[
-      executable,
+      _executable,
       '-project',
       fs.path.absolute(projectPath),
       '-target',
@@ -150,7 +150,7 @@ class XcodeProjectInterpreter {
 
   XcodeProjectInfo getInfo(String projectPath) {
     final String out = runCheckedSync(<String>[
-      executable, '-list',
+      _executable, '-list',
     ], workingDirectory: projectPath);
     return new XcodeProjectInfo.fromXcodeBuildOutput(out);
   }
