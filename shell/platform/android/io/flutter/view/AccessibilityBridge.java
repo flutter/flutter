@@ -126,7 +126,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
 
         AccessibilityNodeInfo result = AccessibilityNodeInfo.obtain(mOwner, virtualViewId);
         result.setPackageName(mOwner.getContext().getPackageName());
-        result.setClassName("Flutter"); // TODO(goderbauer): Set proper class names
+        result.setClassName("android.view.View");
         result.setSource(mOwner, virtualViewId);
         result.setFocusable(object.isFocusable());
         if (mInputFocusedObject != null)
