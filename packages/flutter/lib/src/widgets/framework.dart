@@ -3731,13 +3731,13 @@ class StatefulElement extends ComponentElement {
     assert(_state._debugLifecycleState == _StateLifecycle.created);
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
-      final void _debugCheckForReturnedFuture = _state.initState();
+      final dynamic _debugCheckForReturnedFuture = _state.initState() as dynamic;
       assert(() {
-        if ((_debugCheckForReturnedFuture  as dynamic) is Future) {
+        if (_debugCheckForReturnedFuture is Future) {
           throw new FlutterError(
-              '${_state.runtimeType}.didUpdateWidget returned a Future.\n'
-              'State.didUpdateWidget must be a void method without an `async` keyword.\n'
-              'Async lifecycle methods violate the State contract.\n'
+            '${_state.runtimeType}.didUpdateWidget returned a Future.\n'
+            'State.didUpdateWidget must be a void method without an `async` keyword.\n'
+            'Async lifecycle methods violate the State contract.\n'
           );
         }
         return true;
@@ -3763,13 +3763,13 @@ class StatefulElement extends ComponentElement {
     _state._widget = widget;
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
-      final void _debugCheckForReturnedFuture = _state.didUpdateWidget(oldWidget);
+      final dynamic _debugCheckForReturnedFuture = _state.didUpdateWidget(oldWidget) as dynamic;
       assert(() {
-        if ((_debugCheckForReturnedFuture as dynamic) is Future) {
+        if (_debugCheckForReturnedFuture is Future) {
           throw new FlutterError(
-              '${_state.runtimeType}.didUpdateWidget returned a Future.\n'
-              'State.didUpdateWidget must be a void method without an `async` keyword.\n'
-              'Async lifecycle methods violate the State contract.\n'
+            '${_state.runtimeType}.didUpdateWidget returned a Future.\n'
+            'State.didUpdateWidget must be a void method without an `async` keyword.\n'
+            'Async lifecycle methods violate the State contract.\n'
           );
         }
         return true;

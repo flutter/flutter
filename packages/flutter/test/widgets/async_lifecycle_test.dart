@@ -43,21 +43,14 @@ class InvalidDidUpdateWidgetLifecycleWidgetState extends State<InvalidDidUpdateW
 
 void main() {
   testWidgets('async onInit throws FlutterError', (WidgetTester tester) async {
-    const InvalidOnInitLifecycleWidget invalidWidget = const InvalidOnInitLifecycleWidget();
-
-    await tester.pumpWidget(invalidWidget);
+    await tester.pumpWidget(const InvalidOnInitLifecycleWidget());
 
     expect(tester.takeException(), const isInstanceOf<FlutterError>());
   });
 
   testWidgets('async didUpdateWidget throws FlutterError', (WidgetTester tester) async {
-    const InvalidDidUpdateWidgetLifecycleWidget invalidWidget = const InvalidDidUpdateWidgetLifecycleWidget(id: 1);
-
-    await tester.pumpWidget(invalidWidget);
-
-    const InvalidDidUpdateWidgetLifecycleWidget invalidWidgetUpdate = const InvalidDidUpdateWidgetLifecycleWidget(id: 2);
-
-    await tester.pumpWidget(invalidWidgetUpdate);
+    await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(id: 1));
+    await tester.pumpWidget( const InvalidDidUpdateWidgetLifecycleWidget(id: 2));
 
     expect(tester.takeException(), const isInstanceOf<FlutterError>());
   });
