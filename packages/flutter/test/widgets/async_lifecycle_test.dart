@@ -50,7 +50,7 @@ void main() {
 
   testWidgets('async didUpdateWidget throws FlutterError', (WidgetTester tester) async {
     await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(id: 1));
-    await tester.pumpWidget( const InvalidDidUpdateWidgetLifecycleWidget(id: 2));
+    await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(id: 2));
 
     expect(tester.takeException(), isFlutterError);
   });
