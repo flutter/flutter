@@ -21,18 +21,17 @@ class FabMotionDemo extends StatefulWidget {
 class _FabMotionDemoState extends State<FabMotionDemo> {
   static const List<FloatingActionButtonPositioner> _floatingActionButtonPositioners = const <FloatingActionButtonPositioner>[
     FloatingActionButtonPositioner.endFloat, 
-    FloatingActionButtonPositioner.centerFloat, 
+    FloatingActionButtonPositioner.centerFloat,
     const _TopStartFloatingActionButtonPositioner(),
   ];
 
+  bool _showFab = true;
   FloatingActionButtonPositioner _floatingActionButtonPositioner = FloatingActionButtonPositioner.endFloat;
 
   @override
   Widget build(BuildContext context) {
-    final Widget scaffold = new Scaffold(
-      appBar: new AppBar(title: const Text('FAB Positioner'), bottom: const PreferredSize(preferredSize: const Size.fromHeight(48.0), child: const SizedBox())),
-      floatingActionButtonPositioner: _floatingActionButtonPositioner,
-      floatingActionButton: new Builder(builder: (BuildContext context) {
+    final Widget floatingActionButton = _showFab 
+      ? new Builder(builder: (BuildContext context) {
         // We use a widget builder here so that this inner context can find the Scaffold.
         // This makes it possible to show the snackbar.
         return new FloatingActionButton(
@@ -40,11 +39,28 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
           onPressed: () => _showSnackbar(context),
           child: const Icon(Icons.add), 
         );
-      }),
+      }) 
+      : null;
+    final Widget scaffold = new Scaffold(
+      appBar: new AppBar(title: const Text('FAB Positioner'), bottom: const PreferredSize(preferredSize: const Size.fromHeight(48.0), child: const SizedBox())),
+      floatingActionButtonPositioner: _floatingActionButtonPositioner,
+      floatingActionButton: floatingActionButton,
       body: new Center(
-        child: new RaisedButton(
-          onPressed: _moveFab,
-          child: const Text('MOVE FAB'),
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            new RaisedButton(
+              onPressed: _moveFab,
+              child: const Text('MOVE FAB'),
+            ),
+            new Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text('Toggle FAB'),
+                new Switch(value: _showFab, onChanged: _toggleFab),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -54,6 +70,12 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
   void _moveFab() {
     setState(() {
       _floatingActionButtonPositioner = _floatingActionButtonPositioners[(_floatingActionButtonPositioners.indexOf(_floatingActionButtonPositioner) + 1) % _floatingActionButtonPositioners.length];
+    });
+  }
+
+  void _toggleFab(bool showFab) {
+    setState(() {
+      _showFab = showFab;
     });
   }
 

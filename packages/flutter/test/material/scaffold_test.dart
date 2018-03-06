@@ -796,7 +796,7 @@ void main() {
         child: const Text('1'),
       );
 
-    testWidgets('does nothing when the floating action button is null', (WidgetTester tester) async {
+    testWidgets('still animates motion when the floating action button is null', (WidgetTester tester) async {
       await tester.pumpWidget(build(null, null));
 
       expect(find.byType(FloatingActionButton), findsNothing);
@@ -805,12 +805,12 @@ void main() {
       await tester.pumpWidget(build(null, FloatingActionButtonPositioner.endFloat));
 
       expect(find.byType(FloatingActionButton), findsNothing);
-      expect(tester.binding.transientCallbackCount, 0);
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
 
       await tester.pumpWidget(build(null, FloatingActionButtonPositioner.centerFloat));
 
       expect(find.byType(FloatingActionButton), findsNothing);
-      expect(tester.binding.transientCallbackCount, 0);
+      expect(tester.binding.transientCallbackCount, greaterThan(0));
     });
 
     testWidgets('moves fab from center to end and back', (WidgetTester tester) async {
