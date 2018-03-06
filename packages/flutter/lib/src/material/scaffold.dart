@@ -1729,7 +1729,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         controller: _primaryScrollController,
         child: new Material(
           color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
-          child: new AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, _) {
+          child: new AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget child) {
             return new CustomMultiChildLayout(
               children: children,
               delegate: new _ScaffoldLayout(
