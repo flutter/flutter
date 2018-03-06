@@ -9,6 +9,21 @@ dart_library("flutter") {
 
   disable_analysis = true
 
+  sources = [
+    "animation.dart",
+    "cupertino.dart",
+    "foundation.dart",
+    "gestures.dart",
+    "material.dart",
+    "painting.dart",
+    "physics.dart",
+    "rendering.dart",
+    "scheduler.dart",
+    "semantics.dart",
+    "services.dart",
+    "widgets.dart",
+  ]
+
   deps = [
     "//third_party/dart/third_party/pkg/intl",
     "//third_party/dart-pkg/pub/async",
