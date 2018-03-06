@@ -54,7 +54,7 @@ void main() {
       appStarter = (DriveCommand command) {
         throw 'Unexpected call to appStarter';
       };
-      testRunner = (List<String> testArgs, String observatoryUri) {
+      testRunner = (List<String> testArgs, String observatoryUri, bool previewDart2) {
         throw 'Unexpected call to testRunner';
       };
       appStopper = (DriveCommand command) {
@@ -169,7 +169,7 @@ void main() {
       appStarter = expectAsync1((DriveCommand command) async {
         return new LaunchResult.succeeded();
       });
-      testRunner = expectAsync2((List<String> testArgs, String observatoryUri) async {
+      testRunner = expectAsync3((List<String> testArgs, String observatoryUri, bool previewDart2) async {
         expect(testArgs, <String>[testFile]);
         return null;
       });
@@ -200,7 +200,7 @@ void main() {
       appStarter = expectAsync1((DriveCommand command) async {
         return new LaunchResult.succeeded();
       });
-      testRunner = (List<String> testArgs, String observatoryUri) async {
+      testRunner = (List<String> testArgs, String observatoryUri, bool previewDart2) async {
         throwToolExit(null, exitCode: 123);
       };
       appStopper = expectAsync1((DriveCommand command) async {

@@ -45,10 +45,8 @@ class BotDetector {
 }
 
 bool get isRunningOnBot {
-  if (context == null) {
-    return _kBotDetector.isRunningOnBot;
-  }
-  return context[BotDetector].isRunningOnBot;
+  final BotDetector botDetector = context?.getVariable(BotDetector) ?? _kBotDetector;
+  return botDetector.isRunningOnBot;
 }
 
 String hex(List<int> bytes) {

@@ -248,7 +248,9 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     _checkFlutterCopy();
     await FlutterVersion.instance.ensureVersionFile();
-    await FlutterVersion.instance.checkFlutterVersionFreshness();
+    if (globalResults.command?.name != 'upgrade') {
+      await FlutterVersion.instance.checkFlutterVersionFreshness();
+    }
 
     if (globalResults.wasParsed('packages'))
       PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(globalResults['packages']));

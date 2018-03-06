@@ -18,8 +18,7 @@ void main() {
     testUsingContext('a test', () async {
       final FuchsiaDeviceCommandRunner commandRunner =
           new FuchsiaDeviceCommandRunner('8.8.9.9',
-                                         '~/fuchsia',
-                                         'release-x86-64');
+                                         '~/fuchsia/out/release-x86-64');
       final List<String> ports = await commandRunner.run('ls /tmp');
       expect(ports, hasLength(3));
       expect(ports[0], equals('1234'));

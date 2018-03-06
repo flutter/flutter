@@ -38,6 +38,9 @@ where /q git || ECHO Error: Unable to find git in your PATH. && EXIT /B 1
 REM  Test if the flutter directory is a git clone, otherwise git rev-parse HEAD would fail
 IF NOT EXIST "%flutter_root%\.git" (
   ECHO Error: The Flutter directory is not a clone of the GitHub project.
+  ECHO        The flutter tool requires Git in order to operate properly;
+  ECHO        to set up Flutter, run the following command:
+  ECHO        git clone -b beta https://github.com/flutter/flutter.git
   EXIT /B 1
 )
 
@@ -85,7 +88,10 @@ GOTO :after_subroutine
 
   :do_sdk_update_and_snapshot
     ECHO Checking Dart SDK version...
-    CALL PowerShell.exe -ExecutionPolicy Bypass -Command "& '%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1'"
+    SET update_dart_bin=%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1
+    REM Escape apostrophes from the executable path
+    SET "update_dart_bin=!update_dart_bin:'=''!"
+    CALL PowerShell.exe -ExecutionPolicy Bypass -Command "& '%update_dart_bin%'"
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to update Dart SDK. Retrying...
       timeout /t 5 /nobreak

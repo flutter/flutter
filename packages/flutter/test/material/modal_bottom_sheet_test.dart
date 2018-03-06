@@ -37,7 +37,7 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
-    // Tap on the the bottom sheet itself to dismiss it
+    // Tap on the bottom sheet itself to dismiss it
     await tester.tap(find.text('BottomSheet'));
     await tester.pump(); // bottom sheet dismiss animation starts
     expect(showBottomSheetThenCalled, isTrue);
@@ -58,7 +58,7 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
-    // Tap above the the bottom sheet to dismiss it
+    // Tap above the bottom sheet to dismiss it
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump(); // bottom sheet dismiss animation starts
     expect(showBottomSheetThenCalled, isTrue);

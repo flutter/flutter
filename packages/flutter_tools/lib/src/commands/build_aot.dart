@@ -335,8 +335,15 @@ Future<String> _buildAotSnapshot(
     ]);
   }
 
-  final String genSnapshotInputFile = previewDart2 ? kApplicationKernelPath : mainPath;
+  final String entryPoint = mainPath;
   final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
+  Future<Fingerprint> makeFingerprint() async {
+    final Set<String> snapshotInputPaths = await readDepfile(dependencies)
+      ..add(entryPoint)
+      ..addAll(outputPaths);
+    return Snapshotter.createFingerprint(snapshotType, entryPoint, snapshotInputPaths);
+  }
+
   final File fingerprintFile = fs.file('$dependencies.fingerprint');
   final List<File> fingerprintFiles = <File>[fingerprintFile, fs.file(dependencies)]
     ..addAll(inputPaths.map(fs.file))
@@ -345,11 +352,7 @@ Future<String> _buildAotSnapshot(
     try {
       final String json = await fingerprintFile.readAsString();
       final Fingerprint oldFingerprint = new Fingerprint.fromJson(json);
-      final Set<String> snapshotInputPaths = await readDepfile(dependencies)
-        ..add(genSnapshotInputFile)
-        ..addAll(outputPaths);
-      final Fingerprint newFingerprint = Snapshotter.createFingerprint(snapshotType, genSnapshotInputFile, snapshotInputPaths);
-      if (oldFingerprint == newFingerprint) {
+      if (oldFingerprint == await makeFingerprint()) {
         printStatus('Skipping AOT snapshot build. Fingerprint match.');
         return outputPath;
       }
@@ -364,6 +367,7 @@ Future<String> _buildAotSnapshot(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
       outputFilePath: kApplicationKernelPath,
+      depFilePath: dependencies,
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn : true,
       aot : true,
@@ -373,6 +377,10 @@ Future<String> _buildAotSnapshot(
       printError('Compiler terminated unexpectedly.');
       return null;
     }
+    // Write path to frontend_server, since things need to be re-generated when
+    // that changes.
+    await outputDir.childFile('frontend_server.d')
+        .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
 
     genSnapshotCmd.addAll(<String>[
       '--reify-generic-functions',
@@ -459,10 +467,7 @@ Future<String> _buildAotSnapshot(
 
   // Compute and record build fingerprint.
   try {
-    final Set<String> snapshotInputPaths = await readDepfile(dependencies)
-      ..add(mainPath)
-      ..addAll(outputPaths);
-    final Fingerprint fingerprint = Snapshotter.createFingerprint(snapshotType, mainPath, snapshotInputPaths);
+    final Fingerprint fingerprint = await makeFingerprint();
     await fingerprintFile.writeAsString(fingerprint.toJson());
   } catch (e, s) {
     // Log exception and continue, this step is a performance improvement only.

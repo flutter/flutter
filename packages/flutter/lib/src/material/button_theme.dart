@@ -135,7 +135,7 @@ class ButtonTheme extends InheritedWidget {
 /// A button theme can be specified as part of the overall Material theme
 /// using [ThemeData.buttomTheme]. The Material theme's button theme data
 /// can be overridden with [ButtonTheme].
-class ButtonThemeData {
+class ButtonThemeData extends Diagnosticable {
   /// Create a button theme object that can be used with [ButtonTheme]
   /// or [ThemeData].
   ///
@@ -250,5 +250,19 @@ class ButtonThemeData {
       padding,
       shape,
     );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    final ButtonThemeData defaultTheme = const ButtonThemeData();
+    description.add(new EnumProperty<ButtonTextTheme>('textTheme', textTheme,
+        defaultValue: defaultTheme.textTheme));
+    description.add(new DoubleProperty('minWidth', minWidth, defaultValue: defaultTheme.minWidth));
+    description.add(new DoubleProperty('height', height, defaultValue: defaultTheme.height));
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding,
+        defaultValue: defaultTheme.padding));
+    description.add(
+        new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultTheme.shape));
   }
 }

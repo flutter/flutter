@@ -1495,12 +1495,13 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
   /// parents.
   SemanticsSortOrder order;
 
-  /// The is the starting corner for the rectangle on this semantics node in
-  /// global coordinates. When the container has the directionality
-  /// [TextDirection.ltr], this is the upper left corner.  When the container
-  /// has the directionality [TextDirection.rtl], this is the upper right
-  /// corner. When the container has no directionality, this is set, but the
-  /// x coordinate is ignored.
+  /// The starting corner for the rectangle on this semantics node in
+  /// global coordinates.
+  ///
+  /// When the container has the directionality [TextDirection.ltr], this is the
+  /// upper left corner.  When the container has the directionality
+  /// [TextDirection.rtl], this is the upper right corner. When the container
+  /// has no directionality, this is set, but the x coordinate is ignored.
   Offset globalStartCorner;
 
   static Offset _transformPoint(Offset point, Matrix4 matrix) {
@@ -2623,7 +2624,7 @@ String _concatStrings({
 
 /// Provides a way to specify the order in which semantic nodes are sorted.
 ///
-/// [TranversalSortOrder] objects contain a list of sort keys in the order in
+/// [SemanticsSortOrder] objects contain a list of sort keys in the order in
 /// which they are applied. They are attached to [Semantics] widgets in the
 /// widget hierarchy, and are merged with the sort orders of their parent
 /// [Semantics] widgets. If [SemanticsSortOrder.discardParentOrder] is set to
@@ -2659,7 +2660,7 @@ String _concatStrings({
 ///           child: const Text('Label One'),
 ///         ),
 ///         new Semantics(
-///           sortOrder: new SemanticsSortOrder(key: new OrdinalSortKey(2.0)),
+///           sortOrder: new SemanticsSortOrder(key: new OrdinalSortKey(1.0)),
 ///           child: const Text('Label Two'),
 ///         ),
 ///       ],
@@ -2688,8 +2689,8 @@ class SemanticsSortOrder extends Diagnosticable implements Comparable<SemanticsS
   /// `keys: <SemanticsSortKey>[key]`.
   ///
   /// If [discardParentOrder] is set to true, then the [SemanticsSortOrder.keys]
-  /// will _replace_ the list of keys from the parents when merged, instead of
-  /// extending them.
+  /// will _replace_ the list of keys from the parents when merged. Otherwise,
+  /// the child's keys are appended at the end of the parent's keys.
   SemanticsSortOrder({
     SemanticsSortKey key,
     List<SemanticsSortKey> keys,
@@ -2787,9 +2788,9 @@ abstract class SemanticsSortKey extends Diagnosticable implements Comparable<Sem
 
   /// The implementation of [compareTo].
   ///
-  /// The argument is guaranteed to be the same type as this object.
+  /// The argument is guaranteed to be of the same type as this object.
   ///
-  /// The method should return a negative number of this object is earlier in
+  /// The method should return a negative number if this object comes earlier in
   /// the sort order than the argument; and a positive number if it comes later
   /// in the sort order. Returning zero causes the system to default to
   /// comparing the geometry of the nodes.
@@ -2809,27 +2810,32 @@ abstract class SemanticsSortKey extends Diagnosticable implements Comparable<Sem
 /// The [OrdinalSortKey] compares itself with other [OrdinalSortKey]s
 /// to sort based on the order it is given.
 ///
-/// The ordinal value `order` is typically an integer, though it can be
-/// fractional, e.g. in order to fit between two other consecutive integers. The
-/// value must be finite (it cannot be a NaN value or infinity).
+/// The ordinal value `order` is typically a whole number, though it can be
+/// fractional, e.g. in order to fit between two other consecutive whole
+/// numbers. The value must be finite (it cannot be [double.nan],
+/// [double.infinity], or [double.negativeInfinity]).
 ///
 /// See also:
 ///
 ///  * [SemanticsSortOrder] which manages a list of sort keys.
 class OrdinalSortKey extends SemanticsSortKey {
-  /// Creates a semantics sort key that uses a double as its key value.
+  /// Creates a semantics sort key that uses a [double] as its key value.
   ///
   /// The [order] must be a finite number.
   const OrdinalSortKey(
     this.order, {
     String name,
   }) : assert(order != null),
-       assert(order > double.NEGATIVE_INFINITY),
-       assert(order < double.INFINITY),
+       assert(order != double.nan),
+       assert(order > double.negativeInfinity),
+       assert(order < double.infinity),
        super(name: name);
 
-  /// A double which describes the order in which this node is traversed by the
-  /// platform's accessibility services. Lower values will be traversed first.
+  /// Determines the placement of this key in a sequence of keys that defines
+  /// the order in which this node is traversed by the platform's accessibility
+  /// services.
+  ///
+  /// Lower values will be traversed first.
   final double order;
 
   @override

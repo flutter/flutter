@@ -51,7 +51,7 @@ dev_dependencies:
   stream_channel: 1.6.3 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
-  test: 0.12.30+3 # TRANSITIVE DEPENDENCY
+  test: 0.12.30+4 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.5 # TRANSITIVE DEPENDENCY
   utf: 0.9.0+4 # TRANSITIVE DEPENDENCY
   vector_math: 2.0.5 # TRANSITIVE DEPENDENCY

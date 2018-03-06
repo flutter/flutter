@@ -80,11 +80,15 @@ Future<Null> build({
       incrementalCompilerByteStorePath: fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
       mainPath: fs.file(mainPath).absolute.path,
       outputFilePath: applicationKernelFilePath,
+      depFilePath: depfilePath,
       trackWidgetCreation: trackWidgetCreation,
     );
     if (kernelBinaryFilename == null) {
       throwToolExit('Compiler terminated unexpectedly on $mainPath');
     }
+    await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
+        .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
+
     kernelContent = new DevFSFileContent(fs.file(kernelBinaryFilename));
   }
 

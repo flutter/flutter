@@ -10,15 +10,17 @@ import 'globals.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
-  const BuildInfo(this.mode, this.flavor,
-      {this.previewDart2,
-      this.trackWidgetCreation,
-      this.extraFrontEndOptions,
-      this.extraGenSnapshotOptions,
-      this.preferSharedLibrary,
-      this.targetPlatform});
+  const BuildInfo(this.mode, this.flavor, {
+    this.previewDart2: false,
+    this.trackWidgetCreation,
+    this.extraFrontEndOptions,
+    this.extraGenSnapshotOptions,
+    this.preferSharedLibrary,
+    this.targetPlatform,
+  });
 
   final BuildMode mode;
+
   /// Represents a custom Android product flavor or an Xcode scheme, null for
   /// using the default.
   ///
@@ -27,7 +29,7 @@ class BuildInfo {
   /// Mode-Flavor (e.g. Release-Paid).
   final String flavor;
 
-  // Whether build should be done using Dart2 Frontend parser.
+  /// Whether build should be done using Dart2 Frontend parser.
   final bool previewDart2;
 
   /// Whether the build should track widget creation locations.
@@ -39,7 +41,7 @@ class BuildInfo {
   /// Extra command-line options for gen_snapshot.
   final String extraGenSnapshotOptions;
 
-  // Whether to prefer AOT compiling to a *so file.
+  /// Whether to prefer AOT compiling to a *so file.
   final bool preferSharedLibrary;
 
   /// Target platform for the build (e.g. android_arm versus android_arm64).
