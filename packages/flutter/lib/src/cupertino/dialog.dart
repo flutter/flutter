@@ -130,7 +130,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     this.title,
     this.content,
     this.actions,
-    this.scrollController, //TODO(ekbiker): Perhaps rename this to "titleScrollController".
+    this.scrollController,
     this.actionScrollController,
   }) : super(key: key);
 
@@ -152,14 +152,19 @@ class CupertinoAlertDialog extends StatelessWidget {
   /// Typically this is a list of [CupertinoDialogAction] widgets.
   final List<Widget> actions;
 
-  /// A scroll controller that can be used to control the scrolling of the message
-  /// in the dialog.
+  /// A scroll controller that can be used to control the scrolling of the
+  /// message in the dialog.
   ///
-  /// Defaults to null, and is typically not needed, since most alert messages are short.
+  /// Defaults to null, and is typically not needed, since most alert messages
+  /// are short. Note that another scroll controller, [actionScrollController],
+  /// is needed for the actions section when there are many actions. So, it
+  /// would be nice to disambiguate this scroll controller by changing to
+  /// 'titleScrollController', TODO(ekbiker): change to "titleScrollController",
+  /// but it would be a breaking change.
   final ScrollController scrollController;
 
-  /// A scroll controller that can be used to control the scrolling of the actions
-  /// in the dialog.
+  /// A scroll controller that can be used to control the scrolling of the
+  /// actions in the dialog.
   ///
   /// Defaults to null, and is typically not needed.
   final ScrollController actionScrollController;
@@ -216,7 +221,8 @@ class CupertinoDialogAction extends StatelessWidget {
     @required this.child,
   }) : assert(child != null);
 
-  /// The callback that is called when the button is tapped or otherwise activated.
+  /// The callback that is called when the button is tapped or otherwise
+  /// activated.
   ///
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
@@ -236,8 +242,9 @@ class CupertinoDialogAction extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget child;
 
-  /// Whether the button is enabled or disabled. Buttons are disabled by default. To
-  /// enable a button, set its [onPressed] property to a non-null value.
+  /// Whether the button is enabled or disabled. Buttons are disabled by
+  /// default. To enable a button, set its [onPressed] property to a non-null
+  /// value.
   bool get enabled => onPressed != null;
 
   @override
@@ -256,7 +263,8 @@ class CupertinoDialogAction extends StatelessWidget {
       style = style.copyWith(color: style.color.withOpacity(0.5));
     }
 
-    final double textScaleFactor = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
+    final double textScaleFactor =
+        MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
     return new GestureDetector(
       onTap: onPressed,
       behavior: HitTestBehavior.opaque,
@@ -298,10 +306,11 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
   /// Typically a [Text] widget.
   final Widget message;
 
-  /// A scroll controller that can be used to control the scrolling of the message
-  /// in the dialog.
+  /// A scroll controller that can be used to control the scrolling of the
+  /// message in the dialog.
   ///
-  /// Defaults to null, and is typically not needed, since most alert messages are short.
+  /// Defaults to null, and is typically not needed, since most alert messages
+  /// are short.
   final ScrollController scrollController;
 
   @override
@@ -342,6 +351,8 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
     }
 
     if (titleContentGroup.isEmpty) {
+      // Returning null to let the calling code know to not include the section.
+      // This method is private and the calling code does a null check.
       return null;
     }
 
@@ -382,15 +393,18 @@ class _CupertinoAlertActionSection extends StatelessWidget {
 
   final List<Widget> children;
 
-  /// A scroll controller that can be used to control the scrolling of the message
-  /// in the dialog.
+  /// A scroll controller that can be used to control the scrolling of the
+  /// message in the dialog.
   ///
-  /// Defaults to null, and is typically not needed, since most alert messages are short.
+  /// Defaults to null, and is typically not needed, since most alert messages
+  /// are short.
   final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
     if (children == null || children.isEmpty) {
+      // Returning null to let the calling code know to not include the section.
+      // This method is private and the calling code does a null check.
       return null;
     }
 
@@ -481,5 +495,5 @@ class _CupertinoVerticalDividerPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_CupertinoVerticalDividerPainter other) => true;
+  bool shouldRepaint(_CupertinoVerticalDividerPainter other) => false;
 }

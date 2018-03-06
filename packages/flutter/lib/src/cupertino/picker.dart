@@ -10,8 +10,10 @@ import 'package:flutter/widgets.dart';
 /// Color of the 'magnifier' lens border.
 const Color _kHighlighterBorder = const Color(0xFF7F7F7F);
 const Color _kDefaultBackground = const Color(0xFFD2D4DB);
+
 /// Eyeballed value comparing with a native picker.
 const double _kDefaultDiameterRatio = 1.1;
+
 /// Opacity fraction value that hides the wheel above and below the 'magnifier'
 /// lens with the same color as the background.
 const double _kForegroundScreenOpacityFraction = 0.7;
@@ -46,13 +48,16 @@ class CupertinoPicker extends StatefulWidget {
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required this.children,
-  }) : assert(diameterRatio != null),
-       assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
-       assert(itemExtent != null),
-       assert(itemExtent > 0),
-       super(key: key);
+  })
+      : assert(diameterRatio != null),
+        assert(diameterRatio > 0.0,
+            RenderListWheelViewport.diameterRatioZeroMessage),
+        assert(itemExtent != null),
+        assert(itemExtent > 0),
+        super(key: key);
 
-  /// Relative ratio between this picker's height and the simulated cylinder's diameter.
+  /// Relative ratio between this picker's height and the simulated cylinder's
+  /// diameter.
   ///
   /// Smaller values creates more pronounced curvatures in the scrollable wheel.
   ///
@@ -113,71 +118,10 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     }
   }
 
-  /// Makes the fade to white edge gradients.
-  Widget _buildGradientScreen() {
-    return new Positioned.fill(
-      child: new IgnorePointer(
-        child: new Container(
-          decoration: const BoxDecoration(
-            gradient: const LinearGradient(
-              colors: const <Color>[
-                const Color(0xFFFFFFFF),
-                const Color(0xF2FFFFFF),
-                const Color(0xDDFFFFFF),
-                const Color(0x00FFFFFF),
-                const Color(0x00FFFFFF),
-                const Color(0xDDFFFFFF),
-                const Color(0xF2FFFFFF),
-                const Color(0xFFFFFFFF),
-              ],
-              stops: const <double>[
-                0.0, 0.05, 0.09, 0.22, 0.78, 0.91, 0.95, 1.0,
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Makes the magnifier lens look so that the colors are normal through
-  /// the lens and partially grayed out around it.
-  Widget _buildMagnifierScreen() {
-    final Color foreground = widget.backgroundColor?.withAlpha(
-      (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt()
-    );
-
-    return new IgnorePointer(
-      child: new Column(
-        children: <Widget>[
-          new Expanded(
-            child: new Container(
-              color: foreground,
-            ),
-          ),
-          new Container(
-            decoration: const BoxDecoration(
-              border: const Border(
-                top: const BorderSide(width: 0.0, color: _kHighlighterBorder),
-                bottom: const BorderSide(width: 0.0, color: _kHighlighterBorder),
-              )
-            ),
-            constraints: new BoxConstraints.expand(height: widget.itemExtent),
-          ),
-          new Expanded(
-            child: new Container(
-              color: foreground,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final double textScaleFactor =
+        MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
     Widget result = new Stack(
       children: <Widget>[
         new Positioned.fill(
@@ -185,13 +129,14 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
             controller: widget.scrollController,
             physics: const FixedExtentScrollPhysics(),
             diameterRatio: widget.diameterRatio,
-            itemExtent: widget.itemExtent,
+            itemExtent: widget.itemExtent * textScaleFactor,
             onSelectedItemChanged: _handleSelectedItemChanged,
             children: widget.children,
           ),
         ),
         _buildGradientScreen(),
-        _buildMagnifierScreen(),
+        _buildMagnifierScreen(
+            widget.backgroundColor, widget.itemExtent * textScaleFactor),
       ],
     );
     if (widget.backgroundColor != null) {
@@ -204,4 +149,204 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     }
     return result;
   }
+}
+
+enum CupertinoDatePickerMode {
+  date,           // Displays months, days of the month, and years.
+  time,           // Displays hours, minutes, and (optionally) an AM/PM designation.
+  dateTime,       // Displays dates, hours, minutes, and (optionally) an AM/PM designation.
+  countdownTimer,
+}
+
+///
+///
+///
+///
+///
+///
+///
+/// https://developer.apple.com/ios/human-interface-guidelines/controls/pickers/
+class CupertinoDatePicker extends CupertinoPicker {
+  /// Creates a control used for selecting values.
+  ///
+  /// The [diameterRatio] and [itemExtent] arguments must not be null. The
+  /// [itemExtent] must be greater than zero.
+  ///
+  /// The [backgroundColor] defaults to light gray. It can be set to null to
+  /// disable the background painting entirely; this is mildly more efficient
+  /// than using [Colors.transparent].
+  const CupertinoDatePicker({
+    Key key,
+    double diameterRatio: _kDefaultDiameterRatio,
+    Color backgroundColor: _kDefaultBackground,
+    ScrollController scrollController,
+    double itemExtent,
+    ValueChanged<int> onSelectedItemChanged,
+    List<Widget> children,
+  })
+      : super(
+          key: key,
+          diameterRatio: diameterRatio,
+          backgroundColor: backgroundColor,
+          scrollController: scrollController,
+          itemExtent: itemExtent,
+          onSelectedItemChanged: onSelectedItemChanged,
+          children: children,
+        );
+
+  @override
+  State<StatefulWidget> createState() => new _CupertinoDatePickerState();
+}
+
+class _CupertinoDatePickerState extends State<CupertinoDatePicker> {
+  int _lastHapticIndex;
+
+  void _handleSelectedItemChanged(int index) {
+    if (index != _lastHapticIndex) {
+      // TODO(xster): Insert haptic feedback with lighter knock.
+      // https://github.com/flutter/flutter/issues/13710.
+      _lastHapticIndex = index;
+    }
+
+    if (widget.onSelectedItemChanged != null) {
+      widget.onSelectedItemChanged(index);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double textScaleFactor =
+        MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
+
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      print('ios');
+    } else if (defaultTargetPlatform == TargetPlatform.android) {
+      print('droid');
+    } else {
+      print('Fuschia');
+    }
+
+      Widget result = new Stack(
+      children: <Widget>[
+        new Positioned.fill(
+          child: new Row(
+            children: <Widget>[
+              new Flexible(
+                child: ListWheelScrollView(
+                  //controller: widget.scrollController,
+                  //physics: const FixedExtentScrollPhysics(),
+                  diameterRatio: widget.diameterRatio,
+                  itemExtent: widget.itemExtent,
+                  onSelectedItemChanged: _handleSelectedItemChanged,
+                  children: <Widget>[new Text('1'), new Text('2')],
+                ),
+              ),
+              new Flexible(
+                child: new ListWheelScrollView(
+                  //controller: widget.scrollController,
+                  //physics: const FixedExtentScrollPhysics(),
+                  diameterRatio: widget.diameterRatio,
+                  itemExtent: widget.itemExtent,
+                  onSelectedItemChanged: _handleSelectedItemChanged,
+                  children: <Widget>[new Text('1'), new Text('2')],
+                ),
+              ),
+              new Flexible(
+                flex: 2,
+                child: new ListWheelScrollView(
+                  controller: widget.scrollController,
+                  physics: const FixedExtentScrollPhysics(),
+                  diameterRatio: widget.diameterRatio,
+                  itemExtent: widget.itemExtent,
+                  onSelectedItemChanged: _handleSelectedItemChanged,
+                  children: widget.children,
+                ),
+              ),
+            ],
+          ),
+        ),
+        _buildGradientScreen(),
+        _buildMagnifierScreen(
+            widget.backgroundColor, widget.itemExtent * textScaleFactor),
+      ],
+    );
+    if (widget.backgroundColor != null) {
+      result = new DecoratedBox(
+        decoration: new BoxDecoration(
+          color: widget.backgroundColor,
+        ),
+        child: result,
+      );
+    }
+    return result;
+  }
+}
+
+
+/// Makes the fade to white edge gradients.
+Widget _buildGradientScreen() {
+  return new Positioned.fill(
+    child: new IgnorePointer(
+      child: new Container(
+        decoration: const BoxDecoration(
+          gradient: const LinearGradient(
+            colors: const <Color>[
+              const Color(0xFFFFFFFF),
+              const Color(0xF2FFFFFF),
+              const Color(0xDDFFFFFF),
+              const Color(0x00FFFFFF),
+              const Color(0x00FFFFFF),
+              const Color(0xDDFFFFFF),
+              const Color(0xF2FFFFFF),
+              const Color(0xFFFFFFFF),
+            ],
+            stops: const <double>[
+              0.0,
+              0.05,
+              0.09,
+              0.22,
+              0.78,
+              0.91,
+              0.95,
+              1.0,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// Makes the magnifier lens look so that the colors are normal through
+/// the lens and partially grayed out around it.
+Widget _buildMagnifierScreen(Color backgroundColor, double itemExtent) {
+  final Color foreground = backgroundColor?.withAlpha(
+      (backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt());
+
+  return new IgnorePointer(
+    child: new Column(
+      children: <Widget>[
+        new Expanded(
+          child: new Container(
+            color: foreground,
+          ),
+        ),
+        new Container(
+          decoration: const BoxDecoration(
+              border: const Border(
+            top: const BorderSide(width: 0.0, color: _kHighlighterBorder),
+            bottom: const BorderSide(width: 0.0, color: _kHighlighterBorder),
+          )),
+          constraints: new BoxConstraints.expand(height: itemExtent),
+        ),
+        new Expanded(
+          child: new Container(
+            color: foreground,
+          ),
+        ),
+      ],
+    ),
+  );
 }
