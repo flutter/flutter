@@ -9,7 +9,7 @@ const String _explanatoryText =
   'the floating action button animates to its new position';
 
 class FabMotionDemo extends StatefulWidget {
-  static String routeName = '/material/fab-motion';
+  static const String routeName = '/material/fab-motion';
 
   @override
   State<StatefulWidget> createState() {
