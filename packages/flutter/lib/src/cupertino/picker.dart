@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 /// Color of the 'magnifier' lens border.
@@ -99,10 +100,12 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   int _lastHapticIndex;
 
   void _handleSelectedItemChanged(int index) {
-    if (index != _lastHapticIndex) {
-      // TODO(xster): Insert haptic feedback with lighter knock.
-      // https://github.com/flutter/flutter/issues/13710.
+    // Only the haptic engine hardware on iOS devices would produce the
+    // intended effects.
+    if (defaultTargetPlatform == TargetPlatform.iOS
+        && index != _lastHapticIndex) {
       _lastHapticIndex = index;
+      HapticFeedback.selectionClick();
     }
 
     if (widget.onSelectedItemChanged != null) {

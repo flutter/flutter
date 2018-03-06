@@ -60,8 +60,9 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     final FixedExtentScrollController scrollController =
         new FixedExtentScrollController(initialItem: _selectedItemIndex);
 
-    return new SizedBox(
+    return new Container(
       height: _kPickerSheetHeight,
+      color: CupertinoColors.white,
       child: new DefaultTextStyle(
         style: const TextStyle(
           color: CupertinoColors.black,
@@ -70,20 +71,22 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         child: new GestureDetector(
           // Blocks taps from propagating to the modal sheet and popping.
           onTap: () {},
-          child: new CupertinoPicker(
-            scrollController: scrollController,
-            itemExtent: _kPickerItemHeight,
-            backgroundColor: CupertinoColors.white,
-            onSelectedItemChanged: (int index) {
-              setState(() {
-                _selectedItemIndex = index;
-              });
-            },
-            children: new List<Widget>.generate(coolColorNames.length, (int index) {
-              return new Center(child:
-                new Text(coolColorNames[index]),
-              );
-            }),
+          child: new SafeArea(
+            child: new CupertinoPicker(
+              scrollController: scrollController,
+              itemExtent: _kPickerItemHeight,
+              backgroundColor: CupertinoColors.white,
+              onSelectedItemChanged: (int index) {
+                setState(() {
+                  _selectedItemIndex = index;
+                });
+              },
+              children: new List<Widget>.generate(coolColorNames.length, (int index) {
+                return new Center(child:
+                  new Text(coolColorNames[index]),
+                );
+              }),
+            ),
           ),
         ),
       ),
