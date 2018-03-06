@@ -118,13 +118,13 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
   );
 }
 
-List<dynamic> _validateAndParseCapabilities(String taskName, dynamic capabilitiesYaml) {
+List<String> _validateAndParseCapabilities(String taskName, dynamic capabilitiesYaml) {
   _checkType(capabilitiesYaml is List, capabilitiesYaml, 'required_agent_capabilities', 'list');
   for (int i = 0; i < capabilitiesYaml.length; i++) {
     final dynamic capability = capabilitiesYaml[i];
     _checkType(capability is String, capability, 'required_agent_capabilities[$i]', 'string');
   }
-  return capabilitiesYaml;
+  return capabilitiesYaml.cast<String>();
 }
 
 void _checkType(bool isValid, dynamic value, String variableName, String typeName) {
