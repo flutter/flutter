@@ -12,7 +12,7 @@ source_set("testing") {
   ]
 
   public_deps = [
-    "//third_party/googletest:gtest",
+    "//third_party/gtest",
   ]
 
   public_configs = [ "$flutter_root:config" ]

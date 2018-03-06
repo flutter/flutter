@@ -177,7 +177,7 @@ executable("txt_unittests") {
 
   deps = [
            ":txt",
-           "//third_party/googletest:gtest",
+           "//third_party/gtest",
          ] + txt_common_executable_deps
 }
 

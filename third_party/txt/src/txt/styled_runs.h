@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "text_style.h"
-#include "third_party/googletest/googletest/include/gtest/gtest_prod.h"  // nogncheck
+#include "third_party/gtest/include/gtest/gtest_prod.h"
 #include "utils/WindowsUtils.h"
 
 namespace txt {
