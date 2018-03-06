@@ -258,7 +258,7 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.engineDartSdkPath:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk');
       case Artifact.engineDartBinary:
-        return fs.path.join(_hostEngineOutPath, 'dart-sdk','bin', _artifactToFileName(artifact));
+        return fs.path.join(_hostEngineOutPath,'dart-sdk','bin', _artifactToFileName(artifact));
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;
