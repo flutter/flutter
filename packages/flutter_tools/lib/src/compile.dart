@@ -8,23 +8,9 @@ import 'dart:convert';
 import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
-import 'base/common.dart';
-import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process_manager.dart';
 import 'globals.dart';
-
-String _dartExecutable() {
-  final String engineDartSdkPath = artifacts.getArtifactPath(
-    Artifact.engineDartSdkPath
-  );
-  if (!fs.isDirectorySync(engineDartSdkPath)) {
-    throwToolExit('No dart sdk Flutter host engine build found at $engineDartSdkPath.\n'
-      'Note that corresponding host engine build is required even when targeting particular device platforms.',
-      exitCode: 2);
-  }
-  return fs.path.join(engineDartSdkPath, 'bin', 'dart');
-}
 
 class _StdoutHandler {
   _StdoutHandler() {
@@ -74,7 +60,7 @@ Future<String> compile(
   if (!sdkRoot.endsWith('/'))
     sdkRoot = '$sdkRoot/';
   final List<String> command = <String>[
-    _dartExecutable(),
+    artifacts.getArtifactPath(Artifact.engineDartBinary),
     frontendServer,
     '--sdk-root',
     sdkRoot,
@@ -154,13 +140,13 @@ class ResidentCompiler {
   /// Binary file name is returned if compilation was successful, otherwise
   /// null is returned.
   Future<String> recompile(String mainPath, List<String> invalidatedFiles,
-      {String outputPath}) async {
+      {String outputPath, String packagesFilePath}) async {
     stdoutHandler.reset();
 
     // First time recompile is called we actually have to compile the app from
     // scratch ignoring list of invalidated files.
     if (_server == null)
-      return _compile(mainPath, outputPath);
+      return _compile(mainPath, outputPath, packagesFilePath);
 
     final String inputKey = new Uuid().generateV4();
     _server.stdin.writeln('recompile ${mainPath != null ? mainPath + " ": ""}$inputKey');
@@ -170,12 +156,12 @@ class ResidentCompiler {
     return stdoutHandler.outputFilename.future;
   }
 
-  Future<String> _compile(String scriptFilename, String outputPath) async {
+  Future<String> _compile(String scriptFilename, String outputPath, String packagesFilePath) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
     final List<String> args = <String>[
-      _dartExecutable(),
+      artifacts.getArtifactPath(Artifact.engineDartBinary),
       frontendServer,
       '--sdk-root',
       _sdkRoot,
@@ -185,6 +171,9 @@ class ResidentCompiler {
     ];
     if (outputPath != null) {
       args.addAll(<String>['--output-dill', outputPath]);
+    }
+    if (packagesFilePath != null) {
+      args.addAll(<String>['--packages', packagesFilePath]);
     }
     if (_trackWidgetCreation) {
       args.add('--track-widget-creation');
