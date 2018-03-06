@@ -357,6 +357,7 @@ class AppDomain extends Domain {
     @required bool trackWidgetCreation,
     String projectRootPath,
     String packagesFilePath,
+    String dillOutputPath,
     bool ipv6: false,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
@@ -371,6 +372,7 @@ class AppDomain extends Domain {
       device,
       previewDart2: options.buildInfo.previewDart2,
       trackWidgetCreation: trackWidgetCreation,
+      dillOutputPath: dillOutputPath,
     );
 
     ResidentRunner runner;
@@ -384,6 +386,7 @@ class AppDomain extends Domain {
         applicationBinary: applicationBinary,
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
+        dillOutputPath: dillOutputPath,
         ipv6: ipv6,
         hostIsIde: true,
       );

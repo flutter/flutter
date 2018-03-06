@@ -42,6 +42,7 @@ class HotRunner extends ResidentRunner {
     this.hostIsIde: false,
     String projectRootPath,
     String packagesFilePath,
+    this.dillOutputPath,
     bool stayResident: true,
     bool ipv6: false,
   }) : super(devices,
@@ -57,6 +58,7 @@ class HotRunner extends ResidentRunner {
   final String applicationBinary;
   final bool hostIsIde;
   Set<String> _dartDependencies;
+  final String dillOutputPath;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
   // The initial launch is from a snapshot.
@@ -389,7 +391,10 @@ class HotRunner extends ResidentRunner {
     }
     // We are now running from source.
     _runningFromSnapshot = false;
-    await _launchFromDevFS(debuggingOptions.buildInfo.previewDart2 ? mainPath + '.dill' : mainPath);
+    final String launchPath = debuggingOptions.buildInfo.previewDart2
+        ? dillOutputPath ?? mainPath + '.dill'
+        : mainPath;
+    await _launchFromDevFS(launchPath);
     restartTimer.stop();
     printTrace('Restart performed in '
         '${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
