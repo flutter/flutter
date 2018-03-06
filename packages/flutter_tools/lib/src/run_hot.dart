@@ -42,7 +42,6 @@ class HotRunner extends ResidentRunner {
     this.hostIsIde: false,
     String projectRootPath,
     String packagesFilePath,
-    this.dillOutputPath,
     bool stayResident: true,
     bool ipv6: false,
   }) : super(devices,
@@ -58,7 +57,6 @@ class HotRunner extends ResidentRunner {
   final String applicationBinary;
   final bool hostIsIde;
   Set<String> _dartDependencies;
-  final String dillOutputPath;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
   // The initial launch is from a snapshot.
@@ -336,12 +334,7 @@ class HotRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       final Uri deviceEntryUri = device.devFS.baseUri.resolveUri(
         fs.path.toUri(entryUri));
-      Uri devicePackagesUri;
-      if (packagesFilePath != null) {
-        devicePackagesUri = fs.path.toUri(packagesFilePath);
-      } else {
-        devicePackagesUri = device.devFS.baseUri.resolve('.packages');
-      }
+      final Uri devicePackagesUri = device.devFS.baseUri.resolve('.packages');
       final Uri deviceAssetsDirectoryUri = device.devFS.baseUri.resolveUri(
         fs.path.toUri(getAssetBuildDirectory()));
       await _launchInView(device,
@@ -396,10 +389,7 @@ class HotRunner extends ResidentRunner {
     }
     // We are now running from source.
     _runningFromSnapshot = false;
-    final String launchPath = debuggingOptions.buildInfo.previewDart2
-        ? dillOutputPath ?? mainPath + '.dill'
-        : mainPath;
-    await _launchFromDevFS(launchPath);
+    await _launchFromDevFS(debuggingOptions.buildInfo.previewDart2 ? mainPath + '.dill' : mainPath);
     restartTimer.stop();
     printTrace('Restart performed in '
         '${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
