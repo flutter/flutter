@@ -112,6 +112,44 @@ void main() {
       },
     );
 
+    testWidgets(
+      'do not trigger haptic effects on non-iOS devices',
+      (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.android;
+        final List<int> selectedItems = <int>[];
+        final List<MethodCall> systemCalls = <MethodCall>[];
+
+        SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+          systemCalls.add(methodCall);
+        });
+
+        await tester.pumpWidget(
+          new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new CupertinoPicker(
+              itemExtent: 100.0,
+              onSelectedItemChanged: (int index) { selectedItems.add(index); },
+              children: new List<Widget>.generate(100, (int index) {
+                return new Center(
+                  child: new Container(
+                    width: 400.0,
+                    height: 100.0,
+                    child: new Text(index.toString()),
+                  ),
+                );
+              }),
+            ),
+          ),
+        );
+
+        await tester.drag(find.text('0'), const Offset(0.0, -100.0));
+        expect(selectedItems, <int>[1]);
+        expect(systemCalls, isEmpty);
+
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
+
     testWidgets('a drag in between items settles back', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       final FixedExtentScrollController controller =

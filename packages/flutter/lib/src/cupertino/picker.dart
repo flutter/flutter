@@ -100,7 +100,10 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   int _lastHapticIndex;
 
   void _handleSelectedItemChanged(int index) {
-    if (index != _lastHapticIndex) {
+    // Only the haptic engine hardware on iOS devices would produce the
+    // intended effects.
+    if (defaultTargetPlatform == TargetPlatform.iOS
+        && index != _lastHapticIndex) {
       _lastHapticIndex = index;
       HapticFeedback.selectionClick();
     }
