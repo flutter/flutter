@@ -187,6 +187,8 @@ Future<String> _buildAotSnapshot(
     buildMode,
   );
   final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
+  final String entryPointsJson = artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode);
+  final String entryPointsExtraJson = artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode);
 
   final PackageMap packageMap = new PackageMap(PackageMap.globalPackagesPath);
   final String packageMapError = packageMap.checkValid();
@@ -206,6 +208,13 @@ Future<String> _buildAotSnapshot(
     vmServicePath,
     mainPath,
   ];
+
+  if (previewDart2) {
+    inputPaths.addAll(<String>[
+      entryPointsJson,
+      entryPointsExtraJson,
+    ]);
+  }
 
   final Set<String> outputPaths = new Set<String>();
 
@@ -371,6 +380,7 @@ Future<String> _buildAotSnapshot(
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn : true,
       aot : true,
+      entryPointsJsonFiles: <String>[entryPointsJson, entryPointsExtraJson],
       trackWidgetCreation: false,
     );
     if (mainPath == null) {
