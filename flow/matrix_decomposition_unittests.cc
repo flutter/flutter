@@ -10,7 +10,7 @@
 #include <cmath>
 
 #include "flutter/flow/matrix_decomposition.h"
-#include "third_party/gtest/include/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 TEST(MatrixDecomposition, Rotation) {
   SkMatrix44 matrix = SkMatrix44::I();
