@@ -124,7 +124,7 @@ deps = {
    # and not have to specific specific hashes.
 
   'src/garnet':
-   Var('fuchsia_git') + '/garnet' + '@' + '78f46d051a38ed251970b3e3ffe8803815407cc0',
+   Var('fuchsia_git') + '/garnet' + '@' + 'b3ba6b6d6ab8ef658278cc43c9f839a8a8d1718e',
 
   'src/topaz':
    Var('fuchsia_git') + '/topaz' + '@' + 'e331f910c1003d154a4de6e1b5356f8d785fd6ec',
@@ -132,8 +132,8 @@ deps = {
   'src/third_party/benchmark':
    Var('fuchsia_git') + '/third_party/benchmark' + '@' + '296537bc48d380adf21567c5d736ab79f5363d22',
 
-  'src/third_party/googletest':
-   Var('fuchsia_git') + '/third_party/googletest' + '@' + '2072b0053d3537fa5e8d222e34c759987aae1320',
+  'src/third_party/gtest':
+   Var('fuchsia_git') + '/third_party/gtest' + '@' + 'c00f82917331efbbd27124b537e4ccc915a02b72',
 
   'src/third_party/rapidjson':
    Var('fuchsia_git') + '/third_party/rapidjson' + '@' + '9defbb0209a534ffeb3a2b79d5ee440a77407292',
