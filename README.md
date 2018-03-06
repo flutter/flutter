@@ -10,9 +10,9 @@ The Flutter Engine is the runtime environment for hosting Flutter applications.
 Most developers will interact with Flutter via the Flutter Framework and APIs,
 which run inside the engine.
 
-_Flutter is an early-stage open-source project._ We are still adding
-features. However,
-you can build demos and examples today. We hope you try it out and send
+_Flutter is still under development and we continue to add 
+features._ However, it is ready for use by early adopters who are willing to deal
+with the odd wrinkle or two along the way.  We hope you try it out and send
 us [feedback](mailto:flutter-dev@googlegroups.com).
 
  - For information about using Flutter to build apps, please see
