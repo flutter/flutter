@@ -40,13 +40,11 @@ class Engine : public blink::RuntimeDelegate {
                  const std::string& entrypoint = main_entrypoint_,
                  bool reuse_runtime_controller = false);
 
-  // Uses the given snapshot instead of looking inside the bundle for the
-  // snapshot. If |snapshot_override| is empty, this function looks for the
-  // snapshot in the bundle itself.
-  void RunBundleAndSnapshot(const std::string& bundle_path,
-                            const std::string& snapshot_override,
-                            const std::string& entrypoint = main_entrypoint_,
-                            bool reuse_runtime_controller = false);
+  // Uses the given provider to locate assets.
+  void RunBundleWithAssets(fxl::RefPtr<blink::AssetProvider> asset_provider,
+                           const std::string& bundle_path,
+                           const std::string& entrypoint = main_entrypoint_,
+                           bool reuse_runtime_controller = false);
 
   // Uses the given source code instead of looking inside the bundle for the
   // source code.
@@ -94,6 +92,10 @@ class Engine : public blink::RuntimeDelegate {
 
   void StopAnimator();
   void StartAnimatorIfPossible();
+
+  void DoRunBundle(const std::string& script_uri,
+                   const std::string& entrypoint,
+                   bool reuse_runtime_controller);
 
   void ConfigureAssetBundle(const std::string& path);
   void ConfigureRuntime(const std::string& script_uri,
