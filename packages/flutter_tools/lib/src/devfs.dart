@@ -407,6 +407,7 @@ class DevFS {
     bool bundleDirty: false,
     Set<String> fileFilter,
     ResidentCompiler generator,
+    String dillOutputPath,
     bool fullRestart: false,
   }) async {
     // Mark all entries as possibly deleted.
@@ -500,7 +501,8 @@ class DevFS {
       }
       final String compiledBinary =
           await generator.recompile(mainPath, invalidatedFiles,
-              outputPath: fs.path.join(getBuildDirectory(), 'app.dill'));
+              outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
+              packagesFilePath : _packagesFilePath);
       if (compiledBinary != null && compiledBinary.isNotEmpty)
         dirtyEntries.putIfAbsent(
           Uri.parse(target + '.dill'),
