@@ -307,6 +307,8 @@ class FlutterPlugin implements Plugin<Project> {
                 targetPlatform targetPlatformValue
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
+                extraFrontEndOptions extraFrontEndOptionsValue
+                extraGenSnapshotOptions extraGenSnapshotOptionsValue
             }
 
             FlutterTask flutterTask = project.tasks.create(name: "flutterBuild${variant.name.capitalize()}", type: FlutterTask) {
