@@ -92,12 +92,12 @@ class _TopStartFloatingActionButtonPositioner extends FloatingActionButtonPositi
     double fabX;
     assert(scaffoldGeometry.textDirection != null);
     switch (scaffoldGeometry.textDirection) {
+      case TextDirection.rtl:
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - 16.0 - scaffoldGeometry.horizontalFloatingActionButtonPadding;
+        break;
       case TextDirection.ltr:
         fabX = 16.0 + scaffoldGeometry.horizontalFloatingActionButtonPadding;
         break;
-      case TextDirection.rtl:
-        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - 16.0 - scaffoldGeometry.horizontalFloatingActionButtonPadding;
-      break;
     }
     final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
     return new Offset(fabX, fabY);
