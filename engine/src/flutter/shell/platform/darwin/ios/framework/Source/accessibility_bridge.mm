@@ -318,6 +318,9 @@ NSComparisonResult IntToComparisonResult(int32_t value) {
       ![self node].HasFlag(blink::SemanticsFlags::kIsEnabled)) {
     traits |= UIAccessibilityTraitNotEnabled;
   }
+  if ([self node].HasFlag(blink::SemanticsFlags::kIsHeader)) {
+    traits |= UIAccessibilityTraitHeader;
+  }
   return traits;
 }
 

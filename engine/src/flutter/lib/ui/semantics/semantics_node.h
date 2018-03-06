@@ -53,6 +53,8 @@ enum class SemanticsFlags : int32_t {
   kIsFocused = 1 << 5,
   kHasEnabledState = 1 << 6,
   kIsEnabled = 1 << 7,
+  kIsInMutuallyExclusiveGroup = 1 << 8,
+  kIsHeader = 1 << 9,
 };
 
 struct SemanticsNode {
