@@ -223,7 +223,7 @@ abstract class CachingAssetBundle extends AssetBundle {
 class PlatformAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
-    final Uint8List encoded = UTF8.encoder.convert(key);
+    final Uint8List encoded = UTF8.encoder.convert(new Uri(path: key).path);
     final ByteData asset =
         await BinaryMessages.send('flutter/assets', encoded.buffer.asByteData());
     if (asset == null)
