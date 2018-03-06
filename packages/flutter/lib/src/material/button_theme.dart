@@ -244,6 +244,8 @@ class ButtonThemeData extends Diagnosticable {
   /// its button. In either case the dropdown button will line up the leading
   /// edge of the menu's value with the leading edge of the values
   /// displayed by the menu items.
+  ///
+  /// This property only affects [DropdownButton] and its menu.
   final bool alignedDropdown;
 
   @override
