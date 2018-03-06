@@ -35,12 +35,14 @@ class FlutterDevice {
   DevFS devFS;
   ApplicationPackage package;
   ResidentCompiler generator;
+  String dillOutputPath;
 
   StreamSubscription<String> _loggingSubscription;
 
   FlutterDevice(this.device, {
     @required bool previewDart2,
     @required bool trackWidgetCreation,
+    this.dillOutputPath,
   }) {
     if (previewDart2) {
       generator = new ResidentCompiler(
@@ -386,7 +388,8 @@ class FlutterDevice {
         bundleDirty: bundleDirty,
         fileFilter: fileFilter,
         generator: generator,
-        fullRestart: fullRestart
+        fullRestart: fullRestart,
+        dillOutputPath: dillOutputPath,
       );
     } on DevFSException {
       devFSStatus.cancel();
