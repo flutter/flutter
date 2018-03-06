@@ -126,10 +126,6 @@ VsyncWaiter* PlatformView::GetVsyncWaiter() {
   return vsync_waiter_.get();
 }
 
-fxl::RefPtr<blink::AssetProvider> PlatformView::GetAssetProvider() {
-  return asset_provider_;
-}
-
 void PlatformView::UpdateSemantics(blink::SemanticsNodeUpdates update) {}
 
 void PlatformView::HandlePlatformMessage(
