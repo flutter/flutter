@@ -223,6 +223,7 @@ class SemanticsFlag {
   static const int _kHasEnabledStateIndex = 1 << 6;
   static const int _kIsEnabledIndex = 1 << 7;
   static const int _kIsInMutuallyExclusiveGroupIndex = 1 << 8;
+  static const int _kIsHeaderIndex = 1 << 9;
 
   const SemanticsFlag._(this.index);
 
@@ -292,6 +293,13 @@ class SemanticsFlag {
   /// only one radio button in that group can be marked as [isChecked].
   static const SemanticsFlag isInMutuallyExclusiveGroup = const SemanticsFlag._(_kIsInMutuallyExclusiveGroupIndex);
 
+  /// Whether a semantic node is a header that divides content into sections.
+  ///
+  /// For example, headers can be used to divide a list of alphabetically
+  /// sorted words into the sections A, B, C, etc. as can be found in many
+  /// address book applications.
+  static const SemanticsFlag isHeader = const SemanticsFlag._(_kIsHeaderIndex);
+
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
@@ -305,6 +313,7 @@ class SemanticsFlag {
     _kHasEnabledStateIndex: hasEnabledState,
     _kIsEnabledIndex: isEnabled,
     _kIsInMutuallyExclusiveGroupIndex: isInMutuallyExclusiveGroup,
+    _kIsHeaderIndex: isHeader,
   };
 
   @override
@@ -328,6 +337,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.isEnabled';
       case _kIsInMutuallyExclusiveGroupIndex:
         return 'SemanticsFlag.isInMutuallyExclusiveGroup';
+      case _kIsHeaderIndex:
+        return 'SemanticsFlag.isHeader';
     }
     return null;
   }

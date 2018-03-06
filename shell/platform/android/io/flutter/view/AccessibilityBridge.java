@@ -83,7 +83,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         IS_FOCUSED(1 << 5),
         HAS_ENABLED_STATE(1 << 6),
         IS_ENABLED(1 << 7),
-        IS_IN_MUTUALLY_EXCLUSIVE_GROUP(1 << 8);
+        IS_IN_MUTUALLY_EXCLUSIVE_GROUP(1 << 8),
+        IS_HEADER(1 << 9);
 
         Flag(int value) {
             this.value = value;
