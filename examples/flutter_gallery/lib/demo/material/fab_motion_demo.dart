@@ -42,7 +42,13 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
       }) 
       : null;
     final Widget scaffold = new Scaffold(
-      appBar: new AppBar(title: const Text('FAB Positioner'), bottom: const PreferredSize(preferredSize: const Size.fromHeight(48.0), child: const SizedBox())),
+      appBar: new AppBar(
+        title: const Text('FAB Positioner'), 
+        bottom: const PreferredSize(
+          preferredSize: const Size.fromHeight(48.0), 
+          child: const SizedBox(),
+        ),
+      ),
       floatingActionButtonPositioner: _floatingActionButtonPositioner,
       floatingActionButton: floatingActionButton,
       body: new Center(
