@@ -72,7 +72,6 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
           // Blocks taps from propagating to the modal sheet and popping.
           onTap: () {},
           child: new SafeArea(
-            bottom: true,
             child: new CupertinoPicker(
               scrollController: scrollController,
               itemExtent: _kPickerItemHeight,

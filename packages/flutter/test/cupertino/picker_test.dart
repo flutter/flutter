@@ -99,7 +99,7 @@ void main() {
 
         await tester.drag(find.text('0'), const Offset(0.0, 100.0));
         expect(selectedItems, <int>[1, 0]);
-        expect(systemCalls.length, 2);
+        expect(systemCalls, hasLength(2));
         expect(
           systemCalls.last,
           isMethodCall(
