@@ -177,7 +177,10 @@ Future<Null> _runTests({List<String> options: const <String>[]}) async {
     expectFailure: true,
     printOutput: false,
   );
-  await _runCommand(flutter, <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
+  await _runCommand(flutter,
+    <String>['drive', '--use-existing-app']
+        ..addAll(options)
+        ..addAll(<String>[ '-t', path.join('test_driver', 'failure.dart')]),
     workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
     expectFailure: true,
     printOutput: false,
