@@ -63,7 +63,7 @@ enum _ScaffoldSlot {
 /// Interface for objects that place the [FloatingActionButton] in the [Scaffold].
 /// 
 /// Flutter provides [FloatingActionButtonPositioner]s for the common
-/// [FloatingActionButton] placements in Material Design apps. These
+/// [FloatingActionButton] placements in Material Design applications. These
 /// positioners are available as static members of this class.
 /// 
 /// See also:
@@ -80,7 +80,7 @@ abstract class FloatingActionButtonPositioner {
 
   /// End-aligned [FloatingActionButton], floating at the bottom of the screen.
   /// 
-  /// This is the default alignment of [FloatingActionButton]s in Material apps.
+  /// This is the default alignment of [FloatingActionButton]s in Material applications.
   static const FloatingActionButtonPositioner endFloat = const _EndFloatFabPositioner();
 
   /// Centered [FloatingActionButton], floating at the bottom of the screen.
