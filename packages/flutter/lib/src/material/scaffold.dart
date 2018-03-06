@@ -168,6 +168,8 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
 
   @override
   Animation<double> getScaleAnimation({Animation<double> parent}) {
+    // Animate the scale down from 1 to 0 in the first half of the animation
+    // then from 0 back to 1 in the second half.
     final Curve curve = const Interval(0.5, 1.0, curve: Curves.ease);
     return new AnimationMax<double>(
       new ReverseAnimation(new CurveTween(curve: curve.flipped).animate(parent)),
