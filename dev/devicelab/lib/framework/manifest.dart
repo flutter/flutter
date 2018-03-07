@@ -52,7 +52,7 @@ class ManifestTask {
   final String stage;
 
   /// Capabilities required of the build agent to be able to perform this task.
-  final List<String> requiredAgentCapabilities;
+  final List<dynamic> requiredAgentCapabilities;
 
   /// Whether this test is flaky.
   ///
@@ -75,14 +75,14 @@ class ManifestError extends Error {
 
 // There's no good YAML validator, at least not for Dart, so we validate
 // manually. It's not too much code and produces good error messages.
-Manifest _validateAndParseManifest(Map<String, dynamic> manifestYaml) {
+Manifest _validateAndParseManifest(Map<dynamic, dynamic> manifestYaml) {
   _checkKeys(manifestYaml, 'manifest', const <String>['tasks']);
   return new Manifest._(_validateAndParseTasks(manifestYaml['tasks']));
 }
 
 List<ManifestTask> _validateAndParseTasks(dynamic tasksYaml) {
   _checkType(tasksYaml is Map, tasksYaml, 'Value of "tasks"', 'dictionary');
-  final List<String> sortedKeys = tasksYaml.keys.toList()..sort();
+  final List<dynamic> sortedKeys = tasksYaml.keys.toList()..sort();
   return sortedKeys.map((dynamic taskName) => _validateAndParseTask(taskName, tasksYaml[taskName])).toList();
 }
 
@@ -107,7 +107,7 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
     _checkType(timeoutInMinutes is int, timeoutInMinutes, 'timeout_in_minutes', 'integer');
   }
 
-  final List<String> capabilities = _validateAndParseCapabilities(taskName, taskYaml['required_agent_capabilities']);
+  final List<dynamic> capabilities = _validateAndParseCapabilities(taskName, taskYaml['required_agent_capabilities']);
   return new ManifestTask._(
     name: taskName,
     description: taskYaml['description'],
@@ -124,7 +124,7 @@ List<String> _validateAndParseCapabilities(String taskName, dynamic capabilities
     final dynamic capability = capabilitiesYaml[i];
     _checkType(capability is String, capability, 'required_agent_capabilities[$i]', 'string');
   }
-  return capabilitiesYaml;
+  return capabilitiesYaml.cast<String>();
 }
 
 void _checkType(bool isValid, dynamic value, String variableName, String typeName) {
@@ -141,7 +141,7 @@ void _checkIsNotBlank(dynamic value, String variableName, String ownerName) {
   }
 }
 
-void _checkKeys(Map<String, dynamic> map, String variableName, List<String> allowedKeys) {
+void _checkKeys(Map<dynamic, dynamic> map, String variableName, List<String> allowedKeys) {
   for (String key in map.keys) {
     if (!allowedKeys.contains(key)) {
       throw new ManifestError(
