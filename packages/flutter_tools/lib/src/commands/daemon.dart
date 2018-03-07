@@ -812,6 +812,7 @@ class AppInstance {
 
     final AppContext appContext = new AppContext();
     appContext.setVariable(Logger, _logger);
+    appContext.setVariable(Stdio, const Stdio());
     return appContext.runInZone(method);
   }
 }
