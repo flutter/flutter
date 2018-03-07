@@ -830,7 +830,6 @@ void main() {
   });
 
   testWidgets('Spacing with slight overflow', (WidgetTester tester) async {
-
     await tester.pumpWidget(new Wrap(
       direction: Axis.horizontal,
       textDirection: TextDirection.ltr,
