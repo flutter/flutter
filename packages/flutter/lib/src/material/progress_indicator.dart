@@ -521,7 +521,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     return new Container(
       width: _kIndicatorSize,
       height: _kIndicatorSize,
-      margin: const EdgeInsets.all(4.0), // acommodate the shadow
+      margin: const EdgeInsets.all(4.0), // accommodate the shadow
       child: new Material(
         type: MaterialType.circle,
         color: widget.backgroundColor ?? Theme.of(context).canvasColor,
