@@ -20,7 +20,7 @@ const double _kDragContainerExtentPercentage = 0.25;
 const double _kDragSizeFactorLimit = 1.5;
 
 // When the scroll ends, the duration of the refresh indicator's animation
-// to the RefreshIndicator's displacment.
+// to the RefreshIndicator's displacement.
 const Duration _kIndicatorSnapDuration = const Duration(milliseconds: 150);
 
 // The duration of the ScaleTransition that starts when the refresh action
