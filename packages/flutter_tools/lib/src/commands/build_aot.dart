@@ -187,8 +187,14 @@ Future<String> _buildAotSnapshot(
     buildMode,
   );
   final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
-  final String entryPointsJson = artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode);
-  final String entryPointsExtraJson = artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode);
+
+  final List<String> entryPointsJsonFiles = <String>[];
+  if (previewDart2 && !interpreter) {
+    entryPointsJsonFiles.addAll(<String>[
+      artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode),
+      artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode),
+    ]);
+  }
 
   final PackageMap packageMap = new PackageMap(PackageMap.globalPackagesPath);
   final String packageMapError = packageMap.checkValid();
@@ -209,12 +215,7 @@ Future<String> _buildAotSnapshot(
     mainPath,
   ];
 
-  if (previewDart2) {
-    inputPaths.addAll(<String>[
-      entryPointsJson,
-      entryPointsExtraJson,
-    ]);
-  }
+  inputPaths.addAll(entryPointsJsonFiles);
 
   final Set<String> outputPaths = new Set<String>();
 
@@ -379,8 +380,8 @@ Future<String> _buildAotSnapshot(
       depFilePath: dependencies,
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn : true,
-      aot : true,
-      entryPointsJsonFiles: <String>[entryPointsJson, entryPointsExtraJson],
+      aot : !interpreter,
+      entryPointsJsonFiles: entryPointsJsonFiles,
       trackWidgetCreation: false,
     );
     if (mainPath == null) {
