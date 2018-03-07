@@ -277,7 +277,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(scrollOffset >= 0.0);
     final double initialLayoutOffset = layoutOffset;
     final ScrollDirection adjustedUserScrollDirection =
-        applyGrowthDirecitonToScrollDirection(offset.userScrollDirection, growthDirection);
+        applyGrowthDirectionToScrollDirection(offset.userScrollDirection, growthDirection);
     assert(adjustedUserScrollDirection != null);
     double maxPaintOffset = layoutOffset + overlap;
     while (child != null) {
