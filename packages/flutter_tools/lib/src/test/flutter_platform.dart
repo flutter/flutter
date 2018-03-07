@@ -271,9 +271,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
       if (previewDart2 && dillFilePath == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        if (compiler == null) {
-          compiler = new _Compiler();
-        }
+        compiler ??= new _Compiler();
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {
@@ -505,7 +503,7 @@ class _FlutterPlatform extends PlatformPlugin {
     });
 
     // Prepare the Dart file that will talk to us and start the test.
-    File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
+    final File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
     listenerFile.createSync();
     listenerFile.writeAsStringSync(_generateTestMain(
       testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
