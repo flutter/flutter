@@ -775,7 +775,7 @@ void main() {
   });
 
   group('Floating action button positioner', () {
-    Widget build(FloatingActionButton fab, FloatingActionButtonPositioner fabPositioner) {
+    Widget build(FloatingActionButton fab, FloatingActionButtonPositioner fabPositioner, [GeometryListener listener]) {
       return new Directionality(
         textDirection: TextDirection.ltr,
         child: new MediaQuery(
@@ -786,6 +786,7 @@ void main() {
             appBar: new AppBar(title: const Text('FabPositioner Test')),
             floatingActionButtonPositioner: fabPositioner,
             floatingActionButton: fab,
+            body: listener,
           ),
         ),
       );
@@ -863,24 +864,46 @@ void main() {
     });
 
     testWidgets('interrupts in-progress animations without jumps', (WidgetTester tester) async {
-      ValueListenable<ScaffoldGeometry> geometry;
+      final GeometryListener geometryListener = new GeometryListener();
+      ScaffoldGeometry geometry;
+      GeometryListenerState listenerState;
       Size previousRect = null;
+      // The maximum amounts we expect the fab width and height to change during a transition.
+      const double maxDeltaWidth = 12.0;
+      const double maxDeltaHeight = 12.0;
+      // Measure the delta in width and height of the fab, and check that it never grows
+      // by more than the expected maximum deltas.
       void check() {
-        final Size currentRect = geometry.value.floatingActionButtonArea.size;
+        geometry = listenerState.cache.value;
+        final Size currentRect = geometry.floatingActionButtonArea?.size;
         // Measure the delta in width and height of the rect, and check that it never grows
         // by more than a safe amount.
+        if (previousRect != null && currentRect != null) {
+          final double deltaWidth = currentRect.width - previousRect.width;
+          final double deltaHeight = currentRect.height - previousRect.height;
+          expect(deltaWidth.abs(), lessThanOrEqualTo(maxDeltaWidth), reason: "The Floating Action Button's width should not change faster than $maxDeltaWidth per animation step.");
+          expect(deltaHeight.abs(), lessThanOrEqualTo(maxDeltaHeight), reason: "The Floating Action Button's width should not change faster than $maxDeltaHeight per animation step.");
+        }
         previousRect = currentRect;
       }
+
       // We'll listen to the Scaffold's geometry for any 'jumps' to a size of 1 to detect changes in the size and rotation of the fab.
-      await tester.pumpWidget(build(fab1, FloatingActionButtonPositioner.endFloat));
-      expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
-      final Element fabElement = tester.element(find.byElementPredicate((Element element) => element.widget == fab1));
-      geometry = Scaffold.geometryOf(fabElement);
-      geometry.addListener(check);
-      await tester.pumpWidget(build(fab1, FloatingActionButtonPositioner.centerFloat));
-      await tester.pumpWidget(build(fab1, _kTopStartFabPositioner));
-      expect(tester.binding.transientCallbackCount, greaterThan(0));
+      // Creating a scaffold with the fab at endFloat
+      await tester.pumpWidget(build(fab1, FloatingActionButtonPositioner.endFloat, geometryListener));
       
+      listenerState = tester.state(find.byType(GeometryListener));
+      listenerState.geometryListenable.addListener(check);
+      
+      // Moving the fab to centerFloat'
+      await tester.pumpWidget(build(fab1, FloatingActionButtonPositioner.centerFloat, geometryListener));
+      await tester.pumpAndSettle();
+
+      // Moving the fab to the top start after finishing the previous motion
+      await tester.pumpWidget(build(fab1, _kTopStartFabPositioner, geometryListener));
+
+      // Interrupting motion to move to the end float
+      await tester.pumpWidget(build(fab1, FloatingActionButtonPositioner.endFloat, geometryListener));
+      await tester.pumpAndSettle();
     });
 
   });
