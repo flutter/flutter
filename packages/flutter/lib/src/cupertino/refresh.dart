@@ -133,6 +133,9 @@ class _RenderCupertinoRefreshSliver
       paintContext.paintChild(child, offset);
     }
   }
+
+  // @override
+  // void applyPaintTransform(RenderObject child, Matrix4 transform) {}
 }
 
 /// The state machine moves through these modes only when the scrollable
@@ -257,12 +260,14 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
         } else {
           print('armed');
           SchedulerBinding.instance.addPostFrameCallback((Duration timestamp){
+            print('onRefresh ${widget.onRefresh}');
             if (widget.onRefresh != null) {
-              print('onRefresh');
               HapticFeedback.mediumImpact();
               refreshTask = widget.onRefresh()..then((_) {
+                print('refresh done');
                 if (mounted) {
-                  refreshTask = null;
+                  setState(() => refreshTask = null);
+                  // refreshTask = null;
                   // Trigger one more transition because by this time, BoxConstraint's
                   // maxHeight might already be resting at 0 in which case no
                   // calls to [transitionNextState] will occur anymore and the
@@ -270,7 +275,6 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
                   print('transitioning again');
                   refreshState = transitionNextState();
                 }
-                // setState(() => refreshTask = null);
               });
               setState(() => hasSliverLayoutExtent = true);
             }
@@ -337,9 +341,10 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
         builder: (BuildContext context, BoxConstraints constraints) {
           lastScrollExtent = constraints.maxHeight;
           refreshState = transitionNextState();
+          print('state after transition $refreshState with builder ${widget.builder}');
 
           if (widget.builder != null && refreshState != RefreshIndicatorMode.inactive) {
-            // print('rebuilding');
+            print('calling indicator builder with $refreshState, $lastScrollExtent');
             return widget.builder(
               context,
               refreshState,
