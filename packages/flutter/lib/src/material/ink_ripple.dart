@@ -141,7 +141,7 @@ class InkRipple extends InteractiveInkFeature {
     _radiusController = new AnimationController(duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
-     // Initial splash diamater is 60% of the target diameter, final
+     // Initial splash diameter is 60% of the target diameter, final
      // diameter is 10dps larger than the target diameter.
     _radius = new Tween<double>(
       begin: _targetRadius * 0.30,
