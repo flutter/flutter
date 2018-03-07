@@ -608,7 +608,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
       child.layout(childConstraints, parentUsesSize: true);
       final double childMainAxisExtent = _getMainAxisExtent(child);
       final double childCrossAxisExtent = _getCrossAxisExtent(child);
-      if (runMainAxisExtent + childMainAxisExtent > mainAxisLimit) {
+      if (runMainAxisExtent + childMainAxisExtent + spacing > mainAxisLimit) {
         assert(childCount > 0);
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
