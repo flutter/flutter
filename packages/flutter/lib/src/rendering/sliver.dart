@@ -71,7 +71,7 @@ AxisDirection applyGrowthDirectionToAxisDirection(AxisDirection axisDirection, G
 /// This function is useful in [RenderSliver] subclasses that are given both an
 /// [ScrollDirection] and a [GrowthDirection] and wish to compute the
 /// [ScrollDirection] in which growth will occur.
-ScrollDirection applyGrowthDirecitonToScrollDirection(ScrollDirection scrollDirection, GrowthDirection growthDirection) {
+ScrollDirection applyGrowthDirectionToScrollDirection(ScrollDirection scrollDirection, GrowthDirection growthDirection) {
   assert(scrollDirection != null);
   assert(growthDirection != null);
   switch (growthDirection) {

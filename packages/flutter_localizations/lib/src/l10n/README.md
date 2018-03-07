@@ -31,7 +31,7 @@ regional translations have names that include the locale's regional
 suffix. For example `material_en_GB.arb` contains additional English
 translations that are specific to Great Britain.
 
-There is one language-specifc .arb file for each supported locale. If
+There is one language-specific .arb file for each supported locale. If
 an additional file with a regional suffix is present, the regional
 localizations are automatically merged with the language-specific ones.
 
@@ -187,7 +187,7 @@ If you have feedback about the translations please
 ### See Also
 
 The [Internationalizing Flutter Apps](https://flutter.io/tutorials/internationalization/)
-tutorial describes how to use the internationlization APIs in an
+tutorial describes how to use the internationalization APIs in an
 ordinary Flutter app.
 
 [Application Resource Bundle](https://code.google.com/p/arb/wiki/ApplicationResourceBundleSpecification)

@@ -247,7 +247,7 @@ void main() {
     });
 
     expect(opacities, <double> [
-        1.0, // Smaller font title now visiblee
+        1.0, // Smaller font title now visible
         0.0, // Larger font title invisible.
     ]);
 
@@ -260,7 +260,7 @@ void main() {
     expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 0.0);
   });
 
-  testWidgets('Small title can be overriden', (WidgetTester tester) async {
+  testWidgets('Small title can be overridden', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
     await tester.pumpWidget(
       new WidgetsApp(

@@ -24,7 +24,7 @@ const List<Color> coolColors = const <Color>[
 const List<String> coolColorNames = const <String>[
   'Sarcoline', 'Coquelicot', 'Smaragdine', 'Mikado', 'Glaucous', 'Wenge',
   'Fulvous', 'Xanadu', 'Falu', 'Eburnean', 'Amaranth', 'Australien',
-  'Banan', 'Falu', 'Gingerline', 'Incarnadine', 'Labrabor', 'Nattier',
+  'Banan', 'Falu', 'Gingerline', 'Incarnadine', 'Labrador', 'Nattier',
   'Pervenche', 'Sinoper', 'Verditer', 'Watchet', 'Zaffre',
 ];
 
@@ -678,7 +678,7 @@ List<Widget> buildTab2Conversation() {
         text: 'SJ',
         color: const Color(0xFF34CAD6),
       ),
-      text: "We'll send you our\nnewest Labrabor too!",
+      text: "We'll send you our\nnewest Labrador too!",
     ),
     const Tab2ConversationRow(
       text: 'Yay',

@@ -467,7 +467,7 @@ typedef void _OnDragEnd(Velocity velocity, Offset offset, bool wasAccepted);
 // The lifetime of this object is a little dubious right now. Specifically, it
 // lives as long as the pointer is down. Arguably it should self-immolate if the
 // overlay goes away. _DraggableState has some delicate logic to continue
-// eeding this object pointer events even after it has been disposed.
+// needing this object pointer events even after it has been disposed.
 class _DragAvatar<T> extends Drag {
   _DragAvatar({
     @required this.overlayState,

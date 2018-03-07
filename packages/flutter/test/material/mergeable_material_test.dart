@@ -381,7 +381,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
   });
 
-  testWidgets('MergeableMaterial separate merge seaparate', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial separate merge separate', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(

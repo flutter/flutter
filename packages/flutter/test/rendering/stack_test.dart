@@ -67,15 +67,15 @@ void main() {
           children: <RenderBox>[child1, child2, child3],
       );
 
-      final List<RenderObject> vistedChildren = <RenderObject>[];
+      final List<RenderObject> visitedChildren = <RenderObject>[];
       final RenderObjectVisitor visitor = (RenderObject child) {
-        vistedChildren.add(child);
+        visitedChildren.add(child);
       };
 
       stack.visitChildrenForSemantics(visitor);
 
-      expect(vistedChildren, hasLength(1));
-      expect(vistedChildren.first, child2);
+      expect(visitedChildren, hasLength(1));
+      expect(visitedChildren.first, child2);
     });
 
   });

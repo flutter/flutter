@@ -148,8 +148,8 @@ List<GalleryItem> _buildGalleryItems() {
       title: 'Expansion panels',
       subtitle: 'List of expanding panels',
       category: 'Material Components',
-      routeName: ExpasionPanelsDemo.routeName,
-      buildRoute: (BuildContext context) => new ExpasionPanelsDemo(),
+      routeName: ExpansionPanelsDemo.routeName,
+      buildRoute: (BuildContext context) => new ExpansionPanelsDemo(),
     ),
     new GalleryItem(
       title: 'Floating action button',

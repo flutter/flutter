@@ -360,7 +360,7 @@ class ThemeData extends Diagnosticable {
 
   /// The default color of the [BottomAppBar].
   ///
-  /// This can be overriden by specifying [BottomAppBar.color].
+  /// This can be overridden by specifying [BottomAppBar.color].
   final Color bottomAppBarColor;
 
   /// The color of [Material] when it is used as a [Card].
