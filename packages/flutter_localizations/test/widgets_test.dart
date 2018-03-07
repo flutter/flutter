@@ -337,7 +337,7 @@ void main() {
     expect(find.text('B: en_US'), findsOneWidget);
   });
 
-  testWidgets('Muliple Localizations', (WidgetTester tester) async {
+  testWidgets('Multiple Localizations', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildFrame(
         delegates: <LocalizationsDelegate<dynamic>>[
