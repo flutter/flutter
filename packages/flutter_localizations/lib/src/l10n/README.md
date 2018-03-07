@@ -31,7 +31,7 @@ regional translations have names that include the locale's regional
 suffix. For example `material_en_GB.arb` contains additional English
 translations that are specific to Great Britain.
 
-There is one language-specifc .arb file for each supported locale. If
+There is one language-specific .arb file for each supported locale. If
 an additional file with a regional suffix is present, the regional
 localizations are automatically merged with the language-specific ones.
 
