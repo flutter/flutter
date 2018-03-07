@@ -52,16 +52,19 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Material(
-              child: new Center(
-                child: new Slider(
-                  key: sliderKey,
-                  value: value,
-                  onChanged: (double newValue) {
-                    setState(() {
-                      value = newValue;
-                    });
-                  },
+            return new MediaQuery(
+              data: new MediaQueryData.fromWindow(window),
+              child: new Material(
+                child: new Center(
+                  child: new Slider(
+                    key: sliderKey,
+                    value: value,
+                    onChanged: (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
                 ),
               ),
             );
@@ -95,16 +98,19 @@ void main() {
         textDirection: TextDirection.rtl,
         child: new StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Material(
-              child: new Center(
-                child: new Slider(
-                  key: sliderKey,
-                  value: value,
-                  onChanged: (double newValue) {
-                    setState(() {
-                      value = newValue;
-                    });
-                  },
+            return new MediaQuery(
+              data: new MediaQueryData.fromWindow(window),
+              child: new Material(
+                child: new Center(
+                  child: new Slider(
+                    key: sliderKey,
+                    value: value,
+                    onChanged: (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
                 ),
               ),
             );
@@ -139,17 +145,20 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Material(
-              child: new Center(
-                child: new Slider(
-                  key: sliderKey,
-                  value: value,
-                  onChanged: (double newValue) {
-                    setState(() {
-                      updates++;
-                      value = newValue;
-                    });
-                  },
+            return new MediaQuery(
+              data: new MediaQueryData.fromWindow(window),
+              child: new Material(
+                child: new Center(
+                  child: new Slider(
+                    key: sliderKey,
+                    value: value,
+                    onChanged: (double newValue) {
+                      setState(() {
+                        updates++;
+                        value = newValue;
+                      });
+                    },
+                  ),
                 ),
               ),
             );
@@ -179,19 +188,22 @@ void main() {
         child: new StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(thumbShape: loggingThumb);
-            return new Material(
-              child: new Center(
-                child: new SliderTheme(
-                  data: sliderTheme,
-                  child: new Slider(
-                    key: sliderKey,
-                    value: value,
-                    divisions: 4,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
+            return new MediaQuery(
+              data: new MediaQueryData.fromWindow(window),
+              child: new Material(
+                child: new Center(
+                  child: new SliderTheme(
+                    data: sliderTheme,
+                    child: new Slider(
+                      key: sliderKey,
+                      value: value,
+                      divisions: 4,
+                      onChanged: (double newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -243,21 +255,24 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return new Material(
-              child: new Center(
-                child: new SizedBox(
-                  width: 144.0 + 2 * 16.0, // _kPreferredTotalWidth
-                  child: new Slider(
-                    key: sliderKey,
-                    min: 0.0,
-                    max: 100.0,
-                    divisions: 10,
-                    value: value,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
+            return new MediaQuery(
+              data: new MediaQueryData.fromWindow(window),
+              child: new Material(
+                child: new Center(
+                  child: new SizedBox(
+                    width: 144.0 + 2 * 16.0, // _kPreferredTotalWidth
+                    child: new Slider(
+                      key: sliderKey,
+                      min: 0.0,
+                      max: 100.0,
+                      divisions: 10,
+                      value: value,
+                      onChanged: (double newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -289,14 +304,17 @@ void main() {
     final List<double> log = <double>[];
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: new Material(
-        child: new Slider(
-          value: 0.0,
-          min: 0.0,
-          max: 1.0,
-          onChanged: (double newValue) {
-            log.add(newValue);
-          },
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: new Material(
+          child: new Slider(
+            value: 0.0,
+            min: 0.0,
+            max: 1.0,
+            onChanged: (double newValue) {
+              log.add(newValue);
+            },
+          ),
         ),
       ),
     ));
@@ -307,14 +325,17 @@ void main() {
 
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: new Material(
-        child: new Slider(
-          value: 0.0,
-          min: 0.0,
-          max: 0.0,
-          onChanged: (double newValue) {
-            log.add(newValue);
-          },
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: new Material(
+          child: new Slider(
+            value: 0.0,
+            min: 0.0,
+            max: 0.0,
+            onChanged: (double newValue) {
+              log.add(newValue);
+            },
+          ),
         ),
       ),
     ));
@@ -346,17 +367,20 @@ void main() {
             };
       return new Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Theme(
-              data: theme,
-              child: new Slider(
-                value: value,
-                label: '$value',
-                divisions: divisions,
-                activeColor: activeColor,
-                inactiveColor: inactiveColor,
-                onChanged: onChanged,
+        child: new MediaQuery(
+          data: new MediaQueryData.fromWindow(window),
+          child: new Material(
+            child: new Center(
+              child: new Theme(
+                data: theme,
+                child: new Slider(
+                  value: value,
+                  label: '$value',
+                  divisions: divisions,
+                  activeColor: activeColor,
+                  inactiveColor: inactiveColor,
+                  onChanged: onChanged,
+                ),
               ),
             ),
           ),
@@ -518,19 +542,22 @@ void main() {
     double value = 0.0;
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: new Material(
-        child: new ListView(
-          children: <Widget>[
-            new Slider(
-              value: value,
-              onChanged: (double newValue) {
-                value = newValue;
-              },
-            ),
-            new Container(
-              height: 2000.0,
-            ),
-          ],
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: new Material(
+          child: new ListView(
+            children: <Widget>[
+              new Slider(
+                value: value,
+                onChanged: (double newValue) {
+                  value = newValue;
+                },
+              ),
+              new Container(
+                height: 2000.0,
+              ),
+            ],
+          ),
         ),
       ),
     ));
@@ -543,13 +570,16 @@ void main() {
     double value = 0.0;
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: new Material(
-        child: new Center(
-          child: new Slider(
-            value: value,
-            onChanged: (double newValue) {
-              value = newValue;
-            },
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: new Material(
+          child: new Center(
+            child: new Slider(
+              value: value,
+              onChanged: (double newValue) {
+                value = newValue;
+              },
+            ),
           ),
         ),
       ),
@@ -571,13 +601,16 @@ void main() {
     double value = 0.0;
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.rtl,
-      child: new Material(
-        child: new Center(
-          child: new Slider(
-            value: value,
-            onChanged: (double newValue) {
-              value = newValue;
-            },
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: new Material(
+          child: new Center(
+            child: new Slider(
+              value: value,
+              onChanged: (double newValue) {
+                value = newValue;
+              },
+            ),
           ),
         ),
       ),
@@ -596,24 +629,12 @@ void main() {
   });
 
   testWidgets('Slider sizing', (WidgetTester tester) async {
-    await tester.pumpWidget(const Directionality(
+    await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: const Material(
-        child: const Center(
-          child: const Slider(
-            value: 0.5,
-            onChanged: null,
-          ),
-        ),
-      ),
-    ));
-    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(800.0, 600.0));
-
-    await tester.pumpWidget(const Directionality(
-      textDirection: TextDirection.ltr,
-      child: const Material(
-        child: const Center(
-          child: const IntrinsicWidth(
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: const Material(
+          child: const Center(
             child: const Slider(
               value: 0.5,
               onChanged: null,
@@ -622,18 +643,39 @@ void main() {
         ),
       ),
     ));
+    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(800.0, 600.0));
+
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: const Material(
+          child: const Center(
+            child: const IntrinsicWidth(
+              child: const Slider(
+                value: 0.5,
+                onChanged: null,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
     expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 16.0, 600.0));
 
-    await tester.pumpWidget(const Directionality(
+    await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: const Material(
-        child: const Center(
-          child: const OverflowBox(
-            maxWidth: double.INFINITY,
-            maxHeight: double.INFINITY,
-            child: const Slider(
-              value: 0.5,
-              onChanged: null,
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: const Material(
+          child: const Center(
+            child: const OverflowBox(
+              maxWidth: double.INFINITY,
+              maxHeight: double.INFINITY,
+              child: const Slider(
+                value: 0.5,
+                onChanged: null,
+              ),
             ),
           ),
         ),
@@ -748,10 +790,13 @@ void main() {
 
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: new Material(
-        child: new Slider(
-          value: 0.5,
-          onChanged: (double v) {},
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: new Material(
+          child: new Slider(
+            value: 0.5,
+            onChanged: (double v) {},
+          ),
         ),
       ),
     ));
@@ -770,12 +815,15 @@ void main() {
         ));
 
     // Disable slider
-    await tester.pumpWidget(const Directionality(
+    await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
-      child: const Material(
-        child: const Slider(
-          value: 0.5,
-          onChanged: null,
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: const Material(
+          child: const Slider(
+            value: 0.5,
+            onChanged: null,
+          ),
         ),
       ),
     ));
@@ -802,17 +850,20 @@ void main() {
       final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
       return new Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Theme(
-              data: baseTheme,
-              child: new SliderTheme(
-                data: sliderTheme,
-                child: new Slider(
-                  value: value,
-                  label: '$value',
-                  divisions: divisions,
-                  onChanged: onChanged,
+        child: new MediaQuery(
+          data: new MediaQueryData.fromWindow(window),
+          child: new Material(
+            child: new Center(
+              child: new Theme(
+                data: baseTheme,
+                child: new SliderTheme(
+                  data: sliderTheme,
+                  child: new Slider(
+                    value: value,
+                    label: '$value',
+                    divisions: divisions,
+                    onChanged: onChanged,
+                  ),
                 ),
               ),
             ),
