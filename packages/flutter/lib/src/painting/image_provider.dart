@@ -402,7 +402,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments must not be null.
-  const NetworkImage(this.url, { this.scale: 1.0 , this.headers })
+  const NetworkImage(this.url, { this.scale: 1.0 , this.headers , this.errorAssetName })
       : assert(url != null),
         assert(scale != null);
 
@@ -414,6 +414,9 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
   /// The HTTP headers that will be used with [HttpClient.get] to fetch image from network.
   final Map<String, String> headers;
+
+  /// The name of the asset which be used when failed load.
+  final String errorAssetName;
 
   @override
   Future<NetworkImage> obtainKey(ImageConfiguration configuration) {
@@ -437,16 +440,28 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   Future<ui.Codec> _loadAsync(NetworkImage key) async {
     assert(key == this);
 
-    final Uri resolved = Uri.base.resolve(key.url);
-    final http.Response response = await _httpClient.get(resolved, headers: headers);
-    if (response == null || response.statusCode != 200)
-      throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
+    try {
+      final Uri resolved = Uri.base.resolve(key.url);
+      final http.Response response = await _httpClient.get(resolved, headers: headers);
+      if (response == null || response.statusCode != 200)
+        throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
-    final Uint8List bytes = response.bodyBytes;
-    if (bytes.lengthInBytes == 0)
-      throw new Exception('NetworkImage is an empty file: $resolved');
+      final Uint8List bytes = response.bodyBytes;
+      if (bytes.lengthInBytes == 0)
+        throw new Exception('NetworkImage is an empty file: $resolved');
 
-    return await ui.instantiateImageCodec(bytes);
+      return await ui.instantiateImageCodec(bytes);
+    } catch (e) {
+      if (errorAssetName != null) {
+        return _loadAsyncAsset();
+      }
+      rethrow;
+    }
+  }
+
+  Future<ui.Codec> _loadAsyncAsset() async {
+    final ByteData data = await rootBundle.load(errorAssetName);
+    return await ui.instantiateImageCodec(data.buffer.asUint8List());
   }
 
   @override
@@ -455,14 +470,15 @@ class NetworkImage extends ImageProvider<NetworkImage> {
       return false;
     final NetworkImage typedOther = other;
     return url == typedOther.url
-        && scale == typedOther.scale;
+        && scale == typedOther.scale
+        && errorAssetName == typedOther.errorAssetName;
   }
 
   @override
   int get hashCode => hashValues(url, scale);
 
   @override
-  String toString() => '$runtimeType("$url", scale: $scale)';
+  String toString() => '$runtimeType("$url", scale: $scale, headers: $headers, errorAssetName: $errorAssetName)';
 }
 
 /// Decodes the given [File] object as an image, associating it with the given
