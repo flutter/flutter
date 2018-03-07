@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:developer';
 import 'dart:math' as math;
 
 import 'box.dart';
@@ -608,7 +609,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
       child.layout(childConstraints, parentUsesSize: true);
       final double childMainAxisExtent = _getMainAxisExtent(child);
       final double childCrossAxisExtent = _getCrossAxisExtent(child);
-      if (runMainAxisExtent + childMainAxisExtent > mainAxisLimit) {
+      if (runMainAxisExtent + childMainAxisExtent + spacing > mainAxisLimit) {
         assert(childCount > 0);
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
