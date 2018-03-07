@@ -1,4 +1,8 @@
 {
+  "tabLabel": "Tab $tabIndex von $tabCount",
+  "showAccountsLabel": "Konten anzeigen",
+  "hideAccountsLabel": "Konten ausblenden",
+  "signedInLabel": "Angemeldet",
   "timePickerMinuteModeAnnouncement": "Minuten auswählen",
   "timePickerHourModeAnnouncement": "Stunden auswählen",
   "scriptCategory": "English-like",

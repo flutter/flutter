@@ -12,7 +12,7 @@
   "pageRowsInfoTitle": "第 $firstRow-$lastRow 行（共 $rowCount 行）",
   "pageRowsInfoTitleApproximate": "第 $firstRow-$lastRow 行（共约 $rowCount 行）",
   "rowsPerPageTitle": "每页行数：",
-  "tabLabel": "第 $tabIndex 行（共 $tabCount 行）",
+  "tabLabel": "第 $tabIndex 个标签，共 $tabCount 个",
   "selectedRowCountTitleOther": "已选择 $selectedRowCount 项内容",
   "cancelButtonLabel": "取消",
   "continueButtonLabel": "继续",
@@ -31,8 +31,8 @@
   "postMeridiemAbbreviation": "下午",
   "timePickerHourModeAnnouncement": "选择小时",
   "timePickerMinuteModeAnnouncement": "选择分钟",
-  "signedInLabel": "登录",
-  "hideAccountsLabel": "隐藏帐户",
-  "showAccountsLabel": "显示帐户",
+  "signedInLabel": "已登录",
+  "hideAccountsLabel": "隐藏帐号",
+  "showAccountsLabel": "显示帐号",
   "modalBarrierDismissLabel": "关闭"
 }
