@@ -315,10 +315,10 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       )
     );
 
-    // PhysicalModel has a temporary workaround for a perfomance issue that
+    // PhysicalModel has a temporary workaround for a performance issue that
     // speeds up rectangular non transparent material (the workaround is to
     // skip the call to ui.Canvas.saveLayer if the border radius is 0).
-    // Until the saveLayer perfomance issue is resolved, we're keeping this
+    // Until the saveLayer performance issue is resolved, we're keeping this
     // special case here for canvas material type that is using the default
     // shape (rectangle). We could go down this fast path for explicitly
     // specified rectangles (e.g shape RoundeRectangleBorder with radius 0, but
