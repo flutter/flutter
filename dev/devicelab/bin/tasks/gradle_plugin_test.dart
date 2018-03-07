@@ -252,10 +252,10 @@ class _Dependencies {
     final List<String> colonSeparated = contents.split(': ');
     target = colonSeparated[0].trim();
     dependencies = colonSeparated[1]
-        // Put every file on right-hand side on the seaparate line
+        // Put every file on right-hand side on the separate line
         .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
         .split('\n')
-        // Get rid of escape sequences, so that '\ ' for example becomes ' '
+        // Expand escape sequences, so that '\ ', for example,ß becomes ' '
         .map((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
         .where((String path) => path.isNotEmpty)
         .toSet();
