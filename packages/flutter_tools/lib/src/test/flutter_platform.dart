@@ -60,7 +60,7 @@ void installHook({
   bool startPaused: false,
   bool previewDart2: false,
   int port: 0,
-  String dillFilePath,
+  String precompiledDillPath,
   int observatoryPort,
   InternetAddressType serverType: InternetAddressType.IP_V4,
 }) {
@@ -78,7 +78,7 @@ void installHook({
       host: _kHosts[serverType],
       previewDart2: previewDart2,
       port: port,
-      dillFilePath: dillFilePath,
+      precompiledDillPath: precompiledDillPath,
     ),
   );
 }
@@ -94,17 +94,10 @@ class _CompilationRequest {
   _CompilationRequest(this.path, this.result);
 }
 
-// This class is a wrapper around compiler that allows multiple isolates enqueue
-// compilation requests, but ensures only one compilation at a time.
+// This class is a wrapper around compiler that allows multiple isolates to
+// enqueue compilation requests, but ensures only one compilation at a time.
 class _Compiler {
-  final StreamController<_CompilationRequest> compilerController;
-  ResidentCompiler compiler;
-  final List<_CompilationRequest> compilationQueue;
-
-  _Compiler() :
-        compilerController = new StreamController<_CompilationRequest>(),
-        compilationQueue = <_CompilationRequest>[] {
-
+  _Compiler() {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -123,8 +116,8 @@ class _Compiler {
           final _CompilationRequest request = compilationQueue.first;
           printTrace('Compiling ${request.path}');
           final String outputPath = await compiler.recompile(request.path,
-              <String>[request.path],
-              outputPath: outputDill.path
+            <String>[request.path],
+            outputPath: outputDill.path,
           );
           // Copy output dill next to the source file.
           await outputDill.copy(request.path + '.dill');
@@ -136,7 +129,7 @@ class _Compiler {
         }
       }
     }, onDone: () {
-      outputDillDirectory.delete(recursive: true);
+      outputDillDirectory.deleteSync(recursive: true);
     });
 
     compiler = new ResidentCompiler(
@@ -144,8 +137,12 @@ class _Compiler {
         packagesPath: PackageMap.globalPackagesPath);
   }
 
+  final StreamController<_CompilationRequest> compilerController =
+      new StreamController<_CompilationRequest>();
+  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
+  ResidentCompiler compiler;
 
-  Future<String> compile(String mainDart) async {
+  Future<String> compile(String mainDart) {
     final Completer<String> completer = new Completer<String>();
     compilerController.add(new _CompilationRequest(mainDart, completer));
     return completer.future;
@@ -163,7 +160,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.host,
     this.previewDart2,
     this.port,
-    this.dillFilePath,
+    this.precompiledDillPath,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -175,7 +172,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final InternetAddress host;
   final bool previewDart2;
   final int port;
-  final String dillFilePath;
+  final String precompiledDillPath;
 
   _Compiler compiler;
 
@@ -195,7 +192,7 @@ class _FlutterPlatform extends PlatformPlugin {
       if (explicitObservatoryPort != null)
         throwToolExit('installHook() was called with an observatory port or debugger mode enabled, but then more than one test suite was run.');
       // Fail if we're passing in a precompiled entry-point.
-      if (dillFilePath != null)
+      if (precompiledDillPath != null)
         throwToolExit('installHook() was called with a precompiled test entry-point, but then more than one test suite was run.');
     }
     final int ourTestCount = _testCount;
@@ -261,15 +258,15 @@ class _FlutterPlatform extends PlatformPlugin {
 
       printTrace('test $ourTestCount: starting shell process${previewDart2? " in preview-dart-2 mode":""}');
 
-      // [dillFilePath] can be set only if [previewDart2] is [true].
-      assert(dillFilePath == null || previewDart2);
+      // [precompiledDillPath] can be set only if [previewDart2] is [true].
+      assert(precompiledDillPath == null || previewDart2);
       // If a kernel file is given, then use that to launch the test.
       // Otherwise create a "listener" dart that invokes actual test.
-      String mainDart = dillFilePath != null
-          ? dillFilePath
+      String mainDart = precompiledDillPath != null
+          ? precompiledDillPath
           : _createListenerDart(finalizers, ourTestCount, testPath, server);
 
-      if (previewDart2 && dillFilePath == null) {
+      if (previewDart2 && precompiledDillPath == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
         compiler ??= new _Compiler();
         mainDart = await compiler.compile(mainDart);
@@ -517,7 +514,7 @@ class _FlutterPlatform extends PlatformPlugin {
       return null;
     }
 
-    if (dillFilePath != null) {
+    if (precompiledDillPath != null) {
       return artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
     }
 
