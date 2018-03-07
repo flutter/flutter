@@ -51,7 +51,10 @@ import 'theme.dart';
 /// given unbounded constraints, it will attempt to make the rail 144 pixels
 /// wide (with margins on each side) and will shrink-wrap vertically.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// Both [Material] and [MediaQuery] widgets are required to be present as
+/// ancestors for this widget. Typically, these are introduced by the
+/// [MaterialApp] or [WidgetsApp] widget at the top of your application widget
+/// tree.
 ///
 /// To determine how it should be displayed (e.g. colors, thumb shape, etc.),
 /// a slider uses the [SliderThemeData] available from either a [SliderTheme]
@@ -67,13 +70,16 @@ import 'theme.dart';
 ///  * [Radio], for selecting among a set of explicit values.
 ///  * [Checkbox] and [Switch], for toggling a particular value on or off.
 ///  * <https://material.google.com/components/sliders.html>
+///  * [MediaQuery], from which the text scale factor is obtained.
+
 class Slider extends StatefulWidget {
   /// Creates a material design slider.
   ///
   /// The slider itself does not maintain any state. Instead, when the state of
-  /// the slider changes, the widget calls the [onChanged] callback. Most widgets
-  /// that use a slider will listen for the [onChanged] callback and rebuild the
-  /// slider with a new [value] to update the visual appearance of the slider.
+  /// the slider changes, the widget calls the [onChanged] callback. Most
+  /// widgets that use a slider will listen for the [onChanged] callback and
+  /// rebuild the slider with a new [value] to update the visual appearance of
+  /// the slider.
   ///
   /// * [value] determines currently selected value for this slider.
   /// * [onChanged] is called when the user selects a new value for the slider.
@@ -268,6 +274,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasMediaQuery(context));
 
     SliderThemeData sliderTheme = SliderTheme.of(context);
 
@@ -291,7 +298,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       divisions: widget.divisions,
       label: widget.label,
       sliderTheme: sliderTheme,
-      mediaQueryData: MediaQuery.of(context, nullOk: true),
+      mediaQueryData: MediaQuery.of(context),
       onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
       state: this,
     );
@@ -395,9 +402,10 @@ class _RenderSlider extends RenderBox {
       ..onTapUp = _handleTapUp
       ..onTapCancel = _endInteraction;
 
-    // Don't need to call removeListener on these because this object and the
-    // state have a 1:1 relationship, and state has a more finite lifetime, so
-    // the animation controllers will be disposed of before these are.
+    // We don't need to call removeListener on these because this render object
+    // and the state have a 1:1 relationship, the state has a more finite
+    // lifetime, and so this render object is never used again after the state
+    // is disposed.
     _reaction = new CurvedAnimation(
       parent: state.reactionController,
       curve: Curves.fastOutSlowIn,

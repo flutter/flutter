@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show window;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,14 +33,17 @@ void main() {
     Widget buildSlider(SliderThemeData data) {
       return new Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Theme(
-              data: theme,
-              child: const Slider(
-                value: 0.5,
-                label: '0.5',
-                onChanged: null,
+        child: new MediaQuery(
+          data: new MediaQueryData.fromWindow(window),
+          child: new Material(
+            child: new Center(
+              child: new Theme(
+                data: theme,
+                child: const Slider(
+                  value: 0.5,
+                  label: '0.5',
+                  onChanged: null,
+                ),
               ),
             ),
           ),
@@ -67,16 +72,19 @@ void main() {
     Widget buildSlider(SliderThemeData data) {
       return new Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Theme(
-              data: theme,
-              child: new SliderTheme(
-                data: customTheme,
-                child: const Slider(
-                  value: 0.5,
-                  label: '0.5',
-                  onChanged: null,
+        child: new MediaQuery(
+          data: new MediaQueryData.fromWindow(window),
+          child: new Material(
+            child: new Center(
+              child: new Theme(
+                data: theme,
+                child: new SliderTheme(
+                  data: customTheme,
+                  child: const Slider(
+                    value: 0.5,
+                    label: '0.5',
+                    onChanged: null,
+                  ),
                 ),
               ),
             ),
@@ -161,15 +169,18 @@ void main() {
       final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
       return new Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new SliderTheme(
-              data: sliderTheme,
-              child: new Slider(
-                value: value,
-                label: '$value',
-                divisions: divisions,
-                onChanged: onChanged,
+        child: new MediaQuery(
+          data: new MediaQueryData.fromWindow(window),
+          child: new Material(
+            child: new Center(
+              child: new SliderTheme(
+                data: sliderTheme,
+                child: new Slider(
+                  value: value,
+                  label: '$value',
+                  divisions: divisions,
+                  onChanged: onChanged,
+                ),
               ),
             ),
           ),
@@ -218,21 +229,24 @@ void main() {
     Widget buildApp(String value, {double sliderValue = 0.5}) {
       return new Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Row(
-            children: <Widget>[
-              new Expanded(
-                child: new SliderTheme(
-                  data: sliderTheme,
-                  child: new Slider(
-                    value: sliderValue,
-                    label: '$value',
-                    divisions: 3,
-                    onChanged: (double d) {},
+        child: new MediaQuery(
+          data: new MediaQueryData.fromWindow(window),
+          child: new Material(
+            child: new Row(
+              children: <Widget>[
+                new Expanded(
+                  child: new SliderTheme(
+                    data: sliderTheme,
+                    child: new Slider(
+                      value: sliderValue,
+                      label: '$value',
+                      divisions: 3,
+                      onChanged: (double d) {},
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );
