@@ -262,7 +262,7 @@ class _FlutterPlatform extends PlatformPlugin {
       printTrace('test $ourTestCount: starting shell process${previewDart2? " in preview-dart-2 mode":""}');
 
       // [dillFilePath] can be set only if [previewDart2] is [true].
-      assert(dillFilePath == null || !previewDart2);
+      assert(dillFilePath == null || previewDart2);
       // If a kernel file is given, then use that to launch the test.
       // Otherwise create a "listener" dart that invokes actual test.
       String mainDart = dillFilePath != null
