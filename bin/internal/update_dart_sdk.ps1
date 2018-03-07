@@ -44,7 +44,16 @@ if (Test-Path $dartSdkPath) {
 New-Item $dartSdkPath -force -type directory | Out-Null
 $dartSdkZip = "$cachePath\$dartZipName"
 Import-Module BitsTransfer
-Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
+
+If($httpProxy = ([System.Uri] $env:http_proxy)){
+    $proxyUserInfo = $httpProxy.UserInfo.Split(":")
+    $proxyPass = ConvertTo-SecureString $proxyUserInfo[1] -AsPlainText -Force
+    $proxyCredential = New-Object System.Management.Automation.PSCredential ($proxyUserInfo[0], $proxyPass)
+    
+    Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip -ProxyUsage Override -ProxyList ($httpProxy.Host + ":" + $httpProxy.Port) -ProxyCredential $proxyCredential -ProxyAuthentication Basic    
+}Else{
+    Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
+}
 
 Write-Host "Unzipping Dart SDK..."
 If (Get-Command 7z -errorAction SilentlyContinue) {
