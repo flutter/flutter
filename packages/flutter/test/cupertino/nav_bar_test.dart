@@ -247,7 +247,7 @@ void main() {
     });
 
     expect(opacities, <double> [
-        1.0, // Smaller font title now visiblee
+        1.0, // Smaller font title now visible
         0.0, // Larger font title invisible.
     ]);
 
