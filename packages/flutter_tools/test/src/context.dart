@@ -291,7 +291,16 @@ class MockUsage implements Usage {
 
 class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
-  bool get canInterpretXcodeProjects => true;
+  bool get isInstalled => true;
+
+  @override
+  String get versionText => 'Xcode 9.2';
+
+  @override
+  int get majorVersion => 9;
+
+  @override
+  int get minorVersion => 2;
 
   @override
   Map<String, String> getBuildSettings(String projectPath, String target) {

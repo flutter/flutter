@@ -178,7 +178,7 @@ abstract class IOSApp extends ApplicationPackage {
 
     final String plistPath = fs.path.join('ios', 'Runner', 'Info.plist');
     String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
-    if (id == null)
+    if (id == null || !xcodeProjectInterpreter.isInstalled)
       return null;
     final String projectPath = fs.path.join('ios', 'Runner.xcodeproj');
     final Map<String, String> buildSettings = xcodeProjectInterpreter.getBuildSettings(projectPath, 'Runner');
