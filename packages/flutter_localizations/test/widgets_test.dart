@@ -302,7 +302,7 @@ void main() {
       )
     );
 
-    // All localizations were loaded synchonously
+    // All localizations were loaded synchronously
     expect(find.text('A: en_US'), findsOneWidget);
     expect(find.text('B: en_US'), findsOneWidget);
   });
