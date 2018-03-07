@@ -186,7 +186,7 @@ class SemanticsData extends Diagnosticable {
   ///  * [ScrollPosition.maxScrollExtent], from where this value is usually taken.
   final double scrollExtentMax;
 
-  /// Indicates the mimimum in-range value for [scrollPosition] if the node is
+  /// Indicates the minimum in-range value for [scrollPosition] if the node is
   /// scrollable.
   ///
   /// This value may be infinity if the scroll is unbound.
@@ -1147,7 +1147,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   double get scrollExtentMax => _scrollExtentMax;
   double _scrollExtentMax;
 
-  /// Indicates the mimimum in-range value for [scrollPosition] if the node is
+  /// Indicates the minimum in-range value for [scrollPosition] if the node is
   /// scrollable.
   ///
   /// This value may be infinity if the scroll is unbound.
