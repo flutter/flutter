@@ -74,6 +74,7 @@ Future<String> compile(
     command.add('--no-link-platform');
   if (aot) {
     command.add('--aot');
+    command.add('--tfa');
   }
   if (entryPointsJsonFiles != null) {
     for (String entryPointsJson in entryPointsJsonFiles) {
