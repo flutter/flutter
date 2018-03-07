@@ -159,10 +159,13 @@ class _FlutterPlatform extends PlatformPlugin {
 
   @override
   StreamChannel<dynamic> loadChannel(String testPath, TestPlatform platform) {
-    // Fail if there will be a port conflict.
-    if (explicitObservatoryPort != null) {
-      if (_testCount > 0)
+    if (_testCount > 0) {
+      // Fail if there will be a port conflict.
+      if (explicitObservatoryPort != null)
         throwToolExit('installHook() was called with an observatory port or debugger mode enabled, but then more than one test suite was run.');
+      // Fail if we're passing in a precompiled entry-point.
+      if (dillFilePath != null)
+        throwToolExit('installHook() was called with a precompiled test entry-point, but then more than one test suite was run.');
     }
     final int ourTestCount = _testCount;
     _testCount += 1;
