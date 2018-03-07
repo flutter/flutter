@@ -187,7 +187,7 @@ If you have feedback about the translations please
 ### See Also
 
 The [Internationalizing Flutter Apps](https://flutter.io/tutorials/internationalization/)
-tutorial describes how to use the internationlization APIs in an
+tutorial describes how to use the internationalization APIs in an
 ordinary Flutter app.
 
 [Application Resource Bundle](https://code.google.com/p/arb/wiki/ApplicationResourceBundleSpecification)
