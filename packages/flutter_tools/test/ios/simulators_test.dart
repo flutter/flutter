@@ -165,8 +165,8 @@ void main() {
     testUsingContext(
       'old Xcode doesn\'t support screenshot',
       () {
-        when(mockXcode.xcodeMajorVersion).thenReturn(7);
-        when(mockXcode.xcodeMinorVersion).thenReturn(1);
+        when(mockXcode.majorVersion).thenReturn(7);
+        when(mockXcode.minorVersion).thenReturn(1);
         expect(deviceUnderTest.supportsScreenshot, false);
       },
       overrides: <Type, Generator>{Xcode: () => mockXcode}
@@ -175,8 +175,8 @@ void main() {
     testUsingContext(
       'Xcode 8.2+ supports screenshots',
       () async {
-        when(mockXcode.xcodeMajorVersion).thenReturn(8);
-        when(mockXcode.xcodeMinorVersion).thenReturn(2);
+        when(mockXcode.majorVersion).thenReturn(8);
+        when(mockXcode.minorVersion).thenReturn(2);
         expect(deviceUnderTest.supportsScreenshot, true);
         final MockFile mockFile = new MockFile();
         when(mockFile.path).thenReturn(fs.path.join('some', 'path', 'to', 'screenshot.png'));
