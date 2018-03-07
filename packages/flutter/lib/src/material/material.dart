@@ -321,7 +321,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     // Until the saveLayer performance issue is resolved, we're keeping this
     // special case here for canvas material type that is using the default
     // shape (rectangle). We could go down this fast path for explicitly
-    // specified rectangles (e.g shape RoundeRectangleBorder with radius 0, but
+    // specified rectangles (e.g shape RoundedRectangleBorder with radius 0, but
     // we choose not to as we want the change from the fast-path to the
     // slow-path to be noticeable in the construction site of Material.
     if (widget.type == MaterialType.canvas && widget.shape == null && widget.borderRadius == null) {
