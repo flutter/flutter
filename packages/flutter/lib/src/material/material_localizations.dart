@@ -30,7 +30,7 @@ import 'typography.dart';
 //    same directory), including a best guess as to the translation, e.g.
 //    obtained by optimistic use of Google Translate
 //    (https://translate.google.com/). After that you have to re-generate
-//    lib/src/l10n/localizaions.dart by running
+//    lib/src/l10n/localizations.dart by running
 //    `dart dev/tools/gen_localizations.dart --overwrite`. There is a README
 //    file with further information in the lib/src/l10n/ directory.
 //
