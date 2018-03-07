@@ -113,7 +113,7 @@ class _FlutterPlatform extends PlatformPlugin {
     // for independent execution.
     final Directory outputDillDirectory = fs.systemTempDirectory
         .createTempSync('output_dill');
-    File outputDill = outputDillDirectory.childFile("output.dill");
+    final File outputDill = outputDillDirectory.childFile('output.dill');
 
     compilerController.stream.listen((CompilationRequest request) async {
       final bool isEmpty = compilationQueue.isEmpty;
@@ -130,7 +130,7 @@ class _FlutterPlatform extends PlatformPlugin {
             outputPath: outputDill.path
           );
           // Copy output dill next to the source file.
-          await outputDill.copy(request.path + ".dill");
+          await outputDill.copy(request.path + '.dill');
           compiler.accept();
           compiler.reset();
           request.result.complete(outputPath);
