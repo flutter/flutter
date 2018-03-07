@@ -50,7 +50,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
       help: 'On-device name of the application binary.');
     argParser.addOption('isolate-number',
       abbr: 'i',
-      help: 'To reload only one instance, speficy the isolate number, e.g. '
+      help: 'To reload only one instance, specify the isolate number, e.g. '
             'the number in foo\$main-###### given by --list.');
     argParser.addOption('target',
       abbr: 't',
