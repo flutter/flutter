@@ -107,6 +107,14 @@ class _FlutterPlatform extends PlatformPlugin {
     this.port,
     this.dillFilePath,
   }) : assert(shellPath != null) {
+
+    // Compiler maintains and updates single incremental dill file.
+    // Incremental compilation requests done for each test copy that file away
+    // for independent execution.
+    final Directory outputDillDirectory = fs.systemTempDirectory
+        .createTempSync('output_dill');
+    final File outputDill = outputDillDirectory.childFile('output.dill');
+
     compilerController.stream.listen((CompilationRequest request) async {
       final bool isEmpty = compilationQueue.isEmpty;
       compilationQueue.add(request);
@@ -118,9 +126,11 @@ class _FlutterPlatform extends PlatformPlugin {
           final CompilationRequest request = compilationQueue.first;
           printTrace('Compiling ${request.path}');
           final String outputPath = await compiler.recompile(request.path,
-            <String>[request.path]
+            <String>[request.path],
+            outputPath: outputDill.path
           );
-          print('Finished compilation of ${request.path} into $outputPath');
+          // Copy output dill next to the source file.
+          await outputDill.copy(request.path + '.dill');
           compiler.accept();
           compiler.reset();
           request.result.complete(outputPath);
@@ -128,6 +138,8 @@ class _FlutterPlatform extends PlatformPlugin {
           compilationQueue.removeAt(0);
         }
       }
+    }, onDone: () {
+      outputDillDirectory.delete(recursive: true);
     });
   }
 
