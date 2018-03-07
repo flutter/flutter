@@ -842,8 +842,7 @@ void main() {
         const SizedBox(width: 200.0, height: 10.0),
         const SizedBox(width: 171.0, height: 10.0),
       ],
-      )
-    );
+    ));
 
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
