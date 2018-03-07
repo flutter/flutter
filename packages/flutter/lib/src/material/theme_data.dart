@@ -118,7 +118,7 @@ class ThemeData extends Diagnosticable {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
     primarySwatch ??= Colors.blue;
-    primaryColor ??= isDark ? Colors.grey[900] : primarySwatch[500];
+    primaryColor ??= isDark ? Colors.grey[900] : primarySwatch;
     primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
     primaryColorLight ??= isDark ? Colors.grey[500] : primarySwatch[100];
     primaryColorDark ??= isDark ? Colors.black : primarySwatch[700];

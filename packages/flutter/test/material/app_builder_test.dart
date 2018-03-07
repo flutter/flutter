@@ -15,7 +15,7 @@ void main() {
       home: const Placeholder(),
       builder: (BuildContext context, Widget child) {
         log.add('build');
-        expect(Theme.of(context).primaryColor, Colors.green.shade500);
+        expect(Theme.of(context).primaryColor, Colors.green);
         expect(Directionality.of(context), TextDirection.ltr);
         expect(child, const isInstanceOf<Navigator>());
         return const Placeholder();
@@ -47,7 +47,7 @@ void main() {
         home: new Builder(
           builder: (BuildContext context) {
             log.add('build');
-            expect(Theme.of(context).primaryColor, Colors.yellow.shade500);
+            expect(Theme.of(context).primaryColor, Colors.yellow);
             expect(Directionality.of(context), TextDirection.rtl);
             return const Placeholder();
           },
