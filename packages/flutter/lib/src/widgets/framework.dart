@@ -3102,7 +3102,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         throw new FlutterError(
           'Cannot get size without a render object.\n'
           'In order for an element to have a valid size, the element must have '
-          'an assoicated render object. This element does not have an associated '
+          'an associated render object. This element does not have an associated '
           'render object, which typically means that the size getter was called '
           'too early in the pipeline (e.g., during the build phase) before the '
           'framework has created the render tree.\n'

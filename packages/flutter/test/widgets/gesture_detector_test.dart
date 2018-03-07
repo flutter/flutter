@@ -288,7 +288,7 @@ void main() {
     // called; onTap should never be called.
     Future<Null> dragOut(Duration timeout) async {
       final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
-      // If the timeout is less than kPressTimout the recognizer will just trigger
+      // If the timeout is less than kPressTimeout the recognizer will just trigger
       // the onTapCancel callback. If the timeout is greater than kLongPressTimeout
       // then onTapDown, onLongPress, and onCancel will be called.
       await tester.pump(timeout);

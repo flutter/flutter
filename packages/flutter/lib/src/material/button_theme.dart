@@ -29,7 +29,7 @@ enum ButtonTextTheme {
 /// Used with [ButtonThemeData] to configure the color and geometry of buttons.
 ///
 /// A button theme can be specified as part of the overall Material theme
-/// using [ThemeData.buttomTheme]. The Material theme's button theme data
+/// using [ThemeData.buttonTheme]. The Material theme's button theme data
 /// can be overridden with [ButtonTheme].
 ///
 /// The actual appearance of buttons depends on the button theme, the
@@ -139,7 +139,7 @@ class ButtonTheme extends InheritedWidget {
 /// Used with [ButtonTheme] to configure the color and geometry of buttons.
 ///
 /// A button theme can be specified as part of the overall Material theme
-/// using [ThemeData.buttomTheme]. The Material theme's button theme data
+/// using [ThemeData.buttonTheme]. The Material theme's button theme data
 /// can be overridden with [ButtonTheme].
 class ButtonThemeData extends Diagnosticable {
   /// Create a button theme object that can be used with [ButtonTheme]

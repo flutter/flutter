@@ -158,7 +158,7 @@ class FlutterDriver {
       );
     }
 
-    // Connect to Dart VM servcies
+    // Connect to Dart VM services
     _log.info('Connecting to Flutter application at $dartVmServiceUrl');
     final VMServiceClientConnection connection = await vmServiceConnectFunction(dartVmServiceUrl);
     final VMServiceClient client = connection.client;

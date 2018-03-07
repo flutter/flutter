@@ -279,7 +279,7 @@ const List<Product> _allProducts = const <Product> [
     vendor: _stella,
     description:
       'Who says you can’t walk on water? With Surfboard, by Surfboard Supply, '
-      'you can fly on water. This beast is fast and handles like a porsche. '
+      'you can fly on water. This beast is fast and handles like a Porsche. '
       'Hang Ten Bro!'
   )
 ];

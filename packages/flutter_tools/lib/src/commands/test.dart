@@ -51,7 +51,7 @@ class TestCommand extends FlutterCommand {
     argParser.addFlag('merge-coverage',
       defaultsTo: false,
       negatable: false,
-      help: 'Whether to merge converage data with "coverage/lcov.base.info".\n'
+      help: 'Whether to merge coverage data with "coverage/lcov.base.info".\n'
             'Implies collecting coverage data. (Requires lcov)'
     );
     argParser.addFlag('ipv6',

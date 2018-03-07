@@ -244,7 +244,7 @@ ThinAppFrameworks() {
 # TODO(cbracken) improve error handling, then enable set -e
 
 if [[ $# == 0 ]]; then
-  # Backwards-comptibility: if no args are provided, build.
+  # Backwards-compatibility: if no args are provided, build.
   BuildApp
 else
   case $1 in

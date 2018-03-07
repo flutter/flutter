@@ -179,8 +179,8 @@ void main() {
     final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.text('label1')));
 
     // Splashes start on tapDown.
-    // If the timeout is less than kPressTimout the recognizer will just trigger
-    // the onTapCancel callback. If the timeout is greater or equal to kPressTimout
+    // If the timeout is less than kPressTimeout the recognizer will just trigger
+    // the onTapCancel callback. If the timeout is greater or equal to kPressTimeout
     // and less than kLongPressTimeout then onTapDown, onCancel will be called.
     await tester.pump(kPressTimeout);
 

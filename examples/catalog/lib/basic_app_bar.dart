@@ -109,7 +109,7 @@ Summary: A basic AppBar with a title, actions, and an overflow dropdown menu.
 Description:
 An app that displays one of a half dozen choices with an icon and a title.
 The two most common choices are available as action buttons and the remaining
-choices are included in the overflow dropdow menu.
+choices are included in the overflow dropdown menu.
 
 Classes: AppBar, IconButton, PopupMenuButton, Scaffold
 

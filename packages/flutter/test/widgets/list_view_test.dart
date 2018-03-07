@@ -221,7 +221,7 @@ void main() {
     expect(find.text('19'), findsOneWidget);
   });
 
-  testWidgets('didFinishLayout has correct indicies', (WidgetTester tester) async {
+  testWidgets('didFinishLayout has correct indices', (WidgetTester tester) async {
     final TestSliverChildListDelegate delegate = new TestSliverChildListDelegate(
       new List<Widget>.generate(20, (int i) {
         return new Container(
