@@ -833,7 +833,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
                 'If this widget is always nested in a scrollable widget there '
                 'is no need to use a viewport because there will always be enough '
                 'vertical space for the children. In this case, consider using a '
-                'Column instead. Otherwise, consider using the "shrinkWrap" propery '
+                'Column instead. Otherwise, consider using the "shrinkWrap" property '
                 '(or a ShrinkWrappingViewport) to size the height of the viewport '
                 'to the sum of the heights of its children.'
               );
@@ -859,7 +859,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
                 'If this widget is always nested in a scrollable widget there '
                 'is no need to use a viewport because there will always be enough '
                 'horizontal space for the children. In this case, consider using a '
-                'Row instead. Otherwise, consider using the "shrinkWrap" propery '
+                'Row instead. Otherwise, consider using the "shrinkWrap" property '
                 '(or a ShrinkWrappingViewport) to size the width of the viewport '
                 'to the sum of the widths of its children.'
               );
