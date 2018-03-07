@@ -214,7 +214,7 @@ Future<Null> _runGradleTask({String workingDirectory, String task, List<String> 
   final ProcessResult result = await _resultOfGradleTask(
       workingDirectory: workingDirectory,
       task: task,
-      options:options);
+      options: options);
   if (result.exitCode != 0) {
     print('stdout:');
     print(result.stdout);
@@ -247,23 +247,22 @@ class _Dependencies {
     final RegExp _escapeExpr = new RegExp(r'\\(.)');
 
     // Depfile format:
-    // outfile1 outfile2 : file1.dart file2.dart file3.dart
+    // outfile1 outfile2 : file1.dart file2.dart file3.dart file\ 4.dart
     final String contents = new File(depfilePath).readAsStringSync();
     final List<String> colonSeparated = contents.split(': ');
     target = colonSeparated[0].trim();
     dependencies = colonSeparated[1]
-        .replaceAllMapped(
-        _separatorExpr, (Match match) => '${match.group(1)}\n')
+        // Put every file on right-hand side on the seaparate line
+        .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
         .split('\n')
-        .map((String path) =>
-        path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1))
-            .trim())
+        // Get rid of escape sequences, so that '\ ' for example becomes ' '
+        .map((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
         .where((String path) => path.isNotEmpty)
         .toSet();
   }
 }
 
-/// returns [null] if target matches [expectedTarget, returns [error] otherwise.
+/// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
 String _validateSnapshotDependency(FlutterProject project, String expectedTarget) {
   final _Dependencies deps = new _Dependencies(
       path.join(project.rootPath, 'build', 'app', 'intermediates',
