@@ -190,7 +190,7 @@ class InkRipple extends InteractiveInkFeature {
     _radiusController
       ..duration = _kRadiusDuration
       ..forward();
-    // This confirm may have been preceeded by a cancel.
+    // This confirm may have been preceded by a cancel.
     _fadeInController.forward();
     _fadeOutController
       ..animateTo(1.0, duration: _kFadeOutDuration);
