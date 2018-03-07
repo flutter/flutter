@@ -677,7 +677,7 @@ void main() {
     expect(midflightHeight, lessThan(finalHeight));
     expect(midflightHeight, greaterThan(100.0));
 
-    // Remove the destination hero midlfight
+    // Remove the destination hero midflight
     heroCardSetState(() {
       routeIncludesHero = false;
     });
