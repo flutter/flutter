@@ -48,7 +48,6 @@ Future<String> compile(
     String depFilePath,
     bool linkPlatformKernelIn: false,
     bool aot: false,
-    List<String> entryPointsJsonFiles,
     bool trackWidgetCreation: false,
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath,
@@ -74,11 +73,6 @@ Future<String> compile(
     command.add('--no-link-platform');
   if (aot) {
     command.add('--aot');
-  }
-  if (entryPointsJsonFiles != null) {
-    for (String entryPointsJson in entryPointsJsonFiles) {
-      command.addAll(<String>['--entry-points', entryPointsJson]);
-    }
   }
   if (incrementalCompilerByteStorePath != null) {
     command.add('--incremental');
