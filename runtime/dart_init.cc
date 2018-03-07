@@ -396,8 +396,10 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
     if (!kernel_data.empty()) {
       // We are running kernel code.
+      uint8_t* kernel_buf = static_cast<uint8_t*>(malloc(kernel_data.size()));
+      memcpy(kernel_buf, kernel_data.data(), kernel_data.size());
       FXL_CHECK(!LogIfError(Dart_LoadKernel(Dart_ReadKernelBinary(
-          kernel_data.data(), kernel_data.size(), ReleaseFetchedBytes))));
+          kernel_buf, kernel_data.size(), ReleaseFetchedBytes))));
     } else if (!snapshot_data.empty()) {
       // We are running from a script snapshot.
       FXL_CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(snapshot_data.data(),
@@ -636,8 +638,10 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
     directory_asset_bundle->GetAsBuffer(kPlatformKernelAssetKey,
                                         &platform_data);
     if (!platform_data.empty()) {
-      kernel_platform = Dart_ReadKernelBinary(
-          platform_data.data(), platform_data.size(), ReleaseFetchedBytes);
+      uint8_t* kernel_buf = static_cast<uint8_t*>(malloc(platform_data.size()));
+      memcpy(kernel_buf, platform_data.data(), platform_data.size());
+      kernel_platform = Dart_ReadKernelBinary(kernel_buf, platform_data.size(),
+                                              ReleaseFetchedBytes);
       FXL_DCHECK(kernel_platform != nullptr);
     }
   }
