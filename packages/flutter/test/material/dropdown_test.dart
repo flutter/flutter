@@ -450,7 +450,7 @@ void main() {
 
   testWidgets('Dropdown menus must fit within the screen', (WidgetTester tester) async {
 
-    // The dropdown menu isn't readaily accessible. To find it we're assuming that it
+    // The dropdown menu isn't readily accessible. To find it we're assuming that it
     // contains a ListView and that it's an instance of _DropdownMenu.
     Rect getMenuRect() {
       Rect menuRect;
