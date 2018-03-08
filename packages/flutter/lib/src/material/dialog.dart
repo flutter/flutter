@@ -457,7 +457,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
 
 /// Displays a dialog above the current contents of the app.
 ///
-/// This function typically receives a [Dialog] widget inside of a [WidgetBuilder]
+/// This function typically receives a [WidgetBuilder] which build a [Dialog] widget
 /// as it's `builder` argument. Content below the dialog is dimmed with a [ModalBarrier].
 /// This widget does not share a context with the location that `showDialog` is
 /// originally called from. Use a [StatefulBuilder] or a custom [StatefulWidget]

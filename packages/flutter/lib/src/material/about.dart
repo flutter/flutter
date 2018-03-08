@@ -159,7 +159,7 @@ void showAboutDialog({
         applicationVersion: applicationVersion,
         applicationIcon: applicationIcon,
         applicationLegalese: applicationLegalese,
-        children: children
+        children: children,
       );
     }
   );
