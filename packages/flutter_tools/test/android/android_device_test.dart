@@ -22,7 +22,7 @@ void main() {
   });
 
   group('getAdbDevices', () {
-    testUsingContext('physical devices', () async {
+    testUsingContext('physical devices', () {
       final List<AndroidDevice> devices = <AndroidDevice>[];
       parseADBDeviceOutput('''
 List of devices attached
@@ -33,7 +33,7 @@ List of devices attached
       expect(devices.first.name, 'Nexus 7');
     });
 
-    testUsingContext('emulators and short listings', () async {
+    testUsingContext('emulators and short listings', () {
       final List<AndroidDevice> devices = <AndroidDevice>[];
       parseADBDeviceOutput('''
 List of devices attached
