@@ -290,12 +290,12 @@ class RunCommand extends RunCommandBase {
           if (enableSoftwareRendering) {
             printStatus(
               'Using software rendering with device ${device.name}. You may get better performance'
-              'with hardware mode by configuring hardware rendering for your device.'
+              ' with hardware mode by configuring hardware rendering for your device.'
             );
           } else {
             printStatus(
               'Using hardware rendering with device ${device.name}. If you get graphics artifacts,'
-              'consider enabling software rendering with "--enable-software-rendering".'
+              ' consider enabling software rendering with "--enable-software-rendering".'
             );
           }
         }
