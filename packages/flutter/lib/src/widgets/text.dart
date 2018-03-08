@@ -216,6 +216,7 @@ class Text extends StatelessWidget {
   /// Creates a text widget with a [TextSpan].
   const Text.rich(this.span, {
     Key key,
+    this.style,
     this.textAlign,
     this.textDirection,
     this.softWrap,
@@ -224,17 +225,16 @@ class Text extends StatelessWidget {
     this.maxLines,
   }): assert(span != null),
       data = null,
-      style = null,
       super(key: key);
 
   /// The text to display.
   ///
-  /// If constructed with the default constructor, `span` will be null.
+  /// This will be null if a [TextSpan] is provided instead.
   final String data;
 
   /// The text to display as a span.
   ///
-  /// If constructed with a [TextSpan], `data` will be null.
+  /// This will be null if a String is provided instead.
   final TextSpan span;
 
   /// If non-null, the style to use for this text.
@@ -242,8 +242,6 @@ class Text extends StatelessWidget {
   /// If the style's "inherit" property is true, the style will be merged with
   /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
   /// replace the closest enclosing [DefaultTextStyle].
-  ///
-  /// If constructed with a [TextSpan], the style will be null.
   final TextStyle style;
 
   /// How the text should be aligned horizontally.
@@ -299,7 +297,7 @@ class Text extends StatelessWidget {
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle effectiveTextStyle = style;
-    if (span == null && (style == null || style.inherit))
+    if (style == null || style.inherit)
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     return new RichText(
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
@@ -308,17 +306,19 @@ class Text extends StatelessWidget {
       overflow: overflow ?? defaultTextStyle.overflow,
       textScaleFactor: textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
       maxLines: maxLines ?? defaultTextStyle.maxLines,
-      text: span ?? new TextSpan(
+      text: new TextSpan(
         style: effectiveTextStyle,
         text: data,
-      )
+        children: span != null ? <TextSpan>[span] : null,
+      ),
     );
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new StringProperty('data', data ?? span.toPlainText(), showName: false));
+    description.add(new StringProperty('data', data, showName: false));
+    span?.debugFillProperties(description);
     style?.debugFillProperties(description);
     description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
