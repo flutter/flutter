@@ -10,7 +10,6 @@ import 'package:flutter/widgets.dart';
 import 'material.dart';
 import 'theme.dart';
 
-const double _kLinearProgressIndicatorHeight = 6.0;
 const double _kMinCircularProgressIndicatorSize = 36.0;
 
 // TODO(hansmuller): implement the support for buffer indicator
@@ -158,12 +157,19 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// The [value] argument can be either null (corresponding to an indeterminate
   /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
+  ///
+  /// The [height] argument defaults to `6.0` and must not be `null`.
   const LinearProgressIndicator({
     Key key,
     double value,
     Color backgroundColor,
     Animation<Color> valueColor,
-  }) : super(key: key, value: value, backgroundColor: backgroundColor, valueColor: valueColor);
+    this.height: 6.0,
+  }) : assert(height != null),
+       super(key: key, value: value, backgroundColor: backgroundColor, valueColor: valueColor);
+
+  /// The height of the progress indicator measured in pixels.
+  final double height;
 
   @override
   _LinearProgressIndicatorState createState() => new _LinearProgressIndicatorState();
@@ -203,9 +209,9 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 
   Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
     return new Container(
-      constraints: const BoxConstraints.tightFor(
+      constraints: new BoxConstraints.tightFor(
         width: double.INFINITY,
-        height: _kLinearProgressIndicatorHeight,
+        height: widget.height,
       ),
       child: new CustomPaint(
         painter: new _LinearProgressIndicatorPainter(
