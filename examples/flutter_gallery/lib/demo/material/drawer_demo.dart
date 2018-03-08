@@ -233,7 +233,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   void _onOtherAccountsTap(BuildContext context) {
     showDialog<Null>(
       context: context,
-      builder: new Builder(builder: (BuildContext context) {
+      builder: (BuildContext context) {
         return new AlertDialog(
           title: const Text('Account switching not implemented.'),
           actions: <Widget>[
@@ -245,7 +245,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
             ),
           ],
         );
-      }),
+      },
     );
   }
 }

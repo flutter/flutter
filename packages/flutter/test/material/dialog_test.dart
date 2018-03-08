@@ -23,7 +23,7 @@ void main() {
                   onPressed: () {
                     showDialog<Null>(
                       context: context,
-                      builder: new Builder(builder: (BuildContext context) {
+                      builder: (BuildContext context) {
                         return new AlertDialog(
                           content: new Container(
                             height: 5000.0,
@@ -39,7 +39,7 @@ void main() {
                             )
                           ],
                         );
-                      }),
+                      },
                     );
                   }
                 )
@@ -73,13 +73,13 @@ void main() {
                   onPressed: () {
                     showDialog<Null>(
                       context: context,
-                      builder: new Builder(builder: (BuildContext context) {
+                      builder: (BuildContext context) {
                         return const AlertDialog(
                           title: const Text('Title'),
                           content: const Text('Y'),
                           actions: const <Widget>[ ],
                         );
-                      }),
+                      },
                     );
                   },
                 ),
@@ -120,7 +120,7 @@ void main() {
 
     final Future<int> result = showDialog(
       context: context,
-      builder: new Builder(builder: (BuildContext context) {
+      builder: (BuildContext context) {
         return new SimpleDialog(
           title: const Text('Title'),
           children: <Widget>[
@@ -135,7 +135,7 @@ void main() {
             ),
           ],
         );
-      }),
+      },
     );
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -163,16 +163,14 @@ void main() {
 
     showDialog<Null>(
       context: context,
-      builder: new Builder(
-        builder: (BuildContext context) {
-          return new Container(
-            width: 100.0,
-            height: 100.0,
-            alignment: Alignment.center,
-            child: const Text('Dialog1'),
-          );
-        },
-      ),
+      builder: (BuildContext context) {
+        return new Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog1'),
+        );
+      },
     );
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -187,14 +185,14 @@ void main() {
     showDialog<Null>(
       context: context,
       barrierDismissible: false,
-      builder: new Builder(builder: (BuildContext context) {
+      builder: (BuildContext context) {
         return new Container(
           width: 100.0,
           height: 100.0,
           alignment: Alignment.center,
           child: const Text('Dialog2'),
         );
-      }),
+      },
     );
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -231,9 +229,9 @@ void main() {
     const String alertText = 'A button in an overlay alert';
     showDialog<Null>(
       context: context,
-      builder: new Builder(builder: (BuildContext context) {
+      builder: (BuildContext context) {
         return const AlertDialog(title: const Text(alertText));
-      }),
+      },
     );
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -274,12 +272,10 @@ void main() {
     showDialog<Null>(
       context: outerContext,
       barrierDismissible: false,
-      builder: new Builder(
-        builder: (BuildContext context) {
-          dialogContext = context;
-          return new Container();
-        },
-      ),
+      builder: (BuildContext context) {
+        dialogContext = context;
+        return new Container();
+      },
     );
 
     await tester.pump();

@@ -481,10 +481,11 @@ class _DialogRoute<T> extends PopupRoute<T> {
 Future<T> showDialog<T>({
   @required BuildContext context,
   bool barrierDismissible: true,
-  @required Builder builder,
+  @Deprecated('') Widget child,
+  @required WidgetBuilder builder,
 }) {
   return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
-    child: builder,
+    child: new Builder(builder: builder),
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierDismissible: barrierDismissible,
     barrierLabel: MaterialLocalizations

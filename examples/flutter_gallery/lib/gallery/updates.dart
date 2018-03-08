@@ -41,7 +41,7 @@ class UpdaterState extends State<Updater> {
 
     final String updateUrl = await widget.updateUrlFetcher();
     if (updateUrl != null) {
-      final bool wantsUpdate = await showDialog(context: context, builder: new Builder(builder: (BuildContext context) => _buildDialog()));
+      final bool wantsUpdate = await showDialog(context: context, builder: (BuildContext context) => _buildDialog());
       if (wantsUpdate != null && wantsUpdate)
         launch(updateUrl);
     }

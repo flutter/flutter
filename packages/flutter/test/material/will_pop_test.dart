@@ -86,7 +86,7 @@ void main() {
                   onPressed: () {
                     showDialog<Null>(
                       context: context,
-                      builder: new Builder(builder: (BuildContext context) => new SamplePage()),
+                      builder: (BuildContext context) => new SamplePage(),
                     );
                   },
                 ),
@@ -185,7 +185,7 @@ void main() {
     Future<bool> showYesNoAlert(BuildContext context) {
       return showDialog<bool>(
         context: context,
-        builder: new Builder(builder: (BuildContext context) {
+        builder: (BuildContext context) {
           return new AlertDialog(
             actions: <Widget> [
               new FlatButton(
@@ -198,7 +198,7 @@ void main() {
               ),
             ],
           );
-        }),
+        },
       );
     }
 

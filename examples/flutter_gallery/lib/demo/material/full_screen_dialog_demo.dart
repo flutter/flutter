@@ -116,7 +116,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
 
     return await showDialog<bool>(
       context: context,
-      builder: new Builder(builder: (BuildContext context) {
+      builder: (BuildContext context) {
         return new AlertDialog(
           content: new Text(
             'Discard new event?',
@@ -128,15 +128,16 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               onPressed: () {
                 Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
               }
-          ),
-          new FlatButton(
-            child: const Text('DISCARD'),
-            onPressed: () {
-              Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
-            }
-          )
-        ]);
-      }),
+            ),
+            new FlatButton(
+              child: const Text('DISCARD'),
+              onPressed: () {
+                Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
+              }
+            )
+          ],
+        );
+      },
     ) ?? false;
   }
 

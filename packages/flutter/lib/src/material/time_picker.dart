@@ -1645,9 +1645,7 @@ Future<TimeOfDay> showTimePicker({
 
   return await showDialog<TimeOfDay>(
     context: context,
-    builder: new Builder(builder: (BuildContext context) {
-      return  new _TimePickerDialog(initialTime: initialTime);
-    }),
+    builder: (BuildContext context) => new _TimePickerDialog(initialTime: initialTime),
   );
 }
 

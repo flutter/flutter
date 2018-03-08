@@ -19,7 +19,7 @@ void main() {
                 onPressed: () {
                   showDialog<Null>(
                     context: context,
-                    builder: new Builder(builder: (BuildContext context) {
+                    builder: (BuildContext context) {
                       return new CupertinoAlertDialog(
                         title: const Text('The title'),
                         content: const Text('The content'),
@@ -37,7 +37,7 @@ void main() {
                           ),
                         ],
                       );
-                    })
+                    },
                   );
                 },
                 child: const Text('Go'),
@@ -112,7 +112,7 @@ void main() {
               onPressed: () {
                 showDialog<Null>(
                   context: context,
-                  builder: new Builder(builder: (BuildContext context) {
+                  builder: (BuildContext context) {
                     return new MediaQuery(
                       data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
                       child: new CupertinoAlertDialog(
@@ -130,7 +130,7 @@ void main() {
                         scrollController: scrollController,
                       ),
                     );
-                  }),
+                  },
                 );
               },
               child: const Text('Go'),
