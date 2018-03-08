@@ -199,10 +199,13 @@ bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrContext> context,
       break;
     }
   }
-
+  VkExportMemoryAllocateInfoKHR export_allocate_info = {
+      .sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO_KHR,
+      .pNext = nullptr,
+      .handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_FUCHSIA_VMO_BIT_KHR};
   const VkMemoryAllocateInfo alloc_info = {
       .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-      .pNext = nullptr,
+      .pNext = &export_allocate_info,
       .allocationSize = memory_reqs.size,
       .memoryTypeIndex = memory_type,
   };
