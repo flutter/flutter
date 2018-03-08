@@ -8,7 +8,7 @@ dependencies:
   intl: 0.15.2
   meta: 1.1.2
   path: 1.5.1
-  process: 2.0.7
+  process: 2.0.8
 
 dev_dependencies:
   test: 0.12.30+4
@@ -16,10 +16,10 @@ dev_dependencies:
 
   async: 2.0.4 # TRANSITIVE DEPENDENCY
   barback: 0.15.2+14 # TRANSITIVE DEPENDENCY
-  boolean_selector: 1.0.2 # TRANSITIVE DEPENDENCY
+  boolean_selector: 1.0.3 # TRANSITIVE DEPENDENCY
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
   cli_util: 0.1.2+1 # TRANSITIVE DEPENDENCY
-  collection: 1.14.5 # TRANSITIVE DEPENDENCY
+  collection: 1.14.6 # TRANSITIVE DEPENDENCY
   convert: 2.0.1 # TRANSITIVE DEPENDENCY
   crypto: 2.0.2+1 # TRANSITIVE DEPENDENCY
   csslib: 0.14.1 # TRANSITIVE DEPENDENCY

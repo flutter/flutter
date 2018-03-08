@@ -505,7 +505,7 @@ class DevFS {
               packagesFilePath : _packagesFilePath);
       if (compiledBinary != null && compiledBinary.isNotEmpty)
         dirtyEntries.putIfAbsent(
-          Uri.parse(target + '.dill'),
+          fs.path.toUri(target + '.dill'),
           () => new DevFSFileContent(fs.file(compiledBinary))
         );
     }

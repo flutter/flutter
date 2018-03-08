@@ -16,7 +16,7 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow از $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow از حدود $rowCount",
   "rowsPerPageTitle": "ردیف در هر صفحه:",
-  "tabLabel": "$tabIndex از $tabCount",
+  "tabLabel": "برگه $tabIndex از $tabCount",
   "selectedRowCountTitleOther": "$selectedRowCount مورد انتخاب شدند",
   "cancelButtonLabel": "لغو",
   "closeButtonLabel": "بستن",
@@ -31,8 +31,8 @@
   "postMeridiemAbbreviation": "ب.ظ.",
   "timePickerHourModeAnnouncement": "انتخاب ساعت",
   "timePickerMinuteModeAnnouncement": "انتخاب دقیقه",
-  "signedInLabel": "وارد شدن",
-  "hideAccountsLabel": "پنهان کردن حساب ها",
-  "showAccountsLabel": "نمایش حساب ها",
-  "modalBarrierDismissLabel": "رد کردن"
+  "signedInLabel": "واردشده به سیستم",
+  "hideAccountsLabel": "پنهان کردن حساب‌ها",
+  "showAccountsLabel": "نشان دادن حساب‌ها",
+  "modalBarrierDismissLabel": "نپذیرفتن"
 }

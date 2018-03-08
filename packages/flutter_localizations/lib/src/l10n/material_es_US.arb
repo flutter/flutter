@@ -1,4 +1,9 @@
 {
+  "tabLabel": "Pestaña $tabIndex de $tabCount",
+  "showAccountsLabel": "Mostrar cuentas",
+  "modalBarrierDismissLabel": "Descartar",
+  "hideAccountsLabel": "Ocultar cuentas",
+  "signedInLabel": "Cuenta con la que accediste",
   "deleteButtonTooltip": "Borrar",
   "nextMonthTooltip": "Próximo mes",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow de aproximadamente $rowCount",

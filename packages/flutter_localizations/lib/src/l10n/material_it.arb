@@ -16,7 +16,7 @@
   "pageRowsInfoTitle": "$firstRow-$lastRow di $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow-$lastRow di circa $rowCount",
   "rowsPerPageTitle": "Righe per pagina:",
-  "tabLabel": "$tabIndex di $tabCount",
+  "tabLabel": "Scheda $tabIndex di $tabCount",
   "selectedRowCountTitleOther": "$selectedRowCount elementi selezionati",
   "cancelButtonLabel": "ANNULLA",
   "closeButtonLabel": "CHIUDI",
@@ -31,7 +31,7 @@
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "Seleziona le ore",
   "timePickerMinuteModeAnnouncement": "Seleziona i minuti",
-  "signedInLabel": "Registrato",
+  "signedInLabel": "Connesso",
   "hideAccountsLabel": "Nascondi account",
   "showAccountsLabel": "Mostra account",
   "modalBarrierDismissLabel": "Ignora"
