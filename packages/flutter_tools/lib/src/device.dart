@@ -194,11 +194,8 @@ abstract class Device {
 
   /// Whether the device is a simulator on a platform which supports hardware rendering.
   Future<bool> get supportsHardwareRendering async {
-    if (!await isLocalEmulator) {
-      return false;
-    }
-    final TargetPlatform targetPlatform = await this.targetPlatform;
-    switch (targetPlatform) {
+    assert(await isLocalEmulator);
+    switch (await targetPlatform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
