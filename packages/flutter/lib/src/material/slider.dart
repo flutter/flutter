@@ -401,22 +401,6 @@ class _RenderSlider extends RenderBox {
       ..onTapDown = _handleTapDown
       ..onTapUp = _handleTapUp
       ..onTapCancel = _endInteraction;
-
-    // We don't need to call removeListener on these because this render object
-    // and the state have a 1:1 relationship, the state has a more finite
-    // lifetime, and so this render object is never used again after the state
-    // is disposed.
-    _reaction = new CurvedAnimation(
-      parent: state.reactionController,
-      curve: Curves.fastOutSlowIn,
-    )..addListener(markNeedsPaint);
-    state.enableController.value = isInteractive ? 1.0 : 0.0;
-    _enableAnimation = new CurvedAnimation(
-      parent: state.enableController,
-      curve: Curves.easeInOut,
-    )..addListener(markNeedsPaint);
-    state.positionController.value = _value;
-    state.positionController.addListener(markNeedsPaint);
   }
 
   double get value => _value;
@@ -556,6 +540,30 @@ class _RenderSlider extends RenderBox {
   bool get isInteractive => onChanged != null;
 
   bool get isDiscrete => divisions != null && divisions > 0;
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _reaction = new CurvedAnimation(
+      parent: _state.reactionController,
+      curve: Curves.fastOutSlowIn,
+    )..addListener(markNeedsPaint);
+    _state.enableController.value = isInteractive ? 1.0 : 0.0;
+    _enableAnimation = new CurvedAnimation(
+      parent: _state.enableController,
+      curve: Curves.easeInOut,
+    )..addListener(markNeedsPaint);
+    _state.positionController.value = _value;
+    _state.positionController.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    super.detach();
+    _reaction.removeListener(markNeedsPaint);
+    _enableAnimation.removeListener(markNeedsPaint);
+    _state.positionController.removeListener(markNeedsPaint);
+  }
 
   double _getValueFromVisualPosition(double visualPosition) {
     switch (textDirection) {
