@@ -404,9 +404,9 @@ void main() {
       ' │\n'
       ' └─child node C: TestTree#00000\n'
       '     foo:\n'
-      '     multi\n'
-      '     line\n'
-      '     value!\n',
+      '       multi\n'
+      '       line\n'
+      '       value!\n',
     );
 
     goldenStyleTest(
@@ -448,9 +448,9 @@ void main() {
       ' ╎\n'
       ' └╌child node C: TestTree#00000\n'
       '     foo:\n'
-      '     multi\n'
-      '     line\n'
-      '     value!\n',
+      '       multi\n'
+      '       line\n'
+      '       value!\n',
     );
 
     goldenStyleTest(
@@ -482,9 +482,9 @@ void main() {
       ' ╘═╦══ child node C ═══\n'
       '   ║ TestTree#00000:\n'
       '   ║   foo:\n'
-      '   ║   multi\n'
-      '   ║   line\n'
-      '   ║   value!\n'
+      '   ║     multi\n'
+      '   ║     line\n'
+      '   ║     value!\n'
       '   ╚═══════════\n',
     );
 
@@ -523,9 +523,9 @@ void main() {
       '  ╘═╦══ child node C ═══\n'
       '    ║ TestTree#00000:\n'
       '    ║   foo:\n'
-      '    ║   multi\n'
-      '    ║   line\n'
-      '    ║   value!\n'
+      '    ║     multi\n'
+      '    ║     line\n'
+      '    ║     value!\n'
       '    ╚═══════════\n',
     );
 
@@ -551,9 +551,9 @@ void main() {
         '      foo: 42\n'
         '  child node C: TestTree#00000:\n'
         '    foo:\n'
-        '    multi\n'
-        '    line\n'
-        '    value!\n',
+        '      multi\n'
+        '      line\n'
+        '      value!\n',
     );
 
     // Single line mode does not display children.
@@ -657,9 +657,9 @@ void main() {
         ' │ ╚═══════════\n'
         ' └─child node C: TestTree#00000\n'
         '     foo:\n'
-        '     multi\n'
-        '     line\n'
-        '     value!\n',
+        '       multi\n'
+        '       line\n'
+        '       value!\n',
       ),
     );
   });
@@ -1478,8 +1478,8 @@ void main() {
       multiLineProperty.toStringDeep(),
       equals(
         'objects:\n'
-        '  Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)\n'
-        '  Color(0xffffffff)\n',
+        '    Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)\n'
+        '    Color(0xffffffff)\n',
       ),
     );
     validateIterablePropertyJsonSerialization(multiLineProperty);
@@ -1491,8 +1491,8 @@ void main() {
       equalsIgnoringHashCodes(
         'TestTree#00000\n'
         '   objects:\n'
-        '     Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)\n'
-        '     Color(0xffffffff)\n',
+        '       Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)\n'
+        '       Color(0xffffffff)\n',
       ),
     );
 
