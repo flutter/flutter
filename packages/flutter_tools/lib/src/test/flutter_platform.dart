@@ -130,7 +130,8 @@ class _FlutterPlatform extends PlatformPlugin {
             outputPath: outputDill.path
           );
           // Copy output dill next to the source file.
-          File kernelReadyToRun = await outputDill.copy(request.path + '.dill');
+          final File kernelReadyToRun = await fs.file(outputPath).copy(
+              request.path + '.dill');
           compiler.accept();
           compiler.reset();
           request.result.complete(kernelReadyToRun.path);
