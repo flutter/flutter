@@ -130,10 +130,10 @@ class _FlutterPlatform extends PlatformPlugin {
             outputPath: outputDill.path
           );
           // Copy output dill next to the source file.
-          await outputDill.copy(request.path + '.dill');
+          File kernelReadyToRun = await outputDill.copy(request.path + '.dill');
           compiler.accept();
           compiler.reset();
-          request.result.complete(outputPath);
+          request.result.complete(kernelReadyToRun.path);
           // Only remove now when we finished processing the element
           compilationQueue.removeAt(0);
         }
