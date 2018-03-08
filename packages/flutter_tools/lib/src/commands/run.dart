@@ -284,8 +284,26 @@ class RunCommand extends RunCommandBase {
     }
 
     for (Device device in devices) {
-      if (await device.isLocalEmulator && !isEmulatorBuildMode(getBuildMode()))
-        throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
+      if (await device.isLocalEmulator) {
+        if (await device.supportsHardwareRendering) {
+          final bool enableSoftwareRendering = argResults['enable-software-rendering'] == true;
+          if (enableSoftwareRendering) {
+            printStatus(
+              'Using software rendering with device ${device.name}. You may get better performance'
+              'with hardware mode by configuring hardware rendering for your device.'
+            );
+          } else {
+            printStatus(
+              'Using hardware rendering with device ${device.name}. If you get graphics artifacts,'
+              'consider enabling software rendering with "--enable-software-rendering".'
+            );
+          }
+        }
+
+        if (!isEmulatorBuildMode(getBuildMode())) {
+          throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
+        }
+      }
     }
 
     if (hotMode) {
