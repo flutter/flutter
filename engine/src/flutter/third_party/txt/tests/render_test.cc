@@ -30,7 +30,7 @@ namespace txt {
 
 RenderTest::RenderTest()
     : snapshots_(0), font_collection_(std::make_shared<FontCollection>()) {
-  font_collection_->PushBack(sk_make_sp<AssetFontManager>(
+  font_collection_->SetAssetFontManager(sk_make_sp<AssetFontManager>(
       std::make_unique<txt::DirectoryAssetDataProvider>(GetFontDir())));
 }
 

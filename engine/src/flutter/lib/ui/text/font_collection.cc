@@ -25,7 +25,7 @@ FontCollection& FontCollection::ForProcess() {
 
 FontCollection::FontCollection()
     : collection_(std::make_shared<txt::FontCollection>()) {
-  collection_->PushBack(SkFontMgr::RefDefault());
+  collection_->SetDefaultFontManager(SkFontMgr::RefDefault());
 }
 
 FontCollection::~FontCollection() = default;
@@ -106,7 +106,7 @@ void FontCollection::RegisterFontsFromAssetProvider(
     }
   }
 
-  collection_->PushFront(
+  collection_->SetAssetFontManager(
       sk_make_sp<txt::AssetFontManager>(std::move(font_asset_data_provider)));
 }
 
@@ -120,7 +120,7 @@ void FontCollection::RegisterTestFonts() {
   asset_data_provider->RegisterTypeface(std::move(test_typeface),
                                         GetTestFontFamilyName());
 
-  collection_->PushFront(sk_make_sp<txt::TestFontManager>(
+  collection_->SetTestFontManager(sk_make_sp<txt::TestFontManager>(
       std::move(asset_data_provider), GetTestFontFamilyName()));
 
   collection_->DisableFontFallback();
