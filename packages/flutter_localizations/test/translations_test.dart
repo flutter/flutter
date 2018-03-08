@@ -7,6 +7,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // Watch out: this list must be kept in sync with the comment at the top of
+  // GlobalMaterialLocalizations.
   final List<String> languages = <String>[
     'ar', // Arabic
     'de', // German
@@ -33,6 +35,9 @@ void main() {
   for (String language in languages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
       final Locale locale = new Locale(language, '');
+
+      expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+
       final MaterialLocalizations localizations = new GlobalMaterialLocalizations(locale);
 
       expect(localizations.openAppDrawerTooltip, isNotNull);
