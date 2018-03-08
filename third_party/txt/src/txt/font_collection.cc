@@ -60,23 +60,31 @@ FontCollection::FontCollection() : enable_font_fallback_(true) {}
 FontCollection::~FontCollection() = default;
 
 size_t FontCollection::GetFontManagersCount() const {
-  return skia_font_managers_.size();
+  return GetFontManagerOrder().size();
 }
 
-void FontCollection::PushFront(sk_sp<SkFontMgr> skia_font_manager) {
-  if (!skia_font_manager) {
-    return;
-  }
-  UpdateFallbackFonts(skia_font_manager);
-  skia_font_managers_.push_front(std::move(skia_font_manager));
+void FontCollection::SetDefaultFontManager(sk_sp<SkFontMgr> font_manager) {
+  default_font_manager_ = font_manager;
 }
 
-void FontCollection::PushBack(sk_sp<SkFontMgr> skia_font_manager) {
-  if (!skia_font_manager) {
-    return;
-  }
-  UpdateFallbackFonts(skia_font_manager);
-  skia_font_managers_.push_back(std::move(skia_font_manager));
+void FontCollection::SetAssetFontManager(sk_sp<SkFontMgr> font_manager) {
+  asset_font_manager_ = font_manager;
+}
+
+void FontCollection::SetTestFontManager(sk_sp<SkFontMgr> font_manager) {
+  test_font_manager_ = font_manager;
+}
+
+// Return the available font managers in the order they should be queried.
+std::vector<sk_sp<SkFontMgr>> FontCollection::GetFontManagerOrder() const {
+  std::vector<sk_sp<SkFontMgr>> order;
+  if (test_font_manager_)
+    order.push_back(test_font_manager_);
+  if (asset_font_manager_)
+    order.push_back(asset_font_manager_);
+  if (default_font_manager_)
+    order.push_back(default_font_manager_);
+  return order;
 }
 
 void FontCollection::DisableFontFallback() {
@@ -91,7 +99,7 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
     return cached->second;
   }
 
-  for (sk_sp<SkFontMgr> manager : skia_font_managers_) {
+  for (sk_sp<SkFontMgr>& manager : GetFontManagerOrder()) {
     auto font_style_set = manager->matchFamily(family.c_str());
     if (font_style_set == nullptr || font_style_set->count() == 0) {
       continue;
@@ -157,7 +165,7 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
 
 const std::shared_ptr<minikin::FontFamily>& FontCollection::MatchFallbackFont(
     uint32_t ch) {
-  for (const auto& manager : skia_font_managers_) {
+  for (const sk_sp<SkFontMgr>& manager : GetFontManagerOrder()) {
     sk_sp<SkTypeface> typeface(
         manager->matchFamilyStyleCharacter(0, SkFontStyle(), nullptr, 0, ch));
     if (!typeface)

@@ -44,7 +44,7 @@ void SetCommandLine(fxl::CommandLine cmd) {
 
 std::shared_ptr<FontCollection> GetTestFontCollection() {
   auto collection = std::make_shared<FontCollection>();
-  collection->PushBack(sk_make_sp<AssetFontManager>(
+  collection->SetAssetFontManager(sk_make_sp<AssetFontManager>(
       std::make_unique<DirectoryAssetDataProvider>(GetFontDir())));
   return collection;
 }
