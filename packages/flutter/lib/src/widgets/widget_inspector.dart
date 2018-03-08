@@ -424,7 +424,7 @@ class WidgetInspectorService {
 
   /// Returns whether [Widget] creation locations are available.
   ///
-  /// [Widget] creation locations are only available for slow mode builds when
+  /// [Widget] creation locations are only available for debug mode builds when
   /// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0
   /// is required as injecting creation locations requires a
   /// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
@@ -1127,7 +1127,7 @@ class _Location {
 
 /// Returns the creation location of an object if one is available.
 ///
-/// Creation locations are only available for slow mode builds when
+/// Creation locations are only available for debug mode builds when
 /// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
 /// required as injecting creation locations requires a
 /// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
