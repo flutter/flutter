@@ -86,7 +86,7 @@ void main() {
                   onPressed: () {
                     showDialog<Null>(
                       context: context,
-                      child: new SamplePage(),
+                      builder: new Builder(builder: (BuildContext context) => new SamplePage()),
                     );
                   },
                 ),
@@ -185,18 +185,20 @@ void main() {
     Future<bool> showYesNoAlert(BuildContext context) {
       return showDialog<bool>(
         context: context,
-        child: new AlertDialog(
-          actions: <Widget> [
-            new FlatButton(
-              child: const Text('YES'),
-              onPressed: () { Navigator.of(context).pop(true); },
-            ),
-            new FlatButton(
-              child: const Text('NO'),
-              onPressed: () { Navigator.of(context).pop(false); },
-            ),
-          ],
-        ),
+        builder: new Builder(builder: (BuildContext context) {
+          return new AlertDialog(
+            actions: <Widget> [
+              new FlatButton(
+                child: const Text('YES'),
+                onPressed: () { Navigator.of(context).pop(true); },
+              ),
+              new FlatButton(
+                child: const Text('NO'),
+                onPressed: () { Navigator.of(context).pop(false); },
+              ),
+            ],
+          );
+        }),
       );
     }
 

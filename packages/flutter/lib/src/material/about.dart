@@ -153,12 +153,16 @@ void showAboutDialog({
 }) {
   showDialog<Null>(
     context: context,
-    child: new AboutDialog(
-      applicationName: applicationName,
-      applicationVersion: applicationVersion,
-      applicationIcon: applicationIcon,
-      applicationLegalese: applicationLegalese,
-      children: children
+    builder: new Builder(
+      builder: (BuildContext context) {
+        return new AboutDialog(
+          applicationName: applicationName,
+          applicationVersion: applicationVersion,
+          applicationIcon: applicationIcon,
+          applicationLegalese: applicationLegalese,
+          children: children
+        );
+      }
     )
   );
 }

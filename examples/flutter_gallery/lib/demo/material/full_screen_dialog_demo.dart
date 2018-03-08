@@ -116,17 +116,18 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
 
     return await showDialog<bool>(
       context: context,
-      child: new AlertDialog(
-        content: new Text(
-          'Discard new event?',
-          style: dialogTextStyle
-        ),
-        actions: <Widget>[
-          new FlatButton(
-            child: const Text('CANCEL'),
-            onPressed: () {
-              Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
-            }
+      builder: new Builder(builder: (BuildContext context) {
+        return new AlertDialog(
+          content: new Text(
+            'Discard new event?',
+            style: dialogTextStyle
+          ),
+          actions: <Widget>[
+            new FlatButton(
+              child: const Text('CANCEL'),
+              onPressed: () {
+                Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
+              }
           ),
           new FlatButton(
             child: const Text('DISCARD'),
@@ -134,8 +135,8 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
             }
           )
-        ]
-      )
+        ]);
+      }),
     ) ?? false;
   }
 

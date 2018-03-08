@@ -200,7 +200,7 @@ void main() {
                     onPressed: () {
                       showDialog<Null>(
                         context: context,
-                        child: const Text('dialog'),
+                        builder: new Builder(builder: (BuildContext context) => const Text('dialog')),
                       );
                     },
                     child: const Text('SHOW'),
@@ -232,12 +232,14 @@ void main() {
                   onTap: () {
                     showDialog<Null>(
                       context: context,
-                      child: const Scaffold(
-                        body: const SizedBox(
-                          width: 200.0,
-                          height: 200.0,
-                        ),
-                      )
+                      builder: new Builder(builder: (BuildContext context) {
+                        return const Scaffold(
+                          body: const SizedBox(
+                            width: 200.0,
+                            height: 200.0,
+                          ),
+                        );
+                      }),
                     );
                   },
                   child: const Text('SHOW'),
