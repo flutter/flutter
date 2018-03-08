@@ -208,4 +208,49 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
   });
 
+  testWidgets('LinearProgressIndicator with height 12.0', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const SizedBox(
+            width: 100.0,
+            child: const LinearProgressIndicator(value: 0.25, height: 12.0),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 100.0, 12.0))
+        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 25.0, 12.0))
+    );
+
+    expect(tester.binding.transientCallbackCount, 0);
+  });
+
+  testWidgets('LinearProgressIndicator with default height', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const SizedBox(
+            width: 100.0,
+            child: const LinearProgressIndicator(value: 0.25),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 100.0, 6.0))
+        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 25.0, 6.0))
+    );
+
+    expect(tester.binding.transientCallbackCount, 0);
+  });
 }
