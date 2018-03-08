@@ -460,8 +460,8 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// This function typically receives a [Dialog] widget inside of a [WidgetBuilder]
 /// as it's `builder` argument. Content below the dialog is dimmed with a [ModalBarrier].
 /// This widget does not share a context with the location that `showDialog` is
-/// originally called from, nor will calling `setState()` in this location cause
-/// the dialog to update.
+/// originally called from. Use a [StatefulBuilder] or a custom [StatefulWidget]
+/// if the dialog needs to update dynamically.
 ///
 /// The `context` argument is used to look up the [Navigator] and [Theme] for
 /// the dialog. It is only used when the method is called. Its corresponding
@@ -486,15 +486,18 @@ class _DialogRoute<T> extends PopupRoute<T> {
 Future<T> showDialog<T>({
   @required BuildContext context,
   bool barrierDismissible: true,
-  @deprecated Widget child,
-  @required WidgetBuilder builder,
+  @Deprecated(
+    'Instead of using the "child" argument, return the child from a closure '
+    'provided to the "builder" argument. This will ensure that the BuildContext'
+    ' is appropriate for widgets built in the dialog.'
+  ) Widget child,
+  WidgetBuilder builder,
 }) {
+  assert(child == null || builder == null);
   return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
-    child: child == null ? new Builder(builder: builder) : child,
+    child: child ?? new Builder(builder: builder),
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierDismissible: barrierDismissible,
-    barrierLabel: MaterialLocalizations
-        .of(context)
-        .modalBarrierDismissLabel,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   ));
 }

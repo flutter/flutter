@@ -232,7 +232,7 @@ void main() {
                   onTap: () {
                     showDialog<Null>(
                       context: context,
-                      builder:  (BuildContext context) {
+                      builder: (BuildContext context) {
                         return const Scaffold(
                           body: const SizedBox(
                             width: 200.0,

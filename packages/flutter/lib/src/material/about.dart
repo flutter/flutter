@@ -161,7 +161,7 @@ void showAboutDialog({
         applicationLegalese: applicationLegalese,
         children: children
       );
-      }
+    }
   );
 }
 
