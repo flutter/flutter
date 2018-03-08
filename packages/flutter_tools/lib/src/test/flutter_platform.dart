@@ -60,7 +60,7 @@ void installHook({
   bool startPaused: false,
   bool previewDart2: false,
   int port: 0,
-  String dillFilePath,
+  String precompiledDillPath,
   int observatoryPort,
   InternetAddressType serverType: InternetAddressType.IP_V4,
 }) {
@@ -78,7 +78,7 @@ void installHook({
       host: _kHosts[serverType],
       previewDart2: previewDart2,
       port: port,
-      dillFilePath: dillFilePath,
+      precompiledDillPath: precompiledDillPath,
     ),
   );
 }
@@ -87,11 +87,66 @@ enum _InitialResult { crashed, timedOut, connected }
 enum _TestResult { crashed, harnessBailed, testBailed }
 typedef Future<Null> _Finalizer();
 
-class CompilationRequest {
+class _CompilationRequest {
   String path;
   Completer<String> result;
 
-  CompilationRequest(this.path, this.result);
+  _CompilationRequest(this.path, this.result);
+}
+
+// This class is a wrapper around compiler that allows multiple isolates to
+// enqueue compilation requests, but ensures only one compilation at a time.
+class _Compiler {
+  _Compiler() {
+    // Compiler maintains and updates single incremental dill file.
+    // Incremental compilation requests done for each test copy that file away
+    // for independent execution.
+    final Directory outputDillDirectory = fs.systemTempDirectory
+        .createTempSync('output_dill');
+    final File outputDill = outputDillDirectory.childFile('output.dill');
+
+    compilerController.stream.listen((_CompilationRequest request) async {
+      final bool isEmpty = compilationQueue.isEmpty;
+      compilationQueue.add(request);
+      // Only trigger processing if queue was empty - i.e. no other requests
+      // are currently being processed. This effectively enforces "one
+      // compilation request at a time".
+      if (isEmpty) {
+        while (compilationQueue.isNotEmpty) {
+          final _CompilationRequest request = compilationQueue.first;
+          printTrace('Compiling ${request.path}');
+          final String outputPath = await compiler.recompile(request.path,
+            <String>[request.path],
+            outputPath: outputDill.path,
+          );
+          // Copy output dill next to the source file.
+          await outputDill.copy(request.path + '.dill');
+          compiler.accept();
+          compiler.reset();
+          request.result.complete(outputPath);
+          // Only remove now when we finished processing the element
+          compilationQueue.removeAt(0);
+        }
+      }
+    }, onDone: () {
+      outputDillDirectory.deleteSync(recursive: true);
+    });
+
+    compiler = new ResidentCompiler(
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        packagesPath: PackageMap.globalPackagesPath);
+  }
+
+  final StreamController<_CompilationRequest> compilerController =
+      new StreamController<_CompilationRequest>();
+  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
+  ResidentCompiler compiler;
+
+  Future<String> compile(String mainDart) {
+    final Completer<String> completer = new Completer<String>();
+    compilerController.add(new _CompilationRequest(mainDart, completer));
+    return completer.future;
+  }
 }
 
 class _FlutterPlatform extends PlatformPlugin {
@@ -105,43 +160,8 @@ class _FlutterPlatform extends PlatformPlugin {
     this.host,
     this.previewDart2,
     this.port,
-    this.dillFilePath,
-  }) : assert(shellPath != null) {
-
-    // Compiler maintains and updates single incremental dill file.
-    // Incremental compilation requests done for each test copy that file away
-    // for independent execution.
-    final Directory outputDillDirectory = fs.systemTempDirectory
-        .createTempSync('output_dill');
-    final File outputDill = outputDillDirectory.childFile('output.dill');
-
-    compilerController.stream.listen((CompilationRequest request) async {
-      final bool isEmpty = compilationQueue.isEmpty;
-      compilationQueue.add(request);
-      // Only trigger processing if queue was empty - i.e. no other requests
-      // are currently being processed. This effectively enforces "one
-      // compilation request at a time".
-      if (isEmpty) {
-        while (compilationQueue.isNotEmpty) {
-          final CompilationRequest request = compilationQueue.first;
-          printTrace('Compiling ${request.path}');
-          final String outputPath = await compiler.recompile(request.path,
-            <String>[request.path],
-            outputPath: outputDill.path
-          );
-          // Copy output dill next to the source file.
-          await outputDill.copy(request.path + '.dill');
-          compiler.accept();
-          compiler.reset();
-          request.result.complete(outputPath);
-          // Only remove now when we finished processing the element
-          compilationQueue.removeAt(0);
-        }
-      }
-    }, onDone: () {
-      outputDillDirectory.delete(recursive: true);
-    });
-  }
+    this.precompiledDillPath,
+  }) : assert(shellPath != null);
 
   final String shellPath;
   final TestWatcher watcher;
@@ -152,13 +172,9 @@ class _FlutterPlatform extends PlatformPlugin {
   final InternetAddress host;
   final bool previewDart2;
   final int port;
-  final String dillFilePath;
-  final StreamController<CompilationRequest> compilerController =
-      new StreamController<CompilationRequest>();
-  ResidentCompiler compiler =
-      new ResidentCompiler(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-          packagesPath: PackageMap.globalPackagesPath);
-  final List<CompilationRequest> compilationQueue = <CompilationRequest>[];
+  final String precompiledDillPath;
+
+  _Compiler compiler;
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
@@ -176,7 +192,7 @@ class _FlutterPlatform extends PlatformPlugin {
       if (explicitObservatoryPort != null)
         throwToolExit('installHook() was called with an observatory port or debugger mode enabled, but then more than one test suite was run.');
       // Fail if we're passing in a precompiled entry-point.
-      if (dillFilePath != null)
+      if (precompiledDillPath != null)
         throwToolExit('installHook() was called with a precompiled test entry-point, but then more than one test suite was run.');
     }
     final int ourTestCount = _testCount;
@@ -240,71 +256,25 @@ class _FlutterPlatform extends PlatformPlugin {
         cancelOnError: true,
       );
 
-      // Prepare a temporary directory to store the Dart file that will talk to us.
-      // If a kernel file is given, then use that to launch the test.
-      File listenerFile;
-      if (dillFilePath == null) {
-        final Directory temporaryDirectory = fs.systemTempDirectory
-            .createTempSync('dart_test_listener');
-        finalizers.add(() async {
-          printTrace('test $ourTestCount: deleting temporary directory');
-          temporaryDirectory.deleteSync(recursive: true);
-        });
-
-        // Prepare the Dart file that will talk to us and start the test.
-        listenerFile = fs.file(
-            '${temporaryDirectory.path}/listener.dart');
-        listenerFile.createSync();
-        listenerFile.writeAsStringSync(_generateTestMain(
-          testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
-          encodedWebsocketUrl: Uri.encodeComponent(_getWebSocketUrl(server)),
-        ));
-      }
-      // Start the engine subprocess.
       printTrace('test $ourTestCount: starting shell process${previewDart2? " in preview-dart-2 mode":""}');
 
-      String mainDart = listenerFile?.path ?? testPath;
-      String bundlePath;
+      // [precompiledDillPath] can be set only if [previewDart2] is [true].
+      assert(precompiledDillPath == null || previewDart2);
+      // If a kernel file is given, then use that to launch the test.
+      // Otherwise create a "listener" dart that invokes actual test.
+      String mainDart = precompiledDillPath != null
+          ? precompiledDillPath
+          : _createListenerDart(finalizers, ourTestCount, testPath, server);
 
-      if (previewDart2) {
-        if (dillFilePath == null) {
-          final Completer<String> completer = new Completer<String>();
-          compilerController.add(
-              new CompilationRequest(listenerFile.path, completer));
-          mainDart = await completer.future;
+      if (previewDart2 && precompiledDillPath == null) {
+        // Lazily instantiate compiler so it is built only if it is actually used.
+        compiler ??= new _Compiler();
+        mainDart = await compiler.compile(mainDart);
 
-          if (mainDart == null) {
-            controller.sink.addError(
-                _getErrorMessage('Compilation failed', testPath, shellPath));
-            return null;
-          }
-
-          // bundlePath needs to point to a folder with `platform.dill` file.
-          final Directory tempBundleDirectory = fs.systemTempDirectory
-              .createTempSync('flutter_bundle_directory');
-          finalizers.add(() async {
-            printTrace(
-                'test $ourTestCount: deleting temporary bundle directory');
-            tempBundleDirectory.deleteSync(recursive: true);
-          });
-
-          // copy 'vm_platform_strong.dill' into 'platform.dill'
-          final File vmPlatformStrongDill = fs.file(
-            artifacts.getArtifactPath(Artifact.platformKernelDill),
-          );
-          final File platformDill = vmPlatformStrongDill.copySync(
-            tempBundleDirectory
-                .childFile('platform.dill')
-                .path,
-          );
-          if (!platformDill.existsSync()) {
-            printError('unexpected error copying platform kernel file');
-          }
-
-          bundlePath = tempBundleDirectory.path;
-        } else {
-          mainDart = dillFilePath;
-          bundlePath = artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
+        if (mainDart == null) {
+          controller.sink.addError(
+              _getErrorMessage('Compilation failed', testPath, shellPath));
+          return null;
         }
       }
 
@@ -314,7 +284,7 @@ class _FlutterPlatform extends PlatformPlugin {
         packages: PackageMap.globalPackagesPath,
         enableObservatory: enableObservatory,
         startPaused: startPaused,
-        bundlePath: bundlePath,
+        bundlePath: _getBundlePath(finalizers, ourTestCount),
         observatoryPort: explicitObservatoryPort,
       );
       subprocessActive = true;
@@ -517,6 +487,60 @@ class _FlutterPlatform extends PlatformPlugin {
     }
     printTrace('test $ourTestCount: finished');
     return null;
+  }
+
+  String _createListenerDart(List<_Finalizer> finalizers, int ourTestCount,
+      String testPath, HttpServer server) {
+    // Prepare a temporary directory to store the Dart file that will talk to us.
+    final Directory temporaryDirectory = fs.systemTempDirectory
+        .createTempSync('dart_test_listener');
+    finalizers.add(() async {
+      printTrace('test $ourTestCount: deleting temporary directory');
+      temporaryDirectory.deleteSync(recursive: true);
+    });
+
+    // Prepare the Dart file that will talk to us and start the test.
+    final File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
+    listenerFile.createSync();
+    listenerFile.writeAsStringSync(_generateTestMain(
+      testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
+      encodedWebsocketUrl: Uri.encodeComponent(_getWebSocketUrl(server))
+    ));
+    return listenerFile.path;
+  }
+
+  String _getBundlePath(List<_Finalizer> finalizers, int ourTestCount) {
+    if (!previewDart2) {
+      return null;
+    }
+
+    if (precompiledDillPath != null) {
+      return artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
+    }
+
+    // bundlePath needs to point to a folder with `platform.dill` file.
+    final Directory tempBundleDirectory = fs.systemTempDirectory
+        .createTempSync('flutter_bundle_directory');
+    finalizers.add(() async {
+      printTrace(
+          'test $ourTestCount: deleting temporary bundle directory');
+      tempBundleDirectory.deleteSync(recursive: true);
+    });
+
+    // copy 'vm_platform_strong.dill' into 'platform.dill'
+    final File vmPlatformStrongDill = fs.file(
+      artifacts.getArtifactPath(Artifact.platformKernelDill),
+    );
+    final File platformDill = vmPlatformStrongDill.copySync(
+      tempBundleDirectory
+          .childFile('platform.dill')
+          .path,
+    );
+    if (!platformDill.existsSync()) {
+      printError('unexpected error copying platform kernel file');
+    }
+
+    return tempBundleDirectory.path;
   }
 
   String _getWebSocketUrl(HttpServer server) {
