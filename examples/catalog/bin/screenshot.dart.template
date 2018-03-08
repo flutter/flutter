@@ -36,6 +36,6 @@ class SampleScreenshotsState extends State<SampleScreenshots> {
 
 void main() {
   enableFlutterDriverExtension();
-  WidgetsApp.debugAllowBannerOverride = false; // No "slow mode" banner.
+  WidgetsApp.debugAllowBannerOverride = false; // No "debug" banner.
   runApp(new SampleScreenshots());
 }

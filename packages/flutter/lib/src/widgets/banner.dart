@@ -233,7 +233,7 @@ class BannerPainter extends CustomPainter {
 /// See also:
 ///
 ///  * [CheckedModeBanner], which the [WidgetsApp] widget includes by default in
-///    debug mode, to show a banner that says "SLOW MODE".
+///    debug mode, to show a banner that says "DEBUG".
 class Banner extends StatelessWidget {
   /// Creates a banner.
   ///
@@ -323,7 +323,7 @@ class Banner extends StatelessWidget {
   }
 }
 
-/// Displays a [Banner] saying "SLOW MODE" when running in checked mode.
+/// Displays a [Banner] saying "DEBUG" when running in checked mode.
 /// [MaterialApp] builds one of these by default.
 /// Does nothing in release mode.
 class CheckedModeBanner extends StatelessWidget {
@@ -344,7 +344,7 @@ class CheckedModeBanner extends StatelessWidget {
     assert(() {
       result = new Banner(
         child: result,
-        message: 'SLOW MODE',
+        message: 'DEBUG',
         textDirection: TextDirection.ltr,
         location: BannerLocation.topEnd,
       );
@@ -358,7 +358,7 @@ class CheckedModeBanner extends StatelessWidget {
     super.debugFillProperties(description);
     String message = 'disabled';
     assert(() {
-      message = '"SLOW MODE"';
+      message = '"DEBUG"';
       return true;
     }());
     description.add(new DiagnosticsNode.message(message));
