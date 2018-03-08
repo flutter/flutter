@@ -5,7 +5,7 @@
 import 'package:test/test.dart';
 
 void main() {
-  test('Trival test', () {
+  test('Trivial test', () {
     expect(42, 42);
   });
 }

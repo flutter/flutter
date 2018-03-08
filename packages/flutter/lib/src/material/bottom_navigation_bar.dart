@@ -13,6 +13,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 import 'typography.dart';
 
@@ -129,9 +130,11 @@ class _BottomNavigationTile extends StatelessWidget {
     this.iconSize, {
     this.onTap,
     this.colorTween,
-    this.flex
+    this.flex,
+    this.selected: false,
+    this.indexLabel,
     }
-  );
+  ): assert(selected != null);
 
   final BottomNavigationBarType type;
   final BottomNavigationBarItem item;
@@ -140,6 +143,8 @@ class _BottomNavigationTile extends StatelessWidget {
   final VoidCallback onTap;
   final ColorTween colorTween;
   final double flex;
+  final bool selected;
+  final String indexLabel;
 
   Widget _buildIcon() {
     double tweenStart;
@@ -255,15 +260,26 @@ class _BottomNavigationTile extends StatelessWidget {
     }
     return new Expanded(
       flex: size,
-      child: new InkResponse(
-        onTap: onTap,
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.min,
+      child: new Semantics(
+        container: true,
+        selected: selected,
+        child: new Stack(
           children: <Widget>[
-            _buildIcon(),
-            label,
+            new InkResponse(
+              onTap: onTap,
+              child: new Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _buildIcon(),
+                  label,
+                ],
+              ),
+            ),
+            new Semantics(
+              label: indexLabel,
+            )
           ],
         ),
       ),
@@ -368,6 +384,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   }
 
   List<Widget> _createTiles() {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    assert(localizations != null);
     final List<Widget> children = <Widget>[];
     switch (widget.type) {
       case BottomNavigationBarType.fixed:
@@ -398,6 +416,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                   widget.onTap(i);
               },
               colorTween: colorTween,
+              selected: i == widget.currentIndex,
+              indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
             ),
           );
         }
@@ -415,7 +435,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                   widget.onTap(i);
               },
               flex: _evaluateFlex(_animations[i]),
-            ),
+              selected: i == widget.currentIndex,
+              indexLabel: localizations.tabLabel(tabIndex: i + 1, tabCount: widget.items.length),
+            )
           );
         }
         break;

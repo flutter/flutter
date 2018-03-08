@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:process/process.dart';
@@ -15,6 +16,22 @@ import 'package:test/test.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart' show MockProcessManager, MockStdio, PromptingProcess;
+
+class AlwaysTrueBotDetector implements BotDetector {
+  const AlwaysTrueBotDetector();
+
+  @override
+  bool get isRunningOnBot => true;
+}
+
+
+class AlwaysFalseBotDetector implements BotDetector {
+  const AlwaysFalseBotDetector();
+
+  @override
+  bool get isRunningOnBot => false;
+}
+
 
 void main() {
   Cache.disableLocking();
@@ -221,7 +238,20 @@ void main() {
       mockStdio = new MockStdio();
     });
 
-    testUsingContext('test', () async {
+    testUsingContext('test without bot', () async {
+      await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'test']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(3));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], 'run');
+      expect(commands[2], 'test');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysFalseBotDetector(),
+    });
+
+    testUsingContext('test with bot', () async {
       await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'test']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(4));
@@ -232,6 +262,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
     });
 
     testUsingContext('run', () async {

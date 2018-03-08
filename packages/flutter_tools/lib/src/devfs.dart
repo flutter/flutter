@@ -407,6 +407,7 @@ class DevFS {
     bool bundleDirty: false,
     Set<String> fileFilter,
     ResidentCompiler generator,
+    String dillOutputPath,
     bool fullRestart: false,
   }) async {
     // Mark all entries as possibly deleted.
@@ -427,7 +428,7 @@ class DevFS {
     if (bundle != null) {
       printTrace('Scanning asset files');
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        _scanBundleEntry(archivePath, content, bundleDirty);
+        _scanBundleEntry(archivePath, content);
       });
     }
 
@@ -500,10 +501,11 @@ class DevFS {
       }
       final String compiledBinary =
           await generator.recompile(mainPath, invalidatedFiles,
-              outputPath: fs.path.join(getBuildDirectory(), 'app.dill'));
+              outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
+              packagesFilePath : _packagesFilePath);
       if (compiledBinary != null && compiledBinary.isNotEmpty)
         dirtyEntries.putIfAbsent(
-          Uri.parse(target + '.dill'),
+          fs.path.toUri(target + '.dill'),
           () => new DevFSFileContent(fs.file(compiledBinary))
         );
     }
@@ -541,7 +543,7 @@ class DevFS {
     content._exists = true;
   }
 
-  void _scanBundleEntry(String archivePath, DevFSContent content, bool bundleDirty) {
+  void _scanBundleEntry(String archivePath, DevFSContent content) {
     // We write the assets into the AssetBundle working dir so that they
     // are in the same location in DevFS and the iOS simulator.
     final Uri deviceUri = fs.path.toUri(fs.path.join(getAssetBuildDirectory(), archivePath));

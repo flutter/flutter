@@ -4,7 +4,7 @@
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
-def parse_KV_file(file,seperator='=')
+def parse_KV_file(file,separator='=')
   file_abs_path = File.expand_path(file)
   if !File.exists? file_abs_path
     return [];
@@ -13,7 +13,7 @@ def parse_KV_file(file,seperator='=')
   skip_line_start_symbols = ["#", "/"]
   File.foreach(file_abs_path) { |line|
       next if skip_line_start_symbols.any? { |symbol| line =~ /^\s*#{symbol}/ }
-      plugin = line.split(pattern=seperator)
+      plugin = line.split(pattern=separator)
       if plugin.length == 2
         podname = plugin[0].strip()
         path = plugin[1].strip()

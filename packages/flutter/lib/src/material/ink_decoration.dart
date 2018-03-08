@@ -99,7 +99,7 @@ import 'material.dart';
 /// See also:
 ///
 ///  * [Container], a more generic form of this widget which paints itself,
-///    rather that defering to the nearest [Material] widget.
+///    rather that deferring to the nearest [Material] widget.
 ///  * [InkDecoration], the [InkFeature] subclass used by this widget to paint
 ///    on [Material] widgets.
 ///  * [InkWell] and [InkResponse], which also draw on [Material] widgets.

@@ -23,7 +23,7 @@ void main() {
 
     final List<String> log = <String>[];
 
-    horizontalDrag.onStart = (DragStartDetails details) { log.add('hoizontal-drag-start'); };
+    horizontalDrag.onStart = (DragStartDetails details) { log.add('horizontal-drag-start'); };
     verticalDrag.onStart = (DragStartDetails details) { log.add('vertical-drag-start'); };
     tap.onTap = () { log.add('tap'); };
 

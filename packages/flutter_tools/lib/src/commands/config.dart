@@ -25,7 +25,7 @@ class ConfigCommand extends FlutterCommand {
     argParser.addFlag('machine',
       negatable: false,
       hide: !verboseHelp,
-      help: 'Pring config values as json.');
+      help: 'Print config values as json.');
   }
 
   @override

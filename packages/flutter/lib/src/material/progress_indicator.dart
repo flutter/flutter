@@ -238,7 +238,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 class _CircularProgressIndicatorPainter extends CustomPainter {
   static const double _kTwoPI = math.PI * 2.0;
   static const double _kEpsilon = .001;
-  // Canavs.drawArc(r, 0, 2*PI) doesn't draw anything, so just get close.
+  // Canvas.drawArc(r, 0, 2*PI) doesn't draw anything, so just get close.
   static const double _kSweep = _kTwoPI - _kEpsilon;
   static const double _kStartAngle = -math.PI / 2.0;
 
@@ -521,7 +521,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
     return new Container(
       width: _kIndicatorSize,
       height: _kIndicatorSize,
-      margin: const EdgeInsets.all(4.0), // acommodate the shadow
+      margin: const EdgeInsets.all(4.0), // accommodate the shadow
       child: new Material(
         type: MaterialType.circle,
         color: widget.backgroundColor ?? Theme.of(context).canvasColor,

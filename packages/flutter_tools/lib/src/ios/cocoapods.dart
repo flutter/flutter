@@ -105,7 +105,7 @@ class CocoaPods {
   /// contains a suitable `Podfile` and that its `Flutter/Xxx.xcconfig` files
   /// include pods configuration.
   void setupPodfile(String appDirectory) {
-    if (!xcodeProjectInterpreter.canInterpretXcodeProjects) {
+    if (!xcodeProjectInterpreter.isInstalled) {
       // Don't do anything for iOS when host platform doesn't support it.
       return;
     }

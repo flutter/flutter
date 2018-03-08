@@ -51,7 +51,11 @@ void main() {
     // Currently the TestRunner is not properly configured to be able to run
     // with `previewDart2: true` due to missing resources.
     testRunner = new TestRunner(
-        <FlutterDevice>[new FlutterDevice(new MockDevice())]
+      <FlutterDevice>[new FlutterDevice(
+        new MockDevice(),
+        previewDart2: false,
+        trackWidgetCreation: false,
+      )],
     );
   });
 

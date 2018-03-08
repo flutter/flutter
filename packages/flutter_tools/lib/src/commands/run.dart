@@ -90,6 +90,10 @@ class RunCommand extends RunCommandBase {
               'when testing Flutter on emulators. By default, Flutter will\n'
               'attempt to either use OpenGL or Vulkan and fall back to software\n'
               'when neither is available.');
+    argParser.addFlag('skia-deterministic-rendering',
+        negatable: false,
+        help: 'When combined with --enable-software-rendering, provides 100%\n'
+              'deterministic Skia rendering.');
     argParser.addFlag('trace-skia',
         negatable: false,
         help: 'Enable tracing of Skia code. This is useful when debugging\n'
@@ -142,6 +146,10 @@ class RunCommand extends RunCommandBase {
             'measure the startup time and the app restart time, write the\n'
             'results out to "refresh_benchmark.json", and exit. This flag is\n'
             'intended for use in generating automated flutter benchmarks.');
+
+    argParser.addOption('output-dill',
+        hide: !verboseHelp,
+        help: 'Specify the path to frontend server output kernel file.');
 
     argParser.addOption(FlutterOptions.kExtraFrontEndOptions, hide: true);
     argParser.addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true);
@@ -229,6 +237,7 @@ class RunCommand extends RunCommandBase {
         startPaused: argResults['start-paused'],
         useTestFonts: argResults['use-test-fonts'],
         enableSoftwareRendering: argResults['enable-software-rendering'],
+        skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
         traceSkia: argResults['trace-skia'],
         observatoryPort: observatoryPort,
       );
@@ -254,9 +263,10 @@ class RunCommand extends RunCommandBase {
           devices.first, fs.currentDirectory.path, targetFile, route,
           _createDebuggingOptions(), hotMode,
           applicationBinary: argResults['use-application-binary'],
-          previewDart2: argResults['preview-dart-2'],
+          trackWidgetCreation: argResults['track-widget-creation'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: globalResults['packages'],
+          dillOutputPath: argResults['output-dill'],
           ipv6: ipv6,
         );
       } catch (error) {
@@ -296,6 +306,7 @@ class RunCommand extends RunCommandBase {
         device,
         previewDart2: argResults['preview-dart-2'],
         trackWidgetCreation: argResults['track-widget-creation'],
+        dillOutputPath: argResults['output-dill'],
       );
     }).toList();
 
@@ -307,9 +318,9 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: _createDebuggingOptions(),
         benchmarkMode: argResults['benchmark'],
         applicationBinary: argResults['use-application-binary'],
-        previewDart2: argResults['preview-dart-2'],
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
+        dillOutputPath: argResults['output-dill'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -320,7 +331,6 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: _createDebuggingOptions(),
         traceStartup: traceStartup,
         applicationBinary: argResults['use-application-binary'],
-        previewDart2: argResults['preview-dart-2'],
         stayResident: stayResident,
         ipv6: ipv6,
       );

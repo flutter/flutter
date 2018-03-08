@@ -44,7 +44,7 @@ public class MainActivity extends FlutterActivity {
   }
 
   // Outgoing ByteBuffer messages must be direct-allocated and payload placed between
-  // positon 0 and current position.
+  // position 0 and current position.
   @SuppressWarnings("unchecked")
   private <T> T echo(T message) {
     if (message instanceof ByteBuffer) {

@@ -240,7 +240,7 @@ flutter:
       expect(barFontAsset1.style, 'italic');
     });
 
-    testUsingContext('has only one of two font familes when one declaration is missing the "family" option', () async {
+    testUsingContext('has only one of two font families when one declaration is missing the "family" option', () async {
       const String manifest = '''
 name: test
 dependencies:
@@ -285,7 +285,7 @@ flutter:
       expect(fooFontAsset1.style, 'italic');
     });
 
-    testUsingContext('has only one of two font familes when one declaration is missing the "fonts" option', () async {
+    testUsingContext('has only one of two font families when one declaration is missing the "fonts" option', () async {
       const String manifest = '''
 name: test
 dependencies:

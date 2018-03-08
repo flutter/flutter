@@ -33,7 +33,7 @@ import 'colors.dart';
 ///    globally adjusted, such as the color scheme.
 ///  * <http://material.google.com/style/typography.html>
 @immutable
-class TextTheme {
+class TextTheme extends Diagnosticable {
   /// Creates a text theme that uses the given values.
   ///
   /// Rather than creating a new text theme, consider using [Typography.black]
@@ -114,7 +114,7 @@ class TextTheme {
     TextStyle body2,
     TextStyle body1,
     TextStyle caption,
-    TextStyle button
+    TextStyle button,
   }) {
     return new TextTheme(
       display4: display4 ?? this.display4,
@@ -353,6 +353,34 @@ class TextTheme {
       button,
     );
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    final TextTheme defaultTheme = new Typography(platform: defaultTargetPlatform).black;
+    description.add(new DiagnosticsProperty<TextStyle>('display4', display4,
+        defaultValue: defaultTheme.display4));
+    description.add(new DiagnosticsProperty<TextStyle>('display3', display3,
+        defaultValue: defaultTheme.display3));
+    description.add(new DiagnosticsProperty<TextStyle>('display2', display2,
+        defaultValue: defaultTheme.display2));
+    description.add(new DiagnosticsProperty<TextStyle>('display1', display1,
+        defaultValue: defaultTheme.display1));
+    description.add(new DiagnosticsProperty<TextStyle>('headline', headline,
+        defaultValue: defaultTheme.headline));
+    description
+        .add(new DiagnosticsProperty<TextStyle>('title', title, defaultValue: defaultTheme.title));
+    description.add(
+        new DiagnosticsProperty<TextStyle>('subhead', subhead, defaultValue: defaultTheme.subhead));
+    description
+        .add(new DiagnosticsProperty<TextStyle>('body2', body2, defaultValue: defaultTheme.body2));
+    description
+        .add(new DiagnosticsProperty<TextStyle>('body1', body1, defaultValue: defaultTheme.body1));
+    description.add(
+        new DiagnosticsProperty<TextStyle>('caption', caption, defaultValue: defaultTheme.caption));
+    description.add(
+        new DiagnosticsProperty<TextStyle>('button', button, defaultValue: defaultTheme.button));
+  }
 }
 
 /// The two material design text themes.
@@ -373,7 +401,7 @@ class TextTheme {
 ///  * <http://material.google.com/style/typography.html>
 class Typography {
   /// Creates the default typography for the specified platform.
-  factory Typography({ @required TargetPlatform platform }) {
+  factory Typography({@required TargetPlatform platform}) {
     assert(platform != null);
     switch (platform) {
       case TargetPlatform.android:

@@ -17,7 +17,9 @@ def flutterVersionComponents = flutterVersion.split(/[^0-9]+/)
 int flutterVersionCode = Math.min(flutterVersionComponents[0].toInteger(), 20) * 100000000
 flutterVersionCode += Math.min(flutterVersionComponents[1].toInteger(), 99) * 1000000
 flutterVersionCode += Math.min(flutterVersionComponents[2].toInteger(), 999) * 1000
-flutterVersionCode += Math.min(flutterVersionComponents[3]?.toInteger() ?: 0, 999)
+if (flutterVersionComponents.length > 3) {
+    flutterVersionCode += Math.min(flutterVersionComponents[3].toInteger(), 999)
+}
 
 apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"

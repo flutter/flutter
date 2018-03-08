@@ -73,6 +73,7 @@ Future<int> run(
     context.putIfAbsent(Config, () => new Config());
 
     // Order-independent context entries
+    context.putIfAbsent(BotDetector, () => const BotDetector());
     context.putIfAbsent(DeviceManager, () => new DeviceManager());
     context.putIfAbsent(DevFSConfig, () => new DevFSConfig());
     context.putIfAbsent(Doctor, () => new Doctor());
@@ -233,7 +234,7 @@ Future<String> _doctorText() async {
 
     appContext.setVariable(Logger, logger);
 
-    await appContext.runInZone(() => doctor.diagnose());
+    await appContext.runInZone(() => doctor.diagnose(verbose: true));
 
     return logger.statusText;
   } catch (error, trace) {

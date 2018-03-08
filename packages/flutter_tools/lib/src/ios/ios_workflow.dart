@@ -68,10 +68,10 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
       messages.add(new ValidationMessage('Xcode at ${xcode.xcodeSelectPath}'));
 
-      xcodeVersionInfo = xcode.xcodeVersionText;
+      xcodeVersionInfo = xcode.versionText;
       if (xcodeVersionInfo.contains(','))
         xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
-      messages.add(new ValidationMessage(xcode.xcodeVersionText));
+      messages.add(new ValidationMessage(xcode.versionText));
 
       if (!xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;

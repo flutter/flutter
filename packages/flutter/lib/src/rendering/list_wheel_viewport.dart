@@ -90,8 +90,7 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> { }
 ///    above and below it being transformed more as the angle increases.
 class RenderListWheelViewport
     extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, ListWheelParentData>,
-         RenderBoxContainerDefaultsMixin<RenderBox, ListWheelParentData>
+    with ContainerRenderObjectMixin<RenderBox, ListWheelParentData>
     implements RenderAbstractViewport {
   /// Creates a [RenderListWheelViewport] which renders children on a wheel.
   ///
