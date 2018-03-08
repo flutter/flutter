@@ -851,4 +851,19 @@ void main() {
       const Offset(0.0, 20.0)
     ]);
   });
+
+  testWidgets('Object exactly matches container width', (WidgetTester tester) async {
+    await tester.pumpWidget(new Wrap(
+      direction: Axis.horizontal,
+      textDirection: TextDirection.ltr,
+      spacing: 10.0,
+      runSpacing: 10.0,
+      children: <Widget>[
+        const SizedBox(width: 800.0, height: 0.0),
+      ],
+    ));
+
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    verify(tester, <Offset>[const Offset(0.0, 0.0)]);
+  });
 }
