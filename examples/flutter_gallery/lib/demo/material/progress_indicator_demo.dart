@@ -68,7 +68,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
         child: const LinearProgressIndicator()
       ),
       const LinearProgressIndicator(),
-      const LinearProgressIndicator(),
+      const LinearProgressIndicator(height: 12.0),
       new LinearProgressIndicator(value: _animation.value),
       new Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
