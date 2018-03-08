@@ -883,7 +883,7 @@ abstract class DiagnosticsNode {
 
         builder.write(
             config.isNameOnOwnLine || description.contains('\n') ? '\n' : ' ');
-        if (description.contains('\n'))
+        if (description.contains('\n') && style == DiagnosticsTreeStyle.singleLine)
           builder.prefixOtherLines += '  ';
       }
       builder.prefixOtherLines += children.isEmpty ?

@@ -1478,8 +1478,8 @@ void main() {
       multiLineProperty.toStringDeep(),
       equals(
         'objects:\n'
-        '    Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)\n'
-        '    Color(0xffffffff)\n',
+        '  Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)\n'
+        '  Color(0xffffffff)\n',
       ),
     );
     validateIterablePropertyJsonSerialization(multiLineProperty);
@@ -1491,8 +1491,8 @@ void main() {
       equalsIgnoringHashCodes(
         'TestTree#00000\n'
         '   objects:\n'
-        '       Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)\n'
-        '       Color(0xffffffff)\n',
+        '     Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)\n'
+        '     Color(0xffffffff)\n',
       ),
     );
 
