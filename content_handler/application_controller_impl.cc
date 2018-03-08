@@ -42,9 +42,9 @@ ApplicationControllerImpl::ApplicationControllerImpl(
   // TODO(jeffbrown): Decide what to do with command-line arguments and
   // startup handles.
 
-  if (startup_info->launch_info->service_request.is_valid()) {
+  if (startup_info->launch_info->directory_request.is_valid()) {
     service_provider_bridge_.ServeDirectory(
-        std::move(startup_info->launch_info->service_request));
+        std::move(startup_info->launch_info->directory_request));
   }
 
   service_provider_bridge_.AddService<mozart::ViewProvider>(
