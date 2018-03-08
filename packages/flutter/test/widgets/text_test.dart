@@ -85,4 +85,22 @@ void main() {
     expect(message, contains('Directionality'));
     expect(message, contains(' Text '));
   });
+
+  testWidgets('Text can be created from TextSpans', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Text.fromSpan(
+        const TextSpan(
+          text: 'Hello',
+          children: const <TextSpan>[
+            const TextSpan(text: ' beautiful ', style: const TextStyle(fontStyle: FontStyle.italic)),
+            const TextSpan(text: 'world', style: const TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        textDirection: TextDirection.ltr,
+      ),
+    );
+
+    final RichText text = tester.firstWidget(find.byType(RichText));
+    expect(text, isNotNull);
+  });
 }

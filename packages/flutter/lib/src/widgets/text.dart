@@ -164,6 +164,11 @@ class DefaultTextStyle extends InheritedWidget {
 /// for example, to make the text bold while using the default font family and
 /// size.
 ///
+/// The [Text] widget can also be created directly from a [TextSpan]. Default text
+/// styles will not be provided to the span in this case, but they are used as default
+/// values for the other named parameters.
+///
+///
 /// To display text that uses multiple styles (e.g., a paragraph with some bold
 /// words), use [RichText].
 ///
@@ -210,16 +215,40 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
   }) : assert(data != null),
+       span = null,
        super(key: key);
 
+  /// Creates a text widget from a [TextSpan].
+  const Text.fromSpan(this.span, {
+    Key key,
+    this.textAlign,
+    this.textDirection,
+    this.softWrap,
+    this.overflow,
+    this.textScaleFactor,
+    this.maxLines,
+  }): assert(span != null),
+      data = null,
+      style = null,
+      super(key: key);
+
   /// The text to display.
+  ///
+  /// If constructed with the default constructor, `span` will be null.
   final String data;
+
+  /// The text to display as a span.
+  ///
+  /// If constructed from a [TextSpan], `data` will be null.
+  final TextSpan span;
 
   /// If non-null, the style to use for this text.
   ///
   /// If the style's "inherit" property is true, the style will be merged with
   /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
   /// replace the closest enclosing [DefaultTextStyle].
+  ///
+  /// If constructed from a [TextSpan], the style will be null.
   final TextStyle style;
 
   /// How the text should be aligned horizontally.
@@ -275,7 +304,7 @@ class Text extends StatelessWidget {
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle effectiveTextStyle = style;
-    if (style == null || style.inherit)
+    if (span == null && (style == null || style.inherit))
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     return new RichText(
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
@@ -284,7 +313,7 @@ class Text extends StatelessWidget {
       overflow: overflow ?? defaultTextStyle.overflow,
       textScaleFactor: textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
       maxLines: maxLines ?? defaultTextStyle.maxLines,
-      text: new TextSpan(
+      text: span ?? new TextSpan(
         style: effectiveTextStyle,
         text: data,
       )
@@ -294,7 +323,7 @@ class Text extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new StringProperty('data', data, showName: false));
+    description.add(new StringProperty('data', data ?? span.toPlainText(), showName: false));
     style?.debugFillProperties(description);
     description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
