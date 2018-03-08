@@ -88,7 +88,7 @@ void main() {
 
   testWidgets('Text can be created from TextSpans', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Text.fromSpan(
+      const Text.rich(
         const TextSpan(
           text: 'Hello',
           children: const <TextSpan>[

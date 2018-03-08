@@ -164,13 +164,8 @@ class DefaultTextStyle extends InheritedWidget {
 /// for example, to make the text bold while using the default font family and
 /// size.
 ///
-/// The [Text] widget can also be created directly from a [TextSpan]. Default text
-/// styles will not be provided to the span in this case, but they are used as default
-/// values for the other named parameters.
-///
-///
-/// To display text that uses multiple styles (e.g., a paragraph with some bold
-/// words), use [RichText].
+/// The [Text] widget can also be created directly from a [TextSpan] to display
+/// text that uses multiple styles (e.g., a paragraph with some bold words).
 ///
 /// ## Sample code
 ///
@@ -218,8 +213,8 @@ class Text extends StatelessWidget {
        span = null,
        super(key: key);
 
-  /// Creates a text widget from a [TextSpan].
-  const Text.fromSpan(this.span, {
+  /// Creates a text widget with a [TextSpan].
+  const Text.rich(this.span, {
     Key key,
     this.textAlign,
     this.textDirection,
@@ -239,7 +234,7 @@ class Text extends StatelessWidget {
 
   /// The text to display as a span.
   ///
-  /// If constructed from a [TextSpan], `data` will be null.
+  /// If constructed with a [TextSpan], `data` will be null.
   final TextSpan span;
 
   /// If non-null, the style to use for this text.
@@ -248,7 +243,7 @@ class Text extends StatelessWidget {
   /// the closest enclosing [DefaultTextStyle]. Otherwise, the style will
   /// replace the closest enclosing [DefaultTextStyle].
   ///
-  /// If constructed from a [TextSpan], the style will be null.
+  /// If constructed with a [TextSpan], the style will be null.
   final TextStyle style;
 
   /// How the text should be aligned horizontally.
