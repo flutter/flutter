@@ -206,7 +206,7 @@ void main() {
     void testHorizontalGeometry() {
       expect(right('leading'), 800.0 - 16.0 - rightPadding);
       expect(right('title'), 800.0 - 72.0 - rightPadding);
-      expect(left('leading') - right('title'), 16.0);
+      expect(left('leading') - right('title'), 28.0);
       expect(left('trailing'), 16.0 + leftPadding);
     }
 

@@ -152,14 +152,14 @@ void main() {
 
     // Check sizes/locations of the text.
     expect(tester.getSize(find.text('The Title')), equals(const Size(230.0, 198.0)));
-    expect(tester.getSize(find.text('Cancel')), equals(const Size(75.0, 300.0)));
-    expect(tester.getSize(find.text('OK')), equals(const Size(75.0, 100.0)));
+    expect(tester.getSize(find.text('Cancel')), equals(const Size(51.0, 300.0)));
+    expect(tester.getSize(find.text('OK')), equals(const Size(51.0, 100.0)));
     expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(285.0, 40.0)));
 
     // The Cancel and OK buttons have different Y values because "Cancel" is
     // wrapping (as it should with large text sizes like this).
-    expect(tester.getTopLeft(find.text('Cancel')), equals(const Offset(295.0, 250.0)));
-    expect(tester.getTopLeft(find.text('OK')), equals(const Offset(430.0, 350.0)));
+    expect(tester.getTopLeft(find.text('Cancel')), equals(const Offset(307.0, 250.0)));
+    expect(tester.getTopLeft(find.text('OK')), equals(const Offset(442.0, 350.0)));
   });
 }
 
