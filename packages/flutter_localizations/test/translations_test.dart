@@ -99,8 +99,8 @@ void main() {
 
     localizations = new GlobalMaterialLocalizations(const Locale('ro', ''));
     expect(localizations.selectedRowCountTitle(0), 'Nu există elemente selectate');
-    expect(localizations.selectedRowCountTitle(1), '1 element selectat');
-    expect(localizations.selectedRowCountTitle(2), '2 elemente selectate');
-    expect(localizations.selectedRowCountTitle(123456789), '123.456.789 elemente selectate');
+    expect(localizations.selectedRowCountTitle(1), 'Un articol selectat');
+    expect(localizations.selectedRowCountTitle(2), '2 de articole selectate');
+    expect(localizations.selectedRowCountTitle(123456789), '123.456.789 de articole selectate');
   });
 }
