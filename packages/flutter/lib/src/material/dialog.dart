@@ -457,12 +457,17 @@ class _DialogRoute<T> extends PopupRoute<T> {
 
 /// Displays a dialog above the current contents of the app.
 ///
-/// This function typically receives a [Dialog] widget as its child argument.
-/// Content below the dialog is dimmed with a [ModalBarrier].
+/// This function typically receives a [Dialog] widget inside of a [WidgetBuilder]
+/// as it's `builder` argument. Content below the dialog is dimmed with a [ModalBarrier].
+/// This widget does not share a context with the location that `showDialog` is
+/// originally called from, nor will calling `setState()` in this location cause
+/// the dialog to update.
 ///
 /// The `context` argument is used to look up the [Navigator] and [Theme] for
 /// the dialog. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the dialog is closed.
+///
+/// The `child` argument is deprecated, and should be replaced with `builder`.
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
@@ -481,11 +486,11 @@ class _DialogRoute<T> extends PopupRoute<T> {
 Future<T> showDialog<T>({
   @required BuildContext context,
   bool barrierDismissible: true,
-  @Deprecated('') Widget child,
+  @deprecated Widget child,
   @required WidgetBuilder builder,
 }) {
   return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
-    child: new Builder(builder: builder),
+    child: child == null ? new Builder(builder: builder) : child,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierDismissible: barrierDismissible,
     barrierLabel: MaterialLocalizations
