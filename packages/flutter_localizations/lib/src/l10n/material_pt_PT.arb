@@ -1,4 +1,8 @@
 {
+  "tabLabel": "Separador $tabIndex de $tabCount",
+  "showAccountsLabel": "Mostrar contas",
+  "hideAccountsLabel": "Ocultar contas",
+  "signedInLabel": "Com sessão iniciada",
   "timePickerMinuteModeAnnouncement": "Selecionar minutos",
   "timePickerHourModeAnnouncement": "Selecionar horas",
   "scriptCategory": "English-like",
