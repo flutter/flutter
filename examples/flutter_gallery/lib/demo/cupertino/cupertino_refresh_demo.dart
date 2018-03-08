@@ -49,7 +49,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
                 largeTitle: const Text('Cupertino Refresh'),
               ),
               new CupertinoRefreshControl(
-                onRefresh: () async {
+                onRefresh: () {
                   return new Future<void>.delayed(const Duration(seconds: 3))
                       ..then((_) => setState(() => repopulateList()));
                 },

@@ -4,6 +4,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -35,7 +36,7 @@ class _CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, covariant _RenderCupertinoRefreshSliver renderObject) {
-    print('updating sliver to layoutExtent $refreshIndicatorExtent');
+    print('updating sliver to hasLayoutExtent $hasLayoutExtent');
     renderObject
         ..refreshIndicatorExtent = refreshIndicatorExtent
         ..hasLayoutExtent = hasLayoutExtent;
@@ -84,9 +85,9 @@ class _RenderCupertinoRefreshSliver
   void performLayout() {
     assert(constraints.axisDirection == AxisDirection.down);
     assert(constraints.growthDirection == GrowthDirection.forward);
-    print('layout scrollOffset ${constraints.scrollOffset} overlapping ${constraints.overlap} viewportMainAxisExtent ${constraints.viewportMainAxisExtent} remaining paint extent ${constraints.remainingPaintExtent}');
 
     final double layoutExtent = (_hasLayoutExtent ? 1.0 : 0.0) * _refreshIndicatorExtent;
+    print('sliver performLayout scrollOffset ${constraints.scrollOffset} overlapping ${constraints.overlap} viewportMainAxisExtent ${constraints.viewportMainAxisExtent} remaining paint extent ${constraints.remainingPaintExtent} layoutExtent $layoutExtent');
     // If the new _layoutExtent instructive changed, the SliverGeometry's
     // layoutExtent will take that value (on the next performLayout run). Shift
     // the scroll offset first so it doesn't make the scroll position suddenly jump.
@@ -96,34 +97,36 @@ class _RenderCupertinoRefreshSliver
       );
       layoutExtentOffsetCompensation = layoutExtent;
       // Return so we don't have to do temporary accounting and adjusting the
-      // child's constraints accounting for existing layout extent, new layout
-      // extent change and the overlay.
+      // child's constraints accounting for one transient frame using a
+      // combination of existing layout extent, new layout extent change and
+      // the overlap.
       return;
     }
 
-    // If we never started overscrolling, short circuit out.
-    if (constraints.overlap > 0.0 && layoutExtent == 0.0) {
-      geometry = SliverGeometry.zero;
-    } else {
-      print('incoming max height ${constraints.overlap.abs() + layoutExtentOffsetCompensation}');
-      // Layout the child giving it the space of the currently dragged overscroll
-      // which may or may not include a sliver layout extent space that it will
-      // keep after the user lets go during the refresh process.
-      child.layout(
-        constraints.asBoxConstraints(
-          maxExtent: constraints.overlap.abs() + layoutExtentOffsetCompensation,
-        ),
-        parentUsesSize: true,
-      );
-      // print('child size ${child.size}');
-      print('layoutExtent $layoutExtent layoutExtentOffsetCompensation $layoutExtentOffsetCompensation');
+    final bool active = constraints.overlap < 0.0 || layoutExtent > 0.0;
+    print('child.layout with max height ${layoutExtent + (constraints.overlap < 0.0 ? constraints.overlap.abs() : 0.0)}');//${constraints.overlap.abs() + layoutExtentOffsetCompensation}');
+    // Layout the child giving it the space of the currently dragged overscroll
+    // which may or may not include a sliver layout extent space that it will
+    // keep after the user lets go during the refresh process.
+    child.layout(
+      constraints.asBoxConstraints(
+        maxExtent: layoutExtent
+            + (constraints.overlap < 0.0 ? constraints.overlap.abs() : 0.0),
+      ),
+      parentUsesSize: true,
+    );
+    if (active) {
       geometry = new SliverGeometry(
         scrollExtent: layoutExtent,
-        paintOrigin: constraints.overlap,
-        paintExtent: max(child.size.height, layoutExtent), // constraints.overlap.abs(),
-        maxPaintExtent: max(child.size.height, layoutExtent), //constraints.remainingPaintExtent,
-        layoutExtent: layoutExtent,
+        paintOrigin: (constraints.overlap < 0 ? constraints.overlap : 0.0) - constraints.scrollOffset,
+        paintExtent: max(max(child.size.height, layoutExtent) - constraints.scrollOffset, 0.0), // constraints.overlap.abs(),
+        maxPaintExtent: max(max(child.size.height, layoutExtent) - constraints.scrollOffset, 0.0), // constraints.overlap.abs(),
+        layoutExtent: max(layoutExtent - constraints.scrollOffset, 0.0),
       );
+      print('sliver geometry $geometry');
+    } else {
+      // If we never started overscrolling, return no geometry.
+      geometry = SliverGeometry.zero;
     }
   }
 
@@ -134,8 +137,8 @@ class _RenderCupertinoRefreshSliver
     }
   }
 
-  // @override
-  // void applyPaintTransform(RenderObject child, Matrix4 transform) {}
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {}
 }
 
 /// The state machine moves through these modes only when the scrollable
@@ -186,6 +189,13 @@ class CupertinoRefreshControl extends StatefulWidget {
 
   static const double _kDefaultRefreshTriggerPullDistance = 100.0;
   static const double _kDefaultRefreshIndicatorExtent = 65.0;
+
+  @visibleForTesting
+  static RefreshIndicatorMode state(BuildContext context) {
+    final _CupertinoRefreshControlState state
+        = context.ancestorStateOfType(const TypeMatcher<_CupertinoRefreshControlState>());
+    return state.refreshState;
+  }
 
   static Widget buildDefaultRefreshIndicator(BuildContext context,
     RefreshIndicatorMode refreshState,
@@ -239,6 +249,20 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
 
   RefreshIndicatorMode transitionNextState() {
     RefreshIndicatorMode nextState;
+
+    void goToDone() {
+      nextState = RefreshIndicatorMode.done;
+      print(SchedulerBinding.instance.schedulerPhase);
+      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
+        setState(() => hasSliverLayoutExtent = false);
+      } else {
+        SchedulerBinding.instance.addPostFrameCallback((Duration timestamp){
+          setState(() => hasSliverLayoutExtent = false);
+        });
+      }
+      print('done');
+    }
+
     switch (refreshState) {
       case RefreshIndicatorMode.inactive:
         print('checking inactive max height $lastScrollExtent');
@@ -259,10 +283,10 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
           return RefreshIndicatorMode.drag;
         } else {
           print('armed');
-          SchedulerBinding.instance.addPostFrameCallback((Duration timestamp){
-            print('onRefresh ${widget.onRefresh}');
-            if (widget.onRefresh != null) {
-              HapticFeedback.mediumImpact();
+          if (widget.onRefresh != null) {
+            HapticFeedback.mediumImpact();
+            SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+              print('onRefresh ${widget.onRefresh}');
               refreshTask = widget.onRefresh()..then((_) {
                 print('refresh done');
                 if (mounted) {
@@ -274,11 +298,12 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
                   // state may be stuck in a non-inactive state.
                   print('transitioning again');
                   refreshState = transitionNextState();
+                  print('transitioning again done');
                 }
               });
               setState(() => hasSliverLayoutExtent = true);
-            }
-          });
+            });
+          }
           return RefreshIndicatorMode.armed;
         }
         // Don't continue here. We can never possibly call onRefresh and
@@ -287,11 +312,7 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
       case RefreshIndicatorMode.armed:
         print('checking armed max height $lastScrollExtent refresh task $refreshTask');
         if (refreshState == RefreshIndicatorMode.armed && refreshTask == null) {
-          nextState = RefreshIndicatorMode.done;
-          SchedulerBinding.instance.addPostFrameCallback((Duration timestamp){
-            setState(() => hasSliverLayoutExtent = false);
-          });
-          print('done');
+          goToDone();
           continue done;
         }
 
@@ -308,17 +329,17 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
         if (refreshTask != null) {
           return RefreshIndicatorMode.refresh;
         } else {
-          nextState = RefreshIndicatorMode.done;
-          SchedulerBinding.instance.addPostFrameCallback((Duration timestamp){
-            setState(() => hasSliverLayoutExtent = false);
-          });
-          print('done');
+          goToDone();
         }
         continue done;
       done:
       case RefreshIndicatorMode.done:
         print('checking done max height $lastScrollExtent');
-        if (lastScrollExtent > 0) {
+        // Let the transition back to inactive trigger before strictly going
+        // to 0.0 since the last bit of the animation can take some time and
+        // can feel sluggish if not going all the way back to 0.0 prevented
+        // a subsequent pull-to-refresh from starting.
+        if (lastScrollExtent > widget.refreshTriggerPullDistance * 0.1) {
           return RefreshIndicatorMode.done;
         } else {
           nextState = RefreshIndicatorMode.inactive;
@@ -341,10 +362,8 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
         builder: (BuildContext context, BoxConstraints constraints) {
           lastScrollExtent = constraints.maxHeight;
           refreshState = transitionNextState();
-          print('state after transition $refreshState with builder ${widget.builder}');
-
+          print('calling indicator builder with $refreshState, $lastScrollExtent');
           if (widget.builder != null && refreshState != RefreshIndicatorMode.inactive) {
-            print('calling indicator builder with $refreshState, $lastScrollExtent');
             return widget.builder(
               context,
               refreshState,
