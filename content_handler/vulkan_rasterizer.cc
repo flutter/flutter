@@ -19,7 +19,7 @@
 
 namespace flutter_runner {
 
-constexpr char kDisplayDriverClass[] = "/dev/class/display";
+constexpr char kGpuDriverClass[] = "/dev/class/gpu";
 
 static zx_status_t DriverWatcher(int dirfd,
                                  int event,
@@ -31,20 +31,20 @@ static zx_status_t DriverWatcher(int dirfd,
   return ZX_OK;
 }
 
-bool WaitForFirstDisplayDriver() {
-  fxl::UniqueFD fd(open(kDisplayDriverClass, O_DIRECTORY | O_RDONLY));
+bool WaitForFirstGpuDriver() {
+  fxl::UniqueFD fd(open(kGpuDriverClass, O_DIRECTORY | O_RDONLY));
   if (fd.get() < 0) {
-    FXL_DLOG(ERROR) << "Failed to open " << kDisplayDriverClass;
+    FXL_DLOG(ERROR) << "Failed to open " << kGpuDriverClass;
     return false;
   }
 
   zx_status_t status = fdio_watch_directory(
-      fd.get(), DriverWatcher, zx_deadline_after(ZX_SEC(1)), nullptr);
+      fd.get(), DriverWatcher, zx_deadline_after(ZX_SEC(5)), nullptr);
   return status == ZX_ERR_STOP;
 }
 
 VulkanRasterizer::VulkanRasterizer() : compositor_context_(nullptr) {
-  valid_ = WaitForFirstDisplayDriver();
+  valid_ = WaitForFirstGpuDriver();
 }
 
 VulkanRasterizer::~VulkanRasterizer() = default;
