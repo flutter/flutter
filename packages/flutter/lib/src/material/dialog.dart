@@ -488,14 +488,14 @@ Future<T> showDialog<T>({
   bool barrierDismissible: true,
   @Deprecated(
     'Instead of using the "child" argument, return the child from a closure '
-    'provided to the "builder" argument. This will ensure that the BuildContext'
-    ' is appropriate for widgets built in the dialog.'
+    'provided to the "builder" argument. This will ensure that the BuildContext '
+    'is appropriate for widgets built in the dialog.'
   ) Widget child,
   WidgetBuilder builder,
 }) {
-  assert(child == null || builder == null);
+  assert(child == null || builder == null); // ignore: deprecated_member_use
   return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
-    child: child ?? new Builder(builder: builder),
+    child: child ?? new Builder(builder: builder), // ignore: deprecated_member_use
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierDismissible: barrierDismissible,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
