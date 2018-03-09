@@ -210,7 +210,7 @@ typedef Widget RefreshControlIndicatorBuilder(
 /// [RefreshIndicatorMode.done] state and will start to go away.
 typedef Future<void> RefreshCallback();
 
-/// A sliver widget implementing the iOS-style refresh content control.
+/// A sliver widget implementing the iOS-style pull to refresh content control.
 ///
 /// When inserted as the first sliver in a scroll view or behind other slivers
 /// that still lets the scrollable overscroll in front of this sliver, this
@@ -239,6 +239,11 @@ typedef Future<void> RefreshCallback();
 ///  * [CustomScrollView], a typical sliver holding scroll view this control
 ///    should go into.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/refresh-content-controls/>
+///  * [RefreshIndicator], a Material Design version of the pull-to-refresh
+///    paradigm. This widget works differently than [RefreshIndicator] because
+///    instead of being an overlay on top of the scrollable, the
+///    [CupertinoRefreshControl] is part of the scrollable and actively occupies
+///    scrollable space.
 class CupertinoRefreshControl extends StatefulWidget {
   /// Create a new [CupertinoRefreshControl] for inserting into a list of slivers.
   ///
