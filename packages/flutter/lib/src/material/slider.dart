@@ -51,10 +51,11 @@ import 'theme.dart';
 /// given unbounded constraints, it will attempt to make the rail 144 pixels
 /// wide (with margins on each side) and will shrink-wrap vertically.
 ///
-/// Both [Material] and [MediaQuery] widgets are required to be present as
-/// ancestors for this widget. Typically, these are introduced by the
-/// [MaterialApp] or [WidgetsApp] widget at the top of your application widget
-/// tree.
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// Requires one of its ancestors to be a [MediaQuery] widget. Typically, these
+/// are introduced by the [MaterialApp] or [WidgetsApp] widget at the top of
+/// your application widget tree.
 ///
 /// To determine how it should be displayed (e.g. colors, thumb shape, etc.),
 /// a slider uses the [SliderThemeData] available from either a [SliderTheme]
@@ -71,7 +72,6 @@ import 'theme.dart';
 ///  * [Checkbox] and [Switch], for toggling a particular value on or off.
 ///  * <https://material.google.com/components/sliders.html>
 ///  * [MediaQuery], from which the text scale factor is obtained.
-
 class Slider extends StatefulWidget {
   /// Creates a material design slider.
   ///
@@ -214,13 +214,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   static const Duration enableAnimationDuration = const Duration(milliseconds: 75);
   static const Duration positionAnimationDuration = const Duration(milliseconds: 75);
 
-  /// Animation controller that is run when interactions occur (taps, drags,
-  /// etc.).
+  // Animation controller that is run when interactions occur (taps, drags,
+  // etc.).
   AnimationController reactionController;
-  /// Animation controller that is run when enabling/disabling the slider.
+  // Animation controller that is run when enabling/disabling the slider.
   AnimationController enableController;
-  /// Animation controller that is run when transitioning between one value
-  /// and the next on a discrete slider.
+  // Animation controller that is run when transitioning between one value
+  // and the next on a discrete slider.
   AnimationController positionController;
 
   @override
@@ -238,6 +238,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       duration: positionAnimationDuration,
       vsync: this,
     );
+    enableController.value = widget.onChanged != null ? 1.0 : 0.0;
+    positionController.value = widget.value;
   }
 
   @override
@@ -401,6 +403,14 @@ class _RenderSlider extends RenderBox {
       ..onTapDown = _handleTapDown
       ..onTapUp = _handleTapUp
       ..onTapCancel = _endInteraction;
+    _reaction = new CurvedAnimation(
+      parent: _state.reactionController,
+      curve: Curves.fastOutSlowIn,
+    );
+    _enableAnimation = new CurvedAnimation(
+      parent: _state.enableController,
+      curve: Curves.easeInOut,
+    );
   }
 
   double get value => _value;
@@ -424,7 +434,6 @@ class _RenderSlider extends RenderBox {
 
   int get divisions => _divisions;
   int _divisions;
-
   set divisions(int value) {
     if (value == _divisions) {
       return;
@@ -435,7 +444,6 @@ class _RenderSlider extends RenderBox {
 
   String get label => _label;
   String _label;
-
   set label(String value) {
     if (value == _label) {
       return;
@@ -446,7 +454,6 @@ class _RenderSlider extends RenderBox {
 
   SliderThemeData get sliderTheme => _sliderTheme;
   SliderThemeData _sliderTheme;
-
   set sliderTheme(SliderThemeData value) {
     if (value == _sliderTheme) {
       return;
@@ -457,7 +464,6 @@ class _RenderSlider extends RenderBox {
 
   ThemeData get theme => _theme;
   ThemeData _theme;
-
   set theme(ThemeData value) {
     if (value == _theme) {
       return;
@@ -468,7 +474,6 @@ class _RenderSlider extends RenderBox {
 
   MediaQueryData get mediaQueryData => _mediaQueryData;
   MediaQueryData _mediaQueryData;
-
   set mediaQueryData(MediaQueryData value) {
     if (value == _mediaQueryData) {
       return;
@@ -481,7 +486,6 @@ class _RenderSlider extends RenderBox {
 
   ValueChanged<double> get onChanged => _onChanged;
   ValueChanged<double> _onChanged;
-
   set onChanged(ValueChanged<double> value) {
     if (value == _onChanged) {
       return;
@@ -501,7 +505,6 @@ class _RenderSlider extends RenderBox {
 
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
-
   set textDirection(TextDirection value) {
     assert(value != null);
     if (value == _textDirection) {
@@ -516,7 +519,7 @@ class _RenderSlider extends RenderBox {
       _labelPainter
         ..text = new TextSpan(style: _theme.accentTextTheme.body2, text: label)
         ..textDirection = textDirection
-        ..textScaleFactor = _mediaQueryData?.textScaleFactor ?? 1.0
+        ..textScaleFactor = _mediaQueryData.textScaleFactor
         ..layout();
     } else {
       _labelPainter.text = null;
@@ -544,25 +547,17 @@ class _RenderSlider extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _reaction = new CurvedAnimation(
-      parent: _state.reactionController,
-      curve: Curves.fastOutSlowIn,
-    )..addListener(markNeedsPaint);
-    _state.enableController.value = isInteractive ? 1.0 : 0.0;
-    _enableAnimation = new CurvedAnimation(
-      parent: _state.enableController,
-      curve: Curves.easeInOut,
-    )..addListener(markNeedsPaint);
-    _state.positionController.value = _value;
+    _reaction.addListener(markNeedsPaint);
+    _enableAnimation.addListener(markNeedsPaint);
     _state.positionController.addListener(markNeedsPaint);
   }
 
   @override
   void detach() {
-    super.detach();
     _reaction.removeListener(markNeedsPaint);
     _enableAnimation.removeListener(markNeedsPaint);
     _state.positionController.removeListener(markNeedsPaint);
+    super.detach();
   }
 
   double _getValueFromVisualPosition(double visualPosition) {

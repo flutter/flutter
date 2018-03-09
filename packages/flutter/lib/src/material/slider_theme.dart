@@ -51,25 +51,25 @@ class SliderTheme extends InheritedWidget {
   /// ## Sample code
   ///
   /// ```dart
-  /// class Catatonic extends StatefulWidget {
+  /// class Launch extends StatefulWidget {
   ///   @override
-  ///   State createState() => new CatatonicState();
+  ///   State createState() => new LaunchState();
   /// }
   /// 
-  /// class CatatonicState extends State<Catatonic> {
-  ///   double _howLong;
+  /// class LaunchState extends State<Launch> {
+  ///   double _rocketThrust;
   /// 
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return new SliderTheme(
   ///       data: SliderTheme.of(context).copyWith(activeRailColor: const Color(0xff804040)),
   ///       child: new Slider(
-  ///         onChanged: (double value) => setState(() => _howLong = value),
-  ///         value: _howLong,
+  ///         onChanged: (double value) { setState(() { _rocketThrust = value; }); },
+  ///         value: _rocketThrust,
   ///       ),
   ///     );
   ///   }
-  /// }  
+  /// }
   /// ```
   ///
   /// See also:
@@ -171,7 +171,7 @@ class SliderThemeData extends Diagnosticable {
   ///     return new SliderTheme(
   ///       data: SliderTheme.of(context).copyWith(activeRailColor: const Color(0xff404080)),
   ///       child: new Slider(
-  ///         onChanged: (double value) => setState(() => _bliss = value),
+  ///         onChanged: (double value) { setState(() { _bliss = value; }); },
   ///         value: _bliss,
   ///       ),
   ///     );
