@@ -162,9 +162,66 @@ class _MethodCall implements Invocation {
   List<Type> get typeArguments => _typeArguments;
 }
 
+// We switch to exponential notation aggressively (|v|>1e9 or |v|<1e-9)
+// because trying to read numbers with that many digits isn't pleasant.
+const double _kTooSmall = 1e-9;
+const double _kTooBig = 1e9;
+
+// We only bother with nine decimal places because beyond that you start to see
+// the limitations of binary representations of decimal floating point literals.
+// For example, 0.1 becomes 0.10000000000000000555. By truncating it at nine we
+// can pretend that 0.1 is really a precise 0.1, while still showing the details
+// of 0.000001, etc.
+const int _kDecimalPlaces = 9;
+
+/// This standardizes the stringification of [double]s so that they aren't too
+/// verbose, don't have extraneous zeros, don't look like integers, and
+/// generally are easier to read (hopefully). It is not very performant, so is
+/// only recommended for debug use.
+String prettyDouble(double value) {
+  if (value.isInfinite || value.isNaN)
+    return value.toString();
+  if (value == 0.0)
+    return value.toStringAsFixed(1); // takes care of -0.0 too.
+  if (value.abs() < _kTooSmall || value.abs() > _kTooBig) {
+    final String expStr = value.toStringAsExponential(_kDecimalPlaces - 2);
+    int length = expStr.length;
+    while (expStr[length - 1] != 'e')
+      length -= 1;
+    length--;
+    final String exp = expStr.substring(length);
+    final int minLength = value.isNegative ? 4 : 3;
+    while (expStr[length - 1] == '0' && length > minLength)
+      length -= 1;
+    return '${expStr.substring(0, length)}$exp';
+  }
+  if (value.toInt() == value)
+    return value.toStringAsFixed(1);
+  final int intPart = value.truncate();
+  final double fracPart = (value - intPart).abs();
+  String fracStr = fracPart.toStringAsFixed(_kDecimalPlaces).substring(1);
+  assert(!fracStr.contains('e'));
+  int length = fracStr.length;
+  while (fracStr[length - 1] == '0' && length > 2) {
+    length--;
+  }
+  fracStr = fracStr.substring(0, length);
+  return '$intPart$fracStr';
+}
+
+/// This standardizes the stringification of [Offset]s so that they aren't too
+/// verbose, don't have extraneous zeros, don't look like integers, and
+/// generally are easier to read (hopefully). It is not very performant, so is
+/// only recommended for debug use.
+String prettyOffset(Offset offset) {
+  return '${offset.runtimeType}(${prettyDouble(offset.dx)}, ${prettyDouble(offset.dy)})';
+}
+
 String _valueName(Object value) {
   if (value is double)
-    return value.toStringAsFixed(1);
+    return prettyDouble(value);
+  if (value is Offset)
+    return prettyOffset(value);
   return value.toString();
 }
 
