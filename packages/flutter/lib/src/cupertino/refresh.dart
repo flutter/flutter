@@ -188,7 +188,7 @@ class CupertinoRefreshControl extends StatefulWidget {
   final RefreshCallback onRefresh;
 
   static const double _kDefaultRefreshTriggerPullDistance = 100.0;
-  static const double _kDefaultRefreshIndicatorExtent = 65.0;
+  static const double _kDefaultRefreshIndicatorExtent = 60.0;
 
   @visibleForTesting
   static RefreshIndicatorMode state(BuildContext context) {
@@ -236,6 +236,8 @@ class CupertinoRefreshControl extends StatefulWidget {
 }
 
 class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
+  static const double _kInactiveResetOverscrollFraction = 0.1;
+
   RefreshIndicatorMode refreshState;
   Future<void> refreshTask;
   double lastScrollExtent = 0.0;
@@ -339,7 +341,8 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
         // to 0.0 since the last bit of the animation can take some time and
         // can feel sluggish if not going all the way back to 0.0 prevented
         // a subsequent pull-to-refresh from starting.
-        if (lastScrollExtent > widget.refreshTriggerPullDistance * 0.1) {
+        if (lastScrollExtent >
+            widget.refreshTriggerPullDistance * _kInactiveResetOverscrollFraction) {
           return RefreshIndicatorMode.done;
         } else {
           nextState = RefreshIndicatorMode.inactive;

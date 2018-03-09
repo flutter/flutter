@@ -1,16 +1,20 @@
 {
-  "version": "0.1.0",
+  "version": "2.0.0",
   "command": "flutter",
   "args": [],
-  "showOutput": "always",
-  "echoCommand": true,
   "tasks": [
     {
-      // Assign key binding to workbench.action.tasks.test to quickly run 
-      // the currently open test. 
-      "taskName": "test",
-      "isTestCommand": true,
-      "isShellCommand": true,
+      // Assign key binding to workbench.action.tasks.test to quickly run
+      // the currently open test.
+      "label": "test",
+      "type": "shell",
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
       "args": ["${file}"]
     }
   ]
