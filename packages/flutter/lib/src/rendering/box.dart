@@ -1443,7 +1443,7 @@ abstract class RenderBox extends RenderObject {
   /// of those functions, call [markNeedsLayout] instead to schedule a layout of
   /// the box.
   Size get size {
-    assert(hasSize);
+    assert(hasSize, 'RenderBox was not laid out: ${toString()}');
     assert(() {
       if (_size is _DebugSize) {
         final _DebugSize _size = this._size;

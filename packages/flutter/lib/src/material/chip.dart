@@ -25,9 +25,6 @@ const int _deleteIconAlpha = 0xde;
 const int _containerAlpha = 0x14;
 const double _edgePadding = 4.0;
 
-//const int _disabledAlpha = 0x5e;
-//const double _pressedElevation = 8.0;
-
 /// A material design chip.
 ///
 /// Chips represent complex entities in small blocks, such as a contact, or a
@@ -145,7 +142,7 @@ class Chip extends StatelessWidget {
         theme: new _ChipRenderTheme(
           label: label,
           avatar: avatar,
-          deleteIcon: new Tooltip(
+          deleteIcon: onDeleted != null ? new Tooltip(
             message: deleteButtonTooltipMessage ??
                 MaterialLocalizations.of(context).deleteButtonTooltip,
             child: deleteIcon ??
@@ -154,7 +151,7 @@ class Chip extends StatelessWidget {
                   size: _deleteIconSize,
                   color: deleteIconColor ?? theme.primaryColorDark.withAlpha(_deleteIconAlpha),
                 ),
-          ),
+          ) : null,
           container: new Container(
             decoration: new ShapeDecoration(
               shape: border,
@@ -482,18 +479,16 @@ class _RenderChip extends RenderBox {
     }
   }
 
-  bool get _hasDeleteButton => deleteIcon != null && onDeleted != null;
-
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    if (event is PointerDownEvent && _hasDeleteButton) {
+    if (event is PointerDownEvent && deleteIcon != null) {
       _tap.addPointer(event);
     }
   }
 
   void _handleTapDown(TapDownDetails details) {
-    if (_hasDeleteButton) {
+    if (deleteIcon != null) {
       _tapDownLocation = globalToLocal(details.globalPosition);
     }
   }
@@ -502,7 +497,7 @@ class _RenderChip extends RenderBox {
     if (_tapDownLocation == null) {
       return;
     }
-    if (_hasDeleteButton && _deleteButtonRegion.contains(_tapDownLocation)) {
+    if (deleteIcon != null && _deleteButtonRegion.contains(_tapDownLocation)) {
       onDeleted();
     }
   }
@@ -616,7 +611,7 @@ class _RenderChip extends RenderBox {
       if (constraints.maxWidth.isFinite) {
         final double allPadding = _iconPadding.horizontal * 2.0 + theme.labelPadding.horizontal;
         final double iconSizes = (avatar != null ? iconHeight - _iconPadding.horizontal : 0.0)
-            + (_hasDeleteButton ? iconHeight - _iconPadding.horizontal : 0.0);
+            + (deleteIcon != null ? iconHeight - _iconPadding.horizontal : 0.0);
         label.layout(
           constraints.loosen().copyWith(
                 maxWidth: math.max(0.0, constraints.maxWidth - iconSizes - allPadding),
@@ -637,7 +632,7 @@ class _RenderChip extends RenderBox {
       avatarWidth += _boxSize(avatar).width;
     }
     double deleteIconWidth = _iconPadding.horizontal;
-    if (_hasDeleteButton) {
+    if (deleteIcon != null) {
       deleteIcon.layout(iconConstraints, parentUsesSize: true);
       deleteIconWidth += _boxSize(deleteIcon).width;
     }
@@ -658,7 +653,7 @@ class _RenderChip extends RenderBox {
       return box.size.width;
     }
 
-    final double left = 0.0;
+    const double left = 0.0;
     final double right = overallWidth;
 
     switch (textDirection) {
@@ -673,7 +668,7 @@ class _RenderChip extends RenderBox {
         }
         start -= _iconPadding.start + theme.labelPadding.end;
         double deleteButtonWidth = 0.0;
-        if (_hasDeleteButton) {
+        if (deleteIcon != null) {
           _deleteButtonRegion = new Rect.fromLTWH(0.0, 0.0, iconHeight, iconHeight);
           deleteButtonWidth = _deleteButtonRegion.width;
           start -= centerLayout(deleteIcon, start - deleteIcon.size.width);
@@ -701,11 +696,11 @@ class _RenderChip extends RenderBox {
           _actionRegion = new Rect.fromLTWH(
             0.0,
             0.0,
-            _hasDeleteButton ? (start - _edgePadding) : overallWidth,
+            deleteIcon != null ? (start - _edgePadding) : overallWidth,
             iconHeight,
           );
         }
-        if (_hasDeleteButton) {
+        if (deleteIcon != null) {
           _deleteButtonRegion = new Rect.fromLTWH(
             start - _edgePadding,
             0.0,
@@ -738,7 +733,7 @@ class _RenderChip extends RenderBox {
             ..color = const Color(0xff800000)
             ..strokeWidth = 1.0
             ..style = PaintingStyle.stroke;
-          if (_hasDeleteButton) {
+          if (deleteIcon != null) {
             context.canvas.drawRect(_deleteButtonRegion.shift(offset), outlinePaint);
           }
           context.canvas.drawRect(
@@ -750,7 +745,7 @@ class _RenderChip extends RenderBox {
 
     doPaint(container);
     doPaint(avatar);
-    if (_hasDeleteButton) {
+    if (deleteIcon != null) {
       doPaint(deleteIcon);
     }
     doPaint(label);
