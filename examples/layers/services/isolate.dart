@@ -120,7 +120,7 @@ class CalculationManager {
     if (isRunning) {
       _state = CalculationState.idle;
       if (_isolate != null) {
-        _isolate.kill(priority: Isolate.IMMEDIATE);
+        _isolate.kill(priority: Isolate.immediate);
         _isolate = null;
         _completed = 0.0;
         _total = 1.0;
@@ -144,7 +144,7 @@ class CalculationManager {
         // is synchronous, so if done in the main isolate, the UI would block.
         Isolate.spawn(_calculate, message).then<Null>((Isolate isolate) {
           if (!isRunning) {
-            isolate.kill(priority: Isolate.IMMEDIATE);
+            isolate.kill(priority: Isolate.immediate);
           } else {
             _state = CalculationState.calculating;
             _isolate = isolate;

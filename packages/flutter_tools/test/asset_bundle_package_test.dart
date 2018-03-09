@@ -72,14 +72,14 @@ $assetsSection
         final String entryKey = 'packages/$packageName/$asset';
         expect(bundle.entries.containsKey(entryKey), true);
         expect(
-          UTF8.decode(await bundle.entries[entryKey].contentsAsBytes()),
+          utf8.decode(await bundle.entries[entryKey].contentsAsBytes()),
           asset,
         );
       }
     }
 
     expect(
-      UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+      utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
       expectedAssetManifest,
     );
   }
@@ -127,7 +127,7 @@ $assetsSection
       expect(bundle.entries.length, 2); // LICENSE, AssetManifest
       const String expectedAssetManifest = '{}';
       expect(
-        UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,
       );
     });
@@ -147,7 +147,7 @@ $assetsSection
       expect(bundle.entries.length, 2); // LICENSE, AssetManifest
       const String expectedAssetManifest = '{}';
       expect(
-        UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,
       );
 

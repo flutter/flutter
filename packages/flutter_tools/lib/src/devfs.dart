@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show BASE64, UTF8;
+import 'dart:convert' show base64, utf8;
 
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 
@@ -172,7 +172,7 @@ class DevFSByteContent extends DevFSContent {
 
 /// String content to be copied to the device.
 class DevFSStringContent extends DevFSByteContent {
-  DevFSStringContent(String string) : _string = string, super(UTF8.encode(string));
+  DevFSStringContent(String string) : _string = string, super(utf8.encode(string));
 
   String _string;
 
@@ -180,12 +180,12 @@ class DevFSStringContent extends DevFSByteContent {
 
   set string(String value) {
     _string = value;
-    super.bytes = UTF8.encode(_string);
+    super.bytes = utf8.encode(_string);
   }
 
   @override
   set bytes(List<int> value) {
-    string = UTF8.decode(value);
+    string = utf8.decode(value);
   }
 }
 
@@ -223,7 +223,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
     } catch (e) {
       return e;
     }
-    final String fileContents = BASE64.encode(bytes);
+    final String fileContents = base64.encode(bytes);
     try {
       return await vmService.vm.invokeRpcRaw(
         '_writeDevFSFile',
@@ -299,7 +299,7 @@ class _DevFSHttpWriter {
       request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
       request.headers.add('dev_fs_name', fsName);
       request.headers.add('dev_fs_uri_b64',
-          BASE64.encode(UTF8.encode(deviceUri.toString())));
+          base64.encode(utf8.encode(deviceUri.toString())));
       final Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       final HttpClientResponse response = await request.close();

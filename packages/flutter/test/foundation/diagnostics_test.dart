@@ -51,7 +51,7 @@ enum ExampleEnum {
 /// Encode and decode to JSON to make sure all objects in the JSON for the
 /// [DiagnosticsNode] are valid JSON.
 Map<String, Object> simulateJsonSerialization(DiagnosticsNode node) {
-  return JSON.decode(JSON.encode(node.toJsonMap()));
+  return json.decode(json.encode(node.toJsonMap()));
 }
 
 void validateNodeJsonSerialization(DiagnosticsNode node) {

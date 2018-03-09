@@ -106,7 +106,7 @@ Future<Match> _firstMatchInFile(File file, RegExp regExp) async {
   }
   return file
       .openRead()
-      .transform(UTF8.decoder)
+      .transform(utf8.decoder)
       .transform(const LineSplitter())
       .map(regExp.firstMatch)
       .firstWhere((Match match) => match != null, orElse: () => null);

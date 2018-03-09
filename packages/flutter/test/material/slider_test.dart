@@ -670,8 +670,8 @@ void main() {
         child: const Material(
           child: const Center(
             child: const OverflowBox(
-              maxWidth: double.INFINITY,
-              maxHeight: double.INFINITY,
+              maxWidth: double.infinity,
+              maxHeight: double.infinity,
               child: const Slider(
                 value: 0.5,
                 onChanged: null,
@@ -706,8 +706,8 @@ void main() {
                       ),
                   child: new Center(
                     child: new OverflowBox(
-                      maxWidth: double.INFINITY,
-                      maxHeight: double.INFINITY,
+                      maxWidth: double.infinity,
+                      maxHeight: double.infinity,
                       child: new Slider(
                         key: sliderKey,
                         min: 0.0,

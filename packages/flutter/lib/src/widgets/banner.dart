@@ -204,20 +204,20 @@ class BannerPainter extends CustomPainter {
         switch (location) {
           case BannerLocation.bottomStart:
           case BannerLocation.topEnd:
-            return -math.PI / 4.0;
+            return -math.pi / 4.0;
           case BannerLocation.bottomEnd:
           case BannerLocation.topStart:
-            return math.PI / 4.0;
+            return math.pi / 4.0;
         }
         break;
       case TextDirection.ltr:
         switch (location) {
           case BannerLocation.bottomStart:
           case BannerLocation.topEnd:
-            return math.PI / 4.0;
+            return math.pi / 4.0;
           case BannerLocation.bottomEnd:
           case BannerLocation.topStart:
-            return -math.PI / 4.0;
+            return -math.pi / 4.0;
         }
         break;
     }

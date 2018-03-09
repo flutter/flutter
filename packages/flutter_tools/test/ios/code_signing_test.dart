@@ -125,7 +125,7 @@ void main() {
       when(mockProcess.stdin).thenReturn(mockStdIn);
       when(mockProcess.stdout)
           .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
-            new Future<List<int>>.value(UTF8.encode(
+            new Future<List<int>>.value(utf8.encode(
               'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US'
             ))
           ));
@@ -184,7 +184,7 @@ void main() {
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
       when(mockOpenSslProcess.stdout)
           .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
-            new Future<List<int>>.value(UTF8.encode(
+            new Future<List<int>>.value(utf8.encode(
               'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'
             ))
           ));
@@ -254,7 +254,7 @@ void main() {
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
       when(mockOpenSslProcess.stdout)
           .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
-            new Future<List<int>>.value(UTF8.encode(
+            new Future<List<int>>.value(utf8.encode(
               'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=5555EEEE55/O=My Team/C=US'
             )),
           ));
@@ -316,7 +316,7 @@ void main() {
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
       when(mockOpenSslProcess.stdout)
           .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
-            new Future<List<int>>.value(UTF8.encode(
+            new Future<List<int>>.value(utf8.encode(
               'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'
             ))
           ));
@@ -385,7 +385,7 @@ void main() {
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
       when(mockOpenSslProcess.stdout)
           .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
-            new Future<List<int>>.value(UTF8.encode(
+            new Future<List<int>>.value(utf8.encode(
               'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'
             ))
           ));
