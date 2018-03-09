@@ -2222,8 +2222,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// any way to update the semantics tree.
   void markNeedsSemanticsUpdate() {
     assert(!attached || !owner._debugDoingSemantics);
-    if (attached && owner._semanticsOwner == null)
+    if (!attached || owner._semanticsOwner == null) {
+      _cachedSemanticsConfiguration = null;
       return;
+    }
 
     // Dirty the semantics tree starting at `this` until we have reached a
     // RenderObject that is a semantics boundary. All semantics past this
