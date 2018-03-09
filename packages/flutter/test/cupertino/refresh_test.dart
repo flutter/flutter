@@ -1189,6 +1189,61 @@ void main() {
         debugDefaultTargetPlatformOverride = null;
       },
     );
+
+    testWidgets(
+      "don't have to build any indicators or occupy space during refresh",
+      (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+        refreshIndicator = const Center(child: const Text('-1'));
+
+        await tester.pumpWidget(
+          new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new CustomScrollView(
+              slivers: <Widget>[
+                new CupertinoRefreshControl(
+                  builder: null,
+                  onRefresh: mockHelper.refreshTask,
+                  refreshIndicatorExtent: 0.0,
+                ),
+                buildAListOfStuff(),
+              ],
+            ),
+          ),
+        );
+
+        await tester.drag(find.text('0'), const Offset(0.0, 150.0));
+        await tester.pump();
+        expect(
+          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          RefreshIndicatorMode.armed,
+        );
+
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 5));
+        // In refresh mode but has no UI.
+        expect(
+          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          RefreshIndicatorMode.refresh,
+        );
+        expect(
+          tester.getRect(find.widgetWithText(Center, '0')),
+          new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+        );
+        verify(mockHelper.refreshTask()); // The refresh function still called.
+
+        refreshCompleter.complete(null);
+        await tester.pump();
+        // Goes to inactive right away since the sliver is already collapsed.
+        expect(
+          CupertinoRefreshControl.state(tester.element(find.byType(LayoutBuilder))),
+          RefreshIndicatorMode.inactive,
+        );
+
+        debugDefaultTargetPlatformOverride = null;
+      }
+    );
   });
 }
 

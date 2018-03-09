@@ -26,8 +26,11 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
     final Random random = new Random();
     randomizedContacts = new List<List<String>>.generate(
       100,
-      (int index) => contacts[random.nextInt(contacts.length)]
-          ..add(random.nextBool().toString()),
+      (int index) {
+        return contacts[random.nextInt(contacts.length)]
+            // Randomly adds a telephone icon next to the contact or not.
+            ..add(random.nextBool().toString());
+      }
     );
   }
 
@@ -50,7 +53,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
               ),
               new CupertinoRefreshControl(
                 onRefresh: () {
-                  return new Future<void>.delayed(const Duration(seconds: 3))
+                  return new Future<void>.delayed(const Duration(seconds: 2))
                       ..then((_) => setState(() => repopulateList()));
                 },
               ),
@@ -206,7 +209,10 @@ class _ListItem extends StatelessWidget {
                   ),
                   new Padding(
                     padding: const EdgeInsets.only(left: 9.0),
-                    child: new Icon(CupertinoIcons.info, color: CupertinoColors.activeBlue),
+                    child: new Icon(
+                      CupertinoIcons.info,
+                      color: CupertinoColors.activeBlue
+                    ),
                   ),
                 ],
               ),
