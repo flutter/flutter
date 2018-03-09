@@ -84,7 +84,8 @@ void Shell::InitStandalone(fxl::CommandLine command_line,
 
   fml::icu::InitializeICU(icu_data_path);
 
-  if (!command_line.HasOption(FlagForSwitch(Switch::SkiaDeterministicRendering)))
+  if (!command_line.HasOption(
+          FlagForSwitch(Switch::SkiaDeterministicRendering)))
     SkGraphics::Init();
 
   blink::Settings settings;
@@ -203,7 +204,7 @@ void Shell::AddPlatformView(PlatformView* platform_view) {
   if (platform_view == nullptr) {
     return;
   }
-  fxl::MutexLocker lock(&platform_views_mutex_);
+  std::lock_guard<std::mutex> lock(platform_views_mutex_);
   platform_views_.insert(platform_view);
 }
 
@@ -211,7 +212,7 @@ void Shell::RemovePlatformView(PlatformView* platform_view) {
   if (platform_view == nullptr) {
     return;
   }
-  fxl::MutexLocker lock(&platform_views_mutex_);
+  std::lock_guard<std::mutex> lock(platform_views_mutex_);
   platform_views_.erase(platform_view);
 }
 
@@ -220,7 +221,7 @@ void Shell::IteratePlatformViews(
   if (iterator == nullptr) {
     return;
   }
-  fxl::MutexLocker lock(&platform_views_mutex_);
+  std::lock_guard<std::mutex> lock(platform_views_mutex_);
   for (PlatformView* view : platform_views_) {
     if (!iterator(view)) {
       return;

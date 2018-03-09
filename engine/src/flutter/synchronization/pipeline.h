@@ -11,10 +11,9 @@
 #include "lib/fxl/functional/closure.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/ref_counted.h"
-#include "lib/fxl/synchronization/mutex.h"
-#include "lib/fxl/synchronization/thread_annotations.h"
 
 #include <memory>
+#include <mutex>
 #include <queue>
 
 namespace flutter {
@@ -120,7 +119,7 @@ class Pipeline : public fxl::RefCountedThreadSafe<Pipeline<R>> {
     size_t items_count = 0;
 
     {
-      fxl::MutexLocker lock(&queue_mutex_);
+      std::lock_guard<std::mutex> lock(queue_mutex_);
       std::tie(resource, trace_id) = std::move(queue_.front());
       queue_.pop();
       items_count = queue_.size();
@@ -142,14 +141,13 @@ class Pipeline : public fxl::RefCountedThreadSafe<Pipeline<R>> {
  private:
   Semaphore empty_;
   Semaphore available_;
-  fxl::Mutex queue_mutex_;
-  std::queue<std::pair<ResourcePtr, size_t>> queue_
-      FXL_GUARDED_BY(queue_mutex_);
+  std::mutex queue_mutex_;
+  std::queue<std::pair<ResourcePtr, size_t>> queue_;
   std::atomic_size_t last_trace_id_;
 
   void ProducerCommit(ResourcePtr resource, size_t trace_id) {
     {
-      fxl::MutexLocker lock(&queue_mutex_);
+      std::lock_guard<std::mutex> lock(queue_mutex_);
       queue_.emplace(std::move(resource), trace_id);
     }
 
