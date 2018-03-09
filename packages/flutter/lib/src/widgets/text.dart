@@ -164,8 +164,9 @@ class DefaultTextStyle extends InheritedWidget {
 /// for example, to make the text bold while using the default font family and
 /// size.
 ///
-/// The [Text] widget can also be created with a [TextSpan] to display text that
-/// uses multiple styles (e.g., a paragraph with some bold words).
+/// Using the [new TextSpan.rich] constructor, the [Text] widget can also be
+/// created with a [TextSpan] to display text that use multiple styles
+/// (e.g., a paragraph with some bold words).
 ///
 /// ## Sample code
 ///
@@ -210,11 +211,11 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
   }) : assert(data != null),
-       span = null,
+       textSpan = null,
        super(key: key);
 
   /// Creates a text widget with a [TextSpan].
-  const Text.rich(this.span, {
+  const Text.rich(this.textSpan, {
     Key key,
     this.style,
     this.textAlign,
@@ -223,19 +224,19 @@ class Text extends StatelessWidget {
     this.overflow,
     this.textScaleFactor,
     this.maxLines,
-  }): assert(span != null),
+  }): assert(textSpan != null),
       data = null,
       super(key: key);
 
   /// The text to display.
   ///
-  /// This will be null if a [TextSpan] is provided instead.
+  /// This will be null if a [textSpan] is provided instead.
   final String data;
 
-  /// The text to display as a span.
+  /// The text to display as a [TextSpan].
   ///
-  /// This will be null if a String is provided instead.
-  final TextSpan span;
+  /// This will be null if [data] is provided instead.
+  final TextSpan textSpan;
 
   /// If non-null, the style to use for this text.
   ///
@@ -309,7 +310,7 @@ class Text extends StatelessWidget {
       text: new TextSpan(
         style: effectiveTextStyle,
         text: data,
-        children: span != null ? <TextSpan>[span] : null,
+        children: textSpan != null ? <TextSpan>[textSpan] : null,
       ),
     );
   }
@@ -318,7 +319,9 @@ class Text extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new StringProperty('data', data, showName: false));
-    span?.debugFillProperties(description);
+    if (textSpan != null) {
+      description.add(textSpan.toDiagnosticsNode(name: 'textSpan', style: DiagnosticsTreeStyle.transition));
+    }
     style?.debugFillProperties(description);
     description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
