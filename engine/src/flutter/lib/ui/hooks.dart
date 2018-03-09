@@ -5,11 +5,11 @@
 part of dart.ui;
 
 String _decodeUTF8(ByteData message) {
-  return message != null ? UTF8.decoder.convert(message.buffer.asUint8List()) : null;
+  return message != null ? utf8.decoder.convert(message.buffer.asUint8List()) : null;
 }
 
 dynamic _decodeJSON(String message) {
-  return message != null ? JSON.decode(message) : null;
+  return message != null ? json.decode(message) : null;
 }
 
 void _updateWindowMetrics(double devicePixelRatio,
@@ -50,8 +50,8 @@ void _updateLocale(String languageCode, String countryCode) {
   _invoke(window.onLocaleChanged, window._onLocaleChangedZone);
 }
 
-void _updateUserSettingsData(String json) {
-  final Map<String, dynamic> data = JSON.decode(json);
+void _updateUserSettingsData(String jsonData) {
+  final Map<String, dynamic> data = json.decode(jsonData);
   _updateTextScaleFactor(data['textScaleFactor'].toDouble());
   _updateAlwaysUse24HourFormat(data['alwaysUse24HourFormat']);
 }
@@ -174,7 +174,7 @@ void _invoke3<A1, A2, A3>(void callback(A1 a1, A2 a2, A3 a3), Zone zone, A1 arg1
 const int _kPointerDataFieldCount = 19;
 
 PointerDataPacket _unpackPointerDataPacket(ByteData packet) {
-  const int kStride = Int64List.BYTES_PER_ELEMENT;
+  const int kStride = Int64List.bytesPerElement;
   const int kBytesPerPointerData = _kPointerDataFieldCount * kStride;
   final int length = packet.lengthInBytes ~/ kBytesPerPointerData;
   assert(length * kBytesPerPointerData == packet.lengthInBytes);
