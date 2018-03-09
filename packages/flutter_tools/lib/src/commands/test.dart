@@ -23,18 +23,16 @@ class TestCommand extends FlutterCommand {
   TestCommand({ bool verboseHelp: false }) {
     requiresPubspecYaml();
     usesPubOption();
-    argParser.addOption(
+    argParser.addMultiOption(
       'name',
       help: 'A regular expression matching substrings of the names of tests to run.',
       valueHelp: 'regexp',
-      allowMultiple: true,
       splitCommas: false,
     );
-    argParser.addOption(
+    argParser.addMultiOption(
       'plain-name',
       help: 'A plain-text substring of the names of tests to run.',
       valueHelp: 'substring',
-      allowMultiple: true,
       splitCommas: false,
     );
     argParser.addFlag(

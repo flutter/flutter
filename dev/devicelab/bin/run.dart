@@ -70,10 +70,9 @@ Future<Null> main(List<String> rawArgs) async {
 
 /// Command-line options for the `run.dart` command.
 final ArgParser _argParser = new ArgParser()
-  ..addOption(
+  ..addMultiOption(
     'task',
     abbr: 't',
-    allowMultiple: true,
     splitCommas: true,
     help: 'Either:\n'
         ' - the name of a task defined in manifest.yaml. Example: complex_layout__start_up.\n'
@@ -108,10 +107,9 @@ final ArgParser _argParser = new ArgParser()
     abbr: 'a',
     help: 'Runs all tasks defined in manifest.yaml.',
   )
-  ..addOption(
+  ..addMultiOption(
     'test',
     hide: true,
-    allowMultiple: true,
     splitCommas: true,
     callback: (List<String> value) {
       if (value.isNotEmpty) {
