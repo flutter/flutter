@@ -411,8 +411,8 @@ void RuntimeHolder::HandlePlatformMessage(
 }
 
 void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
-  if (directory_asset_bundle_) {
-    blink::AssetFontSelector::Install(directory_asset_bundle_);
+  if (asset_provider_) {
+    blink::AssetFontSelector::Install(asset_provider_);
   } else if (asset_store_) {
     blink::AssetFontSelector::Install(asset_store_);
   }
@@ -504,7 +504,7 @@ void RuntimeHolder::InitRootBundle(std::vector<char> bundle) {
       FXL_LOG(ERROR) << "Unable to load data dir";
       return;
     }
-    directory_asset_bundle_ =
+    asset_provider_ =
         fxl::MakeRefCounted<blink::DirectoryAssetBundle>(std::move(data_dir));
   }
 }
@@ -532,8 +532,8 @@ bool RuntimeHolder::HandleAssetPlatformMessage(
 
 bool RuntimeHolder::GetAssetAsBuffer(const std::string& name,
                                      std::vector<uint8_t>* data) {
-  return (directory_asset_bundle_ &&
-          directory_asset_bundle_->GetAsBuffer(name, data)) ||
+  return (asset_provider_ &&
+          asset_provider_->GetAsBuffer(name, data)) ||
          (asset_store_ && asset_store_->GetAsBuffer(name, data));
 }
 

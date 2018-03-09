@@ -74,8 +74,9 @@ App::App() {
   if (settings.using_blink) {
     blink::SetFontProvider(std::move(font_provider));
   } else {
-    blink::FontCollection::ForProcess().GetFontCollection()->PushFront(
-        sk_make_sp<txt::FuchsiaFontManager>(std::move(font_provider)));
+    blink::FontCollection::ForProcess().GetFontCollection()->
+        SetAssetFontManager(
+            sk_make_sp<txt::FuchsiaFontManager>(std::move(font_provider)));
   }
 
   context_->outgoing_services()->AddService<app::ApplicationRunner>(

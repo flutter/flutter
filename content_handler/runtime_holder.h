@@ -11,6 +11,7 @@
 #include <unordered_set>
 
 #include "dart-pkg/fuchsia/sdk_ext/fuchsia.h"
+#include "flutter/assets/asset_provider.h"
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
@@ -115,7 +116,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   std::vector<char> root_bundle_data_;
   // TODO(zarah): Remove asset_store_ when flx is completely removed
   fxl::RefPtr<blink::ZipAssetStore> asset_store_;
-  fxl::RefPtr<blink::DirectoryAssetBundle> directory_asset_bundle_;
+  fxl::RefPtr<blink::AssetProvider> asset_provider_;
   void* dylib_handle_ = nullptr;
   std::unique_ptr<Rasterizer> rasterizer_;
   std::unique_ptr<blink::RuntimeController> runtime_;
