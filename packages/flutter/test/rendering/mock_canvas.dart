@@ -1003,19 +1003,20 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
     final Offset pointArgument = arguments[0];
+
     if (x != null && y != null) {
       final Offset point = new Offset(x, y);
       if (point != pointArgument)
-        throw 'It called $methodName with a center coordinate, $pointArgument, which was not exactly the expected coordinate ($point).';
+        throw 'It called $methodName with a center coordinate, Offset(${pointArgument.dx}, ${pointArgument.dy}), which was not exactly the expected coordinate (Offset(${point.dx}, ${point.dy})).';
     } else {
       if (x != null && pointArgument.dx != x)
-        throw 'It called $methodName with a center coordinate, $pointArgument, whose x-coordinate not exactly the expected coordinate (${x.toStringAsFixed(1)}).';
+        throw 'It called $methodName with a center coordinate, Offset(${pointArgument.dx}, ${pointArgument.dy}), whose x-coordinate not exactly the expected coordinate ($x).';
       if (y != null && pointArgument.dy != y)
-        throw 'It called $methodName with a center coordinate, $pointArgument, whose y-coordinate not exactly the expected coordinate (${y.toStringAsFixed(1)}).';
+        throw 'It called $methodName with a center coordinate, Offset(${pointArgument.dx}, ${pointArgument.dy}), whose y-coordinate not exactly the expected coordinate ($y).';
     }
     final double radiusArgument = arguments[1];
     if (radius != null && radiusArgument != radius)
-      throw 'It called $methodName with radius, ${radiusArgument.toStringAsFixed(1)}, which was not exactly the expected radius (${radius.toStringAsFixed(1)}).';
+      throw 'It called $methodName with radius, $radiusArgument, which was not exactly the expected radius ($radius).';
   }
 
   @override
