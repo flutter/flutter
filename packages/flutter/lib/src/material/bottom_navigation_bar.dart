@@ -41,7 +41,7 @@ enum BottomNavigationBarType {
 }
 
 /// A material widget displayed at the bottom of an app for selecting among a
-/// small number of views, typically between three and five views.
+/// small number of views, typically between three and five.
 ///
 /// The bottom navigation bar consists of multiple items in the form of
 /// text labels, icons, or both, laid out on top of a piece of material. It
@@ -82,7 +82,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// If [type] is null then [BottomNavigationBarType.fixed] is used when there
   /// are two or three [items], [BottomNavigationBarType.shifting] otherwise.
   ///
-  /// If [fixedColor] is null, the theme's primary color,
+  /// If [fixedColor] is null then the theme's primary color,
   /// [ThemeData.primaryColor], is used. However if [BottomNavigationBar.type] is
   /// [BottomNavigationBarType.shifting] then [fixedColor] is ignored.
   BottomNavigationBar({
@@ -122,9 +122,9 @@ class BottomNavigationBar extends StatefulWidget {
   /// The color of the selected item when bottom navigation bar is
   /// [BottomNavigationBarType.fixed].
   ///
-  /// If [fixedColor] is null, the theme's primary color,
-  /// [ThemeData.primaryColor], will be used. The [fixedColor]
-  /// will be ignored if [type] is [BottomNavigationBarType.shifting].
+  /// If [fixedColor] is null then the theme's primary color,
+  /// [ThemeData.primaryColor], is used. However if [BottomNavigationBar.type] is
+  /// [BottomNavigationBarType.shifting] then [fixedColor] is ignored.
   final Color fixedColor;
 
   /// The size of all of the [BottomNavigationBarItem] icons.
