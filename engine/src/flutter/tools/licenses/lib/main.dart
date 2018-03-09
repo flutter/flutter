@@ -1890,6 +1890,7 @@ class RepositoryRootThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
         && entry.name != 'binutils' // build-time dependency only
         && entry.name != 'instrumented_libraries' // unused according to chinmay
         && entry.name != 'android_tools' // excluded on advice
+        && entry.name != 'googletest' // only used by tests
         && super.shouldRecurse(entry);
   }
 
