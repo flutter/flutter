@@ -213,8 +213,8 @@ typedef Future<void> RefreshCallback();
 /// A sliver widget implementing the iOS-style pull to refresh content control.
 ///
 /// When inserted as the first sliver in a scroll view or behind other slivers
-/// that still lets the scrollable overscroll in front of this sliver, this
-/// widget will:
+/// that still lets the scrollable overscroll in front of this sliver (such as
+/// the [CupertinoSliverNavigationBar], this widget will:
 ///
 ///  * Let the user draw inside the overscrolled area via the passed in [builder].
 ///  * Trigger the provide [onRefresh] function when overscroll far enough to pass

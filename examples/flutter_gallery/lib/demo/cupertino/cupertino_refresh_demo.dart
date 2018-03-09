@@ -69,7 +69,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
                         called: randomizedContacts[index][3] == 'true',
                       );
                     },
-                    childCount: 100,
+                    childCount: 20,
                   ),
                 ),
               ),
