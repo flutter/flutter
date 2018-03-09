@@ -120,10 +120,11 @@ class _Compiler {
             outputPath: outputDill.path,
           );
           // Copy output dill next to the source file.
-          await outputDill.copy(request.path + '.dill');
+          final File kernelReadyToRun = await fs.file(outputPath).copy(
+              request.path + '.dill');
           compiler.accept();
           compiler.reset();
-          request.result.complete(outputPath);
+          request.result.complete(kernelReadyToRun.path);
           // Only remove now when we finished processing the element
           compilationQueue.removeAt(0);
         }
