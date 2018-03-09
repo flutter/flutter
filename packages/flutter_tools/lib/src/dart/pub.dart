@@ -96,7 +96,7 @@ Future<Null> pubGet({
     );
     final List<String> args = <String>['--verbosity=warning'];
     if (FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'])
-      args.add('--trace');
+      args.add('--verbose');
     args.addAll(<String>[command, '--no-precompile']);
     if (offline)
       args.add('--offline');
