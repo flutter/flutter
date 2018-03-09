@@ -88,7 +88,7 @@ NSComparisonResult IntToComparisonResult(int32_t value) {
 @interface SemanticsObjectContainer : NSObject
 - (instancetype)init __attribute__((unavailable("Use initWithSemanticsObject instead")));
 - (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject
-                                 bridge:(shell::AccessibilityBridge*)bridge
+                                 bridge:(fml::WeakPtr<shell::AccessibilityBridge>)bridge
     NS_DESIGNATED_INITIALIZER;
 @end
 
@@ -107,8 +107,8 @@ NSComparisonResult IntToComparisonResult(int32_t value) {
 
 #pragma mark - Designated initializers
 
-- (instancetype)initWithBridge:(shell::AccessibilityBridge*)bridge uid:(int32_t)uid {
-  FXL_DCHECK(bridge != nil) << "bridge must be set";
+- (instancetype)initWithBridge:(fml::WeakPtr<shell::AccessibilityBridge>)bridge uid:(int32_t)uid {
+  FXL_DCHECK(bridge) << "bridge must be set";
   FXL_DCHECK(uid >= kRootNodeId);
   self = [super init];
 
@@ -122,7 +122,6 @@ NSComparisonResult IntToComparisonResult(int32_t value) {
 }
 
 - (void)dealloc {
-  _bridge = nullptr;
   for (SemanticsObject* child in _children) {
     child.parent = nil;
   }
@@ -294,7 +293,7 @@ NSComparisonResult IntToComparisonResult(int32_t value) {
 
 #pragma mark - Designated initializers
 
-- (instancetype)initWithBridge:(shell::AccessibilityBridge*)bridge uid:(int32_t)uid {
+- (instancetype)initWithBridge:(fml::WeakPtr<shell::AccessibilityBridge>)bridge uid:(int32_t)uid {
   self = [super initWithBridge:bridge uid:uid];
   return self;
 }
@@ -328,7 +327,7 @@ NSComparisonResult IntToComparisonResult(int32_t value) {
 
 @implementation SemanticsObjectContainer {
   SemanticsObject* _semanticsObject;
-  shell::AccessibilityBridge* _bridge;
+  fml::WeakPtr<shell::AccessibilityBridge> _bridge;
 }
 
 #pragma mark - initializers
@@ -341,7 +340,7 @@ NSComparisonResult IntToComparisonResult(int32_t value) {
 }
 
 - (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject
-                                 bridge:(shell::AccessibilityBridge*)bridge {
+                                 bridge:(fml::WeakPtr<shell::AccessibilityBridge>)bridge {
   FXL_DCHECK(semanticsObject != nil) << "semanticsObject must be set";
   self = [super init];
 
@@ -401,6 +400,9 @@ NSComparisonResult IntToComparisonResult(int32_t value) {
 }
 
 - (id)accessibilityContainer {
+  if (!_bridge) {
+    return nil;
+  }
   return ([_semanticsObject uid] == kRootNodeId)
              ? _bridge->view()
              : [[_semanticsObject parent] accessibilityContainer];
@@ -419,7 +421,10 @@ NSComparisonResult IntToComparisonResult(int32_t value) {
 namespace shell {
 
 AccessibilityBridge::AccessibilityBridge(UIView* view, PlatformViewIOS* platform_view)
-    : view_(view), platform_view_(platform_view), objects_([[NSMutableDictionary alloc] init]) {
+    : view_(view),
+      platform_view_(platform_view),
+      objects_([[NSMutableDictionary alloc] init]),
+      weak_factory_(this) {
   accessibility_channel_.reset([[FlutterBasicMessageChannel alloc]
          initWithName:@"flutter/accessibility"
       binaryMessenger:platform_view->binary_messenger()
@@ -525,9 +530,9 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
     blink::SemanticsNode node = updates[uid];
     if (node.HasFlag(blink::SemanticsFlags::kIsTextField)) {
       // Text fields are backed by objects that implement UITextInput.
-      object = [[[TextInputSemanticsObject alloc] initWithBridge:this uid:uid] autorelease];
+      object = [[[TextInputSemanticsObject alloc] initWithBridge:GetWeakPtr() uid:uid] autorelease];
     } else {
-      object = [[[FlutterSemanticsObject alloc] initWithBridge:this uid:uid] autorelease];
+      object = [[[FlutterSemanticsObject alloc] initWithBridge:GetWeakPtr() uid:uid] autorelease];
     }
 
     objects_.get()[@(uid)] = object;
@@ -547,9 +552,11 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
         [objects_ removeObjectForKey:@(node.id)];
         if (isTextField) {
           // Text fields are backed by objects that implement UITextInput.
-          object = [[[TextInputSemanticsObject alloc] initWithBridge:this uid:uid] autorelease];
+          object =
+              [[[TextInputSemanticsObject alloc] initWithBridge:GetWeakPtr() uid:uid] autorelease];
         } else {
-          object = [[[FlutterSemanticsObject alloc] initWithBridge:this uid:uid] autorelease];
+          object =
+              [[[FlutterSemanticsObject alloc] initWithBridge:GetWeakPtr() uid:uid] autorelease];
         }
         [object.parent.children replaceObjectAtIndex:positionInChildlist withObject:object];
         objects_.get()[@(node.id)] = object;
@@ -574,6 +581,10 @@ void AccessibilityBridge::HandleEvent(NSDictionary<NSString*, id>* annotatedEven
   } else {
     NSCAssert(NO, @"Invalid event type %@", type);
   }
+}
+
+fml::WeakPtr<AccessibilityBridge> AccessibilityBridge::GetWeakPtr() {
+  return weak_factory_.GetWeakPtr();
 }
 
 }  // namespace shell
