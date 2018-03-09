@@ -96,25 +96,27 @@ class Dialog extends StatelessWidget {
 ///   return showDialog<Null>(
 ///     context: context,
 ///     barrierDismissible: false, // user must tap button!
-///     child: new AlertDialog(
-///       title: new Text('Rewind and remember'),
-///       content: new SingleChildScrollView(
-///         child: new ListBody(
-///           children: <Widget>[
-///             new Text('You will never be satisfied.'),
-///             new Text('You\’re like me. I’m never satisfied.'),
-///           ],
+///     builder: (BuildContext context) {
+///       return new AlertDialog(
+///         title: new Text('Rewind and remember'),
+///         content: new SingleChildScrollView(
+///           child: new ListBody(
+///             children: <Widget>[
+///               new Text('You will never be satisfied.'),
+///               new Text('You\’re like me. I’m never satisfied.'),
+///             ],
+///           ),
 ///         ),
+///         actions: <Widget>[
+///           new FlatButton(
+///             child: new Text('Regret'),
+///             onPressed: () {
+///               Navigator.of(context).pop();
+///             },
+///           ),
+///         ],
 ///       ),
-///       actions: <Widget>[
-///         new FlatButton(
-///           child: new Text('Regret'),
-///           onPressed: () {
-///             Navigator.of(context).pop();
-///           },
-///         ),
-///       ],
-///     ),
+///     },
 ///   );
 /// }
 /// ```
@@ -301,19 +303,21 @@ class SimpleDialogOption extends StatelessWidget {
 /// Future<Null> _askedToLead() async {
 ///   switch (await showDialog<Department>(
 ///     context: context,
-///     child: new SimpleDialog(
-///       title: const Text('Select assignment'),
-///       children: <Widget>[
-///         new SimpleDialogOption(
-///           onPressed: () { Navigator.pop(context, Department.treasury); },
-///           child: const Text('Treasury department'),
-///         ),
-///         new SimpleDialogOption(
-///           onPressed: () { Navigator.pop(context, Department.state); },
-///           child: const Text('State department'),
-///         ),
-///       ],
-///     ),
+///     builder: (BuildContext context) {
+///       return new SimpleDialog(
+///         title: const Text('Select assignment'),
+///         children: <Widget>[
+///           new SimpleDialogOption(
+///             onPressed: () { Navigator.pop(context, Department.treasury); },
+///             child: const Text('Treasury department'),
+///           ),
+///           new SimpleDialogOption(
+///             onPressed: () { Navigator.pop(context, Department.state); },
+///             child: const Text('State department'),
+///           ),
+///         ],
+///       ),
+///     }
 ///   )) {
 ///     case Department.treasury:
 ///       // Let's go.
