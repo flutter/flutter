@@ -5,7 +5,7 @@ homepage: http://flutter.io
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
-  collection: 1.14.5
+  collection: 1.14.6
   http: 0.11.3+16
   meta: 1.1.2
   typed_data: 1.1.5
@@ -22,7 +22,7 @@ dev_dependencies:
   args: 1.3.0 # TRANSITIVE DEPENDENCY
   async: 2.0.4 # TRANSITIVE DEPENDENCY
   barback: 0.15.2+14 # TRANSITIVE DEPENDENCY
-  boolean_selector: 1.0.2 # TRANSITIVE DEPENDENCY
+  boolean_selector: 1.0.3 # TRANSITIVE DEPENDENCY
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
   cli_util: 0.1.2+1 # TRANSITIVE DEPENDENCY
   convert: 2.0.1 # TRANSITIVE DEPENDENCY

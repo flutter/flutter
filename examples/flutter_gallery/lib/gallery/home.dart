@@ -205,7 +205,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
       )
     );
 
-    // In checked mode our MaterialApp will show the default "slow mode" banner.
+    // In checked mode our MaterialApp will show the default "debug" banner.
     // Otherwise show the "preview" banner.
     bool showPreviewBanner = true;
     assert(() {
