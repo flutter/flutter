@@ -152,7 +152,10 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
               child: new SafeArea(
                 top: false,
                 bottom: false,
-                child: new Text(galleryItem.category, style: headerStyle),
+                child: new Semantics(
+                  header: true,
+                  child: new Text(galleryItem.category, style: headerStyle),
+                ),
               ),
             ),
           )
