@@ -7,6 +7,7 @@
 
 #include <atomic>
 #include <deque>
+#include <mutex>
 #include <queue>
 #include <set>
 #include <utility>
@@ -15,8 +16,6 @@
 #include "lib/fxl/functional/closure.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/ref_counted.h"
-#include "lib/fxl/synchronization/mutex.h"
-#include "lib/fxl/synchronization/thread_annotations.h"
 #include "lib/fxl/time/time_point.h"
 
 namespace fml {
@@ -73,9 +72,9 @@ class MessageLoopImpl : public fxl::RefCountedThreadSafe<MessageLoopImpl> {
       priority_queue<DelayedTask, std::deque<DelayedTask>, DelayedTaskCompare>;
 
   std::set<TaskObserver*> task_observers_;
-  fxl::Mutex delayed_tasks_mutex_;
-  DelayedTaskQueue delayed_tasks_ FXL_GUARDED_BY(delayed_tasks_mutex_);
-  size_t order_ FXL_GUARDED_BY(delayed_tasks_mutex_);
+  std::mutex delayed_tasks_mutex_;
+  DelayedTaskQueue delayed_tasks_;
+  size_t order_;
   std::atomic_bool terminated_;
 
   void RegisterTask(fxl::Closure task, fxl::TimePoint target_time);

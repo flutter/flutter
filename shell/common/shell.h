@@ -5,6 +5,7 @@
 #ifndef SHELL_COMMON_SHELL_H_
 #define SHELL_COMMON_SHELL_H_
 
+#include <mutex>
 #include <unordered_set>
 
 #include "flutter/fml/thread.h"
@@ -14,8 +15,6 @@
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/ref_ptr.h"
 #include "lib/fxl/memory/weak_ptr.h"
-#include "lib/fxl/synchronization/mutex.h"
-#include "lib/fxl/synchronization/thread_annotations.h"
 #include "lib/fxl/synchronization/thread_checker.h"
 #include "lib/fxl/synchronization/waitable_event.h"
 #include "lib/fxl/tasks/task_runner.h"
@@ -68,9 +67,8 @@ class Shell {
   std::unique_ptr<fxl::ThreadChecker> gpu_thread_checker_;
   std::unique_ptr<fxl::ThreadChecker> ui_thread_checker_;
   TracingController tracing_controller_;
-  mutable fxl::Mutex platform_views_mutex_;
-  std::unordered_set<PlatformView*> platform_views_
-      FXL_GUARDED_BY(platform_views_mutex_);
+  mutable std::mutex platform_views_mutex_;
+  std::unordered_set<PlatformView*> platform_views_;
 
   static void Init(fxl::CommandLine command_line,
                    const std::string& bundle_path);

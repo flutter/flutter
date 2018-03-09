@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "lib/fxl/synchronization/mutex.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
+#include <mutex>
 #include <queue>
 
 namespace blink {
@@ -22,9 +22,9 @@ class SkiaUnrefQueue {
 
   static SkiaUnrefQueue instance_;
 
-  fxl::Mutex mutex_;
-  std::deque<SkRefCnt*> objects_ FXL_GUARDED_BY(mutex_);
-  bool drain_pending_ FXL_GUARDED_BY(mutex_);
+  std::mutex mutex_;
+  std::deque<SkRefCnt*> objects_;
+  bool drain_pending_;
 };
 
 template <typename T>

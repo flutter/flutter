@@ -14,8 +14,6 @@
 #include "lib/fxl/build_config.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/ref_counted.h"
-#include "lib/fxl/synchronization/mutex.h"
-#include "lib/fxl/synchronization/thread_annotations.h"
 #include "lib/ui/scenic/client/resources.h"
 #include "third_party/skia/include/core/SkPoint.h"
 

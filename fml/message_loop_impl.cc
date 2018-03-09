@@ -94,7 +94,7 @@ void MessageLoopImpl::DoRun() {
   // should be destructed on the message loop's thread. We have just returned
   // from the implementations |Run| method which we know is on the correct
   // thread. Drop all pending tasks on the floor.
-  fxl::MutexLocker lock(&delayed_tasks_mutex_);
+  std::lock_guard<std::mutex> lock(delayed_tasks_mutex_);
   delayed_tasks_ = {};
 }
 
@@ -111,7 +111,7 @@ void MessageLoopImpl::RegisterTask(fxl::Closure task,
     // |task| synchronously within this function.
     return;
   }
-  fxl::MutexLocker lock(&delayed_tasks_mutex_);
+  std::lock_guard<std::mutex> lock(delayed_tasks_mutex_);
   delayed_tasks_.push({++order_, std::move(task), target_time});
   WakeUp(delayed_tasks_.top().target_time);
 }
@@ -121,7 +121,7 @@ void MessageLoopImpl::RunExpiredTasks() {
   std::vector<fxl::Closure> invocations;
 
   {
-    fxl::MutexLocker lock(&delayed_tasks_mutex_);
+    std::lock_guard<std::mutex> lock(delayed_tasks_mutex_);
 
     if (delayed_tasks_.empty()) {
       return;

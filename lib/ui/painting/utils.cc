@@ -22,7 +22,7 @@ SkiaUnrefQueue& SkiaUnrefQueue::Get() {
 }
 
 void SkiaUnrefQueue::Unref(SkRefCnt* object) {
-  fxl::MutexLocker lock(&mutex_);
+  std::lock_guard<std::mutex> lock(mutex_);
   objects_.push_back(object);
   if (!drain_pending_) {
     drain_pending_ = true;
@@ -33,7 +33,7 @@ void SkiaUnrefQueue::Unref(SkRefCnt* object) {
 void SkiaUnrefQueue::Drain() {
   std::deque<SkRefCnt*> skia_objects;
   {
-    fxl::MutexLocker lock(&mutex_);
+    std::lock_guard<std::mutex> lock(mutex_);
     objects_.swap(skia_objects);
     drain_pending_ = false;
   }
