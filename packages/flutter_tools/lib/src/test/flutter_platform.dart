@@ -8,7 +8,8 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 
-import 'package:test/src/backend/test_platform.dart'; // ignore: implementation_imports
+import 'package:test/src/backend/runtime.dart'; // ignore: implementation_imports
+import 'package:test/src/backend/suite_platform.dart'; // ignore: implementation_imports
 import 'package:test/src/runner/plugin/platform.dart'; // ignore: implementation_imports
 import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
@@ -68,7 +69,7 @@ void installHook({
   if (startPaused || observatoryPort != null)
     assert(enableObservatory);
   hack.registerPlatformPlugin(
-    <TestPlatform>[TestPlatform.vm],
+    <Runtime>[Runtime.vm],
     () => new _FlutterPlatform(
       shellPath: shellPath,
       watcher: watcher,
@@ -192,7 +193,7 @@ class _FlutterPlatform extends PlatformPlugin {
   int _testCount = 0;
 
   @override
-  StreamChannel<dynamic> loadChannel(String testPath, TestPlatform platform) {
+  StreamChannel<dynamic> loadChannel(String testPath, SuitePlatform platform) {
     if (_testCount > 0) {
       // Fail if there will be a port conflict.
       if (explicitObservatoryPort != null)
