@@ -17,7 +17,7 @@ import '../widgets/semantics_tester.dart';
 Widget boilerplate({ Widget child, TextDirection textDirection: TextDirection.ltr }) {
   return new Localizations(
     locale: const Locale('en', 'US'),
-    delegates: <LocalizationsDelegate<dynamic>>[
+    delegates: const <LocalizationsDelegate<dynamic>>[
       DefaultMaterialLocalizations.delegate,
       DefaultWidgetsLocalizations.delegate,
     ],
@@ -1661,7 +1661,7 @@ void main() {
           alignment: Alignment.topLeft,
           child: new TabBar(
             controller: controller,
-            tabs: <Tab>[
+            tabs: const <Tab>[
               const Tab(text: 'LEFT'),
               const Tab(text: 'RIGHT'),
             ],
