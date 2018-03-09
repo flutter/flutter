@@ -867,7 +867,7 @@ void main() {
       final GeometryListener geometryListener = new GeometryListener();
       ScaffoldGeometry geometry;
       GeometryListenerState listenerState;
-      Size previousRect = null;
+      Size previousRect;
       // The maximum amounts we expect the fab width and height to change during a transition.
       const double maxDeltaWidth = 12.0;
       const double maxDeltaHeight = 12.0;
