@@ -241,7 +241,7 @@ void main() {
     await tester.pumpWidget(
       new Localizations(
         locale: const Locale('en', 'US'),
-        delegates: <LocalizationsDelegate<dynamic>>[
+        delegates: const <LocalizationsDelegate<dynamic>>[
           DefaultWidgetsLocalizations.delegate,
           DefaultMaterialLocalizations.delegate,
         ],
@@ -256,7 +256,7 @@ void main() {
     await tester.pumpWidget(
       new Localizations(
         locale: const Locale('en', 'US'),
-        delegates: <LocalizationsDelegate<dynamic>>[
+        delegates: const <LocalizationsDelegate<dynamic>>[
           DefaultWidgetsLocalizations.delegate,
           DefaultMaterialLocalizations.delegate,
         ],
@@ -428,7 +428,7 @@ void main() {
     await tester.pumpWidget(
       new Localizations(
         locale: const Locale('en', 'US'),
-        delegates: <LocalizationsDelegate<dynamic>>[
+        delegates: const <LocalizationsDelegate<dynamic>>[
           DefaultWidgetsLocalizations.delegate,
           DefaultMaterialLocalizations.delegate,
         ],
@@ -468,7 +468,7 @@ void main() {
     await tester.pumpWidget(
       new Localizations(
         locale: const Locale('en', 'US'),
-        delegates: <LocalizationsDelegate<dynamic>>[
+        delegates: const <LocalizationsDelegate<dynamic>>[
           DefaultWidgetsLocalizations.delegate,
           DefaultMaterialLocalizations.delegate,
         ],
