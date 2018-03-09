@@ -3018,7 +3018,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool header,
     bool textField,
     bool focused,
-    bool  inMutuallyExclusiveGroup,
+    bool inMutuallyExclusiveGroup,
     String label,
     String value,
     String increasedValue,
