@@ -29,7 +29,7 @@ class ProcessRunnerException implements Exception {
 
   final String message;
   final ProcessResult result;
-  int get exitCode => result.exitCode ?? -1;
+  int get exitCode => result?.exitCode ?? -1;
 
   @override
   String toString() {
@@ -39,7 +39,7 @@ class ProcessRunnerException implements Exception {
     }
     final String stderr = result?.stderr ?? '';
     if (stderr.isNotEmpty) {
-      output += ':\n${result.stderr}';
+      output += ':\n$stderr';
     }
     return output;
   }
@@ -154,6 +154,10 @@ class ProcessRunner {
         stderrComplete.complete();
       }
     } on ProcessException catch (e) {
+      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
+          'failed with:\n${e.toString()}';
+      throw new ProcessRunnerException(message);
+    } on ArgumentError catch (e) {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n${e.toString()}';
       throw new ProcessRunnerException(message);
@@ -441,7 +445,7 @@ class ArchivePublisher {
     final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
     await _cloudCopy(outputFile.absolute.path, destGsPath);
     assert(tempDir.existsSync());
-    return _updateMetadata();
+    await _updateMetadata();
   }
 
   Future<Null> _updateMetadata() async {
@@ -632,6 +636,9 @@ Future<Null> main(List<String> argList) async {
   } on ProcessRunnerException catch (e) {
     exitCode = e.exitCode;
     message = e.message;
+  } catch (e) {
+    exitCode = -1;
+    message = e.toString();
   } finally {
     if (removeTempDir) {
       tempDir.deleteSync(recursive: true);
