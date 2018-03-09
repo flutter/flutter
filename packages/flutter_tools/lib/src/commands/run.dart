@@ -289,13 +289,13 @@ class RunCommand extends RunCommandBase {
           final bool enableSoftwareRendering = argResults['enable-software-rendering'] == true;
           if (enableSoftwareRendering) {
             printStatus(
-              'Using software rendering with device ${device.name}. You may get better performance'
-              ' with hardware mode by configuring hardware rendering for your device.'
+              'Using software rendering with device ${device.name}. You may get better performance '
+              'with hardware mode by configuring hardware rendering for your device.'
             );
           } else {
             printStatus(
-              'Using hardware rendering with device ${device.name}. If you get graphics artifacts,'
-              ' consider enabling software rendering with "--enable-software-rendering".'
+              'Using hardware rendering with device ${device.name}. If you get graphics artifacts, '
+              'consider enabling software rendering with "--enable-software-rendering".'
             );
           }
         }
