@@ -346,9 +346,14 @@ class _AppBarState extends State<AppBar> {
     TextStyle sideStyle = widget.textTheme?.body1 ?? themeData.primaryTextTheme.body1;
 
     final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
-    SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
-      ? SystemUiOverlayStyle.light
-      : SystemUiOverlayStyle.dark);
+
+    // TODO(xster): remove once https://github.com/flutter/flutter/issues/4630
+    // is fixed.
+    if (parentRoute?.isCurrent == true) {
+      SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
+        ? SystemUiOverlayStyle.light
+        : SystemUiOverlayStyle.dark);
+    }
 
     if (widget.toolbarOpacity != 1.0) {
       final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
