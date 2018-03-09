@@ -144,6 +144,8 @@ class WidgetInspectorService {
   final Map<Object, String> _objectToId = new Map<Object, String>.identity();
   int _nextId = 0;
 
+  List<String> _pubRootDirectories;
+
   /// Clear all InspectorService object references.
   ///
   /// Use this method only for testing to ensure that object references from one
@@ -258,6 +260,17 @@ class WidgetInspectorService {
     _decrementReferenceCount(referenceData);
   }
 
+  /// Set the list of directories that should be considered part of the local
+  /// project.
+  ///
+  /// The local project directories are used to distinguish widgets created by
+  /// the local project over widgets created from inside the framework.
+  void setPubRootDirectories(List<Object> pubRootDirectories) {
+    _pubRootDirectories = pubRootDirectories.map<String>(
+      (Object directory) => Uri.parse(directory).path,
+    ).toList();
+  }
+
   /// Set the [WidgetInspector] selection to the object matching the specified
   /// id if the object is valid object to set as the inspector selection.
   ///
@@ -359,8 +372,24 @@ class WidgetInspectorService {
     final _Location creationLocation = _getCreationLocation(value);
     if (creationLocation != null) {
       json['creationLocation'] = creationLocation.toJsonMap();
+      if (_isLocalCreationLocation(creationLocation)) {
+        json['createdByLocalProject'] = true;
+      }
     }
     return json;
+  }
+
+  bool _isLocalCreationLocation(_Location location) {
+    if (_pubRootDirectories == null || location == null || location.file == null) {
+      return false;
+    }
+    final String file = Uri.parse(location.file).path;
+    for (String directory in _pubRootDirectories) {
+      if (file.startsWith(directory)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   String _serialize(DiagnosticsNode node, String groupName) {
