@@ -785,6 +785,149 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   });
 
+  testWidgets('Slider has correct animations when reparented', (WidgetTester tester) async {
+    final Key sliderKey = new GlobalKey(debugLabel: 'A');
+    double value = 0.0;
+
+    Widget buildSlider(int parents) {
+      Widget createParents(int parents, StateSetter setState) {
+        Widget slider = new Slider(
+          key: sliderKey,
+          value: value,
+          divisions: 4,
+          onChanged: (double newValue) {
+            setState(() {
+              value = newValue;
+            });
+          },
+        );
+
+        for (int i = 0; i < parents; ++i) {
+          slider = new Column(children: <Widget>[slider]);
+        }
+        return slider;
+      }
+
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new MediaQuery(
+              data: new MediaQueryData.fromWindow(window),
+              child: new Material(
+                child: createParents(parents, setState),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    Future<Null> testReparenting(bool reparent) async {
+      final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+      final Offset center = tester.getCenter(find.byType(Slider));
+      // Move to 0.0.
+      TestGesture gesture = await tester.startGesture(Offset.zero);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(seconds: 1));
+      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+      expect(
+        sliderBox,
+        paints
+          ..circle(x: 208.5, y: 16.0, radius: 1.0)
+          ..circle(x: 400.0, y: 16.0, radius: 1.0)
+          ..circle(x: 591.5, y: 16.0, radius: 1.0)
+          ..circle(x: 783.0, y: 16.0, radius: 1.0)
+          ..circle(x: 16.0, y: 16.0, radius: 6.0),
+      );
+
+      gesture = await tester.startGesture(center);
+      await tester.pump();
+      // Wait for animations to start.
+      await tester.pump(const Duration(milliseconds: 25));
+      expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
+      expect(
+        sliderBox,
+        paints
+          ..circle(x: 310.9375, y: 16.0, radius: 3.791776657104492)
+          ..circle(x: 17.0, y: 16.0, radius: 1.0)
+          ..circle(x: 208.5, y: 16.0, radius: 1.0)
+          ..circle(x: 400.0, y: 16.0, radius: 1.0)
+          ..circle(x: 591.5, y: 16.0, radius: 1.0)
+          ..circle(x: 783.0, y: 16.0, radius: 1.0)
+          ..circle(x: 310.9375, y: 16.0, radius: 6.0),
+      );
+
+      // Reparenting in the middle of an animation should do nothing.
+      if (reparent) {
+        await tester.pumpWidget(buildSlider(2));
+      }
+
+      // Move a little further in the animations.
+      await tester.pump(const Duration(milliseconds: 10));
+      expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
+      expect(
+        sliderBox,
+        paints
+          ..circle(x: 396.6802978515625, y: 16.0, radius: 8.0)
+          ..circle(x: 17.0, y: 16.0, radius: 1.0)
+          ..circle(x: 208.5, y: 16.0, radius: 1.0)
+          ..circle(x: 591.5, y: 16.0, radius: 1.0)
+          ..circle(x: 783.0, y: 16.0, radius: 1.0)
+          ..circle(x: 396.6802978515625, y: 16.0, radius: 6.0),
+      );
+      // Wait for animations to finish.
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+      expect(
+        sliderBox,
+        paints
+          ..circle(x: 400.0, y: 16.0, radius: 16.0)
+          ..circle(x: 17.0, y: 16.0, radius: 1.0)
+          ..circle(x: 208.5, y: 16.0, radius: 1.0)
+          ..circle(x: 591.5, y: 16.0, radius: 1.0)
+          ..circle(x: 783.0, y: 16.0, radius: 1.0)
+          ..circle(x: 400.0, y: 16.0, radius: 6.0),
+      );
+      await gesture.up();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+      expect(
+        sliderBox,
+        paints
+          ..circle(x: 17.0, y: 16.0, radius: 1.0)
+          ..circle(x: 208.5, y: 16.0, radius: 1.0)
+          ..circle(x: 591.5, y: 16.0, radius: 1.0)
+          ..circle(x: 783.0, y: 16.0, radius: 1.0)
+          ..circle(x: 400.0, y: 16.0, radius: 6.0),
+      );
+      // Move to 0.0 again.
+      gesture = await tester.startGesture(Offset.zero);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(seconds: 1));
+      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+      expect(
+        sliderBox,
+        paints
+          ..circle(x: 208.5, y: 16.0, radius: 1.0)
+          ..circle(x: 400.0, y: 16.0, radius: 1.0)
+          ..circle(x: 591.5, y: 16.0, radius: 1.0)
+          ..circle(x: 783.0, y: 16.0, radius: 1.0)
+          ..circle(x: 16.0, y: 16.0, radius: 6.0),
+      );
+    }
+
+    await tester.pumpWidget(buildSlider(1));
+    // Do it once without reparenting in the middle of an animation
+    await testReparenting(false);
+    // Now do it again with reparenting in the middle of an animation.
+    await testReparenting(true);
+
+  });
+
   testWidgets('Slider Semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
