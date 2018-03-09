@@ -55,7 +55,7 @@ enum PointerDeviceKind {
 class PointerData {
   /// Creates an object that represents the state of a pointer.
   const PointerData({
-    this.timeStamp: Duration.ZERO,
+    this.timeStamp: Duration.zero,
     this.change: PointerChange.cancel,
     this.kind: PointerDeviceKind.touch,
     this.device: 0,

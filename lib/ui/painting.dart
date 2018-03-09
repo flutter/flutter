@@ -838,9 +838,9 @@ enum PaintingStyle {
 }
 
 // If we actually run on big endian machines, we'll need to do something smarter
-// here. We don't use [Endianness.HOST_ENDIAN] because it's not a compile-time
+// here. We don't use [Endian.Host] because it's not a compile-time
 // constant and can't propagate into the set/get calls.
-const Endianness _kFakeHostEndian = Endianness.LITTLE_ENDIAN;
+const Endian _kFakeHostEndian = Endian.little;
 
 /// A description of the style to use when drawing on a [Canvas].
 ///
