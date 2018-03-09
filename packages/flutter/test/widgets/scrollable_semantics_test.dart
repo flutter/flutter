@@ -12,6 +12,10 @@ import 'semantics_tester.dart';
 void main() {
   SemanticsTester semantics;
 
+  setUp(() {
+    debugResetSemanticsIdCounter();
+  });
+
   tearDown(() {
     semantics?.dispose();
     semantics = null;
@@ -327,11 +331,33 @@ void main() {
           children: new List<Widget>.generate(40, (int i) {
             return new Container(
               child: new Text('item $i'),
-              height: 40.0,
+              height: 400.0,
             );
           }),
         ),
       ),
+    );
+
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          children: <TestSemantics>[
+            new TestSemantics(
+              actions: <SemanticsAction>[SemanticsAction.scrollUp],
+              children: <TestSemantics>[
+                new TestSemantics(
+                  label: r'item 0',
+                  textDirection: TextDirection.ltr,
+                ),
+                new TestSemantics(
+                  label: r'item 1',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
 
     // Start with semantics off.
@@ -341,6 +367,7 @@ void main() {
     semantics = new SemanticsTester(tester);
     await tester.pumpAndSettle();
     expect(tester.binding.pipelineOwner.semanticsOwner, isNotNull);
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true, ignoreRect: true, ignoreTransform: true));
 
     // Semantics off
     semantics.dispose();
@@ -351,6 +378,7 @@ void main() {
     semantics = new SemanticsTester(tester);
     await tester.pumpAndSettle();
     expect(tester.binding.pipelineOwner.semanticsOwner, isNotNull);
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true, ignoreRect: true, ignoreTransform: true));
   });
 }
 
