@@ -115,7 +115,7 @@ class Dialog extends StatelessWidget {
 ///             },
 ///           ),
 ///         ],
-///       ),
+///       );
 ///     },
 ///   );
 /// }
@@ -316,7 +316,7 @@ class SimpleDialogOption extends StatelessWidget {
 ///             child: const Text('State department'),
 ///           ),
 ///         ],
-///       ),
+///       );
 ///     }
 ///   )) {
 ///     case Department.treasury:
