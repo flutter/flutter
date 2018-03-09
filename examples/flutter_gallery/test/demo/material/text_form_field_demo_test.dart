@@ -17,20 +17,24 @@ void main() {
     expect(nameField, findsOneWidget);
 
     await tester.enterText(nameField, '');
+    // The submit button isn't initially visible. Drag it into view so that
+    // it will see the tap.
+    await tester.drag(nameField, const Offset(0.0, -800.0));
     await tester.tap(submitButton);
-    await tester.pump();
+    await tester.pumpAndSettle();
+
     expect(find.text('Name is required.'), findsOneWidget);
     expect(find.text('Please enter only alphabetical characters.'), findsNothing);
 
     await tester.enterText(nameField, '#');
     await tester.tap(submitButton);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Name is required.'), findsNothing);
     expect(find.text('Please enter only alphabetical characters.'), findsOneWidget);
 
     await tester.enterText(nameField, 'Jane Doe');
     await tester.tap(submitButton);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Name is required.'), findsNothing);
     expect(find.text('Please enter only alphabetical characters.'), findsNothing);
   });
