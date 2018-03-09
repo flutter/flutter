@@ -255,7 +255,7 @@ class MatrixUtils {
 List<String> debugDescribeTransform(Matrix4 transform) {
   if (transform == null)
     return const <String>['null'];
-  final List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
+  final List<String> matrix = transform.toString().split('\n').toList();
   matrix.removeLast();
   return matrix;
 }

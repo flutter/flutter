@@ -126,9 +126,20 @@ void main() {
 
     expect(
       root.toStringDeep(childOrder: DebugSemanticsDumpOrder.geometricOrder),
-      'SemanticsNode#3(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 10.0, 5.0))\n'
-      '├SemanticsNode#1(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 5.0, 5.0))\n'
-      '└SemanticsNode#2(STALE, owner: null, Rect.fromLTRB(5.0, 0.0, 10.0, 5.0))\n',
+      'SemanticsNode#3\n'
+      ' │ STALE\n'
+      ' │ owner: null\n'
+      ' │ Rect.fromLTRB(0.0, 0.0, 10.0, 5.0)\n'
+      ' │\n'
+      ' ├─SemanticsNode#1\n'
+      ' │   STALE\n'
+      ' │   owner: null\n'
+      ' │   Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
+      ' │\n'
+      ' └─SemanticsNode#2\n'
+      '     STALE\n'
+      '     owner: null\n'
+      '     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
     );
   });
 
@@ -287,16 +298,38 @@ void main() {
     );
     expect(
       root.toStringDeep(childOrder: DebugSemanticsDumpOrder.geometricOrder),
-      'SemanticsNode#3(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 20.0, 5.0))\n'
-      '├SemanticsNode#2(STALE, owner: null, Rect.fromLTRB(10.0, 0.0, 15.0, 5.0))\n'
-      '└SemanticsNode#1(STALE, owner: null, Rect.fromLTRB(15.0, 0.0, 20.0, 5.0))\n',
+      'SemanticsNode#3\n'
+      ' │ STALE\n'
+      ' │ owner: null\n'
+      ' │ Rect.fromLTRB(0.0, 0.0, 20.0, 5.0)\n'
+      ' │\n'
+      ' ├─SemanticsNode#2\n'
+      ' │   STALE\n'
+      ' │   owner: null\n'
+      ' │   Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
+      ' │\n'
+      ' └─SemanticsNode#1\n'
+      '     STALE\n'
+      '     owner: null\n'
+      '     Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
     );
 
     expect(
       root.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest),
-      'SemanticsNode#3(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 20.0, 5.0))\n'
-      '├SemanticsNode#1(STALE, owner: null, Rect.fromLTRB(15.0, 0.0, 20.0, 5.0))\n'
-      '└SemanticsNode#2(STALE, owner: null, Rect.fromLTRB(10.0, 0.0, 15.0, 5.0))\n',
+      'SemanticsNode#3\n'
+      ' │ STALE\n'
+      ' │ owner: null\n'
+      ' │ Rect.fromLTRB(0.0, 0.0, 20.0, 5.0)\n'
+      ' │\n'
+      ' ├─SemanticsNode#1\n'
+      ' │   STALE\n'
+      ' │   owner: null\n'
+      ' │   Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
+      ' │\n'
+      ' └─SemanticsNode#2\n'
+      '     STALE\n'
+      '     owner: null\n'
+      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
     );
 
     final SemanticsNode child3 = new SemanticsNode()
@@ -320,22 +353,68 @@ void main() {
 
     expect(
       rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.geometricOrder),
-      'SemanticsNode#7(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 25.0, 5.0))\n'
-      '├SemanticsNode#4(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 10.0, 5.0))\n'
-      '│├SemanticsNode#6(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 5.0, 5.0))\n'
-      '│└SemanticsNode#5(STALE, owner: null, Rect.fromLTRB(5.0, 0.0, 10.0, 5.0))\n'
-      '├SemanticsNode#2(STALE, owner: null, Rect.fromLTRB(10.0, 0.0, 15.0, 5.0))\n'
-      '└SemanticsNode#1(STALE, owner: null, Rect.fromLTRB(15.0, 0.0, 20.0, 5.0))\n',
+      'SemanticsNode#7\n'
+      ' │ STALE\n'
+      ' │ owner: null\n'
+      ' │ Rect.fromLTRB(0.0, 0.0, 25.0, 5.0)\n'
+      ' │\n'
+      ' ├─SemanticsNode#4\n'
+      ' │ │ STALE\n'
+      ' │ │ owner: null\n'
+      ' │ │ Rect.fromLTRB(0.0, 0.0, 10.0, 5.0)\n'
+      ' │ │\n'
+      ' │ ├─SemanticsNode#6\n'
+      ' │ │   STALE\n'
+      ' │ │   owner: null\n'
+      ' │ │   Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
+      ' │ │\n'
+      ' │ └─SemanticsNode#5\n'
+      ' │     STALE\n'
+      ' │     owner: null\n'
+      ' │     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
+      ' │\n'
+      ' ├─SemanticsNode#2\n'
+      ' │   STALE\n'
+      ' │   owner: null\n'
+      ' │   Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
+      ' │\n'
+      ' └─SemanticsNode#1\n'
+      '     STALE\n'
+      '     owner: null\n'
+      '     Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
     );
 
     expect(
       rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest),
-      'SemanticsNode#7(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 25.0, 5.0))\n'
-      '├SemanticsNode#1(STALE, owner: null, Rect.fromLTRB(15.0, 0.0, 20.0, 5.0))\n'
-      '├SemanticsNode#2(STALE, owner: null, Rect.fromLTRB(10.0, 0.0, 15.0, 5.0))\n'
-      '└SemanticsNode#4(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 10.0, 5.0))\n'
-      ' ├SemanticsNode#5(STALE, owner: null, Rect.fromLTRB(5.0, 0.0, 10.0, 5.0))\n'
-      ' └SemanticsNode#6(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 5.0, 5.0))\n',
+      'SemanticsNode#7\n'
+      ' │ STALE\n'
+      ' │ owner: null\n'
+      ' │ Rect.fromLTRB(0.0, 0.0, 25.0, 5.0)\n'
+      ' │\n'
+      ' ├─SemanticsNode#1\n'
+      ' │   STALE\n'
+      ' │   owner: null\n'
+      ' │   Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
+      ' │\n'
+      ' ├─SemanticsNode#2\n'
+      ' │   STALE\n'
+      ' │   owner: null\n'
+      ' │   Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
+      ' │\n'
+      ' └─SemanticsNode#4\n'
+      '   │ STALE\n'
+      '   │ owner: null\n'
+      '   │ Rect.fromLTRB(0.0, 0.0, 10.0, 5.0)\n'
+      '   │\n'
+      '   ├─SemanticsNode#5\n'
+      '   │   STALE\n'
+      '   │   owner: null\n'
+      '   │   Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
+      '   │\n'
+      '   └─SemanticsNode#6\n'
+      '       STALE\n'
+      '       owner: null\n'
+      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
     );
   });
 
@@ -343,12 +422,33 @@ void main() {
     final SemanticsNode minimalProperties = new SemanticsNode();
     expect(
       minimalProperties.toStringDeep(),
-      'SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), invisible)\n',
+      'SemanticsNode#1\n'
+      '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+      '   invisible\n'
     );
 
     expect(
       minimalProperties.toStringDeep(minLevel: DiagnosticLevel.hidden),
-      'SemanticsNode#1(owner: null, isMergedIntoParent: false, mergeAllDescendantsIntoThisNode: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), actions: [], isInMutuallyExcusiveGroup: false, isSelected: false, isFocused: false, isButton: false, isTextField: false, invisible, label: "", value: "", increasedValue: "", decreasedValue: "", hint: "", textDirection: null, nextNodeId: null, previousNodeId: null, sortOrder: null, scrollExtentMin: null, scrollPosition: null, scrollExtentMax: null)\n'
+      'SemanticsNode#1\n'
+      '   owner: null\n'
+      '   isMergedIntoParent: false\n'
+      '   mergeAllDescendantsIntoThisNode: false\n'
+      '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+      '   actions: []\n'
+      '   flags: []\n'
+      '   invisible\n'
+      '   label: ""\n'
+      '   value: ""\n'
+      '   increasedValue: ""\n'
+      '   decreasedValue: ""\n'
+      '   hint: ""\n'
+      '   textDirection: null\n'
+      '   nextNodeId: null\n'
+      '   previousNodeId: null\n'
+      '   sortOrder: null\n'
+      '   scrollExtentMin: null\n'
+      '   scrollPosition: null\n'
+      '   scrollExtentMax: null\n'
     );
 
     final SemanticsConfiguration config = new SemanticsConfiguration()
@@ -369,7 +469,19 @@ void main() {
       ..updateWith(config: config, childrenInInversePaintOrder: null);
     expect(
       allProperties.toStringDeep(),
-      equalsIgnoringHashCodes('SemanticsNode#2(STALE, owner: null, merge boundary ⛔️, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), actions: [longPress, scrollUp, showOnScreen], unchecked, selected, button, label: "Use all the properties", textDirection: rtl, sortOrder: SemanticsSortOrder#8e690(keys: [OrdinalSortKey#ca2b8(order: 1.0)]))\n'),
+      equalsIgnoringHashCodes(
+          'SemanticsNode#2\n'
+          '   STALE\n'
+          '   owner: null\n'
+          '   merge boundary ⛔️\n'
+          '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
+          '   actions: longPress, scrollUp, showOnScreen\n'
+          '   flags: hasCheckedState, isSelected, isButton\n'
+          '   label: "Use all the properties"\n'
+          '   textDirection: rtl\n'
+          '   sortOrder: SemanticsSortOrder#b555b(keys:\n'
+          '     [OrdinalSortKey#19df5(order: 1.0)])\n'
+      ),
     );
     expect(
       allProperties.getSemanticsData().toString(),
@@ -381,7 +493,10 @@ void main() {
       ..transform = new Matrix4.diagonal3(new Vector3(10.0, 10.0, 1.0));
     expect(
       scaled.toStringDeep(),
-      'SemanticsNode#3(STALE, owner: null, Rect.fromLTRB(50.0, 10.0, 70.0, 40.0) scaled by 10.0x)\n',
+      'SemanticsNode#3\n'
+      '   STALE\n'
+      '   owner: null\n'
+      '   Rect.fromLTRB(50.0, 10.0, 70.0, 40.0) scaled by 10.0x\n',
     );
     expect(
       scaled.getSemanticsData().toString(),
