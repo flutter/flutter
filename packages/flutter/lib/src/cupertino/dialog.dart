@@ -129,7 +129,7 @@ class CupertinoAlertDialog extends StatelessWidget {
     Key key,
     this.title,
     this.content,
-    this.actions,
+    this.actions: const <Widget>[],
     this.scrollController,
     this.actionScrollController,
   }) : super(key: key);
@@ -178,20 +178,16 @@ class CupertinoAlertDialog extends StatelessWidget {
       message: content,
       scrollController: scrollController,
     );
-    if (titleSection != null) {
-      children.add(titleSection);
-    }
-    
+    children.add(titleSection);
+
     // Add padding between the sections.
     children.add(const Padding(padding: const EdgeInsets.only(top: 8.0)));
-    
+
     final Widget actionSection = new _CupertinoAlertActionSection(
       children: actions,
       scrollController: actionScrollController,
     );
-    if (actionSection != null) {
-      children.add(actionSection);
-    }
+    children.add(actionSection);
 
     return new Padding(
       padding: const EdgeInsets.symmetric(vertical: _kEdgePadding),
@@ -351,9 +347,10 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
     }
 
     if (titleContentGroup.isEmpty) {
-      // Returning null to let the calling code know to not include the section.
-      // This method is private and the calling code does a null check.
-      return null;
+      return new SingleChildScrollView(
+        controller: scrollController,
+        child: new Container(width: 0.0, height: 0.0),
+      );
     }
 
     // Add padding between the widgets if necessary.
@@ -378,7 +375,7 @@ class _CupertinoAlertTitleSection extends StatelessWidget {
 }
 
 
-/// A Action Items section typically used in a [CupertinoAlertDialog].
+/// An Action Items section typically used in a [CupertinoAlertDialog].
 ///
 /// If _shouldLayoutActionsVertically(_) is true, they are laid out vertically
 /// in a column; else they are laid out horizontally in a row. If there isn't
@@ -403,9 +400,10 @@ class _CupertinoAlertActionSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (children == null || children.isEmpty) {
-      // Returning null to let the calling code know to not include the section.
-      // This method is private and the calling code does a null check.
-      return null;
+      return new SingleChildScrollView(
+        controller: scrollController,
+        child: new Container(width: 0.0, height: 0.0),
+      );
     }
 
     final List<Widget> buttons = <Widget>[];
@@ -441,13 +439,18 @@ class _CupertinoAlertActionSection extends StatelessWidget {
         ),
       );
     } else {
-      return new CustomPaint(
-        painter: new _CupertinoHorizontalDividerPainter(children.length),
-        child: new UnconstrainedBox(
-          constrainedAxis: Axis.horizontal,
-          child: new ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: _kButtonHeight),
-            child: new Row(children: buttons),
+      // For a horizontal layout, we don't need the scrollController in almost
+      // all cases, but it still has to be always attached to a scroll view.
+      return new SingleChildScrollView(
+        controller: scrollController,
+        child: new CustomPaint(
+          painter: new _CupertinoHorizontalDividerPainter(children.length),
+          child: new UnconstrainedBox(
+            constrainedAxis: Axis.horizontal,
+            child: new ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: _kButtonHeight),
+              child: new Row(children: buttons),
+            ),
           ),
         ),
       );

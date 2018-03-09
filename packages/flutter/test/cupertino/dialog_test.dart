@@ -231,6 +231,94 @@ void main() {
     expect(tester.getCenter(find.widgetWithText(CupertinoDialogAction, 'Chocolate Brownies')).dx, equals(400.0));
     expect(tester.getCenter(find.widgetWithText(CupertinoDialogAction, 'Cancel')).dx, equals(400.0));
   });
+
+  testWidgets('Title Section is empty, Button section is not empty.',
+      (WidgetTester tester) async {
+    const double textScaleFactor = 1.0;
+    final ScrollController scrollController = new ScrollController(keepScrollOffset: true);
+    await tester.pumpWidget(
+      new MaterialApp(home: new Material(
+        child: new Center(
+          child: new Builder(builder: (BuildContext context) {
+            return new RaisedButton(
+              onPressed: () {
+                showDialog<Null>(
+                  context: context,
+                  child: new Builder(builder: (BuildContext context) {
+                    return new MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                      child: new CupertinoAlertDialog(
+                        actions: <Widget>[
+                          const CupertinoDialogAction(
+                            child: const Text('One'),
+                          ),
+                          const CupertinoDialogAction(
+                            child: const Text('Two'),
+                          ),
+                        ],
+                        actionScrollController: scrollController,
+                      ),
+                    );
+                  }),
+                );
+              },
+              child: const Text('Go'),
+            );
+          }),
+        ),
+      )),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Check that the title/message section is not displayed
+    expect(scrollController.offset, 0.0);
+    expect(tester.getTopLeft(find.widgetWithText(CupertinoDialogAction, 'One')).dy, equals(288.0));
+  });
+
+  testWidgets('Button section is empty, Title section is not empty.',
+      (WidgetTester tester) async {
+    const double textScaleFactor = 1.0;
+    final ScrollController scrollController = new ScrollController(keepScrollOffset: true);
+    await tester.pumpWidget(
+      new MaterialApp(home: new Material(
+        child: new Center(
+          child: new Builder(builder: (BuildContext context) {
+            return new RaisedButton(
+              onPressed: () {
+                showDialog<Null>(
+                  context: context,
+                  child: new Builder(builder: (BuildContext context) {
+                    return new MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                      child: new CupertinoAlertDialog(
+                        title: const Text('The title'),
+                        content: const Text('The content.'),
+                        scrollController: scrollController,
+                      ),
+                    );
+                  }),
+                );
+              },
+              child: const Text('Go'),
+            );
+          }),
+        ),
+      )),
+    );
+
+    await tester.tap(find.text('Go'));
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Check that there's no button action section.
+    expect(scrollController.offset, 0.0);
+    expect(find.widgetWithText(CupertinoDialogAction, 'One').evaluate().toList().length, equals(0));
+  });
 }
 
 Widget boilerplate(Widget child) {

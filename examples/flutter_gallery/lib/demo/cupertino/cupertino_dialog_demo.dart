@@ -101,47 +101,141 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
               showDemoDialog<String>(
                 context: context,
                 child: new CupertinoAlertDialog(
-                    title: const Text('Select Favorite Dessert'),
-                    content: const Text(
-                        'Please select your favorite type of dessert from the '
-                            'list below. Your selection will be used to customize '
-                            'the suggested list of eateries where your are.'
+                  title: const Text('Select Favorite Dessert'),
+                  content: const Text(
+                    'Please select your favorite type of dessert from the '
+                      'list below. Your selection will be used to customize '
+                      'the suggested list of eateries where your are.'
+                  ),
+                  actions: <Widget>[
+                    new CupertinoDialogAction(
+                      child: const Text('Cheesecake'),
+                      onPressed: () { Navigator.pop(context, 'Cheesecake'); }
                     ),
-                    actions: <Widget>[
-                      new CupertinoDialogAction(
-                          child: const Text('Cheesecake'),
-                          onPressed: () { Navigator.pop(context, 'Cheesecake'); }
-                      ),
-                      new CupertinoDialogAction(
-                          child: const Text('Tiramisu'),
-                          onPressed: () { Navigator.pop(context, 'Tiramisu'); }
-                      ),
-                      new CupertinoDialogAction(
-                          child: const Text('Apple Pie'),
-                          onPressed: () { Navigator.pop(context, 'Apple Pie'); }
-                      ),
-                      new CupertinoDialogAction(
-                          child: const Text("Devil's food cake"),
-                          onPressed: () { Navigator.pop(context, "Devil's food cake"); }
-                      ),
-                      new CupertinoDialogAction(
-                          child: const Text('Banana Split'),
-                          onPressed: () { Navigator.pop(context, 'Banana Split'); }
-                      ),
-                      new CupertinoDialogAction(
-                          child: const Text('Oatmeal Cookie'),
-                          onPressed: () { Navigator.pop(context, 'Oatmeal Cookies'); }
-                      ),
-                      new CupertinoDialogAction(
-                          child: const Text('Chocolate Brownie'),
-                          onPressed: () { Navigator.pop(context, 'Chocolate Brownies'); }
-                      ),
-                      new CupertinoDialogAction(
-                          child: const Text('Cancel'),
-                          isDestructiveAction: true,
-                          onPressed: () { Navigator.pop(context, 'Cancel'); }
-                      ),
-                    ]
+                    new CupertinoDialogAction(
+                      child: const Text('Tiramisu'),
+                      onPressed: () { Navigator.pop(context, 'Tiramisu'); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: const Text('Apple Pie'),
+                      onPressed: () { Navigator.pop(context, 'Apple Pie'); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: const Text("Devil's food cake"),
+                      onPressed: () { Navigator.pop(context, "Devil's food cake"); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: const Text('Banana Split'),
+                      onPressed: () { Navigator.pop(context, 'Banana Split'); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: const Text('Oatmeal Cookie'),
+                      onPressed: () { Navigator.pop(context, 'Oatmeal Cookies'); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: const Text('Chocolate Brownie'),
+                      onPressed: () { Navigator.pop(context, 'Chocolate Brownies'); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: const Text('Cancel'),
+                      isDestructiveAction: true,
+                      onPressed: () { Navigator.pop(context, 'Cancel'); }
+                    ),
+                  ]
+                ),
+              );
+            },
+          ),
+          const Padding(padding: const EdgeInsets.all(8.0)),
+          new CupertinoButton(
+            child: const Text('Alert Buttons Only'),
+            color: CupertinoColors.activeBlue,
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+            onPressed: () {
+              showDemoDialog<String>(
+                context: context,
+                child: new CupertinoAlertDialog(
+                  actions: <Widget>[
+                    new CupertinoDialogAction(
+                      child: const Text('One'),
+                      onPressed: () { Navigator.pop(context, 'One'); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: const Text('Two'),
+                      onPressed: () { Navigator.pop(context, 'Two'); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: const Text('Three'),
+                      onPressed: () { Navigator.pop(context, 'Three'); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: const Text("Four"),
+                      onPressed: () { Navigator.pop(context, "Four"); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: const Text('Five'),
+                      onPressed: () { Navigator.pop(context, 'Five'); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: const Text('Six'),
+                      onPressed: () { Navigator.pop(context, 'Six'); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: const Text('Seven'),
+                      onPressed: () { Navigator.pop(context, 'Seven'); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: const Text('Cancel'),
+                      isDestructiveAction: true,
+                      onPressed: () { Navigator.pop(context, 'Cancel'); }
+                    ),
+                  ]
+                ),
+              );
+            },
+          ),
+          const Padding(padding: const EdgeInsets.all(8.0)),
+          new CupertinoButton(
+            child: const Text('Alert Title Only'),
+            color: CupertinoColors.activeBlue,
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+            onPressed: () {
+              showDemoDialog<String>(
+                context: context,
+                child: new CupertinoAlertDialog(
+                  title: const Text('You won the Lottery!'),
+                  actions: <Widget>[
+                    new CupertinoDialogAction(
+                      child: const Text('Yay'),
+                      onPressed: () { Navigator.pop(context, 'Yay'); }
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          const Padding(padding: const EdgeInsets.all(8.0)),
+          new CupertinoButton(
+            child: const Text('Alert Message Only'),
+            color: CupertinoColors.activeBlue,
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+            onPressed: () {
+              showDemoDialog<String>(
+                context: context,
+                child: new CupertinoAlertDialog(
+                  content: const Text(
+                    'Flutter is Google’s mobile UI framework for crafting '
+                      'high-quality native interfaces on iOS and Android '
+                      'in record time. Flutter works with existing code, '
+                      'is used by developers and organizations around the '
+                      'world, and is free and open source.'
+                  ),
+                  actions: <Widget>[
+                    new CupertinoDialogAction(
+                      child: const Text('Okay'),
+                      onPressed: () { Navigator.pop(context, 'Okay'); }
+                    ),
+                  ],
                 ),
               );
             },
