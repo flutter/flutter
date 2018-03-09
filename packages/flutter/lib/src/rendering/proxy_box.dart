@@ -3015,6 +3015,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool checked,
     bool selected,
     bool button,
+    bool header,
+    bool textField,
+    bool focused,
+    bool inMutuallyExclusiveGroup,
     String label,
     String value,
     String increasedValue,
@@ -3045,6 +3049,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _checked = checked,
        _selected = selected,
        _button = button,
+       _header = header,
+       _textField = textField,
+       _focused = focused,
+       _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _label = label,
        _value = value,
        _increasedValue = increasedValue,
@@ -3149,6 +3157,47 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (button == value)
       return;
     _button = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isHeader] semantic to the given value.
+  bool get header => _header;
+  bool _header;
+  set header(bool value) {
+    if (header == value)
+      return;
+    _header = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isTextField] semantic to the given value.
+  bool get textField => _textField;
+  bool _textField;
+  set textField(bool value) {
+    if (textField == value)
+      return;
+    _textField = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isFocused] semantic to the given value.
+  bool get focused => _focused;
+  bool _focused;
+  set focused(bool value) {
+    if (focused == value)
+      return;
+    _focused = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isInMutuallyExclusiveGroup] semantic
+  /// to the given value.
+  bool get inMutuallyExclusiveGroup => _inMutuallyExclusiveGroup;
+  bool _inMutuallyExclusiveGroup;
+  set inMutuallyExclusiveGroup(bool value) {
+    if (inMutuallyExclusiveGroup == value)
+      return;
+    _inMutuallyExclusiveGroup = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3581,6 +3630,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isSelected = selected;
     if (button != null)
       config.isButton = button;
+    if (header != null)
+      config.isHeader = header;
+    if (textField != null)
+      config.isTextField = textField;
+    if (focused != null)
+      config.isFocused = focused;
+    if (inMutuallyExclusiveGroup != null)
+      config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup;
     if (label != null)
       config.label = label;
     if (value != null)

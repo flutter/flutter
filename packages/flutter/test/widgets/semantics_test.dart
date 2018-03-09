@@ -449,6 +449,39 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+        new Semantics(
+          container: true,
+          // flags
+          enabled: true,
+          checked: true,
+          selected: true,
+          button: true,
+          textField: true,
+          focused: true,
+          inMutuallyExclusiveGroup: true,
+          header: true,
+        )
+    );
+
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          rect: TestSemantics.fullScreen,
+          flags: SemanticsFlag.values.values.toList(),
+          previousNodeId: -1,
+          nextNodeId: -1,
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
+
+    semantics.dispose();
+  });
+
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     int semanticsUpdateCount = 0;
