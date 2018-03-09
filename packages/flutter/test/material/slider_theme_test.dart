@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show window;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,53 +33,12 @@ void main() {
     Widget buildSlider(SliderThemeData data) {
       return new Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Theme(
-              data: theme,
-              child: const Slider(
-                value: 0.5,
-                label: '0.5',
-                onChanged: null,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildSlider(sliderTheme));
-
-    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
-
-    expect(
-        sliderBox,
-        paints
-          ..rect(color: sliderTheme.disabledActiveRailColor)
-          ..rect(color: sliderTheme.disabledInactiveRailColor));
-  });
-
-  testWidgets('Slider overrides ThemeData theme if SliderTheme present',
-      (WidgetTester tester) async {
-    final ThemeData theme = new ThemeData(
-      platform: TargetPlatform.android,
-      primarySwatch: Colors.red,
-    );
-    final SliderThemeData sliderTheme = theme.sliderTheme;
-    final SliderThemeData customTheme = sliderTheme.copyWith(
-      activeRailColor: Colors.purple,
-      inactiveRailColor: Colors.purple.withAlpha(0x3d),
-    );
-
-    Widget buildSlider(SliderThemeData data) {
-      return new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new Theme(
-              data: theme,
-              child: new SliderTheme(
-                data: customTheme,
+        child: new MediaQuery(
+          data: new MediaQueryData.fromWindow(window),
+          child: new Material(
+            child: new Center(
+              child: new Theme(
+                data: theme,
                 child: const Slider(
                   value: 0.5,
                   label: '0.5',
@@ -94,20 +55,57 @@ void main() {
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
-    expect(
-        sliderBox,
-        paints
-          ..rect(color: customTheme.disabledActiveRailColor)
-          ..rect(color: customTheme.disabledInactiveRailColor));
+    expect(sliderBox, paints..rect(color: sliderTheme.disabledActiveRailColor)..rect(color: sliderTheme.disabledInactiveRailColor));
   });
 
-  testWidgets('SliderThemeData generates correct opacities for materialDefaults',
-      (WidgetTester tester) async {
+  testWidgets('Slider overrides ThemeData theme if SliderTheme present', (WidgetTester tester) async {
+    final ThemeData theme = new ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.red,
+    );
+    final SliderThemeData sliderTheme = theme.sliderTheme;
+    final SliderThemeData customTheme = sliderTheme.copyWith(
+      activeRailColor: Colors.purple,
+      inactiveRailColor: Colors.purple.withAlpha(0x3d),
+    );
+
+    Widget buildSlider(SliderThemeData data) {
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: new MediaQueryData.fromWindow(window),
+          child: new Material(
+            child: new Center(
+              child: new Theme(
+                data: theme,
+                child: new SliderTheme(
+                  data: customTheme,
+                  child: const Slider(
+                    value: 0.5,
+                    label: '0.5',
+                    onChanged: null,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSlider(sliderTheme));
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    expect(sliderBox, paints..rect(color: customTheme.disabledActiveRailColor)..rect(color: customTheme.disabledInactiveRailColor));
+  });
+
+  testWidgets('SliderThemeData generates correct opacities for materialDefaults', (WidgetTester tester) async {
     const Color customColor1 = const Color(0xcafefeed);
     const Color customColor2 = const Color(0xdeadbeef);
     const Color customColor3 = const Color(0xdecaface);
 
-    final SliderThemeData sliderTheme = new SliderThemeData.materialDefaults(
+    final SliderThemeData sliderTheme = new SliderThemeData.fromPrimaryColors(
       primaryColor: customColor1,
       primaryColorDark: customColor2,
       primaryColorLight: customColor3,
@@ -126,18 +124,17 @@ void main() {
     expect(sliderTheme.overlayColor, equals(customColor1.withAlpha(0x29)));
     expect(sliderTheme.valueIndicatorColor, equals(customColor1.withAlpha(0xff)));
     expect(sliderTheme.thumbShape, equals(const isInstanceOf<RoundSliderThumbShape>()));
-    expect(sliderTheme.valueIndicatorShape,
-        equals(const isInstanceOf<PaddleSliderValueIndicatorShape>()));
+    expect(sliderTheme.valueIndicatorShape, equals(const isInstanceOf<PaddleSliderValueIndicatorShape>()));
     expect(sliderTheme.showValueIndicator, equals(ShowValueIndicator.onlyForDiscrete));
   });
 
   testWidgets('SliderThemeData lerps correctly', (WidgetTester tester) async {
-    final SliderThemeData sliderThemeBlack = new SliderThemeData.materialDefaults(
+    final SliderThemeData sliderThemeBlack = new SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
       primaryColorLight: Colors.black,
     );
-    final SliderThemeData sliderThemeWhite = new SliderThemeData.materialDefaults(
+    final SliderThemeData sliderThemeWhite = new SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.white,
       primaryColorDark: Colors.white,
       primaryColorLight: Colors.white,
@@ -172,15 +169,18 @@ void main() {
       final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
       return new Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new SliderTheme(
-              data: sliderTheme,
-              child: new Slider(
-                value: value,
-                label: '$value',
-                divisions: divisions,
-                onChanged: onChanged,
+        child: new MediaQuery(
+          data: new MediaQueryData.fromWindow(window),
+          child: new Material(
+            child: new Center(
+              child: new SliderTheme(
+                data: sliderTheme,
+                child: new Slider(
+                  value: value,
+                  label: '$value',
+                  divisions: divisions,
+                  onChanged: onChanged,
+                ),
               ),
             ),
           ),
@@ -225,21 +225,27 @@ void main() {
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
     );
-    final SliderThemeData sliderTheme = theme.sliderTheme
-        .copyWith(thumbColor: Colors.red.shade500, showValueIndicator: ShowValueIndicator.always);
-    Widget buildApp(String value) {
+    final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500, showValueIndicator: ShowValueIndicator.always);
+    Widget buildApp(String value, {double sliderValue = 0.5}) {
       return new Directionality(
         textDirection: TextDirection.ltr,
-        child: new Material(
-          child: new Center(
-            child: new SliderTheme(
-              data: sliderTheme,
-              child: new Slider(
-                value: 0.5,
-                label: '$value',
-                divisions: 3,
-                onChanged: (double d) {},
-              ),
+        child: new MediaQuery(
+          data: new MediaQueryData.fromWindow(window),
+          child: new Material(
+            child: new Row(
+              children: <Widget>[
+                new Expanded(
+                  child: new SliderTheme(
+                    data: sliderTheme,
+                    child: new Slider(
+                      value: sliderValue,
+                      label: '$value',
+                      divisions: 3,
+                      onChanged: (double d) {},
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -288,6 +294,48 @@ void main() {
               const Offset(-35.9, -40.0),
             ],
             excludes: <Offset>[const Offset(36.1, -40.0), const Offset(-36.1, -40.0)],
+          ));
+    await gesture.up();
+
+    // Test that it avoids the left edge of the screen.
+    await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0));
+    center = tester.getCenter(find.byType(Slider));
+    gesture = await tester.startGesture(center);
+    await tester.pump();
+    // Wait for value indicator animation to finish.
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(
+        sliderBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -40.0),
+              const Offset(98.0, -40.0),
+              const Offset(-16.0, -40.0),
+            ],
+            excludes: <Offset>[const Offset(98.1, -40.0), const Offset(-16.1, -40.0)],
+          ));
+    await gesture.up();
+
+    // Test that it avoids the right edge of the screen.
+    await tester.pumpWidget(buildApp('1000000', sliderValue: 1.0));
+    center = tester.getCenter(find.byType(Slider));
+    gesture = await tester.startGesture(center);
+    await tester.pump();
+    // Wait for value indicator animation to finish.
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(
+        sliderBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -40.0),
+              const Offset(16.0, -40.0),
+              const Offset(-98.0, -40.0),
+            ],
+            excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-98.1, -40.0)],
           ));
     await gesture.up();
   });
