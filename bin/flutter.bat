@@ -118,7 +118,7 @@ GOTO :after_subroutine
       :not_on_bot
       SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_install
       IF "%PUB_CACHE%" == "" (
-       IF EXIST "%pub_cache_path%" SET PUB_CACHE=%pub_cache_path%
+       IF EXIST "%pub_cache_path%" SET PUB_CACHE="%pub_cache_path%"
       )
       :retry_pub_upgrade
       CALL "%pub%" upgrade --verbosity=error --no-packages-dir
