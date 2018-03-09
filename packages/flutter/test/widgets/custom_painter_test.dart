@@ -400,7 +400,6 @@ void _defineTests() {
 
   testWidgets('Supports all flags', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
-    final List<SemanticsAction> performedActions = <SemanticsAction>[];
 
     await tester.pumpWidget(new CustomPaint(
       painter: new _PainterWithSemantics(
