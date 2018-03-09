@@ -108,7 +108,7 @@ class ChannelCommand extends FlutterCommand {
       if (result == 0) {
         // branch already exists, try just switching to it
         result = await runCommandAndStreamOutput(
-          <String>['git', 'checkout', branchName],
+          <String>['git', 'checkout', branchName, '--'],
           workingDirectory: Cache.flutterRoot,
           prefix: 'git: ',
         );

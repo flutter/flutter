@@ -147,7 +147,7 @@ class TextSelection extends TextRange {
   /// Might be larger than, smaller than, or equal to base.
   final int extentOffset;
 
-  /// If the the text range is collapsed and has more than one visual location
+  /// If the text range is collapsed and has more than one visual location
   /// (e.g., occurs at a line break), which of the two locations to use when
   /// painting the caret.
   final TextAffinity affinity;

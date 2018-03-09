@@ -15,7 +15,7 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow von $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow von etwa $rowCount",
   "rowsPerPageTitle": "Zeilen pro Seite:",
-  "tabLabel": "Tabulator $tabIndex von $tabCount",
+  "tabLabel": "Tab $tabIndex von $tabCount",
   "selectedRowCountTitleZero": "Keine Objekte ausgewählt",
   "selectedRowCountTitleOne": "1 Element ausgewählt",
   "selectedRowCountTitleOther": "$selectedRowCount Elemente ausgewählt",

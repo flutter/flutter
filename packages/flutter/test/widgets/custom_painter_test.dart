@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
@@ -397,6 +398,52 @@ void _defineTests() {
     semantics.dispose();
   });
 
+  testWidgets('Supports all flags', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(new CustomPaint(
+      painter: new _PainterWithSemantics(
+        semantics: new CustomPainterSemantics(
+          key: const ValueKey<int>(1),
+          rect: new Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
+          properties: const SemanticsProperties(
+            enabled: true,
+            checked: true,
+            selected: true,
+            button: true,
+            textField: true,
+            focused: true,
+            inMutuallyExclusiveGroup: true,
+            header: true,
+          ),
+        ),
+      ),
+    ));
+
+    const int expectedId = 2;
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+            id: 1,
+            previousNodeId: -1,
+            nextNodeId: expectedId,
+            children: <TestSemantics>[
+              new TestSemantics.rootChild(
+                id: expectedId,
+                rect: TestSemantics.fullScreen,
+                flags: SemanticsFlag.values.values.toList(),
+                previousNodeId: 1,
+                nextNodeId: -1,
+              ),
+            ]
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
+
+    semantics.dispose();
+  });
+
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {
       final SemanticsTester semanticsTester = new SemanticsTester(tester);
@@ -597,7 +644,7 @@ class _DiffTester {
 
   /// Creates an initial semantics list using the `from` list, then updates the
   /// list to the `to` list. This causes [RenderCustomPaint] to diff the two
-  /// lists and apply the changes. This method asserts the the changes were
+  /// lists and apply the changes. This method asserts the changes were
   /// applied correctly, specifically:
   ///
   /// - checks that initial and final configurations are in the desired states.

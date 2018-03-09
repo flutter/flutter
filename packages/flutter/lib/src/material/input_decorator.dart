@@ -53,7 +53,7 @@ class _InputBorderGap extends ChangeNotifier {
 
 // Used to interpolate between two InputBorders.
 class _InputBorderTween extends Tween<InputBorder> {
-  _InputBorderTween({ InputBorder begin, InputBorder end }) : super(begin: begin, end: end);
+  _InputBorderTween({InputBorder begin, InputBorder end}) : super(begin: begin, end: end);
 
   @override
   InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t);
@@ -108,7 +108,7 @@ class _BorderContainer extends StatefulWidget {
     @required this.border,
     @required this.gap,
     @required this.gapAnimation,
-    this.child
+    this.child,
   }) : assert(border != null),
        assert(gap != null),
        super(key: key);
@@ -2164,7 +2164,7 @@ class InputDecoration {
 /// The [InputDecoration.applyDefaults] method is used to combine a input
 /// decoration theme with an [InputDecoration] object.
 @immutable
-class InputDecorationTheme {
+class InputDecorationTheme extends Diagnosticable {
   /// Creates a value for [ThemeData.inputDecorationTheme] that
   /// defines default values for [InputDecorator].
   ///
@@ -2300,4 +2300,36 @@ class InputDecorationTheme {
   ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
   ///    rounded rectangle around the input decorator's container.
   final InputBorder border;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    final InputDecorationTheme defaultTheme = const InputDecorationTheme();
+    description.add(new DiagnosticsProperty<TextStyle>('labelStyle', labelStyle,
+        defaultValue: defaultTheme.labelStyle));
+    description.add(new DiagnosticsProperty<TextStyle>('helperStyle', helperStyle,
+        defaultValue: defaultTheme.helperStyle));
+    description.add(new DiagnosticsProperty<TextStyle>('hintStyle', hintStyle,
+        defaultValue: defaultTheme.hintStyle));
+    description.add(new DiagnosticsProperty<TextStyle>('errorStyle', errorStyle,
+        defaultValue: defaultTheme.errorStyle));
+    description
+        .add(new DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
+    description.add(new DiagnosticsProperty<EdgeInsets>('contentPadding', contentPadding,
+        defaultValue: defaultTheme.contentPadding));
+    description.add(new DiagnosticsProperty<bool>('isCollapsed', isCollapsed,
+        defaultValue: defaultTheme.isCollapsed));
+    description.add(new DiagnosticsProperty<TextStyle>('prefixStyle', prefixStyle,
+        defaultValue: defaultTheme.prefixStyle));
+    description.add(new DiagnosticsProperty<TextStyle>('suffixStyle', suffixStyle,
+        defaultValue: defaultTheme.suffixStyle));
+    description.add(new DiagnosticsProperty<TextStyle>('counterStyle', counterStyle,
+        defaultValue: defaultTheme.counterStyle));
+    description
+        .add(new DiagnosticsProperty<bool>('filled', filled, defaultValue: defaultTheme.filled));
+    description.add(new DiagnosticsProperty<Color>('fillColor', fillColor,
+        defaultValue: defaultTheme.fillColor));
+    description.add(
+        new DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
+  }
 }

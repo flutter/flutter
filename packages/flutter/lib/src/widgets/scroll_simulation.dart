@@ -191,7 +191,7 @@ class ClampingScrollSimulation extends Simulation {
   //
   // Algebra courtesy of Wolfram Alpha.
   //
-  // f(x) = scrollOffset, x is time in millseconds
+  // f(x) = scrollOffset, x is time in milliseconds
   // f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x - 3.15307
   // f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x, so f(0) is 0
   // f(686ms) = 961 pixels

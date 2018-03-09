@@ -11,6 +11,10 @@ import 'package:flutter/material.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  setUp(() {
+    debugResetSemanticsIdCounter();
+  });
+
   testWidgets('CheckBox semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
@@ -95,6 +99,41 @@ void main() {
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.isChecked,
             SemanticsFlag.hasEnabledState,
+          ],
+        ),
+      ],
+    ), ignoreRect: true, ignoreTransform: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Can wrap CheckBox with Semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(new Material(
+      child: new Semantics(
+        label: 'foo',
+        textDirection: TextDirection.ltr,
+        child: new Checkbox(
+          value: false,
+          onChanged: (bool b) { },
+        ),
+      ),
+    ));
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 1,
+          label: 'foo',
+          textDirection: TextDirection.ltr,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasCheckedState,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
+          ],
+          actions: <SemanticsAction>[
+            SemanticsAction.tap,
           ],
         ),
       ],

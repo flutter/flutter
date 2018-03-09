@@ -40,13 +40,11 @@ class BuildAotCommand extends BuildSubCommand {
       ..addFlag('interpreter')
       ..addFlag('quiet', defaultsTo: false)
       ..addFlag('preview-dart-2', negatable: false, hide: !verboseHelp)
-      ..addOption(FlutterOptions.kExtraFrontEndOptions,
-        allowMultiple: true,
+      ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
         hide: true,
       )
-      ..addOption(FlutterOptions.kExtraGenSnapshotOptions,
-        allowMultiple: true,
+      ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
         splitCommas: true,
         hide: true,
       )
@@ -188,6 +186,14 @@ Future<String> _buildAotSnapshot(
   );
   final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
 
+  final List<String> entryPointsJsonFiles = <String>[];
+  if (previewDart2 && !interpreter) {
+    entryPointsJsonFiles.addAll(<String>[
+      artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode),
+      artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode),
+    ]);
+  }
+
   final PackageMap packageMap = new PackageMap(PackageMap.globalPackagesPath);
   final String packageMapError = packageMap.checkValid();
   if (packageMapError != null) {
@@ -206,6 +212,8 @@ Future<String> _buildAotSnapshot(
     vmServicePath,
     mainPath,
   ];
+
+  inputPaths.addAll(entryPointsJsonFiles);
 
   final Set<String> outputPaths = new Set<String>();
 
@@ -367,15 +375,21 @@ Future<String> _buildAotSnapshot(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
       outputFilePath: kApplicationKernelPath,
+      depFilePath: dependencies,
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn : true,
-      aot : true,
+      aot : !interpreter,
+      entryPointsJsonFiles: entryPointsJsonFiles,
       trackWidgetCreation: false,
     );
     if (mainPath == null) {
       printError('Compiler terminated unexpectedly.');
       return null;
     }
+    // Write path to frontend_server, since things need to be re-generated when
+    // that changes.
+    await outputDir.childFile('frontend_server.d')
+        .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
 
     genSnapshotCmd.addAll(<String>[
       '--reify-generic-functions',

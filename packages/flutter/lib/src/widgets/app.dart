@@ -344,11 +344,11 @@ class WidgetsApp extends StatefulWidget {
   /// inspect modes.
   ///
   /// This lets [MaterialApp] to use a material button to toggle the inspector
-  /// select mode without requiring [WidgetInspector] to depend on the the
+  /// select mode without requiring [WidgetInspector] to depend on the
   /// material package.
   final InspectorSelectButtonBuilder inspectorSelectButtonBuilder;
 
-  /// Turns on a "SLOW MODE" little banner in checked mode to indicate
+  /// Turns on a "DEBUG" little banner in checked mode to indicate
   /// that the app is in checked mode. This is on by default (in
   /// checked mode), to turn it off, set the constructor argument to
   /// false. In release mode this has no effect.

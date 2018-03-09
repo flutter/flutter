@@ -511,7 +511,7 @@ class MaterialApp extends StatefulWidget {
   /// reported by the framework.
   final bool showSemanticsDebugger;
 
-  /// Turns on a little "SLOW MODE" banner in checked mode to indicate
+  /// Turns on a little "DEBUG" banner in checked mode to indicate
   /// that the app is in checked mode. This is on by default (in
   /// checked mode), to turn it off, set the constructor argument to
   /// false. In release mode this has no effect.

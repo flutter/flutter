@@ -446,7 +446,7 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
   }
 }
 
-// This class, and TabBarScrollController, only exist to handle the the case
+// This class, and TabBarScrollController, only exist to handle the case
 // where a scrollable TabBar has a non-zero initialIndex. In that case we can
 // only compute the scroll position's initial scroll offset (the "correct"
 // pixels value) after the TabBar viewport width and scroll limits are known.
@@ -476,7 +476,7 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
   }
 }
 
-// This class, and TabBarScrollPosition, only exist to handle the the case
+// This class, and TabBarScrollPosition, only exist to handle the case
 // where a scrollable TabBar has a non-zero initialIndex.
 class _TabBarScrollController extends ScrollController {
   _TabBarScrollController(this.tabBar);

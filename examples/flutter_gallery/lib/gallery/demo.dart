@@ -117,7 +117,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     getExampleCode(widget.exampleCodeTag, DefaultAssetBundle.of(context)).then<Null>((String code) {
       if (mounted) {
         setState(() {
-          _exampleCode = code;
+          _exampleCode = code ?? 'Example code not found';
         });
       }
     });

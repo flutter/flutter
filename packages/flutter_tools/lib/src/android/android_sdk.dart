@@ -12,9 +12,11 @@ import '../base/file_system.dart';
 import '../base/io.dart' show ProcessResult;
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
 import '../globals.dart';
+import 'android_studio.dart' as android_studio;
 
 AndroidSdk get androidSdk => context[AndroidSdk];
 
@@ -62,6 +64,9 @@ class AndroidSdk {
       this.ndkCompilerArgs]) {
     _init();
   }
+
+  static const String _kJavaHomeEnvironmentVariable = 'JAVA_HOME';
+  static const String _kJavaExecutable = 'java';
 
   /// The path to the Android SDK.
   final String directory;
@@ -291,13 +296,59 @@ class AndroidSdk {
     return fs.path.join(directory, 'tools', 'bin', 'sdkmanager');
   }
 
+  /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
+  static String findJavaBinary() {
+
+    if (android_studio.javaPath != null)
+      return fs.path.join(android_studio.javaPath, 'bin', 'java');
+
+    final String javaHomeEnv = platform.environment[_kJavaHomeEnvironmentVariable];
+    if (javaHomeEnv != null) {
+      // Trust JAVA_HOME.
+      return fs.path.join(javaHomeEnv, 'bin', 'java');
+    }
+
+    // MacOS specific logic to avoid popping up a dialog window.
+    // See: http://stackoverflow.com/questions/14292698/how-do-i-check-if-the-java-jdk-is-installed-on-mac.
+    if (platform.isMacOS) {
+      try {
+        final String javaHomeOutput = runCheckedSync(<String>['/usr/libexec/java_home'], hideStdout: true);
+        if (javaHomeOutput != null) {
+          final List<String> javaHomeOutputSplit = javaHomeOutput.split('\n');
+          if ((javaHomeOutputSplit != null) && (javaHomeOutputSplit.isNotEmpty)) {
+            final String javaHome = javaHomeOutputSplit[0].trim();
+            return fs.path.join(javaHome, 'bin', 'java');
+          }
+        }
+      } catch (_) { /* ignore */ }
+    }
+
+    // Fallback to PATH based lookup.
+    return os.which(_kJavaExecutable)?.path;
+  }
+
+  Map<String, String> _sdkManagerEnv;
+  Map<String, String> get sdkManagerEnv {
+    if (_sdkManagerEnv == null) {
+      // If we can locate Java, then add it to the path used to run the Android SDK manager.
+      _sdkManagerEnv = <String, String>{};
+      final String javaBinary = findJavaBinary();
+      if (javaBinary != null) {
+        _sdkManagerEnv['PATH'] =
+            fs.path.dirname(javaBinary) + os.pathVarSeparator + platform.environment['PATH'];
+      }
+    }
+    return _sdkManagerEnv;
+  }
+
   /// Returns the version of the Android SDK manager tool or null if not found.
   String get sdkManagerVersion {
     if (!processManager.canRun(sdkManagerPath))
       throwToolExit('Android sdkmanager not found. Update to the latest Android SDK to resolve this.');
-    final ProcessResult result = processManager.runSync(<String>[sdkManagerPath, '--version']);
+    final ProcessResult result = processManager.runSync(<String>[sdkManagerPath, '--version'], environment: sdkManagerEnv);
     if (result.exitCode != 0) {
-      throwToolExit('sdkmanager --version failed: ${result.exitCode}', exitCode: result.exitCode);
+      printTrace('sdkmanager --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');
+      return null;
     }
     return result.stdout.trim();
   }

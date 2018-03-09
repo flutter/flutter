@@ -7,6 +7,10 @@ import("//build/dart/dart_library.gni")
 dart_library("flutter_test") {
   package_name = "flutter_test"
 
+  sources = [
+    "flutter_test.dart",
+  ]
+
   disable_analysis = true
 
   deps = [

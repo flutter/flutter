@@ -3102,7 +3102,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         throw new FlutterError(
           'Cannot get size without a render object.\n'
           'In order for an element to have a valid size, the element must have '
-          'an assoicated render object. This element does not have an associated '
+          'an associated render object. This element does not have an associated '
           'render object, which typically means that the size getter was called '
           'too early in the pipeline (e.g., during the build phase) before the '
           'framework has created the render tree.\n'
@@ -3731,7 +3731,18 @@ class StatefulElement extends ComponentElement {
     assert(_state._debugLifecycleState == _StateLifecycle.created);
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
-      _state.initState();
+      final dynamic debugCheckForReturnedFuture = _state.initState() as dynamic;
+      assert(() {
+        if (debugCheckForReturnedFuture is Future) {
+          throw new FlutterError(
+            '${_state.runtimeType}.initState() returned a Future.\n'
+            'State.initState() must be a void method without an `async` keyword.\n'
+            'Rather than awaiting on asynchronous work directly inside of initState,\n'
+            'call a separate method to do this work without awaiting it.'
+          );
+        }
+        return true;
+      }());
     } finally {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }
@@ -3753,7 +3764,18 @@ class StatefulElement extends ComponentElement {
     _state._widget = widget;
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
-      _state.didUpdateWidget(oldWidget);
+      final dynamic debugCheckForReturnedFuture = _state.didUpdateWidget(oldWidget) as dynamic;
+      assert(() {
+        if (debugCheckForReturnedFuture is Future) {
+          throw new FlutterError(
+            '${_state.runtimeType}.didUpdateWidget() returned a Future.\n'
+            'State.didUpdateWidget() must be a void method without an `async` keyword.\n'
+            'Rather than awaiting on asynchronous work directly inside of didUpdateWidget,\n'
+            'call a separate method to do this work without awaiting it.'
+          );
+        }
+        return true;
+      }());
     } finally {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }

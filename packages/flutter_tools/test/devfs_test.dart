@@ -123,9 +123,9 @@ void main() {
       FileSystem: () => fs,
     });
 
-    testUsingContext('add new file to local file system and preserve unusal file name casing', () async {
-      final String filePathWithUnusalCasing = fs.path.join('FooBar', 'TEST.txt');
-      final File file = fs.file(fs.path.join(basePath, filePathWithUnusalCasing));
+    testUsingContext('add new file to local file system and preserve unusual file name casing', () async {
+      final String filePathWithUnusualCasing = fs.path.join('FooBar', 'TEST.txt');
+      final File file = fs.file(fs.path.join(basePath, filePathWithUnusualCasing));
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3, 4, 5, 6, 7]);
       final int bytes = await devFS.update();

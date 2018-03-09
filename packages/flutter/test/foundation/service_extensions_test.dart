@@ -34,7 +34,7 @@ class TestServiceExtensionsBinding extends BindingBase
     extensions[name] = callback;
   }
 
-  Future<Map<String, String>> testExtension(String name, Map<String, String> arguments) {
+  Future<Map<String, dynamic>> testExtension(String name, Map<String, String> arguments) {
     expect(extensions.containsKey(name), isTrue);
     return extensions[name](arguments);
   }
@@ -82,7 +82,7 @@ class TestServiceExtensionsBinding extends BindingBase
 
 TestServiceExtensionsBinding binding;
 
-Future<Map<String, String>> hasReassemble(Future<Map<String, String>> pendingResult) async {
+Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingResult) async {
   bool completed = false;
   pendingResult.whenComplete(() { completed = true; });
   expect(binding.frameScheduled, isFalse);
@@ -118,7 +118,7 @@ void main() {
   // must be first and last respectively.
 
   test('Service extensions - debugAllowBanner', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     expect(binding.frameScheduled, isFalse);
     expect(WidgetsApp.debugAllowBannerOverride, true);
@@ -141,7 +141,7 @@ void main() {
   });
 
   test('Service extensions - debugDumpApp', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     result = await binding.testExtension('debugDumpApp', <String, String>{});
     expect(result, <String, String>{});
@@ -150,7 +150,7 @@ void main() {
   });
 
   test('Service extensions - debugDumpRenderTree', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     await binding.doFrame();
     result = await binding.testExtension('debugDumpRenderTree', <String, String>{});
@@ -170,7 +170,7 @@ void main() {
   });
 
   test('Service extensions - debugDumpLayerTree', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     await binding.doFrame();
     result = await binding.testExtension('debugDumpLayerTree', <String, String>{});
@@ -194,7 +194,7 @@ void main() {
   });
 
   test('Service extensions - debugDumpSemanticsTreeInGeometricOrder', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     await binding.doFrame();
     result = await binding.testExtension('debugDumpSemanticsTreeInGeometricOrder', <String, String>{});
@@ -204,7 +204,7 @@ void main() {
   });
 
   test('Service extensions - debugDumpSemanticsTreeInInverseHitTestOrder', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     await binding.doFrame();
     result = await binding.testExtension('debugDumpSemanticsTreeInInverseHitTestOrder', <String, String>{});
@@ -214,8 +214,8 @@ void main() {
   });
 
   test('Service extensions - debugPaint', () async {
-    Map<String, String> result;
-    Future<Map<String, String>> pendingResult;
+    Map<String, dynamic> result;
+    Future<Map<String, dynamic>> pendingResult;
     bool completed;
 
     expect(binding.frameScheduled, isFalse);
@@ -256,8 +256,8 @@ void main() {
   });
 
   test('Service extensions - debugPaintBaselinesEnabled', () async {
-    Map<String, String> result;
-    Future<Map<String, String>> pendingResult;
+    Map<String, dynamic> result;
+    Future<Map<String, dynamic>> pendingResult;
     bool completed;
 
     expect(binding.frameScheduled, isFalse);
@@ -298,7 +298,7 @@ void main() {
   });
 
   test('Service extensions - evict', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
     bool completed;
 
     completed = false;
@@ -330,14 +330,14 @@ void main() {
   });
 
   test('Service extensions - frameworkPresent', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     result = await binding.testExtension('frameworkPresent', <String, String>{});
     expect(result, <String, String>{});
   });
 
   test('Service extensions - platformOverride', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     expect(binding.reassembled, 0);
     expect(defaultTargetPlatform, TargetPlatform.android);
@@ -372,8 +372,8 @@ void main() {
   });
 
   test('Service extensions - repaintRainbow', () async {
-    Map<String, String> result;
-    Future<Map<String, String>> pendingResult;
+    Map<String, dynamic> result;
+    Future<Map<String, dynamic>> pendingResult;
     bool completed;
 
     expect(binding.frameScheduled, isFalse);
@@ -415,8 +415,8 @@ void main() {
   });
 
   test('Service extensions - reassemble', () async {
-    Map<String, String> result;
-    Future<Map<String, String>> pendingResult;
+    Map<String, dynamic> result;
+    Future<Map<String, dynamic>> pendingResult;
     bool completed;
 
     completed = false;
@@ -437,7 +437,7 @@ void main() {
   });
 
   test('Service extensions - showPerformanceOverlay', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     expect(binding.frameScheduled, isFalse);
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
@@ -460,7 +460,7 @@ void main() {
   });
 
   test('Service extensions - debugWidgetInspector', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     expect(binding.frameScheduled, isFalse);
     expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
@@ -483,7 +483,7 @@ void main() {
   });
 
   test('Service extensions - timeDilation', () async {
-    Map<String, String> result;
+    Map<String, dynamic> result;
 
     expect(binding.frameScheduled, isFalse);
     expect(timeDilation, 1.0);

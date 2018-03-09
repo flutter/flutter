@@ -769,7 +769,7 @@ class Scaffold extends StatefulWidget {
   /// callback should then be invoked from [State.deactivate].
   ///
   /// If there was a previously set [ScaffoldGeometry.floatingActionButtonNotch]
-  /// it will be overriden.
+  /// it will be overridden.
   static VoidCallback setFloatingActionButtonNotchFor(BuildContext context, ComputeNotch computeNotch) {
     final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType(_ScaffoldScope);
     if (scaffoldScope == null)

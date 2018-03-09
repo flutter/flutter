@@ -7,7 +7,6 @@ import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:file/record_replay.dart';
 
-
 import 'common.dart' show throwToolExit;
 import 'context.dart';
 import 'platform.dart';
@@ -40,7 +39,9 @@ void enableRecordingFileSystem(String location) {
   final RecordingFileSystem fileSystem = new RecordingFileSystem(
       delegate: _kLocalFs, destination: dir);
   addShutdownHook(() async {
-    await fileSystem.recording.flush();
+    await fileSystem.recording.flush(
+      pendingResultTimeout: const Duration(seconds: 5),
+    );
     context.setVariable(FileSystem, originalFileSystem);
   }, ShutdownStage.SERIALIZE_RECORDING);
   context.setVariable(FileSystem, fileSystem);

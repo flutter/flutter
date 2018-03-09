@@ -30,7 +30,7 @@ void main() {
         await driver.tap(find.text('Components'));
         await driver.tap(find.text('Style'));
 
-        // TODO(eseidel): These are very artifical scrolls, we should use better
+        // TODO(eseidel): These are very artificial scrolls, we should use better
         // https://github.com/flutter/flutter/issues/3316
         // Scroll down
         for (int i = 0; i < 5; i++) {

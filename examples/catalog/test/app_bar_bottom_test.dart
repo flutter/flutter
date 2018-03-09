@@ -19,7 +19,7 @@ void main() {
     app_bar_bottom_sample.main();
     await tester.pump();
 
-    // Cycle throught the choices using the forward and backwards arrows.
+    // Cycle through the choices using the forward and backwards arrows.
 
     final Finder nextChoice = find.byTooltip('Next choice');
     for (int i = 0; i < choiceCount; i += 1) {

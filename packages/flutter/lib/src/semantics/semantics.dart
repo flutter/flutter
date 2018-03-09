@@ -186,7 +186,7 @@ class SemanticsData extends Diagnosticable {
   ///  * [ScrollPosition.maxScrollExtent], from where this value is usually taken.
   final double scrollExtentMax;
 
-  /// Indicates the mimimum in-range value for [scrollPosition] if the node is
+  /// Indicates the minimum in-range value for [scrollPosition] if the node is
   /// scrollable.
   ///
   /// This value may be infinity if the scroll is unbound.
@@ -315,6 +315,10 @@ class SemanticsProperties extends DiagnosticableTree {
     this.checked,
     this.selected,
     this.button,
+    this.header,
+    this.textField,
+    this.focused,
+    this.inMutuallyExclusiveGroup,
     this.label,
     this.value,
     this.increasedValue,
@@ -365,6 +369,35 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack/VoiceOver provides users with the hint "button" when a button
   /// is focused.
   final bool button;
+
+  /// If non-null, indicates that this subtree represents a header.
+  ///
+  /// A header divides into sections. For example, an address book application
+  /// might define headers A, B, C, etc. to divide the list of alphabetically
+  /// sorted contacts into sections.
+  final bool header;
+
+  /// If non-null, indicates that this subtree represents a text field.
+  ///
+  /// TalkBack/VoiceOver provide special affordances to enter text into a
+  /// text field.
+  final bool textField;
+
+  /// If non-null, whether the node currently holds input focus.
+  ///
+  /// At most one node in the tree should hold input focus at any point in time.
+  ///
+  /// Input focus (indicates that the node will receive keyboard events) is not
+  /// to be confused with accessibility focus. Accessibility focus is the
+  /// green/black rectangular that TalkBack/VoiceOver on the screen and is
+  /// separate from input focus.
+  final bool focused;
+
+  /// If non-null, whether a semantic node is in a mutually exclusive group.
+  ///
+  /// For example, a radio button is in a mutually exclusive group because only
+  /// one radio button in that group can be marked as [checked].
+  final bool inMutuallyExclusiveGroup;
 
   /// Provides a textual description of the widget.
   ///
@@ -1147,7 +1180,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   double get scrollExtentMax => _scrollExtentMax;
   double _scrollExtentMax;
 
-  /// Indicates the mimimum in-range value for [scrollPosition] if the node is
+  /// Indicates the minimum in-range value for [scrollPosition] if the node is
   /// scrollable.
   ///
   /// This value may be infinity if the scroll is unbound.
@@ -1378,15 +1411,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
-    if (_hasFlag(SemanticsFlag.hasEnabledState))
-      properties.add(new FlagProperty('isEnabled', value: _hasFlag(SemanticsFlag.isEnabled), ifFalse: 'disabled'));
-    if (_hasFlag(SemanticsFlag.hasCheckedState))
-      properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlag.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
-    properties.add(new FlagProperty('isInMutuallyExcusiveGroup', value: _hasFlag(SemanticsFlag.isInMutuallyExclusiveGroup), ifTrue: 'mutually-exclusive'));
-    properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlag.isSelected), ifTrue: 'selected'));
-    properties.add(new FlagProperty('isFocused', value: _hasFlag(SemanticsFlag.isFocused), ifTrue: 'focused'));
-    properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlag.isButton), ifTrue: 'button'));
-    properties.add(new FlagProperty('isTextField', value: _hasFlag(SemanticsFlag.isTextField), ifTrue: 'textField'));
+    final List<String> flags = SemanticsFlag.values.values.where((SemanticsFlag flag) => _hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
+    properties.add(new IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(new FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
     properties.add(new StringProperty('label', _label, defaultValue: ''));
     properties.add(new StringProperty('value', _value, defaultValue: ''));
@@ -1422,7 +1448,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   @override
   DiagnosticsNode toDiagnosticsNode({
     String name,
-    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.dense,
+    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.sparse,
     DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.geometricOrder,
   }) {
     return new _SemanticsDiagnosticableNode(
@@ -1495,12 +1521,13 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
   /// parents.
   SemanticsSortOrder order;
 
-  /// The is the starting corner for the rectangle on this semantics node in
-  /// global coordinates. When the container has the directionality
-  /// [TextDirection.ltr], this is the upper left corner.  When the container
-  /// has the directionality [TextDirection.rtl], this is the upper right
-  /// corner. When the container has no directionality, this is set, but the
-  /// x coordinate is ignored.
+  /// The starting corner for the rectangle on this semantics node in
+  /// global coordinates.
+  ///
+  /// When the container has the directionality [TextDirection.ltr], this is the
+  /// upper left corner.  When the container has the directionality
+  /// [TextDirection.rtl], this is the upper right corner. When the container
+  /// has no directionality, this is set, but the x coordinate is ignored.
   Offset globalStartCorner;
 
   static Offset _transformPoint(Offset point, Matrix4 matrix) {
@@ -2371,6 +2398,12 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isButton, value);
   }
 
+  /// Whether the owning [RenderObject] is a header (true) or not (false).
+  bool get isHeader => _hasFlag(SemanticsFlag.isHeader);
+  set isHeader(bool value) {
+    _setFlag(SemanticsFlag.isHeader, value);
+  }
+
   /// Whether the owning [RenderObject] is a text field.
   bool get isTextField => _hasFlag(SemanticsFlag.isTextField);
   set isTextField(bool value) {
@@ -2623,7 +2656,7 @@ String _concatStrings({
 
 /// Provides a way to specify the order in which semantic nodes are sorted.
 ///
-/// [TranversalSortOrder] objects contain a list of sort keys in the order in
+/// [SemanticsSortOrder] objects contain a list of sort keys in the order in
 /// which they are applied. They are attached to [Semantics] widgets in the
 /// widget hierarchy, and are merged with the sort orders of their parent
 /// [Semantics] widgets. If [SemanticsSortOrder.discardParentOrder] is set to
@@ -2659,7 +2692,7 @@ String _concatStrings({
 ///           child: const Text('Label One'),
 ///         ),
 ///         new Semantics(
-///           sortOrder: new SemanticsSortOrder(key: new OrdinalSortKey(2.0)),
+///           sortOrder: new SemanticsSortOrder(key: new OrdinalSortKey(1.0)),
 ///           child: const Text('Label Two'),
 ///         ),
 ///       ],
@@ -2688,8 +2721,8 @@ class SemanticsSortOrder extends Diagnosticable implements Comparable<SemanticsS
   /// `keys: <SemanticsSortKey>[key]`.
   ///
   /// If [discardParentOrder] is set to true, then the [SemanticsSortOrder.keys]
-  /// will _replace_ the list of keys from the parents when merged, instead of
-  /// extending them.
+  /// will _replace_ the list of keys from the parents when merged. Otherwise,
+  /// the child's keys are appended at the end of the parent's keys.
   SemanticsSortOrder({
     SemanticsSortKey key,
     List<SemanticsSortKey> keys,
@@ -2787,9 +2820,9 @@ abstract class SemanticsSortKey extends Diagnosticable implements Comparable<Sem
 
   /// The implementation of [compareTo].
   ///
-  /// The argument is guaranteed to be the same type as this object.
+  /// The argument is guaranteed to be of the same type as this object.
   ///
-  /// The method should return a negative number of this object is earlier in
+  /// The method should return a negative number if this object comes earlier in
   /// the sort order than the argument; and a positive number if it comes later
   /// in the sort order. Returning zero causes the system to default to
   /// comparing the geometry of the nodes.
@@ -2809,27 +2842,32 @@ abstract class SemanticsSortKey extends Diagnosticable implements Comparable<Sem
 /// The [OrdinalSortKey] compares itself with other [OrdinalSortKey]s
 /// to sort based on the order it is given.
 ///
-/// The ordinal value `order` is typically an integer, though it can be
-/// fractional, e.g. in order to fit between two other consecutive integers. The
-/// value must be finite (it cannot be a NaN value or infinity).
+/// The ordinal value `order` is typically a whole number, though it can be
+/// fractional, e.g. in order to fit between two other consecutive whole
+/// numbers. The value must be finite (it cannot be [double.nan],
+/// [double.infinity], or [double.negativeInfinity]).
 ///
 /// See also:
 ///
 ///  * [SemanticsSortOrder] which manages a list of sort keys.
 class OrdinalSortKey extends SemanticsSortKey {
-  /// Creates a semantics sort key that uses a double as its key value.
+  /// Creates a semantics sort key that uses a [double] as its key value.
   ///
   /// The [order] must be a finite number.
   const OrdinalSortKey(
     this.order, {
     String name,
   }) : assert(order != null),
-       assert(order > double.NEGATIVE_INFINITY),
-       assert(order < double.INFINITY),
+       assert(order != double.nan),
+       assert(order > double.negativeInfinity),
+       assert(order < double.infinity),
        super(name: name);
 
-  /// A double which describes the order in which this node is traversed by the
-  /// platform's accessibility services. Lower values will be traversed first.
+  /// Determines the placement of this key in a sequence of keys that defines
+  /// the order in which this node is traversed by the platform's accessibility
+  /// services.
+  ///
+  /// Lower values will be traversed first.
   final double order;
 
   @override

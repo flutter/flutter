@@ -11,8 +11,8 @@ import 'package:flutter_devicelab/framework/utils.dart';
 
 String javaHome;
 
-void main() {
-  task(() async {
+void main() async {
+  await task(() async {
     section('Running flutter doctor to get JAVA_HOME');
     final String flutterDoctor = await evalFlutter('doctor', options: <String>['-v']);
     final RegExp javaHomeExtractor = new RegExp(r'Android Studio at (.*)');
@@ -26,6 +26,20 @@ void main() {
     try {
       section('gradlew assembleDebug');
       await project.runGradleTask('assembleDebug');
+
+      String errorMessage = _validateSnapshotDependency(project,
+          '${project.rootPath}/build/app/intermediates/flutter/debug/snapshot_blob.bin');
+      if (errorMessage != null) {
+        return new TaskResult.failure(errorMessage);
+      }
+
+      section('gradlew assembleDebug preview-dart-2');
+      await project.runGradleTask('assembleDebug', options: <String>['-Ppreview-dart-2=true']);
+
+      errorMessage = _validateSnapshotDependency(project, 'build/app.dill');
+      if (errorMessage != null) {
+        return new TaskResult.failure(errorMessage);
+      }
 
       section('gradlew assembleProfile');
       await project.runGradleTask('assembleProfile');
@@ -154,12 +168,12 @@ android {
     await buildScript.writeAsString((await buildScript.readAsString()).replaceAll('buildTypes', 'builTypes'));
   }
 
-  Future<Null> runGradleTask(String task) async {
-    return _runGradleTask(workingDirectory: androidPath, task: task);
+  Future<Null> runGradleTask(String task, {List<String> options}) async {
+    return _runGradleTask(workingDirectory: androidPath, task: task, options: options);
   }
 
-  Future<ProcessResult> resultOfGradleTask(String task) {
-    return _resultOfGradleTask(workingDirectory: androidPath, task: task);
+  Future<ProcessResult> resultOfGradleTask(String task, {List<String> options}) {
+    return _resultOfGradleTask(workingDirectory: androidPath, task: task, options: options);
   }
 
   Future<ProcessResult> resultOfFlutterCommand(String command, List<String> options) {
@@ -189,15 +203,18 @@ class FlutterPluginProject {
   String get exampleAndroidPath => path.join(examplePath, 'android');
   String get debugApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'debug', 'app-debug.apk');
 
-  Future<Null> runGradleTask(String task) async {
-    return _runGradleTask(workingDirectory: exampleAndroidPath, task: task);
+  Future<Null> runGradleTask(String task, {List<String> options}) async {
+    return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
   }
 
   bool get hasDebugApk => new File(debugApkPath).existsSync();
 }
 
-Future<Null> _runGradleTask({String workingDirectory, String task}) async {
-  final ProcessResult result = await _resultOfGradleTask(workingDirectory: workingDirectory, task: task);
+Future<Null> _runGradleTask({String workingDirectory, String task, List<String> options}) async {
+  final ProcessResult result = await _resultOfGradleTask(
+      workingDirectory: workingDirectory,
+      task: task,
+      options: options);
   if (result.exitCode != 0) {
     print('stdout:');
     print(result.stdout);
@@ -208,11 +225,48 @@ Future<Null> _runGradleTask({String workingDirectory, String task}) async {
     throw 'Gradle exited with error';
 }
 
-Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task}) {
+Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
+    List<String> options}) {
+  final List<String> args = <String>['app:$task'];
+  if (options != null) {
+    args.addAll(options);
+  }
   return Process.run(
     './gradlew',
-    <String>['app:$task'],
+    args,
     workingDirectory: workingDirectory,
     environment: <String, String>{ 'JAVA_HOME': javaHome }
   );
+}
+
+class _Dependencies {
+  String target;
+  Set<String> dependencies;
+  _Dependencies(String depfilePath) {
+    final RegExp _separatorExpr = new RegExp(r'([^\\]) ');
+    final RegExp _escapeExpr = new RegExp(r'\\(.)');
+
+    // Depfile format:
+    // outfile1 outfile2 : file1.dart file2.dart file3.dart file\ 4.dart
+    final String contents = new File(depfilePath).readAsStringSync();
+    final List<String> colonSeparated = contents.split(': ');
+    target = colonSeparated[0].trim();
+    dependencies = colonSeparated[1]
+        // Put every file on right-hand side on the separate line
+        .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
+        .split('\n')
+        // Expand escape sequences, so that '\ ', for example,ß becomes ' '
+        .map((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
+        .where((String path) => path.isNotEmpty)
+        .toSet();
+  }
+}
+
+/// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
+String _validateSnapshotDependency(FlutterProject project, String expectedTarget) {
+  final _Dependencies deps = new _Dependencies(
+      path.join(project.rootPath, 'build', 'app', 'intermediates',
+          'flutter', 'debug', 'snapshot_blob.bin.d'));
+  return deps.target == expectedTarget ? null :
+    'Dependency file should have $expectedTarget as target. Instead has ${deps.target}';
 }

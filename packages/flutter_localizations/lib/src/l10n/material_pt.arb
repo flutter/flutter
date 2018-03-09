@@ -20,7 +20,7 @@
   "pageRowsInfoTitle": "$firstRow – $lastRow de $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow – $lastRow de aproximadamente $rowCount",
   "rowsPerPageTitle": "Linhas por página:",
-  "tabLabel": "$tabIndex de $tabCount",
+  "tabLabel": "Guia $tabIndex de $tabCount",
   "selectedRowCountTitleOther": "$selectedRowCount itens selecionados",
   "cancelButtonLabel": "CANCELAR",
   "closeButtonLabel": "FECHAR",
@@ -33,7 +33,7 @@
   "viewLicensesButtonLabel": "VER LICENÇAS",
   "timePickerHourModeAnnouncement": "Selecione as horas",
   "timePickerMinuteModeAnnouncement": "Selecione os minutos",
-  "signedInLabel": "Assinado",
+  "signedInLabel": "Conectado a",
   "hideAccountsLabel": "Ocultar contas",
   "showAccountsLabel": "Mostrar contas",
   "modalBarrierDismissLabel": "Dispensar"

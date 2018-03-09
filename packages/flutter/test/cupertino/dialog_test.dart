@@ -116,7 +116,7 @@ void main() {
                       child: new CupertinoAlertDialog(
                         title: const Text('The Title'),
                         content: new Text('Very long content ' * 20),
-                        actions: <Widget>[
+                        actions: const <Widget>[
                           const CupertinoDialogAction(
                             child: const Text('Cancel'),
                           ),

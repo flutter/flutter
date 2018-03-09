@@ -84,6 +84,8 @@ class _IsolateConfiguration<Q, R> {
   final SendPort resultPort;
   final String debugLabel;
   final int flowId;
+
+  R apply() => callback(message);
 }
 
 void _spawn<Q, R>(_IsolateConfiguration<Q, R> configuration) {
@@ -91,7 +93,7 @@ void _spawn<Q, R>(_IsolateConfiguration<Q, R> configuration) {
   Timeline.timeSync(
     '${configuration.debugLabel}',
     () {
-      result = configuration.callback(configuration.message);
+      result = configuration.apply();
     },
     flow: Flow.step(configuration.flowId),
   );

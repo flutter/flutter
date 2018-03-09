@@ -642,7 +642,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     final bool canFlex = maxMainSize < double.INFINITY;
 
     double crossSize = 0.0;
-    double allocatedSize = 0.0; // Sum of the sizes of the the non-flexible children.
+    double allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
     RenderBox child = firstChild;
     RenderBox lastFlexChild;
     while (child != null) {

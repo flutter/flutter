@@ -92,7 +92,7 @@ class AnimatedIcon extends StatelessWidget {
   ///
   /// If this is null, the ambient [Directionality] is used instead.
   ///
-  /// If the text diection is [TextDirection.rtl], the icon will be mirrored
+  /// If the text direction is [TextDirection.rtl], the icon will be mirrored
   /// horizontally (e.g back arrow will point right).
   final TextDirection textDirection;
 

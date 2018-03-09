@@ -178,7 +178,7 @@ void main() {
     await tester.tap(find.text('CANCEL'));
   });
 
-  testWidgets('textDirection parameter takes precendence over locale parameter', (WidgetTester tester) async {
+  testWidgets('textDirection parameter takes precedence over locale parameter', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
       locale: const Locale('en', 'US'),
       supportedLocales: const <Locale>[

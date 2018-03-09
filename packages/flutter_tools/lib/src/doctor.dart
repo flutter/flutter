@@ -13,6 +13,7 @@ import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
@@ -26,6 +27,12 @@ import 'version.dart';
 import 'vscode/vscode_validator.dart';
 
 Doctor get doctor => context[Doctor];
+
+class ValidatorTask {
+  ValidatorTask(this.validator, this.result);
+  final DoctorValidator validator;
+  final Future<ValidationResult> result;
+}
 
 class Doctor {
   List<DoctorValidator> _validators;
@@ -54,6 +61,16 @@ class Doctor {
         _validators.add(new DeviceValidator());
     }
     return _validators;
+  }
+
+  /// Return a list of [ValidatorTask] objects and starts validation on all
+  /// objects in [validators].
+  List<ValidatorTask> startValidatorTasks() {
+    final List<ValidatorTask> tasks = <ValidatorTask>[];
+    for (DoctorValidator validator in validators) {
+      tasks.add(new ValidatorTask(validator, validator.validate()));
+    }
+    return tasks;
   }
 
   List<Workflow> get workflows {
@@ -108,9 +125,14 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
-    for (DoctorValidator validator in validators) {
-      final ValidationResult result = await validator.validate();
+    for (ValidatorTask validatorTask in startValidatorTasks()) {
+      final DoctorValidator validator = validatorTask.validator;
+      final Status status = new Status.withSpinner();
+      await (validatorTask.result).then<void>((_) {
+        status.stop();
+      }).whenComplete(status.cancel);
 
+      final ValidationResult result = await validatorTask.result;
       if (result.type == ValidationType.missing) {
         doctorResult = false;
       }
@@ -242,10 +264,15 @@ class _FlutterValidator extends DoctorValidator {
 
     // Check that the binaries we downloaded for this platform actually run on it.
     if (!_genSnapshotRuns(genSnapshotPath)) {
-      messages.add(new ValidationMessage.error(
-        'Downloaded executables cannot execute '
-        'on host (see https://github.com/flutter/flutter/issues/6207 for more information)'
-      ));
+      final StringBuffer buf = new StringBuffer();
+      buf.writeln('Downloaded executables cannot execute on host.');
+      buf.writeln('See https://github.com/flutter/flutter/issues/6207 for more information');
+      if (platform.isLinux) {
+        buf.writeln('On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6');
+        buf.writeln('On Fedora: dnf install libstdc++.i686');
+        buf.writeln('On Arch: pacman -S lib32-libstdc++5');
+      }
+      messages.add(new ValidationMessage.error(buf.toString()));
       valid = ValidationType.partial;
     }
 

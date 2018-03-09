@@ -1854,7 +1854,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Mark this render object as having changed its visual appearance.
   ///
   /// Rather than eagerly updating this render object's display list
-  /// in response to writes, we instead mark the the render object as needing to
+  /// in response to writes, we instead mark the render object as needing to
   /// paint, which schedules a visual update. As part of the visual update, the
   /// rendering pipeline will give this render object an opportunity to update
   /// its display list.
@@ -2222,8 +2222,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// any way to update the semantics tree.
   void markNeedsSemanticsUpdate() {
     assert(!attached || !owner._debugDoingSemantics);
-    if (attached && owner._semanticsOwner == null)
+    if (!attached || owner._semanticsOwner == null) {
+      _cachedSemanticsConfiguration = null;
       return;
+    }
 
     // Dirty the semantics tree starting at `this` until we have reached a
     // RenderObject that is a semantics boundary. All semantics past this
