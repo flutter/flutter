@@ -234,6 +234,8 @@ typedef Future<void> RefreshCallback();
 /// completed and the indicator sliver has retracted at least 90% of the way
 /// back.
 ///
+/// Can only be used in downward scrolling vertical lists.
+///
 /// See also:
 ///
 ///  * [CustomScrollView], a typical sliver holding scroll view this control
@@ -311,6 +313,8 @@ class CupertinoRefreshControl extends StatefulWidget {
   static const double _kDefaultRefreshTriggerPullDistance = 100.0;
   static const double _kDefaultRefreshIndicatorExtent = 60.0;
 
+  /// Retrieve the current state of the CupertinoRefreshControl. The same as the
+  /// state that gets passed into the [builder] function. Used for testing.
   @visibleForTesting
   static RefreshIndicatorMode state(BuildContext context) {
     final _CupertinoRefreshControlState state
@@ -338,7 +342,7 @@ class CupertinoRefreshControl extends StatefulWidget {
                 opacity: opacityCurve.transform(
                   min(pulledExtent / refreshTriggerPullDistance, 1.0)
                 ),
-                child: new Icon(
+                child: const Icon(
                   CupertinoIcons.down_arrow,
                   color: CupertinoColors.inactiveGray,
                   size: 36.0,
