@@ -2250,24 +2250,23 @@ class RenderFittedBox extends RenderProxyBox {
 
 /// Applies a translation transformation before painting its child.
 ///
-/// The translation is expressed as an [Offset] scaled to the child's size. For
-/// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
-/// translation of one quarter the width of the child.
+/// The translation is expressed as an [Offset] which goes through a
+/// special transform function: [transformTranslation].
 ///
 /// Hit tests will only be detected inside the bounds of the
 /// [RenderFractionalTranslation], even if the contents are offset such that
 /// they overflow.
-class RenderFractionalTranslation extends RenderProxyBox {
+abstract class _RenderTranslation extends RenderProxyBox {
   /// Creates a render object that translates its child's painting.
   ///
   /// The [translation] argument must not be null.
-  RenderFractionalTranslation({
+  _RenderTranslation({
     @required Offset translation,
     this.transformHitTests: true,
     RenderBox child
   }) : assert(translation != null),
-       _translation = translation,
-       super(child);
+        _translation = translation,
+        super(child);
 
   /// The translation to apply to the child, scaled to the child's size.
   ///
@@ -2296,8 +2295,8 @@ class RenderFractionalTranslation extends RenderProxyBox {
     assert(!debugNeedsLayout);
     if (transformHitTests) {
       position = new Offset(
-        position.dx - translation.dx * size.width,
-        position.dy - translation.dy * size.height,
+        position.dx - transformedTranslation.dx,
+        position.dy - transformedTranslation.dy,
       );
     }
     return super.hitTest(result, position: position);
@@ -2308,8 +2307,8 @@ class RenderFractionalTranslation extends RenderProxyBox {
     assert(!debugNeedsLayout);
     if (child != null) {
       super.paint(context, new Offset(
-        offset.dx + translation.dx * size.width,
-        offset.dy + translation.dy * size.height,
+        offset.dx + transformedTranslation.dx,
+        offset.dy + transformedTranslation.dy,
       ));
     }
   }
@@ -2317,8 +2316,8 @@ class RenderFractionalTranslation extends RenderProxyBox {
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     transform.translate(
-      translation.dx * size.width,
-      translation.dy * size.height,
+      transformedTranslation.dx,
+      transformedTranslation.dy,
     );
   }
 
@@ -2328,6 +2327,74 @@ class RenderFractionalTranslation extends RenderProxyBox {
     description.add(new DiagnosticsProperty<Offset>('translation', translation));
     description.add(new DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
   }
+
+  Offset get transformedTranslation => transformTranslation(translation);
+
+  Offset transformTranslation(Offset translation);
+}
+
+/// Applies a translation transformation before painting its child.
+///
+/// The translation is expressed as an [Offset] scaled to the child's size. For
+/// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
+/// translation of one quarter the width of the child.
+///
+/// Hit tests will only be detected inside the bounds of the
+/// [RenderFractionalTranslation], even if the contents are offset such that
+/// they overflow.
+class RenderFractionalTranslation extends _RenderTranslation {
+
+  /// Creates a render object that translates its child's painting.
+  ///
+  /// The [translation] argument must not be null.
+  RenderFractionalTranslation({@required Offset translation,
+    bool transformHitTests: true,
+    RenderBox child})
+      : assert(translation != null),
+        super(
+          translation: translation,
+          transformHitTests: transformHitTests,
+          child: child);
+
+  @override
+  Offset transformTranslation(Offset translation) {
+    return new Offset(
+      translation.dx * size.width,
+      translation.dy * size.height,
+    );
+  }
+}
+
+
+/// Applies a translation transformation before painting its child.
+///
+/// The translation is expressed as an [Offset] of logical pixels. For
+/// example, an [Offset] with a `dx` of 25 will result in a horizontal
+/// translation of 25 logical pixel.
+///
+/// Hit tests will only be detected inside the bounds of the
+/// [RenderFractionalTranslation], even if the contents are offset such that
+/// they overflow.
+class RenderLinearTranslation extends _RenderTranslation {
+
+  /// Creates a render object that translates its child's painting.
+  ///
+  /// The [translation] argument must not be null.
+  RenderLinearTranslation({@required Offset translation,
+    bool transformHitTests: true,
+    RenderBox child})
+      : assert(translation != null),
+        super(
+          translation: translation,
+          transformHitTests: transformHitTests,
+          child: child);
+
+
+  @override
+  Offset transformTranslation(Offset translation) {
+    return translation;
+  }
+
 }
 
 /// Signature for listening to [PointerDownEvent] events.
