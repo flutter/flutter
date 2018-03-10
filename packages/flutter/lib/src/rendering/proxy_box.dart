@@ -2373,7 +2373,7 @@ class RenderFractionalTranslation extends _RenderTranslation {
 /// translation of 25 logical pixel.
 ///
 /// Hit tests will only be detected inside the bounds of the
-/// [RenderFractionalTranslation], even if the contents are offset such that
+/// [RenderLinearTranslation], even if the contents are offset such that
 /// they overflow.
 class RenderLinearTranslation extends _RenderTranslation {
 

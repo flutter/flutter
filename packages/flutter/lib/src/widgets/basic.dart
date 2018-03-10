@@ -1165,7 +1165,7 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 /// translation of 25 logical pixels of the child.
 ///
 /// Hit tests will only be detected inside the bounds of the
-/// [FractionalTranslation], even if the contents are offset such that
+/// [LinearTranslation], even if the contents are offset such that
 /// they overflow.
 ///
 /// See also:
