@@ -3,26 +3,51 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:flutter/services.dart';
+import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart' as http;
-import 'package:flutter/services.dart' show createHttpClient;
-
+import 'package:mockito/mockito.dart';
 import '../painting/image_data.dart';
 
 void main() {
   testWidgets('Headers', (WidgetTester tester) async {
-    createHttpClient = () => new http.MockClient((http.BaseRequest request) {
-          expect(request.headers, <String, String>{'flutter': 'flutter'});
-          return new Future<http.Response>.value(new http.Response.bytes(
-              kTransparentImage, 200,
-              request: request));
-        });
-    await tester.pumpWidget(new Image.network(
-      'https://www.example.com/images/frame.png',
-      headers: const <String, String>{'flutter': 'flutter'},
-    ));
+    HttpOverrides.runZoned(() async {
+      await tester.pumpWidget(new Image.network(
+        'https://www.example.com/images/frame.png',
+        headers: const <String, String>{'flutter': 'flutter'},
+      ));
+
+    }, createHttpClient: (SecurityContext _) {
+      final MockHttpClient client = new MockHttpClient();
+      final MockHttpClientRequest request = new MockHttpClientRequest();
+      final MockHttpClientResponse response = new MockHttpClientResponse(kTransparentImage);
+      final MockHttpHeaders headers = new MockHttpHeaders();
+
+      when(request.headers).thenReturn(headers);
+      when(request.close()).thenReturn(new Future<HttpClientResponse>.value(response));
+      when(response.statusCode).thenReturn(200);
+      when(response.contentLength).thenReturn(kTransparentImage.length);
+      when(client.getUrl(Uri.parse('https://www.example.com/images/frame.png'))).thenReturn(new Future<HttpClientRequest>.value(request));
+
+      return client;
+    });
   });
+}
+
+class MockHttpClient extends Mock implements HttpClient {}
+
+class MockHttpClientRequest extends Mock implements HttpClientRequest {}
+
+class MockHttpHeaders extends Mock implements HttpHeaders {}
+
+class MockHttpClientResponse extends Mock implements HttpClientResponse {
+  MockHttpClientResponse(this.bytes);
+
+  final List<int> bytes;
+
+  @override
+  StreamSubscription<List<int>> listen(void onData(List<int> event),
+      {Function onError, void onDone(), bool cancelOnError}) {
+    return new Stream<List<int>>.fromIterable(<List<int>>[bytes]).listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
 }
