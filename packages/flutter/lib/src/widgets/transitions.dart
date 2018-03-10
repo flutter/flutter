@@ -332,6 +332,12 @@ class FadeTransition extends SingleChildRenderObjectWidget {
     renderObject
       ..opacity = opacity;
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
+  }
 }
 
 /// An interpolation between two relative rects.
