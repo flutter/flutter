@@ -116,14 +116,14 @@ class NetworkAssetBundle extends AssetBundle {
           cancelOnError: true);
       return completer.future;
     }
-    final ByteData byteData = new ByteData(response.contentLength);
+    final Uint8List bytes = new Uint8List(response.contentLength);
     int offset = 0;
     response.listen((List<int> chunk) {
       for (int i = 0; i < chunk.length; i++, offset++) {
-        byteData.setUint8(offset, chunk[i]);
+        bytes[offset] = chunk[i];
       }
     }, onError: completer.completeError, onDone: () {
-      completer.complete(byteData);
+      completer.complete(bytes.buffer.asByteData());
     });
     return completer.future;
   }
