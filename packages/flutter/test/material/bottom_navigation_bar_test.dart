@@ -553,7 +553,7 @@ Widget boilerplate({ Widget bottomNavigationBar, @required TextDirection textDir
   assert(textDirection != null);
   return new Localizations(
     locale: const Locale('en', 'US'),
-    delegates: <LocalizationsDelegate<dynamic>>[
+    delegates: const <LocalizationsDelegate<dynamic>>[
       DefaultMaterialLocalizations.delegate,
       DefaultWidgetsLocalizations.delegate,
     ],
