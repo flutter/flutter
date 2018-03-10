@@ -322,7 +322,7 @@ class RunCommand extends RunCommandBase {
     final List<FlutterDevice> flutterDevices = devices.map((Device device) {
       return new FlutterDevice(
         device,
-        previewDart2: argResults['preview-dart-2'],
+        previewDart2: true,
         trackWidgetCreation: argResults['track-widget-creation'],
         dillOutputPath: argResults['output-dill'],
       );

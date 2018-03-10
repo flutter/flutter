@@ -56,7 +56,7 @@ class BuildFlxCommand extends BuildSubCommand {
       depfilePath: argResults['depfile'],
       privateKeyPath: argResults['private-key'],
       workingDirPath: argResults['working-dir'],
-      previewDart2: argResults['preview-dart-2'],
+      previewDart2: true,
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
