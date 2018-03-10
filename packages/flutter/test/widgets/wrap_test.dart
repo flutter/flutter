@@ -835,7 +835,7 @@ void main() {
       textDirection: TextDirection.ltr,
       spacing: 10.0,
       runSpacing: 10.0,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 200.0, height: 10.0),
         const SizedBox(width: 200.0, height: 10.0),
         const SizedBox(width: 200.0, height: 10.0),
@@ -858,7 +858,7 @@ void main() {
       textDirection: TextDirection.ltr,
       spacing: 10.0,
       runSpacing: 10.0,
-      children: <Widget>[
+      children: const <Widget>[
         const SizedBox(width: 800.0, height: 0.0),
       ],
     ));
