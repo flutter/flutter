@@ -441,7 +441,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     headers?.forEach((String name, String value) {
       request.headers.add(name, value);
     });
-    final HttpClientResponse  response = await request.close();
+    final HttpClientResponse response = await request.close();
     if (response == null || response.statusCode != 200)
       throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
