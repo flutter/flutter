@@ -17,6 +17,24 @@ import 'fake_process_manager.dart';
 
 void main() {
   final String testRef = 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeef';
+  test('Throws on missing executable', () async {
+    // Uses a *real* process manager, since we want to know what happens if
+    // it can't find an executable.
+    final ProcessRunner processRunner = new ProcessRunner(subprocessOutput: false);
+    expect(
+        expectAsync1((List<String> commandLine) async {
+          return processRunner.runProcess(commandLine);
+        })(<String>['this_executable_better_not_exist_2857632534321']),
+        throwsA(const isInstanceOf<ProcessRunnerException>()));
+    try {
+      await processRunner.runProcess(<String>['this_executable_better_not_exist_2857632534321']);
+    } on ProcessRunnerException catch (e) {
+      expect(
+        e.message,
+        contains('Invalid argument(s): Cannot find executable for this_executable_better_not_exist_2857632534321.'),
+      );
+    }
+  });
   for (String platformName in <String>['macos', 'linux', 'windows']) {
     final FakePlatform platform = new FakePlatform(
       operatingSystem: platformName,
