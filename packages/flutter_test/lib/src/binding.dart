@@ -12,8 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart' as http;
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
 import 'package:test/test.dart' as test_package;
@@ -140,13 +138,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @override
   void initInstances() {
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
-    createHttpClient = () {
-      return new http.MockClient((http.BaseRequest request) {
-        return new Future<http.Response>.value(
-          new http.Response('Mocked: Unavailable.', 404, request: request)
-        );
-      });
-    };
     _testTextInput = new TestTextInput()..register();
     super.initInstances();
   }
