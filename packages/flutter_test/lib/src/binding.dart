@@ -1170,6 +1170,8 @@ class _MockHttpOverrides extends HttpOverrides {
     return new _MockHttpClient();
   }
 }
+
+/// A mocked [HttpClient] which always returns a [_MockHttpRequest].
 class _MockHttpClient implements HttpClient {
   @override
   bool autoUncompress;
@@ -1275,14 +1277,12 @@ class _MockHttpClient implements HttpClient {
   }
 }
 
+/// A mocked [HttpClientRequest] which always returns a [_MockHttpClientResponse].
 class _MockHttpRequest extends HttpClientRequest {
   @override
-<<<<<<< HEAD
-=======
   Encoding encoding;
 
   @override
->>>>>>> 8cd02e8495b655b112e9007793208233c20a2fb7
   void add(List<int> data) {}
 
   @override
@@ -1325,23 +1325,16 @@ class _MockHttpRequest extends HttpClientRequest {
   void write(Object obj) {}
 
   @override
-<<<<<<< HEAD
-  void writeAll(Iterable<Object> objects, [String separator = '']) {}
-=======
   void writeAll(Iterable objects, [String separator = '']) {}
->>>>>>> 8cd02e8495b655b112e9007793208233c20a2fb7
 
   @override
   void writeCharCode(int charCode) {}
 
   @override
   void writeln([Object obj = '']) {}
-<<<<<<< HEAD
-
-  @override
-  Encoding encoding;
 }
 
+/// A mocked [HttpClientResponse] which is empty and has a [statusCode] of 400.
 class _MockHttpResponse extends Stream<List<int>> implements HttpClientResponse {
   @override
   X509Certificate get certificate => null;
