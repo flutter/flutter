@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'checkbox.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'divider.dart';
 import 'dropdown.dart';
 import 'icons.dart';
 import 'ink_well.dart';
@@ -500,12 +501,12 @@ class DataTable extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final BoxDecoration _kSelectedDecoration = new BoxDecoration(
-      border: new Border(bottom: new BorderSide(color: theme.dividerColor)),
+      border: new Border(bottom: Divider.createBorderSide(context, width: 1.0)),
       // The backgroundColor has to be transparent so you can see the ink on the material
       color: (Theme.of(context).brightness == Brightness.light) ? _kGrey100Opacity : _kGrey300Opacity,
     );
     final BoxDecoration _kUnselectedDecoration = new BoxDecoration(
-      border: new Border(bottom: new BorderSide(color: theme.dividerColor)),
+      border: new Border(bottom: Divider.createBorderSide(context, width: 1.0)),
     );
 
     final bool showCheckboxColumn = rows.any((DataRow row) => row.onSelectChanged != null);
