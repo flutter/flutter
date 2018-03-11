@@ -432,7 +432,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     );
   }
 
-  static final HttpClient _httpClient = HttpOverrides.current.createHttpClient(SecurityContext.defaultContext);
+  static final HttpClient _httpClient = new HttpClient();
 
   Future<ui.Codec> _loadAsync(NetworkImage key) async {
     assert(key == this);

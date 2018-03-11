@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -1276,9 +1277,6 @@ class _MockHttpClient implements HttpClient {
 
 class _MockHttpRequest extends HttpClientRequest {
   @override
-  Encoding encoding;
-
-  @override
   void add(List<int> data) {}
 
   @override
@@ -1321,13 +1319,61 @@ class _MockHttpRequest extends HttpClientRequest {
   void write(Object obj) {}
 
   @override
-  void writeAll(Iterable objects, [String separator = '']) {}
+  void writeAll(Iterable<Object> objects, [String separator = '']) {}
 
   @override
   void writeCharCode(int charCode) {}
 
   @override
   void writeln([Object obj = '']) {}
+
+  @override
+  Encoding encoding;
 }
 
-class _MockHtt
+class _MockHttpResponse extends Stream<List<int>> implements HttpClientResponse {
+  @override
+  X509Certificate get certificate => null;
+
+  @override
+  HttpConnectionInfo get connectionInfo => null;
+
+  @override
+  int get contentLength => -1;
+
+  @override
+  List<Cookie> get cookies => null;
+
+  @override
+  Future<Socket> detachSocket() {
+    return new Future<Socket>.error(new UnsupportedError('Mocked response'));
+  }
+
+  @override
+  HttpHeaders get headers => null;
+
+  @override
+  bool get isRedirect => false;
+
+  @override
+  StreamSubscription<List<int>> listen(void Function(List<int> event) onData, {Function onError, void Function() onDone, bool cancelOnError}) {
+    return const Stream<List<int>>.empty().listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
+
+  @override
+  bool get persistentConnection => null;
+
+  @override
+  String get reasonPhrase => null;
+
+  @override
+  Future<HttpClientResponse> redirect([String method, Uri url, bool followLoops]) {
+    return new Future<HttpClientResponse>.error(new UnsupportedError('Mocked response'));
+  }
+
+  @override
+  List<RedirectInfo> get redirects => <RedirectInfo>[];
+
+  @override
+  int get statusCode => 400;
+}

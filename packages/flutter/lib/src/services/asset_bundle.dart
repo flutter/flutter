@@ -90,7 +90,7 @@ class NetworkAssetBundle extends AssetBundle {
   /// to the given base URL.
   NetworkAssetBundle(Uri baseUrl)
     : _baseUrl = baseUrl,
-      _httpClient = HttpOverrides.current.createHttpClient(SecurityContext.defaultContext);
+      _httpClient = new HttpClient();
 
   final Uri _baseUrl;
   final HttpClient _httpClient;
