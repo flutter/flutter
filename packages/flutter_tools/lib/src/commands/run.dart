@@ -112,6 +112,7 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.');
     argParser.addFlag('preview-dart-2',
+        defaultsTo: true,
         hide: !verboseHelp,
         help: 'Preview Dart 2.0 functionality.');
     argParser.addFlag('track-widget-creation',
