@@ -499,9 +499,9 @@ class _TabBarScrollController extends ScrollController {
 /// Typically created as the [AppBar.bottom] part of an [AppBar] and in
 /// conjunction with a [TabBarView].
 ///
-/// If a [TabController] is not provided, then there must be a
-/// [DefaultTabController] ancestor. The tab controller's [TabController.length]
-/// must equal the length of the [tabs] list.
+/// If a [TabController] is not provided, then a [DefaultTabController] ancestor
+/// must be provided instead. The tab controller's [TabController.length] must
+/// equal the length of the [tabs] list.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
