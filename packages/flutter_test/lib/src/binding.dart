@@ -1325,7 +1325,7 @@ class _MockHttpRequest extends HttpClientRequest {
   void write(Object obj) {}
 
   @override
-  void writeAll(Iterable objects, [String separator = '']) {}
+  void writeAll(Iterable<Object> objects, [String separator = '']) {}
 
   @override
   void writeCharCode(int charCode) {}
