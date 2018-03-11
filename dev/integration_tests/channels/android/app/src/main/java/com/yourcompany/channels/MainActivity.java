@@ -10,7 +10,6 @@ import android.os.Bundle;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
-import java.util.Objects;
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.*;
 import io.flutter.plugins.GeneratedPluginRegistrant;
