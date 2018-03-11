@@ -8,6 +8,9 @@ import java.nio.ByteBuffer;
 
 import android.os.Bundle;
 
+import java.io.ByteArrayOutputStream;
+import java.util.Date;
+import java.util.Objects;
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.*;
 import io.flutter.plugins.GeneratedPluginRegistrant;
@@ -20,9 +23,9 @@ public class MainActivity extends FlutterActivity {
     setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "binary-msg", BinaryCodec.INSTANCE));
     setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "string-msg", StringCodec.INSTANCE));
     setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "json-msg", JSONMessageCodec.INSTANCE));
-    setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "std-msg", StandardMessageCodec.INSTANCE));
+    setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "std-msg", ExtendedStandardMessageCodec.INSTANCE));
     setupMethodHandshake(new MethodChannel(getFlutterView(), "json-method", JSONMethodCodec.INSTANCE));
-    setupMethodHandshake(new MethodChannel(getFlutterView(), "std-method", StandardMethodCodec.INSTANCE));
+    setupMethodHandshake(new MethodChannel(getFlutterView(), "std-method", new StandardMethodCodec(ExtendedStandardMessageCodec.INSTANCE)));
   }
 
   private <T> void setupMessageHandshake(final BasicMessageChannel<T> channel) {
@@ -133,5 +136,51 @@ public class MainActivity extends FlutterActivity {
         result.notImplemented();
       }
     });
+  }
+}
+
+final class ExtendedStandardMessageCodec extends StandardMessageCodec {
+  public static final ExtendedStandardMessageCodec INSTANCE = new ExtendedStandardMessageCodec();
+  private static final byte DATE = 0;
+  private static final byte PAIR = 1;
+
+  @Override
+  protected void writeUnknown(ByteArrayOutputStream stream, Object value) {
+    if (value instanceof Date) {
+      stream.write(DATE);
+      writeLong(stream, ((Date) value).getTime());
+    } else if (value instanceof Pair) {
+      stream.write(PAIR);
+      writeValue(stream, ((Pair) value).left);
+      writeValue(stream, ((Pair) value).right);
+    } else {
+      super.writeUnknown(stream, value);
+    }
+  }
+
+  @Override
+  protected Object readUnknown(ByteBuffer buffer) {
+    switch (buffer.get()) {
+      case DATE:
+        return new Date(buffer.getLong());
+      case PAIR:
+        return new Pair<Object, Object>(readValue(buffer), readValue(buffer));
+      default: return super.readUnknown(buffer);
+    }
+  }
+}
+
+final class Pair<L, R> {
+  public final L left;
+  public final R right;
+
+  public Pair(L left, R right) {
+    this.left = left;
+    this.right = right;
+  }
+
+  @Override
+  public String toString() {
+    return "Pair[" + left + ", " + right + "]";
   }
 }

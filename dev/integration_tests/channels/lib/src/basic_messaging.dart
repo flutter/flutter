@@ -4,8 +4,43 @@
 
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
 import 'test_step.dart';
+import 'pair.dart';
+
+class ExtendedStandardMessageCodec extends StandardMessageCodec {
+  const ExtendedStandardMessageCodec();
+
+  static const _kDateTime = 0;
+  static const _kPair = 1;
+
+  @override
+  void writeUnknown(WriteBuffer buffer, dynamic value) {
+    if (value is DateTime) {
+      buffer.putUint8(_kDateTime);
+      buffer.putInt64(value.millisecondsSinceEpoch);
+    } else if (value is Pair) {
+      buffer.putUint8(_kPair);
+      writeValue(buffer, value.left);
+      writeValue(buffer, value.right);
+    } else {
+      super.writeUnknown(buffer, value);
+    }
+  }
+
+  @override
+  dynamic readUnknown(ReadBuffer buffer) {
+    switch (buffer.getUint8()) {
+    case _kDateTime:
+      return new DateTime.fromMillisecondsSinceEpoch(buffer.getInt64());
+    case _kPair:
+      return new Pair(readValue(buffer), readValue(buffer));
+    default: return super.readUnknown(buffer);
+    }
+  }
+}
 
 Future<TestStepResult> basicBinaryHandshake(ByteData message) async {
   const BasicMessageChannel<ByteData> channel =
@@ -38,7 +73,7 @@ Future<TestStepResult> basicStandardHandshake(dynamic message) async {
   const BasicMessageChannel<dynamic> channel =
       const BasicMessageChannel<dynamic>(
     'std-msg',
-    const StandardMessageCodec(),
+    const ExtendedStandardMessageCodec(),
   );
   return _basicMessageHandshake<dynamic>(
       'Standard >${toString(message)}<', channel, message);
@@ -74,7 +109,7 @@ Future<TestStepResult> basicStandardMessageToUnknownChannel() async {
   const BasicMessageChannel<dynamic> channel =
       const BasicMessageChannel<dynamic>(
     'std-unknown',
-    const StandardMessageCodec(),
+    const ExtendedStandardMessageCodec(),
   );
   return _basicMessageToUnknownChannel<dynamic>('Standard', channel);
 }
