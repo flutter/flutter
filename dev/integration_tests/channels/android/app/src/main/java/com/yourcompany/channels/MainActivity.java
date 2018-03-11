@@ -4,12 +4,12 @@
 
 package com.yourcompany.channels;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
+import java.util.Date;
 
 import android.os.Bundle;
 
-import java.io.ByteArrayOutputStream;
-import java.util.Date;
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.*;
 import io.flutter.plugins.GeneratedPluginRegistrant;
@@ -163,17 +163,17 @@ final class ExtendedStandardMessageCodec extends StandardMessageCodec {
       case DATE:
         return new Date(buffer.getLong());
       case PAIR:
-        return new Pair<Object, Object>(readValue(buffer), readValue(buffer));
+        return new Pair(readValue(buffer), readValue(buffer));
       default: return super.readUnknown(buffer);
     }
   }
 }
 
-final class Pair<L, R> {
-  public final L left;
-  public final R right;
+final class Pair {
+  public final Object left;
+  public final Object right;
 
-  public Pair(L left, R right) {
+  public Pair(Object left, Object right) {
     this.left = left;
     this.right = right;
   }

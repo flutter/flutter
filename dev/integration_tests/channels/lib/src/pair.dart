@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 /// A pair of values. Used for testing custom codecs.
-class Pair<L, R> {
-  final L left;
-  final R right;
+class Pair {
+  final dynamic left;
+  final dynamic right;
 
   Pair(this.left, this.right);
 

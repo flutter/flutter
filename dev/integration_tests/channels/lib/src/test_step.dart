@@ -53,7 +53,6 @@ class TestStepResult {
         if (snapshot.hasData) {
           return snapshot.data;
         } else {
-          print(snapshot.error);
           final TestStepResult result = snapshot.error;
           return result;
         }
@@ -182,6 +181,6 @@ bool _deepEqualsMap(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
   return true;
 }
 
-bool _deepEqualsPair(Pair<dynamic, dynamic> a, Pair<dynamic, dynamic> b) {
+bool _deepEqualsPair(Pair a, Pair b) {
   return _deepEquals(a.left, b.left) && _deepEquals(a.right, b.right);
 }

@@ -90,6 +90,7 @@ const uint8_t PAIR = 1;
   FlutterViewController *flutterController =
       (FlutterViewController *)self.window.rootViewController;
 
+  ExtendedReaderWriter* extendedReaderWriter = [ExtendedReaderWriter new];
   [self setupMessagingHandshakeOnChannel:
     [FlutterBasicMessageChannel messageChannelWithName:@"binary-msg"
                                        binaryMessenger:flutterController
@@ -105,7 +106,7 @@ const uint8_t PAIR = 1;
   [self setupMessagingHandshakeOnChannel:
     [FlutterBasicMessageChannel messageChannelWithName:@"std-msg"
                                        binaryMessenger:flutterController
-                                                 codec:[FlutterStandardMessageCodec withReaderWriter:[ExtendedReaderWriter new]]]];
+                                                 codec:[FlutterStandardMessageCodec withReaderWriter:extendedReaderWriter]]];
   [self setupMethodCallSuccessHandshakeOnChannel:
     [FlutterMethodChannel methodChannelWithName:@"json-method"
                                 binaryMessenger:flutterController
@@ -113,7 +114,7 @@ const uint8_t PAIR = 1;
   [self setupMethodCallSuccessHandshakeOnChannel:
     [FlutterMethodChannel methodChannelWithName:@"std-method"
                                 binaryMessenger:flutterController
-                                          codec:[FlutterStandardMethodCodec withReaderWriter:[ExtendedReaderWriter new]]]];
+                                          codec:[FlutterStandardMethodCodec withReaderWriter:extendedReaderWriter]]];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 

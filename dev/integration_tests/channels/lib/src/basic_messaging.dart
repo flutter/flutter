@@ -4,11 +4,10 @@
 
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
-import 'test_step.dart';
 import 'pair.dart';
+import 'test_step.dart';
 
 class ExtendedStandardMessageCodec extends StandardMessageCodec {
   const ExtendedStandardMessageCodec();
