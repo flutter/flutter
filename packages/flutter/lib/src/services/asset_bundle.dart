@@ -4,12 +4,11 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 
-import 'http_client.dart';
 import 'platform_messages.dart';
 
 /// A collection of resources used by the application.
@@ -91,30 +90,51 @@ class NetworkAssetBundle extends AssetBundle {
   /// to the given base URL.
   NetworkAssetBundle(Uri baseUrl)
     : _baseUrl = baseUrl,
-      _httpClient = createHttpClient();
+      _httpClient = new HttpClient();
 
   final Uri _baseUrl;
-  final http.Client _httpClient;
+  final HttpClient _httpClient;
 
-  String _urlFromKey(String key) => _baseUrl.resolve(key).toString();
+  Uri _urlFromKey(String key) => _baseUrl.resolve(key);
 
   @override
   Future<ByteData> load(String key) async {
-    final http.Response response = await _httpClient.get(_urlFromKey(key));
-    if (response.statusCode != 200)
-      throw new FlutterError('Unable to load asset: $key');
-    return response.bodyBytes.buffer.asByteData();
+    final HttpClientRequest request = await _httpClient.getUrl(_urlFromKey(key));
+    final HttpClientResponse response = await request.close();
+    if (response.statusCode != HttpStatus.OK)
+      throw new FlutterError(
+        'Unable to load asset: $key\n'
+        'HTTP status code: ${response.statusCode}'
+      );
+
+    final Completer<ByteData> completer = new Completer<ByteData>.sync();
+    if (response.contentLength == -1) {
+      final ByteConversionSink sink = new ByteConversionSink.withCallback((List<int> chunk) {
+        final Uint8List bytes = new Uint8List.fromList(chunk);
+        completer.complete(bytes.buffer.asByteData());
+      });
+      response.listen(sink.add, onDone: sink.close, onError: completer.completeError, cancelOnError: true);
+    } else {
+      final Uint8List bytes = new Uint8List(response.contentLength);
+      int offset = 0;
+      response.listen((List<int> chunk) {
+        for (int i = 0; i < chunk.length; i++, offset++) {
+          bytes[offset] = chunk[i];
+        }
+      },
+      onError: completer.completeError,
+      onDone: () {
+        completer.complete(bytes.buffer.asByteData());
+      },
+      cancelOnError: true);
+    }
+    return completer.future;
   }
 
   @override
   Future<String> loadString(String key, { bool cache: true }) async {
-    final http.Response response = await _httpClient.get(_urlFromKey(key));
-    if (response.statusCode != 200)
-      throw new FlutterError(
-          'Unable to load asset: $key\n'
-          'HTTP status code: ${response.statusCode}'
-      );
-    return response.body;
+    final ByteData bytes = await load(key);
+    return const Utf8Decoder().convert(bytes.buffer.asUint8List());
   }
 
   /// Retrieve a string from the asset bundle, parse it with the given function,
