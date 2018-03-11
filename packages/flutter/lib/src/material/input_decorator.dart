@@ -1881,11 +1881,11 @@ class InputDecoration {
   /// [IconTheme] and therefore does not need to be explicitly given in the
   /// icon widget.
   ///
-  /// The suffix icon is not padded. To pad the leading edge of the prefix icon:
+  /// The suffix icon is not padded. To pad the leading edge of the suffix icon:
   /// ```dart
-  /// prefixIcon: new Padding(
+  /// suffixIcon: new Padding(
   ///   padding: const EdgeInsetsDirectional.only(start: 16.0),
-  ///   child: myIcon,
+  ///   child: new Icon(Icons.search),
   /// )
   /// ```
   ///

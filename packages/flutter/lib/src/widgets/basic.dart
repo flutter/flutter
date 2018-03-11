@@ -60,6 +60,10 @@ export 'package:flutter/rendering.dart' show
   WrapAlignment,
   WrapCrossAlignment;
 
+// Examples can assume:
+// class TestWidget extends StatelessWidget { @override Widget build(BuildContext context) => const Placeholder(); }
+// WidgetTester tester;
+
 // BIDIRECTIONAL TEXT SUPPORT
 
 /// A widget that determines the ambient directionality of text and
@@ -4457,6 +4461,47 @@ class RawImage extends LeafRenderObjectWidget {
 ///
 /// For example, used by [Image] to determine which bundle to use for
 /// [AssetImage]s if no bundle is specified explicitly.
+///
+/// ## Sample code
+///
+/// This can be used in tests to override what the current asset bundle is, thus
+/// allowing specific resources to be injected into the widget under test.
+///
+/// For example, a test could create a test asset bundle like this:
+///
+/// ```dart
+/// class TestAssetBundle extends CachingAssetBundle {
+///   @override
+///   Future<ByteData> load(String key) async {
+///     if (key == 'resources/test')
+///       return new ByteData.view(new Uint8List.fromList(utf8.encode('Hello World!')).buffer);
+///     return null;
+///   }
+/// }
+/// ```
+///
+/// ...then wrap the widget under test with a [DefaultAssetBundle] using this
+/// bundle implementation:
+///
+/// ```dart
+/// await tester.pumpWidget(
+///   new MaterialApp(
+///     home: new DefaultAssetBundle(
+///       bundle: new TestAssetBundle(),
+///       child: new TestWidget(),
+///     ),
+///   ),
+/// );
+/// ```
+///
+/// Assuming that `TestWidget` uses [DefaultAssetBundle.of] to obtain its
+/// [AssetBundle], it will now see the [TestAssetBundle]'s "Hello World!" data
+/// when requesting the "resources/test" asset.
+///
+/// See also:
+///
+///  * [AssetBundle], the interface for asset bundles.
+///  * [rootBundle], the default default asset bundle.
 class DefaultAssetBundle extends InheritedWidget {
   /// Creates a widget that determines the default asset bundle for its descendants.
   ///
