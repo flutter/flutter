@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'divider.dart';
 import 'material.dart';
 import 'shadows.dart';
 import 'theme.dart';
@@ -553,9 +554,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           final bool hasBottomDivider = _willNeedDivider(i + 1);
 
           Border border;
-          final BorderSide divider = new BorderSide(
-            color: Theme.of(context).dividerColor,
-            width: 0.5
+          final BorderSide divider = Divider.createBorderSide(
+            context,
+            width: 0.5, // TODO(ianh): This probably looks terrible when the dpr isn't a power of two.
           );
 
           if (i == 0) {

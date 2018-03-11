@@ -14,6 +14,7 @@ import 'app_bar.dart';
 import 'bottom_sheet.dart';
 import 'button_bar.dart';
 import 'button_theme.dart';
+import 'divider.dart';
 import 'drawer.dart';
 import 'flexible_space_bar.dart';
 import 'material.dart';
@@ -1181,9 +1182,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         new Container(
           decoration: new BoxDecoration(
             border: new Border(
-              top: new BorderSide(
-                color: themeData.dividerColor
-              ),
+              top: Divider.createBorderSide(context, width: 1.0),
             ),
           ),
           child: new SafeArea(
