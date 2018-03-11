@@ -1277,6 +1277,12 @@ class _MockHttpClient implements HttpClient {
 
 class _MockHttpRequest extends HttpClientRequest {
   @override
+<<<<<<< HEAD
+=======
+  Encoding encoding;
+
+  @override
+>>>>>>> 8cd02e8495b655b112e9007793208233c20a2fb7
   void add(List<int> data) {}
 
   @override
@@ -1319,13 +1325,18 @@ class _MockHttpRequest extends HttpClientRequest {
   void write(Object obj) {}
 
   @override
+<<<<<<< HEAD
   void writeAll(Iterable<Object> objects, [String separator = '']) {}
+=======
+  void writeAll(Iterable objects, [String separator = '']) {}
+>>>>>>> 8cd02e8495b655b112e9007793208233c20a2fb7
 
   @override
   void writeCharCode(int charCode) {}
 
   @override
   void writeln([Object obj = '']) {}
+<<<<<<< HEAD
 
   @override
   Encoding encoding;
