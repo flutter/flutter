@@ -4,8 +4,8 @@
 
 import 'dart:async';
 import 'package:flutter/services.dart';
-import 'test_step.dart';
 import 'basic_messaging.dart';
+import 'test_step.dart';
 
 Future<TestStepResult> methodCallJsonSuccessHandshake(dynamic payload) async {
   const MethodChannel channel =

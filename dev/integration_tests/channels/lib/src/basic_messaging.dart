@@ -12,8 +12,8 @@ import 'test_step.dart';
 class ExtendedStandardMessageCodec extends StandardMessageCodec {
   const ExtendedStandardMessageCodec();
 
-  static const _kDateTime = 0;
-  static const _kPair = 1;
+  static const int _kDateTime = 0;
+  static const int _kPair = 1;
 
   @override
   void writeUnknown(WriteBuffer buffer, dynamic value) {

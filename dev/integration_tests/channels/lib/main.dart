@@ -73,7 +73,7 @@ class _TestAppState extends State<TestApp> {
   ]);
   static final dynamic aCompoundUnknownValue = <dynamic>[
     anUnknownValue,
-    new Pair<dynamic, dynamic>(anUnknownValue, aList),
+    new Pair(anUnknownValue, aList),
   ];
   static final List<TestStep> steps = <TestStep>[
     () => methodCallJsonSuccessHandshake(null),
