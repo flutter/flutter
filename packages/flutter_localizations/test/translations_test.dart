@@ -20,7 +20,9 @@ void main() {
     'it', // Italian
     'ja', // Japanese
     'ko', // Korean
+    'nb', // Norwegian Bokmål
     'nl', // Dutch
+    'nn', // Norwegian Nynorsk
     'pl', // Polish
     'ps', // Pashto
     'pt', // Portugese

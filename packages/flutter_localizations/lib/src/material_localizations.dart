@@ -49,7 +49,9 @@ import 'widgets_localizations.dart';
 ///   * it - Italian
 ///   * ja - Japanese
 ///   * ko - Korean
+///   * nb - Norwegian Bokmål
 ///   * nl - Dutch
+///   * nn - Norwegian Nynorsk
 ///   * pl - Polish
 ///   * ps - Pashto
 ///   * pt - Portuguese
@@ -510,7 +512,9 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'it', // Italian
     'ja', // Japanese
     'ko', // Korean
+    'nb', // Norwegian Bokmål
     'nl', // Dutch
+    'nn', // Norwegian Nynorsk
     'pl', // Polish
     'ps', // Pashto
     'pt', // Portugese
