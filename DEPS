@@ -31,18 +31,18 @@ vars = {
   # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS.
   # You can use //tools/dart/create_updated_flutter_deps.py to produce
   # updated revision list of existing dependencies.
-  'dart_revision': 'b5b8080b2cfb1e4943a19787ee96548a4a604f7b',
+  'dart_revision': '290c576264faa096a0b3206c71b2435309d9f904',
 
   'dart_args_tag': '0.13.7',
   'dart_async_tag': '2.0.6',
   'dart_barback_tag': '0.15.2+14',
   'dart_bazel_worker_tag': 'v0.1.9',
-  'dart_boolean_selector_tag': '1.0.2',
-  'dart_boringssl_gen_rev': '39762c7f9ee4d828ff212838fae79528b94d5443',
-  'dart_boringssl_rev': 'a62dbf88d8a3c04446db833a1eb80a620cb1514d',
+  'dart_boolean_selector_tag': '1.0.3',
+  'dart_boringssl_gen_rev': '344f455fd13d46f054726638e76026156ea73aa9',
+  'dart_boringssl_rev': '672f6fc2486745d0cabc3aaeb4e0a3cd13b37b12',
   'dart_charcode_tag': 'v1.1.1',
   'dart_cli_util_tag': '0.1.2+1',
-  'dart_collection_tag': '5943e1681204250f33a833eb5550f270357ad6c8',
+  'dart_collection_tag': '6ff408a512df30559c1a18b37cfac9fc51a4ceef',
   'dart_convert_tag': '2.0.1',
   'dart_crypto_tag': '2.0.2+1',
   'dart_csslib_tag': '0.14.1',
