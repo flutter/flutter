@@ -79,8 +79,8 @@ class Fingerprint {
   ///
   /// Throws [ArgumentError], if there is a version mismatch between the
   /// serializing framework and this framework.
-  Fingerprint.fromJson(String jsonEncoded) {
-    final Map<String, dynamic> content = json.decode(jsonEncoded);
+  Fingerprint.fromJson(String jsonData) {
+    final Map<String, dynamic> content = json.decode(jsonData);
 
     final String version = content['version'];
     if (version != FlutterVersion.instance.frameworkRevision)

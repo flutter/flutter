@@ -368,14 +368,14 @@ Future<DevFSContent> _obtainLicenses(
 }
 
 DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
-  final Map<String, List<String>> jsonMap = <String, List<String>>{};
+  final Map<String, List<String>> jsonObject = <String, List<String>>{};
   for (_Asset main in assetVariants.keys) {
     final List<String> variants = <String>[];
     for (_Asset variant in assetVariants[main])
       variants.add(variant.entryUri.path);
-    jsonMap[main.entryUri.path] = variants;
+    jsonObject[main.entryUri.path] = variants;
   }
-  return new DevFSStringContent(json.encode(jsonMap));
+  return new DevFSStringContent(json.encode(jsonObject));
 }
 
 List<Map<String, dynamic>> _parseFonts(

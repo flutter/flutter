@@ -203,8 +203,8 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
 
   static Map<int, _Transaction> _loadTransactions(Directory location) {
     final File file = _getManifest(location);
-    final String jsonString = file.readAsStringSync();
-    final Iterable<_Message> messages = json.decoder.convert(jsonString).map<_Message>(_toMessage);
+    final String jsonData = file.readAsStringSync();
+    final Iterable<_Message> messages = json.decoder.convert(jsonData).map<_Message>(_toMessage);
     final Map<int, _Transaction> transactions = <int, _Transaction>{};
     for (_Message message in messages) {
       final _Transaction transaction =

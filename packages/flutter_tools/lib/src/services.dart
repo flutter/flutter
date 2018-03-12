@@ -103,8 +103,8 @@ File generateServiceDefinitions(
         'class': service['android-class']
       }).toList();
 
-  final Map<String, dynamic> jsonMap = <String, dynamic>{ 'services': services };
+  final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services': services };
   final File servicesFile = fs.file(fs.path.join(dir, 'services.json'));
-  servicesFile.writeAsStringSync(json.encode(jsonMap), mode: FileMode.WRITE, flush: true);
+  servicesFile.writeAsStringSync(json.encode(jsonObject), mode: FileMode.WRITE, flush: true);
   return servicesFile;
 }

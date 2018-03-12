@@ -181,8 +181,8 @@ class VsCode {
     if (!fs.isFileSync(packageJsonPath))
       return null;
     final String jsonString = fs.file(packageJsonPath).readAsStringSync();
-    final Map<String, String> jsonMap = json.decode(jsonString);
-    return jsonMap['version'];
+    final Map<String, String> jsonObject = json.decode(jsonString);
+    return jsonObject['version'];
   }
 }
 

@@ -336,11 +336,11 @@ class VersionCheckStamp {
     if (versionCheckStamp != null) {
       // Attempt to parse stamp JSON.
       try {
-        final dynamic jsonDecoded = json.decode(versionCheckStamp);
-        if (jsonDecoded is Map) {
-          return fromJson(jsonDecoded);
+        final dynamic jsonObject = json.decode(versionCheckStamp);
+        if (jsonObject is Map) {
+          return fromJson(jsonObject);
         } else {
-          printTrace('Warning: expected version stamp to be a Map but found: $jsonDecoded');
+          printTrace('Warning: expected version stamp to be a Map but found: $jsonObject');
         }
       } catch (error, stackTrace) {
         // Do not crash if JSON is malformed.
@@ -352,10 +352,10 @@ class VersionCheckStamp {
     return const VersionCheckStamp();
   }
 
-  static VersionCheckStamp fromJson(Map<String, String> json) {
+  static VersionCheckStamp fromJson(Map<String, String> jsonObject) {
     DateTime readDateTime(String property) {
-      return json.containsKey(property)
-        ? DateTime.parse(json[property])
+      return jsonObject.containsKey(property)
+        ? DateTime.parse(jsonObject[property])
         : null;
     }
 

@@ -305,7 +305,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// function, rather than constructing this class directly.
   const DefaultMaterialLocalizations();
 
-  // Ordered to match DateTime.monday=1, DateTime.SUNDAY=6
+  // Ordered to match DateTime.monday=1, DateTime.sunday=6
   static const List<String> _shortWeekdays = const <String>[
     'Mon',
     'Tue',
@@ -316,7 +316,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'Sun',
   ];
 
-  // Ordered to match DateTime.monday=1, DateTime.SUNDAY=6
+  // Ordered to match DateTime.monday=1, DateTime.sunday=6
   static const List<String> _weekdays = const <String>[
     'Monday',
     'Tuesday',

@@ -80,8 +80,8 @@ class AndroidDevice extends Device {
       printTrace(propCommand.join(' '));
 
       try {
-        // We pass an encoding of LATIN1 so that we don't try and interpret the
-        // `adb shell getprop` result as utf8.
+        // We pass an encoding of latin1 so that we don't try and interpret the
+        // `adb shell getprop` result as UTF8.
         final ProcessResult result = await processManager.run(
           propCommand,
           stdoutEncoding: latin1,

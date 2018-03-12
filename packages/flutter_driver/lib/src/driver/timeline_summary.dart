@@ -112,10 +112,10 @@ class TimelineSummary {
     await file.writeAsString(_encodeJson(summaryJson, pretty));
   }
 
-  String _encodeJson(Map<String, dynamic> jsonMap, bool pretty) {
+  String _encodeJson(Map<String, dynamic> jsonObject, bool pretty) {
     return pretty
-      ? _prettyEncoder.convert(jsonMap)
-      : json.encode(jsonMap);
+      ? _prettyEncoder.convert(jsonObject)
+      : json.encode(jsonObject);
   }
 
   List<TimelineEvent> _extractNamedEvents(String name) {

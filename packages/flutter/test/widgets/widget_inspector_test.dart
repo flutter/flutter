@@ -581,12 +581,12 @@ void main() {
     service.disposeAllGroups();
     service.setPubRootDirectories(<Object>[]);
     service.setSelection(elementA, 'my-group');
-    Map<String, Object> jsonMap = json.decode(service.getSelectedWidget(null, 'my-group'));
-    Map<String, Object> creationLocation = jsonMap['creationLocation'];
+    Map<String, Object> jsonObject = json.decode(service.getSelectedWidget(null, 'my-group'));
+    Map<String, Object> creationLocation = jsonObject['creationLocation'];
     expect(creationLocation, isNotNull);
     final String fileA = creationLocation['file'];
     expect(fileA, endsWith('widget_inspector_test.dart'));
-    expect(jsonMap, isNot(contains('createdByLocalProject')));
+    expect(jsonObject, isNot(contains('createdByLocalProject')));
     final List<String> segments = Uri.parse(fileA).pathSegments;
     // Strip a couple subdirectories away to generate a plausible pub root
     // directory.
@@ -619,9 +619,9 @@ void main() {
     ).evaluate().first;
     service.setSelection(richText, 'my-group');
     service.setPubRootDirectories(<Object>[pubRootTest]);
-    jsonMap = json.decode(service.getSelectedWidget(null, 'my-group'));
-    expect(jsonMap, isNot(contains('createdByLocalProject')));
-    creationLocation = jsonMap['creationLocation'];
+    jsonObject = json.decode(service.getSelectedWidget(null, 'my-group'));
+    expect(jsonObject, isNot(contains('createdByLocalProject')));
+    creationLocation = jsonObject['creationLocation'];
     expect(creationLocation, isNotNull);
     // This RichText widget is created by the build method of the Text widget
     // thus the creation location is in text.dart not basic.dart
