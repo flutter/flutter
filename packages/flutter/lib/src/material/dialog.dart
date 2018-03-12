@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -38,6 +39,8 @@ class Dialog extends StatelessWidget {
   const Dialog({
     Key key,
     this.child,
+    this.insetAnimationDuration: const Duration(milliseconds: 100),
+    this.insetAnimationCurve: Curves.decelerate,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -45,25 +48,46 @@ class Dialog extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// The duration of the animation to show when the system keyboard intrudes
+  /// into the space that the dialog is placed in.
+  ///
+  /// Defaults to 100 milliseconds.
+  final Duration insetAnimationDuration;
+
+  /// The curve to use for the animation shown when the system keyboard intrudes
+  /// into the space that the dialog is placed in.
+  ///
+  /// Defaults to [Curves.fastOutSlowIn].
+  final Curve insetAnimationCurve;
+
   Color _getColor(BuildContext context) {
     return Theme.of(context).dialogBackgroundColor;
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Center(
-      child: new Container(
-        margin: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
-        child: new ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 280.0),
-          child: new Material(
-            elevation: 24.0,
-            color: _getColor(context),
-            type: MaterialType.card,
-            child: child
-          )
-        )
-      )
+    return new AnimatedPadding(
+      padding: MediaQuery.of(context).viewInsets + const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+      duration: insetAnimationDuration,
+      curve: insetAnimationCurve,
+      child: new MediaQuery.removeViewInsets(
+        removeLeft: true,
+        removeTop: true,
+        removeRight: true,
+        removeBottom: true,
+        context: context,
+        child: new Center(
+          child: new ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 280.0),
+            child: new Material(
+              elevation: 24.0,
+              color: _getColor(context),
+              type: MaterialType.card,
+              child: child,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
