@@ -10,7 +10,7 @@ environment:
 dependencies:
   args: 1.4.1
   vector_math: 2.0.5
-  xml: 2.6.0
+  xml: 3.0.0
 
 dev_dependencies:
   test: 0.12.32+1
@@ -41,7 +41,7 @@ dev_dependencies:
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
   path: 1.5.1 # TRANSITIVE DEPENDENCY
-  petitparser: 1.7.4 # TRANSITIVE DEPENDENCY
+  petitparser: 1.7.5 # TRANSITIVE DEPENDENCY
   plugin: 0.2.0+2 # TRANSITIVE DEPENDENCY
   pool: 1.3.4 # TRANSITIVE DEPENDENCY
   pub_semver: 1.3.2 # TRANSITIVE DEPENDENCY
