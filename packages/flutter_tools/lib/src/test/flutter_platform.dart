@@ -193,10 +193,9 @@ enum _TestResult { crashed, harnessBailed, testBailed }
 typedef _Finalizer = Future<Null> Function();
 
 class _CompilationRequest {
+  _CompilationRequest(this.path, this.result);
   String path;
   Completer<String> result;
-
-  _CompilationRequest(this.path, this.result);
 }
 
 // This class is a wrapper around compiler that allows multiple isolates to
