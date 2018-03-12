@@ -187,7 +187,7 @@ void main() {
     });
 
     group('summaryJson', () {
-      test('computes and returns summary as json', () {
+      test('computes and returns summary as JSON', () {
         expect(
           summarize(<Map<String, dynamic>>[
             begin(1000), end(11000),
@@ -226,7 +226,7 @@ void main() {
         restoreFileSystem();
       });
 
-      test('writes timeline to json file', () async {
+      test('writes timeline to JSON file', () async {
         await summarize(<Map<String, String>>[<String, String>{'foo': 'bar'}])
           .writeTimelineToFile('test', destinationDirectory: tempDir.path);
         final String written =
@@ -234,7 +234,7 @@ void main() {
         expect(written, '{"traceEvents":[{"foo":"bar"}]}');
       });
 
-      test('writes summary to json file', () async {
+      test('writes summary to JSON file', () async {
         await summarize(<Map<String, dynamic>>[
           begin(1000), end(11000),
           begin(11000), end(13000),

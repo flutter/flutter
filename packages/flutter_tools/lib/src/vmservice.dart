@@ -104,7 +104,7 @@ class VMService {
     }
   }
 
-  /// Enables recording of VMService json-rpc activity to the specified base
+  /// Enables recording of VMService JSON-rpc activity to the specified base
   /// recording [location].
   ///
   /// Activity will be recorded in a subdirectory of [location] named
@@ -119,9 +119,9 @@ class VMService {
     };
   }
 
-  /// Enables VMService json-rpc replay mode.
+  /// Enables VMService JSON-rpc replay mode.
   ///
-  /// [location] must represent a directory to which VMService json-rpc
+  /// [location] must represent a directory to which VMService JSON-rpc
   /// activity has been recorded (i.e. the result of having been previously
   /// passed to [enableRecordingConnection]), or a [ToolExit] will be thrown.
   static void enableReplayConnection(String location) {

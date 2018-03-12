@@ -75,7 +75,7 @@ class Fingerprint {
     _properties = <String, String>{}..addAll(properties);
   }
 
-  /// Creates a Fingerprint from serialized json.
+  /// Creates a Fingerprint from serialized JSON.
   ///
   /// Throws [ArgumentError], if there is a version mismatch between the
   /// serializing framework and this framework.

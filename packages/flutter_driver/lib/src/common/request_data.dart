@@ -35,7 +35,7 @@ class RequestDataResult extends Result {
   /// The text extracted by the [RequestData] command.
   final String message;
 
-  /// Deserializes the result from json.
+  /// Deserializes the result from JSON.
   static RequestDataResult fromJson(Map<String, dynamic> json) {
     return new RequestDataResult(json['message']);
   }

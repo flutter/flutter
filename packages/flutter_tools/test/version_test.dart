@@ -187,17 +187,17 @@ void main() {
       _expectDefault(await VersionCheckStamp.load());
     });
 
-    testFlutterVersion('loads blank when stamp file is malformed json', () async {
+    testFlutterVersion('loads blank when stamp file is malformed JSON', () async {
       fakeData(stampJson: '<');
       _expectDefault(await VersionCheckStamp.load());
     });
 
-    testFlutterVersion('loads blank when stamp file is well-formed but invalid json', () async {
+    testFlutterVersion('loads blank when stamp file is well-formed but invalid JSON', () async {
       fakeData(stampJson: '[]');
       _expectDefault(await VersionCheckStamp.load());
     });
 
-    testFlutterVersion('loads valid json', () async {
+    testFlutterVersion('loads valid JSON', () async {
       fakeData(stampJson: '''
       {
         "lastKnownRemoteVersion": "${_testClock.ago(days: 1)}",

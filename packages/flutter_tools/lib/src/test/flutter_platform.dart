@@ -185,7 +185,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
-  // that connects to our WebSocket server, then we proxy json messages from
+  // that connects to our WebSocket server, then we proxy JSON messages from
   // the test harness to the engine and back again. If at any time the engine
   // crashes, we inject an error into that stream. When the process closes,
   // we clean everything up.

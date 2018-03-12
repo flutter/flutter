@@ -69,7 +69,7 @@ class TimelineSummary {
   /// The total number of frames recorded in the timeline.
   int countFrames() => _extractFrameDurations().length;
 
-  /// Encodes this summary as json.
+  /// Encodes this summary as JSON.
   Map<String, dynamic> get summaryJson {
     return <String, dynamic> {
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),

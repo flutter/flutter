@@ -29,8 +29,8 @@ import '../vmservice.dart';
 const String protocolVersion = '0.2.0';
 
 /// A server process command. This command will start up a long-lived server.
-/// It reads json-RPC based commands from stdin, executes them, and returns
-/// json-RPC based responses and events to stdout.
+/// It reads JSON-RPC based commands from stdin, executes them, and returns
+/// JSON-RPC based responses and events to stdout.
 ///
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
@@ -41,7 +41,7 @@ class DaemonCommand extends FlutterCommand {
   final String name = 'daemon';
 
   @override
-  final String description = 'Run a persistent, json-RPC based server to communicate with devices.';
+  final String description = 'Run a persistent, JSON-RPC based server to communicate with devices.';
 
   @override
   final bool hidden;
