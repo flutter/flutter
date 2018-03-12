@@ -37,7 +37,7 @@
 // dart dev/tools/gen_localizations.dart --overwrite
 // ```
 
-import 'dart:convert' show JSON;
+import 'dart:convert' show json;
 import 'dart:io';
 
 import 'package:path/path.dart' as pathlib;
@@ -234,7 +234,7 @@ void processBundle(File file, String locale) {
   localeToResourceAttributes[locale] ??= <String, dynamic>{};
   final Map<String, String> resources = localeToResources[locale];
   final Map<String, dynamic> attributes = localeToResourceAttributes[locale];
-  final Map<String, dynamic> bundle = JSON.decode(file.readAsStringSync());
+  final Map<String, dynamic> bundle = json.decode(file.readAsStringSync());
   for (String key in bundle.keys) {
     // The ARB file resource "attributes" for foo are called @foo.
     if (key.startsWith('@'))

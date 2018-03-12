@@ -172,7 +172,7 @@ dependencies:
       workingDirectory: temp.path,
     );
     stderr.addStream(process.stderr);
-    final List<String> errors = await process.stdout.transform<String>(UTF8.decoder).transform<String>(const LineSplitter()).toList();
+    final List<String> errors = await process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList();
     if (errors.first == 'Building flutter tool...')
       errors.removeAt(0);
     if (errors.first.startsWith('Running "flutter packages get" in '))

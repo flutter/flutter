@@ -17,7 +17,7 @@ void main() {
   Map<String, dynamic> parseFlutterResponse(String line) {
     if (line.startsWith('[') && line.endsWith(']')) {
       try {
-        return JSON.decode(line)[0];
+        return json.decode(line)[0];
       } catch (e) {
         // Not valid JSON, so likely some other output that was surrounded by [brackets]
         return null;
@@ -27,7 +27,7 @@ void main() {
   }
 
   Stream<String> transformToLines(Stream<List<int>> byteStream) {
-    return byteStream.transform(UTF8.decoder).transform(const LineSplitter());
+    return byteStream.transform(utf8.decoder).transform(const LineSplitter());
   }
 
   task(() async {
@@ -99,9 +99,9 @@ void main() {
           'method': method,
           'params': params
         };
-        final String json = JSON.encode(<Map<String, dynamic>>[req]);
-        print('run:stdin: $json');
-        run.stdin.writeln(json);
+        final String jsonEncoded = json.encode(<Map<String, dynamic>>[req]);
+        print('run:stdin: $jsonEncoded');
+        run.stdin.writeln(jsonEncoded);
         final Map<String, dynamic> result = await response.future;
         responseSubscription.cancel();
         return result;

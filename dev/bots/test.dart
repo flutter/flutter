@@ -290,8 +290,8 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   final Future<List<List<int>>> savedStderr = process.stderr.toList();
   final int exitCode = await process.exitCode;
   final EvalResult result = new EvalResult(
-    stdout: UTF8.decode((await savedStdout).expand((List<int> ints) => ints).toList()),
-    stderr: UTF8.decode((await savedStderr).expand((List<int> ints) => ints).toList()),
+    stdout: utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()),
+    stderr: utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()),
   );
 
   if (exitCode != 0) {
@@ -341,8 +341,8 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
   final int exitCode = await process.exitCode;
   if ((exitCode == 0) == expectFailure) {
     if (!printOutput) {
-      print(UTF8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
-      print(UTF8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
+      print(utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
+      print(utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
     }
     print(
       '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
