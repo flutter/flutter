@@ -1,4 +1,4 @@
-Signature: aaf97be76c68f8f7e28b2dfb033bd2c3
+Signature: e493a563f62df99aea315a223aa83d38
 
 UNUSED LICENSES:
 
@@ -103,8 +103,6 @@ FILE: ../../../garnet/public/lib/fxl/random/rand_unittest.cc
 FILE: ../../../garnet/public/lib/fxl/random/uuid_unittest.cc
 FILE: ../../../garnet/public/lib/fxl/strings/join_strings.h
 FILE: ../../../garnet/public/lib/fxl/strings/join_strings_unittest.cc
-FILE: ../../../garnet/public/lib/fxl/synchronization/cond_var_win.cc
-FILE: ../../../garnet/public/lib/fxl/synchronization/mutex_win.cc
 FILE: ../../../garnet/public/lib/fxl/threading/thread.cc
 FILE: ../../../garnet/public/lib/fxl/threading/thread.h
 FILE: ../../../garnet/public/lib/fxl/threading/thread_unittest.cc
@@ -170,12 +168,11 @@ FILE: ../../../garnet/public/lib/ui/scenic/client/session.cc
 FILE: ../../../garnet/public/lib/ui/scenic/client/session.h
 FILE: ../../../garnet/public/lib/ui/scenic/fidl/display_info.fidl
 FILE: ../../../garnet/public/lib/ui/scenic/fidl/events.fidl
+FILE: ../../../garnet/public/lib/ui/scenic/fidl/hit.fidl
 FILE: ../../../garnet/public/lib/ui/scenic/fidl/nodes.fidl
 FILE: ../../../garnet/public/lib/ui/scenic/fidl/ops.fidl
 FILE: ../../../garnet/public/lib/ui/scenic/fidl/renderer.fidl
 FILE: ../../../garnet/public/lib/ui/scenic/fidl/resources.fidl
-FILE: ../../../garnet/public/lib/ui/scenic/fidl/scene_manager.fidl
-FILE: ../../../garnet/public/lib/ui/scenic/fidl/session.fidl
 FILE: ../../../garnet/public/lib/ui/scenic/fidl/shapes.fidl
 FILE: ../../../garnet/public/lib/ui/scenic/fidl/types.fidl
 FILE: ../../../garnet/public/lib/ui/scenic/fidl_helpers.cc
@@ -477,6 +474,7 @@ FILE: ../../../garnet/public/lib/ui/mozart/fidl/session.fidl
 FILE: ../../../garnet/public/lib/ui/presentation/fidl/display_usage.fidl
 FILE: ../../../garnet/public/lib/ui/views/fidl/commands.fidl
 FILE: ../../../garnet/public/lib/ui/views/fidl/events.fidl
+FILE: ../../../garnet/public/lib/xi/fidl/xi.fidl
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 The Fuchsia Authors. All rights reserved.
 
@@ -793,14 +791,6 @@ FILE: ../../../garnet/public/lib/fxl/strings/trim.h
 FILE: ../../../garnet/public/lib/fxl/strings/trim_unittest.cc
 FILE: ../../../garnet/public/lib/fxl/strings/utf_codecs.cc
 FILE: ../../../garnet/public/lib/fxl/strings/utf_codecs.h
-FILE: ../../../garnet/public/lib/fxl/synchronization/cond_var.h
-FILE: ../../../garnet/public/lib/fxl/synchronization/cond_var_posix.cc
-FILE: ../../../garnet/public/lib/fxl/synchronization/cond_var_unittest.cc
-FILE: ../../../garnet/public/lib/fxl/synchronization/monitor.cc
-FILE: ../../../garnet/public/lib/fxl/synchronization/monitor.h
-FILE: ../../../garnet/public/lib/fxl/synchronization/mutex.h
-FILE: ../../../garnet/public/lib/fxl/synchronization/mutex_posix.cc
-FILE: ../../../garnet/public/lib/fxl/synchronization/mutex_unittest.cc
 FILE: ../../../garnet/public/lib/fxl/synchronization/sleep.cc
 FILE: ../../../garnet/public/lib/fxl/synchronization/sleep.h
 FILE: ../../../garnet/public/lib/fxl/synchronization/thread_annotations.h
