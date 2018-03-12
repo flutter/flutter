@@ -9,7 +9,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 
 Future<Null> main() async {
   await task(combine(<TaskFunction>[
-    new PluginTest('apk', 'java'),
-    new PluginTest('apk', 'kotlin'),
+    new PluginTest('apk', <String>['-a', 'java']),
+    new PluginTest('apk', <String>['-a', 'kotlin']),
   ]));
 }

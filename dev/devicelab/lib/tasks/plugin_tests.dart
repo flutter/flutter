@@ -27,14 +27,17 @@ TaskFunction combine(List<TaskFunction> tasks) {
 /// builds the specified [buildTarget].
 class PluginTest {
   final String buildTarget;
-  final String language;
+  final List<String> options;
 
-  PluginTest(this.buildTarget, this.language);
+  PluginTest(this.buildTarget, this.options);
 
   Future<TaskResult> call() async {
     section('Create Flutter project');
     final Directory tmp = await Directory.systemTemp.createTemp('plugin');
-    final FlutterProject project = await FlutterProject.create(tmp, buildTarget, language);
+    final FlutterProject project = await FlutterProject.create(tmp, options);
+    if (buildTarget == 'ios') {
+      await prepareProvisioningCertificates(project.rootPath);
+    }
     try {
       section('Add plugin');
       await project.addPlugin('path_provider');
@@ -57,19 +60,14 @@ class FlutterProject {
   final Directory parent;
   final String name;
 
-  static Future<FlutterProject> create(Directory directory, String buildTarget, String language) async {
+  static Future<FlutterProject> create(Directory directory, List<String> options) async {
     await inDirectory(directory, () async {
-      await flutter('create', options: <String>[
-        '--org', 'io.flutter.devicelab',
-        '-${buildTarget[0]}', language,
-        'plugintest',
-      ]);
+      await flutter(
+        'create',
+        options: <String>['--org', 'io.flutter.devicelab']..addAll(options)..add('plugintest')
+      );
     });
-    final FlutterProject project = new FlutterProject(directory, 'plugintest');
-    if (buildTarget == 'ios') {
-      await prepareProvisioningCertificates(project.rootPath);
-    }
-    return project;
+    return new FlutterProject(directory, 'plugintest');
   }
 
   String get rootPath => path.join(parent.path, name);
