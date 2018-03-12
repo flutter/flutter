@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "command": "./.vscode/test.sh",
+      "windows": {
+        // TODO :S
+      },
+      "label": "test",
+      "type": "shell",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      },
+      "args": ["${relativeFile}"]
+    }
+  ]
+}
