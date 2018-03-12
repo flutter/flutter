@@ -29,7 +29,7 @@ void main() {
         <String>['run', '--verbose', '-d', device.deviceId, 'lib/main.dart'],
       );
       run.stdout
-          .transform(UTF8.decoder)
+          .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen((String line) {
         print('run:stdout: $line');
@@ -42,7 +42,7 @@ void main() {
         }
       });
       run.stderr
-          .transform(UTF8.decoder)
+          .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen((String line) {
         stderr.writeln('run:stderr: $line');

@@ -170,7 +170,7 @@ class ProcessRunner {
       throw new ProcessRunnerException(
           message, new ProcessResult(0, exitCode, null, 'returned $exitCode'));
     }
-    return UTF8.decoder.convert(output).trim();
+    return utf8.decoder.convert(output).trim();
   }
 }
 

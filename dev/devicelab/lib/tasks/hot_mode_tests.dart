@@ -48,7 +48,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
           final Completer<Null> stdoutDone = new Completer<Null>();
           final Completer<Null> stderrDone = new Completer<Null>();
           process.stdout
-              .transform(UTF8.decoder)
+              .transform(utf8.decoder)
               .transform(const LineSplitter())
               .listen((String line) {
             if (line.contains('\] Reloaded ')) {
@@ -74,7 +74,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
             stdoutDone.complete();
           });
           process.stderr
-              .transform(UTF8.decoder)
+              .transform(utf8.decoder)
               .transform(const LineSplitter())
               .listen((String line) {
             print('stderr: $line');
@@ -86,7 +86,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
               <Future<Null>>[stdoutDone.future, stderrDone.future]);
           await process.exitCode;
 
-          twoReloadsData = JSON.decode(benchmarkFile.readAsStringSync());
+          twoReloadsData = json.decode(benchmarkFile.readAsStringSync());
         }
         benchmarkFile.deleteSync();
 
@@ -101,7 +101,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
           final Completer<Null> stdoutDone = new Completer<Null>();
           final Completer<Null> stderrDone = new Completer<Null>();
           process.stdout
-              .transform(UTF8.decoder)
+              .transform(utf8.decoder)
               .transform(const LineSplitter())
               .listen((String line) {
             if (line.contains('\] Reloaded ')) {
@@ -112,7 +112,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
             stdoutDone.complete();
           });
           process.stderr
-              .transform(UTF8.decoder)
+              .transform(utf8.decoder)
               .transform(const LineSplitter())
               .listen((String line) {
             print('stderr: $line');
@@ -125,7 +125,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
           await process.exitCode;
 
           freshRestartReloadsData =
-              JSON.decode(benchmarkFile.readAsStringSync());
+              json.decode(benchmarkFile.readAsStringSync());
         }
       });
     });

@@ -243,9 +243,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       Duration timeout = const Duration(minutes: 10),
     ]) {
     assert(duration != null);
-    assert(duration > Duration.ZERO);
+    assert(duration > Duration.zero);
     assert(timeout != null);
-    assert(timeout > Duration.ZERO);
+    assert(timeout > Duration.zero);
     assert(() {
       final WidgetsBinding binding = this.binding;
       if (binding is LiveTestWidgetsFlutterBinding &&

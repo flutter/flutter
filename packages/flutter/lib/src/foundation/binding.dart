@@ -348,7 +348,7 @@ abstract class BindingBase {
   /// extension method is called. The callback must return a [Future]
   /// that either eventually completes to a return value in the form
   /// of a name/value map where the values can all be converted to
-  /// JSON using `json.encode()` (see [JsonCodec.encode]), or fails. In case of failure, the
+  /// JSON using `json.encode()` (see [JsonEncoder]), or fails. In case of failure, the
   /// failure is reported to the remote caller and is dumped to the
   /// logs.
   ///
