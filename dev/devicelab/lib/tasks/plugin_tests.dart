@@ -10,7 +10,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-/// Combines several TaskFunction with trivial success value into one.
+/// Combines several TaskFunctions with trivial success value into one.
 TaskFunction combine(List<TaskFunction> tasks) {
   return () async {
     for (TaskFunction task in tasks) {
