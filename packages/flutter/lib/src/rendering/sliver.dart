@@ -197,11 +197,21 @@ class SliverConstraints extends Constraints {
   ///
   /// For example, if [AxisDirection] is [AxisDirection.down], then this is the
   /// amount the top of the visible portion of the sliver has been scrolled
-  /// past the top of the viewport. Viewports typically stops trying to
-  /// compute the [scrollOffset]s of slivers that are in the 'future' direction
-  /// past the currently visible portion of the viewports. Therefore, the
-  /// [scrollOffset] is typically 0 for slivers below the viewport when
+  /// past the top of the viewport.
+  ///
+  /// This value is typically used to compute whether this sliver should still
+  /// protrude into the viewport via [SliverGeometry.paintExtent] and
+  /// [SliverGeometry.layoutExtent] considering how far the beginning of the
+  /// sliver is above the beginning of the viewport.
+  ///
+  /// For slivers past the end of the viewport, viewports typically stops trying
+  /// to compute the [scrollOffset]s of slivers that are in the 'future'
+  /// direction past the currently visible portion of the viewports. Therefore,
+  /// the [scrollOffset] is typically 0 for slivers below the viewport when
   /// [AxisDirection] is [AxisDirection.down].
+  /// [SliverConstraints.remainingPaintExtent] is typically used to accomplish
+  /// the same goal of computing whether scrolled out slivers should still
+  /// partially 'protrude in' from the bottom of the viewport.
   ///
   /// Whether this corresponds to the beginning or the end of the sliver's
   /// contents depends on the [growthDirection].
