@@ -7,7 +7,7 @@ import 'dart:convert' show json;
 import '../base/io.dart' show stdout;
 import 'watcher.dart';
 
-/// Prints json events when running a test in --machine mode.
+/// Prints JSON events when running a test in --machine mode.
 class EventPrinter extends TestWatcher {
   EventPrinter({StringSink out}) : this._out = out == null ? stdout: out;
 

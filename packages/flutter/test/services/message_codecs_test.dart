@@ -25,7 +25,7 @@ void main() {
       _checkEncodeDecode<String>(string, 'special chars >\u263A\u{1F602}<');
     });
   });
-  group('json message codec', () {
+  group('JSON message codec', () {
     const MessageCodec<dynamic> json = const JSONMessageCodec();
     test('should encode and decode simple messages', () {
       _checkEncodeDecode<dynamic>(json, null);

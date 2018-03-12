@@ -119,7 +119,7 @@ void main() {
     });
 
     group('fromJson', () {
-      testUsingContext('throws if json is invalid', () async {
+      testUsingContext('throws if JSON is invalid', () async {
         expect(() => new Fingerprint.fromJson('<xml></xml>'), throwsA(anything));
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,

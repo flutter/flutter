@@ -25,7 +25,7 @@ class GetTextResult extends Result {
   /// The text extracted by the [GetText] command.
   final String text;
 
-  /// Deserializes the result from json.
+  /// Deserializes the result from JSON.
   static GetTextResult fromJson(Map<String, dynamic> json) {
     return new GetTextResult(json['text']);
   }
@@ -63,7 +63,7 @@ class EnterTextResult extends Result {
   /// Creates a successful result of entering the text.
   EnterTextResult();
 
-  /// Deserializes the result from json.
+  /// Deserializes the result from JSON.
   static EnterTextResult fromJson(Map<String, dynamic> json) {
     return new EnterTextResult();
   }
@@ -99,7 +99,7 @@ class SetTextEntryEmulationResult extends Result {
   /// Creates a successful result.
   SetTextEntryEmulationResult();
 
-  /// Deserializes the result from json.
+  /// Deserializes the result from JSON.
   static SetTextEntryEmulationResult fromJson(Map<String, dynamic> json) {
     return new SetTextEntryEmulationResult();
   }

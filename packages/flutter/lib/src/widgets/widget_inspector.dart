@@ -422,7 +422,7 @@ class WidgetInspectorService {
     return _serialize(WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(), groupName);
   }
 
-  /// Returns a json representation of the [DiagnosticsNode] for the root
+  /// Returns a JSON representation of the [DiagnosticsNode] for the root
   /// [RenderObject].
   String getRootRenderObject(String groupName) {
     return _serialize(RendererBinding.instance?.renderView?.toDiagnosticsNode(), groupName);

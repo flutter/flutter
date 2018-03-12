@@ -56,7 +56,7 @@ class SimControl {
   /// Returns [SimControl] active in the current app context (i.e. zone).
   static SimControl get instance => context[SimControl];
 
-  /// Runs `simctl list --json` and returns the json of the corresponding
+  /// Runs `simctl list --json` and returns the JSON of the corresponding
   /// [section].
   ///
   /// The return type depends on the [section] being listed but is usually

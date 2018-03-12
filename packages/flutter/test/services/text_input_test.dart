@@ -15,7 +15,7 @@ void main() {
       expect(configuration.actionLabel, null);
     });
 
-    test('serializes to json', () async {
+    test('serializes to JSON', () async {
       const TextInputConfiguration configuration = const TextInputConfiguration(
         inputType: TextInputType.number,
         obscureText: true,

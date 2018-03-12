@@ -458,7 +458,7 @@ class ArchivePublisher {
     try {
       jsonData = json.decode(currentMetadata);
     } on FormatException catch (e) {
-      throw new ProcessRunnerException('Unable to parse json metadata received from cloud: $e');
+      throw new ProcessRunnerException('Unable to parse JSON metadata received from cloud: $e');
     }
 
     // Update the metadata file with the data for this package.

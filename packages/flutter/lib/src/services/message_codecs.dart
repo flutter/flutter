@@ -98,7 +98,7 @@ class JSONMethodCodec implements MethodCodec {
   // The codec serializes method calls, and result envelopes as outlined below.
   // This format must match the Android and iOS counterparts.
   //
-  // * Individual values are serialized as defined by the json codec of the
+  // * Individual values are serialized as defined by the JSON codec of the
   //   dart:convert package.
   // * Method calls are serialized as two-element maps, with the method name
   //   keyed by 'method' and the arguments keyed by 'args'.
@@ -108,7 +108,7 @@ class JSONMethodCodec implements MethodCodec {
   //   * three-element lists containing, in order, an error code String, an
   //     error message String, and an error details value.
 
-  /// Creates a [MethodCodec] with UTF-8 encoded json method calls and result
+  /// Creates a [MethodCodec] with UTF-8 encoded JSON method calls and result
   /// envelopes.
   const JSONMethodCodec();
 

@@ -307,7 +307,7 @@ class FlutterDriver {
   final int _driverId;
   /// Client connected to the Dart VM running the Flutter application
   final VMServiceClient _serviceClient;
-  /// JSON-RPC client useful for sending raw json requests.
+  /// JSON-RPC client useful for sending raw JSON requests.
   final rpc.Peer _peer;
   /// The main isolate hosting the Flutter application
   final VMIsolateRef _appIsolate;
