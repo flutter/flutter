@@ -14,4 +14,6 @@ config("extra_warnings") {
     "-Wstring-conversion",
     "-Wthread-safety",
   ]
+
+  defines = [ "_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS" ]
 }
