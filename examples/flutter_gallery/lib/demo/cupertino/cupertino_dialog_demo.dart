@@ -73,10 +73,12 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
               showDemoDialog<String>(
                 context: context,
                 child: new CupertinoAlertDialog(
-                  title: const Text('Allow "Maps" to access your location while you use the app?'),
+                  title: const Text('Allow "Maps" to access your location while'
+                      ' you use the app?'),
                   content: const Text(
-                    'Your current location will be displayed on the map and used for directions, '
-                        'nearby search results, and estimated travel times.'
+                    'Your current location will be displayed on the map and '
+                        'used for directions, nearby search results, and '
+                        'estimated travel times.'
                   ),
                   actions: <Widget>[
                     new CupertinoDialogAction(
@@ -104,8 +106,8 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
                   title: const Text('Select Favorite Dessert'),
                   content: const Text(
                     'Please select your favorite type of dessert from the '
-                      'list below. Your selection will be used to customize '
-                      'the suggested list of eateries where your are.'
+                        'list below. Your selection will be used to customize '
+                        'the suggested list of eateries where your are.'
                   ),
                   actions: <Widget>[
                     new CupertinoDialogAction(
@@ -190,52 +192,6 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
                       onPressed: () { Navigator.pop(context, 'Cancel'); }
                     ),
                   ]
-                ),
-              );
-            },
-          ),
-          const Padding(padding: const EdgeInsets.all(8.0)),
-          new CupertinoButton(
-            child: const Text('Alert Title Only'),
-            color: CupertinoColors.activeBlue,
-            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
-            onPressed: () {
-              showDemoDialog<String>(
-                context: context,
-                child: new CupertinoAlertDialog(
-                  title: const Text('You won the Lottery!'),
-                  actions: <Widget>[
-                    new CupertinoDialogAction(
-                      child: const Text('Yay'),
-                      onPressed: () { Navigator.pop(context, 'Yay'); }
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          const Padding(padding: const EdgeInsets.all(8.0)),
-          new CupertinoButton(
-            child: const Text('Alert Message Only'),
-            color: CupertinoColors.activeBlue,
-            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
-            onPressed: () {
-              showDemoDialog<String>(
-                context: context,
-                child: new CupertinoAlertDialog(
-                  content: const Text(
-                    'Flutter is Google’s mobile UI framework for crafting '
-                      'high-quality native interfaces on iOS and Android '
-                      'in record time. Flutter works with existing code, '
-                      'is used by developers and organizations around the '
-                      'world, and is free and open source.'
-                  ),
-                  actions: <Widget>[
-                    new CupertinoDialogAction(
-                      child: const Text('Okay'),
-                      onPressed: () { Navigator.pop(context, 'Okay'); }
-                    ),
-                  ],
                 ),
               );
             },

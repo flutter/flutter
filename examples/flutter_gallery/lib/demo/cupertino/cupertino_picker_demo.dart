@@ -58,7 +58,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
 
   Widget _buildBottomPicker() {
     final FixedExtentScrollController scrollController =
-    new FixedExtentScrollController(initialItem: _selectedItemIndex);
+        new FixedExtentScrollController(initialItem: _selectedItemIndex);
 
     return new Container(
       height: _kPickerSheetHeight,
@@ -83,7 +83,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               },
               children: new List<Widget>.generate(coolColorNames.length, (int index) {
                 return new Center(child:
-                new Text(coolColorNames[index]),
+                  new Text(coolColorNames[index]),
                 );
               }),
             ),

@@ -277,6 +277,10 @@ void main() {
     // Check that the title/message section is not displayed
     expect(scrollController.offset, 0.0);
     expect(tester.getTopLeft(find.widgetWithText(CupertinoDialogAction, 'One')).dy, equals(288.0));
+
+    // Check that the button's vertical size is the same.
+    expect(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'One')).height,
+        equals(tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Two')).height));
   });
 
   testWidgets('Button section is empty, Title section is not empty.',
