@@ -1443,6 +1443,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         return Colors.white70;
       case Brightness.light:
         return Colors.black45;
+      default:
+        return themeData.iconTheme.color;
     }
   }
 
