@@ -160,6 +160,8 @@ if (is_fuchsia) {
 
     package_root = "$root_gen_dir/dart-pkg/sky_engine"
 
+    sources = []
+
     disable_analysis = true
 
     non_dart_deps = [
