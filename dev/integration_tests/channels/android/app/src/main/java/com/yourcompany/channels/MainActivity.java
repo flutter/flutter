@@ -140,11 +140,11 @@ public class MainActivity extends FlutterActivity {
 
 final class ExtendedStandardMessageCodec extends StandardMessageCodec {
   public static final ExtendedStandardMessageCodec INSTANCE = new ExtendedStandardMessageCodec();
-  private static final byte DATE = 0;
-  private static final byte PAIR = 1;
+  private static final byte DATE = (byte) 128;
+  private static final byte PAIR = (byte) 129;
 
   @Override
-  protected void writeUnknown(ByteArrayOutputStream stream, Object value) {
+  protected void writeValue(ByteArrayOutputStream stream, Object value) {
     if (value instanceof Date) {
       stream.write(DATE);
       writeLong(stream, ((Date) value).getTime());
@@ -153,18 +153,18 @@ final class ExtendedStandardMessageCodec extends StandardMessageCodec {
       writeValue(stream, ((Pair) value).left);
       writeValue(stream, ((Pair) value).right);
     } else {
-      super.writeUnknown(stream, value);
+      super.writeValue(stream, value);
     }
   }
 
   @Override
-  protected Object readUnknown(ByteBuffer buffer) {
-    switch (buffer.get()) {
+  protected Object readValueOfType(byte type, ByteBuffer buffer) {
+    switch (type) {
       case DATE:
         return new Date(buffer.getLong());
       case PAIR:
         return new Pair(readValue(buffer), readValue(buffer));
-      default: return super.readUnknown(buffer);
+      default: return super.readValueOfType(type, buffer);
     }
   }
 }

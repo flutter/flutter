@@ -202,8 +202,8 @@ class JSONMethodCodec implements MethodCodec {
 ///  * [List]\: `NSArray`
 ///  * [Map]\: `NSDictionary`
 ///
-/// The codec is extensible by subclasses overriding [writeUnknown] and
-/// [readUnknown].
+/// The codec is extensible by subclasses overriding [writeValue] and
+/// [readValue].
 class StandardMessageCodec implements MessageCodec<dynamic> {
   // The codec serializes messages as outlined below. This format must
   // match the Android and iOS counterparts.
@@ -256,7 +256,6 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   static const int _kFloat64List = 11;
   static const int _kList = 12;
   static const int _kMap = 13;
-  static const int _kUnknown = 255;
 
   /// Creates a [MessageCodec] using the Flutter standard binary encoding.
   const StandardMessageCodec();
@@ -281,27 +280,16 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
     return result;
   }
 
-  /// Writes an unknown [value] to [buffer].
-  ///
-  /// Hook point for subclasses to extend the codec. The default
-  /// implementation throws.
-  void writeUnknown(WriteBuffer buffer, dynamic value) {
-    throw new ArgumentError.value(value);
-  }
-
-  /// Reads an unknown value from [buffer] as written by [writeUnknown].
-  ///
-  /// Hook point for subclasses to extend the codec. The default implementation
-  /// throws.
-  dynamic readUnknown(ReadBuffer buffer) {
-    throw const FormatException('Message corrupted');
-  }
-
   /// Writes [value] to [buffer] by first writing a type discriminator
   /// byte, then the value itself.
   ///
-  /// This method is intended for use by subclasses overriding
-  /// [writeUnknown].
+  /// Type discriminators 0 through 127 inclusive are reserved for use by the
+  /// base class.
+  ///
+  /// The codec can be extended by overriding this method, calling super
+  /// for values that the extension does not handle. Type discriminators
+  /// used by extensions must be greater than or equal to 128 in order to avoid
+  /// clashes with any later extensions to the base class.
   void writeValue(WriteBuffer buffer, dynamic value) {
     if (value == null) {
       buffer.putUint8(_kNull);
@@ -353,20 +341,28 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         writeValue(buffer, value);
       });
     } else {
-      buffer.putUint8(_kUnknown);
-      writeUnknown(buffer, value);
+      throw new ArgumentError.value(value);
     }
   }
 
   /// Reads a value from [buffer] as written by [writeValue].
   ///
   /// This method is intended for use by subclasses overriding
-  /// [readUnknown].
+  /// [readValueOfType].
   dynamic readValue(ReadBuffer buffer) {
     if (!buffer.hasRemaining)
       throw const FormatException('Message corrupted');
+    final int type = buffer.getUint8();
+    return readValueOfType(type, buffer);
+  }
+
+  /// Reads a value of the indicated [type] from [buffer].
+  ///
+  /// The codec can be extended by overriding this method, calling super
+  /// for types that the extension does not handle.
+  dynamic readValueOfType(int type, ReadBuffer buffer) {
     dynamic result;
-    switch (buffer.getUint8()) {
+    switch (type) {
       case _kNull:
         result = null;
         break;
@@ -427,9 +423,6 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
           result[readValue(buffer)] = readValue(buffer);
         }
         break;
-      case _kUnknown:
-        result = readUnknown(buffer);
-        break;
       default: throw const FormatException('Message corrupted');
     }
     return result;
@@ -439,7 +432,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   /// using an expanding 1-5 byte encoding that optimizes for small values.
   ///
   /// This method is intended for use by subclasses overriding
-  /// [writeUnknown].
+  /// [writeValue].
   void writeSize(WriteBuffer buffer, int value) {
     assert(0 <= value && value <= 0xffffffff);
     if (value < 254) {
@@ -456,7 +449,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   /// Reads a non-negative int from [buffer] as written by [writeSize].
   ///
   /// This method is intended for use by subclasses overriding
-  /// [readUnknown].
+  /// [readValueOfType].
   int readSize(ReadBuffer buffer) {
     final int value = buffer.getUint8();
     if (value < 254)
