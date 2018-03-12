@@ -82,7 +82,7 @@ RenderTransform transformBox;
 
 void rotate(Duration timeStamp) {
   timeBase ??= timeStamp;
-  final double delta = (timeStamp - timeBase).inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND; // radians
+  final double delta = (timeStamp - timeBase).inMicroseconds.toDouble() / Duration.microsecondsPerSecond; // radians
 
   transformBox.setIdentity();
   transformBox.rotateZ(delta);

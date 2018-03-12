@@ -805,7 +805,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 ///   color: Colors.black,
 ///   child: new Transform(
 ///     alignment: Alignment.topRight,
-///     transform: new Matrix4.skewY(0.3)..rotateZ(-math.PI / 12.0),
+///     transform: new Matrix4.skewY(0.3)..rotateZ(-math.pi / 12.0),
 ///     child: new Container(
 ///       padding: const EdgeInsets.all(8.0),
 ///       color: const Color(0xFFE8581C),
@@ -848,7 +848,7 @@ class Transform extends SingleChildRenderObjectWidget {
   ///
   /// ```dart
   /// new Transform.rotate(
-  ///   angle: -math.PI / 12.0,
+  ///   angle: -math.pi / 12.0,
   ///   child: new Container(
   ///     padding: const EdgeInsets.all(8.0),
   ///     color: const Color(0xFFE8581C),
@@ -1549,7 +1549,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///
 /// The [new SizedBox.expand] constructor can be used to make a [SizedBox] that
 /// sizes itself to fit the parent. It is equivalent to setting [width] and
-/// [height] to [double.INFINITY].
+/// [height] to [double.infinity].
 ///
 /// ## Sample code
 ///
@@ -1586,8 +1586,8 @@ class SizedBox extends SingleChildRenderObjectWidget {
 
   /// Creates a box that will become as large as its parent allows.
   const SizedBox.expand({ Key key, Widget child })
-    : width = double.INFINITY,
-      height = double.INFINITY,
+    : width = double.infinity,
+      height = double.infinity,
       super(key: key, child: child);
 
   /// Creates a box with the specified size.
@@ -1620,7 +1620,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 
   @override
   String toStringShort() {
-    final String type = (width == double.INFINITY && height == double.INFINITY) ?
+    final String type = (width == double.infinity && height == double.infinity) ?
                   '$runtimeType.expand' : '$runtimeType';
     return key == null ? '$type' : '$type-$key';
   }
@@ -1628,7 +1628,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    final DiagnosticLevel level = (width == double.INFINITY && height == double.INFINITY)
+    final DiagnosticLevel level = (width == double.infinity && height == double.infinity)
         ? DiagnosticLevel.hidden
         : DiagnosticLevel.info;
     description.add(new DoubleProperty('width', width, defaultValue: null, level: level));
@@ -1905,8 +1905,8 @@ class LimitedBox extends SingleChildRenderObjectWidget {
   /// negative.
   const LimitedBox({
     Key key,
-    this.maxWidth: double.INFINITY,
-    this.maxHeight: double.INFINITY,
+    this.maxWidth: double.infinity,
+    this.maxHeight: double.infinity,
     Widget child,
   }) : assert(maxWidth != null && maxWidth >= 0.0),
        assert(maxHeight != null && maxHeight >= 0.0),
@@ -1938,8 +1938,8 @@ class LimitedBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.INFINITY));
-    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: double.INFINITY));
+    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.infinity));
+    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: double.infinity));
   }
 }
 

@@ -41,7 +41,7 @@ class Health extends Result {
   /// If the application responded, this will be [HealthStatus.ok].
   final HealthStatus status;
 
-  /// Deserializes the result from JSON.
+  /// Deserializes the result from json.
   static Health fromJson(Map<String, dynamic> json) {
     return new Health(_healthStatusIndex.lookupBySimpleName(json['status']));
   }

@@ -70,7 +70,7 @@ void enableFlutterDriverExtension({ DataHandler handler }) {
 /// Signature for functions that handle a command and return a result.
 typedef Future<Result> CommandHandlerCallback(Command c);
 
-/// Signature for functions that deserialize a JSON map to a command object.
+/// Signature for functions that deserialize a json map to a command object.
 typedef Command CommandDeserializerCallback(Map<String, String> params);
 
 /// Signature for functions that run the given finder and return the [Element]
@@ -146,14 +146,14 @@ class FlutterDriverExtension {
   bool _frameSync = true;
 
   /// Processes a driver command configured by [params] and returns a result
-  /// as an arbitrary JSON object.
+  /// as an arbitrary json object.
   ///
   /// [params] must contain key "command" whose value is a string that
   /// identifies the kind of the command and its corresponding
   /// [CommandDeserializerCallback]. Other keys and values are specific to the
   /// concrete implementation of [Command] and [CommandDeserializerCallback].
   ///
-  /// The returned JSON is command specific. Generally the caller deserializes
+  /// The returned json is command specific. Generally the caller deserializes
   /// the result into a subclass of [Result], but that's not strictly required.
   @visibleForTesting
   Future<Map<String, dynamic>> call(Map<String, String> params) async {
@@ -298,7 +298,7 @@ class FlutterDriverExtension {
   Future<ScrollResult> _scroll(Command command) async {
     final Scroll scrollCommand = command;
     final Finder target = await _waitForElement(_createFinder(scrollCommand.finder));
-    final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.MICROSECONDS_PER_SECOND;
+    final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.microsecondsPerSecond;
     final Offset delta = new Offset(scrollCommand.dx, scrollCommand.dy) / totalMoves.toDouble();
     final Duration pause = scrollCommand.duration ~/ totalMoves;
     final Offset startLocation = _prober.getCenter(target);

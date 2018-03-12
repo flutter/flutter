@@ -334,16 +334,16 @@ class VersionCheckStamp {
     final String versionCheckStamp = Cache.instance.getStampFor(kFlutterVersionCheckStampFile);
 
     if (versionCheckStamp != null) {
-      // Attempt to parse stamp JSON.
+      // Attempt to parse stamp json.
       try {
-        final dynamic json = JSON.decode(versionCheckStamp);
-        if (json is Map) {
-          return fromJson(json);
+        final dynamic jsonDecoded = json.decode(versionCheckStamp);
+        if (jsonDecoded is Map) {
+          return fromJson(jsonDecoded);
         } else {
-          printTrace('Warning: expected version stamp to be a Map but found: $json');
+          printTrace('Warning: expected version stamp to be a Map but found: $jsonDecoded');
         }
       } catch (error, stackTrace) {
-        // Do not crash if JSON is malformed.
+        // Do not crash if json is malformed.
         printTrace('${error.runtimeType}: $error\n$stackTrace');
       }
     }

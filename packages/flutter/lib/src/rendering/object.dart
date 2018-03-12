@@ -502,7 +502,7 @@ abstract class Constraints {
   /// This might involve checks more detailed than [isNormalized].
   ///
   /// For example, the [BoxConstraints] subclass verifies that the constraints
-  /// are not [double.NAN].
+  /// are not [double.nan].
   ///
   /// If the `isAppliedConstraint` argument is true, then even stricter rules
   /// are enforced. This argument is set to true when checking constraints that

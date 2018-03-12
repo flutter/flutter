@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON, JsonEncoder;
+import 'dart:convert' show json, JsonEncoder;
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
@@ -69,7 +69,7 @@ class TimelineSummary {
   /// The total number of frames recorded in the timeline.
   int countFrames() => _extractFrameDurations().length;
 
-  /// Encodes this summary as JSON.
+  /// Encodes this summary as json.
   Map<String, dynamic> get summaryJson {
     return <String, dynamic> {
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
@@ -112,10 +112,10 @@ class TimelineSummary {
     await file.writeAsString(_encodeJson(summaryJson, pretty));
   }
 
-  String _encodeJson(Map<String, dynamic> json, bool pretty) {
+  String _encodeJson(Map<String, dynamic> jsonMap, bool pretty) {
     return pretty
-      ? _prettyEncoder.convert(json)
-      : JSON.encode(json);
+      ? _prettyEncoder.convert(jsonMap)
+      : json.encode(jsonMap);
   }
 
   List<TimelineEvent> _extractNamedEvents(String name) {

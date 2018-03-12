@@ -36,7 +36,7 @@ void main() {
 
     result = 'no exception';
     try {
-      const BoxConstraints constraints = const BoxConstraints(minWidth: double.NAN, maxWidth: double.NAN, minHeight: 2.0, maxHeight: double.NAN);
+      const BoxConstraints constraints = const BoxConstraints(minWidth: double.nan, maxWidth: double.nan, minHeight: 2.0, maxHeight: double.nan);
       assert(constraints.debugAssertIsValid());
     } on FlutterError catch (e) {
       result = '$e';
@@ -49,7 +49,7 @@ void main() {
 
     result = 'no exception';
     try {
-      const BoxConstraints constraints = const BoxConstraints(minHeight: double.NAN);
+      const BoxConstraints constraints = const BoxConstraints(minHeight: double.nan);
       assert(constraints.debugAssertIsValid());
     } on FlutterError catch (e) {
       result = '$e';
@@ -62,7 +62,7 @@ void main() {
 
     result = 'no exception';
     try {
-      const BoxConstraints constraints = const BoxConstraints(minHeight: double.NAN, maxWidth: 0.0/0.0);
+      const BoxConstraints constraints = const BoxConstraints(minHeight: double.nan, maxWidth: 0.0/0.0);
       assert(constraints.debugAssertIsValid());
     } on FlutterError catch (e) {
       result = '$e';

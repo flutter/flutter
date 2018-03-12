@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show JSON;
+import 'dart:convert' show json;
 
 import 'package:file/file.dart';
 import 'package:flutter_driver/flutter_driver.dart';
@@ -187,7 +187,7 @@ void main() {
     });
 
     group('summaryJson', () {
-      test('computes and returns summary as JSON', () {
+      test('computes and returns summary as json', () {
         expect(
           summarize(<Map<String, dynamic>>[
             begin(1000), end(11000),
@@ -226,7 +226,7 @@ void main() {
         restoreFileSystem();
       });
 
-      test('writes timeline to JSON file', () async {
+      test('writes timeline to json file', () async {
         await summarize(<Map<String, String>>[<String, String>{'foo': 'bar'}])
           .writeTimelineToFile('test', destinationDirectory: tempDir.path);
         final String written =
@@ -234,7 +234,7 @@ void main() {
         expect(written, '{"traceEvents":[{"foo":"bar"}]}');
       });
 
-      test('writes summary to JSON file', () async {
+      test('writes summary to json file', () async {
         await summarize(<Map<String, dynamic>>[
           begin(1000), end(11000),
           begin(11000), end(13000),
@@ -245,7 +245,7 @@ void main() {
         ]).writeSummaryToFile('test', destinationDirectory: tempDir.path);
         final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline_summary.json')).readAsString();
-        expect(JSON.decode(written), <String, dynamic>{
+        expect(json.decode(written), <String, dynamic>{
           'average_frame_build_time_millis': 7.0,
           'worst_frame_build_time_millis': 11.0,
           'missed_frame_build_budget_count': 2,

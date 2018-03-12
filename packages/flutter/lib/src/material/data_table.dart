@@ -705,7 +705,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     _opacityController.value = widget.visible ? 1.0 : 0.0;
     _orientationAnimation = new Tween<double>(
       begin: 0.0,
-      end: math.PI,
+      end: math.pi,
     ).animate(new CurvedAnimation(
       parent: _orientationController = new AnimationController(
         duration: widget.duration,
@@ -716,7 +716,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     ..addListener(_rebuild)
     ..addStatusListener(_resetOrientationAnimation);
     if (widget.visible)
-      _orientationOffset = widget.down ? 0.0 : math.PI;
+      _orientationOffset = widget.down ? 0.0 : math.pi;
   }
 
   void _rebuild() {
@@ -727,8 +727,8 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
 
   void _resetOrientationAnimation(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
-      assert(_orientationAnimation.value == math.PI);
-      _orientationOffset += math.PI;
+      assert(_orientationAnimation.value == math.pi);
+      _orientationOffset += math.pi;
       _orientationController.value = 0.0; // TODO(ianh): This triggers a pointless rebuild.
     }
   }
@@ -742,7 +742,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
       if (widget.visible && (_opacityController.status == AnimationStatus.dismissed)) {
         _orientationController.stop();
         _orientationController.value = 0.0;
-        _orientationOffset = newDown ? 0.0 : math.PI;
+        _orientationOffset = newDown ? 0.0 : math.pi;
         skipArrow = true;
       }
       if (widget.visible) {

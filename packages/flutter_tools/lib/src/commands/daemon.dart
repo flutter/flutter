@@ -29,8 +29,8 @@ import '../vmservice.dart';
 const String protocolVersion = '0.2.0';
 
 /// A server process command. This command will start up a long-lived server.
-/// It reads JSON-RPC based commands from stdin, executes them, and returns
-/// JSON-RPC based responses and events to stdout.
+/// It reads json-RPC based commands from stdin, executes them, and returns
+/// json-RPC based responses and events to stdout.
 ///
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
@@ -41,7 +41,7 @@ class DaemonCommand extends FlutterCommand {
   final String name = 'daemon';
 
   @override
-  final String description = 'Run a persistent, JSON-RPC based server to communicate with devices.';
+  final String description = 'Run a persistent, json-RPC based server to communicate with devices.';
 
   @override
   final bool hidden;
@@ -693,12 +693,12 @@ class DeviceDomain extends Domain {
 }
 
 Stream<Map<String, dynamic>> get stdinCommandStream => stdin
-  .transform(UTF8.decoder)
+  .transform(utf8.decoder)
   .transform(const LineSplitter())
   .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
   .map((String line) {
     line = line.substring(1, line.length - 1);
-    return JSON.decode(line);
+    return json.decode(line);
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {
@@ -706,7 +706,7 @@ void stdoutCommandResponse(Map<String, dynamic> command) {
 }
 
 String jsonEncodeObject(dynamic object) {
-  return JSON.encode(object, toEncodable: _toEncodable);
+  return json.encode(object, toEncodable: _toEncodable);
 }
 
 dynamic _toEncodable(dynamic object) {

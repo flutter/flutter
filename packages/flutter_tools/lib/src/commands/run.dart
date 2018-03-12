@@ -123,7 +123,7 @@ class RunCommand extends RunCommandBase {
     argParser.addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
-        help: 'Handle machine structured JSON command input and provide output\n'
+        help: 'Handle machine structured json command input and provide output\n'
               'and progress in machine friendly format.');
     argParser.addFlag('hot',
         negatable: true,

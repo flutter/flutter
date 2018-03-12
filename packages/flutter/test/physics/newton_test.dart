@@ -239,7 +239,7 @@ void main() {
       position: 100.0,
       velocity: 400.0,
       leadingExtent: 0.0,
-      trailingExtent: double.INFINITY,
+      trailingExtent: double.infinity,
       spring: spring,
     );
     scroll.tolerance = const Tolerance(velocity: 1.0);

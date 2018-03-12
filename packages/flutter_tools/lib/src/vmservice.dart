@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show BASE64;
+import 'dart:convert' show base64;
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
@@ -104,7 +104,7 @@ class VMService {
     }
   }
 
-  /// Enables recording of VMService JSON-rpc activity to the specified base
+  /// Enables recording of VMService json-rpc activity to the specified base
   /// recording [location].
   ///
   /// Activity will be recorded in a subdirectory of [location] named
@@ -119,9 +119,9 @@ class VMService {
     };
   }
 
-  /// Enables VMService JSON-rpc replay mode.
+  /// Enables VMService json-rpc replay mode.
   ///
-  /// [location] must represent a directory to which VMService JSON-rpc
+  /// [location] must represent a directory to which VMService json-rpc
   /// activity has been recorded (i.e. the result of having been previously
   /// passed to [enableRecordingConnection]), or a [ToolExit] will be thrown.
   static void enableReplayConnection(String location) {
@@ -799,7 +799,7 @@ class VM extends ServiceObjectOwner {
       params: <String, dynamic>{
         'fsName': fsName,
         'path': path,
-        'fileContents': BASE64.encode(fileContents),
+        'fileContents': base64.encode(fileContents),
       },
     );
   }
@@ -813,7 +813,7 @@ class VM extends ServiceObjectOwner {
         'path': path,
       },
     );
-    return BASE64.decode(response['fileContents']);
+    return base64.decode(response['fileContents']);
   }
 
   /// The complete list of a file system.
@@ -896,14 +896,14 @@ class HeapSpace extends ServiceObject {
 
   Duration get avgCollectionTime {
     final double mcs = _totalCollectionTimeInSeconds *
-      Duration.MICROSECONDS_PER_SECOND /
+      Duration.microsecondsPerSecond /
       math.max(_collections, 1);
     return new Duration(microseconds: mcs.ceil());
   }
 
   Duration get avgCollectionPeriod {
     final double mcs = _averageCollectionPeriodInMillis *
-                       Duration.MICROSECONDS_PER_MILLISECOND;
+                       Duration.microsecondsPerMillisecond;
     return new Duration(microseconds: mcs.ceil());
   }
 

@@ -56,7 +56,7 @@ class SimControl {
   /// Returns [SimControl] active in the current app context (i.e. zone).
   static SimControl get instance => context[SimControl];
 
-  /// Runs `simctl list --json` and returns the JSON of the corresponding
+  /// Runs `simctl list --json` and returns the json of the corresponding
   /// [section].
   ///
   /// The return type depends on the [section] being listed but is usually
@@ -87,7 +87,7 @@ class SimControl {
       return <String, Map<String, dynamic>>{};
     }
 
-    return JSON.decode(results.stdout)[section.name];
+    return json.decode(results.stdout)[section.name];
   }
 
   /// Returns a list of all available devices, both potential and connected.
@@ -540,15 +540,15 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     // Device log.
     await device.ensureLogsExists();
     _deviceProcess = await launchDeviceLogTool(device);
-    _deviceProcess.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
-    _deviceProcess.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
+    _deviceProcess.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
+    _deviceProcess.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
 
     // Track system.log crashes.
     // ReportCrash[37965]: Saved crash report for FlutterRunner[37941]...
     _systemProcess = await launchSystemLogTool(device);
     if (_systemProcess != null) {
-      _systemProcess.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
-      _systemProcess.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
+      _systemProcess.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
+      _systemProcess.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
     }
 
     // We don't want to wait for the process or its callback. Best effort

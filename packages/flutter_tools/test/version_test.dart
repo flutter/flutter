@@ -30,7 +30,7 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
-      FlutterVersion.kPauseToLetUserReadTheMessage = Duration.ZERO;
+      FlutterVersion.kPauseToLetUserReadTheMessage = Duration.zero;
     });
 
     setUp(() {
@@ -187,17 +187,17 @@ void main() {
       _expectDefault(await VersionCheckStamp.load());
     });
 
-    testFlutterVersion('loads blank when stamp file is malformed JSON', () async {
+    testFlutterVersion('loads blank when stamp file is malformed json', () async {
       fakeData(stampJson: '<');
       _expectDefault(await VersionCheckStamp.load());
     });
 
-    testFlutterVersion('loads blank when stamp file is well-formed but invalid JSON', () async {
+    testFlutterVersion('loads blank when stamp file is well-formed but invalid json', () async {
       fakeData(stampJson: '[]');
       _expectDefault(await VersionCheckStamp.load());
     });
 
-    testFlutterVersion('loads valid JSON', () async {
+    testFlutterVersion('loads valid json', () async {
       fakeData(stampJson: '''
       {
         "lastKnownRemoteVersion": "${_testClock.ago(days: 1)}",
@@ -300,7 +300,7 @@ void fakeData({
       return stampJson;
 
     if (stamp != null)
-      return JSON.encode(stamp.toJson());
+      return json.encode(stamp.toJson());
 
     return null;
   });
@@ -309,7 +309,7 @@ void fakeData({
     expect(invocation.positionalArguments.first, VersionCheckStamp.kFlutterVersionCheckStampFile);
 
     if (expectSetStamp) {
-      stamp = VersionCheckStamp.fromJson(JSON.decode(invocation.positionalArguments[1]));
+      stamp = VersionCheckStamp.fromJson(json.decode(invocation.positionalArguments[1]));
       return null;
     }
 

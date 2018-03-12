@@ -307,7 +307,7 @@ class FlutterDriver {
   final int _driverId;
   /// Client connected to the Dart VM running the Flutter application
   final VMServiceClient _serviceClient;
-  /// JSON-RPC client useful for sending raw JSON requests.
+  /// json-RPC client useful for sending raw json requests.
   final rpc.Peer _peer;
   /// The main isolate hosting the Flutter application
   final VMIsolateRef _appIsolate;
@@ -530,10 +530,10 @@ class FlutterDriver {
     await new Future<Null>.delayed(const Duration(seconds: 2));
 
     final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot').timeout(timeout);
-    return BASE64.decode(result['screenshot']);
+    return base64.decode(result['screenshot']);
   }
 
-  /// Returns the Flags set in the Dart VM as JSON.
+  /// Returns the Flags set in the Dart VM as json.
   ///
   /// See the complete documentation for `getFlagList` Dart VM service method
   /// [here][getFlagList].
@@ -678,7 +678,7 @@ class VMServiceClientConnection {
   /// Use this for structured access to the VM service's public APIs.
   final VMServiceClient client;
 
-  /// Use this to make arbitrary raw JSON-RPC calls.
+  /// Use this to make arbitrary raw json-RPC calls.
   ///
   /// This object allows reaching into private VM service APIs. Use with
   /// caution.

@@ -7,7 +7,7 @@ import 'package:flutter_driver/src/driver/timeline.dart';
 
 void main() {
   group('Timeline', () {
-    test('parses JSON', () {
+    test('parses json', () {
       final Timeline timeline = new Timeline.fromJson(<String, dynamic>{
         'traceEvents': <Map<String, dynamic>>[
           <String, dynamic>{

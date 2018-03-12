@@ -19,7 +19,7 @@ class Tap extends CommandWithTarget {
 
 /// The result of a [Tap] command.
 class TapResult extends Result {
-  /// Deserializes this result from JSON.
+  /// Deserializes this result from json.
   static TapResult fromJson(Map<String, dynamic> json) {
     return new TapResult();
   }
@@ -76,7 +76,7 @@ class Scroll extends CommandWithTarget {
 
 /// The result of a [Scroll] command.
 class ScrollResult extends Result {
-  /// Deserializes this result from JSON.
+  /// Deserializes this result from json.
   static ScrollResult fromJson(Map<String, dynamic> json) {
     return new ScrollResult();
   }

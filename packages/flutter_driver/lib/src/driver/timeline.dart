@@ -4,7 +4,7 @@
 
 /// Timeline data recorded by the Flutter runtime.
 class Timeline {
-  /// Creates a timeline given JSON-encoded timeline data.
+  /// Creates a timeline given json-encoded timeline data.
   ///
   /// [json] is in the `chrome://tracing` format. It can be saved to a file
   /// and loaded in Chrome for visual inspection.
@@ -16,7 +16,7 @@ class Timeline {
 
   Timeline._(this.json, this.events);
 
-  /// The original timeline JSON.
+  /// The original timeline json.
   final Map<String, dynamic> json;
 
   /// List of all timeline events.
@@ -25,7 +25,7 @@ class Timeline {
 
 /// A single timeline event.
 class TimelineEvent {
-  /// Creates a timeline event given JSON-encoded event data.
+  /// Creates a timeline event given json-encoded event data.
   factory TimelineEvent(Map<String, dynamic> json) {
     return new TimelineEvent._(
       json,
@@ -60,33 +60,33 @@ class TimelineEvent {
     this.arguments
   );
 
-  /// The original event JSON.
+  /// The original event json.
   final Map<String, dynamic> json;
 
   /// The name of the event.
   ///
-  /// Corresponds to the "name" field in the JSON event.
+  /// Corresponds to the "name" field in the json event.
   final String name;
 
   /// Event category. Events with different names may share the same category.
   ///
-  /// Corresponds to the "cat" field in the JSON event.
+  /// Corresponds to the "cat" field in the json event.
   final String category;
 
   /// For a given long lasting event, denotes the phase of the event, such as
   /// "B" for "event began", and "E" for "event ended".
   ///
-  /// Corresponds to the "ph" field in the JSON event.
+  /// Corresponds to the "ph" field in the json event.
   final String phase;
 
   /// ID of process that emitted the event.
   ///
-  /// Corresponds to the "pid" field in the JSON event.
+  /// Corresponds to the "pid" field in the json event.
   final int processId;
 
   /// ID of thread that issues the event.
   ///
-  /// Corresponds to the "tid" field in the JSON event.
+  /// Corresponds to the "tid" field in the json event.
   final int threadId;
 
   /// The duration of the event.
@@ -94,7 +94,7 @@ class TimelineEvent {
   /// Note, some events are reported with duration. Others are reported as a
   /// pair of begin/end events.
   ///
-  /// Corresponds to the "dur" field in the JSON event.
+  /// Corresponds to the "dur" field in the json event.
   final Duration duration;
 
   /// The thread duration of the event.
@@ -102,22 +102,22 @@ class TimelineEvent {
   /// Note, some events are reported with duration. Others are reported as a
   /// pair of begin/end events.
   ///
-  /// Corresponds to the "tdur" field in the JSON event.
+  /// Corresponds to the "tdur" field in the json event.
   final Duration threadDuration;
 
   /// Time passed since tracing was enabled, in microseconds.
   ///
-  /// Corresponds to the "ts" field in the JSON event.
+  /// Corresponds to the "ts" field in the json event.
   final int timestampMicros;
 
   /// Thread clock time, in microseconds.
   ///
-  /// Corresponds to the "tts" field in the JSON event.
+  /// Corresponds to the "tts" field in the json event.
   final int threadTimestampMicros;
 
   /// Arbitrary data attached to the event.
   ///
-  /// Corresponds to the "args" field in the JSON event.
+  /// Corresponds to the "args" field in the json event.
   final Map<String, dynamic> arguments;
 }
 

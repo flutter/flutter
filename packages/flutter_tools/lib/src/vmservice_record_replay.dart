@@ -19,7 +19,7 @@ const String _kId = 'id';
 const String _kType = 'type';
 const String _kData = 'data';
 
-/// A [StreamChannel] that expects VM service (JSON-rpc) protocol messages and
+/// A [StreamChannel] that expects VM service (json-rpc) protocol messages and
 /// serializes all such messages to the file system for later playback.
 class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
   final List<_Message> _messages = <_Message>[];
@@ -51,7 +51,7 @@ class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
   StreamSink<String> get sink => _sinkRecorder ??= new _RecordingSink(super.sink, _messages);
 }
 
-/// Base class for request and response JSON-rpc messages.
+/// Base class for request and response json-rpc messages.
 abstract class _Message implements Comparable<_Message> {
   final String type;
   final Map<String, dynamic> data;
@@ -91,16 +91,16 @@ abstract class _Message implements Comparable<_Message> {
   }
 }
 
-/// A VM service JSON-rpc request (sent to the VM).
+/// A VM service json-rpc request (sent to the VM).
 class _Request extends _Message {
   _Request(Map<String, dynamic> data) : super(_kRequest, data);
-  _Request.fromString(String data) : this(JSON.decoder.convert(data));
+  _Request.fromString(String data) : this(json.decoder.convert(data));
 }
 
-/// A VM service JSON-rpc response (from the VM).
+/// A VM service json-rpc response (from the VM).
 class _Response extends _Message {
   _Response(Map<String, dynamic> data) : super(_kResponse, data);
-  _Response.fromString(String data) : this(JSON.decoder.convert(data));
+  _Response.fromString(String data) : this(json.decoder.convert(data));
 }
 
 /// A matching request/response pair.
@@ -112,7 +112,7 @@ class _Transaction {
   _Response response;
 }
 
-/// A helper class that monitors a [Stream] of VM service JSON-rpc responses
+/// A helper class that monitors a [Stream] of VM service json-rpc responses
 /// and saves the responses to a recording.
 class _RecordingStream {
   final Stream<String> _delegate;
@@ -159,7 +159,7 @@ class _RecordingStream {
   Stream<String> get stream => _controller.stream;
 }
 
-/// A [StreamSink] that monitors VM service JSON-rpc requests and saves the
+/// A [StreamSink] that monitors VM service json-rpc requests and saves the
 /// requests to a recording.
 class _RecordingSink implements StreamSink<String> {
   final StreamSink<String> _delegate;
@@ -190,7 +190,7 @@ class _RecordingSink implements StreamSink<String> {
   }
 }
 
-/// A [StreamChannel] that expects VM service (JSON-rpc) requests to be written
+/// A [StreamChannel] that expects VM service (json-rpc) requests to be written
 /// to its [StreamChannel.sink], looks up those requests in a recording, and
 /// replays the corresponding responses back from the recording.
 class ReplayVMServiceChannel extends StreamChannelMixin<String> {
@@ -203,8 +203,8 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
 
   static Map<int, _Transaction> _loadTransactions(Directory location) {
     final File file = _getManifest(location);
-    final String json = file.readAsStringSync();
-    final Iterable<_Message> messages = JSON.decoder.convert(json).map<_Message>(_toMessage);
+    final String jsonString = file.readAsStringSync();
+    final Iterable<_Message> messages = json.decoder.convert(jsonString).map<_Message>(_toMessage);
     final Map<int, _Transaction> transactions = <int, _Transaction>{};
     for (_Message message in messages) {
       final _Transaction transaction =
@@ -236,7 +236,7 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
       printStatus('Exiting due to dangling request');
       exit(0);
     } else {
-      _controller.add(JSON.encoder.convert(transaction.response.data));
+      _controller.add(json.encoder.convert(transaction.response.data));
       if (_transactions.isEmpty)
         _controller.close();
     }

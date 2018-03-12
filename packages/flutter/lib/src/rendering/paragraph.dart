@@ -174,9 +174,9 @@ class RenderParagraph extends RenderBox {
     markNeedsLayout();
   }
 
-  void _layoutText({ double minWidth: 0.0, double maxWidth: double.INFINITY }) {
+  void _layoutText({ double minWidth: 0.0, double maxWidth: double.infinity }) {
     final bool widthMatters = softWrap || overflow == TextOverflow.ellipsis;
-    _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.INFINITY);
+    _textPainter.layout(minWidth: minWidth, maxWidth: widthMatters ? maxWidth : double.infinity);
   }
 
   void _layoutTextWithConstraints(BoxConstraints constraints) {

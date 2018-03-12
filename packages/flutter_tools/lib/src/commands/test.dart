@@ -72,7 +72,7 @@ class TestCommand extends FlutterCommand {
       'machine',
       hide: !verboseHelp,
       negatable: false,
-      help: 'Handle machine structured JSON command input\n'
+      help: 'Handle machine structured json command input\n'
             'and provide output and progress in machine friendly format.',
     );
     argParser.addFlag(

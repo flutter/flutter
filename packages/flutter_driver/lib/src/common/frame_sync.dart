@@ -28,7 +28,7 @@ class SetFrameSync extends Command {
 
 /// The result of a [SetFrameSync] command.
 class SetFrameSyncResult extends Result {
-  /// Deserializes this result from JSON.
+  /// Deserializes this result from json.
   static SetFrameSyncResult fromJson(Map<String, dynamic> json) {
     return new SetFrameSyncResult();
   }

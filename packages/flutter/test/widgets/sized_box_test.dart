@@ -28,8 +28,8 @@ void main() {
     expect(e.height, 2.0);
 
     const SizedBox f = const SizedBox.expand();
-    expect(f.width, double.INFINITY);
-    expect(f.height, double.INFINITY);
+    expect(f.width, double.infinity);
+    expect(f.height, double.infinity);
   });
 
   testWidgets('SizedBox - no child', (WidgetTester tester) async {

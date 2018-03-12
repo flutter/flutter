@@ -65,7 +65,7 @@ $fontsSection
         final String entryKey = 'packages/$packageName/$packageFont';
         expect(bundle.entries.containsKey(entryKey), true);
         expect(
-          UTF8.decode(await bundle.entries[entryKey].contentsAsBytes()),
+          utf8.decode(await bundle.entries[entryKey].contentsAsBytes()),
           packageFont,
         );
       }
@@ -73,14 +73,14 @@ $fontsSection
       for (String localFont in localFonts) {
         expect(bundle.entries.containsKey(localFont), true);
         expect(
-          UTF8.decode(await bundle.entries[localFont].contentsAsBytes()),
+          utf8.decode(await bundle.entries[localFont].contentsAsBytes()),
           localFont,
         );
       }
     }
 
     expect(
-      UTF8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
+      utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
       expectedAssetManifest,
     );
   }

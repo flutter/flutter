@@ -49,17 +49,17 @@ void main() {
     test('string', () {
       final DevFSStringContent content = new DevFSStringContent('some string');
       expect(content.string, 'some string');
-      expect(content.bytes, orderedEquals(UTF8.encode('some string')));
+      expect(content.bytes, orderedEquals(utf8.encode('some string')));
       expect(content.isModified, isTrue);
       expect(content.isModified, isFalse);
       content.string = 'another string';
       expect(content.string, 'another string');
-      expect(content.bytes, orderedEquals(UTF8.encode('another string')));
+      expect(content.bytes, orderedEquals(utf8.encode('another string')));
       expect(content.isModified, isTrue);
       expect(content.isModified, isFalse);
-      content.bytes = UTF8.encode('foo bar');
+      content.bytes = utf8.encode('foo bar');
       expect(content.string, 'foo bar');
-      expect(content.bytes, orderedEquals(UTF8.encode('foo bar')));
+      expect(content.bytes, orderedEquals(utf8.encode('foo bar')));
       expect(content.isModified, isTrue);
       expect(content.isModified, isFalse);
     });
@@ -97,7 +97,7 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
 
-      final List<String> packageSpecOnDevice = LineSplitter.split(UTF8.decode(
+      final List<String> packageSpecOnDevice = LineSplitter.split(utf8.decode(
           await devFSOperations.devicePathToContent[fs.path.toUri('.packages')].contentsAsBytes()
       )).toList();
       expect(packageSpecOnDevice,
@@ -397,7 +397,7 @@ class MockVMService extends BasicMock implements VMService {
     }
     _server.listen((HttpRequest request) {
       final String fsName = request.headers.value('dev_fs_name');
-      final String devicePath = UTF8.decode(BASE64.decode(request.headers.value('dev_fs_uri_b64')));
+      final String devicePath = utf8.decode(base64.decode(request.headers.value('dev_fs_uri_b64')));
       messages.add('writeFile $fsName $devicePath');
       request.drain<List<int>>().then<Null>((List<int> value) {
         request.response

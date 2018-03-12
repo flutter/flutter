@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON;
+import 'dart:convert' show json;
 
 import 'package:crypto/crypto.dart' show md5;
 import 'package:meta/meta.dart';
@@ -75,12 +75,12 @@ class Fingerprint {
     _properties = <String, String>{}..addAll(properties);
   }
 
-  /// Creates a Fingerprint from serialized JSON.
+  /// Creates a Fingerprint from serialized json.
   ///
   /// Throws [ArgumentError], if there is a version mismatch between the
   /// serializing framework and this framework.
-  Fingerprint.fromJson(String json) {
-    final Map<String, dynamic> content = JSON.decode(json);
+  Fingerprint.fromJson(String jsonEncoded) {
+    final Map<String, dynamic> content = json.decode(jsonEncoded);
 
     final String version = content['version'];
     if (version != FlutterVersion.instance.frameworkRevision)
@@ -92,7 +92,7 @@ class Fingerprint {
   Map<String, String> _checksums;
   Map<String, String> _properties;
 
-  String toJson() => JSON.encode(<String, dynamic>{
+  String toJson() => json.encode(<String, dynamic>{
     'version': FlutterVersion.instance.frameworkRevision,
     'properties': _properties,
     'files': _checksums,

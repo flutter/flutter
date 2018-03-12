@@ -14,9 +14,9 @@ void main() {
   DateTime initialDate;
 
   setUp(() {
-    firstDate = new DateTime(2001, DateTime.JANUARY, 1);
-    lastDate = new DateTime(2031, DateTime.DECEMBER, 31);
-    initialDate = new DateTime(2016, DateTime.JANUARY, 15);
+    firstDate = new DateTime(2001, DateTime.january, 1);
+    lastDate = new DateTime(2031, DateTime.december, 31);
+    initialDate = new DateTime(2016, DateTime.january, 15);
   });
 
   group(DayPicker, () {

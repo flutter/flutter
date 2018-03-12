@@ -26,16 +26,16 @@ void _tests() {
   final Finder previousMonthIcon = find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Previous month') ?? false));
 
   setUp(() {
-    firstDate = new DateTime(2001, DateTime.JANUARY, 1);
-    lastDate = new DateTime(2031, DateTime.DECEMBER, 31);
-    initialDate = new DateTime(2016, DateTime.JANUARY, 15);
+    firstDate = new DateTime(2001, DateTime.january, 1);
+    lastDate = new DateTime(2031, DateTime.december, 31);
+    initialDate = new DateTime(2016, DateTime.january, 15);
     selectableDayPredicate = null;
     initialDatePickerMode = null;
   });
 
   testWidgets('tap-select a day', (WidgetTester tester) async {
     final Key _datePickerKey = new UniqueKey();
-    DateTime _selectedDate = new DateTime(2016, DateTime.JULY, 26);
+    DateTime _selectedDate = new DateTime(2016, DateTime.july, 26);
 
     await tester.pumpWidget(
       new MaterialApp(
@@ -64,7 +64,7 @@ void _tests() {
       )
     );
 
-    expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 26)));
+    expect(_selectedDate, equals(new DateTime(2016, DateTime.july, 26)));
 
     await tester.tapAt(const Offset(50.0, 100.0));
     await tester.pumpAndSettle();
@@ -72,31 +72,31 @@ void _tests() {
 
     await tester.tap(find.text('1'));
     await tester.pumpAndSettle();
-    expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 1)));
+    expect(_selectedDate, equals(new DateTime(2016, DateTime.july, 1)));
 
     await tester.tap(nextMonthIcon);
     await tester.pumpAndSettle();
-    expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 1)));
+    expect(_selectedDate, equals(new DateTime(2016, DateTime.july, 1)));
 
     await tester.tap(find.text('5'));
     await tester.pumpAndSettle();
-    expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 5)));
+    expect(_selectedDate, equals(new DateTime(2016, DateTime.august, 5)));
 
     await tester.drag(find.byKey(_datePickerKey), const Offset(-400.0, 0.0));
     await tester.pumpAndSettle();
-    expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 5)));
+    expect(_selectedDate, equals(new DateTime(2016, DateTime.august, 5)));
 
     await tester.tap(find.text('25'));
     await tester.pumpAndSettle();
-    expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
+    expect(_selectedDate, equals(new DateTime(2016, DateTime.september, 25)));
 
     await tester.drag(find.byKey(_datePickerKey), const Offset(800.0, 0.0));
     await tester.pumpAndSettle();
-    expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
+    expect(_selectedDate, equals(new DateTime(2016, DateTime.september, 25)));
 
     await tester.tap(find.text('17'));
     await tester.pumpAndSettle();
-    expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 17)));
+    expect(_selectedDate, equals(new DateTime(2016, DateTime.august, 17)));
   });
 
   testWidgets('render picker with intrinsic dimensions', (WidgetTester tester) async {
@@ -112,7 +112,7 @@ void _tests() {
                       firstDate: new DateTime(0),
                       lastDate: new DateTime(9999),
                       onChanged: (DateTime value) { },
-                      selectedDate: new DateTime(2000, DateTime.JANUARY, 1),
+                      selectedDate: new DateTime(2000, DateTime.january, 1),
                     ),
                   ),
                 ),
@@ -172,7 +172,7 @@ void _tests() {
   testWidgets('Initial date is the default', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.tap(find.text('OK'));
-      expect(await date, equals(new DateTime(2016, DateTime.JANUARY, 15)));
+      expect(await date, equals(new DateTime(2016, DateTime.january, 15)));
     });
   });
 
@@ -187,7 +187,7 @@ void _tests() {
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.tap(find.text('12'));
       await tester.tap(find.text('OK'));
-      expect(await date, equals(new DateTime(2016, DateTime.JANUARY, 12)));
+      expect(await date, equals(new DateTime(2016, DateTime.january, 12)));
     });
   });
 
@@ -197,7 +197,7 @@ void _tests() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
       await tester.tap(find.text('25'));
       await tester.tap(find.text('OK'));
-      expect(await date, equals(new DateTime(2015, DateTime.DECEMBER, 25)));
+      expect(await date, equals(new DateTime(2015, DateTime.december, 25)));
     });
   });
 
@@ -207,7 +207,7 @@ void _tests() {
       await tester.pump();
       await tester.tap(find.text('2018'));
       await tester.tap(find.text('OK'));
-      expect(await date, equals(new DateTime(2018, DateTime.JANUARY, 15)));
+      expect(await date, equals(new DateTime(2018, DateTime.january, 15)));
     });
   });
 
@@ -220,12 +220,12 @@ void _tests() {
       final MaterialLocalizations localizations = MaterialLocalizations.of(
         tester.element(find.byType(DayPicker))
       );
-      final String dayLabel = localizations.formatMediumDate(new DateTime(2017, DateTime.JANUARY, 15));
+      final String dayLabel = localizations.formatMediumDate(new DateTime(2017, DateTime.january, 15));
       await tester.tap(find.text(dayLabel));
       await tester.pump();
       await tester.tap(find.text('19'));
       await tester.tap(find.text('OK'));
-      expect(await date, equals(new DateTime(2017, DateTime.JANUARY, 19)));
+      expect(await date, equals(new DateTime(2017, DateTime.january, 19)));
     });
   });
 
@@ -241,7 +241,7 @@ void _tests() {
   });
 
   testWidgets('Cannot select a day outside bounds', (WidgetTester tester) async {
-    initialDate = new DateTime(2017, DateTime.JANUARY, 15);
+    initialDate = new DateTime(2017, DateTime.january, 15);
     firstDate = initialDate;
     lastDate = initialDate;
     await preparePicker(tester, (Future<DateTime> date) async {
@@ -254,9 +254,9 @@ void _tests() {
   });
 
   testWidgets('Cannot select a month past last date', (WidgetTester tester) async {
-    initialDate = new DateTime(2017, DateTime.JANUARY, 15);
+    initialDate = new DateTime(2017, DateTime.january, 15);
     firstDate = initialDate;
-    lastDate = new DateTime(2017, DateTime.FEBRUARY, 20);
+    lastDate = new DateTime(2017, DateTime.february, 20);
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.tap(nextMonthIcon);
       await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -266,8 +266,8 @@ void _tests() {
   });
 
   testWidgets('Cannot select a month before first date', (WidgetTester tester) async {
-    initialDate = new DateTime(2017, DateTime.JANUARY, 15);
-    firstDate = new DateTime(2016, DateTime.DECEMBER, 10);
+    initialDate = new DateTime(2017, DateTime.january, 15);
+    firstDate = new DateTime(2016, DateTime.december, 10);
     lastDate = initialDate;
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.tap(previousMonthIcon);
@@ -278,21 +278,21 @@ void _tests() {
   });
 
   testWidgets('Only predicate days are selectable', (WidgetTester tester) async {
-    initialDate = new DateTime(2017, DateTime.JANUARY, 16);
-    firstDate = new DateTime(2017, DateTime.JANUARY, 10);
-    lastDate = new DateTime(2017, DateTime.JANUARY, 20);
+    initialDate = new DateTime(2017, DateTime.january, 16);
+    firstDate = new DateTime(2017, DateTime.january, 10);
+    lastDate = new DateTime(2017, DateTime.january, 20);
     selectableDayPredicate = (DateTime day) => day.day.isEven;
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.tap(find.text('10')); // Even, works.
       await tester.tap(find.text('13')); // Odd, doesn't work.
       await tester.tap(find.text('17')); // Odd, doesn't work.
       await tester.tap(find.text('OK'));
-      expect(await date, equals(new DateTime(2017, DateTime.JANUARY, 10)));
+      expect(await date, equals(new DateTime(2017, DateTime.january, 10)));
     });
   });
 
   testWidgets('Can select initial date picker mode', (WidgetTester tester) async {
-    initialDate = new DateTime(2014, DateTime.JANUARY, 15);
+    initialDate = new DateTime(2014, DateTime.january, 15);
     initialDatePickerMode = DatePickerMode.year;
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.pump();
@@ -300,7 +300,7 @@ void _tests() {
       // The initial current year is 2014.
       await tester.tap(find.text('2018'));
       await tester.tap(find.text('OK'));
-      expect(await date, equals(new DateTime(2018, DateTime.JANUARY, 15)));
+      expect(await date, equals(new DateTime(2018, DateTime.january, 15)));
     });
   });
 
@@ -310,9 +310,9 @@ void _tests() {
 
     setUp(() {
       feedback = new FeedbackTester();
-      initialDate = new DateTime(2017, DateTime.JANUARY, 16);
-      firstDate = new DateTime(2017, DateTime.JANUARY, 10);
-      lastDate = new DateTime(2018, DateTime.JANUARY, 20);
+      initialDate = new DateTime(2017, DateTime.january, 16);
+      firstDate = new DateTime(2017, DateTime.january, 10);
+      lastDate = new DateTime(2018, DateTime.january, 20);
       selectableDayPredicate = (DateTime date) => date.day.isEven;
     });
 
