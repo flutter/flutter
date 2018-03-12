@@ -10,6 +10,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 Future<Null> main() async {
   await task(combine(<TaskFunction>[
     new PluginTest('ios', <String>['-i', 'objc']),
-    new PluginTest('ios', <String>['-i', 'swift']),
+    // TODO(mravn): Re-enable this once CocoaPods is upgraded on device lab.
+    // new PluginTest('ios', <String>['-i', 'swift']),
   ]));
 }
