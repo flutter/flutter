@@ -196,7 +196,12 @@ class SliverConstraints extends Constraints {
   /// the earliest visible part of this sliver in the [AxisDirection].
   ///
   /// For example, if [AxisDirection] is [AxisDirection.down], then this is the
-  /// scroll offset at the top of the visible portion of the sliver.
+  /// amount the top of the visible portion of the sliver has been scrolled
+  /// past the top of the viewport. Viewports typically stops trying to
+  /// compute the [scrollOffset]s of slivers that are in the 'future' direction
+  /// past the currently visible portion of the viewports. Therefore, the
+  /// [scrollOffset] is typically 0 for slivers below the viewport when
+  /// [AxisDirection] is [AxisDirection.down].
   ///
   /// Whether this corresponds to the beginning or the end of the sliver's
   /// contents depends on the [growthDirection].
@@ -438,9 +443,22 @@ class SliverGeometry extends Diagnosticable {
   /// A sliver that occupies no space at all.
   static const SliverGeometry zero = const SliverGeometry();
 
-  /// The (estimated) total scroll extent that this sliver has content for. In
-  /// other words, the scroll offset of the end of the last bit of content of
-  /// this sliver.
+  /// The (estimated) total scrollable extent that this sliver has content for.
+  ///
+  /// It's the amount of scrolling the user needs to do to get from the
+  /// beginning of this sliver to the end of this sliver past a point in a
+  /// viewport.
+  ///
+  /// The value is used to calculate the [SliverConstraints.scrollOffset] of
+  /// all slivers in the scrollable and thus should be provided whether the
+  /// sliver is currently in the viewport or not.
+  ///
+  /// In a typical scrolling scenario, the [scrollExtent] is constant for a
+  /// sliver throughout the scrolling while [paintExtent] and [layoutExtent]
+  /// will progress from `0` when offscreen to between `0` and [scrollExtent]
+  /// as the sliver scrolls partially into and out of the screen and is
+  /// equal to [scrollExtent] while the sliver is entirely on screen. However,
+  /// these relationships can be customized to achieve more special effects.
   ///
   /// This value must be accurate if the [paintExtent] is less than the
   /// [SliverConstraints.remainingPaintExtent] provided during layout.
@@ -451,7 +469,16 @@ class SliverGeometry extends Diagnosticable {
   ///
   /// For example, if the sliver wishes to paint visually before its layout
   /// position, the [paintOrigin] is negative. The coordinate system this sliver
-  /// uses for painting is relative to this [paintOrigin].
+  /// uses for painting is relative to this [paintOrigin]. In other words,
+  /// when [RenderSliver.paint] is called, the (0, 0) position of the [Offset]
+  /// given to it is at this [paintOrigin].
+  ///
+  /// The coordinate system used for the [paintOrigin] itself is relative
+  /// to the start of this sliver's layout position rather than relative to
+  /// its current position on the viewport. In other words, in a typical
+  /// scrolling scenario, [paintOrigin] remains constant at 0.0 rather than
+  /// tracking from 0.0 to [SliverConstraints.viewportMainAxisExtent] as the
+  /// sliver scrolls past the viewport.
   ///
   /// This value does not affect the layout of subsequent slivers. The next
   /// sliver is still placed at [layoutExtent] after this sliver's layout
@@ -463,11 +490,21 @@ class SliverGeometry extends Diagnosticable {
   /// position by default.
   final double paintOrigin;
 
-  /// The amount of visual space that was taken by the sliver to render the
-  /// subset of the sliver that covers all or part of the
-  /// [SliverConstraints.remainingPaintExtent].
+  /// The amount of currently visible visual space that was taken by the sliver
+  /// to render the subset of the sliver that covers all or part of the
+  /// [SliverConstraints.remainingPaintExtent] in the current viewport.
+  ///
+  /// This value does not affect how the next sliver is positioned. In other
+  /// words, if this value was 100 and [layoutExtent] was 0, a typical sliver
+  /// placed after it would overlap while painting by 100 pixel directly on
+  /// top of this sliver.
   ///
   /// This must be between zero and [SliverConstraints.remainingPaintExtent].
+  ///
+  /// This value is typically 0 when outside of the viewport and grows or
+  /// shrinks from 0 or to 0 as the sliver is being scrolled into and out of the
+  /// viewport unless the sliver wants to achieve a special effect and paint
+  /// even when scrolled away.
   ///
   /// This contributes to the calculation for the next sliver's
   /// [SliverConstraints.overlap].
@@ -478,6 +515,12 @@ class SliverGeometry extends Diagnosticable {
   /// [SliverConstraints.scrollOffset] is zero.
   ///
   /// This must be between zero and [paintExtent]. It defaults to [paintExtent].
+  ///
+  /// This value is typically 0 when outside of the viewport and grows or
+  /// shrinks from 0 or to 0 as the sliver is being scrolled into and out of the
+  /// viewport unless then sliver wants to achieve a special effect and push
+  /// down the layout start position of subsequent slivers before the sliver is
+  /// even scrolled into the viewport.
   final double layoutExtent;
 
   /// The (estimated) total paint extent that this sliver would be able to
@@ -520,6 +563,13 @@ class SliverGeometry extends Diagnosticable {
   /// If this is non-zero after [RenderSliver.performLayout] returns, the scroll
   /// offset will be adjusted by the parent and then the entire layout of the
   /// parent will be rerun.
+  ///
+  /// When the value is non-zero, the [RenderSliver] does not need to compute
+  /// the rest of the values when constructing the [SliverGeometry] or call
+  /// [RenderObject.layout] on its children since [RenderSliver.performLayout]
+  /// will be called again on this sliver in the same frame after the
+  /// [SliverConstraints.scrollOffset] correction when the proper
+  /// [SliverGeometry] and layout of its children can be computed.
   ///
   /// If the parent is also a [RenderSliver], it must propagate this value
   /// in its own [RenderSliver.geometry] property until a viewport which adjusts
