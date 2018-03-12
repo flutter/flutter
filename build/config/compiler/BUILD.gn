@@ -62,16 +62,13 @@ config("compiler") {
   # not be compatible with newer ones. To achieve this, we insert a synthetic
   # define into the compile line. We only do this for toolchains that we use
   # from buildtools.
-  clang_stamp_file = ""
-  if (host_os == "linux") {
-    clang_stamp_file = "//buildtools/linux64/clang.stamp"
-  } else if (host_os == "mac") {
-    clang_stamp_file = "//buildtools/mac/clang.stamp"
-  }
-  if (clang_stamp_file != "") {
-    toolchain_version = read_file(clang_stamp_file, "trim string")
-    defines = [ "TOOLCHAIN_VERSION=$toolchain_version" ]
-  }
+  toolchain_version = exec_script("//build/util/lastchange.py",
+                                  [
+                                    "--source-dir=" + rebase_path("//buildtools"),
+                                    "--revision-only",
+                                  ],
+                                  "trim string")
+  defines = [ "TOOLCHAIN_VERSION=$toolchain_version" ]
 
   # In general, Windows is totally different, but all the other builds share
   # some common GCC configuration. This section sets up Windows and the common
