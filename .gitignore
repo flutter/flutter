@@ -17,7 +17,7 @@
 .idea/
 
 # Visual Studio Code related
-.vscode/
+.vscode/*
 
 # Flutter repo-specific
 /bin/cache/
@@ -79,6 +79,8 @@ unlinked_spec.ds
 **/ios/Runner/GeneratedPluginRegistrant.*
 
 # Exceptions to above rules.
+!.vscode/tasks.json
+!.vscode/test.sh
 !**/ios/**/default.mode1v3
 !**/ios/**/default.mode2v3
 !**/ios/**/default.pbxuser
