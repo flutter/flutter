@@ -10,20 +10,31 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
+/// Combines several TaskFunction with trivial success value into one.
+TaskFunction combine(List<TaskFunction> tasks) {
+  return () async {
+    for (TaskFunction task in tasks) {
+      final TaskResult result = await task();
+      if (result.failed) {
+        return result;
+      }
+    }
+    return new TaskResult.success(null);
+  };
+}
+
 /// Defines task that creates new Flutter project, adds a plugin, and then
 /// builds the specified [buildTarget].
 class PluginTest {
   final String buildTarget;
+  final String language;
 
-  PluginTest(this.buildTarget);
+  PluginTest(this.buildTarget, this.language);
 
   Future<TaskResult> call() async {
     section('Create Flutter project');
     final Directory tmp = await Directory.systemTemp.createTemp('plugin');
-    final FlutterProject project = await FlutterProject.create(tmp);
-    if (buildTarget == 'ios') {
-      await prepareProvisioningCertificates(project.rootPath);
-    }
+    final FlutterProject project = await FlutterProject.create(tmp, buildTarget, language);
     try {
       section('Add plugin');
       await project.addPlugin('path_provider');
@@ -46,11 +57,19 @@ class FlutterProject {
   final Directory parent;
   final String name;
 
-  static Future<FlutterProject> create(Directory directory) async {
+  static Future<FlutterProject> create(Directory directory, String buildTarget, String language) async {
     await inDirectory(directory, () async {
-      await flutter('create', options: <String>['--org', 'io.flutter.devicelab', 'plugintest']);
+      await flutter('create', options: <String>[
+        '--org', 'io.flutter.devicelab',
+        '-${buildTarget[0]}', language,
+        'plugintest',
+      ]);
     });
-    return new FlutterProject(directory, 'plugintest');
+    final FlutterProject project = new FlutterProject(directory, 'plugintest');
+    if (buildTarget == 'ios') {
+      await prepareProvisioningCertificates(project.rootPath);
+    }
+    return project;
   }
 
   String get rootPath => path.join(parent.path, name);
