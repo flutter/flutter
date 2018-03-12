@@ -37,14 +37,14 @@ class StringCodec implements MessageCodec<String> {
   String decodeMessage(ByteData message) {
     if (message == null)
       return null;
-    return UTF8.decoder.convert(message.buffer.asUint8List());
+    return utf8.decoder.convert(message.buffer.asUint8List());
   }
 
   @override
   ByteData encodeMessage(String message) {
     if (message == null)
       return null;
-    final Uint8List encoded = UTF8.encoder.convert(message);
+    final Uint8List encoded = utf8.encoder.convert(message);
     return encoded.buffer.asByteData();
   }
 }
@@ -79,14 +79,14 @@ class JSONMessageCodec implements MessageCodec<dynamic> {
   ByteData encodeMessage(dynamic message) {
     if (message == null)
       return null;
-    return const StringCodec().encodeMessage(JSON.encode(message));
+    return const StringCodec().encodeMessage(json.encode(message));
   }
 
   @override
   dynamic decodeMessage(ByteData message) {
     if (message == null)
       return message;
-    return JSON.decode(const StringCodec().decodeMessage(message));
+    return json.decode(const StringCodec().decodeMessage(message));
   }
 }
 
@@ -308,7 +308,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
       buffer.putFloat64(value);
     } else if (value is String) {
       buffer.putUint8(_kString);
-      final List<int> bytes = UTF8.encoder.convert(value);
+      final List<int> bytes = utf8.encoder.convert(value);
       _writeSize(buffer, bytes.length);
       buffer.putUint8List(bytes);
     } else if (value is Uint8List) {
@@ -380,7 +380,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         // 2018-01-09 and will be made unavailable.
         // TODO(mravn): remove this case once the APIs are unavailable.
         final int length = _readSize(buffer);
-        final String hex = UTF8.decoder.convert(buffer.getUint8List(length));
+        final String hex = utf8.decoder.convert(buffer.getUint8List(length));
         result = int.parse(hex, radix: 16);
         break;
       case _kFloat64:
@@ -388,7 +388,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         break;
       case _kString:
         final int length = _readSize(buffer);
-        result = UTF8.decoder.convert(buffer.getUint8List(length));
+        result = utf8.decoder.convert(buffer.getUint8List(length));
         break;
       case _kUint8List:
         final int length = _readSize(buffer);

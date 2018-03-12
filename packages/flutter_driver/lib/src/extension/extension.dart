@@ -298,7 +298,7 @@ class FlutterDriverExtension {
   Future<ScrollResult> _scroll(Command command) async {
     final Scroll scrollCommand = command;
     final Finder target = await _waitForElement(_createFinder(scrollCommand.finder));
-    final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.MICROSECONDS_PER_SECOND;
+    final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.microsecondsPerSecond;
     final Offset delta = new Offset(scrollCommand.dx, scrollCommand.dy) / totalMoves.toDouble();
     final Duration pause = scrollCommand.duration ~/ totalMoves;
     final Offset startLocation = _prober.getCenter(target);

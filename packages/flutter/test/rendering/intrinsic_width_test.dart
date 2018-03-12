@@ -73,10 +73,10 @@ void main() {
     expect(parent.getMinIntrinsicHeight(80.0), equals(20.0));
     expect(parent.getMaxIntrinsicHeight(80.0), equals(200.0));
 
-    expect(parent.getMinIntrinsicWidth(double.INFINITY), equals(100.0));
-    expect(parent.getMaxIntrinsicWidth(double.INFINITY), equals(100.0));
-    expect(parent.getMinIntrinsicHeight(double.INFINITY), equals(20.0));
-    expect(parent.getMaxIntrinsicHeight(double.INFINITY), equals(200.0));
+    expect(parent.getMinIntrinsicWidth(double.infinity), equals(100.0));
+    expect(parent.getMaxIntrinsicWidth(double.infinity), equals(100.0));
+    expect(parent.getMinIntrinsicHeight(double.infinity), equals(20.0));
+    expect(parent.getMaxIntrinsicHeight(double.infinity), equals(200.0));
   });
 
   test('IntrinsicWidth without a child', () {
@@ -107,10 +107,10 @@ void main() {
     expect(parent.getMinIntrinsicHeight(80.0), equals(0.0));
     expect(parent.getMaxIntrinsicHeight(80.0), equals(0.0));
 
-    expect(parent.getMinIntrinsicWidth(double.INFINITY), equals(0.0));
-    expect(parent.getMaxIntrinsicWidth(double.INFINITY), equals(0.0));
-    expect(parent.getMinIntrinsicHeight(double.INFINITY), equals(0.0));
-    expect(parent.getMaxIntrinsicHeight(double.INFINITY), equals(0.0));
+    expect(parent.getMinIntrinsicWidth(double.infinity), equals(0.0));
+    expect(parent.getMaxIntrinsicWidth(double.infinity), equals(0.0));
+    expect(parent.getMinIntrinsicHeight(double.infinity), equals(0.0));
+    expect(parent.getMaxIntrinsicHeight(double.infinity), equals(0.0));
   });
 
   test('Shrink-wrapping width (stepped width)', () {
@@ -142,10 +142,10 @@ void main() {
     expect(parent.getMinIntrinsicHeight(80.0), equals(20.0));
     expect(parent.getMaxIntrinsicHeight(80.0), equals(200.0));
 
-    expect(parent.getMinIntrinsicWidth(double.INFINITY), equals(3.0 * 47.0));
-    expect(parent.getMaxIntrinsicWidth(double.INFINITY), equals(3.0 * 47.0));
-    expect(parent.getMinIntrinsicHeight(double.INFINITY), equals(20.0));
-    expect(parent.getMaxIntrinsicHeight(double.INFINITY), equals(200.0));
+    expect(parent.getMinIntrinsicWidth(double.infinity), equals(3.0 * 47.0));
+    expect(parent.getMaxIntrinsicWidth(double.infinity), equals(3.0 * 47.0));
+    expect(parent.getMinIntrinsicHeight(double.infinity), equals(20.0));
+    expect(parent.getMaxIntrinsicHeight(double.infinity), equals(200.0));
   });
 
   test('Shrink-wrapping width (stepped height)', () {
@@ -177,10 +177,10 @@ void main() {
     expect(parent.getMinIntrinsicHeight(80.0), equals(1.0 * 47.0));
     expect(parent.getMaxIntrinsicHeight(80.0), equals(5.0 * 47.0));
 
-    expect(parent.getMinIntrinsicWidth(double.INFINITY), equals(100.0));
-    expect(parent.getMaxIntrinsicWidth(double.INFINITY), equals(100.0));
-    expect(parent.getMinIntrinsicHeight(double.INFINITY), equals(1.0 * 47.0));
-    expect(parent.getMaxIntrinsicHeight(double.INFINITY), equals(5.0 * 47.0));
+    expect(parent.getMinIntrinsicWidth(double.infinity), equals(100.0));
+    expect(parent.getMaxIntrinsicWidth(double.infinity), equals(100.0));
+    expect(parent.getMinIntrinsicHeight(double.infinity), equals(1.0 * 47.0));
+    expect(parent.getMaxIntrinsicHeight(double.infinity), equals(5.0 * 47.0));
   });
 
   test('Shrink-wrapping width (stepped everything)', () {
@@ -212,10 +212,10 @@ void main() {
     expect(parent.getMinIntrinsicHeight(80.0), equals(1.0 * 47.0));
     expect(parent.getMaxIntrinsicHeight(80.0), equals(5.0 * 47.0));
 
-    expect(parent.getMinIntrinsicWidth(double.INFINITY), equals(3.0 * 37.0));
-    expect(parent.getMaxIntrinsicWidth(double.INFINITY), equals(3.0 * 37.0));
-    expect(parent.getMinIntrinsicHeight(double.INFINITY), equals(1.0 * 47.0));
-    expect(parent.getMaxIntrinsicHeight(double.INFINITY), equals(5.0 * 47.0));
+    expect(parent.getMinIntrinsicWidth(double.infinity), equals(3.0 * 37.0));
+    expect(parent.getMaxIntrinsicWidth(double.infinity), equals(3.0 * 37.0));
+    expect(parent.getMinIntrinsicHeight(double.infinity), equals(1.0 * 47.0));
+    expect(parent.getMaxIntrinsicHeight(double.infinity), equals(5.0 * 47.0));
   });
 
   test('Shrink-wrapping height', () {
@@ -247,10 +247,10 @@ void main() {
     expect(parent.getMinIntrinsicHeight(80.0), equals(200.0));
     expect(parent.getMaxIntrinsicHeight(80.0), equals(200.0));
 
-    expect(parent.getMinIntrinsicWidth(double.INFINITY), equals(10.0));
-    expect(parent.getMaxIntrinsicWidth(double.INFINITY), equals(100.0));
-    expect(parent.getMinIntrinsicHeight(double.INFINITY), equals(200.0));
-    expect(parent.getMaxIntrinsicHeight(double.INFINITY), equals(200.0));
+    expect(parent.getMinIntrinsicWidth(double.infinity), equals(10.0));
+    expect(parent.getMaxIntrinsicWidth(double.infinity), equals(100.0));
+    expect(parent.getMinIntrinsicHeight(double.infinity), equals(200.0));
+    expect(parent.getMaxIntrinsicHeight(double.infinity), equals(200.0));
   });
 
   test('IntrinsicHeight without a child', () {
@@ -281,10 +281,10 @@ void main() {
     expect(parent.getMinIntrinsicHeight(80.0), equals(0.0));
     expect(parent.getMaxIntrinsicHeight(80.0), equals(0.0));
 
-    expect(parent.getMinIntrinsicWidth(double.INFINITY), equals(0.0));
-    expect(parent.getMaxIntrinsicWidth(double.INFINITY), equals(0.0));
-    expect(parent.getMinIntrinsicHeight(double.INFINITY), equals(0.0));
-    expect(parent.getMaxIntrinsicHeight(double.INFINITY), equals(0.0));
+    expect(parent.getMinIntrinsicWidth(double.infinity), equals(0.0));
+    expect(parent.getMaxIntrinsicWidth(double.infinity), equals(0.0));
+    expect(parent.getMinIntrinsicHeight(double.infinity), equals(0.0));
+    expect(parent.getMaxIntrinsicHeight(double.infinity), equals(0.0));
   });
 
   test('Padding and boring intrinsics', () {
@@ -308,10 +308,10 @@ void main() {
     expect(box.getMinIntrinsicHeight(80.0), 50.0);
     expect(box.getMaxIntrinsicHeight(80.0), 50.0);
 
-    expect(box.getMinIntrinsicWidth(double.INFINITY), 50.0);
-    expect(box.getMaxIntrinsicWidth(double.INFINITY), 50.0);
-    expect(box.getMinIntrinsicHeight(double.INFINITY), 50.0);
-    expect(box.getMaxIntrinsicHeight(double.INFINITY), 50.0);
+    expect(box.getMinIntrinsicWidth(double.infinity), 50.0);
+    expect(box.getMaxIntrinsicWidth(double.infinity), 50.0);
+    expect(box.getMinIntrinsicHeight(double.infinity), 50.0);
+    expect(box.getMaxIntrinsicHeight(double.infinity), 50.0);
 
     // also a smoke test:
     layout(
@@ -346,10 +346,10 @@ void main() {
     expect(box.getMinIntrinsicHeight(80.0), 80.0);
     expect(box.getMaxIntrinsicHeight(80.0), 80.0);
 
-    expect(box.getMinIntrinsicWidth(double.INFINITY), 30.0);
-    expect(box.getMaxIntrinsicWidth(double.INFINITY), 30.0);
-    expect(box.getMinIntrinsicHeight(double.INFINITY), 30.0);
-    expect(box.getMaxIntrinsicHeight(double.INFINITY), 30.0);
+    expect(box.getMinIntrinsicWidth(double.infinity), 30.0);
+    expect(box.getMaxIntrinsicWidth(double.infinity), 30.0);
+    expect(box.getMinIntrinsicHeight(double.infinity), 30.0);
+    expect(box.getMaxIntrinsicHeight(double.infinity), 30.0);
 
     // also a smoke test:
     layout(
@@ -384,10 +384,10 @@ void main() {
     expect(box.getMinIntrinsicHeight(80.0), 50.0);
     expect(box.getMaxIntrinsicHeight(80.0), 50.0);
 
-    expect(box.getMinIntrinsicWidth(double.INFINITY), 50.0);
-    expect(box.getMaxIntrinsicWidth(double.INFINITY), 50.0);
-    expect(box.getMinIntrinsicHeight(double.INFINITY), 50.0);
-    expect(box.getMaxIntrinsicHeight(double.INFINITY), 50.0);
+    expect(box.getMinIntrinsicWidth(double.infinity), 50.0);
+    expect(box.getMaxIntrinsicWidth(double.infinity), 50.0);
+    expect(box.getMinIntrinsicHeight(double.infinity), 50.0);
+    expect(box.getMaxIntrinsicHeight(double.infinity), 50.0);
 
     // also a smoke test:
     layout(
@@ -422,10 +422,10 @@ void main() {
     expect(box.getMinIntrinsicHeight(80.0), 80.0);
     expect(box.getMaxIntrinsicHeight(80.0), 80.0);
 
-    expect(box.getMinIntrinsicWidth(double.INFINITY), 30.0);
-    expect(box.getMaxIntrinsicWidth(double.INFINITY), 30.0);
-    expect(box.getMinIntrinsicHeight(double.INFINITY), 30.0);
-    expect(box.getMaxIntrinsicHeight(double.INFINITY), 30.0);
+    expect(box.getMinIntrinsicWidth(double.infinity), 30.0);
+    expect(box.getMaxIntrinsicWidth(double.infinity), 30.0);
+    expect(box.getMinIntrinsicHeight(double.infinity), 30.0);
+    expect(box.getMaxIntrinsicHeight(double.infinity), 30.0);
 
     // also a smoke test:
     layout(

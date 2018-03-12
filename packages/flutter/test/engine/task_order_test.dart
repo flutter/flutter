@@ -13,7 +13,7 @@ void main() {
     tasks.add(1);
 
     // Flush 0 microtasks.
-    await new Future<Null>.delayed(Duration.ZERO);
+    await new Future<Null>.delayed(Duration.zero);
 
     scheduleMicrotask(() {
       tasks.add(3);
@@ -25,7 +25,7 @@ void main() {
     tasks.add(2);
 
     // Flush 2 microtasks.
-    await new Future<Null>.delayed(Duration.ZERO);
+    await new Future<Null>.delayed(Duration.zero);
 
     scheduleMicrotask(() {
       tasks.add(6);
@@ -40,7 +40,7 @@ void main() {
     tasks.add(5);
 
     // Flush 3 microtasks.
-    await new Future<Null>.delayed(Duration.ZERO);
+    await new Future<Null>.delayed(Duration.zero);
 
     tasks.add(9);
 

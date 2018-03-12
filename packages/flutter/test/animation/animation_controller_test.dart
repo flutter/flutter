@@ -234,14 +234,14 @@ void main() {
     // edges
     controller.forward();
     expect(controller.velocity, inInclusiveRange(0.4, 0.6));
-    tick(Duration.ZERO);
+    tick(Duration.zero);
     expect(controller.velocity, inInclusiveRange(0.4, 0.6));
     tick(const Duration(milliseconds: 5));
     expect(controller.velocity, inInclusiveRange(0.9, 1.1));
 
     controller.forward(from: 0.5);
     expect(controller.velocity, inInclusiveRange(0.4, 0.6));
-    tick(Duration.ZERO);
+    tick(Duration.zero);
     expect(controller.velocity, inInclusiveRange(0.4, 0.6));
     tick(const Duration(milliseconds: 5));
     expect(controller.velocity, inInclusiveRange(0.9, 1.1));
@@ -249,13 +249,13 @@ void main() {
     // stopped
     controller.forward(from: 1.0);
     expect(controller.velocity, 0.0);
-    tick(Duration.ZERO);
+    tick(Duration.zero);
     expect(controller.velocity, 0.0);
     tick(const Duration(milliseconds: 500));
     expect(controller.velocity, 0.0);
 
     controller.forward();
-    tick(Duration.ZERO);
+    tick(Duration.zero);
     tick(const Duration(milliseconds: 1000));
     expect(controller.velocity, 0.0);
 
@@ -383,7 +383,7 @@ void main() {
     expect(controller.value, currentValue);
   });
 
-  test('animateTo can deal with duration == Duration.ZERO', () {
+  test('animateTo can deal with duration == Duration.zero', () {
     final AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -391,7 +391,7 @@ void main() {
 
     controller.forward(from: 0.2);
     expect(controller.value, 0.2);
-    controller.animateTo(1.0, duration: Duration.ZERO);
+    controller.animateTo(1.0, duration: Duration.zero);
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0), reason: 'Expected no animation.');
     expect(controller.value, 1.0);
   });

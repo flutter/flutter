@@ -107,7 +107,7 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
             .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
         // Delay return of exitCode until after stdout stream data, since it terminates the logger.
         when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => new Future<int>.delayed(Duration.ZERO, () => 0));
+            .thenAnswer((Invocation invocation) => new Future<int>.delayed(Duration.zero, () => 0));
         return new Future<Process>.value(mockProcess);
       });
 

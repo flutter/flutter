@@ -500,7 +500,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
               // and behind the persistent bar.
               child: new OverflowBox(
                 minHeight: 0.0,
-                maxHeight: double.INFINITY,
+                maxHeight: double.infinity,
                 alignment: AlignmentDirectional.bottomStart,
                 child: new Padding(
                   padding: const EdgeInsetsDirectional.only(

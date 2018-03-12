@@ -403,7 +403,7 @@ bool pathDoesNotContainCircle(Path path, Rect circleBounds) {
   assert(circleBounds.width == circleBounds.height);
   final double radius = circleBounds.width / 2.0;
 
-  for (double theta = 0.0; theta <= 2.0 * math.PI; theta += math.PI / 20.0) {
+  for (double theta = 0.0; theta <= 2.0 * math.pi; theta += math.pi / 20.0) {
     for (double i = 0.0; i < 1; i += 0.01) {
       final double x = i * radius * math.cos(theta);
       final double y = i * radius * math.sin(theta);

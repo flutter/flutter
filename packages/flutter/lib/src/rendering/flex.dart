@@ -524,11 +524,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         if (flex == 0) {
           switch (_direction) {
               case Axis.horizontal:
-                mainSize = child.getMaxIntrinsicWidth(double.INFINITY);
+                mainSize = child.getMaxIntrinsicWidth(double.infinity);
                 crossSize = childSize(child, mainSize);
                 break;
               case Axis.vertical:
-                mainSize = child.getMaxIntrinsicHeight(double.INFINITY);
+                mainSize = child.getMaxIntrinsicHeight(double.infinity);
                 crossSize = childSize(child, mainSize);
                 break;
           }
@@ -639,7 +639,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     int totalChildren = 0;
     assert(constraints != null);
     final double maxMainSize = _direction == Axis.horizontal ? constraints.maxWidth : constraints.maxHeight;
-    final bool canFlex = maxMainSize < double.INFINITY;
+    final bool canFlex = maxMainSize < double.infinity;
 
     double crossSize = 0.0;
     double allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
@@ -748,16 +748,16 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     double allocatedFlexSpace = 0.0;
     double maxBaselineDistance = 0.0;
     if (totalFlex > 0 || crossAxisAlignment == CrossAxisAlignment.baseline) {
-      final double spacePerFlex = canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.NAN;
+      final double spacePerFlex = canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.nan;
       child = firstChild;
       while (child != null) {
         final int flex = _getFlex(child);
         if (flex > 0) {
-          final double maxChildExtent = canFlex ? (child == lastFlexChild ? (freeSpace - allocatedFlexSpace) : spacePerFlex * flex) : double.INFINITY;
+          final double maxChildExtent = canFlex ? (child == lastFlexChild ? (freeSpace - allocatedFlexSpace) : spacePerFlex * flex) : double.infinity;
           double minChildExtent;
           switch (_getFit(child)) {
             case FlexFit.tight:
-              assert(maxChildExtent < double.INFINITY);
+              assert(maxChildExtent < double.infinity);
               minChildExtent = maxChildExtent;
               break;
             case FlexFit.loose:
