@@ -305,7 +305,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// function, rather than constructing this class directly.
   const DefaultMaterialLocalizations();
 
-  // Ordered to match DateTime.MONDAY=1, DateTime.SUNDAY=6
+  // Ordered to match DateTime.monday=1, DateTime.sunday=6
   static const List<String> _shortWeekdays = const <String>[
     'Mon',
     'Tue',
@@ -316,7 +316,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'Sun',
   ];
 
-  // Ordered to match DateTime.MONDAY=1, DateTime.SUNDAY=6
+  // Ordered to match DateTime.monday=1, DateTime.sunday=6
   static const List<String> _weekdays = const <String>[
     'Monday',
     'Tuesday',
@@ -402,21 +402,21 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String formatMediumDate(DateTime date) {
-    final String day = _shortWeekdays[date.weekday - DateTime.MONDAY];
-    final String month = _shortMonths[date.month - DateTime.JANUARY];
+    final String day = _shortWeekdays[date.weekday - DateTime.monday];
+    final String month = _shortMonths[date.month - DateTime.january];
     return '$day, $month ${date.day}';
   }
 
   @override
   String formatFullDate(DateTime date) {
-    final String month = _months[date.month - DateTime.JANUARY];
-    return '${_weekdays[date.weekday - DateTime.MONDAY]}, $month ${date.day}, ${date.year}';
+    final String month = _months[date.month - DateTime.january];
+    return '${_weekdays[date.weekday - DateTime.monday]}, $month ${date.day}, ${date.year}';
   }
 
   @override
   String formatMonthYear(DateTime date) {
     final String year = formatYear(date);
-    final String month = _months[date.month - DateTime.JANUARY];
+    final String month = _months[date.month - DateTime.january];
     return '$month $year';
   }
 

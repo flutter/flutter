@@ -30,7 +30,7 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
-      FlutterVersion.kPauseToLetUserReadTheMessage = Duration.ZERO;
+      FlutterVersion.kPauseToLetUserReadTheMessage = Duration.zero;
     });
 
     setUp(() {
@@ -300,7 +300,7 @@ void fakeData({
       return stampJson;
 
     if (stamp != null)
-      return JSON.encode(stamp.toJson());
+      return json.encode(stamp.toJson());
 
     return null;
   });
@@ -309,7 +309,7 @@ void fakeData({
     expect(invocation.positionalArguments.first, VersionCheckStamp.kFlutterVersionCheckStampFile);
 
     if (expectSetStamp) {
-      stamp = VersionCheckStamp.fromJson(JSON.decode(invocation.positionalArguments[1]));
+      stamp = VersionCheckStamp.fromJson(json.decode(invocation.positionalArguments[1]));
       return null;
     }
 

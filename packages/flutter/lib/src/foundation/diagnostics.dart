@@ -2238,9 +2238,9 @@ abstract class Diagnosticable {
   ///     // default value so is not relevant.
   ///     properties.add(new DoubleProperty('hitTestExtent', hitTestExtent, defaultValue: paintExtent));
   ///
-  ///     // maxWidth of double.INFINITY indicates the width is unconstrained and
+  ///     // maxWidth of double.infinity indicates the width is unconstrained and
   ///     // so maxWidth has no impact.,
-  ///     properties.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.INFINITY));
+  ///     properties.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.infinity));
   ///
   ///     // Progress is a value between 0 and 1 or null. Showing it as a
   ///     // percentage makes the meaning clear enough that the name can be

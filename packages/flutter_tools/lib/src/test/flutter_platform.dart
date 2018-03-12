@@ -383,7 +383,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
           final Completer<Null> harnessDone = new Completer<Null>();
           final StreamSubscription<dynamic> harnessToTest = controller.stream.listen(
-            (dynamic event) { testSocket.add(JSON.encode(event)); },
+            (dynamic event) { testSocket.add(json.encode(event)); },
             onDone: harnessDone.complete,
             onError: (dynamic error, dynamic stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
@@ -402,7 +402,7 @@ class _FlutterPlatform extends PlatformPlugin {
           final StreamSubscription<dynamic> testToHarness = testSocket.listen(
             (dynamic encodedEvent) {
               assert(encodedEvent is String); // we shouldn't ever get binary messages
-              controller.sink.add(JSON.decode(encodedEvent));
+              controller.sink.add(json.decode(encodedEvent));
             },
             onDone: testDone.complete,
             onError: (dynamic error, dynamic stack) {
@@ -584,9 +584,9 @@ void main() {
   WebSocket.connect(server).then((WebSocket socket) {
     socket.map((dynamic x) {
       assert(x is String);
-      return JSON.decode(x);
+      return json.decode(x);
     }).pipe(channel.sink);
-    socket.addStream(channel.stream.map(JSON.encode));
+    socket.addStream(channel.stream.map(json.encode));
   });
 }
 ''';
@@ -673,7 +673,7 @@ void main() {
 
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
-      stream.transform(UTF8.decoder)
+      stream.transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(
           (String line) {

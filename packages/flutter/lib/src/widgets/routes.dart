@@ -107,7 +107,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   AnimationController createAnimationController() {
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     final Duration duration = transitionDuration;
-    assert(duration != null && duration >= Duration.ZERO);
+    assert(duration != null && duration >= Duration.zero);
     return new AnimationController(
       duration: duration,
       debugLabel: debugLabel,
