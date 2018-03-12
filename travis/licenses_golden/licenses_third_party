@@ -1,4 +1,4 @@
-Signature: 35aeeabb739f87512e922eb11cff14a9
+Signature: 4e2bc017cf33139e3cac7a97e5e22e91
 
 UNUSED LICENSES:
 
@@ -924,6 +924,10 @@ FILE: ../../../third_party/boringssl/src/crypto/err/x509.errordata
 FILE: ../../../third_party/boringssl/src/crypto/err/x509v3.errordata
 FILE: ../../../third_party/boringssl/src/crypto/evp/scrypt.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/asm/x86_64-gcc.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/rsaz_exp.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/rsaz_exp.h
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/p256-x86_64.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/p256-x86_64.h
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/intcheck1.png
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/intcheck2.png
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/intcheck3.png
@@ -994,8 +998,6 @@ FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-LabelRew
 FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-Sections/in.s
 FILE: ../../../third_party/boringssl/src/util/fipstools/testdata/x86_64-Sections/out.s
 ----------------------------------------------------------------------------------------------------
-27287883
-
 OpenSSL License
 
  ====================================================================
@@ -1123,40 +1125,6 @@ ISC license used for completely new code in BoringSSL:
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
  * OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
-Some files from Intel carry the following license:
-
-# Copyright (c) 2012, Intel Corporation
-
-# All rights reserved.
-
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
-
-# *  Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-
-# *  Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the
-#    distribution.
-
-# *  Neither the name of the Intel Corporation nor the names of its
-#    contributors may be used to endorse or promote products derived from
-#    this software without specific prior written permission.
-
-# THIS SOFTWARE IS PROVIDED BY INTEL CORPORATION ""AS IS"" AND ANY
-# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL INTEL CORPORATION OR
-# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The code in third_party/fiat carries the MIT license:
 
@@ -1782,9 +1750,7 @@ FILE: ../../../third_party/boringssl/src/crypto/bn_extra/bn_asn1.c
 FILE: ../../../third_party/boringssl/src/crypto/cmac/cmac_test.cc
 FILE: ../../../third_party/boringssl/src/crypto/conf/internal.h
 FILE: ../../../third_party/boringssl/src/crypto/curve25519/asm/x25519-asm-arm.S
-FILE: ../../../third_party/boringssl/src/crypto/curve25519/asm/x25519-asm-x86_64.S
 FILE: ../../../third_party/boringssl/src/crypto/curve25519/ed25519_test.cc
-FILE: ../../../third_party/boringssl/src/crypto/curve25519/x25519-x86_64.c
 FILE: ../../../third_party/boringssl/src/crypto/curve25519/x25519_test.cc
 FILE: ../../../third_party/boringssl/src/crypto/err/err_data_generate.go
 FILE: ../../../third_party/boringssl/src/crypto/evp/pbkdf_test.cc
@@ -1962,6 +1928,33 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/crypto/cipher_extra/e_aesccm.c
+TYPE: LicenseType.unknown
+FILE: ../../../third_party/boringssl/src/crypto/cipher_extra/e_aesccm.c
+FILE: ../../../third_party/boringssl/src/crypto/cpu-aarch64-fuchsia.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/tls/internal.h
+FILE: ../../../third_party/boringssl/src/crypto/self_test.cc
+FILE: ../../../third_party/boringssl/src/fipstools/cavp_kas_test.cc
+FILE: ../../../third_party/boringssl/src/fipstools/cavp_tlskdf_test.cc
+FILE: ../../../third_party/boringssl/src/ssl/handoff.cc
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2018, Google Inc.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ====================================================================================================
 
 ====================================================================================================
@@ -2888,42 +2881,18 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ====================================================================================================
 LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/rsaz_exp.c
-TYPE: LicenseType.bsd
+ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/rsaz_exp.c + ../../../third_party/boringssl/src/LICENSE
+TYPE: LicenseType.unknown
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/rsaz_exp.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/rsaz_exp.h
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2012, Intel Corporation
+Copyright 2013-2016 The OpenSSL Project Authors. All Rights Reserved.
+Copyright (c) 2012, Intel Corporation. All Rights Reserved.
 
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-*  Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-
-*  Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in the
-   documentation and/or other materials provided with the
-   distribution.
-
-*  Neither the name of the Intel Corporation nor the names of its
-   contributors may be used to endorse or promote products derived from
-   this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY INTEL CORPORATION ""AS IS"" AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL INTEL CORPORATION OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+Licensed under the OpenSSL license (the "License").  You may not use
+this file except in compliance with the License.  You can obtain a copy
+in the file LICENSE in the source distribution or at
+https://www.openssl.org/source/license.html
 ====================================================================================================
 
 ====================================================================================================
@@ -3127,24 +3096,18 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ====================================================================================================
 LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/p256-x86_64.c
+ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/p256-x86_64.c + ../../../third_party/boringssl/src/LICENSE
 TYPE: LicenseType.unknown
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/p256-x86_64.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/p256-x86_64.h
 ----------------------------------------------------------------------------------------------------
-Copyright (c) 2014, Intel Corporation.
+Copyright 2014-2016 The OpenSSL Project Authors. All Rights Reserved.
+Copyright (c) 2014, Intel Corporation. All Rights Reserved.
 
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted, provided that the above
-copyright notice and this permission notice appear in all copies.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+Licensed under the OpenSSL license (the "License").  You may not use
+this file except in compliance with the License.  You can obtain a copy
+in the file LICENSE in the source distribution or at
+https://www.openssl.org/source/license.html
 ====================================================================================================
 
 ====================================================================================================
@@ -3160,6 +3123,60 @@ FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/modes/internal.h
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/modes/ofb.c
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2008 The OpenSSL Project.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+
+3. All advertising materials mentioning features or use of this
+   software must display the following acknowledgment:
+   "This product includes software developed by the OpenSSL Project
+   for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
+
+4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
+   endorse or promote products derived from this software without
+   prior written permission. For written permission, please contact
+   openssl-core@openssl.org.
+
+5. Products derived from this software may not be called "OpenSSL"
+   nor may "OpenSSL" appear in their names without prior written
+   permission of the OpenSSL Project.
+
+6. Redistributions of any form whatsoever must retain the following
+   acknowledgment:
+   "This product includes software developed by the OpenSSL Project
+   for use in the OpenSSL Toolkit (http://www.openssl.org/)"
+
+THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
+EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
+ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/modes/ccm.c
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/modes/ccm.c
+FILE: ../../../third_party/boringssl/src/decrepit/xts/xts.c
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2011 The OpenSSL Project.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -3310,30 +3327,6 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/tls/internal.h
-TYPE: LicenseType.unknown
-FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/tls/internal.h
-FILE: ../../../third_party/boringssl/src/crypto/self_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_kas_test.cc
-FILE: ../../../third_party/boringssl/src/fipstools/cavp_tlskdf_test.cc
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2018, Google Inc.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted, provided that the above
-copyright notice and this permission notice appear in all copies.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
-OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ====================================================================================================
 
 ====================================================================================================
@@ -3876,59 +3869,6 @@ FILE: ../../../third_party/boringssl/src/decrepit/dh/dh_decrepit.c
 FILE: ../../../third_party/boringssl/src/decrepit/dsa/dsa_decrepit.c
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 1998-2002 The OpenSSL Project.  All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in
-   the documentation and/or other materials provided with the
-   distribution.
-
-3. All advertising materials mentioning features or use of this
-   software must display the following acknowledgment:
-   "This product includes software developed by the OpenSSL Project
-   for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
-
-4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
-   endorse or promote products derived from this software without
-   prior written permission. For written permission, please contact
-   openssl-core@openssl.org.
-
-5. Products derived from this software may not be called "OpenSSL"
-   nor may "OpenSSL" appear in their names without prior written
-   permission of the OpenSSL Project.
-
-6. Redistributions of any form whatsoever must retain the following
-   acknowledgment:
-   "This product includes software developed by the OpenSSL Project
-   for use in the OpenSSL Toolkit (http://www.openssl.org/)"
-
-THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
-EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
-ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/decrepit/xts/xts.c
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/decrepit/xts/xts.c
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2011 The OpenSSL Project.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -6349,6 +6289,7 @@ ORIGIN: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc + ../../.
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.h
+FILE: ../../../third_party/dart/runtime/vm/datastream.cc
 FILE: ../../../third_party/dart/runtime/vm/finalizable_data.h
 FILE: ../../../third_party/dart/sdk/lib/typed_data/unmodifiable_typed_data.dart
 ----------------------------------------------------------------------------------------------------
