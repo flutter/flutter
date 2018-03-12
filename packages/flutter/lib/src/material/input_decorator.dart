@@ -1556,7 +1556,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Color activeColor = _getActiveColor(themeData);
     final bool decorationIsDense = decoration.isDense == true; // isDense == null, same as false
     final double iconSize = decorationIsDense ? 18.0 : 24.0;
-    final Color iconColor = isFocused ? activeColor : Colors.black45;
+    final Color iconColor = isFocused ? activeColor : themeData.iconTheme.color;
 
     final Widget icon = decoration.icon == null ? null :
       new Padding(
