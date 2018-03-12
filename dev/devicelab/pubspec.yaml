@@ -9,7 +9,7 @@ environment:
 dependencies:
   args: 1.4.1
   file: 2.3.7
-  image: 1.1.29
+  image: 1.1.30
   meta: 1.1.2
   path: 1.5.1
   platform: 2.1.2
