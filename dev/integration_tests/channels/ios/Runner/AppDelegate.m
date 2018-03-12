@@ -20,15 +20,15 @@
 }
 @end
 
-const uint8_t DATE = 0;
-const uint8_t PAIR = 1;
+const UInt8 DATE = 128;
+const UInt8 PAIR = 129;
 
 @interface ExtendedWriter : FlutterStandardWriter
-- (void)writeUnknownValue:(id)value;
+- (void)writeValue:(id)value;
 @end
 
 @implementation ExtendedWriter
-- (void)writeUnknownValue:(id)value {
+- (void)writeValue:(id)value {
   if ([value isKindOfClass:[NSDate class]]) {
     [self writeByte:DATE];
     NSDate* date = value;
@@ -41,19 +41,18 @@ const uint8_t PAIR = 1;
     [self writeValue:pair.left];
     [self writeValue:pair.right];
   } else {
-    [super writeUnknownValue:value];
+    [super writeValue:value];
   }
 }
 @end
 
 @interface ExtendedReader : FlutterStandardReader
-- (id)readUnknownValue;
+- (id)readValueOfType:(UInt8)type;
 @end
 
 @implementation ExtendedReader
-- (id)readUnknownValue {
-  uint8_t field = [self readByte];
-  switch (field) {
+- (id)readValueOfType:(UInt8)type {
+  switch (type) {
     case DATE: {
       SInt64 value;
       [self readBytes:&value length:8];
@@ -63,7 +62,7 @@ const uint8_t PAIR = 1;
     case PAIR: {
       return [[Pair alloc] initWithLeft:[self readValue] right:[self readValue]];
     }
-    default: return [super readUnknownValue];
+    default: return [super readValueOfType:type];
   }
 }
 @end
