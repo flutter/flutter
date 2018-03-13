@@ -65,7 +65,6 @@ class _AppBarBackground extends StatelessWidget {
 class GalleryHome extends StatefulWidget {
   const GalleryHome({
     Key key,
-    //this.useLightTheme,
     this.galleryTheme,
     @required this.onThemeChanged,
     this.timeDilation,
@@ -86,10 +85,6 @@ class GalleryHome extends StatefulWidget {
        assert(onTimeDilationChanged != null),
        super(key: key);
 
-  /*
-  final bool useLightTheme;
-  final ValueChanged<bool> onThemeChanged;
-  */
   final GalleryTheme galleryTheme;
   final ValueChanged<GalleryTheme> onThemeChanged;
 
@@ -178,7 +173,6 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
     Widget home = new Scaffold(
       key: _scaffoldKey,
       drawer: new GalleryDrawer(
-        //useLightTheme: widget.useLightTheme,
         galleryTheme: widget.galleryTheme,
         onThemeChanged: widget.onThemeChanged,
         timeDilation: widget.timeDilation,

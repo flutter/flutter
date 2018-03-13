@@ -38,7 +38,6 @@ class GalleryApp extends StatefulWidget {
 }
 
 class GalleryAppState extends State<GalleryApp> {
-  //bool _useLightTheme = true;
   GalleryTheme _galleryTheme = kAllGalleryThemes[0];
   bool _showPerformanceOverlay = false;
   bool _checkerboardRasterCacheImages = false;
@@ -79,15 +78,7 @@ class GalleryAppState extends State<GalleryApp> {
   @override
   Widget build(BuildContext context) {
     Widget home = new GalleryHome(
-      // useLightTheme: _useLightTheme,
       galleryTheme: _galleryTheme,
-      /*
-      onThemeChanged: (bool value) {
-        setState(() {
-          _useLightTheme = value;
-        });
-      },
-      */
       onThemeChanged: (GalleryTheme value) {
         setState(() {
           _galleryTheme = value;
@@ -169,7 +160,6 @@ class GalleryAppState extends State<GalleryApp> {
     return new MaterialApp(
       title: 'Flutter Gallery',
       color: Colors.grey,
-      //theme: (_useLightTheme ? _kGalleryPurpleTheme : _kGalleryDarkTheme).copyWith(platform: _platform ?? defaultTargetPlatform),
       theme: _galleryTheme.theme.copyWith(platform: _platform ?? defaultTargetPlatform),
       showPerformanceOverlay: _showPerformanceOverlay,
       checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
