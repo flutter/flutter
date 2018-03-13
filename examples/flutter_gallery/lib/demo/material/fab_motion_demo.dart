@@ -107,7 +107,6 @@ class _TopStartFloatingActionButtonPositioner extends FloatingActionButtonPositi
     // at the start of the screen, based on the text direction.
     double fabX;
     assert(scaffoldGeometry.textDirection != null);
-    final double padding = _horizontalInset + scaffoldGeometry.horizontalFloatingActionButtonPadding;
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
         // In RTL layouts, the start of the screen is on the right side,
@@ -122,7 +121,8 @@ class _TopStartFloatingActionButtonPositioner extends FloatingActionButtonPositi
         // The Floating Action Button's origin is at its top-left, so we also need
         // to subtract the Floating Action Button's width to align the right edge
         // of the Floating Action Button instead of the left edge.
-        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - padding;
+        final double startPadding = _horizontalInset + scaffoldGeometry.minInsets.right;
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - startPadding;
         break;
       case TextDirection.ltr:
         // In LTR layouts, the start of the screen is on the left side,
@@ -131,7 +131,8 @@ class _TopStartFloatingActionButtonPositioner extends FloatingActionButtonPositi
         // Placing the fabX at 0.0 will align the left edge of the
         // Floating Action Button with the left edge of the screen, so all
         // we need to do is offset fabX by the designated padding.
-        fabX = padding;
+        final double startPadding = _horizontalInset + scaffoldGeometry.minInsets.left;
+        fabX = startPadding;
         break;
     }
     // Finally, we'll place the Y coordinate for the Floating Action Button 
