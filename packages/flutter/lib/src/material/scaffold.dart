@@ -236,14 +236,14 @@ class ScaffoldPrelayoutGeometry {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const ScaffoldPrelayoutGeometry({
-    this.bottomSheetSize, 
-    this.contentBottom, 
-    this.contentTop, 
-    this.floatingActionButtonSize, 
-    this.horizontalFloatingActionButtonPadding, 
-    this.scaffoldSize, 
-    this.snackBarSize, 
-    this.textDirection,
+    @required this.bottomSheetSize, 
+    @required this.contentBottom, 
+    @required this.contentTop, 
+    @required this.floatingActionButtonSize, 
+    @required this.minInsets, 
+    @required this.scaffoldSize, 
+    @required this.snackBarSize, 
+    @required this.textDirection,
   });
 
   /// The [Size] of [Scaffold.floatingActionButton].
@@ -264,6 +264,10 @@ class ScaffoldPrelayoutGeometry {
   /// place the [FloatingActionButton] at the bottom of the screen, while
   /// keeping it above the [BottomSheet], the [Scaffold.bottomNavigationBar],
   /// or the keyboard.
+  /// 
+  /// Note that [Scaffold.body] is laid out with respect to [minInsets] already.
+  /// This means that a [FloatingActionButtonPositioner] does not need to factor
+  /// in [minInsets.bottom] when aligning a [FloatingActionButton] to [contentBottom].
   final double contentBottom;
 
   /// The vertical distance from the [Scaffold]'s origin to the top of
@@ -272,15 +276,23 @@ class ScaffoldPrelayoutGeometry {
   /// This is useful in a [FloatingActionButtonPositioner] designed to
   /// place the [FloatingActionButton] at the top of the screen, while
   /// keeping it below the [Scaffold.appBar].
+  /// 
+  /// Note that [Scaffold.body] is laid out with respect to [minInsets] already.
+  /// This means that a [FloatingActionButtonPositioner] does not need to factor
+  /// in [minInsets.top] when aligning a [FloatingActionButton] to [contentTop].
   final double contentTop;
 
-  /// The minimum horizontal padding to inset the [FloatingActionButton] by.
+  /// The minimum padding to inset the [FloatingActionButton] by for it
+  /// to remain visible.
   /// 
-  /// In a [FloatingActionButtonPositioner] designed to put the
-  /// [FloatingActionButton] at the left or right edge of the screen, the
-  /// left and right sides of the [FloatingActionButton] should be placed
-  /// at least this far away from the edge of the screen.
-  final double horizontalFloatingActionButtonPadding;
+  /// This value is the result of calling [MediaQuery.padding] in the
+  /// [Scaffold]'s [BuildContext],
+  /// and is useful for insetting the [FloatingActionButton] to avoid features like
+  /// the system status bar or the keyboard.
+  /// 
+  /// If [Scaffold.resizeToAvoidBottomPadding] is set to false, [minInsets.bottom]
+  /// will be 0.0 instead of [MediaQuery.padding.bottom].
+  final EdgeInsets minInsets;
 
   /// The [Size] of the whole [Scaffold].
   /// 
@@ -290,9 +302,11 @@ class ScaffoldPrelayoutGeometry {
   /// 
   /// This means that [FloatingActionButtonPositioner]s designed to reposition
   /// the [FloatingActionButton] based on events such as the keyboard popping
-  /// up should use [contentBottom] and [contentTop] instead.
+  /// up should use [minInsets] to make sure that the [FloatingActionButton] is
+  /// inset by enough to remain visible.
   /// 
-  /// To handle horizontal size changes, use [horizontalFloatingActionButtonPadding].
+  /// See [minInsets] and [MediaQuery.padding] for more information on the appropriate
+  /// insets to apply.
   final Size scaffoldSize;
 
   /// The [Size] of the [Scaffold]'s [SnackBar].
@@ -337,10 +351,14 @@ class _EndFloatFabPositioner extends FloatingActionButtonPositioner {
     assert(scaffoldGeometry.textDirection != null);
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
-        fabX = _kFloatingActionButtonMargin + scaffoldGeometry.horizontalFloatingActionButtonPadding;
+        // In RTL, the end of the screen is the left.
+        final double endPadding = scaffoldGeometry.minInsets.left;
+        fabX = _kFloatingActionButtonMargin + endPadding;
         break;
       case TextDirection.ltr:
-        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - _kFloatingActionButtonMargin - scaffoldGeometry.horizontalFloatingActionButtonPadding;
+        // In LTR, the end of the screen is the right.
+        final double endPadding = scaffoldGeometry.minInsets.right;
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - _kFloatingActionButtonMargin - endPadding;
       break;
     }
 
@@ -531,21 +549,17 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
-    @required this.statusBarHeight,
-    @required this.bottomViewInset,
+    @required this.minInsets, 
     @required this.textDirection,
     @required this.geometryNotifier,
     // for floating action button
-    @required this.horizontalPadding, 
     @required this.previousFloatingActionButtonPositioner,
     @required this.currentFloatingActionButtonPositioner,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
   }) : assert(previousFloatingActionButtonPositioner != null), assert(currentFloatingActionButtonPositioner != null);
 
-  final double statusBarHeight;
-  final double bottomViewInset;
-  final double horizontalPadding;
+  final EdgeInsets minInsets;
   final TextDirection textDirection;
   final _ScaffoldGeometryNotifier geometryNotifier;
 
@@ -594,7 +608,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // Set the content bottom to account for the greater of the height of any
     // bottom-anchored material widgets or of the keyboard or other
     // bottom-anchored system UI.
-    final double contentBottom = math.max(0.0, bottom - math.max(bottomViewInset, bottomWidgetsHeight));
+    final double contentBottom = math.max(0.0, bottom - math.max(minInsets.bottom, bottomWidgetsHeight));
 
     if (hasChild(_ScaffoldSlot.body)) {
       final BoxConstraints bodyConstraints = new BoxConstraints(
@@ -645,7 +659,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         contentBottom: contentBottom,
         contentTop: contentTop,
         floatingActionButtonSize: fabSize,
-        horizontalFloatingActionButtonPadding: horizontalPadding,
+        minInsets: minInsets,
         scaffoldSize: size,
         snackBarSize: snackBarSize,
         textDirection: textDirection,
@@ -662,7 +676,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ScaffoldSlot.statusBar)) {
-      layoutChild(_ScaffoldSlot.statusBar, fullWidthConstraints.tighten(height: statusBarHeight));
+      layoutChild(_ScaffoldSlot.statusBar, fullWidthConstraints.tighten(height: minInsets.top));
       positionChild(_ScaffoldSlot.statusBar, Offset.zero);
     }
 
@@ -684,9 +698,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_ScaffoldLayout oldDelegate) {
-    return oldDelegate.statusBarHeight != statusBarHeight
-        || oldDelegate.bottomViewInset != bottomViewInset
-        || oldDelegate.horizontalPadding != horizontalPadding
+    return oldDelegate.minInsets != minInsets
         || oldDelegate.textDirection != textDirection
         || oldDelegate.floatingActionButtonMoveAnimationProgress != floatingActionButtonMoveAnimationProgress
         || oldDelegate.previousFloatingActionButtonPositioner != previousFloatingActionButtonPositioner
@@ -1773,17 +1785,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       );
     }
 
-    double endPadding;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        endPadding = mediaQuery.padding.left;
-        break;
-      case TextDirection.ltr:
-        endPadding = mediaQuery.padding.right;
-        break;
-    }
-    assert(endPadding != null);
-
+    // The minimum insets for contents of the Scaffold to keep visible.
+    final EdgeInsets minInsets = mediaQuery.padding.copyWith(
+      bottom: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
+    );
+      
     return new _ScaffoldScope(
       hasDrawer: hasDrawer,
       geometryNotifier: _geometryNotifier,
@@ -1795,14 +1801,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             return new CustomMultiChildLayout(
               children: children,
               delegate: new _ScaffoldLayout(
-                bottomViewInset: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
+                minInsets: minInsets,
                 currentFloatingActionButtonPositioner: _floatingActionButtonPositioner,
                 floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
                 floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
                 geometryNotifier: _geometryNotifier,
-                horizontalPadding: endPadding,
                 previousFloatingActionButtonPositioner: _previousFloatingActionButtonPositioner,
-                statusBarHeight: mediaQuery.padding.top,
                 textDirection: textDirection,
               ),
             );
