@@ -400,7 +400,9 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--output-dir", "${intermediateDir}"
                 if (previewDart2) {
                     args "--preview-dart-2"
-                }
+                } else {
+		    args "--no-preview-dart-2"
+		}
                 if (trackWidgetCreation) {
                     args "--track-widget-creation"
                 }
@@ -432,7 +434,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "--target", targetPath
             if (previewDart2) {
                 args "--preview-dart-2"
-            }
+            } else {
+                args "--no-preview-dart-2"
+	    }
             if (trackWidgetCreation) {
                 args "--track-widget-creation"
             }
