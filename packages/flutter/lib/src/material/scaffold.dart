@@ -93,7 +93,7 @@ abstract class FloatingActionButtonPositioner {
   /// 
   /// This uses a [ScaffoldPrelayoutGeometry], which the [Scaffold] constructs
   /// during its layout phase after it has laid out every widget it can lay out
-  /// before the [FloatingActionButton]. The [Scaffold] uses the [Offset]
+  /// except the [FloatingActionButton]. The [Scaffold] uses the [Offset]
   /// returned from this method to position the [FloatingActionButton] and
   /// complete its layout.
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry);
@@ -222,9 +222,12 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
   double getAnimationRestart(double previousValue) => math.min(1.0 - previousValue, previousValue);
 }
 
-/// The geometry of the [Scaffold] before it finishes laying out.
+/// The geometry of the [Scaffold] after it all of its contents except for the
+/// [FloatingActionButton].
 /// 
-/// The Scaffold passes this prelayout geometry to its [FloatingActionButtonPositioner].
+/// The [Scaffold] passes this prelayout geometry to its
+/// [FloatingActionButtonPositioner], which produces an [Offset] that the 
+/// [Scaffold] uses to finish laying out the [FloatingActionButton].
 /// 
 /// For a description of the [Scaffold]'s geometry after it has
 /// finished laying out, see the [ScaffoldGeometry].
@@ -232,14 +235,20 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
 class ScaffoldPrelayoutGeometry {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const ScaffoldPrelayoutGeometry({this.bottomSheetSize, this.contentBottom, this.contentTop, this.floatingActionButtonSize, this.horizontalFloatingActionButtonPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
+  const ScaffoldPrelayoutGeometry({
+    this.bottomSheetSize, 
+    this.contentBottom, 
+    this.contentTop, 
+    this.floatingActionButtonSize, 
+    this.horizontalFloatingActionButtonPadding, 
+    this.scaffoldSize, 
+    this.snackBarSize, 
+    this.textDirection,
+  });
 
-  /// The [Size] of the [Scaffold]'s [FloatingActionButton] (if available).
+  /// The [Size] of [Scaffold.floatingActionButton].
   /// 
-  /// The [Scaffold] will determine the [floatingActionButtonSize] if 
-  /// [Scaffold.floatingActionButton] is not null.
-  /// 
-  /// If [Scaffold.floatingActionButton] is null, this should be [Size.zero].
+  /// If [Scaffold.floatingActionButton] is null, this will be [Size.zero].
   final Size floatingActionButtonSize;
 
   /// The [Size] of the [Scaffold]'s [BottomSheet] (if available).
