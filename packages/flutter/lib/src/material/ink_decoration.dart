@@ -233,7 +233,7 @@ class _InkState extends State<Ink> {
 
   @override
   void deactivate() {
-    _ink.dispose();
+    _ink?.dispose();
     assert(_ink == null);
     super.deactivate();
   }
