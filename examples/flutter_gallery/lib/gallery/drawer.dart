@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
+import 'theme.dart';
+
 class LinkTextSpan extends TextSpan {
 
   // Beware!
@@ -107,7 +109,7 @@ class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
 class GalleryDrawer extends StatelessWidget {
   const GalleryDrawer({
     Key key,
-    this.useLightTheme,
+    this.galleryTheme,
     @required this.onThemeChanged,
     this.timeDilation,
     @required this.onTimeDilationChanged,
@@ -127,8 +129,8 @@ class GalleryDrawer extends StatelessWidget {
        assert(onTimeDilationChanged != null),
        super(key: key);
 
-  final bool useLightTheme;
-  final ValueChanged<bool> onThemeChanged;
+  final GalleryTheme galleryTheme;
+  final ValueChanged<GalleryTheme> onThemeChanged;
 
   final double timeDilation;
   final ValueChanged<double> onTimeDilationChanged;
@@ -158,23 +160,16 @@ class GalleryDrawer extends StatelessWidget {
     final TextStyle aboutTextStyle = themeData.textTheme.body2;
     final TextStyle linkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
 
-    final Widget lightThemeItem = new RadioListTile<bool>(
-      secondary: const Icon(Icons.brightness_5),
-      title: const Text('Light'),
-      value: true,
-      groupValue: useLightTheme,
-      onChanged: onThemeChanged,
-      selected: useLightTheme,
-    );
-
-    final Widget darkThemeItem = new RadioListTile<bool>(
-      secondary: const Icon(Icons.brightness_7),
-      title: const Text('Dark'),
-      value: false,
-      groupValue: useLightTheme,
-      onChanged: onThemeChanged,
-      selected: !useLightTheme,
-    );
+    final List<Widget> themeItems = kAllGalleryThemes.map<Widget>((GalleryTheme theme) {
+      return new RadioListTile<GalleryTheme>(
+        title: new Text(theme.name),
+        secondary: new Icon(theme.icon),
+        value: theme,
+        groupValue: galleryTheme,
+        onChanged: onThemeChanged,
+        selected: galleryTheme == theme,
+      );
+    }).toList();
 
     final Widget mountainViewItem = new RadioListTile<TargetPlatform>(
       // on iOS, we don't want to show an Android phone icon
@@ -288,18 +283,19 @@ class GalleryDrawer extends StatelessWidget {
     );
 
     final List<Widget> allDrawerItems = <Widget>[
-      new GalleryDrawerHeader(light: useLightTheme),
-      lightThemeItem,
-      darkThemeItem,
+      new GalleryDrawerHeader(
+        light: galleryTheme.theme.brightness == Brightness.light,
+      ),
+    ]
+    ..addAll(themeItems)
+    ..addAll(<Widget>[
       const Divider(),
       mountainViewItem,
       cupertinoItem,
       const Divider(),
-    ];
-
-    allDrawerItems.addAll(textSizeItems);
-
-    allDrawerItems..addAll(<Widget>[
+    ])
+    ..addAll(textSizeItems)
+    ..addAll(<Widget>[
       overrideDirectionItem,
       const Divider(),
       animateSlowlyItem,
