@@ -210,11 +210,11 @@ class AssetImage extends AssetBundleImageProvider {
     return completer.future;
   }
 
-  static Future<Map<String, List<String>>> _manifestParser(String json) {
-    if (json == null)
+  static Future<Map<String, List<String>>> _manifestParser(String jsonData) {
+    if (jsonData == null)
       return null;
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
-    final Map<String, dynamic> parsedJson = JSON.decode(json);
+    final Map<String, dynamic> parsedJson = json.decode(jsonData);
     final Iterable<String> keys = parsedJson.keys;
     final Map<String, List<String>> parsedManifest =
         new Map<String, List<String>>.fromIterables(keys,

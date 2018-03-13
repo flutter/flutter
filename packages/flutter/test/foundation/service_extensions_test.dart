@@ -56,7 +56,7 @@ class TestServiceExtensionsBinding extends BindingBase
   Future<Null> doFrame() async {
     frameScheduled = false;
     if (ui.window.onBeginFrame != null)
-      ui.window.onBeginFrame(Duration.ZERO);
+      ui.window.onBeginFrame(Duration.zero);
     await flushMicrotasks();
     if (ui.window.onDrawFrame != null)
       ui.window.onDrawFrame();
@@ -303,7 +303,7 @@ void main() {
 
     completed = false;
     BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) async {
-      expect(UTF8.decode(message.buffer.asUint8List()), 'test');
+      expect(utf8.decode(message.buffer.asUint8List()), 'test');
       completed = true;
       return new ByteData(5); // 0x0000000000
     });

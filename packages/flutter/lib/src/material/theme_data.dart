@@ -362,6 +362,9 @@ class ThemeData extends Diagnosticable {
 
   /// The color of [Divider]s and [PopupMenuDivider]s, also used
   /// between [ListTile]s, between rows in [DataTable]s, and so forth.
+  ///
+  /// To create an appropriate [BorderSide] that uses this color, consider
+  /// [Divider.createBorderSide].
   final Color dividerColor;
 
   /// The highlight color used during ink splash animations or to

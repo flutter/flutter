@@ -14,22 +14,22 @@ class RenderSolidColorBox extends RenderDecoratedBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return desiredSize.width == double.INFINITY ? 0.0 : desiredSize.width;
+    return desiredSize.width == double.infinity ? 0.0 : desiredSize.width;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    return desiredSize.width == double.INFINITY ? 0.0 : desiredSize.width;
+    return desiredSize.width == double.infinity ? 0.0 : desiredSize.width;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return desiredSize.height == double.INFINITY ? 0.0 : desiredSize.height;
+    return desiredSize.height == double.infinity ? 0.0 : desiredSize.height;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return desiredSize.height == double.INFINITY ? 0.0 : desiredSize.height;
+    return desiredSize.height == double.infinity ? 0.0 : desiredSize.height;
   }
 
   @override

@@ -236,7 +236,7 @@ class RotationTransition extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final double turnsValue = turns.value;
-    final Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.PI * 2.0);
+    final Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.pi * 2.0);
     return new Transform(
       transform: transform,
       alignment: Alignment.center,
@@ -331,6 +331,12 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderAnimatedOpacity renderObject) {
     renderObject
       ..opacity = opacity;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
   }
 }
 
@@ -586,7 +592,7 @@ class AlignTransition extends AnimatedWidget {
 ///       child: new Container(width: 200.0, height: 200.0, color: Colors.green),
 ///       builder: (BuildContext context, Widget child) {
 ///         return new Transform.rotate(
-///           angle: _controller.value * 2.0 * math.PI,
+///           angle: _controller.value * 2.0 * math.pi,
 ///           child: child,
 ///         );
 ///       },

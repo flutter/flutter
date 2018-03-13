@@ -8,6 +8,8 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+// To run this: bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart
+
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String _flutter = path.join(_flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 
@@ -61,7 +63,6 @@ class Section {
 const String kDartDocPrefix = '///';
 const String kDartDocPrefixWithSpace = '$kDartDocPrefix ';
 
-/// To run this: bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart
 Future<Null> main() async {
   final Directory temp = Directory.systemTemp.createTempSync('analyze_sample_code_');
   int exitCode = 1;
@@ -136,8 +137,11 @@ Future<Null> main() async {
     }
     buffer.add('// generated code');
     buffer.add('import \'dart:async\';');
+    buffer.add('import \'dart:convert\';');
     buffer.add('import \'dart:math\' as math;');
+    buffer.add('import \'dart:typed_data\';');
     buffer.add('import \'dart:ui\' as ui;');
+    buffer.add('import \'package:flutter_test/flutter_test.dart\' hide TypeMatcher;');
     for (FileSystemEntity file in flutterPackage.listSync(recursive: false, followLinks: false)) {
       if (file is File && path.extension(file.path) == '.dart') {
         buffer.add('');
@@ -158,6 +162,8 @@ name: analyze_sample_code
 dependencies:
   flutter:
     sdk: flutter
+  flutter_test:
+    sdk: flutter
 ''');
     print('Found $sampleCodeSections sample code sections.');
     final Process process = await Process.start(
@@ -166,7 +172,7 @@ dependencies:
       workingDirectory: temp.path,
     );
     stderr.addStream(process.stderr);
-    final List<String> errors = await process.stdout.transform<String>(UTF8.decoder).transform<String>(const LineSplitter()).toList();
+    final List<String> errors = await process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList();
     if (errors.first == 'Building flutter tool...')
       errors.removeAt(0);
     if (errors.first.startsWith('Running "flutter packages get" in '))
@@ -257,7 +263,10 @@ void processBlock(Line line, List<String> block, List<Section> sections) {
   if (block.first.startsWith('new ') || block.first.startsWith('const ')) {
     _expressionId += 1;
     sections.add(new Section(line, 'dynamic expression$_expressionId = ', block.toList(), ';'));
-  } else if (block.first.startsWith('class ') || block.first.startsWith('const ')) {
+  } else if (block.first.startsWith('await ')) {
+    _expressionId += 1;
+    sections.add(new Section(line, 'Future<Null> expression$_expressionId() async { ', block.toList(), ' }'));
+  } else if (block.first.startsWith('class ')) {
     sections.add(new Section(line, null, block.toList(), null));
   } else {
     final List<String> buffer = <String>[];

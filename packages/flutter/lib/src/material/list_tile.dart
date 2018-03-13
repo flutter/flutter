@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'divider.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
@@ -284,19 +285,20 @@ class ListTile extends StatelessWidget {
     assert(tiles != null);
     assert(color != null || context != null);
 
-    final Color dividerColor = color ?? Theme.of(context).dividerColor;
     final Iterator<Widget> iterator = tiles.iterator;
     final bool isNotEmpty = iterator.moveNext();
+
+    final Decoration decoration = new BoxDecoration(
+      border: new Border(
+        bottom: Divider.createBorderSide(context, color: color),
+      ),
+    );
 
     Widget tile = iterator.current;
     while (iterator.moveNext()) {
       yield new DecoratedBox(
         position: DecorationPosition.foreground,
-        decoration: new BoxDecoration(
-          border: new Border(
-            bottom: new BorderSide(color: dividerColor, width: 0.0),
-          ),
-        ),
+        decoration: decoration,
         child: tile,
       );
       tile = iterator.current;

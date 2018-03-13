@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show JSON;
+import 'dart:convert' show json;
 
 import 'package:file/file.dart';
 import 'package:flutter_driver/flutter_driver.dart';
@@ -245,7 +245,7 @@ void main() {
         ]).writeSummaryToFile('test', destinationDirectory: tempDir.path);
         final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline_summary.json')).readAsString();
-        expect(JSON.decode(written), <String, dynamic>{
+        expect(json.decode(written), <String, dynamic>{
           'average_frame_build_time_millis': 7.0,
           'worst_frame_build_time_millis': 11.0,
           'missed_frame_build_budget_count': 2,

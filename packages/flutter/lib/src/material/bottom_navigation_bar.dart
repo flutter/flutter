@@ -41,7 +41,7 @@ enum BottomNavigationBarType {
 }
 
 /// A material widget displayed at the bottom of an app for selecting among a
-/// small number of views.
+/// small number of views, typically between three and five.
 ///
 /// The bottom navigation bar consists of multiple items in the form of
 /// text labels, icons, or both, laid out on top of a piece of material. It
@@ -50,6 +50,23 @@ enum BottomNavigationBarType {
 ///
 /// A bottom navigation bar is usually used in conjunction with a [Scaffold],
 /// where it is provided as the [Scaffold.bottomNavigationBar] argument.
+///
+/// The bottom navigation bar's [type] changes how its [items] are displayed.
+/// If not specified it's automatically set to [BottomNavigationBarType.fixed]
+/// when there are less than four items, [BottomNavigationBarType.shifting]
+/// otherwise.
+///
+///  * [BottomNavigationBarType.fixed], the default when there are less than
+///    four [items]. The selected item is rendered with [fixedColor] if it's
+///    non-null, otherwise the theme's [ThemeData.primaryColor] is used. The
+///    navigation bar's background color is the default [Material] background
+///    color, [ThemeData.canvasColor] (essentially opaque white).
+///  * [BottomNavigationBarType.shifting], the default when there are four
+///    or more [items]. All items are rendered in white and the navigation bar's
+///    background color is the same as the
+///    [BottomNavigationBarItem.backgroundColor] of the selected item. In this
+///    case it's assumed that each item will have a different background color
+///    and that background color will contrast well with white.
 ///
 /// See also:
 ///
@@ -60,16 +77,14 @@ class BottomNavigationBar extends StatefulWidget {
   /// Creates a bottom navigation bar, typically used in a [Scaffold] where it
   /// is provided as the [Scaffold.bottomNavigationBar] argument.
   ///
-  /// The argument [items] should not be null.
+  /// The length of [items] must be at least two.
   ///
-  /// The number of items passed should be equal to, or greater than, two. If
-  /// three or fewer items are passed, then the default [type] (if [type] is
-  /// null or not given) will be [BottomNavigationBarType.fixed], and if more
-  /// than three items are passed, will be [BottomNavigationBarType.shifting].
+  /// If [type] is null then [BottomNavigationBarType.fixed] is used when there
+  /// are two or three [items], [BottomNavigationBarType.shifting] otherwise.
   ///
-  /// Passing a null [fixedColor] will cause a fallback to the theme's primary
-  /// color. The [fixedColor] field will be ignored if the [BottomNavigationBar.type] is
-  /// not [BottomNavigationBarType.fixed].
+  /// If [fixedColor] is null then the theme's primary color,
+  /// [ThemeData.primaryColor], is used. However if [BottomNavigationBar.type] is
+  /// [BottomNavigationBarType.shifting] then [fixedColor] is ignored.
   BottomNavigationBar({
     Key key,
     @required this.items,
@@ -107,8 +122,9 @@ class BottomNavigationBar extends StatefulWidget {
   /// The color of the selected item when bottom navigation bar is
   /// [BottomNavigationBarType.fixed].
   ///
-  /// If [fixedColor] is null, it will use the theme's primary color. The [fixedColor]
-  /// field will be ignored if the [type] is not [BottomNavigationBarType.fixed].
+  /// If [fixedColor] is null then the theme's primary color,
+  /// [ThemeData.primaryColor], is used. However if [BottomNavigationBar.type] is
+  /// [BottomNavigationBarType.shifting] then [fixedColor] is ignored.
   final Color fixedColor;
 
   /// The size of all of the [BottomNavigationBarItem] icons.

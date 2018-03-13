@@ -12,7 +12,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'box.dart';
 import 'object.dart';
 
-const double _kQuarterTurnsInRadians = math.PI / 2.0;
+const double _kQuarterTurnsInRadians = math.pi / 2.0;
 
 /// Rotates its child by a integral number of quarter turns.
 ///

@@ -530,7 +530,7 @@ class FlutterDriver {
     await new Future<Null>.delayed(const Duration(seconds: 2));
 
     final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot').timeout(timeout);
-    return BASE64.decode(result['screenshot']);
+    return base64.decode(result['screenshot']);
   }
 
   /// Returns the Flags set in the Dart VM as JSON.

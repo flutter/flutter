@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON;
+import 'dart:convert' show json;
 
 import 'package:meta/meta.dart';
 
@@ -566,8 +566,8 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
     // the directory and basenames.
     'framework': fs.path.basenameWithoutExtension(service['ios-framework'])
   }).toList();
-  final Map<String, dynamic> json = <String, dynamic>{ 'services' : jsonServices };
-  manifest.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);
+  final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services' : jsonServices };
+  manifest.writeAsStringSync(json.encode(jsonObject), mode: FileMode.WRITE, flush: true);
 }
 
 Future<bool> upgradePbxProjWithFlutterAssets(String app) async {

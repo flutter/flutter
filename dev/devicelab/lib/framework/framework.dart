@@ -67,7 +67,7 @@ class _TaskRunner {
         ? new Duration(minutes: int.parse(parameters['timeoutInMinutes']))
         : _kDefaultTaskTimeout;
       final TaskResult result = await run(taskTimeout);
-      return new ServiceExtensionResponse.result(JSON.encode(result.toJson()));
+      return new ServiceExtensionResponse.result(json.encode(result.toJson()));
     });
     registerExtension('ext.cocoonRunnerReady',
         (String method, Map<String, String> parameters) async {
@@ -164,7 +164,7 @@ class TaskResult {
   /// Constructs a successful result using JSON data stored in a file.
   factory TaskResult.successFromFile(File file,
       {List<String> benchmarkScoreKeys}) {
-    return new TaskResult.success(JSON.decode(file.readAsStringSync()),
+    return new TaskResult.success(json.decode(file.readAsStringSync()),
         benchmarkScoreKeys: benchmarkScoreKeys);
   }
 

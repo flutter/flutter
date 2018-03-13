@@ -334,7 +334,7 @@ class WidgetInspectorService {
     else
       throw new FlutterError('Cannot get parent chain for node of type ${value.runtimeType}');
 
-    return JSON.encode(path.map((_DiagnosticsPathNode node) => _pathNodeToJson(node, groupName)).toList());
+    return json.encode(path.map((_DiagnosticsPathNode node) => _pathNodeToJson(node, groupName)).toList());
   }
 
   Map<String, Object> _pathNodeToJson(_DiagnosticsPathNode pathNode, String groupName) {
@@ -393,7 +393,7 @@ class WidgetInspectorService {
   }
 
   String _serialize(DiagnosticsNode node, String groupName) {
-    return JSON.encode(_nodeToJson(node, groupName));
+    return json.encode(_nodeToJson(node, groupName));
   }
 
   List<Map<String, Object>> _nodesToJson(Iterable<DiagnosticsNode> nodes, String groupName) {
@@ -406,14 +406,14 @@ class WidgetInspectorService {
   /// object that `diagnosticsNodeId` references.
   String getProperties(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
-    return JSON.encode(_nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), groupName));
+    return json.encode(_nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), groupName));
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
   /// object that `diagnosticsNodeId` references.
   String getChildren(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
-    return JSON.encode(_nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getChildren(), groupName));
+    return json.encode(_nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getChildren(), groupName));
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
@@ -614,7 +614,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     // Order matches by the size of the hit area.
     double _area(RenderObject object) {
       final Size size = object.semanticBounds?.size;
-      return size == null ? double.MAX_FINITE : size.width * size.height;
+      return size == null ? double.maxFinite : size.width * size.height;
     }
     regularHits.sort((RenderObject a, RenderObject b) => _area(a).compareTo(_area(b)));
     final Set<RenderObject> hits = new LinkedHashSet<RenderObject>();
@@ -823,7 +823,7 @@ class _RenderInspectorOverlay extends RenderBox {
 
   @override
   void performResize() {
-    size = constraints.constrain(const Size(double.INFINITY, double.INFINITY));
+    size = constraints.constrain(const Size(double.infinity, double.infinity));
   }
 
   @override

@@ -65,7 +65,7 @@ class Upload {
       } else {
         // TODO(hansmuller): only retry on 5xx and 429 responses
         logMessage('Request to save "$name" (length ${content.length}) failed with status ${response.statusCode}, will retry');
-        logMessage(await response.transform(UTF8.decoder).join());
+        logMessage(await response.transform(utf8.decoder).join());
       }
       return response.statusCode == HttpStatus.OK;
     } on TimeoutException catch (_) {

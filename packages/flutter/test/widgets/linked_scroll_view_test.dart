@@ -171,8 +171,8 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
     assert(beforeOverscroll == 0.0 || afterOverscroll == 0.0);
 
     final double localOverscroll = setPixels(value.clamp(
-      owner.canLinkWithBefore ? minScrollExtent : -double.INFINITY,
-      owner.canLinkWithAfter ? maxScrollExtent : double.INFINITY,
+      owner.canLinkWithBefore ? minScrollExtent : -double.infinity,
+      owner.canLinkWithAfter ? maxScrollExtent : double.infinity,
     ));
 
     assert(localOverscroll == 0.0 || (beforeOverscroll == 0.0 && afterOverscroll == 0.0));
