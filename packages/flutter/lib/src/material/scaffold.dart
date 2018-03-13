@@ -389,11 +389,14 @@ class _TransitionSnapshotFabPositioner extends FloatingActionButtonPositioner {
 
 /// Geometry information for [Scaffold] components after layout is finished.
 ///
-/// To get a [ValueNotifier] for the scaffold geometry call
-/// [Scaffold.geometryOf].
+/// To get a [ValueNotifier] for the scaffold geometry of a given
+/// [BuildContext], use [Scaffold.geometryOf].
 /// 
-/// For information about the [Scaffold]'s geometry that is used as part of
-/// the layout process, see [ScaffoldPrelayoutGeometry].
+/// The ScaffoldGeometry is only available during the paint phase, because
+/// its value is computed during the animation and layout phases prior to painting.
+/// 
+/// For information about the [Scaffold]'s geometry that is used while laying 
+/// out the [FloatingActionButton], see [ScaffoldPrelayoutGeometry].
 @immutable
 class ScaffoldGeometry {
   /// Create an object that describes the geometry of a [Scaffold].
