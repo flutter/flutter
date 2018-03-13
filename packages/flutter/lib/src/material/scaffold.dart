@@ -291,6 +291,8 @@ class ScaffoldPrelayoutGeometry {
   /// This means that [FloatingActionButtonPositioner]s designed to reposition
   /// the [FloatingActionButton] based on events such as the keyboard popping
   /// up should use [contentBottom] and [contentTop] instead.
+  /// 
+  /// To handle horizontal size changes, use [horizontalFloatingActionButtonPadding].
   final Size scaffoldSize;
 
   /// The [Size] of the [Scaffold]'s [SnackBar].
