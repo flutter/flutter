@@ -60,7 +60,8 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
-/// Interface for objects that place the [FloatingActionButton] in the [Scaffold].
+/// An object that defines a position for the [FloatingActionButton]
+/// based on the [Scaffold]'s [ScaffoldPrelayoutGeometry].
 /// 
 /// Flutter provides [FloatingActionButtonPositioner]s for the common
 /// [FloatingActionButton] placements in Material Design applications. These
@@ -73,6 +74,8 @@ enum _ScaffoldSlot {
 ///  * [FloatingActionButtonAnimator], which is used to animate the
 ///    [Scaffold.floatingActionButton] from one [FloatingActionButtonPositioner] to 
 ///    another.
+///  * [ScaffoldPrelayoutGeometry], the geometry that 
+///    [FloatingActionButtonPositioner]s use to position the [FloatingActionButton].
 abstract class FloatingActionButtonPositioner {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
