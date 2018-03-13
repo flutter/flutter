@@ -307,7 +307,6 @@ class _CenterFloatFabPositioner extends FloatingActionButtonPositioner {
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    print('Scaffold size: ${scaffoldGeometry.scaffoldSize}');
     // Compute the x-axis offset.
     final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
 
@@ -331,7 +330,6 @@ class _EndFloatFabPositioner extends FloatingActionButtonPositioner {
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    print('Scaffold size: ${scaffoldGeometry.scaffoldSize}');
     // Compute the x-axis offset.
     double fabX;
     assert(scaffoldGeometry.textDirection != null);
