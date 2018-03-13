@@ -27,10 +27,6 @@
   return [self.text substringWithRange:textRange];
 }
 
-- (NSString*)accessibilityLabel {
-  return self.text;
-}
-
 - (void)replaceRange:(UITextRange*)range withText:(NSString*)text {
   // This method is required but not called by accessibility API for
   // features we are using it for. It may need to be implemented if
@@ -241,14 +237,23 @@
 }
 
 - (NSString*)accessibilityLabel {
+  NSString* label = [super accessibilityLabel];
+  if (label != nil)
+    return label;
   return [self textInputSurrogate].accessibilityLabel;
 }
 
 - (NSString*)accessibilityHint {
+  NSString* hint = [super accessibilityHint];
+  if (hint != nil)
+    return hint;
   return [self textInputSurrogate].accessibilityHint;
 }
 
 - (NSString*)accessibilityValue {
+  NSString* value = [super accessibilityValue];
+  if (value != nil)
+    return value;
   return [self textInputSurrogate].accessibilityValue;
 }
 
@@ -256,7 +261,7 @@
   // Adding UIAccessibilityTraitKeyboardKey to the trait list so that iOS treats it like
   // a keyboard entry control, thus adding support for text editing features, such as
   // pinch to select text, and up/down fling to move cursor.
-  return [self textInputSurrogate].accessibilityTraits | UIAccessibilityTraitKeyboardKey;
+  return [super accessibilityTraits] | [self textInputSurrogate].accessibilityTraits | UIAccessibilityTraitKeyboardKey;
 }
 
 #pragma mark - UITextInput overrides
