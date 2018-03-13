@@ -105,7 +105,7 @@ const UInt8 PAIR = 129;
   [self setupMessagingHandshakeOnChannel:
     [FlutterBasicMessageChannel messageChannelWithName:@"std-msg"
                                        binaryMessenger:flutterController
-                                                 codec:[FlutterStandardMessageCodec withReaderWriter:extendedReaderWriter]]];
+                                                 codec:[FlutterStandardMessageCodec codecWithReaderWriter:extendedReaderWriter]]];
   [self setupMethodCallSuccessHandshakeOnChannel:
     [FlutterMethodChannel methodChannelWithName:@"json-method"
                                 binaryMessenger:flutterController
@@ -113,7 +113,7 @@ const UInt8 PAIR = 129;
   [self setupMethodCallSuccessHandshakeOnChannel:
     [FlutterMethodChannel methodChannelWithName:@"std-method"
                                 binaryMessenger:flutterController
-                                          codec:[FlutterStandardMethodCodec withReaderWriter:extendedReaderWriter]]];
+                                          codec:[FlutterStandardMethodCodec codecWithReaderWriter:extendedReaderWriter]]];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
