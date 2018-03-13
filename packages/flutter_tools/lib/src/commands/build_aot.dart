@@ -41,7 +41,7 @@ class BuildAotCommand extends BuildSubCommand {
       ..addFlag('quiet', defaultsTo: false)
       ..addFlag('preview-dart-2',
         defaultsTo: true,
-        negatable: false,
+        negatable: true,
 	hide: !verboseHelp)
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,

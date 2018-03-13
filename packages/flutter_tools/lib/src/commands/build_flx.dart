@@ -24,7 +24,7 @@ class BuildFlxCommand extends BuildSubCommand {
     argParser.addFlag(
       'preview-dart-2',
       defaultsTo: true,
-      negatable: false,
+      negatable: true,
       hide: !verboseHelp);
     argParser.addFlag(
       'track-widget-creation',

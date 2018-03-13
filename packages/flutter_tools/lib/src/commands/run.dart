@@ -113,6 +113,7 @@ class RunCommand extends RunCommandBase {
         help: 'Specify a pre-built application binary to use when running.');
     argParser.addFlag('preview-dart-2',
         defaultsTo: true,
+        negatable: true,
         hide: !verboseHelp,
         help: 'Preview Dart 2.0 functionality.');
     argParser.addFlag('track-widget-creation',
@@ -323,7 +324,7 @@ class RunCommand extends RunCommandBase {
     final List<FlutterDevice> flutterDevices = devices.map((Device device) {
       return new FlutterDevice(
         device,
-        previewDart2: true,
+        previewDart2: argResults['preview-dart-2'],
         trackWidgetCreation: argResults['track-widget-creation'],
         dillOutputPath: argResults['output-dill'],
       );
