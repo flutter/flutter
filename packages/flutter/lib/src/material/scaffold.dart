@@ -251,19 +251,27 @@ class ScaffoldPrelayoutGeometry {
   /// If [Scaffold.floatingActionButton] is null, this will be [Size.zero].
   final Size floatingActionButtonSize;
 
-  /// The [Size] of the [Scaffold]'s [BottomSheet] (if available).
-  /// 
-  /// The [Scaffold] will determine the [bottomSheetSize] if the [Scaffold]
-  /// is currently showing a [BottomSheet].
+  /// The [Size] of the [Scaffold]'s [BottomSheet].
   /// 
   /// If the [Scaffold] is not currently showing a [BottomSheet],
-  /// this should be [Size.zero].
+  /// this will be [Size.zero].
   final Size bottomSheetSize;
 
-  /// The height from the [Scaffold]'s top where its body ends.
+  /// The vertical distance from the Scaffold's origin to the bottom of
+  /// [Scaffold.body].
+  /// 
+  /// This is useful in a [FloatingActionButtonPositioner] designed to
+  /// place the [FloatingActionButton] at the bottom of the screen, while
+  /// keeping it above the [BottomSheet], the [Scaffold.bottomNavigationBar],
+  /// or the keyboard.
   final double contentBottom;
 
-  /// The height from the [Scaffold]'s top where its body starts.
+  /// The vertical distance from the [Scaffold]'s origin to the top of
+  /// [Scaffold.body].
+  /// 
+  /// This is useful in a [FloatingActionButtonPositioner] designed to
+  /// place the [FloatingActionButton] at the top of the screen, while
+  /// keeping it below the [Scaffold.appBar].
   final double contentTop;
 
   /// The minimum horizontal padding the [FloatingActionButton] should observe.
@@ -272,13 +280,9 @@ class ScaffoldPrelayoutGeometry {
   /// The [Size] of the whole [Scaffold].
   final Size scaffoldSize;
 
-  /// The [Size] of the [Scaffold]'s [SnackBar] (if available).
+  /// The [Size] of the [Scaffold]'s [SnackBar].
   /// 
-  /// The [Scaffold] will determine the [snackBarSize] if the [Scaffold]
-  /// is currently showing a [SnackBar].
-  /// 
-  /// If the [Scaffold] is not showing a [SnackBar],
-  /// this should be [Size.zero].
+  /// If the [Scaffold] is not showing a [SnackBar], this will be [Size.zero].
   final Size snackBarSize;
 
   /// The [TextDirection] of the [Scaffold]'s [BuildContext].
