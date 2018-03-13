@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -212,22 +214,30 @@ class Slider extends StatefulWidget {
 
 class _SliderState extends State<Slider> with TickerProviderStateMixin {
   static const Duration enableAnimationDuration = const Duration(milliseconds: 75);
-  static const Duration positionAnimationDuration = const Duration(milliseconds: 75);
+  static const Duration valueIndicatorAnimationDuration = const Duration(milliseconds: 100);
 
-  // Animation controller that is run when interactions occur (taps, drags,
-  // etc.).
-  AnimationController reactionController;
+  // Animation controller that is run when the overlay (a.k.a radial reaction)
+  // is shown in response to user interaction.
+  AnimationController overlayController;
+  // Animation controller that is run when the value indicator is being shown
+  // or hidden.
+  AnimationController valueIndicatorController;
   // Animation controller that is run when enabling/disabling the slider.
   AnimationController enableController;
   // Animation controller that is run when transitioning between one value
   // and the next on a discrete slider.
   AnimationController positionController;
+  Timer interactionTimer;
 
   @override
   void initState() {
     super.initState();
-    reactionController = new AnimationController(
+    overlayController = new AnimationController(
       duration: kRadialReactionDuration,
+      vsync: this,
+    );
+    valueIndicatorController = new AnimationController(
+      duration: valueIndicatorAnimationDuration,
       vsync: this,
     );
     enableController = new AnimationController(
@@ -235,18 +245,24 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       vsync: this,
     );
     positionController = new AnimationController(
-      duration: positionAnimationDuration,
+      duration: Duration.zero,
       vsync: this,
     );
+    // Create timer in a cancelled state, so that we don't have to
+    // check for null below.
+    interactionTimer = new Timer(Duration.zero, () {});
+    interactionTimer.cancel();
     enableController.value = widget.onChanged != null ? 1.0 : 0.0;
-    positionController.value = widget.value;
+    positionController.value = _unlerp(widget.value);
   }
 
   @override
   void dispose() {
-    reactionController.dispose();
+    overlayController.dispose();
+    valueIndicatorController.dispose();
     enableController.dispose();
     positionController.dispose();
+    interactionTimer?.cancel();
     super.dispose();
   }
 
@@ -358,15 +374,6 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   }
 }
 
-const double _overlayRadius = 16.0;
-const double _overlayDiameter = _overlayRadius * 2.0;
-const double _railHeight = 2.0;
-const double _preferredRailWidth = 144.0;
-const double _preferredTotalWidth = _preferredRailWidth + _overlayDiameter;
-
-const double _adjustmentUnit = 0.1; // Matches iOS implementation of material slider.
-final Tween<double> _overlayRadiusTween = new Tween<double>(begin: 0.0, end: _overlayRadius);
-
 class _RenderSlider extends RenderBox {
   _RenderSlider({
     @required double value,
@@ -403,8 +410,12 @@ class _RenderSlider extends RenderBox {
       ..onTapDown = _handleTapDown
       ..onTapUp = _handleTapUp
       ..onTapCancel = _endInteraction;
-    _reaction = new CurvedAnimation(
-      parent: _state.reactionController,
+    _overlayAnimation = new CurvedAnimation(
+      parent: _state.overlayController,
+      curve: Curves.fastOutSlowIn,
+    );
+    _valueIndicatorAnimation = new CurvedAnimation(
+      parent: _state.valueIndicatorController,
       curve: Curves.fastOutSlowIn,
     );
     _enableAnimation = new CurvedAnimation(
@@ -413,11 +424,34 @@ class _RenderSlider extends RenderBox {
     );
   }
 
-  double get value => _value;
-  double _value;
+  static const Duration _positionAnimationDuration = const Duration(milliseconds: 75);
+  static const double _overlayRadius = 16.0;
+  static const double _overlayDiameter = _overlayRadius * 2.0;
+  static const double _railHeight = 2.0;
+  static const double _preferredRailWidth = 144.0;
+  static const double _preferredTotalWidth = _preferredRailWidth + _overlayDiameter;
+  static const Duration _minimumInteractionTime = const Duration(milliseconds: 500);
+  static const double _adjustmentUnit = 0.1; // Matches iOS implementation of material slider.
+  static final Tween<double> _overlayRadiusTween = new Tween<double>(begin: 0.0, end: _overlayRadius);
 
   _SliderState _state;
+  Animation<double> _overlayAnimation;
+  Animation<double> _valueIndicatorAnimation;
+  Animation<double> _enableAnimation;
+  final TextPainter _labelPainter = new TextPainter();
+  HorizontalDragGestureRecognizer _drag;
+  TapGestureRecognizer _tap;
+  bool _active = false;
+  double _currentDragValue = 0.0;
 
+  double get _railLength => size.width - _overlayDiameter;
+
+  bool get isInteractive => onChanged != null;
+
+  bool get isDiscrete => divisions != null && divisions > 0;
+
+  double get value => _value;
+  double _value;
   set value(double newValue) {
     assert(newValue != null && newValue >= 0.0 && newValue <= 1.0);
     final double convertedValue = isDiscrete ? _discretize(newValue) : newValue;
@@ -426,6 +460,14 @@ class _RenderSlider extends RenderBox {
     }
     _value = convertedValue;
     if (isDiscrete) {
+      // Reset the duration to match the distance that we're traveling, so that
+      // whatever the distance, we still do it in _positionAnimationDuration,
+      // and if we get re-targeted in the middle, it still takes that long to
+      // get to the new location.
+      final double distance = (_value - _state.positionController.value).abs();
+      _state.positionController.duration = distance != 0.0
+        ? _positionAnimationDuration * (1.0 / distance)
+        : 0.0;
       _state.positionController.animateTo(convertedValue, curve: Curves.easeInOut);
     } else {
       _state.positionController.value = convertedValue;
@@ -514,6 +556,25 @@ class _RenderSlider extends RenderBox {
     _updateLabelPainter();
   }
 
+  bool get showValueIndicator {
+    bool showValueIndicator;
+    switch (_sliderTheme.showValueIndicator) {
+      case ShowValueIndicator.onlyForDiscrete:
+        showValueIndicator = isDiscrete;
+        break;
+      case ShowValueIndicator.onlyForContinuous:
+        showValueIndicator = !isDiscrete;
+        break;
+      case ShowValueIndicator.always:
+        showValueIndicator = true;
+        break;
+      case ShowValueIndicator.never:
+        showValueIndicator = false;
+        break;
+    }
+    return showValueIndicator;
+  }
+
   void _updateLabelPainter() {
     if (label != null) {
       _labelPainter
@@ -530,31 +591,19 @@ class _RenderSlider extends RenderBox {
     markNeedsLayout();
   }
 
-  double get _railLength => size.width - _overlayDiameter;
-
-  Animation<double> _reaction;
-  Animation<double> _enableAnimation;
-  final TextPainter _labelPainter = new TextPainter();
-  HorizontalDragGestureRecognizer _drag;
-  TapGestureRecognizer _tap;
-  bool _active = false;
-  double _currentDragValue = 0.0;
-
-  bool get isInteractive => onChanged != null;
-
-  bool get isDiscrete => divisions != null && divisions > 0;
-
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _reaction.addListener(markNeedsPaint);
+    _overlayAnimation.addListener(markNeedsPaint);
+    _valueIndicatorAnimation.addListener(markNeedsPaint);
     _enableAnimation.addListener(markNeedsPaint);
     _state.positionController.addListener(markNeedsPaint);
   }
 
   @override
   void detach() {
-    _reaction.removeListener(markNeedsPaint);
+    _overlayAnimation.removeListener(markNeedsPaint);
+    _valueIndicatorAnimation.removeListener(markNeedsPaint);
     _enableAnimation.removeListener(markNeedsPaint);
     _state.positionController.removeListener(markNeedsPaint);
     super.detach();
@@ -588,7 +637,19 @@ class _RenderSlider extends RenderBox {
       _active = true;
       _currentDragValue = _getValueFromGlobalPosition(globalPosition);
       onChanged(_discretize(_currentDragValue));
-      _state.reactionController.forward();
+      _state.overlayController.forward();
+      if (showValueIndicator) {
+        _state.valueIndicatorController.forward();
+        if (_state.interactionTimer.isActive) {
+          _state.interactionTimer.cancel();
+        }
+        _state.interactionTimer = new Timer(_minimumInteractionTime * timeDilation, () {
+          if (!_active && _state.valueIndicatorController.status == AnimationStatus.completed) {
+            _state.valueIndicatorController.reverse();
+          }
+          _state.interactionTimer.cancel();
+        });
+      }
     }
   }
 
@@ -596,7 +657,10 @@ class _RenderSlider extends RenderBox {
     if (_active) {
       _active = false;
       _currentDragValue = 0.0;
-      _state.reactionController.reverse();
+      _state.overlayController.reverse();
+      if (showValueIndicator && !_state.interactionTimer.isActive) {
+        _state.valueIndicatorController.reverse();
+      }
     }
   }
 
@@ -696,15 +760,15 @@ class _RenderSlider extends RenderBox {
   }
 
   void _paintOverlay(Canvas canvas, Offset center) {
-    if (!_reaction.isDismissed) {
+    if (!_overlayAnimation.isDismissed) {
       // TODO(gspencer) : We don't really follow the spec here for overlays.
       // The spec says to use 16% opacity for drawing over light material,
       // and 32% for colored material, but we don't really have a way to
       // know what the underlying color is, so there's no easy way to
       // implement this. Choosing the "light" version for now.
-      final Paint reactionPaint = new Paint()..color = _sliderTheme.overlayColor;
-      final double radius = _overlayRadiusTween.evaluate(_reaction);
-      canvas.drawCircle(center, radius, reactionPaint);
+      final Paint overlayPaint = new Paint()..color = _sliderTheme.overlayColor;
+      final double radius = _overlayRadiusTween.evaluate(_overlayAnimation);
+      canvas.drawCircle(center, radius, overlayPaint);
     }
   }
 
@@ -781,29 +845,15 @@ class _RenderSlider extends RenderBox {
       rightTickMarkPaint,
     );
 
-    if (isInteractive && _reaction.status != AnimationStatus.dismissed && label != null) {
-      bool showValueIndicator;
-      switch (_sliderTheme.showValueIndicator) {
-        case ShowValueIndicator.onlyForDiscrete:
-          showValueIndicator = isDiscrete;
-          break;
-        case ShowValueIndicator.onlyForContinuous:
-          showValueIndicator = !isDiscrete;
-          break;
-        case ShowValueIndicator.always:
-          showValueIndicator = true;
-          break;
-        case ShowValueIndicator.never:
-          showValueIndicator = false;
-          break;
-      }
+    if (isInteractive && label != null &&
+        _valueIndicatorAnimation.status != AnimationStatus.dismissed) {
       if (showValueIndicator) {
         _sliderTheme.valueIndicatorShape.paint(
           this,
           context,
           isDiscrete,
           thumbCenter,
-          _reaction,
+          _valueIndicatorAnimation,
           _enableAnimation,
           _labelPainter,
           _sliderTheme,
@@ -818,7 +868,7 @@ class _RenderSlider extends RenderBox {
       context,
       isDiscrete,
       thumbCenter,
-      _reaction,
+      _overlayAnimation,
       _enableAnimation,
       label != null ? _labelPainter : null,
       _sliderTheme,
