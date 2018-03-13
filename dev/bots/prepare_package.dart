@@ -480,7 +480,7 @@ class ArchivePublisher {
     jsonData['releases'][revision][branchName] = metadata;
 
     final File tempFile = new File(path.join(tempDir.absolute.path, 'releases_$platformName.json'));
-    final JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+    const JsonEncoder encoder = const JsonEncoder.withIndent('  ');
     tempFile.writeAsStringSync(encoder.convert(jsonData));
     await _cloudCopy(tempFile.absolute.path, metadataGsPath);
   }

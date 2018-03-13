@@ -877,7 +877,7 @@ class _DialPainter extends CustomPainter {
     final Paint selectorPaint = new Paint()
       ..color = accentColor;
     final Offset focusedPoint = getOffsetForTheta(theta, activeRing);
-    final double focusedRadius = labelPadding - 4.0;
+    const double focusedRadius = labelPadding - 4.0;
     canvas.drawCircle(centerPoint, 4.0, selectorPaint);
     canvas.drawCircle(focusedPoint, focusedRadius, selectorPaint);
     selectorPaint.strokeWidth = 2.0;

@@ -587,7 +587,7 @@ void main() {
       ),
     );
 
-    final String testValue = kThreeLines;
+    const String testValue = kThreeLines;
     const String cutValue = 'First line of stuff ';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);

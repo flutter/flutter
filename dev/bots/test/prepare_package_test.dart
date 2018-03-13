@@ -16,7 +16,7 @@ import '../prepare_package.dart';
 import 'fake_process_manager.dart';
 
 void main() {
-  final String testRef = 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeef';
+  const String testRef = 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeef';
   test('Throws on missing executable', () async {
     // Uses a *real* process manager, since we want to know what happens if
     // it can't find an executable.
@@ -295,7 +295,7 @@ void main() {
         expect(contents, contains('"beta": "6da8ec6bd0c4801b80d666869e4069698561c043"'));
         // Make sure it's valid JSON, and in the right format.
         final Map<String, dynamic> jsonData = json.decode(contents);
-        final JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+        const JsonEncoder encoder = const JsonEncoder.withIndent('  ');
         expect(contents, equals(encoder.convert(jsonData)));
       });
     });

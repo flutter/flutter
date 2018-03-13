@@ -326,7 +326,7 @@ void main() {
     final Key keyBottom = new UniqueKey();
 
     bool valueTop = false;
-    final bool valueBottom = true;
+    const bool valueBottom = true;
 
     await tester.pumpWidget(
       new Directionality(

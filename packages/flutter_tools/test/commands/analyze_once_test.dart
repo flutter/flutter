@@ -194,7 +194,7 @@ void bar() {
     });
 
     testUsingContext('--preview-dart-2', () async {
-      final String contents = '''
+      const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
 
@@ -213,7 +213,7 @@ StringBuffer bar = StringBuffer('baz');
     });
 
     testUsingContext('no --preview-dart-2 shows errors', () async {
-      final String contents = '''
+      const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
 
