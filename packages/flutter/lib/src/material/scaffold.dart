@@ -159,16 +159,18 @@ abstract class FloatingActionButtonAnimator {
   /// corresponding to 0 and 360 degrees, while 0.5 corresponds to 180 degrees.
   Animation<double> getRotationAnimation({@required Animation<double> parent});
 
-  /// Gets the value to restart the motion animation at if it's interrupted.
+  /// Gets the progress value to restart a motion animation from when the animation is interrupted.
+  /// 
+  /// [previousValue] is the value of the animation before it was interrupted.
   /// 
   /// The restart of the animation will affect all three parts of the motion animation:
   /// offset animation, scale animation, and rotation animation.
   /// 
-  /// An interruption is triggered if the [Scaffold] is given a new [FloatingActionButtonPositioner]
+  /// An interruption triggers if the [Scaffold] is given a new [FloatingActionButtonPositioner]
   /// while it is still animating a transition between two previous [FloatingActionButtonPositioner]s.
   /// 
   /// A sensible default is usually 0.0, which is the same as restarting
-  /// the animation from the beginning.
+  /// the animation from the beginning, regardless of the original state of the animation.
   double getAnimationRestart(double previousValue) => 0.0;
 
   @override
