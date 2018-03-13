@@ -274,7 +274,12 @@ class ScaffoldPrelayoutGeometry {
   /// keeping it below the [Scaffold.appBar].
   final double contentTop;
 
-  /// The minimum horizontal padding the [FloatingActionButton] should observe.
+  /// The minimum horizontal padding to inset the [FloatingActionButton] by.
+  /// 
+  /// In a [FloatingActionButtonPositioner] designed to put the
+  /// [FloatingActionButton] at the left or right edge of the screen, the
+  /// left and right sides of the [FloatingActionButton] should be placed
+  /// at least this far away from the edge of the screen.
   final double horizontalFloatingActionButtonPadding;
 
   /// The [Size] of the whole [Scaffold].
