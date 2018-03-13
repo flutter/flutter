@@ -259,7 +259,7 @@ class _CenterFloatFabPositioner extends FloatingActionButtonPositioner {
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     // Compute the x-axis offset.
-    final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2;
+    final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
 
     // Compute the y-axis offset.
     final double contentBottom = scaffoldGeometry.contentBottom;
@@ -355,14 +355,12 @@ class ScaffoldGeometry {
   });
 
   /// The distance from the [Scaffold]'s top edge to the top edge of the
-  /// rectangle in which the [Scaffold.bottomNavigationBar] bar is being laid
-  /// out.
+  /// rectangle in which the [Scaffold.bottomNavigationBar] bar is laid out.
   ///
-  /// When there is no [Scaffold.bottomNavigationBar] set, this will be null.
+  /// Null if [Scaffold.bottomNavigationBar] is null.
   final double bottomNavigationBarTop;
 
-  /// The rectangle in which the [Scaffold] is laying out
-  /// [Scaffold.floatingActionButton].
+  /// The [Scaffold.floatingActionButton]'s bounding rectangle.
   ///
   /// This is null when there is no floating action button showing.
   final Rect floatingActionButtonArea;
@@ -600,7 +598,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       );
       final Offset currentFabOffset = currentFloatingActionButtonPositioner.getOffset(currentGeometry);
       final Offset previousFabOffset = previousFloatingActionButtonPositioner.getOffset(currentGeometry);
-      final Offset fabOffset = floatingActionButtonMotionAnimator.getOffset(begin: previousFabOffset, end: currentFabOffset, progress: floatingActionButtonMoveAnimationProgress);
+      final Offset fabOffset = floatingActionButtonMotionAnimator.getOffset(
+        begin: previousFabOffset, 
+        end: currentFabOffset, 
+        progress: floatingActionButtonMoveAnimationProgress,
+      );
       positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
       floatingActionButtonRect = fabOffset & fabSize;
     }
@@ -794,7 +796,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   @override
   Widget build(BuildContext context) {
-     final List<Widget> children = <Widget>[];
+    final List<Widget> children = <Widget>[];
     if (_previousController.status != AnimationStatus.dismissed) {
       children.add(new ScaleTransition(
         scale: _previousScaleAnimation,
@@ -1458,7 +1460,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _floatingActionButtonPositioner = widget.floatingActionButtonPositioner ?? _kDefaultFloatingActionButtonPositioner;
     _floatingActionButtonAnimator = widget.floatingActionButtonAnimator ?? _kDefaultFloatingActionButtonAnimator;
     _previousFloatingActionButtonPositioner = _floatingActionButtonPositioner;
-    _floatingActionButtonMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 1.0, duration: _kFloatingActionButtonSegue * 2);
+    _floatingActionButtonMoveController = new AnimationController(
+      vsync: this, 
+      lowerBound: 0.0, 
+      upperBound: 1.0, 
+      value: 1.0, 
+      duration: _kFloatingActionButtonSegue * 2,
+    );
   }
 
   @override
