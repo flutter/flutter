@@ -119,9 +119,9 @@ class _TopStartFloatingActionButtonPositioner extends FloatingActionButtonPositi
         // The Scaffold's origin is at its top-left, so we need to offset fabX
         // by the Scaffold's width to get the right edge of the screen.
         //
-        // The Floating Action Button's origin is at its top-left, so need
-        // to subtract the Floating Action Button's width
-        // to align the right edge of the Floating Action Button instead of the left edge.
+        // The Floating Action Button's origin is at its top-left, so we also need
+        // to subtract the Floating Action Button's width to align the right edge
+        // of the Floating Action Button instead of the left edge.
         fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - padding;
         break;
       case TextDirection.ltr:
