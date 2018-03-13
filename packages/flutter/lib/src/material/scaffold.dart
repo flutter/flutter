@@ -90,6 +90,12 @@ abstract class FloatingActionButtonPositioner {
   static const FloatingActionButtonPositioner centerFloat = const _CenterFloatFabPositioner();
 
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
+  /// 
+  /// This uses a [ScaffoldPrelayoutGeometry], which the [Scaffold] constructs
+  /// during its layout phase after it has laid out every widget it can lay out
+  /// before the [FloatingActionButton]. The [Scaffold] uses the [Offset]
+  /// returned from this method to position the [FloatingActionButton] and
+  /// complete its layout.
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry);
 
   @override
@@ -100,11 +106,11 @@ abstract class FloatingActionButtonPositioner {
 /// 
 /// The [Scaffold] uses [Scaffold.floatingActionButtonAnimator] to define:
 ///
-///  * The [Offset] of the [FloatingActionButton] between the old and new 
-///    [FloatingActionButtonPositioner]s as part of the transition animation
-///  * An [Animation] to scale the [FloatingActionButton] during the transition
-///  * An [Animation] to rotate the [FloatingActionButton] during the transition
-///  * Where to start a new animation from if an animation is interrupted
+///  * The [Offset] of the [FloatingActionButton] between the old and new
+///    [FloatingActionButtonPositioner]s as part of the transition animation.
+///  * An [Animation] to scale the [FloatingActionButton] during the transition.
+///  * An [Animation] to rotate the [FloatingActionButton] during the transition.
+///  * Where to start a new animation from if an animation is interrupted.
 /// 
 /// See also:
 /// 
@@ -117,7 +123,11 @@ abstract class FloatingActionButtonAnimator {
   /// const constructors so that they can be used in const expressions.
   const FloatingActionButtonAnimator();
 
-  /// Moves the [FloatingActionButton] by scaling out and in at a new location.
+  /// Moves the [FloatingActionButton] by scaling out and then in at a new 
+  /// [FloatingActionButtonLocation].
+  /// 
+  /// This animator shrinks the [FloatingActionButton] down until it disappears, then
+  /// grows it back to full size at its new [FloatingActionButtonLocation].
   /// 
   /// This is the default [FloatingActionButton] motion animation.
   static const FloatingActionButtonAnimator scaling = const _ScalingFabMotionAnimator();
