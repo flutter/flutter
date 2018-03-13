@@ -759,6 +759,7 @@ class _Editable extends LeafRenderObjectWidget {
       onSelectionChanged: onSelectionChanged,
       onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
+      obscureText: obscureText,
     );
   }
 
@@ -778,7 +779,8 @@ class _Editable extends LeafRenderObjectWidget {
       ..offset = offset
       ..onSelectionChanged = onSelectionChanged
       ..onCaretChanged = onCaretChanged
-      ..ignorePointer = rendererIgnoresPointer;
+      ..ignorePointer = rendererIgnoresPointer
+      ..obscureText = obscureText;
   }
 
   TextSpan get _styledTextSpan {
@@ -801,7 +803,7 @@ class _Editable extends LeafRenderObjectWidget {
 
     String text = value.text;
     if (obscureText) {
-      text = new String.fromCharCodes(new List<int>.filled(text.length, 0x2022));
+      text = RenderEditable.obscuringCharacter * text.length;
       final int o = obscureShowCharacterAtIndex;
       if (o != null && o >= 0 && o < text.length)
         text = text.replaceRange(o, o + 1, value.text.substring(o, o + 1));

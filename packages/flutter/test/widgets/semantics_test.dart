@@ -464,6 +464,7 @@ void main() {
           focused: true,
           inMutuallyExclusiveGroup: true,
           header: true,
+          password: true,
         )
     );
 
