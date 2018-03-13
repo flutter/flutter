@@ -29,7 +29,7 @@ class BuildIOSCommand extends BuildSubCommand {
     argParser.addFlag('simulator', help: 'Build for the iOS simulator instead of the device.');
     argParser.addFlag('codesign', negatable: true, defaultsTo: true,
         help: 'Codesign the application bundle (only available on device builds).');
-    argParser.addFlag('preview-dart-2', defaultsTo: true, negatable: false,
+    argParser.addFlag('preview-dart-2', defaultsTo: true, negatable: true,
         hide: !verboseHelp);
   }
 
