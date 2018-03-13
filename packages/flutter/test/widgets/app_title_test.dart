@@ -19,7 +19,7 @@ Future<Null> pumpApp(WidgetTester tester, { GenerateAppTitle onGenerateTitle }) 
       color: kTitleColor,
       onGenerateTitle: onGenerateTitle,
       onGenerateRoute: (RouteSettings settings) {
-        return new PageRouteBuilder<Null>(
+        return new PageRouteBuilder<void>(
           pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
             return new Container();
           }

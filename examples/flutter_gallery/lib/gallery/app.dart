@@ -165,7 +165,7 @@ class GalleryAppState extends State<GalleryApp> {
       checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
       checkerboardOffscreenLayers: _checkerboardOffscreenLayers,
       routes: _kRoutes,
-      home: _applyScaleFactor(home),
+      home: home,
       builder: (BuildContext context, Widget child) {
         return new Directionality(
           textDirection: _overrideDirection,

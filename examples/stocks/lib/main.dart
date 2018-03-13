@@ -83,7 +83,7 @@ class StocksAppState extends State<StocksApp> {
     return null;
   }
 
-  Route<Null> _getRoute(RouteSettings settings) {
+  Route<dynamic> _getRoute(RouteSettings settings) {
     // Routes, by convention, are split on slashes, like filesystem paths.
     final List<String> path = settings.name.split('/');
     // We only support paths that start with a slash, so bail if
@@ -100,7 +100,7 @@ class StocksAppState extends State<StocksApp> {
       // Extract the symbol part of "stock:..." and return a route
       // for that symbol.
       final String symbol = path[1].substring(6);
-      return new MaterialPageRoute<Null>(
+      return new MaterialPageRoute<void>(
         settings: settings,
         builder: (BuildContext context) => new StockSymbolPage(symbol: symbol, stocks: stocks),
       );

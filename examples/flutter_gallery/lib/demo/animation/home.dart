@@ -451,7 +451,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     if (_scrollController.offset >= midScrollOffset)
       _scrollController.animateTo(0.0, curve: _kScrollCurve, duration: _kScrollDuration);
     else
-      Navigator.of(context).maybePop();
+      Navigator.maybePop(context);
   }
 
   // Only enable paging for the heading when the user has scrolled to midScrollOffset.

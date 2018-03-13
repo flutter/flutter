@@ -45,9 +45,11 @@ class TestRoute extends LocalHistoryRoute<String> {
   }
 
   @override
-  void didReplace(covariant TestRoute oldRoute) {
-    log('didReplace ${oldRoute.name}');
-    super.didReplace(oldRoute);
+  void didReplace(Route<dynamic> oldRoute) {
+    expect(oldRoute, const isInstanceOf<TestRoute>());
+    final TestRoute castRoute = oldRoute;
+    log('didReplace ${castRoute.name}');
+    super.didReplace(castRoute);
   }
 
   @override
@@ -60,15 +62,19 @@ class TestRoute extends LocalHistoryRoute<String> {
   }
 
   @override
-  void didPopNext(covariant TestRoute nextRoute) {
-    log('didPopNext ${nextRoute.name}');
-    super.didPopNext(nextRoute);
+  void didPopNext(Route<dynamic> nextRoute) {
+    expect(nextRoute, const isInstanceOf<TestRoute>());
+    final TestRoute castRoute = nextRoute;
+    log('didPopNext ${castRoute.name}');
+    super.didPopNext(castRoute);
   }
 
   @override
-  void didChangeNext(covariant TestRoute nextRoute) {
-    log('didChangeNext ${nextRoute?.name}');
-    super.didChangeNext(nextRoute);
+  void didChangeNext(Route<dynamic> nextRoute) {
+    expect(nextRoute, anyOf(isNull, const isInstanceOf<TestRoute>()));
+    final TestRoute castRoute = nextRoute;
+    log('didChangeNext ${castRoute?.name}');
+    super.didChangeNext(castRoute);
   }
 
   @override

@@ -67,7 +67,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   }
 
   void _showNotImplementedMessage() {
-    Navigator.of(context).pop(); // Dismiss the drawer.
+    Navigator.pop(context); // Dismiss the drawer.
     _scaffoldKey.currentState.showSnackBar(const SnackBar(
       content: const Text("The drawer's items don't do anything")
     ));
@@ -231,7 +231,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   }
 
   void _onOtherAccountsTap(BuildContext context) {
-    showDialog<Null>(
+    showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return new AlertDialog(
@@ -240,7 +240,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
             new FlatButton(
               child: const Text('OK'),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.pop(context);
               },
             ),
           ],

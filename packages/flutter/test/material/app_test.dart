@@ -87,7 +87,7 @@ void main() {
     expect(state2.marker, equals('original'));
   });
 
-  testWidgets('Do not rebuild page on the second frame of the route transition', (WidgetTester tester) async {
+  testWidgets('Do not rebuild page during a route transition', (WidgetTester tester) async {
     int buildCounter = 0;
     await tester.pumpWidget(
       new MaterialApp(
@@ -128,8 +128,80 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(buildCounter, 1);
     await tester.pump(const Duration(seconds: 1));
-    expect(buildCounter, 2);
+    expect(buildCounter, 1);
     expect(find.text('Y'), findsOneWidget);
+  });
+
+  testWidgets('Do rebuild the home page if it changes', (WidgetTester tester) async {
+    int buildCounter = 0;
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Builder(
+          builder: (BuildContext context) {
+            ++buildCounter;
+            return const Text('A');
+          }
+        ),
+      ),
+    );
+    expect(buildCounter, 1);
+    expect(find.text('A'), findsOneWidget);
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Builder(
+          builder: (BuildContext context) {
+            ++buildCounter;
+            return const Text('B');
+          }
+        ),
+      ),
+    );
+    expect(buildCounter, 2);
+    expect(find.text('B'), findsOneWidget);
+  });
+
+  testWidgets('Do not rebuild the home page if it does not actually change', (WidgetTester tester) async {
+    int buildCounter = 0;
+    final Widget home = new Builder(
+      builder: (BuildContext context) {
+        ++buildCounter;
+        return const Placeholder();
+      }
+    );
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: home,
+      ),
+    );
+    expect(buildCounter, 1);
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: home,
+      ),
+    );
+    expect(buildCounter, 1);
+  });
+
+  testWidgets('Do rebuild pages that come from the routes table if the MaterialApp changes', (WidgetTester tester) async {
+    int buildCounter = 0;
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) {
+        ++buildCounter;
+        return const Placeholder();
+      },
+    };
+    await tester.pumpWidget(
+      new MaterialApp(
+        routes: routes,
+      ),
+    );
+    expect(buildCounter, 1);
+    await tester.pumpWidget(
+      new MaterialApp(
+        routes: routes,
+      ),
+    );
+    expect(buildCounter, 2);
   });
 
   testWidgets('Cannot pop the initial route', (WidgetTester tester) async {

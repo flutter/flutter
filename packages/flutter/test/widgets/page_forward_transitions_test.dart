@@ -86,7 +86,7 @@ void main() {
                 child: new Builder(
                   key: insideKey,
                   builder: (BuildContext context) {
-                    final PageRoute<Null> route = ModalRoute.of(context);
+                    final PageRoute<void> route = ModalRoute.of(context);
                     return new Column(
                       children: <Widget>[
                         new TestTransition(
