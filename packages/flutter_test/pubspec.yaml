@@ -18,9 +18,6 @@ dependencies:
   # stack_trace. See https://github.com/dart-lang/test/issues/590
   stack_trace: 1.9.2
 
-  # We override the createHttpClient in flutter with a MockClient.
-  http: 0.11.3+16
-
   # Used by globalToLocal et al.
   vector_math: 2.0.5
 
@@ -35,7 +32,8 @@ dependencies:
   crypto: 2.0.2+1 # TRANSITIVE DEPENDENCY
   csslib: 0.14.1 # TRANSITIVE DEPENDENCY
   glob: 1.1.5 # TRANSITIVE DEPENDENCY
-  html: 0.13.2+2 # TRANSITIVE DEPENDENCY
+  html: 0.13.3 # TRANSITIVE DEPENDENCY
+  http: 0.11.3+16 # TRANSITIVE DEPENDENCY
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
   io: 0.3.2+1 # TRANSITIVE DEPENDENCY
