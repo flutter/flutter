@@ -204,9 +204,11 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
     // Animate the scale down from 1 to 0 in the first half of the animation
     // then from 0 back to 1 in the second half.
     final Curve curve = const Interval(0.5, 1.0, curve: Curves.ease);
-    return new AnimationMax<double>(
+    return new _AnimationSwap<double>(
       new ReverseAnimation(new CurveTween(curve: curve.flipped).animate(parent)),
       new CurveTween(curve: curve).animate(parent),
+      parent,
+      0.5,
     );
   }
 
@@ -231,6 +233,25 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
   @override
   double getAnimationRestart(double previousValue) => math.min(1.0 - previousValue, previousValue);
 }
+
+/// An animation that swaps from one animation to the next when the [parent] passes [swapThreshold].
+///
+/// The [value] of this animation is the value of [first] when [parent.value] < [swapThreshold]
+/// and the value of [next] otherwise.
+class _AnimationSwap<T> extends CompoundAnimation<T> {
+  /// Creates an [_AnimationSwap].
+  ///
+  /// Both arguments must be non-null. Either can be an [AnimationMin] itself
+  /// to combine multiple animations.
+  _AnimationSwap(Animation<T> first, Animation<T> next, this.parent, this.swapThreshold): super(first: first, next: next);
+
+  final Animation<double> parent;
+  final double swapThreshold;
+
+  @override
+  T get value => parent.value < swapThreshold ? first.value : next.value;
+}
+
 
 /// The geometry of the [Scaffold] after it all of its contents except for the
 /// [FloatingActionButton].
