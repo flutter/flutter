@@ -16,17 +16,28 @@ void main() {
     final Finder nameField = find.widgetWithText(TextFormField, 'Name *');
     expect(nameField, findsOneWidget);
 
+    final Finder passwordField = find.widgetWithText(TextFormField, 'Password *');
+    expect(passwordField, findsOneWidget);
+
     await tester.enterText(nameField, '');
     // The submit button isn't initially visible. Drag it into view so that
     // it will see the tap.
-    await tester.drag(nameField, const Offset(0.0, -800.0));
+    await tester.drag(nameField, const Offset(0.0, -1200.0));
+    await tester.pumpAndSettle();
     await tester.tap(submitButton);
     await tester.pumpAndSettle();
 
+    // Now drag the password field (the submit button will be obscured by
+    // the snackbar) and expose the name field again.
+    await tester.drag(passwordField, const Offset(0.0, 1200.0));
+    await tester.pumpAndSettle();
     expect(find.text('Name is required.'), findsOneWidget);
     expect(find.text('Please enter only alphabetical characters.'), findsNothing);
-
     await tester.enterText(nameField, '#');
+
+    // Make the submit button visible again (by dragging the name field), so
+    // it will see the tap.
+    await tester.drag(nameField, const Offset(0.0, -1200.0));
     await tester.tap(submitButton);
     await tester.pumpAndSettle();
     expect(find.text('Name is required.'), findsNothing);
