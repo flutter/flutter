@@ -1436,6 +1436,17 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
     return lightEnabled;
   }
+  
+  Color _getDefaultIconColor(ThemeData themeData) {
+    switch (themeData.brightness) {
+      case Brightness.dark:
+        return Colors.white70;
+      case Brightness.light:
+        return Colors.black45;
+      default:
+        return themeData.iconTheme.color;
+    }
+  }
 
   // True if the label will be shown and the hint will not.
   // If we're not focused, there's no value, and labelText was provided,
@@ -1556,7 +1567,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Color activeColor = _getActiveColor(themeData);
     final bool decorationIsDense = decoration.isDense == true; // isDense == null, same as false
     final double iconSize = decorationIsDense ? 18.0 : 24.0;
-    final Color iconColor = isFocused ? activeColor : Colors.black45;
+    final Color iconColor = isFocused ? activeColor : _getDefaultIconColor(themeData);
 
     final Widget icon = decoration.icon == null ? null :
       new Padding(
