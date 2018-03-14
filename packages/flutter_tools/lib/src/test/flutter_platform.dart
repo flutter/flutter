@@ -293,6 +293,7 @@ class _FlutterPlatform extends PlatformPlugin {
         startPaused: startPaused,
         bundlePath: _getBundlePath(finalizers, ourTestCount),
         observatoryPort: explicitObservatoryPort,
+        serverPort: server.port,
       );
       subprocessActive = true;
       finalizers.add(() async {
@@ -511,7 +512,8 @@ class _FlutterPlatform extends PlatformPlugin {
     listenerFile.createSync();
     listenerFile.writeAsStringSync(_generateTestMain(
       testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
-      encodedWebsocketUrl: Uri.encodeComponent(_getWebSocketUrl(server))
+      encodedWebsocketUrl: Uri.encodeComponent(_getWebSocketUrl()),
+      serverPort: r'$serverPort',
     ));
     return listenerFile.path;
   }
@@ -550,19 +552,20 @@ class _FlutterPlatform extends PlatformPlugin {
     return tempBundleDirectory.path;
   }
 
-  String _getWebSocketUrl(HttpServer server) {
+  String _getWebSocketUrl() {
     return host.type == InternetAddressType.IP_V4
-        ? 'ws://${host.address}:${server.port}'
-        : 'ws://[${host.address}]:${server.port}';
+        ? 'ws://${host.address}'
+        : 'ws://[${host.address}]';
   }
 
   String _generateTestMain({
     String testUrl,
     String encodedWebsocketUrl,
+    String serverPort,
   }) {
     return '''
 import 'dart:convert';
-import 'dart:io'; // ignore: dart_io_import
+import 'dart:io';
 
 // We import this library first in order to trigger an import error for
 // package:test (rather than package:stream_channel) when the developer forgets
@@ -576,7 +579,8 @@ import '$testUrl' as test;
 
 void main() {
   print('$_kStartTimeoutTimerMessage');
-  String server = Uri.decodeComponent('$encodedWebsocketUrl');
+  String serverPort = Platform.environment['SERVER_PORT'];
+  String server = Uri.decodeComponent('$encodedWebsocketUrl:$serverPort');
   StreamChannel channel = serializeSuite(() {
     catchIsolateErrors();
     return test.main;
@@ -621,6 +625,7 @@ void main() {
     bool enableObservatory: false,
     bool startPaused: false,
     int observatoryPort,
+    int serverPort,
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
     assert(!startPaused || enableObservatory);
@@ -660,6 +665,7 @@ void main() {
     final Map<String, String> environment = <String, String>{
       'FLUTTER_TEST': 'true',
       'FONTCONFIG_FILE': _fontConfigFile.path,
+      'SERVER_PORT': serverPort.toString(),
     };
     return processManager.start(command, environment: environment);
   }
@@ -739,7 +745,7 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
 
   @override
   Future<dynamic> close() {
-   Future.wait<dynamic>(<Future<dynamic>>[
+    Future.wait<dynamic>(<Future<dynamic>>[
       _parent.close(),
       _shellProcessClosed,
     ]).then<Null>(
@@ -754,7 +760,8 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
   @override
   void add(S event) => _parent.add(event);
   @override
-  void addError(dynamic errorEvent, [ StackTrace stackTrace ]) => _parent.addError(errorEvent, stackTrace);
+  void addError(dynamic errorEvent, [StackTrace stackTrace]) =>
+      _parent.addError(errorEvent, stackTrace);
   @override
   Future<dynamic> addStream(Stream<S> stream) => _parent.addStream(stream);
 }
