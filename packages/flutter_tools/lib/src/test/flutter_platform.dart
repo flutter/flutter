@@ -98,54 +98,48 @@ class _CompilationRequest {
 }
 
 // This class is a wrapper around compiler that allows multiple isolates to
-// enqueue compilation requests, but ensures only one compilation at a time.
+// enqueue compilation requests while reusing compilers when possible.
 class _Compiler {
   _Compiler(bool trackWidgetCreation) {
-    // Compiler maintains and updates single incremental dill file.
-    // Incremental compilation requests done for each test copy that file away
-    // for independent execution.
     final Directory outputDillDirectory = fs.systemTempDirectory
         .createTempSync('output_dill');
-    final File outputDill = outputDillDirectory.childFile('output.dill');
-
     compilerController.stream.listen((_CompilationRequest request) async {
-      final bool isEmpty = compilationQueue.isEmpty;
-      compilationQueue.add(request);
-      // Only trigger processing if queue was empty - i.e. no other requests
-      // are currently being processed. This effectively enforces "one
-      // compilation request at a time".
-      if (isEmpty) {
-        while (compilationQueue.isNotEmpty) {
-          final _CompilationRequest request = compilationQueue.first;
-          printTrace('Compiling ${request.path}');
-          final String outputPath = await compiler.recompile(request.path,
-            <String>[request.path],
-            outputPath: outputDill.path,
-          );
-          // Copy output dill next to the source file.
-          final File kernelReadyToRun = await fs.file(outputPath).copy(
-              request.path + '.dill');
-          compiler.accept();
-          compiler.reset();
-          request.result.complete(kernelReadyToRun.path);
-          // Only remove now when we finished processing the element
-          compilationQueue.removeAt(0);
-        }
+      ResidentCompiler compiler;
+      String outputDill;
+      if (idleCompilers.isEmpty) {
+        // Create compiler
+        compiler = new ResidentCompiler(
+            artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+            packagesPath: PackageMap.globalPackagesPath,
+            trackWidgetCreation: trackWidgetCreation);
+        compilers++;
+        outputDill = outputDillDirectory.childFile('output_$compilers.dill').path;
+      } else {
+        compiler = idleCompilers.removeLast();
       }
+
+      printTrace('Compiling ${request.path}');
+      final String outputPath = await compiler.recompile(request.path,
+        <String>[request.path],
+        outputPath: outputDill,
+      );
+
+      // Copy output dill next to the source file.
+      final File kernelReadyToRun = await fs.file(outputPath).copy(
+          request.path + '.dill');
+      compiler.accept();
+      compiler.reset();
+      idleCompilers.add(compiler);
+      request.result.complete(kernelReadyToRun.path);
     }, onDone: () {
       outputDillDirectory.deleteSync(recursive: true);
     });
-
-    compiler = new ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        packagesPath: PackageMap.globalPackagesPath,
-        trackWidgetCreation: trackWidgetCreation);
   }
 
   final StreamController<_CompilationRequest> compilerController =
       new StreamController<_CompilationRequest>();
-  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
-  ResidentCompiler compiler;
+  List<ResidentCompiler> idleCompilers = <ResidentCompiler>[];
+  int compilers = 0;
 
   Future<String> compile(String mainDart) {
     final Completer<String> completer = new Completer<String>();
