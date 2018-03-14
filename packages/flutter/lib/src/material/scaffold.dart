@@ -157,6 +157,16 @@ abstract class FloatingActionButtonAnimator {
   /// 
   /// The animation values are a fraction of a full circle, with 0.0 and 1.0
   /// corresponding to 0 and 360 degrees, while 0.5 corresponds to 180 degrees.
+  /// 
+  /// For example, to create a rotation animation that rotates the 
+  /// [FloatingActionButton] through a full circle:
+  /// 
+  /// ```dart
+  ///   @override
+  ///   Animation<double> getRotationAnimation({@required Animation<double> parent}) {
+  ///     return new Tween<double>(begin: 0.0, end: 1.0).animate(parent);
+  ///   }
+  /// ```
   Animation<double> getRotationAnimation({@required Animation<double> parent});
 
   /// Gets the progress value to restart a motion animation from when the animation is interrupted.
