@@ -302,7 +302,7 @@ void main() {
     );
     final RenderConstrainedOverflowBox parent = new RenderConstrainedOverflowBox(
       minWidth: 0.0,
-      maxWidth: double.INFINITY,
+      maxWidth: double.infinity,
       minHeight: 0.0,
       maxHeight: 400.0,
       child: flex,
@@ -347,7 +347,7 @@ void main() {
     );
     final RenderConstrainedOverflowBox parent = new RenderConstrainedOverflowBox(
       minWidth: 0.0,
-      maxWidth: double.INFINITY,
+      maxWidth: double.infinity,
       minHeight: 0.0,
       maxHeight: 400.0,
       child: flex,
@@ -376,7 +376,7 @@ void main() {
     );
     final RenderConstrainedOverflowBox parent = new RenderConstrainedOverflowBox(
       minWidth: 0.0,
-      maxWidth: double.INFINITY,
+      maxWidth: double.infinity,
       minHeight: 0.0,
       maxHeight: 400.0,
       child: flex,

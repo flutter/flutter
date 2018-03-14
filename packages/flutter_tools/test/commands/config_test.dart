@@ -30,14 +30,14 @@ void main() {
       await command.handleMachine();
 
       expect(logger.statusText, isNotEmpty);
-      final dynamic json = JSON.decode(logger.statusText);
-      expect(json, isMap);
+      final dynamic jsonObject = json.decode(logger.statusText);
+      expect(jsonObject, isMap);
 
-      expect(json.containsKey('android-studio-dir'), true);
-      expect(json['android-studio-dir'], isNotNull);
+      expect(jsonObject.containsKey('android-studio-dir'), true);
+      expect(jsonObject['android-studio-dir'], isNotNull);
 
-      expect(json.containsKey('android-sdk'), true);
-      expect(json['android-sdk'], isNotNull);
+      expect(jsonObject.containsKey('android-sdk'), true);
+      expect(jsonObject['android-sdk'], isNotNull);
     }, overrides: <Type, Generator>{
       AndroidStudio: () => mockAndroidStudio,
       AndroidSdk: () => mockAndroidSdk,

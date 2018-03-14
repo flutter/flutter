@@ -2304,7 +2304,7 @@ class InputDecorationTheme extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    final InputDecorationTheme defaultTheme = const InputDecorationTheme();
+    const InputDecorationTheme defaultTheme = const InputDecorationTheme();
     description.add(new DiagnosticsProperty<TextStyle>('labelStyle', labelStyle,
         defaultValue: defaultTheme.labelStyle));
     description.add(new DiagnosticsProperty<TextStyle>('helperStyle', helperStyle,

@@ -30,7 +30,7 @@ void main() {
       );
       final StreamController<String> stdout = new StreamController<String>.broadcast();
       run.stdout
-        .transform(UTF8.decoder)
+        .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
           print('run:stdout: $line');
@@ -44,7 +44,7 @@ void main() {
           }
         });
       run.stderr
-        .transform(UTF8.decoder)
+        .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
           stderr.writeln('run:stderr: $line');
@@ -112,13 +112,13 @@ class DriveHelper {
       <String>['drive', '--use-existing-app', 'http://127.0.0.1:$vmServicePort/', '--keep-app-running', '--driver', 'test_driver/commands_${name}_test.dart'],
     );
     drive.stdout
-        .transform(UTF8.decoder)
+        .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
       print('drive:stdout: $line');
     });
     drive.stderr
-        .transform(UTF8.decoder)
+        .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
       stderr.writeln('drive:stderr: $line');

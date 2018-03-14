@@ -209,8 +209,8 @@ void main() {
       final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null));
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTWH(50.0, 50.0, 10.0, 10.0);
-      final Offset start = const Offset(10.0, 100.0);
-      final Offset end = const Offset(60.0, 100.0);
+      const Offset start = const Offset(10.0, 100.0);
+      const Offset end = const Offset(60.0, 100.0);
       expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
     });
 
@@ -233,8 +233,8 @@ void main() {
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
 
-      final Offset start = const Offset(191.0, 100.0);
-      final Offset end = const Offset(220.0, 100.0);
+      const Offset start = const Offset(191.0, 100.0);
+      const Offset end = const Offset(220.0, 100.0);
       expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
     });
 
@@ -243,8 +243,8 @@ void main() {
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
 
-      final Offset start = const Offset(180.0, 100.0);
-      final Offset end = const Offset(209.0, 100.0);
+      const Offset start = const Offset(180.0, 100.0);
+      const Offset end = const Offset(209.0, 100.0);
       expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
     });
 
@@ -252,8 +252,8 @@ void main() {
       final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null, notchMargin: 0.0));
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
-      final Offset start = const Offset(180.0, 100.0);
-      final Offset end = const Offset(220.0, 100.0);
+      const Offset start = const Offset(180.0, 100.0);
+      const Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
       final Path notchedRectangle =
@@ -268,8 +268,8 @@ void main() {
       );
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
-      final Offset start = const Offset(180.0, 100.0);
-      final Offset end = const Offset(220.0, 100.0);
+      const Offset start = const Offset(180.0, 100.0);
+      const Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
       final Path notchedRectangle =
@@ -283,8 +283,8 @@ void main() {
       );
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 85.0, 210.0, 105.0);
-      final Offset start = const Offset(180.0, 100.0);
-      final Offset end = const Offset(220.0, 100.0);
+      const Offset start = const Offset(180.0, 100.0);
+      const Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
       final Path notchedRectangle =
@@ -298,8 +298,8 @@ void main() {
       );
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 95.0, 210.0, 115.0);
-      final Offset start = const Offset(180.0, 100.0);
-      final Offset end = const Offset(220.0, 100.0);
+      const Offset start = const Offset(180.0, 100.0);
+      const Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
       final Path notchedRectangle =
@@ -313,8 +313,8 @@ void main() {
       );
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 40.0, 210.0, 60.0);
-      final Offset start = const Offset(180.0, 100.0);
-      final Offset end = const Offset(220.0, 100.0);
+      const Offset start = const Offset(180.0, 100.0);
+      const Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
       final Path notchedRectangle =
@@ -403,7 +403,7 @@ bool pathDoesNotContainCircle(Path path, Rect circleBounds) {
   assert(circleBounds.width == circleBounds.height);
   final double radius = circleBounds.width / 2.0;
 
-  for (double theta = 0.0; theta <= 2.0 * math.PI; theta += math.PI / 20.0) {
+  for (double theta = 0.0; theta <= 2.0 * math.pi; theta += math.pi / 20.0) {
     for (double i = 0.0; i < 1; i += 0.01) {
       final double x = i * radius * math.cos(theta);
       final double y = i * radius * math.sin(theta);

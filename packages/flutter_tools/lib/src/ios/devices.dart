@@ -383,7 +383,7 @@ String decodeSyslog(String line) {
   int decodeOctal(int x, int y, int z) => (x & 0x3) << 6 | (y & 0x7) << 3 | z & 0x7;
 
   try {
-    final List<int> bytes = UTF8.encode(line);
+    final List<int> bytes = utf8.encode(line);
     final List<int> out = <int>[];
     for (int i = 0; i < bytes.length; ) {
       if (bytes[i] != kBackslash || i > bytes.length - 4) {
@@ -407,7 +407,7 @@ String decodeSyslog(String line) {
         i += 4;
       }
     }
-    return UTF8.decode(out);
+    return utf8.decode(out);
   } catch (_) {
     // Unable to decode line: return as-is.
     return line;
@@ -445,8 +445,8 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   void _start() {
     iMobileDevice.startLogger().then<Null>((Process process) {
       _process = process;
-      _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
-      _process.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
+      _process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_onLine);
+      _process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_onLine);
       _process.exitCode.whenComplete(() {
         if (_linesController.hasListener)
           _linesController.close();

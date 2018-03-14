@@ -137,7 +137,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
     environment: environment
   );
   final StreamSubscription<String> stdoutSubscription = process.stdout
-    .transform(UTF8.decoder)
+    .transform(utf8.decoder)
     .transform(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
@@ -152,7 +152,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
       }
     });
   final StreamSubscription<String> stderrSubscription = process.stderr
-    .transform(UTF8.decoder)
+    .transform(utf8.decoder)
     .transform(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {

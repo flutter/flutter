@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
+// ignore: implementation_imports
 import 'package:intl/src/intl_helpers.dart';
 
 import 'stock_messages_en.dart' as messages_en;
@@ -29,21 +30,27 @@ MessageLookupByLibrary _findExact(localeName) {
 }
 
 /// User programs should call this before using [localeName] for messages.
-Future initializeMessages(String localeName) {
-  var lib = _deferredLibraries[Intl.canonicalizedLocale(localeName)];
-  var load = lib == null ? new Future.value(false) : lib();
-  return load.then((_) {
-    initializeInternalMessageLookup(() => new CompositeMessageLookup());
-    messageLookup.addLocale(localeName, _findGeneratedMessagesFor);
-  });
+Future<bool> initializeMessages(String localeName) async {
+  var availableLocale = Intl.verifiedLocale(
+    localeName,
+    (locale) => _deferredLibraries[locale] != null,
+    onFailure: (_) => null);
+  if (availableLocale == null) {
+    return new Future.value(false);
+  }
+  var lib = _deferredLibraries[availableLocale];
+  await (lib == null ? new Future.value(false) : lib());
+  initializeInternalMessageLookup(() => new CompositeMessageLookup());
+  messageLookup.addLocale(availableLocale, _findGeneratedMessagesFor);
+  return new Future.value(true);
 }
 
 bool _messagesExistFor(String locale) {
-  var messages;
   try {
-    messages = _findExact(locale);
-  } catch (e) {}
-  return messages != null;
+    return _findExact(locale) != null;
+  } catch (e) {
+    return false;
+  }
 }
 
 MessageLookupByLibrary _findGeneratedMessagesFor(locale) {

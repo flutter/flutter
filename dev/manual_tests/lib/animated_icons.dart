@@ -53,7 +53,7 @@ class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderS
       title: new Text(widget.sample.description),
       subtitle: new Slider(
         value: progress.value,
-        onChanged: (double v) { progress.animateTo(v, duration: Duration.ZERO); },
+        onChanged: (double v) { progress.animateTo(v, duration: Duration.zero); },
       ),
     );
   }

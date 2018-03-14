@@ -398,7 +398,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
       // If the simulation is headed up towards midScrollOffset but will not reach it,
       // then snap it there. Similarly if the simulation is headed down past
       // midScrollOffset but will not reach zero, then snap it to zero.
-      final double simulationEnd = simulation.x(double.INFINITY);
+      final double simulationEnd = simulation.x(double.infinity);
       if (simulationEnd >= midScrollOffset)
         return simulation;
       if (dragVelocity > 0.0)

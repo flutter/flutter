@@ -53,7 +53,7 @@ Future<Null> main() async {
       workingDirectory: flutterDirectory.path,
     );
     double total = 0.0;
-    await for (String entry in git.stdout.transform(UTF8.decoder).transform(const LineSplitter()))
+    await for (String entry in git.stdout.transform(utf8.decoder).transform(const LineSplitter()))
       total += await findCostsForFile(new File(path.join(flutterDirectory.path, entry)));
     final int gitExitCode = await git.exitCode;
     if (gitExitCode != 0)

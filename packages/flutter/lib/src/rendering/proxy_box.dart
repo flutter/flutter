@@ -302,8 +302,8 @@ class RenderLimitedBox extends RenderProxyBox {
   /// non-negative.
   RenderLimitedBox({
     RenderBox child,
-    double maxWidth: double.INFINITY,
-    double maxHeight: double.INFINITY
+    double maxWidth: double.infinity,
+    double maxHeight: double.infinity
   }) : assert(maxWidth != null && maxWidth >= 0.0),
        assert(maxHeight != null && maxHeight >= 0.0),
        _maxWidth = maxWidth,
@@ -354,8 +354,8 @@ class RenderLimitedBox extends RenderProxyBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.INFINITY));
-    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: double.INFINITY));
+    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.infinity));
+    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: double.infinity));
   }
 }
 
@@ -591,7 +591,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!width.isFinite)
-      width = computeMaxIntrinsicWidth(double.INFINITY);
+      width = computeMaxIntrinsicWidth(double.infinity);
     assert(width.isFinite);
     final double height = child.getMinIntrinsicHeight(width);
     return _applyStep(height, _stepHeight);
@@ -602,7 +602,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!width.isFinite)
-      width = computeMaxIntrinsicWidth(double.INFINITY);
+      width = computeMaxIntrinsicWidth(double.infinity);
     assert(width.isFinite);
     final double height = child.getMaxIntrinsicHeight(width);
     return _applyStep(height, _stepHeight);
@@ -658,7 +658,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!height.isFinite)
-      height = child.getMaxIntrinsicHeight(double.INFINITY);
+      height = child.getMaxIntrinsicHeight(double.infinity);
     assert(height.isFinite);
     return child.getMinIntrinsicWidth(height);
   }
@@ -668,7 +668,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!height.isFinite)
-      height = child.getMaxIntrinsicHeight(double.INFINITY);
+      height = child.getMaxIntrinsicHeight(double.infinity);
     assert(height.isFinite);
     return child.getMaxIntrinsicWidth(height);
   }
@@ -4039,10 +4039,10 @@ class RenderFollowerLayer extends RenderProxyBox {
       Offset.zero,
       childPaintBounds: new Rect.fromLTRB(
         // We don't know where we'll end up, so we have no idea what our cull rect should be.
-        double.NEGATIVE_INFINITY,
-        double.NEGATIVE_INFINITY,
-        double.INFINITY,
-        double.INFINITY,
+        double.negativeInfinity,
+        double.negativeInfinity,
+        double.infinity,
+        double.infinity,
       ),
     );
   }

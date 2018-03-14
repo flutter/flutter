@@ -80,12 +80,12 @@ class AndroidDevice extends Device {
       printTrace(propCommand.join(' '));
 
       try {
-        // We pass an encoding of LATIN1 so that we don't try and interpret the
+        // We pass an encoding of latin1 so that we don't try and interpret the
         // `adb shell getprop` result as UTF8.
         final ProcessResult result = await processManager.run(
           propCommand,
-          stdoutEncoding: LATIN1,
-          stderrEncoding: LATIN1,
+          stdoutEncoding: latin1,
+          stderrEncoding: latin1,
         ).timeout(const Duration(seconds: 5));
         if (result.exitCode == 0) {
           _properties = parseAdbDeviceProperties(result.stdout);
@@ -522,7 +522,7 @@ class AndroidDevice extends Device {
     final StreamSubscription<String> logs = getLogReader().logLines.listen((String line) {
       final Match match = discoverExp.firstMatch(line);
       if (match != null) {
-        final Map<String, dynamic> app = JSON.decode(match.group(1));
+        final Map<String, dynamic> app = json.decode(match.group(1));
         result.add(new DiscoveredApp(app['id'], app['observatoryPort']));
       }
     });

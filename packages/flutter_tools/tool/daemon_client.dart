@@ -21,13 +21,13 @@ Future<Null> main() async {
   print('daemon process started, pid: ${daemon.pid}');
 
   daemon.stdout
-    .transform(UTF8.decoder)
+    .transform(utf8.decoder)
     .transform(const LineSplitter())
     .listen((String line) => print('<== $line'));
   daemon.stderr.listen((dynamic data) => stderr.add(data));
 
   stdout.write('> ');
-  stdin.transform(UTF8.decoder).transform(const LineSplitter()).listen((String line) {
+  stdin.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
     final List<String> words = line.split(' ');
 
     if (line == 'version' || line == 'v') {
@@ -80,7 +80,7 @@ int id = 0;
 
 void _send(Map<String, dynamic> map) {
   map['id'] = id++;
-  final String str = '[${JSON.encode(map)}]';
+  final String str = '[${json.encode(map)}]';
   daemon.stdin.writeln(str);
   print('==> $str');
 }
