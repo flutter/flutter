@@ -1,4 +1,4 @@
-Signature: 4e2bc017cf33139e3cac7a97e5e22e91
+Signature: c0ff62ce60a1c9e3a2661402b6cc5367
 
 UNUSED LICENSES:
 
@@ -280,550 +280,6 @@ the terms of any one of the MPL, the GPL or the LGPL.
 ====================================================================================================
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 USED LICENSES:
-
-====================================================================================================
-LIBRARY: boringssl
-LIBRARY: gtest
-ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/third_party/googletest/CHANGES
-FILE: ../../../third_party/boringssl/src/third_party/googletest/CONTRIBUTORS
-FILE: ../../../third_party/boringssl/src/third_party/googletest/METADATA
-FILE: ../../../third_party/boringssl/src/third_party/googletest/cmake/gtest.pc.in
-FILE: ../../../third_party/boringssl/src/third_party/googletest/cmake/gtest_main.pc.in
-FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest.cbproj
-FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest.groupproj
-FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest_main.cbproj
-FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest_unittest.cbproj
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-param-test.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-param-test.h.pump
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-test-part.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-filepath.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest-md.sln
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest-md.vcxproj
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest-md.vcxproj.filters
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest.sln
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest.vcxproj
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest.vcxproj.filters
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_main-md.vcxproj
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_main-md.vcxproj.filters
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_main.vcxproj
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_main.vcxproj.filters
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_prod_test-md.vcxproj
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_prod_test-md.vcxproj.filters
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_prod_test.vcxproj
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_prod_test.vcxproj.filters
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_unittest-md.vcxproj
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_unittest-md.vcxproj.filters
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_unittest.vcxproj
-FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_unittest.vcxproj.filters
-FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-all.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-filepath.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-port.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-test-part.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Config/DebugProject.xcconfig
-FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Config/FrameworkTarget.xcconfig
-FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Config/General.xcconfig
-FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Config/ReleaseProject.xcconfig
-FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Config/StaticLibraryTarget.xcconfig
-FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Config/TestTarget.xcconfig
-FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Resources/Info.plist
-FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Samples/FrameworkSample/Info.plist
-FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Samples/FrameworkSample/WidgetFramework.xcodeproj/project.pbxproj
-FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Samples/FrameworkSample/widget.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Samples/FrameworkSample/widget.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Samples/FrameworkSample/widget_test.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/gtest.xcodeproj/project.pbxproj
-FILE: ../../../third_party/gtest/CHANGES
-FILE: ../../../third_party/gtest/CONTRIBUTORS
-FILE: ../../../third_party/gtest/codegear/gtest.cbproj
-FILE: ../../../third_party/gtest/codegear/gtest.groupproj
-FILE: ../../../third_party/gtest/codegear/gtest_main.cbproj
-FILE: ../../../third_party/gtest/codegear/gtest_unittest.cbproj
-FILE: ../../../third_party/gtest/include/gtest/gtest-param-test.h
-FILE: ../../../third_party/gtest/include/gtest/gtest-param-test.h.pump
-FILE: ../../../third_party/gtest/include/gtest/gtest-test-part.h
-FILE: ../../../third_party/gtest/include/gtest/internal/gtest-filepath.h
-FILE: ../../../third_party/gtest/msvc/gtest-md.sln
-FILE: ../../../third_party/gtest/msvc/gtest-md.vcproj
-FILE: ../../../third_party/gtest/msvc/gtest.sln
-FILE: ../../../third_party/gtest/msvc/gtest.vcproj
-FILE: ../../../third_party/gtest/msvc/gtest_main-md.vcproj
-FILE: ../../../third_party/gtest/msvc/gtest_main.vcproj
-FILE: ../../../third_party/gtest/msvc/gtest_prod_test-md.vcproj
-FILE: ../../../third_party/gtest/msvc/gtest_prod_test.vcproj
-FILE: ../../../third_party/gtest/msvc/gtest_unittest-md.vcproj
-FILE: ../../../third_party/gtest/msvc/gtest_unittest.vcproj
-FILE: ../../../third_party/gtest/src/gtest-all.cc
-FILE: ../../../third_party/gtest/src/gtest-filepath.cc
-FILE: ../../../third_party/gtest/src/gtest-port.cc
-FILE: ../../../third_party/gtest/src/gtest-test-part.cc
-FILE: ../../../third_party/gtest/xcode/Config/DebugProject.xcconfig
-FILE: ../../../third_party/gtest/xcode/Config/FrameworkTarget.xcconfig
-FILE: ../../../third_party/gtest/xcode/Config/General.xcconfig
-FILE: ../../../third_party/gtest/xcode/Config/ReleaseProject.xcconfig
-FILE: ../../../third_party/gtest/xcode/Config/StaticLibraryTarget.xcconfig
-FILE: ../../../third_party/gtest/xcode/Config/TestTarget.xcconfig
-FILE: ../../../third_party/gtest/xcode/Resources/Info.plist
-FILE: ../../../third_party/gtest/xcode/Samples/FrameworkSample/Info.plist
-FILE: ../../../third_party/gtest/xcode/Samples/FrameworkSample/WidgetFramework.xcodeproj/project.pbxproj
-FILE: ../../../third_party/gtest/xcode/Samples/FrameworkSample/widget.cc
-FILE: ../../../third_party/gtest/xcode/Samples/FrameworkSample/widget.h
-FILE: ../../../third_party/gtest/xcode/Samples/FrameworkSample/widget_test.cc
-FILE: ../../../third_party/gtest/xcode/gtest.xcodeproj/project.pbxproj
-----------------------------------------------------------------------------------------------------
-Copyright 2008, Google Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-LIBRARY: gtest
-ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest_all.cc
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest_all.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest_link.cc
-FILE: ../../../third_party/gtest/codegear/gtest_all.cc
-FILE: ../../../third_party/gtest/codegear/gtest_link.cc
-----------------------------------------------------------------------------------------------------
-Copyright 2009, Google Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-LIBRARY: gtest
-ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-printers.h
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-printers.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-spi.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-printers.cc
-FILE: ../../../third_party/gtest/include/gtest/gtest-printers.h
-FILE: ../../../third_party/gtest/include/gtest/gtest-spi.h
-FILE: ../../../third_party/gtest/src/gtest-printers.cc
-----------------------------------------------------------------------------------------------------
-Copyright 2007, Google Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-LIBRARY: gtest
-ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest_pred_impl.h
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest_pred_impl.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest_prod.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest_main.cc
-FILE: ../../../third_party/gtest/include/gtest/gtest_pred_impl.h
-FILE: ../../../third_party/gtest/include/gtest/gtest_prod.h
-FILE: ../../../third_party/gtest/src/gtest_main.cc
-----------------------------------------------------------------------------------------------------
-Copyright 2006, Google Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-LIBRARY: gtest
-ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/custom/gtest-port.h
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/custom/gtest-port.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/custom/gtest-printers.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/custom/gtest.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-port-arch.h
-FILE: ../../../third_party/gtest/include/gtest/internal/custom/gtest-port.h
-FILE: ../../../third_party/gtest/include/gtest/internal/custom/gtest-printers.h
-FILE: ../../../third_party/gtest/include/gtest/internal/custom/gtest.h
-FILE: ../../../third_party/gtest/include/gtest/internal/gtest-port-arch.h
-----------------------------------------------------------------------------------------------------
-Copyright 2015, Google Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-LIBRARY: gtest
-ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-death-test-internal.h
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-death-test.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-message.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-death-test-internal.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-internal.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-port.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-string.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample1.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample1.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample1_unittest.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample2.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample2.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample2_unittest.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample3-inl.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample3_unittest.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample4.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample4.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample4_unittest.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample5_unittest.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-death-test.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-internal-inl.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest.cc
-FILE: ../../../third_party/gtest/include/gtest/gtest-death-test.h
-FILE: ../../../third_party/gtest/include/gtest/gtest-message.h
-FILE: ../../../third_party/gtest/include/gtest/gtest.h
-FILE: ../../../third_party/gtest/include/gtest/internal/gtest-death-test-internal.h
-FILE: ../../../third_party/gtest/include/gtest/internal/gtest-internal.h
-FILE: ../../../third_party/gtest/include/gtest/internal/gtest-port.h
-FILE: ../../../third_party/gtest/include/gtest/internal/gtest-string.h
-FILE: ../../../third_party/gtest/samples/sample1.cc
-FILE: ../../../third_party/gtest/samples/sample1.h
-FILE: ../../../third_party/gtest/samples/sample1_unittest.cc
-FILE: ../../../third_party/gtest/samples/sample2.cc
-FILE: ../../../third_party/gtest/samples/sample2.h
-FILE: ../../../third_party/gtest/samples/sample2_unittest.cc
-FILE: ../../../third_party/gtest/samples/sample3-inl.h
-FILE: ../../../third_party/gtest/samples/sample3_unittest.cc
-FILE: ../../../third_party/gtest/samples/sample4.cc
-FILE: ../../../third_party/gtest/samples/sample4.h
-FILE: ../../../third_party/gtest/samples/sample4_unittest.cc
-FILE: ../../../third_party/gtest/samples/sample5_unittest.cc
-FILE: ../../../third_party/gtest/src/gtest-death-test.cc
-FILE: ../../../third_party/gtest/src/gtest-internal-inl.h
-FILE: ../../../third_party/gtest/src/gtest.cc
-----------------------------------------------------------------------------------------------------
-Copyright 2005, Google Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-LIBRARY: gtest
-ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-linked_ptr.h
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-linked_ptr.h
-FILE: ../../../third_party/gtest/include/gtest/internal/gtest-linked_ptr.h
-----------------------------------------------------------------------------------------------------
-Copyright 2003 Google Inc.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-LIBRARY: gtest
-ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-param-util-generated.h
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-typed-test.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-param-util-generated.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-param-util-generated.h.pump
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-param-util.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-type-util.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-type-util.h.pump
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/prime_tables.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample6_unittest.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample7_unittest.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample8_unittest.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-typed-test.cc
-FILE: ../../../third_party/gtest/include/gtest/gtest-typed-test.h
-FILE: ../../../third_party/gtest/include/gtest/internal/gtest-param-util-generated.h
-FILE: ../../../third_party/gtest/include/gtest/internal/gtest-param-util-generated.h.pump
-FILE: ../../../third_party/gtest/include/gtest/internal/gtest-param-util.h
-FILE: ../../../third_party/gtest/include/gtest/internal/gtest-type-util.h
-FILE: ../../../third_party/gtest/include/gtest/internal/gtest-type-util.h.pump
-FILE: ../../../third_party/gtest/samples/prime_tables.h
-FILE: ../../../third_party/gtest/samples/sample6_unittest.cc
-FILE: ../../../third_party/gtest/samples/sample7_unittest.cc
-FILE: ../../../third_party/gtest/samples/sample8_unittest.cc
-FILE: ../../../third_party/gtest/src/gtest-typed-test.cc
-----------------------------------------------------------------------------------------------------
-Copyright 2008 Google Inc.
-All Rights Reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-LIBRARY: gtest
-ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-tuple.h
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-tuple.h
-FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-tuple.h.pump
-FILE: ../../../third_party/gtest/include/gtest/internal/gtest-tuple.h
-FILE: ../../../third_party/gtest/include/gtest/internal/gtest-tuple.h.pump
-----------------------------------------------------------------------------------------------------
-Copyright 2009 Google Inc.
-All Rights Reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-LIBRARY: gtest
-ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/samples/sample10_unittest.cc
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample10_unittest.cc
-FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample9_unittest.cc
-FILE: ../../../third_party/gtest/samples/sample10_unittest.cc
-FILE: ../../../third_party/gtest/samples/sample9_unittest.cc
-----------------------------------------------------------------------------------------------------
-Copyright 2009 Google Inc. All Rights Reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
 
 ====================================================================================================
 LIBRARY: boringssl
@@ -4206,6 +3662,453 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/third_party/googletest/CHANGES
+FILE: ../../../third_party/boringssl/src/third_party/googletest/CONTRIBUTORS
+FILE: ../../../third_party/boringssl/src/third_party/googletest/METADATA
+FILE: ../../../third_party/boringssl/src/third_party/googletest/cmake/gtest.pc.in
+FILE: ../../../third_party/boringssl/src/third_party/googletest/cmake/gtest_main.pc.in
+FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest.cbproj
+FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest.groupproj
+FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest_main.cbproj
+FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest_unittest.cbproj
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-param-test.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-param-test.h.pump
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-test-part.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-filepath.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest-md.sln
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest-md.vcxproj
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest-md.vcxproj.filters
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest.sln
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest.vcxproj
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest.vcxproj.filters
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_main-md.vcxproj
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_main-md.vcxproj.filters
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_main.vcxproj
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_main.vcxproj.filters
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_prod_test-md.vcxproj
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_prod_test-md.vcxproj.filters
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_prod_test.vcxproj
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_prod_test.vcxproj.filters
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_unittest-md.vcxproj
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_unittest-md.vcxproj.filters
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_unittest.vcxproj
+FILE: ../../../third_party/boringssl/src/third_party/googletest/msvc/2010/gtest_unittest.vcxproj.filters
+FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-all.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-filepath.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-port.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-test-part.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Config/DebugProject.xcconfig
+FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Config/FrameworkTarget.xcconfig
+FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Config/General.xcconfig
+FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Config/ReleaseProject.xcconfig
+FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Config/StaticLibraryTarget.xcconfig
+FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Config/TestTarget.xcconfig
+FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Resources/Info.plist
+FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Samples/FrameworkSample/Info.plist
+FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Samples/FrameworkSample/WidgetFramework.xcodeproj/project.pbxproj
+FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Samples/FrameworkSample/widget.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Samples/FrameworkSample/widget.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/Samples/FrameworkSample/widget_test.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/xcode/gtest.xcodeproj/project.pbxproj
+----------------------------------------------------------------------------------------------------
+Copyright 2008, Google Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest_all.cc
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest_all.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/codegear/gtest_link.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2009, Google Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-printers.h
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-printers.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-spi.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-printers.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2007, Google Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest_pred_impl.h
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest_pred_impl.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest_prod.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest_main.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2006, Google Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/custom/gtest-port.h
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/custom/gtest-port.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/custom/gtest-printers.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/custom/gtest.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-port-arch.h
+----------------------------------------------------------------------------------------------------
+Copyright 2015, Google Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-death-test-internal.h
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-death-test.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-message.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-death-test-internal.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-internal.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-port.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-string.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample1.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample1.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample1_unittest.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample2.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample2.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample2_unittest.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample3-inl.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample3_unittest.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample4.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample4.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample4_unittest.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample5_unittest.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-death-test.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-internal-inl.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2005, Google Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-linked_ptr.h
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-linked_ptr.h
+----------------------------------------------------------------------------------------------------
+Copyright 2003 Google Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-param-util-generated.h
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/gtest-typed-test.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-param-util-generated.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-param-util-generated.h.pump
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-param-util.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-type-util.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-type-util.h.pump
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/prime_tables.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample6_unittest.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample7_unittest.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample8_unittest.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/src/gtest-typed-test.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2008 Google Inc.
+All Rights Reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-tuple.h
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-tuple.h
+FILE: ../../../third_party/boringssl/src/third_party/googletest/include/gtest/internal/gtest-tuple.h.pump
+----------------------------------------------------------------------------------------------------
+Copyright 2009 Google Inc.
+All Rights Reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/third_party/googletest/samples/sample10_unittest.cc
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample10_unittest.cc
+FILE: ../../../third_party/boringssl/src/third_party/googletest/samples/sample9_unittest.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2009 Google Inc. All Rights Reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================

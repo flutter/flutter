@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/flow/raster_cache.h"
-#include "third_party/gtest/include/gtest/gtest.h"
+#include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 
