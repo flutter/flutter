@@ -221,9 +221,11 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
       end: 1.0,
     );
     // This rotation will turn on the way in, but not on the way out.
-    return new AnimationMax<double>(
+    return new _AnimationSwap<double>(
       rotationTween.animate(parent),
       new ReverseAnimation(new CurveTween(curve: const Threshold(0.5)).animate(parent)),
+      parent,
+      0.5,
     );
   }
 
