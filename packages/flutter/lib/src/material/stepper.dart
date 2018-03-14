@@ -58,7 +58,7 @@ const TextStyle _kStepStyle = const TextStyle(
   fontSize: 12.0,
   color: Colors.white,
 );
-final Color _kErrorLight = Colors.red;
+const Color _kErrorLight = Colors.red;
 final Color _kErrorDark = Colors.red.shade400;
 const Color _kCircleActiveLight = Colors.white;
 const Color _kCircleActiveDark = Colors.black87;
