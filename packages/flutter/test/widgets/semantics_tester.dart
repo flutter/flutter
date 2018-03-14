@@ -350,6 +350,14 @@ class SemanticsTester {
   /// tester.
   SemanticsTester(this.tester) {
     _semanticsHandle = tester.binding.pipelineOwner.ensureSemantics();
+
+    // This _extra_ clean-up is needed for the case when a test fails and
+    // therefore fails to call dispose() explicitly. The test is still required
+    // to call dispose() explicitly, because the semanticsOwner check is
+    // performed irrespective of whether the owner was created via
+    // SemanticsTester or directly. When the test succeeds, this tear-down
+    // becomes a no-op.
+    addTearDown(dispose);
   }
 
   /// The widget tester that this object is testing the semantics of.
@@ -358,10 +366,12 @@ class SemanticsTester {
 
   /// Release resources held by this semantics tester.
   ///
-  /// Call this function at the end of any test that uses a semantics tester.
+  /// Call this function at the end of any test that uses a semantics tester. It
+  /// is OK to call this function multiple times. If the resources have already
+  /// been released, the subsequent calls have no effect.
   @mustCallSuper
   void dispose() {
-    _semanticsHandle.dispose();
+    _semanticsHandle?.dispose();
     _semanticsHandle = null;
   }
 

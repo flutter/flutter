@@ -105,18 +105,18 @@ void _tests() {
         new TestSemantics(
           children: <TestSemantics>[
             new TestSemantics(
-              nextNodeId: 4,
+              nextNodeId: -1,
               previousNodeId: -1,
               children: <TestSemantics>[
                 new TestSemantics(
-                  nextNodeId: 2,
-                  previousNodeId: 1,
+                  nextNodeId: -1,
+                  previousNodeId: -1,
                   children: <TestSemantics>[
                     new TestSemantics(
                       label: r'Plain text',
                       textDirection: TextDirection.ltr,
                       nextNodeId: 3,
-                      previousNodeId: 4,
+                      previousNodeId: -1,
                     ),
                     new TestSemantics(
                       flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.isSelected],

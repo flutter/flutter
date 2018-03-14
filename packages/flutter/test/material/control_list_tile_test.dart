@@ -139,6 +139,8 @@ void main() {
         ),
       ],
     )));
+
+    semantics.dispose();
   });
 
 }

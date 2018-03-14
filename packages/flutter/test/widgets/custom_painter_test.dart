@@ -357,13 +357,13 @@ void _defineTests() {
         new TestSemantics.rootChild(
           id: 1,
           previousNodeId: -1,
-          nextNodeId: expectedId,
+          nextNodeId: -1,
           children: <TestSemantics>[
             new TestSemantics.rootChild(
               id: expectedId,
               rect: TestSemantics.fullScreen,
               actions: allActions.fold(0, (int previous, SemanticsAction action) => previous | action.index),
-              previousNodeId: 1,
+              previousNodeId: -1,
               nextNodeId: -1,
             ),
           ]
@@ -420,19 +420,18 @@ void _defineTests() {
       ),
     ));
 
-    const int expectedId = 2;
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
             id: 1,
             previousNodeId: -1,
-            nextNodeId: expectedId,
+            nextNodeId: -1,
             children: <TestSemantics>[
               new TestSemantics.rootChild(
-                id: expectedId,
+                id: 2,
                 rect: TestSemantics.fullScreen,
                 flags: SemanticsFlag.values.values.toList(),
-                previousNodeId: 1,
+                previousNodeId: -1,
                 nextNodeId: -1,
               ),
             ]

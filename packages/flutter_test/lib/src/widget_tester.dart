@@ -471,6 +471,19 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   void _endOfTestVerifications() {
     verifyTickersWereDisposed('at the end of the test');
+    _verifySemanticsHandlesWereDisposed();
+  }
+
+  void _verifySemanticsHandlesWereDisposed() {
+    if (binding.pipelineOwner.semanticsOwner != null) {
+      throw new FlutterError(
+        'A SemanticsHandle was active at the end of the test.\n'
+        'All SemanticsHandle instances must be disposed by calling dispose() on '
+        'the SemanticsHandle. If your test uses SemanticsTester, it is '
+        'sufficient to call dispose() on SemanticsTester. Otherwise, the '
+        'existing handle will leak into another test and alter its behavior.'
+      );
+    }
   }
 
   /// Returns the TestTextInput singleton.
