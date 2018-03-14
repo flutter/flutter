@@ -132,7 +132,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       jsonStarted = false;
       processWasKilledIntentionally = true;
       process.kill(ProcessSignal.SIGINT); // flutter run doesn't quit automatically
-      completer.complete(JSON.decode(jsonBuf.toString()));
+      completer.complete(json.decode(jsonBuf.toString()));
       return;
     }
 

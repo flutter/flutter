@@ -296,7 +296,7 @@ class SliverConstraints extends Constraints {
   /// Useful for slivers that have [RenderBox] children.
   BoxConstraints asBoxConstraints({
     double minExtent: 0.0,
-    double maxExtent: double.INFINITY,
+    double maxExtent: double.infinity,
     double crossAxisExtent,
   }) {
     crossAxisExtent ??= this.crossAxisExtent;

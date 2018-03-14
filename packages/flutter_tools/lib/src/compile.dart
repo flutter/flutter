@@ -107,10 +107,10 @@ Future<String> compile(
   final _StdoutHandler stdoutHandler = new _StdoutHandler();
 
   server.stderr
-    .transform(UTF8.decoder)
+    .transform(utf8.decoder)
     .listen((String s) { printError('compiler message: $s'); });
   server.stdout
-    .transform(UTF8.decoder)
+    .transform(utf8.decoder)
     .transform(const LineSplitter())
     .listen(stdoutHandler.handler);
   final int exitCode = await server.exitCode;
@@ -190,7 +190,7 @@ class ResidentCompiler {
     }
     _server = await processManager.start(args);
     _server.stdout
-      .transform(UTF8.decoder)
+      .transform(utf8.decoder)
       .transform(const LineSplitter())
       .listen(
         stdoutHandler.handler,
@@ -203,7 +203,7 @@ class ResidentCompiler {
         });
 
     _server.stderr
-      .transform(UTF8.decoder)
+      .transform(utf8.decoder)
       .transform(const LineSplitter())
       .listen((String s) { printError('compiler message: $s'); });
 

@@ -37,7 +37,7 @@ void main() {
   test('AlignmentGeometry invariants', () {
     final AlignmentDirectional topStart = AlignmentDirectional.topStart;
     final AlignmentDirectional topEnd = AlignmentDirectional.topEnd;
-    final Alignment center = Alignment.center;
+    const Alignment center = Alignment.center;
     final Alignment topLeft = Alignment.topLeft;
     final Alignment topRight = Alignment.topRight;
     final List<double> numbers = <double>[0.0, 1.0, -1.0, 2.0, 0.25, 0.5, 100.0, -999.75];

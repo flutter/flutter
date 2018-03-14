@@ -917,7 +917,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///
 /// class LogoFadeState extends State<LogoFade> {
 ///   double opacityLevel = 1.0;
-/// 
+///
 ///   _changeOpacity() {
 ///     setState(() => opacityLevel = opacityLevel == 0 ? 1.0 : 0.0);
 ///   }

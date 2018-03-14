@@ -15,7 +15,7 @@ import '../src/context.dart';
 void main() {
   group('doctor', () {
     testUsingContext('intellij validator', () async {
-      final String installPath = '/path/to/intelliJ';
+      const String installPath = '/path/to/intelliJ';
       final ValidationResult result = await new IntelliJValidatorTestTarget('Test', installPath).validate();
       expect(result.type, ValidationType.partial);
       expect(result.statusInfo, 'version test.test.test');

@@ -96,25 +96,27 @@ class Dialog extends StatelessWidget {
 ///   return showDialog<Null>(
 ///     context: context,
 ///     barrierDismissible: false, // user must tap button!
-///     child: new AlertDialog(
-///       title: new Text('Rewind and remember'),
-///       content: new SingleChildScrollView(
-///         child: new ListBody(
-///           children: <Widget>[
-///             new Text('You will never be satisfied.'),
-///             new Text('You\’re like me. I’m never satisfied.'),
-///           ],
+///     builder: (BuildContext context) {
+///       return new AlertDialog(
+///         title: new Text('Rewind and remember'),
+///         content: new SingleChildScrollView(
+///           child: new ListBody(
+///             children: <Widget>[
+///               new Text('You will never be satisfied.'),
+///               new Text('You\’re like me. I’m never satisfied.'),
+///             ],
+///           ),
 ///         ),
-///       ),
-///       actions: <Widget>[
-///         new FlatButton(
-///           child: new Text('Regret'),
-///           onPressed: () {
-///             Navigator.of(context).pop();
-///           },
-///         ),
-///       ],
-///     ),
+///         actions: <Widget>[
+///           new FlatButton(
+///             child: new Text('Regret'),
+///             onPressed: () {
+///               Navigator.of(context).pop();
+///             },
+///           ),
+///         ],
+///       );
+///     },
 ///   );
 /// }
 /// ```
@@ -301,19 +303,21 @@ class SimpleDialogOption extends StatelessWidget {
 /// Future<Null> _askedToLead() async {
 ///   switch (await showDialog<Department>(
 ///     context: context,
-///     child: new SimpleDialog(
-///       title: const Text('Select assignment'),
-///       children: <Widget>[
-///         new SimpleDialogOption(
-///           onPressed: () { Navigator.pop(context, Department.treasury); },
-///           child: const Text('Treasury department'),
-///         ),
-///         new SimpleDialogOption(
-///           onPressed: () { Navigator.pop(context, Department.state); },
-///           child: const Text('State department'),
-///         ),
-///       ],
-///     ),
+///     builder: (BuildContext context) {
+///       return new SimpleDialog(
+///         title: const Text('Select assignment'),
+///         children: <Widget>[
+///           new SimpleDialogOption(
+///             onPressed: () { Navigator.pop(context, Department.treasury); },
+///             child: const Text('Treasury department'),
+///           ),
+///           new SimpleDialogOption(
+///             onPressed: () { Navigator.pop(context, Department.state); },
+///             child: const Text('State department'),
+///           ),
+///         ],
+///       );
+///     }
 ///   )) {
 ///     case Department.treasury:
 ///       // Let's go.
@@ -457,12 +461,17 @@ class _DialogRoute<T> extends PopupRoute<T> {
 
 /// Displays a dialog above the current contents of the app.
 ///
-/// This function typically receives a [Dialog] widget as its child argument.
-/// Content below the dialog is dimmed with a [ModalBarrier].
+/// This function takes a `builder` which typically builds a [Dialog] widget.
+/// Content below the dialog is dimmed with a [ModalBarrier]. This widget does
+/// not share a context with the location that `showDialog` is originally
+/// called from. Use a [StatefulBuilder] or a custom [StatefulWidget] if the
+/// dialog needs to update dynamically.
 ///
 /// The `context` argument is used to look up the [Navigator] and [Theme] for
 /// the dialog. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the dialog is closed.
+///
+/// The `child` argument is deprecated, and should be replaced with `builder`.
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
@@ -481,10 +490,16 @@ class _DialogRoute<T> extends PopupRoute<T> {
 Future<T> showDialog<T>({
   @required BuildContext context,
   bool barrierDismissible: true,
-  @required Widget child,
+  @Deprecated(
+    'Instead of using the "child" argument, return the child from a closure '
+    'provided to the "builder" argument. This will ensure that the BuildContext '
+    'is appropriate for widgets built in the dialog.'
+  ) Widget child,
+  WidgetBuilder builder,
 }) {
+  assert(child == null || builder == null); // ignore: deprecated_member_use
   return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
-    child: child,
+    child: child ?? new Builder(builder: builder), // ignore: deprecated_member_use
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierDismissible: barrierDismissible,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,

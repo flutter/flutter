@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'checkbox.dart';
 import 'colors.dart';
 import 'debug.dart';
+import 'divider.dart';
 import 'dropdown.dart';
 import 'icons.dart';
 import 'ink_well.dart';
@@ -500,12 +501,12 @@ class DataTable extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final BoxDecoration _kSelectedDecoration = new BoxDecoration(
-      border: new Border(bottom: new BorderSide(color: theme.dividerColor)),
+      border: new Border(bottom: Divider.createBorderSide(context, width: 1.0)),
       // The backgroundColor has to be transparent so you can see the ink on the material
       color: (Theme.of(context).brightness == Brightness.light) ? _kGrey100Opacity : _kGrey300Opacity,
     );
     final BoxDecoration _kUnselectedDecoration = new BoxDecoration(
-      border: new Border(bottom: new BorderSide(color: theme.dividerColor)),
+      border: new Border(bottom: Divider.createBorderSide(context, width: 1.0)),
     );
 
     final bool showCheckboxColumn = rows.any((DataRow row) => row.onSelectChanged != null);
@@ -704,7 +705,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     _opacityController.value = widget.visible ? 1.0 : 0.0;
     _orientationAnimation = new Tween<double>(
       begin: 0.0,
-      end: math.PI,
+      end: math.pi,
     ).animate(new CurvedAnimation(
       parent: _orientationController = new AnimationController(
         duration: widget.duration,
@@ -715,7 +716,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     ..addListener(_rebuild)
     ..addStatusListener(_resetOrientationAnimation);
     if (widget.visible)
-      _orientationOffset = widget.down ? 0.0 : math.PI;
+      _orientationOffset = widget.down ? 0.0 : math.pi;
   }
 
   void _rebuild() {
@@ -726,8 +727,8 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
 
   void _resetOrientationAnimation(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
-      assert(_orientationAnimation.value == math.PI);
-      _orientationOffset += math.PI;
+      assert(_orientationAnimation.value == math.pi);
+      _orientationOffset += math.pi;
       _orientationController.value = 0.0; // TODO(ianh): This triggers a pointless rebuild.
     }
   }
@@ -741,7 +742,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
       if (widget.visible && (_opacityController.status == AnimationStatus.dismissed)) {
         _orientationController.stop();
         _orientationController.value = 0.0;
-        _orientationOffset = newDown ? 0.0 : math.PI;
+        _orientationOffset = newDown ? 0.0 : math.pi;
         skipArrow = true;
       }
       if (widget.visible) {

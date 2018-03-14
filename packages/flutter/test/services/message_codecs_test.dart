@@ -137,8 +137,8 @@ void main() {
       _checkEncodeDecode<dynamic>(standard, 9223372036854775807);
       _checkEncodeDecode<dynamic>(standard, -9223372036854775807);
       _checkEncodeDecode<dynamic>(standard, 3.14);
-      _checkEncodeDecode<dynamic>(standard, double.INFINITY);
-      _checkEncodeDecode<dynamic>(standard, double.NAN);
+      _checkEncodeDecode<dynamic>(standard, double.infinity);
+      _checkEncodeDecode<dynamic>(standard, double.nan);
       _checkEncodeDecode<dynamic>(standard, '');
       _checkEncodeDecode<dynamic>(standard, 'hello');
       _checkEncodeDecode<dynamic>(standard, 'special chars >\u263A\u{1F602}<');
@@ -161,15 +161,15 @@ void main() {
             <int>[-0x7fffffffffffffff - 1, 0, 0x7fffffffffffffff]),
         null, // ensures the offset of the following list is unaligned.
         new Float64List.fromList(<double>[
-          double.NEGATIVE_INFINITY,
-          -double.MAX_FINITE,
-          -double.MIN_POSITIVE,
+          double.negativeInfinity,
+          -double.maxFinite,
+          -double.minPositive,
           -0.0,
           0.0,
-          double.MIN_POSITIVE,
-          double.MAX_FINITE,
-          double.INFINITY,
-          double.NAN
+          double.minPositive,
+          double.maxFinite,
+          double.infinity,
+          double.nan
         ]),
         <dynamic>['nested', <dynamic>[]],
         <dynamic, dynamic>{ 'a': 'nested', null: <dynamic, dynamic>{} },

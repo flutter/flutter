@@ -38,7 +38,7 @@ ui.Picture paint(ui.Rect paintBounds) {
 
   canvas.translate(mid.dx, mid.dy);
   paint.color = const ui.Color.fromARGB(128, 255, 0, 255);
-  canvas.rotate(math.PI/4.0);
+  canvas.rotate(math.pi/4.0);
 
   final ui.Gradient yellowBlue = new ui.Gradient.linear(
     new ui.Offset(-radius, -radius),

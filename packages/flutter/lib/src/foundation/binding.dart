@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON;
+import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
 
@@ -348,7 +348,7 @@ abstract class BindingBase {
   /// extension method is called. The callback must return a [Future]
   /// that either eventually completes to a return value in the form
   /// of a name/value map where the values can all be converted to
-  /// JSON using `JSON.encode()` (see [JsonCodec.encode]), or fails. In case of failure, the
+  /// JSON using `json.encode()` (see [JsonEncoder]), or fails. In case of failure, the
   /// failure is reported to the remote caller and is dumped to the
   /// logs.
   ///
@@ -375,7 +375,7 @@ abstract class BindingBase {
       if (caughtException == null) {
         result['type'] = '_extensionType';
         result['method'] = method;
-        return new developer.ServiceExtensionResponse.result(JSON.encode(result));
+        return new developer.ServiceExtensionResponse.result(json.encode(result));
       } else {
         FlutterError.reportError(new FlutterErrorDetails(
           exception: caughtException,
@@ -384,7 +384,7 @@ abstract class BindingBase {
         ));
         return new developer.ServiceExtensionResponse.error(
           developer.ServiceExtensionResponse.extensionError,
-          JSON.encode(<String, String>{
+          json.encode(<String, String>{
             'exception': caughtException.toString(),
             'stack': caughtStack.toString(),
             'method': method,

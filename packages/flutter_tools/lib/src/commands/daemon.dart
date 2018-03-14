@@ -693,12 +693,12 @@ class DeviceDomain extends Domain {
 }
 
 Stream<Map<String, dynamic>> get stdinCommandStream => stdin
-  .transform(UTF8.decoder)
+  .transform(utf8.decoder)
   .transform(const LineSplitter())
   .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
   .map((String line) {
     line = line.substring(1, line.length - 1);
-    return JSON.decode(line);
+    return json.decode(line);
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {
@@ -706,7 +706,7 @@ void stdoutCommandResponse(Map<String, dynamic> command) {
 }
 
 String jsonEncodeObject(dynamic object) {
-  return JSON.encode(object, toEncodable: _toEncodable);
+  return json.encode(object, toEncodable: _toEncodable);
 }
 
 dynamic _toEncodable(dynamic object) {

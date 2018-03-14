@@ -259,7 +259,7 @@ void main() {
   testWidgets('Transform.rotate', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Transform.rotate(
-        angle: math.PI / 2.0,
+        angle: math.pi / 2.0,
         child: new Opacity(opacity: 0.5, child: new Container()),
       ),
     );

@@ -16,8 +16,8 @@ void main() {
 
   test('RenderLimitedBox getters and setters', () {
     final RenderLimitedBox box = new RenderLimitedBox();
-    expect(box.maxWidth, double.INFINITY);
-    expect(box.maxHeight, double.INFINITY);
+    expect(box.maxWidth, double.infinity);
+    expect(box.maxHeight, double.infinity);
     box.maxWidth = 0.0;
     box.maxHeight = 1.0;
     expect(box.maxHeight, 1.0);

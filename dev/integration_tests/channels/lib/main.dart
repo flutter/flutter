@@ -59,15 +59,15 @@ class _TestAppState extends State<TestApp> {
   ]);
   static final Float64List someFloat64s =
       new Float64List.fromList(<double>[
-    double.NAN,
-    double.NEGATIVE_INFINITY,
-    -double.MAX_FINITE,
-    -double.MIN_POSITIVE,
+    double.nan,
+    double.negativeInfinity,
+    -double.maxFinite,
+    -double.minPositive,
     -0.0,
     0.0,
-    double.MIN_POSITIVE,
-    double.MAX_FINITE,
-    double.INFINITY,
+    double.minPositive,
+    double.maxFinite,
+    double.infinity,
   ]);
   static final List<TestStep> steps = <TestStep>[
     () => methodCallJsonSuccessHandshake(null),

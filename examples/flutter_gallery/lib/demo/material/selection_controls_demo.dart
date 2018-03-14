@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 const String _checkboxText =
-  'Checkboxes allow the user to select multiple options from a set.';
+  'Checkboxes allow the user to select multiple options from a set. '
+  'A normal checkbox\'s value is true or false and a tristate checkbox\'s '
+  'value can also be null.';
 
 const String _checkboxCode = 'selectioncontrols_checkbox';
 
@@ -64,6 +66,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
 
   bool checkboxValueA = true;
   bool checkboxValueB = false;
+  bool checkboxValueC;
   int radioValue = 0;
   bool switchValue = false;
 
@@ -82,24 +85,40 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
           new Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new Checkbox(value: checkboxValueA, onChanged: (bool value) {
-                setState(() {
-                  checkboxValueA = value;
-                });
-              }),
-              new Checkbox(value: checkboxValueB, onChanged: (bool value) {
-                setState(() {
-                  checkboxValueB = value;
-                });
-              })
-            ]
+              new Checkbox(
+                value: checkboxValueA,
+                onChanged: (bool value) {
+                  setState(() {
+                    checkboxValueA = value;
+                  });
+                },
+              ),
+              new Checkbox(
+                value: checkboxValueB,
+                onChanged: (bool value) {
+                  setState(() {
+                    checkboxValueB = value;
+                  });
+                },
+              ),
+              new Checkbox(
+                value: checkboxValueC,
+                tristate: true,
+                onChanged: (bool value) {
+                  setState(() {
+                    checkboxValueC = value;
+                  });
+                },
+              ),
+            ],
           ),
           new Row(
             mainAxisSize: MainAxisSize.min,
             children: const <Widget>[
               // Disabled checkboxes
               const Checkbox(value: true, onChanged: null),
-              const Checkbox(value: false, onChanged: null)
+              const Checkbox(value: false, onChanged: null),
+              const Checkbox(value: null, tristate: true, onChanged: null),
             ]
           )
         ]

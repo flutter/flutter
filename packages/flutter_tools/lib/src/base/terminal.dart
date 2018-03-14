@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show ASCII;
+import 'dart:convert' show ascii;
 
 import 'package:quiver/strings.dart';
 
@@ -87,7 +87,7 @@ class AnsiTerminal {
   ///
   /// Useful when the console is in [singleCharMode].
   Stream<String> get onCharInput {
-    _broadcastStdInString ??= io.stdin.transform(ASCII.decoder).asBroadcastStream();
+    _broadcastStdInString ??= io.stdin.transform(ascii.decoder).asBroadcastStream();
     return _broadcastStdInString;
   }
 

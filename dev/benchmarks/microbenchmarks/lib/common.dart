@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show JSON;
+import 'dart:convert' show json;
 
 import 'package:meta/meta.dart';
 
@@ -54,7 +54,7 @@ class BenchmarkResultPrinter {
     for (_BenchmarkResult result in _results) {
       results[result.name] = result.value;
     }
-    return JSON.encode(results);
+    return json.encode(results);
   }
 
   String _printPlainText() {

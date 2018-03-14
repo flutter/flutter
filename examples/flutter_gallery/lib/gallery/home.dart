@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'drawer.dart';
 import 'item.dart';
+import 'theme.dart';
 
 const double _kFlexibleSpaceMaxHeight = 256.0;
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
@@ -64,7 +65,7 @@ class _AppBarBackground extends StatelessWidget {
 class GalleryHome extends StatefulWidget {
   const GalleryHome({
     Key key,
-    this.useLightTheme,
+    this.galleryTheme,
     @required this.onThemeChanged,
     this.timeDilation,
     @required this.onTimeDilationChanged,
@@ -84,8 +85,8 @@ class GalleryHome extends StatefulWidget {
        assert(onTimeDilationChanged != null),
        super(key: key);
 
-  final bool useLightTheme;
-  final ValueChanged<bool> onThemeChanged;
+  final GalleryTheme galleryTheme;
+  final ValueChanged<GalleryTheme> onThemeChanged;
 
   final double timeDilation;
   final ValueChanged<double> onTimeDilationChanged;
@@ -172,7 +173,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
     Widget home = new Scaffold(
       key: _scaffoldKey,
       drawer: new GalleryDrawer(
-        useLightTheme: widget.useLightTheme,
+        galleryTheme: widget.galleryTheme,
         onThemeChanged: widget.onThemeChanged,
         timeDilation: widget.timeDilation,
         onTimeDilationChanged: widget.onTimeDilationChanged,
