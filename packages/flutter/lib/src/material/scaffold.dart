@@ -149,6 +149,20 @@ abstract class FloatingActionButtonAnimator {
   /// Animates the scale of the [FloatingActionButton].
   /// 
   /// The animation should both start and end with a value of 1.0.
+  /// 
+  /// For example, to create an animation that linearly scales out and then back in,
+  /// you could join animations that pass each other:
+  /// 
+  /// ```dart
+  ///   @override
+  ///   Animation<double> getScaleAnimation({@required Animation<double> parent}) {
+  ///     // The animations will cross at value 0, and the train will return to 1.0.
+  ///     return new TrainHoppingAnimation(
+  ///       Tween<double>(begin: 1.0, end: -1.0).animate(parent),
+  ///       Tween<double>(begin: -1.0, end: 1.0).animate(parent),
+  ///     );
+  ///   }
+  /// ```
   Animation<double> getScaleAnimation({@required Animation<double> parent});
 
   /// Animates the rotation of [Scaffold.floatingActionButton].
