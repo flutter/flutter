@@ -1436,7 +1436,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     }
     return lightEnabled;
   }
-  
+
   Color _getDefaultIconColor(ThemeData themeData) {
     switch (themeData.brightness) {
       case Brightness.dark:
@@ -1771,7 +1771,7 @@ class InputDecoration {
   ///
   /// When the input field is empty and unfocused, the label is displayed on
   /// top of the input field (i.e., at the same location on the screen where
-  /// text my be entered in the input field). When the input field receives
+  /// text may be entered in the input field). When the input field receives
   /// focus (or if the field is non-empty), the label moves above (i.e.,
   /// vertically adjacent to) the input field.
   final String labelText;
@@ -1800,7 +1800,7 @@ class InputDecoration {
   /// Text that suggests what sort of input the field accepts.
   ///
   /// Displayed on top of the input [child] (i.e., at the same location on the
-  /// screen where text my be entered in the input [child]) when the input
+  /// screen where text may be entered in the input [child]) when the input
   /// [isEmpty] and either (a) [labelText] is null or (b) the input has the focus.
   final String hintText;
 
@@ -1808,7 +1808,7 @@ class InputDecoration {
   ///
   /// Also used for the [labelText] when the [labelText] is displayed on
   /// top of the input field (i.e., at the same location on the screen where
-  /// text my be entered in the input [child]).
+  /// text may be entered in the input [child]).
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
@@ -2217,7 +2217,7 @@ class InputDecorationTheme extends Diagnosticable {
   ///
   /// Also used for the [labelText] when the [labelText] is displayed on
   /// top of the input field (i.e., at the same location on the screen where
-  /// text my be entered in the input field).
+  /// text may be entered in the input field).
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
