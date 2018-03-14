@@ -438,7 +438,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(DropdownButtonHideUnderline old) => false;
+  bool updateShouldNotify(DropdownButtonHideUnderline oldWidget) => false;
 }
 
 /// A material design button for selecting from a list of items.

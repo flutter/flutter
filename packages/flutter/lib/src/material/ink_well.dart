@@ -364,8 +364,8 @@ class InkResponse extends StatefulWidget {
   _InkResponseState<InkResponse> createState() => new _InkResponseState<InkResponse>();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     final List<String> gestures = <String>[];
     if (onTap != null)
       gestures.add('tap');
@@ -373,9 +373,9 @@ class InkResponse extends StatefulWidget {
       gestures.add('double tap');
     if (onLongPress != null)
       gestures.add('long press');
-    description.add(new IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
-    description.add(new DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
-    description.add(new DiagnosticsProperty<BoxShape>(
+    properties.add(new IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
+    properties.add(new DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
+    properties.add(new DiagnosticsProperty<BoxShape>(
       'highlightShape',
       highlightShape,
       description: '${containedInkWell ? "clipped to " : ""}$highlightShape',

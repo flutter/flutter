@@ -2105,9 +2105,9 @@ abstract class RenderBox extends RenderObject {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Size>('size', _size, missingIfNull: true));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Size>('size', _size, missingIfNull: true));
   }
 }
 

@@ -170,7 +170,7 @@ class DashOutlineCirclePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(DashOutlineCirclePainter oldPainter) => false;
+  bool shouldRepaint(DashOutlineCirclePainter oldDelegate) => false;
 }
 
 class MovableBall extends StatelessWidget {

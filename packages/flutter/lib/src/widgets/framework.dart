@@ -413,9 +413,9 @@ abstract class Widget extends DiagnosticableTree {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.dense;
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.dense;
   }
 
 
@@ -1300,14 +1300,14 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   void didChangeDependencies() { }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     assert(() {
-      description.add(new EnumProperty<_StateLifecycle>('lifecycle state', _debugLifecycleState, defaultValue: _StateLifecycle.ready));
+      properties.add(new EnumProperty<_StateLifecycle>('lifecycle state', _debugLifecycleState, defaultValue: _StateLifecycle.ready));
       return true;
     }());
-    description.add(new ObjectFlagProperty<T>('_widget', _widget, ifNull: 'no widget'));
-    description.add(new ObjectFlagProperty<StatefulElement>('_element', _element, ifNull: 'not mounted'));
+    properties.add(new ObjectFlagProperty<T>('_widget', _widget, ifNull: 'no widget'));
+    properties.add(new ObjectFlagProperty<StatefulElement>('_element', _element, ifNull: 'not mounted'));
   }
 }
 
@@ -3349,16 +3349,16 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.defaultDiagnosticsTreeStyle= DiagnosticsTreeStyle.dense;
-    description.add(new ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
-    description.add(new ObjectFlagProperty<Widget>('widget', widget, ifNull: 'no widget'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.defaultDiagnosticsTreeStyle= DiagnosticsTreeStyle.dense;
+    properties.add(new ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
+    properties.add(new ObjectFlagProperty<Widget>('widget', widget, ifNull: 'no widget'));
     if (widget != null) {
-      description.add(new DiagnosticsProperty<Key>('key', widget?.key, showName: false, defaultValue: null, level: DiagnosticLevel.hidden));
-      widget.debugFillProperties(description);
+      properties.add(new DiagnosticsProperty<Key>('key', widget?.key, showName: false, defaultValue: null, level: DiagnosticLevel.hidden));
+      widget.debugFillProperties(properties);
     }
-    description.add(new FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
+    properties.add(new FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
   }
 
   @override
@@ -3554,9 +3554,9 @@ class ErrorWidget extends LeafRenderObjectWidget {
   RenderBox createRenderObject(BuildContext context) => new RenderErrorBox(message);
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new StringProperty('message', message, quoted: false));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new StringProperty('message', message, quoted: false));
   }
 }
 
@@ -3863,9 +3863,9 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<State<StatefulWidget>>('state', state, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<State<StatefulWidget>>('state', state, defaultValue: null));
   }
 }
 
@@ -3909,7 +3909,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
   ParentDataWidget<T> get widget => super.widget;
 
   @override
-  void mount(Element parent, dynamic slot) {
+  void mount(Element parent, dynamic newSlot) {
     assert(() {
       final List<Widget> badAncestors = <Widget>[];
       Element ancestor = parent;
@@ -3935,7 +3935,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
         )
       );
     }());
-    super.mount(parent, slot);
+    super.mount(parent, newSlot);
   }
 
   void _applyParentData(ParentDataWidget<T> widget) {
@@ -4531,9 +4531,9 @@ abstract class RenderObjectElement extends Element {
   void removeChildRenderObject(covariant RenderObject child);
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<RenderObject>('renderObject', renderObject, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<RenderObject>('renderObject', renderObject, defaultValue: null));
   }
 }
 

@@ -151,9 +151,9 @@ class Hero extends StatefulWidget {
   _HeroState createState() => new _HeroState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Object>('tag', tag));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Object>('tag', tag));
   }
 }
 
@@ -448,17 +448,17 @@ class HeroController extends NavigatorObserver {
   final Map<Object, _HeroFlight> _flights = <Object, _HeroFlight>{};
 
   @override
-  void didPush(Route<dynamic> to, Route<dynamic> from) {
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
     assert(navigator != null);
-    assert(to != null);
-    _maybeStartHeroTransition(from, to, _HeroFlightType.push);
+    assert(route != null);
+    _maybeStartHeroTransition(previousRoute, route, _HeroFlightType.push);
   }
 
   @override
-  void didPop(Route<dynamic> from, Route<dynamic> to) {
+  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
     assert(navigator != null);
-    assert(from != null);
-    _maybeStartHeroTransition(from, to, _HeroFlightType.pop);
+    assert(route != null);
+    _maybeStartHeroTransition(route, previousRoute, _HeroFlightType.pop);
   }
 
   @override

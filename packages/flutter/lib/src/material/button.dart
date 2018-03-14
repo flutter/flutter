@@ -397,8 +397,8 @@ class MaterialButton extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }
 }
