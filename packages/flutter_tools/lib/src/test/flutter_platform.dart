@@ -4,6 +4,8 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
+import 'dart:math' show max;
 
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -97,9 +99,11 @@ class _CompilationRequest {
   _CompilationRequest(this.path, this.result);
 }
 
-// This class is a wrapper around compiler that allows multiple isolates to
+// This class is a wrapper around compiler that allows multiple tests to
 // enqueue compilation requests, but ensures only one compilation at a time.
 class _Compiler {
+  int pending = 0;
+
   _Compiler(bool trackWidgetCreation) {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
@@ -108,29 +112,24 @@ class _Compiler {
         .createTempSync('output_dill');
     final File outputDill = outputDillDirectory.childFile('output.dill');
 
-    compilerController.stream.listen((_CompilationRequest request) async {
-      final bool isEmpty = compilationQueue.isEmpty;
-      compilationQueue.add(request);
-      // Only trigger processing if queue was empty - i.e. no other requests
-      // are currently being processed. This effectively enforces "one
-      // compilation request at a time".
-      if (isEmpty) {
-        while (compilationQueue.isNotEmpty) {
-          final _CompilationRequest request = compilationQueue.first;
-          printTrace('Compiling ${request.path}');
-          final String outputPath = await compiler.recompile(request.path,
-            <String>[request.path],
-            outputPath: outputDill.path,
-          );
-          // Copy output dill next to the source file.
-          final File kernelReadyToRun = await fs.file(outputPath).copy(
-              request.path + '.dill');
-          compiler.accept();
-          compiler.reset();
-          request.result.complete(kernelReadyToRun.path);
-          // Only remove now when we finished processing the element
-          compilationQueue.removeAt(0);
-        }
+    StreamSubscription<_CompilationRequest> subscription;
+    subscription = compilerController.stream.listen((_CompilationRequest request) async {
+      subscription.pause();
+      try {
+        printTrace('Compiling ${request.path}');
+        final String outputPath = await compiler.recompile(request.path,
+          <String>[request.path],
+          outputPath: outputDill.path,
+        );
+        // Copy output dill next to the source file.
+        final File kernelReadyToRun = await fs.file(outputPath).copy(
+          request.path + '.dill');
+        compiler.accept();
+        compiler.reset();
+        request.result.complete(kernelReadyToRun.path);
+      } finally {
+        pending--;
+        subscription.resume();
       }
     }, onDone: () {
       outputDillDirectory.deleteSync(recursive: true);
@@ -144,13 +143,39 @@ class _Compiler {
 
   final StreamController<_CompilationRequest> compilerController =
       new StreamController<_CompilationRequest>();
-  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
   ResidentCompiler compiler;
 
   Future<String> compile(String mainDart) {
+    pending++;
     final Completer<String> completer = new Completer<String>();
     compilerController.add(new _CompilationRequest(mainDart, completer));
     return completer.future;
+  }
+}
+
+class _CompilerPool {
+  final int maxCompilers = max(Platform.numberOfProcessors ~/ 2, 1);
+  final bool trackWidgetCreation;
+  final List<_Compiler> compilers = <_Compiler>[];
+
+  _CompilerPool(this.trackWidgetCreation);
+
+  Future<String> compile(String mainDart) {
+    // First try to find a compiler that is idling.
+    _Compiler compiler = compilers.firstWhere((_Compiler compiler) => compiler.pending == 0, orElse: () => null);
+
+    if (compiler == null) {
+      // If we are below the threshold just create a new compiler.
+      if (compilers.length < maxCompilers) {
+        compiler = new _Compiler(trackWidgetCreation);
+        compilers.add(compiler);
+      } else {
+        // Otherwise find compiler that is least busy.
+        compiler = compilers.reduce((_Compiler a, _Compiler b) => a.pending <= b.pending ? a : b);
+      }
+    }
+
+    return compiler.compile(mainDart);
   }
 }
 
@@ -181,7 +206,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final String precompiledDillPath;
   final bool trackWidgetCreation;
 
-  _Compiler compiler;
+  _CompilerPool compilerPool;
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
@@ -275,8 +300,8 @@ class _FlutterPlatform extends PlatformPlugin {
 
       if (previewDart2 && precompiledDillPath == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= new _Compiler(trackWidgetCreation);
-        mainDart = await compiler.compile(mainDart);
+        compilerPool ??= new _CompilerPool(trackWidgetCreation);
+        mainDart = await compilerPool.compile(mainDart);
 
         if (mainDart == null) {
           controller.sink.addError(
