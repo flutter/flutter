@@ -149,7 +149,7 @@ class RenderPadding extends RenderShiftedBox {
     _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
-    if (child != null) // next line relies on double.INFINITY absorption
+    if (child != null) // next line relies on double.infinity absorption
       return child.getMinIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding;
     return totalHorizontalPadding;
   }
@@ -159,7 +159,7 @@ class RenderPadding extends RenderShiftedBox {
     _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
-    if (child != null) // next line relies on double.INFINITY absorption
+    if (child != null) // next line relies on double.infinity absorption
       return child.getMaxIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding;
     return totalHorizontalPadding;
   }
@@ -169,7 +169,7 @@ class RenderPadding extends RenderShiftedBox {
     _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
-    if (child != null) // next line relies on double.INFINITY absorption
+    if (child != null) // next line relies on double.infinity absorption
       return child.getMinIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
     return totalVerticalPadding;
   }
@@ -179,7 +179,7 @@ class RenderPadding extends RenderShiftedBox {
     _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
-    if (child != null) // next line relies on double.INFINITY absorption
+    if (child != null) // next line relies on double.infinity absorption
       return child.getMaxIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
     return totalVerticalPadding;
   }
@@ -374,17 +374,17 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
 
   @override
   void performLayout() {
-    final bool shrinkWrapWidth = _widthFactor != null || constraints.maxWidth == double.INFINITY;
-    final bool shrinkWrapHeight = _heightFactor != null || constraints.maxHeight == double.INFINITY;
+    final bool shrinkWrapWidth = _widthFactor != null || constraints.maxWidth == double.infinity;
+    final bool shrinkWrapHeight = _heightFactor != null || constraints.maxHeight == double.infinity;
 
     if (child != null) {
       child.layout(constraints.loosen(), parentUsesSize: true);
-      size = constraints.constrain(new Size(shrinkWrapWidth ? child.size.width * (_widthFactor ?? 1.0) : double.INFINITY,
-                                            shrinkWrapHeight ? child.size.height * (_heightFactor ?? 1.0) : double.INFINITY));
+      size = constraints.constrain(new Size(shrinkWrapWidth ? child.size.width * (_widthFactor ?? 1.0) : double.infinity,
+                                            shrinkWrapHeight ? child.size.height * (_heightFactor ?? 1.0) : double.infinity));
       alignChild();
     } else {
-      size = constraints.constrain(new Size(shrinkWrapWidth ? 0.0 : double.INFINITY,
-                                            shrinkWrapHeight ? 0.0 : double.INFINITY));
+      size = constraints.constrain(new Size(shrinkWrapWidth ? 0.0 : double.infinity,
+                                            shrinkWrapHeight ? 0.0 : double.infinity));
     }
   }
 
@@ -870,7 +870,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     double result;
     if (child == null) {
       result = super.computeMinIntrinsicWidth(height);
-    } else { // the following line relies on double.INFINITY absorption
+    } else { // the following line relies on double.infinity absorption
       result = child.getMinIntrinsicWidth(height * (_heightFactor ?? 1.0));
     }
     assert(result.isFinite);
@@ -882,7 +882,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     double result;
     if (child == null) {
       result = super.computeMaxIntrinsicWidth(height);
-    } else { // the following line relies on double.INFINITY absorption
+    } else { // the following line relies on double.infinity absorption
       result = child.getMaxIntrinsicWidth(height * (_heightFactor ?? 1.0));
     }
     assert(result.isFinite);
@@ -894,7 +894,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     double result;
     if (child == null) {
       result = super.computeMinIntrinsicHeight(width);
-    } else { // the following line relies on double.INFINITY absorption
+    } else { // the following line relies on double.infinity absorption
       result = child.getMinIntrinsicHeight(width * (_widthFactor ?? 1.0));
     }
     assert(result.isFinite);
@@ -906,7 +906,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     double result;
     if (child == null) {
       result = super.computeMaxIntrinsicHeight(width);
-    } else { // the following line relies on double.INFINITY absorption
+    } else { // the following line relies on double.infinity absorption
       result = child.getMaxIntrinsicHeight(width * (_widthFactor ?? 1.0));
     }
     assert(result.isFinite);

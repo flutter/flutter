@@ -15,7 +15,7 @@
   "pageRowsInfoTitle": "$firstRow-$lastRow จาก $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow จากประมาณ $rowCount",
   "rowsPerPageTitle": "แถวต่อหน้า:",
-  "tabLabel": "$tabIndex จาก $tabCount",
+  "tabLabel": "แท็บที่ $tabIndex จาก $tabCount",
   "selectedRowCountTitleOne": "เลือกแล้ว 1 รายการ",
   "selectedRowCountTitleOther": "เลือกแล้ว $selectedRowCount รายการ",
   "cancelButtonLabel": "ยกเลิก",
@@ -31,8 +31,8 @@
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "เลือกชั่วโมง",
   "timePickerMinuteModeAnnouncement": "เลือกนาที",
-  "signedInLabel": "ลงทะเบียนเข้า",
+  "signedInLabel": "ลงชื่อเข้าใช้",
   "hideAccountsLabel": "ซ่อนบัญชี",
   "showAccountsLabel": "แสดงบัญชี",
-  "modalBarrierDismissLabel": "ยกเลิก"
+  "modalBarrierDismissLabel": "ปิด"
 }

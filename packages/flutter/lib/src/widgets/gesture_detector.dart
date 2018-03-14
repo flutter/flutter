@@ -723,24 +723,42 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 
   @override
   RenderSemanticsGestureHandler createRenderObject(BuildContext context) {
-    final RenderSemanticsGestureHandler renderObject = new RenderSemanticsGestureHandler();
-    _updateHandlers(renderObject);
-    return renderObject;
+    return new RenderSemanticsGestureHandler(
+      onTap: _onTapHandler,
+      onLongPress: _onLongPressHandler,
+      onHorizontalDragUpdate: _onHorizontalDragUpdateHandler,
+      onVerticalDragUpdate: _onVerticalDragUpdateHandler,
+    );
   }
 
   void _updateHandlers(RenderSemanticsGestureHandler renderObject) {
-    final Map<Type, GestureRecognizer> recognizers = owner._recognizers;
     renderObject
-      ..onTap = recognizers.containsKey(TapGestureRecognizer) ? owner._handleSemanticsTap : null
-      ..onLongPress = recognizers.containsKey(LongPressGestureRecognizer) ? owner._handleSemanticsLongPress : null
-      ..onHorizontalDragUpdate = recognizers.containsKey(HorizontalDragGestureRecognizer) ||
-          recognizers.containsKey(PanGestureRecognizer) ? owner._handleSemanticsHorizontalDragUpdate : null
-      ..onVerticalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
-          recognizers.containsKey(PanGestureRecognizer) ? owner._handleSemanticsVerticalDragUpdate : null;
+      ..onTap = _onTapHandler
+      ..onLongPress = _onLongPressHandler
+      ..onHorizontalDragUpdate = _onHorizontalDragUpdateHandler
+      ..onVerticalDragUpdate = _onVerticalDragUpdateHandler;
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSemanticsGestureHandler renderObject) {
     _updateHandlers(renderObject);
+  }
+
+  GestureTapCallback get _onTapHandler {
+    return owner._recognizers.containsKey(TapGestureRecognizer) ? owner._handleSemanticsTap : null;
+  }
+
+  GestureTapCallback get _onLongPressHandler {
+    return owner._recognizers.containsKey(LongPressGestureRecognizer) ? owner._handleSemanticsLongPress : null;
+  }
+
+  GestureDragUpdateCallback get _onHorizontalDragUpdateHandler {
+    return owner._recognizers.containsKey(HorizontalDragGestureRecognizer) ||
+        owner._recognizers.containsKey(PanGestureRecognizer) ? owner._handleSemanticsHorizontalDragUpdate : null;
+  }
+
+  GestureDragUpdateCallback get _onVerticalDragUpdateHandler {
+    return owner._recognizers.containsKey(VerticalDragGestureRecognizer) ||
+        owner._recognizers.containsKey(PanGestureRecognizer) ? owner._handleSemanticsVerticalDragUpdate : null;
   }
 }

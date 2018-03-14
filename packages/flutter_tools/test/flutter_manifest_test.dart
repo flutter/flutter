@@ -203,7 +203,7 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
 
-      final String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
+      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
                                              ' {fonts: [{asset: a/baz}, {style: italic, weight: 400, asset: a/baz}], family: bar}]';
       expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
@@ -264,7 +264,7 @@ flutter:
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
 
 
-      final String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
+      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
                                              ' {fonts: [{asset: a/baz}, {style: italic, weight: 400, asset: a/baz}]}]';
       expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
@@ -304,7 +304,7 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
 
-      final String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
+      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
                                              ' {family: bar}]';
       expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;

@@ -37,10 +37,10 @@ void main() {
   });
 
   testWidgets('GlobalObjectKey toString test', (WidgetTester tester) async {
-    final GlobalObjectKey one = const GlobalObjectKey(1);
-    final GlobalObjectKey<TestState> two = const GlobalObjectKey<TestState>(2);
-    final GlobalObjectKey three = const _MyGlobalObjectKey(3);
-    final GlobalObjectKey<TestState> four = const _MyGlobalObjectKey<TestState>(4);
+    const GlobalObjectKey one = const GlobalObjectKey(1);
+    const GlobalObjectKey<TestState> two = const GlobalObjectKey<TestState>(2);
+    const GlobalObjectKey three = const _MyGlobalObjectKey(3);
+    const GlobalObjectKey<TestState> four = const _MyGlobalObjectKey<TestState>(4);
 
     expect(one.toString(), equals('[GlobalObjectKey ${describeIdentity(1)}]'));
     expect(two.toString(), equals('[GlobalObjectKey<TestState> ${describeIdentity(2)}]'));

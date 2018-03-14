@@ -51,7 +51,7 @@ enum ExampleEnum {
 /// Encode and decode to JSON to make sure all objects in the JSON for the
 /// [DiagnosticsNode] are valid JSON.
 Map<String, Object> simulateJsonSerialization(DiagnosticsNode node) {
-  return JSON.decode(JSON.encode(node.toJsonMap()));
+  return json.decode(json.encode(node.toJsonMap()));
 }
 
 void validateNodeJsonSerialization(DiagnosticsNode node) {
@@ -404,9 +404,9 @@ void main() {
       ' │\n'
       ' └─child node C: TestTree#00000\n'
       '     foo:\n'
-      '     multi\n'
-      '     line\n'
-      '     value!\n',
+      '       multi\n'
+      '       line\n'
+      '       value!\n',
     );
 
     goldenStyleTest(
@@ -448,9 +448,9 @@ void main() {
       ' ╎\n'
       ' └╌child node C: TestTree#00000\n'
       '     foo:\n'
-      '     multi\n'
-      '     line\n'
-      '     value!\n',
+      '       multi\n'
+      '       line\n'
+      '       value!\n',
     );
 
     goldenStyleTest(
@@ -482,9 +482,9 @@ void main() {
       ' ╘═╦══ child node C ═══\n'
       '   ║ TestTree#00000:\n'
       '   ║   foo:\n'
-      '   ║   multi\n'
-      '   ║   line\n'
-      '   ║   value!\n'
+      '   ║     multi\n'
+      '   ║     line\n'
+      '   ║     value!\n'
       '   ╚═══════════\n',
     );
 
@@ -523,9 +523,9 @@ void main() {
       '  ╘═╦══ child node C ═══\n'
       '    ║ TestTree#00000:\n'
       '    ║   foo:\n'
-      '    ║   multi\n'
-      '    ║   line\n'
-      '    ║   value!\n'
+      '    ║     multi\n'
+      '    ║     line\n'
+      '    ║     value!\n'
       '    ╚═══════════\n',
     );
 
@@ -551,9 +551,9 @@ void main() {
         '      foo: 42\n'
         '  child node C: TestTree#00000:\n'
         '    foo:\n'
-        '    multi\n'
-        '    line\n'
-        '    value!\n',
+        '      multi\n'
+        '      line\n'
+        '      value!\n',
     );
 
     // Single line mode does not display children.
@@ -657,9 +657,9 @@ void main() {
         ' │ ╚═══════════\n'
         ' └─child node C: TestTree#00000\n'
         '     foo:\n'
-        '     multi\n'
-        '     line\n'
-        '     value!\n',
+        '       multi\n'
+        '       line\n'
+        '       value!\n',
       ),
     );
   });

@@ -97,7 +97,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     double result = 0.0;
     for (RenderBox cell in cells)
-      result = math.max(result, cell.getMinIntrinsicWidth(double.INFINITY));
+      result = math.max(result, cell.getMinIntrinsicWidth(double.infinity));
     return result;
   }
 
@@ -105,7 +105,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   double maxIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     double result = 0.0;
     for (RenderBox cell in cells)
-      result = math.max(result, cell.getMaxIntrinsicWidth(double.INFINITY));
+      result = math.max(result, cell.getMaxIntrinsicWidth(double.infinity));
     return result;
   }
 
@@ -726,7 +726,7 @@ class RenderTable extends RenderBox {
     for (int x = 0; x < columns; x += 1) {
       final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
       final Iterable<RenderBox> columnCells = column(x);
-      totalMinWidth += columnWidth.minIntrinsicWidth(columnCells, double.INFINITY);
+      totalMinWidth += columnWidth.minIntrinsicWidth(columnCells, double.infinity);
     }
     return totalMinWidth;
   }
@@ -738,7 +738,7 @@ class RenderTable extends RenderBox {
     for (int x = 0; x < columns; x += 1) {
       final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
       final Iterable<RenderBox> columnCells = column(x);
-      totalMaxWidth += columnWidth.maxIntrinsicWidth(columnCells, double.INFINITY);
+      totalMaxWidth += columnWidth.maxIntrinsicWidth(columnCells, double.infinity);
     }
     return totalMaxWidth;
   }

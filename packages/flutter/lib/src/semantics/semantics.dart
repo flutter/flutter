@@ -315,6 +315,10 @@ class SemanticsProperties extends DiagnosticableTree {
     this.checked,
     this.selected,
     this.button,
+    this.header,
+    this.textField,
+    this.focused,
+    this.inMutuallyExclusiveGroup,
     this.label,
     this.value,
     this.increasedValue,
@@ -365,6 +369,35 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack/VoiceOver provides users with the hint "button" when a button
   /// is focused.
   final bool button;
+
+  /// If non-null, indicates that this subtree represents a header.
+  ///
+  /// A header divides into sections. For example, an address book application
+  /// might define headers A, B, C, etc. to divide the list of alphabetically
+  /// sorted contacts into sections.
+  final bool header;
+
+  /// If non-null, indicates that this subtree represents a text field.
+  ///
+  /// TalkBack/VoiceOver provide special affordances to enter text into a
+  /// text field.
+  final bool textField;
+
+  /// If non-null, whether the node currently holds input focus.
+  ///
+  /// At most one node in the tree should hold input focus at any point in time.
+  ///
+  /// Input focus (indicates that the node will receive keyboard events) is not
+  /// to be confused with accessibility focus. Accessibility focus is the
+  /// green/black rectangular that TalkBack/VoiceOver on the screen and is
+  /// separate from input focus.
+  final bool focused;
+
+  /// If non-null, whether a semantic node is in a mutually exclusive group.
+  ///
+  /// For example, a radio button is in a mutually exclusive group because only
+  /// one radio button in that group can be marked as [checked].
+  final bool inMutuallyExclusiveGroup;
 
   /// Provides a textual description of the widget.
   ///
@@ -1378,15 +1411,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
-    if (_hasFlag(SemanticsFlag.hasEnabledState))
-      properties.add(new FlagProperty('isEnabled', value: _hasFlag(SemanticsFlag.isEnabled), ifFalse: 'disabled'));
-    if (_hasFlag(SemanticsFlag.hasCheckedState))
-      properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlag.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
-    properties.add(new FlagProperty('isInMutuallyExcusiveGroup', value: _hasFlag(SemanticsFlag.isInMutuallyExclusiveGroup), ifTrue: 'mutually-exclusive'));
-    properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlag.isSelected), ifTrue: 'selected'));
-    properties.add(new FlagProperty('isFocused', value: _hasFlag(SemanticsFlag.isFocused), ifTrue: 'focused'));
-    properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlag.isButton), ifTrue: 'button'));
-    properties.add(new FlagProperty('isTextField', value: _hasFlag(SemanticsFlag.isTextField), ifTrue: 'textField'));
+    final List<String> flags = SemanticsFlag.values.values.where((SemanticsFlag flag) => _hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
+    properties.add(new IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(new FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
     properties.add(new StringProperty('label', _label, defaultValue: ''));
     properties.add(new StringProperty('value', _value, defaultValue: ''));
@@ -1422,7 +1448,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   @override
   DiagnosticsNode toDiagnosticsNode({
     String name,
-    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.dense,
+    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.sparse,
     DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.geometricOrder,
   }) {
     return new _SemanticsDiagnosticableNode(
@@ -2370,6 +2396,12 @@ class SemanticsConfiguration {
   bool get isButton => _hasFlag(SemanticsFlag.isButton);
   set isButton(bool value) {
     _setFlag(SemanticsFlag.isButton, value);
+  }
+
+  /// Whether the owning [RenderObject] is a header (true) or not (false).
+  bool get isHeader => _hasFlag(SemanticsFlag.isHeader);
+  set isHeader(bool value) {
+    _setFlag(SemanticsFlag.isHeader, value);
   }
 
   /// Whether the owning [RenderObject] is a text field.

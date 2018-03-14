@@ -238,13 +238,13 @@ Future<int> exec(
   final Completer<Null> stdoutDone = new Completer<Null>();
   final Completer<Null> stderrDone = new Completer<Null>();
   process.stdout
-      .transform(UTF8.decoder)
+      .transform(utf8.decoder)
       .transform(const LineSplitter())
       .listen((String line) {
         print('stdout: $line');
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
-      .transform(UTF8.decoder)
+      .transform(utf8.decoder)
       .transform(const LineSplitter())
       .listen((String line) {
         print('stderr: $line');
@@ -274,14 +274,14 @@ Future<String> eval(
   final Completer<Null> stdoutDone = new Completer<Null>();
   final Completer<Null> stderrDone = new Completer<Null>();
   process.stdout
-      .transform(UTF8.decoder)
+      .transform(utf8.decoder)
       .transform(const LineSplitter())
       .listen((String line) {
         print('stdout: $line');
         output.writeln(line);
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
-      .transform(UTF8.decoder)
+      .transform(utf8.decoder)
       .transform(const LineSplitter())
       .listen((String line) {
         print('stderr: $line');

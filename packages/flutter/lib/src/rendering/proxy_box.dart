@@ -302,8 +302,8 @@ class RenderLimitedBox extends RenderProxyBox {
   /// non-negative.
   RenderLimitedBox({
     RenderBox child,
-    double maxWidth: double.INFINITY,
-    double maxHeight: double.INFINITY
+    double maxWidth: double.infinity,
+    double maxHeight: double.infinity
   }) : assert(maxWidth != null && maxWidth >= 0.0),
        assert(maxHeight != null && maxHeight >= 0.0),
        _maxWidth = maxWidth,
@@ -354,8 +354,8 @@ class RenderLimitedBox extends RenderProxyBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.INFINITY));
-    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: double.INFINITY));
+    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.infinity));
+    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: double.infinity));
   }
 }
 
@@ -591,7 +591,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!width.isFinite)
-      width = computeMaxIntrinsicWidth(double.INFINITY);
+      width = computeMaxIntrinsicWidth(double.infinity);
     assert(width.isFinite);
     final double height = child.getMinIntrinsicHeight(width);
     return _applyStep(height, _stepHeight);
@@ -602,7 +602,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!width.isFinite)
-      width = computeMaxIntrinsicWidth(double.INFINITY);
+      width = computeMaxIntrinsicWidth(double.infinity);
     assert(width.isFinite);
     final double height = child.getMaxIntrinsicHeight(width);
     return _applyStep(height, _stepHeight);
@@ -658,7 +658,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!height.isFinite)
-      height = child.getMaxIntrinsicHeight(double.INFINITY);
+      height = child.getMaxIntrinsicHeight(double.infinity);
     assert(height.isFinite);
     return child.getMinIntrinsicWidth(height);
   }
@@ -668,7 +668,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!height.isFinite)
-      height = child.getMaxIntrinsicHeight(double.INFINITY);
+      height = child.getMaxIntrinsicHeight(double.infinity);
     assert(height.isFinite);
     return child.getMaxIntrinsicWidth(height);
   }
@@ -3015,6 +3015,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool checked,
     bool selected,
     bool button,
+    bool header,
+    bool textField,
+    bool focused,
+    bool inMutuallyExclusiveGroup,
     String label,
     String value,
     String increasedValue,
@@ -3045,6 +3049,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _checked = checked,
        _selected = selected,
        _button = button,
+       _header = header,
+       _textField = textField,
+       _focused = focused,
+       _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _label = label,
        _value = value,
        _increasedValue = increasedValue,
@@ -3149,6 +3157,47 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (button == value)
       return;
     _button = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isHeader] semantic to the given value.
+  bool get header => _header;
+  bool _header;
+  set header(bool value) {
+    if (header == value)
+      return;
+    _header = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isTextField] semantic to the given value.
+  bool get textField => _textField;
+  bool _textField;
+  set textField(bool value) {
+    if (textField == value)
+      return;
+    _textField = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isFocused] semantic to the given value.
+  bool get focused => _focused;
+  bool _focused;
+  set focused(bool value) {
+    if (focused == value)
+      return;
+    _focused = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isInMutuallyExclusiveGroup] semantic
+  /// to the given value.
+  bool get inMutuallyExclusiveGroup => _inMutuallyExclusiveGroup;
+  bool _inMutuallyExclusiveGroup;
+  set inMutuallyExclusiveGroup(bool value) {
+    if (inMutuallyExclusiveGroup == value)
+      return;
+    _inMutuallyExclusiveGroup = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3581,6 +3630,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isSelected = selected;
     if (button != null)
       config.isButton = button;
+    if (header != null)
+      config.isHeader = header;
+    if (textField != null)
+      config.isTextField = textField;
+    if (focused != null)
+      config.isFocused = focused;
+    if (inMutuallyExclusiveGroup != null)
+      config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup;
     if (label != null)
       config.label = label;
     if (value != null)
@@ -3982,10 +4039,10 @@ class RenderFollowerLayer extends RenderProxyBox {
       Offset.zero,
       childPaintBounds: new Rect.fromLTRB(
         // We don't know where we'll end up, so we have no idea what our cull rect should be.
-        double.NEGATIVE_INFINITY,
-        double.NEGATIVE_INFINITY,
-        double.INFINITY,
-        double.INFINITY,
+        double.negativeInfinity,
+        double.negativeInfinity,
+        double.infinity,
+        double.infinity,
       ),
     );
   }

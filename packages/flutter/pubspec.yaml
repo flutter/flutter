@@ -5,7 +5,7 @@ homepage: http://flutter.io
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
-  collection: 1.14.5
+  collection: 1.14.6
   http: 0.11.3+16
   meta: 1.1.2
   typed_data: 1.1.5
@@ -19,17 +19,17 @@ dev_dependencies:
     sdk: flutter
   mockito: 2.2.3
 
-  args: 1.3.0 # TRANSITIVE DEPENDENCY
-  async: 2.0.4 # TRANSITIVE DEPENDENCY
+  args: 1.4.1 # TRANSITIVE DEPENDENCY
+  async: 2.0.6 # TRANSITIVE DEPENDENCY
   barback: 0.15.2+14 # TRANSITIVE DEPENDENCY
-  boolean_selector: 1.0.2 # TRANSITIVE DEPENDENCY
+  boolean_selector: 1.0.3 # TRANSITIVE DEPENDENCY
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
   cli_util: 0.1.2+1 # TRANSITIVE DEPENDENCY
   convert: 2.0.1 # TRANSITIVE DEPENDENCY
   crypto: 2.0.2+1 # TRANSITIVE DEPENDENCY
   csslib: 0.14.1 # TRANSITIVE DEPENDENCY
   glob: 1.1.5 # TRANSITIVE DEPENDENCY
-  html: 0.13.2+2 # TRANSITIVE DEPENDENCY
+  html: 0.13.3 # TRANSITIVE DEPENDENCY
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
   io: 0.3.2+1 # TRANSITIVE DEPENDENCY
@@ -54,11 +54,11 @@ dev_dependencies:
   source_map_stack_trace: 1.1.4 # TRANSITIVE DEPENDENCY
   source_maps: 0.10.4 # TRANSITIVE DEPENDENCY
   source_span: 1.4.0 # TRANSITIVE DEPENDENCY
-  stack_trace: 1.9.1 # TRANSITIVE DEPENDENCY
-  stream_channel: 1.6.3 # TRANSITIVE DEPENDENCY
+  stack_trace: 1.9.2 # TRANSITIVE DEPENDENCY
+  stream_channel: 1.6.4 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
-  test: 0.12.30+4 # TRANSITIVE DEPENDENCY
+  test: 0.12.32+1 # TRANSITIVE DEPENDENCY
   utf: 0.9.0+4 # TRANSITIVE DEPENDENCY
   watcher: 0.9.7+7 # TRANSITIVE DEPENDENCY
   web_socket_channel: 1.0.7 # TRANSITIVE DEPENDENCY

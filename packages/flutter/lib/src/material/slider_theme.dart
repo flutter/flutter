@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -49,20 +48,27 @@ class SliderTheme extends InheritedWidget {
   /// Defaults to the ambient [ThemeData.sliderTheme] if there is no
   /// [SliderTheme] in the given build context.
   ///
-  /// Typical usage is as follows:
+  /// ## Sample code
   ///
   /// ```dart
-  /// double _rocketThrust;
+  /// class Launch extends StatefulWidget {
+  ///   @override
+  ///   State createState() => new LaunchState();
+  /// }
   ///
-  /// @override
-  /// Widget build(BuildContext context) {
-  ///   return new SliderTheme(
-  ///     data: SliderTheme.of(context).copyWith(activeRail: Colors.orange),
-  ///     child: new Slider(
-  ///       onChanged: (double value) => setState(() => _rocketThrust = value),
-  ///       value: _rocketThrust;
-  ///     ),
-  ///   );
+  /// class LaunchState extends State<Launch> {
+  ///   double _rocketThrust;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return new SliderTheme(
+  ///       data: SliderTheme.of(context).copyWith(activeRailColor: const Color(0xff804040)),
+  ///       child: new Slider(
+  ///         onChanged: (double value) { setState(() { _rocketThrust = value; }); },
+  ///         value: _rocketThrust,
+  ///       ),
+  ///     );
+  ///   }
   /// }
   /// ```
   ///
@@ -147,7 +153,31 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// The simplest way to create a SliderThemeData is to use
   /// [copyWith] on the one you get from [SliderTheme.of], or create an
-  /// entirely new one with [SliderThemeData.materialDefaults].
+  /// entirely new one with [SliderThemeData.fromPrimaryColors].
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// class Blissful extends StatefulWidget {
+  ///   @override
+  ///   State createState() => new BlissfulState();
+  /// }
+  ///
+  /// class BlissfulState extends State<Blissful> {
+  ///   double _bliss;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return new SliderTheme(
+  ///       data: SliderTheme.of(context).copyWith(activeRailColor: const Color(0xff404080)),
+  ///       child: new Slider(
+  ///         onChanged: (double value) { setState(() { _bliss = value; }); },
+  ///         value: _bliss,
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
   const SliderThemeData({
     @required this.activeRailColor,
     @required this.inactiveRailColor,
@@ -189,7 +219,7 @@ class SliderThemeData extends Diagnosticable {
   /// defaults when assigning them to the slider theme component colors.
   ///
   /// This is used to generate the default slider theme for a [ThemeData].
-  factory SliderThemeData.materialDefaults({
+  factory SliderThemeData.fromPrimaryColors({
     @required Color primaryColor,
     @required Color primaryColorDark,
     @required Color primaryColorLight,
@@ -238,22 +268,69 @@ class SliderThemeData extends Diagnosticable {
     );
   }
 
+  /// The color of the [Slider] rail between the [Slider.min] position and the
+  /// current thumb position.
   final Color activeRailColor;
+
+  /// The color of the [Slider] rail between the current thumb position and the
+  /// [Slider.max] position.
   final Color inactiveRailColor;
+
+  /// The color of the [Slider] rail between the [Slider.min] position and the
+  /// current thumb position when the [Slider] is disabled.
   final Color disabledActiveRailColor;
+
+  /// The color of the [Slider] rail between the current thumb position and the
+  /// [Slider.max] position when the [Slider] is disabled.
   final Color disabledInactiveRailColor;
+
+  /// The color of the rail's tick marks that are drawn between the [Slider.min]
+  /// position and the current thumb position.
   final Color activeTickMarkColor;
+
+  /// The color of the rail's tick marks that are drawn between the current
+  /// thumb position and the [Slider.max] position.
   final Color inactiveTickMarkColor;
+
+  /// The color of the rail's tick marks that are drawn between the [Slider.min]
+  /// position and the current thumb position when the [Slider] is disabled.
   final Color disabledActiveTickMarkColor;
+
+  /// The color of the rail's tick marks that are drawn between the current
+  /// thumb position and the [Slider.max] position when the [Slider] is
+  /// disabled.
   final Color disabledInactiveTickMarkColor;
+
+  /// The color given to the [thumbShape] to draw itself with.
   final Color thumbColor;
+
+  /// The color given to the [thumbShape] to draw itself with when the
+  /// [Slider] is disabled.
   final Color disabledThumbColor;
+
+  /// The color of the overlay drawn around the slider thumb when it is pressed.
+  ///
+  /// This is typically a semi-transparent color.
   final Color overlayColor;
+
+  /// The color given to the [valueIndicatorShape] to draw itself with.
   final Color valueIndicatorColor;
+
+  /// The shape and behavior that will be used to draw the [Slider]'s thumb.
+  ///
+  /// This can be customized by implementing a subclass of
+  /// [SliderComponentShape].
   final SliderComponentShape thumbShape;
+
+  /// The shape and behavior that will be used to draw the [Slider]'s value
+  /// indicator.
+  ///
+  /// This can be customized by implementing a subclass of
+  /// [SliderComponentShape].
   final SliderComponentShape valueIndicatorShape;
 
-  /// Whether the value indicator should be shown for different types of sliders.
+  /// Whether the value indicator should be shown for different types of
+  /// sliders.
   ///
   /// By default, [showValueIndicator] is set to
   /// [ShowValueIndicator.onlyForDiscrete]. The value indicator is only shown
@@ -285,8 +362,7 @@ class SliderThemeData extends Diagnosticable {
       activeTickMarkColor: activeTickMarkColor ?? this.activeTickMarkColor,
       inactiveTickMarkColor: inactiveTickMarkColor ?? this.inactiveTickMarkColor,
       disabledActiveTickMarkColor: disabledActiveTickMarkColor ?? this.disabledActiveTickMarkColor,
-      disabledInactiveTickMarkColor:
-          disabledInactiveTickMarkColor ?? this.disabledInactiveTickMarkColor,
+      disabledInactiveTickMarkColor: disabledInactiveTickMarkColor ?? this.disabledInactiveTickMarkColor,
       thumbColor: thumbColor ?? this.thumbColor,
       disabledThumbColor: disabledThumbColor ?? this.disabledThumbColor,
       overlayColor: overlayColor ?? this.overlayColor,
@@ -320,14 +396,11 @@ class SliderThemeData extends Diagnosticable {
       activeRailColor: Color.lerp(a.activeRailColor, b.activeRailColor, t),
       inactiveRailColor: Color.lerp(a.inactiveRailColor, b.inactiveRailColor, t),
       disabledActiveRailColor: Color.lerp(a.disabledActiveRailColor, b.disabledActiveRailColor, t),
-      disabledInactiveRailColor:
-          Color.lerp(a.disabledInactiveRailColor, b.disabledInactiveRailColor, t),
+      disabledInactiveRailColor: Color.lerp(a.disabledInactiveRailColor, b.disabledInactiveRailColor, t),
       activeTickMarkColor: Color.lerp(a.activeTickMarkColor, b.activeTickMarkColor, t),
       inactiveTickMarkColor: Color.lerp(a.inactiveTickMarkColor, b.inactiveTickMarkColor, t),
-      disabledActiveTickMarkColor:
-          Color.lerp(a.disabledActiveTickMarkColor, b.disabledActiveTickMarkColor, t),
-      disabledInactiveTickMarkColor:
-          Color.lerp(a.disabledInactiveTickMarkColor, b.disabledInactiveTickMarkColor, t),
+      disabledActiveTickMarkColor: Color.lerp(a.disabledActiveTickMarkColor, b.disabledActiveTickMarkColor, t),
+      disabledInactiveTickMarkColor: Color.lerp(a.disabledInactiveTickMarkColor, b.disabledInactiveTickMarkColor, t),
       thumbColor: Color.lerp(a.thumbColor, b.thumbColor, t),
       disabledThumbColor: Color.lerp(a.disabledThumbColor, b.disabledThumbColor, t),
       overlayColor: Color.lerp(a.overlayColor, b.overlayColor, t),
@@ -361,6 +434,9 @@ class SliderThemeData extends Diagnosticable {
 
   @override
   bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -386,47 +462,26 @@ class SliderThemeData extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     final ThemeData defaultTheme = new ThemeData.fallback();
-    final SliderThemeData defaultData = new SliderThemeData.materialDefaults(
+    final SliderThemeData defaultData = new SliderThemeData.fromPrimaryColors(
       primaryColor: defaultTheme.primaryColor,
       primaryColorDark: defaultTheme.primaryColorDark,
       primaryColorLight: defaultTheme.primaryColorLight,
     );
-    description.add(new DiagnosticsProperty<Color>('activeRailColor', activeRailColor,
-        defaultValue: defaultData.activeRailColor));
-    description.add(new DiagnosticsProperty<Color>('inactiveRailColor', inactiveRailColor,
-        defaultValue: defaultData.inactiveRailColor));
-    description.add(new DiagnosticsProperty<Color>(
-        'disabledActiveRailColor', disabledActiveRailColor,
-        defaultValue: defaultData.disabledActiveRailColor));
-    description.add(new DiagnosticsProperty<Color>(
-        'disabledInactiveRailColor', disabledInactiveRailColor,
-        defaultValue: defaultData.disabledInactiveRailColor));
-    description.add(new DiagnosticsProperty<Color>('activeTickMarkColor', activeTickMarkColor,
-        defaultValue: defaultData.activeTickMarkColor));
-    description.add(new DiagnosticsProperty<Color>('inactiveTickMarkColor', inactiveTickMarkColor,
-        defaultValue: defaultData.inactiveTickMarkColor));
-    description.add(new DiagnosticsProperty<Color>(
-        'disabledActiveTickMarkColor', disabledActiveTickMarkColor,
-        defaultValue: defaultData.disabledActiveTickMarkColor));
-    description.add(new DiagnosticsProperty<Color>(
-        'disabledInactiveTickMarkColor', disabledInactiveTickMarkColor,
-        defaultValue: defaultData.disabledInactiveTickMarkColor));
-    description.add(new DiagnosticsProperty<Color>('thumbColor', thumbColor,
-        defaultValue: defaultData.thumbColor));
-    description.add(new DiagnosticsProperty<Color>('disabledThumbColor', disabledThumbColor,
-        defaultValue: defaultData.disabledThumbColor));
-    description.add(new DiagnosticsProperty<Color>('overlayColor', overlayColor,
-        defaultValue: defaultData.overlayColor));
-    description.add(new DiagnosticsProperty<Color>('valueIndicatorColor', valueIndicatorColor,
-        defaultValue: defaultData.valueIndicatorColor));
-    description.add(new DiagnosticsProperty<SliderComponentShape>('thumbShape', thumbShape,
-        defaultValue: defaultData.thumbShape));
-    description.add(new DiagnosticsProperty<SliderComponentShape>(
-        'valueIndicatorShape', valueIndicatorShape,
-        defaultValue: defaultData.valueIndicatorShape));
-    description.add(new DiagnosticsProperty<ShowValueIndicator>(
-        'showValueIndicator', showValueIndicator,
-        defaultValue: defaultData.showValueIndicator));
+    description.add(new DiagnosticsProperty<Color>('activeRailColor', activeRailColor, defaultValue: defaultData.activeRailColor));
+    description.add(new DiagnosticsProperty<Color>('inactiveRailColor', inactiveRailColor, defaultValue: defaultData.inactiveRailColor));
+    description.add(new DiagnosticsProperty<Color>('disabledActiveRailColor', disabledActiveRailColor, defaultValue: defaultData.disabledActiveRailColor, level: DiagnosticLevel.debug));
+    description.add(new DiagnosticsProperty<Color>('disabledInactiveRailColor', disabledInactiveRailColor, defaultValue: defaultData.disabledInactiveRailColor, level: DiagnosticLevel.debug));
+    description.add(new DiagnosticsProperty<Color>('activeTickMarkColor', activeTickMarkColor, defaultValue: defaultData.activeTickMarkColor, level: DiagnosticLevel.debug));
+    description.add(new DiagnosticsProperty<Color>('inactiveTickMarkColor', inactiveTickMarkColor, defaultValue: defaultData.inactiveTickMarkColor, level: DiagnosticLevel.debug));
+    description.add(new DiagnosticsProperty<Color>('disabledActiveTickMarkColor', disabledActiveTickMarkColor, defaultValue: defaultData.disabledActiveTickMarkColor, level: DiagnosticLevel.debug));
+    description.add(new DiagnosticsProperty<Color>('disabledInactiveTickMarkColor', disabledInactiveTickMarkColor, defaultValue: defaultData.disabledInactiveTickMarkColor, level: DiagnosticLevel.debug));
+    description.add(new DiagnosticsProperty<Color>('thumbColor', thumbColor, defaultValue: defaultData.thumbColor));
+    description.add(new DiagnosticsProperty<Color>('disabledThumbColor', disabledThumbColor, defaultValue: defaultData.disabledThumbColor, level: DiagnosticLevel.debug));
+    description.add(new DiagnosticsProperty<Color>('overlayColor', overlayColor, defaultValue: defaultData.overlayColor, level: DiagnosticLevel.debug));
+    description.add(new DiagnosticsProperty<Color>('valueIndicatorColor', valueIndicatorColor, defaultValue: defaultData.valueIndicatorColor));
+    description.add(new DiagnosticsProperty<SliderComponentShape>('thumbShape', thumbShape, defaultValue: defaultData.thumbShape, level: DiagnosticLevel.debug));
+    description.add(new DiagnosticsProperty<SliderComponentShape>('valueIndicatorShape', valueIndicatorShape, defaultValue: defaultData.valueIndicatorShape, level: DiagnosticLevel.debug));
+    description.add(new EnumProperty<ShowValueIndicator>('showValueIndicator', showValueIndicator, defaultValue: defaultData.showValueIndicator));
   }
 }
 
@@ -460,6 +515,7 @@ abstract class SliderComponentShape {
   /// passed is null, then no label was supplied to the [Slider].
   /// [value] is the current parametric value (from 0.0 to 1.0) of the slider.
   void paint(
+    RenderBox parentBox,
     PaintingContext context,
     bool isDiscrete,
     Offset thumbCenter,
@@ -468,7 +524,6 @@ abstract class SliderComponentShape {
     TextPainter labelPainter,
     SliderThemeData sliderTheme,
     TextDirection textDirection,
-    double textScaleFactor,
     double value,
   );
 }
@@ -493,6 +548,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   @override
   void paint(
+    RenderBox parentBox,
     PaintingContext context,
     bool isDiscrete,
     Offset thumbCenter,
@@ -501,14 +557,17 @@ class RoundSliderThumbShape extends SliderComponentShape {
     TextPainter labelPainter,
     SliderThemeData sliderTheme,
     TextDirection textDirection,
-    double textScaleFactor,
     double value,
   ) {
     final Canvas canvas = context.canvas;
-    final Tween<double> radiusTween =
-        new Tween<double>(begin: _disabledThumbRadius, end: _thumbRadius);
-    final ColorTween colorTween =
-        new ColorTween(begin: sliderTheme.disabledThumbColor, end: sliderTheme.thumbColor);
+    final Tween<double> radiusTween = new Tween<double>(
+      begin: _disabledThumbRadius,
+      end: _thumbRadius,
+    );
+    final ColorTween colorTween = new ColorTween(
+      begin: sliderTheme.disabledThumbColor,
+      end: sliderTheme.thumbColor,
+    );
     canvas.drawCircle(
       thumbCenter,
       radiusTween.evaluate(enableAnimation),
@@ -536,6 +595,9 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
 
   // Radius of the top lobe of the value indicator.
   static const double _topLobeRadius = 16.0;
+  // Designed size of the label text. This is the size that the value indicator
+  // was designed to contain. We scale it from here to fit other sizes.
+  static const double _labelTextDesignSize = 14.0;
   // Radius of the bottom lobe of the value indicator.
   static const double _bottomLobeRadius = 6.0;
   // The starting angle for the bottom lobe. Picked to get the desired
@@ -557,15 +619,19 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   static const double _twoSeventyDegrees = 3.0 * math.pi / 2.0;
   static const double _ninetyDegrees = math.pi / 2.0;
   static const double _thirtyDegrees = math.pi / 6.0;
-  static const Size preferredSize =
+  static const Size _preferredSize =
       const Size.fromHeight(_distanceBetweenTopBottomCenters + _topLobeRadius + _bottomLobeRadius);
+  // Set to true if you want a rectangle to be drawn around the label bubble.
+  // This helps with building tests that check that the label draws in the right
+  // place (because it prints the rect in the failed test output). It should not
+  // be checked in while set to "true".
+  static const bool _debuggingLabelLocation = false;
 
-  static final Tween<double> _slideUpTween = new Tween<double>(begin: 0.0, end: 1.0);
   static Path _bottomLobePath; // Initialized by _generateBottomLobe
   static Offset _bottomLobeEnd; // Initialized by _generateBottomLobe
 
   @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) => preferredSize;
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) => _preferredSize;
 
   // Adds an arc to the path that has the attributes passed in. This is
   // a convenience to make adding arcs have less boilerplate.
@@ -638,61 +704,154 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     return _bottomLobeEnd;
   }
 
-  void _drawValueIndicator(Canvas canvas, Offset center, Paint paint, double scale,
-      TextPainter labelPainter, double textScaleFactor) {
+  // Determines the "best" offset to keep the bubble on the screen. The calling
+  // code will bound that with the available movement in the paddle shape.
+  double _getIdealOffset(
+    RenderBox parentBox,
+    double halfWidthNeeded,
+    double scale,
+    Offset center,
+  ) {
+    const double edgeMargin = 4.0;
+    final Rect topLobeRect = new Rect.fromLTWH(
+      -_topLobeRadius - halfWidthNeeded,
+      -_topLobeRadius - _distanceBetweenTopBottomCenters,
+      2.0 * (_topLobeRadius + halfWidthNeeded),
+      2.0 * _topLobeRadius,
+    );
+    // We can just multiply by scale instead of a transform, since we're scaling
+    // around (0, 0).
+    final Offset topLeft = (topLobeRect.topLeft * scale) + center;
+    final Offset bottomRight = (topLobeRect.bottomRight * scale) + center;
+    double shift = 0.0;
+    if (topLeft.dx < edgeMargin) {
+      shift = edgeMargin - topLeft.dx;
+    }
+    if (bottomRight.dx > parentBox.size.width - edgeMargin) {
+      shift = parentBox.size.width - bottomRight.dx - edgeMargin;
+    }
+    shift = (scale == 0.0 ? 0.0 : shift / scale);
+    return shift;
+  }
+
+  void _drawValueIndicator(
+    RenderBox parentBox,
+    Canvas canvas,
+    Offset center,
+    Paint paint,
+    double scale,
+    TextPainter labelPainter,
+  ) {
     canvas.save();
     canvas.translate(center.dx, center.dy);
-    // The entire value indicator should scale with the text scale factor,
+    // The entire value indicator should scale with the size of the label,
     // to keep it large enough to encompass the label text.
-    canvas.scale(scale * textScaleFactor, scale * textScaleFactor);
-    final double inverseTextScale = 1.0 / textScaleFactor;
+    final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
+    final double overallScale = scale * textScaleFactor;
+    canvas.scale(overallScale, overallScale);
+    final double inverseTextScale = textScaleFactor != 0 ? 1.0 / textScaleFactor : 0.0;
     final double labelHalfWidth = labelPainter.width / 2.0;
 
     // This is the needed extra width for the label.  It is only positive when
     // the label exceeds the minimum size contained by the round top lobe.
-    final double halfWidthNeeded =
-        math.max(0.0, inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding));
+    final double halfWidthNeeded = math.max(
+      0.0,
+      inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding),
+    );
+
+    double shift = _getIdealOffset(parentBox, halfWidthNeeded, overallScale, center);
+    double leftWidthNeeded;
+    double rightWidthNeeded;
+    if (shift < 0.0) {  // shifting to the left
+      shift = math.max(shift, -halfWidthNeeded);
+    } else {  // shifting to the right
+      shift = math.min(shift, halfWidthNeeded);
+    }
+    rightWidthNeeded = halfWidthNeeded + shift;
+    leftWidthNeeded = halfWidthNeeded - shift;
 
     final Path path = new Path();
     final Offset bottomLobeEnd = _addBottomLobe(path);
+
     // The base of the triangle between the top lobe center and the centers of
     // the two top neck arcs.
     final double neckTriangleBase = _topNeckRadius - bottomLobeEnd.dx;
     // The parameter that describes how far along the transition from round to
     // stretched we are.
-    final double t = math.max(0.0, math.min(1.0, halfWidthNeeded / neckTriangleBase));
+    final double leftAmount = math.max(0.0, math.min(1.0, leftWidthNeeded / neckTriangleBase));
+    final double rightAmount = math.max(0.0, math.min(1.0, rightWidthNeeded / neckTriangleBase));
     // The angle between the top neck arc's center and the top lobe's center
     // and vertical.
-    final double theta = (1.0 - t) * _thirtyDegrees;
+    final double leftTheta = (1.0 - leftAmount) * _thirtyDegrees;
+    final double rightTheta = (1.0 - rightAmount) * _thirtyDegrees;
     // The center of the top left neck arc.
     final Offset neckLeftCenter = new Offset(
-        -neckTriangleBase, _topLobeCenter.dy + math.cos(theta) * _neckTriangleHypotenuse);
-    final Offset topLobeShift = new Offset(halfWidthNeeded, 0.0);
-    final double neckArcAngle = _ninetyDegrees - theta;
+      -neckTriangleBase,
+      _topLobeCenter.dy + math.cos(leftTheta) * _neckTriangleHypotenuse,
+    );
+    final Offset neckRightCenter = new Offset(
+      neckTriangleBase,
+      _topLobeCenter.dy + math.cos(rightTheta) * _neckTriangleHypotenuse,
+    );
+    final double leftNeckArcAngle = _ninetyDegrees - leftTheta;
+    final double rightNeckArcAngle = math.pi + _ninetyDegrees - rightTheta;
+    // The distance between the end of the bottom neck arc and the beginning of
+    // the top neck arc. We use this to shrink/expand it based on the scale
+    // factor of the value indicator.
+    final double neckStretchBaseline = bottomLobeEnd.dy - math.max(neckLeftCenter.dy, neckRightCenter.dy);
+    final double t = math.pow(inverseTextScale, 3.0);
+    final double stretch = (neckStretchBaseline * t).clamp(0.0, 10.0 * neckStretchBaseline);
+    final Offset neckStretch = new Offset(0.0, neckStretchBaseline - stretch);
+
+    assert(!_debuggingLabelLocation || () {
+      final Offset leftCenter = _topLobeCenter - new Offset(leftWidthNeeded, 0.0) + neckStretch;
+      final Offset rightCenter = _topLobeCenter + new Offset(rightWidthNeeded, 0.0) + neckStretch;
+      final Rect valueRect = new Rect.fromLTRB(
+        leftCenter.dx - _topLobeRadius,
+        leftCenter.dy - _topLobeRadius,
+        rightCenter.dx + _topLobeRadius,
+        rightCenter.dy + _topLobeRadius,
+      );
+      final Paint outlinePaint = new Paint()
+        ..color = const Color(0xffff0000)
+        ..style = PaintingStyle.stroke..strokeWidth = 1.0;
+      canvas.drawRect(valueRect, outlinePaint);
+      return true;
+    }());
+
     _addArc(
       path,
-      neckLeftCenter,
+      neckLeftCenter + neckStretch,
       _topNeckRadius,
       0.0,
-      -neckArcAngle,
+      -leftNeckArcAngle,
     );
-    _addArc(path, _topLobeCenter - topLobeShift, _topLobeRadius, _ninetyDegrees + theta,
-        _twoSeventyDegrees);
-    _addArc(path, _topLobeCenter + topLobeShift, _topLobeRadius, _twoSeventyDegrees,
-        _twoSeventyDegrees + math.pi - theta);
-    final Offset neckRightCenter = new Offset(-neckLeftCenter.dx, neckLeftCenter.dy);
     _addArc(
       path,
-      neckRightCenter,
+      _topLobeCenter - new Offset(leftWidthNeeded, 0.0) + neckStretch,
+      _topLobeRadius,
+      _ninetyDegrees + leftTheta,
+      _twoSeventyDegrees,
+    );
+    _addArc(
+      path,
+      _topLobeCenter + new Offset(rightWidthNeeded, 0.0) + neckStretch,
+      _topLobeRadius,
+      _twoSeventyDegrees,
+      _twoSeventyDegrees + math.pi - rightTheta,
+    );
+    _addArc(
+      path,
+      neckRightCenter + neckStretch,
       _topNeckRadius,
-      math.pi + neckArcAngle,
+      rightNeckArcAngle,
       math.pi,
     );
     canvas.drawPath(path, paint);
 
     // Draw the label.
     canvas.save();
-    canvas.translate(0.0, -_distanceBetweenTopBottomCenters);
+    canvas.translate(shift, -_distanceBetweenTopBottomCenters + neckStretch.dy);
     canvas.scale(inverseTextScale, inverseTextScale);
     labelPainter.paint(canvas, Offset.zero - new Offset(labelHalfWidth, labelPainter.height / 2.0));
     canvas.restore();
@@ -701,6 +860,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
 
   @override
   void paint(
+    RenderBox parentBox,
     PaintingContext context,
     bool isDiscrete,
     Offset thumbCenter,
@@ -709,21 +869,20 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     TextPainter labelPainter,
     SliderThemeData sliderTheme,
     TextDirection textDirection,
-    double textScaleFactor,
     double value,
   ) {
     assert(labelPainter != null);
-    final ColorTween colorTween =
-        new ColorTween(begin: Colors.transparent, end: sliderTheme.valueIndicatorColor);
     final ColorTween enableColor = new ColorTween(
-        begin: sliderTheme.disabledThumbColor, end: colorTween.evaluate(activationAnimation));
+      begin: sliderTheme.disabledThumbColor,
+      end: sliderTheme.valueIndicatorColor,
+    );
     _drawValueIndicator(
+      parentBox,
       context.canvas,
       thumbCenter,
       new Paint()..color = enableColor.evaluate(enableAnimation),
-      _slideUpTween.evaluate(activationAnimation),
+      activationAnimation.value,
       labelPainter,
-      textScaleFactor,
     );
   }
 }

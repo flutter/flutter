@@ -7,22 +7,10 @@ import("//build/dart/dart_library.gni")
 dart_library("flutter") {
   package_name = "flutter"
 
-  disable_analysis = true
+  # Can be left empty as analysis is disabled.
+  sources = []
 
-  sources = [
-    "animation.dart",
-    "cupertino.dart",
-    "foundation.dart",
-    "gestures.dart",
-    "material.dart",
-    "painting.dart",
-    "physics.dart",
-    "rendering.dart",
-    "scheduler.dart",
-    "semantics.dart",
-    "services.dart",
-    "widgets.dart",
-  ]
+  disable_analysis = true
 
   deps = [
     "//third_party/dart/third_party/pkg/intl",

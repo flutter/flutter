@@ -29,7 +29,7 @@ class ProcessRunnerException implements Exception {
 
   final String message;
   final ProcessResult result;
-  int get exitCode => result.exitCode ?? -1;
+  int get exitCode => result?.exitCode ?? -1;
 
   @override
   String toString() {
@@ -39,7 +39,7 @@ class ProcessRunnerException implements Exception {
     }
     final String stderr = result?.stderr ?? '';
     if (stderr.isNotEmpty) {
-      output += ':\n${result.stderr}';
+      output += ':\n$stderr';
     }
     return output;
   }
@@ -157,6 +157,10 @@ class ProcessRunner {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n${e.toString()}';
       throw new ProcessRunnerException(message);
+    } on ArgumentError catch (e) {
+      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
+          'failed with:\n${e.toString()}';
+      throw new ProcessRunnerException(message);
     }
 
     final int exitCode = await allComplete();
@@ -166,7 +170,7 @@ class ProcessRunner {
       throw new ProcessRunnerException(
           message, new ProcessResult(0, exitCode, null, 'returned $exitCode'));
     }
-    return UTF8.decoder.convert(output).trim();
+    return utf8.decoder.convert(output).trim();
   }
 }
 
@@ -441,7 +445,7 @@ class ArchivePublisher {
     final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
     await _cloudCopy(outputFile.absolute.path, destGsPath);
     assert(tempDir.existsSync());
-    return _updateMetadata();
+    await _updateMetadata();
   }
 
   Future<Null> _updateMetadata() async {
@@ -476,7 +480,7 @@ class ArchivePublisher {
     jsonData['releases'][revision][branchName] = metadata;
 
     final File tempFile = new File(path.join(tempDir.absolute.path, 'releases_$platformName.json'));
-    final JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+    const JsonEncoder encoder = const JsonEncoder.withIndent('  ');
     tempFile.writeAsStringSync(encoder.convert(jsonData));
     await _cloudCopy(tempFile.absolute.path, metadataGsPath);
   }
@@ -632,6 +636,9 @@ Future<Null> main(List<String> argList) async {
   } on ProcessRunnerException catch (e) {
     exitCode = e.exitCode;
     message = e.message;
+  } catch (e) {
+    exitCode = -1;
+    message = e.toString();
   } finally {
     if (removeTempDir) {
       tempDir.deleteSync(recursive: true);

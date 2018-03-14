@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap: false }) {
   return new Localizations(
     locale: const Locale('en', 'US'),
-    delegates: <LocalizationsDelegate<dynamic>>[
+    delegates: const <LocalizationsDelegate<dynamic>>[
       DefaultMaterialLocalizations.delegate,
       DefaultWidgetsLocalizations.delegate,
     ],

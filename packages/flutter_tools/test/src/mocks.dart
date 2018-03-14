@@ -169,13 +169,13 @@ class MockProcess extends Mock implements Process {
 /// some lines to stdout before it exits.
 class PromptingProcess implements Process {
   Future<Null> showPrompt(String prompt, List<String> outputLines) async {
-    _stdoutController.add(UTF8.encode(prompt));
+    _stdoutController.add(utf8.encode(prompt));
     final List<int> bytesOnStdin = await _stdin.future;
     // Echo stdin to stdout.
     _stdoutController.add(bytesOnStdin);
-    if (bytesOnStdin[0] == UTF8.encode('y')[0]) {
+    if (bytesOnStdin[0] == utf8.encode('y')[0]) {
       for (final String line in outputLines)
-        _stdoutController.add(UTF8.encode('$line\n'));
+        _stdoutController.add(utf8.encode('$line\n'));
     }
     await _stdoutController.close();
   }
@@ -219,7 +219,7 @@ class CompleterIOSink extends MemoryIOSink {
 /// An IOSink that collects whatever is written to it.
 class MemoryIOSink implements IOSink {
   @override
-  Encoding encoding = UTF8;
+  Encoding encoding = utf8;
 
   final List<List<int>> writes = <List<int>>[];
 
@@ -291,7 +291,7 @@ class MockStdio extends Stdio {
   Stream<List<int>> get stdin => _stdin.stream;
 
   void simulateStdin(String line) {
-    _stdin.add(UTF8.encode('$line\n'));
+    _stdin.add(utf8.encode('$line\n'));
   }
 
   List<String> get writtenToStdout => _stdout.writes.map(_stdout.encoding.decode).toList();

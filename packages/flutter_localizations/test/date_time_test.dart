@@ -31,7 +31,7 @@ void main() {
         await tester.pumpWidget(new MaterialApp(
           supportedLocales: <Locale>[locale],
           locale: locale,
-          localizationsDelegates: <LocalizationsDelegate<dynamic>>[
+          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
             GlobalMaterialLocalizations.delegate,
           ],
           home: new Builder(builder: (BuildContext context) {
@@ -85,7 +85,7 @@ void main() {
         await tester.pumpWidget(new MaterialApp(
           supportedLocales: <Locale>[locale],
           locale: locale,
-          localizationsDelegates: <LocalizationsDelegate<dynamic>>[
+          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
             GlobalMaterialLocalizations.delegate,
           ],
           home: new Builder(builder: (BuildContext context) {

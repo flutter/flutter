@@ -229,7 +229,7 @@ void _tests() {
     await tester.pumpWidget(
       new Localizations(
         locale: const Locale('en', 'US'),
-        delegates: <LocalizationsDelegate<dynamic>>[
+        delegates: const <LocalizationsDelegate<dynamic>>[
           DefaultMaterialLocalizations.delegate,
           DefaultWidgetsLocalizations.delegate,
         ],

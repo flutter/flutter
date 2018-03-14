@@ -135,7 +135,7 @@ class BannerPainter extends CustomPainter {
       ..rotate(_rotation)
       ..drawRect(_kRect, _paintShadow)
       ..drawRect(_kRect, _paintBanner);
-    final double width = _kOffset * 2.0;
+    const double width = _kOffset * 2.0;
     _textPainter.layout(minWidth: width, maxWidth: width);
     _textPainter.paint(canvas, _kRect.topLeft + new Offset(0.0, (_kRect.height - _textPainter.height) / 2.0));
   }
@@ -204,20 +204,20 @@ class BannerPainter extends CustomPainter {
         switch (location) {
           case BannerLocation.bottomStart:
           case BannerLocation.topEnd:
-            return -math.PI / 4.0;
+            return -math.pi / 4.0;
           case BannerLocation.bottomEnd:
           case BannerLocation.topStart:
-            return math.PI / 4.0;
+            return math.pi / 4.0;
         }
         break;
       case TextDirection.ltr:
         switch (location) {
           case BannerLocation.bottomStart:
           case BannerLocation.topEnd:
-            return math.PI / 4.0;
+            return math.pi / 4.0;
           case BannerLocation.bottomEnd:
           case BannerLocation.topStart:
-            return -math.PI / 4.0;
+            return -math.pi / 4.0;
         }
         break;
     }
@@ -233,7 +233,7 @@ class BannerPainter extends CustomPainter {
 /// See also:
 ///
 ///  * [CheckedModeBanner], which the [WidgetsApp] widget includes by default in
-///    debug mode, to show a banner that says "SLOW MODE".
+///    debug mode, to show a banner that says "DEBUG".
 class Banner extends StatelessWidget {
   /// Creates a banner.
   ///
@@ -323,7 +323,7 @@ class Banner extends StatelessWidget {
   }
 }
 
-/// Displays a [Banner] saying "SLOW MODE" when running in checked mode.
+/// Displays a [Banner] saying "DEBUG" when running in checked mode.
 /// [MaterialApp] builds one of these by default.
 /// Does nothing in release mode.
 class CheckedModeBanner extends StatelessWidget {
@@ -344,7 +344,7 @@ class CheckedModeBanner extends StatelessWidget {
     assert(() {
       result = new Banner(
         child: result,
-        message: 'SLOW MODE',
+        message: 'DEBUG',
         textDirection: TextDirection.ltr,
         location: BannerLocation.topEnd,
       );
@@ -358,7 +358,7 @@ class CheckedModeBanner extends StatelessWidget {
     super.debugFillProperties(description);
     String message = 'disabled';
     assert(() {
-      message = '"SLOW MODE"';
+      message = '"DEBUG"';
       return true;
     }());
     description.add(new DiagnosticsNode.message(message));

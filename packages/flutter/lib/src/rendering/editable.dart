@@ -512,13 +512,13 @@ class RenderEditable extends RenderBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    _layoutText(double.INFINITY);
+    _layoutText(double.infinity);
     return _textPainter.minIntrinsicWidth;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    _layoutText(double.INFINITY);
+    _layoutText(double.infinity);
     return _textPainter.maxIntrinsicWidth;
   }
 
@@ -529,7 +529,7 @@ class RenderEditable extends RenderBox {
   double _preferredHeight(double width) {
     if (maxLines != null)
       return preferredLineHeight * maxLines;
-    if (width == double.INFINITY) {
+    if (width == double.infinity) {
       final String text = _textPainter.text.toPlainText();
       int lines = 1;
       for (int index = 0; index < text.length; index += 1) {
@@ -644,9 +644,9 @@ class RenderEditable extends RenderBox {
     assert(constraintWidth != null);
     if (_textLayoutLastWidth == constraintWidth)
       return;
-    final double caretMargin = _kCaretGap + _kCaretWidth;
+    const double caretMargin = _kCaretGap + _kCaretWidth;
     final double availableWidth = math.max(0.0, constraintWidth - caretMargin);
-    final double maxWidth = _isMultiline ? availableWidth : double.INFINITY;
+    final double maxWidth = _isMultiline ? availableWidth : double.infinity;
     _textPainter.layout(minWidth: availableWidth, maxWidth: maxWidth);
     _textLayoutLastWidth = constraintWidth;
   }

@@ -190,7 +190,7 @@ void main() {
       );
       final List<dynamic> events = await channel.receiveBroadcastStream('hello').toList();
       expect(events, orderedEquals(<String>['hello1', 'hello2']));
-      await new Future<Null>.delayed(Duration.ZERO);
+      await new Future<Null>.delayed(Duration.zero);
       expect(canceled, isTrue);
     });
     test('can receive error event', () async {
@@ -212,7 +212,7 @@ void main() {
       final List<dynamic> events = <dynamic>[];
       final List<dynamic> errors = <dynamic>[];
       channel.receiveBroadcastStream('hello').listen(events.add, onError: errors.add);
-      await new Future<Null>.delayed(Duration.ZERO);
+      await new Future<Null>.delayed(Duration.zero);
       expect(events, isEmpty);
       expect(errors, hasLength(1));
       expect(errors[0], const isInstanceOf<PlatformException>());

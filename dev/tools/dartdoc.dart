@@ -340,7 +340,7 @@ void printStream(Stream<List<int>> stream, { String prefix: '', List<Pattern> fi
   assert(prefix != null);
   assert(filter != null);
   stream
-    .transform(UTF8.decoder)
+    .transform(utf8.decoder)
     .transform(const LineSplitter())
     .listen((String line) {
       if (!filter.any((Pattern pattern) => line.contains(pattern)))
