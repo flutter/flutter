@@ -595,16 +595,20 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
                 arraysize(kDartPrecompilationArgs));
   }
 
-#if defined(OS_FUCHSIA) && defined(NDEBUG)
+#if defined(OS_FUCHSIA)
+#if defined(NDEBUG)
   // Do not enable checked mode for Fuchsia release builds
   // TODO(mikejurka): remove this once precompiled code is working on Fuchsia
   const bool use_checked_mode = false;
-#else
+#else  // !defined(NDEBUG)
+  const bool use_checked_mode = true;
+#endif  // !defined(NDEBUG)
+#else  // !defined(OS_FUCHSIA)
   // Enable checked mode if we are not running precompiled code. We run non-
   // precompiled code only in the debug product mode.
   const bool use_checked_mode =
       !IsRunningPrecompiledCode() && !settings.dart_non_checked_mode;
-#endif
+#endif  // !defined(OS_FUCHSIA)
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   // Debug mode uses the JIT, disable code page write protection to avoid
