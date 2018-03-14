@@ -284,7 +284,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
     final String template = _translationBundle.tabLabel;
     return template
       .replaceFirst(r'$tabIndex', formatDecimal(tabIndex))
-      .replaceFirst(r'tabCount', formatDecimal(tabCount));
+      .replaceFirst(r'$tabCount', formatDecimal(tabCount));
   }
 
   @override
