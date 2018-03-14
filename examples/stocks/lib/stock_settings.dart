@@ -67,24 +67,26 @@ class StockSettingsState extends State<StockSettings> {
       case StockMode.pessimistic:
         showDialog<bool>(
           context: context,
-          child: new AlertDialog(
-            title: const Text('Change mode?'),
-            content: const Text('Optimistic mode means everything is awesome. Are you sure you can handle that?'),
-            actions: <Widget>[
-              new FlatButton(
-                child: const Text('NO THANKS'),
-                onPressed: () {
-                  Navigator.pop(context, false);
-                }
-              ),
-              new FlatButton(
-                child: const Text('AGREE'),
-                onPressed: () {
-                  Navigator.pop(context, true);
-                }
-              ),
-            ]
-          )
+           builder: (BuildContext context) {
+            return new AlertDialog(
+              title: const Text('Change mode?'),
+              content: const Text('Optimistic mode means everything is awesome. Are you sure you can handle that?'),
+              actions: <Widget>[
+                new FlatButton(
+                  child: const Text('NO THANKS'),
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  }
+                ),
+                new FlatButton(
+                  child: const Text('AGREE'),
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  }
+                ),
+              ],
+            );
+          },
         ).then<void>(_handleOptimismChanged);
         break;
     }

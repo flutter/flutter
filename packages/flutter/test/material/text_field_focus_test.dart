@@ -110,7 +110,7 @@ void main() {
 
     showDialog<Null>(
       context: context,
-      child: const SimpleDialog(title: const Text('Dialog')),
+      builder: (BuildContext context) => const SimpleDialog(title: const Text('Dialog')),
     );
 
     await tester.pump();
