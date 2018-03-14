@@ -44,10 +44,10 @@ class BouncingScrollSimulation extends Simulation {
        super(tolerance: tolerance) {
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
-      _springTime = double.NEGATIVE_INFINITY;
+      _springTime = double.negativeInfinity;
     } else if (position > trailingExtent) {
       _springSimulation = _overscrollSimulation(position, velocity);
-      _springTime = double.NEGATIVE_INFINITY;
+      _springTime = double.negativeInfinity;
     } else {
       _frictionSimulation = new FrictionSimulation(0.135, position, velocity);
       final double finalX = _frictionSimulation.finalX;
@@ -66,7 +66,7 @@ class BouncingScrollSimulation extends Simulation {
         );
         assert(_springTime.isFinite);
       } else {
-        _springTime = double.INFINITY;
+        _springTime = double.infinity;
       }
     }
     assert(_springTime != null);

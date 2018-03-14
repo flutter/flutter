@@ -276,7 +276,7 @@ class ButtonThemeData extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    final ButtonThemeData defaultTheme = const ButtonThemeData();
+    const ButtonThemeData defaultTheme = const ButtonThemeData();
     description.add(new EnumProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: defaultTheme.textTheme));
     description.add(new DoubleProperty('minWidth', minWidth, defaultValue: defaultTheme.minWidth));
     description.add(new DoubleProperty('height', height, defaultValue: defaultTheme.height));

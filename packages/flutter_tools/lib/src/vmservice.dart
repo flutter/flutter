@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show BASE64;
+import 'dart:convert' show base64;
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
@@ -799,7 +799,7 @@ class VM extends ServiceObjectOwner {
       params: <String, dynamic>{
         'fsName': fsName,
         'path': path,
-        'fileContents': BASE64.encode(fileContents),
+        'fileContents': base64.encode(fileContents),
       },
     );
   }
@@ -813,7 +813,7 @@ class VM extends ServiceObjectOwner {
         'path': path,
       },
     );
-    return BASE64.decode(response['fileContents']);
+    return base64.decode(response['fileContents']);
   }
 
   /// The complete list of a file system.
@@ -896,14 +896,14 @@ class HeapSpace extends ServiceObject {
 
   Duration get avgCollectionTime {
     final double mcs = _totalCollectionTimeInSeconds *
-      Duration.MICROSECONDS_PER_SECOND /
+      Duration.microsecondsPerSecond /
       math.max(_collections, 1);
     return new Duration(microseconds: mcs.ceil());
   }
 
   Duration get avgCollectionPeriod {
     final double mcs = _averageCollectionPeriodInMillis *
-                       Duration.MICROSECONDS_PER_MILLISECOND;
+                       Duration.microsecondsPerMillisecond;
     return new Duration(microseconds: mcs.ceil());
   }
 

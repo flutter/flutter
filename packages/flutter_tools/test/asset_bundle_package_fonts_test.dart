@@ -65,7 +65,7 @@ $fontsSection
         final String entryKey = 'packages/$packageName/$packageFont';
         expect(bundle.entries.containsKey(entryKey), true);
         expect(
-          UTF8.decode(await bundle.entries[entryKey].contentsAsBytes()),
+          utf8.decode(await bundle.entries[entryKey].contentsAsBytes()),
           packageFont,
         );
       }
@@ -73,14 +73,14 @@ $fontsSection
       for (String localFont in localFonts) {
         expect(bundle.entries.containsKey(localFont), true);
         expect(
-          UTF8.decode(await bundle.entries[localFont].contentsAsBytes()),
+          utf8.decode(await bundle.entries[localFont].contentsAsBytes()),
           localFont,
         );
       }
     }
 
     expect(
-      UTF8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
+      utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
       expectedAssetManifest,
     );
   }
@@ -170,7 +170,7 @@ $fontsSection
       const String localFont = 'a/bar';
       writeFontAsset('', localFont);
 
-      final String expectedFontManifest =
+      const String expectedFontManifest =
           '[{"fonts":[{"asset":"packages/test_package/bar"},{"asset":"a/bar"}],'
           '"family":"foo"}]';
       await buildAndVerifyFonts(
@@ -200,7 +200,7 @@ $fontsSection
       const String font = 'a/bar';
       writeFontAsset('p/p/', font);
 
-      final String expectedFontManifest =
+      const String expectedFontManifest =
           '[{"family":"packages/test_package/foo",'
           '"fonts":[{"asset":"packages/test_package/a/bar"}]}]';
       await buildAndVerifyFonts(
@@ -231,7 +231,7 @@ $fontsSection
       const String font = 'bar';
       writeFontAsset('p2/p/lib/', font);
 
-      final String expectedFontManifest =
+      const String expectedFontManifest =
           '[{"family":"packages/test_package/foo",'
           '"fonts":[{"asset":"packages/test_package2/bar"}]}]';
       await buildAndVerifyFonts(
@@ -263,7 +263,7 @@ $fontsSection
       const String font = 'a/bar';
       writeFontAsset('p/p/', font);
 
-      final String expectedFontManifest =
+      const String expectedFontManifest =
           '[{"family":"packages/test_package/foo",'
           '"fonts":[{"weight":400,"style":"italic","asset":"packages/test_package/a/bar"}]}]';
       await buildAndVerifyFonts(
@@ -298,7 +298,7 @@ $fontsSection
       writeFontAsset('', font);
       writeFontAsset('p/p/', font);
 
-      final String expectedFontManifest =
+      const String expectedFontManifest =
           '[{"fonts":[{"asset":"a/bar"}],"family":"foo"},'
           '{"family":"packages/test_package/foo",'
           '"fonts":[{"asset":"packages/test_package/a/bar"}]}]';

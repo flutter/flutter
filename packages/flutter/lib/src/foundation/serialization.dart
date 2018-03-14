@@ -11,7 +11,7 @@ import 'package:typed_data/typed_buffers.dart' show Uint8Buffer;
 /// A WriteBuffer instance can be used only once. Attempts to reuse will result
 /// in [NoSuchMethodError]s being thrown.
 ///
-/// The byte order used is [Endianness.HOST_ENDIAN] throughout.
+/// The byte order used is [Endian.host] throughout.
 class WriteBuffer {
   /// Creates an interface for incrementally building a [ByteData] instance.
   WriteBuffer() {
@@ -31,32 +31,32 @@ class WriteBuffer {
 
   /// Write a Uint16 into the buffer.
   void putUint16(int value) {
-    _eightBytes.setUint16(0, value, Endianness.HOST_ENDIAN);
+    _eightBytes.setUint16(0, value, Endian.host);
     _buffer.addAll(_eightBytesAsList, 0, 2);
   }
 
   /// Write a Uint32 into the buffer.
   void putUint32(int value) {
-    _eightBytes.setUint32(0, value, Endianness.HOST_ENDIAN);
+    _eightBytes.setUint32(0, value, Endian.host);
     _buffer.addAll(_eightBytesAsList, 0, 4);
   }
 
   /// Write an Int32 into the buffer.
   void putInt32(int value) {
-    _eightBytes.setInt32(0, value, Endianness.HOST_ENDIAN);
+    _eightBytes.setInt32(0, value, Endian.host);
     _buffer.addAll(_eightBytesAsList, 0, 4);
   }
 
   /// Write an Int64 into the buffer.
   void putInt64(int value) {
-    _eightBytes.setInt64(0, value, Endianness.HOST_ENDIAN);
+    _eightBytes.setInt64(0, value, Endian.host);
     _buffer.addAll(_eightBytesAsList, 0, 8);
   }
 
   /// Write an Float64 into the buffer.
   void putFloat64(double value) {
     _alignTo(8);
-    _eightBytes.setFloat64(0, value, Endianness.HOST_ENDIAN);
+    _eightBytes.setFloat64(0, value, Endian.host);
     _buffer.addAll(_eightBytesAsList);
   }
 
@@ -101,7 +101,7 @@ class WriteBuffer {
 
 /// Read-only buffer for reading sequentially from a [ByteData] instance.
 ///
-/// The byte order used is [Endianness.HOST_ENDIAN] throughout.
+/// The byte order used is [Endian.host] throughout.
 class ReadBuffer {
   /// Creates a [ReadBuffer] for reading from the specified [data].
   ReadBuffer(this.data)
@@ -123,28 +123,28 @@ class ReadBuffer {
 
   /// Reads a Uint16 from the buffer.
   int getUint16() {
-    final int value = data.getUint16(_position, Endianness.HOST_ENDIAN);
+    final int value = data.getUint16(_position, Endian.host);
     _position += 2;
     return value;
   }
 
   /// Reads a Uint32 from the buffer.
   int getUint32() {
-    final int value = data.getUint32(_position, Endianness.HOST_ENDIAN);
+    final int value = data.getUint32(_position, Endian.host);
     _position += 4;
     return value;
   }
 
   /// Reads an Int32 from the buffer.
   int getInt32() {
-    final int value = data.getInt32(_position, Endianness.HOST_ENDIAN);
+    final int value = data.getInt32(_position, Endian.host);
     _position += 4;
     return value;
   }
 
   /// Reads an Int64 from the buffer.
   int getInt64() {
-    final int value = data.getInt64(_position, Endianness.HOST_ENDIAN);
+    final int value = data.getInt64(_position, Endian.host);
     _position += 8;
     return value;
   }
@@ -152,7 +152,7 @@ class ReadBuffer {
   /// Reads a Float64 from the buffer.
   double getFloat64() {
     _alignTo(8);
-    final double value = data.getFloat64(_position, Endianness.HOST_ENDIAN);
+    final double value = data.getFloat64(_position, Endian.host);
     _position += 8;
     return value;
   }

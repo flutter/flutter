@@ -85,7 +85,7 @@ Future<Null> main(List<String> rawArgs) async {
   buffer.writeln('const Map<String, dynamic> dateSymbols = const <String, dynamic> {');
   symbolFiles.forEach((String locale, File data) {
     if (materialLocales.contains(locale))
-      buffer.writeln(_jsonToMapEntry(locale, JSON.decode(data.readAsStringSync())));
+      buffer.writeln(_jsonToMapEntry(locale, json.decode(data.readAsStringSync())));
   });
   buffer.writeln('};');
 
@@ -94,7 +94,7 @@ Future<Null> main(List<String> rawArgs) async {
   buffer.writeln('const Map<String, Map<String, String>> datePatterns = const <String, Map<String, String>> {');
   patternFiles.forEach((String locale, File data) {
     if (materialLocales.contains(locale)) {
-      final Map<String, dynamic> patterns = JSON.decode(data.readAsStringSync());
+      final Map<String, dynamic> patterns = json.decode(data.readAsStringSync());
       buffer.writeln("'$locale': const <String, String>{");
       patterns.forEach((String key, dynamic value) {
         assert(value is String);

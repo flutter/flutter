@@ -205,7 +205,6 @@ tasks:
       Runs tests of concurrent hot reload commands via flutter run --machine.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true
 
   service_extensions_test:
     description: >
@@ -264,6 +263,7 @@ tasks:
       Checks that the project template works and supports plugins on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
+    flaky: true
 
   external_ui_integration_test_ios:
     description: >
@@ -295,21 +295,18 @@ tasks:
       iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   flutter_gallery_ios__start_up:
     description: >
       Measures the startup time of the Flutter Gallery app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   complex_layout_ios__start_up:
     description: >
       Measures the startup time of the Complex Layout sample app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   flutter_gallery_ios__transition_perf:
     description: >
@@ -324,14 +321,12 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 30
-    flaky: true
 
   flutter_view_ios__start_up:
     description: >
       Verifies that Flutter View can be used from an iOS project.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   integration_ui_ios:
     description: >

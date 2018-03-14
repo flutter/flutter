@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:convert' show JSON;
+import 'dart:convert' show json;
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -95,26 +95,26 @@ void main() {
         await fs.file('b.dart').writeAsString('This is b');
         final Fingerprint fingerprint = new Fingerprint.fromBuildInputs(<String, String>{}, <String>['a.dart', 'b.dart']);
 
-        final Map<String, dynamic> json = JSON.decode(fingerprint.toJson());
-        expect(json['files'], hasLength(2));
-        expect(json['files']['a.dart'], '8a21a15fad560b799f6731d436c1b698');
-        expect(json['files']['b.dart'], '6f144e08b58cd0925328610fad7ac07c');
+        final Map<String, dynamic> jsonObject = json.decode(fingerprint.toJson());
+        expect(jsonObject['files'], hasLength(2));
+        expect(jsonObject['files']['a.dart'], '8a21a15fad560b799f6731d436c1b698');
+        expect(jsonObject['files']['b.dart'], '6f144e08b58cd0925328610fad7ac07c');
       }, overrides: <Type, Generator>{ FileSystem: () => fs });
 
       testUsingContext('includes framework version', () {
         final Fingerprint fingerprint = new Fingerprint.fromBuildInputs(<String, String>{}, <String>[]);
 
-        final Map<String, dynamic> json = JSON.decode(fingerprint.toJson());
-        expect(json['version'], mockVersion.frameworkRevision);
+        final Map<String, dynamic> jsonObject = json.decode(fingerprint.toJson());
+        expect(jsonObject['version'], mockVersion.frameworkRevision);
       }, overrides: <Type, Generator>{ FlutterVersion: () => mockVersion });
 
       testUsingContext('includes provided properties', () {
         final Fingerprint fingerprint = new Fingerprint.fromBuildInputs(<String, String>{'a': 'A', 'b': 'B'}, <String>[]);
 
-        final Map<String, dynamic> json = JSON.decode(fingerprint.toJson());
-        expect(json['properties'], hasLength(2));
-        expect(json['properties']['a'], 'A');
-        expect(json['properties']['b'], 'B');
+        final Map<String, dynamic> jsonObject = json.decode(fingerprint.toJson());
+        expect(jsonObject['properties'], hasLength(2));
+        expect(jsonObject['properties']['a'], 'A');
+        expect(jsonObject['properties']['b'], 'B');
       }, overrides: <Type, Generator>{ FlutterVersion: () => mockVersion });
     });
 
@@ -126,7 +126,7 @@ void main() {
       });
 
       testUsingContext('creates fingerprint from valid JSON', () async {
-        final String json = JSON.encode(<String, dynamic>{
+        final String jsonString = json.encode(<String, dynamic>{
           'version': kVersion,
           'properties': <String, String>{
             'buildMode': BuildMode.release.toString(),
@@ -138,8 +138,8 @@ void main() {
             'b.dart': '6f144e08b58cd0925328610fad7ac07c',
           },
         });
-        final Fingerprint fingerprint = new Fingerprint.fromJson(json);
-        final Map<String, dynamic> content = JSON.decode(fingerprint.toJson());
+        final Fingerprint fingerprint = new Fingerprint.fromJson(jsonString);
+        final Map<String, dynamic> content = json.decode(fingerprint.toJson());
         expect(content, hasLength(3));
         expect(content['version'], mockVersion.frameworkRevision);
         expect(content['properties'], hasLength(3));
@@ -154,31 +154,31 @@ void main() {
       });
 
       testUsingContext('throws ArgumentError for unknown versions', () async {
-        final String json = JSON.encode(<String, dynamic>{
+        final String jsonString = json.encode(<String, dynamic>{
           'version': 'bad',
           'properties':<String, String>{},
           'files':<String, String>{},
         });
-        expect(() => new Fingerprint.fromJson(json), throwsArgumentError);
+        expect(() => new Fingerprint.fromJson(jsonString), throwsArgumentError);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
 
       testUsingContext('throws ArgumentError if version is not present', () async {
-        final String json = JSON.encode(<String, dynamic>{
+        final String jsonString = json.encode(<String, dynamic>{
           'properties':<String, String>{},
           'files':<String, String>{},
         });
-        expect(() => new Fingerprint.fromJson(json), throwsArgumentError);
+        expect(() => new Fingerprint.fromJson(jsonString), throwsArgumentError);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
 
       testUsingContext('treats missing properties and files entries as if empty', () async {
-        final String json = JSON.encode(<String, dynamic>{
+        final String jsonString = json.encode(<String, dynamic>{
           'version': kVersion,
         });
-        expect(new Fingerprint.fromJson(json), new Fingerprint.fromBuildInputs(<String, String>{}, <String>[]));
+        expect(new Fingerprint.fromJson(jsonString), new Fingerprint.fromBuildInputs(<String, String>{}, <String>[]));
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
@@ -197,7 +197,7 @@ void main() {
         b['properties'] = <String, String>{
           'buildMode': BuildMode.release.toString(),
         };
-        expect(new Fingerprint.fromJson(JSON.encode(a)) == new Fingerprint.fromJson(JSON.encode(b)), isFalse);
+        expect(new Fingerprint.fromJson(json.encode(a)) == new Fingerprint.fromJson(json.encode(b)), isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
@@ -216,7 +216,7 @@ void main() {
           'a.dart': '8a21a15fad560b799f6731d436c1b698',
           'b.dart': '6f144e08b58cd0925328610fad7ac07d',
         };
-        expect(new Fingerprint.fromJson(JSON.encode(a)) == new Fingerprint.fromJson(JSON.encode(b)), isFalse);
+        expect(new Fingerprint.fromJson(json.encode(a)) == new Fingerprint.fromJson(json.encode(b)), isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
@@ -235,7 +235,7 @@ void main() {
           'a.dart': '8a21a15fad560b799f6731d436c1b698',
           'c.dart': '6f144e08b58cd0925328610fad7ac07d',
         };
-        expect(new Fingerprint.fromJson(JSON.encode(a)) == new Fingerprint.fromJson(JSON.encode(b)), isFalse);
+        expect(new Fingerprint.fromJson(json.encode(a)) == new Fingerprint.fromJson(json.encode(b)), isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
@@ -253,7 +253,7 @@ void main() {
             'b.dart': '6f144e08b58cd0925328610fad7ac07c',
           },
         };
-        expect(new Fingerprint.fromJson(JSON.encode(a)) == new Fingerprint.fromJson(JSON.encode(a)), isTrue);
+        expect(new Fingerprint.fromJson(json.encode(a)) == new Fingerprint.fromJson(json.encode(a)), isTrue);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
@@ -344,7 +344,7 @@ void main() {
     };
 
     Future<Null> writeFingerprint({ Map<String, String> files = const <String, String>{} }) {
-      return fs.file('output.snapshot.d.fingerprint').writeAsString(JSON.encode(<String, dynamic>{
+      return fs.file('output.snapshot.d.fingerprint').writeAsString(json.encode(<String, dynamic>{
         'version': kVersion,
         'properties': <String, String>{
           'buildMode': BuildMode.debug.toString(),
@@ -371,14 +371,14 @@ void main() {
       String entryPoint: 'main.dart',
       Map<String, String> checksums = const <String, String>{},
     }) {
-      final Map<String, dynamic> json = JSON.decode(fs.file('output.snapshot.d.fingerprint').readAsStringSync());
-      expect(json['properties']['entryPoint'], entryPoint);
-      expect(json['files'], hasLength(checksums.length + 2));
+      final Map<String, dynamic> jsonObject = json.decode(fs.file('output.snapshot.d.fingerprint').readAsStringSync());
+      expect(jsonObject['properties']['entryPoint'], entryPoint);
+      expect(jsonObject['files'], hasLength(checksums.length + 2));
       checksums.forEach((String path, String checksum) {
-        expect(json['files'][path], checksum);
+        expect(jsonObject['files'][path], checksum);
       });
-      expect(json['files'][kVmSnapshotData], '2ec34912477a46c03ddef07e8b909b46');
-      expect(json['files'][kIsolateSnapshotData], '621b3844bb7d4d17d2cfc5edf9a91c4c');
+      expect(jsonObject['files'][kVmSnapshotData], '2ec34912477a46c03ddef07e8b909b46');
+      expect(jsonObject['files'][kIsolateSnapshotData], '621b3844bb7d4d17d2cfc5edf9a91c4c');
     }
 
     testUsingContext('builds snapshot and fingerprint when no fingerprint is present', () async {

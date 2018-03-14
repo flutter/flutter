@@ -773,7 +773,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   ) {
     final int childCount = this.childCount;
     if (childCount == null)
-      return double.INFINITY;
+      return double.infinity;
     if (lastIndex == childCount - 1)
       return trailingScrollOffset;
     final int reifiedCount = lastIndex - firstIndex + 1;

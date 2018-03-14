@@ -111,7 +111,9 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 ///   // Therefore we return false here. If we had fields (set
 ///   // from the constructor) then we would return true if any
 ///   // of them differed from the same fields on the oldDelegate.
+///   @override
 ///   bool shouldRepaint(Sky oldDelegate) => false;
+///   @override
 ///   bool shouldRebuildSemantics(Sky oldDelegate) => false;
 /// }
 /// ```

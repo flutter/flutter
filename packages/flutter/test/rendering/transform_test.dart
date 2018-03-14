@@ -95,7 +95,7 @@ void main() {
   test('RenderTransform - rotation', () {
     RenderBox inner;
     final RenderBox sizer = new RenderTransform(
-      transform: new Matrix4.rotationZ(math.PI),
+      transform: new Matrix4.rotationZ(math.pi),
       alignment: Alignment.center,
       child: inner = new RenderSizedBox(const Size(100.0, 100.0)),
     );
@@ -113,7 +113,7 @@ void main() {
   test('RenderTransform - rotation with internal offset', () {
     RenderBox inner;
     final RenderBox sizer = new RenderTransform(
-      transform: new Matrix4.rotationZ(math.PI),
+      transform: new Matrix4.rotationZ(math.pi),
       alignment: Alignment.center,
       child: new RenderPadding(
         padding: const EdgeInsets.only(left: 20.0),
@@ -134,7 +134,7 @@ void main() {
   test('RenderTransform - perspective - globalToLocal', () {
     RenderBox inner;
     final RenderBox sizer = new RenderTransform(
-      transform: rotateAroundXAxis(math.PI * 0.25), // at pi/4, we are about 70 pixels high
+      transform: rotateAroundXAxis(math.pi * 0.25), // at pi/4, we are about 70 pixels high
       alignment: Alignment.center,
       child: inner = new RenderSizedBox(const Size(100.0, 100.0)),
     );
@@ -151,7 +151,7 @@ void main() {
   test('RenderTransform - perspective - localToGlobal', () {
     RenderBox inner;
     final RenderBox sizer = new RenderTransform(
-      transform: rotateAroundXAxis(math.PI * 0.4999), // at pi/2, we're seeing the box on its edge,
+      transform: rotateAroundXAxis(math.pi * 0.4999), // at pi/2, we're seeing the box on its edge,
       alignment: Alignment.center,
       child: inner = new RenderSizedBox(const Size(100.0, 100.0)),
     );

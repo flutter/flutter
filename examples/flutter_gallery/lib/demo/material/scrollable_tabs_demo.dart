@@ -43,6 +43,7 @@ class ScrollableTabsDemo extends StatefulWidget {
 class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTickerProviderStateMixin {
   TabController _controller;
   TabsDemoStyle _demoStyle = TabsDemoStyle.iconsAndText;
+  bool _customIndicator = false;
 
   @override
   void initState() {
@@ -62,6 +63,61 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
     });
   }
 
+  ShapeDecoration getIndicator() {
+    if (!_customIndicator)
+      return null;
+
+    switch(_demoStyle) {
+      case TabsDemoStyle.iconsAndText:
+        return new ShapeDecoration(
+          shape: const RoundedRectangleBorder(
+            borderRadius: const BorderRadius.all(const Radius.circular(4.0)),
+            side: const BorderSide(
+              color: Colors.white24,
+              width: 2.0,
+            ),
+          ) + const RoundedRectangleBorder(
+            borderRadius: const BorderRadius.all(const Radius.circular(4.0)),
+            side: const BorderSide(
+              color: Colors.transparent,
+              width: 4.0,
+            ),
+          ),
+        );
+
+      case TabsDemoStyle.iconsOnly:
+        return new ShapeDecoration(
+          shape: const CircleBorder(
+            side: const BorderSide(
+              color: Colors.white24,
+              width: 4.0,
+            ),
+          ) + const CircleBorder(
+            side: const BorderSide(
+              color: Colors.transparent,
+              width: 4.0,
+            ),
+          ),
+        );
+
+      case TabsDemoStyle.textOnly:
+        return new ShapeDecoration(
+          shape: const StadiumBorder(
+            side: const BorderSide(
+              color: Colors.white24,
+              width: 2.0,
+            ),
+          ) + const StadiumBorder(
+            side: const BorderSide(
+              color: Colors.transparent,
+              width: 4.0,
+            ),
+          ),
+        );
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final Color iconColor = Theme.of(context).accentColor;
@@ -69,6 +125,14 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
       appBar: new AppBar(
         title: const Text('Scrollable tabs'),
         actions: <Widget>[
+          new IconButton(
+            icon: const Icon(Icons.sentiment_very_satisfied),
+            onPressed: () {
+              setState(() {
+                _customIndicator = !_customIndicator;
+              });
+            },
+          ),
           new PopupMenuButton<TabsDemoStyle>(
             onSelected: changeDemoStyle,
             itemBuilder: (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
@@ -90,6 +154,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
         bottom: new TabBar(
           controller: _controller,
           isScrollable: true,
+          indicator: getIndicator(),
           tabs: _allPages.map((_Page page) {
             switch (_demoStyle) {
               case TabsDemoStyle.iconsAndText:

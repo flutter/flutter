@@ -92,20 +92,20 @@ void main() {
 
   test('BoxConstraints lerp with unbounded width', () {
     const BoxConstraints constraints1 = const BoxConstraints(
-      minWidth: double.INFINITY,
-      maxWidth: double.INFINITY,
+      minWidth: double.infinity,
+      maxWidth: double.infinity,
       minHeight: 10.0,
       maxHeight: 20.0,
     );
     const BoxConstraints constraints2 = const BoxConstraints(
-      minWidth: double.INFINITY,
-      maxWidth: double.INFINITY,
+      minWidth: double.infinity,
+      maxWidth: double.infinity,
       minHeight: 20.0,
       maxHeight: 30.0,
     );
     const BoxConstraints constraints3 = const BoxConstraints(
-      minWidth: double.INFINITY,
-      maxWidth: double.INFINITY,
+      minWidth: double.infinity,
+      maxWidth: double.infinity,
       minHeight: 15.0,
       maxHeight: 25.0,
     );
@@ -116,40 +116,40 @@ void main() {
     const BoxConstraints constraints1 = const BoxConstraints(
       minWidth: 10.0,
       maxWidth: 20.0,
-      minHeight: double.INFINITY,
-      maxHeight: double.INFINITY,
+      minHeight: double.infinity,
+      maxHeight: double.infinity,
     );
     const BoxConstraints constraints2 = const BoxConstraints(
       minWidth: 20.0,
       maxWidth: 30.0,
-      minHeight: double.INFINITY,
-      maxHeight: double.INFINITY,
+      minHeight: double.infinity,
+      maxHeight: double.infinity,
     );
     const BoxConstraints constraints3 = const BoxConstraints(
       minWidth: 15.0,
       maxWidth: 25.0,
-      minHeight: double.INFINITY,
-      maxHeight: double.INFINITY,
+      minHeight: double.infinity,
+      maxHeight: double.infinity,
     );
     expect(BoxConstraints.lerp(constraints1, constraints2, 0.5), constraints3);
   });
 
   test('BoxConstraints lerp from bounded to unbounded', () {
     const BoxConstraints constraints1 = const BoxConstraints(
-      minWidth: double.INFINITY,
-      maxWidth: double.INFINITY,
-      minHeight: double.INFINITY,
-      maxHeight: double.INFINITY,
+      minWidth: double.infinity,
+      maxWidth: double.infinity,
+      minHeight: double.infinity,
+      maxHeight: double.infinity,
     );
     const BoxConstraints constraints2 = const BoxConstraints(
       minWidth: 20.0,
       maxWidth: 30.0,
-      minHeight: double.INFINITY,
-      maxHeight: double.INFINITY,
+      minHeight: double.infinity,
+      maxHeight: double.infinity,
     );
     const BoxConstraints constraints3 = const BoxConstraints(
-      minWidth: double.INFINITY,
-      maxWidth: double.INFINITY,
+      minWidth: double.infinity,
+      maxWidth: double.infinity,
       minHeight: 20.0,
       maxHeight: 30.0,
     );

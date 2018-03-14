@@ -22,7 +22,7 @@ import 'time.dart';
 import 'typography.dart';
 
 const Duration _kDialAnimateDuration = const Duration(milliseconds: 200);
-const double _kTwoPi = 2 * math.PI;
+const double _kTwoPi = 2 * math.pi;
 const Duration _kVibrateCommitDelay = const Duration(milliseconds: 100);
 
 enum _TimePickerMode { hour, minute }
@@ -861,7 +861,7 @@ class _DialPainter extends CustomPainter {
       if (labels == null)
         return;
       final double labelThetaIncrement = -_kTwoPi / labels.length;
-      double labelTheta = math.PI / 2.0;
+      double labelTheta = math.pi / 2.0;
 
       for (_TappableLabel label in labels) {
         final TextPainter labelPainter = label.painter;
@@ -877,7 +877,7 @@ class _DialPainter extends CustomPainter {
     final Paint selectorPaint = new Paint()
       ..color = accentColor;
     final Offset focusedPoint = getOffsetForTheta(theta, activeRing);
-    final double focusedRadius = labelPadding - 4.0;
+    const double focusedRadius = labelPadding - 4.0;
     canvas.drawCircle(centerPoint, 4.0, selectorPaint);
     canvas.drawCircle(focusedPoint, focusedRadius, selectorPaint);
     selectorPaint.strokeWidth = 2.0;
@@ -931,7 +931,7 @@ class _DialPainter extends CustomPainter {
       if (labels == null)
         return;
       final double labelThetaIncrement = -_kTwoPi / labels.length;
-      double labelTheta = math.PI / 2.0;
+      double labelTheta = math.pi / 2.0;
 
       for (_TappableLabel label in labels) {
         final TextPainter labelPainter = label.painter;
@@ -1078,7 +1078,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     final double fraction = widget.mode == _TimePickerMode.hour
       ? (time.hour / TimeOfDay.hoursPerPeriod) % TimeOfDay.hoursPerPeriod
       : (time.minute / TimeOfDay.minutesPerHour) % TimeOfDay.minutesPerHour;
-    return (math.PI / 2.0 - fraction * _kTwoPi) % _kTwoPi;
+    return (math.pi / 2.0 - fraction * _kTwoPi) % _kTwoPi;
   }
 
   TimeOfDay _getTimeForTheta(double theta) {
@@ -1115,7 +1115,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   void _updateThetaForPan() {
     setState(() {
       final Offset offset = _position - _center;
-      final double angle = (math.atan2(offset.dx, offset.dy) - math.PI / 2.0) % _kTwoPi;
+      final double angle = (math.atan2(offset.dx, offset.dy) - math.pi / 2.0) % _kTwoPi;
       _thetaTween
         ..begin = angle
         ..end = angle; // The controller doesn't animate during the pan gesture.
@@ -1645,7 +1645,7 @@ Future<TimeOfDay> showTimePicker({
 
   return await showDialog<TimeOfDay>(
     context: context,
-    child: new _TimePickerDialog(initialTime: initialTime),
+    builder: (BuildContext context) => new _TimePickerDialog(initialTime: initialTime),
   );
 }
 
