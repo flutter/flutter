@@ -328,7 +328,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     final double buttonTop = buttonRect.top;
     final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
     double menuTop = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
-    final double topPreferredLimit = _kMenuItemHeight;
+    const double topPreferredLimit = _kMenuItemHeight;
     if (menuTop < topPreferredLimit)
       menuTop = math.min(buttonTop, topPreferredLimit);
     double bottom = menuTop + menuHeight;
