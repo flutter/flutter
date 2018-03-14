@@ -85,20 +85,22 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
 
     return await showDialog<bool>(
       context: context,
-      child: new AlertDialog(
-        title: const Text('This form has errors'),
-        content: const Text('Really leave this form?'),
-        actions: <Widget> [
-          new FlatButton(
-            child: const Text('YES'),
-            onPressed: () { Navigator.of(context).pop(true); },
-          ),
-          new FlatButton(
-            child: const Text('NO'),
-            onPressed: () { Navigator.of(context).pop(false); },
-          ),
-        ],
-      ),
+      builder: (BuildContext context) {
+        return new AlertDialog(
+          title: const Text('This form has errors'),
+          content: const Text('Really leave this form?'),
+          actions: <Widget> [
+            new FlatButton(
+              child: const Text('YES'),
+              onPressed: () { Navigator.of(context).pop(true); },
+            ),
+            new FlatButton(
+              child: const Text('NO'),
+              onPressed: () { Navigator.of(context).pop(false); },
+            ),
+          ],
+        );
+      },
     ) ?? false;
   }
 
