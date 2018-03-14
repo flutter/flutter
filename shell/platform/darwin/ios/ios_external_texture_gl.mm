@@ -57,12 +57,13 @@ void IOSExternalTextureGL::Paint(SkCanvas& canvas, const SkRect& bounds) {
     return;
   }
   GrGLTextureInfo textureInfo = {CVOpenGLESTextureGetTarget(texture_ref_),
-                                 CVOpenGLESTextureGetName(texture_ref_)};
-  GrBackendTexture backendTexture(bounds.width(), bounds.height(), kRGBA_8888_GrPixelConfig,
+                                 CVOpenGLESTextureGetName(texture_ref_),
+                                 GL_RGBA8_OES};
+  GrBackendTexture backendTexture(bounds.width(), bounds.height(), GrMipMapped::kNo,
                                   textureInfo);
   sk_sp<SkImage> image =
       SkImage::MakeFromTexture(canvas.getGrContext(), backendTexture, kTopLeft_GrSurfaceOrigin,
-                               SkAlphaType::kPremul_SkAlphaType, nullptr);
+                               kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr);
   if (image) {
     canvas.drawImage(image, bounds.x(), bounds.y());
   }
