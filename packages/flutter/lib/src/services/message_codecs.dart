@@ -203,7 +203,7 @@ class JSONMethodCodec implements MethodCodec {
 ///  * [Map]\: `NSDictionary`
 ///
 /// The codec is extensible by subclasses overriding [writeValue] and
-/// [readValue].
+/// [readValueOfType].
 class StandardMessageCodec implements MessageCodec<dynamic> {
   // The codec serializes messages as outlined below. This format must
   // match the Android and iOS counterparts.
@@ -282,6 +282,8 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
 
   /// Writes [value] to [buffer] by first writing a type discriminator
   /// byte, then the value itself.
+  ///
+  /// This method may be called recursively to serialize container values.
   ///
   /// Type discriminators 0 through 127 inclusive are reserved for use by the
   /// base class.
@@ -452,12 +454,14 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   /// [readValueOfType].
   int readSize(ReadBuffer buffer) {
     final int value = buffer.getUint8();
-    if (value < 254)
-      return value;
-    else if (value == 254)
-      return buffer.getUint16();
-    else
-      return buffer.getUint32();
+    switch (value) {
+      case 254:
+        return buffer.getUint16();
+      case 255:
+        return buffer.getUint32();
+      default:
+        return value;
+    }
   }
 }
 
