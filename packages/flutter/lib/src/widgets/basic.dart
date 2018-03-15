@@ -1448,7 +1448,7 @@ class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
   }
 }
 
-/// Meta data for identifying children in a [CustomMultiChildLayout].
+/// Metadata for identifying children in a [CustomMultiChildLayout].
 ///
 /// The [MultiChildLayoutDelegate.hasChild],
 /// [MultiChildLayoutDelegate.layoutChild], and
@@ -1466,6 +1466,9 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
        super(key: key ?? new ValueKey<Object>(id), child: child);
 
   /// An object representing the identity of this child.
+  ///
+  /// The [id] needs to be unique among the children that the
+  /// [CustomMultiChildLayout] manages.
   final Object id;
 
   @override
