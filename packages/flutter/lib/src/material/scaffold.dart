@@ -268,7 +268,6 @@ class _AnimationSwap<T> extends CompoundAnimation<T> {
   T get value => parent.value < swapThreshold ? first.value : next.value;
 }
 
-
 /// The geometry of the [Scaffold] after it all of its contents except for the
 /// [FloatingActionButton].
 /// 
