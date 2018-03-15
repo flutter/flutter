@@ -238,4 +238,8 @@ class ResidentCompiler {
   void reset() {
     _server.stdin.writeln('reset');
   }
+
+  void shutdown() {
+    _server.kill();
+  }
 }
