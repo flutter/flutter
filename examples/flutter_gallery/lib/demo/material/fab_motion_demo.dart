@@ -96,9 +96,6 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
 class _TopStartFloatingActionButtonLocation extends FloatingActionButtonLocation {
   const _TopStartFloatingActionButtonLocation();
 
-  // An additional inset we apply to the side of the Floating Action Button.
-  static const double _horizontalInset = 16.0;
-
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     // First, we'll place the X coordinate for the Floating Action Button
@@ -119,7 +116,7 @@ class _TopStartFloatingActionButtonLocation extends FloatingActionButtonLocation
         // The Floating Action Button's origin is at its top-left, so we also need
         // to subtract the Floating Action Button's width to align the right edge
         // of the Floating Action Button instead of the left edge.
-        final double startPadding = _horizontalInset + scaffoldGeometry.minInsets.right;
+        final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.right;
         fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - startPadding;
         break;
       case TextDirection.ltr:
@@ -129,7 +126,7 @@ class _TopStartFloatingActionButtonLocation extends FloatingActionButtonLocation
         // Placing the fabX at 0.0 will align the left edge of the
         // Floating Action Button with the left edge of the screen, so all
         // we need to do is offset fabX by the designated padding.
-        final double startPadding = _horizontalInset + scaffoldGeometry.minInsets.left;
+        final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.left;
         fabX = startPadding;
         break;
     }
