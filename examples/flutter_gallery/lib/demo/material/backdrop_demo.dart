@@ -229,7 +229,6 @@ class BackdropDemo extends StatefulWidget {
 class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderStateMixin {
   final GlobalKey _backdropKey = new GlobalKey(debugLabel: 'Backdrop');
   AnimationController _controller;
-  Animation<double> _appBarAnimation;
   Category _category = allCategories[0];
 
   @override
@@ -239,10 +238,6 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
       duration: const Duration(milliseconds: 300),
       value: 1.0,
       vsync: this,
-    );
-    _appBarAnimation = new CurvedAnimation(
-      parent: _controller,
-      curve: Curves.fastOutSlowIn,
     );
   }
 
@@ -370,14 +365,11 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
           onPressed: _toggleBackdropPanelVisibility,
           icon: new AnimatedIcon(
             icon: AnimatedIcons.close_menu,
-            progress: _appBarAnimation,
+            progress: _controller.view,
           ),
         ),
         title: new BackdropTitle(
-          listenable: new CurvedAnimation(
-            parent: _controller,
-            curve: Curves.fastOutSlowIn,
-          ),
+          listenable: _controller.view,
         ),
       ),
       body: new LayoutBuilder(
