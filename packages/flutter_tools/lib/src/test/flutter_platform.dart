@@ -65,6 +65,7 @@ void installHook({
   bool trackWidgetCreation: false,
   int observatoryPort,
   InternetAddressType serverType: InternetAddressType.IP_V4,
+  int concurrency,
 }) {
   if (startPaused || observatoryPort != null)
     assert(enableObservatory);
@@ -82,6 +83,7 @@ void installHook({
       port: port,
       precompiledDillPath: precompiledDillPath,
       trackWidgetCreation: trackWidgetCreation,
+      concurrency: concurrency,
     ),
   );
 }
@@ -100,37 +102,47 @@ class _CompilationRequest {
 // This class is a wrapper around compiler that allows multiple isolates to
 // enqueue compilation requests while reusing compilers when possible.
 class _Compiler {
-  _Compiler(bool trackWidgetCreation) {
+  _Compiler(_FlutterPlatform platform) {
     final Directory outputDillDirectory = fs.systemTempDirectory
         .createTempSync('output_dill');
+
     compilerController.stream.listen((_CompilationRequest request) async {
+      compilationQueue.add(request);
       ResidentCompiler compiler;
       String outputDill;
-      if (idleCompilers.isEmpty) {
+      if (idleCompilers.isEmpty && compilers < platform.concurrency) {
         // Create compiler
         compiler = new ResidentCompiler(
             artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
             packagesPath: PackageMap.globalPackagesPath,
-            trackWidgetCreation: trackWidgetCreation);
+            trackWidgetCreation: platform.trackWidgetCreation);
         compilers++;
         outputDill = outputDillDirectory.childFile('output_$compilers.dill').path;
+      } else if (idleCompilers.isEmpty) {
+        // The request was added to the queue, but we can't process it now.
+        return;
       } else {
         compiler = idleCompilers.removeLast();
       }
 
-      printTrace('Compiling ${request.path}');
-      final String outputPath = await compiler.recompile(request.path,
-        <String>[request.path],
-        outputPath: outputDill,
-      );
+      while (compilationQueue.isNotEmpty) {
+        final _CompilationRequest request = compilationQueue.first;
+        compilationQueue.removeAt(0);
 
-      // Copy output dill next to the source file.
-      final File kernelReadyToRun = await fs.file(outputPath).copy(
-          request.path + '.dill');
-      compiler.accept();
-      compiler.reset();
+        printTrace('Compiling ${request.path}');
+        final String outputPath = await compiler.recompile(request.path,
+          <String>[request.path],
+          outputPath: outputDill,
+        );
+        // Copy output dill next to the source file.
+        final File kernelReadyToRun = await fs.file(outputPath).copy(
+            request.path + '.dill');
+        compiler.accept();
+        compiler.reset();
+        request.result.complete(kernelReadyToRun.path);
+      }
+
       idleCompilers.add(compiler);
-      request.result.complete(kernelReadyToRun.path);
     }, onDone: () {
       outputDillDirectory.deleteSync(recursive: true);
     });
@@ -138,6 +150,7 @@ class _Compiler {
 
   final StreamController<_CompilationRequest> compilerController =
       new StreamController<_CompilationRequest>();
+  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
   List<ResidentCompiler> idleCompilers = <ResidentCompiler>[];
   int compilers = 0;
 
@@ -161,6 +174,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.port,
     this.precompiledDillPath,
     this.trackWidgetCreation,
+    this.concurrency = 1,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -174,6 +188,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final int port;
   final String precompiledDillPath;
   final bool trackWidgetCreation;
+  final int concurrency;
 
   _Compiler compiler;
 
@@ -269,7 +284,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
       if (previewDart2 && precompiledDillPath == null) {
         // Lazily instantiate compiler so it is built only if it is actually used.
-        compiler ??= new _Compiler(trackWidgetCreation);
+        compiler ??= new _Compiler(this);
         mainDart = await compiler.compile(mainDart);
 
         if (mainDart == null) {
