@@ -96,7 +96,7 @@ Run the following steps, from the `src` directory created in the steps above:
 * `git pull upstream master` in `src/flutter` to update the Flutter Engine repo.
 * `gclient sync` to update your dependencies.
 * `./flutter/tools/gn --android --unoptimized` to prepare your build files (or `--android --android-cpu [x86|x64] --unoptimized` for x86/x64 emulators) .
-* `ninja -C out/android_debug_unopt` to actually build the Android binary (or `out/android_debug_unopt_x64 for x86/x64 emulators).
+* `ninja -C out/android_debug_unopt` to actually build the Android binary (or `out/android_debug_unopt_x64` for x86/x64 emulators).
 
 This builds a debug-enabled ("unoptimized") binary configured to run Dart in
 checked mode ("debug"). There are other versions, [discussed on the wiki](https://github.com/flutter/flutter/wiki/Flutter's-modes).
