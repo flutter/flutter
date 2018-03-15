@@ -6,6 +6,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+// This demo displays one Category at a time. The backdrop show a list
+// of all of the categories and the selected category is displayed
+// (CategoryView) on top of the backdrop.
+
 class Category {
   const Category({ this.title, this.assets });
   final String title;
@@ -133,6 +137,8 @@ class CategoryView extends StatelessWidget {
   }
 }
 
+// One BackdropPanel is visible at a time. It's stacked on top of the
+// the BackdropDemo.
 class BackdropPanel extends StatelessWidget {
   const BackdropPanel({
     Key key,
@@ -184,6 +190,7 @@ class BackdropPanel extends StatelessWidget {
   }
 }
 
+// Cross fades between 'Select a Category' and 'Asset Viewer'.
 class BackdropTitle extends AnimatedWidget {
   const BackdropTitle({
     Key key,
@@ -219,6 +226,7 @@ class BackdropTitle extends AnimatedWidget {
   }
 }
 
+// This widget is essentially the backdrop itself.
 class BackdropDemo extends StatefulWidget {
   static const String routeName = '/material/backdrop';
 
@@ -291,6 +299,11 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
       _controller.fling(velocity: _controller.value < 0.5 ? -2.0 : 2.0);
   }
 
+  // Stacks a BackdropPanel, which displays the selected category, on top
+  // of the backdrop. The categories are displayed with ListTiles. Just one
+  // can be selected at a time. This is a LayoutWidgetBuild function because
+  // we need to know how big the BackdropPanel will be to set up its
+  // animation.
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
     const double panelTitleHeight = 48.0;
     final Size panelSize = constraints.biggest;
@@ -343,7 +356,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
           ),
           new PositionedTransition(
             rect: panelAnimation,
-            child:new BackdropPanel(
+            child: new BackdropPanel(
               onTap: _toggleBackdropPanelVisibility,
               onVerticalDragUpdate: _handleDragUpdate,
               onVerticalDragEnd: _handleDragEnd,
