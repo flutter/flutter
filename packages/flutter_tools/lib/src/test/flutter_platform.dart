@@ -565,7 +565,7 @@ class _FlutterPlatform extends PlatformPlugin {
   }) {
     return '''
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io';  // ignore: dart_io_import
 
 // We import this library first in order to trigger an import error for
 // package:test (rather than package:stream_channel) when the developer forgets
