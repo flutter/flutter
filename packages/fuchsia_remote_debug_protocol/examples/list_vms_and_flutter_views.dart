@@ -22,7 +22,10 @@ Future<Null> main(List<String> args) async {
   // Log only at info level within the library. If issues arise, this can be
   // changed to [LoggingLevel.all] or [LoggingLevel.fine] to see more
   // information.
-  Logger.globalLevel = LoggingLevel.all;
+  Logger.globalLevel = LoggingLevel.info;
+  if (args.length == 0) {
+    return;
+  }
   final String address = args[0];
   final String interface = args.length > 1 ? args[1] : '';
   // Example ssh config path for the Fuchsia device after having made a local
