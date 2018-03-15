@@ -868,7 +868,7 @@ void main() {
       ScaffoldGeometry geometry;
       GeometryListenerState listenerState;
       Size previousRect;
-      // The maximum amounts we expect the fab width and height to change during a transition.
+      // The maximum amounts we expect the fab width and height to change during one step of a transition.
       const double maxDeltaWidth = 12.0;
       const double maxDeltaHeight = 12.0;
       // Measure the delta in width and height of the fab, and check that it never grows
@@ -1231,7 +1231,7 @@ class _TopStartFabPositioner extends FloatingActionButtonPositioner {
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    final double fabX = 16.0 + scaffoldGeometry.horizontalFloatingActionButtonPadding;
+    final double fabX = 16.0 + scaffoldGeometry.minInsets.left;
     final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
     return new Offset(fabX, fabY);
   }

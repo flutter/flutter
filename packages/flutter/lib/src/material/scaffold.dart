@@ -60,7 +60,8 @@ enum _ScaffoldSlot {
   statusBar,
 }
 
-/// Interface for objects that place the [FloatingActionButton] in the [Scaffold].
+/// An object that defines a position for the [FloatingActionButton]
+/// based on the [Scaffold]'s [ScaffoldPrelayoutGeometry].
 /// 
 /// Flutter provides [FloatingActionButtonPositioner]s for the common
 /// [FloatingActionButton] placements in Material Design applications. These
@@ -73,6 +74,8 @@ enum _ScaffoldSlot {
 ///  * [FloatingActionButtonAnimator], which is used to animate the
 ///    [Scaffold.floatingActionButton] from one [FloatingActionButtonPositioner] to 
 ///    another.
+///  * [ScaffoldPrelayoutGeometry], the geometry that 
+///    [FloatingActionButtonPositioner]s use to position the [FloatingActionButton].
 abstract class FloatingActionButtonPositioner {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -87,6 +90,12 @@ abstract class FloatingActionButtonPositioner {
   static const FloatingActionButtonPositioner centerFloat = const _CenterFloatFabPositioner();
 
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
+  /// 
+  /// This uses a [ScaffoldPrelayoutGeometry], which the [Scaffold] constructs
+  /// during its layout phase after it has laid out every widget it can lay out
+  /// except the [FloatingActionButton]. The [Scaffold] uses the [Offset]
+  /// returned from this method to position the [FloatingActionButton] and
+  /// complete its layout.
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry);
 
   @override
@@ -97,11 +106,11 @@ abstract class FloatingActionButtonPositioner {
 /// 
 /// The [Scaffold] uses [Scaffold.floatingActionButtonAnimator] to define:
 ///
-///  * The [Offset] of the [FloatingActionButton] between the old and new 
-///    [FloatingActionButtonPositioner]s as part of the transition animation
-///  * An [Animation] to scale the [FloatingActionButton] during the transition
-///  * An [Animation] to rotate the [FloatingActionButton] during the transition
-///  * Where to start a new animation from if an animation is interrupted
+///  * The [Offset] of the [FloatingActionButton] between the old and new
+///    [FloatingActionButtonPositioner]s as part of the transition animation.
+///  * An [Animation] to scale the [FloatingActionButton] during the transition.
+///  * An [Animation] to rotate the [FloatingActionButton] during the transition.
+///  * Where to start a new animation from if an animation is interrupted.
 /// 
 /// See also:
 /// 
@@ -114,23 +123,46 @@ abstract class FloatingActionButtonAnimator {
   /// const constructors so that they can be used in const expressions.
   const FloatingActionButtonAnimator();
 
-  /// Moves the [FloatingActionButton] by scaling out and in at a new location.
+  /// Moves the [FloatingActionButton] by scaling out and then in at a new 
+  /// [FloatingActionButtonLocation].
+  /// 
+  /// This animator shrinks the [FloatingActionButton] down until it disappears, then
+  /// grows it back to full size at its new [FloatingActionButtonLocation].
   /// 
   /// This is the default [FloatingActionButton] motion animation.
   static const FloatingActionButtonAnimator scaling = const _ScalingFabMotionAnimator();
 
-  /// Gets the [FloatingActionButton]'s [Offset] based on a [progress].
+  /// Gets the [FloatingActionButton]'s position relative to the origin of the
+  /// [Scaffold] based on [progress].
   /// 
-  /// [begin] is the [Offset] provided by the previous [FloatingActionButtonPositioner].
+  /// [begin] is the [Offset] provided by the previous 
+  /// [FloatingActionButtonPositioner].
   /// 
-  /// [end] is the [Offset] provided by the new [FloatingActionButtonPositioner].
+  /// [end] is the [Offset] provided by the new 
+  /// [FloatingActionButtonPositioner].
   /// 
   /// [progress] is the current progress of the transition animation.
+  /// When [progress] is 0.0, the returned [Offset] should be equal to [begin].
+  /// when [progress] is 1.0, the returned [Offset] should be equal to [end].
   Offset getOffset({@required Offset begin, @required Offset end, @required double progress});
 
   /// Animates the scale of the [FloatingActionButton].
   /// 
   /// The animation should both start and end with a value of 1.0.
+  /// 
+  /// For example, to create an animation that linearly scales out and then back in,
+  /// you could join animations that pass each other:
+  /// 
+  /// ```dart
+  ///   @override
+  ///   Animation<double> getScaleAnimation({@required Animation<double> parent}) {
+  ///     // The animations will cross at value 0, and the train will return to 1.0.
+  ///     return new TrainHoppingAnimation(
+  ///       Tween<double>(begin: 1.0, end: -1.0).animate(parent),
+  ///       Tween<double>(begin: -1.0, end: 1.0).animate(parent),
+  ///     );
+  ///   }
+  /// ```
   Animation<double> getScaleAnimation({@required Animation<double> parent});
 
   /// Animates the rotation of [Scaffold.floatingActionButton].
@@ -139,15 +171,30 @@ abstract class FloatingActionButtonAnimator {
   /// 
   /// The animation values are a fraction of a full circle, with 0.0 and 1.0
   /// corresponding to 0 and 360 degrees, while 0.5 corresponds to 180 degrees.
+  /// 
+  /// For example, to create a rotation animation that rotates the 
+  /// [FloatingActionButton] through a full circle:
+  /// 
+  /// ```dart
+  ///   @override
+  ///   Animation<double> getRotationAnimation({@required Animation<double> parent}) {
+  ///     return new Tween<double>(begin: 0.0, end: 1.0).animate(parent);
+  ///   }
+  /// ```
   Animation<double> getRotationAnimation({@required Animation<double> parent});
 
-  /// Gets the value to restart a motion animation at if it's interrupted.
+  /// Gets the progress value to restart a motion animation from when the animation is interrupted.
   /// 
-  /// An interruption is triggered if the [Scaffold] is given a new [FloatingActionButtonPositioner]
+  /// [previousValue] is the value of the animation before it was interrupted.
+  /// 
+  /// The restart of the animation will affect all three parts of the motion animation:
+  /// offset animation, scale animation, and rotation animation.
+  /// 
+  /// An interruption triggers if the [Scaffold] is given a new [FloatingActionButtonPositioner]
   /// while it is still animating a transition between two previous [FloatingActionButtonPositioner]s.
   /// 
   /// A sensible default is usually 0.0, which is the same as restarting
-  /// the animation from the beginning.
+  /// the animation from the beginning, regardless of the original state of the animation.
   double getAnimationRestart(double previousValue) => 0.0;
 
   @override
@@ -171,9 +218,11 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
     // Animate the scale down from 1 to 0 in the first half of the animation
     // then from 0 back to 1 in the second half.
     final Curve curve = const Interval(0.5, 1.0, curve: Curves.ease);
-    return new AnimationMax<double>(
+    return new _AnimationSwap<double>(
       new ReverseAnimation(new CurveTween(curve: curve.flipped).animate(parent)),
       new CurveTween(curve: curve).animate(parent),
+      parent,
+      0.5,
     );
   }
 
@@ -186,9 +235,11 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
       end: 1.0,
     );
     // This rotation will turn on the way in, but not on the way out.
-    return new AnimationMax<double>(
+    return new _AnimationSwap<double>(
       rotationTween.animate(parent),
       new ReverseAnimation(new CurveTween(curve: const Threshold(0.5)).animate(parent)),
+      parent,
+      0.5,
     );
   }
 
@@ -199,9 +250,31 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
   double getAnimationRestart(double previousValue) => math.min(1.0 - previousValue, previousValue);
 }
 
-/// The geometry of the [Scaffold] before it finishes laying out.
+/// An animation that swaps from one animation to the next when the [parent] passes [swapThreshold].
+///
+/// The [value] of this animation is the value of [first] when [parent.value] < [swapThreshold]
+/// and the value of [next] otherwise.
+class _AnimationSwap<T> extends CompoundAnimation<T> {
+  /// Creates an [_AnimationSwap].
+  ///
+  /// Both arguments must be non-null. Either can be an [AnimationMin] itself
+  /// to combine multiple animations.
+  _AnimationSwap(Animation<T> first, Animation<T> next, this.parent, this.swapThreshold): super(first: first, next: next);
+
+  final Animation<double> parent;
+  final double swapThreshold;
+
+  @override
+  T get value => parent.value < swapThreshold ? first.value : next.value;
+}
+
+
+/// The geometry of the [Scaffold] after it all of its contents except for the
+/// [FloatingActionButton].
 /// 
-/// The Scaffold passes this prelayout geometry to its [FloatingActionButtonPositioner].
+/// The [Scaffold] passes this prelayout geometry to its
+/// [FloatingActionButtonPositioner], which produces an [Offset] that the 
+/// [Scaffold] uses to finish laying out the [FloatingActionButton].
 /// 
 /// For a description of the [Scaffold]'s geometry after it has
 /// finished laying out, see the [ScaffoldGeometry].
@@ -209,44 +282,83 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
 class ScaffoldPrelayoutGeometry {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const ScaffoldPrelayoutGeometry({this.bottomSheetSize, this.contentBottom, this.contentTop, this.floatingActionButtonSize, this.horizontalFloatingActionButtonPadding, this.scaffoldSize, this.snackBarSize, this.textDirection});
+  const ScaffoldPrelayoutGeometry({
+    @required this.bottomSheetSize, 
+    @required this.contentBottom, 
+    @required this.contentTop, 
+    @required this.floatingActionButtonSize, 
+    @required this.minInsets, 
+    @required this.scaffoldSize, 
+    @required this.snackBarSize, 
+    @required this.textDirection,
+  });
 
-  /// The [Size] of the [Scaffold]'s [FloatingActionButton] (if available).
+  /// The [Size] of [Scaffold.floatingActionButton].
   /// 
-  /// The [Scaffold] will determine the [floatingActionButtonSize] if 
-  /// [Scaffold.floatingActionButton] is not null.
-  /// 
-  /// If [Scaffold.floatingActionButton] is null, this should be [Size.zero].
+  /// If [Scaffold.floatingActionButton] is null, this will be [Size.zero].
   final Size floatingActionButtonSize;
 
-  /// The [Size] of the [Scaffold]'s [BottomSheet] (if available).
-  /// 
-  /// The [Scaffold] will determine the [bottomSheetSize] if the [Scaffold]
-  /// is currently showing a [BottomSheet].
+  /// The [Size] of the [Scaffold]'s [BottomSheet].
   /// 
   /// If the [Scaffold] is not currently showing a [BottomSheet],
-  /// this should be [Size.zero].
+  /// this will be [Size.zero].
   final Size bottomSheetSize;
 
-  /// The height from the [Scaffold]'s top where its body ends.
+  /// The vertical distance from the Scaffold's origin to the bottom of
+  /// [Scaffold.body].
+  /// 
+  /// This is useful in a [FloatingActionButtonPositioner] designed to
+  /// place the [FloatingActionButton] at the bottom of the screen, while
+  /// keeping it above the [BottomSheet], the [Scaffold.bottomNavigationBar],
+  /// or the keyboard.
+  /// 
+  /// Note that [Scaffold.body] is laid out with respect to [minInsets] already.
+  /// This means that a [FloatingActionButtonPositioner] does not need to factor
+  /// in [minInsets.bottom] when aligning a [FloatingActionButton] to [contentBottom].
   final double contentBottom;
 
-  /// The height from the [Scaffold]'s top where its body starts.
+  /// The vertical distance from the [Scaffold]'s origin to the top of
+  /// [Scaffold.body].
+  /// 
+  /// This is useful in a [FloatingActionButtonPositioner] designed to
+  /// place the [FloatingActionButton] at the top of the screen, while
+  /// keeping it below the [Scaffold.appBar].
+  /// 
+  /// Note that [Scaffold.body] is laid out with respect to [minInsets] already.
+  /// This means that a [FloatingActionButtonPositioner] does not need to factor
+  /// in [minInsets.top] when aligning a [FloatingActionButton] to [contentTop].
   final double contentTop;
 
-  /// The minimum horizontal padding the [FloatingActionButton] should observe.
-  final double horizontalFloatingActionButtonPadding;
+  /// The minimum padding to inset the [FloatingActionButton] by for it
+  /// to remain visible.
+  /// 
+  /// This value is the result of calling [MediaQuery.padding] in the
+  /// [Scaffold]'s [BuildContext],
+  /// and is useful for insetting the [FloatingActionButton] to avoid features like
+  /// the system status bar or the keyboard.
+  /// 
+  /// If [Scaffold.resizeToAvoidBottomPadding] is set to false, [minInsets.bottom]
+  /// will be 0.0 instead of [MediaQuery.padding.bottom].
+  final EdgeInsets minInsets;
 
   /// The [Size] of the whole [Scaffold].
+  /// 
+  /// If the [Size] of the [Scaffold]'s contents is modified by values such as 
+  /// [Scaffold.resizeToAvoidBottomPadding] or the keyboard opening, then the
+  /// [scaffoldSize] here will not reflect those changes.
+  /// 
+  /// This means that [FloatingActionButtonPositioner]s designed to reposition
+  /// the [FloatingActionButton] based on events such as the keyboard popping
+  /// up should use [minInsets] to make sure that the [FloatingActionButton] is
+  /// inset by enough to remain visible.
+  /// 
+  /// See [minInsets] and [MediaQuery.padding] for more information on the appropriate
+  /// insets to apply.
   final Size scaffoldSize;
 
-  /// The [Size] of the [Scaffold]'s [SnackBar] (if available).
+  /// The [Size] of the [Scaffold]'s [SnackBar].
   /// 
-  /// The [Scaffold] will determine the [snackBarSize] if the [Scaffold]
-  /// is currently showing a [SnackBar].
-  /// 
-  /// If the [Scaffold] is not showing a [SnackBar],
-  /// this should be [Size.zero].
+  /// If the [Scaffold] is not showing a [SnackBar], this will be [Size.zero].
   final Size snackBarSize;
 
   /// The [TextDirection] of the [Scaffold]'s [BuildContext].
@@ -259,7 +371,7 @@ class _CenterFloatFabPositioner extends FloatingActionButtonPositioner {
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     // Compute the x-axis offset.
-    final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2;
+    final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
 
     // Compute the y-axis offset.
     final double contentBottom = scaffoldGeometry.contentBottom;
@@ -286,10 +398,14 @@ class _EndFloatFabPositioner extends FloatingActionButtonPositioner {
     assert(scaffoldGeometry.textDirection != null);
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
-        fabX = _kFloatingActionButtonMargin + scaffoldGeometry.horizontalFloatingActionButtonPadding;
+        // In RTL, the end of the screen is the left.
+        final double endPadding = scaffoldGeometry.minInsets.left;
+        fabX = _kFloatingActionButtonMargin + endPadding;
         break;
       case TextDirection.ltr:
-        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - _kFloatingActionButtonMargin - scaffoldGeometry.horizontalFloatingActionButtonPadding;
+        // In LTR, the end of the screen is the right.
+        final double endPadding = scaffoldGeometry.minInsets.right;
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - _kFloatingActionButtonMargin - endPadding;
       break;
     }
 
@@ -340,11 +456,14 @@ class _TransitionSnapshotFabPositioner extends FloatingActionButtonPositioner {
 
 /// Geometry information for [Scaffold] components after layout is finished.
 ///
-/// To get a [ValueNotifier] for the scaffold geometry call
-/// [Scaffold.geometryOf].
+/// To get a [ValueNotifier] for the scaffold geometry of a given
+/// [BuildContext], use [Scaffold.geometryOf].
 /// 
-/// For information about the [Scaffold]'s geometry that is used as part of
-/// the layout process, see [ScaffoldPrelayoutGeometry].
+/// The ScaffoldGeometry is only available during the paint phase, because
+/// its value is computed during the animation and layout phases prior to painting.
+/// 
+/// For information about the [Scaffold]'s geometry that is used while laying 
+/// out the [FloatingActionButton], see [ScaffoldPrelayoutGeometry].
 @immutable
 class ScaffoldGeometry {
   /// Create an object that describes the geometry of a [Scaffold].
@@ -355,14 +474,12 @@ class ScaffoldGeometry {
   });
 
   /// The distance from the [Scaffold]'s top edge to the top edge of the
-  /// rectangle in which the [Scaffold.bottomNavigationBar] bar is being laid
-  /// out.
+  /// rectangle in which the [Scaffold.bottomNavigationBar] bar is laid out.
   ///
-  /// When there is no [Scaffold.bottomNavigationBar] set, this will be null.
+  /// Null if [Scaffold.bottomNavigationBar] is null.
   final double bottomNavigationBarTop;
 
-  /// The rectangle in which the [Scaffold] is laying out
-  /// [Scaffold.floatingActionButton].
+  /// The [Scaffold.floatingActionButton]'s bounding rectangle.
   ///
   /// This is null when there is no floating action button showing.
   final Rect floatingActionButtonArea;
@@ -479,21 +596,17 @@ class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenabl
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
-    @required this.statusBarHeight,
-    @required this.bottomViewInset,
+    @required this.minInsets, 
     @required this.textDirection,
     @required this.geometryNotifier,
     // for floating action button
-    @required this.horizontalPadding, 
     @required this.previousFloatingActionButtonPositioner,
     @required this.currentFloatingActionButtonPositioner,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
   }) : assert(previousFloatingActionButtonPositioner != null), assert(currentFloatingActionButtonPositioner != null);
 
-  final double statusBarHeight;
-  final double bottomViewInset;
-  final double horizontalPadding;
+  final EdgeInsets minInsets;
   final TextDirection textDirection;
   final _ScaffoldGeometryNotifier geometryNotifier;
 
@@ -542,7 +655,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // Set the content bottom to account for the greater of the height of any
     // bottom-anchored material widgets or of the keyboard or other
     // bottom-anchored system UI.
-    final double contentBottom = math.max(0.0, bottom - math.max(bottomViewInset, bottomWidgetsHeight));
+    final double contentBottom = math.max(0.0, bottom - math.max(minInsets.bottom, bottomWidgetsHeight));
 
     if (hasChild(_ScaffoldSlot.body)) {
       final BoxConstraints bodyConstraints = new BoxConstraints(
@@ -593,20 +706,24 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         contentBottom: contentBottom,
         contentTop: contentTop,
         floatingActionButtonSize: fabSize,
-        horizontalFloatingActionButtonPadding: horizontalPadding,
+        minInsets: minInsets,
         scaffoldSize: size,
         snackBarSize: snackBarSize,
         textDirection: textDirection,
       );
       final Offset currentFabOffset = currentFloatingActionButtonPositioner.getOffset(currentGeometry);
       final Offset previousFabOffset = previousFloatingActionButtonPositioner.getOffset(currentGeometry);
-      final Offset fabOffset = floatingActionButtonMotionAnimator.getOffset(begin: previousFabOffset, end: currentFabOffset, progress: floatingActionButtonMoveAnimationProgress);
+      final Offset fabOffset = floatingActionButtonMotionAnimator.getOffset(
+        begin: previousFabOffset, 
+        end: currentFabOffset, 
+        progress: floatingActionButtonMoveAnimationProgress,
+      );
       positionChild(_ScaffoldSlot.floatingActionButton, fabOffset);
       floatingActionButtonRect = fabOffset & fabSize;
     }
 
     if (hasChild(_ScaffoldSlot.statusBar)) {
-      layoutChild(_ScaffoldSlot.statusBar, fullWidthConstraints.tighten(height: statusBarHeight));
+      layoutChild(_ScaffoldSlot.statusBar, fullWidthConstraints.tighten(height: minInsets.top));
       positionChild(_ScaffoldSlot.statusBar, Offset.zero);
     }
 
@@ -628,9 +745,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_ScaffoldLayout oldDelegate) {
-    return oldDelegate.statusBarHeight != statusBarHeight
-        || oldDelegate.bottomViewInset != bottomViewInset
-        || oldDelegate.horizontalPadding != horizontalPadding
+    return oldDelegate.minInsets != minInsets
         || oldDelegate.textDirection != textDirection
         || oldDelegate.floatingActionButtonMoveAnimationProgress != floatingActionButtonMoveAnimationProgress
         || oldDelegate.previousFloatingActionButtonPositioner != previousFloatingActionButtonPositioner
@@ -794,7 +909,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   @override
   Widget build(BuildContext context) {
-     final List<Widget> children = <Widget>[];
+    final List<Widget> children = <Widget>[];
     if (_previousController.status != AnimationStatus.dismissed) {
       children.add(new ScaleTransition(
         scale: _previousScaleAnimation,
@@ -1458,7 +1573,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _floatingActionButtonPositioner = widget.floatingActionButtonPositioner ?? _kDefaultFloatingActionButtonPositioner;
     _floatingActionButtonAnimator = widget.floatingActionButtonAnimator ?? _kDefaultFloatingActionButtonAnimator;
     _previousFloatingActionButtonPositioner = _floatingActionButtonPositioner;
-    _floatingActionButtonMoveController = new AnimationController(vsync: this, lowerBound: 0.0, upperBound: 1.0, value: 1.0, duration: _kFloatingActionButtonSegue * 2);
+    _floatingActionButtonMoveController = new AnimationController(
+      vsync: this, 
+      lowerBound: 0.0, 
+      upperBound: 1.0, 
+      value: 1.0, 
+      duration: _kFloatingActionButtonSegue * 2,
+    );
   }
 
   @override
@@ -1711,17 +1832,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       );
     }
 
-    double endPadding;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        endPadding = mediaQuery.padding.left;
-        break;
-      case TextDirection.ltr:
-        endPadding = mediaQuery.padding.right;
-        break;
-    }
-    assert(endPadding != null);
-
+    // The minimum insets for contents of the Scaffold to keep visible.
+    final EdgeInsets minInsets = mediaQuery.padding.copyWith(
+      bottom: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
+    );
+      
     return new _ScaffoldScope(
       hasDrawer: hasDrawer,
       geometryNotifier: _geometryNotifier,
@@ -1733,14 +1848,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             return new CustomMultiChildLayout(
               children: children,
               delegate: new _ScaffoldLayout(
-                bottomViewInset: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
+                minInsets: minInsets,
                 currentFloatingActionButtonPositioner: _floatingActionButtonPositioner,
                 floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
                 floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
                 geometryNotifier: _geometryNotifier,
-                horizontalPadding: endPadding,
                 previousFloatingActionButtonPositioner: _previousFloatingActionButtonPositioner,
-                statusBarHeight: mediaQuery.padding.top,
                 textDirection: textDirection,
               ),
             );

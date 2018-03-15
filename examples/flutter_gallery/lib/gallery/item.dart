@@ -160,7 +160,7 @@ List<GalleryItem> _buildGalleryItems() {
     ),
     new GalleryItem(
       title: 'Floating action button motion',
-      subtitle: 'Action buttons with customized motion',
+      subtitle: 'Action buttons with customized positions',
       category: 'Material Components',
       routeName: FabMotionDemo.routeName,
       buildRoute: (BuildContext context) => new FabMotionDemo(),
