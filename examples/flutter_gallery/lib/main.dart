@@ -5,10 +5,13 @@
 // Thanks for checking out Flutter!
 // Like what you see? Tweet us @flutterio
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import 'gallery/app.dart';
 
 void main() {
+  // Overriding https://github.com/flutter/flutter/issues/13736 for better
+  // visual effect at the cost of performance.
+  MaterialPageRoute.debugEnableFadingRoutes = true; // ignore: deprecated_member_use
   runApp(const GalleryApp());
 }
