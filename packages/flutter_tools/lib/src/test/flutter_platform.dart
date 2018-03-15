@@ -560,7 +560,6 @@ class _FlutterPlatform extends PlatformPlugin {
   String _generateTestMain({
     String testUrl,
     String encodedWebsocketUrl,
-    String serverPort: r'$serverPort' ,
   }) {
     return '''
 import 'dart:convert';
@@ -579,7 +578,7 @@ import '$testUrl' as test;
 void main() {
   print('$_kStartTimeoutTimerMessage');
   String serverPort = Platform.environment['SERVER_PORT'];
-  String server = Uri.decodeComponent('$encodedWebsocketUrl:$serverPort');
+  String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
   StreamChannel channel = serializeSuite(() {
     catchIsolateErrors();
     return test.main;
