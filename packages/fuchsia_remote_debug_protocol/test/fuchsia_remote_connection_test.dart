@@ -27,8 +27,8 @@ void main() {
 
     test('end-to-end with three vm connections and flutter view query',
         () async {
-      final String address = 'fe80::8eae:4cff:fef4:9247';
-      final String interface = 'eno1';
+      const String address = 'fe80::8eae:4cff:fef4:9247';
+      const String interface = 'eno1';
       // Adds some extra junk to make sure the strings will be cleaned up.
       when(mockRunner.run(any))
           .thenReturn(<String>['123\n\n\n', '456  ', '789']);

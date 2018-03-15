@@ -44,8 +44,8 @@ void main() {
     });
 
     test('verify interface is appended to ipv6 address', () async {
-      final String ipV6Addr = 'fe80::8eae:4cff:fef4:9247';
-      final String interface = 'eno1';
+      const String ipV6Addr = 'fe80::8eae:4cff:fef4:9247';
+      const String interface = 'eno1';
       runner = new SshCommandRunner.withProcessManager(
         mockProcessManager,
         address: ipV6Addr,
@@ -62,7 +62,7 @@ void main() {
 
     test('verify no percentage symbol is added when no ipv6 interface',
         () async {
-      final String ipV6Addr = 'fe80::8eae:4cff:fef4:9247';
+      const String ipV6Addr = 'fe80::8eae:4cff:fef4:9247';
       runner = new SshCommandRunner.withProcessManager(
         mockProcessManager,
         address: ipV6Addr,
@@ -76,7 +76,7 @@ void main() {
     });
 
     test('verify commands are split into multiple lines', () async {
-      final String addr = '192.168.1.1';
+      const String addr = '192.168.1.1';
       runner = new SshCommandRunner.withProcessManager(mockProcessManager,
           address: addr);
       when<String>(mockProcessResult.stdout).thenReturn('''this
@@ -89,7 +89,7 @@ void main() {
     });
 
     test('verify exception on nonzero process result exit code', () async {
-      final String addr = '192.168.1.1';
+      const String addr = '192.168.1.1';
       runner = new SshCommandRunner.withProcessManager(mockProcessManager,
           address: addr);
       when<String>(mockProcessResult.stdout).thenReturn('whatever');
@@ -102,8 +102,8 @@ void main() {
     });
 
     test('verify correct args with config', () async {
-      final String addr = 'fe80::8eae:4cff:fef4:9247';
-      final String config = '/this/that/this/and/uh';
+      const String addr = 'fe80::8eae:4cff:fef4:9247';
+      const String config = '/this/that/this/and/uh';
       runner = new SshCommandRunner.withProcessManager(
         mockProcessManager,
         address: addr,
@@ -121,7 +121,7 @@ void main() {
     });
 
     test('verify config is excluded correctly', () async {
-      final String addr = 'fe80::8eae:4cff:fef4:9247';
+      const String addr = 'fe80::8eae:4cff:fef4:9247';
       runner = new SshCommandRunner.withProcessManager(
         mockProcessManager,
         address: addr,
