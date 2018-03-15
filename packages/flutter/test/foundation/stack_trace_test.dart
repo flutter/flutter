@@ -10,7 +10,7 @@ import 'platform_helper.dart';
 void main() {
   // TODO(8128): These tests and the filtering mechanism should be revisited to account for causal async stack traces.
 
-  final String dividerRegExp = pathSeparatorForRegExp;
+  final String dividerRegExp = '/';
 
   test('FlutterError.defaultStackFilter', () {
     final List<String> filtered = FlutterError.defaultStackFilter(StackTrace.current.toString().trimRight().split('\n')).toList();
