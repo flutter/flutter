@@ -16,7 +16,7 @@ matrix:
   - os: osx
     env: SHARD=docs
 allow_failures:
-    env: SHARD=tests_dart2
+  - env: SHARD=tests_dart2
 sudo: false
 filter_secrets: false
 
