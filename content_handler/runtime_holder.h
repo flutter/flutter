@@ -101,7 +101,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void InitDartIoInternal();
   void InitFuchsia();
   void InitZircon();
-  void InitMozartInternal();
+  void InitScenicInternal();
 
   void PostBeginFrame();
   void BeginFrame();

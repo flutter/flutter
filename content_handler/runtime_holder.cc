@@ -238,18 +238,18 @@ void RuntimeHolder::CreateView(
   input_connection_->SetEventListener(std::move(input_listener));
 
   // Setup the session.
-  f1dl::InterfaceHandle<ui_mozart::Mozart> mozart;
-  view_manager_->GetMozart(mozart.NewRequest());
+  f1dl::InterfaceHandle<ui::Scenic> scenic;
+  view_manager_->GetScenic(scenic.NewRequest());
 
   blink::Threads::Gpu()->PostTask(fxl::MakeCopyable([
     rasterizer = rasterizer_.get(),            //
-    mozart = std::move(mozart),  //
+    scenic = std::move(scenic),  //
     import_token = std::move(import_token),    //
     weak_runtime_holder = GetWeakPtr()
   ]() mutable {
     ASSERT_IS_GPU_THREAD;
     rasterizer->SetScene(
-        std::move(mozart), std::move(import_token),
+        std::move(scenic), std::move(import_token),
         // TODO(MZ-222): Ideally we would immediately redraw the previous layer
         // tree when the metrics change since there's no need to rerecord it.
         // However, we want to make sure there's only one outstanding frame.
@@ -419,7 +419,7 @@ void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
   InitDartIoInternal();
   InitFuchsia();
   InitZircon();
-  InitMozartInternal();
+  InitScenicInternal();
 }
 
 void RuntimeHolder::InitDartIoInternal() {
@@ -466,7 +466,7 @@ void RuntimeHolder::InitZircon() {
                                  ToDart(reinterpret_cast<intptr_t>(namespc_))));
 }
 
-void RuntimeHolder::InitMozartInternal() {
+void RuntimeHolder::InitScenicInternal() {
   f1dl::InterfaceHandle<mozart::ViewContainer> view_container;
   view_->GetContainer(view_container.NewRequest());
 

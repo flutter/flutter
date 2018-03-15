@@ -21,7 +21,7 @@ SceneUpdateContext::SceneUpdateContext(scenic_lib::Session* session,
 SceneUpdateContext::~SceneUpdateContext() {
   ASSERT_IS_GPU_THREAD;
 
-  // Release Mozart session resources for all ExportNodes.
+  // Release Scenic session resources for all ExportNodes.
   for (auto export_node : export_nodes_) {
     export_node->Dispose(false);
   }

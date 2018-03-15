@@ -7,9 +7,9 @@
 
 namespace flutter_runner {
 
-SessionConnection::SessionConnection(ui_mozart::MozartPtr mozart,
+SessionConnection::SessionConnection(ui::ScenicPtr scenic,
                                      zx::eventpair import_token)
-    : session_(mozart.get()),
+    : session_(scenic.get()),
       root_node_(&session_),
       surface_producer_(std::make_unique<VulkanSurfaceProducer>(&session_)),
       scene_update_context_(&session_, surface_producer_.get()) {
@@ -22,7 +22,7 @@ SessionConnection::SessionConnection(ui_mozart::MozartPtr mozart,
 
   root_node_.Bind(std::move(import_token));
   root_node_.SetEventMask(scenic::kMetricsEventMask);
-  session_.Present(0, [](ui_mozart::PresentationInfoPtr info) {});
+  session_.Present(0, [](ui::PresentationInfoPtr info) {});
 
   present_callback_ =
       std::bind(&SessionConnection::OnPresent, this, std::placeholders::_1);
@@ -39,7 +39,7 @@ void SessionConnection::OnSessionError() {
 }
 
 void SessionConnection::OnSessionEvents(
-    f1dl::Array<ui_mozart::EventPtr> events) {
+    f1dl::Array<ui::EventPtr> events) {
   scenic::MetricsPtr new_metrics;
   for (const auto& event : events) {
     if (event->is_scenic() && event->get_scenic()->is_metrics() &&
@@ -81,7 +81,7 @@ void SessionConnection::Present(flow::CompositorContext::ScopedFrame& frame,
   EnqueueClearOps();
 }
 
-void SessionConnection::OnPresent(ui_mozart::PresentationInfoPtr info) {
+void SessionConnection::OnPresent(ui::PresentationInfoPtr info) {
   ASSERT_IS_GPU_THREAD;
   auto callback = pending_on_present_callback_;
   pending_on_present_callback_ = nullptr;

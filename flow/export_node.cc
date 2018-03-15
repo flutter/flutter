@@ -51,7 +51,7 @@ void ExportNode::Bind(SceneUpdateContext& context,
     node_.reset(new scenic_lib::EntityNode(container.session()));
     node_->Export(std::move(export_token_));
 
-    // Add ourselves to the context so it can call Dispose() on us if the Mozart
+    // Add ourselves to the context so it can call Dispose() on us if the Scenic
     // session is closed.
     context.AddExportNode(this);
     scene_update_context_ = &context;
