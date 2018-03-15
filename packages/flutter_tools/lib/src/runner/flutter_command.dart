@@ -163,7 +163,7 @@ abstract class FlutterCommand extends Command<Null> {
   BuildInfo getBuildInfo() {
     final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
         ? argResults['preview-dart-2']
-        : false;
+        : true;
 
     TargetPlatform targetPlatform;
     if (argParser.options.containsKey('target-platform') &&

@@ -75,7 +75,8 @@ class DriveCommand extends RunCommandBase {
     );
 
     argParser.addFlag('preview-dart-2',
-        defaultsTo: false,
+        defaultsTo: true,
+        negatable: true,
         help: 'Preview Dart 2.0 functionality.');
   }
 
@@ -301,6 +302,8 @@ Future<Null> _runTests(List<String> testArgs, String observatoryUri, bool previe
     ..add('-rexpanded');
   if (previewDart2) {
     args.add('--preview-dart-2');
+  } else {
+    args.add('--no-preview-dart-2');
   }
 
   final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
