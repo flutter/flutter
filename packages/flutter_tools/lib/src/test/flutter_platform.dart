@@ -513,7 +513,6 @@ class _FlutterPlatform extends PlatformPlugin {
     listenerFile.writeAsStringSync(_generateTestMain(
       testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
       encodedWebsocketUrl: Uri.encodeComponent(_getWebSocketUrl()),
-      serverPort: r'$serverPort',
     ));
     return listenerFile.path;
   }
@@ -561,7 +560,7 @@ class _FlutterPlatform extends PlatformPlugin {
   String _generateTestMain({
     String testUrl,
     String encodedWebsocketUrl,
-    String serverPort,
+    String serverPort: r'$serverPort' ,
   }) {
     return '''
 import 'dart:convert';
