@@ -3,13 +3,13 @@ dependencies:
   flutter:
     sdk: flutter
   collection: 1.14.6
-  device_info: 0.1.2
+  device_info: 0.2.0
   intl: 0.15.2
-  connectivity: 0.2.1
+  connectivity: 0.3.0
   string_scanner: 1.0.2
-  url_launcher: 2.0.2
+  url_launcher: 3.0.0
   cupertino_icons: 0.1.1
-  video_player: 0.2.1
+  video_player: 0.3.0
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets:
