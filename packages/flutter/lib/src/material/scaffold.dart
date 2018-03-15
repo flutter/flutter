@@ -607,7 +607,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     @required this.currentFloatingActionButtonPositioner,
     @required this.floatingActionButtonMoveAnimationProgress,
     @required this.floatingActionButtonMotionAnimator,
-  }) : assert(previousFloatingActionButtonPositioner != null), assert(currentFloatingActionButtonPositioner != null);
+  }) : assert(previousFloatingActionButtonPositioner != null), 
+       assert(currentFloatingActionButtonPositioner != null);
 
   final EdgeInsets minInsets;
   final TextDirection textDirection;
