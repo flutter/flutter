@@ -449,13 +449,11 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (previewDart2) {
                 args "--preview-dart-2"
             }
-            print "fileSystemRoots: $fileSystemRoots"
             if (fileSystemRoots != null) {
                 for (root in fileSystemRoots) {
                     args "--filesystem-root", root
                 }
             }
-            print "fileSystemScheme: $fileSystemScheme"
             if (fileSystemScheme != null) {
                 args "--filesystem-scheme", fileSystemScheme
             }
