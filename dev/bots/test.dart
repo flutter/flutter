@@ -29,7 +29,6 @@ const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
   'docs': _generateDocs,
   'analyze': _analyzeRepo,
   'tests': _runTests,
-  'tests_dart1': _runTestsDart1,
   'coverage': _runCoverage,
 };
 
@@ -128,15 +127,6 @@ Future<Null> _analyzeRepo() async {
   );
 
   print('${bold}DONE: Analysis successful.$reset');
-}
-
-Future<Null> _runTestsDart1() async {
-  if (Platform.isWindows) {
-    // AppVeyor platform is overloaded, won't be able to handle additional
-    // load of dart1 testing.
-    return;
-  }
-  _runTests(options: <String>['--no-preview-dart-2']);
 }
 
 Future<Null> _runTests({List<String> options: const <String>[]}) async {
