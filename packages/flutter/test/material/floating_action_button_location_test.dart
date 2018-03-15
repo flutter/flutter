@@ -158,7 +158,7 @@ class _GeometryListenerState extends State<_GeometryListener> {
 
   int numNotifications = 0;
   ValueListenable<ScaffoldGeometry> geometryListenable;
-  GeometryCachePainter cache;
+  _GeometryCachePainter cache;
 
   @override
   void didChangeDependencies() {
@@ -172,7 +172,7 @@ class _GeometryListenerState extends State<_GeometryListener> {
     
     geometryListenable = newListenable;
     geometryListenable.addListener(onGeometryChanged);
-    cache = new GeometryCachePainter(geometryListenable);
+    cache = new _GeometryCachePainter(geometryListenable);
   }
 
   void onGeometryChanged() {
@@ -184,8 +184,8 @@ class _GeometryListenerState extends State<_GeometryListener> {
 // The Scaffold.geometryOf() value is only available at paint time.
 // To fetch it for the tests we implement this CustomPainter that just
 // caches the ScaffoldGeometry value in its paint method.
-class GeometryCachePainter extends CustomPainter {
-  GeometryCachePainter(this.geometryListenable) : super(repaint: geometryListenable);
+class _GeometryCachePainter extends CustomPainter {
+  _GeometryCachePainter(this.geometryListenable) : super(repaint: geometryListenable);
 
   final ValueListenable<ScaffoldGeometry> geometryListenable;
 
@@ -196,7 +196,7 @@ class GeometryCachePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(GeometryCachePainter oldDelegate) {
+  bool shouldRepaint(_GeometryCachePainter oldDelegate) {
     return true;
   }
 }
