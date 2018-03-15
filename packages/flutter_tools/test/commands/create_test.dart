@@ -477,11 +477,16 @@ Future<Null> _runFlutterTest(Directory workingDir, {String target}) async {
   if (target != null)
     args.add(target);
 
+  print('$dartSdkPath/bin/dart');
+  print(args);
+  print(workingDir.path);
   final ProcessResult exec = Process.runSync(
     '$dartSdkPath/bin/dart',
     args,
     workingDirectory: workingDir.path,
   );
+  print(exec.stdout);
+  print(exec.stderr);
   if (exec.exitCode != 0) {
     print(exec.stdout);
     print(exec.stderr);
