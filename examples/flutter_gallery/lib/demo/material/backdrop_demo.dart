@@ -255,7 +255,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   void _changeCategory(Category category) {
     setState(() {
       _category = category;
-      _controller.forward();
+      _controller.fling(velocity: 2.0);
     });
   }
 
@@ -327,14 +327,13 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: allCategories.map((Category category) {
                   final bool selected = category == _category;
-                  return new Container(
-                    decoration: new BoxDecoration(
+                  return new Material(
+                    shape: const RoundedRectangleBorder(
                       borderRadius: const BorderRadius.all(const Radius.circular(4.0)),
-                      color: selected
-                        ? Colors.white.withOpacity(0.25)
-                        : Colors.transparent,
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    color: selected
+                      ? Colors.white.withOpacity(0.25)
+                      : Colors.transparent,
                     child: new ListTile(
                       title: new Text(category.title),
                       selected: selected,
