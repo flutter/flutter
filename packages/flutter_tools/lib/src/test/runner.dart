@@ -35,6 +35,7 @@ Future<int> runTests(
     bool previewDart2: false,
     bool trackWidgetCreation: false,
     TestWatcher watcher,
+    int jobs,
     }) async {
   if (trackWidgetCreation && !previewDart2) {
     throw new UsageException(
@@ -53,6 +54,8 @@ Future<int> runTests(
   }
 
   int concurrency = max(Platform.numberOfProcessors ~/ 2, 1);
+  if (jobs != null)
+    concurrency = min(jobs, Platform.numberOfProcessors);
 
   if (enableObservatory) {
     // (In particular, for collecting code coverage.)

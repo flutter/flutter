@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as dartio show Platform;
+import 'dart:math' show max, min;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -86,6 +88,14 @@ class TestCommand extends FlutterCommand {
       hide: !verboseHelp,
       help: 'Track widget creation locations.\n'
             'This enables testing of features such as the widget inspector.',
+    );
+    argParser.addOption(
+      'jobs',
+      abbr: 'j',
+      defaultsTo: '${max(dartio.Platform.numberOfProcessors ~/ 2, 1)}',
+      help: 'Hint the number of concurrent tests.\n'
+            'This can in some circumstances be overruled.\n'
+            'This is always limited to the number of cores.',
     );
   }
 
@@ -207,6 +217,10 @@ class TestCommand extends FlutterCommand {
           "The test command doesn't support --machine and coverage together");
     }
 
+    int jobs = min(int.parse(argResults['jobs'], onError: (_) => -1), dartio.Platform.numberOfProcessors);
+    if (jobs < 1)
+      jobs = max(dartio.Platform.numberOfProcessors ~/ 2, 1);
+
     TestWatcher watcher;
     if (collector != null) {
       watcher = collector;
@@ -228,6 +242,7 @@ class TestCommand extends FlutterCommand {
       machine: machine,
       previewDart2: argResults['preview-dart-2'],
       trackWidgetCreation: argResults['track-widget-creation'],
+      jobs: jobs
     );
 
     if (collector != null) {
