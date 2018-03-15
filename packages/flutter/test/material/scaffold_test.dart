@@ -775,7 +775,7 @@ void main() {
   });
 
   group('Floating action button positioner', () {
-    Widget build(FloatingActionButton fab, FloatingActionButtonLocation fabPositioner, [GeometryListener listener]) {
+    Widget build(FloatingActionButton fab, FloatingActionButtonLocation fabLocation, [GeometryListener listener]) {
       return new Directionality(
         textDirection: TextDirection.ltr,
         child: new MediaQuery(
@@ -783,8 +783,8 @@ void main() {
             viewInsets: const EdgeInsets.only(bottom: 200.0),
           ),
           child: new Scaffold(
-            appBar: new AppBar(title: const Text('FabPositioner Test')),
-            floatingActionButtonPositioner: fabPositioner,
+            appBar: new AppBar(title: const Text('FabLocation Test')),
+            floatingActionButtonLocation: fabLocation,
             floatingActionButton: fab,
             body: listener,
           ),
@@ -840,7 +840,7 @@ void main() {
     });
 
     testWidgets('moves to and from custom-defined positions', (WidgetTester tester) async {
-      await tester.pumpWidget(build(fab1, _kTopStartFabPositioner));
+      await tester.pumpWidget(build(fab1, _kTopStartFabLocation));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 56.0));
 
@@ -852,7 +852,7 @@ void main() {
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(400.0, 356.0));
       expect(tester.binding.transientCallbackCount, 0);
 
-      await tester.pumpWidget(build(fab1, _kTopStartFabPositioner));
+      await tester.pumpWidget(build(fab1, _kTopStartFabLocation));
       
       expect(tester.binding.transientCallbackCount, greaterThan(0));
 
@@ -899,7 +899,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Moving the fab to the top start after finishing the previous motion
-      await tester.pumpWidget(build(fab1, _kTopStartFabPositioner, geometryListener));
+      await tester.pumpWidget(build(fab1, _kTopStartFabLocation, geometryListener));
 
       // Interrupting motion to move to the end float
       await tester.pumpWidget(build(fab1, FloatingActionButtonLocation.endFloat, geometryListener));
@@ -1224,10 +1224,10 @@ class GeometryCachePainter extends CustomPainter {
   }
 }
 
-const _TopStartFabPositioner _kTopStartFabPositioner = const _TopStartFabPositioner();
+const _TopStartFabLocation _kTopStartFabLocation = const _TopStartFabLocation();
 
-class _TopStartFabPositioner extends FloatingActionButtonLocation {
-  const _TopStartFabPositioner();
+class _TopStartFabLocation extends FloatingActionButtonLocation {
+  const _TopStartFabLocation();
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
