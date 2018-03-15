@@ -461,6 +461,10 @@ class _TransitionSnapshotFabPositioner extends FloatingActionButtonPositioner {
 /// The ScaffoldGeometry is only available during the paint phase, because
 /// its value is computed during the animation and layout phases prior to painting.
 /// 
+/// For an example of using the [ScaffoldGeometry], see the [BottomAppBar],
+/// which uses the [ScaffoldGeometry] to paint a notch around the
+/// [FloatingActionButton].
+/// 
 /// For information about the [Scaffold]'s geometry that is used while laying 
 /// out the [FloatingActionButton], see [ScaffoldPrelayoutGeometry].
 @immutable
