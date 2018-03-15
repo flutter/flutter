@@ -273,7 +273,7 @@ class _AnimationSwap<T> extends CompoundAnimation<T> {
 /// 
 /// The [Scaffold] passes this prelayout geometry to its
 /// [FloatingActionButtonPositioner], which produces an [Offset] that the 
-/// [Scaffold] uses to finish laying out the [FloatingActionButton].
+/// [Scaffold] uses to position the [FloatingActionButton].
 /// 
 /// For a description of the [Scaffold]'s geometry after it has
 /// finished laying out, see the [ScaffoldGeometry].
