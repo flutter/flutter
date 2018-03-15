@@ -12,7 +12,7 @@ class GalleryTheme {
 }
 
 const MaterialColor _kPurpleSwatch = const MaterialColor(
-  500,
+  0xFF6200EE,
   const <int, Color> {
     50: const Color(0xFFF2E7FE),
     100: const Color(0xFFD7B7FD),
