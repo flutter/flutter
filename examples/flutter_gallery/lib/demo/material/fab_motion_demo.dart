@@ -40,7 +40,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
         );
       }) 
       : null;
-    final Widget scaffold = new Scaffold(
+    return new Scaffold(
       appBar: new AppBar(
         title: const Text('FAB Positioner'), 
         bottom: const PreferredSize(
@@ -69,7 +69,6 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
         ),
       ),
     );
-    return scaffold;
   }
 
   void _moveFab() {
