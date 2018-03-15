@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 const String _explanatoryText =
-  "When the Scaffold's floating action button positioner changes, "
+  "When the Scaffold's floating action button location changes, "
   'the floating action button animates to its new position';
 
 class FabMotionDemo extends StatefulWidget {
@@ -44,7 +44,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
       appBar: new AppBar(
         title: const Text('FAB Location'), 
         // Add 48dp of space onto the bottom of the appbar.
-        // This gives space for the top-start positioner to attach to without
+        // This gives space for the top-start location to attach to without
         // blocking the 'back' button.
         bottom: const PreferredSize(
           preferredSize: const Size.fromHeight(48.0), 
