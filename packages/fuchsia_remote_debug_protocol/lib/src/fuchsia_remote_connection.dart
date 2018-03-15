@@ -17,7 +17,7 @@ final String _ipv4Loopback = InternetAddress.LOOPBACK_IP_V4.address;
 
 final String _ipv6Loopback = InternetAddress.LOOPBACK_IP_V6.address;
 
-final ProcessManager _processManager = const LocalProcessManager();
+const ProcessManager _processManager = const LocalProcessManager();
 
 final Logger _log = new Logger('FuchsiaRemoteConnection');
 
