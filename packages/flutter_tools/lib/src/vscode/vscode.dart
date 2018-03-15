@@ -155,7 +155,7 @@ class VsCode {
 
   static List<VsCode> _findInstalled(
       List<_VsCodeInstallLocation> allLocations) {
-    final Iterable<_VsCodeInstallLocation> searchLocations = 
+    final Iterable<_VsCodeInstallLocation> searchLocations =
       _includeInsiders
         ? allLocations
         : allLocations.where((_VsCodeInstallLocation p) => p.isInsiders != true);
@@ -175,7 +175,7 @@ class VsCode {
 
   @override
   String toString() =>
-      'VS Code ($version)${(_extensionVersion != Version.unknown ? ', Dart Code ($_extensionVersion)' : '')}';
+      'VS Code ($version)${_extensionVersion != Version.unknown ? ', Dart Code ($_extensionVersion)' : ''}';
 
   static String _getVersionFromPackageJson(String packageJsonPath) {
     if (!fs.isFileSync(packageJsonPath))

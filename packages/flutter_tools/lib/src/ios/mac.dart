@@ -231,7 +231,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       appIosDirectory: appDirectory,
       iosEngineDir: flutterFrameworkDir(buildInfo.mode),
       isSwift: app.isSwift,
-      flutterPodChanged: (previousGeneratedXcconfig != currentGeneratedXcconfig),
+      flutterPodChanged: previousGeneratedXcconfig != currentGeneratedXcconfig,
     );
   }
 
