@@ -17,7 +17,7 @@ typedef void CompilerMessageConsumer(String message);
 class _StdoutHandler {
   final CompilerMessageConsumer consumer;
 
-  _StdoutHandler({this.consumer : printError}) {
+  _StdoutHandler({this.consumer: printError}) {
     reset();
   }
 
@@ -128,7 +128,7 @@ Future<String> compile(
 /// restarts the Flutter app.
 class ResidentCompiler {
   ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation: false,
-      String packagesPath, CompilerMessageConsumer compilerMessageConsumer})
+      String packagesPath, CompilerMessageConsumer compilerMessageConsumer: printError})
     : assert(_sdkRoot != null),
       _trackWidgetCreation = trackWidgetCreation,
       _packagesPath = packagesPath,
