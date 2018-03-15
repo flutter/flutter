@@ -17,7 +17,6 @@ class FabMotionDemo extends StatefulWidget {
   }
 }
 
-
 class _FabMotionDemoState extends State<FabMotionDemo> {
   static const List<FloatingActionButtonPositioner> _floatingActionButtonPositioners = const <FloatingActionButtonPositioner>[
     FloatingActionButtonPositioner.endFloat, 
