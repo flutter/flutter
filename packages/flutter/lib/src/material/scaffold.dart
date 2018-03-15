@@ -26,7 +26,7 @@ const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 200);
 // The fraction of a circle the Floating Action Button should turn when it enters.
 const double _kFloatingActionButtonTurnInterval = 0.125;
 
-const FloatingActionButtonPositioner _kDefaultFloatingActionButtonPositioner = FloatingActionButtonPositioner.endFloat;
+const FloatingActionButtonLocation _kDefaultFloatingActionButtonPositioner = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
 /// Returns a path for a notch in the outline of a shape.
@@ -63,7 +63,7 @@ enum _ScaffoldSlot {
 /// An object that defines a position for the [FloatingActionButton]
 /// based on the [Scaffold]'s [ScaffoldPrelayoutGeometry].
 /// 
-/// Flutter provides [FloatingActionButtonPositioner]s for the common
+/// Flutter provides [FloatingActionButtonLocation]s for the common
 /// [FloatingActionButton] placements in Material Design applications. These
 /// positioners are available as static members of this class.
 /// 
@@ -76,18 +76,18 @@ enum _ScaffoldSlot {
 ///    another.
 ///  * [ScaffoldPrelayoutGeometry], the geometry that 
 ///    [FloatingActionButtonPositioner]s use to position the [FloatingActionButton].
-abstract class FloatingActionButtonPositioner {
+abstract class FloatingActionButtonLocation {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const FloatingActionButtonPositioner();
+  const FloatingActionButtonLocation();
 
   /// End-aligned [FloatingActionButton], floating at the bottom of the screen.
   /// 
   /// This is the default alignment of [FloatingActionButton]s in Material applications.
-  static const FloatingActionButtonPositioner endFloat = const _EndFloatFabPositioner();
+  static const FloatingActionButtonLocation endFloat = const _EndFloatFabPositioner();
 
   /// Centered [FloatingActionButton], floating at the bottom of the screen.
-  static const FloatingActionButtonPositioner centerFloat = const _CenterFloatFabPositioner();
+  static const FloatingActionButtonLocation centerFloat = const _CenterFloatFabLocation();
 
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
   /// 
@@ -102,7 +102,7 @@ abstract class FloatingActionButtonPositioner {
   String toString() => '$runtimeType';
 }
 
-/// Provider of animations to move the [FloatingActionButton] between [FloatingActionButtonPositioner]s.
+/// Provider of animations to move the [FloatingActionButton] between [FloatingActionButtonLocation]s.
 /// 
 /// The [Scaffold] uses [Scaffold.floatingActionButtonAnimator] to define:
 ///
@@ -116,7 +116,7 @@ abstract class FloatingActionButtonPositioner {
 /// 
 ///  * [FloatingActionButton], which is a circular button typically shown in the
 ///    bottom right corner of the app.
-///  * [FloatingActionButtonPositioner], which the [Scaffold] uses to place the 
+///  * [FloatingActionButtonLocation], which the [Scaffold] uses to place the 
 ///    [Scaffold.floatingActionButton] within the [Scaffold]'s layout. 
 abstract class FloatingActionButtonAnimator {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -136,10 +136,10 @@ abstract class FloatingActionButtonAnimator {
   /// [Scaffold] based on [progress].
   /// 
   /// [begin] is the [Offset] provided by the previous 
-  /// [FloatingActionButtonPositioner].
+  /// [FloatingActionButtonLocation].
   /// 
   /// [end] is the [Offset] provided by the new 
-  /// [FloatingActionButtonPositioner].
+  /// [FloatingActionButtonLocation].
   /// 
   /// [progress] is the current progress of the transition animation.
   /// When [progress] is 0.0, the returned [Offset] should be equal to [begin].
@@ -190,8 +190,8 @@ abstract class FloatingActionButtonAnimator {
   /// The restart of the animation will affect all three parts of the motion animation:
   /// offset animation, scale animation, and rotation animation.
   /// 
-  /// An interruption triggers if the [Scaffold] is given a new [FloatingActionButtonPositioner]
-  /// while it is still animating a transition between two previous [FloatingActionButtonPositioner]s.
+  /// An interruption triggers if the [Scaffold] is given a new [FloatingActionButtonLocation]
+  /// while it is still animating a transition between two previous [FloatingActionButtonLocation]s.
   /// 
   /// A sensible default is usually 0.0, which is the same as restarting
   /// the animation from the beginning, regardless of the original state of the animation.
@@ -272,7 +272,7 @@ class _AnimationSwap<T> extends CompoundAnimation<T> {
 /// except the [FloatingActionButton].
 /// 
 /// The [Scaffold] passes this prelayout geometry to its
-/// [FloatingActionButtonPositioner], which produces an [Offset] that the 
+/// [FloatingActionButtonLocation], which produces an [Offset] that the 
 /// [Scaffold] uses to position the [FloatingActionButton].
 /// 
 /// For a description of the [Scaffold]'s geometry after it has
@@ -306,25 +306,25 @@ class ScaffoldPrelayoutGeometry {
   /// The vertical distance from the Scaffold's origin to the bottom of
   /// [Scaffold.body].
   /// 
-  /// This is useful in a [FloatingActionButtonPositioner] designed to
+  /// This is useful in a [FloatingActionButtonLocation] designed to
   /// place the [FloatingActionButton] at the bottom of the screen, while
   /// keeping it above the [BottomSheet], the [Scaffold.bottomNavigationBar],
   /// or the keyboard.
   /// 
   /// Note that [Scaffold.body] is laid out with respect to [minInsets] already.
-  /// This means that a [FloatingActionButtonPositioner] does not need to factor
+  /// This means that a [FloatingActionButtonLocation] does not need to factor
   /// in [minInsets.bottom] when aligning a [FloatingActionButton] to [contentBottom].
   final double contentBottom;
 
   /// The vertical distance from the [Scaffold]'s origin to the top of
   /// [Scaffold.body].
   /// 
-  /// This is useful in a [FloatingActionButtonPositioner] designed to
+  /// This is useful in a [FloatingActionButtonLocation] designed to
   /// place the [FloatingActionButton] at the top of the screen, while
   /// keeping it below the [Scaffold.appBar].
   /// 
   /// Note that [Scaffold.body] is laid out with respect to [minInsets] already.
-  /// This means that a [FloatingActionButtonPositioner] does not need to factor
+  /// This means that a [FloatingActionButtonLocation] does not need to factor
   /// in [minInsets.top] when aligning a [FloatingActionButton] to [contentTop].
   final double contentTop;
 
@@ -346,7 +346,7 @@ class ScaffoldPrelayoutGeometry {
   /// [Scaffold.resizeToAvoidBottomPadding] or the keyboard opening, then the
   /// [scaffoldSize] will not reflect those changes.
   /// 
-  /// This means that [FloatingActionButtonPositioner]s designed to reposition
+  /// This means that [FloatingActionButtonLocation]s designed to reposition
   /// the [FloatingActionButton] based on events such as the keyboard popping
   /// up should use [minInsets] to make sure that the [FloatingActionButton] is
   /// inset by enough to remain visible.
@@ -364,8 +364,8 @@ class ScaffoldPrelayoutGeometry {
   final TextDirection textDirection;
 }
 
-class _CenterFloatFabPositioner extends FloatingActionButtonPositioner {
-  const _CenterFloatFabPositioner();
+class _CenterFloatFabLocation extends FloatingActionButtonLocation {
+  const _CenterFloatFabLocation();
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
@@ -387,7 +387,7 @@ class _CenterFloatFabPositioner extends FloatingActionButtonPositioner {
   }
 }
 
-class _EndFloatFabPositioner extends FloatingActionButtonPositioner {
+class _EndFloatFabPositioner extends FloatingActionButtonLocation {
   const _EndFloatFabPositioner();
 
   @override
@@ -424,17 +424,17 @@ class _EndFloatFabPositioner extends FloatingActionButtonPositioner {
   }
 }
 
-/// A snapshot of a transition between two [FloatingActionButtonPositioner]s.
+/// A snapshot of a transition between two [FloatingActionButtonLocation]s.
 ///
 /// [ScaffoldState] uses this to seamlessly change transition animations
-/// when a running [FloatingActionButtonPositioner] transition is interrupted by a new transition.
+/// when a running [FloatingActionButtonLocation] transition is interrupted by a new transition.
 @immutable
-class _TransitionSnapshotFabPositioner extends FloatingActionButtonPositioner {
+class _TransitionSnapshotFabPositioner extends FloatingActionButtonLocation {
   
   const _TransitionSnapshotFabPositioner(this.begin, this.end, this.animator, this.progress);
 
-  final FloatingActionButtonPositioner begin;
-  final FloatingActionButtonPositioner end;
+  final FloatingActionButtonLocation begin;
+  final FloatingActionButtonLocation end;
   final FloatingActionButtonAnimator animator;
   final double progress;
 
@@ -614,8 +614,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final TextDirection textDirection;
   final _ScaffoldGeometryNotifier geometryNotifier;
 
-  final FloatingActionButtonPositioner previousFloatingActionButtonPositioner;
-  final FloatingActionButtonPositioner currentFloatingActionButtonPositioner;
+  final FloatingActionButtonLocation previousFloatingActionButtonPositioner;
+  final FloatingActionButtonLocation currentFloatingActionButtonPositioner;
   final double floatingActionButtonMoveAnimationProgress;
   final FloatingActionButtonAnimator floatingActionButtonMotionAnimator;
 
@@ -764,7 +764,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 /// * Entrance/Exit animations, which this widget triggers
 ///   when the [FloatingActionButton] is added, updated, or removed.
 /// * Motion animations, which are triggered by the [Scaffold]
-///   when its [FloatingActionButtonPositioner] is updated.
+///   when its [FloatingActionButtonLocation] is updated.
 class _FloatingActionButtonTransition extends StatefulWidget {
   const _FloatingActionButtonTransition({
     Key key,
@@ -960,7 +960,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///    of an app using the [bottomNavigationBar] property.
 ///  * [FloatingActionButton], which is a circular button typically shown in the
 ///    bottom right corner of the app using the [floatingActionButton] property.
-///  * [FloatingActionButtonPositioner], which is used to place the 
+///  * [FloatingActionButtonLocation], which is used to place the 
 ///    [floatingActionButton] within the [Scaffold]'s layout.
 ///  * [FloatingActionButtonAnimator], which is used to animate the
 ///    [floatingActionButton] from one [floatingActionButtonPositioner] to 
@@ -1025,8 +1025,8 @@ class Scaffold extends StatefulWidget {
 
   /// Responsible for determining where the [floatingActionButton] should go.
   /// 
-  /// If null, the [ScaffoldState] will use the default positioner, [FloatingActionButtonPositioner.endFloat].
-  final FloatingActionButtonPositioner floatingActionButtonPositioner;
+  /// If null, the [ScaffoldState] will use the default positioner, [FloatingActionButtonLocation.endFloat].
+  final FloatingActionButtonLocation floatingActionButtonPositioner;
 
   /// Animator to move the [floatingActionButton] to a new [floatingActionButtonPositioner].
   /// 
@@ -1524,12 +1524,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // Floating Action Button API
   AnimationController _floatingActionButtonMoveController;
   FloatingActionButtonAnimator _floatingActionButtonAnimator;
-  FloatingActionButtonPositioner _previousFloatingActionButtonPositioner;
-  FloatingActionButtonPositioner _floatingActionButtonPositioner;
+  FloatingActionButtonLocation _previousFloatingActionButtonPositioner;
+  FloatingActionButtonLocation _floatingActionButtonPositioner;
 
   // Moves the Floating Action Button to the new Floating Action Button Positioner.
-  void _moveFloatingActionButton(final FloatingActionButtonPositioner newPositioner) {
-    FloatingActionButtonPositioner previousPositioner = _floatingActionButtonPositioner;
+  void _moveFloatingActionButton(final FloatingActionButtonLocation newPositioner) {
+    FloatingActionButtonLocation previousPositioner = _floatingActionButtonPositioner;
     double restartAnimationFrom = 0.0;
     // If the Floating Action Button is moving right now, we need to start from a snapshot of the current transition.
     if (_floatingActionButtonMoveController.isAnimating) {

@@ -775,7 +775,7 @@ void main() {
   });
 
   group('Floating action button positioner', () {
-    Widget build(FloatingActionButton fab, FloatingActionButtonPositioner fabPositioner, [GeometryListener listener]) {
+    Widget build(FloatingActionButton fab, FloatingActionButtonLocation fabPositioner, [GeometryListener listener]) {
       return new Directionality(
         textDirection: TextDirection.ltr,
         child: new MediaQuery(
@@ -803,24 +803,24 @@ void main() {
       expect(find.byType(FloatingActionButton), findsNothing);
       expect(tester.binding.transientCallbackCount, 0);
 
-      await tester.pumpWidget(build(null, FloatingActionButtonPositioner.endFloat));
+      await tester.pumpWidget(build(null, FloatingActionButtonLocation.endFloat));
 
       expect(find.byType(FloatingActionButton), findsNothing);
       expect(tester.binding.transientCallbackCount, greaterThan(0));
 
-      await tester.pumpWidget(build(null, FloatingActionButtonPositioner.centerFloat));
+      await tester.pumpWidget(build(null, FloatingActionButtonLocation.centerFloat));
 
       expect(find.byType(FloatingActionButton), findsNothing);
       expect(tester.binding.transientCallbackCount, greaterThan(0));
     });
 
     testWidgets('moves fab from center to end and back', (WidgetTester tester) async {
-      await tester.pumpWidget(build(fab1, FloatingActionButtonPositioner.endFloat));
+      await tester.pumpWidget(build(fab1, FloatingActionButtonLocation.endFloat));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
       expect(tester.binding.transientCallbackCount, 0);
 
-      await tester.pumpWidget(build(fab1, FloatingActionButtonPositioner.centerFloat));
+      await tester.pumpWidget(build(fab1, FloatingActionButtonLocation.centerFloat));
 
       expect(tester.binding.transientCallbackCount, greaterThan(0));
 
@@ -829,7 +829,7 @@ void main() {
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(400.0, 356.0));
       expect(tester.binding.transientCallbackCount, 0);
 
-      await tester.pumpWidget(build(fab1, FloatingActionButtonPositioner.endFloat));
+      await tester.pumpWidget(build(fab1, FloatingActionButtonLocation.endFloat));
       
       expect(tester.binding.transientCallbackCount, greaterThan(0));
 
@@ -844,7 +844,7 @@ void main() {
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 56.0));
 
-      await tester.pumpWidget(build(fab1, FloatingActionButtonPositioner.centerFloat));
+      await tester.pumpWidget(build(fab1, FloatingActionButtonLocation.centerFloat));
       expect(tester.binding.transientCallbackCount, greaterThan(0));
 
       await tester.pumpAndSettle();
@@ -889,20 +889,20 @@ void main() {
 
       // We'll listen to the Scaffold's geometry for any 'jumps' to a size of 1 to detect changes in the size and rotation of the fab.
       // Creating a scaffold with the fab at endFloat
-      await tester.pumpWidget(build(fab1, FloatingActionButtonPositioner.endFloat, geometryListener));
+      await tester.pumpWidget(build(fab1, FloatingActionButtonLocation.endFloat, geometryListener));
       
       listenerState = tester.state(find.byType(GeometryListener));
       listenerState.geometryListenable.addListener(check);
       
       // Moving the fab to centerFloat'
-      await tester.pumpWidget(build(fab1, FloatingActionButtonPositioner.centerFloat, geometryListener));
+      await tester.pumpWidget(build(fab1, FloatingActionButtonLocation.centerFloat, geometryListener));
       await tester.pumpAndSettle();
 
       // Moving the fab to the top start after finishing the previous motion
       await tester.pumpWidget(build(fab1, _kTopStartFabPositioner, geometryListener));
 
       // Interrupting motion to move to the end float
-      await tester.pumpWidget(build(fab1, FloatingActionButtonPositioner.endFloat, geometryListener));
+      await tester.pumpWidget(build(fab1, FloatingActionButtonLocation.endFloat, geometryListener));
       await tester.pumpAndSettle();
     });
 
@@ -1226,7 +1226,7 @@ class GeometryCachePainter extends CustomPainter {
 
 const _TopStartFabPositioner _kTopStartFabPositioner = const _TopStartFabPositioner();
 
-class _TopStartFabPositioner extends FloatingActionButtonPositioner {
+class _TopStartFabPositioner extends FloatingActionButtonLocation {
   const _TopStartFabPositioner();
 
   @override

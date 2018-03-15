@@ -18,14 +18,14 @@ class FabMotionDemo extends StatefulWidget {
 }
 
 class _FabMotionDemoState extends State<FabMotionDemo> {
-  static const List<FloatingActionButtonPositioner> _floatingActionButtonPositioners = const <FloatingActionButtonPositioner>[
-    FloatingActionButtonPositioner.endFloat, 
-    FloatingActionButtonPositioner.centerFloat,
-    const _TopStartFloatingActionButtonPositioner(),
+  static const List<FloatingActionButtonLocation> _floatingActionButtonLocations = const <FloatingActionButtonLocation>[
+    FloatingActionButtonLocation.endFloat, 
+    FloatingActionButtonLocation.centerFloat,
+    const _TopStartFloatingActionButtonLocation(),
   ];
 
   bool _showFab = true;
-  FloatingActionButtonPositioner _floatingActionButtonPositioner = FloatingActionButtonPositioner.endFloat;
+  FloatingActionButtonLocation _floatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
       : null;
     return new Scaffold(
       appBar: new AppBar(
-        title: const Text('FAB Positioner'), 
+        title: const Text('FAB Location'), 
         // Add 48dp of space onto the bottom of the appbar.
         // This gives space for the top-start positioner to attach to without
         // blocking the 'back' button.
@@ -51,7 +51,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
           child: const SizedBox(),
         ),
       ),
-      floatingActionButtonPositioner: _floatingActionButtonPositioner,
+      floatingActionButtonLocation: _floatingActionButtonLocation,
       floatingActionButton: floatingActionButton,
       body: new Center(
         child: new Column(
@@ -76,7 +76,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
 
   void _moveFab() {
     setState(() {
-      _floatingActionButtonPositioner = _floatingActionButtonPositioners[(_floatingActionButtonPositioners.indexOf(_floatingActionButtonPositioner) + 1) % _floatingActionButtonPositioners.length];
+      _floatingActionButtonLocation = _floatingActionButtonLocations[(_floatingActionButtonLocations.indexOf(_floatingActionButtonLocation) + 1) % _floatingActionButtonLocations.length];
     });
   }
 
@@ -93,8 +93,8 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
 
 // Places the Floating Action Button at the top of the content area of the
 // app, on the border between the body and the app bar.
-class _TopStartFloatingActionButtonPositioner extends FloatingActionButtonPositioner {
-  const _TopStartFloatingActionButtonPositioner();
+class _TopStartFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _TopStartFloatingActionButtonLocation();
 
   // An additional inset we apply to the side of the Floating Action Button.
   static const double _horizontalInset = 16.0;
