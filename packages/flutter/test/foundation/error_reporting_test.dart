@@ -45,7 +45,7 @@ Future<Null> main() async {
 
   final StackTrace sampleStack = await getSampleStack();
 
-  final String dividerRegExp = pathSeparatorForRegExp;
+  final String dividerRegExp = '/';
 
   test('Error reporting - pretest', () async {
     expect(debugPrint, equals(debugPrintThrottled));
