@@ -147,9 +147,13 @@ class _Compiler {
             <String>[request.path],
             outputPath: outputDill.path,
           );
-          // Copy output dill next to the source file.
+
+          // Check if the compiler produced the output. It could have crashed
+          // in which case outputPath would be null. In this case pass
+          // null upwards to the consumer and shutdown the compiler.
           if (outputPath == null) {
             request.result.complete(null);
+            compiler.shutdown();
             compiler = null;
           } else {
             final File kernelReadyToRun = await fs.file(outputPath).copy(
