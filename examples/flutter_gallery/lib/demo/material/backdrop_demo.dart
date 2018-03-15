@@ -320,7 +320,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     );
 
     final ThemeData theme = Theme.of(context);
-    final List<Widget> backdropItems = allCategories.map((Category category) {
+    final List<Widget> backdropItems = allCategories.map<Widget>((Category category) {
       final bool selected = category == _category;
       return new Material(
         shape: const RoundedRectangleBorder(
