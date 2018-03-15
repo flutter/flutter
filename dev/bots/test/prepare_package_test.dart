@@ -113,8 +113,7 @@ void main() {
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter':
               null,
           'git reset --hard $testRef': null,
-          'git remote remove origin': null,
-          'git remote add origin https://github.com/flutter/flutter.git': null,
+          'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --abbrev=0': <ProcessResult>[new ProcessResult(0, 0, 'v1.2.3', '')],
         };
         if (platform.isWindows) {
@@ -158,8 +157,7 @@ void main() {
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter':
               null,
           'git reset --hard $testRef': null,
-          'git remote remove origin': null,
-          'git remote add origin https://github.com/flutter/flutter.git': null,
+          'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --abbrev=0': <ProcessResult>[new ProcessResult(0, 0, 'v1.2.3', '')],
         };
         if (platform.isWindows) {

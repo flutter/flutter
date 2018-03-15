@@ -298,8 +298,7 @@ class ArchiveCreator {
     await _runGit(<String>['reset', '--hard', revision]);
 
     // Make the origin point to github instead of the chromium mirror.
-    await _runGit(<String>['remote', 'remove', 'origin']);
-    await _runGit(<String>['remote', 'add', 'origin', githubRepo]);
+    await _runGit(<String>['remote', 'set-url', 'origin', githubRepo]);
   }
 
   /// Retrieve the MinGit executable from storage and unpack it.
@@ -362,18 +361,25 @@ class ArchiveCreator {
 
   /// Unpacks the given zip file into the currentDirectory (if set), or the
   /// same directory as the archive.
-  ///
-  /// May only be run on Windows (since 7Zip is not available on other platforms).
   Future<String> _unzipArchive(File archive, {Directory workingDirectory}) {
-    assert(platform.isWindows); // 7Zip is only available on Windows.
     workingDirectory ??= new Directory(path.dirname(archive.absolute.path));
-    final List<String> commandLine = <String>['7za', 'x', archive.absolute.path];
+    List<String> commandLine;
+    if (platform.isWindows) {
+      commandLine = <String>[
+        '7za',
+        'x',
+        archive.absolute.path,
+      ];
+    } else {
+      commandLine = <String>[
+        'unzip',
+        archive.absolute.path,
+      ];
+    }
     return _processRunner.runProcess(commandLine, workingDirectory: workingDirectory);
   }
 
   /// Create a zip archive from the directory source.
-  ///
-  /// May only be run on Windows (since 7Zip is not available on other platforms).
   Future<String> _createZipArchive(File output, Directory source) {
     List<String> commandLine;
     if (platform.isWindows) {
