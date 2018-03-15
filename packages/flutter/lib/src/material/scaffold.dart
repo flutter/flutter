@@ -344,7 +344,7 @@ class ScaffoldPrelayoutGeometry {
   /// 
   /// If the [Size] of the [Scaffold]'s contents is modified by values such as 
   /// [Scaffold.resizeToAvoidBottomPadding] or the keyboard opening, then the
-  /// [scaffoldSize] here will not reflect those changes.
+  /// [scaffoldSize] will not reflect those changes.
   /// 
   /// This means that [FloatingActionButtonPositioner]s designed to reposition
   /// the [FloatingActionButton] based on events such as the keyboard popping
