@@ -194,7 +194,7 @@ Future<int> runInteractively(List<String> command, {
   process.stdin.addStream(stdin);
   // Wait for stdout and stderr to be fully processed, because process.exitCode
   // may complete first.
-  Future.wait<dynamic>(<Future<dynamic>>[
+  await Future.wait<dynamic>(<Future<dynamic>>[
     stdout.addStream(process.stdout),
     stderr.addStream(process.stderr),
   ]);
