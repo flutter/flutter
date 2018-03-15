@@ -107,7 +107,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         printTrace('Reading pubspec.yaml from: ${directory.path}');
         final PubspecYaml pubspec = new PubspecYaml(directory); // this parses the pubspec.yaml
         pubspecs.add(pubspec); // remember it for later
-        for (PubspecDependency dependency in pubspec.dependencies) { // this is all the explicit dependencies
+        for (PubspecDependency dependency in pubspec.allDependencies) { // this is all the explicit dependencies
           if (dependencies.containsKey(dependency.name)) {
             // If we've seen the dependency before, make sure that we are
             // importing it the same way. There's several ways to import a
@@ -398,6 +398,8 @@ class PubspecYaml {
           // We're in a section we care about. Try to parse out the dependency:
           final PubspecDependency dependency = PubspecDependency.parse(line, filename: filename);
           if (dependency != null) { // We got one!
+            // track whether or not this a dev dependency.
+            dependency.isDevDependency = seenDev;
             result.add(dependency);
             if (dependency.kind == DependencyKind.unknown) {
               // If we didn't get a version number, then we need to be ready to
@@ -462,14 +464,22 @@ class PubspecYaml {
     return new PubspecYaml._(file, packageName, packageVersion, result);
   }
 
-  /// This returns all the explicit dependencies that this pubspec.yaml lists.
+  /// This returns all the explicit dependencies that this pubspec.yaml lists under dependencies.
   Iterable<PubspecDependency> get dependencies sync* {
     // It works by iterating over the parsed data from _parse above, collecting
     // all the dependencies that were found, ignoring any that are flagged as as
     // overridden by subsequent entries in the same file and any that have the
     // magic comment flagging them as auto-generated transitive dependencies
     // that we added in a previous run.
-    for (PubspecLine data in inputData) {
+    for (PubspecLine data in inputData) { 
+      if (data is PubspecDependency && data.kind != DependencyKind.overridden && !data.isTransitive && !data.isDevDependency)
+        yield data;
+    }
+  }
+
+  /// This returns all regular dependencies and all dev dependencies.
+  Iterable<PubspecDependency> get allDependencies sync* {
+    for (PubspecLine data in inputData) { 
       if (data is PubspecDependency && data.kind != DependencyKind.overridden && !data.isTransitive)
         yield data;
     }
@@ -502,7 +512,10 @@ class PubspecYaml {
         // If we're leaving one of the sections in which we can list transitive
         // dependencies, then remember this as the current last known valid
         // place to insert our transitive dependencies.
-        if (section == Section.dependencies || section == Section.devDependencies)
+        if (section == Section.dependencies)
+          endOfDirectDependencies = output.length;
+          lastPossiblePlace = output.length;
+        if (section == Section.devDependencies)
           lastPossiblePlace = output.length;
         section = data.section; // track which section we're now in.
         output.add(data.line); // insert the header into the output
@@ -582,7 +595,7 @@ class PubspecYaml {
     final Set<String> implied = new Set<String>.from(directDependencies)
       ..addAll(specialDependencies)
       ..addAll(devDependencies);
-    
+
     // Create a new set to hold the list of packages we've already processed, so
     // that we don't redundantly process them multiple times.
     final Set<String> done = new Set<String>();
@@ -594,7 +607,7 @@ class PubspecYaml {
     // Sort that list lexically so that we don't get noisy diffs when upgrading.
     final List<String> transitiveDependenciesAsList = transitiveDependencies.toList()..sort();
     final List<String> transitiveDevDependenciesAsList = transitiveDevDependencies.toList()..sort();
-    
+
     // Add a blank line to keep the output clean. It doesn't matter if this adds
     // redundant blank lines because we'll clean them out later.
     transitiveDependencyOutput.add('');
@@ -611,24 +624,19 @@ class PubspecYaml {
     transitiveDevDependencyOutput.add('');
     // Insert the block of transitive dependency declarations into the output in
     // the place we previously established was optimal.
-    //output.insertAll(lastPossiblePlace, transitiveDevDependencyOutput);
-    //output.insertAll(endOfDirectDependencies, transitiveDependencyOutput);
-    final List<String> result = output
-      .take(endOfDirectDependencies)
-      .followedBy(transitiveDependencyOutput)
-      .followedBy(output.skip(endOfDirectDependencies))
-      .followedBy(transitiveDevDependencyOutput)
-      .toList();
+    output
+      ..insertAll(lastPossiblePlace, transitiveDevDependencyOutput)
+      ..insertAll(endOfDirectDependencies, transitiveDependencyOutput);
 
     // Remove trailing lines.
-    while (result.last.isEmpty)
-      result.removeLast();
+    while (output.last.isEmpty)
+      output.removeLast();
 
     // Output the result to the pubspec.yaml file, skipping leading and
     // duplicate blank lines and removing trailing spaces.
     final StringBuffer contents = new StringBuffer();
     bool hadBlankLine = true;
-    for (String line in result) {
+    for (String line in output) {
       line = line.trimRight();
       if (line == '') {
         if (!hadBlankLine)
@@ -731,6 +739,9 @@ class PubspecDependency extends PubspecLine {
     DependencyKind kind,
     this.sourcePath,
   }) : _kind = kind, super(line);
+
+  /// Whether this dependency is under the `dev dependencies` section.
+  bool isDevDependency;
 
   static PubspecDependency parse(String line, { @required String filename }) {
     // We recognize any line that:
