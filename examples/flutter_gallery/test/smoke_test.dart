@@ -128,7 +128,6 @@ Future<Null> runSmokeTest(WidgetTester tester) async {
     final Finder finder = findGalleryItemByRouteName(tester, routeName);
     Scrollable.ensureVisible(tester.element(finder), alignment: 0.5);
     await tester.pumpAndSettle();
-    // The backdrop demo has no back button so it can't be smoked.
     if (routeName == '/material/backdrop')
       continue;
     await smokeDemo(tester, routeName);

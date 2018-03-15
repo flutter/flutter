@@ -320,6 +320,32 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     );
 
     final ThemeData theme = Theme.of(context);
+    final List<Widget> backdropItems = allCategories.map((Category category) {
+      final bool selected = category == _category;
+      return new Material(
+        shape: const RoundedRectangleBorder(
+          borderRadius: const BorderRadius.all(const Radius.circular(4.0)),
+        ),
+        color: selected
+          ? Colors.white.withOpacity(0.25)
+          : Colors.transparent,
+        child: new ListTile(
+          title: new Text(category.title),
+          selected: selected,
+          onTap: () {
+            _changeCategory(category);
+          },
+        ),
+      );
+    }).toList()
+    ..add(const SizedBox(height: 8.0))
+    ..add(
+      new Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: new BackButton(color: Colors.white.withOpacity(0.5))
+      ),
+    );
+
     return new Container(
       key: _backdropKey,
       color: theme.primaryColor,
@@ -333,24 +359,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: new Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: allCategories.map((Category category) {
-                  final bool selected = category == _category;
-                  return new Material(
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: const BorderRadius.all(const Radius.circular(4.0)),
-                    ),
-                    color: selected
-                      ? Colors.white.withOpacity(0.25)
-                      : Colors.transparent,
-                    child: new ListTile(
-                      title: new Text(category.title),
-                      selected: selected,
-                      onTap: () {
-                        _changeCategory(category);
-                      },
-                    ),
-                  );
-                }).toList(),
+                children: backdropItems,
               ),
             ),
           ),
