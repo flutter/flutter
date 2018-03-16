@@ -537,8 +537,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Makes an effort to dismiss the current page with a Material [Scaffold] or
   /// a [CupertinoPageScaffold].
   ///
-  /// Will throw an error if there is no scaffold, no back button in the
-  /// scaffolds or the back button are not tappable.
+  /// Will throw an error if there is no back button in the page.
   Future<void> pageBack() async {
     Finder backButton = find.byTooltip('Back');
     if (backButton.evaluate().isEmpty) {
