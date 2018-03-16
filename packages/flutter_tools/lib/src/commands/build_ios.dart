@@ -37,7 +37,10 @@ class BuildIOSCommand extends BuildSubCommand {
         defaultsTo: true,
         help: 'Codesign the application bundle (only available on device builds).',
       )
-      ..addFlag('preview-dart-2', defaultsTo: true, hide: !verboseHelp);
+      ..addFlag('preview-dart-2',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Preview Dart 2.0 functionality.');
   }
 
   @override

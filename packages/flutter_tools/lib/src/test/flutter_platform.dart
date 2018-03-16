@@ -149,9 +149,10 @@ class _Compiler {
             outputPath: outputDill.path,
           );
 
-          // Check if the compiler produced the output. It could have crashed
-          // in which case outputPath would be null. In this case pass
-          // null upwards to the consumer and shutdown the compiler.
+          // Check if the compiler produced the output. If it failed then
+          // outputPath would be null. In this case pass null upwards to the
+          // consumer and shutdown the compiler to avoid reusing compiler
+          // that might have gotten into a weird state.
           if (outputPath == null) {
             request.result.complete(null);
             await shutdown();

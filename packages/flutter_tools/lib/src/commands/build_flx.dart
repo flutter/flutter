@@ -22,7 +22,11 @@ class BuildFlxCommand extends BuildSubCommand {
       ..addOption('snapshot', defaultsTo: defaultSnapshotPath)
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
       ..addOption('kernel-file', defaultsTo: defaultApplicationKernelPath)
-      ..addFlag('preview-dart-2', defaultsTo: true, hide: !verboseHelp)
+      ..addFlag('preview-dart-2',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Preview Dart 2.0 functionality.',
+      )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
         help: 'Track widget creation locations. Requires Dart 2.0 functionality.',

@@ -39,7 +39,11 @@ class BuildAotCommand extends BuildSubCommand {
       )
       ..addFlag('interpreter')
       ..addFlag('quiet', defaultsTo: false)
-      ..addFlag('preview-dart-2', defaultsTo: true, hide: !verboseHelp)
+      ..addFlag('preview-dart-2',
+        defaultsTo: true,
+        hide: !verboseHelp
+        help: 'Preview Dart 2.0 functionality.',
+      )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
         hide: true,
