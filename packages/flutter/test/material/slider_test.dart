@@ -177,168 +177,6 @@ void main() {
     expect(updates, equals(1));
   });
 
-  testWidgets('Value indicator shows for a bit after being tapped', (WidgetTester tester) async {
-    final Key sliderKey = new UniqueKey();
-    double value = 0.0;
-
-    await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return new MediaQuery(
-              data: new MediaQueryData.fromWindow(window),
-              child: new Material(
-                child: new Center(
-                  child: new Slider(
-                    key: sliderKey,
-                    value: value,
-                    divisions: 4,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        value = newValue;
-                      });
-                    },
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-
-    expect(value, equals(0.0));
-    await tester.tap(find.byKey(sliderKey));
-    expect(value, equals(0.5));
-    await tester.pump(const Duration(milliseconds: 100));
-    // Starts with the position animation and value indicator
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
-    await tester.pump(const Duration(milliseconds: 100));
-    // Value indicator is longer than position.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
-    await tester.pump(const Duration(milliseconds: 100));
-    // Shown for long enough, value indicator is animated closed.
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
-    await tester.pump(const Duration(milliseconds: 101));
-    expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
-  });
-
-  testWidgets('Discrete Slider repaints and animates when dragged', (WidgetTester tester) async {
-    final Key sliderKey = new UniqueKey();
-    double value = 0.0;
-    final List<Offset> log = <Offset>[];
-    final LoggingThumbShape loggingThumb = new LoggingThumbShape(log);
-    await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(thumbShape: loggingThumb);
-            return new MediaQuery(
-              data: new MediaQueryData.fromWindow(window),
-              child: new Material(
-                child: new Center(
-                  child: new SliderTheme(
-                    data: sliderTheme,
-                    child: new Slider(
-                      key: sliderKey,
-                      value: value,
-                      divisions: 4,
-                      onChanged: (double newValue) {
-                        setState(() {
-                          value = newValue;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-
-    final List<Offset> expectedLog = <Offset>[
-      const Offset(16.0, 300.0),
-      const Offset(16.0, 300.0),
-      const Offset(400.0, 300.0),
-    ];
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(value, equals(0.5));
-    expect(log.length, 3);
-    expect(log, orderedEquals(expectedLog));
-    await gesture.moveBy(const Offset(-500.0, 0.0));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 10));
-    expect(value, equals(0.0));
-    expect(log.length, 5);
-    expect(log.last.dx, closeTo(386.3, 0.1));
-    // With no more gesture or value changes, the thumb position should still
-    // be redrawn in the animated position.
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 10));
-    expect(value, equals(0.0));
-    expect(log.length, 7);
-    expect(log.last.dx, closeTo(343.3, 0.1));
-    // Final position.
-    await tester.pump(const Duration(milliseconds: 80));
-    expectedLog.add(const Offset(16.0, 300.0));
-    expect(value, equals(0.0));
-    expect(log.length, 8);
-    expect(log.last.dx, closeTo(16.0, 0.1));
-    await gesture.up();
-  });
-
-  testWidgets("Slider doesn't send duplicate change events if tapped on the same value", (WidgetTester tester) async {
-    final Key sliderKey = new UniqueKey();
-    double value = 0.0;
-    int updates = 0;
-
-    await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return new MediaQuery(
-              data: new MediaQueryData.fromWindow(window),
-              child: new Material(
-                child: new Center(
-                  child: new Slider(
-                    key: sliderKey,
-                    value: value,
-                    onChanged: (double newValue) {
-                      setState(() {
-                        updates++;
-                        value = newValue;
-                      });
-                    },
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-
-    expect(value, equals(0.0));
-    await tester.tap(find.byKey(sliderKey));
-    expect(value, equals(0.5));
-    await tester.pump();
-    await tester.tap(find.byKey(sliderKey));
-    expect(value, equals(0.5));
-    await tester.pump();
-    expect(updates, equals(1));
-  });
-
   testWidgets('discrete Slider repaints when dragged', (WidgetTester tester) async {
     final Key sliderKey = new UniqueKey();
     double value = 0.0;
@@ -391,14 +229,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 5);
-    expect(log.last.dx, closeTo(386.3, 0.1));
+    expect(log.last.dx, closeTo(343.3, 0.1));
     // With no more gesture or value changes, the thumb position should still
     // be redrawn in the animated position.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(value, equals(0.0));
     expect(log.length, 7);
-    expect(log.last.dx, closeTo(343.3, 0.1));
+    expect(log.last.dx, closeTo(185.5, 0.1));
     // Final position.
     await tester.pump(const Duration(milliseconds: 80));
     expectedLog.add(const Offset(16.0, 300.0));
@@ -605,11 +443,7 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveRailColor)));
 
     // Test colors for discrete slider with inactiveColor and activeColor set.
-    await tester.pumpWidget(buildApp(
-      activeColor: customColor1,
-      inactiveColor: customColor2,
-      divisions: 3,
-    ));
+    await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, divisions: 3));
     expect(sliderBox, paints..rect(color: customColor1)..rect(color: customColor2));
     expect(
         sliderBox,
@@ -628,7 +462,7 @@ void main() {
 
     // Test default theme for disabled widget.
     await tester.pumpWidget(buildApp(enabled: false));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1)); // wait for disable animation to finish.
     expect(
         sliderBox,
         paints
@@ -655,8 +489,9 @@ void main() {
     await tester.pumpWidget(buildApp(divisions: 3));
     Offset center = tester.getCenter(find.byType(Slider));
     TestGesture gesture = await tester.startGesture(center);
+    await tester.pump();
     // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
     expect(value, equals(2.0 / 3.0));
     expect(
       sliderBox,
@@ -672,8 +507,9 @@ void main() {
         ..circle(color: sliderTheme.thumbColor),
     );
     await gesture.up();
+    await tester.pump();
     // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
 
     // Testing the custom colors are used for the indicator.
     await tester.pumpWidget(buildApp(
@@ -683,8 +519,9 @@ void main() {
     ));
     center = tester.getCenter(find.byType(Slider));
     gesture = await tester.startGesture(center);
+    await tester.pump();
     // Wait for value indicator animation to finish.
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
     expect(value, equals(2.0 / 3.0));
     expect(
       sliderBox,
@@ -897,22 +734,24 @@ void main() {
     await tester.pumpWidget(buildSlider(textScaleFactor: 1.0));
     Offset center = tester.getCenter(find.byType(Slider));
     TestGesture gesture = await tester.startGesture(center);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(tester.renderObject(find.byType(Slider)), paints..scale(x: 1.0, y: 1.0));
 
     await gesture.up();
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
 
     await tester.pumpWidget(buildSlider(textScaleFactor: 2.0));
     center = tester.getCenter(find.byType(Slider));
     gesture = await tester.startGesture(center);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(tester.renderObject(find.byType(Slider)), paints..scale(x: 2.0, y: 2.0));
 
     await gesture.up();
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
 
     // Check continuous
     await tester.pumpWidget(buildSlider(
@@ -922,12 +761,13 @@ void main() {
     ));
     center = tester.getCenter(find.byType(Slider));
     gesture = await tester.startGesture(center);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(tester.renderObject(find.byType(Slider)), paints..scale(x: 1.0, y: 1.0));
 
     await gesture.up();
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
 
     await tester.pumpWidget(buildSlider(
       textScaleFactor: 2.0,
@@ -936,12 +776,13 @@ void main() {
     ));
     center = tester.getCenter(find.byType(Slider));
     gesture = await tester.startGesture(center);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(tester.renderObject(find.byType(Slider)), paints..scale(x: 2.0, y: 2.0));
 
     await gesture.up();
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
   });
 
   testWidgets('Slider has correct animations when reparented', (WidgetTester tester) async {
@@ -989,7 +830,7 @@ void main() {
       TestGesture gesture = await tester.startGesture(Offset.zero);
       await tester.pump();
       await gesture.up();
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 1));
       expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
       expect(
         sliderBox,
@@ -1009,13 +850,13 @@ void main() {
       expect(
         sliderBox,
         paints
-          ..circle(x: 105.0625, y: 16.0, radius: 3.791776657104492)
+          ..circle(x: 310.9375, y: 16.0, radius: 3.791776657104492)
           ..circle(x: 17.0, y: 16.0, radius: 1.0)
           ..circle(x: 208.5, y: 16.0, radius: 1.0)
           ..circle(x: 400.0, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 105.0625, y: 16.0, radius: 6.0),
+          ..circle(x: 310.9375, y: 16.0, radius: 6.0),
       );
 
       // Reparenting in the middle of an animation should do nothing.
@@ -1029,16 +870,15 @@ void main() {
       expect(
         sliderBox,
         paints
-          ..circle(x: 185.5457763671875, y: 16.0, radius: 8.0)
+          ..circle(x: 396.6802978515625, y: 16.0, radius: 8.0)
           ..circle(x: 17.0, y: 16.0, radius: 1.0)
           ..circle(x: 208.5, y: 16.0, radius: 1.0)
-          ..circle(x: 400.0, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 185.5457763671875, y: 16.0, radius: 6.0),
+          ..circle(x: 396.6802978515625, y: 16.0, radius: 6.0),
       );
       // Wait for animations to finish.
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 300));
       expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
       expect(
         sliderBox,
@@ -1051,7 +891,8 @@ void main() {
           ..circle(x: 400.0, y: 16.0, radius: 6.0),
       );
       await gesture.up();
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
       expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
       expect(
         sliderBox,
@@ -1062,6 +903,21 @@ void main() {
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
           ..circle(x: 400.0, y: 16.0, radius: 6.0),
       );
+      // Move to 0.0 again.
+      gesture = await tester.startGesture(Offset.zero);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(seconds: 1));
+      expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+      expect(
+        sliderBox,
+        paints
+          ..circle(x: 208.5, y: 16.0, radius: 1.0)
+          ..circle(x: 400.0, y: 16.0, radius: 1.0)
+          ..circle(x: 591.5, y: 16.0, radius: 1.0)
+          ..circle(x: 783.0, y: 16.0, radius: 1.0)
+          ..circle(x: 16.0, y: 16.0, radius: 6.0),
+      );
     }
 
     await tester.pumpWidget(buildSlider(1));
@@ -1069,6 +925,7 @@ void main() {
     await testReparenting(false);
     // Now do it again with reparenting in the middle of an animation.
     await testReparenting(true);
+
   });
 
   testWidgets('Slider Semantics', (WidgetTester tester) async {
@@ -1168,8 +1025,9 @@ void main() {
       await tester.pumpWidget(buildApp(sliderTheme: theme, divisions: divisions, enabled: enabled));
       final Offset center = tester.getCenter(find.byType(Slider));
       final TestGesture gesture = await tester.startGesture(center);
+      await tester.pump();
       // Wait for value indicator animation to finish.
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
       expect(
