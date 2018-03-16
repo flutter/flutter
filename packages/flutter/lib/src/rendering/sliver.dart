@@ -196,19 +196,19 @@ class SliverConstraints extends Constraints {
   /// the earliest visible part of this sliver in the [AxisDirection].
   ///
   /// For example, if [AxisDirection] is [AxisDirection.down], then this is the
-  /// amount the top of the visible portion of the sliver has been scrolled
-  /// past the top of the viewport.
+  /// scroll offset at the top of the visible portion of the sliver or
+  /// equivalently the amount the top of the sliver has been scrolled past the
+  /// top of the viewport.
   ///
   /// This value is typically used to compute whether this sliver should still
   /// protrude into the viewport via [SliverGeometry.paintExtent] and
   /// [SliverGeometry.layoutExtent] considering how far the beginning of the
   /// sliver is above the beginning of the viewport.
   ///
-  /// For slivers past the end of the viewport, viewports typically stops trying
-  /// to compute the [scrollOffset]s of slivers that are in the 'future'
-  /// direction past the currently visible portion of the viewports. Therefore,
-  /// the [scrollOffset] is typically 0 for slivers below the viewport when
-  /// [AxisDirection] is [AxisDirection.down].
+  /// For slivers whose top is not past the top of the viewport, the
+  /// [scrollOffset] is `0` when [AxisDirection] is [AxisDirection.down]. This
+  /// includes all the slivers that are beyond the bottom of the viewport.
+  ///
   /// [SliverConstraints.remainingPaintExtent] is typically used to accomplish
   /// the same goal of computing whether scrolled out slivers should still
   /// partially 'protrude in' from the bottom of the viewport.
@@ -455,9 +455,8 @@ class SliverGeometry extends Diagnosticable {
 
   /// The (estimated) total scrollable extent that this sliver has content for.
   ///
-  /// It's the amount of scrolling the user needs to do to get from the
-  /// beginning of this sliver to the end of this sliver past a point in a
-  /// viewport.
+  /// This is the amount of scrolling the user needs to do to get from the
+  /// beginning of this sliver to the end of this sliver.
   ///
   /// The value is used to calculate the [SliverConstraints.scrollOffset] of
   /// all slivers in the scrollable and thus should be provided whether the
@@ -505,9 +504,9 @@ class SliverGeometry extends Diagnosticable {
   /// [SliverConstraints.remainingPaintExtent] in the current viewport.
   ///
   /// This value does not affect how the next sliver is positioned. In other
-  /// words, if this value was 100 and [layoutExtent] was 0, a typical sliver
-  /// placed after it would overlap while painting by 100 pixel directly on
-  /// top of this sliver.
+  /// words, if this value was 100 and [layoutExtent] was 0, typical slivers
+  /// placed after it would end up drawing in the same 100 pixel space while
+  /// painting.
   ///
   /// This must be between zero and [SliverConstraints.remainingPaintExtent].
   ///
@@ -578,8 +577,8 @@ class SliverGeometry extends Diagnosticable {
   /// the rest of the values when constructing the [SliverGeometry] or call
   /// [RenderObject.layout] on its children since [RenderSliver.performLayout]
   /// will be called again on this sliver in the same frame after the
-  /// [SliverConstraints.scrollOffset] correction when the proper
-  /// [SliverGeometry] and layout of its children can be computed.
+  /// [SliverConstraints.scrollOffset] correction has ben applied, when the
+  /// proper [SliverGeometry] and layout of its children can be computed.
   ///
   /// If the parent is also a [RenderSliver], it must propagate this value
   /// in its own [RenderSliver.geometry] property until a viewport which adjusts
