@@ -125,10 +125,11 @@ class _Compiler {
 
     ResidentCompiler createCompiler() {
       return new ResidentCompiler(
-          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-          packagesPath: PackageMap.globalPackagesPath,
-          trackWidgetCreation: trackWidgetCreation,
-          compilerMessageConsumer: reportCompilerMessage);
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        packagesPath: PackageMap.globalPackagesPath,
+        trackWidgetCreation: trackWidgetCreation,
+        compilerMessageConsumer: reportCompilerMessage,
+      );
     }
 
     compilerController.stream.listen((_CompilationRequest request) async {
@@ -155,8 +156,8 @@ class _Compiler {
             request.result.complete(null);
             await shutdown();
           } else {
-            final File kernelReadyToRun = await fs.file(outputPath).copy(
-              request.path + '.dill');
+            final File kernelReadyToRun =
+                await fs.file(outputPath).copy('${request.path}.dill');
             request.result.complete(kernelReadyToRun.path);
             compiler.accept();
             compiler.reset();

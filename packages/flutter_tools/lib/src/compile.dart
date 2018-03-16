@@ -15,12 +15,11 @@ import 'globals.dart';
 typedef void CompilerMessageConsumer(String message);
 
 class _StdoutHandler {
-  final CompilerMessageConsumer consumer;
-
   _StdoutHandler({this.consumer: printError}) {
     reset();
   }
 
+  final CompilerMessageConsumer consumer;
   String boundaryKey;
   Completer<String> outputFilename;
 
