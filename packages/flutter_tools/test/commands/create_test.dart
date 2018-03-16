@@ -464,6 +464,7 @@ Future<Null> _analyzeProject(String workingDir, {String target}) async {
 }
 
 Future<Null> _runFlutterTest(Directory workingDir, {String target}) async {
+  await null;
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',
