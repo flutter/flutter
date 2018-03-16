@@ -200,7 +200,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
 
     // When tCollapsed > 0, the indicators move closer together
     //final double rowIndicatorWidth = 48.0 + (1.0 - tCollapsed) * (rowTitleWidth - 48.0);
-    final double paddedSectionIndicatorWidth = kSectionIndicatorWidth + 8.0;
+    const double paddedSectionIndicatorWidth = kSectionIndicatorWidth + 8.0;
     final double rowIndicatorWidth = paddedSectionIndicatorWidth +
       (1.0 - tCollapsed) * (rowTitleWidth - paddedSectionIndicatorWidth);
     double rowIndicatorX = (size.width - rowIndicatorWidth) / 2.0 - selectedIndex * rowIndicatorWidth;
