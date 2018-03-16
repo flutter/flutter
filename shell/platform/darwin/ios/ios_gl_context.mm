@@ -193,7 +193,7 @@ bool IOSGLContext::UpdateStorageSizeIfNecessary() {
   bool rebind_color_buffer = false;
 
   if (depthbuffer_ != GL_NONE || stencilbuffer_ != GL_NONE ||
-      depth_stencil_packed_buffer_ != GL_NONE) {
+      depth_stencil_packed_buffer_ != GL_NONE || colorbuffer_ != GL_NONE) {
     // Fetch the dimensions of the color buffer whose backing was just updated
     // so that backing of the attachments can be updated
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
