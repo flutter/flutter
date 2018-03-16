@@ -73,7 +73,7 @@ public class FlutterMain {
     private static final String MANIFEST = "flutter.yaml";
 
     private static String fromFlutterAssets(String filePath) {
-        return sFlutterAssetsDir + "/" + filePath;
+        return sFlutterAssetsDir + File.separator + filePath;
     }
 
     private static final Set<String> SKY_RESOURCES = ImmutableSetBuilder.<String>newInstance()
@@ -307,5 +307,31 @@ public class FlutterMain {
         String dataDirectory = PathUtils.getDataDirectory(applicationContext);
         File appBundle = new File(dataDirectory, sFlutterAssetsDir);
         return appBundle.exists() ? appBundle.getPath() : null;
+    }
+
+    /**
+     * Returns the file name for the given asset.
+     * The returned file name can be used to access the asset in the APK
+     * through the {@link AssetManager} API.
+     *
+     * @param asset the name of the asset. The name can be hierarchical
+     * @return      the filename to be used with {@link AssetManager}
+     */
+    public static String getLookupKeyForAsset(String asset) {
+        return fromFlutterAssets(asset);
+    }
+
+    /**
+     * Returns the file name for the given asset which originates from the
+     * specified packageName. The returned file name can be used to access
+     * the asset in the APK through the {@link AssetManager} API.
+     *
+     * @param asset       the name of the asset. The name can be hierarchical
+     * @param packageName the name of the package from which the asset originates
+     * @return            the file name to be used with {@link AssetManager}
+     */
+    public static String getLookupKeyForAsset(String asset, String packageName) {
+        return getLookupKeyForAsset(
+            "packages" + File.separator + packageName + File.separator + asset);
     }
 }

@@ -105,6 +105,29 @@ public interface PluginRegistry {
          */
         FlutterView view();
 
+
+        /**
+         * Returns the file name for the given asset.
+         * The returned file name can be used to access the asset in the APK
+         * through the {@link AssetManager} API.
+         *
+         * @param asset the name of the asset. The name can be hierarchical
+         * @return      the filename to be used with {@link AssetManager}
+         */
+        String lookupKeyForAsset(String asset);
+
+        /**
+         * Returns the file name for the given asset which originates from the
+         * specified packageName. The returned file name can be used to access
+         * the asset in the APK through the {@link AssetManager} API.
+         *
+         * @param asset       the name of the asset. The name can be hierarchical
+         * @param packageName the name of the package from which the asset originates
+         * @return            the file name to be used with {@link AssetManager}
+         */
+        String lookupKeyForAsset(String asset, String packageName);
+
+
         /**
          * Publishes a value associated with the plugin being registered.
          *
