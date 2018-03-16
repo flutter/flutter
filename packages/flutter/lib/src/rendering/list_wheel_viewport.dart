@@ -562,9 +562,7 @@ class RenderListWheelViewport
     );
 
     context.pushTransform(
-      // Text with TransformLayers and no cullRects currently have an issue rendering
-      // https://github.com/flutter/flutter/issues/14224.
-      false,
+      needsCompositing,
       offset,
       _centerOriginTransform(transform),
       // Pre-transform painting function.
