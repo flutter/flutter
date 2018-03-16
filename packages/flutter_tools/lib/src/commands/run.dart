@@ -24,17 +24,21 @@ abstract class RunCommandBase extends FlutterCommand {
   RunCommandBase() {
     addBuildModeFlags(defaultToRelease: false);
     usesFlavorOption();
-    argParser.addFlag('trace-startup',
+    argParser
+      ..addFlag('trace-startup',
         negatable: false,
-        help: 'Start tracing during startup.');
-    argParser.addFlag('ipv6',
+        help: 'Start tracing during startup.',
+      )
+      ..addFlag('ipv6',
         hide: true,
         negatable: false,
         help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool\n'
-              'forwards the host port to a device port.');
-    argParser.addOption('route',
-        help: 'Which route to load when running the app.');
-    argParser.addOption('target-platform',
+              'forwards the host port to a device port.',
+      )
+      ..addOption('route',
+        help: 'Which route to load when running the app.',
+      )
+      ..addOption('target-platform',
         defaultsTo: 'default',
         allowed: <String>['default', 'android-arm', 'android-arm64'],
         help: 'Specify the target platform when building the app for an '
@@ -78,81 +82,97 @@ class RunCommand extends RunCommandBase {
   RunCommand({ bool verboseHelp: false }) {
     requiresPubspecYaml();
 
-    argParser.addFlag('full-restart',
+    argParser
+      ..addFlag('full-restart',
         defaultsTo: true,
-        help: 'Stop any currently running application process before running the app.');
-    argParser.addFlag('start-paused',
+        help: 'Stop any currently running application process before running the app.',
+      )
+      ..addFlag('start-paused',
         negatable: false,
-        help: 'Start in a paused mode and wait for a debugger to connect.');
-    argParser.addFlag('enable-software-rendering',
+        help: 'Start in a paused mode and wait for a debugger to connect.',
+      )
+      ..addFlag('enable-software-rendering',
         negatable: false,
         help: 'Enable rendering using the Skia software backend. This is useful\n'
               'when testing Flutter on emulators. By default, Flutter will\n'
               'attempt to either use OpenGL or Vulkan and fall back to software\n'
-              'when neither is available.');
-    argParser.addFlag('skia-deterministic-rendering',
+              'when neither is available.',
+      )
+      ..addFlag('skia-deterministic-rendering',
         negatable: false,
         help: 'When combined with --enable-software-rendering, provides 100%\n'
-              'deterministic Skia rendering.');
-    argParser.addFlag('trace-skia',
+              'deterministic Skia rendering.',
+      )
+      ..addFlag('trace-skia',
         negatable: false,
         help: 'Enable tracing of Skia code. This is useful when debugging\n'
-              'the GPU thread. By default, Flutter will not log skia code.');
-    argParser.addFlag('use-test-fonts',
+              'the GPU thread. By default, Flutter will not log skia code.',
+      )
+      ..addFlag('use-test-fonts',
         negatable: true,
         help: 'Enable (and default to) the "Ahem" font. This is a special font\n'
               'used in tests to remove any dependencies on the font metrics. It\n'
               'is enabled when you use "flutter test". Set this flag when running\n'
               'a test using "flutter run" for debugging purposes. This flag is\n'
-              'only available when running in debug mode.');
-    argParser.addFlag('build',
+              'only available when running in debug mode.',
+      )
+      ..addFlag('build',
         defaultsTo: true,
-        help: 'If necessary, build the app before running.');
-    argParser.addOption('use-application-binary',
+        help: 'If necessary, build the app before running.',
+      )
+      ..addOption('use-application-binary',
         hide: !verboseHelp,
-        help: 'Specify a pre-built application binary to use when running.');
-    argParser.addFlag('preview-dart-2',
+        help: 'Specify a pre-built application binary to use when running.',
+      )
+      ..addFlag('preview-dart-2',
+        defaultsTo: true,
         hide: !verboseHelp,
-        help: 'Preview Dart 2.0 functionality.');
-    argParser.addFlag('track-widget-creation',
+        help: 'Preview Dart 2.0 functionality.',
+      )
+      ..addFlag('track-widget-creation',
         hide: !verboseHelp,
-        help: 'Track widget creation locations. Requires Dart 2.0 functionality.');
-    argParser.addOption('project-root',
+        help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
+      )
+      ..addOption('project-root',
         hide: !verboseHelp,
-        help: 'Specify the project root directory.');
-    argParser.addFlag('machine',
+        help: 'Specify the project root directory.',
+      )
+      ..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
         help: 'Handle machine structured JSON command input and provide output\n'
-              'and progress in machine friendly format.');
-    argParser.addFlag('hot',
+              'and progress in machine friendly format.',
+      )
+      ..addFlag('hot',
         negatable: true,
         defaultsTo: kHotReloadDefault,
-        help: 'Run with support for hot reloading.');
-    argParser.addOption('pid-file',
+        help: 'Run with support for hot reloading.',
+      )
+      ..addOption('pid-file',
         help: 'Specify a file to write the process id to.\n'
               'You can send SIGUSR1 to trigger a hot reload\n'
-              'and SIGUSR2 to trigger a full restart.');
-    argParser.addFlag('resident',
+              'and SIGUSR2 to trigger a full restart.',
+      )
+      ..addFlag('resident',
         negatable: true,
         defaultsTo: true,
         hide: !verboseHelp,
-        help: 'Stay resident after launching the application.');
-
-    argParser.addFlag('benchmark',
-      negatable: false,
-      hide: !verboseHelp,
-      help: 'Enable a benchmarking mode. This will run the given application,\n'
-            'measure the startup time and the app restart time, write the\n'
-            'results out to "refresh_benchmark.json", and exit. This flag is\n'
-            'intended for use in generating automated flutter benchmarks.');
-
-    argParser.addOption('output-dill',
+        help: 'Stay resident after launching the application.',
+      )
+      ..addFlag('benchmark',
+        negatable: false,
         hide: !verboseHelp,
-        help: 'Specify the path to frontend server output kernel file.');
-
-    argParser.addOption(FlutterOptions.kExtraFrontEndOptions, hide: true);
-    argParser.addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true);
+        help: 'Enable a benchmarking mode. This will run the given application,\n'
+              'measure the startup time and the app restart time, write the\n'
+              'results out to "refresh_benchmark.json", and exit. This flag is\n'
+              'intended for use in generating automated flutter benchmarks.',
+      )
+      ..addOption('output-dill',
+        hide: !verboseHelp,
+        help: 'Specify the path to frontend server output kernel file.',
+      )
+      ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
+      ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true);
   }
 
   List<Device> devices;

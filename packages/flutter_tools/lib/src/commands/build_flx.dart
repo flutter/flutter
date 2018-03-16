@@ -11,24 +11,31 @@ import 'build.dart';
 class BuildFlxCommand extends BuildSubCommand {
   BuildFlxCommand({bool verboseHelp: false}) {
     usesTargetOption();
-    argParser.addFlag('precompiled', negatable: false);
-    // This option is still referenced by the iOS build scripts. We should
-    // remove it once we've updated those build scripts.
-    argParser.addOption('asset-base', help: 'Ignored. Will be removed.', hide: !verboseHelp);
-    argParser.addOption('manifest', defaultsTo: defaultManifestPath);
-    argParser.addOption('private-key', defaultsTo: defaultPrivateKeyPath);
-    argParser.addOption('output-file', abbr: 'o', defaultsTo: defaultFlxOutputPath);
-    argParser.addOption('snapshot', defaultsTo: defaultSnapshotPath);
-    argParser.addOption('depfile', defaultsTo: defaultDepfilePath);
-    argParser.addOption('kernel-file', defaultsTo: defaultApplicationKernelPath);
-    argParser.addFlag('preview-dart-2', negatable: false, hide: !verboseHelp);
-    argParser.addFlag(
-      'track-widget-creation',
-      hide: !verboseHelp,
-      help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
-    );
-    argParser.addOption('working-dir', defaultsTo: getAssetBuildDirectory());
-    argParser.addFlag('report-licensed-packages', help: 'Whether to report the names of all the packages that are included in the application\'s LICENSE file.', defaultsTo: false);
+    argParser
+      ..addFlag('precompiled', negatable: false)
+      // This option is still referenced by the iOS build scripts. We should
+      // remove it once we've updated those build scripts.
+      ..addOption('asset-base', help: 'Ignored. Will be removed.', hide: !verboseHelp)
+      ..addOption('manifest', defaultsTo: defaultManifestPath)
+      ..addOption('private-key', defaultsTo: defaultPrivateKeyPath)
+      ..addOption('output-file', abbr: 'o', defaultsTo: defaultFlxOutputPath)
+      ..addOption('snapshot', defaultsTo: defaultSnapshotPath)
+      ..addOption('depfile', defaultsTo: defaultDepfilePath)
+      ..addOption('kernel-file', defaultsTo: defaultApplicationKernelPath)
+      ..addFlag('preview-dart-2',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Preview Dart 2.0 functionality.',
+      )
+      ..addFlag('track-widget-creation',
+        hide: !verboseHelp,
+        help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
+      )
+      ..addOption('working-dir', defaultsTo: getAssetBuildDirectory())
+      ..addFlag('report-licensed-packages',
+        help: 'Whether to report the names of all the packages that are included '
+              'in the application\'s LICENSE file.',
+        defaultsTo: false);
     usesPubOption();
   }
 

@@ -8,8 +8,7 @@ When the exception was thrown, this was the stack:
 <asynchronous suspension>
 #1      .+ \(package:flutter_test[/\\]src[/\\]widget_tester\.dart:[0-9]+:[0-9]+\)
 <<skip until matching line>>
-^\(elided [0-9]+ .+[^)]$
-^.+\)$
+^\(elided [0-9]+ .+\)$
 
 The test description was:
 Exception handling in test harness - string
@@ -28,8 +27,7 @@ When the exception was thrown, this was the stack:
 <asynchronous suspension>
 #1      .+ \(package:flutter_test[/\\]src[/\\]widget_tester\.dart:[0-9]+:[0-9]+\)
 <<skip until matching line>>
-^\(elided [0-9]+ .+[^)]$
-^.+\)$
+^\(elided [0-9]+ .+\)$
 
 The test description was:
 Exception handling in test harness - FlutterError
@@ -45,11 +43,10 @@ Who lives, who dies, who tells your story\?
 
 When the exception was thrown, this was the stack:
 #[0-9]+ +main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]flutter_test[/\\]exception_handling_test\.dart:16:9\)
-#[0-9]+ +main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]flutter_test[/\\]exception_handling_test\.dart:15:105\)
+#[0-9]+ +main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]flutter_test[/\\]exception_handling_test\.dart:15:77\)
 #[0-9]+ +.+ \(package:flutter_test[/\\]src[/\\]widget_tester\.dart:[0-9]+:[0-9]+\)
 <<skip until matching line>>
-^\(elided [0-9]+ .+[^)]$
-^.+\)$
+^\(elided [0-9]+ .+\)$
 
 The test description was:
 Exception handling in test harness - uncaught Future error
