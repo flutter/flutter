@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show Platform;
+import 'dart:math' show max, min;
 
 import 'package:args/command_runner.dart';
 // ignore: implementation_imports
@@ -14,6 +16,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../base/terminal.dart';
+import '../base/utils.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../test/flutter_platform.dart' as loader;
@@ -32,6 +35,7 @@ Future<int> runTests(
     bool previewDart2: false,
     bool trackWidgetCreation: false,
     TestWatcher watcher,
+    int jobs,
     }) async {
   if (trackWidgetCreation && !previewDart2) {
     throw new UsageException(
@@ -49,6 +53,10 @@ Future<int> runTests(
     testArgs.addAll(<String>['-r', 'json']);
   }
 
+  int concurrency = max(Platform.numberOfProcessors ~/ 2, 1);
+  if (jobs != null)
+    concurrency = min(jobs, Platform.numberOfProcessors);
+
   if (enableObservatory) {
     // (In particular, for collecting code coverage.)
 
@@ -56,8 +64,12 @@ Future<int> runTests(
     // too many tests such that they all time out, and too few tests such that
     // the tests overall take too much time. The current number is empirically
     // based on what our infrastructure can handle, which isn't ideal...
-    testArgs.add('--concurrency=2');
+    concurrency = min(concurrency, 2);
   }
+  if (isRunningOnBot) {
+    concurrency = 1;
+  }
+  testArgs.add('--concurrency=$concurrency');
 
   for (String name in names) {
     testArgs..add('--name')..add(name);
@@ -87,6 +99,7 @@ Future<int> runTests(
     serverType: serverType,
     previewDart2: previewDart2,
     trackWidgetCreation: trackWidgetCreation,
+    concurrency: concurrency,
   );
 
   // Make the global packages path absolute.
