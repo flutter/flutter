@@ -685,9 +685,16 @@ void Paragraph::Layout(double width, bool force) {
   }
 
   max_intrinsic_width_ = 0;
-  for (double line_width : line_widths_) {
-    max_intrinsic_width_ += line_width;
+  double line_block_width = 0;
+  for (size_t i = 0; i < line_widths_.size(); ++i) {
+    line_block_width += line_widths_[i];
+    if (line_ranges_[i].hard_break) {
+      max_intrinsic_width_ = std::max(line_block_width, max_intrinsic_width_);
+      line_block_width = 0;
+    }
   }
+  max_intrinsic_width_ = std::max(line_block_width, max_intrinsic_width_);
+
   if (paragraph_style_.max_lines == 1 ||
       (paragraph_style_.unlimited_lines() && paragraph_style_.ellipsized())) {
     min_intrinsic_width_ = max_intrinsic_width_;
