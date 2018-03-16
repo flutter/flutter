@@ -263,7 +263,6 @@ tasks:
       Checks that the project template works and supports plugins on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   external_ui_integration_test_ios:
     description: >
@@ -359,6 +358,7 @@ tasks:
       Checks that the project template works and supports plugins on Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
+    flaky: true
 
   hot_mode_dev_cycle_win__benchmark:
     description: >
