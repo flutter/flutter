@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import io.flutter.plugin.common.*;
+import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterView;
 import io.flutter.view.TextureRegistry;
@@ -109,6 +110,16 @@ public class FlutterPluginRegistry
         @Override
         public FlutterView view() {
             return mFlutterView;
+        }
+
+        @Override
+        public String lookupKeyForAsset(String asset) {
+            return FlutterMain.getLookupKeyForAsset(asset);
+        }
+
+        @Override
+        public String lookupKeyForAsset(String asset, String packageName) {
+            return FlutterMain.getLookupKeyForAsset(asset, packageName);
         }
 
         @Override

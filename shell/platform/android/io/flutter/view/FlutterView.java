@@ -254,6 +254,14 @@ public class FlutterView extends SurfaceView
         return mNativeView.getPluginRegistry();
     }
 
+    public String getLookupKeyForAsset(String asset) {
+        return FlutterMain.getLookupKeyForAsset(asset);
+    }
+
+    public String getLookupKeyForAsset(String asset, String packageName) {
+        return FlutterMain.getLookupKeyForAsset(asset, packageName);
+    }
+
     public void addActivityLifecycleListener(ActivityLifecycleListener listener) {
         mActivityLifecycleListeners.add(listener);
     }
