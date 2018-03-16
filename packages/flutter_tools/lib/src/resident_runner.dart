@@ -36,8 +36,6 @@ class FlutterDevice {
   ApplicationPackage package;
   ResidentCompiler generator;
   String dillOutputPath;
-  List<String> fileSystemRoots;
-  String fileSystemScheme;
 
   StreamSubscription<String> _loggingSubscription;
 
@@ -45,14 +43,11 @@ class FlutterDevice {
     @required bool previewDart2,
     @required bool trackWidgetCreation,
     this.dillOutputPath,
-    this.fileSystemRoots,
-    this.fileSystemScheme,
   }) {
     if (previewDart2) {
       generator = new ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
         trackWidgetCreation: trackWidgetCreation,
-        fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
       );
     }
   }
