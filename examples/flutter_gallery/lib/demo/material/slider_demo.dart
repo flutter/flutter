@@ -22,12 +22,11 @@ Path _triangle(double size, Offset thumbCenter, {bool invert: false}) {
   thumbPath.moveTo(thumbCenter.dx - halfSide, thumbCenter.dy + sign * centerHeight);
   thumbPath.lineTo(thumbCenter.dx, thumbCenter.dy - 2.0 * sign * centerHeight);
   thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy + sign * centerHeight);
-  thumbPath.lineTo(thumbCenter.dx - halfSide, thumbCenter.dy + sign * centerHeight);
+  thumbPath.close();
   return thumbPath;
 }
 
 class _CustomThumbShape extends SliderComponentShape {
-  const _CustomThumbShape();
   static const double _thumbSize = 4.0;
   static const double _disabledThumbSize = 4.0;
 
@@ -36,19 +35,14 @@ class _CustomThumbShape extends SliderComponentShape {
     return new Size.fromRadius(isEnabled ? _thumbSize : _disabledThumbSize);
   }
 
+  SliderThemeData sliderTheme;
+  Animation<double> enableAnimation;
+
   @override
   void paint(
-    RenderBox parentBox,
     PaintingContext context,
-    bool isDiscrete,
     Offset thumbCenter,
-    Animation<double> activationAnimation,
-    Animation<double> enableAnimation,
-    TextPainter labelPainter,
-    SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    double value,
-  ) {
+    ) {
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = new Tween<double>(
       begin: _disabledThumbSize,
@@ -65,7 +59,6 @@ class _CustomThumbShape extends SliderComponentShape {
 }
 
 class _CustomValueIndicatorShape extends SliderComponentShape {
-  const _CustomValueIndicatorShape();
   static const double _indicatorSize = 4.0;
   static const double _disabledIndicatorSize = 4.0;
   static const double _slideUpHeight = 40.0;
@@ -75,18 +68,15 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
     return new Size.fromRadius(isEnabled ? _indicatorSize : _disabledIndicatorSize);
   }
 
+  SliderThemeData sliderTheme;
+  Animation<double> activationAnimation;
+  Animation<double> enableAnimation;
+  TextPainter labelPainter;
+
   @override
   void paint(
-    RenderBox parentBox,
     PaintingContext context,
-    bool isDiscrete,
     Offset thumbCenter,
-    Animation<double> activationAnimation,
-    Animation<double> enableAnimation,
-    TextPainter labelPainter,
-    SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    double value,
   ) {
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = new Tween<double>(
@@ -191,8 +181,8 @@ class _SliderDemoState extends State<SliderDemo> {
                     overlayColor: Colors.black12,
                     thumbColor: Colors.deepPurple,
                     valueIndicatorColor: Colors.deepPurpleAccent,
-                    thumbShape: const _CustomThumbShape(),
-                    valueIndicatorShape: const _CustomValueIndicatorShape(),
+                    thumbShape: new _CustomThumbShape(),
+                    valueIndicatorShape: new _CustomValueIndicatorShape(),
                     valueIndicatorTextStyle: theme.accentTextTheme.body2.copyWith(color: Colors.black87),
                   ),
                   child: new Slider(
