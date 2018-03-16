@@ -151,6 +151,19 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Specify the path to frontend server output kernel file.');
 
+    argParser.addMultiOption('filesystem-root',
+        hide: !verboseHelp,
+        help: 'Specify the path, that is used as root in a virtual file system\n'
+              'for compilation. Input file name should be specified as Uri in\n'
+              'filesystem-scheme scheme. Use only in Dart 2 mode.\n'
+              'Requires --output-dill option to be explicitly specified.\n');
+
+    argParser.addOption('filesystem-scheme',
+        defaultsTo: 'org-dartlang-root',
+        hide: !verboseHelp,
+        help: 'Specify the scheme that is used for virtual file system used in\n'
+            'compilation. See more details on filesystem-root option.\n');
+
     argParser.addOption(FlutterOptions.kExtraFrontEndOptions, hide: true);
     argParser.addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true);
   }
@@ -325,6 +338,8 @@ class RunCommand extends RunCommandBase {
         previewDart2: argResults['preview-dart-2'],
         trackWidgetCreation: argResults['track-widget-creation'],
         dillOutputPath: argResults['output-dill'],
+        fileSystemRoots: argResults['filesystem-root'],
+        fileSystemScheme: argResults['filesystem-scheme'],
       );
     }).toList();
 
