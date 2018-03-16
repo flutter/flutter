@@ -77,6 +77,8 @@ class TestCommand extends FlutterCommand {
     );
     argParser.addFlag(
       'preview-dart-2',
+      defaultsTo: true,
+      negatable: true,
       hide: !verboseHelp,
       help: 'Preview Dart 2.0 functionality.',
     );

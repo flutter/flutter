@@ -108,6 +108,29 @@ class _Compiler {
         .createTempSync('output_dill');
     final File outputDill = outputDillDirectory.childFile('output.dill');
 
+    bool suppressOutput = false;
+    void reportCompilerMessage(String message) {
+      if (suppressOutput)
+        return;
+
+      if (message.startsWith('compiler message: Error: Could not resolve the package \'test\'')) {
+        printTrace(message);
+        printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n');
+        suppressOutput = true;
+        return;
+      }
+
+      printError('$message');
+    }
+
+    ResidentCompiler createCompiler() {
+      return new ResidentCompiler(
+          artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+          packagesPath: PackageMap.globalPackagesPath,
+          trackWidgetCreation: trackWidgetCreation,
+          compilerMessageConsumer: reportCompilerMessage);
+    }
+
     compilerController.stream.listen((_CompilationRequest request) async {
       final bool isEmpty = compilationQueue.isEmpty;
       compilationQueue.add(request);
@@ -118,16 +141,27 @@ class _Compiler {
         while (compilationQueue.isNotEmpty) {
           final _CompilationRequest request = compilationQueue.first;
           printTrace('Compiling ${request.path}');
+          compiler ??= createCompiler();
+          suppressOutput = false;
           final String outputPath = await compiler.recompile(request.path,
             <String>[request.path],
             outputPath: outputDill.path,
           );
-          // Copy output dill next to the source file.
-          final File kernelReadyToRun = await fs.file(outputPath).copy(
+
+          // Check if the compiler produced the output. It could have crashed
+          // in which case outputPath would be null. In this case pass
+          // null upwards to the consumer and shutdown the compiler.
+          if (outputPath == null) {
+            request.result.complete(null);
+            compiler.shutdown();
+            compiler = null;
+          } else {
+            final File kernelReadyToRun = await fs.file(outputPath).copy(
               request.path + '.dill');
-          compiler.accept();
-          compiler.reset();
-          request.result.complete(kernelReadyToRun.path);
+            request.result.complete(kernelReadyToRun.path);
+            compiler.accept();
+            compiler.reset();
+          }
           // Only remove now when we finished processing the element
           compilationQueue.removeAt(0);
         }
@@ -135,11 +169,6 @@ class _Compiler {
     }, onDone: () {
       outputDillDirectory.deleteSync(recursive: true);
     });
-
-    compiler = new ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        packagesPath: PackageMap.globalPackagesPath,
-        trackWidgetCreation: trackWidgetCreation);
   }
 
   final StreamController<_CompilationRequest> compilerController =

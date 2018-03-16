@@ -451,7 +451,7 @@ Future<Null> _analyzeProject(String workingDir, {String target}) async {
   if (target != null)
     args.add(target);
 
-  final ProcessResult exec = await Process.run(
+  final ProcessResult exec = Process.runSync(
     '$dartSdkPath/bin/dart',
     args,
     workingDirectory: workingDir,
@@ -477,11 +477,17 @@ Future<Null> _runFlutterTest(Directory workingDir, {String target}) async {
   if (target != null)
     args.add(target);
 
-  final ProcessResult exec = await Process.run(
+  print('$dartSdkPath/bin/dart');
+  print(args);
+  print(workingDir.path);
+  final ProcessResult exec = Process.runSync(
     '$dartSdkPath/bin/dart',
     args,
     workingDirectory: workingDir.path,
   );
+  print('Parent process');
+  print(exec.stdout);
+  print(exec.stderr);
   if (exec.exitCode != 0) {
     print(exec.stdout);
     print(exec.stderr);

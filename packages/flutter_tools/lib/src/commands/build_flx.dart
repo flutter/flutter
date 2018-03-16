@@ -21,7 +21,11 @@ class BuildFlxCommand extends BuildSubCommand {
     argParser.addOption('snapshot', defaultsTo: defaultSnapshotPath);
     argParser.addOption('depfile', defaultsTo: defaultDepfilePath);
     argParser.addOption('kernel-file', defaultsTo: defaultApplicationKernelPath);
-    argParser.addFlag('preview-dart-2', negatable: false, hide: !verboseHelp);
+    argParser.addFlag(
+      'preview-dart-2',
+      defaultsTo: true,
+      negatable: true,
+      hide: !verboseHelp);
     argParser.addFlag(
       'track-widget-creation',
       hide: !verboseHelp,

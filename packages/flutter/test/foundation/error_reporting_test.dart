@@ -7,8 +7,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:test/test.dart';
 
-import 'platform_helper.dart';
-
 dynamic getAssertionErrorWithMessage() {
   try {
     assert(false, 'Message goes here.');
@@ -45,7 +43,7 @@ Future<Null> main() async {
 
   final StackTrace sampleStack = await getSampleStack();
 
-  final String dividerRegExp = pathSeparatorForRegExp;
+  const String dividerRegExp = '/';
 
   test('Error reporting - pretest', () async {
     expect(debugPrint, equals(debugPrintThrottled));
