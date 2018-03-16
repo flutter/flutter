@@ -459,7 +459,7 @@ class PubspecYaml {
           // We're in a section we care about. Try to parse out the dependency:
           final PubspecDependency dependency = PubspecDependency.parse(line, filename: filename);
           if (dependency != null) { // We got one!
-            // track whether or not this a dev dependency.
+            // Track whether or not this a dev dependency.
             dependency.isDevDependency = seenDev;
             result.add(dependency);
             if (dependency.kind == DependencyKind.unknown) {
@@ -561,8 +561,10 @@ class PubspecYaml {
     final Set<String> devDependencies = new Set<String>();
     Section section = Section.other; // the section we're currently handling
 
+    // the line number where we're going to insert the transitive dependencies.
     int endOfDirectDependencies;
-    int lastPossiblePlace; // the line number where we're going to insert the transitive dependencies
+    // The line number where we're going to insert the transitive dev dependencies.
+    int endOfDevDependencies;
     // Walk the pre-parsed input file, outputting it unmodified except for
     // updating version numbers, removing the old transitive dependencies lines,
     // and adding our new transitive dependencies lines. We also do a little
@@ -579,9 +581,9 @@ class PubspecYaml {
         // place to insert our transitive dependencies.
         if (section == Section.dependencies)
           endOfDirectDependencies = output.length;
-          lastPossiblePlace = output.length;
+          endOfDevDependencies = output.length;
         if (section == Section.devDependencies)
-          lastPossiblePlace = output.length;
+          endOfDevDependencies = output.length;
         section = data.section; // track which section we're now in.
         output.add(data.line); // insert the header into the output
       } else if (data is PubspecDependency) {
@@ -623,11 +625,12 @@ class PubspecYaml {
             }
             // Since we're in one of the places where we can list dependencies,
             // remember this as the current last known valid place to insert our
-            // transitive dependencies.
+            // transitive dev dependencies. If the section is for regular dependencies,
+            // then also rememeber the line for the end of direct dependencies.
             if (section == Section.dependencies) {
               endOfDirectDependencies = output.length;
             }
-            lastPossiblePlace = output.length;
+            endOfDevDependencies = output.length;
             break;
           default:
             // In other sections, pass everything through in its original form.
@@ -643,20 +646,24 @@ class PubspecYaml {
     }
 
     // By this point we should know where to put our transitive dependencies.
-    // Only if there were no dependencies: or dev_dependencies: sections could
-    // we get here with this still null, and we should not have any such files
+    // Only if there were no dependencies or dev_dependencies sections could
+    // we get here with these still null, and we should not have any such files
     // in our repo.
     assert(endOfDirectDependencies != null);
-    assert(lastPossiblePlace != null);
+    assert(endOfDevDependencies != null);
 
-    // Now include all the transitive dependencies.
-    final List<String> transitiveDependencyOutput = <String>[]; // the block of text to insert
+    // Now include all the transitive dependencies and transitive dev dependencies.
+    // The blocks of text to insert for each dependency section.
+    final List<String> transitiveDependencyOutput = <String>[];
     final List<String> transitiveDevDependencyOutput = <String>[];
-    final Set<String> transitiveDependencies = new Set<String>(); // which dependencies we need to handle
+
+    // Which dependencies we need to handle for the transitive and dev dependency sections.
+    final Set<String> transitiveDependencies = new Set<String>();
     final Set<String> transitiveDevDependencies = new Set<String>();
     
-    // Merge the lists of dependencies we've seen in this file and the dependencies we know this
-    // file mentions that are already pinned (and which didn't get special processing above).
+    // Merge the lists of dependencies we've seen in this file from dependencies, dev dependencies,
+    // and the dependencies we know this file mentions that are already pinned 
+    // (and which didn't get special processing above).
     final Set<String> implied = new Set<String>.from(directDependencies)
       ..addAll(specialDependencies)
       ..addAll(devDependencies);
@@ -680,15 +687,14 @@ class PubspecYaml {
       transitiveDevDependencyOutput.add('  $package: ${versions.versionFor(package)} $kTransitiveMagicString');
 
 
-    // build a sorted list of all dependencies and their versions for the checksum.
-    // include the version string if it is availible.
+    // Build a sorted list of all dependencies for the checksum.
     final Set<String> checksumDependencies = new Set<String>()
       ..addAll(directDependencies)
       ..addAll(devDependencies)
       ..addAll(transitiveDependenciesAsList)
       ..addAll(transitiveDevDependenciesAsList);
     
-    // combine the package name with a version, if availible, and sort them.
+    // Combine the package name with a version, if availible, and sort them.
     final List<String> sortedChecksumDependencies = checksumDependencies
       .where((String name) => !_ignoreForChecksum.contains(name))
       .map((String name) => '$name${versions.versionFor(name) ?? ""}')
@@ -710,7 +716,7 @@ class PubspecYaml {
     // and the blocks of transitive dev dependency declarations into the output after [lastPossiblePlace]. Finally,
     // insert the [checksumString] at the very end.
     output
-      ..insertAll(lastPossiblePlace, transitiveDevDependencyOutput)
+      ..insertAll(endOfDevDependencies, transitiveDevDependencyOutput)
       ..insertAll(endOfDirectDependencies, transitiveDependencyOutput)
       ..add('')
       ..add('$kDependencyChecksum$checksumString');
