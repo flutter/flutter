@@ -207,7 +207,7 @@ class SliverConstraints extends Constraints {
   ///
   /// For slivers whose top is not past the top of the viewport, the
   /// [scrollOffset] is `0` when [AxisDirection] is [AxisDirection.down]. This
-  /// includes all the slivers that are beyond the bottom of the viewport.
+  /// includes all the slivers that are below the bottom of the viewport.
   ///
   /// [SliverConstraints.remainingPaintExtent] is typically used to accomplish
   /// the same goal of computing whether scrolled out slivers should still
