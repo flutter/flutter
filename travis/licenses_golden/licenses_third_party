@@ -1,4 +1,4 @@
-Signature: c8697498a14fcd12bb1b238164160be1
+Signature: 8002aa37a2e3a8073ba0bce943b9db6e
 
 UNUSED LICENSES:
 
@@ -70,173 +70,6 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-====================================================================================================
-
-====================================================================================================
-ORIGIN: ../../../third_party/skia/third_party/etc1/LICENSE
-TYPE: LicenseType.apache
-----------------------------------------------------------------------------------------------------
-Apache License
-
-Version 2.0, January 2004
-
-http://www.apache.org/licenses
-
-TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
-1. Definitions.
-
-"License" shall mean the terms and conditions for use, reproduction, and
-distribution as defined by Sections 1 through 9 of this document.
-
-"Licensor" shall mean the copyright owner or entity authorized by the
-copyright owner that is granting the License.
-
-"Legal Entity" shall mean the union of the acting entity and all other
-entities that control, are controlled by, or are under common control with
-that entity. For the purposes of this definition, "control" means (i) the
-power, direct or indirect, to cause the direction or management of such
-entity, whether by contract or otherwise, or (ii) ownership of fifty
-percent (50%) or more of the outstanding shares, or (iii) beneficial
-ownership of such entity.
-
-"You" (or "Your") shall mean an individual or Legal Entity exercising
-permissions granted by this License.
-
-"Source" form shall mean the preferred form for making modifications,
-including but not limited to software source code, documentation
-source, and configuration files.
-
-"Object" form shall mean any form resulting from mechanical transformation
-or translation of a Source form, including but not limited to compiled
-object code, generated documentation, and conversions to other media types.
-
-"Work" shall mean the work of authorship, whether in Source or Object
-form, made available under the License, as indicated by a copyright
-notice that is included in or attached to the work (an example is
-provided in the Appendix below).
-
-"Derivative Works" shall mean any work, whether in Source or Object
-form, that is based on (or derived from) the Work and for which the
-editorial revisions, annotations, elaborations, or other modifications
-represent, as a whole, an original work of authorship. For the purposes
-of this License, Derivative Works shall not include works that remain
-separable from, or merely link (or bind by name) to the interfaces of,
-the Work and Derivative Works thereof.
-
-"Contribution" shall mean any work of authorship, including the original
-version of the Work and any modifications or additions to that Work or
-Derivative Works thereof, that is intentionally submitted to Licensor
-for inclusion in the Work by the copyright owner or by an individual or
-Legal Entity authorized to submit on behalf of the copyright owner. For
-the purposes of this definition, "submitted" means any form of electronic,
-verbal, or written communication sent to the Licensor or its
-representatives, including but not limited to communication on electronic
-mailing lists, source code control systems, and issue tracking systems that
-are managed by, or on behalf of, the Licensor for the purpose of discussing
-and improving the Work, but excluding communication that is conspicuously
-marked or otherwise designated in writing by the copyright owner as "Not
-a Contribution."
-
-"Contributor" shall mean Licensor and any individual or Legal Entity on
-behalf of whom a Contribution has been received by Licensor and subsequently
-incorporated within the Work.
-
-2. Grant of Copyright License. Subject to the terms and conditions of this
-License, each Contributor hereby grants to You a perpetual, worldwide,
-non-exclusive, no-charge, royalty-free, irrevocable copyright license to
-reproduce, prepare Derivative Works of, publicly display, publicly perform,
-sublicense, and distribute the Work and such Derivative Works in Source or
-Object form.
-
-3. Grant of Patent License. Subject to the terms and conditions of this
-License, each Contributor hereby grants to You a perpetual, worldwide,
-non-exclusive, no-charge, royalty-free, irrevocable (except as stated in
-this section) patent license to make, have made, use, offer to sell, sell,
-import, and otherwise transfer the Work, where such license applies only to
-those patent claims licensable by such Contributor that are necessarily
-infringed by their Contribution(s) alone or by combination of their
-Contribution(s) with the Work to which such Contribution(s) was submitted.
-If You institute patent litigation against any entity (including a cross-claim
-or counterclaim in a lawsuit) alleging that the Work or a Contribution
-incorporated within the Work constitutes direct or contributory patent
-infringement, then any patent licenses granted to You under this License
-for that Work shall terminate as of the date such litigation is filed.
-
-4. Redistribution. You may reproduce and distribute copies of the Work or
-Derivative Works thereof in any medium, with or without modifications, and
-in Source or Object form, provided that You meet the following conditions:
-
-You must give any other recipients of the Work or Derivative Works a copy of
-this License; and
-You must cause any modified files to carry prominent notices stating that
-You changed the files; and
-You must retain, in the Source form of any Derivative Works that You
-distribute, all copyright, patent, trademark, and attribution notices
-from the Source form of the Work, excluding those notices that do not
-pertain to any part of the Derivative Works; and
-If the Work includes a "NOTICE" text file as part of its distribution,
-then any Derivative Works that You distribute must include a readable
-copy of the attribution notices contained within such NOTICE file, excluding
-those notices that do not pertain to any part of the Derivative Works, in
-at least one of the following places: within a NOTICE text file distributed
-as part of the Derivative Works; within the Source form or documentation, if
-provided along with the Derivative Works; or, within a display generated by
-the Derivative Works, if and wherever such third-party notices normally
-appear. The contents of the NOTICE file are for informational purposes
-only and do not modify the License. You may add Your own attribution
-notices within Derivative Works that You distribute, alongside or as
-an addendum to the NOTICE text from the Work, provided that such additional
-attribution notices cannot be construed as modifying the License.
-
-You may add Your own copyright statement to Your modifications and may provide
-additional or different license terms and conditions for use, reproduction, or
-distribution of Your modifications, or for any such Derivative Works as a
-whole, provided Your use, reproduction, and distribution of the Work otherwise
-complies with the conditions stated in this License.
-5. Submission of Contributions. Unless You explicitly state otherwise, any
-Contribution intentionally submitted for inclusion in the Work by You to the
-Licensor shall be under the terms and conditions of this License, without any
-additional terms or conditions. Notwithstanding the above, nothing herein
-shall supersede or modify the terms of any separate license agreement you
-may have executed with Licensor regarding such Contributions.
-
-6. Trademarks. This License does not grant permission to use the trade names,
-trademarks, service marks, or product names of the Licensor, except as
-required for reasonable and customary use in describing the origin of the
-Work and reproducing the content of the NOTICE file.
-
-7. Disclaimer of Warranty. Unless required by applicable law or agreed to
-in writing, Licensor provides the Work (and each Contributor provides its
-Contributions) on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
-ANY KIND, either express or implied, including, without limitation, any
-warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or
-FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for determining
-the appropriateness of using or redistributing the Work and assume any risks
-associated with Your exercise of permissions under this License.
-
-8. Limitation of Liability. In no event and under no legal theory, whether in
-tort (including negligence), contract, or otherwise, unless required by
-applicable law (such as deliberate and grossly negligent acts) or agreed to
-in writing, shall any Contributor be liable to You for damages, including
-any direct, indirect, special, incidental, or consequential damages of any
-character arising as a result of this License or out of the use or inability
-to use the Work (including but not limited to damages for loss of goodwill,
-work stoppage, computer failure or malfunction, or any and all other
-commercial damages or losses), even if such Contributor has been advised
-of the possibility of such damages.
-
-9. Accepting Warranty or Additional Liability. While redistributing the
-Work or Derivative Works thereof, You may choose to offer, and charge a
-fee for, acceptance of support, warranty, indemnity, or other liability
-obligations and/or rights consistent with this License. However, in accepting
-such obligations, You may act only on Your own behalf and on Your sole
-responsibility, not on behalf of any other Contributor, and only if You
-agree to indemnify, defend, and hold each Contributor harmless for any
-liability incurred by, or claims asserted against, such Contributor by
-reason of your accepting any such warranty or additional liability.
-
-END OF TERMS AND CONDITIONS
 ====================================================================================================
 
 ====================================================================================================
@@ -6375,273 +6208,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: etc1
-LIBRARY: observatory_pub_packages
-LIBRARY: skia
-LIBRARY: vulkan
-ORIGIN: ../../../flutter/third_party/txt/LICENSE
-TYPE: LicenseType.apache
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/.analysis_options
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/async.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/cache.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/check.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/collection.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/core.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/io.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/iterables.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/mirrors.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/pattern.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/collect.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/concat.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/countdown_timer.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/enumerate.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/future_group.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/future_stream.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/iteration.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/metronome.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/stream_buffer.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/stream_router.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/cache/cache.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/cache/map_cache.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/bimap.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/delegates/iterable.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/delegates/list.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/delegates/map.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/delegates/queue.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/delegates/set.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/lru_map.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/multimap.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/treeset.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/core/hash.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/core/optional.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/concat.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/count.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/cycle.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/enumerate.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/generating_iterable.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/infinite_iterable.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/merge.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/min_max.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/partition.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/range.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/zip.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/pattern/glob.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/time/clock.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/time/duration_unit_constants.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/strings.dart
-FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/time.dart
-FILE: ../../../third_party/skia/src/images/SkWebpEncoder.cpp
-FILE: ../../../third_party/skia/third_party/etc1/etc1.cpp
-FILE: ../../../third_party/skia/third_party/etc1/etc1.h
-FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vk_platform.h
-FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan.h
-FILE: ../../../third_party/vulkan/src/vulkan/vk_platform.h
-FILE: ../../../third_party/vulkan/src/vulkan/vulkan.h
-----------------------------------------------------------------------------------------------------
-Apache License
-Version 2.0, January 2004
-http://www.apache.org/licenses
-
-TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
-1. Definitions.
-
-   "License" shall mean the terms and conditions for use, reproduction,
-   and distribution as defined by Sections 1 through 9 of this document.
-
-   "Licensor" shall mean the copyright owner or entity authorized by
-   the copyright owner that is granting the License.
-
-   "Legal Entity" shall mean the union of the acting entity and all
-   other entities that control, are controlled by, or are under common
-   control with that entity. For the purposes of this definition,
-   "control" means (i) the power, direct or indirect, to cause the
-   direction or management of such entity, whether by contract or
-   otherwise, or (ii) ownership of fifty percent (50%) or more of the
-   outstanding shares, or (iii) beneficial ownership of such entity.
-
-   "You" (or "Your") shall mean an individual or Legal Entity
-   exercising permissions granted by this License.
-
-   "Source" form shall mean the preferred form for making modifications,
-   including but not limited to software source code, documentation
-   source, and configuration files.
-
-   "Object" form shall mean any form resulting from mechanical
-   transformation or translation of a Source form, including but
-   not limited to compiled object code, generated documentation,
-   and conversions to other media types.
-
-   "Work" shall mean the work of authorship, whether in Source or
-   Object form, made available under the License, as indicated by a
-   copyright notice that is included in or attached to the work
-   (an example is provided in the Appendix below).
-
-   "Derivative Works" shall mean any work, whether in Source or Object
-   form, that is based on (or derived from) the Work and for which the
-   editorial revisions, annotations, elaborations, or other modifications
-   represent, as a whole, an original work of authorship. For the purposes
-   of this License, Derivative Works shall not include works that remain
-   separable from, or merely link (or bind by name) to the interfaces of,
-   the Work and Derivative Works thereof.
-
-   "Contribution" shall mean any work of authorship, including
-   the original version of the Work and any modifications or additions
-   to that Work or Derivative Works thereof, that is intentionally
-   submitted to Licensor for inclusion in the Work by the copyright owner
-   or by an individual or Legal Entity authorized to submit on behalf of
-   the copyright owner. For the purposes of this definition, "submitted"
-   means any form of electronic, verbal, or written communication sent
-   to the Licensor or its representatives, including but not limited to
-   communication on electronic mailing lists, source code control systems,
-   and issue tracking systems that are managed by, or on behalf of, the
-   Licensor for the purpose of discussing and improving the Work, but
-   excluding communication that is conspicuously marked or otherwise
-   designated in writing by the copyright owner as "Not a Contribution."
-
-   "Contributor" shall mean Licensor and any individual or Legal Entity
-   on behalf of whom a Contribution has been received by Licensor and
-   subsequently incorporated within the Work.
-
-2. Grant of Copyright License. Subject to the terms and conditions of
-   this License, each Contributor hereby grants to You a perpetual,
-   worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-   copyright license to reproduce, prepare Derivative Works of,
-   publicly display, publicly perform, sublicense, and distribute the
-   Work and such Derivative Works in Source or Object form.
-
-3. Grant of Patent License. Subject to the terms and conditions of
-   this License, each Contributor hereby grants to You a perpetual,
-   worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-   (except as stated in this section) patent license to make, have made,
-   use, offer to sell, sell, import, and otherwise transfer the Work,
-   where such license applies only to those patent claims licensable
-   by such Contributor that are necessarily infringed by their
-   Contribution(s) alone or by combination of their Contribution(s)
-   with the Work to which such Contribution(s) was submitted. If You
-   institute patent litigation against any entity (including a
-   cross-claim or counterclaim in a lawsuit) alleging that the Work
-   or a Contribution incorporated within the Work constitutes direct
-   or contributory patent infringement, then any patent licenses
-   granted to You under this License for that Work shall terminate
-   as of the date such litigation is filed.
-
-4. Redistribution. You may reproduce and distribute copies of the
-   Work or Derivative Works thereof in any medium, with or without
-   modifications, and in Source or Object form, provided that You
-   meet the following conditions:
-
-   (a) You must give any other recipients of the Work or
-       Derivative Works a copy of this License; and
-
-   (b) You must cause any modified files to carry prominent notices
-       stating that You changed the files; and
-
-   (c) You must retain, in the Source form of any Derivative Works
-       that You distribute, all copyright, patent, trademark, and
-       attribution notices from the Source form of the Work,
-       excluding those notices that do not pertain to any part of
-       the Derivative Works; and
-
-   (d) If the Work includes a "NOTICE" text file as part of its
-       distribution, then any Derivative Works that You distribute must
-       include a readable copy of the attribution notices contained
-       within such NOTICE file, excluding those notices that do not
-       pertain to any part of the Derivative Works, in at least one
-       of the following places: within a NOTICE text file distributed
-       as part of the Derivative Works; within the Source form or
-       documentation, if provided along with the Derivative Works; or,
-       within a display generated by the Derivative Works, if and
-       wherever such third-party notices normally appear. The contents
-       of the NOTICE file are for informational purposes only and
-       do not modify the License. You may add Your own attribution
-       notices within Derivative Works that You distribute, alongside
-       or as an addendum to the NOTICE text from the Work, provided
-       that such additional attribution notices cannot be construed
-       as modifying the License.
-
-   You may add Your own copyright statement to Your modifications and
-   may provide additional or different license terms and conditions
-   for use, reproduction, or distribution of Your modifications, or
-   for any such Derivative Works as a whole, provided Your use,
-   reproduction, and distribution of the Work otherwise complies with
-   the conditions stated in this License.
-
-5. Submission of Contributions. Unless You explicitly state otherwise,
-   any Contribution intentionally submitted for inclusion in the Work
-   by You to the Licensor shall be under the terms and conditions of
-   this License, without any additional terms or conditions.
-   Notwithstanding the above, nothing herein shall supersede or modify
-   the terms of any separate license agreement you may have executed
-   with Licensor regarding such Contributions.
-
-6. Trademarks. This License does not grant permission to use the trade
-   names, trademarks, service marks, or product names of the Licensor,
-   except as required for reasonable and customary use in describing the
-   origin of the Work and reproducing the content of the NOTICE file.
-
-7. Disclaimer of Warranty. Unless required by applicable law or
-   agreed to in writing, Licensor provides the Work (and each
-   Contributor provides its Contributions) on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-   implied, including, without limitation, any warranties or conditions
-   of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
-   PARTICULAR PURPOSE. You are solely responsible for determining the
-   appropriateness of using or redistributing the Work and assume any
-   risks associated with Your exercise of permissions under this License.
-
-8. Limitation of Liability. In no event and under no legal theory,
-   whether in tort (including negligence), contract, or otherwise,
-   unless required by applicable law (such as deliberate and grossly
-   negligent acts) or agreed to in writing, shall any Contributor be
-   liable to You for damages, including any direct, indirect, special,
-   incidental, or consequential damages of any character arising as a
-   result of this License or out of the use or inability to use the
-   Work (including but not limited to damages for loss of goodwill,
-   work stoppage, computer failure or malfunction, or any and all
-   other commercial damages or losses), even if such Contributor
-   has been advised of the possibility of such damages.
-
-9. Accepting Warranty or Additional Liability. While redistributing
-   the Work or Derivative Works thereof, You may choose to offer,
-   and charge a fee for, acceptance of support, warranty, indemnity,
-   or other liability obligations and/or rights consistent with this
-   License. However, in accepting such obligations, You may act only
-   on Your own behalf and on Your sole responsibility, not on behalf
-   of any other Contributor, and only if You agree to indemnify,
-   defend, and hold each Contributor harmless for any liability
-   incurred by, or claims asserted against, such Contributor by reason
-   of your accepting any such warranty or additional liability.
-
-END OF TERMS AND CONDITIONS
-
-APPENDIX: How to apply the Apache License to your work.
-
-   To apply the Apache License to your work, attach the following
-   boilerplate notice, with the fields enclosed by brackets "[]"
-   replaced with your own identifying information. (Don't include
-   the brackets!)  The text should be enclosed in the appropriate
-   comment syntax for the file format. We also recommend that a
-   file or class name and description of purpose be included on the
-   same "printed page" as the copyright notice for easier
-   identification within third-party archives.
-
-Copyright [yyyy] [name of copyright owner]
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
 ====================================================================================================
 
 ====================================================================================================
@@ -14495,7 +14061,6 @@ FILE: ../../../third_party/skia/fuzz/Fuzz.h
 FILE: ../../../third_party/skia/fuzz/FuzzGradients.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzParsePath.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzPathop.cpp
-FILE: ../../../third_party/skia/fuzz/FuzzScaleToSides.cpp
 FILE: ../../../third_party/skia/fuzz/fuzz.cpp
 FILE: ../../../third_party/skia/gm/OverStroke.cpp
 FILE: ../../../third_party/skia/gm/animatedGif.cpp
@@ -15645,6 +15210,270 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: observatory_pub_packages
+LIBRARY: skia
+LIBRARY: vulkan
+ORIGIN: ../../../flutter/third_party/txt/LICENSE
+TYPE: LicenseType.apache
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/.analysis_options
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/async.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/cache.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/check.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/collection.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/core.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/io.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/iterables.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/mirrors.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/pattern.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/collect.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/concat.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/countdown_timer.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/enumerate.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/future_group.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/future_stream.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/iteration.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/metronome.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/stream_buffer.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/async/stream_router.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/cache/cache.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/cache/map_cache.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/bimap.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/delegates/iterable.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/delegates/list.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/delegates/map.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/delegates/queue.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/delegates/set.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/lru_map.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/multimap.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/collection/treeset.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/core/hash.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/core/optional.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/concat.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/count.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/cycle.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/enumerate.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/generating_iterable.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/infinite_iterable.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/merge.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/min_max.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/partition.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/range.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/iterables/zip.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/pattern/glob.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/time/clock.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/src/time/duration_unit_constants.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/strings.dart
+FILE: ../../../third_party/dart/third_party/observatory_pub_packages/packages/quiver/lib/time.dart
+FILE: ../../../third_party/skia/src/images/SkWebpEncoder.cpp
+FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vk_platform.h
+FILE: ../../../third_party/skia/third_party/vulkan/vulkan/vulkan.h
+FILE: ../../../third_party/vulkan/src/vulkan/vk_platform.h
+FILE: ../../../third_party/vulkan/src/vulkan/vulkan.h
+----------------------------------------------------------------------------------------------------
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses
+
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+1. Definitions.
+
+   "License" shall mean the terms and conditions for use, reproduction,
+   and distribution as defined by Sections 1 through 9 of this document.
+
+   "Licensor" shall mean the copyright owner or entity authorized by
+   the copyright owner that is granting the License.
+
+   "Legal Entity" shall mean the union of the acting entity and all
+   other entities that control, are controlled by, or are under common
+   control with that entity. For the purposes of this definition,
+   "control" means (i) the power, direct or indirect, to cause the
+   direction or management of such entity, whether by contract or
+   otherwise, or (ii) ownership of fifty percent (50%) or more of the
+   outstanding shares, or (iii) beneficial ownership of such entity.
+
+   "You" (or "Your") shall mean an individual or Legal Entity
+   exercising permissions granted by this License.
+
+   "Source" form shall mean the preferred form for making modifications,
+   including but not limited to software source code, documentation
+   source, and configuration files.
+
+   "Object" form shall mean any form resulting from mechanical
+   transformation or translation of a Source form, including but
+   not limited to compiled object code, generated documentation,
+   and conversions to other media types.
+
+   "Work" shall mean the work of authorship, whether in Source or
+   Object form, made available under the License, as indicated by a
+   copyright notice that is included in or attached to the work
+   (an example is provided in the Appendix below).
+
+   "Derivative Works" shall mean any work, whether in Source or Object
+   form, that is based on (or derived from) the Work and for which the
+   editorial revisions, annotations, elaborations, or other modifications
+   represent, as a whole, an original work of authorship. For the purposes
+   of this License, Derivative Works shall not include works that remain
+   separable from, or merely link (or bind by name) to the interfaces of,
+   the Work and Derivative Works thereof.
+
+   "Contribution" shall mean any work of authorship, including
+   the original version of the Work and any modifications or additions
+   to that Work or Derivative Works thereof, that is intentionally
+   submitted to Licensor for inclusion in the Work by the copyright owner
+   or by an individual or Legal Entity authorized to submit on behalf of
+   the copyright owner. For the purposes of this definition, "submitted"
+   means any form of electronic, verbal, or written communication sent
+   to the Licensor or its representatives, including but not limited to
+   communication on electronic mailing lists, source code control systems,
+   and issue tracking systems that are managed by, or on behalf of, the
+   Licensor for the purpose of discussing and improving the Work, but
+   excluding communication that is conspicuously marked or otherwise
+   designated in writing by the copyright owner as "Not a Contribution."
+
+   "Contributor" shall mean Licensor and any individual or Legal Entity
+   on behalf of whom a Contribution has been received by Licensor and
+   subsequently incorporated within the Work.
+
+2. Grant of Copyright License. Subject to the terms and conditions of
+   this License, each Contributor hereby grants to You a perpetual,
+   worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+   copyright license to reproduce, prepare Derivative Works of,
+   publicly display, publicly perform, sublicense, and distribute the
+   Work and such Derivative Works in Source or Object form.
+
+3. Grant of Patent License. Subject to the terms and conditions of
+   this License, each Contributor hereby grants to You a perpetual,
+   worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+   (except as stated in this section) patent license to make, have made,
+   use, offer to sell, sell, import, and otherwise transfer the Work,
+   where such license applies only to those patent claims licensable
+   by such Contributor that are necessarily infringed by their
+   Contribution(s) alone or by combination of their Contribution(s)
+   with the Work to which such Contribution(s) was submitted. If You
+   institute patent litigation against any entity (including a
+   cross-claim or counterclaim in a lawsuit) alleging that the Work
+   or a Contribution incorporated within the Work constitutes direct
+   or contributory patent infringement, then any patent licenses
+   granted to You under this License for that Work shall terminate
+   as of the date such litigation is filed.
+
+4. Redistribution. You may reproduce and distribute copies of the
+   Work or Derivative Works thereof in any medium, with or without
+   modifications, and in Source or Object form, provided that You
+   meet the following conditions:
+
+   (a) You must give any other recipients of the Work or
+       Derivative Works a copy of this License; and
+
+   (b) You must cause any modified files to carry prominent notices
+       stating that You changed the files; and
+
+   (c) You must retain, in the Source form of any Derivative Works
+       that You distribute, all copyright, patent, trademark, and
+       attribution notices from the Source form of the Work,
+       excluding those notices that do not pertain to any part of
+       the Derivative Works; and
+
+   (d) If the Work includes a "NOTICE" text file as part of its
+       distribution, then any Derivative Works that You distribute must
+       include a readable copy of the attribution notices contained
+       within such NOTICE file, excluding those notices that do not
+       pertain to any part of the Derivative Works, in at least one
+       of the following places: within a NOTICE text file distributed
+       as part of the Derivative Works; within the Source form or
+       documentation, if provided along with the Derivative Works; or,
+       within a display generated by the Derivative Works, if and
+       wherever such third-party notices normally appear. The contents
+       of the NOTICE file are for informational purposes only and
+       do not modify the License. You may add Your own attribution
+       notices within Derivative Works that You distribute, alongside
+       or as an addendum to the NOTICE text from the Work, provided
+       that such additional attribution notices cannot be construed
+       as modifying the License.
+
+   You may add Your own copyright statement to Your modifications and
+   may provide additional or different license terms and conditions
+   for use, reproduction, or distribution of Your modifications, or
+   for any such Derivative Works as a whole, provided Your use,
+   reproduction, and distribution of the Work otherwise complies with
+   the conditions stated in this License.
+
+5. Submission of Contributions. Unless You explicitly state otherwise,
+   any Contribution intentionally submitted for inclusion in the Work
+   by You to the Licensor shall be under the terms and conditions of
+   this License, without any additional terms or conditions.
+   Notwithstanding the above, nothing herein shall supersede or modify
+   the terms of any separate license agreement you may have executed
+   with Licensor regarding such Contributions.
+
+6. Trademarks. This License does not grant permission to use the trade
+   names, trademarks, service marks, or product names of the Licensor,
+   except as required for reasonable and customary use in describing the
+   origin of the Work and reproducing the content of the NOTICE file.
+
+7. Disclaimer of Warranty. Unless required by applicable law or
+   agreed to in writing, Licensor provides the Work (and each
+   Contributor provides its Contributions) on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+   implied, including, without limitation, any warranties or conditions
+   of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+   PARTICULAR PURPOSE. You are solely responsible for determining the
+   appropriateness of using or redistributing the Work and assume any
+   risks associated with Your exercise of permissions under this License.
+
+8. Limitation of Liability. In no event and under no legal theory,
+   whether in tort (including negligence), contract, or otherwise,
+   unless required by applicable law (such as deliberate and grossly
+   negligent acts) or agreed to in writing, shall any Contributor be
+   liable to You for damages, including any direct, indirect, special,
+   incidental, or consequential damages of any character arising as a
+   result of this License or out of the use or inability to use the
+   Work (including but not limited to damages for loss of goodwill,
+   work stoppage, computer failure or malfunction, or any and all
+   other commercial damages or losses), even if such Contributor
+   has been advised of the possibility of such damages.
+
+9. Accepting Warranty or Additional Liability. While redistributing
+   the Work or Derivative Works thereof, You may choose to offer,
+   and charge a fee for, acceptance of support, warranty, indemnity,
+   or other liability obligations and/or rights consistent with this
+   License. However, in accepting such obligations, You may act only
+   on Your own behalf and on Your sole responsibility, not on behalf
+   of any other Contributor, and only if You agree to indemnify,
+   defend, and hold each Contributor harmless for any liability
+   incurred by, or claims asserted against, such Contributor by reason
+   of your accepting any such warranty or additional liability.
+
+END OF TERMS AND CONDITIONS
+
+APPENDIX: How to apply the Apache License to your work.
+
+   To apply the Apache License to your work, attach the following
+   boilerplate notice, with the fields enclosed by brackets "[]"
+   replaced with your own identifying information. (Don't include
+   the brackets!)  The text should be enclosed in the appropriate
+   comment syntax for the file format. We also recommend that a
+   file or class name and description of purpose be included on the
+   same "printed page" as the copyright notice for easier
+   identification within third-party archives.
+
+Copyright [yyyy] [name of copyright owner]
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 ====================================================================================================
 
 ====================================================================================================
@@ -17862,6 +17691,7 @@ FILE: ../../../third_party/skia/docs/SkPixmap_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkPoint_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkRect_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkSurface_Reference.bmh
+FILE: ../../../third_party/skia/docs/illustrations.bmh
 FILE: ../../../third_party/skia/docs/markup.bmh
 FILE: ../../../third_party/skia/docs/overview.bmh
 FILE: ../../../third_party/skia/docs/status.json
@@ -17882,7 +17712,7 @@ FILE: ../../../third_party/skia/infra/bots/assets.isolate
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_darwin/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_windows/VERSION
-FILE: ../../../third_party/skia/infra/bots/assets/android_sdk/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/android_sdk_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/armhf_sysroot/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/cast_toolchain/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/chromebook_arm_gles/VERSION
@@ -17890,10 +17720,12 @@ FILE: ../../../third_party/skia/infra/bots/assets/chromebook_x86_64_gles/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/clang_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/clang_win/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/emscripten_sdk/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/gcloud_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/go/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_intel_driver_debug/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_intel_driver_release/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_sdk/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/procdump_win/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/protoc/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/skimage/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/skp/VERSION
@@ -17915,6 +17747,9 @@ FILE: ../../../third_party/skia/infra/bots/housekeeper_skia.isolate
 FILE: ../../../third_party/skia/infra/bots/infra_skia.isolate
 FILE: ../../../third_party/skia/infra/bots/infrabots.isolate
 FILE: ../../../third_party/skia/infra/bots/ios_bin.isolate
+FILE: ../../../third_party/skia/infra/bots/isolate_android_sdk_linux.isolate
+FILE: ../../../third_party/skia/infra/bots/isolate_gcloud_linux.isolate
+FILE: ../../../third_party/skia/infra/bots/isolate_go_linux.isolate
 FILE: ../../../third_party/skia/infra/bots/isolate_ndk_linux.isolate
 FILE: ../../../third_party/skia/infra/bots/isolate_skimage.isolate
 FILE: ../../../third_party/skia/infra/bots/isolate_skp.isolate
@@ -17930,6 +17765,7 @@ FILE: ../../../third_party/skia/infra/bots/perf_skia_bundled_win.isolate
 FILE: ../../../third_party/skia/infra/bots/presubmit_skia.isolate
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/builder_name_schema/builder_name_schema.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/builder_name_schema/examples/full.expected/test.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/Build-Debian9-Clang-x86_64-Release-NoDEPS.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/Housekeeper-Weekly-RecreateSKPs.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/cross_repo_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/flutter_trybot.json
@@ -17945,10 +17781,12 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.e
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-Clang-arm-Release-Android_ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-Clang-arm-Release-Chromebook_GLES.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-Clang-arm64-Release-Android_ASAN.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-Clang-universal-devrel-Android_SKQP.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-Clang-x86_64-Debug-Chromebook_GLES.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-Clang-x86_64-Debug-SK_USE_DISCARDABLE_SCALEDIMAGECACHE.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-Clang-x86_64-Release-Fast.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-Clang-x86_64-Release-Mini.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-Clang-x86_64-Release-NoDEPS.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-Clang-x86_64-Release-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-EMCC-wasm-Release.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-GCC-x86_64-Debug-EmbededResouces.json
@@ -17964,9 +17802,6 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.e
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Mac-Clang-x86_64-Debug-Metal.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Win-Clang-arm64-Release-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Win-Clang-x86_64-Debug-GDI.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Win-Clang-x86_64-Debug-GomaNoFallback.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Win-Clang-x86_64-Release-ANGLE_Goma.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Win-Clang-x86_64-Release-Goma.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Win-Clang-x86_64-Release-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Win-Clang-x86_64-Release.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Win-MSVC-x86-Debug-Exceptions.json
@@ -17987,12 +17822,14 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.e
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Android-Clang-Nexus7-CPU-Tegra3-arm-Release-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Android-Clang-Pixel-GPU-Adreno530-arm64-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-ChromeOS-Clang-SamsungChromebookPlus-GPU-MaliT860-arm-Release-All.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian9-Clang-GCE-CPU-AVX2-universal-devrel-All-Android_SKQP.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-All-Coverage.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-All-SafeStack.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Release-All-TSAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian9-GCC-GCE-CPU-AVX2-x86_64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Ubuntu16-Clang-NUC7i5BNK-GPU-IntelIris640-x86_64-Debug-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Ubuntu17-GCC-Golo-GPU-QuadroP400-x86_64-Release-All-Valgrind_AbandonGpuContext_SK_CPU_LIMIT_SSE41.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Vulkan_ProcDump.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Win10-MSVC-ShuttleA-GPU-GTX660-x86_64-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-iOS-Clang-iPadPro-GPU-GT7800-arm64-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/cpu_scale_failed.json
@@ -18034,6 +17871,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/swarming/examples/full
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/swarming/examples/full.expected/swarming_timeout_old.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/swarming/examples/full.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/swarming_client/examples/full.expected/basic.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Build-Debian9-Clang-x86_64-Release-NoDEPS.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Build-Debian9-Clang-x86_64-Release-ParentRevision.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Build-Debian9-Clang-x86_64-Release-SKNX_NO_SIMD.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Build-Debian9-GCC-x86_64-Release-Flutter_Android.json
@@ -18046,7 +17884,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.exp
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Perf-Chromecast-GCC-Chorizo-CPU-Cortex_A7-arm-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Perf-Debian9-Clang-GCE-CPU-AVX2-x86_64-Release-All-ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Perf-Ubuntu14-GCC-GCE-CPU-AVX2-x86_64-Release-All-CT_BENCH_1k_SKPs.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Upload-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-Coverage.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Upload-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-Coverage-All.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/win_test.json
 FILE: ../../../third_party/skia/infra/bots/recipes/android_compile.expected/android_compile_nontrybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/android_compile.expected/android_compile_trybot.json
@@ -18073,6 +17911,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-Clang-x86_64-Release-Chromebook_GLES.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-Clang-x86_64-Release-Fast.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-Clang-x86_64-Release-Mini.json
+FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-Clang-x86_64-Release-NoDEPS.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-Clang-x86_64-Release-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-Clang-x86_64-Release-Vulkan_Coverage.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-EMCC-wasm-Release.json
@@ -18140,6 +17979,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Ubuntu16-C
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Ubuntu17-GCC-Golo-GPU-QuadroP400-x86_64-Release-All-Valgrind_AbandonGpuContext_SK_CPU_LIMIT_SSE41.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Ubuntu17-GCC-Golo-GPU-QuadroP400-x86_64-Release-All-Valgrind_SK_CPU_LIMIT_SSE41.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-AlphaR2-GPU-RadeonR9M470X-x86_64-Release-All-ANGLE.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-AlphaR2-GPU-RadeonR9M470X-x86_64-Release-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-NUC6i5SYK-GPU-IntelIris540-x86_64-Release-All-ANGLE.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-NUC6i5SYK-GPU-IntelIris540-x86_64-Release-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-ShuttleC-GPU-GTX960-x86_64-Release-All-ANGLE.json
@@ -18158,6 +17998,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Androi
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Android-Clang-PixelC-GPU-TegraX1-arm64-Release-All-Android_Skpbench.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Android-Clang-PixelC-GPU-TegraX1-arm64-Release-All-Android_Vulkan_Skpbench.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipes/skqp_test.expected/Test-Debian9-Clang-GCE-CPU-AVX2-universal-devrel-All-Android_SKQP.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-AndroidOne-GPU-Mali400MP2-arm-Release-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-GalaxyS6-GPU-MaliT760-arm64-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-GalaxyS7_G930A-GPU-Adreno530-arm64-Debug-All-Android.json
@@ -18186,6 +18027,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-GCC-GCE-CPU-AVX2-x86-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-GCC-GCE-CPU-AVX2-x86_64-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacBook10.1-GPU-IntelHD615-x86_64-Debug-All.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacBook10.1-GPU-IntelHD615-x86_64-Release-All-NativeFonts.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacBookAir7.2-GPU-IntelHD6000-x86_64-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacMini7.1-CPU-AVX-x86_64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacMini7.1-GPU-IntelIris5100-x86_64-Debug-All-CommandBuffer.json
@@ -18193,6 +18035,8 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu16-C
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu16-Clang-NUC5PPYH-GPU-IntelHD405-x86_64-Release-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu16-Clang-NUC7i5BNK-GPU-IntelIris640-x86_64-Debug-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu16-Clang-NUCDE3815TYKHE-GPU-IntelBayTrail-x86_64-Debug-All.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu17-Clang-Golo-GPU-QuadroP400-x86_64-Debug-All-DDL1.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu17-Clang-Golo-GPU-QuadroP400-x86_64-Debug-All-DDL3.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu17-Clang-Golo-GPU-QuadroP400-x86_64-Debug-All-Vulkan_Coverage.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu17-GCC-Golo-GPU-QuadroP400-x86_64-Release-All-Valgrind_AbandonGpuContext_SK_CPU_LIMIT_SSE41.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu17-GCC-Golo-GPU-QuadroP400-x86_64-Release-All-Valgrind_PreAbandonGpuContext_SK_CPU_LIMIT_SSE41.json
@@ -18262,6 +18106,7 @@ FILE: ../../../third_party/skia/infra/bots/upload_dm_results.isolate
 FILE: ../../../third_party/skia/infra/bots/upload_nano_results.isolate
 FILE: ../../../third_party/skia/infra/branch-config/cq.cfg
 FILE: ../../../third_party/skia/infra/config/recipes.cfg
+FILE: ../../../third_party/skia/infra/cts/whitelist_devices.json
 FILE: ../../../third_party/skia/infra/project-config/cr-buildbucket.cfg
 FILE: ../../../third_party/skia/infra/project-config/project.cfg
 FILE: ../../../third_party/skia/infra/project-config/refs.cfg
@@ -18449,7 +18294,6 @@ FILE: ../../../third_party/skia/gm/strokefill.cpp
 FILE: ../../../third_party/skia/gm/strokerects.cpp
 FILE: ../../../third_party/skia/gm/strokes.cpp
 FILE: ../../../third_party/skia/gm/tablecolorfilter.cpp
-FILE: ../../../third_party/skia/gm/texdata.cpp
 FILE: ../../../third_party/skia/gm/texteffects.cpp
 FILE: ../../../third_party/skia/gm/tilemodes.cpp
 FILE: ../../../third_party/skia/gm/tilemodes_scaled.cpp
@@ -18473,7 +18317,6 @@ FILE: ../../../third_party/skia/include/ports/SkTypeface_mac.h
 FILE: ../../../third_party/skia/include/ports/SkTypeface_win.h
 FILE: ../../../third_party/skia/include/private/GrGLSL.h
 FILE: ../../../third_party/skia/include/private/SkTArray.h
-FILE: ../../../third_party/skia/include/utils/SkDumpCanvas.h
 FILE: ../../../third_party/skia/include/utils/SkNWayCanvas.h
 FILE: ../../../third_party/skia/include/utils/mac/SkCGUtils.h
 FILE: ../../../third_party/skia/include/views/SkTouchGesture.h
@@ -18655,7 +18498,6 @@ FILE: ../../../third_party/skia/src/ports/SkScalerContext_win_dw.cpp
 FILE: ../../../third_party/skia/src/shaders/SkBitmapProcShader.cpp
 FILE: ../../../third_party/skia/src/shaders/SkEmptyShader.h
 FILE: ../../../third_party/skia/src/utils/SkBitSet.h
-FILE: ../../../third_party/skia/src/utils/SkDumpCanvas.cpp
 FILE: ../../../third_party/skia/src/utils/SkNWayCanvas.cpp
 FILE: ../../../third_party/skia/src/utils/SkOSPath.cpp
 FILE: ../../../third_party/skia/src/utils/SkParsePath.cpp
@@ -19523,14 +19365,14 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrStencilPathOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrTessellatingPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrTessellatingPathRenderer.h
-FILE: ../../../third_party/skia/src/gpu/text/GrAtlasGlyphCache.cpp
-FILE: ../../../third_party/skia/src/gpu/text/GrAtlasGlyphCache.h
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasTextBlob.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasTextBlob.h
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasTextContext.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrAtlasTextContext.h
 FILE: ../../../third_party/skia/src/gpu/text/GrDistanceFieldAdjustTable.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrDistanceFieldAdjustTable.h
+FILE: ../../../third_party/skia/src/gpu/text/GrGlyphCache.cpp
+FILE: ../../../third_party/skia/src/gpu/text/GrGlyphCache.h
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.cpp
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobCache.h
 FILE: ../../../third_party/skia/src/gpu/text/GrTextUtils.cpp
@@ -19779,8 +19621,6 @@ FILE: ../../../third_party/skia/src/core/SkBitmapDevice.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapDevice.h
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_matrix_template.h
 FILE: ../../../third_party/skia/src/core/SkDataTable.cpp
-FILE: ../../../third_party/skia/src/core/SkDeviceLooper.cpp
-FILE: ../../../third_party/skia/src/core/SkDeviceLooper.h
 FILE: ../../../third_party/skia/src/core/SkDiscardableMemory.h
 FILE: ../../../third_party/skia/src/core/SkDocument.cpp
 FILE: ../../../third_party/skia/src/core/SkDrawLooper.cpp
@@ -19901,8 +19741,6 @@ FILE: ../../../third_party/skia/bench/CubicKLMBench.cpp
 FILE: ../../../third_party/skia/bench/MultitextureImageBench.cpp
 FILE: ../../../third_party/skia/bench/PathTextBench.cpp
 FILE: ../../../third_party/skia/bench/ShadowBench.cpp
-FILE: ../../../third_party/skia/dm/DMFontMgr.cpp
-FILE: ../../../third_party/skia/dm/DMFontMgr.h
 FILE: ../../../third_party/skia/dm/DMGpuTestProcs.cpp
 FILE: ../../../third_party/skia/example/HelloWorld.cpp
 FILE: ../../../third_party/skia/example/HelloWorld.h
@@ -19996,6 +19834,7 @@ FILE: ../../../third_party/skia/include/core/SkDeferredDisplayListRecorder.h
 FILE: ../../../third_party/skia/include/core/SkExecutor.h
 FILE: ../../../third_party/skia/include/core/SkFontArguments.h
 FILE: ../../../third_party/skia/include/core/SkSerialProcs.h
+FILE: ../../../third_party/skia/include/core/SkSurfaceCharacterization.h
 FILE: ../../../third_party/skia/include/core/SkVertices.h
 FILE: ../../../third_party/skia/include/effects/SkHighContrastFilter.h
 FILE: ../../../third_party/skia/include/effects/SkToSRGBColorFilter.h
@@ -20011,12 +19850,10 @@ FILE: ../../../third_party/skia/include/private/GrSharedEnums.h
 FILE: ../../../third_party/skia/include/private/SkDeferredDisplayList.h
 FILE: ../../../third_party/skia/include/private/SkMalloc.h
 FILE: ../../../third_party/skia/include/private/SkShadowFlags.h
-FILE: ../../../third_party/skia/include/private/SkSurfaceCharacterization.h
 FILE: ../../../third_party/skia/include/utils/SkShadowUtils.h
 FILE: ../../../third_party/skia/samplecode/SampleCCPRGeometry.cpp
 FILE: ../../../third_party/skia/samplecode/SampleChineseFling.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCowboy.cpp
-FILE: ../../../third_party/skia/samplecode/SamplePathFinder.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathText.cpp
 FILE: ../../../third_party/skia/samplecode/SampleSGInval.cpp
 FILE: ../../../third_party/skia/samplecode/SampleShadowColor.cpp
@@ -20116,7 +19953,6 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPathProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPathProcessor.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCQuadraticShader.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCQuadraticShader.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCTriangleShader.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCTriangleShader.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCoverageCountingPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCoverageCountingPathRenderer.h
@@ -20178,11 +20014,7 @@ FILE: ../../../third_party/skia/src/gpu/vk/GrVkTexelBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkTexelBuffer.h
 FILE: ../../../third_party/skia/src/jumper/SkJumper.cpp
 FILE: ../../../third_party/skia/src/jumper/SkJumper.h
-FILE: ../../../third_party/skia/src/jumper/SkJumper_generated.S
-FILE: ../../../third_party/skia/src/jumper/SkJumper_generated_win.S
 FILE: ../../../third_party/skia/src/jumper/SkJumper_misc.h
-FILE: ../../../third_party/skia/src/jumper/SkJumper_stages.cpp
-FILE: ../../../third_party/skia/src/jumper/SkJumper_stages_lowp.cpp
 FILE: ../../../third_party/skia/src/opts/SkUtils_opts.h
 FILE: ../../../third_party/skia/src/pdf/SkKeyedImage.cpp
 FILE: ../../../third_party/skia/src/pdf/SkKeyedImage.h
@@ -20348,38 +20180,45 @@ FILE: ../../../third_party/skia/experimental/sksg/effects/SkSGOpacityEffect.cpp
 FILE: ../../../third_party/skia/experimental/sksg/effects/SkSGOpacityEffect.h
 FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGGeometryTransform.cpp
 FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGGeometryTransform.h
+FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGPlane.cpp
+FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGPlane.h
 FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGText.cpp
 FILE: ../../../third_party/skia/experimental/sksg/geometry/SkSGText.h
 FILE: ../../../third_party/skia/experimental/sksg/paint/SkSGGradient.cpp
 FILE: ../../../third_party/skia/experimental/sksg/paint/SkSGGradient.h
-FILE: ../../../third_party/skia/fuzz/FuzzCommon.h
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAnimatedImage.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzImage.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzCommon.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzPathMeasure.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzImageFilterDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionSetPath.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzTextBlobDeserialize.cpp
 FILE: ../../../third_party/skia/gm/hugepath.cpp
 FILE: ../../../third_party/skia/gm/makeRasterImage.cpp
 FILE: ../../../third_party/skia/gm/orientation.cpp
 FILE: ../../../third_party/skia/gm/scaledemoji.cpp
 FILE: ../../../third_party/skia/gm/shadermaskfilter.cpp
+FILE: ../../../third_party/skia/gm/sharedcorners.cpp
 FILE: ../../../third_party/skia/include/android/SkAnimatedImage.h
+FILE: ../../../third_party/skia/include/core/SkCanvasVirtualEnforcer.h
 FILE: ../../../third_party/skia/include/core/SkCoverageMode.h
 FILE: ../../../third_party/skia/include/effects/SkShaderMaskFilter.h
+FILE: ../../../third_party/skia/include/effects/SkTrimPathEffect.h
 FILE: ../../../third_party/skia/include/private/GrSurfaceProxyRef.h
 FILE: ../../../third_party/skia/include/private/SkSafe32.h
 FILE: ../../../third_party/skia/infra/cts/run_testlab.go
 FILE: ../../../third_party/skia/samplecode/SampleAnimatedImage.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFlutterAnimate.cpp
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
+FILE: ../../../third_party/skia/src/core/SkBlurPriv.h
 FILE: ../../../third_party/skia/src/core/SkCanvasPriv.cpp
 FILE: ../../../third_party/skia/src/core/SkCoverageModePriv.h
 FILE: ../../../third_party/skia/src/core/SkCubicMap.cpp
 FILE: ../../../third_party/skia/src/core/SkCubicMap.h
 FILE: ../../../third_party/skia/src/core/SkDeferredDisplayList.cpp
+FILE: ../../../third_party/skia/src/core/SkGlyph.cpp
 FILE: ../../../third_party/skia/src/core/SkMaskFilterBase.h
+FILE: ../../../third_party/skia/src/core/SkPath_serial.cpp
+FILE: ../../../third_party/skia/src/core/SkRRectPriv.h
 FILE: ../../../third_party/skia/src/core/SkRectPriv.h
 FILE: ../../../third_party/skia/src/core/SkRemoteGlyphCache.cpp
 FILE: ../../../third_party/skia/src/core/SkRemoteGlyphCache.h
@@ -20389,21 +20228,27 @@ FILE: ../../../third_party/skia/src/core/SkTypeface_remote.h
 FILE: ../../../third_party/skia/src/effects/GrAlphaThresholdFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/effects/GrAlphaThresholdFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/effects/GrAlphaThresholdFragmentProcessor.h
-FILE: ../../../third_party/skia/src/effects/GrCircleBlurFragmentProcessor.cpp
-FILE: ../../../third_party/skia/src/effects/GrCircleBlurFragmentProcessor.fp
-FILE: ../../../third_party/skia/src/effects/GrCircleBlurFragmentProcessor.h
 FILE: ../../../third_party/skia/src/effects/SkShaderMaskFilter.cpp
+FILE: ../../../third_party/skia/src/effects/SkTrimPE.h
+FILE: ../../../third_party/skia/src/effects/SkTrimPathEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/GrDDLContext.cpp
+FILE: ../../../third_party/skia/src/gpu/GrDirectContext.cpp
 FILE: ../../../third_party/skia/src/gpu/GrFPArgs.h
 FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceProviderPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrSurfaceProxyRef.cpp
+FILE: ../../../third_party/skia/src/gpu/GrUninstantiateProxyTracker.cpp
+FILE: ../../../third_party/skia/src/gpu/GrUninstantiateProxyTracker.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticFP.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticFP.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticFP.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrCircleBlurFragmentProcessor.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrCircleBlurFragmentProcessor.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrCircleBlurFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.h
@@ -20437,6 +20282,10 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrUnpremulInputFragmentProcessor
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
+FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
+FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.h
+FILE: ../../../third_party/skia/src/opts/SkOpts_hsw.cpp
+FILE: ../../../third_party/skia/src/opts/SkRasterPipeline_opts.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 Google Inc.
 
@@ -20474,6 +20323,48 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/fuzz/FuzzDrawFunctions.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2016 Mozilla Foundation
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: skia
+ORIGIN: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPIImageFilter.cpp + ../../../third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/fuzz/FuzzCommon.h
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAPIImageFilter.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAnimatedImage.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzDrawFunctions.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzGradients.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzImage.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathMeasure.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzTextBlobDeserialize.cpp
+----------------------------------------------------------------------------------------------------
+Copyright 2018 Google, LLC
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -20604,6 +20495,9 @@ FILE: ../../../third_party/skia/src/core/SkBlitter.h
 FILE: ../../../third_party/skia/src/core/SkBlitter_A8.cpp
 FILE: ../../../third_party/skia/src/core/SkBlitter_ARGB32.cpp
 FILE: ../../../third_party/skia/src/core/SkBlitter_Sprite.cpp
+FILE: ../../../third_party/skia/src/core/SkBlurMF.cpp
+FILE: ../../../third_party/skia/src/core/SkBlurMask.cpp
+FILE: ../../../third_party/skia/src/core/SkBlurMask.h
 FILE: ../../../third_party/skia/src/core/SkBuffer.cpp
 FILE: ../../../third_party/skia/src/core/SkBuffer.h
 FILE: ../../../third_party/skia/src/core/SkColor.cpp
@@ -20662,8 +20556,6 @@ FILE: ../../../third_party/skia/src/core/SkXfermode.cpp
 FILE: ../../../third_party/skia/src/core/SkXfermodePriv.h
 FILE: ../../../third_party/skia/src/effects/Sk1DPathEffect.cpp
 FILE: ../../../third_party/skia/src/effects/Sk2DPathEffect.cpp
-FILE: ../../../third_party/skia/src/effects/SkBlurMask.cpp
-FILE: ../../../third_party/skia/src/effects/SkBlurMask.h
 FILE: ../../../third_party/skia/src/effects/SkBlurMaskFilter.cpp
 FILE: ../../../third_party/skia/src/effects/SkCornerPathEffect.cpp
 FILE: ../../../third_party/skia/src/effects/SkDashPathEffect.cpp
