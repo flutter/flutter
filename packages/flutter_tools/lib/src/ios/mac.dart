@@ -149,25 +149,25 @@ class Xcode {
     return _eulaSigned;
   }
 
-  bool _areAdditionalComponentsInstalled;
+  bool _isSimctlInstalled;
 
   /// Verifies that simctl is installed by trying to run it.
-  bool get areAdditionalComponentsInstalled {
-    if (_areAdditionalComponentsInstalled == null) {
+  bool get isSimctlInstalled {
+    if (_isSimctlInstalled == null) {
       try {
         // This command will error if additional components need to be installed in
         // xcode 9.2 and above.
         final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'simctl', 'list']);
         if (result.stderr != null) {
-          _areAdditionalComponentsInstalled = false;
+          _isSimctlInstalled = false;
         } else {
-          _areAdditionalComponentsInstalled = true;
+          _isSimctlInstalled = true;
         }
       } on ProcessException {
-        _areAdditionalComponentsInstalled = false;
+        _isSimctlInstalled = false;
       }
     }
-    return _areAdditionalComponentsInstalled;
+    return _isSimctlInstalled;
   }
 
   bool get isVersionSatisfactory {
