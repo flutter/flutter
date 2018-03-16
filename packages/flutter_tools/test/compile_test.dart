@@ -32,6 +32,7 @@ void main() {
       final StreamController<String> stdErrStreamController = new StreamController<String>();
       when(mockFrontendServerStdErr.transform<String>(any)).thenReturn(stdErrStreamController.stream);
       when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
+      when(mockProcessManager.canRun(any)).thenReturn(true);
       when(mockProcessManager.start(any)).thenAnswer(
           (Invocation invocation) => new Future<Process>.value(mockFrontendServer));
       when(mockFrontendServer.exitCode).thenReturn(0);
@@ -120,6 +121,7 @@ void main() {
       when(mockFrontendServerStdErr.transform<String>(any))
           .thenAnswer((Invocation invocation) => stdErrStreamController.stream);
 
+      when(mockProcessManager.canRun(any)).thenReturn(true);
       when(mockProcessManager.start(any)).thenAnswer(
           (Invocation invocation) => new Future<Process>.value(mockFrontendServer)
       );
