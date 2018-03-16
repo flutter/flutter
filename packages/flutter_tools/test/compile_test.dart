@@ -229,7 +229,7 @@ Future<Null> _recompile(StreamController<List<int>> streamController,
   expect(output, equals('/path/to/main.dart.dill'));
   final String commands = mockFrontendServerStdIn.getAndClear();
   final String sep = fs.path.separator;
-  final RegExp re = new RegExp('^recompile (.*)\\n${sep}path${sep}to${sep}main.dart\n(.*)\\n\$');
+  final RegExp re = new RegExp('^recompile (.*)\\n${sep}path${sep}to${sep}main.dart\\n(.*)\\n\$');
   expect(commands, matches(re));
   final Match match = re.firstMatch(commands);
   expect(match[1] == match[2], isTrue);
