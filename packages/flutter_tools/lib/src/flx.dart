@@ -44,8 +44,6 @@ Future<Null> build({
   bool precompiledSnapshot: false,
   bool reportLicensedPackages: false,
   bool trackWidgetCreation: false,
-  List<String> fileSystemRoots,
-  String fileSystemScheme,
 }) async {
   outputPath ??= defaultFlxOutputPath;
   snapshotPath ??= defaultSnapshotPath;
@@ -84,9 +82,6 @@ Future<Null> build({
       outputFilePath: applicationKernelFilePath,
       depFilePath: depfilePath,
       trackWidgetCreation: trackWidgetCreation,
-      fileSystemRoots: fileSystemRoots,
-      fileSystemScheme: fileSystemScheme,
-      packagesPath: packagesPath,
     );
     if (kernelBinaryFilename == null) {
       throwToolExit('Compiler terminated unexpectedly on $mainPath');

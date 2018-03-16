@@ -303,10 +303,6 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
       command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
     if (buildInfo.extraGenSnapshotOptions != null)
       command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions}');
-    if (buildInfo.fileSystemRoots != null)
-      command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
-    if (buildInfo.fileSystemScheme != null)
-      command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
   }
   if (buildInfo.preferSharedLibrary && androidSdk.ndkCompiler != null) {
     command.add('-Pprefer-shared-library=true');
