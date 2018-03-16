@@ -239,7 +239,7 @@ class ResidentCompiler {
     _server.stdin.writeln('reset');
   }
 
-  Future shutdown() {
+  Future<dynamic> shutdown() {
     _server.kill();
     return _server.exitCode;
   }

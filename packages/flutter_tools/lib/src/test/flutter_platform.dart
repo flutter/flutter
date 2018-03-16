@@ -629,6 +629,7 @@ void main() {
 
   File _cachedFontConfig;
 
+  @override
   Future<dynamic> close() async {
     if (compiler != null) {
       await compiler.shutdown();
