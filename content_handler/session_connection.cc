@@ -21,7 +21,7 @@ SessionConnection::SessionConnection(ui::ScenicPtr scenic,
                                        this, std::placeholders::_1));
 
   root_node_.Bind(std::move(import_token));
-  root_node_.SetEventMask(scenic::kMetricsEventMask);
+  root_node_.SetEventMask(ui::gfx::kMetricsEventMask);
   session_.Present(0, [](ui::PresentationInfoPtr info) {});
 
   present_callback_ =
@@ -38,13 +38,12 @@ void SessionConnection::OnSessionError() {
   FXL_CHECK(false) << "Session connection was terminated.";
 }
 
-void SessionConnection::OnSessionEvents(
-    f1dl::Array<ui::EventPtr> events) {
-  scenic::MetricsPtr new_metrics;
+void SessionConnection::OnSessionEvents(f1dl::Array<ui::EventPtr> events) {
+  ui::gfx::MetricsPtr new_metrics;
   for (const auto& event : events) {
-    if (event->is_scenic() && event->get_scenic()->is_metrics() &&
-        event->get_scenic()->get_metrics()->node_id == root_node_.id()) {
-      new_metrics = std::move(event->get_scenic()->get_metrics()->metrics);
+    if (event->is_gfx() && event->get_gfx()->is_metrics() &&
+        event->get_gfx()->get_metrics()->node_id == root_node_.id()) {
+      new_metrics = std::move(event->get_gfx()->get_metrics()->metrics);
     }
   }
   if (!new_metrics)
@@ -78,7 +77,7 @@ void SessionConnection::Present(flow::CompositorContext::ScopedFrame& frame,
   surface_producer_->OnSurfacesPresented(std::move(surfaces_to_submit));
 
   // Prepare for the next frame.
-  EnqueueClearOps();
+  EnqueueClearCommands();
 }
 
 void SessionConnection::OnPresent(ui::PresentationInfoPtr info) {
@@ -88,11 +87,11 @@ void SessionConnection::OnPresent(ui::PresentationInfoPtr info) {
   callback();
 }
 
-void SessionConnection::EnqueueClearOps() {
+void SessionConnection::EnqueueClearCommands() {
   ASSERT_IS_GPU_THREAD;
   // We are going to be sending down a fresh node hierarchy every frame. So just
-  // enqueue a detach op on the imported root node.
-  session_.Enqueue(scenic_lib::NewDetachChildrenOp(root_node_.id()));
+  // enqueue a detach command on the imported root node.
+  session_.Enqueue(scenic_lib::NewDetachChildrenCommand(root_node_.id()));
 }
 
 }  // namespace flutter_runner

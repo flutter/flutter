@@ -58,7 +58,7 @@ class RasterCache {
                                       const SkMatrix& transformation_matrix,
                                       SkColorSpace* dst_color_space,
 #if defined(OS_FUCHSIA)
-                                      scenic::Metrics* metrics,
+                                      ui::gfx::Metrics* metrics,
 #endif
                                       bool is_complex,
                                       bool will_change);

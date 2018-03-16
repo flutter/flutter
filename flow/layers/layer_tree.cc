@@ -19,7 +19,7 @@ LayerTree::~LayerTree() = default;
 
 void LayerTree::Raster(CompositorContext::ScopedFrame& frame,
 #if defined(OS_FUCHSIA)
-                       scenic::Metrics* metrics,
+                       ui::gfx::Metrics* metrics,
 #endif
                        bool ignore_raster_cache) {
 #if defined(OS_FUCHSIA)
@@ -35,7 +35,7 @@ void LayerTree::Raster(CompositorContext::ScopedFrame& frame,
 
 void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
 #if defined(OS_FUCHSIA)
-                        scenic::Metrics* metrics,
+                        ui::gfx::Metrics* metrics,
 #endif
                         bool ignore_raster_cache) {
 #if defined(OS_FUCHSIA)

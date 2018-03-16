@@ -26,7 +26,7 @@ class SessionConnection {
 
   bool has_metrics() const { return scene_update_context_.has_metrics(); }
 
-  const scenic::MetricsPtr& metrics() const {
+  const ui::gfx::MetricsPtr& metrics() const {
     return scene_update_context_.metrics();
   }
 
@@ -58,7 +58,7 @@ class SessionConnection {
   void OnSessionError();
   void OnSessionEvents(f1dl::Array<ui::EventPtr> events);
 
-  void EnqueueClearOps();
+  void EnqueueClearCommands();
 
   void OnPresent(ui::PresentationInfoPtr info);
 
