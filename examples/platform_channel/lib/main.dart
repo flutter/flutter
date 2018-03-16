@@ -47,7 +47,7 @@ class _PlatformChannelState extends State<PlatformChannel> {
     });
   }
 
-  void _onError(PlatformException error) {
+  FutureOr _onError(Object error) {
     setState(() {
       _chargingStatus = 'Battery status: unknown.';
     });
