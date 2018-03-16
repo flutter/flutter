@@ -43,8 +43,8 @@ class TestSemantics {
     this.decreasedValue: '',
     this.hint: '',
     this.textDirection,
-    this.nextNodeId,
-    this.previousNodeId,
+    this.nextNodeId: -1,
+    this.previousNodeId: -1,
     this.rect,
     this.transform,
     this.textSelection,
@@ -58,6 +58,8 @@ class TestSemantics {
        assert(decreasedValue != null),
        assert(hint != null),
        assert(children != null),
+       assert(nextNodeId != null),
+       assert(previousNodeId != null),
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
@@ -71,8 +73,6 @@ class TestSemantics {
     this.decreasedValue: '',
     this.hint: '',
     this.textDirection,
-    this.previousNodeId,
-    this.nextNodeId,
     this.transform,
     this.textSelection,
     this.children: const <TestSemantics>[],
@@ -87,6 +87,8 @@ class TestSemantics {
        assert(hint != null),
        rect = TestSemantics.rootRect,
        assert(children != null),
+       nextNodeId = null,
+       previousNodeId = null,
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
@@ -108,8 +110,8 @@ class TestSemantics {
     this.increasedValue: '',
     this.decreasedValue: '',
     this.textDirection,
-    this.nextNodeId,
-    this.previousNodeId,
+    this.nextNodeId: -1,
+    this.previousNodeId: -1,
     this.rect,
     Matrix4 transform,
     this.textSelection,
@@ -124,6 +126,8 @@ class TestSemantics {
        assert(hint != null),
        transform = _applyRootChildScale(transform),
        assert(children != null),
+       assert(nextNodeId != null),
+       assert(previousNodeId != null),
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
 
   /// The unique identifier for this node.
@@ -265,9 +269,9 @@ class TestSemantics {
       return fail('expected node id $id to have hint "$hint" but found hint "${nodeData.hint}".');
     if (textDirection != null && textDirection != nodeData.textDirection)
       return fail('expected node id $id to have textDirection "$textDirection" but found "${nodeData.textDirection}".');
-    if (!ignoreId && nextNodeId != null && nextNodeId != nodeData.nextNodeId)
+    if (!ignoreId && nextNodeId != nodeData.nextNodeId)
       return fail('expected node id $id to have nextNodeId "$nextNodeId" but found "${nodeData.nextNodeId}".');
-    if (!ignoreId && previousNodeId != null && previousNodeId != nodeData.previousNodeId)
+    if (!ignoreId && previousNodeId != nodeData.previousNodeId)
       return fail('expected node id $id to have previousNodeId "$previousNodeId" but found "${nodeData.previousNodeId}".');
     if ((nodeData.label != '' || nodeData.value != '' || nodeData.hint != '' || node.increasedValue != '' || node.decreasedValue != '') && nodeData.textDirection == null)
       return fail('expected node id $id, which has a label, value, or hint, to have a textDirection, but it did not.');
@@ -503,6 +507,10 @@ class SemanticsTester {
     return '<SemanticsFlag>[${list.join(', ')}]';
   }
 
+  static String _tagsToSemanticsTagExpression(Set<SemanticsTag> tags) {
+    return '<SemanticsTag>[${tags.map((SemanticsTag tag) => 'const SemanticsTag(\'${tag.name}\')').join(', ')}]';
+  }
+
   static String _actionsToSemanticsActionExpression(dynamic actions) {
     Iterable<SemanticsAction> list;
     if (actions is int) {
@@ -520,32 +528,37 @@ class SemanticsTester {
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = new StringBuffer();
     final SemanticsData nodeData = node.getSemanticsData();
-    buf.writeln('new TestSemantics(');
+    final bool isRoot = node.id == 0;
+    buf.writeln('new TestSemantics${isRoot ? '.root': ''}(');
+    if (!isRoot)
+      buf.writeln('  id: ${node.id},');
+    if (nodeData.tags != null)
+      buf.writeln('  tags: ${_tagsToSemanticsTagExpression(nodeData.tags)},');
     if (nodeData.flags != 0)
       buf.writeln('  flags: ${_flagsToSemanticsFlagExpression(nodeData.flags)},');
     if (nodeData.actions != 0)
       buf.writeln('  actions: ${_actionsToSemanticsActionExpression(nodeData.actions)},');
     if (node.label != null && node.label.isNotEmpty) {
       final String escapedLabel = node.label.replaceAll('\n', r'\n');
-      if (escapedLabel == node.label) {
+      if (escapedLabel != node.label) {
         buf.writeln('  label: r\'$escapedLabel\',');
       } else {
         buf.writeln('  label: \'$escapedLabel\',');
       }
     }
     if (node.value != null && node.value.isNotEmpty)
-      buf.writeln('  value: r\'${node.value}\',');
+      buf.writeln('  value: \'${node.value}\',');
     if (node.increasedValue != null && node.increasedValue.isNotEmpty)
-      buf.writeln('  increasedValue: r\'${node.increasedValue}\',');
+      buf.writeln('  increasedValue: \'${node.increasedValue}\',');
     if (node.decreasedValue != null && node.decreasedValue.isNotEmpty)
-      buf.writeln('  decreasedValue: r\'${node.decreasedValue}\',');
+      buf.writeln('  decreasedValue: \'${node.decreasedValue}\',');
     if (node.hint != null && node.hint.isNotEmpty)
-      buf.writeln('  hint: r\'${node.hint}\',');
+      buf.writeln('  hint: \'${node.hint}\',');
     if (node.textDirection != null)
       buf.writeln('  textDirection: ${node.textDirection},');
-    if (node.nextNodeId != null)
+    if (node.nextNodeId != null && node.nextNodeId != -1)
       buf.writeln('  nextNodeId: ${node.nextNodeId},');
-    if (node.previousNodeId != null)
+    if (node.previousNodeId != null && node.previousNodeId != -1)
       buf.writeln('  previousNodeId: ${node.previousNodeId},');
 
     if (node.hasChildren) {

@@ -424,8 +424,6 @@ void main() {
           id: expectedId,
           rect: TestSemantics.fullScreen,
           actions: allActions.fold(0, (int previous, SemanticsAction action) => previous | action.index),
-          previousNodeId: -1,
-          nextNodeId: -1,
         ),
       ],
     );
@@ -480,8 +478,6 @@ void main() {
         new TestSemantics.rootChild(
           rect: TestSemantics.fullScreen,
           flags: SemanticsFlag.values.values.toList(),
-          previousNodeId: -1,
-          nextNodeId: -1,
         ),
       ],
     );
@@ -655,19 +651,15 @@ void main() {
     );
     expect(semanticsUpdateCount, 1);
     expect(semantics, hasSemantics(
-      new TestSemantics(
-        id: 0,
+      new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics(
             id: 1,
-            nextNodeId: -1,
-            previousNodeId: -1,
             children: <TestSemantics>[
               new TestSemantics(
                 id: 2,
                 label: r'Label 1',
                 textDirection: TextDirection.ltr,
-                nextNodeId: -1,
                 previousNodeId: 3,
               ),
               new TestSemantics(
@@ -680,13 +672,11 @@ void main() {
               new TestSemantics(
                 id: 4,
                 nextNodeId: 3,
-                previousNodeId: -1,
                 children: <TestSemantics>[
                   new TestSemantics(
                     id: 5,
                     label: r'Label 3',
                     textDirection: TextDirection.ltr,
-                    nextNodeId: -1,
                     previousNodeId: 6,
                   ),
                   new TestSemantics(
@@ -701,7 +691,6 @@ void main() {
                     label: r'Label 5',
                     textDirection: TextDirection.ltr,
                     nextNodeId: 6,
-                    previousNodeId: -1,
                   ),
                 ],
               ),
@@ -746,14 +735,12 @@ void main() {
     );
     expect(semanticsUpdateCount, 1);
     expect(semantics, hasSemantics(
-      new TestSemantics(
-        id: 0,
+      new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics(
             id: 1,
             label: r'Label 1',
             textDirection: TextDirection.ltr,
-            nextNodeId: -1,
             previousNodeId: 3,
           ),
           new TestSemantics(
@@ -761,7 +748,6 @@ void main() {
             label: r'Label 2',
             textDirection: TextDirection.ltr,
             nextNodeId: 3,
-            previousNodeId: -1,
           ),
           new TestSemantics(
             id: 3,
@@ -810,7 +796,6 @@ void main() {
           new TestSemantics(
             label: r'Label 1',
             textDirection: TextDirection.ltr,
-            previousNodeId: -1,
           ),
           new TestSemantics(
             label: r'Label 2',
@@ -886,7 +871,6 @@ void main() {
           new TestSemantics(
             label: r'Label 3',
             textDirection: TextDirection.ltr,
-            previousNodeId: -1,
           ),
           new TestSemantics(
             label: r'Label 4',
@@ -981,7 +965,6 @@ void main() {
           children: <TestSemantics>[
             new TestSemantics(
               flags: <SemanticsFlag>[SemanticsFlag.isButton],
-              previousNodeId: -1,
             ),
             new TestSemantics(
               flags: <SemanticsFlag>[SemanticsFlag.isButton],

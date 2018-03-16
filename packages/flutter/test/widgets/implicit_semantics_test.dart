@@ -79,10 +79,12 @@ void main() {
               children: <TestSemantics>[
                 new TestSemantics(
                   id: 2,
+                  nextNodeId: 3,
                   label: 'Michael Goderbauer',
                 ),
                 new TestSemantics(
                   id: 3,
+                  previousNodeId: 2,
                   label: 'goderbauer@google.com',
                 ),
               ],
@@ -233,16 +235,20 @@ void main() {
               children: <TestSemantics>[
                 new TestSemantics(
                   id: 6,
+                  nextNodeId: 7,
                   flags: SemanticsFlag.isSelected.index,
                   label: 'node 1',
                 ),
                 new TestSemantics(
                   id: 7,
+                  previousNodeId: 6,
+                  nextNodeId: 8,
                   flags: SemanticsFlag.isSelected.index,
                   label: 'node 2',
                 ),
                 new TestSemantics(
                   id: 8,
+                  previousNodeId: 7,
                   flags: SemanticsFlag.isSelected.index,
                   label: 'node 3',
                 ),
