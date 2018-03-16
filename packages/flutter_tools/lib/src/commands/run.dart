@@ -153,9 +153,9 @@ class RunCommand extends RunCommandBase {
 
     argParser.addMultiOption('filesystem-root',
         hide: !verboseHelp,
-        help: 'Specify the path, that is used as a root in virtual file system\n'
+        help: 'Specify the path, that is used as root in a virtual file system\n'
               'for compilation. Input file name should be specified as Uri in\n'
-              'filesystem-scheme scheme. Only used when --preview-dart-2 is set.\n'
+              'filesystem-scheme scheme. Use only in Dart 2 mode.\n'
               'Requires --output-dill option to be explicitly specified.\n');
 
     argParser.addOption('filesystem-scheme',

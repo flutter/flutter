@@ -470,8 +470,6 @@ abstract class BaseFlutterTask extends DefaultTask {
                 }
             }
             args "--working-dir", "${intermediateDir}/flutter_assets"
-
-            print args
         }
     }
 }

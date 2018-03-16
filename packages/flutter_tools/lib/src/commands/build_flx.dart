@@ -31,9 +31,9 @@ class BuildFlxCommand extends BuildSubCommand {
     argParser.addFlag('report-licensed-packages', help: 'Whether to report the names of all the packages that are included in the application\'s LICENSE file.', defaultsTo: false);
     argParser.addMultiOption('filesystem-root',
         hide: !verboseHelp,
-        help: 'Specify the path, that is used as a root in virtual file system\n'
+        help: 'Specify the path, that is used as root in a virtual file system\n'
             'for compilation. Input file name should be specified as Uri in\n'
-            'filesystem-scheme scheme. Only used when --preview-dart-2 is set.\n'
+            'filesystem-scheme scheme. Use only in Dart 2 mode.\n'
             'Requires --output-dill option to be explicitly specified.\n');
 
     argParser.addOption('filesystem-scheme',
