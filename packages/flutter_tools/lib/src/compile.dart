@@ -12,11 +12,14 @@ import 'base/io.dart';
 import 'base/process_manager.dart';
 import 'globals.dart';
 
+typedef void CompilerMessageConsumer(String message);
+
 class _StdoutHandler {
-  _StdoutHandler() {
+  _StdoutHandler({this.consumer: printError}) {
     reset();
   }
 
+  final CompilerMessageConsumer consumer;
   String boundaryKey;
   Completer<String> outputFilename;
 
@@ -30,7 +33,7 @@ class _StdoutHandler {
         ? string.substring(boundaryKey.length + 1)
         : null);
     else
-      printError('compiler message: $string');
+      consumer('compiler message: $string');
   }
 
   // This is needed to get ready to process next compilation result output,
@@ -134,12 +137,14 @@ Future<String> compile(
 /// restarts the Flutter app.
 class ResidentCompiler {
   ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation: false,
-      String packagesPath, List<String> fileSystemRoots, String fileSystemScheme })
+      String packagesPath, List<String> fileSystemRoots, String fileSystemScheme ,
+      CompilerMessageConsumer compilerMessageConsumer: printError})
     : assert(_sdkRoot != null),
       _trackWidgetCreation = trackWidgetCreation,
       _packagesPath = packagesPath,
       _fileSystemRoots = fileSystemRoots,
-      _fileSystemScheme = fileSystemScheme {
+      _fileSystemScheme = fileSystemScheme,
+      stdoutHandler = new _StdoutHandler(consumer: compilerMessageConsumer) {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
@@ -151,7 +156,7 @@ class ResidentCompiler {
   final String _fileSystemScheme;
   String _sdkRoot;
   Process _server;
-  final _StdoutHandler stdoutHandler = new _StdoutHandler();
+  final _StdoutHandler stdoutHandler;
 
   /// If invoked for the first time, it compiles Dart script identified by
   /// [mainPath], [invalidatedFiles] list is ignored.
@@ -262,10 +267,17 @@ class ResidentCompiler {
     if (_fileSystemRoots != null) {
       for (String root in _fileSystemRoots) {
         if (filename.startsWith(root)) {
-          return new Uri(scheme: _fileSystemScheme, path: filename.substring(root.length)).toString();
+          return new Uri(
+              scheme: _fileSystemScheme, path: filename.substring(root.length))
+              .toString();
         }
       }
     }
     return filename;
+  }
+
+  Future<dynamic> shutdown() {
+    _server.kill();
+    return _server.exitCode;
   }
 }

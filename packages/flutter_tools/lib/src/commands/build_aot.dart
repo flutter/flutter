@@ -39,7 +39,11 @@ class BuildAotCommand extends BuildSubCommand {
       )
       ..addFlag('interpreter')
       ..addFlag('quiet', defaultsTo: false)
-      ..addFlag('preview-dart-2', negatable: false, hide: !verboseHelp)
+      ..addFlag('preview-dart-2',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Preview Dart 2.0 functionality.',
+      )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
         hide: true,
@@ -48,8 +52,9 @@ class BuildAotCommand extends BuildSubCommand {
         splitCommas: true,
         hide: true,
       )
-      ..addFlag('prefer-shared-library', negatable: false,
-          help: 'Whether to prefer compiling to a *.so file (android only).');
+      ..addFlag('prefer-shared-library',
+        negatable: false,
+        help: 'Whether to prefer compiling to a *.so file (android only).');
   }
 
   @override
