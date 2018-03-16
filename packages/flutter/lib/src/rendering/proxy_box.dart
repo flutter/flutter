@@ -3278,7 +3278,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// Sets the [SemanticsNode.sortKey] to the given value.
   ///
-  /// This defines how this node are sorted with the other semantics nodes
+  /// This defines how this node is sorted among the sibling semantics nodes
   /// to determine the order in which they are traversed by the accessibility
   /// services on the platform (e.g. VoiceOver on iOS and TalkBack on Android).
   SemanticsSortKey get sortKey => _sortKey;
