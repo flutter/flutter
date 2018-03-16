@@ -418,7 +418,7 @@ class WidgetCreatorTracker implements ProgramTransformer {
     clazz.constructors.forEach(handleConstructor);
   }
 
-  Component _computeFullProgram(Component deltaProgram) {
+  Program _computeFullProgram(Program deltaProgram) {
     final Set<Library> libraries = new Set<Library>();
     final List<Library> workList = <Library>[];
     for (Library library in deltaProgram.libraries) {
@@ -434,7 +434,7 @@ class WidgetCreatorTracker implements ProgramTransformer {
         }
       }
     }
-    return new Component()..libraries.addAll(libraries);
+    return new Program()..libraries.addAll(libraries);
   }
 
   /// Transform the given [program].
@@ -442,7 +442,7 @@ class WidgetCreatorTracker implements ProgramTransformer {
   /// It is safe to call this method on a delta program generated as part of
   /// performing a hot reload.
   @override
-  void transform(Component program) {
+  void transform(Program program) {
     final List<Library> libraries = program.libraries;
 
     if (libraries.isEmpty) {
