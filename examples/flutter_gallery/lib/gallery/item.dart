@@ -159,6 +159,13 @@ List<GalleryItem> _buildGalleryItems() {
       buildRoute: (BuildContext context) => new TabsFabDemo(),
     ),
     new GalleryItem(
+      title: 'Floating action button motion',
+      subtitle: 'Action buttons with customized positions',
+      category: 'Material Components',
+      routeName: FabMotionDemo.routeName,
+      buildRoute: (BuildContext context) => new FabMotionDemo(),
+    ),
+    new GalleryItem(
       title: 'Grid',
       subtitle: 'Row and column layout',
       category: 'Material Components',
