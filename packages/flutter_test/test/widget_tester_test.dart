@@ -350,7 +350,7 @@ void main() {
                     Navigator.push<void>(context, new CupertinoPageRoute<void>(
                       builder: (BuildContext context) {
                         return new CupertinoPageScaffold(
-                          navigationBar: new CupertinoNavigationBar(
+                          navigationBar: const CupertinoNavigationBar(
                             middle: const Text('Page 2'),
                           ),
                           child: new Container(),
