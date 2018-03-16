@@ -260,6 +260,14 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('preview-dart-2')) {
             previewDart2Value = project.property('preview-dart-2')
         }
+        String[] fileSystemRootsValue = null
+        if (project.hasProperty('filesystem-roots')) {
+            fileSystemRootsValue = project.property('filesystem-roots').split('\\|')
+        }
+        String fileSystemSchemeValue = null
+        if (project.hasProperty('filesystem-scheme')) {
+            fileSystemSchemeValue = project.property('filesystem-scheme')
+        }
         Boolean trackWidgetCreationValue = false
         if (project.hasProperty('track-widget-creation')) {
             trackWidgetCreationValue = project.property('track-widget-creation')
@@ -302,6 +310,8 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
                 previewDart2 previewDart2Value
+                fileSystemRoots fileSystemRootsValue
+                fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
                 preferSharedLibrary preferSharedLibraryValue
                 targetPlatform targetPlatformValue
@@ -320,6 +330,8 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
                 previewDart2 previewDart2Value
+                fileSystemRoots fileSystemRootsValue
+                fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
                 preferSharedLibrary preferSharedLibraryValue
                 targetPlatform targetPlatformValue
@@ -356,6 +368,10 @@ abstract class BaseFlutterTask extends DefaultTask {
     String targetPath
     @Optional @Input
     Boolean previewDart2
+    @Optional @Input
+    String[] fileSystemRoots
+    @Optional @Input
+    String fileSystemScheme
     @Optional @Input
     Boolean trackWidgetCreation
     @Optional @Input
@@ -432,6 +448,14 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "--target", targetPath
             if (previewDart2) {
                 args "--preview-dart-2"
+            }
+            if (fileSystemRoots != null) {
+                for (root in fileSystemRoots) {
+                    args "--filesystem-root", root
+                }
+            }
+            if (fileSystemScheme != null) {
+                args "--filesystem-scheme", fileSystemScheme
             }
             if (trackWidgetCreation) {
                 args "--track-widget-creation"
