@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/file_system.dart' show fs;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
