@@ -144,7 +144,7 @@ void main() {
   });
 
   test('OrdinalSortKey compares correctly', () {
-    final List<List<SemanticsSortKey>> tests = <List<SemanticsSortKey>>[
+    const List<List<SemanticsSortKey>> tests = const <List<SemanticsSortKey>>[
       <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(0.0)],
       <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
       <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
@@ -164,10 +164,10 @@ void main() {
   });
 
   test('SemanticsSortKey sorts correctly when assigned names', () {
-    final SemanticsSortKey order1g1 = const CustomSortKey(0.0, name: 'group 1');
-    final SemanticsSortKey order2g1 = const CustomSortKey(1.0, name: 'group 1');
-    final SemanticsSortKey order2g2 = const CustomSortKey(1.0, name: 'group 2');
-    final SemanticsSortKey order3g2 = const OrdinalSortKey(1.0, name: 'group 1');
+    const SemanticsSortKey order1g1 = const CustomSortKey(0.0, name: 'group 1');
+    const SemanticsSortKey order2g1 = const CustomSortKey(1.0, name: 'group 1');
+    const SemanticsSortKey order2g2 = const CustomSortKey(1.0, name: 'group 2');
+    const SemanticsSortKey order3g2 = const OrdinalSortKey(1.0, name: 'group 1');
     // Keys in the same group compare.
     expect(order1g1.compareTo(order2g1), equals(-1));
     // Keys with different names compare equal.
@@ -177,7 +177,7 @@ void main() {
   });
 
   test('OrdinalSortKey compares correctly', () {
-    final List<List<SemanticsSortKey>> tests = <List<SemanticsSortKey>>[
+    const List<List<SemanticsSortKey>> tests = const <List<SemanticsSortKey>>[
       <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(0.0)],
       <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
       <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
@@ -197,10 +197,10 @@ void main() {
   });
 
   test('SemanticsSortKey sorts correctly when assigned names', () {
-    final SemanticsSortKey order1g1 = const CustomSortKey(0.0, name: 'group 1');
-    final SemanticsSortKey order2g1 = const CustomSortKey(1.0, name: 'group 1');
-    final SemanticsSortKey order2g2 = const CustomSortKey(1.0, name: 'group 2');
-    final SemanticsSortKey order3g2 = const OrdinalSortKey(1.0, name: 'group 1');
+    const SemanticsSortKey order1g1 = const CustomSortKey(0.0, name: 'group 1');
+    const SemanticsSortKey order2g1 = const CustomSortKey(1.0, name: 'group 1');
+    const SemanticsSortKey order2g2 = const CustomSortKey(1.0, name: 'group 2');
+    const SemanticsSortKey order3g2 = const OrdinalSortKey(1.0, name: 'group 1');
     // Keys in the same group compare.
     expect(order1g1.compareTo(order2g1), equals(-1));
     // Keys with different names compare equal.
