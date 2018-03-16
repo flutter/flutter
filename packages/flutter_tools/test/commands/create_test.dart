@@ -464,7 +464,6 @@ Future<Null> _analyzeProject(String workingDir, {String target}) async {
 }
 
 Future<Null> _runFlutterTest(Directory workingDir, {String target}) async {
-  await new Future.value(null);
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',
@@ -486,6 +485,7 @@ Future<Null> _runFlutterTest(Directory workingDir, {String target}) async {
     args,
     workingDirectory: workingDir.path,
   );
+  print("Parent process");
   print(exec.stdout);
   print(exec.stderr);
   if (exec.exitCode != 0) {
