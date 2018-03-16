@@ -1870,6 +1870,10 @@ abstract class RenderBox extends RenderObject {
   /// Override this method if this render object can be hit even if its
   /// children were not hit.
   ///
+  /// The caller is responsible for transforming [position] into the local
+  /// coordinate space of the callee. The callee is responsible for checking
+  /// whether the given position is within its bounds.
+  ///
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.
   @protected
@@ -1881,6 +1885,10 @@ abstract class RenderBox extends RenderObject {
   /// Typically children should be hit-tested in reverse paint order so that
   /// hit tests at locations where children overlap hit the child that is
   /// visually "on top" (i.e., paints later).
+  ///
+  /// The caller is responsible for transforming [position] into the local
+  /// coordinate space of the callee. The callee is responsible for checking
+  /// whether the given position is within its bounds.
   ///
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.

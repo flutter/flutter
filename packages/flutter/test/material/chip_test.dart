@@ -182,8 +182,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
-    expect(tester.getSize(find.byType(Chip)), const Size(64.0, 32.0));
+    expect(tester.getSize(find.byType(Text)), const Size(56.0, 14.0));
+    expect(tester.getSize(find.byType(Chip)), const Size(80.0, 32.0));
     await tester.pumpWidget(
       new MaterialApp(
         home: new Material(
@@ -195,8 +195,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
-    expect(tester.getSize(find.byType(Chip)), const Size(64.0, 32.0));
+    expect(tester.getSize(find.byType(Text)), const Size(56.0, 14.0));
+    expect(tester.getSize(find.byType(Chip)), const Size(80.0, 32.0));
     await tester.pumpWidget(
       new MaterialApp(
         home: new Material(
@@ -208,11 +208,12 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
+    expect(tester.getSize(find.byType(Text)), const Size(56.0, 14.0));
     expect(tester.getSize(find.byType(Chip)), const Size(800.0, 32.0));
   });
 
-  testWidgets('Chip supports RTL', (WidgetTester tester) async {
+  testWidgets('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
+    final UniqueKey iconKey = new UniqueKey();
     final Widget test = new Overlay(
       initialEntries: <OverlayEntry>[
         new OverlayEntry(
@@ -220,6 +221,7 @@ void main() {
             return new Material(
               child: new Center(
                 child: new Chip(
+                  deleteIcon: new Icon(Icons.delete, key: iconKey),
                   onDeleted: () {},
                   label: const Text('ABC'),
                 ),
@@ -243,8 +245,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getCenter(find.text('ABC')).dx, greaterThan(tester.getCenter(find.byType(Icon)).dx));
-
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+    expect(tester.getCenter(find.text('ABC')).dx, greaterThan(tester.getCenter(find.byKey(iconKey)).dx));
     await tester.pumpWidget(
       new Localizations(
         locale: const Locale('en', 'US'),
@@ -258,7 +260,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getCenter(find.text('ABC')).dx, lessThan(tester.getCenter(find.byType(Icon)).dx));
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+    expect(tester.getCenter(find.text('ABC')).dx, lessThan(tester.getCenter(find.byKey(iconKey)).dx));
   });
 
   testWidgets('Chip responds to textScaleFactor', (WidgetTester tester) async {
@@ -390,6 +393,47 @@ void main() {
     expect(tester.getSize(find.byType(Chip).last), const Size(58.0, 32.0));
   });
 
+  testWidgets('Avatars can be non-circle avatar widgets', (WidgetTester tester) async {
+    final Key keyA = new GlobalKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Column(
+            children: <Widget>[
+              new Chip(
+                avatar: new Container(key: keyA, width: 20.0, height: 20.0),
+                label: const Text('Chip A'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(keyA)), equals(const Size(20.0, 20.0)));
+  });
+
+  testWidgets('Delete icons can be non-icon widgets', (WidgetTester tester) async {
+    final Key keyA = new GlobalKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Column(
+            children: <Widget>[
+              new Chip(
+                deleteIcon: new Container(key: keyA, width: 20.0, height: 20.0),
+                label: const Text('Chip A'),
+                onDeleted: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(keyA)), equals(const Size(20.0, 20.0)));
+  });
+
   testWidgets('Chip padding - LTR', (WidgetTester tester) async {
     final GlobalKey keyA = new GlobalKey();
     final GlobalKey keyB = new GlobalKey();
@@ -410,7 +454,11 @@ void main() {
                     child: new Center(
                       child: new Chip(
                         avatar: new Placeholder(key: keyA),
-                        label: new Container(key: keyB, width: 40.0, height: 40.0,),
+                        label: new Container(
+                          key: keyB,
+                          width: 40.0,
+                          height: 40.0,
+                        ),
                         onDeleted: () {},
                       ),
                     ),
@@ -426,8 +474,8 @@ void main() {
     expect(tester.getBottomRight(find.byKey(keyA)), const Offset(372.0, 316.0));
     expect(tester.getTopLeft(find.byKey(keyB)), const Offset(380.0, 280.0));
     expect(tester.getBottomRight(find.byKey(keyB)), const Offset(420.0, 320.0));
-    expect(tester.getTopLeft(find.byType(Icon)), const Offset(428.0, 284.0));
-    expect(tester.getBottomRight(find.byType(Icon)), const Offset(460.0, 316.0));
+    expect(tester.getTopLeft(find.byType(Icon)), const Offset(435.0, 291.0));
+    expect(tester.getBottomRight(find.byType(Icon)), const Offset(453.0, 309.0));
   });
 
   testWidgets('Chip padding - RTL', (WidgetTester tester) async {
@@ -450,7 +498,11 @@ void main() {
                     child: new Center(
                       child: new Chip(
                         avatar: new Placeholder(key: keyA),
-                        label: new Container(key: keyB, width: 40.0, height: 40.0,),
+                        label: new Container(
+                          key: keyB,
+                          width: 40.0,
+                          height: 40.0,
+                        ),
                         onDeleted: () {},
                       ),
                     ),
@@ -467,7 +519,84 @@ void main() {
     expect(tester.getBottomRight(find.byKey(keyA)), const Offset(460.0, 316.0));
     expect(tester.getTopLeft(find.byKey(keyB)), const Offset(380.0, 280.0));
     expect(tester.getBottomRight(find.byKey(keyB)), const Offset(420.0, 320.0));
-    expect(tester.getTopLeft(find.byType(Icon)), const Offset(340.0, 284.0));
-    expect(tester.getBottomRight(find.byType(Icon)), const Offset(372.0, 316.0));
+    expect(tester.getTopLeft(find.byType(Icon)), const Offset(347.0, 291.0));
+    expect(tester.getBottomRight(find.byType(Icon)), const Offset(365.0, 309.0));
+  });
+
+  testWidgets('Avatar area works as expected on RawChip', (WidgetTester tester) async {
+    final GlobalKey labelKey = new GlobalKey();
+    Future<Null> pushChip({Widget avatar, ValueChanged<bool> onSelected, bool selected}) async {
+      return tester.pumpWidget(
+        new MaterialApp(
+          home: new Material(
+            child: new Wrap(
+              children: <Widget>[
+                new RawChip(
+                  avatar: avatar,
+                  onSelected: onSelected,
+                  selected: selected,
+                  label: new Text('Chip', key: labelKey),
+                  border: const StadiumBorder(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // No avatar
+    await pushChip();
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 32.0)));
+    final GlobalKey avatarKey = new GlobalKey();
+
+    // Add an avatar
+    await pushChip(
+      avatar: new Container(
+        key: avatarKey,
+        color: const Color(0xff000000),
+        width: 40.0,
+        height: 40.0,
+      ),
+    );
+    // Avatar drawer should start out closed.
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 32.0)));
+    // The avatar should be there already.
+    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 4.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 9.0)));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    // Avatar drawer should start expanding.
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(81.2, 0.1));
+    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 4.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(13.2, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(86.7, 0.1));
+    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 4.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(18.6, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(94.7, 0.1));
+    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 4.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(26.7, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(99.5, 0.1));
+    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 4.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(31.5, 0.1));
+
+    // Wait for being done with animation, and make sure it didn't change
+    // height.
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 32.0)));
+    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 4.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(36.0, 9.0)));
   });
 }
