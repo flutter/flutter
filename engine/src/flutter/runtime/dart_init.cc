@@ -396,10 +396,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
     if (!kernel_data.empty()) {
       // We are running kernel code.
-      uint8_t* kernel_buf = static_cast<uint8_t*>(malloc(kernel_data.size()));
-      memcpy(kernel_buf, kernel_data.data(), kernel_data.size());
-      FXL_CHECK(!LogIfError(Dart_LoadKernel(Dart_ReadKernelBinary(
-          kernel_buf, kernel_data.size(), ReleaseFetchedBytes))));
+      FXL_CHECK(!LogIfError(Dart_LoadScriptFromKernel(kernel_data.data(),
+                                                      kernel_data.size())));
     } else if (!snapshot_data.empty()) {
       // We are running from a script snapshot.
       FXL_CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(snapshot_data.data(),
