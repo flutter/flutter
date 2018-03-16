@@ -90,6 +90,25 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byIcon(IconData icon, { bool skipOffstage: true }) => new _WidgetIconFinder(icon, skipOffstage: skipOffstage);
 
+  /// Looks for widgets that contain an [Icon] descendant displaying [IconData]
+  /// `icon` in it.
+  ///
+  /// Example:
+  ///
+  ///     // Suppose you have a button with icon 'arrow_forward' in it:
+  ///     new Button(
+  ///       child: new Icon(Icons.arrow_forward)
+  ///     )
+  ///
+  ///     // You can find and tap on it like this:
+  ///     tester.tap(find.widgetWithIcon(Button, Icons.arrow_forward));
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder widgetWithIcon(Type widgetType, IconData icon, { bool skipOffstage: true }) {
+    return new _WidgetWithIconFinder(widgetType, icon, skipOffstage: skipOffstage);
+  }
+
   /// Finds widgets by searching for elements with a particular type.
   ///
   /// This does not do subclass tests, so for example
@@ -508,6 +527,40 @@ class _WidgetIconFinder extends MatchFinder {
   bool matches(Element candidate) {
     final Widget widget = candidate.widget;
     return widget is Icon && widget.icon == icon;
+  }
+}
+
+class _WidgetWithIconFinder extends Finder {
+  _WidgetWithIconFinder(this.widgetType, this.icon, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+
+  final Type widgetType;
+  final IconData icon;
+
+  @override
+  String get description => 'type $widgetType with icon "$icon"';
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) {
+    return candidates
+      .map((Element iconElement) {
+        if (iconElement.widget is! Icon)
+          return null;
+
+        final Icon iconWidget = iconElement.widget;
+        if (iconWidget.icon == icon) {
+          try {
+            iconElement.visitAncestorElements((Element element) {
+              if (element.widget.runtimeType == widgetType)
+                throw element;
+              return true;
+            });
+          } on Element catch (result) {
+            return result;
+          }
+        }
+        return null;
+      })
+      .where((Element element) => element != null);
   }
 }
 

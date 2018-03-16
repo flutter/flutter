@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const List<Widget> fooBarTexts = const <Text>[
@@ -286,6 +287,94 @@ void main() {
         matching: find.widgetWithText(Column, 'foo'),
         matchRoot: true,
       ), findsOneWidget);
+    });
+  });
+
+  group('pageBack', (){
+    testWidgets('fails when there are no back buttons', (WidgetTester tester) async {
+      await tester.pumpWidget(new Container());
+
+      expect(
+        expectAsync0(tester.pageBack),
+        throwsA(const isInstanceOf<TestFailure>()),
+      );
+    });
+
+    testWidgets('successfully taps material back buttons', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new MaterialApp(
+          home: new Center(
+            child: new Builder(
+              builder: (BuildContext context) {
+                return new RaisedButton(
+                  child: const Text('Next'),
+                  onPressed: () {
+                    Navigator.push<void>(context, new MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return new Scaffold(
+                          appBar: new AppBar(
+                            title: const Text('Page 2'),
+                          ),
+                        );
+                      },
+                    ));
+                  },
+                );
+              } ,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Next'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      await tester.pageBack();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('Next'), findsOneWidget);
+      expect(find.text('Page 2'), findsNothing);
+    });
+
+    testWidgets('successfully taps cupertino back buttons', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new MaterialApp(
+          home: new Center(
+            child: new Builder(
+              builder: (BuildContext context) {
+                return new CupertinoButton(
+                  child: const Text('Next'),
+                  onPressed: () {
+                    Navigator.push<void>(context, new CupertinoPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return new CupertinoPageScaffold(
+                          navigationBar: new CupertinoNavigationBar(
+                            middle: const Text('Page 2'),
+                          ),
+                          child: new Container(),
+                        );
+                      },
+                    ));
+                  },
+                );
+              } ,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Next'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      await tester.pageBack();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('Next'), findsOneWidget);
+      expect(find.text('Page 2'), findsNothing);
     });
   });
 
