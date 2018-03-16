@@ -19,16 +19,21 @@ import java.nio.ByteOrder;
  * {@link StandardMessageCodec}.</p>
  */
 public final class StandardMethodCodec implements MethodCodec {
-    public static final StandardMethodCodec INSTANCE = new StandardMethodCodec();
+    public static final StandardMethodCodec INSTANCE = new StandardMethodCodec(StandardMessageCodec.INSTANCE);
+    private final StandardMessageCodec messageCodec;
 
-    private StandardMethodCodec() {
+    /**
+     * Creates a new method codec based on the specified message codec.
+     */
+    public StandardMethodCodec(StandardMessageCodec messageCodec) {
+      this.messageCodec = messageCodec;
     }
 
     @Override
     public ByteBuffer encodeMethodCall(MethodCall methodCall) {
         final ExposedByteArrayOutputStream stream = new ExposedByteArrayOutputStream();
-        StandardMessageCodec.writeValue(stream, methodCall.method);
-        StandardMessageCodec.writeValue(stream, methodCall.arguments);
+        messageCodec.writeValue(stream, methodCall.method);
+        messageCodec.writeValue(stream, methodCall.arguments);
         final ByteBuffer buffer = ByteBuffer.allocateDirect(stream.size());
         buffer.put(stream.buffer(), 0, stream.size());
         return buffer;
@@ -37,8 +42,8 @@ public final class StandardMethodCodec implements MethodCodec {
     @Override
     public MethodCall decodeMethodCall(ByteBuffer methodCall) {
         methodCall.order(ByteOrder.nativeOrder());
-        final Object method = StandardMessageCodec.readValue(methodCall);
-        final Object arguments = StandardMessageCodec.readValue(methodCall);
+        final Object method = messageCodec.readValue(methodCall);
+        final Object arguments = messageCodec.readValue(methodCall);
         if (method instanceof String && !methodCall.hasRemaining()) {
             return new MethodCall((String) method, arguments);
         }
@@ -49,7 +54,7 @@ public final class StandardMethodCodec implements MethodCodec {
     public ByteBuffer encodeSuccessEnvelope(Object result) {
         final ExposedByteArrayOutputStream stream = new ExposedByteArrayOutputStream();
         stream.write(0);
-        StandardMessageCodec.writeValue(stream, result);
+        messageCodec.writeValue(stream, result);
         final ByteBuffer buffer = ByteBuffer.allocateDirect(stream.size());
         buffer.put(stream.buffer(), 0, stream.size());
         return buffer;
@@ -60,9 +65,9 @@ public final class StandardMethodCodec implements MethodCodec {
         Object errorDetails) {
         final ExposedByteArrayOutputStream stream = new ExposedByteArrayOutputStream();
         stream.write(1);
-        StandardMessageCodec.writeValue(stream, errorCode);
-        StandardMessageCodec.writeValue(stream, errorMessage);
-        StandardMessageCodec.writeValue(stream, errorDetails);
+        messageCodec.writeValue(stream, errorCode);
+        messageCodec.writeValue(stream, errorMessage);
+        messageCodec.writeValue(stream, errorDetails);
         final ByteBuffer buffer = ByteBuffer.allocateDirect(stream.size());
         buffer.put(stream.buffer(), 0, stream.size());
         return buffer;
@@ -74,15 +79,15 @@ public final class StandardMethodCodec implements MethodCodec {
         final byte flag = envelope.get();
         switch (flag) {
             case 0: {
-                final Object result = StandardMessageCodec.readValue(envelope);
+                final Object result = messageCodec.readValue(envelope);
                 if (!envelope.hasRemaining()) {
                     return result;
                 }
             }
             case 1: {
-                final Object code = StandardMessageCodec.readValue(envelope);
-                final Object message = StandardMessageCodec.readValue(envelope);
-                final Object details = StandardMessageCodec.readValue(envelope);
+                final Object code = messageCodec.readValue(envelope);
+                final Object message = messageCodec.readValue(envelope);
+                final Object details = messageCodec.readValue(envelope);
                 if (code instanceof String
                     && (message == null || message instanceof String)
                     && !envelope.hasRemaining()) {
