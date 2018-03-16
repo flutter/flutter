@@ -90,8 +90,8 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       if (!xcode.isSimctlInstalled) {
         xcodeStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
-          'Xcode requires additional components to be installed in order to run.  Launch Xcode and install '
-          'additional required components when prompted.'
+          'Xcode requires additional components to be installed in order to run.\n'
+          'Launch Xcode and install additional required components when prompted.'
         ));
       }
       if ((await macDevMode).contains('disabled')) {

@@ -158,11 +158,7 @@ class Xcode {
         // This command will error if additional components need to be installed in
         // xcode 9.2 and above.
         final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'simctl', 'list']);
-        if (result.stderr != null) {
-          _isSimctlInstalled = false;
-        } else {
-          _isSimctlInstalled = true;
-        }
+        _isSimctlInstalled = result.stderr == null;
       } on ProcessException {
         _isSimctlInstalled = false;
       }
