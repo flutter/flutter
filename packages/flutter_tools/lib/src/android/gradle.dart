@@ -122,7 +122,7 @@ void handleKnownGradleExceptions(String exceptionString) {
   // Handle Gradle error thrown when Gradle needs to download additional
   // Android SDK components (e.g. Platform Tools), and the license
   // for that component has not been accepted.
-  final String matcher =
+  const String matcher =
     r'You have not accepted the license agreements of the following SDK components:'
     r'\s*\[(.+)\]';
   final RegExp licenseFailure = new RegExp(matcher, multiLine: true);

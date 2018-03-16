@@ -95,7 +95,7 @@ class StockHomeState extends State<StockHome> {
       case _StockMenuItem.refresh:
         showDialog<Null>(
           context: context,
-          child: new _NotImplementedDialog()
+          builder: (BuildContext context) => new _NotImplementedDialog(),
         );
         break;
       case _StockMenuItem.speedUp:
