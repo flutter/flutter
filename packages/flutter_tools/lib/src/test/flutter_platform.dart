@@ -153,8 +153,7 @@ class _Compiler {
           // null upwards to the consumer and shutdown the compiler.
           if (outputPath == null) {
             request.result.complete(null);
-            compiler.shutdown();
-            compiler = null;
+            await shutdown();
           } else {
             final File kernelReadyToRun = await fs.file(outputPath).copy(
               request.path + '.dill');
@@ -180,6 +179,11 @@ class _Compiler {
     final Completer<String> completer = new Completer<String>();
     compilerController.add(new _CompilationRequest(mainDart, completer));
     return completer.future;
+  }
+
+  Future<dynamic> shutdown() async {
+    await compiler.shutdown();
+    compiler = null;
   }
 }
 
@@ -624,6 +628,13 @@ void main() {
   }
 
   File _cachedFontConfig;
+
+  Future<dynamic> close() async {
+    if (compiler != null) {
+      await compiler.shutdown();
+      compiler = null;
+    }
+  }
 
   /// Returns a Fontconfig config file that limits font fallback to the
   /// artifact cache directory.
