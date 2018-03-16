@@ -23,9 +23,6 @@ IOSGLContext::IOSGLContext(PlatformView::SurfaceConfig config, CAEAGLLayer* laye
                                               sharegroup:context_.get().sharegroup]),
       framebuffer_(GL_NONE),
       colorbuffer_(GL_NONE),
-      depthbuffer_(GL_NONE),
-      stencilbuffer_(GL_NONE),
-      depth_stencil_packed_buffer_(GL_NONE),
       storage_size_width_(0),
       storage_size_height_(0),
       valid_(false) {
@@ -57,48 +54,6 @@ IOSGLContext::IOSGLContext(PlatformView::SurfaceConfig config, CAEAGLLayer* laye
 
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorbuffer_);
   VERIFY(glGetError() == GL_NO_ERROR);
-
-  // On iOS, if both depth and stencil attachments are requested, we are
-  // required to create a single renderbuffer that acts as both.
-
-  auto requires_packed = (config.depth_bits != 0) && (config.stencil_bits != 0);
-
-  if (requires_packed) {
-    glGenRenderbuffers(1, &depth_stencil_packed_buffer_);
-    glBindRenderbuffer(GL_RENDERBUFFER, depth_stencil_packed_buffer_);
-    VERIFY(depth_stencil_packed_buffer_ != GL_NONE);
-
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
-                              depth_stencil_packed_buffer_);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
-                              depth_stencil_packed_buffer_);
-    VERIFY(depth_stencil_packed_buffer_ != GL_NONE);
-  } else {
-    // Setup the depth attachment if necessary
-    if (config.depth_bits != 0) {
-      glGenRenderbuffers(1, &depthbuffer_);
-      VERIFY(depthbuffer_ != GL_NONE);
-
-      glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer_);
-      VERIFY(glGetError() == GL_NO_ERROR);
-
-      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthbuffer_);
-      VERIFY(glGetError() == GL_NO_ERROR);
-    }
-
-    // Setup the stencil attachment if necessary
-    if (config.stencil_bits != 0) {
-      glGenRenderbuffers(1, &stencilbuffer_);
-      VERIFY(stencilbuffer_ != GL_NONE);
-
-      glBindRenderbuffer(GL_RENDERBUFFER, stencilbuffer_);
-      VERIFY(glGetError() == GL_NO_ERROR);
-
-      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
-                                stencilbuffer_);
-      VERIFY(glGetError() == GL_NO_ERROR);
-    }
-  }
 
   // TODO:
   // iOS displays are more variable than just P3 or sRGB.  Reading the display
@@ -135,11 +90,7 @@ IOSGLContext::~IOSGLContext() {
 
   // Deletes on GL_NONEs are ignored
   glDeleteFramebuffers(1, &framebuffer_);
-
   glDeleteRenderbuffers(1, &colorbuffer_);
-  glDeleteRenderbuffers(1, &depthbuffer_);
-  glDeleteRenderbuffers(1, &stencilbuffer_);
-  glDeleteRenderbuffers(1, &depth_stencil_packed_buffer_);
 
   FXL_DCHECK(glGetError() == GL_NO_ERROR);
 }
@@ -190,10 +141,8 @@ bool IOSGLContext::UpdateStorageSizeIfNecessary() {
 
   GLint width = 0;
   GLint height = 0;
-  bool rebind_color_buffer = false;
 
-  if (depthbuffer_ != GL_NONE || stencilbuffer_ != GL_NONE ||
-      depth_stencil_packed_buffer_ != GL_NONE || colorbuffer_ != GL_NONE) {
+  if (colorbuffer_ != GL_NONE) {
     // Fetch the dimensions of the color buffer whose backing was just updated
     // so that backing of the attachments can be updated
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
@@ -202,28 +151,6 @@ bool IOSGLContext::UpdateStorageSizeIfNecessary() {
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
     FXL_DCHECK(glGetError() == GL_NO_ERROR);
 
-    rebind_color_buffer = true;
-  }
-
-  if (depth_stencil_packed_buffer_ != GL_NONE) {
-    glBindRenderbuffer(GL_RENDERBUFFER, depth_stencil_packed_buffer_);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, width, height);
-    FXL_DCHECK(glGetError() == GL_NO_ERROR);
-  }
-
-  if (depthbuffer_ != GL_NONE) {
-    glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer_);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
-    FXL_DCHECK(glGetError() == GL_NO_ERROR);
-  }
-
-  if (stencilbuffer_ != GL_NONE) {
-    glBindRenderbuffer(GL_RENDERBUFFER, stencilbuffer_);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, width, height);
-    FXL_DCHECK(glGetError() == GL_NO_ERROR);
-  }
-
-  if (rebind_color_buffer) {
     glBindRenderbuffer(GL_RENDERBUFFER, colorbuffer_);
     FXL_DCHECK(glGetError() == GL_NO_ERROR);
   }
