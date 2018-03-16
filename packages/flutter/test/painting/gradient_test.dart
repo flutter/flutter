@@ -37,6 +37,10 @@ void main() {
         const Color(0x33333333),
         const Color(0x66666666),
       ],
+      stops: const <double>[
+        0.0,
+        0.5,
+      ],
     );
     const LinearGradient testGradient2 = const LinearGradient(
       begin: Alignment.topRight,
@@ -44,6 +48,10 @@ void main() {
       colors: const <Color>[
         const Color(0x44444444),
         const Color(0x88888888),
+      ],
+      stops: const <double>[
+        0.5,
+        1.0,
       ],
     );
 
@@ -54,6 +62,10 @@ void main() {
       colors: const <Color>[
         const Color(0x3B3B3B3B),
         const Color(0x77777777),
+      ],
+      stops: const <double>[
+        0.25,
+        0.75,
       ],
     ));
   });
@@ -160,6 +172,10 @@ void main() {
         const Color(0x33333333),
         const Color(0x66666666),
       ],
+      stops: const <double>[
+        0.0,
+        0.5,
+      ],
     );
     const RadialGradient testGradient2 = const RadialGradient(
       center: Alignment.topRight,
@@ -167,6 +183,10 @@ void main() {
       colors: const <Color>[
         const Color(0x44444444),
         const Color(0x88888888),
+      ],
+      stops: const <double>[
+        0.5,
+        1.0,
       ],
     );
 
@@ -177,6 +197,10 @@ void main() {
       colors: const <Color>[
         const Color(0x3B3B3B3B),
         const Color(0x77777777),
+      ],
+      stops: const <double>[
+        0.25,
+        0.75,
       ],
     ));
   });
