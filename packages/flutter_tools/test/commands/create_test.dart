@@ -485,7 +485,7 @@ Future<Null> _runFlutterTest(Directory workingDir, {String target}) async {
     args,
     workingDirectory: workingDir.path,
   );
-  print("Parent process");
+  print('Parent process');
   print(exec.stdout);
   print(exec.stderr);
   if (exec.exitCode != 0) {
