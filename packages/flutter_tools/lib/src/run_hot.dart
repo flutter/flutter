@@ -392,7 +392,7 @@ class HotRunner extends ResidentRunner {
     // We are now running from source.
     _runningFromSnapshot = false;
     final String launchPath = debuggingOptions.buildInfo.previewDart2
-        ? mainPath + '.dill'
+        ? dillOutputPath ?? mainPath + '.dill'
         : mainPath;
     await _launchFromDevFS(launchPath);
     restartTimer.stop();

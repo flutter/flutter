@@ -61,8 +61,6 @@ class FlutterCommandResult {
 class FlutterOptions {
   static const String kExtraFrontEndOptions = 'extra-front-end-options';
   static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
-  static const String kFileSystemRoot = 'filesystem-root';
-  static const String kFileSystemScheme = 'filesystem-scheme';
 }
 
 abstract class FlutterCommand extends Command<Null> {
@@ -196,12 +194,7 @@ abstract class FlutterCommand extends Command<Null> {
       preferSharedLibrary: argParser.options.containsKey('prefer-shared-library')
         ? argResults['prefer-shared-library']
         : false,
-      targetPlatform: targetPlatform,
-      fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
-          ? argResults[FlutterOptions.kFileSystemRoot] : null,
-      fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
-          ? argResults[FlutterOptions.kFileSystemScheme] : null,
-    );
+      targetPlatform: targetPlatform);
   }
 
   void setupApplicationPackages() {

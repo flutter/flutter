@@ -17,8 +17,6 @@ class BuildInfo {
     this.extraGenSnapshotOptions,
     this.preferSharedLibrary,
     this.targetPlatform,
-    this.fileSystemRoots,
-    this.fileSystemScheme,
   });
 
   final BuildMode mode;
@@ -33,9 +31,6 @@ class BuildInfo {
 
   /// Whether build should be done using Dart2 Frontend parser.
   final bool previewDart2;
-
-  final List<String> fileSystemRoots;
-  final String fileSystemScheme;
 
   /// Whether the build should track widget creation locations.
   final bool trackWidgetCreation;
