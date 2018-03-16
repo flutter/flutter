@@ -194,6 +194,7 @@ class SliderThemeData extends Diagnosticable {
     @required this.thumbShape,
     @required this.valueIndicatorShape,
     @required this.showValueIndicator,
+    this.valueIndicatorTextStyle,
   }) : assert(activeRailColor != null),
        assert(inactiveRailColor != null),
        assert(disabledActiveRailColor != null),
@@ -337,6 +338,11 @@ class SliderThemeData extends Diagnosticable {
   /// when the thumb is being touched.
   final ShowValueIndicator showValueIndicator;
 
+  /// The text style for the text on the value indicator.
+  ///
+  /// By default this is the [ThemeData.accentTextTheme.body2] text theme.
+  final TextStyle valueIndicatorTextStyle;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SliderThemeData copyWith({
@@ -355,6 +361,7 @@ class SliderThemeData extends Diagnosticable {
     SliderComponentShape thumbShape,
     SliderComponentShape valueIndicatorShape,
     ShowValueIndicator showValueIndicator,
+    TextStyle valueIndicatorTextStyle,
   }) {
     return new SliderThemeData(
       activeRailColor: activeRailColor ?? this.activeRailColor,
@@ -372,6 +379,7 @@ class SliderThemeData extends Diagnosticable {
       thumbShape: thumbShape ?? this.thumbShape,
       valueIndicatorShape: valueIndicatorShape ?? this.valueIndicatorShape,
       showValueIndicator: showValueIndicator ?? this.showValueIndicator,
+      valueIndicatorTextStyle: valueIndicatorTextStyle ?? this.valueIndicatorTextStyle,
     );
   }
 
@@ -410,6 +418,9 @@ class SliderThemeData extends Diagnosticable {
       thumbShape: t < 0.5 ? a.thumbShape : b.thumbShape,
       valueIndicatorShape: t < 0.5 ? a.valueIndicatorShape : b.valueIndicatorShape,
       showValueIndicator: t < 0.5 ? a.showValueIndicator : b.showValueIndicator,
+      valueIndicatorTextStyle: (a.valueIndicatorTextStyle != null && b.valueIndicatorTextStyle != null)
+          ? TextStyle.lerp(a.valueIndicatorTextStyle, b.valueIndicatorTextStyle, t)
+          : t < 0.5 ? a.valueIndicatorTextStyle : b.valueIndicatorTextStyle,
     );
   }
 
@@ -431,6 +442,7 @@ class SliderThemeData extends Diagnosticable {
       thumbShape,
       valueIndicatorShape,
       showValueIndicator,
+      valueIndicatorTextStyle,
     );
   }
 
@@ -457,7 +469,8 @@ class SliderThemeData extends Diagnosticable {
         otherData.valueIndicatorColor == valueIndicatorColor &&
         otherData.thumbShape == thumbShape &&
         otherData.valueIndicatorShape == valueIndicatorShape &&
-        otherData.showValueIndicator == showValueIndicator;
+        otherData.showValueIndicator == showValueIndicator &&
+        otherData.valueIndicatorTextStyle == valueIndicatorTextStyle;
   }
 
   @override
@@ -484,6 +497,7 @@ class SliderThemeData extends Diagnosticable {
     description.add(new DiagnosticsProperty<SliderComponentShape>('thumbShape', thumbShape, defaultValue: defaultData.thumbShape, level: DiagnosticLevel.debug));
     description.add(new DiagnosticsProperty<SliderComponentShape>('valueIndicatorShape', valueIndicatorShape, defaultValue: defaultData.valueIndicatorShape, level: DiagnosticLevel.debug));
     description.add(new EnumProperty<ShowValueIndicator>('showValueIndicator', showValueIndicator, defaultValue: defaultData.showValueIndicator));
+    description.add(new DiagnosticsProperty<TextStyle>('valueIndicatorTextStyle', valueIndicatorTextStyle, defaultValue: defaultData.valueIndicatorTextStyle));
   }
 }
 

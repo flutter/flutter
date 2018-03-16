@@ -578,7 +578,10 @@ class _RenderSlider extends RenderBox {
   void _updateLabelPainter() {
     if (label != null) {
       _labelPainter
-        ..text = new TextSpan(style: _theme.accentTextTheme.body2, text: label)
+        ..text = new TextSpan(
+          style: _sliderTheme.valueIndicatorTextStyle ?? _theme.accentTextTheme.body2,
+          text: label,
+        )
         ..textDirection = textDirection
         ..textScaleFactor = _mediaQueryData.textScaleFactor
         ..layout();
