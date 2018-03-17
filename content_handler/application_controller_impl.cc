@@ -82,17 +82,18 @@ fdio_ns_t* ApplicationControllerImpl::SetupNamespace(
     FXL_LOG(ERROR) << "Failed to create namespace";
     return nullptr;
   }
-  for (size_t i = 0; i < flat->paths.size(); ++i) {
-    if (flat->paths[i] == kServiceRootPath) {
+  for (size_t i = 0; i < flat->paths->size(); ++i) {
+    if (flat->paths->at(i) == kServiceRootPath) {
       // Ownership of /svc goes to the ApplicationContext created above.
       continue;
     }
-    zx::channel dir = std::move(flat->directories[i]);
+    zx::channel dir = std::move(flat->directories->at(i));
     zx_handle_t dir_handle = dir.release();
-    const char* path = flat->paths[i]->data();
+    const char* path = flat->paths->at(i)->data();
     status = fdio_ns_bind(fdio_namespc, path, dir_handle);
     if (status != ZX_OK) {
-      FXL_LOG(ERROR) << "Failed to bind " << flat->paths[i] << " to namespace";
+      FXL_LOG(ERROR) << "Failed to bind " << flat->paths->at(i)
+                     << " to namespace";
       zx_handle_close(dir_handle);
       fdio_ns_destroy(fdio_namespc);
       return nullptr;

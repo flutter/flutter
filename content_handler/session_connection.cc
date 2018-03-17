@@ -40,7 +40,7 @@ void SessionConnection::OnSessionError() {
 
 void SessionConnection::OnSessionEvents(f1dl::Array<ui::EventPtr> events) {
   ui::gfx::MetricsPtr new_metrics;
-  for (const auto& event : events) {
+  for (const auto& event : *events) {
     if (event->is_gfx() && event->get_gfx()->is_metrics() &&
         event->get_gfx()->get_metrics()->node_id == root_node_.id()) {
       new_metrics = std::move(event->get_gfx()->get_metrics()->metrics);
