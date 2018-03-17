@@ -104,6 +104,8 @@ class SliverConstraints extends Constraints {
     @required this.crossAxisExtent,
     @required this.crossAxisDirection,
     @required this.viewportMainAxisExtent,
+    @required this.trueScrollOffset,
+    @required this.padding,
   }) : assert(axisDirection != null),
        assert(growthDirection != null),
        assert(userScrollDirection != null),
@@ -112,7 +114,9 @@ class SliverConstraints extends Constraints {
        assert(remainingPaintExtent != null),
        assert(crossAxisExtent != null),
        assert(crossAxisDirection != null),
-       assert(viewportMainAxisExtent != null);
+       assert(viewportMainAxisExtent != null),
+       assert(trueScrollOffset != null),
+       assert(padding != null);
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -126,6 +130,8 @@ class SliverConstraints extends Constraints {
     double crossAxisExtent,
     AxisDirection crossAxisDirection,
     double viewportMainAxisExtent,
+    double trueScrollOffset,
+    double padding,
   }) {
     return new SliverConstraints(
       axisDirection: axisDirection ?? this.axisDirection,
@@ -137,6 +143,8 @@ class SliverConstraints extends Constraints {
       crossAxisExtent: crossAxisExtent ?? this.crossAxisExtent,
       crossAxisDirection: crossAxisDirection ?? this.crossAxisDirection,
       viewportMainAxisExtent: viewportMainAxisExtent ?? this.viewportMainAxisExtent,
+      trueScrollOffset: trueScrollOffset ?? this.trueScrollOffset,
+      padding: padding ?? this.padding,
     );
   }
 
@@ -242,6 +250,23 @@ class SliverConstraints extends Constraints {
   ///
   /// For a vertical list, this is the height of the viewport.
   final double viewportMainAxisExtent;
+
+  /// The number of pixels the sliver's leading edge is away from the leading
+  /// edge of the viewport.
+  ///
+  /// A sliver currently positioned at the leading edge of the viewport will
+  /// have a [trueScrollOffset] of 0.0. For slivers positioned before the
+  /// leading edge, this value is positive and identical with [scrollOffset].
+  /// For slivers positioned after the leading edge, this value is negative.
+  final double trueScrollOffset;
+
+  /// Amount of pixels the viewport is virtually extended beyond the leading and
+  /// trailing edge of the viewport for caching and semantic purposes.
+  ///
+  /// Slivers, that are positioned in the padding area should contribute their
+  /// semantic information to the semantics tree. If the sliver has no visible
+  /// part in the viewport its [SemanticsNode]s will be marked as hidden.
+  final double padding;
 
   /// The axis along which the [scrollOffset] and [remainingPaintExtent] are measured.
   Axis get axis => axisDirectionToAxis(axisDirection);
@@ -367,7 +392,9 @@ class SliverConstraints extends Constraints {
         && typedOther.remainingPaintExtent == remainingPaintExtent
         && typedOther.crossAxisExtent == crossAxisExtent
         && typedOther.crossAxisDirection == crossAxisDirection
-        && typedOther.viewportMainAxisExtent == viewportMainAxisExtent;
+        && typedOther.viewportMainAxisExtent == viewportMainAxisExtent
+        && typedOther.trueScrollOffset == trueScrollOffset
+        && typedOther.padding == padding;
   }
 
   @override
@@ -381,6 +408,8 @@ class SliverConstraints extends Constraints {
       crossAxisExtent,
       crossAxisDirection,
       viewportMainAxisExtent,
+      trueScrollOffset,
+      padding,
     );
   }
 
@@ -393,9 +422,11 @@ class SliverConstraints extends Constraints {
              'scrollOffset: ${scrollOffset.toStringAsFixed(1)}, '
              'remainingPaintExtent: ${remainingPaintExtent.toStringAsFixed(1)}, ' +
              (overlap != 0.0 ? 'overlap: ${overlap.toStringAsFixed(1)}, ' : '') +
-             'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}, ' +
-             'crossAxisDirection: $crossAxisDirection, ' +
-             'viewportMainAxisExtent: ${viewportMainAxisExtent.toStringAsFixed(1)}' +
+             'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}, '
+             'crossAxisDirection: $crossAxisDirection, '
+             'viewportMainAxisExtent: ${viewportMainAxisExtent.toStringAsFixed(1)}, '
+             'trueScrollOffset: ${trueScrollOffset.toStringAsFixed(1)}, '
+             'pading: ${padding.toStringAsFixed(1)}'
            ')';
   }
 }
@@ -896,6 +927,21 @@ abstract class RenderSliver extends RenderObject {
 
   @override
   Rect get semanticBounds => paintBounds;
+
+  /// Whether the sliver wants to contribute information to the semantics tree.
+  ///
+  /// All slivers that are visible and slivers placed inside
+  /// [SliverConstraints.padding] will be given a chance to contribute
+  /// information to the semantics tree.
+  bool get includeInSemantics {
+    if (geometry.visible) {
+      return true;
+    }
+    final double leadingEdgeTrueScrollOffset = constraints.trueScrollOffset;
+    final double startOffset = constraints.padding + geometry.scrollExtent;
+    final double endOffset = -(constraints.viewportMainAxisExtent + constraints.padding);
+    return leadingEdgeTrueScrollOffset < startOffset && leadingEdgeTrueScrollOffset > endOffset;
+  }
 
   @override
   Rect get paintBounds {

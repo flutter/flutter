@@ -99,11 +99,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    for (RenderSliver sliver in childrenInPaintOrder) {
-      if (sliver.geometry.paintExtent != 0 &&
-          sliver.constraints.overlap < sliver.geometry.paintOrigin + sliver.geometry.paintExtent)
-        visitor(sliver);
-    }
+    childrenInPaintOrder.where((RenderSliver sliver) => sliver.includeInSemantics).forEach(visitor);
   }
 
   /// The direction in which the [SliverConstraints.scrollOffset] increases.
@@ -281,17 +277,18 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(adjustedUserScrollDirection != null);
     double maxPaintOffset = layoutOffset + overlap;
     while (child != null) {
-      assert(scrollOffset >= 0.0);
       child.layout(new SliverConstraints(
         axisDirection: axisDirection,
         growthDirection: growthDirection,
         userScrollDirection: adjustedUserScrollDirection,
-        scrollOffset: scrollOffset,
+        scrollOffset: scrollOffset <= 0.0 ? 0.0 : scrollOffset,
         overlap: maxPaintOffset - layoutOffset,
         remainingPaintExtent: math.max(0.0, remainingPaintExtent - layoutOffset + initialLayoutOffset),
         crossAxisExtent: crossAxisExtent,
         crossAxisDirection: crossAxisDirection,
         viewportMainAxisExtent: mainAxisExtent,
+        trueScrollOffset: scrollOffset,
+        padding: 250.0,
       ), parentUsesSize: true);
 
       final SliverGeometry childLayoutGeometry = child.geometry;
@@ -309,9 +306,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       scrollOffset -= childLayoutGeometry.scrollExtent;
       layoutOffset += childLayoutGeometry.layoutExtent;
 
-      if (scrollOffset <= 0.0)
-        scrollOffset = 0.0;
-
       updateOutOfBandData(growthDirection, childLayoutGeometry);
 
       // move on to the next child
@@ -320,6 +314,79 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
     // we made it without a correction, whee!
     return 0.0;
+  }
+
+  @override
+  Rect describeApproximatePaintClip(RenderSliver child) {
+    if (child.geometry.paintExtent == 0) {
+      return Rect.zero;
+    }
+    Rect localBounds = child.paintBounds;
+    if (child.constraints.overlap > 0) {
+      final double overlap = child.constraints.overlap;
+      final double paintOrigin = child.geometry.paintOrigin;
+      switch (axisDirection) {
+        case AxisDirection.down:
+          localBounds = new Rect.fromLTRB(
+            localBounds.left,
+            localBounds.top + overlap - paintOrigin,
+            localBounds.right,
+            localBounds.bottom,
+          );
+          break;
+        case AxisDirection.up:
+          localBounds = new Rect.fromLTRB(
+            localBounds.left,
+            localBounds.top,
+            localBounds.right,
+            localBounds.bottom - overlap - paintOrigin,
+          );
+          break;
+        case AxisDirection.right:
+          localBounds = new Rect.fromLTRB(
+            localBounds.left + overlap - paintOrigin,
+            localBounds.top,
+            localBounds.right,
+            localBounds.bottom,
+          );
+          break;
+        case AxisDirection.left:
+          localBounds = new Rect.fromLTRB(
+            localBounds.left,
+            localBounds.top,
+            localBounds.right - overlap - paintOrigin,
+            localBounds.bottom,
+          );
+          break;
+      }
+    }
+    final Rect viewportClip = Offset.zero & size;
+    final Matrix4 transform = new Matrix4.identity();
+    applyPaintTransform(child, transform);
+    final Rect globalClip = MatrixUtils.transformRect(transform, localBounds).intersect(viewportClip);
+    return globalClip.isEmpty ? Rect.zero : globalClip;
+  }
+
+  @override
+  Rect describeSemanticsClip(RenderSliver child) {
+    switch(axis) {
+      case Axis.vertical:
+        return new Rect.fromLTRB(
+          semanticBounds.left,
+          semanticBounds.top - child.constraints.padding,
+          semanticBounds.right,
+          semanticBounds.bottom + child.constraints.padding,
+        );
+      case Axis.horizontal:
+        return new Rect.fromLTRB(
+          semanticBounds.left - child.constraints.padding,
+          semanticBounds.top,
+          semanticBounds.right + child.constraints.padding,
+          semanticBounds.bottom,
+        );
+    }
+    assert(false);
+    return null;
   }
 
   @override

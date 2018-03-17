@@ -70,7 +70,8 @@ void main() {
         ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
         ' │   crossAxisDirection: AxisDirection.right,\n'
-        ' │   viewportMainAxisExtent: 600.0)\n'
+        ' │   viewportMainAxisExtent: 600.0, trueScrollOffset: 0.0, pading:\n'
+        ' │   250.0)\n'
         ' │ geometry: SliverGeometry(scrollExtent: 12000.0, paintExtent:\n'
         ' │   600.0, maxPaintExtent: 12000.0, hasVisualOverflow: true)\n'
         ' │ currently live children: 0 to 0\n'
@@ -98,6 +99,7 @@ void main() {
         '       ║   <all styles inherited>\n'
         '       ║   "0"\n'
         '       ╚═══════════\n'
+
       ),
     );
   });
