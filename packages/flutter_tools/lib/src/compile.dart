@@ -176,8 +176,8 @@ class ResidentCompiler {
 
     final String inputKey = new Uuid().generateV4();
     _server.stdin.writeln('recompile ${mainPath != null ? _mapFilename(mainPath) + " ": ""}$inputKey');
-    for (String uri in invalidatedFiles) {
-      _server.stdin.writeln(_mapFilename(Uri.parse(uri).toFilePath()));
+    for (String filePath in invalidatedFiles) {
+      _server.stdin.writeln(_mapFilename(filePath));
     }
     _server.stdin.writeln(inputKey);
 
