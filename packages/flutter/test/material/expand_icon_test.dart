@@ -1,6 +1,7 @@
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -66,6 +67,23 @@ void main() {
     );
 
     expect(expanded, isFalse);
+  });
+
+  testWidgets('ExpandIcon is rotated initially if isExpanded is true on first build', (WidgetTester tester) async {
+    bool expanded = true;
+
+    await tester.pumpWidget(
+        wrap(
+            child: new ExpandIcon(
+              isExpanded: expanded,
+              onPressed: (bool isExpanded) {
+                expanded = !isExpanded;
+              },
+            )
+        )
+    );
+    final RotationTransition rotation = tester.firstWidget(find.byType(RotationTransition));
+    expect(rotation.turns.value, 0.5);
   });
 }
 
