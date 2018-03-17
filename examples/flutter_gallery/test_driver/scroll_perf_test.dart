@@ -26,7 +26,7 @@ void main() {
         final SerializableFinder stockList = find.byValueKey('Gallery List');
         expect(stockList, isNotNull);
 
-        await driver.tap(find.text('Demos'));
+        await driver.tap(find.text('Vignettes'));
         await driver.tap(find.text('Components'));
         await driver.tap(find.text('Style'));
 
