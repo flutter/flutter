@@ -38,7 +38,7 @@ std::string GetLabelFromURL(const std::string& url) {
 
 App::App() {
   g_app = this;
-  context_ = app::ApplicationContext::CreateFromStartupInfo();
+  context_ = component::ApplicationContext::CreateFromStartupInfo();
 
   gpu_thread_ = std::make_unique<fsl::Thread>();
   io_thread_ = std::make_unique<fsl::Thread>();
@@ -79,8 +79,8 @@ App::App() {
             sk_make_sp<txt::FuchsiaFontManager>(std::move(font_provider)));
   }
 
-  context_->outgoing_services()->AddService<app::ApplicationRunner>(
-      [this](f1dl::InterfaceRequest<app::ApplicationRunner> request) {
+  context_->outgoing_services()->AddService<component::ApplicationRunner>(
+      [this](f1dl::InterfaceRequest<component::ApplicationRunner> request) {
         runner_bindings_.AddBinding(this, std::move(request));
       });
 }
@@ -130,9 +130,9 @@ void App::WaitForPlatformViewsIdsUIThread(
 }
 
 void App::StartApplication(
-    app::ApplicationPackagePtr application,
-    app::ApplicationStartupInfoPtr startup_info,
-    f1dl::InterfaceRequest<app::ApplicationController> controller) {
+    component::ApplicationPackagePtr application,
+    component::ApplicationStartupInfoPtr startup_info,
+    f1dl::InterfaceRequest<component::ApplicationController> controller) {
   if (controllers_.empty()) {
     // Name this process after the url of the first application being launched.
     base_label_ = "flutter:" + GetLabelFromURL(startup_info->launch_info->url);

@@ -110,8 +110,8 @@ RuntimeHolder::~RuntimeHolder() {
 
 void RuntimeHolder::Init(
     fdio_ns_t* namespc,
-    std::unique_ptr<app::ApplicationContext> context,
-    f1dl::InterfaceRequest<app::ServiceProvider> outgoing_services,
+    std::unique_ptr<component::ApplicationContext> context,
+    f1dl::InterfaceRequest<component::ServiceProvider> outgoing_services,
     std::vector<char> bundle) {
   FXL_DCHECK(!rasterizer_);
   rasterizer_ = Rasterizer::Create();
@@ -194,7 +194,7 @@ void RuntimeHolder::Init(
 void RuntimeHolder::CreateView(
     const std::string& script_uri,
     f1dl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-    f1dl::InterfaceRequest<app::ServiceProvider> services) {
+    f1dl::InterfaceRequest<component::ServiceProvider> services) {
   if (view_listener_binding_.is_bound()) {
     // TODO(jeffbrown): Refactor this to support multiple view instances
     // sharing the same underlying root bundle (but with different runtimes).
@@ -228,7 +228,7 @@ void RuntimeHolder::CreateView(
                             std::move(export_token),        // export token
                             script_uri                      // diagnostic label
   );
-  app::ServiceProviderPtr view_services;
+  component::ServiceProviderPtr view_services;
   view_->GetServiceProvider(view_services.NewRequest());
 
   // Listen for input events.
@@ -444,12 +444,12 @@ void RuntimeHolder::InitDartIoInternal() {
 }
 
 void RuntimeHolder::InitFuchsia() {
-  f1dl::InterfaceHandle<app::ApplicationEnvironment> environment;
+  f1dl::InterfaceHandle<component::ApplicationEnvironment> environment;
   context_->ConnectToEnvironmentService(environment.NewRequest());
   fuchsia::dart::Initialize(std::move(environment),
                             std::move(outgoing_services_));
 
-  app::ServiceProviderPtr parent_env_service_provider;
+  component::ServiceProviderPtr parent_env_service_provider;
   context_->environment()->GetServices(
       parent_env_service_provider.NewRequest());
   ConnectToService(parent_env_service_provider.get(), clipboard_.NewRequest());

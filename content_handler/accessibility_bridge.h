@@ -17,7 +17,7 @@ namespace flutter_runner {
 // with the Context Service.
 class AccessibilityBridge {
  public:
-  explicit AccessibilityBridge(app::ApplicationContext* context);
+  explicit AccessibilityBridge(component::ApplicationContext* context);
 
   // Update the internal representation of the semantics nodes, and write the
   // semantics to Context Service.

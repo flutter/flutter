@@ -17,19 +17,19 @@
 
 namespace flutter_runner {
 
-class App : public app::ApplicationRunner {
+class App : public component::ApplicationRunner {
  public:
   App();
   ~App();
 
   static App& Shared();
 
-  // |app::ApplicationRunner| implementation:
+  // |component::ApplicationRunner| implementation:
 
   void StartApplication(
-      app::ApplicationPackagePtr application,
-      app::ApplicationStartupInfoPtr startup_info,
-      f1dl::InterfaceRequest<app::ApplicationController> controller) override;
+      component::ApplicationPackagePtr application,
+      component::ApplicationStartupInfoPtr startup_info,
+      f1dl::InterfaceRequest<component::ApplicationController> controller) override;
 
   void Destroy(ApplicationControllerImpl* controller);
 
@@ -47,10 +47,10 @@ class App : public app::ApplicationRunner {
       fxl::AutoResetWaitableEvent* latch);
   void UpdateProcessLabel();
 
-  std::unique_ptr<app::ApplicationContext> context_;
+  std::unique_ptr<component::ApplicationContext> context_;
   std::unique_ptr<fsl::Thread> gpu_thread_;
   std::unique_ptr<fsl::Thread> io_thread_;
-  f1dl::BindingSet<app::ApplicationRunner> runner_bindings_;
+  f1dl::BindingSet<component::ApplicationRunner> runner_bindings_;
   std::unordered_map<ApplicationControllerImpl*,
                      std::unique_ptr<ApplicationControllerImpl>>
       controllers_;

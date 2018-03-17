@@ -24,18 +24,18 @@ namespace flutter_runner {
 class App;
 class RuntimeHolder;
 
-class ApplicationControllerImpl : public app::ApplicationController,
+class ApplicationControllerImpl : public component::ApplicationController,
                                   public mozart::ViewProvider {
  public:
   ApplicationControllerImpl(
       App* app,
-      app::ApplicationPackagePtr application,
-      app::ApplicationStartupInfoPtr startup_info,
-      f1dl::InterfaceRequest<app::ApplicationController> controller);
+      component::ApplicationPackagePtr application,
+      component::ApplicationStartupInfoPtr startup_info,
+      f1dl::InterfaceRequest<component::ApplicationController> controller);
 
   ~ApplicationControllerImpl() override;
 
-  // |app::ApplicationController| implementation
+  // |component::ApplicationController| implementation
 
   void Kill() override;
   void Detach() override;
@@ -45,7 +45,7 @@ class ApplicationControllerImpl : public app::ApplicationController,
 
   void CreateView(
       f1dl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-      f1dl::InterfaceRequest<app::ServiceProvider> services) override;
+      f1dl::InterfaceRequest<component::ServiceProvider> services) override;
 
   Dart_Port GetUIIsolateMainPort();
   std::string GetUIIsolateName();
@@ -54,12 +54,12 @@ class ApplicationControllerImpl : public app::ApplicationController,
   void StartRuntimeIfReady();
   void SendReturnCode(int32_t return_code);
 
-  fdio_ns_t* SetupNamespace(const app::FlatNamespacePtr& flat);
+  fdio_ns_t* SetupNamespace(const component::FlatNamespacePtr& flat);
 
   App* app_;
-  f1dl::Binding<app::ApplicationController> binding_;
+  f1dl::Binding<component::ApplicationController> binding_;
 
-  app::ServiceProviderBridge service_provider_bridge_;
+  component::ServiceProviderBridge service_provider_bridge_;
 
   f1dl::BindingSet<mozart::ViewProvider> view_provider_bindings_;
 

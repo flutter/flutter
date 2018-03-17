@@ -16,7 +16,7 @@
 
 namespace flutter_runner {
 
-AccessibilityBridge::AccessibilityBridge(app::ApplicationContext* context)
+AccessibilityBridge::AccessibilityBridge(component::ApplicationContext* context)
     : writer_(context->ConnectToEnvironmentService<maxwell::ContextWriter>()) {}
 
 void AccessibilityBridge::UpdateSemantics(

@@ -19,9 +19,9 @@ namespace flutter_runner {
 
 ApplicationControllerImpl::ApplicationControllerImpl(
     App* app,
-    app::ApplicationPackagePtr application,
-    app::ApplicationStartupInfoPtr startup_info,
-    f1dl::InterfaceRequest<app::ApplicationController> controller)
+    component::ApplicationPackagePtr application,
+    component::ApplicationStartupInfoPtr startup_info,
+    f1dl::InterfaceRequest<component::ApplicationController> controller)
     : app_(app), binding_(this) {
   if (controller.is_valid()) {
     binding_.Bind(std::move(controller));
@@ -52,7 +52,7 @@ ApplicationControllerImpl::ApplicationControllerImpl(
         view_provider_bindings_.AddBinding(this, std::move(request));
       });
 
-  app::ServiceProviderPtr service_provider;
+  component::ServiceProviderPtr service_provider;
   auto request = service_provider.NewRequest();
   service_provider_bridge_.set_backend(std::move(service_provider));
 
@@ -66,7 +66,7 @@ ApplicationControllerImpl::ApplicationControllerImpl(
   runtime_holder_.reset(new RuntimeHolder());
   runtime_holder_->SetMainIsolateShutdownCallback([this]() { Kill(); });
   runtime_holder_->Init(
-      fdio_ns, app::ApplicationContext::CreateFrom(std::move(startup_info)),
+      fdio_ns, component::ApplicationContext::CreateFrom(std::move(startup_info)),
       std::move(request), std::move(bundle));
 }
 
@@ -75,7 +75,7 @@ ApplicationControllerImpl::~ApplicationControllerImpl() = default;
 constexpr char kServiceRootPath[] = "/svc";
 
 fdio_ns_t* ApplicationControllerImpl::SetupNamespace(
-    const app::FlatNamespacePtr& flat) {
+    const component::FlatNamespacePtr& flat) {
   fdio_ns_t* fdio_namespc;
   zx_status_t status = fdio_ns_create(&fdio_namespc);
   if (status != ZX_OK) {
@@ -126,7 +126,7 @@ void ApplicationControllerImpl::SendReturnCode(int32_t return_code) {
 
 void ApplicationControllerImpl::CreateView(
     f1dl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-    f1dl::InterfaceRequest<app::ServiceProvider> services) {
+    f1dl::InterfaceRequest<component::ServiceProvider> services) {
   runtime_holder_->CreateView(url_, std::move(view_owner_request),
                               std::move(services));
 }

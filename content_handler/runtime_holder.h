@@ -47,12 +47,12 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   ~RuntimeHolder();
 
   void Init(fdio_ns_t* namespc,
-            std::unique_ptr<app::ApplicationContext> context,
-            f1dl::InterfaceRequest<app::ServiceProvider> outgoing_services,
+            std::unique_ptr<component::ApplicationContext> context,
+            f1dl::InterfaceRequest<component::ServiceProvider> outgoing_services,
             std::vector<char> bundle);
   void CreateView(const std::string& script_uri,
                   f1dl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-                  f1dl::InterfaceRequest<app::ServiceProvider> services);
+                  f1dl::InterfaceRequest<component::ServiceProvider> services);
 
   Dart_Port GetUIIsolateMainPort();
   std::string GetUIIsolateName();
@@ -111,8 +111,8 @@ class RuntimeHolder : public blink::RuntimeDelegate,
 
   fdio_ns_t* namespc_;
   int dirfd_;
-  std::unique_ptr<app::ApplicationContext> context_;
-  f1dl::InterfaceRequest<app::ServiceProvider> outgoing_services_;
+  std::unique_ptr<component::ApplicationContext> context_;
+  f1dl::InterfaceRequest<component::ServiceProvider> outgoing_services_;
   std::vector<char> root_bundle_data_;
   // TODO(zarah): Remove asset_store_ when flx is completely removed
   fxl::RefPtr<blink::ZipAssetStore> asset_store_;
