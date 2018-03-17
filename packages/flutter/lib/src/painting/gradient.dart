@@ -28,6 +28,7 @@ _ColorsAndStops _interpolateColorsAndStops(List<Color> aColors, List<double> aSt
     aStops ??= const <double>[0.0, 1.0];
     bStops ??= const <double>[0.0, 1.0];
     assert(aStops.length == bStops.length);
+    interpolatedStops = <double>[];
     for (int i = 0; i < aStops.length; i += 1)
       interpolatedStops.add(ui.lerpDouble(aStops[i], bStops[i], t).clamp(0.0, 1.0));
   }
