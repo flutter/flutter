@@ -139,29 +139,13 @@ bool DartController::SendStartMessage(Dart_Handle root_library,
   return LogIfError(result);
 }
 
-static void CopyVectorBytes(const std::vector<uint8_t>& vector,
-                            uint8_t*& bytes) {
-  bytes = (uint8_t*)malloc(vector.size());
-  memcpy(bytes, vector.data(), vector.size());
-}
-
-static void ReleaseFetchedBytes(uint8_t* buffer) {
-  free(buffer);
-}
-
 tonic::DartErrorHandleType DartController::RunFromKernel(
     const std::vector<uint8_t>& kernel,
     const std::string& entrypoint) {
   tonic::DartState::Scope scope(dart_state());
   tonic::DartErrorHandleType error = tonic::kNoError;
   if (Dart_IsNull(Dart_RootLibrary())) {
-    // Copy kernel bytes and pass ownership of the copy to the Dart_LoadKernel,
-    // which is expected to release them.
-    uint8_t* kernel_bytes = nullptr;
-    CopyVectorBytes(kernel, kernel_bytes);
-
-    Dart_Handle result = Dart_LoadKernel(Dart_ReadKernelBinary(
-        kernel_bytes, kernel.size(), ReleaseFetchedBytes));
+    Dart_Handle result = Dart_LoadScriptFromKernel(kernel.data(), kernel.size());
     LogIfError(result);
     error = tonic::GetErrorHandleType(result);
   }
