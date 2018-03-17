@@ -16,16 +16,18 @@ import 'icons.dart';
 class _CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
   const _CupertinoRefreshSliver({
     this.refreshIndicatorLayoutExtent: 0.0,
-    this.hasLayoutExtent,
+    this.hasLayoutExtent: false,
     Widget child,
-  }) : super(child: child);
+  }) : assert(refreshIndicatorLayoutExtent != null && refreshIndicatorLayoutExtent >= 0.0),
+       assert(hasLayoutExtent != null),
+       super(child: child);
 
-  /// The amount of space the indicator should occupy in the sliver in a
-  /// resting state when in the refreshing mode.
+  // The amount of space the indicator should occupy in the sliver in a
+  // resting state when in the refreshing mode.
   final double refreshIndicatorLayoutExtent;
-  /// _RenderCupertinoRefreshSliver will paint the child in the available
-  /// space either way but this instructs the _RenderCupertinoRefreshSliver
-  /// on whether to also occupy any layoutExtent space or not.
+  // _RenderCupertinoRefreshSliver will paint the child in the available
+  // space either way but this instructs the _RenderCupertinoRefreshSliver
+  // on whether to also occupy any layoutExtent space or not.
   final bool hasLayoutExtent;
 
   @override
@@ -39,56 +41,60 @@ class _CupertinoRefreshSliver extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, covariant _RenderCupertinoRefreshSliver renderObject) {
     renderObject
-        ..refreshIndicatorLayoutExtent = refreshIndicatorLayoutExtent
-        ..hasLayoutExtent = hasLayoutExtent;
+      ..refreshIndicatorLayoutExtent = refreshIndicatorLayoutExtent
+      ..hasLayoutExtent = hasLayoutExtent;
   }
 }
 
-/// RenderSliver object that gives its child RenderBox object space to paint
-/// in the overscrolled gap and may or may not hold that overscrolled gap
-/// around the RenderBox depending on whether [layoutExtent] is set.
-///
-/// The [layoutExtentOffsetCompensation] field keeps internal accounting to
-/// prevent scroll position jumps as the [layoutExtent] is set and unset.
+// RenderSliver object that gives its child RenderBox object space to paint
+// in the overscrolled gap and may or may not hold that overscrolled gap
+// around the RenderBox depending on whether [layoutExtent] is set.
+//
+// The [layoutExtentOffsetCompensation] field keeps internal accounting to
+// prevent scroll position jumps as the [layoutExtent] is set and unset.
 class _RenderCupertinoRefreshSliver
     extends RenderSliver
     with RenderObjectWithChildMixin<RenderBox> {
   _RenderCupertinoRefreshSliver({
-    double refreshIndicatorExtent,
-    bool hasLayoutExtent,
+    @required double refreshIndicatorExtent,
+    @required bool hasLayoutExtent,
     RenderBox child,
-  }) : _refreshIndicatorExtent = refreshIndicatorExtent,
+  }) : assert(refreshIndicatorExtent != null && refreshIndicatorExtent >= 0.0),
+       assert(hasLayoutExtent != null),
+       _refreshIndicatorExtent = refreshIndicatorExtent,
        _hasLayoutExtent = hasLayoutExtent {
     this.child = child;
   }
 
-  /// The amount of layout space the indicator should occupy in the sliver in a
-  /// resting state when in the refreshing mode.
+  // The amount of layout space the indicator should occupy in the sliver in a
+  // resting state when in the refreshing mode.
   double get refreshIndicatorLayoutExtent => _refreshIndicatorExtent;
   double _refreshIndicatorExtent;
   set refreshIndicatorLayoutExtent(double value) {
+    assert(value != null && value >= 0.0);
     if (value == _refreshIndicatorExtent)
       return;
     _refreshIndicatorExtent = value;
     markNeedsLayout();
   }
 
-  /// The child box will be laid out and painted in the available space either
-  /// way but this determines whether to also occupy any layoutExtent space or
-  /// not.
+  // The child box will be laid out and painted in the available space either
+  // way but this determines whether to also occupy any layoutExtent space or
+  // not.
   bool get hasLayoutExtent => _hasLayoutExtent;
   bool _hasLayoutExtent;
   set hasLayoutExtent(bool value) {
+    assert(value != null);
     if (value == _hasLayoutExtent)
       return;
     _hasLayoutExtent = value;
     markNeedsLayout();
   }
 
-  /// This keeps track of the previously applied scroll offsets to the scrollable
-  /// so that when [refreshIndicatorLayoutExtent] or [hasLayoutExtent] changes,
-  /// the appropriate delta can be applied to keep everything in the same place
-  /// visually.
+  // This keeps track of the previously applied scroll offsets to the scrollable
+  // so that when [refreshIndicatorLayoutExtent] or [hasLayoutExtent] changes,
+  // the appropriate delta can be applied to keep everything in the same place
+  // visually.
   double layoutExtentOffsetCompensation = 0.0;
 
   @override
@@ -261,8 +267,8 @@ class CupertinoRefreshControl extends StatefulWidget {
     this.refreshIndicatorExtent: _kDefaultRefreshIndicatorExtent,
     this.builder: buildSimpleRefreshIndicator,
     this.onRefresh,
-  }) : assert(refreshTriggerPullDistance != null && refreshTriggerPullDistance > 0),
-       assert(refreshIndicatorExtent != null && refreshIndicatorExtent >= 0),
+  }) : assert(refreshTriggerPullDistance != null && refreshTriggerPullDistance > 0.0),
+       assert(refreshIndicatorExtent != null && refreshIndicatorExtent >= 0.0),
        assert(
          refreshTriggerPullDistance >= refreshIndicatorExtent,
          'The refresh indicator cannot take more space in its final state '
@@ -370,16 +376,16 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
   static const double _kInactiveResetOverscrollFraction = 0.1;
 
   RefreshIndicatorMode refreshState;
-  /// [Future] returned by the widget's `onRefresh`.
+  // [Future] returned by the widget's `onRefresh`.
   Future<void> refreshTask;
-  /// The amount of space available from the inner indicator box's perspective.
-  ///
-  /// The value is the sum of the sliver's layout extent and the overscroll
-  /// (which partially gets transfered into the layout extent when the refresh
-  /// triggers).
-  ///
-  /// The value is independent from the slivers scrollOffset. i.e. it's still
-  /// the same when the sliver scrolls away without retracting.
+  // The amount of space available from the inner indicator box's perspective.
+  //
+  // The value is the sum of the sliver's layout extent and the overscroll
+  // (which partially gets transfered into the layout extent when the refresh
+  // triggers).
+  //
+  // The value is independent from the slivers scrollOffset. i.e. it's still
+  // the same when the sliver scrolls away without retracting.
   double lastIndicatorExtent = 0.0;
   bool hasSliverLayoutExtent = false;
 
@@ -389,8 +395,8 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
     refreshState = RefreshIndicatorMode.inactive;
   }
 
-  /// A state machine transition calculator. Multiple states can be transitioned
-  /// through per single call.
+  // A state machine transition calculator. Multiple states can be transitioned
+  // through per single call.
   RefreshIndicatorMode transitionNextState() {
     RefreshIndicatorMode nextState;
 
