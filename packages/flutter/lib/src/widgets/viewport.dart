@@ -57,6 +57,7 @@ class Viewport extends MultiChildRenderObjectWidget {
     this.anchor: 0.0,
     @required this.offset,
     this.center,
+    this.cacheExtent,
     List<Widget> slivers: const <Widget>[],
   }) : assert(offset != null),
        assert(slivers != null),
@@ -109,6 +110,24 @@ class Viewport extends MultiChildRenderObjectWidget {
   /// The [center] must be the key of a child of the viewport.
   final Key center;
 
+  /// The viewport has an area before and after the visible area to cache items
+  /// that are about to become visible when the user scrolls.
+  ///
+  /// Items that fall in this cache area are rendered even though they are not
+  /// (yet) visible on screen. The [cacheExtent] describes how many pixels
+  /// the cache area extends before the leading edge and after the trailing edge
+  /// of the viewport.
+  ///
+  /// The total extent, which the viewport will try to cover with children, is
+  /// [cacheExtent] before the leading edge + extent of the main axis +
+  /// [cacheExtent] after the trailing edge.
+  ///
+  /// The cache area is also used to implement implicit accessibility scrolling
+  /// on iOS: When the accessibility focus moves from an item in the visible
+  /// viewport to an invisible item in the cache area, th framework will bring
+  /// that item into view with an (implicit) scroll action.
+  final double cacheExtent;
+
   /// Given a [BuildContext] and an [AxisDirection], determine the correct cross
   /// axis direction.
   ///
@@ -136,6 +155,7 @@ class Viewport extends MultiChildRenderObjectWidget {
       crossAxisDirection: crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection),
       anchor: anchor,
       offset: offset,
+      cacheExtent: cacheExtent,
     );
   }
 
@@ -145,7 +165,8 @@ class Viewport extends MultiChildRenderObjectWidget {
       ..axisDirection = axisDirection
       ..crossAxisDirection = crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection)
       ..anchor = anchor
-      ..offset = offset;
+      ..offset = offset
+      ..cacheExtent = cacheExtent;
   }
 
   @override
@@ -199,6 +220,14 @@ class _ViewportElement extends MultiChildRenderObjectElement {
     } else {
       renderObject.center = null;
     }
+  }
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    children.where((Element e) {
+      final RenderSliver renderSliver = e.renderObject;
+      return renderSliver.geometry.visible;
+    }).forEach(visitor);
   }
 }
 

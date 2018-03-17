@@ -26,10 +26,10 @@ Future<Null> test(WidgetTester tester, double offset, { double anchor: 0.0 }) {
 }
 
 void verify(WidgetTester tester, List<Offset> idealPositions, List<bool> idealVisibles) {
-  final List<Offset> actualPositions = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
+  final List<Offset> actualPositions = tester.renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false)).map<Offset>(
     (RenderBox target) => target.localToGlobal(const Offset(0.0, 0.0))
   ).toList();
-  final List<bool> actualVisibles = tester.renderObjectList<RenderSliverToBoxAdapter>(find.byType(SliverToBoxAdapter)).map<bool>(
+  final List<bool> actualVisibles = tester.renderObjectList<RenderSliverToBoxAdapter>(find.byType(SliverToBoxAdapter, skipOffstage: false)).map<bool>(
     (RenderSliverToBoxAdapter target) => target.geometry.visible
   ).toList();
   expect(actualPositions, equals(idealPositions));

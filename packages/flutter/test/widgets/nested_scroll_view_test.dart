@@ -339,7 +339,7 @@ void main() {
     final Offset point1 = tester.getCenter(find.text('AA'));
     await tester.dragFrom(point1, const Offset(0.0, 200.0));
     await tester.pump(const Duration(milliseconds: 20));
-    final Offset point2 = tester.getCenter(find.text('AA'));
+    final Offset point2 = tester.getCenter(find.text('AA', skipOffstage: false));
     expect(point1.dy, greaterThan(point2.dy));
   });
 

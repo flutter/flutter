@@ -27,7 +27,7 @@ Future<Null> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding
 }
 
 void verify(WidgetTester tester, List<Rect> answerKey) {
-  final List<Rect> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Rect>(
+  final List<Rect> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false)).map<Rect>(
     (RenderBox target) {
       final Offset topLeft = target.localToGlobal(Offset.zero);
       final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
@@ -363,6 +363,7 @@ void main() {
       return new Directionality(
         textDirection: TextDirection.ltr,
         child: new CustomScrollView(
+          cacheExtent: 0.0,
           slivers: <Widget>[
             new SliverPadding(
               padding: EdgeInsets.zero,

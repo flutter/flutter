@@ -55,8 +55,8 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder widgetWithText(Type widgetType, String text, { bool skipOffstage: true }) {
     return find.ancestor(
-      of: find.text(text),
-      matching: find.byType(widgetType),
+      of: find.text(text, skipOffstage: skipOffstage),
+      matching: find.byType(widgetType, skipOffstage: skipOffstage),
     );
   }
 

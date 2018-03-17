@@ -53,6 +53,14 @@ abstract class RenderAbstractViewport extends RenderObject {
   /// descendant of the viewport and there must not be any other
   /// [RenderAbstractViewport] objects between the target and this object.
   double getOffsetToReveal(RenderObject target, double alignment);
+
+  /// The default value for the cache extent of the viewport.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderViewportBase.cacheExtent] for a definition of the cache extent.
+  @protected
+  static const double defaultCacheExtent = 250.0;
 }
 
 /// A base class for render objects that are bigger on the inside.
@@ -82,13 +90,15 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     AxisDirection axisDirection: AxisDirection.down,
     @required AxisDirection crossAxisDirection,
     @required ViewportOffset offset,
+    double cacheExtent,
   }) : assert(axisDirection != null),
        assert(crossAxisDirection != null),
        assert(offset != null),
        assert(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection)),
        _axisDirection = axisDirection,
        _crossAxisDirection = crossAxisDirection,
-       _offset = offset;
+       _offset = offset,
+       _cacheExtent = cacheExtent ?? RenderAbstractViewport.defaultCacheExtent;
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
@@ -99,11 +109,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    for (RenderSliver sliver in childrenInPaintOrder) {
-      if (sliver.geometry.paintExtent != 0 &&
-          sliver.constraints.overlap < sliver.geometry.paintOrigin + sliver.geometry.paintExtent)
-        visitor(sliver);
-    }
+    childrenInPaintOrder.where((RenderSliver sliver) => sliver.geometry.includeInSemantics).forEach(visitor);
   }
 
   /// The direction in which the [SliverConstraints.scrollOffset] increases.
@@ -163,6 +169,33 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // We need to go through layout even if the new offset has the same pixels
     // value as the old offset so that we will apply our viewport and content
     // dimensions.
+    markNeedsLayout();
+  }
+
+  /// The viewport has an area before and after the visible area to cache items
+  /// that are about to become visible when the user scrolls.
+  ///
+  /// Items that fall in this cache area are rendered even though they are not
+  /// (yet) visible on screen. The [cacheExtent] describes how many pixels
+  /// the cache area extends before the leading edge and after the trailing edge
+  /// of the viewport.
+  ///
+  /// The total extent, which the viewport will try to cover with children, is
+  /// [cacheExtent] before the leading edge + extent of the main axis +
+  /// [cacheExtent] after the trailing edge.
+  ///
+  /// The cache area is also used to implement implicit accessibility scrolling
+  /// on iOS: When the accessibility focus moves from an item in the visible
+  /// viewport to an invisible item in the cache area, th framework will bring
+  /// that item into view with an (implicit) scroll action.
+  double get cacheExtent => _cacheExtent;
+  double _cacheExtent;
+  set cacheExtent(double value) {
+    value = value ?? RenderAbstractViewport.defaultCacheExtent;
+    assert(value != null);
+    if (value == _cacheExtent)
+      return;
+    _cacheExtent = value;
     markNeedsLayout();
   }
 
@@ -280,18 +313,35 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         applyGrowthDirectionToScrollDirection(offset.userScrollDirection, growthDirection);
     assert(adjustedUserScrollDirection != null);
     double maxPaintOffset = layoutOffset + overlap;
+
+    double remainingCacheExtent = remainingPaintExtent - layoutOffset + initialLayoutOffset + 2 * cacheExtent;
+    double paddingOrigin = -cacheExtent;
+
     while (child != null) {
-      assert(scrollOffset >= 0.0);
+      final double sliverScrollOffset = scrollOffset <= 0.0 ? 0.0 : scrollOffset;
+      // If the scrollOffset is too small we adjust the paddedOrigin because it
+      // doesn't make sense to ask a sliver for content before its scroll
+      // offset.
+      final double corectedCacheOrigin = math.max(paddingOrigin, -sliverScrollOffset);
+      final double cacheExtentCorrection = paddingOrigin - corectedCacheOrigin;
+
+      assert(sliverScrollOffset >= corectedCacheOrigin.abs());
+      assert(corectedCacheOrigin <= 0.0);
+      assert(sliverScrollOffset >= 0.0);
+      assert(cacheExtentCorrection <= 0.0);
+
       child.layout(new SliverConstraints(
         axisDirection: axisDirection,
         growthDirection: growthDirection,
         userScrollDirection: adjustedUserScrollDirection,
-        scrollOffset: scrollOffset,
+        scrollOffset: sliverScrollOffset,
         overlap: maxPaintOffset - layoutOffset,
         remainingPaintExtent: math.max(0.0, remainingPaintExtent - layoutOffset + initialLayoutOffset),
         crossAxisExtent: crossAxisExtent,
         crossAxisDirection: crossAxisDirection,
         viewportMainAxisExtent: mainAxisExtent,
+        remainingCacheExtent: math.max(0.0, remainingCacheExtent + cacheExtentCorrection),
+        cacheOrigin: corectedCacheOrigin,
       ), parentUsesSize: true);
 
       final SliverGeometry childLayoutGeometry = child.geometry;
@@ -308,9 +358,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       maxPaintOffset = math.max(effectiveLayoutOffset + childLayoutGeometry.paintExtent, maxPaintOffset);
       scrollOffset -= childLayoutGeometry.scrollExtent;
       layoutOffset += childLayoutGeometry.layoutExtent;
-
-      if (scrollOffset <= 0.0)
-        scrollOffset = 0.0;
+      if (childLayoutGeometry.cacheExtent != 0.0) {
+        remainingCacheExtent -= childLayoutGeometry.cacheExtent - cacheExtentCorrection;
+        paddingOrigin = math.min(corectedCacheOrigin + childLayoutGeometry.cacheExtent, 0.0);
+      }
 
       updateOutOfBandData(growthDirection, childLayoutGeometry);
 
@@ -320,6 +371,59 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
     // we made it without a correction, whee!
     return 0.0;
+  }
+
+  @override
+  Rect describeApproximatePaintClip(RenderSliver child) {
+    final Rect viewportClip = Offset.zero & size;
+    if (child.constraints.overlap == 0) {
+      return viewportClip;
+    }
+
+    // Adjust the clip rect for this sliver by the overlap from the previous sliver.
+    double left = viewportClip.left;
+    double right = viewportClip.right;
+    double top = viewportClip.top;
+    double bottom = viewportClip.bottom;
+    final double startOfOverlap = child.constraints.viewportMainAxisExtent - child.constraints.remainingPaintExtent;
+    final double overlapCorrection = startOfOverlap + child.constraints.overlap;
+    switch (applyGrowthDirectionToAxisDirection(axisDirection, child.constraints.growthDirection)) {
+      case AxisDirection.down:
+        top += overlapCorrection;
+        break;
+      case AxisDirection.up:
+        bottom -= overlapCorrection;
+        break;
+      case AxisDirection.right:
+        left += overlapCorrection;
+        break;
+      case AxisDirection.left:
+        right -= overlapCorrection;
+        break;
+    }
+    return new Rect.fromLTRB(left, top, right, bottom);
+  }
+
+  @override
+  Rect describeSemanticsClip(RenderSliver child) {
+    switch(axis) {
+      case Axis.vertical:
+        return new Rect.fromLTRB(
+          semanticBounds.left,
+          semanticBounds.top - cacheExtent,
+          semanticBounds.right,
+          semanticBounds.bottom + cacheExtent,
+        );
+      case Axis.horizontal:
+        return new Rect.fromLTRB(
+          semanticBounds.left - cacheExtent,
+          semanticBounds.top,
+          semanticBounds.right + cacheExtent,
+          semanticBounds.bottom,
+        );
+    }
+    assert(false);
+    return null;
   }
 
   @override
@@ -734,11 +838,12 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     double anchor: 0.0,
     List<RenderSliver> children,
     RenderSliver center,
+    double cacheExtent,
   }) : assert(anchor != null),
        assert(anchor >= 0.0 && anchor <= 1.0),
        _anchor = anchor,
        _center = center,
-       super(axisDirection: axisDirection, crossAxisDirection: crossAxisDirection, offset: offset) {
+       super(axisDirection: axisDirection, crossAxisDirection: crossAxisDirection, offset: offset, cacheExtent: cacheExtent) {
     addAll(children);
     if (center == null && firstChild != null)
       _center = firstChild;
