@@ -339,7 +339,7 @@ class _AppBarState extends State<AppBar> {
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
     final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
     final bool canPop = parentRoute?.canPop ?? false;
-    final bool useCloseButton = parentRoute is MaterialPageRoute<dynamic> && parentRoute.fullscreenDialog;
+    final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
     IconThemeData appBarIconTheme = widget.iconTheme ?? themeData.primaryIconTheme;
     TextStyle centerStyle = widget.textTheme?.title ?? themeData.primaryTextTheme.title;
