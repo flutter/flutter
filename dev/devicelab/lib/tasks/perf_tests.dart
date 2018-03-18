@@ -199,9 +199,9 @@ class CompileTest {
         ..addAll(await _compileAot())
         ..addAll(await _compileApp())
         ..addAll(await _compileDebug())
-        ..addAll(_suffix(await _compileAot(previewDart2: true), '__preview_dart_2'))
-        ..addAll(_suffix(await _compileApp(previewDart2: true), '__preview_dart_2'))
-        ..addAll(_suffix(await _compileDebug(previewDart2: true), '__preview_dart_2'));
+        ..addAll(_suffix(await _compileAot(previewDart2: false), '__dart1'))
+        ..addAll(_suffix(await _compileApp(previewDart2: false), '__dart1'))
+        ..addAll(_suffix(await _compileDebug(previewDart2: false), '__dart1'));
 
       return new TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
     });
