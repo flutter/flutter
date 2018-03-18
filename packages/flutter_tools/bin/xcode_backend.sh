@@ -101,6 +101,8 @@ BuildApp() {
   local preview_dart_2_flag=""
   if [[ -n "$PREVIEW_DART_2" ]]; then
     preview_dart_2_flag="--preview-dart-2"
+  else
+    preview_dart_2_flag="--no-preview-dart-2"
   fi
 
   if [[ "$CURRENT_ARCH" != "x86_64" ]]; then

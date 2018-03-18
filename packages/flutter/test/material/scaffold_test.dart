@@ -109,7 +109,7 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 0.0)));
   });
 
-  testWidgets('Floating action animation', (WidgetTester tester) async {
+  testWidgets('Floating action entrance/exit animation', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(home: const Scaffold(
       floatingActionButton: const FloatingActionButton(
         key: const Key('one'),
@@ -131,7 +131,9 @@ void main() {
     expect(tester.binding.transientCallbackCount, greaterThan(0));
     await tester.pumpWidget(new Container());
     expect(tester.binding.transientCallbackCount, 0);
+
     await tester.pumpWidget(new MaterialApp(home: const Scaffold()));
+    
     expect(tester.binding.transientCallbackCount, 0);
 
     await tester.pumpWidget(new MaterialApp(home: const Scaffold(
@@ -145,7 +147,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, greaterThan(0));
   });
 
-  testWidgets('Floating action button position', (WidgetTester tester) async {
+  testWidgets('Floating action button directionality', (WidgetTester tester) async {
     Widget build(TextDirection textDirection) {
       return new Directionality(
         textDirection: textDirection,
@@ -168,6 +170,7 @@ void main() {
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
 
     await tester.pumpWidget(build(TextDirection.rtl));
+    expect(tester.binding.transientCallbackCount, 0);
 
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 356.0));
   });
@@ -779,13 +782,13 @@ void main() {
             bottomNavigationBar: new ConstrainedBox(
               key: key,
               constraints: const BoxConstraints.expand(height: 80.0),
-              child: new GeometryListener(),
+              child: new _GeometryListener(),
             ),
       )));
 
       final RenderBox navigationBox = tester.renderObject(find.byKey(key));
       final RenderBox appBox = tester.renderObject(find.byType(MaterialApp));
-      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final _GeometryListenerState listenerState = tester.state(find.byType(_GeometryListener));
       final ScaffoldGeometry geometry = listenerState.cache.value;
 
       expect(
@@ -798,11 +801,11 @@ void main() {
       await tester.pumpWidget(new MaterialApp(home: new Scaffold(
             body: new ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
-              child: new GeometryListener(),
+              child: new _GeometryListener(),
             ),
       )));
 
-      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final _GeometryListenerState listenerState = tester.state(find.byType(_GeometryListener));
       final ScaffoldGeometry geometry = listenerState.cache.value;
 
       expect(
@@ -817,13 +820,13 @@ void main() {
             body: new Container(),
             floatingActionButton: new FloatingActionButton(
               key: key,
-              child: new GeometryListener(),
+              child: new _GeometryListener(),
               onPressed: () {},
             ),
       )));
 
       final RenderBox floatingActionButtonBox = tester.renderObject(find.byKey(key));
-      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final _GeometryListenerState listenerState = tester.state(find.byType(_GeometryListener));
       final ScaffoldGeometry geometry = listenerState.cache.value;
 
       final Rect fabRect = floatingActionButtonBox.localToGlobal(Offset.zero) & floatingActionButtonBox.size;
@@ -838,11 +841,11 @@ void main() {
       await tester.pumpWidget(new MaterialApp(home: new Scaffold(
             body: new ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
-              child: new GeometryListener(),
+              child: new _GeometryListener(),
             ),
       )));
 
-      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final _GeometryListenerState listenerState = tester.state(find.byType(_GeometryListener));
       final ScaffoldGeometry geometry = listenerState.cache.value;
 
       expect(
@@ -851,12 +854,12 @@ void main() {
       );
     });
 
-    testWidgets('floatingActionButton animation', (WidgetTester tester) async {
+    testWidgets('floatingActionButton entrance/exit animation', (WidgetTester tester) async {
       final GlobalKey key = new GlobalKey();
       await tester.pumpWidget(new MaterialApp(home: new Scaffold(
             body: new ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
-              child: new GeometryListener(),
+              child: new _GeometryListener(),
             ),
       )));
 
@@ -864,12 +867,12 @@ void main() {
             body: new Container(),
             floatingActionButton: new FloatingActionButton(
               key: key,
-              child: new GeometryListener(),
+              child: new _GeometryListener(),
               onPressed: () {},
             ),
       )));
 
-      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final _GeometryListenerState listenerState = tester.state(find.byType(_GeometryListener));
       await tester.pump(const Duration(milliseconds: 50));
 
       ScaffoldGeometry geometry = listenerState.cache.value;
@@ -908,11 +911,11 @@ void main() {
       await tester.pumpWidget(new MaterialApp(home: new Scaffold(
             body: new ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
-              child: new GeometryListener(),
+              child: new _GeometryListener(),
             ),
       )));
 
-      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final _GeometryListenerState listenerState = tester.state(find.byType(_GeometryListener));
 
       expect(listenerState.numNotifications, greaterThan(numNotificationsAtLastFrame));
       numNotificationsAtLastFrame = listenerState.numNotifications;
@@ -921,7 +924,7 @@ void main() {
             body: new Container(),
             floatingActionButton: new FloatingActionButton(
               key: key,
-              child: new GeometryListener(),
+              child: new _GeometryListener(),
               onPressed: () {},
             ),
       )));
@@ -946,13 +949,13 @@ void main() {
           home: new Scaffold(
             body: new ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
-              child: new GeometryListener(),
+              child: new _GeometryListener(),
             ),
-            floatingActionButton: new ComputeNotchSetter(computeNotch),
+            floatingActionButton: new _ComputeNotchSetter(computeNotch),
           )
       ));
 
-      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final _GeometryListenerState listenerState = tester.state(find.byType(_GeometryListener));
       ScaffoldGeometry geometry = listenerState.cache.value;
 
       expect(
@@ -964,7 +967,7 @@ void main() {
           home: new Scaffold(
             body: new ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
-              child: new GeometryListener(),
+              child: new _GeometryListener(),
             ),
           )
       ));
@@ -985,13 +988,13 @@ void main() {
           home: new Scaffold(
             body: new ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
-              child: new GeometryListener(),
+              child: new _GeometryListener(),
             ),
-            floatingActionButton: new ComputeNotchSetter(computeNotch),
+            floatingActionButton: new _ComputeNotchSetter(computeNotch),
           )
       ));
 
-      final ComputeNotchSetterState computeNotchSetterState = tester.state(find.byType(ComputeNotchSetter));
+      final _ComputeNotchSetterState computeNotchSetterState = tester.state(find.byType(_ComputeNotchSetter));
 
       final VoidCallback clearFirstComputeNotch = computeNotchSetterState.clearComputeNotch;
 
@@ -1000,9 +1003,9 @@ void main() {
           home: new Scaffold(
             body: new ConstrainedBox(
               constraints: const BoxConstraints.expand(height: 80.0),
-              child: new GeometryListener(),
+              child: new _GeometryListener(),
             ),
-            floatingActionButton: new ComputeNotchSetter(
+            floatingActionButton: new _ComputeNotchSetter(
               computeNotch2,
               // We're setting a key to make sure a new ComputeNotchSetterState is
               // created.
@@ -1019,7 +1022,7 @@ void main() {
 
       clearFirstComputeNotch();
 
-      final GeometryListenerState listenerState = tester.state(find.byType(GeometryListener));
+      final _GeometryListenerState listenerState = tester.state(find.byType(_GeometryListener));
       final ScaffoldGeometry geometry = listenerState.cache.value;
 
       expect(
@@ -1030,12 +1033,12 @@ void main() {
   });
 }
 
-class GeometryListener extends StatefulWidget {
+class _GeometryListener extends StatefulWidget {
   @override
-  State createState() => new GeometryListenerState();
+  _GeometryListenerState createState() => new _GeometryListenerState();
 }
 
-class GeometryListenerState extends State<GeometryListener> {
+class _GeometryListenerState extends State<_GeometryListener> {
   @override
   Widget build(BuildContext context) {
     return new CustomPaint(
@@ -1045,7 +1048,7 @@ class GeometryListenerState extends State<GeometryListener> {
 
   int numNotifications = 0;
   ValueListenable<ScaffoldGeometry> geometryListenable;
-  GeometryCachePainter cache;
+  _GeometryCachePainter cache;
 
   @override
   void didChangeDependencies() {
@@ -1059,7 +1062,7 @@ class GeometryListenerState extends State<GeometryListener> {
 
     geometryListenable = newListenable;
     geometryListenable.addListener(onGeometryChanged);
-    cache = new GeometryCachePainter(geometryListenable);
+    cache = new _GeometryCachePainter(geometryListenable);
   }
 
   void onGeometryChanged() {
@@ -1070,8 +1073,8 @@ class GeometryListenerState extends State<GeometryListener> {
 // The Scaffold.geometryOf() value is only available at paint time.
 // To fetch it for the tests we implement this CustomPainter that just
 // caches the ScaffoldGeometry value in its paint method.
-class GeometryCachePainter extends CustomPainter {
-  GeometryCachePainter(this.geometryListenable) : super(repaint: geometryListenable);
+class _GeometryCachePainter extends CustomPainter {
+  _GeometryCachePainter(this.geometryListenable) : super(repaint: geometryListenable);
 
   final ValueListenable<ScaffoldGeometry> geometryListenable;
 
@@ -1082,21 +1085,21 @@ class GeometryCachePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(GeometryCachePainter oldDelegate) {
+  bool shouldRepaint(_GeometryCachePainter oldDelegate) {
     return true;
   }
 }
 
-class ComputeNotchSetter extends StatefulWidget {
-  const ComputeNotchSetter(this.computeNotch, {Key key}): super(key: key);
+class _ComputeNotchSetter extends StatefulWidget {
+  const _ComputeNotchSetter(this.computeNotch, {Key key}): super(key: key);
 
   final ComputeNotch computeNotch;
 
   @override
-  State createState() => new ComputeNotchSetterState();
+  State createState() => new _ComputeNotchSetterState();
 }
 
-class ComputeNotchSetterState extends State<ComputeNotchSetter> {
+class _ComputeNotchSetterState extends State<_ComputeNotchSetter> {
 
   VoidCallback clearComputeNotch;
   @override
