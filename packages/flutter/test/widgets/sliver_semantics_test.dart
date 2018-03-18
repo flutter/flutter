@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -167,7 +169,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Offscreen sliver are not included in semantics tree', (WidgetTester tester) async {
+  testWidgets('Offscreen sliver are hidden in semantics tree', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     const double containerHeight = 200.0;
@@ -202,31 +204,38 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 7,
             tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
-                id: 10,
-                actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
+                actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 8,
+                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    label: 'Item 3',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
                     label: 'Item 2',
                     textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
-                    id: 9,
                     label: 'Item 1',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    label: 'Item 0',
                     textDirection: TextDirection.ltr,
                   ),
                 ],
               ),
             ],
-          )
+          ),
         ],
       ),
       ignoreRect: true,
       ignoreTransform: true,
+      ignoreId: true,
     ));
 
     semantics.dispose();
@@ -256,45 +265,39 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 11,
             tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
-                id: 17,
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 12,
                     label: 'Item 4',
                     textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
-                    id: 13,
                     label: 'Item 3',
                     textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
-                    id: 14,
                     label: 'Item 2',
                     textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
-                    id: 15,
                     label: 'Item 1',
                     textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
-                    id: 16,
                     label: 'Item 0',
                     textDirection: TextDirection.ltr,
                   ),
                 ],
               ),
             ],
-          )
+          ),
         ],
       ),
       ignoreRect: true,
       ignoreTransform: true,
+      ignoreId: true,
     ));
 
     semantics.dispose();
@@ -337,39 +340,33 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 18,
             rect: TestSemantics.fullScreen,
             tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
-                id: 23,
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 rect: TestSemantics.fullScreen,
                 children: <TestSemantics>[
                   // Item 0 is missing because its covered by the app bar.
                   new TestSemantics(
-                    id: 19,
-                    rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                    rect: new Rect.fromLTRB(0.0, 36.0, 800.0, 200.0),
                     // Item 1 starts 20.0dp below edge, so there would be room for Item 0.
                     transform: new Matrix4.translation(new Vector3(0.0, 20.0, 0.0)),
                     label: 'Item 1',
                   ),
                   new TestSemantics(
-                    id: 20,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 220.0, 0.0)),
                     label: 'Item 2',
                   ),
                   new TestSemantics(
-                    id: 21,
-                    rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                    rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 180.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 420.0, 0.0)),
                     label: 'Item 3',
                   ),
                 ],
               ),
               new TestSemantics(
-                id: 22,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                 label: 'AppBar',
@@ -379,6 +376,7 @@ void main() {
         ],
       ),
       ignoreTransform: true,
+      ignoreId: true,
     ));
 
     semantics.dispose();
@@ -413,46 +411,49 @@ void main() {
       ),
     ));
 
-    // 'Item 0' is covered by app bar.
-    expect(semantics, isNot(includesNodeWith(label: 'Item 0')));
-
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 24,
             rect: TestSemantics.fullScreen,
             tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
-                id: 29,
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 rect: TestSemantics.fullScreen,
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 25,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
-                    transform: new Matrix4.translation(new Vector3(0.0, 420.0, 0.0)),
+                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    label: 'Item 5',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    label: 'Item 4',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 180.0),
                     label: 'Item 3',
                   ),
                   new TestSemantics(
-                    id: 26,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
-                    transform: new Matrix4.translation(new Vector3(0.0, 220.0, 0.0)),
                     label: 'Item 2',
                   ),
                   new TestSemantics(
-                    id: 27,
-                    rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
-                    // Item 1 starts 20.0dp below edge, so there would be room for Item 0.
-                    transform: new Matrix4.translation(new Vector3(0.0, 20.0, 0.0)),
+                    rect: new Rect.fromLTRB(0.0, 36.0, 800.0, 200.0),
                     label: 'Item 1',
                   ),
-                  // Item 0 is missing because its covered by the app bar.
+                  new TestSemantics(
+                    rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    label: 'Item 0',
+                  ),
                 ],
               ),
               new TestSemantics(
-                id: 28,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                 label: 'AppBar'
@@ -462,6 +463,7 @@ void main() {
         ],
       ),
       ignoreTransform: true,
+      ignoreId: true,
     ));
 
     semantics.dispose();
@@ -505,41 +507,30 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 30,
             rect: TestSemantics.fullScreen,
             tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
-                id: 35,
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 rect: TestSemantics.fullScreen,
                 children: <TestSemantics>[
                   // Item 0 is missing because its covered by the app bar.
                   new TestSemantics(
-                    id: 31,
-                    // Item 1 ends at 580dp, so there would be 20dp space for Item 0.
-                    rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
-                    transform: new Matrix4.translation(new Vector3(0.0, 380.0, 0.0)),
+                    rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 164.0),
                     label: 'Item 1',
                   ),
                   new TestSemantics(
-                    id: 32,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
-                    transform: new Matrix4.translation(new Vector3(0.0, 180.0, 0.0)),
                     label: 'Item 2',
                   ),
                   new TestSemantics(
-                    id: 33,
-                    rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
-                    transform: new Matrix4.translation(new Vector3(0.0, -20.0, 0.0)),
+                    rect: new Rect.fromLTRB(0.0, 20.0, 800.0, 200.0),
                     label: 'Item 3',
                   ),
                 ],
               ),
               new TestSemantics(
-                id: 34,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
-                transform: new Matrix4.translation(new Vector3(0.0, 544.0, 0.0)),
                 tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                 label: 'AppBar'
               ),
@@ -548,12 +539,13 @@ void main() {
         ],
       ),
       ignoreTransform: true,
+      ignoreId: true,
     ));
 
     semantics.dispose();
   });
 
-  testWidgets('Slivers fully covered by another overlapping sliver are excluded (reverse)', (WidgetTester tester) async {
+  testWidgets('Slivers fully covered by another overlapping sliver are hidden (reverse)', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     final ScrollController controller = new ScrollController(initialScrollOffset: 280.0);
@@ -583,48 +575,48 @@ void main() {
       ),
     ));
 
-    // 'Item 0' is covered by app bar.
-    expect(semantics, isNot(includesNodeWith(label: 'Item 0')));
-
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 36,
             rect: TestSemantics.fullScreen,
             tags: <SemanticsTag>[RenderViewport.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
-                id: 41,
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 rect: TestSemantics.fullScreen,
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 37,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
-                    transform: new Matrix4.translation(new Vector3(0.0, -20.0, 0.0)),
+                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    label:r'Item 5',
+                  ),
+                  new TestSemantics(
+                    rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    label: 'Item 4',
+                  ),
+                  new TestSemantics(
+                    rect: new Rect.fromLTRB(0.0, 20.0, 800.0, 200.0),
                     label: 'Item 3',
                   ),
                   new TestSemantics(
-                    id: 38,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
-                    transform: new Matrix4.translation(new Vector3(0.0, 180.0, 0.0)),
                     label: 'Item 2',
                   ),
                   new TestSemantics(
-                    id: 39,
-                    rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
-                    // Item 1 ends at 580dp, so there would be 20dp space for Item 0.
-                    transform: new Matrix4.translation(new Vector3(0.0, 380.0, 0.0)),
+                    rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 164.0),
                     label: 'Item 1',
                   ),
-                  // Item 0 is missing because its covered by the app bar.
+                  new TestSemantics(
+                    rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    label: 'Item 0',
+                  ),
                 ],
               ),
               new TestSemantics(
-                id: 40,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
-                transform: new Matrix4.translation(new Vector3(0.0, 544.0, 0.0)),
                 tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                 label: 'AppBar'
               ),
@@ -633,6 +625,7 @@ void main() {
         ],
       ),
       ignoreTransform: true,
+      ignoreId: true,
     ));
 
     semantics.dispose();

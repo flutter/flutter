@@ -4896,6 +4896,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool textField,
     bool focused,
     bool inMutuallyExclusiveGroup,
+    bool hidden,
     String label,
     String value,
     String increasedValue,
@@ -4934,6 +4935,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       textField: textField,
       focused: focused,
       inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
+      hidden: hidden,
       label: label,
       value: value,
       increasedValue: increasedValue,
@@ -5017,6 +5019,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       textField: properties.textField,
       focused: properties.focused,
       inMutuallyExclusiveGroup: properties.inMutuallyExclusiveGroup,
+      hidden: properties.hidden,
       label: properties.label,
       value: properties.value,
       increasedValue: properties.increasedValue,
@@ -5063,6 +5066,12 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..enabled = properties.enabled
       ..checked = properties.checked
       ..selected = properties.selected
+      ..button = properties.button
+      ..header = properties.header
+      ..textField = properties.textField
+      ..focused = properties.focused
+      ..inMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup
+      ..hidden = properties.hidden
       ..label = properties.label
       ..value = properties.value
       ..increasedValue = properties.increasedValue

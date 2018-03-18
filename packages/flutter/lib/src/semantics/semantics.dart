@@ -319,6 +319,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.textField,
     this.focused,
     this.inMutuallyExclusiveGroup,
+    this.hidden,
     this.label,
     this.value,
     this.increasedValue,
@@ -398,6 +399,24 @@ class SemanticsProperties extends DiagnosticableTree {
   /// For example, a radio button is in a mutually exclusive group because only
   /// one radio button in that group can be marked as [checked].
   final bool inMutuallyExclusiveGroup;
+
+  /// If non-null, whether the node is considered hidden.
+  ///
+  /// Hidden elements are currently not visible on screen. They may be covered
+  /// by other elements or positioned outside of the visible area of a viewport.
+  ///
+  /// Hidden elements cannot gain accessibility focus though regular touch. The
+  /// only way they can be focused is by moving the focus to them via linear
+  /// navigation.
+  ///
+  /// Platforms are free to completely ignore hidden elements and new platforms
+  /// are encouraged to do so.
+  ///
+  /// Instead of marking an element as hidden it should usually be excluded from
+  /// the semantics tree altogether. Hidden elements are only included in the
+  /// semantics tree to work around platform limitations and they are mainly
+  /// used to implement accessibility scrolling on iOS.
+  final bool hidden;
 
   /// Provides a textual description of the widget.
   ///
@@ -765,11 +784,17 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
 
-  /// The clip rect from an ancestor that was applied to this node.
+  /// The semantic clip from an ancestor that was applied to this node.
   ///
   /// Expressed in the coordinate system of the node. May be null if no clip has
   /// been applied.
-  Rect parentClipRect;
+  Rect parentSemanticsClipRect;
+
+  /// The paint clip from an ancestor that was applied to this node.
+  ///
+  /// Expressed in the coordinate system of the node. May be null if no clip has
+  /// been applied.
+  Rect parentPaintClipRect;
 
   /// Whether the node is invisible.
   ///
@@ -2408,6 +2433,27 @@ class SemanticsConfiguration {
   bool get isTextField => _hasFlag(SemanticsFlag.isTextField);
   set isTextField(bool value) {
     _setFlag(SemanticsFlag.isTextField, value);
+  }
+
+  /// Whether the owning [RenderObject] is considered hidden.
+  ///
+  /// Hidden elements are currently not visible on screen. They may be covered
+  /// by other elements or positioned outside of the visible area of a viewport.
+  ///
+  /// Hidden elements cannot gain accessibility focus though regular touch. The
+  /// only way they can be focused is by moving the focus to them via linear
+  /// navigation.
+  ///
+  /// Platforms are free to completely ignore hidden elements and new platforms
+  /// are encouraged to do so.
+  ///
+  /// Instead of marking an element as hidden it should usually be excluded from
+  /// the semantics tree altogether. Hidden elements are only included in the
+  /// semantics tree to work around platform limitations and they are mainly
+  /// used to implement accessibility scrolling on iOS.
+  bool get isHidden => _hasFlag(SemanticsFlag.isHidden);
+  set isHidden(bool value) {
+    _setFlag(SemanticsFlag.isHidden, value);
   }
 
   /// The currently selected text (or the position of the cursor) within [value]
