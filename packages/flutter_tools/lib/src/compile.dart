@@ -176,8 +176,8 @@ class ResidentCompiler {
 
     final String inputKey = new Uuid().generateV4();
     _server.stdin.writeln('recompile ${mainPath != null ? _mapFilename(mainPath) + " ": ""}$inputKey');
-    for (String filePath in invalidatedFiles) {
-      _server.stdin.writeln(_mapFilename(filePath));
+    for (String fileUri in invalidatedFiles) {
+      _server.stdin.writeln(_mapFileUri(fileUri));
     }
     _server.stdin.writeln(inputKey);
 
@@ -274,6 +274,20 @@ class ResidentCompiler {
       }
     }
     return filename;
+  }
+
+  String _mapFileUri(String fileUri) {
+    if (_fileSystemRoots != null) {
+      final String filename = Uri.parse(fileUri).toFilePath();
+      for (String root in _fileSystemRoots) {
+        if (filename.startsWith(root)) {
+          return new Uri(
+              scheme: _fileSystemScheme, path: filename.substring(root.length))
+              .toString();
+        }
+      }
+    }
+    return fileUri;
   }
 
   Future<dynamic> shutdown() {
