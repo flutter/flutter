@@ -413,7 +413,7 @@ class _RenderSwitch extends RenderToggleable {
     // Paint the track
     final Paint paint = new Paint()
       ..color = trackColor;
-    final double trackHorizontalPadding = kRadialReactionRadius - _kTrackRadius;
+    const double trackHorizontalPadding = kRadialReactionRadius - _kTrackRadius;
     final Rect trackRect = new Rect.fromLTWH(
       offset.dx + trackHorizontalPadding,
       offset.dy + (size.height - _kTrackHeight) / 2.0,

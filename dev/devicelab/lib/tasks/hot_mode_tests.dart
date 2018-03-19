@@ -16,7 +16,7 @@ import '../framework/utils.dart';
 final Directory _editedFlutterGalleryDir = dir(path.join(Directory.systemTemp.path, 'edited_flutter_gallery'));
 final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'examples/flutter_gallery'));
 
-TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
+TaskFunction createHotModeTest({ bool isPreviewDart2: true }) {
   return () async {
     final Device device = await devices.workingDevice;
     await device.unlock();
@@ -27,6 +27,8 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
     ];
     if (isPreviewDart2)
       options.add('--preview-dart-2');
+    else
+      options.add('--no-preview-dart-2');
     setLocalEngineOptionIfNecessary(options);
     int hotReloadCount = 0;
     Map<String, dynamic> twoReloadsData;
@@ -48,7 +50,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
           final Completer<Null> stdoutDone = new Completer<Null>();
           final Completer<Null> stderrDone = new Completer<Null>();
           process.stdout
-              .transform(UTF8.decoder)
+              .transform(utf8.decoder)
               .transform(const LineSplitter())
               .listen((String line) {
             if (line.contains('\] Reloaded ')) {
@@ -74,7 +76,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
             stdoutDone.complete();
           });
           process.stderr
-              .transform(UTF8.decoder)
+              .transform(utf8.decoder)
               .transform(const LineSplitter())
               .listen((String line) {
             print('stderr: $line');
@@ -86,7 +88,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
               <Future<Null>>[stdoutDone.future, stderrDone.future]);
           await process.exitCode;
 
-          twoReloadsData = JSON.decode(benchmarkFile.readAsStringSync());
+          twoReloadsData = json.decode(benchmarkFile.readAsStringSync());
         }
         benchmarkFile.deleteSync();
 
@@ -101,7 +103,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
           final Completer<Null> stdoutDone = new Completer<Null>();
           final Completer<Null> stderrDone = new Completer<Null>();
           process.stdout
-              .transform(UTF8.decoder)
+              .transform(utf8.decoder)
               .transform(const LineSplitter())
               .listen((String line) {
             if (line.contains('\] Reloaded ')) {
@@ -112,7 +114,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
             stdoutDone.complete();
           });
           process.stderr
-              .transform(UTF8.decoder)
+              .transform(utf8.decoder)
               .transform(const LineSplitter())
               .listen((String line) {
             print('stderr: $line');
@@ -125,7 +127,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
           await process.exitCode;
 
           freshRestartReloadsData =
-              JSON.decode(benchmarkFile.readAsStringSync());
+              json.decode(benchmarkFile.readAsStringSync());
         }
       });
     });

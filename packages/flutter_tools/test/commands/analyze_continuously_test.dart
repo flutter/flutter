@@ -71,7 +71,7 @@ void main() {
   });
 
   testUsingContext('--preview-dart-2', () async {
-    final String contents = "StringBuffer bar = StringBuffer('baz');";
+    const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
     server = new AnalysisServer(dartSdkPath, <String>[tempDir.path], previewDart2: true);
 
@@ -90,7 +90,7 @@ void main() {
   });
 
   testUsingContext('no --preview-dart-2 shows errors', () async {
-    final String contents = "StringBuffer bar = StringBuffer('baz');";
+    const String contents = "StringBuffer bar = StringBuffer('baz');";
     tempDir.childFile('main.dart').writeAsStringSync(contents);
     server = new AnalysisServer(dartSdkPath, <String>[tempDir.path], previewDart2: false);
 

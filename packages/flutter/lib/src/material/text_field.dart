@@ -213,6 +213,8 @@ class TextField extends StatefulWidget {
   /// characters may be entered, but the error counter and divider will
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
+  /// ## Limitations
+  ///
   /// The TextField does not currently count Unicode grapheme clusters (i.e.
   /// characters visible to the user), it counts Unicode scalar values, which
   /// leaves out a number of useful possible characters (like many emoji and

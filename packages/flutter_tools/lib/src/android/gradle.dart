@@ -122,7 +122,7 @@ void handleKnownGradleExceptions(String exceptionString) {
   // Handle Gradle error thrown when Gradle needs to download additional
   // Android SDK components (e.g. Platform Tools), and the license
   // for that component has not been accepted.
-  final String matcher =
+  const String matcher =
     r'You have not accepted the license agreements of the following SDK components:'
     r'\s*\[(.+)\]';
   final RegExp licenseFailure = new RegExp(matcher, multiLine: true);
@@ -303,6 +303,10 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
       command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
     if (buildInfo.extraGenSnapshotOptions != null)
       command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions}');
+    if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty)
+      command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
+    if (buildInfo.fileSystemScheme != null)
+      command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
   }
   if (buildInfo.preferSharedLibrary && androidSdk.ndkCompiler != null) {
     command.add('-Pprefer-shared-library=true');

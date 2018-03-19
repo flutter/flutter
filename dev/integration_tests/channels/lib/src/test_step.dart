@@ -7,6 +7,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import 'pair.dart';
+
 enum TestStatus { ok, pending, failed, complete }
 
 typedef Future<TestStepResult> TestStep();
@@ -147,6 +149,8 @@ bool _deepEquals(dynamic a, dynamic b) {
     return b is List && _deepEqualsList(a, b);
   if (a is Map)
     return b is Map && _deepEqualsMap(a, b);
+  if (a is Pair)
+    return b is Pair && _deepEqualsPair(a, b);
   return false;
 }
 
@@ -175,4 +179,8 @@ bool _deepEqualsMap(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
       return false;
   }
   return true;
+}
+
+bool _deepEqualsPair(Pair a, Pair b) {
+  return _deepEquals(a.left, b.left) && _deepEquals(a.right, b.right);
 }

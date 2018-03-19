@@ -118,7 +118,7 @@ class ThemeData extends Diagnosticable {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
     primarySwatch ??= Colors.blue;
-    primaryColor ??= isDark ? Colors.grey[900] : primarySwatch[500];
+    primaryColor ??= isDark ? Colors.grey[900] : primarySwatch;
     primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
     primaryColorLight ??= isDark ? Colors.grey[500] : primarySwatch[100];
     primaryColorDark ??= isDark ? Colors.black : primarySwatch[700];
@@ -146,7 +146,7 @@ class ThemeData extends Diagnosticable {
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     dialogBackgroundColor ??= isDark ? Colors.grey[800] : Colors.white;
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
-    hintColor ??= isDark ? const Color(0x42FFFFFF) : const Color(0x4C000000);
+    hintColor ??= isDark ?  const Color(0x80FFFFFF) : const Color(0x8A000000);
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
@@ -166,6 +166,7 @@ class ThemeData extends Diagnosticable {
       primaryColor: primaryColor,
       primaryColorLight: primaryColorLight,
       primaryColorDark: primaryColorDark,
+      valueIndicatorTextStyle: accentTextTheme.body2,
     );
     return new ThemeData.raw(
       brightness: brightness,

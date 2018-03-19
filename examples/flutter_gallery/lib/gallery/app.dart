@@ -10,17 +10,8 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 
 import 'home.dart';
 import 'item.dart';
+import 'theme.dart';
 import 'updates.dart';
-
-final ThemeData _kGalleryLightTheme = new ThemeData(
-  brightness: Brightness.light,
-  primarySwatch: Colors.blue,
-);
-
-final ThemeData _kGalleryDarkTheme = new ThemeData(
-  brightness: Brightness.dark,
-  primarySwatch: Colors.blue,
-);
 
 class GalleryApp extends StatefulWidget {
   const GalleryApp({
@@ -47,7 +38,7 @@ class GalleryApp extends StatefulWidget {
 }
 
 class GalleryAppState extends State<GalleryApp> {
-  bool _useLightTheme = true;
+  GalleryTheme _galleryTheme = kAllGalleryThemes[0];
   bool _showPerformanceOverlay = false;
   bool _checkerboardRasterCacheImages = false;
   bool _checkerboardOffscreenLayers = false;
@@ -87,10 +78,10 @@ class GalleryAppState extends State<GalleryApp> {
   @override
   Widget build(BuildContext context) {
     Widget home = new GalleryHome(
-      useLightTheme: _useLightTheme,
-      onThemeChanged: (bool value) {
+      galleryTheme: _galleryTheme,
+      onThemeChanged: (GalleryTheme value) {
         setState(() {
-          _useLightTheme = value;
+          _galleryTheme = value;
         });
       },
       showPerformanceOverlay: _showPerformanceOverlay,
@@ -138,7 +129,7 @@ class GalleryAppState extends State<GalleryApp> {
       onTextScaleFactorChanged: (double value) {
         setState(() {
           _textScaleFactor = value;
-        });
+         });
       },
       overrideDirection: _overrideDirection,
       onOverrideDirectionChanged: (TextDirection value) {
@@ -169,7 +160,7 @@ class GalleryAppState extends State<GalleryApp> {
     return new MaterialApp(
       title: 'Flutter Gallery',
       color: Colors.grey,
-      theme: (_useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme).copyWith(platform: _platform ?? defaultTargetPlatform),
+      theme: _galleryTheme.theme.copyWith(platform: _platform ?? defaultTargetPlatform),
       showPerformanceOverlay: _showPerformanceOverlay,
       checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
       checkerboardOffscreenLayers: _checkerboardOffscreenLayers,

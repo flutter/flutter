@@ -17,10 +17,12 @@ void main() {
     'fa', // Farsi (Persian)
     'fr', // French
     'he', // Hebrew
+    'id', // Indonesian
     'it', // Italian
     'ja', // Japanese
     'ko', // Korean
     'nl', // Dutch
+    'nl', // Norwegian
     'pl', // Polish
     'ps', // Pashto
     'pt', // Portugese
@@ -82,8 +84,8 @@ void main() {
       expect(localizations.pageRowsInfoTitle(1, 10, 100, false), isNot(contains(r'$rowCount')));
 
       expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNotNull);
-      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNot(contains('tabIndex')));
-      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNot(contains('tabCount')));
+      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNot(contains(r'$tabIndex')));
+      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNot(contains(r'$tabCount')));
       expect(() => localizations.tabLabel(tabIndex: 0, tabCount: 5), throwsAssertionError);
       expect(() => localizations.tabLabel(tabIndex: 2, tabCount: 0), throwsAssertionError);
     });

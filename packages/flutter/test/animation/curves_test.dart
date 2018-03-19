@@ -17,7 +17,7 @@ void main() {
   });
 
   test('Curve flipped control test', () {
-    final Curve ease = Curves.ease;
+    const Curve ease = Curves.ease;
     final Curve flippedEase = ease.flipped;
     expect(flippedEase.transform(0.0), lessThan(0.001));
     expect(flippedEase.transform(0.5), lessThan(ease.transform(0.5)));

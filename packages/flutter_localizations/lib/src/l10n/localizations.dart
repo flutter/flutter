@@ -401,6 +401,47 @@ class _Bundle_he extends TranslationBundle {
 }
 
 // ignore: camel_case_types
+class _Bundle_id extends TranslationBundle {
+  const _Bundle_id() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Buka menu navigasi';
+  @override String get backButtonTooltip => r'Kembali';
+  @override String get closeButtonTooltip => r'Tutup';
+  @override String get deleteButtonTooltip => r'Hapus';
+  @override String get nextMonthTooltip => r'Bulan berikutnya';
+  @override String get previousMonthTooltip => r'Bulan sebelumnya';
+  @override String get nextPageTooltip => r'Halaman berikutnya';
+  @override String get previousPageTooltip => r'Halaman sebelumnya';
+  @override String get showMenuTooltip => r'Tampilkan menu';
+  @override String get aboutListTileTitle => r'Tentang $applicationName';
+  @override String get licensesPageTitle => r'Lisensi';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow dari $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow dari kira-kira $rowCount';
+  @override String get rowsPerPageTitle => r'Baris per halaman:';
+  @override String get tabLabel => r'Tab $tabIndex dari $tabCount';
+  @override String get selectedRowCountTitleOne => r'1 item dipilih';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount item dipilih';
+  @override String get cancelButtonLabel => r'BATAL';
+  @override String get closeButtonLabel => r'TUTUP';
+  @override String get continueButtonLabel => r'LANJUTKAN';
+  @override String get copyButtonLabel => r'SALIN';
+  @override String get cutButtonLabel => r'POTONG';
+  @override String get okButtonLabel => r'Oke';
+  @override String get pasteButtonLabel => r'TEMPEL';
+  @override String get selectAllButtonLabel => r'PILIH SEMUA';
+  @override String get viewLicensesButtonLabel => r'LIHAT LISENSI';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get timePickerHourModeAnnouncement => r'Pilih jam';
+  @override String get timePickerMinuteModeAnnouncement => r'Pilih menit';
+  @override String get modalBarrierDismissLabel => r'Tutup';
+  @override String get signedInLabel => r'Telah login';
+  @override String get hideAccountsLabel => r'Sembunyikan akun';
+  @override String get showAccountsLabel => r'Tampilkan akun';
+}
+
+// ignore: camel_case_types
 class _Bundle_it extends TranslationBundle {
   const _Bundle_it() : super(null);
   @override String get scriptCategory => r'English-like';
@@ -562,6 +603,47 @@ class _Bundle_nl extends TranslationBundle {
   @override String get hideAccountsLabel => r'Accounts verbergen';
   @override String get showAccountsLabel => r'Accounts weergeven';
   @override String get modalBarrierDismissLabel => r'Sluiten';
+}
+
+// ignore: camel_case_types
+class _Bundle_no extends TranslationBundle {
+  const _Bundle_no() : super(null);
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get openAppDrawerTooltip => r'Åpne navigasjonsmenyen';
+  @override String get backButtonTooltip => r'Tilbake';
+  @override String get closeButtonTooltip => r'Lukk';
+  @override String get deleteButtonTooltip => r'Slett';
+  @override String get nextMonthTooltip => r'Neste måned';
+  @override String get previousMonthTooltip => r'Forrige måned';
+  @override String get nextPageTooltip => r'Neste side';
+  @override String get previousPageTooltip => r'Forrige side';
+  @override String get showMenuTooltip => r'Vis meny';
+  @override String get aboutListTileTitle => r'Om $applicationName';
+  @override String get licensesPageTitle => r'Lisenser';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow av $rowCount';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow av omtrent $rowCount';
+  @override String get rowsPerPageTitle => r'Rader per side:';
+  @override String get tabLabel => r'Fane $tabIndex av $tabCount';
+  @override String get selectedRowCountTitleOne => r'1 element er valgt';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount elementer er valgt';
+  @override String get cancelButtonLabel => r'AVBRYT';
+  @override String get closeButtonLabel => r'LUKK';
+  @override String get continueButtonLabel => r'FORTSETT';
+  @override String get copyButtonLabel => r'KOPIÉR';
+  @override String get cutButtonLabel => r'KLIPP UT';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'LIM INN';
+  @override String get selectAllButtonLabel => r'VELG ALLE';
+  @override String get viewLicensesButtonLabel => r'SE LISENSER';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get timePickerHourModeAnnouncement => r'Angi timer';
+  @override String get timePickerMinuteModeAnnouncement => r'Angi minutter';
+  @override String get modalBarrierDismissLabel => r'Avvis';
+  @override String get signedInLabel => r'Pålogget';
+  @override String get hideAccountsLabel => r'Skjul kontoer';
+  @override String get showAccountsLabel => r'Vis kontoer';
 }
 
 // ignore: camel_case_types
@@ -1541,6 +1623,8 @@ TranslationBundle translationBundleForLocale(Locale locale) {
       return const _Bundle_gsw();
     case 'he':
       return const _Bundle_he();
+    case 'id':
+      return const _Bundle_id();
     case 'it':
       return const _Bundle_it();
     case 'ja':
@@ -1549,6 +1633,8 @@ TranslationBundle translationBundleForLocale(Locale locale) {
       return const _Bundle_ko();
     case 'nl':
       return const _Bundle_nl();
+    case 'no':
+      return const _Bundle_no();
     case 'pl':
       return const _Bundle_pl();
     case 'ps':

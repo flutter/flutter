@@ -1058,7 +1058,7 @@ class _InspectorOverlayLayer extends Layer {
     if (!tooltipBelow)
       wedgeY += tooltipSize.height;
 
-    final double wedgeSize = _kTooltipPadding * 2;
+    const double wedgeSize = _kTooltipPadding * 2;
     double wedgeX = math.max(tipOffset.dx, target.dx) + wedgeSize * 2;
     wedgeX = math.min(wedgeX, tipOffset.dx + tooltipSize.width - wedgeSize * 2);
     final List<Offset> wedge = <Offset>[

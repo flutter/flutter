@@ -151,7 +151,7 @@ class DashOutlineCirclePainter extends CustomPainter {
   const DashOutlineCirclePainter();
 
   static const int segments = 17;
-  static const double deltaTheta = math.PI * 2 / segments; // radians
+  static const double deltaTheta = math.pi * 2 / segments; // radians
   static const double segmentArc = deltaTheta / 2.0; // radians
   static const double startOffset = 1.0; // radians
 
@@ -164,7 +164,7 @@ class DashOutlineCirclePainter extends CustomPainter {
       ..strokeWidth = radius / 10.0;
     final Path path = new Path();
     final Rect box = Offset.zero & size;
-    for (double theta = 0.0; theta < math.PI * 2.0; theta += deltaTheta)
+    for (double theta = 0.0; theta < math.pi * 2.0; theta += deltaTheta)
       path.addArc(box, theta + startOffset, segmentArc);
     canvas.drawPath(path, paint);
   }

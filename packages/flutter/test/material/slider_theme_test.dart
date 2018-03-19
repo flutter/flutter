@@ -104,11 +104,13 @@ void main() {
     const Color customColor1 = const Color(0xcafefeed);
     const Color customColor2 = const Color(0xdeadbeef);
     const Color customColor3 = const Color(0xdecaface);
+    const Color customColor4 = const Color(0xfeedcafe);
 
     final SliderThemeData sliderTheme = new SliderThemeData.fromPrimaryColors(
       primaryColor: customColor1,
       primaryColorDark: customColor2,
       primaryColorLight: customColor3,
+      valueIndicatorTextStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor4),
     );
 
     expect(sliderTheme.activeRailColor, equals(customColor1.withAlpha(0xff)));
@@ -126,6 +128,7 @@ void main() {
     expect(sliderTheme.thumbShape, equals(const isInstanceOf<RoundSliderThumbShape>()));
     expect(sliderTheme.valueIndicatorShape, equals(const isInstanceOf<PaddleSliderValueIndicatorShape>()));
     expect(sliderTheme.showValueIndicator, equals(ShowValueIndicator.onlyForDiscrete));
+    expect(sliderTheme.valueIndicatorTextStyle.color, equals(customColor4));
   });
 
   testWidgets('SliderThemeData lerps correctly', (WidgetTester tester) async {
@@ -133,11 +136,13 @@ void main() {
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
       primaryColorLight: Colors.black,
+      valueIndicatorTextStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.black),
     );
     final SliderThemeData sliderThemeWhite = new SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.white,
       primaryColorDark: Colors.white,
       primaryColorLight: Colors.white,
+      valueIndicatorTextStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
     );
     final SliderThemeData lerp = SliderThemeData.lerp(sliderThemeBlack, sliderThemeWhite, 0.5);
     const Color middleGrey = const Color(0xff7f7f7f);
@@ -153,6 +158,7 @@ void main() {
     expect(lerp.disabledThumbColor, equals(middleGrey.withAlpha(0x52)));
     expect(lerp.overlayColor, equals(middleGrey.withAlpha(0x29)));
     expect(lerp.valueIndicatorColor, equals(middleGrey.withAlpha(0xff)));
+    expect(lerp.valueIndicatorTextStyle.color, equals(middleGrey.withAlpha(0xff)));
   });
 
   testWidgets('Default slider thumb shape draws correctly', (WidgetTester tester) async {
@@ -195,11 +201,11 @@ void main() {
     expect(sliderBox, paints..circle(color: sliderTheme.thumbColor, radius: 6.0));
 
     await tester.pumpWidget(buildApp(enabled: false));
-    await tester.pump(const Duration(milliseconds: 500)); // wait for disable animation
+    await tester.pumpAndSettle(); // wait for disable animation
     expect(sliderBox, paints..circle(color: sliderTheme.disabledThumbColor, radius: 4.0));
 
     await tester.pumpWidget(buildApp(divisions: 3));
-    await tester.pump(const Duration(milliseconds: 500)); // wait for disable animation
+    await tester.pumpAndSettle(); // wait for disable animation
     expect(
         sliderBox,
         paints
@@ -210,7 +216,7 @@ void main() {
           ..circle(color: sliderTheme.thumbColor, radius: 6.0));
 
     await tester.pumpWidget(buildApp(divisions: 3, enabled: false));
-    await tester.pump(const Duration(milliseconds: 500)); // wait for disable animation
+    await tester.pumpAndSettle(); // wait for disable animation
     expect(
         sliderBox,
         paints
@@ -226,11 +232,11 @@ void main() {
       primarySwatch: Colors.blue,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500, showValueIndicator: ShowValueIndicator.always);
-    Widget buildApp(String value, {double sliderValue = 0.5}) {
+    Widget buildApp(String value, {double sliderValue = 0.5, double textScale = 1.0}) {
       return new Directionality(
         textDirection: TextDirection.ltr,
         child: new MediaQuery(
-          data: new MediaQueryData.fromWindow(window),
+          data: new MediaQueryData.fromWindow(window).copyWith(textScaleFactor: textScale),
           child: new Material(
             child: new Row(
               children: <Widget>[
@@ -258,9 +264,8 @@ void main() {
 
     Offset center = tester.getCenter(find.byType(Slider));
     TestGesture gesture = await tester.startGesture(center);
-    await tester.pump();
     // Wait for value indicator animation to finish.
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
     expect(
         sliderBox,
         paints
@@ -280,9 +285,8 @@ void main() {
     await tester.pumpWidget(buildApp('1000'));
     center = tester.getCenter(find.byType(Slider));
     gesture = await tester.startGesture(center);
-    await tester.pump();
     // Wait for value indicator animation to finish.
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
     expect(
         sliderBox,
         paints
@@ -301,9 +305,8 @@ void main() {
     await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0));
     center = tester.getCenter(find.byType(Slider));
     gesture = await tester.startGesture(center);
-    await tester.pump();
     // Wait for value indicator animation to finish.
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
     expect(
         sliderBox,
         paints
@@ -322,9 +325,8 @@ void main() {
     await tester.pumpWidget(buildApp('1000000', sliderValue: 1.0));
     center = tester.getCenter(find.byType(Slider));
     gesture = await tester.startGesture(center);
-    await tester.pump();
     // Wait for value indicator animation to finish.
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
     expect(
         sliderBox,
         paints
@@ -336,6 +338,56 @@ void main() {
               const Offset(-98.0, -40.0),
             ],
             excludes: <Offset>[const Offset(16.1, -40.0), const Offset(-98.1, -40.0)],
+          ));
+    await gesture.up();
+
+    // Test that the neck stretches when the text scale gets smaller.
+    await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScale: 0.5));
+    center = tester.getCenter(find.byType(Slider));
+    gesture = await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+    expect(
+        sliderBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -49.0),
+              const Offset(90.0, -49.0),
+              const Offset(-24.0, -49.0),
+            ],
+            excludes: <Offset>[
+              const Offset(98.0, -32.0),  // inside full size, outside small
+              const Offset(-16.0, -32.0),  // inside full size, outside small
+              const Offset(90.1, -49.0),
+              const Offset(-24.1, -49.0),
+            ],
+          ));
+    await gesture.up();
+
+    // Test that the neck shrinks when the text scale gets larger.
+    await tester.pumpWidget(buildApp('1000000', sliderValue: 0.0, textScale: 2.5));
+    center = tester.getCenter(find.byType(Slider));
+    gesture = await tester.startGesture(center);
+    // Wait for value indicator animation to finish.
+    await tester.pumpAndSettle();
+    expect(
+        sliderBox,
+        paints
+          ..path(
+            color: sliderTheme.valueIndicatorColor,
+            includes: <Offset>[
+              const Offset(0.0, -38.8),
+              const Offset(98.0, -38.8),
+              const Offset(-16.0, -38.8),
+              const Offset(10.0, -23.0), // Inside large, outside scale=1.0
+              const Offset(-4.0, -23.0), // Inside large, outside scale=1.0
+            ],
+            excludes: <Offset>[
+              const Offset(98.5, -38.8),
+              const Offset(-16.1, -38.8),
+            ],
           ));
     await gesture.up();
   });

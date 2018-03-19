@@ -82,6 +82,13 @@ List<GalleryItem> _buildGalleryItems() {
     ),
     // Material Components
     new GalleryItem(
+      title: 'Backdrop',
+      subtitle: 'Select a front layer from back layer',
+      category: 'Material Components',
+      routeName: BackdropDemo.routeName,
+      buildRoute: (BuildContext context) => new BackdropDemo(),
+    ),
+    new GalleryItem(
       title: 'Bottom navigation',
       subtitle: 'Bottom navigation with cross-fading views',
       category: 'Material Components',
@@ -157,6 +164,13 @@ List<GalleryItem> _buildGalleryItems() {
       category: 'Material Components',
       routeName: TabsFabDemo.routeName,
       buildRoute: (BuildContext context) => new TabsFabDemo(),
+    ),
+    new GalleryItem(
+      title: 'Floating action button motion',
+      subtitle: 'Action buttons with customized positions',
+      category: 'Material Components',
+      routeName: FabMotionDemo.routeName,
+      buildRoute: (BuildContext context) => new FabMotionDemo(),
     ),
     new GalleryItem(
       title: 'Grid',

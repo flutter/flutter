@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -38,6 +39,8 @@ class Dialog extends StatelessWidget {
   const Dialog({
     Key key,
     this.child,
+    this.insetAnimationDuration: const Duration(milliseconds: 100),
+    this.insetAnimationCurve: Curves.decelerate,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -45,25 +48,46 @@ class Dialog extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// The duration of the animation to show when the system keyboard intrudes
+  /// into the space that the dialog is placed in.
+  ///
+  /// Defaults to 100 milliseconds.
+  final Duration insetAnimationDuration;
+
+  /// The curve to use for the animation shown when the system keyboard intrudes
+  /// into the space that the dialog is placed in.
+  ///
+  /// Defaults to [Curves.fastOutSlowIn].
+  final Curve insetAnimationCurve;
+
   Color _getColor(BuildContext context) {
     return Theme.of(context).dialogBackgroundColor;
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Center(
-      child: new Container(
-        margin: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
-        child: new ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 280.0),
-          child: new Material(
-            elevation: 24.0,
-            color: _getColor(context),
-            type: MaterialType.card,
-            child: child
-          )
-        )
-      )
+    return new AnimatedPadding(
+      padding: MediaQuery.of(context).viewInsets + const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+      duration: insetAnimationDuration,
+      curve: insetAnimationCurve,
+      child: new MediaQuery.removeViewInsets(
+        removeLeft: true,
+        removeTop: true,
+        removeRight: true,
+        removeBottom: true,
+        context: context,
+        child: new Center(
+          child: new ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 280.0),
+            child: new Material(
+              elevation: 24.0,
+              color: _getColor(context),
+              type: MaterialType.card,
+              child: child,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -96,25 +120,27 @@ class Dialog extends StatelessWidget {
 ///   return showDialog<Null>(
 ///     context: context,
 ///     barrierDismissible: false, // user must tap button!
-///     child: new AlertDialog(
-///       title: new Text('Rewind and remember'),
-///       content: new SingleChildScrollView(
-///         child: new ListBody(
-///           children: <Widget>[
-///             new Text('You will never be satisfied.'),
-///             new Text('You\’re like me. I’m never satisfied.'),
-///           ],
+///     builder: (BuildContext context) {
+///       return new AlertDialog(
+///         title: new Text('Rewind and remember'),
+///         content: new SingleChildScrollView(
+///           child: new ListBody(
+///             children: <Widget>[
+///               new Text('You will never be satisfied.'),
+///               new Text('You\’re like me. I’m never satisfied.'),
+///             ],
+///           ),
 ///         ),
-///       ),
-///       actions: <Widget>[
-///         new FlatButton(
-///           child: new Text('Regret'),
-///           onPressed: () {
-///             Navigator.of(context).pop();
-///           },
-///         ),
-///       ],
-///     ),
+///         actions: <Widget>[
+///           new FlatButton(
+///             child: new Text('Regret'),
+///             onPressed: () {
+///               Navigator.of(context).pop();
+///             },
+///           ),
+///         ],
+///       );
+///     },
 ///   );
 /// }
 /// ```
@@ -301,19 +327,21 @@ class SimpleDialogOption extends StatelessWidget {
 /// Future<Null> _askedToLead() async {
 ///   switch (await showDialog<Department>(
 ///     context: context,
-///     child: new SimpleDialog(
-///       title: const Text('Select assignment'),
-///       children: <Widget>[
-///         new SimpleDialogOption(
-///           onPressed: () { Navigator.pop(context, Department.treasury); },
-///           child: const Text('Treasury department'),
-///         ),
-///         new SimpleDialogOption(
-///           onPressed: () { Navigator.pop(context, Department.state); },
-///           child: const Text('State department'),
-///         ),
-///       ],
-///     ),
+///     builder: (BuildContext context) {
+///       return new SimpleDialog(
+///         title: const Text('Select assignment'),
+///         children: <Widget>[
+///           new SimpleDialogOption(
+///             onPressed: () { Navigator.pop(context, Department.treasury); },
+///             child: const Text('Treasury department'),
+///           ),
+///           new SimpleDialogOption(
+///             onPressed: () { Navigator.pop(context, Department.state); },
+///             child: const Text('State department'),
+///           ),
+///         ],
+///       );
+///     }
 ///   )) {
 ///     case Department.treasury:
 ///       // Let's go.
@@ -457,12 +485,17 @@ class _DialogRoute<T> extends PopupRoute<T> {
 
 /// Displays a dialog above the current contents of the app.
 ///
-/// This function typically receives a [Dialog] widget as its child argument.
-/// Content below the dialog is dimmed with a [ModalBarrier].
+/// This function takes a `builder` which typically builds a [Dialog] widget.
+/// Content below the dialog is dimmed with a [ModalBarrier]. This widget does
+/// not share a context with the location that `showDialog` is originally
+/// called from. Use a [StatefulBuilder] or a custom [StatefulWidget] if the
+/// dialog needs to update dynamically.
 ///
 /// The `context` argument is used to look up the [Navigator] and [Theme] for
 /// the dialog. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the dialog is closed.
+///
+/// The `child` argument is deprecated, and should be replaced with `builder`.
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
@@ -481,10 +514,16 @@ class _DialogRoute<T> extends PopupRoute<T> {
 Future<T> showDialog<T>({
   @required BuildContext context,
   bool barrierDismissible: true,
-  @required Widget child,
+  @Deprecated(
+    'Instead of using the "child" argument, return the child from a closure '
+    'provided to the "builder" argument. This will ensure that the BuildContext '
+    'is appropriate for widgets built in the dialog.'
+  ) Widget child,
+  WidgetBuilder builder,
 }) {
+  assert(child == null || builder == null); // ignore: deprecated_member_use
   return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
-    child: child,
+    child: child ?? new Builder(builder: builder), // ignore: deprecated_member_use
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierDismissible: barrierDismissible,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
