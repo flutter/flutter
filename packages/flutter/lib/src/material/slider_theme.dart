@@ -266,8 +266,8 @@ class SliderThemeData extends Diagnosticable {
       disabledThumbColor: primaryColorDark.withAlpha(disabledThumbAlpha),
       overlayColor: primaryColor.withAlpha(overlayLightAlpha),
       valueIndicatorColor: primaryColor.withAlpha(valueIndicatorAlpha),
-      thumbShape: new RoundSliderThumbShape(),
-      valueIndicatorShape: new PaddleSliderValueIndicatorShape(),
+      thumbShape: const RoundSliderThumbShape(),
+      valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
       valueIndicatorTextStyle: valueIndicatorTextStyle,
       showValueIndicator: ShowValueIndicator.onlyForDiscrete,
     );
@@ -492,8 +492,7 @@ class SliderThemeData extends Diagnosticable {
     description.add(new DiagnosticsProperty<Color>('activeTickMarkColor', activeTickMarkColor, defaultValue: defaultData.activeTickMarkColor, level: DiagnosticLevel.debug));
     description.add(new DiagnosticsProperty<Color>('inactiveTickMarkColor', inactiveTickMarkColor, defaultValue: defaultData.inactiveTickMarkColor, level: DiagnosticLevel.debug));
     description.add(new DiagnosticsProperty<Color>('disabledActiveTickMarkColor', disabledActiveTickMarkColor, defaultValue: defaultData.disabledActiveTickMarkColor, level: DiagnosticLevel.debug));
-    description
-        .add(new DiagnosticsProperty<Color>('disabledInactiveTickMarkColor', disabledInactiveTickMarkColor, defaultValue: defaultData.disabledInactiveTickMarkColor, level: DiagnosticLevel.debug));
+    description.add(new DiagnosticsProperty<Color>('disabledInactiveTickMarkColor', disabledInactiveTickMarkColor, defaultValue: defaultData.disabledInactiveTickMarkColor, level: DiagnosticLevel.debug));
     description.add(new DiagnosticsProperty<Color>('thumbColor', thumbColor, defaultValue: defaultData.thumbColor));
     description.add(new DiagnosticsProperty<Color>('disabledThumbColor', disabledThumbColor, defaultValue: defaultData.disabledThumbColor, level: DiagnosticLevel.debug));
     description.add(new DiagnosticsProperty<Color>('overlayColor', overlayColor, defaultValue: defaultData.overlayColor, level: DiagnosticLevel.debug));
@@ -510,9 +509,6 @@ class SliderThemeData extends Diagnosticable {
 /// Create a subclass of this if you would like a custom slider thumb or
 /// value indicator shape.
 ///
-/// Override the setters that you need in order to implement your shape.
-/// By default, the setters ignore the values set on them.
-///
 /// See also:
 ///
 ///  * [RoundSliderThumbShape] for a simple example of a thumb shape.
@@ -526,46 +522,32 @@ abstract class SliderComponentShape {
   /// Returns the preferred size of the shape, based on the given conditions.
   Size getPreferredSize(bool isEnabled, bool isDiscrete);
 
-  /// The parent [RenderBox] for this shape.
-  set parentBox(RenderBox parentBox) {}
-
-  /// Whether this slider is a discrete slider or not.
-  set isDiscrete(bool isDiscrete) {}
-
-  /// The current animation for the activation of the value indicator. It
-  /// reverses when the user stops interacting with the slider.
-  set activationAnimation(Animation<double> activationAnimation) {}
-
-  /// An animation triggered when the [Slider] is enabled, and it reverses when
-  /// the slider is disabled.
-  set enableAnimation(Animation<double> enableAnimation) {}
-
-  /// The painter for the value indicator's label.
-  ///
-  /// If [labelPainter] is non-null, then [labelPainter.paint] should be
-  /// called with the location that the label should appear if you want to have
-  /// a label in your value indicator. If the labelPainter passed is null, then
-  /// no label was supplied to the [Slider].
-  set labelPainter(TextPainter labelPainter) {}
-
-  /// The current text direction.
-  set textDirection(TextDirection textDirection) {}
-
-  /// The slider theme that this shape is associated with at paint time.
-  set sliderTheme(SliderThemeData sliderTheme) {}
-
-  /// The current parametric value of the slider, from 0.0 to 1.0.
-  set value(double value) {}
-
   /// Paints the shape, taking into account the state passed to it.
   ///
-  /// context is the current painting context, containing the canvas to be drawn
-  /// on. The thumb center is the current location of the thumb in the local
-  /// coordinate system.
+  /// [activationAnimation] is an animation triggered when the user beings
+  /// to interact with the slider. It reverses when the user stops interacting
+  /// with the slider.
+  ///
+  /// [enableAnimation] is an animation triggered when the [Slider] is enabled,
+  /// and it reverses when the slider is disabled.
+  ///
+  /// [value] is the current parametric value (from 0.0 to 1.0) of the slider.
+  ///
+  /// If [labelPainter] is non-null, then [labelPainter.paint] should be
+  /// called with the location that the label should appear. If the labelPainter
+  /// passed is null, then no label was supplied to the [Slider].
   void paint(
     PaintingContext context,
-    Offset thumbCenter,
-  );
+    Offset thumbCenter, {
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+  });
 }
 
 /// This is the default shape to a [Slider]'s thumb if no
@@ -577,6 +559,9 @@ abstract class SliderComponentShape {
 ///  * [SliderThemeData] where an instance of this class is set to inform the
 ///    slider of the shape of the its thumb.
 class RoundSliderThumbShape extends SliderComponentShape {
+  /// Create a slider thumb that draws a circle.
+  const RoundSliderThumbShape();
+
   static const double _thumbRadius = 6.0;
   static const double _disabledThumbRadius = 4.0;
 
@@ -585,39 +570,32 @@ class RoundSliderThumbShape extends SliderComponentShape {
     return new Size.fromRadius(isEnabled ? _thumbRadius : _disabledThumbRadius);
   }
 
-  Animation<double> enableAnimation;
-
-  SliderThemeData get sliderTheme => _sliderTheme;
-  SliderThemeData _sliderTheme;
-  @override
-  set sliderTheme(SliderThemeData sliderTheme) {
-    if (sliderTheme == _sliderTheme) {
-      return;
-    }
-    _sliderTheme = sliderTheme;
-    _enableColor = new ColorTween(
-      begin: sliderTheme.disabledThumbColor,
-      end: sliderTheme.thumbColor,
-    );
-  }
-
-  final Tween<double> radiusTween = new Tween<double>(
-    begin: _disabledThumbRadius,
-    end: _thumbRadius,
-  );
-
-  ColorTween _enableColor;
-
   @override
   void paint(
     PaintingContext context,
-    Offset thumbCenter,
-  ) {
+    Offset thumbCenter, {
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+  }) {
     final Canvas canvas = context.canvas;
+    final Tween<double> radiusTween = new Tween<double>(
+      begin: _disabledThumbRadius,
+      end: _thumbRadius,
+    );
+    final ColorTween colorTween = new ColorTween(
+      begin: sliderTheme.disabledThumbColor,
+      end: sliderTheme.thumbColor,
+    );
     canvas.drawCircle(
       thumbCenter,
       radiusTween.evaluate(enableAnimation),
-      new Paint()..color = _enableColor.evaluate(enableAnimation),
+      new Paint()..color = colorTween.evaluate(enableAnimation),
     );
   }
 }
@@ -631,6 +609,9 @@ class RoundSliderThumbShape extends SliderComponentShape {
 ///  * [SliderThemeData] where an instance of this class is set to inform the
 ///    slider of the shape of the its value indicator.
 class PaddleSliderValueIndicatorShape extends SliderComponentShape {
+  /// Create a slider value indicator in the shape of an upside-down pear.
+  const PaddleSliderValueIndicatorShape();
+
   // These constants define the shape of the default value indicator.
   // The value indicator changes shape based on the size of
   // the label: The top lobe spreads horizontally, and the
@@ -675,27 +656,6 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) => _preferredSize;
-
-  RenderBox parentBox;
-  Animation<double> activationAnimation;
-  Animation<double> enableAnimation;
-  TextPainter labelPainter;
-
-  SliderThemeData get sliderTheme => _sliderTheme;
-  SliderThemeData _sliderTheme;
-  @override
-  set sliderTheme(SliderThemeData sliderTheme) {
-    if (sliderTheme == _sliderTheme) {
-      return;
-    }
-    _sliderTheme = sliderTheme;
-    _enableColor = new ColorTween(
-      begin: sliderTheme.disabledThumbColor,
-      end: sliderTheme.valueIndicatorColor,
-    );
-  }
-
-  ColorTween _enableColor;
 
   // Adds an arc to the path that has the attributes passed in. This is
   // a convenience to make adding arcs have less boilerplate.
@@ -929,14 +889,25 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   @override
   void paint(
     PaintingContext context,
-    Offset thumbCenter,
-  ) {
-    assert(labelPainter != null);
+    Offset thumbCenter, {
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+  }) {
+    final ColorTween enableColor = new ColorTween(
+      begin: sliderTheme.disabledThumbColor,
+      end: sliderTheme.valueIndicatorColor,
+    );
     _drawValueIndicator(
       parentBox,
       context.canvas,
       thumbCenter,
-      new Paint()..color = _enableColor.evaluate(enableAnimation),
+      new Paint()..color = enableColor.evaluate(enableAnimation),
       activationAnimation.value,
       labelPainter,
     );

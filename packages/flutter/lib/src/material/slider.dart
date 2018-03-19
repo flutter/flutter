@@ -775,28 +775,6 @@ class _RenderSlider extends RenderBox {
     }
   }
 
-  void _updateThumb() {
-    _sliderTheme.thumbShape.activationAnimation = _valueIndicatorAnimation;
-    _sliderTheme.thumbShape.enableAnimation = _enableAnimation;
-    _sliderTheme.thumbShape.isDiscrete = isDiscrete;
-    _sliderTheme.thumbShape.labelPainter = _labelPainter;
-    _sliderTheme.thumbShape.parentBox = this;
-    _sliderTheme.thumbShape.sliderTheme = _sliderTheme;
-    _sliderTheme.thumbShape.textDirection = _textDirection;
-    _sliderTheme.thumbShape.value = _value;
-  }
-
-  void _updateValueIndicator() {
-    _sliderTheme.valueIndicatorShape.activationAnimation = _valueIndicatorAnimation;
-    _sliderTheme.valueIndicatorShape.enableAnimation = _enableAnimation;
-    _sliderTheme.valueIndicatorShape.isDiscrete = isDiscrete;
-    _sliderTheme.valueIndicatorShape.labelPainter = _labelPainter;
-    _sliderTheme.valueIndicatorShape.parentBox = this;
-    _sliderTheme.valueIndicatorShape.sliderTheme = _sliderTheme;
-    _sliderTheme.valueIndicatorShape.textDirection = _textDirection;
-    _sliderTheme.valueIndicatorShape.value = _value;
-  }
-
   @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
@@ -873,18 +851,32 @@ class _RenderSlider extends RenderBox {
     if (isInteractive && label != null &&
         _valueIndicatorAnimation.status != AnimationStatus.dismissed) {
       if (showValueIndicator) {
-        _updateValueIndicator();
         _sliderTheme.valueIndicatorShape.paint(
           context,
           thumbCenter,
+          activationAnimation: _valueIndicatorAnimation,
+          enableAnimation: _enableAnimation,
+          isDiscrete: isDiscrete,
+          labelPainter: _labelPainter,
+          parentBox: this,
+          sliderTheme: _sliderTheme,
+          textDirection: _textDirection,
+          value: _value,
         );
       }
     }
 
-    _updateThumb();
     _sliderTheme.thumbShape.paint(
       context,
       thumbCenter,
+      activationAnimation: _valueIndicatorAnimation,
+      enableAnimation: _enableAnimation,
+      isDiscrete: isDiscrete,
+      labelPainter: _labelPainter,
+      parentBox: this,
+      sliderTheme: _sliderTheme,
+      textDirection: _textDirection,
+      value: _value,
     );
   }
 

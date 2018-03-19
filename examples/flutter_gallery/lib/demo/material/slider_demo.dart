@@ -28,31 +28,37 @@ Path _triangle(double size, Offset thumbCenter, {bool invert: false}) {
 
 class _CustomThumbShape extends SliderComponentShape {
   static const double _thumbSize = 4.0;
-  static const double _disabledThumbSize = 4.0;
+  static const double _disabledThumbSize = 3.0;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return new Size.fromRadius(isEnabled ? _thumbSize : _disabledThumbSize);
+    return isEnabled ? const Size.fromRadius(_thumbSize) : const Size.fromRadius(_disabledThumbSize);
   }
 
-  SliderThemeData sliderTheme;
-  Animation<double> enableAnimation;
+  static final Tween<double> sizeTween = new Tween<double>(
+    begin: _disabledThumbSize,
+    end: _thumbSize,
+  );
 
   @override
   void paint(
     PaintingContext context,
-    Offset thumbCenter,
-    ) {
+    Offset thumbCenter, {
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+  }) {
     final Canvas canvas = context.canvas;
-    final Tween<double> radiusTween = new Tween<double>(
-      begin: _disabledThumbSize,
-      end: _thumbSize,
-    );
     final ColorTween colorTween = new ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.thumbColor,
     );
-    final double size = _thumbSize * radiusTween.evaluate(enableAnimation);
+    final double size = _thumbSize * sizeTween.evaluate(enableAnimation);
     final Path thumbPath = _triangle(size, thumbCenter);
     canvas.drawPath(thumbPath, new Paint()..color = colorTween.evaluate(enableAnimation));
   }
@@ -60,7 +66,7 @@ class _CustomThumbShape extends SliderComponentShape {
 
 class _CustomValueIndicatorShape extends SliderComponentShape {
   static const double _indicatorSize = 4.0;
-  static const double _disabledIndicatorSize = 4.0;
+  static const double _disabledIndicatorSize = 3.0;
   static const double _slideUpHeight = 40.0;
 
   @override
@@ -68,21 +74,25 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
     return new Size.fromRadius(isEnabled ? _indicatorSize : _disabledIndicatorSize);
   }
 
-  SliderThemeData sliderTheme;
-  Animation<double> activationAnimation;
-  Animation<double> enableAnimation;
-  TextPainter labelPainter;
+  static final Tween<double> sizeTween = new Tween<double>(
+    begin: _disabledIndicatorSize,
+    end: _indicatorSize,
+  );
 
   @override
   void paint(
     PaintingContext context,
-    Offset thumbCenter,
-  ) {
+    Offset thumbCenter, {
+    Animation<double> activationAnimation,
+    Animation<double> enableAnimation,
+    bool isDiscrete,
+    TextPainter labelPainter,
+    RenderBox parentBox,
+    SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    double value,
+  }) {
     final Canvas canvas = context.canvas;
-    final Tween<double> radiusTween = new Tween<double>(
-      begin: _disabledIndicatorSize,
-      end: _indicatorSize,
-    );
     final ColorTween enableColor = new ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
@@ -91,7 +101,7 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
       begin: 0.0,
       end: _slideUpHeight,
     );
-    final double size = _indicatorSize * radiusTween.evaluate(enableAnimation);
+    final double size = _indicatorSize * sizeTween.evaluate(enableAnimation);
     final Offset slideUpOffset = new Offset(0.0, -slideUpTween.evaluate(activationAnimation));
     final Path thumbPath = _triangle(
       size,
