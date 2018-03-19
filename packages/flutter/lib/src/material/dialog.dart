@@ -155,14 +155,19 @@ class AlertDialog extends StatelessWidget {
   /// Creates an alert dialog.
   ///
   /// Typically used in conjunction with [showDialog].
+  ///
+  /// The [contentPadding] must not be null. The [titlePadding] defaults to
+  /// null, which implies a default that depends on the values of the other
+  /// properties. See the documentation of [titlePadding] for details.
   const AlertDialog({
     Key key,
     this.title,
     this.titlePadding,
     this.content,
-    this.contentPadding,
-    this.actions
-  }) : super(key: key);
+    this.contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
+    this.actions,
+  }) : assert(contentPadding != null),
+       super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -172,8 +177,14 @@ class AlertDialog extends StatelessWidget {
 
   /// Padding around the title.
   ///
-  /// Uses material design default if none is supplied. If there is no title, no
-  /// padding will be provided.
+  /// If there is no title, no padding will be provided. Otherwise, this padding
+  /// is used.
+  ///
+  /// This property defaults to providing 24 pixels on the top, left, and right
+  /// of the title. If the [content] is not null, then no bottom padding is
+  /// provided (but see [contentPadding]). If it _is_ null, then an extra 20
+  /// pixels of bottom padding is added to separate the [title] from the
+  /// [actions].
   final EdgeInsetsGeometry titlePadding;
 
   /// The (optional) content of the dialog is displayed in the center of the
@@ -186,7 +197,10 @@ class AlertDialog extends StatelessWidget {
 
   /// Padding around the content.
   ///
-  /// Uses material design default if none is supplied.
+  /// If there is no content, no padding will be provided. Otherwise, padding of
+  /// 20 pixels is provided above the content to separate the content from the
+  /// title, and padding of 24 pixels is provided on the left, right, and bottom
+  /// to separate the content from the other edges of the dialog.
   final EdgeInsetsGeometry contentPadding;
 
   /// The (optional) set of actions that are displayed at the bottom of the
@@ -194,7 +208,12 @@ class AlertDialog extends StatelessWidget {
   ///
   /// Typically this is a list of [FlatButton] widgets.
   ///
-  /// These widgets will be wrapped in a [ButtonBar].
+  /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
+  /// of padding on each side.
+  ///
+  /// If the [title] is not null but the [content] _is_ null, then an extra 20
+  /// pixels of padding is added above the [ButtonBar] to separate the [title]
+  /// from the [actions].
   final List<Widget> actions;
 
   @override
@@ -203,7 +222,7 @@ class AlertDialog extends StatelessWidget {
 
     if (title != null) {
       children.add(new Padding(
-        padding: titlePadding ?? new EdgeInsetsDirectional.fromSTEB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
+        padding: titlePadding ?? new EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
           child: title,
@@ -214,7 +233,7 @@ class AlertDialog extends StatelessWidget {
     if (content != null) {
       children.add(new Flexible(
         child: new Padding(
-          padding: contentPadding ?? const EdgeInsetsDirectional.fromSTEB(24.0, 20.0, 24.0, 24.0),
+          padding: contentPadding,
           child: new DefaultTextStyle(
             style: Theme.of(context).textTheme.subhead,
             child: content,
@@ -249,6 +268,12 @@ class AlertDialog extends StatelessWidget {
 /// widget is commonly used to represent each of the options. If the user
 /// selects this option, the widget will call the [onPressed] callback, which
 /// typically uses [Navigator.pop] to close the dialog.
+///
+/// The padding on a [SimpleDialogOption] is configured to combine with the
+/// default [SimpleDialog.contentPadding] so that each option ends up 8 pixels
+/// from the other vertically, with 20 pixels of spacing between the dialog's
+/// title and the first option, and 24 pixels of spacing between the last option
+/// and the bottom of the dialog.
 ///
 /// ## Sample code
 ///
@@ -303,6 +328,10 @@ class SimpleDialogOption extends StatelessWidget {
 ///
 /// A simple dialog offers the user a choice between several options. A simple
 /// dialog has an optional title that is displayed above the choices.
+///
+/// Choices are normally represented using [SimpleDialogOption] widgets. If
+/// other widgets are used, see [contentPadding] for notes regarding the
+/// conventions for obtaining the spacing expected by Material Design.
 ///
 /// For dialogs that inform the user about a situation, consider using an
 /// [AlertDialog].
@@ -365,13 +394,17 @@ class SimpleDialog extends StatelessWidget {
   /// Creates a simple dialog.
   ///
   /// Typically used in conjunction with [showDialog].
+  ///
+  /// The [titlePadding] and [contentPadding] arguments must not be null.
   const SimpleDialog({
     Key key,
     this.title,
-    this.titlePadding,
+    this.titlePadding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
     this.children,
-    this.contentPadding,
-  }) : super(key: key);
+    this.contentPadding: const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
+  }) : assert(titlePadding != null),
+       assert(contentPadding != null),
+       super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -381,8 +414,13 @@ class SimpleDialog extends StatelessWidget {
 
   /// Padding around the title.
   ///
-  /// Uses material design default if none is supplied. If there is no title, no
-  /// padding will be provided.
+  /// If there is no title, no padding will be provided.
+  ///
+  /// By default, this provides the recommend Material Design padding of 24
+  /// pixels around the left, top, and right edges of the title.
+  ///
+  /// See [contentPadding] for the conventions regarding padding between the
+  /// [title] and the [children].
   final EdgeInsetsGeometry titlePadding;
 
   /// The (optional) content of the dialog is displayed in a
@@ -393,7 +431,16 @@ class SimpleDialog extends StatelessWidget {
 
   /// Padding around the content.
   ///
-  /// Uses material design default if none is supplied.
+  /// By default, this is 12 pixels on the top and 16 pixels on the bottom. This
+  /// is intended to be combined with children that have 24 pixels of padding on
+  /// the left and right, and 8 pixels of padding on the top and bottom, so that
+  /// the content ends up being indented 20 pixels from the title, 24 pixels
+  /// from the bottom, and 24 pixels from the sides.
+  ///
+  /// The [SimpleDialogOption] widget uses such padding.
+  ///
+  /// If there is no [title], the [contentPadding] should be adjusted so that
+  /// the top padding ends up being 24 pixels.
   final EdgeInsetsGeometry contentPadding;
 
   @override
@@ -402,10 +449,10 @@ class SimpleDialog extends StatelessWidget {
 
     if (title != null) {
       body.add(new Padding(
-        padding: titlePadding ?? const EdgeInsetsDirectional.fromSTEB(24.0, 24.0, 24.0, 0.0),
+        padding: titlePadding,
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
-          child: title
+          child: title,
         )
       ));
     }
@@ -413,7 +460,7 @@ class SimpleDialog extends StatelessWidget {
     if (children != null) {
       body.add(new Flexible(
         child: new SingleChildScrollView(
-          padding: contentPadding ?? const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 16.0),
+          padding: contentPadding,
           child: new ListBody(children: children),
         )
       ));
