@@ -49,7 +49,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
       : null;
     return new Scaffold(
       appBar: new AppBar(
-        title: const Text('FAB Location'), 
+        title: const Text('FAB Location with Bottom App Bar'), 
         // Add 48dp of space onto the bottom of the appbar.
         // This gives space for the top-start location to attach to without
         // blocking the 'back' button.
