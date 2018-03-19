@@ -788,12 +788,34 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Expressed in the coordinate system of the node. May be null if no clip has
   /// been applied.
+  ///
+  /// Descendant [SemanticsNode]s that are positioned outside of this rect will
+  /// be excluded from the semantics tree. Descendant [SemanticsNode]s that are
+  /// overlapping with this rect, but are outside of [parentPaintClipRect] will
+  /// be included in the tree, but they will be marked as hidden because they
+  /// are assumed to be not visible on screen.
+  ///
+  /// If this rect is null, all descendant [SemanticsNode]s outside of
+  /// [parentPaintClipRect] will be excluded from the tree.
+  ///
+  /// If this rect is non-null it has to completely enclose
+  /// [parentPaintClipRect]. If [parentPaintClipRect] is null this property is
+  /// also null.
   Rect parentSemanticsClipRect;
 
   /// The paint clip from an ancestor that was applied to this node.
   ///
   /// Expressed in the coordinate system of the node. May be null if no clip has
   /// been applied.
+  ///
+  /// Descendant [SemanticsNode]s that are positioned outside of this rect will
+  /// either be excluded from the semantics tree (if they have no overlap with
+  /// [parentSemanticsClipRect]) or they will be included and marked as hidden
+  /// (if they are overlapping with [parentSemanticsClipRect]).
+  ///
+  /// This rect is completely enclosed by [parentSemanticsClipRect].
+  ///
+  /// If this rect is null [parentSemanticsClipRect] also has to be null.
   Rect parentPaintClipRect;
 
   /// Whether the node is invisible.
@@ -1439,6 +1461,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     final List<String> flags = SemanticsFlag.values.values.where((SemanticsFlag flag) => _hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
     properties.add(new IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(new FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
+    properties.add(new FlagProperty('isHidden', value: _hasFlag(SemanticsFlag.isHidden), ifTrue: 'HIDDEN 💨'));
     properties.add(new StringProperty('label', _label, defaultValue: ''));
     properties.add(new StringProperty('value', _value, defaultValue: ''));
     properties.add(new StringProperty('increasedValue', _increasedValue, defaultValue: ''));

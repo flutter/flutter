@@ -3316,7 +3316,6 @@ class _SemanticsGeometry {
 
     _transform = new Matrix4.identity();
     _semanticsClipRect = parentSemanticsClipRect;
-    // TODO(goderbauer): consider cases with a viewport within a viewport, _paintClipRect probably needs to be a list.
     _paintClipRect = parentPaintClipRect;
     for (int index = ancestors.length-1; index > 0; index -= 1) {
       final RenderObject parent = ancestors[index];
