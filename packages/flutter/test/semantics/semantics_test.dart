@@ -145,14 +145,14 @@ void main() {
 
   test('OrdinalSortKey compares correctly', () {
     const List<List<SemanticsSortKey>> tests = const <List<SemanticsSortKey>>[
-      <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(0.0)],
-      <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
-      <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
-      <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(1.0)],
-      <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(1.0)],
-      <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(0.0)],
-      <SemanticsSortKey>[const CustomSortKey(0.0), const OrdinalSortKey(0.0)],
-      <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(1.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(1.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(0.0)],
+      const <SemanticsSortKey>[const CustomSortKey(0.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(0.0)],
     ];
     final List<int> expectedResults = <int>[0, -1, 1, 0, 0, 0, 0, 0];
     assert(tests.length == expectedResults.length);
@@ -178,14 +178,14 @@ void main() {
 
   test('OrdinalSortKey compares correctly', () {
     const List<List<SemanticsSortKey>> tests = const <List<SemanticsSortKey>>[
-      <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(0.0)],
-      <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
-      <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
-      <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(1.0)],
-      <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(1.0)],
-      <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(0.0)],
-      <SemanticsSortKey>[const CustomSortKey(0.0), const OrdinalSortKey(0.0)],
-      <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(1.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(1.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(0.0)],
+      const <SemanticsSortKey>[const CustomSortKey(0.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(0.0)],
     ];
     final List<int> expectedResults = <int>[0, -1, 1, 0, 0, 0, 0, 0];
     assert(tests.length == expectedResults.length);
