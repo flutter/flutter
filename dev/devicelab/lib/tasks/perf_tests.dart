@@ -214,7 +214,7 @@ class CompileTest {
     );
   }
 
-  static Future<Map<String, dynamic>> _compileAot({ bool previewDart2: false }) async {
+  static Future<Map<String, dynamic>> _compileAot({ bool previewDart2: true }) async {
     // Generate blobs instead of assembly.
     await flutter('clean');
     final Stopwatch watch = new Stopwatch()..start();
@@ -235,6 +235,8 @@ class CompileTest {
     }
     if (previewDart2)
       options.add('--preview-dart-2');
+    else
+      options.add('--no-preview-dart-2');
     setLocalEngineOptionIfNecessary(options);
     final String compileLog = await evalFlutter('build', options: options);
     watch.stop();
@@ -249,7 +251,7 @@ class CompileTest {
     return metrics;
   }
 
-  static Future<Map<String, dynamic>> _compileApp({ bool previewDart2: false }) async {
+  static Future<Map<String, dynamic>> _compileApp({ bool previewDart2: true }) async {
     await flutter('clean');
     final Stopwatch watch = new Stopwatch();
     int releaseSizeInBytes;
@@ -288,7 +290,7 @@ class CompileTest {
     };
   }
 
-  static Future<Map<String, dynamic>> _compileDebug({ bool previewDart2: false }) async {
+  static Future<Map<String, dynamic>> _compileDebug({ bool previewDart2: true }) async {
     await flutter('clean');
     final Stopwatch watch = new Stopwatch();
     final List<String> options = <String>['--debug'];

@@ -16,7 +16,7 @@ import '../framework/utils.dart';
 final Directory _editedFlutterGalleryDir = dir(path.join(Directory.systemTemp.path, 'edited_flutter_gallery'));
 final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'examples/flutter_gallery'));
 
-TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
+TaskFunction createHotModeTest({ bool isPreviewDart2: true }) {
   return () async {
     final Device device = await devices.workingDevice;
     await device.unlock();
@@ -27,6 +27,8 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
     ];
     if (isPreviewDart2)
       options.add('--preview-dart-2');
+    else
+      options.add('--no-preview-dart-2');
     setLocalEngineOptionIfNecessary(options);
     int hotReloadCount = 0;
     Map<String, dynamic> twoReloadsData;

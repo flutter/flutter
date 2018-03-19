@@ -10,5 +10,5 @@ import 'package:flutter_devicelab/framework/adb.dart';
 
 Future<Null> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createHotModeTest(isPreviewDart2: true));
+  await task(createHotModeTest(isPreviewDart2: false));
 }
