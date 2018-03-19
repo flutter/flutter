@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
+import 'base/common.dart';
 import 'base/io.dart';
 import 'base/process_manager.dart';
 import 'globals.dart';
@@ -65,8 +66,12 @@ Future<String> compile(
   // This is a URI, not a file path, so the forward slash is correct even on Windows.
   if (!sdkRoot.endsWith('/'))
     sdkRoot = '$sdkRoot/';
+  final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+  if (!processManager.canRun(engineDartPath)) {
+    throwToolExit('Unable to find Dart binary at $engineDartPath');
+  }
   final List<String> command = <String>[
-    artifacts.getArtifactPath(Artifact.engineDartBinary),
+    engineDartPath,
     frontendServer,
     '--sdk-root',
     sdkRoot,
