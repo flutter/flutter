@@ -50,6 +50,7 @@ class DefaultLayerBuilder final : public LayerBuilder {
   void PushPhysicalShape(const SkPath& path,
                          double elevation,
                          SkColor color,
+                         SkColor shadow_color,
                          SkScalar device_pixel_ratio) override;
 
   // |flow::LayerBuilder|

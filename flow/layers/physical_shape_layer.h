@@ -18,6 +18,7 @@ class PhysicalShapeLayer : public ContainerLayer {
 
   void set_elevation(float elevation) { elevation_ = elevation; }
   void set_color(SkColor color) { color_ = color; }
+  void set_shadow_color(SkColor shadow_color) { shadow_color_ = shadow_color; }
   void set_device_pixel_ratio(SkScalar dpr) { device_pixel_ratio_ = dpr; }
 
   static void DrawShadow(SkCanvas* canvas,
@@ -38,6 +39,7 @@ class PhysicalShapeLayer : public ContainerLayer {
  private:
   float elevation_;
   SkColor color_;
+  SkColor shadow_color_;
   SkScalar device_pixel_ratio_;
   SkPath path_;
   bool isRect_;

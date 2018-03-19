@@ -102,11 +102,13 @@ void SceneBuilder::pushShaderMask(Shader* shader,
 
 void SceneBuilder::pushPhysicalShape(const CanvasPath* path,
                                      double elevation,
-                                     int color) {
+                                     int color,
+                                     int shadow_color) {
   layer_builder_->PushPhysicalShape(
       path->path(),                 //
       elevation,                    //
       static_cast<SkColor>(color),  //
+      static_cast<SkColor>(shadow_color),
       UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio);
 }
 
