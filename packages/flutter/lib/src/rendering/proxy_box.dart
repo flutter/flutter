@@ -1596,6 +1596,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
           clipPath: offsetClipPath,
           elevation: elevation,
           color: color,
+          shadowColor: shadowColor,
         );
         context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
       } else {

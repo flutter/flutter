@@ -754,9 +754,11 @@ class PhysicalModelLayer extends ContainerLayer {
     @required this.clipPath,
     @required this.elevation,
     @required this.color,
+    @required this.shadowColor,
   }) : assert(clipPath != null),
        assert(elevation != null),
-       assert(color != null);
+       assert(color != null),
+       assert(shadowColor != null);
 
   /// The path to clip in the parent's coordinate system.
   ///
@@ -776,12 +778,15 @@ class PhysicalModelLayer extends ContainerLayer {
   /// (as described at [Layer]).
   Color color;
 
+  Color shadowColor;
+
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushPhysicalShape(
       path: clipPath.shift(layerOffset),
       elevation: elevation,
       color: color,
+      shadowColor: shadowColor,
     );
     addChildrenToScene(builder, layerOffset);
     builder.pop();
