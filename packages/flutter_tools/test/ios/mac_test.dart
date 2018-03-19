@@ -41,7 +41,7 @@ void main() {
 
     testUsingContext('getAvailableDeviceIDs throws ToolExit when idevice_id returns non-zero', () async {
       when(mockProcessManager.run(<String>['idevice_id', '-l']))
-          .thenReturn(new ProcessResult(1, 1, '', 'Sad today'));
+          .thenAnswer((_) => new Future<ProcessResult>.value(new ProcessResult(1, 1, '', 'Sad today')));
       expect(() async => await iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -49,7 +49,7 @@ void main() {
 
     testUsingContext('getAvailableDeviceIDs returns idevice_id output when installed', () async {
       when(mockProcessManager.run(<String>['idevice_id', '-l']))
-          .thenReturn(new ProcessResult(1, 0, 'foo', ''));
+          .thenAnswer((_) => new Future<ProcessResult>.value(new ProcessResult(1, 0, 'foo', '')));
       expect(await iMobileDevice.getAvailableDeviceIDs(), 'foo');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -72,7 +72,7 @@ void main() {
         when(mockProcessManager.run(<String>['idevicescreenshot', outputPath],
             environment: null,
             workingDirectory: null
-        )).thenReturn(new ProcessResult(4, 1, '', ''));
+        )).thenAnswer((_) => new Future<ProcessResult>.value(new ProcessResult(4, 1, '', '')));
 
         expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
       }, overrides: <Type, Generator>{
