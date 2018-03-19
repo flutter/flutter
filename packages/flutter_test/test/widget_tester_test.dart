@@ -196,7 +196,9 @@ void main() {
       expect(failure, isNotNull);
       expect(
         failure.message,
-        contains('Actual: ?:<zero widgets with text "bar" that has ancestor(s) with type Column with text "foo"')
+        contains(
+          'Actual: ?:<zero widgets with text "bar" that has ancestor(s) with type "Column" which is an ancestor of text "foo"',
+        ),
       );
     });
   });
@@ -256,7 +258,9 @@ void main() {
       expect(failure, isNotNull);
       expect(
         failure.message,
-        contains('Actual: ?:<zero widgets with type Column with text "foo" which is an ancestor of text "bar"'),
+        contains(
+          'Actual: ?:<zero widgets with type "Column" which is an ancestor of text "foo" which is an ancestor of text "bar"',
+        ),
       );
     });
 
