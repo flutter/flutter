@@ -166,6 +166,7 @@ class ThemeData extends Diagnosticable {
       primaryColor: primaryColor,
       primaryColorLight: primaryColorLight,
       primaryColorDark: primaryColorDark,
+      valueIndicatorTextStyle: accentTextTheme.body2,
     );
     return new ThemeData.raw(
       brightness: brightness,
