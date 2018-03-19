@@ -277,16 +277,19 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   void didUpdateWidget(_HelperError old) {
     super.didUpdateWidget(old);
 
-    final String errorText = widget.errorText;
-    final String helperText = widget.helperText;
+    final String newErrorText = widget.errorText;
+    final String newHelperText = widget.helperText;
     final String oldErrorText = old.errorText;
     final String oldHelperText = old.helperText;
 
-    if ((errorText ?? helperText) != (oldErrorText ?? oldHelperText)) {
-      if (errorText != null) {
+    final bool errorTextStateChanged = (newErrorText != null) != (oldErrorText != null);
+    final bool helperTextStateChanged = newErrorText == null && (newHelperText != null) != (oldHelperText != null);
+
+    if (errorTextStateChanged || helperTextStateChanged) {
+      if (newErrorText != null) {
         _error = _buildError();
         _controller.forward();
-      } else if (helperText != null) {
+      } else if (newHelperText != null) {
         _helper = _buildHelper();
         _controller.reverse();
       } else {
@@ -1818,6 +1821,9 @@ class InputDecoration {
   ///
   /// If non-null, the border's color animates to red and the [helperText] is
   /// not shown.
+  ///
+  /// In a [TextFormField], this is overridden by the value returned from
+  /// [TextFormField.validator], if that is not null.
   final String errorText;
 
   /// The style to use for the [errorText].
