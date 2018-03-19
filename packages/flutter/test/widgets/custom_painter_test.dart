@@ -150,16 +150,20 @@ void _defineTests() {
             children: <TestSemantics>[
               new TestSemantics(
                 id: 3,
+                nextNodeId: 4,
+                previousNodeId: 2,
                 label: 'background',
                 rect: new Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
               ),
               new TestSemantics(
                 id: 2,
+                nextNodeId: 3,
                 label: 'Hello',
                 rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
               ),
               new TestSemantics(
                 id: 4,
+                previousNodeId: 3,
                 label: 'foreground',
                 rect: new Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
               ),
@@ -356,15 +360,11 @@ void _defineTests() {
       children: <TestSemantics>[
         new TestSemantics.rootChild(
           id: 1,
-          previousNodeId: -1,
-          nextNodeId: expectedId,
           children: <TestSemantics>[
             new TestSemantics.rootChild(
               id: expectedId,
               rect: TestSemantics.fullScreen,
               actions: allActions.fold(0, (int previous, SemanticsAction action) => previous | action.index),
-              previousNodeId: 1,
-              nextNodeId: -1,
             ),
           ]
         ),
@@ -420,20 +420,15 @@ void _defineTests() {
       ),
     ));
 
-    const int expectedId = 2;
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
             id: 1,
-            previousNodeId: -1,
-            nextNodeId: expectedId,
             children: <TestSemantics>[
               new TestSemantics.rootChild(
-                id: expectedId,
+                id: 2,
                 rect: TestSemantics.fullScreen,
                 flags: SemanticsFlag.values.values.toList(),
-                previousNodeId: 1,
-                nextNodeId: -1,
               ),
             ]
         ),

@@ -3025,7 +3025,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     String decreasedValue,
     String hint,
     TextDirection textDirection,
-    SemanticsSortOrder sortOrder,
+    SemanticsSortKey sortKey,
     VoidCallback onTap,
     VoidCallback onLongPress,
     VoidCallback onScrollLeft,
@@ -3059,7 +3059,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _decreasedValue = decreasedValue,
        _hint = hint,
        _textDirection = textDirection,
-       _sortOrder = sortOrder,
+       _sortKey = sortKey,
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onScrollLeft = onScrollLeft,
@@ -3276,17 +3276,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// Sets the [SemanticsNode.sortOrder] to the given value.
+  /// Sets the [SemanticsNode.sortKey] to the given value.
   ///
-  /// This defines how this node will be sorted with the other semantics nodes
+  /// This defines how this node is sorted among the sibling semantics nodes
   /// to determine the order in which they are traversed by the accessibility
   /// services on the platform (e.g. VoiceOver on iOS and TalkBack on Android).
-  SemanticsSortOrder get sortOrder => _sortOrder;
-  SemanticsSortOrder _sortOrder;
-  set sortOrder(SemanticsSortOrder value) {
-    if (sortOrder == value)
+  SemanticsSortKey get sortKey => _sortKey;
+  SemanticsSortKey _sortKey;
+  set sortKey(SemanticsSortKey value) {
+    if (sortKey == value)
       return;
-    _sortOrder = value;
+    _sortKey = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3650,8 +3650,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.hint = hint;
     if (textDirection != null)
       config.textDirection = textDirection;
-    if (sortOrder != null)
-      config.sortOrder = sortOrder;
+    if (sortKey != null)
+      config.sortKey = sortKey;
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.
