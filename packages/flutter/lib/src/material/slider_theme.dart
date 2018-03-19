@@ -35,9 +35,9 @@ class SliderTheme extends InheritedWidget {
     Key key,
     @required this.data,
     @required Widget child,
-  }) : assert(child != null),
-       assert(data != null),
-       super(key: key, child: child);
+  })  : assert(child != null),
+        assert(data != null),
+        super(key: key, child: child);
 
   /// Specifies the color and shape values for descendant slider widgets.
   final SliderThemeData data;
@@ -194,21 +194,23 @@ class SliderThemeData extends Diagnosticable {
     @required this.thumbShape,
     @required this.valueIndicatorShape,
     @required this.showValueIndicator,
-  }) : assert(activeRailColor != null),
-       assert(inactiveRailColor != null),
-       assert(disabledActiveRailColor != null),
-       assert(disabledInactiveRailColor != null),
-       assert(activeTickMarkColor != null),
-       assert(inactiveTickMarkColor != null),
-       assert(disabledActiveTickMarkColor != null),
-       assert(disabledInactiveTickMarkColor != null),
-       assert(thumbColor != null),
-       assert(disabledThumbColor != null),
-       assert(overlayColor != null),
-       assert(valueIndicatorColor != null),
-       assert(thumbShape != null),
-       assert(valueIndicatorShape != null),
-       assert(showValueIndicator != null);
+    @required this.valueIndicatorTextStyle,
+  })  : assert(activeRailColor != null),
+        assert(inactiveRailColor != null),
+        assert(disabledActiveRailColor != null),
+        assert(disabledInactiveRailColor != null),
+        assert(activeTickMarkColor != null),
+        assert(inactiveTickMarkColor != null),
+        assert(disabledActiveTickMarkColor != null),
+        assert(disabledInactiveTickMarkColor != null),
+        assert(thumbColor != null),
+        assert(disabledThumbColor != null),
+        assert(overlayColor != null),
+        assert(valueIndicatorColor != null),
+        assert(thumbShape != null),
+        assert(valueIndicatorShape != null),
+        assert(valueIndicatorTextStyle != null),
+        assert(showValueIndicator != null);
 
   /// Generates a SliderThemeData from three main colors.
   ///
@@ -223,10 +225,12 @@ class SliderThemeData extends Diagnosticable {
     @required Color primaryColor,
     @required Color primaryColorDark,
     @required Color primaryColorLight,
+    @required TextStyle valueIndicatorTextStyle,
   }) {
     assert(primaryColor != null);
     assert(primaryColorDark != null);
     assert(primaryColorLight != null);
+    assert(valueIndicatorTextStyle != null);
 
     // These are Material Design defaults, and are used to derive
     // component Colors (with opacity) from base colors.
@@ -264,6 +268,7 @@ class SliderThemeData extends Diagnosticable {
       valueIndicatorColor: primaryColor.withAlpha(valueIndicatorAlpha),
       thumbShape: const RoundSliderThumbShape(),
       valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
+      valueIndicatorTextStyle: valueIndicatorTextStyle,
       showValueIndicator: ShowValueIndicator.onlyForDiscrete,
     );
   }
@@ -337,6 +342,11 @@ class SliderThemeData extends Diagnosticable {
   /// when the thumb is being touched.
   final ShowValueIndicator showValueIndicator;
 
+  /// The text style for the text on the value indicator.
+  ///
+  /// By default this is the [ThemeData.accentTextTheme.body2] text theme.
+  final TextStyle valueIndicatorTextStyle;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SliderThemeData copyWith({
@@ -355,6 +365,7 @@ class SliderThemeData extends Diagnosticable {
     SliderComponentShape thumbShape,
     SliderComponentShape valueIndicatorShape,
     ShowValueIndicator showValueIndicator,
+    TextStyle valueIndicatorTextStyle,
   }) {
     return new SliderThemeData(
       activeRailColor: activeRailColor ?? this.activeRailColor,
@@ -372,6 +383,7 @@ class SliderThemeData extends Diagnosticable {
       thumbShape: thumbShape ?? this.thumbShape,
       valueIndicatorShape: valueIndicatorShape ?? this.valueIndicatorShape,
       showValueIndicator: showValueIndicator ?? this.showValueIndicator,
+      valueIndicatorTextStyle: valueIndicatorTextStyle ?? this.valueIndicatorTextStyle,
     );
   }
 
@@ -410,6 +422,7 @@ class SliderThemeData extends Diagnosticable {
       thumbShape: t < 0.5 ? a.thumbShape : b.thumbShape,
       valueIndicatorShape: t < 0.5 ? a.valueIndicatorShape : b.valueIndicatorShape,
       showValueIndicator: t < 0.5 ? a.showValueIndicator : b.showValueIndicator,
+      valueIndicatorTextStyle: TextStyle.lerp(a.valueIndicatorTextStyle, b.valueIndicatorTextStyle, t),
     );
   }
 
@@ -431,6 +444,7 @@ class SliderThemeData extends Diagnosticable {
       thumbShape,
       valueIndicatorShape,
       showValueIndicator,
+      valueIndicatorTextStyle,
     );
   }
 
@@ -457,7 +471,8 @@ class SliderThemeData extends Diagnosticable {
         otherData.valueIndicatorColor == valueIndicatorColor &&
         otherData.thumbShape == thumbShape &&
         otherData.valueIndicatorShape == valueIndicatorShape &&
-        otherData.showValueIndicator == showValueIndicator;
+        otherData.showValueIndicator == showValueIndicator &&
+        otherData.valueIndicatorTextStyle == valueIndicatorTextStyle;
   }
 
   @override
@@ -468,6 +483,7 @@ class SliderThemeData extends Diagnosticable {
       primaryColor: defaultTheme.primaryColor,
       primaryColorDark: defaultTheme.primaryColorDark,
       primaryColorLight: defaultTheme.primaryColorLight,
+      valueIndicatorTextStyle: defaultTheme.accentTextTheme.body2,
     );
     description.add(new DiagnosticsProperty<Color>('activeRailColor', activeRailColor, defaultValue: defaultData.activeRailColor));
     description.add(new DiagnosticsProperty<Color>('inactiveRailColor', inactiveRailColor, defaultValue: defaultData.inactiveRailColor));
@@ -484,6 +500,7 @@ class SliderThemeData extends Diagnosticable {
     description.add(new DiagnosticsProperty<SliderComponentShape>('thumbShape', thumbShape, defaultValue: defaultData.thumbShape, level: DiagnosticLevel.debug));
     description.add(new DiagnosticsProperty<SliderComponentShape>('valueIndicatorShape', valueIndicatorShape, defaultValue: defaultData.valueIndicatorShape, level: DiagnosticLevel.debug));
     description.add(new EnumProperty<ShowValueIndicator>('showValueIndicator', showValueIndicator, defaultValue: defaultData.showValueIndicator));
+    description.add(new DiagnosticsProperty<TextStyle>('valueIndicatorTextStyle', valueIndicatorTextStyle, defaultValue: defaultData.valueIndicatorTextStyle));
   }
 }
 
@@ -510,24 +527,27 @@ abstract class SliderComponentShape {
   /// [activationAnimation] is an animation triggered when the user beings
   /// to interact with the slider. It reverses when the user stops interacting
   /// with the slider.
+  ///
   /// [enableAnimation] is an animation triggered when the [Slider] is enabled,
   /// and it reverses when the slider is disabled.
+  ///
+  /// [value] is the current parametric value (from 0.0 to 1.0) of the slider.
+  ///
   /// If [labelPainter] is non-null, then [labelPainter.paint] should be
   /// called with the location that the label should appear. If the labelPainter
   /// passed is null, then no label was supplied to the [Slider].
-  /// [value] is the current parametric value (from 0.0 to 1.0) of the slider.
   void paint(
-    RenderBox parentBox,
     PaintingContext context,
-    bool isDiscrete,
-    Offset thumbCenter,
+    Offset thumbCenter, {
     Animation<double> activationAnimation,
     Animation<double> enableAnimation,
+    bool isDiscrete,
     TextPainter labelPainter,
+    RenderBox parentBox,
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-  );
+  });
 }
 
 /// This is the default shape to a [Slider]'s thumb if no
@@ -552,17 +572,17 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   @override
   void paint(
-    RenderBox parentBox,
     PaintingContext context,
-    bool isDiscrete,
-    Offset thumbCenter,
+    Offset thumbCenter, {
     Animation<double> activationAnimation,
     Animation<double> enableAnimation,
+    bool isDiscrete,
     TextPainter labelPainter,
+    RenderBox parentBox,
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-  ) {
+  }) {
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = new Tween<double>(
       begin: _disabledThumbRadius,
@@ -624,8 +644,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   static const double _twoSeventyDegrees = 3.0 * math.pi / 2.0;
   static const double _ninetyDegrees = math.pi / 2.0;
   static const double _thirtyDegrees = math.pi / 6.0;
-  static const Size _preferredSize =
-      const Size.fromHeight(_distanceBetweenTopBottomCenters + _topLobeRadius + _bottomLobeRadius);
+  static const Size _preferredSize = const Size.fromHeight(_distanceBetweenTopBottomCenters + _topLobeRadius + _bottomLobeRadius);
   // Set to true if you want a rectangle to be drawn around the label bubble.
   // This helps with building tests that check that the label draws in the right
   // place (because it prints the rect in the failed test output). It should not
@@ -767,9 +786,11 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     double shift = _getIdealOffset(parentBox, halfWidthNeeded, overallScale, center);
     double leftWidthNeeded;
     double rightWidthNeeded;
-    if (shift < 0.0) {  // shifting to the left
+    if (shift < 0.0) {
+      // shifting to the left
       shift = math.max(shift, -halfWidthNeeded);
-    } else {  // shifting to the right
+    } else {
+      // shifting to the right
       shift = math.min(shift, halfWidthNeeded);
     }
     rightWidthNeeded = halfWidthNeeded + shift;
@@ -808,21 +829,23 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     final double stretch = (neckStretchBaseline * t).clamp(0.0, 10.0 * neckStretchBaseline);
     final Offset neckStretch = new Offset(0.0, neckStretchBaseline - stretch);
 
-    assert(!_debuggingLabelLocation || () {
-      final Offset leftCenter = _topLobeCenter - new Offset(leftWidthNeeded, 0.0) + neckStretch;
-      final Offset rightCenter = _topLobeCenter + new Offset(rightWidthNeeded, 0.0) + neckStretch;
-      final Rect valueRect = new Rect.fromLTRB(
-        leftCenter.dx - _topLobeRadius,
-        leftCenter.dy - _topLobeRadius,
-        rightCenter.dx + _topLobeRadius,
-        rightCenter.dy + _topLobeRadius,
-      );
-      final Paint outlinePaint = new Paint()
-        ..color = const Color(0xffff0000)
-        ..style = PaintingStyle.stroke..strokeWidth = 1.0;
-      canvas.drawRect(valueRect, outlinePaint);
-      return true;
-    }());
+    assert(!_debuggingLabelLocation ||
+        () {
+          final Offset leftCenter = _topLobeCenter - new Offset(leftWidthNeeded, 0.0) + neckStretch;
+          final Offset rightCenter = _topLobeCenter + new Offset(rightWidthNeeded, 0.0) + neckStretch;
+          final Rect valueRect = new Rect.fromLTRB(
+            leftCenter.dx - _topLobeRadius,
+            leftCenter.dy - _topLobeRadius,
+            rightCenter.dx + _topLobeRadius,
+            rightCenter.dy + _topLobeRadius,
+          );
+          final Paint outlinePaint = new Paint()
+            ..color = const Color(0xffff0000)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.0;
+          canvas.drawRect(valueRect, outlinePaint);
+          return true;
+        }());
 
     _addArc(
       path,
@@ -865,18 +888,17 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
 
   @override
   void paint(
-    RenderBox parentBox,
     PaintingContext context,
-    bool isDiscrete,
-    Offset thumbCenter,
+    Offset thumbCenter, {
     Animation<double> activationAnimation,
     Animation<double> enableAnimation,
+    bool isDiscrete,
     TextPainter labelPainter,
+    RenderBox parentBox,
     SliderThemeData sliderTheme,
     TextDirection textDirection,
     double value,
-  ) {
-    assert(labelPainter != null);
+  }) {
     final ColorTween enableColor = new ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.valueIndicatorColor,
