@@ -138,7 +138,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             result.setAccessibilityFocused(mA11yFocusedObject.id == virtualViewId);
 
         if (object.hasFlag(Flag.IS_TEXT_FIELD)) {
-            result.setPassword(object.hasFlag(Flag.IS_PASSWORD);
+            result.setPassword(object.hasFlag(Flag.IS_PASSWORD));
             result.setClassName("android.widget.EditText");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 result.setEditable(true);
