@@ -62,17 +62,17 @@ class MaterialPointArcTween extends Tween<Offset> {
           _beginAngle = sweepAngle() * (begin.dy - end.dy).sign;
           _endAngle = 0.0;
         } else {
-          _beginAngle = math.PI + sweepAngle() * (end.dy - begin.dy).sign;
-          _endAngle = math.PI;
+          _beginAngle = math.pi + sweepAngle() * (end.dy - begin.dy).sign;
+          _endAngle = math.pi;
         }
       } else {
         _radius = distanceFromAtoB * distanceFromAtoB / (c - end).distance / 2.0;
         _center = new Offset(begin.dx, begin.dy + (end.dy - begin.dy).sign * _radius);
         if (begin.dy < end.dy) {
-          _beginAngle = -math.PI / 2.0;
+          _beginAngle = -math.pi / 2.0;
           _endAngle = _beginAngle + sweepAngle() * (end.dx - begin.dx).sign;
         } else {
-          _beginAngle = math.PI / 2.0;
+          _beginAngle = math.pi / 2.0;
           _endAngle = _beginAngle + sweepAngle() * (begin.dx - end.dx).sign;
         }
       }

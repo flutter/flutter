@@ -1,4 +1,9 @@
 {
+  "tabLabel": "第 $tabIndex 個分頁 (共 $tabCount 個)",
+  "showAccountsLabel": "顯示帳戶",
+  "modalBarrierDismissLabel": "關閉",
+  "hideAccountsLabel": "隱藏帳戶",
+  "signedInLabel": "已登入帳戶",
   "scriptCategory": "dense",
   "timeOfDayFormat": "ah:mm",
   "openAppDrawerTooltip": "開啟導覽選單",

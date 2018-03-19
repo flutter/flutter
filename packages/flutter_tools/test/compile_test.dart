@@ -32,6 +32,7 @@ void main() {
       final StreamController<String> stdErrStreamController = new StreamController<String>();
       when(mockFrontendServerStdErr.transform<String>(any)).thenReturn(stdErrStreamController.stream);
       when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
+      when(mockProcessManager.canRun(any)).thenReturn(true);
       when(mockProcessManager.start(any)).thenAnswer(
           (Invocation invocation) => new Future<Process>.value(mockFrontendServer));
       when(mockFrontendServer.exitCode).thenReturn(0);
@@ -41,7 +42,7 @@ void main() {
       final BufferLogger logger = context[Logger];
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
-            new Future<List<int>>.value(UTF8.encode(
+            new Future<List<int>>.value(utf8.encode(
               'result abc\nline1\nline2\nabc /path/to/main.dart.dill'
             ))
           ));
@@ -60,7 +61,7 @@ void main() {
 
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
-            new Future<List<int>>.value(UTF8.encode(
+            new Future<List<int>>.value(utf8.encode(
               'result abc\nline1\nline2\nabc'
             ))
           ));
@@ -82,7 +83,7 @@ void main() {
 
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
-          new Future<List<int>>.value(UTF8.encode(
+          new Future<List<int>>.value(utf8.encode(
               'result abc\nline1\nline2\nabc'
           ))
       ));
@@ -120,6 +121,7 @@ void main() {
       when(mockFrontendServerStdErr.transform<String>(any))
           .thenAnswer((Invocation invocation) => stdErrStreamController.stream);
 
+      when(mockProcessManager.canRun(any)).thenReturn(true);
       when(mockProcessManager.start(any)).thenAnswer(
           (Invocation invocation) => new Future<Process>.value(mockFrontendServer)
       );
@@ -134,7 +136,7 @@ void main() {
 
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
-            new Future<List<int>>.value(UTF8.encode(
+            new Future<List<int>>.value(utf8.encode(
               'result abc\nline1\nline2\nabc /path/to/main.dart.dill'
             ))
           ));
@@ -169,7 +171,7 @@ void main() {
       final StreamController<List<int>> streamController = new StreamController<List<int>>();
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => streamController.stream);
-      streamController.add(UTF8.encode('result abc\nline0\nline1\nabc /path/to/main.dart.dill\n'));
+      streamController.add(utf8.encode('result abc\nline0\nline1\nabc /path/to/main.dart.dill\n'));
       await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */);
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
@@ -192,7 +194,7 @@ void main() {
       final StreamController<List<int>> streamController = new StreamController<List<int>>();
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => streamController.stream);
-      streamController.add(UTF8.encode(
+      streamController.add(utf8.encode(
         'result abc\nline0\nline1\nabc /path/to/main.dart.dill\n'
       ));
       await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */);
@@ -222,12 +224,12 @@ Future<Null> _recompile(StreamController<List<int>> streamController,
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
   new Future<List<int>>(() {
-    streamController.add(UTF8.encode(mockCompilerOutput));
+    streamController.add(utf8.encode(mockCompilerOutput));
   });
   final String output = await generator.recompile(null /* mainPath */, <String>['/path/to/main.dart']);
   expect(output, equals('/path/to/main.dart.dill'));
   final String commands = mockFrontendServerStdIn.getAndClear();
-  final RegExp re = new RegExp(r'^recompile (.*)\n/path/to/main.dart\n(.*)\n$');
+  final RegExp re = new RegExp('^recompile (.*)\\n/path/to/main.dart\\n(.*)\\n\$');
   expect(commands, matches(re));
   final Match match = re.firstMatch(commands);
   expect(match[1] == match[2], isTrue);

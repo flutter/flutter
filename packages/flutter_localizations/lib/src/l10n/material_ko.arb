@@ -15,7 +15,7 @@
   "pageRowsInfoTitle": "$rowCount행 중 $firstRow~$lastRow행",
   "pageRowsInfoTitleApproximate": "약 $rowCount행 중 $firstRow~$lastRow행",
   "rowsPerPageTitle": "페이지당 행 수:",
-  "tabLabel": "$tabCount행 중 $tabIndex행",
+  "tabLabel": "탭 $tabCount개 중 $tabIndex번째",
   "selectedRowCountTitleOne": "항목 1개 선택됨",
   "selectedRowCountTitleOther": "항목 $selectedRowCount개 선택됨",
   "cancelButtonLabel": "취소",
@@ -31,8 +31,8 @@
   "postMeridiemAbbreviation": "오후",
   "timePickerHourModeAnnouncement": "시간 선택",
   "timePickerMinuteModeAnnouncement": "분 선택",
-  "signedInLabel": "로그인 함",
+  "signedInLabel": "로그인됨",
   "hideAccountsLabel": "계정 숨기기",
   "showAccountsLabel": "계정 표시",
-  "modalBarrierDismissLabel": "버리다"
+  "modalBarrierDismissLabel": "닫기"
 }

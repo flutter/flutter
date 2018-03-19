@@ -82,6 +82,13 @@ List<GalleryItem> _buildGalleryItems() {
     ),
     // Material Components
     new GalleryItem(
+      title: 'Backdrop',
+      subtitle: 'Select a front layer from back layer',
+      category: 'Material Components',
+      routeName: BackdropDemo.routeName,
+      buildRoute: (BuildContext context) => new BackdropDemo(),
+    ),
+    new GalleryItem(
       title: 'Bottom navigation',
       subtitle: 'Bottom navigation with cross-fading views',
       category: 'Material Components',
@@ -148,8 +155,8 @@ List<GalleryItem> _buildGalleryItems() {
       title: 'Expansion panels',
       subtitle: 'List of expanding panels',
       category: 'Material Components',
-      routeName: ExpasionPanelsDemo.routeName,
-      buildRoute: (BuildContext context) => new ExpasionPanelsDemo(),
+      routeName: ExpansionPanelsDemo.routeName,
+      buildRoute: (BuildContext context) => new ExpansionPanelsDemo(),
     ),
     new GalleryItem(
       title: 'Floating action button',

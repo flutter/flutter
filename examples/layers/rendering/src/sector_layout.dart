@@ -7,12 +7,12 @@ import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
-const double kTwoPi = 2 * math.PI;
+const double kTwoPi = 2 * math.pi;
 
 class SectorConstraints extends Constraints {
   const SectorConstraints({
     this.minDeltaRadius: 0.0,
-    this.maxDeltaRadius: double.INFINITY,
+    this.maxDeltaRadius: double.infinity,
     this.minDeltaTheta: 0.0,
     this.maxDeltaTheta: kTwoPi
   }) : assert(maxDeltaRadius >= minDeltaRadius),
@@ -99,9 +99,9 @@ abstract class RenderSector extends RenderObject {
   void debugAssertDoesMeetConstraints() {
     assert(constraints != null);
     assert(deltaRadius != null);
-    assert(deltaRadius < double.INFINITY);
+    assert(deltaRadius < double.infinity);
     assert(deltaTheta != null);
-    assert(deltaTheta < double.INFINITY);
+    assert(deltaTheta < double.infinity);
     assert(constraints.minDeltaRadius <= deltaRadius);
     assert(deltaRadius <= math.max(constraints.minDeltaRadius, constraints.maxDeltaRadius));
     assert(constraints.minDeltaTheta <= deltaTheta);
@@ -215,7 +215,7 @@ class RenderSectorRing extends RenderSectorWithChildren {
 
   RenderSectorRing({
     BoxDecoration decoration,
-    double deltaRadius: double.INFINITY,
+    double deltaRadius: double.infinity,
     double padding: 0.0
   }) : _padding = padding,
        assert(deltaRadius >= 0.0),
@@ -284,7 +284,7 @@ class RenderSectorRing extends RenderSectorWithChildren {
   void performLayout() {
     assert(parentData is SectorParentData);
     deltaRadius = constraints.constrainDeltaRadius(desiredDeltaRadius);
-    assert(deltaRadius < double.INFINITY);
+    assert(deltaRadius < double.infinity);
     final double innerDeltaRadius = deltaRadius - padding * 2.0;
     final double childRadius = parentData.radius + padding;
     final double paddingTheta = math.atan(padding / (parentData.radius + deltaRadius));
@@ -487,8 +487,8 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
   }
 
   Size getIntrinsicDimensions({
-    double width: double.INFINITY,
-    double height: double.INFINITY
+    double width: double.infinity,
+    double height: double.infinity
   }) {
     assert(child is RenderSector);
     assert(child.parentData is SectorParentData);
@@ -539,7 +539,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
     y -= size.height / 2.0;
     // convert to radius/theta
     final double radius = math.sqrt(x * x + y * y);
-    final double theta = (math.atan2(x, -y) - math.PI / 2.0) % kTwoPi;
+    final double theta = (math.atan2(x, -y) - math.pi / 2.0) % kTwoPi;
     if (radius < innerRadius)
       return false;
     if (radius >= innerRadius + child.deltaRadius)
@@ -555,7 +555,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
 
 class RenderSolidColor extends RenderDecoratedSector {
   RenderSolidColor(this.backgroundColor, {
-    this.desiredDeltaRadius: double.INFINITY,
+    this.desiredDeltaRadius: double.infinity,
     this.desiredDeltaTheta: kTwoPi
   }) : super(new BoxDecoration(color: backgroundColor));
 

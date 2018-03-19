@@ -192,7 +192,7 @@ ProcessResult _runGit(String command) {
 
 void _reportGitFailureAndExit(ProcessResult result, String explanation) {
   if (result.exitCode != 0) {
-    print('Failed to $explanation. Git exitted with error code ${result.exitCode}.');
+    print('Failed to $explanation. Git exited with error code ${result.exitCode}.');
   } else {
     print('Failed to $explanation.');
   }

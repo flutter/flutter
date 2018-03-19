@@ -44,10 +44,10 @@ class BouncingScrollSimulation extends Simulation {
        super(tolerance: tolerance) {
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
-      _springTime = double.NEGATIVE_INFINITY;
+      _springTime = double.negativeInfinity;
     } else if (position > trailingExtent) {
       _springSimulation = _overscrollSimulation(position, velocity);
-      _springTime = double.NEGATIVE_INFINITY;
+      _springTime = double.negativeInfinity;
     } else {
       _frictionSimulation = new FrictionSimulation(0.135, position, velocity);
       final double finalX = _frictionSimulation.finalX;
@@ -66,7 +66,7 @@ class BouncingScrollSimulation extends Simulation {
         );
         assert(_springTime.isFinite);
       } else {
-        _springTime = double.INFINITY;
+        _springTime = double.infinity;
       }
     }
     assert(_springTime != null);
@@ -191,7 +191,7 @@ class ClampingScrollSimulation extends Simulation {
   //
   // Algebra courtesy of Wolfram Alpha.
   //
-  // f(x) = scrollOffset, x is time in millseconds
+  // f(x) = scrollOffset, x is time in milliseconds
   // f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x - 3.15307
   // f(x) = 3.60882×10^-6 x^3 - 0.00668009 x^2 + 4.29427 x, so f(0) is 0
   // f(686ms) = 961 pixels

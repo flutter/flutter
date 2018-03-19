@@ -29,7 +29,6 @@ const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
   'docs': _generateDocs,
   'analyze': _analyzeRepo,
   'tests': _runTests,
-  'tests_dart2': _runTestsDart2,
   'coverage': _runCoverage,
 };
 
@@ -130,15 +129,6 @@ Future<Null> _analyzeRepo() async {
   print('${bold}DONE: Analysis successful.$reset');
 }
 
-Future<Null> _runTestsDart2() async {
-  if (Platform.isWindows) {
-    // AppVeyor platform is overloaded, won't be able to handle additional
-    // load of dart2 testing.
-    return;
-  }
-  _runTests(options: <String>['--preview-dart-2']);
-}
-
 Future<Null> _runTests({List<String> options: const <String>[]}) async {
   // Verify that the tests actually return failure on failure and success on success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
@@ -228,7 +218,7 @@ Future<Null> _runCoverage() async {
   }
   coverageFile.deleteSync();
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
-    options: const <String>['--coverage'],
+    options: const <String>['--coverage', '--no-preview-dart-2'],
   );
   if (!coverageFile.existsSync()) {
     print('${red}Coverage file not found.$reset');
@@ -290,8 +280,8 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   final Future<List<List<int>>> savedStderr = process.stderr.toList();
   final int exitCode = await process.exitCode;
   final EvalResult result = new EvalResult(
-    stdout: UTF8.decode((await savedStdout).expand((List<int> ints) => ints).toList()),
-    stderr: UTF8.decode((await savedStderr).expand((List<int> ints) => ints).toList()),
+    stdout: utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()),
+    stderr: utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()),
   );
 
   if (exitCode != 0) {
@@ -341,8 +331,8 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
   final int exitCode = await process.exitCode;
   if ((exitCode == 0) == expectFailure) {
     if (!printOutput) {
-      print(UTF8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
-      print(UTF8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
+      print(utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
+      print(utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
     }
     print(
       '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'

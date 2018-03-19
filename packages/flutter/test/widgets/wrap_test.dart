@@ -828,4 +828,42 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Baseline)).size,
            within<Size>(from: const Size(100.0, 200.0), distance: 0.001));
   });
+
+  testWidgets('Spacing with slight overflow', (WidgetTester tester) async {
+    await tester.pumpWidget(new Wrap(
+      direction: Axis.horizontal,
+      textDirection: TextDirection.ltr,
+      spacing: 10.0,
+      runSpacing: 10.0,
+      children: const <Widget>[
+        const SizedBox(width: 200.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 10.0),
+        const SizedBox(width: 171.0, height: 10.0),
+      ],
+    ));
+
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(210.0, 0.0),
+      const Offset(420.0, 0.0),
+      const Offset(0.0, 20.0)
+    ]);
+  });
+
+  testWidgets('Object exactly matches container width', (WidgetTester tester) async {
+    await tester.pumpWidget(new Wrap(
+      direction: Axis.horizontal,
+      textDirection: TextDirection.ltr,
+      spacing: 10.0,
+      runSpacing: 10.0,
+      children: const <Widget>[
+        const SizedBox(width: 800.0, height: 0.0),
+      ],
+    ));
+
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    verify(tester, <Offset>[const Offset(0.0, 0.0)]);
+  });
 }

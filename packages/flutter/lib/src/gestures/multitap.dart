@@ -237,7 +237,7 @@ class _TapGesture extends _TapTracker {
     entry: GestureBinding.instance.gestureArena.add(event.pointer, gestureRecognizer)
   ) {
     startTrackingPointer(handleEvent);
-    if (longTapDelay > Duration.ZERO) {
+    if (longTapDelay > Duration.zero) {
       _timer = new Timer(longTapDelay, () {
         _timer = null;
         gestureRecognizer._dispatchLongTap(event.pointer, _lastPosition);
@@ -313,10 +313,10 @@ class _TapGesture extends _TapTracker {
 class MultiTapGestureRecognizer extends GestureRecognizer {
   /// Creates a multi-tap gesture recognizer.
   ///
-  /// The [longTapDelay] defaults to [Duration.ZERO], which means
+  /// The [longTapDelay] defaults to [Duration.zero], which means
   /// [onLongTapDown] is called immediately after [onTapDown].
   MultiTapGestureRecognizer({
-    this.longTapDelay: Duration.ZERO,
+    this.longTapDelay: Duration.zero,
     Object debugOwner,
   }) : super(debugOwner: debugOwner);
 

@@ -366,7 +366,7 @@ void main() {
                 child: const Text('body'),
               ),
             ),
-            persistentFooterButtons: <Widget>[const Placeholder()],
+            persistentFooterButtons: const <Widget>[const Placeholder()],
           ),
         ),
       ),
@@ -1059,7 +1059,7 @@ class _GeometryListenerState extends State<_GeometryListener> {
 
     if (geometryListenable != null)
       geometryListenable.removeListener(onGeometryChanged);
-    
+
     geometryListenable = newListenable;
     geometryListenable.addListener(onGeometryChanged);
     cache = new _GeometryCachePainter(geometryListenable);

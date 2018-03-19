@@ -22,7 +22,7 @@ void main() {
     expect(new ValueKey<int>(nonconst(3)) == new ValueKey<int>(nonconst(3)), isTrue);
     expect(new ValueKey<num>(nonconst(3)) == new ValueKey<int>(nonconst(3)), isFalse);
     expect(new ValueKey<int>(nonconst(3)) == new ValueKey<int>(nonconst(2)), isFalse);
-    expect(const ValueKey<double>(double.NAN) == const ValueKey<double>(double.NAN), isFalse);
+    expect(const ValueKey<double>(double.nan) == const ValueKey<double>(double.nan), isFalse);
 
     expect(new Key(nonconst('')) == new ValueKey<String>(nonconst('')), isTrue);
     expect(new ValueKey<String>(nonconst('')) == new ValueKey<String>(nonconst('')), isTrue);

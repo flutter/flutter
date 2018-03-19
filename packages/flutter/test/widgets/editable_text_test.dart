@@ -289,6 +289,8 @@ void main() {
     await tester.pump();
 
     expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused]));
+
+    semantics.dispose();
   });
 
   testWidgets('EditableText includes text as value in semantics', (WidgetTester tester) async {
@@ -327,6 +329,8 @@ void main() {
       flags: <SemanticsFlag>[SemanticsFlag.isTextField],
       value: value2,
     ));
+
+    semantics.dispose();
   });
 
   testWidgets('changing selection with keyboard does not show handles', (WidgetTester tester) async {
@@ -678,7 +682,7 @@ void main() {
       await tester.pump();
 
       final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner;
-      const int expectedNodeId = 3;
+      const int expectedNodeId = 2;
 
       expect(semantics, hasSemantics(new TestSemantics.root(
         children: <TestSemantics>[

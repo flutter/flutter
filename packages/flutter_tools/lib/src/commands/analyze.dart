@@ -19,7 +19,7 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('current-package', help: 'Include the lib/main.dart file from the current directory, if any.', defaultsTo: true);
     argParser.addFlag('dartdocs', help: 'List every public member that is lacking documentation (only works with --flutter-repo and without --watch).', defaultsTo: false, hide: !verboseHelp);
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
-    argParser.addFlag('preview-dart-2', help: 'Preview Dart 2.0 functionality.');
+    argParser.addFlag('preview-dart-2', defaultsTo: true, help: 'Preview Dart 2.0 functionality.');
     argParser.addOption('write', valueHelp: 'file', help: 'Also output the results to a file. This is useful with --watch if you want a file to always contain the latest results.');
     argParser.addOption('dart-sdk', valueHelp: 'path-to-sdk', help: 'The path to the Dart SDK.', hide: !verboseHelp);
 

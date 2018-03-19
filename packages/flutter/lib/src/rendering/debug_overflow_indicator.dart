@@ -148,7 +148,7 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
         label: 'LEFT OVERFLOWED BY ${_formatPixels(overflow.left)} PIXELS',
         labelOffset: markerRect.centerLeft +
             const Offset(_indicatorFontSizePixels + _indicatorLabelPaddingPixels, 0.0),
-        rotation: math.PI / 2.0,
+        rotation: math.pi / 2.0,
         side: _OverflowSide.left,
       ));
     }
@@ -164,7 +164,7 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
         label: 'RIGHT OVERFLOWED BY ${_formatPixels(overflow.right)} PIXELS',
         labelOffset: markerRect.centerRight -
             const Offset(_indicatorFontSizePixels + _indicatorLabelPaddingPixels, 0.0),
-        rotation: -math.PI / 2.0,
+        rotation: -math.pi / 2.0,
         side: _OverflowSide.right,
       ));
     }

@@ -16,10 +16,10 @@ void main() {
       textDirection: TextDirection.ltr,
       offset: new ViewportOffset.zero(),
     );
-    expect(editable.getMinIntrinsicWidth(double.INFINITY), 50.0);
-    expect(editable.getMaxIntrinsicWidth(double.INFINITY), 50.0);
-    expect(editable.getMinIntrinsicHeight(double.INFINITY), 10.0);
-    expect(editable.getMaxIntrinsicHeight(double.INFINITY), 10.0);
+    expect(editable.getMinIntrinsicWidth(double.infinity), 50.0);
+    expect(editable.getMaxIntrinsicWidth(double.infinity), 50.0);
+    expect(editable.getMinIntrinsicHeight(double.infinity), 10.0);
+    expect(editable.getMaxIntrinsicHeight(double.infinity), 10.0);
 
     expect(
       editable.toStringDeep(minLevel: DiagnosticLevel.info),

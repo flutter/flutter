@@ -112,9 +112,14 @@ class AlwaysStoppedAnimation<T> extends Animation<T> {
   }
 }
 
-/// Implements most of the [Animation] interface, by deferring its behavior to a
-/// given [parent] Animation. To implement an [Animation] that proxies to a
-/// parent, this class plus implementing "T get value" is all that is necessary.
+/// Implements most of the [Animation] interface by deferring its behavior to a
+/// given [parent] Animation.
+///
+/// To implement an [Animation] that is driven by a parent, it is only necessary
+/// to mix in this class, implement [parent], and implement `T get value`.
+///
+/// To define a mapping from values in the range 0..1, consider subclassing
+/// [Tween] instead.
 abstract class AnimationWithParentMixin<T> {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.

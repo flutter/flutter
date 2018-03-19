@@ -182,11 +182,11 @@ void main() {
         expect(onChangedCalled, isTrue);
         boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
-        // We expect a clip to preceed the drawImageRect call.
+        // We expect a clip to precede the drawImageRect call.
         final List<Invocation> commands = canvas.invocations.where((Invocation invocation) {
           return invocation.memberName == #clipPath || invocation.memberName == #drawImageRect;
         }).toList();
-        if (expectClip) { // We expect a clip to preceed the drawImageRect call.
+        if (expectClip) { // We expect a clip to precede the drawImageRect call.
           expect(commands.length, 2);
           expect(commands[0].memberName, equals(#clipPath));
           expect(commands[1].memberName, equals(#drawImageRect));

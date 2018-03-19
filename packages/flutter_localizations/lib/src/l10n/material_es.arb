@@ -15,7 +15,7 @@
   "pageRowsInfoTitle": "$firstRow‑$lastRow de $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow‑$lastRow de aproximadamente $rowCount",
   "rowsPerPageTitle": "Filas por página:",
-  "tabLabel": "$tabIndex de $tabCount",
+  "tabLabel": "Pestaña $tabIndex de $tabCount",
   "selectedRowCountTitleZero": "No se han seleccionado elementos",
   "selectedRowCountTitleOne": "1 elemento seleccionado",
   "selectedRowCountTitleOther": "$selectedRowCount elementos seleccionados",
@@ -32,7 +32,7 @@
   "postMeridiemAbbreviation": "P.M.",
   "timePickerHourModeAnnouncement": "Seleccionar horas",
   "timePickerMinuteModeAnnouncement": "Seleccionar minutos",
-  "signedInLabel": "Registrado",
+  "signedInLabel": "Sesión iniciada",
   "hideAccountsLabel": "Ocultar cuentas",
   "showAccountsLabel": "Mostrar cuentas",
   "modalBarrierDismissLabel": "Ignorar"

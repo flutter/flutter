@@ -53,7 +53,7 @@ void main() {
         String boundary = request.headers['Content-Type'];
         boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
         fields = new Map<String, String>.fromIterable(
-          UTF8.decode(request.bodyBytes)
+          utf8.decode(request.bodyBytes)
               .split('--$boundary')
               .map<List<String>>((String part) {
                 final Match nameMatch = new RegExp(r'name="(.*)"').firstMatch(part);

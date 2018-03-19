@@ -302,8 +302,8 @@ class RenderLimitedBox extends RenderProxyBox {
   /// non-negative.
   RenderLimitedBox({
     RenderBox child,
-    double maxWidth: double.INFINITY,
-    double maxHeight: double.INFINITY
+    double maxWidth: double.infinity,
+    double maxHeight: double.infinity
   }) : assert(maxWidth != null && maxWidth >= 0.0),
        assert(maxHeight != null && maxHeight >= 0.0),
        _maxWidth = maxWidth,
@@ -354,8 +354,8 @@ class RenderLimitedBox extends RenderProxyBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.INFINITY));
-    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: double.INFINITY));
+    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.infinity));
+    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: double.infinity));
   }
 }
 
@@ -591,7 +591,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!width.isFinite)
-      width = computeMaxIntrinsicWidth(double.INFINITY);
+      width = computeMaxIntrinsicWidth(double.infinity);
     assert(width.isFinite);
     final double height = child.getMinIntrinsicHeight(width);
     return _applyStep(height, _stepHeight);
@@ -602,7 +602,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!width.isFinite)
-      width = computeMaxIntrinsicWidth(double.INFINITY);
+      width = computeMaxIntrinsicWidth(double.infinity);
     assert(width.isFinite);
     final double height = child.getMaxIntrinsicHeight(width);
     return _applyStep(height, _stepHeight);
@@ -658,7 +658,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!height.isFinite)
-      height = child.getMaxIntrinsicHeight(double.INFINITY);
+      height = child.getMaxIntrinsicHeight(double.infinity);
     assert(height.isFinite);
     return child.getMinIntrinsicWidth(height);
   }
@@ -668,7 +668,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!height.isFinite)
-      height = child.getMaxIntrinsicHeight(double.INFINITY);
+      height = child.getMaxIntrinsicHeight(double.infinity);
     assert(height.isFinite);
     return child.getMaxIntrinsicWidth(height);
   }
@@ -2187,7 +2187,7 @@ class RenderFittedBox extends RenderProxyBox {
       final double scaleY = sizes.destination.height / sizes.source.height;
       final Rect sourceRect = _resolvedAlignment.inscribe(sizes.source, Offset.zero & childSize);
       final Rect destinationRect = _resolvedAlignment.inscribe(sizes.destination, Offset.zero & size);
-      _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.width;
+      _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.height;
       _transform = new Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
         ..scale(scaleX, scaleY, 1.0)
         ..translate(-sourceRect.left, -sourceRect.top);
@@ -3015,13 +3015,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool checked,
     bool selected,
     bool button,
+    bool header,
+    bool textField,
+    bool focused,
+    bool inMutuallyExclusiveGroup,
     String label,
     String value,
     String increasedValue,
     String decreasedValue,
     String hint,
     TextDirection textDirection,
-    SemanticsSortOrder sortOrder,
+    SemanticsSortKey sortKey,
     VoidCallback onTap,
     VoidCallback onLongPress,
     VoidCallback onScrollLeft,
@@ -3045,13 +3049,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _checked = checked,
        _selected = selected,
        _button = button,
+       _header = header,
+       _textField = textField,
+       _focused = focused,
+       _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _label = label,
        _value = value,
        _increasedValue = increasedValue,
        _decreasedValue = decreasedValue,
        _hint = hint,
        _textDirection = textDirection,
-       _sortOrder = sortOrder,
+       _sortKey = sortKey,
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onScrollLeft = onScrollLeft,
@@ -3152,6 +3160,47 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// If non-null, sets the [SemanticsNode.isHeader] semantic to the given value.
+  bool get header => _header;
+  bool _header;
+  set header(bool value) {
+    if (header == value)
+      return;
+    _header = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isTextField] semantic to the given value.
+  bool get textField => _textField;
+  bool _textField;
+  set textField(bool value) {
+    if (textField == value)
+      return;
+    _textField = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isFocused] semantic to the given value.
+  bool get focused => _focused;
+  bool _focused;
+  set focused(bool value) {
+    if (focused == value)
+      return;
+    _focused = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isInMutuallyExclusiveGroup] semantic
+  /// to the given value.
+  bool get inMutuallyExclusiveGroup => _inMutuallyExclusiveGroup;
+  bool _inMutuallyExclusiveGroup;
+  set inMutuallyExclusiveGroup(bool value) {
+    if (inMutuallyExclusiveGroup == value)
+      return;
+    _inMutuallyExclusiveGroup = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
   ///
   /// The reading direction is given by [textDirection].
@@ -3227,17 +3276,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// Sets the [SemanticsNode.sortOrder] to the given value.
+  /// Sets the [SemanticsNode.sortKey] to the given value.
   ///
-  /// This defines how this node will be sorted with the other semantics nodes
+  /// This defines how this node is sorted among the sibling semantics nodes
   /// to determine the order in which they are traversed by the accessibility
   /// services on the platform (e.g. VoiceOver on iOS and TalkBack on Android).
-  SemanticsSortOrder get sortOrder => _sortOrder;
-  SemanticsSortOrder _sortOrder;
-  set sortOrder(SemanticsSortOrder value) {
-    if (sortOrder == value)
+  SemanticsSortKey get sortKey => _sortKey;
+  SemanticsSortKey _sortKey;
+  set sortKey(SemanticsSortKey value) {
+    if (sortKey == value)
       return;
-    _sortOrder = value;
+    _sortKey = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3581,6 +3630,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isSelected = selected;
     if (button != null)
       config.isButton = button;
+    if (header != null)
+      config.isHeader = header;
+    if (textField != null)
+      config.isTextField = textField;
+    if (focused != null)
+      config.isFocused = focused;
+    if (inMutuallyExclusiveGroup != null)
+      config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup;
     if (label != null)
       config.label = label;
     if (value != null)
@@ -3593,8 +3650,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.hint = hint;
     if (textDirection != null)
       config.textDirection = textDirection;
-    if (sortOrder != null)
-      config.sortOrder = sortOrder;
+    if (sortKey != null)
+      config.sortKey = sortKey;
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.
@@ -3982,10 +4039,10 @@ class RenderFollowerLayer extends RenderProxyBox {
       Offset.zero,
       childPaintBounds: new Rect.fromLTRB(
         // We don't know where we'll end up, so we have no idea what our cull rect should be.
-        double.NEGATIVE_INFINITY,
-        double.NEGATIVE_INFINITY,
-        double.INFINITY,
-        double.INFINITY,
+        double.negativeInfinity,
+        double.negativeInfinity,
+        double.infinity,
+        double.infinity,
       ),
     );
   }

@@ -235,8 +235,8 @@ void main() {
     );
 
     DecoratedBox widget = tester.firstWidget(find.byType(DecoratedBox));
-    BoxDecoration decoraton = widget.decoration;
-    expect(decoraton.color, equals(Colors.blue[500]));
+    BoxDecoration decoration = widget.decoration;
+    expect(decoration.color, equals(Colors.blue));
 
     setState(() {
       themeData = new ThemeData(primarySwatch: Colors.green);
@@ -245,8 +245,8 @@ void main() {
     await tester.pump();
 
     widget = tester.firstWidget(find.byType(DecoratedBox));
-    decoraton = widget.decoration;
-    expect(decoraton.color, equals(Colors.green[500]));
+    decoration = widget.decoration;
+    expect(decoration.color, equals(Colors.green));
   });
 
   testWidgets('ListView padding', (WidgetTester tester) async {

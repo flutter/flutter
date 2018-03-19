@@ -253,7 +253,7 @@ void main() {
     await tester.pumpWidget(
       new Stack(
         textDirection: TextDirection.ltr,
-        children: <Widget>[
+        children: const <Widget>[
           const Positioned(
             top: 5.0,
             bottom: 8.0,
@@ -275,7 +275,7 @@ void main() {
     await tester.pumpWidget(
       new Container(
         child: new Row(
-          children: <Widget>[
+          children: const <Widget>[
             const Positioned(
               top: 6.0,
               left: 7.0,

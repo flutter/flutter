@@ -15,7 +15,7 @@ import 'context.dart';
 import 'file_system.dart';
 import 'platform.dart';
 
-final BotDetector _kBotDetector = const BotDetector();
+const BotDetector _kBotDetector = const BotDetector();
 
 class BotDetector {
   const BotDetector();
@@ -114,7 +114,7 @@ final NumberFormat kSecondsFormat = new NumberFormat('0.0');
 final NumberFormat kMillisecondsFormat = new NumberFormat.decimalPattern();
 
 String getElapsedAsSeconds(Duration duration) {
-  final double seconds = duration.inMilliseconds / Duration.MILLISECONDS_PER_SECOND;
+  final double seconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
   return '${kSecondsFormat.format(seconds)}s';
 }
 
@@ -239,7 +239,7 @@ typedef Future<Null> AsyncCallback();
 ///   - has a different initial value for the first callback delay
 ///   - waits for a callback to be complete before it starts the next timer
 class Poller {
-  Poller(this.callback, this.pollingInterval, { this.initialDelay: Duration.ZERO }) {
+  Poller(this.callback, this.pollingInterval, { this.initialDelay: Duration.zero }) {
     new Future<Null>.delayed(initialDelay, _handleCallback);
   }
 

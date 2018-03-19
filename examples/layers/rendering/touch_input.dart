@@ -86,7 +86,7 @@ class RenderDots extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
     // The "size" property indicates the size of that this render box was
-    // alotted during layout. Here we paint our bounds white. Notice that we're
+    // allotted during layout. Here we paint our bounds white. Notice that we're
     // located at "offset" from the origin of the canvas' coordinate system.
     // Passing offset during the render tree's paint walk is an optimization to
     // avoid having to change the origin of the canvas's coordinate system too

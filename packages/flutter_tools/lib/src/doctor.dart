@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show UTF8;
+import 'dart:convert' show utf8;
 
 import 'package:archive/archive.dart';
 
@@ -409,7 +409,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     try {
       final Archive archive = new ZipDecoder().decodeBytes(fs.file(jarPath).readAsBytesSync());
       final ArchiveFile file = archive.findFile('META-INF/plugin.xml');
-      final String content = UTF8.decode(file.content);
+      final String content = utf8.decode(file.content);
       const String versionStartTag = '<version>';
       final int start = content.indexOf(versionStartTag);
       final int end = content.indexOf('</version>', start);

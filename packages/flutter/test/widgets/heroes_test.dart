@@ -259,7 +259,7 @@ void main() {
     // over duration and according to curve.
 
     const Duration duration = const Duration(milliseconds: 300);
-    final Curve curve = Curves.fastOutSlowIn;
+    const Curve curve = Curves.fastOutSlowIn;
     final double initialHeight = tester.getSize(find.byKey(firstKey, skipOffstage: false)).height;
     final double finalHeight = tester.getSize(find.byKey(secondKey, skipOffstage: false)).height;
     final double deltaHeight = finalHeight - initialHeight;
@@ -677,7 +677,7 @@ void main() {
     expect(midflightHeight, lessThan(finalHeight));
     expect(midflightHeight, greaterThan(100.0));
 
-    // Remove the destination hero midlfight
+    // Remove the destination hero midflight
     heroCardSetState(() {
       routeIncludesHero = false;
     });
@@ -1086,7 +1086,7 @@ void main() {
 
     const double epsilon = 0.001;
     const Duration duration = const Duration(milliseconds: 300);
-    final Curve curve = Curves.fastOutSlowIn;
+    const Curve curve = Curves.fastOutSlowIn;
     final MaterialPointArcTween pushCenterTween = new MaterialPointArcTween(
       begin: const Offset(50.0, 50.0),
       end: const Offset(400.0, 300.0),

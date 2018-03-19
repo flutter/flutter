@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_theme.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
@@ -21,7 +22,11 @@ import 'theme.dart';
 const Duration _kDropdownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
 const double _kDenseButtonHeight = 24.0;
-const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 16.0);
+const EdgeInsets _kMenuItemPadding = const EdgeInsets.symmetric(horizontal: 16.0);
+const EdgeInsetsGeometry _kAlignedButtonPadding = const EdgeInsetsDirectional.only(start: 16.0, end: 4.0);
+const EdgeInsets _kUnalignedButtonPadding = EdgeInsets.zero;
+const EdgeInsets _kAlignedMenuMargin = EdgeInsets.zero;
+const EdgeInsetsGeometry _kUnalignedMenuMargin = const EdgeInsetsDirectional.only(start: 16.0, end: 24.0);
 
 class _DropdownMenuPainter extends CustomPainter {
   _DropdownMenuPainter({
@@ -91,10 +96,12 @@ class _DropdownScrollBehavior extends ScrollBehavior {
 class _DropdownMenu<T> extends StatefulWidget {
   const _DropdownMenu({
     Key key,
+    this.padding,
     this.route,
   }) : super(key: key);
 
   final _DropdownRoute<T> route;
+  final EdgeInsets padding;
 
   @override
   _DropdownMenuState<T> createState() => new _DropdownMenuState<T>();
@@ -149,7 +156,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
         opacity: opacity,
         child: new InkWell(
           child: new Container(
-            padding: _kMenuHorizontalPadding,
+            padding: widget.padding,
             child: route.items[itemIndex],
           ),
           onTap: () => Navigator.pop(
@@ -212,7 +219,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     final double maxHeight = math.max(0.0, constraints.maxHeight - 2 * _kMenuItemHeight);
     // The width of a menu should be at most the view width. This ensures that
     // the menu does not extend past the left and right edges of the screen.
-    final double width = math.min(constraints.maxWidth, buttonRect.width + 8.0);
+    final double width = math.min(constraints.maxWidth, buttonRect.width);
     return new BoxConstraints(
       minWidth: width,
       maxWidth: width,
@@ -238,7 +245,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     double left;
     switch (textDirection) {
       case TextDirection.rtl:
-        left = buttonRect.right.clamp(0.0, size.width - childSize.width) - childSize.width;
+      left = buttonRect.right.clamp(0.0, size.width) - childSize.width;
         break;
       case TextDirection.ltr:
         left = buttonRect.left.clamp(0.0, size.width - childSize.width);
@@ -279,6 +286,7 @@ class _DropdownRouteResult<T> {
 class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   _DropdownRoute({
     this.items,
+    this.padding,
     this.buttonRect,
     this.selectedIndex,
     this.elevation: 8,
@@ -288,6 +296,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   }) : assert(style != null);
 
   final List<DropdownMenuItem<T>> items;
+  final EdgeInsetsGeometry padding;
   final Rect buttonRect;
   final int selectedIndex;
   final int elevation;
@@ -319,7 +328,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     final double buttonTop = buttonRect.top;
     final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
     double menuTop = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
-    final double topPreferredLimit = _kMenuItemHeight;
+    const double topPreferredLimit = _kMenuItemHeight;
     if (menuTop < topPreferredLimit)
       menuTop = math.min(buttonTop, topPreferredLimit);
     double bottom = menuTop + menuHeight;
@@ -336,7 +345,12 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       scrollController = new ScrollController(initialScrollOffset: scrollOffset);
     }
 
-    Widget menu = new _DropdownMenu<T>(route: this);
+    final TextDirection textDirection = Directionality.of(context);
+    Widget menu = new _DropdownMenu<T>(
+      route: this,
+      padding: padding.resolve(textDirection),
+    );
+
     if (theme != null)
       menu = new Theme(data: theme, child: menu);
 
@@ -353,7 +367,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
               buttonRect: buttonRect,
               menuTop: menuTop,
               menuHeight: menuHeight,
-              textDirection: Directionality.of(context),
+              textDirection: textDirection,
             ),
             child: menu,
           );
@@ -566,11 +580,16 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   void _handleTap() {
     final RenderBox itemBox = context.findRenderObject();
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
+    final TextDirection textDirection = Directionality.of(context);
+    final EdgeInsetsGeometry menuMargin = ButtonTheme.of(context).alignedDropdown
+      ?_kAlignedMenuMargin
+      : _kUnalignedMenuMargin;
 
     assert(_dropdownRoute == null);
     _dropdownRoute = new _DropdownRoute<T>(
       items: widget.items,
-      buttonRect: _kMenuHorizontalPadding.inflateRect(itemRect),
+      buttonRect: menuMargin.resolve(textDirection).inflateRect(itemRect),
+      padding: _kMenuItemPadding.resolve(textDirection),
       selectedIndex: _selectedIndex ?? 0,
       elevation: widget.elevation,
       theme: Theme.of(context, shadowThemeOnly: true),
@@ -613,9 +632,14 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       ));
     }
 
+    final EdgeInsetsGeometry padding = ButtonTheme.of(context).alignedDropdown
+      ? _kAlignedButtonPadding
+      : _kUnalignedButtonPadding;
+
     Widget result = new DefaultTextStyle(
       style: _textStyle,
-      child: new SizedBox(
+      child: new Container(
+        padding: padding.resolve(Directionality.of(context)),
         height: widget.isDense ? _denseButtonHeight : null,
         child: new Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

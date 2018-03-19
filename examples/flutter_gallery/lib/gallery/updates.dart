@@ -41,13 +41,13 @@ class UpdaterState extends State<Updater> {
 
     final String updateUrl = await widget.updateUrlFetcher();
     if (updateUrl != null) {
-      final bool wantsUpdate = await showDialog(context: context, child: _buildDialog());
+      final bool wantsUpdate = await showDialog(context: context, builder: _buildDialog);
       if (wantsUpdate != null && wantsUpdate)
         launch(updateUrl);
     }
   }
 
-  Widget _buildDialog() {
+  Widget _buildDialog(BuildContext _) {
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle =
         theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);

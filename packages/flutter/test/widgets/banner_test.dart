@@ -48,7 +48,7 @@ void main() {
     });
 
     expect(rotateCommand, isNotNull);
-    expect(rotateCommand.positionalArguments[0], equals(-math.PI / 4.0));
+    expect(rotateCommand.positionalArguments[0], equals(-math.pi / 4.0));
   });
 
   test('A Banner with a location of topStart paints in the top right (RTL)', () {
@@ -76,7 +76,7 @@ void main() {
     });
 
     expect(rotateCommand, isNotNull);
-    expect(rotateCommand.positionalArguments[0], equals(math.PI / 4.0));
+    expect(rotateCommand.positionalArguments[0], equals(math.pi / 4.0));
   });
 
   test('A Banner with a location of topEnd paints in the top right (LTR)', () {
@@ -104,7 +104,7 @@ void main() {
     });
 
     expect(rotateCommand, isNotNull);
-    expect(rotateCommand.positionalArguments[0], equals(math.PI / 4.0));
+    expect(rotateCommand.positionalArguments[0], equals(math.pi / 4.0));
   });
 
   test('A Banner with a location of topEnd paints in the top left (RTL)', () {
@@ -132,7 +132,7 @@ void main() {
     });
 
     expect(rotateCommand, isNotNull);
-    expect(rotateCommand.positionalArguments[0], equals(-math.PI / 4.0));
+    expect(rotateCommand.positionalArguments[0], equals(-math.pi / 4.0));
   });
 
   test('A Banner with a location of bottomStart paints in the bottom left (LTR)', () {
@@ -160,7 +160,7 @@ void main() {
     });
 
     expect(rotateCommand, isNotNull);
-    expect(rotateCommand.positionalArguments[0], equals(math.PI / 4.0));
+    expect(rotateCommand.positionalArguments[0], equals(math.pi / 4.0));
   });
 
   test('A Banner with a location of bottomStart paints in the bottom right (RTL)', () {
@@ -188,7 +188,7 @@ void main() {
     });
 
     expect(rotateCommand, isNotNull);
-    expect(rotateCommand.positionalArguments[0], equals(-math.PI / 4.0));
+    expect(rotateCommand.positionalArguments[0], equals(-math.pi / 4.0));
   });
 
   test('A Banner with a location of bottomEnd paints in the bottom right (LTR)', () {
@@ -216,7 +216,7 @@ void main() {
     });
 
     expect(rotateCommand, isNotNull);
-    expect(rotateCommand.positionalArguments[0], equals(-math.PI / 4.0));
+    expect(rotateCommand.positionalArguments[0], equals(-math.pi / 4.0));
   });
 
   test('A Banner with a location of bottomEnd paints in the bottom left (RTL)', () {
@@ -244,7 +244,7 @@ void main() {
     });
 
     expect(rotateCommand, isNotNull);
-    expect(rotateCommand.positionalArguments[0], equals(math.PI / 4.0));
+    expect(rotateCommand.positionalArguments[0], equals(math.pi / 4.0));
   });
 
   testWidgets('Banner widget', (WidgetTester tester) async {
@@ -257,7 +257,7 @@ void main() {
     expect(find.byType(CustomPaint), paints
       ..save
       ..translate(x: 800.0, y: 0.0)
-      ..rotate(angle: math.PI / 4.0)
+      ..rotate(angle: math.pi / 4.0)
       ..rect(rect: new Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0x7f000000), hasMaskFilter: true)
       ..rect(rect: new Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0xa0b71c1c), hasMaskFilter: false)
       ..paragraph(offset: const Offset(-40.0, 29.0))
@@ -270,10 +270,10 @@ void main() {
     expect(find.byType(CheckedModeBanner), paints
       ..save
       ..translate(x: 800.0, y: 0.0)
-      ..rotate(angle: math.PI / 4.0)
+      ..rotate(angle: math.pi / 4.0)
       ..rect(rect: new Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0x7f000000), hasMaskFilter: true)
       ..rect(rect: new Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0xa0b71c1c), hasMaskFilter: false)
-      ..paragraph(offset: const Offset(-40.0, 24.0))
+      ..paragraph(offset: const Offset(-40.0, 29.0))
       ..restore
     );
   });

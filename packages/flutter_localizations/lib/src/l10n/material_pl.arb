@@ -17,7 +17,7 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow z $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow z około $rowCount",
   "rowsPerPageTitle": "Wiersze na stronie:",
-  "tabLabel": "$tabIndex z $tabCount",
+  "tabLabel": "Karta $tabIndex z $tabCount",
   "selectedRowCountTitleOne": "1 wybrany element",
   "selectedRowCountTitleOther": "$selectedRowCount wybranego elementu",
   "cancelButtonLabel": "ANULUJ",
@@ -33,8 +33,8 @@
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "Wybierz godziny",
   "timePickerMinuteModeAnnouncement": "Wybierz minuty",
-  "signedInLabel": "Zapisany",
+  "signedInLabel": "Zalogowani użytkownicy",
   "hideAccountsLabel": "Ukryj konta",
   "showAccountsLabel": "Pokaż konta",
-  "modalBarrierDismissLabel": "oddalić"
+  "modalBarrierDismissLabel": "Zamknij"
 }

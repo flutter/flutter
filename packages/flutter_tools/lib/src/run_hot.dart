@@ -336,12 +336,7 @@ class HotRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       final Uri deviceEntryUri = device.devFS.baseUri.resolveUri(
         fs.path.toUri(entryUri));
-      Uri devicePackagesUri;
-      if (packagesFilePath != null) {
-        devicePackagesUri = fs.path.toUri(packagesFilePath);
-      } else {
-        devicePackagesUri = device.devFS.baseUri.resolve('.packages');
-      }
+      final Uri devicePackagesUri = device.devFS.baseUri.resolve('.packages');
       final Uri deviceAssetsDirectoryUri = device.devFS.baseUri.resolveUri(
         fs.path.toUri(getAssetBuildDirectory()));
       await _launchInView(device,
@@ -397,7 +392,7 @@ class HotRunner extends ResidentRunner {
     // We are now running from source.
     _runningFromSnapshot = false;
     final String launchPath = debuggingOptions.buildInfo.previewDart2
-        ? dillOutputPath ?? mainPath + '.dill'
+        ? mainPath + '.dill'
         : mainPath;
     await _launchFromDevFS(launchPath);
     restartTimer.stop();

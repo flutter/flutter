@@ -9,52 +9,52 @@ environment:
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   archive: 1.0.33
-  args: 1.3.0
+  args: 1.4.1
   cli_util: 0.1.2+1
   coverage: 0.10.0
   crypto: 2.0.2+1
-  file: 2.3.6
+  file: 2.3.7
   http: 0.11.3+16
   intl: 0.15.2
   json_rpc_2: 2.0.7
   json_schema: 1.0.8
-  linter: 0.1.43
+  linter: 0.1.44
   meta: 1.1.2
   mustache: 1.0.0
   package_config: 1.0.3
   platform: 2.1.2
   plugin: 0.2.0+2
-  process: 2.0.7
+  process: 2.0.8
   quiver: 0.28.0
-  stack_trace: 1.9.1
-  stream_channel: 1.6.3
+  stack_trace: 1.9.2
+  stream_channel: 1.6.4
   usage: 3.3.0
   vm_service_client: 0.2.4+1
   web_socket_channel: 1.0.7
-  xml: 2.6.0
+  xml: 3.0.0
   yaml: 2.1.13
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
-  test: 0.12.30+4
+  test: 0.12.32+1
 
   # Version from the vended Dart SDK as defined in `dependency_overrides`.
   analyzer: any
   front_end: any
 
 dev_dependencies:
-  collection: 1.14.5
+  collection: 1.14.6
   mockito: 2.2.3
 
-  async: 2.0.4 # TRANSITIVE DEPENDENCY
+  async: 2.0.6 # TRANSITIVE DEPENDENCY
   barback: 0.15.2+14 # TRANSITIVE DEPENDENCY
-  boolean_selector: 1.0.2 # TRANSITIVE DEPENDENCY
+  boolean_selector: 1.0.3 # TRANSITIVE DEPENDENCY
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
   convert: 2.0.1 # TRANSITIVE DEPENDENCY
   csslib: 0.14.1 # TRANSITIVE DEPENDENCY
   glob: 1.1.5 # TRANSITIVE DEPENDENCY
-  html: 0.13.2+2 # TRANSITIVE DEPENDENCY
+  html: 0.13.3 # TRANSITIVE DEPENDENCY
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
   io: 0.3.2+1 # TRANSITIVE DEPENDENCY
@@ -67,7 +67,7 @@ dev_dependencies:
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
   path: 1.5.1 # TRANSITIVE DEPENDENCY
-  petitparser: 1.7.0 # TRANSITIVE DEPENDENCY
+  petitparser: 1.7.6 # TRANSITIVE DEPENDENCY
   pool: 1.3.4 # TRANSITIVE DEPENDENCY
   pub_semver: 1.3.2 # TRANSITIVE DEPENDENCY
   shelf: 0.7.2 # TRANSITIVE DEPENDENCY

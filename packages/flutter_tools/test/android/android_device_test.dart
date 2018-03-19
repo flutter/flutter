@@ -109,6 +109,7 @@ Use the 'android' tool to install them:
       hardware = 'goldfish';
       final AndroidDevice device = new AndroidDevice('test');
       expect(await device.isLocalEmulator, true);
+      expect(await device.supportsHardwareRendering, true);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
@@ -125,6 +126,7 @@ Use the 'android' tool to install them:
       buildCharacteristics = 'att,emulator';
       final AndroidDevice device = new AndroidDevice('test');
       expect(await device.isLocalEmulator, true);
+      expect(await device.supportsHardwareRendering, true);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
