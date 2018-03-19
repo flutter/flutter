@@ -224,7 +224,7 @@ class SemanticsFlag {
   static const int _kIsEnabledIndex = 1 << 7;
   static const int _kIsInMutuallyExclusiveGroupIndex = 1 << 8;
   static const int _kIsHeaderIndex = 1 << 9;
-  static const int _kIsPasswordIndex = 1 << 10;
+  static const int _kIsObscuredIndex = 1 << 10;
 
   const SemanticsFlag._(this.index);
 
@@ -301,11 +301,11 @@ class SemanticsFlag {
   /// address book applications.
   static const SemanticsFlag isHeader = const SemanticsFlag._(_kIsHeaderIndex);
 
-  /// Whether the semantics node represents a password.
+  /// Whether the value of the semantics node is obscured.
   ///
-  /// This is usually used for text fields to indicate that the content should
-  /// be obscured.
-  static const SemanticsFlag isPassword = const SemanticsFlag._(_kIsPasswordIndex);
+  /// This is usually used for text fields to indicate that its content
+  /// is a password or contains other sensitive information.
+  static const SemanticsFlag isObscured = const SemanticsFlag._(_kIsObscuredIndex);
 
   /// The possible semantics flags.
   ///
@@ -321,7 +321,7 @@ class SemanticsFlag {
     _kIsEnabledIndex: isEnabled,
     _kIsInMutuallyExclusiveGroupIndex: isInMutuallyExclusiveGroup,
     _kIsHeaderIndex: isHeader,
-    _kIsPasswordIndex: isPassword,
+    _kIsObscuredIndex: isObscured,
   };
 
   @override
@@ -347,8 +347,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.isInMutuallyExclusiveGroup';
       case _kIsHeaderIndex:
         return 'SemanticsFlag.isHeader';
-      case _kIsPasswordIndex:
-        return 'SemanticsFlag.isPassword';
+      case _kIsObscuredIndex:
+        return 'SemanticsFlag.isObscured';
     }
     return null;
   }
