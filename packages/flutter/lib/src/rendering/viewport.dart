@@ -318,53 +318,35 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   Rect describeApproximatePaintClip(RenderSliver child) {
-    if (child.geometry.paintExtent == 0) {
-      return Rect.zero;
-    }
-    Rect localBounds = child.paintBounds;
-    if (child.constraints.overlap > 0) {
-      final double overlap = child.constraints.overlap;
-      final double paintOrigin = child.geometry.paintOrigin;
-      switch (axisDirection) {
-        case AxisDirection.down:
-          localBounds = new Rect.fromLTRB(
-            localBounds.left,
-            localBounds.top + overlap - paintOrigin,
-            localBounds.right,
-            localBounds.bottom,
-          );
-          break;
-        case AxisDirection.up:
-          localBounds = new Rect.fromLTRB(
-            localBounds.left,
-            localBounds.top,
-            localBounds.right,
-            localBounds.bottom - overlap - paintOrigin,
-          );
-          break;
-        case AxisDirection.right:
-          localBounds = new Rect.fromLTRB(
-            localBounds.left + overlap - paintOrigin,
-            localBounds.top,
-            localBounds.right,
-            localBounds.bottom,
-          );
-          break;
-        case AxisDirection.left:
-          localBounds = new Rect.fromLTRB(
-            localBounds.left,
-            localBounds.top,
-            localBounds.right - overlap - paintOrigin,
-            localBounds.bottom,
-          );
-          break;
-      }
-    }
     final Rect viewportClip = Offset.zero & size;
-    final Matrix4 transform = new Matrix4.identity();
-    applyPaintTransform(child, transform);
-    final Rect globalClip = MatrixUtils.transformRect(transform, localBounds).intersect(viewportClip);
-    return globalClip.isEmpty ? Rect.zero : globalClip;
+    if (child.constraints.overlap == 0) {
+      return viewportClip;
+    }
+
+    // Adjust the clip rect for this sliver by the overlap from the previous sliver.
+    double left = viewportClip.left;
+    double right = viewportClip.right;
+    double top = viewportClip.top;
+    double bottom = viewportClip.bottom;
+    final double startOfOverlap = child.constraints.trueScrollOffset < 0.0
+        ? child.constraints.trueScrollOffset.abs()
+        : 0.0;
+    final double overlapCorrection = startOfOverlap + child.constraints.overlap;
+    switch (axisDirection) {
+      case AxisDirection.down:
+        top += overlapCorrection;
+        break;
+      case AxisDirection.up:
+        bottom -= overlapCorrection;
+        break;
+      case AxisDirection.right:
+        left += overlapCorrection;
+        break;
+      case AxisDirection.left:
+        right -= overlapCorrection;
+        break;
+    }
+    return new Rect.fromLTRB(left, top, right, bottom);
   }
 
   @override
