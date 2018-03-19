@@ -4875,13 +4875,9 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// The [container] argument must not be null. To create a `const` instance
   /// of [Semantics], use the [Semantics.fromProperties] constructor.
   ///
-  /// Only one of [sortKey] or [sortOrder] may be specified. Specifying [sortKey]
-  /// is just a shorthand for specifying `new SemanticsSortOrder(key: sortKey)`
-  /// for the [sortOrder].
-  ///
   /// See also:
   ///
-  ///  * [SemanticsSortOrder] for a class that determines accessibility traversal
+  ///  * [SemanticsSortKey] for a class that determines accessibility traversal
   ///    order.
   Semantics({
     Key key,
@@ -4902,7 +4898,6 @@ class Semantics extends SingleChildRenderObjectWidget {
     String decreasedValue,
     String hint,
     TextDirection textDirection,
-    SemanticsSortOrder sortOrder,
     SemanticsSortKey sortKey,
     VoidCallback onTap,
     VoidCallback onLongPress,
@@ -4940,7 +4935,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       decreasedValue: decreasedValue,
       hint: hint,
       textDirection: textDirection,
-      sortOrder: _effectiveSortOrder(sortKey, sortOrder),
+      sortKey: sortKey,
       onTap: onTap,
       onLongPress: onLongPress,
       onScrollLeft: onScrollLeft,
@@ -4971,11 +4966,6 @@ class Semantics extends SingleChildRenderObjectWidget {
   }) : assert(container != null),
        assert(properties != null),
        super(key: key, child: child);
-
-  static SemanticsSortOrder _effectiveSortOrder(SemanticsSortKey sortKey, SemanticsSortOrder sortOrder) {
-    assert(sortOrder == null || sortKey == null, 'Only one of sortOrder or sortKey may be specified.');
-    return sortOrder ?? (sortKey != null ? new SemanticsSortOrder(key: sortKey) : null);
-  }
 
   /// Contains properties used by assistive technologies to make the application
   /// more accessible.
@@ -5023,7 +5013,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       decreasedValue: properties.decreasedValue,
       hint: properties.hint,
       textDirection: _getTextDirection(context),
-      sortOrder: properties.sortOrder,
+      sortKey: properties.sortKey,
       onTap: properties.onTap,
       onLongPress: properties.onLongPress,
       onScrollLeft: properties.onScrollLeft,
@@ -5069,7 +5059,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..decreasedValue = properties.decreasedValue
       ..hint = properties.hint
       ..textDirection = _getTextDirection(context)
-      ..sortOrder = properties.sortOrder
+      ..sortKey = properties.sortKey
       ..onTap = properties.onTap
       ..onLongPress = properties.onLongPress
       ..onScrollLeft = properties.onScrollLeft

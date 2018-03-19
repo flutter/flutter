@@ -1675,6 +1675,8 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
+
+    semantics.dispose();
   });
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
@@ -1771,7 +1773,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
@@ -1789,7 +1791,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           textDirection: TextDirection.ltr,
           value: 'Guten Tag',
           actions: <SemanticsAction>[
@@ -1808,7 +1810,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           textDirection: TextDirection.ltr,
           value: 'Guten Tag',
           textSelection: const TextSelection.collapsed(offset: 9),
@@ -1832,7 +1834,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           textDirection: TextDirection.ltr,
           textSelection: const TextSelection.collapsed(offset: 4),
           value: 'Guten Tag',
@@ -1858,7 +1860,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           textDirection: TextDirection.ltr,
           textSelection: const TextSelection.collapsed(offset: 0),
           value: 'Schönen Feierabend',
@@ -1897,7 +1899,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           value: 'Hello',
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
@@ -1917,7 +1919,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           value: 'Hello',
           textSelection: const TextSelection.collapsed(offset: 5),
           textDirection: TextDirection.ltr,
@@ -1941,7 +1943,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           value: 'Hello',
           textSelection: const TextSelection(baseOffset: 5, extentOffset: 3),
           textDirection: TextDirection.ltr,
@@ -1985,7 +1987,7 @@ void main() {
     await tester.tap(find.byKey(key));
     await tester.pump();
 
-    const int inputFieldId = 2;
+    const int inputFieldId = 1;
 
     expect(controller.selection, const TextSelection.collapsed(offset: 5, affinity: TextAffinity.upstream));
     expect(semantics, hasSemantics(new TestSemantics.root(

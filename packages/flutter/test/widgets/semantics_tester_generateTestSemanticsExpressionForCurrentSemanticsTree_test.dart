@@ -102,32 +102,32 @@ void _tests() {
         // generateTestSemanticsExpressionForCurrentSemanticsTree. Otherwise,
         // the test 'generates code', defined above, will fail.
         // vvvvvvvvvvvv
-        new TestSemantics(
+        new TestSemantics.root(
           children: <TestSemantics>[
             new TestSemantics(
-              nextNodeId: 4,
-              previousNodeId: -1,
+              id: 1,
               children: <TestSemantics>[
                 new TestSemantics(
-                  nextNodeId: 2,
-                  previousNodeId: 1,
+                  id: 4,
                   children: <TestSemantics>[
                     new TestSemantics(
-                      label: r'Plain text',
+                      id: 2,
+                      tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
+                      label: 'Plain text',
                       textDirection: TextDirection.ltr,
                       nextNodeId: 3,
-                      previousNodeId: 4,
                     ),
                     new TestSemantics(
+                      id: 3,
+                      tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
                       flags: <SemanticsFlag>[SemanticsFlag.hasCheckedState, SemanticsFlag.isChecked, SemanticsFlag.isSelected],
                       actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.decrease],
-                      label: r'‪Interactive text‬',
-                      value: r'test-value',
-                      increasedValue: r'test-increasedValue',
-                      decreasedValue: r'test-decreasedValue',
-                      hint: r'test-hint',
+                      label: '‪Interactive text‬',
+                      value: 'test-value',
+                      increasedValue: 'test-increasedValue',
+                      decreasedValue: 'test-decreasedValue',
+                      hint: 'test-hint',
                       textDirection: TextDirection.rtl,
-                      nextNodeId: -1,
                       previousNodeId: 2,
                     ),
                   ],

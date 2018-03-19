@@ -56,6 +56,7 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
+            nextNodeId: 4,
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: label,
             rect: TestSemantics.fullScreen,
@@ -63,6 +64,7 @@ void main() {
           // IDs 2 and 3 are used up by the nodes that get merged in
           new TestSemantics.rootChild(
             id: 4,
+            previousNodeId: 1,
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: label,
             rect: TestSemantics.fullScreen,
@@ -112,6 +114,7 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
+            nextNodeId: 4,
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: label,
             rect: TestSemantics.fullScreen,
@@ -119,6 +122,7 @@ void main() {
           // IDs 2 and 3 are used up by the nodes that get merged in
           new TestSemantics.rootChild(
             id: 4,
+            previousNodeId: 1,
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: label,
             rect: TestSemantics.fullScreen,
