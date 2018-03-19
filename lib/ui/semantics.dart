@@ -224,6 +224,7 @@ class SemanticsFlag {
   static const int _kIsEnabledIndex = 1 << 7;
   static const int _kIsInMutuallyExclusiveGroupIndex = 1 << 8;
   static const int _kIsHeaderIndex = 1 << 9;
+  static const int _kIsPasswordIndex = 1 << 10;
 
   const SemanticsFlag._(this.index);
 
@@ -300,6 +301,12 @@ class SemanticsFlag {
   /// address book applications.
   static const SemanticsFlag isHeader = const SemanticsFlag._(_kIsHeaderIndex);
 
+  /// Whether the semantics node represents a password.
+  ///
+  /// This is usually used for text fields to indicate that the content should
+  /// be obscured.
+  static const SemanticsFlag isPassword = const SemanticsFlag._(_kIsPasswordIndex);
+
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
@@ -314,6 +321,7 @@ class SemanticsFlag {
     _kIsEnabledIndex: isEnabled,
     _kIsInMutuallyExclusiveGroupIndex: isInMutuallyExclusiveGroup,
     _kIsHeaderIndex: isHeader,
+    _kIsPasswordIndex: isPassword,
   };
 
   @override
@@ -339,6 +347,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.isInMutuallyExclusiveGroup';
       case _kIsHeaderIndex:
         return 'SemanticsFlag.isHeader';
+      case _kIsPasswordIndex:
+        return 'SemanticsFlag.isPassword';
     }
     return null;
   }

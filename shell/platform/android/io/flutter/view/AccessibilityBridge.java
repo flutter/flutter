@@ -84,7 +84,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         HAS_ENABLED_STATE(1 << 6),
         IS_ENABLED(1 << 7),
         IS_IN_MUTUALLY_EXCLUSIVE_GROUP(1 << 8),
-        IS_HEADER(1 << 9);
+        IS_HEADER(1 << 9),
+        IS_PASSWORD(1 << 10);
 
         Flag(int value) {
             this.value = value;
@@ -137,6 +138,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             result.setAccessibilityFocused(mA11yFocusedObject.id == virtualViewId);
 
         if (object.hasFlag(Flag.IS_TEXT_FIELD)) {
+            result.setPassword(object.hasFlag(Flag.IS_PASSWORD);
             result.setClassName("android.widget.EditText");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 result.setEditable(true);
