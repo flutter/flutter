@@ -466,23 +466,19 @@ class _ModalScopeState extends State<_ModalScope> {
         offstage: widget.route.offstage,
         child: new IgnorePointer(
           ignoring: widget.route.animation?.status == AnimationStatus.reverse,
-          // Keep the transition between repaint boundaries so we don't trigger
-          // deep repaints of the render tree above or below the transition.
-          child: new RepaintBoundary(
-            child: widget.route.buildTransitions(
-              context,
-              widget.route.animation,
-              widget.route.secondaryAnimation,
-              new RepaintBoundary(
-                child: new PageStorage(
-                  key: widget.route._subtreeKey,
-                  bucket: widget.route._storageBucket,
-                  child: new _ModalScopeStatus(
-                    route: widget.route,
-                    isCurrent: widget.route.isCurrent,
-                    canPop: widget.route.canPop,
-                    child: widget.page,
-                  ),
+          child: widget.route.buildTransitions(
+            context,
+            widget.route.animation,
+            widget.route.secondaryAnimation,
+            new RepaintBoundary(
+              child: new PageStorage(
+                key: widget.route._subtreeKey,
+                bucket: widget.route._storageBucket,
+                child: new _ModalScopeStatus(
+                  route: widget.route,
+                  isCurrent: widget.route.isCurrent,
+                  canPop: widget.route.canPop,
+                  child: widget.page,
                 ),
               ),
             ),
