@@ -1495,6 +1495,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     super.debugFillProperties(description);
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', color));
   }
 }
 

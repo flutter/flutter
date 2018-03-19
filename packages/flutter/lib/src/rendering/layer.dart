@@ -778,6 +778,7 @@ class PhysicalModelLayer extends ContainerLayer {
   /// (as described at [Layer]).
   Color color;
 
+  /// The shadow color.
   Color shadowColor;
 
   @override
