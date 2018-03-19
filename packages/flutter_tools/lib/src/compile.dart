@@ -278,7 +278,7 @@ class ResidentCompiler {
 
   String _mapFileUri(String fileUri) {
     if (_fileSystemRoots != null) {
-      String filename = Uri.parse(fileUri).toFilePath();
+      final String filename = Uri.parse(fileUri).toFilePath();
       for (String root in _fileSystemRoots) {
         if (filename.startsWith(root)) {
           return new Uri(
