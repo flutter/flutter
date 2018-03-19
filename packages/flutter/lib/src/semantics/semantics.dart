@@ -319,7 +319,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.textField,
     this.focused,
     this.inMutuallyExclusiveGroup,
-    this.password,
+    this.obscured,
     this.label,
     this.value,
     this.increasedValue,
@@ -400,12 +400,12 @@ class SemanticsProperties extends DiagnosticableTree {
   /// one radio button in that group can be marked as [checked].
   final bool inMutuallyExclusiveGroup;
   
-  /// If non-null, whether the semantic node represents a password.
+  /// If non-null, whether [value] should be obscured.
   ///
   /// This option is usually set in combination with [textField] to indicate
-  /// that the text field contains a password. Doing so instructs screen readers
-  /// to not read out the [value].
-  final bool password;
+  /// that the text field contains a password (or other sensitive information).
+  /// Doing so instructs screen readers to not read out the [value].
+  final bool obscured;
 
   /// Provides a textual description of the widget.
   ///
@@ -2418,14 +2418,14 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isTextField, value);
   }
 
-  /// Whether the owning [RenderObject] represents a password.
+  /// Whether the [value] should be obscured.
   ///
-  /// This option is usually set in combination with [isTextField] to indicate
-  /// that the text field contains a password. Doing so instructs screen readers
-  /// to not read out the [value].
-  bool get isPassword => _hasFlag(SemanticsFlag.isPassword);
-  set isPassword(bool value) {
-    _setFlag(SemanticsFlag.isPassword, value);
+  /// This option is usually set in combination with [textField] to indicate
+  /// that the text field contains a password (or other sensitive information).
+  /// Doing so instructs screen readers to not read out the [value].
+  bool get isObscured => _hasFlag(SemanticsFlag.isObscured);
+  set isObscured(bool value) {
+    _setFlag(SemanticsFlag.isObscured, value);
   }
 
   /// The currently selected text (or the position of the cursor) within [value]

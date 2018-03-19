@@ -591,7 +591,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics(
       children: <TestSemantics>[
         new TestSemantics(
-          flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isPassword],
+          flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isObscured],
           value: expectedValue,
           textDirection: TextDirection.ltr,
           nextNodeId: -1,

@@ -370,7 +370,7 @@ class RenderEditable extends RenderBox {
       ..value = obscureText
           ? obscuringCharacter * text.toPlainText().length
           : text.toPlainText()
-      ..isPassword = obscureText
+      ..obscured = obscureText
       ..textDirection = textDirection
       ..isFocused = hasFocus
       ..isTextField = true;
