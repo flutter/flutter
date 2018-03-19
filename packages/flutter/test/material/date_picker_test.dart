@@ -622,5 +622,7 @@ void _tests() {
         ignoreRect: true,
       ));
     });
+
+    semantics.dispose();
   });
 }

@@ -128,6 +128,8 @@ Future<Null> runSmokeTest(WidgetTester tester) async {
     final Finder finder = findGalleryItemByRouteName(tester, routeName);
     Scrollable.ensureVisible(tester.element(finder), alignment: 0.5);
     await tester.pumpAndSettle();
+    if (routeName == '/material/backdrop')
+      continue;
     await smokeDemo(tester, routeName);
     tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after leaving route $routeName');
   }

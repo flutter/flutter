@@ -1,6 +1,6 @@
 # <img src="https://flutter.io/images/flutter-mark-square-100.png" alt="Flutter" width="40" height="40" /> Flutter [![Join Gitter Chat Channel -](https://badges.gitter.im/flutter/flutter.svg)](https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status - Travis](https://travis-ci.org/flutter/flutter.svg?branch=master)](https://travis-ci.org/flutter/flutter) [![Build Status - AppVeyor](https://ci.appveyor.com/api/projects/status/meyi9evcny64a2mg/branch/master?svg=true)](https://ci.appveyor.com/project/flutter/flutter/branch/master) [![Coverage Status -](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
 
-A new mobile app SDK to help developers and designers build modern mobile apps for iOS and Android. Flutter is an alpha, open-source project.
+A new mobile app SDK to help developers and designers build modern mobile apps for iOS and Android. Flutter is an open-source project currently in beta.
 
 ### Documentation
 
@@ -104,7 +104,7 @@ Future<Null> getBatteryLevel() async {
 }
 ```
 
-Learn how to use <a href="https://flutter.io/using-packages/">packages</a>, or 
+Learn how to use <a href="https://flutter.io/using-packages/">packages</a>, or
 write <a href="https://flutter.io/platform-channels/">platform channels</a>,
 to access native code, APIs, and SDKs.
 
@@ -121,48 +121,48 @@ existing Java/Kotlin/ObjC/Swift investment.
 ### Build
 
 * **Beautiful app UIs**
-  * Rich 2D GPU-accelerated APIs
-  * Reactive framework
-  * Animation/motion APIs
-  * Material Design and iOS widgets
+    * Rich 2D GPU-accelerated APIs
+    * Reactive framework
+    * Animation/motion APIs
+    * Material Design and iOS widgets
 * **Fluid coding experience**
-  * Sub-second, stateful hot reload
-  * IntelliJ: refactor, code completion, etc
-  * Dart language and core libs
-  * Package manager
+    * Sub-second, stateful hot reload
+    * IntelliJ: refactor, code completion, etc
+    * Dart language and core libs
+    * Package manager
 * **Full-featured apps**
-  * Interop with mobile OS APIs & SDKs
-  * Gradle/Java/Kotlin
-  * Cocoapods/ObjC/Swift
+    * Interop with mobile OS APIs & SDKs
+    * Gradle/Java/Kotlin
+    * Cocoapods/ObjC/Swift
 
 ### Optimize
 
 * **Test**
-  * Unit testing
-  * Integration testing
-  * On-device testing
+    * Unit testing
+    * Integration testing
+    * On-device testing
 * **Debug**
-  * IDE debugger
-  * Web-based debugger
-  * async/await aware
-  * Expression evaluator
+    * IDE debugger
+    * Web-based debugger
+    * async/await aware
+    * Expression evaluator
 * **Profile**
-  * Timeline
-  * CPU and memory
-  * In-app perf charts
+    * Timeline
+    * CPU and memory
+    * In-app perf charts
 
 ### Deploy
 
 * **Compile**
-  * Native ARM code
-  * Dead code elimination
+    * Native ARM code
+    * Dead code elimination
 * **Distribution**
-  * App Store
-  * Play Store
+    * App Store
+    * Play Store
 
 Learn more about what makes Flutter special in the
 <a href="https://flutter.io/technical-overview/">technical overview</a>.
-  
+
 Join us in our [Gitter chat room](https://gitter.im/flutter/flutter) or join our public mailing list,
 [flutter-dev@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-dev).
 

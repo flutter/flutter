@@ -337,6 +337,8 @@ class SliderThemeData extends Diagnosticable {
   /// when the thumb is being touched.
   final ShowValueIndicator showValueIndicator;
 
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
   SliderThemeData copyWith({
     Color activeRailColor,
     Color inactiveRailColor,
@@ -537,7 +539,9 @@ abstract class SliderComponentShape {
 ///  * [SliderThemeData] where an instance of this class is set to inform the
 ///    slider of the shape of the its thumb.
 class RoundSliderThumbShape extends SliderComponentShape {
+  /// Create a slider thumb that draws a circle.
   const RoundSliderThumbShape();
+
   static const double _thumbRadius = 6.0;
   static const double _disabledThumbRadius = 4.0;
 
@@ -585,6 +589,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 ///  * [SliderThemeData] where an instance of this class is set to inform the
 ///    slider of the shape of the its value indicator.
 class PaddleSliderValueIndicatorShape extends SliderComponentShape {
+  /// Create a slider value indicator in the shape of an upside-down pear.
   const PaddleSliderValueIndicatorShape();
 
   // These constants define the shape of the default value indicator.

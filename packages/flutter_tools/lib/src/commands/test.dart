@@ -23,70 +23,62 @@ class TestCommand extends FlutterCommand {
   TestCommand({ bool verboseHelp: false }) {
     requiresPubspecYaml();
     usesPubOption();
-    argParser.addMultiOption(
-      'name',
-      help: 'A regular expression matching substrings of the names of tests to run.',
-      valueHelp: 'regexp',
-      splitCommas: false,
-    );
-    argParser.addMultiOption(
-      'plain-name',
-      help: 'A plain-text substring of the names of tests to run.',
-      valueHelp: 'substring',
-      splitCommas: false,
-    );
-    argParser.addFlag(
-      'start-paused',
-      defaultsTo: false,
-      negatable: false,
-      help: 'Start in a paused mode and wait for a debugger to connect.\n'
-            'You must specify a single test file to run, explicitly.\n'
-            'Instructions for connecting with a debugger and printed to the\n'
-            'console once the test has started.',
-    );
-    argParser.addFlag(
-      'coverage',
-      defaultsTo: false,
-      negatable: false,
-      help: 'Whether to collect coverage information.',
-    );
-    argParser.addFlag(
-      'merge-coverage',
-      defaultsTo: false,
-      negatable: false,
-      help: 'Whether to merge coverage data with "coverage/lcov.base.info".\n'
-            'Implies collecting coverage data. (Requires lcov)',
-    );
-    argParser.addFlag(
-      'ipv6',
-      negatable: false,
-      hide: true,
-      help: 'Whether to use IPv6 for the test harness server socket.',
-    );
-    argParser.addOption(
-      'coverage-path',
-      defaultsTo: 'coverage/lcov.info',
-      help: 'Where to store coverage information (if coverage is enabled).',
-    );
-    argParser.addFlag(
-      'machine',
-      hide: !verboseHelp,
-      negatable: false,
-      help: 'Handle machine structured JSON command input\n'
-            'and provide output and progress in machine friendly format.',
-    );
-    argParser.addFlag(
-      'preview-dart-2',
-      hide: !verboseHelp,
-      help: 'Preview Dart 2.0 functionality.',
-    );
-    argParser.addFlag(
-      'track-widget-creation',
-      negatable: false,
-      hide: !verboseHelp,
-      help: 'Track widget creation locations.\n'
-            'This enables testing of features such as the widget inspector.',
-    );
+    argParser
+      ..addMultiOption('name',
+        help: 'A regular expression matching substrings of the names of tests to run.',
+        valueHelp: 'regexp',
+        splitCommas: false,
+      )
+      ..addMultiOption('plain-name',
+        help: 'A plain-text substring of the names of tests to run.',
+        valueHelp: 'substring',
+        splitCommas: false,
+      )
+      ..addFlag('start-paused',
+        defaultsTo: false,
+        negatable: false,
+        help: 'Start in a paused mode and wait for a debugger to connect.\n'
+              'You must specify a single test file to run, explicitly.\n'
+              'Instructions for connecting with a debugger and printed to the\n'
+              'console once the test has started.',
+      )
+      ..addFlag('coverage',
+        defaultsTo: false,
+        negatable: false,
+        help: 'Whether to collect coverage information.',
+      )
+      ..addFlag('merge-coverage',
+        defaultsTo: false,
+        negatable: false,
+        help: 'Whether to merge coverage data with "coverage/lcov.base.info".\n'
+              'Implies collecting coverage data. (Requires lcov)',
+      )
+      ..addFlag('ipv6',
+        negatable: false,
+        hide: true,
+        help: 'Whether to use IPv6 for the test harness server socket.',
+      )
+      ..addOption('coverage-path',
+        defaultsTo: 'coverage/lcov.info',
+        help: 'Where to store coverage information (if coverage is enabled).',
+      )
+      ..addFlag('machine',
+        hide: !verboseHelp,
+        negatable: false,
+        help: 'Handle machine structured JSON command input\n'
+              'and provide output and progress in machine friendly format.',
+      )
+      ..addFlag('preview-dart-2',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Preview Dart 2.0 functionality.',
+      )
+      ..addFlag('track-widget-creation',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Track widget creation locations.\n'
+              'This enables testing of features such as the widget inspector.',
+      );
   }
 
   @override

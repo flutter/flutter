@@ -457,6 +457,8 @@ void _tests() {
       action: SemanticsAction.decrease,
       finalValue: '23',
     );
+
+    semantics.dispose();
   });
 
   testWidgets('can increment and decrement minutes', (WidgetTester tester) async {
@@ -501,6 +503,8 @@ void _tests() {
       action: SemanticsAction.decrease,
       finalValue: '58',
     );
+
+    semantics.dispose();
   });
 }
 
