@@ -35,6 +35,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     final Widget floatingActionButton = _showFab 
       ? new Builder(builder: (BuildContext context) {
         // We use a widget builder here so that this inner context can find the Scaffold.
@@ -56,6 +57,10 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
           preferredSize: const Size.fromHeight(48.0), 
           child: const SizedBox(),
         ),
+      ),
+      bottomNavigationBar: new BottomAppBar(
+        color: theme.primaryColor, 
+        child: const SizedBox(height: 48.0),
       ),
       floatingActionButtonLocation: _floatingActionButtonLocation,
       floatingActionButton: floatingActionButton,
