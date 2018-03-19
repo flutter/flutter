@@ -158,7 +158,7 @@ class GalleryAppState extends State<GalleryApp> {
     }
 
     return new MaterialApp(
-      title: 'My Flutter Gallery',
+      title: 'Flutter Gallery',
       color: Colors.grey,
       theme: _galleryTheme.theme.copyWith(platform: _platform ?? defaultTargetPlatform),
       showPerformanceOverlay: _showPerformanceOverlay,
