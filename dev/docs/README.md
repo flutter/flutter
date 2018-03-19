@@ -1,6 +1,4 @@
-Flutter is Google’s mobile UI framework to craft high-quality native interfaces.
-Integrates with iOS and Android, works with existing code,
-and is free and open source.
-
-See the [getting started guide](https://flutter.io/getting-started/) for
-information about using Flutter.
+This directory contains the documentation generator for
+<https://docs.flutter.io/>. Those docs are updated only for the beta
+branch, see <../bots/docs.sh>. You can find docs for the master branch
+staged at <https://master-docs-flutter-io.firebaseapp.com/>.
