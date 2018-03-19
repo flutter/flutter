@@ -109,6 +109,7 @@ void DefaultLayerBuilder::PushShaderMask(sk_sp<SkShader> shader,
 void DefaultLayerBuilder::PushPhysicalShape(const SkPath& sk_path,
                                             double elevation,
                                             SkColor color,
+                                            SkColor shadow_color,
                                             SkScalar device_pixel_ratio) {
   SkRect cullRect;
   if (!cullRect.intersect(sk_path.getBounds(), cull_rects_.top())) {
@@ -118,6 +119,7 @@ void DefaultLayerBuilder::PushPhysicalShape(const SkPath& sk_path,
   layer->set_path(sk_path);
   layer->set_elevation(elevation);
   layer->set_color(color);
+  layer->set_shadow_color(shadow_color);
   layer->set_device_pixel_ratio(device_pixel_ratio);
   PushLayer(std::move(layer), cullRect);
 }

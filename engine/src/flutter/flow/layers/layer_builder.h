@@ -50,6 +50,7 @@ class LayerBuilder {
   virtual void PushPhysicalShape(const SkPath& path,
                                  double elevation,
                                  SkColor color,
+                                 SkColor shadow_color,
                                  SkScalar device_pixel_ratio) = 0;
 
   virtual void PushPerformanceOverlay(uint64_t enabled_options,

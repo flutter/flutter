@@ -82,7 +82,7 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
   FXL_DCHECK(needs_painting());
 
   if (elevation_ != 0) {
-    DrawShadow(&context.canvas, path_, SK_ColorBLACK, elevation_,
+    DrawShadow(&context.canvas, path_, shadow_color_, elevation_,
                SkColorGetA(color_) != 0xff, device_pixel_ratio_);
   }
 
