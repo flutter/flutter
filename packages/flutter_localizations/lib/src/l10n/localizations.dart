@@ -524,6 +524,47 @@ class _Bundle_ko extends TranslationBundle {
 }
 
 // ignore: camel_case_types
+class _Bundle_nb extends TranslationBundle {
+  const _Bundle_nb() : super(null);
+  @override String get tabLabel => r'Fane $tabIndex av $tabCount';
+  @override String get showAccountsLabel => r'Vis kontoer';
+  @override String get hideAccountsLabel => r'Skjul kontoer';
+  @override String get signedInLabel => r'Logget inn';
+  @override String get timePickerMinuteModeAnnouncement => r'Velg minutter';
+  @override String get timePickerHourModeAnnouncement => r'Velg timer';
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get nextMonthTooltip => r'Neste måned';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow av ca $rowCount';
+  @override String get copyButtonLabel => r'KOPIER';
+  @override String get closeButtonTooltip => r'Lukk';
+  @override String get deleteButtonTooltip => r'Slett';
+  @override String get selectAllButtonLabel => r'VELG ALLE';
+  @override String get viewLicensesButtonLabel => r'VIS LISENSER';
+  @override String get rowsPerPageTitle => r'Rader per side:';
+  @override String get aboutListTileTitle => r'Om $applicationName';
+  @override String get backButtonTooltip => r'Tilbake';
+  @override String get licensesPageTitle => r'Lisenser';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'LIM INN';
+  @override String get previousMonthTooltip => r'Forrige måned';
+  @override String get closeButtonLabel => r'LUKK';
+  @override String get cutButtonLabel => r'KLIPP UT';
+  @override String get continueButtonLabel => r'FORTSETTE';
+  @override String get nextPageTooltip => r'Neste side';
+  @override String get openAppDrawerTooltip => r'Åpne navigasjonsmenyen';
+  @override String get previousPageTooltip => r'Forrige side';
+  @override String get cancelButtonLabel => r'AVBRYT';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow av $rowCount';
+  @override String get selectedRowCountTitleOne => r'1 element valgt';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount elementer valgt';
+  @override String get showMenuTooltip => r'Vis meny';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get modalBarrierDismissLabel => r'Forkast';
+}
+
+// ignore: camel_case_types
 class _Bundle_nl extends TranslationBundle {
   const _Bundle_nl() : super(null);
   @override String get scriptCategory => r'English-like';
@@ -562,6 +603,47 @@ class _Bundle_nl extends TranslationBundle {
   @override String get hideAccountsLabel => r'Accounts verbergen';
   @override String get showAccountsLabel => r'Accounts weergeven';
   @override String get modalBarrierDismissLabel => r'Sluiten';
+}
+
+// ignore: camel_case_types
+class _Bundle_nn extends TranslationBundle {
+  const _Bundle_nn() : super(null);
+  @override String get tabLabel => r'Fane $tabIndex av $tabCount';
+  @override String get showAccountsLabel => r'Vis kontoar';
+  @override String get hideAccountsLabel => r'Skjul kontoar';
+  @override String get signedInLabel => r'Logga inn';
+  @override String get timePickerMinuteModeAnnouncement => r'Vel minutt';
+  @override String get timePickerHourModeAnnouncement => r'Vel timar';
+  @override String get scriptCategory => r'English-like';
+  @override String get timeOfDayFormat => r'HH:mm';
+  @override String get nextMonthTooltip => r'Neste månad';
+  @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow av ca $rowCount';
+  @override String get copyButtonLabel => r'KOPIAR';
+  @override String get closeButtonTooltip => r'Lukk';
+  @override String get deleteButtonTooltip => r'Slett';
+  @override String get selectAllButtonLabel => r'VEL ALLE';
+  @override String get viewLicensesButtonLabel => r'VIS LISENSAR';
+  @override String get rowsPerPageTitle => r'Rader per side:';
+  @override String get aboutListTileTitle => r'Om $applicationName';
+  @override String get backButtonTooltip => r'Tilbake';
+  @override String get licensesPageTitle => r'Lisensar';
+  @override String get okButtonLabel => r'OK';
+  @override String get pasteButtonLabel => r'LIM INN';
+  @override String get previousMonthTooltip => r'Førre månad';
+  @override String get closeButtonLabel => r'LUKK';
+  @override String get cutButtonLabel => r'KLIPP UT';
+  @override String get continueButtonLabel => r'FORSETJE';
+  @override String get nextPageTooltip => r'Neste side';
+  @override String get openAppDrawerTooltip => r'Opne navigasjonsmenyen';
+  @override String get previousPageTooltip => r'Førre side';
+  @override String get cancelButtonLabel => r'AVBRYT';
+  @override String get pageRowsInfoTitle => r'$firstRow–$lastRow av $rowCount';
+  @override String get selectedRowCountTitleOne => r'1 element valt';
+  @override String get selectedRowCountTitleOther => r'$selectedRowCount element valt';
+  @override String get showMenuTooltip => r'Vis meny';
+  @override String get anteMeridiemAbbreviation => r'AM';
+  @override String get postMeridiemAbbreviation => r'PM';
+  @override String get modalBarrierDismissLabel => r'Forkast';
 }
 
 // ignore: camel_case_types
@@ -1364,6 +1446,16 @@ class _Bundle_fr_CA extends TranslationBundle {
 }
 
 // ignore: camel_case_types
+class _Bundle_nb_NO extends TranslationBundle {
+  const _Bundle_nb_NO() : super(const _Bundle_nb());
+}
+
+// ignore: camel_case_types
+class _Bundle_nn_NO extends TranslationBundle {
+  const _Bundle_nn_NO() : super(const _Bundle_nn());
+}
+
+// ignore: camel_case_types
 class _Bundle_pt_PT extends TranslationBundle {
   const _Bundle_pt_PT() : super(const _Bundle_pt());
   @override String get tabLabel => r'Separador $tabIndex de $tabCount';
@@ -1547,8 +1639,22 @@ TranslationBundle translationBundleForLocale(Locale locale) {
       return const _Bundle_ja();
     case 'ko':
       return const _Bundle_ko();
+    case 'nb': {
+      switch (locale.toString()) {
+        case 'nb_NO':
+          return const _Bundle_nb_NO();
+      }
+      return const _Bundle_nb();
+    }
     case 'nl':
       return const _Bundle_nl();
+    case 'nn': {
+      switch (locale.toString()) {
+        case 'nn_NO':
+          return const _Bundle_nn_NO();
+      }
+      return const _Bundle_nn();
+    }
     case 'pl':
       return const _Bundle_pl();
     case 'ps':
