@@ -163,13 +163,13 @@ abstract class CachingAssetBundle extends AssetBundle {
     if (data.lengthInBytes < 10 * 1024) {
       // 10KB takes about 3ms to parse on a Pixel 2 XL.
       // See: https://github.com/dart-lang/sdk/issues/31954
-      return UTF8.decode(data.buffer.asUint8List());
+      return utf8.decode(data.buffer.asUint8List());
     }
     return compute(_utf8decode, data, debugLabel: 'UTF8 decode for "$key"');
   }
 
   static String _utf8decode(ByteData data) {
-    return UTF8.decode(data.buffer.asUint8List());
+    return utf8.decode(data.buffer.asUint8List());
   }
 
   /// Retrieve a string from the asset bundle, parse it with the given function,
@@ -223,7 +223,7 @@ abstract class CachingAssetBundle extends AssetBundle {
 class PlatformAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
-    final Uint8List encoded = UTF8.encoder.convert(key);
+    final Uint8List encoded = utf8.encoder.convert(new Uri(path: key).path);
     final ByteData asset =
         await BinaryMessages.send('flutter/assets', encoded.buffer.asByteData());
     if (asset == null)

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON;
+import 'dart:convert' show json;
 import 'dart:io';
 
 import '../framework/adb.dart';
@@ -121,7 +121,7 @@ class StartupTest {
         '-d',
         deviceId,
       ]).timeout(_startupTimeout);
-      final Map<String, dynamic> data = JSON.decode(file('$testDirectory/build/start_up_info.json').readAsStringSync());
+      final Map<String, dynamic> data = json.decode(file('$testDirectory/build/start_up_info.json').readAsStringSync());
 
       if (!reportMetrics)
         return new TaskResult.success(data);
@@ -161,7 +161,7 @@ class PerfTest {
         '-d',
         deviceId,
       ]);
-      final Map<String, dynamic> data = JSON.decode(file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync());
+      final Map<String, dynamic> data = json.decode(file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync());
 
       if (data['frame_count'] < 5) {
         return new TaskResult.failure(

@@ -82,7 +82,7 @@ class TraceCommand extends FlutterCommand {
       localFile = getUniqueFile(fs.currentDirectory, 'trace', 'json');
     }
 
-    await localFile.writeAsString(JSON.encode(timeline));
+    await localFile.writeAsString(json.encode(timeline));
 
     printStatus('Trace file saved to ${localFile.path}');
   }

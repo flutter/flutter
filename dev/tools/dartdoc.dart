@@ -129,7 +129,7 @@ Future<Null> main(List<String> arguments) async {
     '--exclude-packages',
 'analyzer,args,barback,cli_util,csslib,front_end,glob,html,http_multi_server,io,isolate,js,kernel,logging,mime,mockito,node_preamble,plugin,shelf,shelf_packages_handler,shelf_static,shelf_web_socket,utf,watcher,yaml',
     '--exclude',
-  'package:Flutter/temp_doc.dart,package:http/browser_client.dart,package:intl/intl_browser.dart,package:matcher/mirror_matchers.dart,package:quiver/mirrors.dart,pacakge:quiver/io.dart,package:vm_service_client/vm_service_client.dart,package:web_socket_channel/html.dart',
+  'package:Flutter/temp_doc.dart,package:http/browser_client.dart,package:intl/intl_browser.dart,package:matcher/mirror_matchers.dart,package:quiver/mirrors.dart,package:quiver/io.dart,package:vm_service_client/vm_service_client.dart,package:web_socket_channel/html.dart',
     '--favicon=favicon.ico',
     '--use-categories',
     '--category-order', 'flutter,Dart Core,flutter_test,flutter_driver',
@@ -340,7 +340,7 @@ void printStream(Stream<List<int>> stream, { String prefix: '', List<Pattern> fi
   assert(prefix != null);
   assert(filter != null);
   stream
-    .transform(UTF8.decoder)
+    .transform(utf8.decoder)
     .transform(const LineSplitter())
     .listen((String line) {
       if (!filter.any((Pattern pattern) => line.contains(pattern)))

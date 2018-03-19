@@ -14,6 +14,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../globals.dart';
+import '../runner/flutter_command.dart';
 import 'sdk.dart';
 
 /// Represents Flutter-specific data that is added to the `PUB_ENVIRONMENT`
@@ -93,7 +94,10 @@ Future<Null> pubGet({
       'Running "flutter packages $command" in ${fs.path.basename(directory)}...',
       expectSlowOperation: true,
     );
-    final List<String> args = <String>['--verbosity=warning', command, '--no-precompile'];
+    final List<String> args = <String>['--verbosity=warning'];
+    if (FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'])
+      args.add('--verbose');
+    args.addAll(<String>[command, '--no-precompile']);
     if (offline)
       args.add('--offline');
     try {

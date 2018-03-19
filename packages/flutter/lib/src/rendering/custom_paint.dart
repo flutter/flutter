@@ -111,7 +111,9 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 ///   // Therefore we return false here. If we had fields (set
 ///   // from the constructor) then we would return true if any
 ///   // of them differed from the same fields on the oldDelegate.
+///   @override
 ///   bool shouldRepaint(Sky oldDelegate) => false;
+///   @override
 ///   bool shouldRebuildSemantics(Sky oldDelegate) => false;
 /// }
 /// ```
@@ -816,6 +818,21 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.button != null) {
       config.isButton = properties.button;
+    }
+    if (properties.textField != null) {
+      config.isTextField = properties.textField;
+    }
+    if (properties.focused != null) {
+      config.isFocused = properties.focused;
+    }
+    if (properties.enabled != null) {
+      config.isEnabled = properties.enabled;
+    }
+    if (properties.inMutuallyExclusiveGroup != null) {
+      config.isInMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup;
+    }
+    if (properties.header != null) {
+      config.isHeader = properties.header;
     }
     if (properties.label != null) {
       config.label = properties.label;

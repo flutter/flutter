@@ -50,7 +50,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
       help: 'On-device name of the application binary.');
     argParser.addOption('isolate-number',
       abbr: 'i',
-      help: 'To reload only one instance, speficy the isolate number, e.g. '
+      help: 'To reload only one instance, specify the isolate number, e.g. '
             'the number in foo\$main-###### given by --list.');
     argParser.addOption('target',
       abbr: 't',
@@ -162,24 +162,9 @@ class FuchsiaReloadCommand extends FlutterCommand {
     return _vmServiceCache[port];
   }
 
-  Future<bool> _checkPort(int port) async {
-    bool connected = true;
-    Socket s;
-    try {
-      s = await Socket.connect(ipv4Loopback, port);
-    } catch (_) {
-      connected = false;
-    }
-    if (s != null)
-      await s.close();
-    return connected;
-  }
-
   Future<List<FlutterView>> _getViews(List<int> ports) async {
     final List<FlutterView> views = <FlutterView>[];
     for (int port in ports) {
-      if (!await _checkPort(port))
-        continue;
       final VMService vmService = await _getVMService(port);
       await vmService.getVM();
       await vmService.waitForViews();

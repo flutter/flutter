@@ -23,9 +23,8 @@ void main() {
     final Offset allDemosOrigin = tester.getTopRight(find.text('Demos'));
     final Finder button = find.text('Buttons');
     while (button.evaluate().isEmpty) {
-      await tester.dragFrom(allDemosOrigin, const Offset(0.0, -100.0));
-      await tester.pump(); // start the scroll
-      await tester.pump(const Duration(seconds: 1));
+      await tester.dragFrom(allDemosOrigin, const Offset(0.0, -200.0));
+      await tester.pumpAndSettle();
     }
 
     // Launch the buttons demo and then prove that showing the example

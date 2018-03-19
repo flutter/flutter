@@ -97,7 +97,7 @@ class TravelDestinationItem extends StatelessWidget {
                   ],
                 ),
               ),
-              // description and share/expore buttons
+              // description and share/explore buttons
               new Expanded(
                 child: new Padding(
                   padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),

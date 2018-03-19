@@ -7,6 +7,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // Watch out: this list must be kept in sync with the comment at the top of
+  // GlobalMaterialLocalizations.
   final List<String> languages = <String>[
     'ar', // Arabic
     'de', // German
@@ -33,6 +35,9 @@ void main() {
   for (String language in languages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
       final Locale locale = new Locale(language, '');
+
+      expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+
       final MaterialLocalizations localizations = new GlobalMaterialLocalizations(locale);
 
       expect(localizations.openAppDrawerTooltip, isNotNull);
@@ -77,8 +82,8 @@ void main() {
       expect(localizations.pageRowsInfoTitle(1, 10, 100, false), isNot(contains(r'$rowCount')));
 
       expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNotNull);
-      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNot(contains('tabIndex')));
-      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNot(contains('tabCount')));
+      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNot(contains(r'$tabIndex')));
+      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNot(contains(r'$tabCount')));
       expect(() => localizations.tabLabel(tabIndex: 0, tabCount: 5), throwsAssertionError);
       expect(() => localizations.tabLabel(tabIndex: 2, tabCount: 0), throwsAssertionError);
     });
@@ -99,8 +104,8 @@ void main() {
 
     localizations = new GlobalMaterialLocalizations(const Locale('ro', ''));
     expect(localizations.selectedRowCountTitle(0), 'Nu există elemente selectate');
-    expect(localizations.selectedRowCountTitle(1), '1 element selectat');
-    expect(localizations.selectedRowCountTitle(2), '2 elemente selectate');
-    expect(localizations.selectedRowCountTitle(123456789), '123.456.789 elemente selectate');
+    expect(localizations.selectedRowCountTitle(1), 'Un articol selectat');
+    expect(localizations.selectedRowCountTitle(2), '2 de articole selectate');
+    expect(localizations.selectedRowCountTitle(123456789), '123.456.789 de articole selectate');
   });
 }

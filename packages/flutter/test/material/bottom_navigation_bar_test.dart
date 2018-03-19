@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('BottomNavigationBar callback test', (WidgetTester tester) async {
@@ -483,17 +486,85 @@ void main() {
     await tester.pump(const Duration(milliseconds: 20));
     expect(box, paints..circle(x: 600.0)..circle(x: 200.0)..circle(x: 600.0));
   });
+
+  testWidgets('BottomNavigationBar semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.ltr,
+        bottomNavigationBar: new BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            const BottomNavigationBarItem(
+              icon: const Icon(Icons.ac_unit),
+              title: const Text('AC'),
+            ),
+            const BottomNavigationBarItem(
+              icon: const Icon(Icons.access_alarm),
+              title: const Text('Alarm'),
+            ),
+            const BottomNavigationBarItem(
+              icon: const Icon(Icons.hot_tub),
+              title: const Text('Hot Tub'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // TODO(goderbauer): traversal order is incorrect, https://github.com/flutter/flutter/issues/14375
+    final TestSemantics expected = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics(
+          id: 1,
+          flags: <SemanticsFlag>[SemanticsFlag.isSelected],
+          actions: <SemanticsAction>[SemanticsAction.tap],
+          label: 'AC\nTab 1 of 3',
+          textDirection: TextDirection.ltr,
+          nextNodeId: -1,
+          previousNodeId: 3, // Should be 2
+        ),
+        new TestSemantics(
+          id: 2,
+          actions: <SemanticsAction>[SemanticsAction.tap],
+          label: 'Alarm\nTab 2 of 3',
+          textDirection: TextDirection.ltr,
+          nextNodeId: 3,
+          previousNodeId: -1, // Should be 1
+        ),
+        new TestSemantics(
+          id: 3,
+          actions: <SemanticsAction>[SemanticsAction.tap],
+          label: 'Hot Tub\nTab 3 of 3',
+          textDirection: TextDirection.ltr,
+          nextNodeId: 1, // Should be -1
+          previousNodeId: 2,
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
 }
 
 Widget boilerplate({ Widget bottomNavigationBar, @required TextDirection textDirection }) {
   assert(textDirection != null);
-  return new Directionality(
-    textDirection: textDirection,
-    child: new MediaQuery(
-      data: const MediaQueryData(),
-      child: new Material(
-        child: new Scaffold(
-          bottomNavigationBar: bottomNavigationBar,
+  return new Localizations(
+    locale: const Locale('en', 'US'),
+    delegates: const <LocalizationsDelegate<dynamic>>[
+      DefaultMaterialLocalizations.delegate,
+      DefaultWidgetsLocalizations.delegate,
+    ],
+    child: new Directionality(
+      textDirection: textDirection,
+      child: new MediaQuery(
+        data: const MediaQueryData(),
+        child: new Material(
+          child: new Scaffold(
+            bottomNavigationBar: bottomNavigationBar,
+          ),
         ),
       ),
     ),

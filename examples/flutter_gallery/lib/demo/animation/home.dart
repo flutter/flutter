@@ -200,7 +200,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
 
     // When tCollapsed > 0, the indicators move closer together
     //final double rowIndicatorWidth = 48.0 + (1.0 - tCollapsed) * (rowTitleWidth - 48.0);
-    final double paddedSectionIndicatorWidth = kSectionIndicatorWidth + 8.0;
+    const double paddedSectionIndicatorWidth = kSectionIndicatorWidth + 8.0;
     final double rowIndicatorWidth = paddedSectionIndicatorWidth +
       (1.0 - tCollapsed) * (rowTitleWidth - paddedSectionIndicatorWidth);
     double rowIndicatorX = (size.width - rowIndicatorWidth) / 2.0 - selectedIndex * rowIndicatorWidth;
@@ -398,7 +398,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
       // If the simulation is headed up towards midScrollOffset but will not reach it,
       // then snap it there. Similarly if the simulation is headed down past
       // midScrollOffset but will not reach zero, then snap it to zero.
-      final double simulationEnd = simulation.x(double.INFINITY);
+      final double simulationEnd = simulation.x(double.infinity);
       if (simulationEnd >= midScrollOffset)
         return simulation;
       if (dragVelocity > 0.0)

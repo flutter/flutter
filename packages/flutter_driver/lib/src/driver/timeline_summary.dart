@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON, JsonEncoder;
+import 'dart:convert' show json, JsonEncoder;
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
@@ -112,10 +112,10 @@ class TimelineSummary {
     await file.writeAsString(_encodeJson(summaryJson, pretty));
   }
 
-  String _encodeJson(Map<String, dynamic> json, bool pretty) {
+  String _encodeJson(Map<String, dynamic> jsonObject, bool pretty) {
     return pretty
-      ? _prettyEncoder.convert(json)
-      : JSON.encode(json);
+      ? _prettyEncoder.convert(jsonObject)
+      : json.encode(jsonObject);
   }
 
   List<TimelineEvent> _extractNamedEvents(String name) {

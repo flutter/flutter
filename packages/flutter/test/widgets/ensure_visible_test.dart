@@ -66,8 +66,8 @@ Widget buildListView(Axis scrollDirection, { bool reverse: false, bool shrinkWra
 
 void main() {
 
-  group('SingleChildScollView', () {
-    testWidgets('SingleChildScollView ensureVisible Axis.vertical', (WidgetTester tester) async {
+  group('SingleChildScrollView', () {
+    testWidgets('SingleChildScrollView ensureVisible Axis.vertical', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
 
       await tester.pumpWidget(buildSingleChildScrollView(Axis.vertical));
@@ -94,7 +94,7 @@ void main() {
       expect(tester.getTopLeft(findKey(3)).dy, equals(100.0));
     });
 
-    testWidgets('SingleChildScollView ensureVisible Axis.horizontal', (WidgetTester tester) async {
+    testWidgets('SingleChildScrollView ensureVisible Axis.horizontal', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
 
       await tester.pumpWidget(buildSingleChildScrollView(Axis.horizontal));
@@ -121,7 +121,7 @@ void main() {
       expect(tester.getTopLeft(findKey(3)).dx, equals(100.0));
     });
 
-    testWidgets('SingleChildScollView ensureVisible Axis.vertical reverse', (WidgetTester tester) async {
+    testWidgets('SingleChildScrollView ensureVisible Axis.vertical reverse', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
 
       await tester.pumpWidget(buildSingleChildScrollView(Axis.vertical, reverse: true));
@@ -148,7 +148,7 @@ void main() {
       expect(tester.getBottomRight(findKey(3)).dy, equals(500.0));
     });
 
-    testWidgets('SingleChildScollView ensureVisible Axis.horizontal reverse', (WidgetTester tester) async {
+    testWidgets('SingleChildScrollView ensureVisible Axis.horizontal reverse', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
 
       await tester.pumpWidget(buildSingleChildScrollView(Axis.horizontal, reverse: true));
@@ -175,7 +175,7 @@ void main() {
       expect(tester.getBottomRight(findKey(3)).dx, equals(700.0));
     });
 
-    testWidgets('SingleChildScollView ensureVisible rotated child', (WidgetTester tester) async {
+    testWidgets('SingleChildScrollView ensureVisible rotated child', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
 
       await tester.pumpWidget(
@@ -193,7 +193,7 @@ void main() {
                     height: 200.0,
                     child: new Center(
                       child: new Transform(
-                        transform: new Matrix4.rotationZ(math.PI),
+                        transform: new Matrix4.rotationZ(math.pi),
                         child: new Container(
                           key: const ValueKey<int>(0),
                           width: 100.0,
@@ -449,7 +449,7 @@ void main() {
                   height: 200.0,
                   child: new Center(
                     child: new Transform(
-                      transform: new Matrix4.rotationZ(math.PI),
+                      transform: new Matrix4.rotationZ(math.pi),
                       child: new Container(
                         key: const ValueKey<int>(0),
                         width: 100.0,

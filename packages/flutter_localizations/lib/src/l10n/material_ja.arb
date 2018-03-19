@@ -16,7 +16,7 @@
   "pageRowsInfoTitle": "$firstRow - $lastRow 行（合計 $rowCount 行）",
   "pageRowsInfoTitleApproximate": "$firstRow – $lastRow 行（合計約 $rowCount 行）",
   "rowsPerPageTitle": "ページあたりの行数:",
-  "tabLabel": "$tabIndex 行（合計 $tabCount 行）",
+  "tabLabel": "タブ: $tabIndex/$tabCount",
   "selectedRowCountTitleOther": "$selectedRowCount 件のアイテムを選択中",
   "cancelButtonLabel": "キャンセル",
   "closeButtonLabel": "閉じる",
@@ -32,7 +32,7 @@
   "timePickerHourModeAnnouncement": "時間を選択",
   "timePickerMinuteModeAnnouncement": "分を選択",
   "signedInLabel": "ログイン中",
-  "hideAccountsLabel": "アカウントを隠す",
-  "showAccountsLabel": "アカウントを表示する",
+  "hideAccountsLabel": "アカウントを非表示",
+  "showAccountsLabel": "アカウントを表示",
   "modalBarrierDismissLabel": "閉じる"
 }

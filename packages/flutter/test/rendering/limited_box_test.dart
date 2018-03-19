@@ -15,9 +15,9 @@ void main() {
     );
     final RenderBox parent = new RenderConstrainedOverflowBox(
       minWidth: 0.0,
-      maxWidth: double.INFINITY,
+      maxWidth: double.infinity,
       minHeight: 0.0,
-      maxHeight: double.INFINITY,
+      maxHeight: double.infinity,
       child: new RenderLimitedBox(
         maxWidth: 100.0,
         maxHeight: 200.0,
@@ -64,7 +64,7 @@ void main() {
     );
     final RenderBox parent = new RenderConstrainedOverflowBox(
       minWidth: 0.0,
-      maxWidth: double.INFINITY,
+      maxWidth: double.infinity,
       minHeight: 500.0,
       maxHeight: 500.0,
       child: new RenderLimitedBox(
@@ -86,7 +86,7 @@ void main() {
       minWidth: 500.0,
       maxWidth: 500.0,
       minHeight: 0.0,
-      maxHeight: double.INFINITY,
+      maxHeight: double.infinity,
       child: new RenderLimitedBox(
         maxWidth: 100.0,
         maxHeight: 200.0,
@@ -105,7 +105,7 @@ void main() {
       minWidth: 10.0,
       maxWidth: 500.0,
       minHeight: 0.0,
-      maxHeight: double.INFINITY,
+      maxHeight: double.infinity,
       child: box = new RenderLimitedBox(
         maxWidth: 100.0,
         maxHeight: 200.0,

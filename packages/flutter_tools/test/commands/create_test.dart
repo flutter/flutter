@@ -207,7 +207,7 @@ void main() {
             <String>[file.path],
             workingDirectory: projectDir.path,
           );
-          final String formatted = await process.stdout.transform(UTF8.decoder).join();
+          final String formatted = await process.stdout.transform(utf8.decoder).join();
 
           expect(original, formatted, reason: file.path);
         }

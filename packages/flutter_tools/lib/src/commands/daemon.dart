@@ -357,6 +357,7 @@ class AppDomain extends Domain {
     @required bool trackWidgetCreation,
     String projectRootPath,
     String packagesFilePath,
+    String dillOutputPath,
     bool ipv6: false,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
@@ -371,6 +372,7 @@ class AppDomain extends Domain {
       device,
       previewDart2: options.buildInfo.previewDart2,
       trackWidgetCreation: trackWidgetCreation,
+      dillOutputPath: dillOutputPath,
     );
 
     ResidentRunner runner;
@@ -384,6 +386,7 @@ class AppDomain extends Domain {
         applicationBinary: applicationBinary,
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
+        dillOutputPath: dillOutputPath,
         ipv6: ipv6,
         hostIsIde: true,
       );
@@ -690,12 +693,12 @@ class DeviceDomain extends Domain {
 }
 
 Stream<Map<String, dynamic>> get stdinCommandStream => stdin
-  .transform(UTF8.decoder)
+  .transform(utf8.decoder)
   .transform(const LineSplitter())
   .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
   .map((String line) {
     line = line.substring(1, line.length - 1);
-    return JSON.decode(line);
+    return json.decode(line);
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {
@@ -703,7 +706,7 @@ void stdoutCommandResponse(Map<String, dynamic> command) {
 }
 
 String jsonEncodeObject(dynamic object) {
-  return JSON.encode(object, toEncodable: _toEncodable);
+  return json.encode(object, toEncodable: _toEncodable);
 }
 
 dynamic _toEncodable(dynamic object) {
@@ -809,6 +812,7 @@ class AppInstance {
 
     final AppContext appContext = new AppContext();
     appContext.setVariable(Logger, _logger);
+    appContext.setVariable(Stdio, const Stdio());
     return appContext.runInZone(method);
   }
 }

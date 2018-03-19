@@ -162,7 +162,7 @@ class RenderPerformanceOverlay extends RenderBox {
 
   @override
   void performResize() {
-    size = constraints.constrain(new Size(double.INFINITY, _intrinsicHeight));
+    size = constraints.constrain(new Size(double.infinity, _intrinsicHeight));
   }
 
   @override

@@ -30,10 +30,10 @@ class _DebugSize extends Size {
 ///
 /// The constraints themselves must satisfy these relations:
 ///
-/// * 0.0 <= [minWidth] <= [maxWidth] <= [double.INFINITY]
-/// * 0.0 <= [minHeight] <= [maxHeight] <= [double.INFINITY]
+/// * 0.0 <= [minWidth] <= [maxWidth] <= [double.infinity]
+/// * 0.0 <= [minHeight] <= [maxHeight] <= [double.infinity]
 ///
-/// [double.INFINITY] is a legal value for each constraint.
+/// [double.infinity] is a legal value for each constraint.
 ///
 /// ## The box layout model
 ///
@@ -83,9 +83,9 @@ class BoxConstraints extends Constraints {
   /// Creates box constraints with the given constraints.
   const BoxConstraints({
     this.minWidth: 0.0,
-    this.maxWidth: double.INFINITY,
+    this.maxWidth: double.infinity,
     this.minHeight: 0.0,
-    this.maxHeight: double.INFINITY
+    this.maxHeight: double.infinity
   });
 
   /// The minimum width that satisfies the constraints.
@@ -93,7 +93,7 @@ class BoxConstraints extends Constraints {
 
   /// The maximum width that satisfies the constraints.
   ///
-  /// Might be [double.INFINITY].
+  /// Might be [double.infinity].
   final double maxWidth;
 
   /// The minimum height that satisfies the constraints.
@@ -101,7 +101,7 @@ class BoxConstraints extends Constraints {
 
   /// The maximum height that satisfies the constraints.
   ///
-  /// Might be [double.INFINITY].
+  /// Might be [double.infinity].
   final double maxHeight;
 
   /// Creates box constraints that is respected only by the given size.
@@ -122,9 +122,9 @@ class BoxConstraints extends Constraints {
     double width,
     double height
   }): minWidth = width != null ? width : 0.0,
-      maxWidth = width != null ? width : double.INFINITY,
+      maxWidth = width != null ? width : double.infinity,
       minHeight = height != null ? height : 0.0,
-      maxHeight = height != null ? height : double.INFINITY;
+      maxHeight = height != null ? height : double.infinity;
 
   /// Creates box constraints that require the given width or height, except if
   /// they are infinite.
@@ -134,12 +134,12 @@ class BoxConstraints extends Constraints {
   ///  * [new BoxConstraints.tightFor], which is similar but instead of being
   ///    tight if the value is not infinite, is tight if the value is non-null.
   const BoxConstraints.tightForFinite({
-    double width: double.INFINITY,
-    double height: double.INFINITY
-  }): minWidth = width != double.INFINITY ? width : 0.0,
-      maxWidth = width != double.INFINITY ? width : double.INFINITY,
-      minHeight = height != double.INFINITY ? height : 0.0,
-      maxHeight = height != double.INFINITY ? height : double.INFINITY;
+    double width: double.infinity,
+    double height: double.infinity
+  }): minWidth = width != double.infinity ? width : 0.0,
+      maxWidth = width != double.infinity ? width : double.infinity,
+      minHeight = height != double.infinity ? height : 0.0,
+      maxHeight = height != double.infinity ? height : double.infinity;
 
   /// Creates box constraints that forbid sizes larger than the given size.
   BoxConstraints.loose(Size size)
@@ -155,10 +155,10 @@ class BoxConstraints extends Constraints {
   const BoxConstraints.expand({
     double width,
     double height
-  }): minWidth = width != null ? width : double.INFINITY,
-      maxWidth = width != null ? width : double.INFINITY,
-      minHeight = height != null ? height : double.INFINITY,
-      maxHeight = height != null ? height : double.INFINITY;
+  }): minWidth = width != null ? width : double.infinity,
+      maxWidth = width != null ? width : double.infinity,
+      minHeight = height != null ? height : double.infinity,
+      maxHeight = height != null ? height : double.infinity;
 
   /// Creates a copy of this box constraints but with the given fields replaced with the new values.
   BoxConstraints copyWith({
@@ -243,14 +243,14 @@ class BoxConstraints extends Constraints {
 
   /// Returns the width that both satisfies the constraints and is as close as
   /// possible to the given width.
-  double constrainWidth([double width = double.INFINITY]) {
+  double constrainWidth([double width = double.infinity]) {
     assert(debugAssertIsValid());
     return width.clamp(minWidth, maxWidth);
   }
 
   /// Returns the height that both satisfies the constraints and is as close as
   /// possible to the given height.
-  double constrainHeight([double height = double.INFINITY]) {
+  double constrainHeight([double height = double.infinity]) {
     assert(debugAssertIsValid());
     return height.clamp(minHeight, maxHeight);
   }
@@ -346,10 +346,10 @@ class BoxConstraints extends Constraints {
   bool get isTight => hasTightWidth && hasTightHeight;
 
   /// Whether there is an upper bound on the maximum width.
-  bool get hasBoundedWidth => maxWidth < double.INFINITY;
+  bool get hasBoundedWidth => maxWidth < double.infinity;
 
   /// Whether there is an upper bound on the maximum height.
-  bool get hasBoundedHeight => maxHeight < double.INFINITY;
+  bool get hasBoundedHeight => maxHeight < double.infinity;
 
   /// Whether the given size satisfies the constraints.
   bool isSatisfiedBy(Size size) {
@@ -424,15 +424,15 @@ class BoxConstraints extends Constraints {
       return a * (1.0 - t);
     assert(a.debugAssertIsValid());
     assert(b.debugAssertIsValid());
-    assert((a.minWidth.isFinite && b.minWidth.isFinite) || (a.minWidth == double.INFINITY && b.minWidth == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
-    assert((a.maxWidth.isFinite && b.maxWidth.isFinite) || (a.maxWidth == double.INFINITY && b.maxWidth == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
-    assert((a.minHeight.isFinite && b.minHeight.isFinite) || (a.minHeight == double.INFINITY && b.minHeight == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
-    assert((a.maxHeight.isFinite && b.maxHeight.isFinite) || (a.maxHeight == double.INFINITY && b.maxHeight == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
+    assert((a.minWidth.isFinite && b.minWidth.isFinite) || (a.minWidth == double.infinity && b.minWidth == double.infinity), 'Cannot interpolate between finite constraints and unbounded constraints.');
+    assert((a.maxWidth.isFinite && b.maxWidth.isFinite) || (a.maxWidth == double.infinity && b.maxWidth == double.infinity), 'Cannot interpolate between finite constraints and unbounded constraints.');
+    assert((a.minHeight.isFinite && b.minHeight.isFinite) || (a.minHeight == double.infinity && b.minHeight == double.infinity), 'Cannot interpolate between finite constraints and unbounded constraints.');
+    assert((a.maxHeight.isFinite && b.maxHeight.isFinite) || (a.maxHeight == double.infinity && b.maxHeight == double.infinity), 'Cannot interpolate between finite constraints and unbounded constraints.');
     return new BoxConstraints(
-      minWidth: a.minWidth.isFinite ? ui.lerpDouble(a.minWidth, b.minWidth, t) : double.INFINITY,
-      maxWidth: a.maxWidth.isFinite ? ui.lerpDouble(a.maxWidth, b.maxWidth, t) : double.INFINITY,
-      minHeight: a.minHeight.isFinite ? ui.lerpDouble(a.minHeight, b.minHeight, t) : double.INFINITY,
-      maxHeight: a.maxHeight.isFinite ? ui.lerpDouble(a.maxHeight, b.maxHeight, t) : double.INFINITY,
+      minWidth: a.minWidth.isFinite ? ui.lerpDouble(a.minWidth, b.minWidth, t) : double.infinity,
+      maxWidth: a.maxWidth.isFinite ? ui.lerpDouble(a.maxWidth, b.maxWidth, t) : double.infinity,
+      minHeight: a.minHeight.isFinite ? ui.lerpDouble(a.minHeight, b.minHeight, t) : double.infinity,
+      maxHeight: a.maxHeight.isFinite ? ui.lerpDouble(a.maxHeight, b.maxHeight, t) : double.infinity,
     );
   }
 
@@ -557,10 +557,10 @@ class BoxConstraints extends Constraints {
   @override
   String toString() {
     final String annotation = isNormalized ? '' : '; NOT NORMALIZED';
-    if (minWidth == double.INFINITY && minHeight == double.INFINITY)
+    if (minWidth == double.infinity && minHeight == double.infinity)
       return 'BoxConstraints(biggest$annotation)';
-    if (minWidth == 0 && maxWidth == double.INFINITY &&
-        minHeight == 0 && maxHeight == double.INFINITY)
+    if (minWidth == 0 && maxWidth == double.infinity &&
+        minHeight == 0 && maxHeight == double.infinity)
       return 'BoxConstraints(unconstrained$annotation)';
     String describe(double min, double max, String dim) {
       if (min == max)
@@ -1089,7 +1089,7 @@ abstract class RenderBox extends RenderObject {
         throw new FlutterError(
           'The height argument to getMinIntrinsicWidth was null.\n'
           'The argument to getMinIntrinsicWidth must not be negative or null. '
-          'If you do not have a specific height in mind, then pass double.INFINITY instead.'
+          'If you do not have a specific height in mind, then pass double.infinity instead.'
         );
       }
       if (height < 0.0) {
@@ -1228,7 +1228,7 @@ abstract class RenderBox extends RenderObject {
         throw new FlutterError(
           'The height argument to getMaxIntrinsicWidth was null.\n'
           'The argument to getMaxIntrinsicWidth must not be negative or null. '
-          'If you do not have a specific height in mind, then pass double.INFINITY instead.'
+          'If you do not have a specific height in mind, then pass double.infinity instead.'
         );
       }
       if (height < 0.0) {
@@ -1304,7 +1304,7 @@ abstract class RenderBox extends RenderObject {
         throw new FlutterError(
           'The width argument to getMinIntrinsicHeight was null.\n'
           'The argument to getMinIntrinsicHeight must not be negative or null. '
-          'If you do not have a specific width in mind, then pass double.INFINITY instead.'
+          'If you do not have a specific width in mind, then pass double.infinity instead.'
         );
       }
       if (width < 0.0) {
@@ -1377,7 +1377,7 @@ abstract class RenderBox extends RenderObject {
         throw new FlutterError(
           'The width argument to getMaxIntrinsicHeight was null.\n'
           'The argument to getMaxIntrinsicHeight must not be negative or null. '
-          'If you do not have a specific width in mind, then pass double.INFINITY instead.'
+          'If you do not have a specific width in mind, then pass double.infinity instead.'
         );
       }
       if (width < 0.0) {
@@ -1747,8 +1747,8 @@ abstract class RenderBox extends RenderObject {
           }
         }
 
-        testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', double.INFINITY);
-        testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', double.INFINITY);
+        testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', double.infinity);
+        testIntrinsicsForValues(getMinIntrinsicHeight, getMaxIntrinsicHeight, 'Height', double.infinity);
         if (constraints.hasBoundedWidth)
           testIntrinsicsForValues(getMinIntrinsicWidth, getMaxIntrinsicWidth, 'Width', constraints.maxWidth);
         if (constraints.hasBoundedHeight)

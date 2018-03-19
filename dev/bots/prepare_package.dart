@@ -29,7 +29,7 @@ class ProcessRunnerException implements Exception {
 
   final String message;
   final ProcessResult result;
-  int get exitCode => result.exitCode ?? -1;
+  int get exitCode => result?.exitCode ?? -1;
 
   @override
   String toString() {
@@ -39,7 +39,7 @@ class ProcessRunnerException implements Exception {
     }
     final String stderr = result?.stderr ?? '';
     if (stderr.isNotEmpty) {
-      output += ':\n${result.stderr}';
+      output += ':\n$stderr';
     }
     return output;
   }
@@ -157,6 +157,10 @@ class ProcessRunner {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n${e.toString()}';
       throw new ProcessRunnerException(message);
+    } on ArgumentError catch (e) {
+      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
+          'failed with:\n${e.toString()}';
+      throw new ProcessRunnerException(message);
     }
 
     final int exitCode = await allComplete();
@@ -166,7 +170,7 @@ class ProcessRunner {
       throw new ProcessRunnerException(
           message, new ProcessResult(0, exitCode, null, 'returned $exitCode'));
     }
-    return UTF8.decoder.convert(output).trim();
+    return utf8.decoder.convert(output).trim();
   }
 }
 
@@ -294,8 +298,7 @@ class ArchiveCreator {
     await _runGit(<String>['reset', '--hard', revision]);
 
     // Make the origin point to github instead of the chromium mirror.
-    await _runGit(<String>['remote', 'remove', 'origin']);
-    await _runGit(<String>['remote', 'add', 'origin', githubRepo]);
+    await _runGit(<String>['remote', 'set-url', 'origin', githubRepo]);
   }
 
   /// Retrieve the MinGit executable from storage and unpack it.
@@ -358,18 +361,25 @@ class ArchiveCreator {
 
   /// Unpacks the given zip file into the currentDirectory (if set), or the
   /// same directory as the archive.
-  ///
-  /// May only be run on Windows (since 7Zip is not available on other platforms).
   Future<String> _unzipArchive(File archive, {Directory workingDirectory}) {
-    assert(platform.isWindows); // 7Zip is only available on Windows.
     workingDirectory ??= new Directory(path.dirname(archive.absolute.path));
-    final List<String> commandLine = <String>['7za', 'x', archive.absolute.path];
+    List<String> commandLine;
+    if (platform.isWindows) {
+      commandLine = <String>[
+        '7za',
+        'x',
+        archive.absolute.path,
+      ];
+    } else {
+      commandLine = <String>[
+        'unzip',
+        archive.absolute.path,
+      ];
+    }
     return _processRunner.runProcess(commandLine, workingDirectory: workingDirectory);
   }
 
   /// Create a zip archive from the directory source.
-  ///
-  /// May only be run on Windows (since 7Zip is not available on other platforms).
   Future<String> _createZipArchive(File output, Directory source) {
     List<String> commandLine;
     if (platform.isWindows) {
@@ -441,7 +451,7 @@ class ArchivePublisher {
     final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
     await _cloudCopy(outputFile.absolute.path, destGsPath);
     assert(tempDir.existsSync());
-    return _updateMetadata();
+    await _updateMetadata();
   }
 
   Future<Null> _updateMetadata() async {
@@ -476,7 +486,7 @@ class ArchivePublisher {
     jsonData['releases'][revision][branchName] = metadata;
 
     final File tempFile = new File(path.join(tempDir.absolute.path, 'releases_$platformName.json'));
-    final JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+    const JsonEncoder encoder = const JsonEncoder.withIndent('  ');
     tempFile.writeAsStringSync(encoder.convert(jsonData));
     await _cloudCopy(tempFile.absolute.path, metadataGsPath);
   }
@@ -632,6 +642,9 @@ Future<Null> main(List<String> argList) async {
   } on ProcessRunnerException catch (e) {
     exitCode = e.exitCode;
     message = e.message;
+  } catch (e) {
+    exitCode = -1;
+    message = e.toString();
   } finally {
     if (removeTempDir) {
       tempDir.deleteSync(recursive: true);

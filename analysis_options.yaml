@@ -109,8 +109,8 @@ linter:
     - prefer_conditional_assignment
     - prefer_const_constructors
     - prefer_const_constructors_in_immutables
-    # - prefer_const_declarations # not yet tested
-    # - prefer_const_literals_to_create_immutables # not yet tested
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
     # - prefer_constructors_over_static_methods # not yet tested
     - prefer_contains
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods

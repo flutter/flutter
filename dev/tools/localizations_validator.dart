@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show JSON;
+import 'dart:convert' show json;
 import 'dart:io';
 
 /// Sanity checking of the @foo metadata in the English translations,
@@ -22,7 +22,7 @@ String validateEnglishLocalizations(File file) {
     return errorMessages.toString();
   }
 
-  final Map<String, dynamic> bundle = JSON.decode(file.readAsStringSync());
+  final Map<String, dynamic> bundle = json.decode(file.readAsStringSync());
   for (String atResourceId in bundle.keys) {
     if (!atResourceId.startsWith('@'))
       continue;

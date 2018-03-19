@@ -20,7 +20,7 @@
   "pageRowsInfoTitle": "من $firstRow إلى $lastRow من إجمالي $rowCount",
   "pageRowsInfoTitleApproximate": "من $firstRow إلى $lastRow من إجمالي $rowCount تقريبًا",
   "rowsPerPageTitle": "عدد الصفوف في الصفحة:",
-  "tabLabel": "من $tabIndex من إجمالي $tabCount",
+  "tabLabel": "علامة التبويب $tabIndex من $tabCount",
   "selectedRowCountTitleOther": "تم اختيار $selectedRowCount عنصر",
   "cancelButtonLabel": "إلغاء",
   "closeButtonLabel": "إغلاق",
@@ -37,6 +37,6 @@
   "timePickerMinuteModeAnnouncement": "اختيار الدقائق",
   "signedInLabel": "تم تسجيل الدخول",
   "hideAccountsLabel": "إخفاء الحسابات",
-  "showAccountsLabel": "عرض الحسابات",
-  "modalBarrierDismissLabel": "تجاهل"
+  "showAccountsLabel": "إظهار الحسابات",
+  "modalBarrierDismissLabel": "رفض"
 }

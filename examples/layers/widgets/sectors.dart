@@ -34,10 +34,10 @@ class SectorAppState extends State<SectorApp> {
     final double currentTheta = this.currentTheta;
     if (currentTheta < kTwoPi) {
       double deltaTheta;
-      if (currentTheta >= kTwoPi - (math.PI * 0.2 + 0.05))
+      if (currentTheta >= kTwoPi - (math.pi * 0.2 + 0.05))
         deltaTheta = kTwoPi - currentTheta;
       else
-        deltaTheta = math.PI * rand.nextDouble() / 5.0 + 0.05;
+        deltaTheta = math.pi * rand.nextDouble() / 5.0 + 0.05;
       wantedSectorSizes.add(deltaTheta);
       updateEnabledState();
     }

@@ -8,6 +8,9 @@ import("//build/dart/dart_tool.gni")
 dart_library("flutter_tools") {
   package_name = "flutter_tools"
 
+  # Can be left empty as analysis is disabled.
+  sources = []
+
   disable_analysis = true
 
   deps = [

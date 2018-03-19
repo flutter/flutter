@@ -18,8 +18,8 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
   void showDemoDialog<T>({ BuildContext context, Widget child }) {
     showDialog<T>(
       context: context,
-      child: child,
       barrierDismissible: false,
+      builder: (BuildContext context) => child,
     )
     .then<Null>((T value) { // The value passed to Navigator.pop() or null.
       if (value != null) {

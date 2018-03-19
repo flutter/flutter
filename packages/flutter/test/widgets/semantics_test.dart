@@ -449,6 +449,39 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+        new Semantics(
+          container: true,
+          // flags
+          enabled: true,
+          checked: true,
+          selected: true,
+          button: true,
+          textField: true,
+          focused: true,
+          inMutuallyExclusiveGroup: true,
+          header: true,
+        )
+    );
+
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          rect: TestSemantics.fullScreen,
+          flags: SemanticsFlag.values.values.toList(),
+          previousNodeId: -1,
+          nextNodeId: -1,
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
+
+    semantics.dispose();
+  });
+
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     int semanticsUpdateCount = 0;
@@ -880,7 +913,7 @@ void main() {
             const Text('Label 1'),
             const Text('Label 2'),
             new Row(
-              children: <Widget>[
+              children: const <Widget>[
                 const Text('Label 3'),
                 const Text('Label 4'),
                 const Text('Label 5'),
@@ -943,7 +976,7 @@ void main() {
             new Transform.rotate(
               angle: pi / 2.0,
               child: new Row(
-                children: <Widget>[
+                children: const <Widget>[
                   const Text('Label 3'),
                   const Text('Label 4'),
                   const Text('Label 5'),
