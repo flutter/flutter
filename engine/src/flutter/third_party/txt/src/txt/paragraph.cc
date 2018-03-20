@@ -773,7 +773,6 @@ void Paragraph::SetFontCollection(
 // The x,y coordinates will be the very top left corner of the rendered
 // paragraph.
 void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
-  SkAutoCanvasRestore canvas_restore(canvas, true);
   canvas->translate(x, y);
   SkPaint paint;
   for (const PaintRecord& record : records_) {
@@ -782,6 +781,7 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
     canvas->drawTextBlob(record.text(), offset.x(), offset.y(), paint);
     PaintDecorations(canvas, record);
   }
+  canvas->translate(-x, -y);
 }
 
 void Paragraph::PaintDecorations(SkCanvas* canvas, const PaintRecord& record) {
