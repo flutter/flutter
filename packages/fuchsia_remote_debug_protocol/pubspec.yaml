@@ -13,7 +13,7 @@ dependencies:
 
 dev_dependencies:
   mockito: 2.2.3
-  test: 0.12.32+1
+  test: 0.12.32+2
 
   args: 1.4.1 # TRANSITIVE DEPENDENCY
   async: 2.0.6 # TRANSITIVE DEPENDENCY
@@ -31,7 +31,7 @@ dev_dependencies:
   http: 0.11.3+16 # TRANSITIVE DEPENDENCY
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
-  intl: 0.15.2 # TRANSITIVE DEPENDENCY
+  intl: 0.15.3 # TRANSITIVE DEPENDENCY
   io: 0.3.2+1 # TRANSITIVE DEPENDENCY
   isolate: 1.1.0 # TRANSITIVE DEPENDENCY
   js: 0.6.1 # TRANSITIVE DEPENDENCY
