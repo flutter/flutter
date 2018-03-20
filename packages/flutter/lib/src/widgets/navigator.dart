@@ -1239,6 +1239,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     _cancelActivePointers();
   }
 
+  /// Retrieves the [Route] with this name if it is associated with this navigator
+  /// and null otherwise.
+  Route<dynamic> findRouteByName(String routeName) {
+    assert(routeName != null);
+    try {
+      return _history.firstWhere((dynamic route) => route.settings.name == routeName);
+    } catch (e) {
+      return null;
+    }
+  }
+
   /// Complete the lifecycle for a route that has been popped off the navigator.
   ///
   /// When the navigator pops a route, the navigator retains a reference to the
