@@ -117,6 +117,31 @@ void main() {
     expect(paragraphText(getInspectorState().selection.current), equals('BOTTOM'));
   });
 
+  testWidgets('WidgetInspector non-invertible transform regression test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new WidgetInspector(
+          selectButtonBuilder: null,
+          child: new Transform(
+            transform: new Matrix4.identity()..scale(0.0),
+            child: new Stack(
+              children: const <Widget>[
+                const Text('a', textDirection: TextDirection.ltr),
+                const Text('b', textDirection: TextDirection.ltr),
+                const Text('c', textDirection: TextDirection.ltr),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(Transform));
+
+    expect(true, isTrue); // Expect that we reach here without crashing.
+  });
+
   testWidgets('WidgetInspector scroll test', (WidgetTester tester) async {
     final Key childKey = new UniqueKey();
     final GlobalKey selectButtonKey = new GlobalKey();
