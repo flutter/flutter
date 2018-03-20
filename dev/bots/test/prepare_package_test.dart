@@ -143,10 +143,10 @@ void main() {
         await creator.createArchive();
         expect(
           verify(processManager.start(
-            captureAny,
-            workingDirectory: captureAny,
-            environment: captureAny,
-          )).captured[1]['PUB_CACHE'],
+            typed(captureAny),
+            workingDirectory: typed(captureAny, named: 'workingDirectory'),
+            environment: typed(captureAny, named: 'environment'),
+          )).captured[2]['PUB_CACHE'],
           endsWith(path.join('flutter', '.pub-cache')),
         );
       });
@@ -257,10 +257,11 @@ void main() {
     }
 }
 ''';
+        new File(jsonPath).writeAsStringSync(releasesJson);
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
           'gsutil rm $gsArchivePath': null,
           'gsutil -h Content-Type:$archiveMime cp $archivePath $gsArchivePath': null,
-          'gsutil cat $gsJsonPath': <ProcessResult>[new ProcessResult(0, 0, releasesJson, '')],
+          'gsutil cp $gsJsonPath $jsonPath': null,
           'gsutil rm $gsJsonPath': null,
           'gsutil -h Content-Type:application/json cp $jsonPath $gsJsonPath': null,
         };
