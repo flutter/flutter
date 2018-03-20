@@ -132,12 +132,14 @@ class RenderEditable extends RenderBox {
     this.onSelectionChanged,
     this.onCaretChanged,
     this.ignorePointer: false,
+    bool obscureText: false,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
        assert(textScaleFactor != null),
        assert(offset != null),
        assert(ignorePointer != null),
+       assert(obscureText != null),
        _textPainter = new TextPainter(
          text: text,
          textAlign: textAlign,
@@ -150,7 +152,8 @@ class RenderEditable extends RenderBox {
        _maxLines = maxLines,
        _selectionColor = selectionColor,
        _selection = selection,
-       _offset = offset {
+       _offset = offset,
+       _obscureText = obscureText {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
     _tap = new TapGestureRecognizer(debugOwner: this)
@@ -159,6 +162,9 @@ class RenderEditable extends RenderBox {
     _longPress = new LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
   }
+
+  /// Character used to obscure text if [obscureText] is true.
+  static const String obscuringCharacter = '•';
 
   /// Called when the selection changes.
   SelectionChangedHandler onSelectionChanged;
@@ -174,6 +180,16 @@ class RenderEditable extends RenderBox {
   ///
   /// The default value of this property is false.
   bool ignorePointer;
+
+  /// Whether to hide the text being edited (e.g., for passwords).
+  bool get obscureText => _obscureText;
+  bool _obscureText;
+  set obscureText(bool value) {
+    if (_obscureText == value)
+      return;
+    _obscureText = value;
+    markNeedsSemanticsUpdate();
+  }
 
   Rect _lastCaretRect;
 
@@ -351,7 +367,10 @@ class RenderEditable extends RenderBox {
     super.describeSemanticsConfiguration(config);
 
     config
-      ..value = text.toPlainText()
+      ..value = obscureText
+          ? obscuringCharacter * text.toPlainText().length
+          : text.toPlainText()
+      ..isObscured = obscureText
       ..textDirection = textDirection
       ..isFocused = hasFocus
       ..isTextField = true;

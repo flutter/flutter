@@ -470,6 +470,7 @@ void main() {
           focused: true,
           inMutuallyExclusiveGroup: true,
           header: true,
+          obscured: true,
         )
     );
 
