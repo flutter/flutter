@@ -439,7 +439,7 @@ class _RoundedRectangleToStadiumBorder extends ShapeBorder {
         if (width == 0.0) {
           canvas.drawRRect(_adjustBorderRadius(rect).toRRect(rect), side.toPaint());
         } else {
-          final RRect outer = adjustBorderRadius(rect).toRRect(rect);
+          final RRect outer = _adjustBorderRadius(rect).toRRect(rect);
           final RRect inner = outer.deflate(width);
           final Paint paint = new Paint()
             ..color = side.color;

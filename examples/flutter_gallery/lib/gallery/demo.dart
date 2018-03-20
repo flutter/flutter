@@ -59,19 +59,21 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
       child: new Scaffold(
         appBar: new AppBar(
           title: new Text(title),
-          actions: <Widget>[
-            new Builder(
-              builder: (BuildContext context) {
-                return new IconButton(
-                  icon: const Icon(Icons.description),
-                  tooltip: 'Show example code',
-                  onPressed: () {
-                    _showExampleCode(context);
-                  },
-                );
-              },
-            ),
-          ]..addAll(actions),
+          actions: (actions ?? <Widget>[])..addAll(
+            <Widget>[
+              new Builder(
+                builder: (BuildContext context) {
+                  return new IconButton(
+                    icon: const Icon(Icons.description),
+                    tooltip: 'Show example code',
+                    onPressed: () {
+                      _showExampleCode(context);
+                    },
+                  );
+                },
+              )
+            ],
+          ),
           bottom: new TabBar(
             isScrollable: true,
             tabs: demos.map((ComponentDemoTabData data) => new Tab(text: data.tabName)).toList(),
