@@ -1160,14 +1160,14 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<TableBorder>('border', border, defaultValue: null));
-    description.add(new DiagnosticsProperty<Map<int, TableColumnWidth>>('specified column widths', _columnWidths, level: _columnWidths.isEmpty ? DiagnosticLevel.hidden : DiagnosticLevel.info));
-    description.add(new DiagnosticsProperty<TableColumnWidth>('default column width', defaultColumnWidth));
-    description.add(new MessageProperty('table size', '$columns\u00D7$rows'));
-    description.add(new IterableProperty<double>('column offsets', _columnLefts, ifNull: 'unknown'));
-    description.add(new IterableProperty<double>('row offsets', _rowTops, ifNull: 'unknown'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<TableBorder>('border', border, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Map<int, TableColumnWidth>>('specified column widths', _columnWidths, level: _columnWidths.isEmpty ? DiagnosticLevel.hidden : DiagnosticLevel.info));
+    properties.add(new DiagnosticsProperty<TableColumnWidth>('default column width', defaultColumnWidth));
+    properties.add(new MessageProperty('table size', '$columns\u00D7$rows'));
+    properties.add(new IterableProperty<double>('column offsets', _columnLefts, ifNull: 'unknown'));
+    properties.add(new IterableProperty<double>('row offsets', _rowTops, ifNull: 'unknown'));
   }
 
   @override

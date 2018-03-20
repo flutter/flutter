@@ -334,19 +334,19 @@ class RenderImage extends RenderBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<ui.Image>('image', image));
-    description.add(new DoubleProperty('width', width, defaultValue: null));
-    description.add(new DoubleProperty('height', height, defaultValue: null));
-    description.add(new DoubleProperty('scale', scale, defaultValue: 1.0));
-    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    description.add(new EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
-    description.add(new EnumProperty<BoxFit>('fit', fit, defaultValue: null));
-    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
-    description.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
-    description.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
-    description.add(new FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<ui.Image>('image', image));
+    properties.add(new DoubleProperty('width', width, defaultValue: null));
+    properties.add(new DoubleProperty('height', height, defaultValue: null));
+    properties.add(new DoubleProperty('scale', scale, defaultValue: 1.0));
+    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(new EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
+    properties.add(new EnumProperty<BoxFit>('fit', fit, defaultValue: null));
+    properties.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
+    properties.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
+    properties.add(new FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }

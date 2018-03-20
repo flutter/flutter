@@ -32,9 +32,9 @@ class ObserverList<T> extends Iterable<T> {
   }
 
   @override
-  bool contains(Object item) {
+  bool contains(Object element) {
     if (_list.length < 3)
-      return _list.contains(item);
+      return _list.contains(element);
 
     if (_isDirty) {
       if (_set == null) {
@@ -46,7 +46,7 @@ class ObserverList<T> extends Iterable<T> {
       _isDirty = false;
     }
 
-    return _set.contains(item);
+    return _set.contains(element);
   }
 
   @override

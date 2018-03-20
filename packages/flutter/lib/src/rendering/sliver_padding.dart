@@ -326,9 +326,9 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }

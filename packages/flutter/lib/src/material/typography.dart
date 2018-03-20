@@ -355,30 +355,30 @@ class TextTheme extends Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     final TextTheme defaultTheme = new Typography(platform: defaultTargetPlatform).black;
-    description.add(new DiagnosticsProperty<TextStyle>('display4', display4,
+    properties.add(new DiagnosticsProperty<TextStyle>('display4', display4,
         defaultValue: defaultTheme.display4));
-    description.add(new DiagnosticsProperty<TextStyle>('display3', display3,
+    properties.add(new DiagnosticsProperty<TextStyle>('display3', display3,
         defaultValue: defaultTheme.display3));
-    description.add(new DiagnosticsProperty<TextStyle>('display2', display2,
+    properties.add(new DiagnosticsProperty<TextStyle>('display2', display2,
         defaultValue: defaultTheme.display2));
-    description.add(new DiagnosticsProperty<TextStyle>('display1', display1,
+    properties.add(new DiagnosticsProperty<TextStyle>('display1', display1,
         defaultValue: defaultTheme.display1));
-    description.add(new DiagnosticsProperty<TextStyle>('headline', headline,
+    properties.add(new DiagnosticsProperty<TextStyle>('headline', headline,
         defaultValue: defaultTheme.headline));
-    description
+    properties
         .add(new DiagnosticsProperty<TextStyle>('title', title, defaultValue: defaultTheme.title));
-    description.add(
+    properties.add(
         new DiagnosticsProperty<TextStyle>('subhead', subhead, defaultValue: defaultTheme.subhead));
-    description
+    properties
         .add(new DiagnosticsProperty<TextStyle>('body2', body2, defaultValue: defaultTheme.body2));
-    description
+    properties
         .add(new DiagnosticsProperty<TextStyle>('body1', body1, defaultValue: defaultTheme.body1));
-    description.add(
+    properties.add(
         new DiagnosticsProperty<TextStyle>('caption', caption, defaultValue: defaultTheme.caption));
-    description.add(
+    properties.add(
         new DiagnosticsProperty<TextStyle>('button', button, defaultValue: defaultTheme.button));
   }
 }

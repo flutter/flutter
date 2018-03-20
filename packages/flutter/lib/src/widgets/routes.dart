@@ -976,8 +976,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  void didChangePrevious(Route<dynamic> route) {
-    super.didChangePrevious(route);
+  void didChangePrevious(Route<dynamic> previousRoute) {
+    super.didChangePrevious(previousRoute);
     setState(() { /* this might affect canPop */ });
   }
 

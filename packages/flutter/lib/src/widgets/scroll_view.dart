@@ -237,14 +237,14 @@ abstract class ScrollView extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<Axis>('scrollDirection', scrollDirection));
-    description.add(new FlagProperty('reverse', value: reverse, ifTrue: 'reversed', showName: true));
-    description.add(new DiagnosticsProperty<ScrollController>('controller', controller, showName: false, defaultValue: null));
-    description.add(new FlagProperty('primary', value: primary, ifTrue: 'using primary controller', showName: true));
-    description.add(new DiagnosticsProperty<ScrollPhysics>('physics', physics, showName: false, defaultValue: null));
-    description.add(new FlagProperty('shrinkWrap', value: shrinkWrap, ifTrue: 'shrink-wrapping', showName: true));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<Axis>('scrollDirection', scrollDirection));
+    properties.add(new FlagProperty('reverse', value: reverse, ifTrue: 'reversed', showName: true));
+    properties.add(new DiagnosticsProperty<ScrollController>('controller', controller, showName: false, defaultValue: null));
+    properties.add(new FlagProperty('primary', value: primary, ifTrue: 'using primary controller', showName: true));
+    properties.add(new DiagnosticsProperty<ScrollPhysics>('physics', physics, showName: false, defaultValue: null));
+    properties.add(new FlagProperty('shrinkWrap', value: shrinkWrap, ifTrue: 'shrink-wrapping', showName: true));
   }
 }
 
@@ -424,9 +424,9 @@ abstract class BoxScrollView extends ScrollView {
   Widget buildChildLayout(BuildContext context);
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
   }
 }
 
@@ -721,9 +721,9 @@ class ListView extends BoxScrollView {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('itemExtent', itemExtent, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('itemExtent', itemExtent, defaultValue: null));
   }
 }
 

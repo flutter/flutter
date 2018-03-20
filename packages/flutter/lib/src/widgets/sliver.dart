@@ -361,9 +361,9 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<SliverChildDelegate>('delegate', delegate));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<SliverChildDelegate>('delegate', delegate));
   }
 }
 
@@ -944,8 +944,8 @@ class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
   bool debugCanApplyOutOfTurn() => keepAlive;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<bool>('keepAlive', keepAlive));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<bool>('keepAlive', keepAlive));
   }
 }

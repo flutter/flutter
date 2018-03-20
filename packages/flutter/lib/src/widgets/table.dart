@@ -393,8 +393,8 @@ class TableCell extends ParentDataWidget<Table> {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<TableCellVerticalAlignment>('verticalAlignment', verticalAlignment));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<TableCellVerticalAlignment>('verticalAlignment', verticalAlignment));
   }
 }

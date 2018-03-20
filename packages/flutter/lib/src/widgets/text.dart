@@ -132,22 +132,22 @@ class DefaultTextStyle extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(DefaultTextStyle old) {
-    return style != old.style ||
-        textAlign != old.textAlign ||
-        softWrap != old.softWrap ||
-        overflow != old.overflow ||
-        maxLines != old.maxLines;
+  bool updateShouldNotify(DefaultTextStyle oldWidget) {
+    return style != oldWidget.style ||
+        textAlign != oldWidget.textAlign ||
+        softWrap != oldWidget.softWrap ||
+        overflow != oldWidget.overflow ||
+        maxLines != oldWidget.maxLines;
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    style?.debugFillProperties(description);
-    description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-    description.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
-    description.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
-    description.add(new IntProperty('maxLines', maxLines, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    style?.debugFillProperties(properties);
+    properties.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    properties.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(new IntProperty('maxLines', maxLines, defaultValue: null));
   }
 }
 
@@ -316,18 +316,18 @@ class Text extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new StringProperty('data', data, showName: false));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new StringProperty('data', data, showName: false));
     if (textSpan != null) {
-      description.add(textSpan.toDiagnosticsNode(name: 'textSpan', style: DiagnosticsTreeStyle.transition));
+      properties.add(textSpan.toDiagnosticsNode(name: 'textSpan', style: DiagnosticsTreeStyle.transition));
     }
-    style?.debugFillProperties(description);
-    description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    description.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
-    description.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
-    description.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
-    description.add(new IntProperty('maxLines', maxLines, defaultValue: null));
+    style?.debugFillProperties(properties);
+    properties.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    properties.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
+    properties.add(new IntProperty('maxLines', maxLines, defaultValue: null));
   }
 }
