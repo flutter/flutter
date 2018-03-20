@@ -164,19 +164,19 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
           children: <Widget>[
             new Container(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              decoration: new BoxDecoration(
-                border: new Border(bottom: new BorderSide(color: theme.dividerColor))
-              ),
               alignment: Alignment.bottomLeft,
-              child: new Text('Event name', style: theme.textTheme.display2)
+              child: new TextField(
+                decoration: const InputDecoration(hintText: 'Event name'),
+                style: theme.textTheme.display2
+              )
             ),
             new Container(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              decoration: new BoxDecoration(
-                border: new Border(bottom: new BorderSide(color: theme.dividerColor))
-              ),
               alignment: Alignment.bottomLeft,
-              child: new Text('Location', style: theme.textTheme.title.copyWith(color: Colors.black54))
+              child: new TextField(
+                decoration: const InputDecoration(hintText: 'Location'),
+                style: theme.textTheme.title.copyWith(color: Colors.black54)
+              )
             ),
             new Column(
               crossAxisAlignment: CrossAxisAlignment.start,
