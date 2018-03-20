@@ -89,6 +89,8 @@ class AnalyzeOnce extends AnalyzeBase {
 
       if (previewDart2) {
         arguments.add('--preview-dart-2');
+      } else {
+        arguments.add('--no-preview-dart-2');
       }
 
       final String dartanalyzer = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartanalyzer');
