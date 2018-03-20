@@ -19,6 +19,8 @@ class BuildInfo {
     this.targetPlatform,
     this.fileSystemRoots,
     this.fileSystemScheme,
+    this.buildNumber,
+    this.buildName,
   });
 
   final BuildMode mode;
@@ -51,6 +53,12 @@ class BuildInfo {
 
   /// Target platform for the build (e.g. android_arm versus android_arm64).
   final TargetPlatform targetPlatform;
+
+  /// Internal used version number.
+  final String buildNumber;
+
+  /// Version number shown to users.
+  final String buildName;
 
   static const BuildInfo debug = const BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = const BuildInfo(BuildMode.profile, null);

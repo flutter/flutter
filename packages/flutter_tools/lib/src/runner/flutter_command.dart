@@ -122,7 +122,23 @@ abstract class FlutterCommand extends Command<Null> {
     _usesPubOption = true;
   }
 
-  void addBuildModeFlags({ bool defaultToRelease: true }) {
+  void usesBuildNumberOption() {
+    argParser.addOption('buildNumber',
+        help: 'An integer used as an internal version number.\n'
+            'On Android it is used as \'versionCode\'\n'
+            'On xcode builds it is used as \'CFBundleVersion\'',
+        valueHelp: '42');
+  }
+
+  void usesBuildNameOption() {
+    argParser.addOption('buildName',
+        help: 'A string used as the version number shown to users.\n'
+            'On Android it is used as \'versionName\'\n'
+            'On xcode builds it is used as \'CFBundleShortVersionString\'',
+        valueHelp: '1.0.42');
+  }
+
+  void addBuildModeFlags({bool defaultToRelease: true}) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     argParser.addFlag('debug',
@@ -201,6 +217,12 @@ abstract class FlutterCommand extends Command<Null> {
           ? argResults[FlutterOptions.kFileSystemRoot] : null,
       fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
           ? argResults[FlutterOptions.kFileSystemScheme] : null,
+      buildNumber: argParser.options.containsKey('buildNumber')
+          ? argResults['buildNumber']
+          : null,
+      buildName: argParser.options.containsKey('buildName')
+          ? argResults['buildName']
+          : null,
     );
   }
 

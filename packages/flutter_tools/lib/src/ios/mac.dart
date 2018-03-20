@@ -252,6 +252,47 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
+  // If buildNumber is not specified, keep the project untouched.
+  if (buildInfo.buildNumber != null) {
+    final Status buildNumberStatus =
+    logger.startProgress('Running agvtool new-version...', expectSlowOperation: true);
+    final RunResult buildNumberResult = await runAsync(
+      <String>[
+        '/usr/bin/env',
+        'xcrun',
+        'agvtool',
+        'new-version',
+        '-all',
+        buildInfo.buildNumber,
+      ],
+      workingDirectory: app.appDirectory,
+    );
+    buildNumberStatus.stop();
+    if (buildNumberResult.exitCode != 0) {
+      throwToolExit('Xcode failed to set new version\n${buildNumberResult.stderr}');
+    }
+  }
+
+  // If buildName is not specified, keep the project untouched.
+  if (buildInfo.buildName != null) {
+    final Status buildNameStatus =
+    logger.startProgress('Running agvtool new-marketing-version...', expectSlowOperation: true);
+    final RunResult buildNameResult = await runAsync(
+      <String>[
+        '/usr/bin/env',
+        'xcrun',
+        'agvtool',
+        'new-marketing-version',
+        buildInfo.buildName,
+      ],
+      workingDirectory: app.appDirectory,
+    );
+    buildNameStatus.stop();
+    if (buildNameResult.exitCode != 0) {
+      throwToolExit('Xcode failed to set new marketing version\n${buildNameResult.stderr}');
+    }
+  }
+
   final Status cleanStatus =
       logger.startProgress('Running Xcode clean...', expectSlowOperation: true);
   final RunResult cleanResult = await runAsync(
