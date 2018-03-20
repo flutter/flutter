@@ -508,10 +508,6 @@ static std::vector<const char*> ProfilingFlags(bool enable_profiling) {
   // flags.
   if (enable_profiling) {
     return {
-        // Dart assumes ARM devices are insufficiently powerful and sets the
-        // default profile period to 100Hz. This number is suitable for older
-        // Raspberry Pi devices but quite low for current smartphones.
-        "--profile_period=1000",
         // This is the default. But just be explicit.
         "--profiler",
         // This instructs the profiler to walk C++ frames, and to include
