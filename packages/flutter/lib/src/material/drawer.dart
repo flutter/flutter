@@ -287,6 +287,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     }
   }
 
+  bool get isOpen => !_controller.isDismissed;
+
   /// Starts an animation to open the drawer.
   ///
   /// Typically called by [ScaffoldState.openDrawer].
