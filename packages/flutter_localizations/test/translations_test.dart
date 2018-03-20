@@ -22,7 +22,7 @@ void main() {
     'ja', // Japanese
     'ko', // Korean
     'nl', // Dutch
-    'nl', // Norwegian
+    'no', // Norwegian
     'pl', // Polish
     'ps', // Pashto
     'pt', // Portugese
