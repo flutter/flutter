@@ -93,13 +93,18 @@ class FuchsiaRemoteConnection {
   /// then `interface` will probably need to be set in order to connect
   /// successfully (that being the outgoing interface of your machine, not the
   /// interface on the target machine).
-  static Future<FuchsiaRemoteConnection> connect(String address,
-      [String interface = '', String sshConfigPath]) async {
+  static Future<FuchsiaRemoteConnection> connect(
+    String address, [
+    String interface = '',
+    String sshConfigPath,
+  ]) async {
     return await FuchsiaRemoteConnection.connectWithSshCommandRunner(
-        new SshCommandRunner(
-            address: address,
-            interface: interface,
-            sshConfigPath: sshConfigPath));
+      new SshCommandRunner(
+        address: address,
+        interface: interface,
+        sshConfigPath: sshConfigPath,
+      ),
+    );
   }
 
   /// Closes all open connections.
@@ -177,6 +182,8 @@ class FuchsiaRemoteConnection {
   /// found. An exception is thrown in the event of an actual error when
   /// attempting to acquire the ports.
   Future<List<int>> getDeviceServicePorts() async {
+    // TODO(awdavies): This is using a temporary workaround rather than a
+    // well-defined service, and will be deprecated in the near future.
     final List<String> lsOutput =
         await _sshCommandRunner.run('ls /tmp/dart.services');
     final List<int> ports = <int>[];
@@ -221,14 +228,6 @@ abstract class PortForwarder {
 ///
 /// The SSH tunnel is from the host to a VM service running on a Fuchsia device.
 class _SshPortForwarder implements PortForwarder {
-  final String _remoteAddress;
-  final int _remotePort;
-  final int _localPort;
-  final Process _process;
-  final String _sshConfigPath;
-  final String _interface;
-  final bool _ipV6;
-
   _SshPortForwarder._(
     this._remoteAddress,
     this._remotePort,
@@ -238,6 +237,14 @@ class _SshPortForwarder implements PortForwarder {
     this._sshConfigPath,
     this._ipV6,
   );
+
+  final String _remoteAddress;
+  final int _remotePort;
+  final int _localPort;
+  final Process _process;
+  final String _sshConfigPath;
+  final String _interface;
+  final bool _ipV6;
 
   @override
   int get port => _localPort;
@@ -256,11 +263,11 @@ class _SshPortForwarder implements PortForwarder {
           '$address:$remotePort');
       return null;
     }
-    // TODO: The square-bracket enclosure for using the IPv6 loopback didn't
-    // appear to work, but when assigning to the IPv4 loopback device, netstat
-    // shows that the local port is actually being used on the IPv6 loopback
-    // (::1). While this can be used for forwarding to the destination IPv6
-    // interface, it cannot be used to connect to a websocket.
+    // TODO(awdavies): The square-bracket enclosure for using the IPv6 loopback
+    // didn't appear to work, but when assigning to the IPv4 loopback device,
+    // netstat shows that the local port is actually being used on the IPv6
+    // loopback (::1). While this can be used for forwarding to the destination
+    // IPv6 interface, it cannot be used to connect to a websocket.
     final String formattedForwardingUrl =
         '$localPort:$_ipv4Loopback:$remotePort';
     final List<String> command = <String>['ssh'];

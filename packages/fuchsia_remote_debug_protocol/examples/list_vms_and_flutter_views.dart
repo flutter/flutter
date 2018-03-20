@@ -10,9 +10,9 @@ import 'package:fuchsia_remote_debug_protocol/logging.dart';
 
 /// Runs through a simple usage of the fuchsia_remote_debug_protocol library:
 /// connects to a remote machine at the address in argument 1 (interface
-/// optional for argument 2) to list all active flutter views and Dart VM's
-/// running on said device. Note that this uses an SSH config file (optional,
-/// depending on your setup).
+/// optional for argument 2) to list all active flutter views and Dart VMs
+/// running on said device. This uses an SSH config file (optional, depending
+/// on your setup).
 ///
 /// Example usage:
 ///
@@ -23,7 +23,8 @@ Future<Null> main(List<String> args) async {
   // changed to [LoggingLevel.all] or [LoggingLevel.fine] to see more
   // information.
   Logger.globalLevel = LoggingLevel.info;
-  if (args.length == 0) {
+  if (args.isEmpty) {
+    print('Expects an IP address and/or network interface');
     return;
   }
   final String address = args[0];

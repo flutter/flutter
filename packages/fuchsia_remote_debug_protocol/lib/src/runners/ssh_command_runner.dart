@@ -17,12 +17,12 @@ import '../common/network.dart';
 /// run the command on the remote device. This error is raised when the
 /// subprocess running the SSH command returns a nonzero exit code.
 class SshCommandError extends Error {
-  /// The reason for the command failure.
-  final String message;
-
   /// Basic constructor outlining the reason for the SSH command failure through
   /// the message string.
   SshCommandError(this.message);
+
+  /// The reason for the command failure.
+  final String message;
 
   @override
   String toString() {
@@ -35,20 +35,6 @@ class SshCommandError extends Error {
 /// Requires a Fuchsia root and build type (to load the ssh config),
 /// and the address of the Fuchsia device.
 class SshCommandRunner {
-  final Logger _log = new Logger('SshCommandRunner');
-
-  final ProcessManager _processManager;
-
-  /// The IPv4 address to access the Fuchsia machine over SSH.
-  final String address;
-
-  /// The path to the SSH config (optional).
-  final String sshConfigPath;
-
-  /// The name of the machine's network interface (for use with IPv6
-  /// connections. Ignored otherwise).
-  final String interface;
-
   /// Instantiates the command runner, pointing to an `address` as well as
   /// an optional SSH config file path.
   ///
@@ -70,6 +56,20 @@ class SshCommandRunner {
       {this.address, this.interface = '', this.sshConfigPath}) {
     validateAddress(address);
   }
+
+  final Logger _log = new Logger('SshCommandRunner');
+
+  final ProcessManager _processManager;
+
+  /// The IPv4 address to access the Fuchsia machine over SSH.
+  final String address;
+
+  /// The path to the SSH config (optional).
+  final String sshConfigPath;
+
+  /// The name of the machine's network interface (for use with IPv6
+  /// connections. Ignored otherwise).
+  final String interface;
 
   /// Runs a command on a Fuchsia device through an SSH tunnel.
   ///

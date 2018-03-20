@@ -7,7 +7,7 @@ import 'dart:io';
 
 /// Determines the level of logging.
 ///
-/// Verbosity is increasing from zero (none) to four (fine). The fifth level
+/// Verbosity is increasing from one (none) to five (fine). The sixth level
 /// (all) logs everything.
 enum LoggingLevel {
   /// Logs no logs.
@@ -16,9 +16,8 @@ enum LoggingLevel {
   /// Logs severe messages at the most (note that severe messages are always
   /// logged).
   ///
-  /// Severe means that the process has
-  /// encountered a critical level of failure in which it cannot recover and
-  /// will terminate as a result.
+  /// Severe means that the process has encountered a critical level of failure
+  /// in which it cannot recover and will terminate as a result.
   severe,
 
   /// Logs warning messages at the most.
@@ -97,8 +96,13 @@ class LogMessage {
 /// Example of setting log level to [LoggingLevel.warning] and creating a
 /// logging function:
 ///
+/// ```dart
 /// Logger.globalLevel = LoggingLevel.warning;
+/// ```
 class Logger {
+  /// Creates a logger with the given [tag].
+  Logger(this.tag);
+
   /// The tag associated with the log message (usable in the logging function).
   /// [LogMessage] objects emitted by this class will have [LogMessage.tag] set
   /// to this value.
@@ -116,12 +120,9 @@ class Logger {
   /// Determines the logging level all [Logger] instances use.
   static LoggingLevel globalLevel = LoggingLevel.none;
 
-  /// Creates a logger with the given [tag].
-  Logger(this.tag);
-
   /// Logs a [LoggingLevel.severe] level `message`.
   ///
-  /// Note that severe messages are always logged.
+  /// Severe messages are always logged, regardless of what level is set.
   void severe(String message) {
     loggingFunction(new LogMessage(message, tag, LoggingLevel.severe));
   }

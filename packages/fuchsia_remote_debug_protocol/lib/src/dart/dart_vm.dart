@@ -69,11 +69,11 @@ void restoreVmServiceConnectionFunction() {
 /// A more detailed description of the error is found within the [message]
 /// field.
 class RpcFormatError extends Error {
-  /// The reason for format error.
-  final String message;
-
   /// Basic constructor outlining the reason for the format error.
   RpcFormatError(this.message);
+
+  /// The reason for format error.
+  final String message;
 
   @override
   String toString() {
@@ -86,9 +86,9 @@ class RpcFormatError extends Error {
 /// Either wraps existing RPC calls to the Dart VM service, or runs raw RPC
 /// function calls via [invokeRpc].
 class DartVm {
-  final json_rpc.Peer _peer;
-
   DartVm._(this._peer);
+
+  final json_rpc.Peer _peer;
 
   /// Attempts to connect to the given [Uri].
   ///
@@ -108,17 +108,24 @@ class DartVm {
   ///
   /// When `timeout` is set and reached, throws a [TimeoutException].
   ///
-  /// If the function returns, it is with a raw JSON response.
-  Future<Map<String, dynamic>> invokeRpc(String function,
-      {Map<String, dynamic> params, Duration timeout}) async {
-    final Future<Map<String, dynamic>> future =
-        _peer.sendRequest(function, params ?? <String, dynamic>{});
+  /// If the function returns, it is with a parsed JSON response.
+  Future<Map<String, dynamic>> invokeRpc(
+    String function, {
+    Map<String, dynamic> params,
+    Duration timeout,
+  }) async {
+    final Future<Map<String, dynamic>> future = _peer.sendRequest(
+      function,
+      params ?? <String, dynamic>{},
+    );
     if (timeout == null) {
       return future;
     }
     return future.timeout(timeout, onTimeout: () {
       throw new TimeoutException(
-          'Peer connection timed out during RPC call', timeout);
+        'Peer connection timed out during RPC call',
+        timeout,
+      );
     });
   }
 
@@ -152,12 +159,7 @@ class DartVm {
 
 /// Represents an instance of a Flutter view running on a Fuchsia device.
 class FlutterView {
-  /// Determines the name of the isolate associated with this view. If there is
-  /// no associated isolate, this will be set to the view's ID.
-  final String _name;
-
-  /// The ID of the Flutter view.
-  final String _id;
+  FlutterView._(this._name, this._id);
 
   /// Attempts to construct a [FlutterView] from a json representation.
   ///
@@ -184,7 +186,12 @@ class FlutterView {
     return new FlutterView._(name, id);
   }
 
-  FlutterView._(this._name, this._id);
+  /// Determines the name of the isolate associated with this view. If there is
+  /// no associated isolate, this will be set to the view's ID.
+  final String _name;
+
+  /// The ID of the Flutter view.
+  final String _id;
 
   /// The ID of the [FlutterView].
   String get id => _id;
