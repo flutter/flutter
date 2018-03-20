@@ -10,6 +10,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'debug.dart';
+
 /// A composited layer.
 ///
 /// During painting, the render tree generates a tree of composited layers that
@@ -531,9 +533,11 @@ class ClipRectLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushClipRect(clipRect.shift(layerOffset));
+    if (!debugDisableClipLayers)
+      builder.pushClipRect(clipRect.shift(layerOffset));
     addChildrenToScene(builder, layerOffset);
-    builder.pop();
+    if (!debugDisableClipLayers)
+      builder.pop();
   }
 
   @override
@@ -559,9 +563,11 @@ class ClipRRectLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushClipRRect(clipRRect.shift(layerOffset));
+    if (!debugDisableClipLayers)
+      builder.pushClipRRect(clipRRect.shift(layerOffset));
     addChildrenToScene(builder, layerOffset);
-    builder.pop();
+    if (!debugDisableClipLayers)
+      builder.pop();
   }
 
   @override
@@ -587,9 +593,11 @@ class ClipPathLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushClipPath(clipPath.shift(layerOffset));
+    if (!debugDisableClipLayers)
+      builder.pushClipPath(clipPath.shift(layerOffset));
     addChildrenToScene(builder, layerOffset);
-    builder.pop();
+    if (!debugDisableClipLayers)
+      builder.pop();
   }
 }
 
@@ -664,9 +672,11 @@ class OpacityLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushOpacity(alpha);
+    if (!debugDisableOpacityLayers)
+      builder.pushOpacity(alpha);
     addChildrenToScene(builder, layerOffset);
-    builder.pop();
+    if (!debugDisableOpacityLayers)
+      builder.pop();
   }
 
   @override
@@ -778,13 +788,15 @@ class PhysicalModelLayer extends ContainerLayer {
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    builder.pushPhysicalShape(
-      path: clipPath.shift(layerOffset),
-      elevation: elevation,
-      color: color,
-    );
+    if (!debugDisablePhysicalShapeLayers)
+      builder.pushPhysicalShape(
+        path: clipPath.shift(layerOffset),
+        elevation: elevation,
+        color: color,
+      );
     addChildrenToScene(builder, layerOffset);
-    builder.pop();
+    if (!debugDisablePhysicalShapeLayers)
+      builder.pop();
   }
 
   @override
