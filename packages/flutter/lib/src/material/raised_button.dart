@@ -384,20 +384,20 @@ class RaisedButton extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    description.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
-    description.add(new DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
-    description.add(new DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: null));
-    description.add(new DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: null));
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
+    properties.add(new DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    properties.add(new DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: null));
+    properties.add(new DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: null));
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }

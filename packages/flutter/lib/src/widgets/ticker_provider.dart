@@ -54,12 +54,12 @@ class TickerMode extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(TickerMode old) => enabled != old.enabled;
+  bool updateShouldNotify(TickerMode oldWidget) => enabled != oldWidget.enabled;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new FlagProperty('mode', value: enabled, ifTrue: 'enabled', ifFalse: 'disabled', showName: true));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new FlagProperty('mode', value: enabled, ifTrue: 'enabled', ifFalse: 'disabled', showName: true));
   }
 }
 
@@ -128,8 +128,8 @@ abstract class SingleTickerProviderStateMixin<T extends StatefulWidget> extends 
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     String tickerDescription;
     if (_ticker != null) {
       if (_ticker.isActive && _ticker.muted)
@@ -141,7 +141,7 @@ abstract class SingleTickerProviderStateMixin<T extends StatefulWidget> extends 
       else
         tickerDescription = 'inactive';
     }
-    description.add(new DiagnosticsProperty<Ticker>('ticker', _ticker, description: tickerDescription, showSeparator: false, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Ticker>('ticker', _ticker, description: tickerDescription, showSeparator: false, defaultValue: null));
   }
 
 }
@@ -212,9 +212,9 @@ abstract class TickerProviderStateMixin<T extends StatefulWidget> extends State<
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Set<Ticker>>(
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Set<Ticker>>(
       'tickers',
       _tickers,
       description: _tickers != null ?

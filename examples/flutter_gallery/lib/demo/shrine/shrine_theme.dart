@@ -51,5 +51,5 @@ class ShrineTheme extends InheritedWidget {
   static ShrineTheme of(BuildContext context) => context.inheritFromWidgetOfExactType(ShrineTheme);
 
   @override
-  bool updateShouldNotify(ShrineTheme old) => false;
+  bool updateShouldNotify(ShrineTheme oldWidget) => false;
 }

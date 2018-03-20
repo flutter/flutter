@@ -265,19 +265,19 @@ class TextField extends StatefulWidget {
   _TextFieldState createState() => new _TextFieldState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
-    description.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
-    description.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
-    description.add(new EnumProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
-    description.add(new DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-    description.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-    description.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    description.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
-    description.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
-    description.add(new IntProperty('maxLength', maxLength, defaultValue: null));
-    description.add(new FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
+    properties.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    properties.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
+    properties.add(new EnumProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
+    properties.add(new DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
+    properties.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    properties.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
+    properties.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
+    properties.add(new IntProperty('maxLength', maxLength, defaultValue: null));
+    properties.add(new FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
   }
 }
 

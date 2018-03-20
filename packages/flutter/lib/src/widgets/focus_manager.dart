@@ -354,10 +354,10 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     if (_focus != null)
-      description.add(new DiagnosticsProperty<FocusNode>('focus', _focus));
+      properties.add(new DiagnosticsProperty<FocusNode>('focus', _focus));
   }
 
   @override
