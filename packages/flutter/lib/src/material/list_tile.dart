@@ -104,12 +104,12 @@ class ListTileTheme extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(ListTileTheme oldTheme) {
-    return dense != oldTheme.dense
-        || style != oldTheme.style
-        || selectedColor != oldTheme.selectedColor
-        || iconColor != oldTheme.iconColor
-        || textColor != oldTheme.textColor;
+  bool updateShouldNotify(ListTileTheme oldWidget) {
+    return dense != oldWidget.dense
+        || style != oldWidget.style
+        || selectedColor != oldWidget.selectedColor
+        || iconColor != oldWidget.iconColor
+        || textColor != oldWidget.textColor;
   }
 }
 

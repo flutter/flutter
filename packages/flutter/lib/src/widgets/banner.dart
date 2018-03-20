@@ -141,11 +141,11 @@ class BannerPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(BannerPainter oldPainter) {
-    return message != oldPainter.message
-        || location != oldPainter.location
-        || color != oldPainter.color
-        || textStyle != oldPainter.textStyle;
+  bool shouldRepaint(BannerPainter oldDelegate) {
+    return message != oldDelegate.message
+        || location != oldDelegate.location
+        || color != oldDelegate.color
+        || textStyle != oldDelegate.textStyle;
   }
 
   @override
@@ -312,14 +312,14 @@ class Banner extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new StringProperty('message', message, showName: false));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    description.add(new EnumProperty<BannerLocation>('location', location));
-    description.add(new EnumProperty<TextDirection>('layoutDirection', layoutDirection, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('color', color, showName: false));
-    textStyle?.debugFillProperties(description, prefix: 'text ');
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new StringProperty('message', message, showName: false));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new EnumProperty<BannerLocation>('location', location));
+    properties.add(new EnumProperty<TextDirection>('layoutDirection', layoutDirection, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('color', color, showName: false));
+    textStyle?.debugFillProperties(properties, prefix: 'text ');
   }
 }
 
@@ -354,13 +354,13 @@ class CheckedModeBanner extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     String message = 'disabled';
     assert(() {
       message = '"DEBUG"';
       return true;
     }());
-    description.add(new DiagnosticsNode.message(message));
+    properties.add(new DiagnosticsNode.message(message));
   }
 }

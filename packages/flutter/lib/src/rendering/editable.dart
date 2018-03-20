@@ -742,15 +742,15 @@ class RenderEditable extends RenderBox {
   Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Color>('cursorColor', cursorColor));
-    description.add(new DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
-    description.add(new IntProperty('maxLines', maxLines));
-    description.add(new DiagnosticsProperty<Color>('selectionColor', selectionColor));
-    description.add(new DoubleProperty('textScaleFactor', textScaleFactor));
-    description.add(new DiagnosticsProperty<TextSelection>('selection', selection));
-    description.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Color>('cursorColor', cursorColor));
+    properties.add(new DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
+    properties.add(new IntProperty('maxLines', maxLines));
+    properties.add(new DiagnosticsProperty<Color>('selectionColor', selectionColor));
+    properties.add(new DoubleProperty('textScaleFactor', textScaleFactor));
+    properties.add(new DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
   }
 
   @override

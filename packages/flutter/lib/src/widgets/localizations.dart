@@ -449,10 +449,10 @@ class Localizations extends StatefulWidget {
   _LocalizationsState createState() => new _LocalizationsState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Locale>('locale', locale));
-    description.add(new IterableProperty<LocalizationsDelegate<dynamic>>('delegates', delegates));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Locale>('locale', locale));
+    properties.add(new IterableProperty<LocalizationsDelegate<dynamic>>('delegates', delegates));
   }
 }
 

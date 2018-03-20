@@ -670,15 +670,15 @@ class SemanticsProperties extends DiagnosticableTree {
   final VoidCallback onDidLoseAccessibilityFocus;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
-    description.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
-    description.add(new StringProperty('label', label, defaultValue: ''));
-    description.add(new StringProperty('value', value));
-    description.add(new StringProperty('hint', hint));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    description.add(new DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
+    properties.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
+    properties.add(new StringProperty('label', label, defaultValue: ''));
+    properties.add(new StringProperty('value', value));
+    properties.add(new StringProperty('hint', hint));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
   }
 }
 
@@ -2709,9 +2709,9 @@ abstract class SemanticsSortKey extends Diagnosticable implements Comparable<Sem
   int doCompare(covariant SemanticsSortKey other);
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new StringProperty('name', name, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new StringProperty('name', name, defaultValue: null));
   }
 }
 
@@ -2757,8 +2757,8 @@ class OrdinalSortKey extends SemanticsSortKey {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('order', order, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('order', order, defaultValue: null));
   }
 }

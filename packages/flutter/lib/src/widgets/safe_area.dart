@@ -99,12 +99,12 @@ class SafeArea extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
-    description.add(new FlagProperty('top', value: left, ifTrue: 'avoid top padding'));
-    description.add(new FlagProperty('right', value: left, ifTrue: 'avoid right padding'));
-    description.add(new FlagProperty('bottom', value: left, ifTrue: 'avoid bottom padding'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
+    properties.add(new FlagProperty('top', value: left, ifTrue: 'avoid top padding'));
+    properties.add(new FlagProperty('right', value: left, ifTrue: 'avoid right padding'));
+    properties.add(new FlagProperty('bottom', value: left, ifTrue: 'avoid bottom padding'));
   }
 }
 
@@ -193,11 +193,11 @@ class SliverSafeArea extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
-    description.add(new FlagProperty('top', value: left, ifTrue: 'avoid top padding'));
-    description.add(new FlagProperty('right', value: left, ifTrue: 'avoid right padding'));
-    description.add(new FlagProperty('bottom', value: left, ifTrue: 'avoid bottom padding'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
+    properties.add(new FlagProperty('top', value: left, ifTrue: 'avoid top padding'));
+    properties.add(new FlagProperty('right', value: left, ifTrue: 'avoid right padding'));
+    properties.add(new FlagProperty('bottom', value: left, ifTrue: 'avoid bottom padding'));
   }
 }

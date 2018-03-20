@@ -291,19 +291,19 @@ class EditableText extends StatefulWidget {
   EditableTextState createState() => new EditableTextState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<TextEditingController>('controller', controller));
-    description.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode));
-    description.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    description.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
-    style?.debugFillProperties(description);
-    description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    description.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
-    description.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
-    description.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-    description.add(new EnumProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<TextEditingController>('controller', controller));
+    properties.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode));
+    properties.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    properties.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    style?.debugFillProperties(properties);
+    properties.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
+    properties.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
+    properties.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(new EnumProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
   }
 }
 

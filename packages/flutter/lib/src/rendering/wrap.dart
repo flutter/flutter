@@ -761,15 +761,15 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<Axis>('direction', direction));
-    description.add(new EnumProperty<WrapAlignment>('alignment', alignment));
-    description.add(new DoubleProperty('spacing', spacing));
-    description.add(new EnumProperty<WrapAlignment>('runAlignment', runAlignment));
-    description.add(new DoubleProperty('runSpacing', runSpacing));
-    description.add(new DoubleProperty('crossAxisAlignment', runSpacing));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    description.add(new EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<Axis>('direction', direction));
+    properties.add(new EnumProperty<WrapAlignment>('alignment', alignment));
+    properties.add(new DoubleProperty('spacing', spacing));
+    properties.add(new EnumProperty<WrapAlignment>('runAlignment', runAlignment));
+    properties.add(new DoubleProperty('runSpacing', runSpacing));
+    properties.add(new DoubleProperty('crossAxisAlignment', runSpacing));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
   }
 }
