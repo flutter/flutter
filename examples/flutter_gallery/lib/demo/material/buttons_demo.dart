@@ -53,25 +53,40 @@ class ButtonsDemo extends StatefulWidget {
 }
 
 class _ButtonsDemoState extends State<ButtonsDemo> {
+  ShapeBorder _buttonShape;
+
   @override
   Widget build(BuildContext context) {
+    final ButtonThemeData buttonTheme = ButtonTheme.of(context).copyWith(
+      shape: _buttonShape
+    );
+
     final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       new ComponentDemoTabData(
         tabName: 'RAISED',
         description: _raisedText,
-        demoWidget: buildRaisedButton(),
+        demoWidget: new ButtonTheme.fromButtonThemeData(
+          data: buttonTheme,
+          child: buildRaisedButton(),
+        ),
         exampleCodeTag: _raisedCode,
       ),
       new ComponentDemoTabData(
         tabName: 'FLAT',
         description: _flatText,
-        demoWidget: buildFlatButton(),
+        demoWidget: new ButtonTheme.fromButtonThemeData(
+          data: buttonTheme,
+          child: buildFlatButton(),
+        ),
         exampleCodeTag: _flatCode,
       ),
       new ComponentDemoTabData(
         tabName: 'OUTLINE',
         description: _outlineText,
-        demoWidget: buildOutlineButton(),
+        demoWidget: new ButtonTheme.fromButtonThemeData(
+          data: buttonTheme,
+          child: buildOutlineButton(),
+        ),
         exampleCodeTag: _outlineCode,
       ),
       new ComponentDemoTabData(
@@ -97,6 +112,16 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     return new TabbedComponentDemoScaffold(
       title: 'Buttons',
       demos: demos,
+      actions: <Widget>[
+        new IconButton(
+          icon: const Icon(Icons.sentiment_very_satisfied),
+          onPressed: () {
+            setState(() {
+              _buttonShape = _buttonShape == null ? const StadiumBorder() : null;
+            });
+          },
+        ),
+      ],
     );
   }
 

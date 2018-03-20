@@ -35,11 +35,13 @@ class ComponentDemoTabData {
 class TabbedComponentDemoScaffold extends StatelessWidget {
   const TabbedComponentDemoScaffold({
     this.title,
-    this.demos
+    this.demos,
+    this.actions,
   });
 
   final List<ComponentDemoTabData> demos;
   final String title;
+  final List<Widget> actions;
 
   void _showExampleCode(BuildContext context) {
     final String tag = demos[DefaultTabController.of(context).index].exampleCodeTag;
@@ -69,7 +71,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                 );
               },
             ),
-          ],
+          ]..addAll(actions),
           bottom: new TabBar(
             isScrollable: true,
             tabs: demos.map((ComponentDemoTabData data) => new Tab(text: data.tabName)).toList(),
