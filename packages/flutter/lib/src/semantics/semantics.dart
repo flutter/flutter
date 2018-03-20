@@ -319,6 +319,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.textField,
     this.focused,
     this.inMutuallyExclusiveGroup,
+    this.obscured,
     this.label,
     this.value,
     this.increasedValue,
@@ -398,6 +399,13 @@ class SemanticsProperties extends DiagnosticableTree {
   /// For example, a radio button is in a mutually exclusive group because only
   /// one radio button in that group can be marked as [checked].
   final bool inMutuallyExclusiveGroup;
+  
+  /// If non-null, whether [value] should be obscured.
+  ///
+  /// This option is usually set in combination with [textField] to indicate
+  /// that the text field contains a password (or other sensitive information).
+  /// Doing so instructs screen readers to not read out the [value].
+  final bool obscured;
 
   /// Provides a textual description of the widget.
   ///
@@ -2403,6 +2411,16 @@ class SemanticsConfiguration {
   bool get isTextField => _hasFlag(SemanticsFlag.isTextField);
   set isTextField(bool value) {
     _setFlag(SemanticsFlag.isTextField, value);
+  }
+
+  /// Whether the [value] should be obscured.
+  ///
+  /// This option is usually set in combination with [textField] to indicate
+  /// that the text field contains a password (or other sensitive information).
+  /// Doing so instructs screen readers to not read out the [value].
+  bool get isObscured => _hasFlag(SemanticsFlag.isObscured);
+  set isObscured(bool value) {
+    _setFlag(SemanticsFlag.isObscured, value);
   }
 
   /// The currently selected text (or the position of the cursor) within [value]

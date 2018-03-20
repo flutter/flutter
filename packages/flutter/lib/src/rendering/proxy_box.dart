@@ -3019,6 +3019,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool textField,
     bool focused,
     bool inMutuallyExclusiveGroup,
+    bool obscured,
     String label,
     String value,
     String increasedValue,
@@ -3053,6 +3054,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _textField = textField,
        _focused = focused,
        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
+       _obscured = obscured,
        _label = label,
        _value = value,
        _increasedValue = increasedValue,
@@ -3198,6 +3200,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (inMutuallyExclusiveGroup == value)
       return;
     _inMutuallyExclusiveGroup = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isObscured] semantic to the given
+  /// value.
+  bool get obscured => _obscured;
+  bool _obscured;
+  set obscured(bool value) {
+    if (obscured == value)
+      return;
+    _obscured = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3638,6 +3651,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isFocused = focused;
     if (inMutuallyExclusiveGroup != null)
       config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup;
+    if (obscured != null)
+      config.isObscured = obscured;
     if (label != null)
       config.label = label;
     if (value != null)
