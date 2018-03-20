@@ -86,8 +86,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     String label;
     if (position != null) {
       switch (position) {
@@ -101,8 +101,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     } else {
       label = 'decoration';
     }
-    description.add(new EnumProperty<DecorationPosition>('position', position, level: position != null ? DiagnosticLevel.hidden : DiagnosticLevel.info));
-    description.add(new DiagnosticsProperty<Decoration>(
+    properties.add(new EnumProperty<DecorationPosition>('position', position, level: position != null ? DiagnosticLevel.hidden : DiagnosticLevel.info));
+    properties.add(new DiagnosticsProperty<Decoration>(
       label,
       decoration,
       ifNull: 'no decoration',
@@ -377,14 +377,14 @@ class Container extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    description.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
-    description.add(new DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
-    description.add(new DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
-    description.add(new ObjectFlagProperty<Matrix4>.has('transform', transform));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
+    properties.add(new DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
+    properties.add(new ObjectFlagProperty<Matrix4>.has('transform', transform));
   }
 }

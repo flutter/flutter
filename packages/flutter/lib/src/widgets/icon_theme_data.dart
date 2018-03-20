@@ -102,10 +102,10 @@ class IconThemeData extends Diagnosticable {
   int get hashCode => hashValues(color, opacity, size);
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    description.add(new DoubleProperty('opacity', opacity, defaultValue: null));
-    description.add(new DoubleProperty('size', size, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(new DoubleProperty('opacity', opacity, defaultValue: null));
+    properties.add(new DoubleProperty('size', size, defaultValue: null));
   }
 }

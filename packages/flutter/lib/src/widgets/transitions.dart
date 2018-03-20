@@ -59,9 +59,9 @@ abstract class AnimatedWidget extends StatefulWidget {
   _AnimatedState createState() => new _AnimatedState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Listenable>('animation', listenable));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Listenable>('animation', listenable));
   }
 }
 
@@ -334,9 +334,9 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
   }
 }
 

@@ -575,6 +575,38 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('password fields have correct semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    controller.text = 'super-secret-password!!1';
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new EditableText(
+        obscureText: true,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    final String expectedValue = '•' * controller.text.length;
+
+    expect(semantics, hasSemantics(new TestSemantics(
+      children: <TestSemantics>[
+        new TestSemantics(
+          flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isObscured],
+          value: expectedValue,
+          textDirection: TextDirection.ltr,
+          nextNodeId: -1,
+          previousNodeId: -1,
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+
+    semantics.dispose();
+  });
+
   group('a11y copy/cut/paste', () {
     Future<Null> _buildApp(MockTextSelectionControls controls, WidgetTester tester) {
       return tester.pumpWidget(new MaterialApp(

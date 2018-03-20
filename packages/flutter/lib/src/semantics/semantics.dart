@@ -319,6 +319,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.textField,
     this.focused,
     this.inMutuallyExclusiveGroup,
+    this.obscured,
     this.label,
     this.value,
     this.increasedValue,
@@ -398,6 +399,13 @@ class SemanticsProperties extends DiagnosticableTree {
   /// For example, a radio button is in a mutually exclusive group because only
   /// one radio button in that group can be marked as [checked].
   final bool inMutuallyExclusiveGroup;
+  
+  /// If non-null, whether [value] should be obscured.
+  ///
+  /// This option is usually set in combination with [textField] to indicate
+  /// that the text field contains a password (or other sensitive information).
+  /// Doing so instructs screen readers to not read out the [value].
+  final bool obscured;
 
   /// Provides a textual description of the widget.
   ///
@@ -662,15 +670,15 @@ class SemanticsProperties extends DiagnosticableTree {
   final VoidCallback onDidLoseAccessibilityFocus;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
-    description.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
-    description.add(new StringProperty('label', label, defaultValue: ''));
-    description.add(new StringProperty('value', value));
-    description.add(new StringProperty('hint', hint));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    description.add(new DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
+    properties.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
+    properties.add(new StringProperty('label', label, defaultValue: ''));
+    properties.add(new StringProperty('value', value));
+    properties.add(new StringProperty('hint', hint));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
   }
 }
 
@@ -2405,6 +2413,16 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isTextField, value);
   }
 
+  /// Whether the [value] should be obscured.
+  ///
+  /// This option is usually set in combination with [textField] to indicate
+  /// that the text field contains a password (or other sensitive information).
+  /// Doing so instructs screen readers to not read out the [value].
+  bool get isObscured => _hasFlag(SemanticsFlag.isObscured);
+  set isObscured(bool value) {
+    _setFlag(SemanticsFlag.isObscured, value);
+  }
+
   /// The currently selected text (or the position of the cursor) within [value]
   /// if this node represents a text field.
   TextSelection get textSelection => _textSelection;
@@ -2691,9 +2709,9 @@ abstract class SemanticsSortKey extends Diagnosticable implements Comparable<Sem
   int doCompare(covariant SemanticsSortKey other);
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new StringProperty('name', name, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new StringProperty('name', name, defaultValue: null));
   }
 }
 
@@ -2739,8 +2757,8 @@ class OrdinalSortKey extends SemanticsSortKey {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('order', order, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('order', order, defaultValue: null));
   }
 }

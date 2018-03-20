@@ -239,21 +239,21 @@ class OutlineButton extends StatefulWidget {
 
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    description.add(new DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: 2.0));
-    description.add(new DiagnosticsProperty<BorderSide>('borderSide', borderSide, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('disabledBorderColor', disabledBorderColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('highlightedBorderColor', highlightedBorderColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(new DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: 2.0));
+    properties.add(new DiagnosticsProperty<BorderSide>('borderSide', borderSide, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('disabledBorderColor', disabledBorderColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('highlightedBorderColor', highlightedBorderColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }
 
