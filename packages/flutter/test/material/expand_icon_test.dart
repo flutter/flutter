@@ -67,6 +67,23 @@ void main() {
 
     expect(expanded, isFalse);
   });
+
+  testWidgets('ExpandIcon is rotated initially if isExpanded is true on first build', (WidgetTester tester) async {
+    bool expanded = true;
+
+    await tester.pumpWidget(
+        wrap(
+            child: new ExpandIcon(
+              isExpanded: expanded,
+              onPressed: (bool isExpanded) {
+                expanded = !isExpanded;
+              },
+            )
+        )
+    );
+    final RotationTransition rotation = tester.firstWidget(find.byType(RotationTransition));
+    expect(rotation.turns.value, 0.5);
+  });
 }
 
 Widget wrap({ Widget child }) {
