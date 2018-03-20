@@ -190,7 +190,7 @@ class _Compiler {
 
   static Future<String> handleTimeout(Future<String> value, String path) {
     return value.timeout(const Duration(minutes: 5), onTimeout: () {
-      printError('Compilation of ${path} timed out after 5 minutes.');
+      printError('Compilation of $path timed out after 5 minutes.');
       return null;
     });
   }
