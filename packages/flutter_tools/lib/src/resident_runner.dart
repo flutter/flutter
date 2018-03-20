@@ -826,21 +826,36 @@ abstract class ResidentRunner {
   void printHelp({ @required bool details });
 
   void printHelpDetails() {
-    if (supportsServiceProtocol) {
-      printStatus('You can dump the widget hierarchy of the app (debugDumpApp) by pressing "w".');
-      printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
-      if (isRunningDebug) {
-        printStatus('For layers (debugDumpLayerTree), use "L"; for accessibility (debugDumpSemantics), use "S" (for geometric order) or "U" (for inverse hit test order).');
-        printStatus('To toggle the widget inspector (WidgetsApp.showWidgetInspectorOverride), press "i".');
-        printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
-        printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
-      } else {
-        printStatus('To dump the accessibility tree (debugDumpSemantics), press "S" (for geometric order) or "U" (for inverse hit test order).');
-      }
-      printStatus('To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
+    printStatus('');
+
+    if (!supportsServiceProtocol) {
+      if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot))
+        printStatus('To save a screenshot to flutter.png, press "s".');
+      return;
     }
-    if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot))
-      printStatus('To save a screenshot to flutter.png, press "s".');
+
+    printStatus('Inspectors:');
+    if (isRunningDebug)
+      printStatus("- 'i': toggle the widget inspector (showWidgetInspector)");
+    printStatus("- 'P': display the performance overlay (showPerformanceOverlay)");
+    printStatus('');
+    printStatus('Widgets, layers, render and semantic trees:');
+    printStatus("- 'w': dump the widget hierarchy of the app (debugDumpApp)");
+    printStatus("- 't': dump the rendering tree of the app (debugDumpRenderTree)");
+    if (isRunningDebug)
+      printStatus("- 'L': dump the layer tree (debugDumpLayerTree)");
+    printStatus("- 'S': dump accessibility tree in geometric order (debugDumpSemantics)");
+    printStatus("- 'U': dump accessibility tree in inverse hit test order");
+    printStatus('');
+    printStatus('Framework toggles and utilities:');
+    if (isRunningDebug) {
+      printStatus(
+          "- 'p': toggle the display of construction lines (debugPaintSizeEnabled)");
+      printStatus(
+          "- 'o': simulate different operating systems (defaultTargetPlatform)");
+    }
+    printStatus("- 's': take a screenshot (saved to flutter_XX.png)");
+    printStatus('');
   }
 
   /// Called when a signal has requested we exit.

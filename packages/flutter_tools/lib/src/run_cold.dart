@@ -125,22 +125,22 @@ class ColdRunner extends ResidentRunner {
   @override
   void printHelp({ @required bool details }) {
     bool haveDetails = false;
-    for (FlutterDevice device in flutterDevices) {
-      final String dname = device.device.name;
-      if (device.observatoryUris != null) {
-        for (Uri uri in device.observatoryUris)
-          printStatus('An Observatory debugger and profiler on $dname is available at $uri');
-      }
-    }
     if (supportsServiceProtocol) {
       haveDetails = true;
       if (details)
         printHelpDetails();
     }
     if (haveDetails && !details) {
-      printStatus('For a more detailed help message, press "h". To quit, press "q".');
+      for (FlutterDevice device in flutterDevices) {
+        final String name = device.device.name;
+        if (device.observatoryUris != null) {
+          for (Uri uri in device.observatoryUris)
+            printStatus('An Observatory debugger and profiler on $name is available at $uri');
+        }
+      }
+      printStatus("For a more detailed help message, press 'h'; to quit, press 'q'.");
     } else {
-      printStatus('To repeat this help message, press "h". To quit, press "q".');
+      printStatus("To repeat this help message, press 'h'; to quit, press 'q'.");
     }
   }
 
