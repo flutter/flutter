@@ -134,7 +134,7 @@ void main() {
       // but never called.
       verify(mockHelper.builder);
       verify(mockHelper.builder(
-        any,
+        typed(any),
         RefreshIndicatorMode.drag,
         50.0,
         100.0, // Default value.
@@ -214,23 +214,23 @@ void main() {
       verifyInOrder(<void>[
         mockHelper.builder,
         mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.drag,
           50.0,
           100.0, // Default value.
           60.0, // Default value.
         ),
         mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.drag,
-          argThat(moreOrLessEquals(48.36801747187993)),
+          typed(argThat(moreOrLessEquals(48.36801747187993))),
           100.0, // Default value.
           60.0, // Default value.
         ),
         mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.drag,
-          argThat(moreOrLessEquals(44.63031931875867)),
+          typed(argThat(moreOrLessEquals(44.63031931875867))),
           100.0, // Default value.
           60.0, // Default value.
         ),
@@ -282,23 +282,23 @@ void main() {
         mockHelper.builder,
         mockHelper.refreshTask,
         mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.drag,
           99.0,
           100.0, // Default value.
           60.0, // Default value.
         ),
         mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.drag,
-          argThat(moreOrLessEquals(86.78169)),
+          typed(argThat(moreOrLessEquals(86.78169))),
           100.0, // Default value.
           60.0, // Default value.
         ),
         mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.armed,
-          argThat(moreOrLessEquals(105.80452021305739)),
+          typed(argThat(moreOrLessEquals(105.80452021305739))),
           100.0, // Default value.
           60.0, // Default value.
         ),
@@ -343,7 +343,7 @@ void main() {
           mockHelper.builder,
           mockHelper.refreshTask,
           mockHelper.builder(
-            any,
+            typed(any),
             RefreshIndicatorMode.armed,
             150.0,
             100.0, // Default value.
@@ -351,9 +351,9 @@ void main() {
           ),
           mockHelper.refreshTask(),
           mockHelper.builder(
-            any,
+            typed(any),
             RefreshIndicatorMode.armed,
-            argThat(moreOrLessEquals(127.10396988577114)),
+            typed(argThat(moreOrLessEquals(127.10396988577114))),
             100.0, // Default value.
             60.0, // Default value.
           ),
@@ -362,7 +362,7 @@ void main() {
         // Reaches refresh state and sliver's at 60.0 in height after a while.
         await tester.pump(const Duration(seconds: 1));
         verify(mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.refresh,
           60.0,
           100.0, // Default value.
@@ -381,7 +381,7 @@ void main() {
         await tester.pump();
 
         verify(mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.done,
           60.0,
           100.0, // Default value.
@@ -417,7 +417,7 @@ void main() {
       await tester.pump();
 
       verify(mockHelper.builder(
-        any,
+        typed(any),
         RefreshIndicatorMode.armed,
         150.0,
         100.0, // Default value.
@@ -435,7 +435,7 @@ void main() {
 
       // Refresh indicator still being told to layout the same way.
       verify(mockHelper.builder(
-        any,
+        typed(any),
         RefreshIndicatorMode.refresh,
         60.0,
         100.0, // Default value.
@@ -496,7 +496,7 @@ void main() {
       await tester.drag(find.text('0'), const Offset(0.0, 150.0));
       await tester.pump();
       verify(mockHelper.builder(
-        any,
+        typed(any),
         RefreshIndicatorMode.armed,
         150.0,
         100.0, // Default value.
@@ -513,7 +513,7 @@ void main() {
       // Let it snap back to occupy the indicator's final sliver space only.
       await tester.pump(const Duration(seconds: 2));
       verify(mockHelper.builder(
-        any,
+        typed(any),
         RefreshIndicatorMode.refresh,
         60.0,
         100.0, // Default value.
@@ -531,7 +531,7 @@ void main() {
       refreshCompleter.complete(null);
       await tester.pump();
       verify(mockHelper.builder(
-        any,
+        typed(any),
         RefreshIndicatorMode.done,
         60.0,
         100.0, // Default value.
@@ -577,7 +577,7 @@ void main() {
         refreshCompleter.complete(null);
         await tester.pump();
         verify(mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.done,
           150.0, // Still overscrolled here.
           100.0, // Default value.
@@ -588,7 +588,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 100));
         // The refresh indicator is still building.
         verify(mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.done,
           91.31180913199277,
           100.0, // Default value.
@@ -607,7 +607,7 @@ void main() {
         // Instead, it's still in the done state because the sliver never
         // fully retracted.
         verify(mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.done,
           147.3772721631821,
           100.0, // Default value.
@@ -626,7 +626,7 @@ void main() {
         await tester.drag(find.text('0'), const Offset(0.0, 40.0));
         await tester.pump();
         verify(mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.drag,
           40.0,
           100.0, // Default value.
@@ -669,7 +669,7 @@ void main() {
         refreshCompleter.complete(null);
         await tester.pump();
         verify(mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.done,
           150.0, // Still overscrolled here.
           100.0, // Default value.
@@ -725,7 +725,7 @@ void main() {
 
         // Refresh indicator still being told to layout the same way.
         verify(mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.refresh,
           60.0,
           100.0, // Default value.
@@ -760,7 +760,7 @@ void main() {
         await tester.pump();
 
         verify(mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.drag,
           4.615384615384642,
           100.0, // Default value.
@@ -839,7 +839,7 @@ void main() {
         await tester.drag(find.text('0'), const Offset(0.0, 150.0));
         await tester.pump();
         verify(mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.armed,
           150.0,
           100.0, // Default value.
@@ -848,7 +848,7 @@ void main() {
 
         await tester.pump(const Duration(milliseconds: 10));
         verify(mockHelper.builder(
-          any,
+          typed(any),
           RefreshIndicatorMode.done, // Goes to done on the next frame.
           148.6463892921364,
           100.0, // Default value.
