@@ -165,10 +165,11 @@ class ProcessRunner {
 
     final int exitCode = await allComplete();
     if (exitCode != 0 && !failOk) {
-      final String message =
-          'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
+      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
       throw new ProcessRunnerException(
-          message, new ProcessResult(0, exitCode, null, 'returned $exitCode'));
+        message,
+        new ProcessResult(0, exitCode, null, 'returned $exitCode'),
+      );
     }
     return utf8.decoder.convert(output).trim();
   }
@@ -350,13 +351,17 @@ class ArchiveCreator {
   }
 
   Future<String> _runFlutter(List<String> args, {Directory workingDirectory}) {
-    return _processRunner.runProcess(<String>[_flutter]..addAll(args),
-        workingDirectory: workingDirectory ?? flutterRoot);
+    return _processRunner.runProcess(
+      <String>[_flutter]..addAll(args),
+      workingDirectory: workingDirectory ?? flutterRoot,
+    );
   }
 
   Future<String> _runGit(List<String> args, {Directory workingDirectory}) {
-    return _processRunner.runProcess(<String>['git']..addAll(args),
-        workingDirectory: workingDirectory ?? flutterRoot);
+    return _processRunner.runProcess(
+      <String>['git']..addAll(args),
+      workingDirectory: workingDirectory ?? flutterRoot,
+    );
   }
 
   /// Unpacks the given zip file into the currentDirectory (if set), or the
@@ -400,8 +405,10 @@ class ArchiveCreator {
         path.basename(source.path),
       ];
     }
-    return _processRunner.runProcess(commandLine,
-        workingDirectory: new Directory(path.dirname(source.absolute.path)));
+    return _processRunner.runProcess(
+      commandLine,
+      workingDirectory: new Directory(path.dirname(source.absolute.path)),
+    );
   }
 
   /// Create a tar archive from the directory source.
@@ -427,7 +434,7 @@ class ArchivePublisher {
     this.platform: const LocalPlatform(),
   }) : assert(revision.length == 40),
        platformName = platform.operatingSystem.toLowerCase(),
-       metadataGsPath = '$gsReleaseFolder/releases_${platform.operatingSystem.toLowerCase()}.json',
+       metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
        _processRunner = new ProcessRunner(
          processManager: processManager,
          subprocessOutput: subprocessOutput,
@@ -443,8 +450,8 @@ class ArchivePublisher {
   final File outputFile;
   final ProcessRunner _processRunner;
   String get branchName => getBranchName(branch);
-  String get destinationArchivePath =>
-      '$branchName/$platformName/${path.basename(outputFile.path)}';
+  String get destinationArchivePath => '$branchName/$platformName/${path.basename(outputFile.path)}';
+  static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
 
   /// Publish the archive to Google Storage.
   Future<Null> publishArchive() async {
@@ -455,7 +462,15 @@ class ArchivePublisher {
   }
 
   Future<Null> _updateMetadata() async {
-    final String currentMetadata = await _runGsUtil(<String>['cat', metadataGsPath]);
+    // We can't just cat the metadata from the server with 'gsutil cat', because
+    // Windows wants to echo the commands that execute in gsutil.bat to the
+    // stdout when we do that. So, we copy the file locally and then read it
+    // back in.
+    final File metadataFile = new File(
+      path.join(tempDir.absolute.path, getMetadataFilename(platform)),
+    );
+    await _runGsUtil(<String>['cp', metadataGsPath, metadataFile.absolute.path]);
+    final String currentMetadata = metadataFile.readAsStringSync();
     if (currentMetadata.isEmpty) {
       throw new ProcessRunnerException('Empty metadata received from server');
     }
@@ -485,14 +500,16 @@ class ArchivePublisher {
     metadata['version'] = version;
     jsonData['releases'][revision][branchName] = metadata;
 
-    final File tempFile = new File(path.join(tempDir.absolute.path, 'releases_$platformName.json'));
     const JsonEncoder encoder = const JsonEncoder.withIndent('  ');
-    tempFile.writeAsStringSync(encoder.convert(jsonData));
-    await _cloudCopy(tempFile.absolute.path, metadataGsPath);
+    metadataFile.writeAsStringSync(encoder.convert(jsonData));
+    await _cloudCopy(metadataFile.absolute.path, metadataGsPath);
   }
 
-  Future<String> _runGsUtil(List<String> args,
-      {Directory workingDirectory, bool failOk: false}) async {
+  Future<String> _runGsUtil(
+    List<String> args, {
+    Directory workingDirectory,
+    bool failOk: false,
+  }) async {
     return _processRunner.runProcess(
       <String>['gsutil']..addAll(args),
       workingDirectory: workingDirectory,
