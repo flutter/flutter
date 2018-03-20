@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
+import 'base/common.dart';
 import 'base/io.dart';
 import 'base/process_manager.dart';
 import 'globals.dart';
@@ -65,8 +66,12 @@ Future<String> compile(
   // This is a URI, not a file path, so the forward slash is correct even on Windows.
   if (!sdkRoot.endsWith('/'))
     sdkRoot = '$sdkRoot/';
+  final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+  if (!processManager.canRun(engineDartPath)) {
+    throwToolExit('Unable to find Dart binary at $engineDartPath');
+  }
   final List<String> command = <String>[
-    artifacts.getArtifactPath(Artifact.engineDartBinary),
+    engineDartPath,
     frontendServer,
     '--sdk-root',
     sdkRoot,
@@ -176,8 +181,8 @@ class ResidentCompiler {
 
     final String inputKey = new Uuid().generateV4();
     _server.stdin.writeln('recompile ${mainPath != null ? _mapFilename(mainPath) + " ": ""}$inputKey');
-    for (String filePath in invalidatedFiles) {
-      _server.stdin.writeln(_mapFilename(filePath));
+    for (String fileUri in invalidatedFiles) {
+      _server.stdin.writeln(_mapFileUri(fileUri));
     }
     _server.stdin.writeln(inputKey);
 
@@ -274,6 +279,20 @@ class ResidentCompiler {
       }
     }
     return filename;
+  }
+
+  String _mapFileUri(String fileUri) {
+    if (_fileSystemRoots != null) {
+      final String filename = Uri.parse(fileUri).toFilePath();
+      for (String root in _fileSystemRoots) {
+        if (filename.startsWith(root)) {
+          return new Uri(
+              scheme: _fileSystemScheme, path: filename.substring(root.length))
+              .toString();
+        }
+      }
+    }
+    return fileUri;
   }
 
   Future<dynamic> shutdown() {

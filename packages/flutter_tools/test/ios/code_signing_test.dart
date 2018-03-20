@@ -189,7 +189,7 @@ void main() {
             ))
           ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
-      when(mockOpenSslProcess.exitCode).thenReturn(0);
+      when(mockOpenSslProcess.exitCode).thenAnswer((_) => new Future<int>.value(0));
 
       final String developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
@@ -259,7 +259,7 @@ void main() {
             )),
           ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
-      when(mockOpenSslProcess.exitCode).thenReturn(0);
+      when(mockOpenSslProcess.exitCode).thenAnswer((_) => new Future<int>.value(0));
 
       final String developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: false);
 
@@ -321,7 +321,7 @@ void main() {
             ))
           ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
-      when(mockOpenSslProcess.exitCode).thenReturn(0);
+      when(mockOpenSslProcess.exitCode).thenAnswer((_) => new Future<int>.value(0));
       when<String>(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Profile 3 (3333CCCC33)');
 
       final String developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
@@ -390,7 +390,7 @@ void main() {
             ))
           ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
-      when(mockOpenSslProcess.exitCode).thenReturn(0);
+      when(mockOpenSslProcess.exitCode).thenAnswer((_) => new Future<int>.value(0));
       when<String>(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Invalid Profile');
 
       final String developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);

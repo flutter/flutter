@@ -487,7 +487,7 @@ class DevFS {
           final DevFSContent content = dirtyEntries[uri];
           if (content is DevFSFileContent) {
             filesUris.add(uri);
-            invalidatedFiles.add(content.file.path);
+            invalidatedFiles.add(content.file.uri.toString());
             numBytes -= content.size;
           }
         }

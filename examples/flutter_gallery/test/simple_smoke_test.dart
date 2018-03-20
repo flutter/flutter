@@ -37,7 +37,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // end animation
 
     // Open Demos
-    await tester.tap(find.text('Demos'));
+    await tester.tap(find.text('Vignettes'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1)); // end animation
 
