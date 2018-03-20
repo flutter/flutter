@@ -167,7 +167,12 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               alignment: Alignment.bottomLeft,
               child: new TextField(
                 decoration: const InputDecoration(hintText: 'Event name'),
-                style: theme.textTheme.display2
+                style: theme.textTheme.display2,
+                onChanged: (String value) {
+                  setState(() {
+                    _saveNeeded = true;
+                  });
+                }
               )
             ),
             new Container(
@@ -175,7 +180,12 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               alignment: Alignment.bottomLeft,
               child: new TextField(
                 decoration: const InputDecoration(hintText: 'Location'),
-                style: theme.textTheme.title.copyWith(color: Colors.black54)
+                style: theme.textTheme.title.copyWith(color: Colors.black54),
+                onChanged: (String value) {
+                  setState(() {
+                    _saveNeeded = true;
+                  });
+                }
               )
             ),
             new Column(
