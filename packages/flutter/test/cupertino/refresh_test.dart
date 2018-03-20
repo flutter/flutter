@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:async';
@@ -694,7 +694,7 @@ void main() {
     );
 
     testWidgets(
-      'sliver scrolled await when task completes properly removes itself',
+      'sliver scrolled away when task completes properly removes itself',
       (WidgetTester tester) async {
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
@@ -742,7 +742,7 @@ void main() {
           moreOrLessEquals(-115.38461538461536),
         );
 
-        // Complete the task while scrolled await.
+        // Complete the task while scrolled away.
         refreshCompleter.complete(null);
         // The sliver is instantly gone since there is no overscroll physics
         // simulation.
