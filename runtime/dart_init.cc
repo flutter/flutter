@@ -336,8 +336,13 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     }
     // Entry script path (file:// is stripped).
     entry_path = std::string(script_uri + strlen(kFileUriPrefix));
-    if (!running_from_source) {
-      // Attempt to copy the snapshot from the asset bundle.
+    if (StringEndsWith(entry_path, ".dill")) {
+      // Load the kernel from the script URI.
+      if (!files::ReadFileToVector(entry_path, &kernel_data)) {
+        FXL_LOG(ERROR) << "Failed to load kernel";
+      }
+    } else if (!running_from_source) {
+      // Attempt to copy the snapshot or kernel from the asset bundle.
       const std::string& bundle_path = entry_path;
 
       struct stat stat_result = {};
