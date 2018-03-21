@@ -405,7 +405,7 @@ void main() {
       );
 
       expect(
-        List.from<TransformLayer>(
+        new List<TransformLayer>.from(
           tester.layers.where((Layer layer) => layer is TransformLayer)
         )
           .map((TransformLayer layer) => layer.transform.storage)
