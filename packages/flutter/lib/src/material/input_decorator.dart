@@ -68,6 +68,7 @@ class _InputBorderPainter extends CustomPainter {
     this.gapAnimation,
     this.gap,
     this.textDirection,
+    this.fillColor,
   }) : super(repaint: repaint);
 
   final Animation<double> borderAnimation;
@@ -75,12 +76,25 @@ class _InputBorderPainter extends CustomPainter {
   final Animation<double> gapAnimation;
   final _InputBorderGap gap;
   final TextDirection textDirection;
+  final Color fillColor;
 
   @override
   void paint(Canvas canvas, Size size) {
-    border.evaluate(borderAnimation).paint(
+    final InputBorder borderValue = border.evaluate(borderAnimation);
+    final Rect canvasRect = Offset.zero & size;
+
+    if (fillColor.alpha > 0) {
+      canvas.drawPath(
+        borderValue.getOuterPath(canvasRect, textDirection: textDirection),
+        new Paint()
+          ..color = fillColor
+          ..style = PaintingStyle.fill,
+      );
+    }
+
+    borderValue.paint(
       canvas,
-      Offset.zero & size,
+      canvasRect,
       gapStart: gap.start,
       gapExtent: gap.extent,
       gapPercentage: gapAnimation.value,
@@ -108,14 +122,17 @@ class _BorderContainer extends StatefulWidget {
     @required this.border,
     @required this.gap,
     @required this.gapAnimation,
+    @required this.fillColor,
     this.child,
   }) : assert(border != null),
        assert(gap != null),
+       assert(fillColor != null),
        super(key: key);
 
   final InputBorder border;
   final _InputBorderGap gap;
   final Animation<double> gapAnimation;
+  final Color fillColor;
   final Widget child;
 
   @override
@@ -174,6 +191,7 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
         gapAnimation: widget.gapAnimation,
         gap: widget.gap,
         textDirection: Directionality.of(context),
+        fillColor: widget.fillColor,
       ),
       child: widget.child,
     );
@@ -1518,15 +1536,16 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ),
     );
 
-    final Widget containerFill = new DecoratedBox(
-      decoration: new BoxDecoration(color: _getFillColor(themeData)),
-    );
-    final Widget container = border == null ? containerFill : new _BorderContainer(
-      border: border,
-      gap: _borderGap,
-      gapAnimation: _floatingLabelController.view,
-      child: containerFill,
-    );
+    final Widget container = border == null
+      ? new DecoratedBox(
+          decoration: new BoxDecoration(color: _getFillColor(themeData))
+        )
+      : new _BorderContainer(
+          border: border,
+          gap: _borderGap,
+          gapAnimation: _floatingLabelController.view,
+          fillColor: _getFillColor(themeData),
+        );
 
     final TextStyle inlineLabelStyle = inlineStyle.merge(decoration.labelStyle);
     final Widget label = decoration.labelText == null ? null : new _Shaker(
