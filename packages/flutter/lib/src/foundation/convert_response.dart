@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -14,11 +13,20 @@ Future<Uint8List> convertResponse(HttpClientResponse response) {
   assert(response.contentLength != null);
   final Completer<Uint8List> completer = new Completer<Uint8List>.sync();
   if (response.contentLength == -1) {
-    final ByteConversionSink sink = new ByteConversionSink.withCallback((List<int> chunk) {
-      final Uint8List bytes = new Uint8List.fromList(chunk);
-      completer.complete(bytes);
-    });
-    response.listen(sink.add, onDone: sink.close, onError: completer.completeError, cancelOnError: true);
+    final List<List<int>> chunks = <List<int>>[];
+    int contentLength = 0;
+    response.listen((List<int> chunk) {
+      chunks.add(chunk);
+      contentLength += chunk.length;
+    }, onDone: () {
+     final Uint8List bytes = new Uint8List(contentLength);
+     int offset = 0;
+     for (List<int> chunk in chunks) {
+       bytes.setRange(offset, offset + chunk.length, chunk);
+       offset += chunk.length;
+     }
+     completer.complete(bytes);
+    }, onError: completer.completeError, cancelOnError: true);
   } else {
     // If the response has a content length, then allocate a buffer of the correct size.
     final Uint8List bytes = new Uint8List(response.contentLength);
