@@ -4,9 +4,11 @@
 
 #include "gpu_surface_gl.h"
 
-#if OS_MACOSX || OS_IOS
+#if OS_IOS
 #include <OpenGLES/ES2/gl.h>
 #include <OpenGLES/ES2/glext.h>
+#elif OS_MACOSX
+#include <OpenGL/gl3.h>
 #else
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -85,7 +87,11 @@ static SkColorType FirstSupportedColorType(GrContext* context, GLenum* format) {
     *format = (y);                                 \
     return (x);                                    \
   }
+#if OS_MACOSX
+  RETURN_IF_RENDERABLE(kRGBA_8888_SkColorType, GL_RGBA8);
+#else
   RETURN_IF_RENDERABLE(kRGBA_8888_SkColorType, GL_RGBA8_OES);
+#endif
   RETURN_IF_RENDERABLE(kARGB_4444_SkColorType, GL_RGBA4);
   RETURN_IF_RENDERABLE(kRGB_565_SkColorType, GL_RGB565);
   return kUnknown_SkColorType;
