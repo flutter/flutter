@@ -461,6 +461,42 @@ class ArchivePublisher {
     await _updateMetadata();
   }
 
+  Map<String, dynamic> _addRelease(Map<String, dynamic> jsonData) {
+    jsonData['base_url'] = '$baseUrl$releaseFolder';
+    if (!jsonData.containsKey('current_release')) {
+      jsonData['current_release'] = <String, String>{};
+    }
+    jsonData['current_release'][branchName] = revision;
+    if (!jsonData.containsKey('releases')) {
+      jsonData['releases'] = <Map<String, dynamic>>[];
+    }
+
+    final Map<String, dynamic> newEntry = <String, dynamic>{};
+    newEntry['hash'] = revision;
+    newEntry['channel'] = branchName;
+    newEntry['version'] = version;
+    newEntry['release_date'] = new DateTime.now().toUtc().toIso8601String();
+    newEntry['archive'] = destinationArchivePath;
+
+    // Search for any entries with the same hash and channel and remove them.
+    final List<dynamic> releases = jsonData['releases'];
+    final List<Map<String, dynamic>> prunedReleases = <Map<String, dynamic>>[];
+    for (Map<String, dynamic> entry in releases) {
+      if (entry['hash'] != newEntry['hash'] || entry['channel'] != newEntry['channel']) {
+        prunedReleases.add(entry);
+      }
+    }
+
+    prunedReleases.add(newEntry);
+    prunedReleases.sort((Map<String, dynamic> a, Map<String, dynamic> b) {
+      final DateTime aDate = DateTime.parse(a['release_date']);
+      final DateTime bDate = DateTime.parse(b['release_date']);
+      return bDate.compareTo(aDate);
+    });
+    jsonData['releases'] = prunedReleases;
+    return jsonData;
+  }
+
   Future<Null> _updateMetadata() async {
     // We can't just cat the metadata from the server with 'gsutil cat', because
     // Windows wants to echo the commands that execute in gsutil.bat to the
@@ -482,23 +518,7 @@ class ArchivePublisher {
       throw new ProcessRunnerException('Unable to parse JSON metadata received from cloud: $e');
     }
 
-    // Update the metadata file with the data for this package.
-    jsonData['base_url'] = '$baseUrl$releaseFolder';
-    if (!jsonData.containsKey('current_release')) {
-      jsonData['current_release'] = <String, String>{};
-    }
-    jsonData['current_release'][branchName] = revision;
-    if (!jsonData.containsKey('releases')) {
-      jsonData['releases'] = <String, dynamic>{};
-    }
-    if (!jsonData['releases'].containsKey(revision)) {
-      jsonData['releases'][revision] = <String, Map<String, String>>{};
-    }
-    final Map<String, String> metadata = <String, String>{};
-    metadata['${platformName}_archive'] = destinationArchivePath;
-    metadata['release_date'] = new DateTime.now().toUtc().toIso8601String();
-    metadata['version'] = version;
-    jsonData['releases'][revision][branchName] = metadata;
+    jsonData = _addRelease(jsonData);
 
     const JsonEncoder encoder = const JsonEncoder.withIndent('  ');
     metadataFile.writeAsStringSync(encoder.convert(jsonData));
