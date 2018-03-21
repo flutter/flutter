@@ -258,6 +258,8 @@ class CompileTest {
     final List<String> options = <String>['--release'];
     if (previewDart2)
       options.add('--preview-dart-2');
+    else
+      options.add('--no-preview-dart-2');
     setLocalEngineOptionIfNecessary(options);
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
@@ -296,6 +298,8 @@ class CompileTest {
     final List<String> options = <String>['--debug'];
     if (previewDart2)
       options.add('--preview-dart-2');
+    else
+      options.add('--no-preview-dart-2');
     setLocalEngineOptionIfNecessary(options);
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
