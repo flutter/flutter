@@ -56,6 +56,7 @@ linter:
     - avoid_init_to_null
     - avoid_null_checks_in_equality_operators
     # - avoid_positional_boolean_parameters # not yet tested
+    # - avoid_relative_lib_imports # not yet tested
     - avoid_return_types_on_setters
     # - avoid_returning_null # we do this commonly
     # - avoid_returning_this # https://github.com/dart-lang/linter/issues/842
@@ -134,6 +135,7 @@ linter:
     - unnecessary_null_aware_assignments
     - unnecessary_null_in_if_null_operators
     - unnecessary_overrides
+    - unnecessary_parenthesis
     # - unnecessary_statements # not yet tested
     - unnecessary_this
     - unrelated_type_equality_checks
