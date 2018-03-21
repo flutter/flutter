@@ -240,7 +240,7 @@ class GalleryDrawer extends StatelessWidget {
 
     final Widget aboutItem = new AboutListTile(
       icon: const FlutterLogo(),
-      applicationVersion: 'April 2017 Preview',
+      applicationVersion: 'March 2018 Preview',
       applicationIcon: const FlutterLogo(),
       applicationLegalese: '© 2017 The Chromium Authors',
       aboutBoxChildren: <Widget>[
