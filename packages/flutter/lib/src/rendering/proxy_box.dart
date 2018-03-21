@@ -1704,6 +1704,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
           clipPath: offsetPath,
           elevation: elevation,
           color: color,
+          shadowColor: shadowColor,
         );
         context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
       } else {
