@@ -27,8 +27,11 @@ class ResponseConverter extends Converter<HttpClientResponse, Future<Uint8List>>
     } else {
       // If the response has a content length, then allocate a buffer of the correct size.
       final Uint8List bytes = new Uint8List(response.contentLength);
+      int offset = 0;
       response.listen((List<int> chunk) {
-        bytes.addAll(chunk);
+        for (int i = 0; i < chunk.length; i+=1, offset+=1) {
+          bytes[offset] = chunk[i];
+        }
       },
       onError: completer.completeError,
       onDone: () {
