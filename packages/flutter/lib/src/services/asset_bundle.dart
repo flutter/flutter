@@ -63,7 +63,21 @@ abstract class AssetBundle {
   /// caller is going to be doing its own caching. (It might not be cached if
   /// it's set to true either, that depends on the asset bundle
   /// implementation.)
-  Future<String> loadString(String key, { bool cache: true });
+  Future<String> loadString(String key, { bool cache: true }) async {
+    final ByteData data = await load(key);
+    if (data == null)
+      throw new FlutterError('Unable to load asset: $key');
+    if (data.lengthInBytes < 10 * 1024) {
+      // 10KB takes about 3ms to parse on a Pixel 2 XL.
+      // See: https://github.com/dart-lang/sdk/issues/31954
+      return utf8.decode(data.buffer.asUint8List());
+    }
+    return compute(_utf8decode, data, debugLabel: 'UTF8 decode for "$key"');
+  }
+
+  static String _utf8decode(ByteData data) {
+    return utf8.decode(data.buffer.asUint8List());
+  }
 
   /// Retrieve a string from the asset bundle, parse it with the given function,
   /// and return the function's result.
@@ -106,35 +120,8 @@ class NetworkAssetBundle extends AssetBundle {
         'Unable to load asset: $key\n'
         'HTTP status code: ${response.statusCode}'
       );
-
-    final Completer<ByteData> completer = new Completer<ByteData>.sync();
-    if (response.contentLength == -1) {
-      final ByteConversionSink sink = new ByteConversionSink.withCallback((List<int> chunk) {
-        final Uint8List bytes = new Uint8List.fromList(chunk);
-        completer.complete(bytes.buffer.asByteData());
-      });
-      response.listen(sink.add, onDone: sink.close, onError: completer.completeError, cancelOnError: true);
-    } else {
-      final Uint8List bytes = new Uint8List(response.contentLength);
-      int offset = 0;
-      response.listen((List<int> chunk) {
-        for (int i = 0; i < chunk.length; i++, offset++) {
-          bytes[offset] = chunk[i];
-        }
-      },
-      onError: completer.completeError,
-      onDone: () {
-        completer.complete(bytes.buffer.asByteData());
-      },
-      cancelOnError: true);
-    }
-    return completer.future;
-  }
-
-  @override
-  Future<String> loadString(String key, { bool cache: true }) async {
-    final ByteData bytes = await load(key);
-    return const Utf8Decoder().convert(bytes.buffer.asUint8List());
+    final Uint8List bytes = await const ResponseConverter().convert(response);
+    return bytes.buffer.asByteData();
   }
 
   /// Retrieve a string from the asset bundle, parse it with the given function,
@@ -172,24 +159,8 @@ abstract class CachingAssetBundle extends AssetBundle {
   @override
   Future<String> loadString(String key, { bool cache: true }) {
     if (cache)
-      return _stringCache.putIfAbsent(key, () => _fetchString(key));
-    return _fetchString(key);
-  }
-
-  Future<String> _fetchString(String key) async {
-    final ByteData data = await load(key);
-    if (data == null)
-      throw new FlutterError('Unable to load asset: $key');
-    if (data.lengthInBytes < 10 * 1024) {
-      // 10KB takes about 3ms to parse on a Pixel 2 XL.
-      // See: https://github.com/dart-lang/sdk/issues/31954
-      return utf8.decode(data.buffer.asUint8List());
-    }
-    return compute(_utf8decode, data, debugLabel: 'UTF8 decode for "$key"');
-  }
-
-  static String _utf8decode(ByteData data) {
-    return utf8.decode(data.buffer.asUint8List());
+      return _stringCache.putIfAbsent(key, () => super.loadString(key));
+    return super.loadString(key);
   }
 
   /// Retrieve a string from the asset bundle, parse it with the given function,

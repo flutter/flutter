@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui show instantiateImageCodec, Codec;
@@ -446,28 +445,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     if (response.statusCode != HttpStatus.OK)
       throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
-    final Completer<Uint8List> completer = new Completer<Uint8List>.sync();
-    if (response.contentLength == -1) {
-      final ByteConversionSink sink = new ByteConversionSink.withCallback((List<int> chunk) {
-        completer.complete(new Uint8List.fromList(chunk));
-      });
-      response.listen(sink.add, onDone: sink.close, onError: completer.completeError, cancelOnError: true);
-    } else {
-      final Uint8List bytes = new Uint8List(response.contentLength);
-      int offset = 0;
-      response.listen((List<int> chunk) {
-          for (int i = 0; i < chunk.length; i++, offset++) {
-            bytes[offset] = chunk[i];
-          }
-        },
-        onError: completer.completeError,
-        onDone: () {
-          completer.complete(bytes);
-        },
-        cancelOnError: true,
-      );
-    }
-    final Uint8List bytes = await completer.future;
+    final Uint8List bytes = await const ResponseConverter().convert(response);
     if (bytes.lengthInBytes == 0)
       throw new Exception('NetworkImage is an empty file: $resolved');
 
