@@ -754,7 +754,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
     if (bottomRight.dx > parentBox.size.width - edgeMargin) {
       shift = parentBox.size.width - bottomRight.dx - edgeMargin;
     }
-    shift = (scale == 0.0 ? 0.0 : shift / scale);
+    shift = scale == 0.0 ? 0.0 : shift / scale;
     return shift;
   }
 
