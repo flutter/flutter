@@ -30,7 +30,7 @@ void main() {
       const String address = 'fe80::8eae:4cff:fef4:9247';
       const String interface = 'eno1';
       // Adds some extra junk to make sure the strings will be cleaned up.
-      when(mockRunner.run(any))
+      when(mockRunner.run(typed(any)))
           .thenReturn(<String>['123\n\n\n', '456  ', '789']);
       when(mockRunner.address).thenReturn(address);
       when(mockRunner.interface).thenReturn(interface);
@@ -98,7 +98,7 @@ void main() {
           final MockPeer mp = new MockPeer();
           mockPeerConnections.add(mp);
           uriConnections.add(uri);
-          when(mp.sendRequest(any, any)).thenReturn(
+          when(mp.sendRequest(typed(any), typed(any))).thenReturn(
               new Future<Map<String, dynamic>>(
                   () => flutterViewCannedResponses[flutterViewIndex++]));
           return mp;

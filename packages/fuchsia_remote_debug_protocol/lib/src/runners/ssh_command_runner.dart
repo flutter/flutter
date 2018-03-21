@@ -45,15 +45,22 @@ class SshCommandRunner {
   /// IPv4 nor IPv6. Note that when connecting to a link local address (fe80::
   /// is usually at the start of the address), then an interface should be
   /// supplied.
-  SshCommandRunner({this.address, this.interface = '', this.sshConfigPath})
-      : _processManager = const LocalProcessManager() {
+  SshCommandRunner({
+    this.address,
+    this.interface = '',
+    this.sshConfigPath,
+  }) : _processManager = const LocalProcessManager() {
     validateAddress(address);
   }
 
   /// Private constructor for dependency injection of the process manager.
   @visibleForTesting
-  SshCommandRunner.withProcessManager(this._processManager,
-      {this.address, this.interface = '', this.sshConfigPath}) {
+  SshCommandRunner.withProcessManager(
+    this._processManager, {
+    this.address,
+    this.interface = '',
+    this.sshConfigPath,
+  }) {
     validateAddress(address);
   }
 

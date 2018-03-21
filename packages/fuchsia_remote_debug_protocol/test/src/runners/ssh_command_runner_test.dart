@@ -56,7 +56,7 @@ void main() {
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(captureAny)).captured.single;
+          verify(mockProcessManager.run(typed(captureAny))).captured.single;
       expect(passedCommand, contains('$ipV6Addr%$interface'));
     });
 
@@ -71,7 +71,7 @@ void main() {
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(captureAny)).captured.single;
+          verify(mockProcessManager.run(typed(captureAny))).captured.single;
       expect(passedCommand, contains(ipV6Addr));
     });
 
@@ -113,7 +113,7 @@ void main() {
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(captureAny)).captured.single;
+          verify(mockProcessManager.run(typed(captureAny))).captured.single;
       expect(passedCommand, contains('-F'));
       final int indexOfFlag = passedCommand.indexOf('-F');
       final String passedConfig = passedCommand[indexOfFlag + 1];
@@ -130,7 +130,7 @@ void main() {
       when(mockProcessResult.exitCode).thenReturn(0);
       await runner.run('ls /whatever');
       final List<String> passedCommand =
-          verify(mockProcessManager.run(captureAny)).captured.single;
+          verify(mockProcessManager.run(typed(captureAny))).captured.single;
       final int indexOfFlag = passedCommand.indexOf('-F');
       expect(indexOfFlag, equals(-1));
     });
