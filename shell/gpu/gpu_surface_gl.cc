@@ -4,8 +4,13 @@
 
 #include "gpu_surface_gl.h"
 
+#if OS_MACOSX || OS_IOS
+#include <OpenGLES/ES2/gl.h>
+#include <OpenGLES/ES2/glext.h>
+#else
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#endif
 
 #include "flutter/glue/trace_event.h"
 #include "lib/fxl/arraysize.h"
