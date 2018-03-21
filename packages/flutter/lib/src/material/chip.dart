@@ -18,12 +18,12 @@ import 'theme.dart';
 import 'tooltip.dart';
 
 // Some design constants
-const double _chipHeight = 32.0;
-const double _deleteIconSize = 18.0;
-const int _textLabelAlpha = 0xde;
-const int _deleteIconAlpha = 0xde;
-const int _containerAlpha = 0x14;
-const double _edgePadding = 4.0;
+const double _kChipHeight = 32.0;
+const double _kDeleteIconSize = 18.0;
+const int _kTextLabelAlpha = 0xde;
+const int _kDeleteIconAlpha = 0xde;
+const int _kContainerAlpha = 0x14;
+const double _kEdgePadding = 4.0;
 
 /// A material design chip.
 ///
@@ -53,6 +53,9 @@ const double _edgePadding = 4.0;
 ///  * [CircleAvatar], which shows images or initials of people.
 ///  * <https://material.google.com/components/chips.html>
 class Chip extends StatelessWidget {
+  /// Creates a material design chip
+  ///
+  /// The [label] and [border] arguments may not be null.
   const Chip({
     Key key,
     this.avatar,
@@ -73,12 +76,12 @@ class Chip extends StatelessWidget {
   /// Typically a [CircleAvatar] widget.
   final Widget avatar;
 
-  /// The icon displayed when the [onDeleted] is non-null.
+  /// The icon displayed when [onDeleted] is non-null.
   ///
   /// This has no effect when [onDeleted] is null since no delete icon will be
   /// shown.
   ///
-  /// Defaults to an [Icon] widget set to use [Icons.cancel].
+  /// Defaults to an [Icon] widget containing [Icons.cancel].
   final Widget deleteIcon;
 
   /// The primary content of the chip.
@@ -98,7 +101,8 @@ class Chip extends StatelessWidget {
   /// such as [Text].
   final TextStyle labelStyle;
 
-  /// Color to be used for the chip's background, the default being grey.
+  /// Color to be used for the chip's background, the default is based on the
+  /// ambient [IconTheme].
   ///
   /// This color is used as the background of the container that will hold the
   /// widget's label.
@@ -109,20 +113,10 @@ class Chip extends StatelessWidget {
   /// Defaults to a [StadiumBorder].
   final ShapeBorder border;
 
-  /// Color for delete icon, the default being black.
-  ///
-  /// This has no effect when [onDeleted] or [deleteIcon] are null since no
-  /// delete icon will be shown.
-  ///
-  /// If [deleteIcon] is set to something other than its default, then this
-  /// will have no effect, since the color specified in the [deleteIcon] widget
-  /// will take precedence.
+  /// Color for delete icon. The default is based on the ambient [IconTheme].
   final Color deleteIconColor;
 
   /// Message to be used for the chip delete button's tooltip.
-  ///
-  /// This has no effect when [onDeleted] or [deleteIcon] are null since no
-  /// delete icon will be shown.
   final String deleteButtonTooltipMessage;
 
   @override
@@ -136,35 +130,31 @@ class Chip extends StatelessWidget {
       softWrap: false,
       style: labelStyle ??
           theme.textTheme.body2.copyWith(
-            color: theme.primaryColorDark.withAlpha(_textLabelAlpha),
+            color: theme.primaryColorDark.withAlpha(_kTextLabelAlpha),
           ),
       child: new _ChipRenderWidget(
         theme: new _ChipRenderTheme(
           label: label,
           avatar: avatar,
-          deleteIcon: onDeleted != null ? new Tooltip(
-            message: deleteButtonTooltipMessage ??
-                MaterialLocalizations.of(context).deleteButtonTooltip,
-            child: deleteIcon ??
-                new Icon(
-                  Icons.cancel,
-                  size: _deleteIconSize,
-                  color: deleteIconColor ?? theme.primaryColorDark.withAlpha(_deleteIconAlpha),
+          deleteIcon: onDeleted == null
+              ? null
+              : new Tooltip(
+                  message: deleteButtonTooltipMessage ?? MaterialLocalizations.of(context).deleteButtonTooltip,
+                  child: new IconTheme(
+                    data: theme.iconTheme.copyWith(
+                      color: deleteIconColor ?? theme.iconTheme.color.withAlpha(_kDeleteIconAlpha),
+                    ),
+                    child: deleteIcon ?? const Icon(Icons.cancel, size: _kDeleteIconSize),
+                  ),
                 ),
-          ) : null,
           container: new Container(
             decoration: new ShapeDecoration(
               shape: border,
-              color: backgroundColor ?? theme.primaryColorDark.withAlpha(_containerAlpha),
+              color: backgroundColor ?? theme.primaryColorDark.withAlpha(_kContainerAlpha),
             ),
           ),
-          padding: const EdgeInsetsDirectional.fromSTEB(
-            _edgePadding,
-            _edgePadding,
-            _edgePadding,
-            _edgePadding,
-          ),
-          labelPadding: const EdgeInsetsDirectional.only(start: _edgePadding, end: _edgePadding),
+          padding: const EdgeInsets.all(_kEdgePadding),
+          labelPadding: const EdgeInsets.symmetric(horizontal: _kEdgePadding),
         ),
         key: key,
         onDeleted: Feedback.wrapForTap(onDeleted, context),
@@ -191,7 +181,8 @@ class _ChipRenderWidget extends RenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderChip renderObject) {
     renderObject
       ..theme = theme
-      ..textDirection = Directionality.of(context);
+      ..textDirection = Directionality.of(context)
+      ..onDeleted = onDeleted;
   }
 
   @override
@@ -338,8 +329,8 @@ class _ChipRenderTheme {
   final Widget label;
   final Widget deleteIcon;
   final Widget container;
-  final EdgeInsetsDirectional padding;
-  final EdgeInsetsDirectional labelPadding;
+  final EdgeInsets padding;
+  final EdgeInsets labelPadding;
 
   @override
   bool operator ==(dynamic other) {
@@ -388,12 +379,7 @@ class _RenderChip extends RenderBox {
   // Set this to true to have outlines of the tap targets drawn over
   // the chip.  This should never be checked in while set to 'true'.
   static const bool _debugShowTapTargetOutlines = false;
-  static const EdgeInsetsDirectional _iconPadding = const EdgeInsetsDirectional.fromSTEB(
-    _edgePadding,
-    _edgePadding,
-    _edgePadding,
-    _edgePadding,
-  );
+  static const EdgeInsets _iconPadding = const EdgeInsets.all(_kEdgePadding);
 
   final Map<_ChipSlot, RenderBox> slotToChild = <_ChipSlot, RenderBox>{};
   final Map<RenderBox, _ChipSlot> childToSlot = <RenderBox, _ChipSlot>{};
@@ -401,8 +387,8 @@ class _RenderChip extends RenderBox {
   TapGestureRecognizer _tap;
 
   VoidCallback onDeleted;
-  Rect _deleteButtonRegion;
-  Rect _actionRegion;
+  Rect _deleteButtonRect;
+  Rect _actionRect;
   Offset _tapDownLocation;
 
   RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _ChipSlot slot) {
@@ -497,7 +483,7 @@ class _RenderChip extends RenderBox {
     if (_tapDownLocation == null) {
       return;
     }
-    if (deleteIcon != null && _deleteButtonRegion.contains(_tapDownLocation)) {
+    if (deleteIcon != null && onDeleted != null && _deleteButtonRect.contains(_tapDownLocation)) {
       onDeleted();
     }
   }
@@ -569,8 +555,7 @@ class _RenderChip extends RenderBox {
     // because we add the padding regardless to give extra padding for the label
     // when they're missing.
     final double overallPadding = theme.labelPadding.horizontal + _iconPadding.horizontal * 2.0;
-    return overallPadding + _minWidth(avatar, height) + _minWidth(label, height)
-        + _minWidth(deleteIcon, height);
+    return overallPadding + _minWidth(avatar, height) + _minWidth(label, height) + _minWidth(deleteIcon, height);
   }
 
   @override
@@ -579,15 +564,15 @@ class _RenderChip extends RenderBox {
     // because we add the padding regardless to give extra padding for the label
     // when they're missing.
     final double overallPadding = theme.labelPadding.horizontal + _iconPadding.horizontal * 2.0;
-    return overallPadding + _maxWidth(avatar, height) + _maxWidth(label, height)
-        + _maxWidth(deleteIcon, height);
+    return overallPadding + _maxWidth(avatar, height) + _maxWidth(label, height) + _maxWidth(deleteIcon, height);
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    // This widget is sized to the height of the label only.  The other
-    // widgets are sized to match.
-    return theme.labelPadding.vertical + _minHeight(label, width);
+    // This widget is sized to the height of the label only, as long as it's
+    // larger than _kChipHeight.  The other widgets are sized to match the
+    // label.
+    return math.max(_kChipHeight, theme.labelPadding.vertical + _minHeight(label, width));
   }
 
   @override
@@ -601,17 +586,17 @@ class _RenderChip extends RenderBox {
 
   @override
   void performLayout() {
-    double iconHeight = _chipHeight;
+    double overallHeight = _kChipHeight;
     if (label != null) {
       label.layout(constraints.loosen(), parentUsesSize: true);
       // Now that we know the height, we can determine how much to shrink the
       // constraints by for the "real" layout. Ignored if the constraints are
       // infinite.
-      iconHeight = math.max(iconHeight, _boxSize(label).height);
+      overallHeight = math.max(overallHeight, _boxSize(label).height);
       if (constraints.maxWidth.isFinite) {
         final double allPadding = _iconPadding.horizontal * 2.0 + theme.labelPadding.horizontal;
-        final double iconSizes = (avatar != null ? iconHeight - _iconPadding.horizontal : 0.0)
-            + (deleteIcon != null ? iconHeight - _iconPadding.horizontal : 0.0);
+        final double iconSizes = (avatar != null ? overallHeight - _iconPadding.vertical : 0.0)
+            + (deleteIcon != null ? overallHeight - _iconPadding.vertical : 0.0);
         label.layout(
           constraints.loosen().copyWith(
                 maxWidth: math.max(0.0, constraints.maxWidth - iconSizes - allPadding),
@@ -621,7 +606,7 @@ class _RenderChip extends RenderBox {
       }
     }
     final double labelWidth = theme.labelPadding.horizontal + _boxSize(label).width;
-    final double iconSize = iconHeight - _iconPadding.vertical;
+    final double iconSize = overallHeight - _iconPadding.vertical;
     final BoxConstraints iconConstraints = new BoxConstraints.tightFor(
       width: iconSize,
       height: iconSize,
@@ -637,7 +622,6 @@ class _RenderChip extends RenderBox {
       deleteIconWidth += _boxSize(deleteIcon).width;
     }
     final double overallWidth = avatarWidth + labelWidth + deleteIconWidth;
-    final double overallHeight = iconHeight;
 
     if (container != null) {
       final BoxConstraints containerConstraints = new BoxConstraints.tightFor(
@@ -658,54 +642,59 @@ class _RenderChip extends RenderBox {
 
     switch (textDirection) {
       case TextDirection.rtl:
-        double start = right - _edgePadding;
+        double start = right - _kEdgePadding;
         if (avatar != null) {
           start -= centerLayout(avatar, start - avatar.size.width);
         }
-        start -= _iconPadding.end + theme.labelPadding.start;
+        start -= _iconPadding.left + theme.labelPadding.right;
         if (label != null) {
           start -= centerLayout(label, start - label.size.width);
         }
-        start -= _iconPadding.start + theme.labelPadding.end;
+        start -= _iconPadding.right + theme.labelPadding.left;
         double deleteButtonWidth = 0.0;
         if (deleteIcon != null) {
-          _deleteButtonRegion = new Rect.fromLTWH(0.0, 0.0, iconHeight, iconHeight);
-          deleteButtonWidth = _deleteButtonRegion.width;
+          _deleteButtonRect = new Rect.fromLTWH(
+            0.0,
+            0.0,
+            iconSize + _iconPadding.horizontal,
+            iconSize + _iconPadding.vertical,
+          );
+          deleteButtonWidth = _deleteButtonRect.width;
           start -= centerLayout(deleteIcon, start - deleteIcon.size.width);
         }
         if (avatar != null || label != null) {
-          _actionRegion = new Rect.fromLTWH(
+          _actionRect = new Rect.fromLTWH(
             deleteButtonWidth,
             0.0,
             overallWidth - deleteButtonWidth,
-            iconHeight,
+            overallHeight,
           );
         }
         break;
       case TextDirection.ltr:
-        double start = left + _edgePadding;
+        double start = left + _kEdgePadding;
         if (avatar != null) {
           start += centerLayout(avatar, start);
         }
-        start += _iconPadding.end + theme.labelPadding.start;
+        start += _iconPadding.right + theme.labelPadding.left;
         if (label != null) {
           start += centerLayout(label, start);
         }
-        start += _iconPadding.start + theme.labelPadding.end;
+        start += _iconPadding.left + theme.labelPadding.right;
         if (avatar != null || label != null) {
-          _actionRegion = new Rect.fromLTWH(
+          _actionRect = new Rect.fromLTWH(
             0.0,
             0.0,
-            deleteIcon != null ? (start - _edgePadding) : overallWidth,
-            iconHeight,
+            deleteIcon != null ? (start - _kEdgePadding) : overallWidth,
+            overallHeight,
           );
         }
         if (deleteIcon != null) {
-          _deleteButtonRegion = new Rect.fromLTWH(
-            start - _edgePadding,
+          _deleteButtonRect = new Rect.fromLTWH(
+            start - _kEdgePadding,
             0.0,
-            iconHeight,
-            iconHeight,
+            iconSize + _iconPadding.horizontal,
+            iconSize + _iconPadding.vertical,
           );
           centerLayout(deleteIcon, start);
         }
@@ -734,10 +723,10 @@ class _RenderChip extends RenderBox {
             ..strokeWidth = 1.0
             ..style = PaintingStyle.stroke;
           if (deleteIcon != null) {
-            context.canvas.drawRect(_deleteButtonRegion.shift(offset), outlinePaint);
+            context.canvas.drawRect(_deleteButtonRect.shift(offset), outlinePaint);
           }
           context.canvas.drawRect(
-            _actionRegion.shift(offset),
+            _actionRect.shift(offset),
             outlinePaint..color = const Color(0xff008000),
           );
           return true;
@@ -745,9 +734,7 @@ class _RenderChip extends RenderBox {
 
     doPaint(container);
     doPaint(avatar);
-    if (deleteIcon != null) {
-      doPaint(deleteIcon);
-    }
+    doPaint(deleteIcon);
     doPaint(label);
   }
 
@@ -758,8 +745,7 @@ class _RenderChip extends RenderBox {
   bool hitTestChildren(HitTestResult result, {@required Offset position}) {
     assert(position != null);
     for (RenderBox child in _children) {
-      if (child.hasSize &&
-          child.hitTest(result, position: position - _boxParentData(child).offset)) {
+      if (child.hasSize && child.hitTest(result, position: position - _boxParentData(child).offset)) {
         return true;
       }
     }

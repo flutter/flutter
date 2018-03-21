@@ -69,9 +69,9 @@ class CircleAvatar extends StatelessWidget {
   /// The color with which to fill the circle. Changing the background
   /// color will cause the avatar to animate to the new color.
   ///
-  /// If a background color is not specified, the theme's light primary color
-  /// is used with dark foreground colors, and the dark primary color with light
-  /// foreground colors.
+  /// If a [backgroundColor] is not specified, the theme's
+  /// [ThemeData.primaryColorLight] is used with dark foreground colors, and
+  /// [ThemeData.primaryColorDark] with light foreground colors.
   final Color backgroundColor;
 
   /// The default text color for text in the circle.
@@ -79,9 +79,8 @@ class CircleAvatar extends StatelessWidget {
   /// Defaults to the primary text theme color if no [backgroundColor] is
   /// specified.
   ///
-  /// If a [backgroundColor] is specified, this falls back to the light primary
-  /// color for dark background colors or the dark primary color for light
-  /// background colors.
+  /// Defaults to [ThemeData.primaryColorLight] for dark background colors, and
+  /// [ThemeData.primaryColorDark] for light background colors.
   final Color foregroundColor;
 
   /// The background image of the circle. Changing the background
@@ -93,9 +92,9 @@ class CircleAvatar extends StatelessWidget {
   /// The size of the avatar. Changing the radius will cause the
   /// avatar to animate to the new size.
   ///
-  /// If radius is specified, then [minRadius] and [maxRadius] may not be
-  /// specified. Specifying radius is equivalent to specifying a [minRadius] and
-  /// [maxRadius], both with the value of radius.
+  /// If [radius] is specified, then neither [minRadius] nor [maxRadius] may be
+  /// specified. Specifying [radius] is equivalent to specifying a [minRadius]
+  /// and [maxRadius], both with the value of [radius].
   ///
   /// Defaults to 20 logical pixels.
   final double radius;
@@ -105,7 +104,7 @@ class CircleAvatar extends StatelessWidget {
   /// Changing the minRadius may cause the avatar to animate to the new size, if
   /// constraints allow.
   ///
-  /// If minRadius is specified, then [radius] may not also be specified.
+  /// If minRadius is specified, then [radius] must not also be specified.
   ///
   /// Defaults to zero.
   final double minRadius;
@@ -115,33 +114,32 @@ class CircleAvatar extends StatelessWidget {
   /// Changing the maxRadius will cause the avatar to animate to the new size,
   /// if constraints allow.
   ///
-  /// If maxRadius is specified, then [radius] may not also be specified.
+  /// If maxRadius is specified, then [radius] must not also be specified.
   ///
   /// Defaults to [double.infinity].
   final double maxRadius;
 
+  // The default radius if nothing is specified.
   static const double _defaultRadius = 20.0;
+
+  // The default min if only the max is specified.
   static const double _defaultMinRadius = 0.0;
+
+  // The default max if only the min is specified.
   static const double _defaultMaxRadius = double.infinity;
 
   double get _minDiameter {
-    double minDiameter = _defaultRadius * 2.0;
-    if (radius != null) {
-      minDiameter = radius * 2.0;
-    } else if (minRadius != null || maxRadius != null) {
-      minDiameter = 2.0 * (minRadius ?? _defaultMinRadius);
+    if (radius == null && minRadius == null && maxRadius == null) {
+      return _defaultRadius * 2.0;
     }
-    return minDiameter;
+    return 2.0 * (radius ?? minRadius ?? _defaultMinRadius);
   }
 
   double get _maxDiameter {
-    double maxDiameter = _defaultRadius * 2.0;
-    if (radius != null) {
-      maxDiameter = radius * 2.0;
-    } else if (minRadius != null || maxRadius != null) {
-      maxDiameter = 2.0 * (maxRadius ?? _defaultMaxRadius);
+    if (radius == null && minRadius == null && maxRadius == null) {
+      return _defaultRadius * 2.0;
     }
-    return maxDiameter;
+    return 2.0 * (radius ?? maxRadius ?? _defaultMaxRadius);
   }
 
   @override
@@ -150,22 +148,22 @@ class CircleAvatar extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     TextStyle textStyle = theme.primaryTextTheme.title.copyWith(color: foregroundColor);
     Color effectiveBackgroundColor = backgroundColor;
-    if (effectiveBackgroundColor != null) {
-      switch (ThemeData.estimateBrightnessForColor(backgroundColor)) {
-        case Brightness.dark:
-          textStyle = textStyle.copyWith(color: theme.primaryColorLight);
-          break;
-        case Brightness.light:
-          textStyle = textStyle.copyWith(color: theme.primaryColorDark);
-          break;
-      }
-    } else {
+    if (effectiveBackgroundColor == null) {
       switch (ThemeData.estimateBrightnessForColor(textStyle.color)) {
         case Brightness.dark:
           effectiveBackgroundColor = theme.primaryColorLight;
           break;
         case Brightness.light:
           effectiveBackgroundColor = theme.primaryColorDark;
+          break;
+      }
+    } else if (foregroundColor == null) {
+      switch (ThemeData.estimateBrightnessForColor(backgroundColor)) {
+        case Brightness.dark:
+          textStyle = textStyle.copyWith(color: theme.primaryColorLight);
+          break;
+        case Brightness.light:
+          textStyle = textStyle.copyWith(color: theme.primaryColorDark);
           break;
       }
     }
@@ -184,8 +182,9 @@ class CircleAvatar extends StatelessWidget {
         image: backgroundImage != null ? new DecorationImage(image: backgroundImage) : null,
         shape: BoxShape.circle,
       ),
-      child: child != null
-          ? new Center(
+      child: child == null
+          ? null
+          : new Center(
               child: new MediaQuery(
                 // Need to ignore the ambient textScaleFactor here so that the
                 // text doesn't escape the avatar when the textScaleFactor is large.
@@ -198,8 +197,7 @@ class CircleAvatar extends StatelessWidget {
                   ),
                 ),
               ),
-            )
-          : null,
+            ),
     );
   }
 }
