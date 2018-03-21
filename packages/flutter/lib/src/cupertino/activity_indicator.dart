@@ -22,7 +22,8 @@ class CupertinoActivityIndicator extends StatefulWidget {
     this.animating: true,
     this.radius: _kDefaultIndicatorRadius,
   }) : assert(animating != null),
-       assert(radius != null && radius > 0),
+       assert(radius != null),
+       assert(radius > 0),
        super(key: key);
 
   /// Whether the activity indicator is running its animation.

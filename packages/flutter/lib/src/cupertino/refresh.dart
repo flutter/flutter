@@ -281,7 +281,7 @@ class CupertinoRefreshControl extends StatefulWidget {
 
   /// The amount of overscroll the scrollable must be dragged to trigger a reload.
   ///
-  /// Must not be null, must be larger than 0 and larger than [refreshIndicatorExtent].
+  /// Must not be null, must be larger than 0.0 and larger than [refreshIndicatorExtent].
   ///
   /// When overscrolled past this distance, [onRefresh] will be called if not
   /// null and the [builder] will build in the [RefreshIndicatorMode.armed] state.
@@ -290,8 +290,8 @@ class CupertinoRefreshControl extends StatefulWidget {
   /// The amount of space the refresh indicator sliver will keep holding while
   /// [onRefresh]'s [Future] is still running.
   ///
-  /// Must not be null and must be positive, but can be 0, in which case the
-  /// sliver will start retracting back to 0 as soon as the refresh is started.
+  /// Must not be null and must be positive, but can be 0.0, in which case the
+  /// sliver will start retracting back to 0.0 as soon as the refresh is started.
   ///
   /// Must be smaller than [refreshTriggerPullDistance], since the sliver
   /// shouldn't grow further after triggering the refresh.
@@ -306,7 +306,7 @@ class CupertinoRefreshControl extends StatefulWidget {
   /// Can be set to null, in which case nothing will be drawn in the overscrolled
   /// space.
   ///
-  /// Will not be called when the available space is 0 such as before any
+  /// Will not be called when the available space is zero such as before any
   /// overscroll.
   final RefreshControlIndicatorBuilder builder;
 
@@ -386,8 +386,8 @@ class _CupertinoRefreshControlState extends State<CupertinoRefreshControl> {
   // (which partially gets transfered into the layout extent when the refresh
   // triggers).
   //
-  // The value is independent from the slivers scrollOffset. i.e. it's still
-  // the same when the sliver scrolls away without retracting.
+  // The value of lastIndicatorExtent doesn't change when the sliver scrolls
+  // away without retracting; it is independent from the sliver's scrollOffset.
   double lastIndicatorExtent = 0.0;
   bool hasSliverLayoutExtent = false;
 
