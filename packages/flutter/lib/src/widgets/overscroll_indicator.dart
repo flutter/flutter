@@ -30,6 +30,8 @@ import 'ticker_provider.dart';
 ///
 /// Created automatically by [ScrollBehavior.buildViewportChrome] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication.
+///
+/// In a [MaterialApp], the edge glow color is the [ThemeData.accentColor].
 class GlowingOverscrollIndicator extends StatefulWidget {
   /// Creates a visual indication that a scroll view has overscrolled.
   ///
@@ -108,9 +110,9 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   _GlowingOverscrollIndicatorState createState() => new _GlowingOverscrollIndicatorState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
     String showDescription;
     if (showLeading && showTrailing) {
       showDescription = 'both sides';
@@ -121,8 +123,8 @@ class GlowingOverscrollIndicator extends StatefulWidget {
     } else {
       showDescription = 'neither side (!)';
     }
-    description.add(new MessageProperty('show', showDescription));
-    description.add(new DiagnosticsProperty<Color>('color', color, showName: false));
+    properties.add(new MessageProperty('show', showDescription));
+    properties.add(new DiagnosticsProperty<Color>('color', color, showName: false));
   }
 }
 
@@ -198,7 +200,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         }
       }
     } else if (notification is ScrollEndNotification || notification is ScrollUpdateNotification) {
-      if (notification.dragDetails != null) { // ignore: undefined_getter
+      if ((notification as dynamic).dragDetails != null) {
         _leadingController.scrollEnd();
         _trailingController.scrollEnd();
       }
@@ -306,7 +308,7 @@ class _GlowController extends ChangeNotifier {
   static const Duration _pullTime = const Duration(milliseconds: 167);
   static const Duration _pullHoldTime = const Duration(milliseconds: 167);
   static const Duration _pullDecayTime = const Duration(milliseconds: 2000);
-  static final Duration _crossAxisHalfTime = new Duration(microseconds: (Duration.MICROSECONDS_PER_SECOND / 60.0).round());
+  static final Duration _crossAxisHalfTime = new Duration(microseconds: (Duration.microsecondsPerSecond / 60.0).round());
 
   static const double _maxOpacity = 0.5;
   static const double _pullOpacityGlowFactor = 0.8;
@@ -362,7 +364,7 @@ class _GlowController extends ChangeNotifier {
     _glowOpacityTween.end = math.min(_glowOpacity.value + overscroll / extent * _pullOpacityGlowFactor, _maxOpacity);
     final double height = math.min(extent, crossExtent * _kWidthToHeightFactor);
     _glowSizeTween.begin = _glowSize.value;
-    _glowSizeTween.end = math.max((1.0 - 1.0 / (0.7 * math.sqrt(_pullDistance * height))), _glowSize.value);
+    _glowSizeTween.end = math.max(1.0 - 1.0 / (0.7 * math.sqrt(_pullDistance * height)), _glowSize.value);
     _displacementTarget = crossAxisOffset / crossExtent;
     if (_displacementTarget != _displacement) {
       if (!_displacementTicker.isTicking) {
@@ -477,7 +479,7 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
   /// The direction of the viewport.
   final AxisDirection axisDirection;
 
-  static const double piOver2 = math.PI / 2.0;
+  static const double piOver2 = math.pi / 2.0;
 
   void _paintSide(Canvas canvas, Size size, _GlowController controller, AxisDirection axisDirection, GrowthDirection growthDirection) {
     if (controller == null)

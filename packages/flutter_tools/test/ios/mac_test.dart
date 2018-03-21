@@ -5,10 +5,10 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -19,6 +19,7 @@ import '../src/context.dart';
 
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockFile extends Mock implements File {}
+class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 
 void main() {
   group('IMobileDevice', () {
@@ -40,7 +41,7 @@ void main() {
 
     testUsingContext('getAvailableDeviceIDs throws ToolExit when idevice_id returns non-zero', () async {
       when(mockProcessManager.run(<String>['idevice_id', '-l']))
-          .thenReturn(new ProcessResult(1, 1, '', 'Sad today'));
+          .thenAnswer((_) => new Future<ProcessResult>.value(new ProcessResult(1, 1, '', 'Sad today')));
       expect(() async => await iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -48,7 +49,7 @@ void main() {
 
     testUsingContext('getAvailableDeviceIDs returns idevice_id output when installed', () async {
       when(mockProcessManager.run(<String>['idevice_id', '-l']))
-          .thenReturn(new ProcessResult(1, 0, 'foo', ''));
+          .thenAnswer((_) => new Future<ProcessResult>.value(new ProcessResult(1, 0, 'foo', '')));
       expect(await iMobileDevice.getAvailableDeviceIDs(), 'foo');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -71,7 +72,7 @@ void main() {
         when(mockProcessManager.run(<String>['idevicescreenshot', outputPath],
             environment: null,
             workingDirectory: null
-        )).thenReturn(new ProcessResult(4, 1, '', ''));
+        )).thenAnswer((_) => new Future<ProcessResult>.value(new ProcessResult(4, 1, '', '')));
 
         expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
       }, overrides: <Type, Generator>{
@@ -81,7 +82,7 @@ void main() {
 
       testUsingContext('idevicescreenshot captures and returns screenshot', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
-        when(mockProcessManager.run(any, environment: null, workingDirectory:  null)).thenAnswer(
+        when(mockProcessManager.run(any, environment: null, workingDirectory: null)).thenAnswer(
             (Invocation invocation) => new Future<ProcessResult>.value(new ProcessResult(4, 0, '', '')));
 
         await iMobileDevice.takeScreenshot(mockOutputFile);
@@ -98,9 +99,11 @@ void main() {
   group('Xcode', () {
     MockProcessManager mockProcessManager;
     Xcode xcode;
+    MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
 
     setUp(() {
       mockProcessManager = new MockProcessManager();
+      mockXcodeProjectInterpreter = new MockXcodeProjectInterpreter();
       xcode = new Xcode();
     });
 
@@ -113,7 +116,7 @@ void main() {
     });
 
     testUsingContext('xcodeSelectPath returns path when xcode-select is installed', () {
-      final String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
+      const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
       when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
           .thenReturn(new ProcessResult(1, 0, xcodePath, ''));
       expect(xcode.xcodeSelectPath, xcodePath);
@@ -121,100 +124,47 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('xcodeVersionText returns null when xcodebuild is not installed', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenThrow(const ProcessException('/usr/bin/xcodebuild', const <String>['-version']));
-      expect(xcode.xcodeVersionText, isNull);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('xcodeVersionText returns formatted version text', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
-      expect(xcode.xcodeVersionText, 'Xcode 8.3.3, Build version 8E3004b');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('xcodeVersionText handles Xcode version string with unexpected format', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
-      expect(xcode.xcodeVersionText, 'Xcode Ultra5000, Build version 8E3004b');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('xcodeMajorVersion returns major version', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
-      expect(xcode.xcodeMajorVersion, 8);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('xcodeMajorVersion is null when version has unexpected format', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
-      expect(xcode.xcodeMajorVersion, isNull);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('xcodeMinorVersion returns minor version', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
-      expect(xcode.xcodeMinorVersion, 3);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('xcodeMinorVersion returns 0 when minor version is unspecified', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 8\nBuild version 8E3004b', ''));
-      expect(xcode.xcodeMinorVersion, 0);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('xcodeMinorVersion is null when version has unexpected format', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
-      expect(xcode.xcodeMinorVersion, isNull);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
     testUsingContext('xcodeVersionSatisfactory is false when version is less than minimum', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
-      expect(xcode.xcodeVersionSatisfactory, isFalse);
+      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(8);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(17);
+      expect(xcode.isVersionSatisfactory, isFalse);
     }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
+      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });
 
-    testUsingContext('xcodeVersionSatisfactory is false when version in unknown format', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode SuperHD\nBuild version 7A1001', ''));
-      expect(xcode.xcodeVersionSatisfactory, isFalse);
+    testUsingContext('xcodeVersionSatisfactory is false when xcodebuild tools are not installed', () {
+      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
+      expect(xcode.isVersionSatisfactory, isFalse);
     }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
+      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });
 
     testUsingContext('xcodeVersionSatisfactory is true when version meets minimum', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 9.0\nBuild version 9A235', ''));
-      expect(xcode.xcodeVersionSatisfactory, isTrue);
+      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+      expect(xcode.isVersionSatisfactory, isTrue);
     }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
+      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });
 
-    testUsingContext('xcodeVersionSatisfactory is true when version exceeds minimum', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
-          .thenReturn(new ProcessResult(1, 0, 'Xcode 10.0\nBuild version 10A123', ''));
-      expect(xcode.xcodeVersionSatisfactory, isTrue);
+    testUsingContext('xcodeVersionSatisfactory is true when major version exceeds minimum', () {
+      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+      expect(xcode.isVersionSatisfactory, isTrue);
     }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
+      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+    });
+
+    testUsingContext('xcodeVersionSatisfactory is true when minor version exceeds minimum', () {
+      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(1);
+      expect(xcode.isVersionSatisfactory, isTrue);
+    }, overrides: <Type, Generator>{
+      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });
 
     testUsingContext('eulaSigned is false when clang is not installed', () {
@@ -243,15 +193,12 @@ void main() {
   });
 
   group('Diagnose Xcode build failure', () {
-    BuildableIOSApp app;
+    Map<String, String> buildSettings;
 
     setUp(() {
-      app = new BuildableIOSApp(
-        projectBundleId: 'test.app',
-        buildSettings: <String, String>{
-          'For our purposes': 'a non-empty build settings map is valid',
-        },
-      );
+      buildSettings = <String, String>{
+        'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
+      };
     });
 
     testUsingContext('No provisioning profile shows message', () async {
@@ -313,13 +260,14 @@ Could not build the precompiled application for the device.
 
 Error launching application on iPhone.''',
         xcodeBuildExecution: new XcodeBuildExecution(
-          <String>['xcrun', 'xcodebuild', 'blah'],
-          '/blah/blah',
-          buildForPhysicalDevice: true
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          buildForPhysicalDevice: true,
+          buildSettings: buildSettings,
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult, app);
+      await diagnoseXcodeBuildFailure(buildResult);
       expect(
         testLogger.errorText,
         contains('No Provisioning Profile was found for your project\'s Bundle Identifier or your device.'),
@@ -393,13 +341,14 @@ Xcode's output:
 
 Could not build the precompiled application for the device.''',
         xcodeBuildExecution: new XcodeBuildExecution(
-          <String>['xcrun', 'xcodebuild', 'blah'],
-          '/blah/blah',
-          buildForPhysicalDevice: true
+          buildCommands: <String>['xcrun', 'xcodebuild', 'blah'],
+          appDirectory: '/blah/blah',
+          buildForPhysicalDevice: true,
+          buildSettings: buildSettings,
         ),
       );
 
-      await diagnoseXcodeBuildFailure(buildResult, app);
+      await diagnoseXcodeBuildFailure(buildResult);
       expect(
         testLogger.errorText,
         contains('Building a deployable iOS app requires a selected Development Team with a Provisioning Profile'),

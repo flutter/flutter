@@ -33,14 +33,14 @@ void main() {
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    final Offset firstLocation = const Offset(10.0, 10.0);
+    const Offset firstLocation = const Offset(10.0, 10.0);
     final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     expect(didStartDrag, isTrue);
     didStartDrag = false;
     expect(updatedDragDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    final Offset secondLocation = const Offset(10.0, 9.0);
+    const Offset secondLocation = const Offset(10.0, 9.0);
     await gesture.moveTo(secondLocation);
     expect(didStartDrag, isFalse);
     expect(updatedDragDelta, -1.0);
@@ -60,8 +60,8 @@ void main() {
     int gestureCount = 0;
     double dragDistance = 0.0;
 
-    final Offset downLocation = const Offset(10.0, 10.0);
-    final Offset upLocation = const Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
+    const Offset downLocation = const Offset(10.0, 10.0);
+    const Offset upLocation = const Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
 
     final Widget widget = new GestureDetector(
       onVerticalDragUpdate: (DragUpdateDetails details) { dragDistance += details.primaryDelta; },
@@ -288,7 +288,7 @@ void main() {
     // called; onTap should never be called.
     Future<Null> dragOut(Duration timeout) async {
       final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0));
-      // If the timeout is less than kPressTimout the recognizer will just trigger
+      // If the timeout is less than kPressTimeout the recognizer will just trigger
       // the onTapCancel callback. If the timeout is greater than kLongPressTimeout
       // then onTapDown, onLongPress, and onCancel will be called.
       await tester.pump(timeout);

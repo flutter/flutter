@@ -30,7 +30,7 @@ const Vendor _trevor = const Vendor(
   avatarAsset: 'shrine/vendors/zach.jpg',
   avatarAssetPackage: _kGalleryAssetsPackage,
   description:
-    'Trevor makes great stuff for awesome people like you.  Super cool and extra '
+    'Trevor makes great stuff for awesome people like you. Super cool and extra '
     'awesome all of his shop’s goods are handmade with love. Custom orders are '
     'available upon request if you need something extra special.'
 );
@@ -40,7 +40,7 @@ const Vendor _peter = const Vendor(
   avatarAsset: 'shrine/vendors/peter-carlsson.png',
   avatarAssetPackage: _kGalleryAssetsPackage,
   description:
-    'Peter makes great stuff for awesome people like you.  Super cool and extra '
+    'Peter makes great stuff for awesome people like you. Super cool and extra '
     'awesome all of his shop’s goods are handmade with love. Custom orders are '
     'available upon request if you need something extra special.'
 );
@@ -279,7 +279,7 @@ const List<Product> _allProducts = const <Product> [
     vendor: _stella,
     description:
       'Who says you can’t walk on water? With Surfboard, by Surfboard Supply, '
-      'you can fly on water. This beast is fast and handles like a porsche. '
+      'you can fly on water. This beast is fast and handles like a Porsche. '
       'Hang Ten Bro!'
   )
 ];

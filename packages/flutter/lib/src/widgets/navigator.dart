@@ -433,7 +433,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 ///
 /// There are also widgets which create popup routes, like [PopupMenuButton] and
 /// [DropdownButton]. These widgets create internal subclasses of PopupRoute
-/// and use the Naviagator's push and pop methods to show and dismiss them.
+/// and use the Navigator's push and pop methods to show and dismiss them.
 ///
 /// ### Custom routes
 ///
@@ -966,7 +966,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       if (index + 1 < _history.length) {
         newRoute.didChangeNext(_history[index + 1]);
         _history[index + 1].didChangePrevious(newRoute);
-      } else  {
+      } else {
         newRoute.didChangeNext(null);
       }
       if (index > 0)

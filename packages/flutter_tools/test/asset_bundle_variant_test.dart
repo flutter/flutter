@@ -15,7 +15,7 @@ import 'package:test/test.dart';
 import 'src/common.dart';
 import 'src/context.dart';
 
-void main()  {
+void main() {
   // These tests do not use a memory file system because we want to ensure that
   // asset bundles work correctly on Windows and Posix systems.
   Directory tempDir;
@@ -71,17 +71,17 @@ flutter:
           ..writeAsStringSync(asset);
       }
 
-      AssetBundle bundle = new AssetBundle();
+      AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
 
       // The main asset file, /a/b/c/foo, and its variants exist.
       for (String asset in assets) {
         expect(bundle.entries.containsKey(asset), true);
-        expect(UTF8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
+        expect(utf8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
       }
 
       fs.file('a/b/c/foo').deleteSync();
-      bundle = new AssetBundle();
+      bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
 
       // Now the main asset file, /a/b/c/foo, does not exist. This is OK because
@@ -89,7 +89,7 @@ flutter:
       expect(bundle.entries.containsKey('a/b/c/foo'), false);
       for (String asset in assets.skip(1)) {
         expect(bundle.entries.containsKey(asset), true);
-        expect(UTF8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
+        expect(utf8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
       }
     });
 

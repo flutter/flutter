@@ -218,6 +218,10 @@ class FormField<T> extends StatefulWidget {
 
   /// An optional method that validates an input. Returns an error string to
   /// display if the input is invalid, or null otherwise.
+  ///
+  /// The returned value is exposed by the [FormFieldState.errorText] property.
+  /// The [TextFormField] uses this to override the [InputDecoration.errorText]
+  /// value.
   final FormFieldValidator<T> validator;
 
   /// Function that returns the widget representing this form field. It is

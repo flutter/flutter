@@ -40,39 +40,32 @@ class DriveCommand extends RunCommandBase {
   DriveCommand() {
     requiresPubspecYaml();
 
-    argParser.addFlag(
-      'keep-app-running',
-      defaultsTo: null,
-      negatable: true,
-      help:
-        'Will keep the Flutter application running when done testing.\n'
-        'By default, "flutter drive" stops the application after tests are finished,\n'
-        'and --keep-app-running overrides this. On the other hand, if --use-existing-app\n'
-        'is specified, then "flutter drive" instead defaults to leaving the application\n'
-        'running, and --no-keep-app-running overrides it.'
-    );
-
-    argParser.addOption(
-      'use-existing-app',
-      help:
-        'Connect to an already running instance via the given observatory URL.\n'
-        'If this option is given, the application will not be automatically started,\n'
-        'and it will only be stopped if --no-keep-app-running is explicitly set.',
-      valueHelp:
-        'url'
-    );
-
-    argParser.addOption(
-      'driver',
-      help:
-        'The test file to run on the host (as opposed to the target file to run on\n'
-        'the device). By default, this file has the same base name as the target\n'
-        'file, but in the "test_driver/" directory instead, and with "_test" inserted\n'
-        'just before the extension, so e.g. if the target is "lib/main.dart", the\n'
-        'driver will be "test_driver/main_test.dart".',
-      valueHelp:
-        'path'
-    );
+    argParser
+      ..addFlag('keep-app-running',
+        defaultsTo: null,
+        help: 'Will keep the Flutter application running when done testing.\n'
+              'By default, "flutter drive" stops the application after tests are finished,\n'
+              'and --keep-app-running overrides this. On the other hand, if --use-existing-app\n'
+              'is specified, then "flutter drive" instead defaults to leaving the application\n'
+              'running, and --no-keep-app-running overrides it.',
+      )
+      ..addOption('use-existing-app',
+        help: 'Connect to an already running instance via the given observatory URL.\n'
+              'If this option is given, the application will not be automatically started,\n'
+              'and it will only be stopped if --no-keep-app-running is explicitly set.',
+        valueHelp: 'url',
+      )
+      ..addOption('driver',
+        help: 'The test file to run on the host (as opposed to the target file to run on\n'
+              'the device). By default, this file has the same base name as the target\n'
+              'file, but in the "test_driver/" directory instead, and with "_test" inserted\n'
+              'just before the extension, so e.g. if the target is "lib/main.dart", the\n'
+              'driver will be "test_driver/main_test.dart".',
+        valueHelp: 'path',
+      )
+      ..addFlag('preview-dart-2',
+        defaultsTo: true,
+        help: 'Preview Dart 2.0 functionality.');
   }
 
   @override
@@ -130,7 +123,7 @@ class DriveCommand extends RunCommandBase {
     Cache.releaseLockEarly();
 
     try {
-      await testRunner(<String>[testFile], observatoryUri);
+      await testRunner(<String>[testFile], observatoryUri, argResults['preview-dart-2']);
     } catch (error, stackTrace) {
       if (error is ToolExit)
         rethrow;
@@ -282,19 +275,25 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef Future<Null> TestRunner(List<String> testArgs, String observatoryUri);
+typedef Future<Null> TestRunner(List<String> testArgs, String observatoryUri, bool previewDart2);
 TestRunner testRunner = _runTests;
 void restoreTestRunner() {
   testRunner = _runTests;
 }
 
-Future<Null> _runTests(List<String> testArgs, String observatoryUri) async {
+Future<Null> _runTests(List<String> testArgs, String observatoryUri, bool previewDart2) async {
   printTrace('Running driver tests.');
 
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
   final List<String> args = testArgs.toList()
     ..add('--packages=${PackageMap.globalPackagesPath}')
     ..add('-rexpanded');
+  if (previewDart2) {
+    args.add('--preview-dart-2');
+  } else {
+    args.add('--no-preview-dart-2');
+  }
+
   final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
   final int result = await runCommandAndStreamOutput(
     <String>[dartVmPath]..addAll(dartVmFlags)..addAll(args),

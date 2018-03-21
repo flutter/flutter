@@ -117,7 +117,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     getExampleCode(widget.exampleCodeTag, DefaultAssetBundle.of(context)).then<Null>((String code) {
       if (mounted) {
         setState(() {
-          _exampleCode = code;
+          _exampleCode = code ?? 'Example code not found';
         });
       }
     });
@@ -154,7 +154,10 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     return new Scaffold(
       appBar: new AppBar(
         leading: new IconButton(
-          icon: const Icon(Icons.clear),
+          icon: const Icon(
+            Icons.clear,
+            semanticLabel: 'Close',
+          ),
           onPressed: () { Navigator.pop(context); }
         ),
         title: const Text('Example code')

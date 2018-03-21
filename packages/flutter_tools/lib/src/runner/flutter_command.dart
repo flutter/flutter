@@ -11,6 +11,7 @@ import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -20,6 +21,7 @@ import '../device.dart';
 import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../project.dart';
 import '../usage.dart';
 import 'flutter_command_runner.dart';
 
@@ -59,9 +61,16 @@ class FlutterCommandResult {
 class FlutterOptions {
   static const String kExtraFrontEndOptions = 'extra-front-end-options';
   static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
+  static const String kFileSystemRoot = 'filesystem-root';
+  static const String kFileSystemScheme = 'filesystem-scheme';
 }
 
 abstract class FlutterCommand extends Command<Null> {
+  /// The currently executing command (or sub-command).
+  ///
+  /// Will be `null` until the top-most command has begun execution.
+  static FlutterCommand get current => context[FlutterCommand];
+
   @override
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = new ArgParser(allowTrailingOptions: false);
@@ -156,13 +165,20 @@ abstract class FlutterCommand extends Command<Null> {
   BuildInfo getBuildInfo() {
     final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
         ? argResults['preview-dart-2']
+        : true;
+
+    TargetPlatform targetPlatform;
+    if (argParser.options.containsKey('target-platform') &&
+        argResults['target-platform'] != 'default') {
+      targetPlatform = getTargetPlatformForName(argResults['target-platform']);
+    }
+
+    final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation')
+        ? argResults['track-widget-creation']
         : false;
-    final bool strongMode =  argParser.options.containsKey('strong')
-        ? argResults['strong']
-        : false;
-    if (strongMode == true && previewDart2 == false) {
+    if (trackWidgetCreation == true && previewDart2 == false) {
       throw new UsageException(
-          '--strong is valid only when --preview-dart-2 is specified.', null);
+          '--track-widget-creation is valid only when --preview-dart-2 is specified.', null);
     }
 
     return new BuildInfo(getBuildMode(),
@@ -170,7 +186,7 @@ abstract class FlutterCommand extends Command<Null> {
         ? argResults['flavor']
         : null,
       previewDart2: previewDart2,
-      strongMode: strongMode,
+      trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
           ? argResults[FlutterOptions.kExtraFrontEndOptions]
           : null,
@@ -179,7 +195,13 @@ abstract class FlutterCommand extends Command<Null> {
           : null,
       preferSharedLibrary: argParser.options.containsKey('prefer-shared-library')
         ? argResults['prefer-shared-library']
-        : false);
+        : false,
+      targetPlatform: targetPlatform,
+      fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
+          ? argResults[FlutterOptions.kFileSystemRoot] : null,
+      fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
+          ? argResults[FlutterOptions.kFileSystemScheme] : null,
+    );
   }
 
   void setupApplicationPackages() {
@@ -202,6 +224,8 @@ abstract class FlutterCommand extends Command<Null> {
   @override
   Future<Null> run() async {
     final DateTime startTime = clock.now();
+
+    context.setVariable(FlutterCommand, this);
 
     if (flutterUsage.isFirstRun)
       flutterUsage.printWelcome();
@@ -256,8 +280,10 @@ abstract class FlutterCommand extends Command<Null> {
     if (shouldUpdateCache)
       await cache.updateAll();
 
-    if (shouldRunPub)
+    if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name));
+      new FlutterProject(fs.currentDirectory).ensureReadyForPlatformSpecificTooling();
+    }
 
     setupApplicationPackages();
 
@@ -388,16 +414,6 @@ abstract class FlutterCommand extends Command<Null> {
       final String targetPath = targetFile;
       if (!fs.isFileSync(targetPath))
         throw new ToolExit('Target file "$targetPath" not found.');
-    }
-
-    final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
-        ? argResults['preview-dart-2']
-        : false;
-    final bool strongMode =  argParser.options.containsKey('strong')
-        ? argResults['strong']
-        : false;
-    if (strongMode == true && previewDart2 == false) {
-      throw new ToolExit('--strong is valid only with --preview-dart-2 option.');
     }
   }
 

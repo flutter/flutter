@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 /// Color of the 'magnifier' lens border.
@@ -29,6 +30,14 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 ///    the iOS design specific chrome.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/pickers/>
 class CupertinoPicker extends StatefulWidget {
+  /// Creates a control used for selecting values.
+  ///
+  /// The [diameterRatio] and [itemExtent] arguments must not be null. The
+  /// [itemExtent] must be greater than zero.
+  ///
+  /// The [backgroundColor] defaults to light gray. It can be set to null to
+  /// disable the background painting entirely; this is mildly more efficient
+  /// than using [Colors.transparent].
   const CupertinoPicker({
     Key key,
     this.diameterRatio: _kDefaultDiameterRatio,
@@ -55,6 +64,9 @@ class CupertinoPicker extends StatefulWidget {
   /// Background color behind the children.
   ///
   /// Defaults to a gray color in the iOS color palette.
+  ///
+  /// This can be set to null to disable the background painting entirely; this
+  /// is mildly more efficient than using [Colors.transparent].
   final Color backgroundColor;
 
   /// A [FixedExtentScrollController] to read and control the current item.
@@ -88,10 +100,12 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   int _lastHapticIndex;
 
   void _handleSelectedItemChanged(int index) {
-    if (index != _lastHapticIndex) {
-      // TODO(xster): Insert haptic feedback with lighter knock.
-      // https://github.com/flutter/flutter/issues/13710.
+    // Only the haptic engine hardware on iOS devices would produce the
+    // intended effects.
+    if (defaultTargetPlatform == TargetPlatform.iOS
+        && index != _lastHapticIndex) {
       _lastHapticIndex = index;
+      HapticFeedback.selectionClick();
     }
 
     if (widget.onSelectedItemChanged != null) {
@@ -132,7 +146,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   /// the lens and partially grayed out around it.
   Widget _buildMagnifierScreen() {
     final Color foreground = widget.backgroundColor?.withAlpha(
-      (widget.backgroundColor?.alpha * _kForegroundScreenOpacityFraction).toInt()
+      (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction).toInt()
     );
 
     return new IgnorePointer(
@@ -164,26 +178,30 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
 
   @override
   Widget build(BuildContext context) {
-    return new DecoratedBox(
-      decoration: new BoxDecoration(
-        color: widget.backgroundColor,
-      ),
-      child: new Stack(
-        children: <Widget>[
-          new Positioned.fill(
-            child: new ListWheelScrollView(
-              controller: widget.scrollController,
-              physics: const FixedExtentScrollPhysics(),
-              diameterRatio: widget.diameterRatio,
-              itemExtent: widget.itemExtent,
-              onSelectedItemChanged: _handleSelectedItemChanged,
-              children: widget.children,
-            ),
+    Widget result = new Stack(
+      children: <Widget>[
+        new Positioned.fill(
+          child: new ListWheelScrollView(
+            controller: widget.scrollController,
+            physics: const FixedExtentScrollPhysics(),
+            diameterRatio: widget.diameterRatio,
+            itemExtent: widget.itemExtent,
+            onSelectedItemChanged: _handleSelectedItemChanged,
+            children: widget.children,
           ),
-          _buildGradientScreen(),
-          _buildMagnifierScreen(),
-        ],
-      ),
+        ),
+        _buildGradientScreen(),
+        _buildMagnifierScreen(),
+      ],
     );
+    if (widget.backgroundColor != null) {
+      result = new DecoratedBox(
+        decoration: new BoxDecoration(
+          color: widget.backgroundColor,
+        ),
+        child: result,
+      );
+    }
+    return result;
   }
 }

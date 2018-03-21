@@ -13,6 +13,6 @@ Run `flutter analyze` and attach any output of that command also.
 
 ## Flutter Doctor
 
-Paste the output of running `flutter doctor` here.
+Paste the output of running `flutter doctor -v` here.
 
 > For more information about diagnosing and reporting Flutter bugs, please see [https://flutter.io/bug-reports/](https://flutter.io/bug-reports/).

@@ -26,7 +26,7 @@ void main() {
     testUsingContext('not have extraneous error messages', () async {
       Cache.flutterRoot = '../..';
       return _testFile('trivial_widget', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
-    }, skip: io.Platform.isLinux);  // Flutter on Linux sometimes has problems with font resolution (#7224)
+    }, skip: io.Platform.isLinux); // Flutter on Linux sometimes has problems with font resolution (#7224)
 
     testUsingContext('report nice errors for exceptions thrown within testWidgets()', () async {
       Cache.flutterRoot = '../..';

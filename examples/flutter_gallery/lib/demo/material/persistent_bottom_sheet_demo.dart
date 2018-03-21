@@ -53,18 +53,22 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
     });
   }
 
-  void _showMessage()  {
+  void _showMessage() {
     showDialog<Null>(
       context: context,
-      child: new AlertDialog(
-        content: const Text('You tapped the floating action button.'),
-        actions: <Widget>[
-          new FlatButton(
-            onPressed: () { Navigator.pop(context); },
-            child: const Text('OK')
-          )
-        ]
-      )
+      builder: (BuildContext context) {
+        return new AlertDialog(
+          content: const Text('You tapped the floating action button.'),
+          actions: <Widget>[
+            new FlatButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK')
+            )
+          ],
+        );
+      },
     );
   }
 
@@ -76,7 +80,10 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
       floatingActionButton: new FloatingActionButton(
         onPressed: _showMessage,
         backgroundColor: Colors.redAccent,
-        child: const Icon(Icons.add)
+        child: const Icon(
+          Icons.add,
+          semanticLabel: 'Add',
+        ),
       ),
       body: new Center(
         child: new RaisedButton(

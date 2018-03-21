@@ -111,7 +111,9 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 ///   // Therefore we return false here. If we had fields (set
 ///   // from the constructor) then we would return true if any
 ///   // of them differed from the same fields on the oldDelegate.
+///   @override
 ///   bool shouldRepaint(Sky oldDelegate) => false;
+///   @override
 ///   bool shouldRebuildSemantics(Sky oldDelegate) => false;
 /// }
 /// ```
@@ -468,7 +470,7 @@ class RenderCustomPaint extends RenderProxyBox {
   ///
   /// The compositor contains a raster cache that holds bitmaps of layers in
   /// order to avoid the cost of repeatedly rendering those layers on each
-  /// frame.  If this flag is not set, then the compositor will apply its own
+  /// frame. If this flag is not set, then the compositor will apply its own
   /// heuristics to decide whether the this layer is complex enough to benefit
   /// from caching.
   bool isComplex;
@@ -817,6 +819,24 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.button != null) {
       config.isButton = properties.button;
     }
+    if (properties.textField != null) {
+      config.isTextField = properties.textField;
+    }
+    if (properties.focused != null) {
+      config.isFocused = properties.focused;
+    }
+    if (properties.enabled != null) {
+      config.isEnabled = properties.enabled;
+    }
+    if (properties.inMutuallyExclusiveGroup != null) {
+      config.isInMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup;
+    }
+    if (properties.obscured != null) {
+      config.isObscured = properties.obscured;
+    }
+    if (properties.header != null) {
+      config.isHeader = properties.header;
+    }
     if (properties.label != null) {
       config.label = properties.label;
     }
@@ -876,6 +896,12 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.onSetSelection != null) {
       config.onSetSelection = properties.onSetSelection;
+    }
+    if (properties.onDidGainAccessibilityFocus != null) {
+      config.onDidGainAccessibilityFocus = properties.onDidGainAccessibilityFocus;
+    }
+    if (properties.onDidLoseAccessibilityFocus != null) {
+      config.onDidLoseAccessibilityFocus = properties.onDidLoseAccessibilityFocus;
     }
 
     newChild.updateWith(

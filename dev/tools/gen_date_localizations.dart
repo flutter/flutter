@@ -75,7 +75,7 @@ Future<Null> main(List<String> rawArgs) async {
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file has been automatically generated.  Please do not edit it manually.
+// This file has been automatically generated. Please do not edit it manually.
 // To regenerate run (omit -w to print to console instead of the file):
 // dart --enable-asserts dev/tools/gen_date_localizations.dart --overwrite
 
@@ -85,7 +85,7 @@ Future<Null> main(List<String> rawArgs) async {
   buffer.writeln('const Map<String, dynamic> dateSymbols = const <String, dynamic> {');
   symbolFiles.forEach((String locale, File data) {
     if (materialLocales.contains(locale))
-      buffer.writeln(_jsonToMapEntry(locale, JSON.decode(data.readAsStringSync())));
+      buffer.writeln(_jsonToMapEntry(locale, json.decode(data.readAsStringSync())));
   });
   buffer.writeln('};');
 
@@ -94,7 +94,7 @@ Future<Null> main(List<String> rawArgs) async {
   buffer.writeln('const Map<String, Map<String, String>> datePatterns = const <String, Map<String, String>> {');
   patternFiles.forEach((String locale, File data) {
     if (materialLocales.contains(locale)) {
-      final Map<String, dynamic> patterns = JSON.decode(data.readAsStringSync());
+      final Map<String, dynamic> patterns = json.decode(data.readAsStringSync());
       buffer.writeln("'$locale': const <String, String>{");
       patterns.forEach((String key, dynamic value) {
         assert(value is String);

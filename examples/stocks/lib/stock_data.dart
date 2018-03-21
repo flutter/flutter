@@ -29,9 +29,9 @@ class Stock {
     // FIXME: This class should only have static data, not lastSale, etc.
     // "Symbol","Name","LastSale","MarketCap","IPOyear","Sector","industry","Summary Quote",
     lastSale = 0.0;
-    try{
+    try {
       lastSale = double.parse(fields[2]);
-    } catch(_) {}
+    } catch (_) {}
     symbol = fields[0];
     name = fields[1];
     marketCap = fields[4];
@@ -56,9 +56,9 @@ class StockData extends ChangeNotifier {
 
   bool get loading => _httpClient != null;
 
-  void add(List<List<String>> data) {
-    for (List<String> fields in data) {
-      final Stock stock = new Stock.fromFields(fields);
+  void add(List<dynamic> data) {
+    for (List<dynamic> fields in data) {
+      final Stock stock = new Stock.fromFields(fields.cast<String>());
       _symbols.add(stock.symbol);
       _stocks[stock.symbol] = stock;
     }
@@ -85,7 +85,7 @@ class StockData extends ChangeNotifier {
         _end();
         return;
       }
-      final JsonDecoder decoder = const JsonDecoder();
+      const JsonDecoder decoder = const JsonDecoder();
       add(decoder.convert(json));
       if (_nextChunk < _kChunkCount) {
         _fetchNextChunk();

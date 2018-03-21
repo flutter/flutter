@@ -10,7 +10,7 @@
 /// to the platform.
 ///
 /// The [SemanticsNode] hierarchy represents the semantic structure of the UI
-/// and is used to by the platform-specific accessibility services.
+/// and is used by the platform-specific accessibility services.
 library semantics;
 
 export 'src/semantics/semantics.dart';

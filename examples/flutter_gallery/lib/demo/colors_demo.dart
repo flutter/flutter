@@ -60,20 +60,23 @@ class ColorItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
-      height: kColorItemHeight,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      color: color,
-      child: new SafeArea(
-        top: false,
-        bottom: false,
-        child: new Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            new Text('$prefix$index'),
-            new Text(colorString()),
-          ],
+    return new Semantics(
+      container: true,
+      child: new Container(
+        height: kColorItemHeight,
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        color: color,
+        child: new SafeArea(
+          top: false,
+          bottom: false,
+          child: new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              new Text('$prefix$index'),
+              new Text(colorString()),
+            ],
+          ),
         ),
       ),
     );
@@ -97,7 +100,7 @@ class PaletteTabView extends StatelessWidget {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle whiteTextStyle = textTheme.body1.copyWith(color: Colors.white);
     final TextStyle blackTextStyle = textTheme.body1.copyWith(color: Colors.black);
-    final List<Widget> colorItems =  primaryKeys.map((int index) {
+    final List<Widget> colorItems = primaryKeys.map((int index) {
       return new DefaultTextStyle(
         style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
         child: new ColorItem(index: index, color: colors.primary[index]),

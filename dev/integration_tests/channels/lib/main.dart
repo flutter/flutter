@@ -10,6 +10,7 @@ import 'package:flutter_driver/driver_extension.dart';
 
 import 'src/basic_messaging.dart';
 import 'src/method_calls.dart';
+import 'src/pair.dart';
 import 'src/test_step.dart';
 
 void main() {
@@ -23,6 +24,7 @@ class TestApp extends StatefulWidget {
 }
 
 class _TestAppState extends State<TestApp> {
+  static final dynamic anUnknownValue = new DateTime.fromMillisecondsSinceEpoch(1520777802314);
   static final List<dynamic> aList = <dynamic>[
     false,
     0,
@@ -39,7 +41,7 @@ class _TestAppState extends State<TestApp> {
     'd': 'hello',
     'e': <dynamic>[
       <String, dynamic>{'key': 42}
-    ]
+    ],
   };
   static final Uint8List someUint8s = new Uint8List.fromList(<int>[
     0xBA,
@@ -59,16 +61,20 @@ class _TestAppState extends State<TestApp> {
   ]);
   static final Float64List someFloat64s =
       new Float64List.fromList(<double>[
-    double.NAN,
-    double.NEGATIVE_INFINITY,
-    -double.MAX_FINITE,
-    -double.MIN_POSITIVE,
+    double.nan,
+    double.negativeInfinity,
+    -double.maxFinite,
+    -double.minPositive,
     -0.0,
     0.0,
-    double.MIN_POSITIVE,
-    double.MAX_FINITE,
-    double.INFINITY,
+    double.minPositive,
+    double.maxFinite,
+    double.infinity,
   ]);
+  static final dynamic aCompoundUnknownValue = <dynamic>[
+    anUnknownValue,
+    new Pair(anUnknownValue, aList),
+  ];
   static final List<TestStep> steps = <TestStep>[
     () => methodCallJsonSuccessHandshake(null),
     () => methodCallJsonSuccessHandshake(true),
@@ -83,6 +89,8 @@ class _TestAppState extends State<TestApp> {
     () => methodCallStandardSuccessHandshake('world'),
     () => methodCallStandardSuccessHandshake(aList),
     () => methodCallStandardSuccessHandshake(aMap),
+    () => methodCallStandardSuccessHandshake(anUnknownValue),
+    () => methodCallStandardSuccessHandshake(aCompoundUnknownValue),
     () => methodCallJsonErrorHandshake(null),
     () => methodCallJsonErrorHandshake('world'),
     () => methodCallStandardErrorHandshake(null),
@@ -138,6 +146,8 @@ class _TestAppState extends State<TestApp> {
     () => basicStandardHandshake(<String, dynamic>{}),
     () => basicStandardHandshake(<dynamic, dynamic>{7: true, false: -7}),
     () => basicStandardHandshake(aMap),
+    () => basicStandardHandshake(anUnknownValue),
+    () => basicStandardHandshake(aCompoundUnknownValue),
     () => basicBinaryMessageToUnknownChannel(),
     () => basicStringMessageToUnknownChannel(),
     () => basicJsonMessageToUnknownChannel(),

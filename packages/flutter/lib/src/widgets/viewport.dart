@@ -152,16 +152,16 @@ class Viewport extends MultiChildRenderObjectWidget {
   _ViewportElement createElement() => new _ViewportElement(this);
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
-    description.add(new EnumProperty<AxisDirection>('crossAxisDirection', crossAxisDirection, defaultValue: null));
-    description.add(new DoubleProperty('anchor', anchor));
-    description.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
+    properties.add(new EnumProperty<AxisDirection>('crossAxisDirection', crossAxisDirection, defaultValue: null));
+    properties.add(new DoubleProperty('anchor', anchor));
+    properties.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
     if (center != null) {
-      description.add(new DiagnosticsProperty<Key>('center', center));
+      properties.add(new DiagnosticsProperty<Key>('center', center));
     } else if (children.isNotEmpty && children.first.key != null) {
-      description.add(new DiagnosticsProperty<Key>('center', children.first.key, tooltip: 'implicit'));
+      properties.add(new DiagnosticsProperty<Key>('center', children.first.key, tooltip: 'implicit'));
     }
   }
 }
@@ -290,10 +290,10 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
-    description.add(new EnumProperty<AxisDirection>('crossAxisDirection', crossAxisDirection, defaultValue: null));
-    description.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
+    properties.add(new EnumProperty<AxisDirection>('crossAxisDirection', crossAxisDirection, defaultValue: null));
+    properties.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
   }
 }

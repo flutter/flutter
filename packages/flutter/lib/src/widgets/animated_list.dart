@@ -172,7 +172,7 @@ class AnimatedList extends StatefulWidget {
       'This can happen when the context provided is from the same StatefulWidget that '
       'built the AnimatedList. Please see the AnimatedList documentation for examples '
       'of how to refer to an AnimatedListState object: '
-      '  https://docs.flutter.io/flutter/widgets/AnimatedState-class.html\n'
+      '  https://docs.flutter.io/flutter/widgets/AnimatedListState-class.html \n'
       'The context used was:\n'
       '  $context'
     );
@@ -190,7 +190,7 @@ class AnimatedList extends StatefulWidget {
 /// is needed.
 ///
 /// When an item is removed with [removeItem] its animation is reversed.
-/// The removed item's animation  is passed to the [removeItem] builder
+/// The removed item's animation is passed to the [removeItem] builder
 /// parameter.
 ///
 /// An app that needs to insert or remove items in response to an event

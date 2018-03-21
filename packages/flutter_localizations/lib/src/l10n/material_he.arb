@@ -18,7 +18,7 @@
   "pageRowsInfoTitle": "$lastRow–$firstRow מתוך $rowCount",
   "pageRowsInfoTitleApproximate": "$lastRow–$firstRow מתוך כ-$rowCount",
   "rowsPerPageTitle": "שורות בכל דף:",
-  "tabLabel": "$tabIndex מתוך $tabCount",
+  "tabLabel": "כרטיסייה $tabIndex מתוך $tabCount",
   "selectedRowCountTitleOther": "$selectedRowCount פריטים נבחרו",
   "cancelButtonLabel": "ביטול",
   "closeButtonLabel": "סגירה",
@@ -34,7 +34,7 @@
   "timePickerHourModeAnnouncement": "בחירת שעות",
   "timePickerMinuteModeAnnouncement": "בחירת דקות",
   "signedInLabel": "מחובר",
-  "hideAccountsLabel": "הסתר חשבונות",
-  "showAccountsLabel": "הצג חשבונות",
+  "hideAccountsLabel": "הסתרת החשבונות",
+  "showAccountsLabel": "הצגת החשבונות",
   "modalBarrierDismissLabel": "סגירה"
 }

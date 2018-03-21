@@ -22,8 +22,8 @@ SET snapshot_path=%cache_dir%\flutter_tools.snapshot
 SET stamp_path=%cache_dir%\flutter_tools.stamp
 SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
 SET dart_sdk_path=%cache_dir%\dart-sdk
-SET dart_stamp_path=%cache_dir%\dart-sdk.stamp
-SET dart_version_path=%FLUTTER_ROOT%\bin\internal\dart-sdk.version
+SET engine_stamp=%cache_dir%\engine-dart-sdk.stamp
+SET engine_version_path=%FLUTTER_ROOT%\bin\internal\engine.version
 SET pub_cache_path=%FLUTTER_ROOT%\.pub-cache
 
 SET dart=%dart_sdk_path%\bin\dart.exe
@@ -38,6 +38,9 @@ where /q git || ECHO Error: Unable to find git in your PATH. && EXIT /B 1
 REM  Test if the flutter directory is a git clone, otherwise git rev-parse HEAD would fail
 IF NOT EXIST "%flutter_root%\.git" (
   ECHO Error: The Flutter directory is not a clone of the GitHub project.
+  ECHO        The flutter tool requires Git in order to operate properly;
+  ECHO        to set up Flutter, run the following command:
+  ECHO        git clone -b beta https://github.com/flutter/flutter.git
   EXIT /B 1
 )
 
@@ -63,9 +66,9 @@ GOTO :after_subroutine
   REM The following IF conditions are all linked with a logical OR. However,
   REM there is no OR operator in batch and a GOTO construct is used as replacement.
 
-  IF NOT EXIST "%dart_stamp_path%" GOTO do_sdk_update_and_snapshot
-  SET /P dart_required_version=<"%dart_version_path%"
-  SET /P dart_installed_version=<"%dart_stamp_path%"
+  IF NOT EXIST "%engine_stamp%" GOTO do_sdk_update_and_snapshot
+  SET /P dart_required_version=<"%engine_version_path%"
+  SET /P dart_installed_version=<"%engine_stamp%"
   IF !dart_required_version! NEQ !dart_installed_version! GOTO do_sdk_update_and_snapshot
   IF NOT EXIST "%snapshot_path%" GOTO do_snapshot
   IF NOT EXIST "%stamp_path%" GOTO do_snapshot
@@ -85,7 +88,10 @@ GOTO :after_subroutine
 
   :do_sdk_update_and_snapshot
     ECHO Checking Dart SDK version...
-    CALL PowerShell.exe -ExecutionPolicy Bypass -Command "& '%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1'"
+    SET update_dart_bin=%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1
+    REM Escape apostrophes from the executable path
+    SET "update_dart_bin=!update_dart_bin:'=''!"
+    CALL PowerShell.exe -ExecutionPolicy Bypass -Command "& '%update_dart_bin%'"
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to update Dart SDK. Retrying...
       timeout /t 5 /nobreak

@@ -8,6 +8,7 @@ import 'dart:convert';
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/port_scanner.dart';
 import '../base/process.dart';
@@ -148,7 +149,7 @@ class IOSDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage app, {
+    ApplicationPackage package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -160,11 +161,11 @@ class IOSDevice extends Device {
   }) async {
     if (!prebuiltApplication) {
       // TODO(chinmaygarde): Use mainPath, route.
-      printTrace('Building ${app.name} for $id');
+      printTrace('Building ${package.name} for $id');
 
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
-          app: app,
+          app: package,
           buildInfo: debuggingOptions.buildInfo,
           target: mainPath,
           buildForDevice: true,
@@ -172,17 +173,17 @@ class IOSDevice extends Device {
       );
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');
-        await diagnoseXcodeBuildFailure(buildResult, app);
+        await diagnoseXcodeBuildFailure(buildResult);
         printError('');
         return new LaunchResult.failed();
       }
     } else {
-      if (!await installApp(app))
+      if (!await installApp(package))
         return new LaunchResult.failed();
     }
 
     // Step 2: Check that the application exists at the specified path.
-    final IOSApp iosApp = app;
+    final IOSApp iosApp = package;
     final Directory bundle = fs.directory(iosApp.deviceBundlePath);
     if (!bundle.existsSync()) {
       printError('Could not find the built application bundle at ${bundle.path}.');
@@ -209,6 +210,9 @@ class IOSDevice extends Device {
     if (debuggingOptions.enableSoftwareRendering)
       launchArguments.add('--enable-software-rendering');
 
+    if (debuggingOptions.skiaDeterministicRendering)
+      launchArguments.add('--skia-deterministic-rendering');
+
     if (debuggingOptions.traceSkia)
       launchArguments.add('--trace-skia');
 
@@ -234,6 +238,8 @@ class IOSDevice extends Device {
     int installationResult = -1;
     Uri localObservatoryUri;
 
+    final Status installStatus =
+        logger.startProgress('Installing and launching...', expectSlowOperation: true);
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
       printTrace('Debugging is not enabled');
@@ -242,6 +248,7 @@ class IOSDevice extends Device {
         mapFunction: monitorInstallationFailure,
         trace: true,
       );
+      installStatus.stop();
     } else {
       // Debugging is enabled, look for the observatory server port post launch.
       printTrace('Debugging is enabled, connecting to observatory');
@@ -249,7 +256,7 @@ class IOSDevice extends Device {
       // TODO(danrubel): The Android device class does something similar to this code below.
       // The various Device subclasses should be refactored and common code moved into the superclass.
       final ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(
-        getLogReader(app: app),
+        getLogReader(app: package),
         portForwarder: portForwarder,
         hostPort: debuggingOptions.observatoryPort,
         ipv6: ipv6,
@@ -277,6 +284,7 @@ class IOSDevice extends Device {
         observatoryDiscovery.cancel();
       });
     }
+    installStatus.stop();
 
     if (installationResult != 0) {
       printError('Could not install ${bundle.path} on $id.');
@@ -375,7 +383,7 @@ String decodeSyslog(String line) {
   int decodeOctal(int x, int y, int z) => (x & 0x3) << 6 | (y & 0x7) << 3 | z & 0x7;
 
   try {
-    final List<int> bytes = UTF8.encode(line);
+    final List<int> bytes = utf8.encode(line);
     final List<int> out = <int>[];
     for (int i = 0; i < bytes.length; ) {
       if (bytes[i] != kBackslash || i > bytes.length - 4) {
@@ -399,7 +407,7 @@ String decodeSyslog(String line) {
         i += 4;
       }
     }
-    return UTF8.decode(out);
+    return utf8.decode(out);
   } catch (_) {
     // Unable to decode line: return as-is.
     return line;
@@ -437,8 +445,8 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   void _start() {
     iMobileDevice.startLogger().then<Null>((Process process) {
       _process = process;
-      _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
-      _process.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
+      _process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_onLine);
+      _process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_onLine);
       _process.exitCode.whenComplete(() {
         if (_linesController.hasListener)
           _linesController.close();

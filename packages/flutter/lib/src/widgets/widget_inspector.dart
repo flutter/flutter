@@ -144,6 +144,8 @@ class WidgetInspectorService {
   final Map<Object, String> _objectToId = new Map<Object, String>.identity();
   int _nextId = 0;
 
+  List<String> _pubRootDirectories;
+
   /// Clear all InspectorService object references.
   ///
   /// Use this method only for testing to ensure that object references from one
@@ -190,7 +192,7 @@ class WidgetInspectorService {
       id = 'inspector-$_nextId';
       _nextId += 1;
       _objectToId[object] = id;
-      referenceData =  new _InspectorReferenceData(object);
+      referenceData = new _InspectorReferenceData(object);
       _idToReferenceData[id] = referenceData;
       group.add(referenceData);
     } else {
@@ -258,6 +260,17 @@ class WidgetInspectorService {
     _decrementReferenceCount(referenceData);
   }
 
+  /// Set the list of directories that should be considered part of the local
+  /// project.
+  ///
+  /// The local project directories are used to distinguish widgets created by
+  /// the local project over widgets created from inside the framework.
+  void setPubRootDirectories(List<Object> pubRootDirectories) {
+    _pubRootDirectories = pubRootDirectories.map<String>(
+      (Object directory) => Uri.parse(directory).path,
+    ).toList();
+  }
+
   /// Set the [WidgetInspector] selection to the object matching the specified
   /// id if the object is valid object to set as the inspector selection.
   ///
@@ -321,7 +334,7 @@ class WidgetInspectorService {
     else
       throw new FlutterError('Cannot get parent chain for node of type ${value.runtimeType}');
 
-    return JSON.encode(path.map((_DiagnosticsPathNode node) => _pathNodeToJson(node, groupName)).toList());
+    return json.encode(path.map((_DiagnosticsPathNode node) => _pathNodeToJson(node, groupName)).toList());
   }
 
   Map<String, Object> _pathNodeToJson(_DiagnosticsPathNode pathNode, String groupName) {
@@ -340,7 +353,7 @@ class WidgetInspectorService {
 
   List<_DiagnosticsPathNode> _getRenderObjectParentChain(RenderObject renderObject, String groupName) {
     final List<RenderObject> chain = <RenderObject>[];
-    while(renderObject != null) {
+    while (renderObject != null) {
       chain.add(renderObject);
       renderObject = renderObject.parent;
     }
@@ -353,12 +366,34 @@ class WidgetInspectorService {
     final Map<String, Object> json = node.toJsonMap();
 
     json['objectId'] = toId(node, groupName);
-    json['valueId'] = toId(node.value, groupName);
+    final Object value = node.value;
+    json['valueId'] = toId(value, groupName);
+
+    final _Location creationLocation = _getCreationLocation(value);
+    if (creationLocation != null) {
+      json['creationLocation'] = creationLocation.toJsonMap();
+      if (_isLocalCreationLocation(creationLocation)) {
+        json['createdByLocalProject'] = true;
+      }
+    }
     return json;
   }
 
+  bool _isLocalCreationLocation(_Location location) {
+    if (_pubRootDirectories == null || location == null || location.file == null) {
+      return false;
+    }
+    final String file = Uri.parse(location.file).path;
+    for (String directory in _pubRootDirectories) {
+      if (file.startsWith(directory)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   String _serialize(DiagnosticsNode node, String groupName) {
-    return JSON.encode(_nodeToJson(node, groupName));
+    return json.encode(_nodeToJson(node, groupName));
   }
 
   List<Map<String, Object>> _nodesToJson(Iterable<DiagnosticsNode> nodes, String groupName) {
@@ -371,14 +406,14 @@ class WidgetInspectorService {
   /// object that `diagnosticsNodeId` references.
   String getProperties(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
-    return JSON.encode(_nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), groupName));
+    return json.encode(_nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), groupName));
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
   /// object that `diagnosticsNodeId` references.
   String getChildren(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
-    return JSON.encode(_nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getChildren(), groupName));
+    return json.encode(_nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getChildren(), groupName));
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
@@ -415,6 +450,19 @@ class WidgetInspectorService {
     final Element current = selection?.currentElement;
     return _serialize(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), groupName);
   }
+
+  /// Returns whether [Widget] creation locations are available.
+  ///
+  /// [Widget] creation locations are only available for debug mode builds when
+  /// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0
+  /// is required as injecting creation locations requires a
+  /// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+  bool isWidgetCreationTracked() => new _WidgetForTypeTests() is _HasCreationLocation;
+}
+
+class _WidgetForTypeTests extends Widget {
+  @override
+  Element createElement() => null;
 }
 
 /// A widget that enables inspecting the child widget's structure.
@@ -516,7 +564,14 @@ class _WidgetInspectorState extends State<WidgetInspector>
     Matrix4 transform,
   ) {
     bool hit = false;
-    final Matrix4 inverse = new Matrix4.inverted(transform);
+    Matrix4 inverse;
+    try {
+      inverse = new Matrix4.inverted(transform);
+    } on ArgumentError {
+      // We cannot invert the transform. That means the object doesn't appear on
+      // screen and cannot be hit.
+      return false;
+    }
     final Offset localPosition = MatrixUtils.transformPoint(inverse, position);
 
     final List<DiagnosticsNode> children = object.debugDescribeChildren();
@@ -566,7 +621,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     // Order matches by the size of the hit area.
     double _area(RenderObject object) {
       final Size size = object.semanticBounds?.size;
-      return size == null ? double.MAX_FINITE : size.width * size.height;
+      return size == null ? double.maxFinite : size.width * size.height;
     }
     regularHits.sort((RenderObject a, RenderObject b) => _area(a).compareTo(_area(b)));
     final Set<RenderObject> hits = new LinkedHashSet<RenderObject>();
@@ -656,7 +711,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
       children.add(new Positioned(
         left: _kInspectButtonMargin,
         bottom: _kInspectButtonMargin,
-        child:  widget.selectButtonBuilder(context, _handleEnableSelect)
+        child: widget.selectButtonBuilder(context, _handleEnableSelect)
       ));
     }
     children.add(new _InspectorOverlay(selection: selection));
@@ -775,7 +830,7 @@ class _RenderInspectorOverlay extends RenderBox {
 
   @override
   void performResize() {
-    size = constraints.constrain(const Size(double.INFINITY, double.INFINITY));
+    size = constraints.constrain(const Size(double.infinity, double.infinity));
   }
 
   @override
@@ -905,7 +960,7 @@ class _InspectorOverlayLayer extends Layer {
     final _InspectorOverlayRenderState state = new _InspectorOverlayRenderState(
       overlayRect: overlayRect,
       selected: new _TransformedRect(selected),
-      tooltip:  selection.currentElement.toStringShort(),
+      tooltip: selection.currentElement.toStringShort(),
       textDirection: TextDirection.ltr,
       candidates: candidates,
     );
@@ -954,7 +1009,7 @@ class _InspectorOverlayLayer extends Layer {
     final Rect targetRect = MatrixUtils.transformRect(
         state.selected.transform, state.selected.rect);
     final Offset target = new Offset(targetRect.left, targetRect.center.dy);
-    final double offsetFromWidget = 9.0;
+    const double offsetFromWidget = 9.0;
     final double verticalOffset = (targetRect.height) / 2 + offsetFromWidget;
 
     _paintDescription(canvas, state.tooltip, state.textDirection, target, verticalOffset, size, targetRect);
@@ -1010,7 +1065,7 @@ class _InspectorOverlayLayer extends Layer {
     if (!tooltipBelow)
       wedgeY += tooltipSize.height;
 
-    final double wedgeSize = _kTooltipPadding * 2;
+    const double wedgeSize = _kTooltipPadding * 2;
     double wedgeX = math.max(tipOffset.dx, target.dx) + wedgeSize * 2;
     wedgeX = math.min(wedgeX, tipOffset.dx + tooltipSize.width - wedgeSize * 2);
     final List<Offset> wedge = <Offset>[
@@ -1037,3 +1092,84 @@ const TextStyle _messageStyle = const TextStyle(
   fontSize: 10.0,
   height: 1.2,
 );
+
+/// Interface for classes that track the source code location the their
+/// constructor was called from.
+///
+/// A [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+/// adds this interface to the [Widget] class when the
+/// `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
+/// required as injecting creation locations requires a
+/// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+// ignore: unused_element
+abstract class _HasCreationLocation {
+  _Location get _location;
+}
+
+/// A tuple with file, line, and column number, for displaying human-readable
+/// file locations.
+class _Location {
+  const _Location({
+    this.file,
+    this.line,
+    this.column,
+    this.name,
+    this.parameterLocations
+  });
+
+  /// File path of the location.
+  final String file;
+
+  /// 1-based line number.
+  final int line;
+  /// 1-based column number.
+  final int column;
+
+  /// Optional name of the parameter or function at this location.
+  final String name;
+
+  /// Optional locations of the parameters of the member at this location.
+  final List<_Location> parameterLocations;
+
+  Map<String, Object> toJsonMap() {
+    final Map<String, Object> json = <String, Object>{
+      'file': file,
+      'line': line,
+      'column': column,
+    };
+    if (name != null) {
+      json['name'] = name;
+    }
+    if (parameterLocations != null) {
+      json['parameterLocations'] = parameterLocations.map<Map<String, Object>>(
+          (_Location location) => location.toJsonMap()).toList();
+    }
+    return json;
+  }
+
+  @override
+  String toString() {
+    final List<String> parts = <String>[];
+    if (name != null) {
+      parts.add(name);
+    }
+    if (file != null) {
+      parts.add(file);
+    }
+    parts..add('$line')..add('$column');
+    return parts.join(':');
+  }
+}
+
+/// Returns the creation location of an object if one is available.
+///
+/// Creation locations are only available for debug mode builds when
+/// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
+/// required as injecting creation locations requires a
+/// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+///
+/// Currently creation locations are only available for [Widget] and [Element]
+_Location _getCreationLocation(Object object) {
+  final Object candidate =  object is Element ? object.widget : object;
+  return candidate is _HasCreationLocation ? candidate._location : null;
+}

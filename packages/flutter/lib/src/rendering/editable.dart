@@ -132,12 +132,14 @@ class RenderEditable extends RenderBox {
     this.onSelectionChanged,
     this.onCaretChanged,
     this.ignorePointer: false,
+    bool obscureText: false,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
        assert(textScaleFactor != null),
        assert(offset != null),
        assert(ignorePointer != null),
+       assert(obscureText != null),
        _textPainter = new TextPainter(
          text: text,
          textAlign: textAlign,
@@ -150,7 +152,8 @@ class RenderEditable extends RenderBox {
        _maxLines = maxLines,
        _selectionColor = selectionColor,
        _selection = selection,
-       _offset = offset {
+       _offset = offset,
+       _obscureText = obscureText {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
     _tap = new TapGestureRecognizer(debugOwner: this)
@@ -159,6 +162,9 @@ class RenderEditable extends RenderBox {
     _longPress = new LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
   }
+
+  /// Character used to obscure text if [obscureText] is true.
+  static const String obscuringCharacter = '•';
 
   /// Called when the selection changes.
   SelectionChangedHandler onSelectionChanged;
@@ -174,6 +180,16 @@ class RenderEditable extends RenderBox {
   ///
   /// The default value of this property is false.
   bool ignorePointer;
+
+  /// Whether to hide the text being edited (e.g., for passwords).
+  bool get obscureText => _obscureText;
+  bool _obscureText;
+  set obscureText(bool value) {
+    if (_obscureText == value)
+      return;
+    _obscureText = value;
+    markNeedsSemanticsUpdate();
+  }
 
   Rect _lastCaretRect;
 
@@ -351,7 +367,10 @@ class RenderEditable extends RenderBox {
     super.describeSemanticsConfiguration(config);
 
     config
-      ..value = text.toPlainText()
+      ..value = obscureText
+          ? obscuringCharacter * text.toPlainText().length
+          : text.toPlainText()
+      ..isObscured = obscureText
       ..textDirection = textDirection
       ..isFocused = hasFocus
       ..isTextField = true;
@@ -512,13 +531,13 @@ class RenderEditable extends RenderBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    _layoutText(double.INFINITY);
+    _layoutText(double.infinity);
     return _textPainter.minIntrinsicWidth;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    _layoutText(double.INFINITY);
+    _layoutText(double.infinity);
     return _textPainter.maxIntrinsicWidth;
   }
 
@@ -529,7 +548,7 @@ class RenderEditable extends RenderBox {
   double _preferredHeight(double width) {
     if (maxLines != null)
       return preferredLineHeight * maxLines;
-    if (width == double.INFINITY) {
+    if (width == double.infinity) {
       final String text = _textPainter.text.toPlainText();
       int lines = 1;
       for (int index = 0; index < text.length; index += 1) {
@@ -644,9 +663,9 @@ class RenderEditable extends RenderBox {
     assert(constraintWidth != null);
     if (_textLayoutLastWidth == constraintWidth)
       return;
-    final double caretMargin = _kCaretGap + _kCaretWidth;
+    const double caretMargin = _kCaretGap + _kCaretWidth;
     final double availableWidth = math.max(0.0, constraintWidth - caretMargin);
-    final double maxWidth = _isMultiline ? availableWidth : double.INFINITY;
+    final double maxWidth = _isMultiline ? availableWidth : double.infinity;
     _textPainter.layout(minWidth: availableWidth, maxWidth: maxWidth);
     _textLayoutLastWidth = constraintWidth;
   }
@@ -723,15 +742,15 @@ class RenderEditable extends RenderBox {
   Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Color>('cursorColor', cursorColor));
-    description.add(new DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
-    description.add(new IntProperty('maxLines', maxLines));
-    description.add(new DiagnosticsProperty<Color>('selectionColor', selectionColor));
-    description.add(new DoubleProperty('textScaleFactor', textScaleFactor));
-    description.add(new DiagnosticsProperty<TextSelection>('selection', selection));
-    description.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Color>('cursorColor', cursorColor));
+    properties.add(new DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
+    properties.add(new IntProperty('maxLines', maxLines));
+    properties.add(new DiagnosticsProperty<Color>('selectionColor', selectionColor));
+    properties.add(new DoubleProperty('textScaleFactor', textScaleFactor));
+    properties.add(new DiagnosticsProperty<TextSelection>('selection', selection));
+    properties.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
   }
 
   @override

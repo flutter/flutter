@@ -193,6 +193,7 @@ class IconButton extends StatelessWidget {
 
     Widget result = new Semantics(
       button: true,
+      enabled: onPressed != null,
       child: new ConstrainedBox(
         constraints: const BoxConstraints(minWidth: _kMinButtonSize, minHeight: _kMinButtonSize),
         child: new Padding(
@@ -235,10 +236,10 @@ class IconButton extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Widget>('icon', icon, showName: false));
-    description.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    description.add(new StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Widget>('icon', icon, showName: false));
+    properties.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(new StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
   }
 }

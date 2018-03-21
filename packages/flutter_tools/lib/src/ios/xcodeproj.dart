@@ -5,27 +5,48 @@
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../flx.dart' as flx;
 import '../globals.dart';
 
-final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(\S+)');
+final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = new RegExp(r'\$\((.*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
 }
 
-void updateXcodeGeneratedProperties({
+String _generatedXcodePropertiesPath(String projectPath) {
+  return fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig');
+}
+
+/// Writes default Xcode properties files in the Flutter project at
+/// [projectPath], if such files do not already exist.
+void generateXcodeProperties(String projectPath) {
+  if (fs.file(_generatedXcodePropertiesPath(projectPath)).existsSync())
+    return;
+  updateGeneratedXcodeProperties(
+      projectPath: projectPath,
+      buildInfo: BuildInfo.debug,
+      target: flx.defaultMainPath,
+      previewDart2: false,
+  );
+}
+
+/// Writes or rewrites Xcode property files with the specified information.
+void updateGeneratedXcodeProperties({
   @required String projectPath,
   @required BuildInfo buildInfo,
   @required String target,
-  @required bool hasPlugins,
   @required bool previewDart2,
-  @required bool strongMode,
 }) {
   final StringBuffer localsBuffer = new StringBuffer();
 
@@ -58,28 +79,93 @@ void updateXcodeGeneratedProperties({
   if (previewDart2) {
     localsBuffer.writeln('PREVIEW_DART_2=true');
   }
-  if (strongMode) {
-    localsBuffer.writeln('STRONG=true');
-  }
 
-  // Add dependency to CocoaPods' generated project only if plugins are used.
-  if (hasPlugins)
-    localsBuffer.writeln('#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"');
-
-  final File localsFile = fs.file(fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
+  final File localsFile = fs.file(_generatedXcodePropertiesPath(projectPath));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
 
-Map<String, String> getXcodeBuildSettings(String xcodeProjPath, String target) {
-  final String absProjPath = fs.path.absolute(xcodeProjPath);
-  final String out = runCheckedSync(<String>[
-    '/usr/bin/xcodebuild', '-project', absProjPath, '-target', target, '-showBuildSettings'
-  ]);
+XcodeProjectInterpreter get xcodeProjectInterpreter => context.putIfAbsent(
+  XcodeProjectInterpreter,
+  () => new XcodeProjectInterpreter(),
+);
+
+/// Interpreter of Xcode projects.
+class XcodeProjectInterpreter {
+  static const String _executable = '/usr/bin/xcodebuild';
+  static final RegExp _versionRegex = new RegExp(r'Xcode ([0-9.]+)');
+
+  void _updateVersion() {
+    if (!platform.isMacOS || !fs.file(_executable).existsSync()) {
+      return;
+    }
+    try {
+      final ProcessResult result = processManager.runSync(<String>[_executable, '-version']);
+      if (result.exitCode != 0) {
+        return;
+      }
+      _versionText = result.stdout.trim().replaceAll('\n', ', ');
+      final Match match = _versionRegex.firstMatch(versionText);
+      if (match == null)
+        return;
+      final String version = match.group(1);
+      final List<String> components = version.split('.');
+      _majorVersion = int.parse(components[0]);
+      _minorVersion = components.length == 1 ? 0 : int.parse(components[1]);
+    } on ProcessException {
+      // Ignore: leave values null.
+    }
+  }
+
+  bool get isInstalled => majorVersion != null;
+
+  String _versionText;
+  String get versionText {
+    if (_versionText == null)
+      _updateVersion();
+    return _versionText;
+  }
+
+  int _majorVersion;
+  int get majorVersion {
+    if (_majorVersion == null)
+      _updateVersion();
+    return _majorVersion;
+  }
+
+  int _minorVersion;
+  int get minorVersion {
+    if (_minorVersion == null)
+      _updateVersion();
+    return _minorVersion;
+  }
+
+  Map<String, String> getBuildSettings(String projectPath, String target) {
+    final String out = runCheckedSync(<String>[
+      _executable,
+      '-project',
+      fs.path.absolute(projectPath),
+      '-target',
+      target,
+      '-showBuildSettings'
+    ], workingDirectory: projectPath);
+    return parseXcodeBuildSettings(out);
+  }
+
+  XcodeProjectInfo getInfo(String projectPath) {
+    final String out = runCheckedSync(<String>[
+      _executable, '-list',
+    ], workingDirectory: projectPath);
+    return new XcodeProjectInfo.fromXcodeBuildOutput(out);
+  }
+}
+
+Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
   final Map<String, String> settings = <String, String>{};
-  for (String line in out.split('\n').where(_settingExpr.hasMatch)) {
-    final Match match = _settingExpr.firstMatch(line);
-    settings[match[1]] = match[2];
+  for (Match match in showBuildSettingsOutput.split('\n').map(_settingExpr.firstMatch)) {
+    if (match != null) {
+      settings[match[1]] = match[2];
+    }
   }
   return settings;
 }
@@ -99,13 +185,6 @@ String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettin
 /// Represents the output of `xcodebuild -list`.
 class XcodeProjectInfo {
   XcodeProjectInfo(this.targets, this.buildConfigurations, this.schemes);
-
-  factory XcodeProjectInfo.fromProjectSync(String projectPath) {
-    final String out = runCheckedSync(<String>[
-      '/usr/bin/xcodebuild', '-list',
-    ], workingDirectory: projectPath);
-    return new XcodeProjectInfo.fromXcodeBuildOutput(out);
-  }
 
   factory XcodeProjectInfo.fromXcodeBuildOutput(String output) {
     final List<String> targets = <String>[];

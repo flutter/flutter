@@ -147,7 +147,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
               new CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.horizontalSwipe,
                 checked: _dismissDirection == DismissDirection.horizontal,
-                child: const Text('Hoizontal swipe')
+                child: const Text('Horizontal swipe')
               ),
               new CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.leftSwipe,

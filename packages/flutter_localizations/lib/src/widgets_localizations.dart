@@ -32,11 +32,11 @@ class GlobalWidgetsLocalizations implements WidgetsLocalizations {
 
   // See http://en.wikipedia.org/wiki/Right-to-left
   static const List<String> _rtlLanguages = const <String>[
-    'ar',  // Arabic
-    'fa',  // Farsi
-    'he',  // Hebrew
-    'ps',  // Pashto
-    'ur',  // Urdu
+    'ar', // Arabic
+    'fa', // Farsi
+    'he', // Hebrew
+    'ps', // Pashto
+    'ur', // Urdu
   ];
 
   /// The locale for which the values of this class's localized resources

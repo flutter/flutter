@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:async';
-import 'dart:convert' show UTF8;
+import 'dart:convert' show utf8;
 
 import 'package:quiver/strings.dart';
 
@@ -107,7 +107,7 @@ Future<String> getCodeSigningIdentityDevelopmentTeam({BuildableIOSApp iosApp, bo
   if (!exitsHappy(const <String>['which', 'security']) || !exitsHappy(const <String>['which', 'openssl']))
     return null;
 
-  final List<String> findIdentityCommand =
+  const List<String> findIdentityCommand =
       const <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
   final List<String> validCodeSigningIdentities = runCheckedSync(findIdentityCommand)
       .split('\n')
@@ -146,7 +146,7 @@ Future<String> getCodeSigningIdentityDevelopmentTeam({BuildableIOSApp iosApp, bo
       ..write(signingCertificate)
       ..close();
 
-  final String opensslOutput = await UTF8.decodeStream(opensslProcess.stdout);
+  final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);
   // Fire and forget discard of the stderr stream so we don't hold onto resources.
   // Don't care about the result.
   opensslProcess.stderr.drain<String>(); // ignore: unawaited_futures

@@ -325,7 +325,7 @@ class _BoxDecorationPainter extends BoxPainter {
 
   Paint _cachedBackgroundPaint;
   Rect _rectForCachedBackgroundPaint;
-  Paint _getBackgroundPaint(Rect rect) {
+  Paint _getBackgroundPaint(Rect rect, TextDirection textDirection) {
     assert(rect != null);
     assert(_decoration.gradient != null || _rectForCachedBackgroundPaint == null);
 
@@ -335,7 +335,7 @@ class _BoxDecorationPainter extends BoxPainter {
       if (_decoration.color != null)
         paint.color = _decoration.color;
       if (_decoration.gradient != null) {
-        paint.shader = _decoration.gradient.createShader(rect);
+        paint.shader = _decoration.gradient.createShader(rect, textDirection: textDirection);
         _rectForCachedBackgroundPaint = rect;
       }
       _cachedBackgroundPaint = paint;
@@ -376,7 +376,7 @@ class _BoxDecorationPainter extends BoxPainter {
 
   void _paintBackgroundColor(Canvas canvas, Rect rect, TextDirection textDirection) {
     if (_decoration.color != null || _decoration.gradient != null)
-      _paintBox(canvas, rect, _getBackgroundPaint(rect), textDirection);
+      _paintBox(canvas, rect, _getBackgroundPaint(rect, textDirection), textDirection);
   }
 
   DecorationImagePainter _imagePainter;

@@ -48,12 +48,14 @@ class Tooltip extends StatefulWidget {
     this.padding: const EdgeInsets.symmetric(horizontal: 16.0),
     this.verticalOffset: 24.0,
     this.preferBelow: true,
+    this.excludeFromSemantics: false,
     this.child,
   }) : assert(message != null),
        assert(height != null),
        assert(padding != null),
        assert(verticalOffset != null),
        assert(preferBelow != null),
+       assert(excludeFromSemantics != null),
        super(key: key);
 
   /// The text to display in the tooltip.
@@ -77,6 +79,10 @@ class Tooltip extends StatefulWidget {
   /// direction.
   final bool preferBelow;
 
+  /// Whether the tooltip's [message] should be excluded from the semantics
+  /// tree.
+  final bool excludeFromSemantics;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
@@ -86,11 +92,11 @@ class Tooltip extends StatefulWidget {
   _TooltipState createState() => new _TooltipState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new StringProperty('message', message, showName: false));
-    description.add(new DoubleProperty('vertical offset', verticalOffset));
-    description.add(new FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new StringProperty('message', message, showName: false));
+    properties.add(new DoubleProperty('vertical offset', verticalOffset));
+    properties.add(new FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
   }
 }
 
@@ -191,7 +197,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       onLongPress: _handleLongPress,
       excludeFromSemantics: true,
       child: new Semantics(
-        label: widget.message,
+        label: widget.excludeFromSemantics ? null : widget.message,
         child: widget.child,
       ),
     );

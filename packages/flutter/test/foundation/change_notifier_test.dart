@@ -219,20 +219,48 @@ void main() {
 
     listenableUnderTest = new Listenable.merge(<Listenable>[source1]);
     expect(
-      listenableUnderTest.toString(), 
+      listenableUnderTest.toString(),
       "Listenable.merge([Instance of 'TestNotifier'])",
     );
 
     listenableUnderTest = new Listenable.merge(<Listenable>[source1, source2]);
     expect(
-      listenableUnderTest.toString(), 
+      listenableUnderTest.toString(),
       "Listenable.merge([Instance of 'TestNotifier', Instance of 'TestNotifier'])",
     );
 
     listenableUnderTest = new Listenable.merge(<Listenable>[null, source2]);
     expect(
-      listenableUnderTest.toString(), 
+      listenableUnderTest.toString(),
       "Listenable.merge([null, Instance of 'TestNotifier'])",
     );
   });
+
+  test('hasListeners', () {
+    final HasListenersTester<bool> notifier = new HasListenersTester<bool>(true);
+    expect(notifier.testHasListeners, isFalse);
+    void test1() { }
+    void test2() { }
+    notifier.addListener(test1);
+    expect(notifier.testHasListeners, isTrue);
+    notifier.addListener(test1);
+    expect(notifier.testHasListeners, isTrue);
+    notifier.removeListener(test1);
+    expect(notifier.testHasListeners, isTrue);
+    notifier.removeListener(test1);
+    expect(notifier.testHasListeners, isFalse);
+    notifier.addListener(test1);
+    expect(notifier.testHasListeners, isTrue);
+    notifier.addListener(test2);
+    expect(notifier.testHasListeners, isTrue);
+    notifier.removeListener(test1);
+    expect(notifier.testHasListeners, isTrue);
+    notifier.removeListener(test2);
+    expect(notifier.testHasListeners, isFalse);
+  });
+}
+
+class HasListenersTester<T> extends ValueNotifier<T> {
+  HasListenersTester(T value) : super(value);
+  bool get testHasListeners => hasListeners;
 }

@@ -14,14 +14,10 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../base/utils.dart';
-import '../build_info.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../doctor.dart';
-import '../flx.dart' as flx;
 import '../globals.dart';
-import '../ios/xcodeproj.dart';
-import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
@@ -232,18 +228,9 @@ class CreateCommand extends FlutterCommand {
     printStatus('Wrote $generatedCount files.');
     printStatus('');
 
-    updateXcodeGeneratedProperties(
-      projectPath: appPath,
-      buildInfo: BuildInfo.debug,
-      target: flx.defaultMainPath,
-      hasPlugins: generatePlugin,
-      previewDart2: false,
-      strongMode: false,
-    );
-
     if (argResults['pub']) {
       await pubGet(context: PubContext.create, directory: appPath, offline: argResults['offline']);
-      injectPlugins(directory: appPath);
+      new FlutterProject(fs.directory(appPath)).ensureReadyForPlatformSpecificTooling();
     }
 
     if (android_sdk.androidSdk != null)
@@ -369,15 +356,24 @@ String _createUTIIdentifier(String organization, String name) {
 }
 
 final Set<String> _packageDependencies = new Set<String>.from(<String>[
+  'analyzer',
   'args',
   'async',
   'collection',
   'convert',
+  'crypto',
   'flutter',
+  'flutter_test',
+  'front_end',
   'html',
+  'http',
   'intl',
+  'io',
+  'isolate',
+  'kernel',
   'logging',
   'matcher',
+  'meta',
   'mime',
   'path',
   'plugin',

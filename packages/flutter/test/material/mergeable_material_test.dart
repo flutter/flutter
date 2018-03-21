@@ -381,7 +381,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
   });
 
-  testWidgets('MergeableMaterial separate merge seaparate', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial separate merge separate', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
@@ -1044,7 +1044,7 @@ void main() {
 
   bool isDivider(Widget widget, bool top, bool bottom) {
     final DecoratedBox box = widget;
-    final BorderSide side = const BorderSide(color: const Color(0x1F000000), width: 0.5);
+    const BorderSide side = const BorderSide(color: const Color(0x1F000000), width: 0.5);
 
     return box.decoration == new BoxDecoration(
       border: new Border(

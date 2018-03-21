@@ -45,10 +45,10 @@ class TestPointer {
 
   /// Create a [PointerDownEvent] at the given location.
   ///
-  /// By default, the time stamp on the event is [Duration.ZERO]. You
+  /// By default, the time stamp on the event is [Duration.zero]. You
   /// can give a specific time stamp by passing the `timeStamp`
   /// argument.
-  PointerDownEvent down(Offset newLocation, { Duration timeStamp: Duration.ZERO }) {
+  PointerDownEvent down(Offset newLocation, { Duration timeStamp: Duration.zero }) {
     assert(!isDown);
     _isDown = true;
     _location = newLocation;
@@ -61,10 +61,10 @@ class TestPointer {
 
   /// Create a [PointerMoveEvent] to the given location.
   ///
-  /// By default, the time stamp on the event is [Duration.ZERO]. You
+  /// By default, the time stamp on the event is [Duration.zero]. You
   /// can give a specific time stamp by passing the `timeStamp`
   /// argument.
-  PointerMoveEvent move(Offset newLocation, { Duration timeStamp: Duration.ZERO }) {
+  PointerMoveEvent move(Offset newLocation, { Duration timeStamp: Duration.zero }) {
     assert(isDown);
     final Offset delta = newLocation - location;
     _location = newLocation;
@@ -78,12 +78,12 @@ class TestPointer {
 
   /// Create a [PointerUpEvent].
   ///
-  /// By default, the time stamp on the event is [Duration.ZERO]. You
+  /// By default, the time stamp on the event is [Duration.zero]. You
   /// can give a specific time stamp by passing the `timeStamp`
   /// argument.
   ///
   /// The object is no longer usable after this method has been called.
-  PointerUpEvent up({ Duration timeStamp: Duration.ZERO }) {
+  PointerUpEvent up({ Duration timeStamp: Duration.zero }) {
     assert(isDown);
     _isDown = false;
     return new PointerUpEvent(
@@ -95,12 +95,12 @@ class TestPointer {
 
   /// Create a [PointerCancelEvent].
   ///
-  /// By default, the time stamp on the event is [Duration.ZERO]. You
+  /// By default, the time stamp on the event is [Duration.zero]. You
   /// can give a specific time stamp by passing the `timeStamp`
   /// argument.
   ///
   /// The object is no longer usable after this method has been called.
-  PointerCancelEvent cancel({ Duration timeStamp: Duration.ZERO }) {
+  PointerCancelEvent cancel({ Duration timeStamp: Duration.zero }) {
     assert(isDown);
     _isDown = false;
     return new PointerCancelEvent(
@@ -163,13 +163,13 @@ class TestGesture {
   final TestPointer _pointer;
 
   /// Send a move event moving the pointer by the given offset.
-  Future<Null> moveBy(Offset offset, { Duration timeStamp: Duration.ZERO }) {
+  Future<Null> moveBy(Offset offset, { Duration timeStamp: Duration.zero }) {
     assert(_pointer._isDown);
     return moveTo(_pointer.location + offset, timeStamp: timeStamp);
   }
 
   /// Send a move event moving the pointer to the given location.
-  Future<Null> moveTo(Offset location, { Duration timeStamp: Duration.ZERO }) {
+  Future<Null> moveTo(Offset location, { Duration timeStamp: Duration.zero }) {
     return TestAsyncUtils.guard(() {
       assert(_pointer._isDown);
       return _dispatcher(_pointer.move(location, timeStamp: timeStamp), _result);

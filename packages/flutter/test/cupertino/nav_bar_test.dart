@@ -247,7 +247,7 @@ void main() {
     });
 
     expect(opacities, <double> [
-        1.0, // Smaller font title now visiblee
+        1.0, // Smaller font title now visible
         0.0, // Larger font title invisible.
     ]);
 
@@ -260,7 +260,7 @@ void main() {
     expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 0.0);
   });
 
-  testWidgets('Small title can be overriden', (WidgetTester tester) async {
+  testWidgets('Small title can be overridden', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
     await tester.pumpWidget(
       new WidgetsApp(
@@ -394,6 +394,92 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
 
     expect(find.text('Home page'), findsOneWidget);
+  });
+
+  testWidgets('Border should be displayed by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return const CupertinoNavigationBar(
+                middle: const Text('Title'),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNotNull);
+
+    final BorderSide side = decoration.border.bottom;
+    expect(side, isNotNull);
+  });
+
+  testWidgets('Overrides border color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return const CupertinoNavigationBar(
+                middle: const Text('Title'),
+                border: const Border(
+                  bottom: const BorderSide(
+                    color: const Color(0xFFAABBCC),
+                    width: 0.0,
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNotNull);
+
+    final BorderSide side = decoration.border.bottom;
+    expect(side, isNotNull);
+    expect(side.color, const Color(0xFFAABBCC));
+  });
+
+  testWidgets('Border should not be displayed when null', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return const CupertinoNavigationBar(
+                middle: const Text('Title'),
+                border: null,
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    expect(decoratedBox.decoration.runtimeType, BoxDecoration);
+
+    final BoxDecoration decoration = decoratedBox.decoration;
+    expect(decoration.border, isNull);
   });
 }
 

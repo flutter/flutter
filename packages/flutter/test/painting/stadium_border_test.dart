@@ -10,9 +10,9 @@ import 'common_matchers.dart';
 
 void main() {
   test('StadiumBorder', () {
-    final StadiumBorder c10 = const StadiumBorder(side: const BorderSide(width: 10.0));
-    final StadiumBorder c15 = const StadiumBorder(side: const BorderSide(width: 15.0));
-    final StadiumBorder c20 = const StadiumBorder(side: const BorderSide(width: 20.0));
+    const StadiumBorder c10 = const StadiumBorder(side: const BorderSide(width: 10.0));
+    const StadiumBorder c15 = const StadiumBorder(side: const BorderSide(width: 15.0));
+    const StadiumBorder c20 = const StadiumBorder(side: const BorderSide(width: 20.0));
     expect(c10.dimensions, const EdgeInsets.all(10.0));
     expect(c10.scale(2.0), c20);
     expect(c20.scale(0.5), c10);
@@ -20,9 +20,9 @@ void main() {
     expect(ShapeBorder.lerp(c10, c20, 0.5), c15);
     expect(ShapeBorder.lerp(c10, c20, 1.0), c20);
 
-    final StadiumBorder c1 = const StadiumBorder(side: const BorderSide(width: 1.0));
+    const StadiumBorder c1 = const StadiumBorder(side: const BorderSide(width: 1.0));
     expect(c1.getOuterPath(new Rect.fromCircle(center: Offset.zero, radius: 1.0)), isUnitCircle);
-    final StadiumBorder c2 = const StadiumBorder(side: const BorderSide(width: 1.0));
+    const StadiumBorder c2 = const StadiumBorder(side: const BorderSide(width: 1.0));
     expect(c2.getInnerPath(new Rect.fromCircle(center: Offset.zero, radius: 2.0)), isUnitCircle);
     final Rect rect = new Rect.fromLTRB(10.0, 20.0, 100.0, 200.0);
     expect(
@@ -36,8 +36,8 @@ void main() {
   });
 
   test('StadiumBorder and CircleBorder', () {
-    final StadiumBorder stadium = const StadiumBorder(side: BorderSide.none);
-    final CircleBorder circle = const CircleBorder(side: BorderSide.none);
+    const StadiumBorder stadium = const StadiumBorder(side: BorderSide.none);
+    const CircleBorder circle = const CircleBorder(side: BorderSide.none);
     final Rect rect = new Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
     final Matcher looksLikeS = isPathThat(
       includes: const <Offset>[ const Offset(30.0, 10.0), const Offset(50.0, 10.0), ],
@@ -87,8 +87,8 @@ void main() {
   });
 
   test('StadiumBorder and RoundedRectBorder', () {
-    final StadiumBorder stadium = const StadiumBorder(side: BorderSide.none);
-    final RoundedRectangleBorder rrect = const RoundedRectangleBorder(side: BorderSide.none);
+    const StadiumBorder stadium = const StadiumBorder(side: BorderSide.none);
+    const RoundedRectangleBorder rrect = const RoundedRectangleBorder(side: BorderSide.none);
     final Rect rect = new Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
     final Matcher looksLikeS = isPathThat(
       includes: const <Offset>[

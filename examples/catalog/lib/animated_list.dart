@@ -42,7 +42,7 @@ class _AnimatedListSampleState extends State<AnimatedListSample> {
   }
 
   // Used to build an item after it has been removed from the list. This method is
-  // needed because a removed item remains  visible until its animation has
+  // needed because a removed item remains visible until its animation has
   // completed (even though it's gone as far this ListModel is concerned).
   // The widget will be used by the [AnimatedListState.removeItem] method's
   // [AnimatedListRemovedItemBuilder] parameter.

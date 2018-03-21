@@ -5,6 +5,7 @@
 import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
@@ -42,6 +43,8 @@ class TestSemantics {
     this.decreasedValue: '',
     this.hint: '',
     this.textDirection,
+    this.nextNodeId: -1,
+    this.previousNodeId: -1,
     this.rect,
     this.transform,
     this.textSelection,
@@ -55,6 +58,8 @@ class TestSemantics {
        assert(decreasedValue != null),
        assert(hint != null),
        assert(children != null),
+       assert(nextNodeId != null),
+       assert(previousNodeId != null),
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
@@ -82,6 +87,8 @@ class TestSemantics {
        assert(hint != null),
        rect = TestSemantics.rootRect,
        assert(children != null),
+       nextNodeId = null,
+       previousNodeId = null,
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
@@ -103,6 +110,8 @@ class TestSemantics {
     this.increasedValue: '',
     this.decreasedValue: '',
     this.textDirection,
+    this.nextNodeId: -1,
+    this.previousNodeId: -1,
     this.rect,
     Matrix4 transform,
     this.textSelection,
@@ -117,6 +126,8 @@ class TestSemantics {
        assert(hint != null),
        transform = _applyRootChildScale(transform),
        assert(children != null),
+       assert(nextNodeId != null),
+       assert(previousNodeId != null),
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
 
   /// The unique identifier for this node.
@@ -168,6 +179,14 @@ class TestSemantics {
   /// label is present on the [SemanticsNode], a [SemanticsNode.textDirection]
   /// is also set.
   final TextDirection textDirection;
+
+  /// The ID of the node that is next in the semantics traversal order after
+  /// this node.
+  final int nextNodeId;
+
+  /// The ID of the node that is previous in the semantics traversal order before
+  /// this node.
+  final int previousNodeId;
 
   /// The bounding box for this node in its coordinate system.
   ///
@@ -250,6 +269,10 @@ class TestSemantics {
       return fail('expected node id $id to have hint "$hint" but found hint "${nodeData.hint}".');
     if (textDirection != null && textDirection != nodeData.textDirection)
       return fail('expected node id $id to have textDirection "$textDirection" but found "${nodeData.textDirection}".');
+    if (!ignoreId && nextNodeId != nodeData.nextNodeId)
+      return fail('expected node id $id to have nextNodeId "$nextNodeId" but found "${nodeData.nextNodeId}".');
+    if (!ignoreId && previousNodeId != nodeData.previousNodeId)
+      return fail('expected node id $id to have previousNodeId "$previousNodeId" but found "${nodeData.previousNodeId}".');
     if ((nodeData.label != '' || nodeData.value != '' || nodeData.hint != '' || node.increasedValue != '' || node.decreasedValue != '') && nodeData.textDirection == null)
       return fail('expected node id $id, which has a label, value, or hint, to have a textDirection, but it did not.');
     if (!ignoreRect && rect != nodeData.rect)
@@ -257,7 +280,7 @@ class TestSemantics {
     if (!ignoreTransform && transform != nodeData.transform)
       return fail('expected node id $id to have transform $transform but found transform:\n${nodeData.transform}.');
     if (textSelection?.baseOffset != nodeData.textSelection?.baseOffset || textSelection?.extentOffset != nodeData.textSelection?.extentOffset) {
-      return fail('expected node id $id to have textDirection [${textSelection?.baseOffset}, ${textSelection?.end}] but found: [${nodeData.textSelection?.baseOffset}, ${nodeData.textSelection?.extentOffset}].');
+      return fail('expected node id $id to have textSelection [${textSelection?.baseOffset}, ${textSelection?.end}] but found: [${nodeData.textSelection?.baseOffset}, ${nodeData.textSelection?.extentOffset}].');
     }
     final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
     if (children.length != childrenCount)
@@ -301,6 +324,10 @@ class TestSemantics {
       buf.writeln('$indent  hint: \'$hint\',');
     if (textDirection != null)
       buf.writeln('$indent  textDirection: $textDirection,');
+    if (nextNodeId != null)
+      buf.writeln('$indent  nextNodeId: $nextNodeId,');
+    if (previousNodeId != null)
+      buf.writeln('$indent  previousNodeId: $previousNodeId,');
     if (textSelection?.isValid == true)
       buf.writeln('$indent  textSelection:\n[${textSelection.start}, ${textSelection.end}],');
     if (rect != null)
@@ -327,6 +354,14 @@ class SemanticsTester {
   /// tester.
   SemanticsTester(this.tester) {
     _semanticsHandle = tester.binding.pipelineOwner.ensureSemantics();
+
+    // This _extra_ clean-up is needed for the case when a test fails and
+    // therefore fails to call dispose() explicitly. The test is still required
+    // to call dispose() explicitly, because the semanticsOwner check is
+    // performed irrespective of whether the owner was created via
+    // SemanticsTester or directly. When the test succeeds, this tear-down
+    // becomes a no-op.
+    addTearDown(dispose);
   }
 
   /// The widget tester that this object is testing the semantics of.
@@ -335,10 +370,12 @@ class SemanticsTester {
 
   /// Release resources held by this semantics tester.
   ///
-  /// Call this function at the end of any test that uses a semantics tester.
+  /// Call this function at the end of any test that uses a semantics tester. It
+  /// is OK to call this function multiple times. If the resources have already
+  /// been released, the subsequent calls have no effect.
   @mustCallSuper
   void dispose() {
-    _semanticsHandle.dispose();
+    _semanticsHandle?.dispose();
     _semanticsHandle = null;
   }
 
@@ -358,6 +395,9 @@ class SemanticsTester {
     TextDirection textDirection,
     List<SemanticsAction> actions,
     List<SemanticsFlag> flags,
+    double scrollPosition,
+    double scrollExtentMax,
+    double scrollExtentMin,
     SemanticsNode ancestor,
   }) {
     bool checkNode(SemanticsNode node) {
@@ -379,6 +419,12 @@ class SemanticsTester {
         if (expectedFlags != actualFlags)
           return false;
       }
+      if (scrollPosition != null && !nearEqual(node.scrollPosition, scrollPosition, 0.1))
+        return false;
+      if (scrollExtentMax != null && !nearEqual(node.scrollExtentMax, scrollExtentMax, 0.1))
+        return false;
+      if (scrollExtentMin != null && !nearEqual(node.scrollExtentMin, scrollExtentMin, 0.1))
+        return false;
       return true;
     }
 
@@ -461,6 +507,10 @@ class SemanticsTester {
     return '<SemanticsFlag>[${list.join(', ')}]';
   }
 
+  static String _tagsToSemanticsTagExpression(Set<SemanticsTag> tags) {
+    return '<SemanticsTag>[${tags.map((SemanticsTag tag) => 'const SemanticsTag(\'${tag.name}\')').join(', ')}]';
+  }
+
   static String _actionsToSemanticsActionExpression(dynamic actions) {
     Iterable<SemanticsAction> list;
     if (actions is int) {
@@ -478,23 +528,38 @@ class SemanticsTester {
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = new StringBuffer();
     final SemanticsData nodeData = node.getSemanticsData();
-    buf.writeln('new TestSemantics(');
+    final bool isRoot = node.id == 0;
+    buf.writeln('new TestSemantics${isRoot ? '.root': ''}(');
+    if (!isRoot)
+      buf.writeln('  id: ${node.id},');
+    if (nodeData.tags != null)
+      buf.writeln('  tags: ${_tagsToSemanticsTagExpression(nodeData.tags)},');
     if (nodeData.flags != 0)
       buf.writeln('  flags: ${_flagsToSemanticsFlagExpression(nodeData.flags)},');
     if (nodeData.actions != 0)
       buf.writeln('  actions: ${_actionsToSemanticsActionExpression(nodeData.actions)},');
-    if (node.label != null && node.label.isNotEmpty)
-      buf.writeln('  label: r\'${node.label}\',');
+    if (node.label != null && node.label.isNotEmpty) {
+      final String escapedLabel = node.label.replaceAll('\n', r'\n');
+      if (escapedLabel != node.label) {
+        buf.writeln('  label: r\'$escapedLabel\',');
+      } else {
+        buf.writeln('  label: \'$escapedLabel\',');
+      }
+    }
     if (node.value != null && node.value.isNotEmpty)
-      buf.writeln('  value: r\'${node.value}\',');
+      buf.writeln('  value: \'${node.value}\',');
     if (node.increasedValue != null && node.increasedValue.isNotEmpty)
-      buf.writeln('  increasedValue: r\'${node.increasedValue}\',');
+      buf.writeln('  increasedValue: \'${node.increasedValue}\',');
     if (node.decreasedValue != null && node.decreasedValue.isNotEmpty)
-      buf.writeln('  decreasedValue: r\'${node.decreasedValue}\',');
+      buf.writeln('  decreasedValue: \'${node.decreasedValue}\',');
     if (node.hint != null && node.hint.isNotEmpty)
-      buf.writeln('  hint: r\'${node.hint}\',');
+      buf.writeln('  hint: \'${node.hint}\',');
     if (node.textDirection != null)
       buf.writeln('  textDirection: ${node.textDirection},');
+    if (node.nextNodeId != null && node.nextNodeId != -1)
+      buf.writeln('  nextNodeId: ${node.nextNodeId},');
+    if (node.previousNodeId != null && node.previousNodeId != -1)
+      buf.writeln('  previousNodeId: ${node.previousNodeId},');
 
     if (node.hasChildren) {
       buf.writeln('  children: <TestSemantics>[');
@@ -559,13 +624,19 @@ class _IncludesNodeWith extends Matcher {
     this.textDirection,
     this.actions,
     this.flags,
-}) : assert(label != null || value != null || actions != null || flags != null);
+    this.scrollPosition,
+    this.scrollExtentMax,
+    this.scrollExtentMin,
+}) : assert(label != null || value != null || actions != null || flags != null || scrollPosition != null || scrollExtentMax != null || scrollExtentMin != null);
 
   final String label;
   final String value;
   final TextDirection textDirection;
   final List<SemanticsAction> actions;
   final List<SemanticsFlag> flags;
+  final double scrollPosition;
+  final double scrollExtentMax;
+  final double scrollExtentMin;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -575,6 +646,9 @@ class _IncludesNodeWith extends Matcher {
       textDirection: textDirection,
       actions: actions,
       flags: flags,
+      scrollPosition: scrollPosition,
+      scrollExtentMax: scrollExtentMax,
+      scrollExtentMin: scrollExtentMin,
     ).isNotEmpty;
   }
 
@@ -600,6 +674,12 @@ class _IncludesNodeWith extends Matcher {
       strings.add('actions "${actions.join(', ')}"');
     if (flags != null)
       strings.add('flags "${flags.join(', ')}"');
+    if (scrollPosition != null)
+      strings.add('scrollPosition "$scrollPosition"');
+    if (scrollExtentMax != null)
+      strings.add('scrollExtentMax "$scrollExtentMax"');
+    if (scrollExtentMin != null)
+      strings.add('scrollExtentMin "$scrollExtentMin"');
     return strings.join(', ');
   }
 }
@@ -614,6 +694,9 @@ Matcher includesNodeWith({
   TextDirection textDirection,
   List<SemanticsAction> actions,
   List<SemanticsFlag> flags,
+  double scrollPosition,
+  double scrollExtentMax,
+  double scrollExtentMin,
 }) {
   return new _IncludesNodeWith(
     label: label,
@@ -621,5 +704,8 @@ Matcher includesNodeWith({
     textDirection: textDirection,
     actions: actions,
     flags: flags,
+    scrollPosition: scrollPosition,
+    scrollExtentMax: scrollExtentMax,
+    scrollExtentMin: scrollExtentMin,
   );
 }

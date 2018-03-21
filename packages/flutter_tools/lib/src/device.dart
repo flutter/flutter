@@ -192,6 +192,25 @@ abstract class Device {
   /// Whether it is an emulated device running on localhost.
   Future<bool> get isLocalEmulator;
 
+  /// Whether the device is a simulator on a platform which supports hardware rendering.
+  Future<bool> get supportsHardwareRendering async {
+    assert(await isLocalEmulator);
+    switch (await targetPlatform) {
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+        return true;
+      case TargetPlatform.ios:
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.fuchsia:
+      default:
+        return false;
+    }
+  }
+
   /// Check if a version of the given app is already installed
   Future<bool> isAppInstalled(ApplicationPackage app);
 
@@ -320,6 +339,7 @@ class DebuggingOptions {
   DebuggingOptions.enabled(this.buildInfo, {
     this.startPaused: false,
     this.enableSoftwareRendering: false,
+    this.skiaDeterministicRendering: false,
     this.traceSkia: false,
     this.useTestFonts: false,
     this.observatoryPort,
@@ -330,6 +350,7 @@ class DebuggingOptions {
     useTestFonts = false,
     startPaused = false,
     enableSoftwareRendering = false,
+    skiaDeterministicRendering = false,
     traceSkia = false,
     observatoryPort = null;
 
@@ -338,6 +359,7 @@ class DebuggingOptions {
   final BuildInfo buildInfo;
   final bool startPaused;
   final bool enableSoftwareRendering;
+  final bool skiaDeterministicRendering;
   final bool traceSkia;
   final bool useTestFonts;
   final int observatoryPort;

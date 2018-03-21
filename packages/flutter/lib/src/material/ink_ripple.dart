@@ -141,7 +141,7 @@ class InkRipple extends InteractiveInkFeature {
     _radiusController = new AnimationController(duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
-     // Initial splash diamater is 60% of the target diameter, final
+     // Initial splash diameter is 60% of the target diameter, final
      // diameter is 10dps larger than the target diameter.
     _radius = new Tween<double>(
       begin: _targetRadius * 0.30,
@@ -190,7 +190,7 @@ class InkRipple extends InteractiveInkFeature {
     _radiusController
       ..duration = _kRadiusDuration
       ..forward();
-    // This confirm may have been preceeded by a cancel.
+    // This confirm may have been preceded by a cancel.
     _fadeInController.forward();
     _fadeOutController
       ..animateTo(1.0, duration: _kFadeOutDuration);
@@ -199,9 +199,15 @@ class InkRipple extends InteractiveInkFeature {
   @override
   void cancel() {
     _fadeInController.stop();
-    _fadeOutController
-      ..value = 1.0 - _fadeInController.value
-      ..animateTo(1.0, duration: _kCancelDuration);
+    // Watch out: setting _fadeOutController's value to 1.0 would
+    // trigger a call to _handleAlphaStatusChanged() which would
+    // dispose _fadeOutController.
+    final double _fadeOutValue = 1.0 - _fadeInController.value;
+    if (_fadeOutValue < 1.0) {
+      _fadeOutController
+        ..value = _fadeOutValue
+        ..animateTo(1.0, duration: _kCancelDuration);
+    }
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {

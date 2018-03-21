@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON;
+import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
 
@@ -20,7 +20,7 @@ import 'platform.dart';
 /// "type" key will be set to the string `_extensionType` to indicate
 /// that this is a return value from a service extension, and the
 /// "method" key will be set to the full name of the method.
-typedef Future<Map<String, String>> ServiceExtensionCallback(Map<String, String> parameters);
+typedef Future<Map<String, dynamic>> ServiceExtensionCallback(Map<String, String> parameters);
 
 /// Base class for mixins that provide singleton services (also known as
 /// "bindings").
@@ -135,7 +135,7 @@ abstract class BindingBase {
             }
             await reassembleApplication();
           }
-          return <String, String>{
+          return <String, dynamic>{
             'value': defaultTargetPlatform
                      .toString()
                      .substring('$TargetPlatform.'.length),
@@ -248,7 +248,7 @@ abstract class BindingBase {
       name: name,
       callback: (Map<String, String> parameters) async {
         await callback();
-        return <String, String>{};
+        return <String, dynamic>{};
       }
     );
   }
@@ -279,7 +279,7 @@ abstract class BindingBase {
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey('enabled'))
           await setter(parameters['enabled'] == 'true');
-        return <String, String>{ 'enabled': await getter() ? 'true' : 'false' };
+        return <String, dynamic>{ 'enabled': await getter() ? 'true' : 'false' };
       }
     );
   }
@@ -309,7 +309,7 @@ abstract class BindingBase {
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey(name))
           await setter(double.parse(parameters[name]));
-        return <String, String>{ name: (await getter()).toString() };
+        return <String, dynamic>{ name: (await getter()).toString() };
       }
     );
   }
@@ -338,7 +338,7 @@ abstract class BindingBase {
       callback: (Map<String, String> parameters) async {
         if (parameters.containsKey('value'))
           await setter(parameters['value']);
-        return <String, String>{ 'value': await getter() };
+        return <String, dynamic>{ 'value': await getter() };
       }
     );
   }
@@ -348,7 +348,7 @@ abstract class BindingBase {
   /// extension method is called. The callback must return a [Future]
   /// that either eventually completes to a return value in the form
   /// of a name/value map where the values can all be converted to
-  /// JSON using `JSON.encode()` (see [JsonCodec.encode]), or fails. In case of failure, the
+  /// JSON using `json.encode()` (see [JsonEncoder]), or fails. In case of failure, the
   /// failure is reported to the remote caller and is dumped to the
   /// logs.
   ///
@@ -365,7 +365,7 @@ abstract class BindingBase {
       assert(method == methodName);
       dynamic caughtException;
       StackTrace caughtStack;
-      Map<String, String> result;
+      Map<String, dynamic> result;
       try {
         result = await callback(parameters);
       } catch (exception, stack) {
@@ -375,7 +375,7 @@ abstract class BindingBase {
       if (caughtException == null) {
         result['type'] = '_extensionType';
         result['method'] = method;
-        return new developer.ServiceExtensionResponse.result(JSON.encode(result));
+        return new developer.ServiceExtensionResponse.result(json.encode(result));
       } else {
         FlutterError.reportError(new FlutterErrorDetails(
           exception: caughtException,
@@ -384,7 +384,7 @@ abstract class BindingBase {
         ));
         return new developer.ServiceExtensionResponse.error(
           developer.ServiceExtensionResponse.extensionError,
-          JSON.encode(<String, String>{
+          json.encode(<String, String>{
             'exception': caughtException.toString(),
             'stack': caughtStack.toString(),
             'method': method,

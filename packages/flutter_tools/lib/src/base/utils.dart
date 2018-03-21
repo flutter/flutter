@@ -15,27 +15,38 @@ import 'context.dart';
 import 'file_system.dart';
 import 'platform.dart';
 
+const BotDetector _kBotDetector = const BotDetector();
+
+class BotDetector {
+  const BotDetector();
+
+  bool get isRunningOnBot {
+    return
+      platform.environment['BOT'] == 'true' ||
+
+          // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+          platform.environment['TRAVIS'] == 'true' ||
+          platform.environment['CONTINUOUS_INTEGRATION'] == 'true' ||
+          platform.environment.containsKey('CI') || // Travis and AppVeyor
+
+          // https://www.appveyor.com/docs/environment-variables/
+          platform.environment.containsKey('APPVEYOR') ||
+
+          // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+          (platform.environment.containsKey('AWS_REGION') && platform.environment.containsKey('CODEBUILD_INITIATOR')) ||
+
+          // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
+          platform.environment.containsKey('JENKINS_URL') ||
+
+          // Properties on Flutter's Chrome Infra bots.
+          platform.environment['CHROME_HEADLESS'] == '1' ||
+          platform.environment.containsKey('BUILDBOT_BUILDERNAME');
+  }
+}
+
 bool get isRunningOnBot {
-  return
-    platform.environment['BOT'] == 'true' ||
-
-    // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
-    platform.environment['TRAVIS'] == 'true' ||
-    platform.environment['CONTINUOUS_INTEGRATION'] == 'true' ||
-    platform.environment.containsKey('CI') || // Travis and AppVeyor
-
-    // https://www.appveyor.com/docs/environment-variables/
-    platform.environment.containsKey('APPVEYOR') ||
-
-    // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
-    (platform.environment.containsKey('AWS_REGION') && platform.environment.containsKey('CODEBUILD_INITIATOR')) ||
-
-    // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
-    platform.environment.containsKey('JENKINS_URL') ||
-
-    // Properties on Flutter's Chrome Infra bots.
-    platform.environment['CHROME_HEADLESS'] == '1' ||
-    platform.environment.containsKey('BUILDBOT_BUILDERNAME');
+  final BotDetector botDetector = context?.getVariable(BotDetector) ?? _kBotDetector;
+  return botDetector.isRunningOnBot;
 }
 
 String hex(List<int> bytes) {
@@ -103,7 +114,7 @@ final NumberFormat kSecondsFormat = new NumberFormat('0.0');
 final NumberFormat kMillisecondsFormat = new NumberFormat.decimalPattern();
 
 String getElapsedAsSeconds(Duration duration) {
-  final double seconds = duration.inMilliseconds / Duration.MILLISECONDS_PER_SECOND;
+  final double seconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
   return '${kSecondsFormat.format(seconds)}s';
 }
 
@@ -115,7 +126,7 @@ String getElapsedAsMilliseconds(Duration duration) {
 /// absolute path.
 String getDisplayPath(String fullPath) {
   final String cwd = fs.currentDirectory.path + fs.path.separator;
-  return fullPath.startsWith(cwd) ?  fullPath.substring(cwd.length) : fullPath;
+  return fullPath.startsWith(cwd) ? fullPath.substring(cwd.length) : fullPath;
 }
 
 /// A class to maintain a list of items, fire events when items are added or
@@ -207,7 +218,7 @@ class Uuid {
       '${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}-'
           '${_bitsDigits(16, 4)}-'
           '4${_bitsDigits(12, 3)}-'
-          '${_printDigits(special,  1)}${_bitsDigits(12, 3)}-'
+          '${_printDigits(special, 1)}${_bitsDigits(12, 3)}-'
           '${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}';
   }
 
@@ -228,7 +239,7 @@ typedef Future<Null> AsyncCallback();
 ///   - has a different initial value for the first callback delay
 ///   - waits for a callback to be complete before it starts the next timer
 class Poller {
-  Poller(this.callback, this.pollingInterval, { this.initialDelay: Duration.ZERO }) {
+  Poller(this.callback, this.pollingInterval, { this.initialDelay: Duration.zero }) {
     new Future<Null>.delayed(initialDelay, _handleCallback);
   }
 

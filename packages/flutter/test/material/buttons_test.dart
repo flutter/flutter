@@ -172,8 +172,8 @@ void main() {
   // This test is very similar to the '...explicit splashColor and highlightColor' test
   // in icon_button_test.dart. If you change this one, you may want to also change that one.
   testWidgets('MaterialButton with explicit splashColor and highlightColor', (WidgetTester tester) async {
-    final Color directSplashColor = const Color(0xFF000011);
-    final Color directHighlightColor = const Color(0xFF000011);
+    const Color directSplashColor = const Color(0xFF000011);
+    const Color directHighlightColor = const Color(0xFF000011);
 
     Widget buttonWidget = new Material(
       child: new Center(
@@ -200,15 +200,25 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
+    final Rect expectedClipRect = new Rect.fromLTRB(356.0, 282.0, 444.0, 318.0);
+    final Path expectedClipPath = new Path()
+     ..addRRect(new RRect.fromRectAndRadius(
+         expectedClipRect,
+         const Radius.circular(2.0),
+     ));
     expect(
       Material.of(tester.element(find.byType(MaterialButton))),
       paints
+        ..clipPath(pathMatcher: coversSameAreaAs(
+            expectedClipPath,
+            areaToCompare: expectedClipRect.inflate(10.0),
+        ))
         ..circle(color: directSplashColor)
-        ..rrect(color: directHighlightColor)
+        ..rect(color: directHighlightColor)
     );
 
-    final Color themeSplashColor1 = const Color(0xFF001100);
-    final Color themeHighlightColor1 = const Color(0xFF001100);
+    const Color themeSplashColor1 = const Color(0xFF001100);
+    const Color themeHighlightColor1 = const Color(0xFF001100);
 
     buttonWidget = new Material(
       child: new Center(
@@ -234,12 +244,16 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(MaterialButton))),
       paints
+        ..clipPath(pathMatcher: coversSameAreaAs(
+            expectedClipPath,
+            areaToCompare: expectedClipRect.inflate(10.0),
+        ))
         ..circle(color: themeSplashColor1)
-        ..rrect(color: themeHighlightColor1)
+        ..rect(color: themeHighlightColor1)
     );
 
-    final Color themeSplashColor2 = const Color(0xFF002200);
-    final Color themeHighlightColor2 = const Color(0xFF002200);
+    const Color themeSplashColor2 = const Color(0xFF002200);
+    const Color themeHighlightColor2 = const Color(0xFF002200);
 
     await tester.pumpWidget(
       new Directionality(
@@ -258,7 +272,7 @@ void main() {
       Material.of(tester.element(find.byType(MaterialButton))),
       paints
         ..circle(color: themeSplashColor2)
-        ..rrect(color: themeHighlightColor2)
+        ..rect(color: themeHighlightColor2)
     );
 
     await gesture.up();
@@ -342,5 +356,4 @@ void main() {
 
     semantics.dispose();
   });
-
 }

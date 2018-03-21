@@ -76,9 +76,9 @@ void main() {
     final PushRouteObserver observer = new PushRouteObserver();
     WidgetsBinding.instance.addObserver(observer);
 
-    final String testRouteName = 'testRouteName';
+    const String testRouteName = 'testRouteName';
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
-      new MethodCall('pushRoute', testRouteName));
+      const MethodCall('pushRoute', testRouteName));
     await BinaryMessages.handlePlatformMessage('flutter/navigation', message, (_) {});
     expect(observer.pushedRoute, testRouteName);
 

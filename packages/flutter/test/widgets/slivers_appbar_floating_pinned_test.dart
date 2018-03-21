@@ -15,12 +15,12 @@ void main() {
           data: const MediaQueryData(),
           child: new CustomScrollView(
             controller: controller,
-            slivers: <Widget>[
+            slivers: const <Widget>[
               const SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: const Text('A')),
               const SliverAppBar(primary: false, pinned: true, title: const Text('B')),
-              new SliverList(
-                delegate: new SliverChildListDelegate(
-                  <Widget>[
+              const SliverList(
+                delegate: const SliverChildListDelegate(
+                  const <Widget>[
                     const Text('C'),
                     const Text('D'),
                     const SizedBox(height: 500.0),

@@ -12,7 +12,6 @@ import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-
 import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
@@ -93,8 +92,13 @@ class SemanticsData extends Diagnosticable {
     @required this.decreasedValue,
     @required this.hint,
     @required this.textDirection,
+    @required this.nextNodeId,
+    @required this.previousNodeId,
     @required this.rect,
     @required this.textSelection,
+    @required this.scrollPosition,
+    @required this.scrollExtentMax,
+    @required this.scrollExtentMin,
     this.tags,
     this.transform,
   }) : assert(flags != null),
@@ -148,9 +152,49 @@ class SemanticsData extends Diagnosticable {
   /// [increasedValue], and [decreasedValue].
   final TextDirection textDirection;
 
+  /// The index indicating the ID of the next node in the traversal order after
+  /// this node for the platform's accessibility services.
+  final int nextNodeId;
+
+  /// The index indicating the ID of the previous node in the traversal order before
+  /// this node for the platform's accessibility services.
+  final int previousNodeId;
+
   /// The currently selected text (or the position of the cursor) within [value]
   /// if this node represents a text field.
   final TextSelection textSelection;
+
+  /// Indicates the current scrolling position in logical pixels if the node is
+  /// scrollable.
+  ///
+  /// The properties [scrollExtentMin] and [scrollExtentMax] indicate the valid
+  /// in-range values for this property. The value for [scrollPosition] may
+  /// (temporarily) be outside that range, e.g. during an overscroll.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.pixels], from where this value is usually taken.
+  final double scrollPosition;
+
+  /// Indicates the maximum in-range value for [scrollPosition] if the node is
+  /// scrollable.
+  ///
+  /// This value may be infinity if the scroll is unbound.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.maxScrollExtent], from where this value is usually taken.
+  final double scrollExtentMax;
+
+  /// Indicates the minimum in-range value for [scrollPosition] if the node is
+  /// scrollable.
+  ///
+  /// This value may be infinity if the scroll is unbound.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.minScrollExtent], from where this value is usually taken.
+  final double scrollExtentMin;
 
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
@@ -198,8 +242,13 @@ class SemanticsData extends Diagnosticable {
     properties.add(new StringProperty('decreasedValue', decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new IntProperty('nextNodeId', nextNodeId, defaultValue: null));
+    properties.add(new IntProperty('previousNodeId', previousNodeId, defaultValue: null));
     if (textSelection?.isValid == true)
-      properties.add(new MessageProperty('text selection', '[${textSelection.start}, ${textSelection.end}]'));
+      properties.add(new MessageProperty('textSelection', '[${textSelection.start}, ${textSelection.end}]'));
+    properties.add(new DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
+    properties.add(new DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
+    properties.add(new DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
   }
 
   @override
@@ -215,14 +264,19 @@ class SemanticsData extends Diagnosticable {
         && typedOther.decreasedValue == decreasedValue
         && typedOther.hint == hint
         && typedOther.textDirection == textDirection
+        && typedOther.nextNodeId == nextNodeId
+        && typedOther.previousNodeId == previousNodeId
         && typedOther.rect == rect
         && setEquals(typedOther.tags, tags)
         && typedOther.textSelection == textSelection
+        && typedOther.scrollPosition == scrollPosition
+        && typedOther.scrollExtentMax == scrollExtentMax
+        && typedOther.scrollExtentMin == scrollExtentMin
         && typedOther.transform == transform;
   }
 
   @override
-  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, rect, tags, textSelection, transform);
+  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, nextNodeId, previousNodeId, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform);
 }
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
@@ -256,19 +310,23 @@ class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
 @immutable
 class SemanticsProperties extends DiagnosticableTree {
   /// Creates a semantic annotation.
-  ///
-  /// The [container] argument must not be null.
   const SemanticsProperties({
     this.enabled,
     this.checked,
     this.selected,
     this.button,
+    this.header,
+    this.textField,
+    this.focused,
+    this.inMutuallyExclusiveGroup,
+    this.obscured,
     this.label,
     this.value,
     this.increasedValue,
     this.decreasedValue,
     this.hint,
     this.textDirection,
+    this.sortKey,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -283,6 +341,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onMoveCursorForwardByCharacter,
     this.onMoveCursorBackwardByCharacter,
     this.onSetSelection,
+    this.onDidGainAccessibilityFocus,
+    this.onDidLoseAccessibilityFocus,
   });
 
   /// If non-null, indicates that this subtree represents something that can be
@@ -310,6 +370,42 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack/VoiceOver provides users with the hint "button" when a button
   /// is focused.
   final bool button;
+
+  /// If non-null, indicates that this subtree represents a header.
+  ///
+  /// A header divides into sections. For example, an address book application
+  /// might define headers A, B, C, etc. to divide the list of alphabetically
+  /// sorted contacts into sections.
+  final bool header;
+
+  /// If non-null, indicates that this subtree represents a text field.
+  ///
+  /// TalkBack/VoiceOver provide special affordances to enter text into a
+  /// text field.
+  final bool textField;
+
+  /// If non-null, whether the node currently holds input focus.
+  ///
+  /// At most one node in the tree should hold input focus at any point in time.
+  ///
+  /// Input focus (indicates that the node will receive keyboard events) is not
+  /// to be confused with accessibility focus. Accessibility focus is the
+  /// green/black rectangular that TalkBack/VoiceOver on the screen and is
+  /// separate from input focus.
+  final bool focused;
+
+  /// If non-null, whether a semantic node is in a mutually exclusive group.
+  ///
+  /// For example, a radio button is in a mutually exclusive group because only
+  /// one radio button in that group can be marked as [checked].
+  final bool inMutuallyExclusiveGroup;
+  
+  /// If non-null, whether [value] should be obscured.
+  ///
+  /// This option is usually set in combination with [textField] to indicate
+  /// that the text field contains a password (or other sensitive information).
+  /// Doing so instructs screen readers to not read out the [value].
+  final bool obscured;
 
   /// Provides a textual description of the widget.
   ///
@@ -377,6 +473,14 @@ class SemanticsProperties extends DiagnosticableTree {
   /// Defaults to the ambient [Directionality].
   final TextDirection textDirection;
 
+  /// Determines the position of this node among its siblings in the traversal
+  /// sort order.
+  ///
+  /// This is used to describe the order in which the semantic node should be
+  /// traversed by the accessibility services on the platform (e.g. VoiceOver
+  /// on iOS and TalkBack on Android).
+  final SemanticsSortKey sortKey;
+
   /// The handler for [SemanticsAction.tap].
   ///
   /// This is the semantic equivalent of a user briefly tapping the screen with
@@ -418,7 +522,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// VoiceOver users on iOS can trigger this action by swiping right with three
   /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// left and then right in one motion path.  On Android, [onScrollDown] and
+  /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
   final VoidCallback onScrollRight;
@@ -527,15 +631,54 @@ class SemanticsProperties extends DiagnosticableTree {
   /// beginning/end" or "Select all" from the local context menu.
   final SetSelectionHandler onSetSelection;
 
+  /// The handler for [SemanticsAction.didGainAccessibilityFocus].
+  ///
+  /// This handler is invoked when the node annotated with this handler gains
+  /// the accessibility focus. The accessibility focus is the
+  /// green (on Android with TalkBack) or black (on iOS with VoiceOver)
+  /// rectangle shown on screen to indicate what element an accessibility
+  /// user is currently interacting with.
+  ///
+  /// The accessibility focus is different from the input focus. The input focus
+  /// is usually held by the element that currently responds to keyboard inputs.
+  /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
+  ///    focus is removed from the node
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  final VoidCallback onDidGainAccessibilityFocus;
+
+  /// The handler for [SemanticsAction.didLoseAccessibilityFocus].
+  ///
+  /// This handler is invoked when the node annotated with this handler
+  /// loses the accessibility focus. The accessibility focus is
+  /// the green (on Android with TalkBack) or black (on iOS with VoiceOver)
+  /// rectangle shown on screen to indicate what element an accessibility
+  /// user is currently interacting with.
+  ///
+  /// The accessibility focus is different from the input focus. The input focus
+  /// is usually held by the element that currently responds to keyboard inputs.
+  /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
+  ///    accessibility focus
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  final VoidCallback onDidLoseAccessibilityFocus;
+
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
-    description.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
-    description.add(new StringProperty('label', label, defaultValue: ''));
-    description.add(new StringProperty('value', value));
-    description.add(new StringProperty('hint', hint));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
+    properties.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
+    properties.add(new StringProperty('label', label, defaultValue: ''));
+    properties.add(new StringProperty('value', value));
+    properties.add(new StringProperty('hint', hint));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
   }
 }
 
@@ -732,7 +875,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     if (newChildren != null) {
       for (SemanticsNode child in newChildren) {
-        assert(!child.isInvisible, '$child is invisible and should not be added as child of $this.');
+        assert(!child.isInvisible, 'Child $child is invisible and should not be added as a child of $this.');
         child._dead = false;
       }
     }
@@ -890,7 +1033,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         _increasedValue != config.increasedValue ||
         _flags != config._flags ||
         _textDirection != config.textDirection ||
+        _sortKey != config._sortKey ||
         _textSelection != config._textSelection ||
+        _scrollPosition != config._scrollPosition ||
+        _scrollExtentMax != config._scrollExtentMax ||
+        _scrollExtentMin != config._scrollExtentMin ||
         _actionsAsBits != config._actionsAsBits ||
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
   }
@@ -957,10 +1104,96 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection = _kEmptyConfig.textDirection;
 
+  /// Determines the position of this node among its siblings in the traversal
+  /// sort order.
+  ///
+  /// This is used to describe the order in which the semantic node should be
+  /// traversed by the accessibility services on the platform (e.g. VoiceOver
+  /// on iOS and TalkBack on Android).
+  ///
+  /// This is used to determine the [nextNodeId] and [previousNodeId] during a
+  /// semantics update.
+  SemanticsSortKey get sortKey => _sortKey;
+  SemanticsSortKey _sortKey;
+
+  /// The ID of the next node in the traversal order after this node.
+  ///
+  /// Only valid after at least one semantics update has been built.
+  ///
+  /// This is the value passed to the engine to tell it what the order
+  /// should be for traversing semantics nodes.
+  ///
+  /// If this is set to -1, it will indicate that there is no next node to
+  /// the engine (i.e. this is the last node in the sort order). When it is
+  /// null, it means that no semantics update has been built yet.
+  int get nextNodeId => _nextNodeId;
+  int _nextNodeId;
+  void _updateNextNodeId(int value) {
+    if (value == _nextNodeId)
+      return;
+    _nextNodeId = value;
+    _markDirty();
+  }
+
+  /// The ID of the previous node in the traversal order before this node.
+  ///
+  /// Only valid after at least one semantics update has been built.
+  ///
+  /// This is the value passed to the engine to tell it what the order
+  /// should be for traversing semantics nodes.
+  ///
+  /// If this is set to -1, it will indicate that there is no previous node to
+  /// the engine (i.e. this is the first node in the sort order). When it is
+  /// null, it means that no semantics update has been built yet.
+  int get previousNodeId => _previousNodeId;
+  int _previousNodeId;
+  void _updatePreviousNodeId(int value) {
+    if (value == _previousNodeId)
+      return;
+    _previousNodeId = value;
+    _markDirty();
+  }
+
   /// The currently selected text (or the position of the cursor) within [value]
   /// if this node represents a text field.
   TextSelection get textSelection => _textSelection;
   TextSelection _textSelection;
+
+  /// Indicates the current scrolling position in logical pixels if the node is
+  /// scrollable.
+  ///
+  /// The properties [scrollExtentMin] and [scrollExtentMax] indicate the valid
+  /// in-range values for this property. The value for [scrollPosition] may
+  /// (temporarily) be outside that range, e.g. during an overscroll.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.pixels], from where this value is usually taken.
+  double get scrollPosition => _scrollPosition;
+  double _scrollPosition;
+
+
+  /// Indicates the maximum in-range value for [scrollPosition] if the node is
+  /// scrollable.
+  ///
+  /// This value may be infinity if the scroll is unbound.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.maxScrollExtent], from where this value is usually taken.
+  double get scrollExtentMax => _scrollExtentMax;
+  double _scrollExtentMax;
+
+  /// Indicates the minimum in-range value for [scrollPosition] if the node is
+  /// scrollable.
+  ///
+  /// This value may be infinity if the scroll is unbound.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.minScrollExtent] from where this value is usually taken.
+  double get scrollExtentMin => _scrollExtentMin;
+  double _scrollExtentMin;
 
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
@@ -990,9 +1223,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _hint = config.hint;
     _flags = config._flags;
     _textDirection = config.textDirection;
+    _sortKey = config.sortKey;
     _actions = new Map<SemanticsAction, _SemanticsActionHandler>.from(config._actions);
     _actionsAsBits = config._actionsAsBits;
     _textSelection = config._textSelection;
+    _scrollPosition = config._scrollPosition;
+    _scrollExtentMax = config._scrollExtentMax;
+    _scrollExtentMin = config._scrollExtentMin;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
@@ -1021,8 +1258,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     String increasedValue = _increasedValue;
     String decreasedValue = _decreasedValue;
     TextDirection textDirection = _textDirection;
+    int nextNodeId = _nextNodeId;
+    int previousNodeId = _previousNodeId;
     Set<SemanticsTag> mergedTags = tags == null ? null : new Set<SemanticsTag>.from(tags);
     TextSelection textSelection = _textSelection;
+    double scrollPosition = _scrollPosition;
+    double scrollExtentMax = _scrollExtentMax;
+    double scrollExtentMin = _scrollExtentMin;
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
@@ -1030,7 +1272,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         flags |= node._flags;
         actions |= node._actionsAsBits;
         textDirection ??= node._textDirection;
+        nextNodeId ??= node._nextNodeId;
+        previousNodeId ??= node._previousNodeId;
         textSelection ??= node._textSelection;
+        scrollPosition ??= node._scrollPosition;
+        scrollExtentMax ??= node._scrollExtentMax;
+        scrollExtentMin ??= node._scrollExtentMin;
         if (value == '' || value == null)
           value = node._value;
         if (increasedValue == '' || increasedValue == null)
@@ -1066,10 +1313,15 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       decreasedValue: decreasedValue,
       hint: hint,
       textDirection: textDirection,
+      nextNodeId: nextNodeId,
+      previousNodeId: previousNodeId,
       rect: rect,
       transform: transform,
       tags: mergedTags,
       textSelection: textSelection,
+      scrollPosition: scrollPosition,
+      scrollExtentMax: scrollExtentMax,
+      scrollExtentMin: scrollExtentMin,
     );
   }
 
@@ -1089,8 +1341,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     } else {
       final int childCount = _children.length;
       children = new Int32List(childCount);
-      for (int i = 0; i < childCount; ++i)
+      for (int i = 0; i < childCount; ++i) {
         children[i] = _children[i].id;
+      }
     }
     builder.updateNode(
       id: id,
@@ -1103,8 +1356,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       increasedValue: data.increasedValue,
       hint: data.hint,
       textDirection: data.textDirection,
+      nextNodeId: data.nextNodeId,
+      previousNodeId: data.previousNodeId,
       textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
+      scrollPosition: data.scrollPosition != null ? data.scrollPosition : double.nan,
+      scrollExtentMax: data.scrollExtentMax != null ? data.scrollExtentMax : double.nan,
+      scrollExtentMin: data.scrollExtentMin != null ? data.scrollExtentMin : double.nan,
       transform: data.transform?.storage ?? _kIdentityTransform,
       children: children,
     );
@@ -1157,23 +1415,23 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
-    if (_hasFlag(SemanticsFlag.hasEnabledState))
-      properties.add(new FlagProperty('isEnabled', value: _hasFlag(SemanticsFlag.isEnabled), ifFalse: 'disabled'));
-    if (_hasFlag(SemanticsFlag.hasCheckedState))
-      properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlag.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
-    properties.add(new FlagProperty('isInMutuallyExcusiveGroup', value: _hasFlag(SemanticsFlag.isInMutuallyExclusiveGroup), ifTrue: 'mutually-exclusive'));
-    properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlag.isSelected), ifTrue: 'selected'));
-    properties.add(new FlagProperty('isFocused', value: _hasFlag(SemanticsFlag.isFocused), ifTrue: 'focused'));
-    properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlag.isButton), ifTrue: 'button'));
-    properties.add(new FlagProperty('isTextField', value: _hasFlag(SemanticsFlag.isTextField), ifTrue: 'textField'));
+    final List<String> flags = SemanticsFlag.values.values.where((SemanticsFlag flag) => _hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
+    properties.add(new IterableProperty<String>('flags', flags, ifEmpty: null));
+    properties.add(new FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
     properties.add(new StringProperty('label', _label, defaultValue: ''));
     properties.add(new StringProperty('value', _value, defaultValue: ''));
     properties.add(new StringProperty('increasedValue', _increasedValue, defaultValue: ''));
     properties.add(new StringProperty('decreasedValue', _decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', _hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
+    properties.add(new IntProperty('nextNodeId', _nextNodeId, defaultValue: null));
+    properties.add(new IntProperty('previousNodeId', _previousNodeId, defaultValue: null));
+    properties.add(new DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     if (_textSelection?.isValid == true)
       properties.add(new MessageProperty('text selection', '[${_textSelection.start}, ${_textSelection.end}]'));
+    properties.add(new DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
+    properties.add(new DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
+    properties.add(new DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -1185,7 +1443,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     String prefixLineOne: '',
     String prefixOtherLines,
     DiagnosticLevel minLevel: DiagnosticLevel.debug,
-    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.traversal,
+    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.geometricOrder,
   }) {
     assert(childOrder != null);
     return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
@@ -1194,8 +1452,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   @override
   DiagnosticsNode toDiagnosticsNode({
     String name,
-    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.dense,
-    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.traversal,
+    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.sparse,
+    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.geometricOrder,
   }) {
     return new _SemanticsDiagnosticableNode(
       name: name,
@@ -1218,7 +1476,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       return const <SemanticsNode>[];
 
     switch (childOrder) {
-      case DebugSemanticsDumpOrder.traversal:
+      case DebugSemanticsDumpOrder.geometricOrder:
         return new List<SemanticsNode>.from(_children)..sort(_geometryComparator);
       case DebugSemanticsDumpOrder.inverseHitTest:
         return _children;
@@ -1232,6 +1490,95 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     final Rect rectB = b.transform == null ? b.rect : MatrixUtils.transformRect(b.transform, b.rect);
     final int top = rectA.top.compareTo(rectB.top);
     return top == 0 ? rectA.left.compareTo(rectB.left) : top;
+  }
+}
+
+/// The implementation of [Comparable] that implements the ordering of
+/// [SemanticsNode]s in the accessibility traversal.
+///
+/// [SemanticsNode]s are sorted prior to sending them to the engine side.
+///
+/// This implementation considers a [node]'s [sortKey], it's parent's text
+/// direction ([containerTextDirection]), and its geometric position relative to
+/// its siblings ([globalStartCorner]).
+///
+/// A null value is allowed for [containerTextDirection], because in that case
+/// we want to fall back to ordering by child insertion order for nodes that are
+/// equal after sorting from top to bottom.
+class _TraversalSortNode implements Comparable<_TraversalSortNode> {
+  _TraversalSortNode({@required this.node, this.containerTextDirection, this.sortKey, Matrix4 transform})
+    : assert(node != null),
+      // When containerTextDirection is null, this is set to topLeft, but the x
+      // coordinate is also ignored when doing the comparison in that case, so
+      // this isn't actually expressing a directionality opinion.
+      globalStartCorner = _transformPoint(
+        containerTextDirection == TextDirection.rtl ? node.rect.topRight : node.rect.topLeft,
+        transform,
+      );
+
+  /// The node whose position this sort node determines.
+  final SemanticsNode node;
+
+  /// The effective text direction for this node is the directionality that
+  /// its container has.
+  final TextDirection containerTextDirection;
+
+  /// Determines the position of this node among its siblings.
+  ///
+  /// Sort keys take precedence over other attributes, such as
+  /// [globalStartCorner].
+  final SemanticsSortKey sortKey;
+
+  /// The starting corner for the rectangle on this semantics node in
+  /// global coordinates.
+  ///
+  /// When the container has the directionality [TextDirection.ltr], this is the
+  /// upper left corner.  When the container has the directionality
+  /// [TextDirection.rtl], this is the upper right corner. When the container
+  /// has no directionality, this is set, but the x coordinate is ignored.
+  final Offset globalStartCorner;
+
+  static Offset _transformPoint(Offset point, Matrix4 matrix) {
+    final Vector3 result = matrix.transform3(new Vector3(point.dx, point.dy, 0.0));
+    return new Offset(result.x, result.y);
+  }
+
+  /// Compares the node's start corner with that of `other`.
+  ///
+  /// Sorts top to bottom, and then start to end.
+  ///
+  /// This takes into account the container text direction, since the
+  /// coordinate system has zero on the left, and we need to compare
+  /// differently for different text directions.
+  ///
+  /// If no text direction is available (i.e. [containerTextDirection] is
+  /// null), then we sort by vertical position first, and then by child
+  /// insertion order.
+  int _compareGeometry(_TraversalSortNode other) {
+    final int verticalDiff = globalStartCorner.dy.compareTo(other.globalStartCorner.dy);
+    if (verticalDiff != 0) {
+      return verticalDiff;
+    }
+    switch (containerTextDirection) {
+      case TextDirection.rtl:
+        return other.globalStartCorner.dx.compareTo(globalStartCorner.dx);
+      case TextDirection.ltr:
+        return globalStartCorner.dx.compareTo(other.globalStartCorner.dx);
+    }
+    // In case containerTextDirection is null we fall back to child insertion order.
+    return 0;
+  }
+
+  @override
+  int compareTo(_TraversalSortNode other) {
+    if (sortKey == null || other?.sortKey == null) {
+      return _compareGeometry(other);
+    }
+    final int comparison = sortKey.compareTo(other.sortKey);
+    if (comparison != 0) {
+      return comparison;
+    }
+    return _compareGeometry(other);
   }
 }
 
@@ -1259,10 +1606,58 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
+  // Updates the nextNodeId and previousNodeId IDs on the semantics nodes. These
+  // IDs are used on the platform side to order the nodes for traversal by the
+  // accessibility services. If the nextNodeId or previousNodeId for a node
+  // changes, the node will be marked as dirty.
+  void _updateTraversalOrder() {
+    void updateRecursively(SemanticsNode parent, Matrix4 parentGlobalTransform) {
+      assert(parentGlobalTransform != null);
+
+      final List<_TraversalSortNode> children = <_TraversalSortNode>[];
+
+      parent.visitChildren((SemanticsNode child) {
+        final Matrix4 childGlobalTransform = child.transform != null
+            ? parentGlobalTransform.multiplied(child.transform)
+            : parentGlobalTransform;
+
+        children.add(new _TraversalSortNode(
+          node: child,
+          containerTextDirection: parent.textDirection,
+          sortKey: child.sortKey,
+          transform: childGlobalTransform,
+        ));
+
+        updateRecursively(child, childGlobalTransform);
+        return true;
+      });
+
+      if (children.isEmpty) {
+        // We need at least one node for the following code to work.
+        return;
+      }
+
+      children.sort();
+      _TraversalSortNode node = children.removeLast();
+      node.node._updateNextNodeId(-1);
+      while (children.isNotEmpty) {
+        final _TraversalSortNode previousNode = children.removeLast();
+        node.node._updatePreviousNodeId(previousNode.node.id);
+        previousNode.node._updateNextNodeId(node.node.id);
+        node = previousNode;
+      }
+      node.node._updatePreviousNodeId(-1);
+    }
+
+    updateRecursively(rootSemanticsNode, new Matrix4.identity());
+  }
+
   /// Update the semantics using [Window.updateSemantics].
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;
+    // Nodes that change their previousNodeId will be marked as dirty.
+    _updateTraversalOrder();
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
       final List<SemanticsNode> localDirtyNodes = _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
@@ -1564,7 +1959,7 @@ class SemanticsConfiguration {
   ///
   /// VoiceOver users on iOS can trigger this action by swiping right with three
   /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// left and then right in one motion path.  On Android, [onScrollDown] and
+  /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
   VoidCallback get onScrollRight => _onScrollRight;
@@ -1762,6 +2157,54 @@ class SemanticsConfiguration {
     _onSetSelection = value;
   }
 
+  /// The handler for [SemanticsAction.didGainAccessibilityFocus].
+  ///
+  /// This handler is invoked when the node annotated with this handler gains
+  /// the accessibility focus. The accessibility focus is the
+  /// green (on Android with TalkBack) or black (on iOS with VoiceOver)
+  /// rectangle shown on screen to indicate what element an accessibility
+  /// user is currently interacting with.
+  ///
+  /// The accessibility focus is different from the input focus. The input focus
+  /// is usually held by the element that currently responds to keyboard inputs.
+  /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
+  ///    focus is removed from the node
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  VoidCallback get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
+  VoidCallback _onDidGainAccessibilityFocus;
+  set onDidGainAccessibilityFocus(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.didGainAccessibilityFocus, value);
+    _onDidGainAccessibilityFocus = value;
+  }
+
+  /// The handler for [SemanticsAction.didLoseAccessibilityFocus].
+  ///
+  /// This handler is invoked when the node annotated with this handler
+  /// loses the accessibility focus. The accessibility focus is
+  /// the green (on Android with TalkBack) or black (on iOS with VoiceOver)
+  /// rectangle shown on screen to indicate what element an accessibility
+  /// user is currently interacting with.
+  ///
+  /// The accessibility focus is different from the input focus. The input focus
+  /// is usually held by the element that currently responds to keyboard inputs.
+  /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
+  ///    accessibility focus
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  VoidCallback get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
+  VoidCallback _onDidLoseAccessibilityFocus;
+  set onDidLoseAccessibilityFocus(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.didLoseAccessibilityFocus, value);
+    _onDidLoseAccessibilityFocus = value;
+  }
+
   /// Returns the action handler registered for [action] or null if none was
   /// registered.
   ///
@@ -1769,6 +2212,25 @@ class SemanticsConfiguration {
   ///
   ///  * [addAction] to add an action.
   _SemanticsActionHandler getActionHandler(SemanticsAction action) => _actions[action];
+
+  /// Determines the position of this node among its siblings in the traversal
+  /// sort order.
+  ///
+  /// This is used to describe the order in which the semantic node should be
+  /// traversed by the accessibility services on the platform (e.g. VoiceOver
+  /// on iOS and TalkBack on Android).
+  ///
+  /// Whether this sort key has an effect on the [SemanticsNode] sort order is
+  /// subject to how this configuration is used. For example, the [absorb]
+  /// method may decide to not use this key when it combines multiple
+  /// [SemanticsConfiguration] objects.
+  SemanticsSortKey get sortKey => _sortKey;
+  SemanticsSortKey _sortKey;
+  set sortKey(SemanticsSortKey value) {
+    assert(value != null);
+    _sortKey = value;
+    _hasBeenAnnotated = true;
+  }
 
   /// Whether the semantic information provided by the owning [RenderObject] and
   /// all of its descendants should be treated as one logical entity.
@@ -1939,10 +2401,26 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isButton, value);
   }
 
+  /// Whether the owning [RenderObject] is a header (true) or not (false).
+  bool get isHeader => _hasFlag(SemanticsFlag.isHeader);
+  set isHeader(bool value) {
+    _setFlag(SemanticsFlag.isHeader, value);
+  }
+
   /// Whether the owning [RenderObject] is a text field.
   bool get isTextField => _hasFlag(SemanticsFlag.isTextField);
   set isTextField(bool value) {
     _setFlag(SemanticsFlag.isTextField, value);
+  }
+
+  /// Whether the [value] should be obscured.
+  ///
+  /// This option is usually set in combination with [textField] to indicate
+  /// that the text field contains a password (or other sensitive information).
+  /// Doing so instructs screen readers to not read out the [value].
+  bool get isObscured => _hasFlag(SemanticsFlag.isObscured);
+  set isObscured(bool value) {
+    _setFlag(SemanticsFlag.isObscured, value);
   }
 
   /// The currently selected text (or the position of the cursor) within [value]
@@ -1952,6 +2430,56 @@ class SemanticsConfiguration {
   set textSelection(TextSelection value) {
     assert(value != null);
     _textSelection = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// Indicates the current scrolling position in logical pixels if the node is
+  /// scrollable.
+  ///
+  /// The properties [scrollExtentMin] and [scrollExtentMax] indicate the valid
+  /// in-range values for this property. The value for [scrollPosition] may
+  /// (temporarily) be outside that range, e.g. during an overscroll.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.pixels], from where this value is usually taken.
+  double get scrollPosition => _scrollPosition;
+  double _scrollPosition;
+  set scrollPosition(double value) {
+    assert(value != null);
+    _scrollPosition = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// Indicates the maximum in-range value for [scrollPosition] if the node is
+  /// scrollable.
+  ///
+  /// This value may be infinity if the scroll is unbound.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.maxScrollExtent], from where this value is usually taken.
+  double get scrollExtentMax => _scrollExtentMax;
+  double _scrollExtentMax;
+  set scrollExtentMax(double value) {
+    assert(value != null);
+    _scrollExtentMax = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// Indicates the minimum in-range value for [scrollPosition] if the node is
+  /// scrollable.
+  ///
+  /// This value may be infinity if the scroll is unbound.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.minScrollExtent], from where this value is usually taken.
+  double get scrollExtentMin => _scrollExtentMin;
+  double _scrollExtentMin;
+  set scrollExtentMin(double value) {
+    assert(value != null);
+    _scrollExtentMin = value;
     _hasBeenAnnotated = true;
   }
 
@@ -2038,8 +2566,12 @@ class SemanticsConfiguration {
     _actionsAsBits |= other._actionsAsBits;
     _flags |= other._flags;
     _textSelection ??= other._textSelection;
+    _scrollPosition ??= other._scrollPosition;
+    _scrollExtentMax ??= other._scrollExtentMax;
+    _scrollExtentMin ??= other._scrollExtentMin;
 
     textDirection ??= other.textDirection;
+    _sortKey ??= other._sortKey;
     _label = _concatStrings(
       thisString: _label,
       thisTextDirection: textDirection,
@@ -2071,6 +2603,7 @@ class SemanticsConfiguration {
       .._hasBeenAnnotated = _hasBeenAnnotated
       .._isMergingSemanticsOfDescendants = _isMergingSemanticsOfDescendants
       .._textDirection = _textDirection
+      .._sortKey = _sortKey
       .._label = _label
       .._increasedValue = _increasedValue
       .._value = _value
@@ -2079,6 +2612,9 @@ class SemanticsConfiguration {
       .._flags = _flags
       .._tagsForChildren = _tagsForChildren
       .._textSelection = _textSelection
+      .._scrollPosition = _scrollPosition
+      .._scrollExtentMax = _scrollExtentMax
+      .._scrollExtentMin = _scrollExtentMin
       .._actionsAsBits = _actionsAsBits
       .._actions.addAll(_actions);
   }
@@ -2094,11 +2630,17 @@ enum DebugSemanticsDumpOrder {
   /// the second last, etc. until a taker is found.
   inverseHitTest,
 
-  /// Print nodes in traversal order.
+  /// Print nodes in geometric traversal order.
   ///
-  /// Traversal order defines how the user can move the accessibility focus from
-  /// one node to another.
-  traversal,
+  /// Geometric traversal order is the default traversal order for semantics nodes which
+  /// don't have [SemanticsNode.sortOrder] set.  This traversal order ignores the node
+  /// sort order, since the diagnostics system follows the widget tree and can only sort
+  /// a node's children, and the semantics system sorts nodes globally.
+  geometricOrder,
+
+  // TODO(gspencer): Add support to toStringDeep (and others) to print the tree in
+  // the actual traversal order that the user will experience.  This requires sorting
+  // nodes globally before printing, not just the children.
 }
 
 String _concatStrings({
@@ -2123,4 +2665,100 @@ String _concatStrings({
   if (thisString.isEmpty)
     return nestedLabel;
   return '$thisString\n$nestedLabel';
+}
+
+/// Base class for all sort keys for [Semantics] accessibility traversal order
+/// sorting.
+///
+/// If subclasses of this class compare themselves to another subclass of
+/// [SemanticsSortKey], they will compare as "equal" so that keys of the same
+/// type are ordered only with respect to one another.
+///
+/// See Also:
+///
+///  * [SemanticsSortOrder] which manages a list of sort keys.
+///  * [OrdinalSortKey] for a sort key that sorts using an ordinal.
+abstract class SemanticsSortKey extends Diagnosticable implements Comparable<SemanticsSortKey> {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const SemanticsSortKey({this.name});
+
+  /// An optional name that will make this sort key only order itself
+  /// with respect to other sort keys of the same [name], as long as
+  /// they are of the same [runtimeType]. If compared with a
+  /// [SemanticsSortKey] with a different name or type, they will
+  /// compare as "equal".
+  final String name;
+
+  @override
+  int compareTo(SemanticsSortKey other) {
+    if (other.runtimeType != runtimeType || other.name != name)
+      return 0;
+    return doCompare(other);
+  }
+
+  /// The implementation of [compareTo].
+  ///
+  /// The argument is guaranteed to be of the same type as this object.
+  ///
+  /// The method should return a negative number if this object comes earlier in
+  /// the sort order than the argument; and a positive number if it comes later
+  /// in the sort order. Returning zero causes the system to default to
+  /// comparing the geometry of the nodes.
+  @protected
+  int doCompare(covariant SemanticsSortKey other);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new StringProperty('name', name, defaultValue: null));
+  }
+}
+
+/// A [SemanticsSortKey] that sorts simply based on the `double` value it is
+/// given.
+///
+/// The [OrdinalSortKey] compares itself with other [OrdinalSortKey]s
+/// to sort based on the order it is given.
+///
+/// The ordinal value `order` is typically a whole number, though it can be
+/// fractional, e.g. in order to fit between two other consecutive whole
+/// numbers. The value must be finite (it cannot be [double.nan],
+/// [double.infinity], or [double.negativeInfinity]).
+///
+/// See also:
+///
+///  * [SemanticsSortOrder] which manages a list of sort keys.
+class OrdinalSortKey extends SemanticsSortKey {
+  /// Creates a semantics sort key that uses a [double] as its key value.
+  ///
+  /// The [order] must be a finite number.
+  const OrdinalSortKey(
+    this.order, {
+    String name,
+  }) : assert(order != null),
+       assert(order != double.nan),
+       assert(order > double.negativeInfinity),
+       assert(order < double.infinity),
+       super(name: name);
+
+  /// Determines the placement of this key in a sequence of keys that defines
+  /// the order in which this node is traversed by the platform's accessibility
+  /// services.
+  ///
+  /// Lower values will be traversed first.
+  final double order;
+
+  @override
+  int doCompare(OrdinalSortKey other) {
+    if (other.order == null || order == null || other.order == order)
+      return 0;
+    return order.compareTo(other.order);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('order', order, defaultValue: null));
+  }
 }

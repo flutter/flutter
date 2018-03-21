@@ -8,13 +8,15 @@ import '../doctor.dart';
 import '../runner/flutter_command.dart';
 
 class DoctorCommand extends FlutterCommand {
-  DoctorCommand() {
+  DoctorCommand({this.verbose: false}) {
     argParser.addFlag('android-licenses',
       defaultsTo: false,
       negatable: false,
       help: 'Run the Android SDK manager tool to accept the SDK\'s licenses.',
     );
   }
+
+  final bool verbose;
 
   @override
   final String name = 'doctor';
@@ -24,7 +26,7 @@ class DoctorCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final bool success = await doctor.diagnose(androidLicenses: argResults['android-licenses']);
+    final bool success = await doctor.diagnose(androidLicenses: argResults['android-licenses'], verbose: verbose);
     return new FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
 }

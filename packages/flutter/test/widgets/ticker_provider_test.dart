@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('TickerMode', (WidgetTester tester) async {
-    final Widget widget = const TickerMode(
+    const Widget widget = const TickerMode(
       enabled: false,
       child: const CircularProgressIndicator()
     );

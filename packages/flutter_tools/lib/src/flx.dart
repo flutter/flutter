@@ -22,6 +22,7 @@ const String defaultManifestPath = 'pubspec.yaml';
 String get defaultFlxOutputPath => fs.path.join(getBuildDirectory(), 'app.flx');
 String get defaultSnapshotPath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin');
 String get defaultDepfilePath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
+String get defaultApplicationKernelPath => fs.path.join(getBuildDirectory(), 'app.dill');
 const String defaultPrivateKeyPath = 'privatekey.der';
 
 const String _kKernelKey = 'kernel_blob.bin';
@@ -34,20 +35,24 @@ Future<Null> build({
   String manifestPath: defaultManifestPath,
   String outputPath,
   String snapshotPath,
+  String applicationKernelFilePath,
   String depfilePath,
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
   String packagesPath,
   bool previewDart2 : false,
-  bool strongMode : false,
   bool precompiledSnapshot: false,
-  bool reportLicensedPackages: false
+  bool reportLicensedPackages: false,
+  bool trackWidgetCreation: false,
+  List<String> fileSystemRoots,
+  String fileSystemScheme,
 }) async {
   outputPath ??= defaultFlxOutputPath;
   snapshotPath ??= defaultSnapshotPath;
   depfilePath ??= defaultDepfilePath;
   workingDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
+  applicationKernelFilePath ??= defaultApplicationKernelPath;
   File snapshotFile;
 
   if (!precompiledSnapshot && !previewDart2) {
@@ -70,51 +75,59 @@ Future<Null> build({
 
   DevFSContent kernelContent;
   if (!precompiledSnapshot && previewDart2) {
+    ensureDirectoryExists(applicationKernelFilePath);
+
     final String kernelBinaryFilename = await compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       incrementalCompilerByteStorePath: fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
       mainPath: fs.file(mainPath).absolute.path,
-      strongMode: strongMode
+      outputFilePath: applicationKernelFilePath,
+      depFilePath: depfilePath,
+      trackWidgetCreation: trackWidgetCreation,
+      fileSystemRoots: fileSystemRoots,
+      fileSystemScheme: fileSystemScheme,
+      packagesPath: packagesPath,
     );
     if (kernelBinaryFilename == null) {
       throwToolExit('Compiler terminated unexpectedly on $mainPath');
     }
+    await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
+        .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
+
     kernelContent = new DevFSFileContent(fs.file(kernelBinaryFilename));
   }
 
-  return assemble(
+  final AssetBundle assets = await buildAssets(
     manifestPath: manifestPath,
+    workingDirPath: workingDirPath,
+    packagesPath: packagesPath,
+    reportLicensedPackages: reportLicensedPackages,
+  );
+  if (assets == null)
+    throwToolExit('Error building assets for $outputPath', exitCode: 1);
+
+  return assemble(
+    assetBundle: assets,
     kernelContent: kernelContent,
     snapshotFile: snapshotFile,
     outputPath: outputPath,
     privateKeyPath: privateKeyPath,
     workingDirPath: workingDirPath,
-    packagesPath: packagesPath,
-    strongMode: strongMode,
-    reportLicensedPackages: reportLicensedPackages
   ).then((_) => null);
 }
 
-Future<List<String>> assemble({
+Future<AssetBundle> buildAssets({
   String manifestPath,
-  DevFSContent kernelContent,
-  File snapshotFile,
-  File dylibFile,
-  String outputPath,
-  String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
   String packagesPath,
-  bool strongMode : false,
   bool includeDefaultFonts: true,
   bool reportLicensedPackages: false
 }) async {
-  outputPath ??= defaultFlxOutputPath;
   workingDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
-  printTrace('Building $outputPath');
 
   // Build the asset bundle.
-  final AssetBundle assetBundle = new AssetBundle();
+  final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(
     manifestPath: manifestPath,
     workingDirPath: workingDirPath,
@@ -123,7 +136,23 @@ Future<List<String>> assemble({
     reportLicensedPackages: reportLicensedPackages
   );
   if (result != 0)
-    throwToolExit('Error building $outputPath: $result', exitCode: result);
+    return null;
+
+  return assetBundle;
+}
+
+Future<List<String>> assemble({
+  AssetBundle assetBundle,
+  DevFSContent kernelContent,
+  File snapshotFile,
+  File dylibFile,
+  String outputPath,
+  String privateKeyPath: defaultPrivateKeyPath,
+  String workingDirPath,
+}) async {
+  outputPath ??= defaultFlxOutputPath;
+  workingDirPath ??= getAssetBuildDirectory();
+  printTrace('Building $outputPath');
 
   final ZipBuilder zipBuilder = new ZipBuilder();
 
@@ -135,9 +164,7 @@ Future<List<String>> assemble({
       .toList();
 
   if (kernelContent != null) {
-    final String platformKernelDill = strongMode ?
-        artifacts.getArtifactPath(Artifact.platformKernelStrongDill) :
-        artifacts.getArtifactPath(Artifact.platformKernelDill);
+    final String platformKernelDill = artifacts.getArtifactPath(Artifact.platformKernelDill);
     zipBuilder.entries[_kKernelKey] = kernelContent;
     zipBuilder.entries[_kPlatformKernelKey] = new DevFSFileContent(fs.file(platformKernelDill));
   }

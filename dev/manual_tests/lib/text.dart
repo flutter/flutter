@@ -124,7 +124,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _random = new math.Random(widget.seed); // providing a seed is important for reproducability
+    _random = new math.Random(widget.seed); // providing a seed is important for reproducibility
     _ticker = createTicker(_updateTextSpan)..start();
     _updateTextSpan(null);
   }
@@ -798,7 +798,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _random = new math.Random(widget.seed); // providing a seed is important for reproducability
+    _random = new math.Random(widget.seed); // providing a seed is important for reproducibility
     _ticker = createTicker(_update)..start();
     _update(null);
   }
@@ -865,7 +865,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
                   onChanged: (bool value) {
                     setState(() {
                       _allowSpacing = value;
-                      _random = new math.Random(widget.seed); // reset for reproducability
+                      _random = new math.Random(widget.seed); // reset for reproducibility
                     });
                   },
                 ),
@@ -875,7 +875,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
                   onChanged: (bool value) {
                     setState(() {
                       _varyBase = value;
-                      _random = new math.Random(widget.seed); // reset for reproducability
+                      _random = new math.Random(widget.seed); // reset for reproducibility
                     });
                   },
                 ),
@@ -905,7 +905,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _random = new math.Random(widget.seed); // providing a seed is important for reproducability
+    _random = new math.Random(widget.seed); // providing a seed is important for reproducibility
     _ticker = createTicker(_update)..start();
     _update(null);
   }
@@ -1027,7 +1027,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                   onChanged: (bool value) {
                     setState(() {
                       _ellipsize = value;
-                      _random = new math.Random(widget.seed); // reset for reproducability
+                      _random = new math.Random(widget.seed); // reset for reproducibility
                       if (!_ticker.isActive)
                         _update(null);
                     });

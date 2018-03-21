@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:yaml/yaml.dart';
 
+import 'base/context.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'cache.dart';
@@ -15,8 +16,45 @@ import 'devfs.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart';
 
-/// A bundle of assets.
-class AssetBundle {
+const AssetBundleFactory _kManifestFactory = const _ManifestAssetBundleFactory();
+
+/// Injected factory class for spawning [AssetBundle] instances.
+abstract class AssetBundleFactory {
+  /// The singleton instance, pulled from the [AppContext].
+  static AssetBundleFactory get instance => context == null
+      ? _kManifestFactory
+      : context.putIfAbsent(AssetBundleFactory, () => _kManifestFactory);
+
+  /// Creates a new [AssetBundle].
+  AssetBundle createBundle();
+}
+
+abstract class AssetBundle {
+  Map<String, DevFSContent> get entries;
+
+  bool wasBuiltOnce();
+
+  bool needsBuild({String manifestPath: _ManifestAssetBundle.defaultManifestPath});
+
+  /// Returns 0 for success; non-zero for failure.
+  Future<int> build({
+    String manifestPath: _ManifestAssetBundle.defaultManifestPath,
+    String workingDirPath,
+    String packagesPath,
+    bool includeDefaultFonts: true,
+    bool reportLicensedPackages: false
+  });
+}
+
+class _ManifestAssetBundleFactory implements AssetBundleFactory {
+  const _ManifestAssetBundleFactory();
+
+  @override
+  AssetBundle createBundle() => new _ManifestAssetBundle();
+}
+
+class _ManifestAssetBundle implements AssetBundle {
+  @override
   final Map<String, DevFSContent> entries = <String, DevFSContent>{};
 
   static const String defaultManifestPath = 'pubspec.yaml';
@@ -25,34 +63,17 @@ class AssetBundle {
   static const String _kFontSetMaterial = 'material';
   static const String _kLICENSE = 'LICENSE';
 
-  bool _fixed = false;
   DateTime _lastBuildTimestamp;
 
-  /// Constructs an [AssetBundle] that gathers the set of assets from the
+  /// Constructs an [_ManifestAssetBundle] that gathers the set of assets from the
   /// pubspec.yaml manifest.
-  AssetBundle();
+  _ManifestAssetBundle();
 
-  /// Constructs an [AssetBundle] with a fixed set of assets.
-  /// [projectRoot] The absolute path to the project root.
-  /// [projectAssets] comma separated list of assets.
-  AssetBundle.fixed(String projectRoot, String projectAssets) {
-    _fixed = true;
-    if ((projectRoot == null) || (projectAssets == null))
-      return;
+  @override
+  bool wasBuiltOnce() => _lastBuildTimestamp != null;
 
-    final List<String> assets = projectAssets.split(',');
-    for (String asset in assets) {
-      if (asset == '')
-        continue;
-      final String assetPath = fs.path.join(projectRoot, asset);
-      final String archivePath = asset;
-      entries[archivePath] = new DevFSFileContent(fs.file(assetPath));
-    }
-  }
-
+  @override
   bool needsBuild({String manifestPath: defaultManifestPath}) {
-    if (_fixed)
-      return false;
     if (_lastBuildTimestamp == null)
       return true;
 
@@ -63,6 +84,7 @@ class AssetBundle {
     return stat.modified.isAfter(_lastBuildTimestamp);
   }
 
+  @override
   Future<int> build({
     String manifestPath: defaultManifestPath,
     String workingDirPath,
@@ -184,17 +206,12 @@ class AssetBundle {
 
 
     if (fonts.isNotEmpty)
-      entries[_kFontManifestJson] = new DevFSStringContent(JSON.encode(fonts));
+      entries[_kFontManifestJson] = new DevFSStringContent(json.encode(fonts));
 
     // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
     entries[_kLICENSE] = await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
 
     return 0;
-  }
-
-  void dump() {
-    printTrace('Dumping AssetBundle:');
-    (entries.keys.toList()..sort()).forEach(printTrace);
   }
 }
 
@@ -351,14 +368,14 @@ Future<DevFSContent> _obtainLicenses(
 }
 
 DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
-  final Map<String, List<String>> json = <String, List<String>>{};
+  final Map<String, List<String>> jsonObject = <String, List<String>>{};
   for (_Asset main in assetVariants.keys) {
     final List<String> variants = <String>[];
     for (_Asset variant in assetVariants[main])
       variants.add(variant.entryUri.path);
-    json[main.entryUri.path] = variants;
+    jsonObject[main.entryUri.path] = variants;
   }
-  return new DevFSStringContent(JSON.encode(json));
+  return new DevFSStringContent(json.encode(jsonObject));
 }
 
 List<Map<String, dynamic>> _parseFonts(
@@ -369,7 +386,7 @@ List<Map<String, dynamic>> _parseFonts(
 }) {
   final List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
   if (manifest.usesMaterialDesign && includeDefaultFonts) {
-    fonts.addAll(_getMaterialFonts(AssetBundle._kFontSetMaterial));
+    fonts.addAll(_getMaterialFonts(_ManifestAssetBundle._kFontSetMaterial));
   }
   if (packageName == null) {
     fonts.addAll(manifest.fontsDescriptor);

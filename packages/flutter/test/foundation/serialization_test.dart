@@ -64,7 +64,7 @@ void main() {
       expect(read.getInt64List(3), equals(integers));
     });
     test('of double list when unaligned', () {
-      final Float64List doubles = new Float64List.fromList(<double>[3.14, double.NAN]);
+      final Float64List doubles = new Float64List.fromList(<double>[3.14, double.nan]);
       final WriteBuffer write = new WriteBuffer();
       write.putUint8(9);
       write.putFloat64List(doubles);

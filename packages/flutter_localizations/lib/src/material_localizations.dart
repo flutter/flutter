@@ -14,6 +14,10 @@ import 'l10n/date_localizations.dart' as date_localizations;
 import 'l10n/localizations.dart' show TranslationBundle, translationBundleForLocale;
 import 'widgets_localizations.dart';
 
+// Watch out: the supported locales list in the doc comment below must be kept
+// in sync with the list we test, see test/translations_test.dart, and of course
+// the acutal list of supported locales in _MaterialLocalizationsDelegate.
+
 /// Localized strings for the material widgets.
 ///
 /// To include the localizations provided by this class in a [MaterialApp],
@@ -42,10 +46,12 @@ import 'widgets_localizations.dart';
 ///   * fa - Farsi
 ///   * fr - French
 ///   * he - Hebrew
+///   * id - Indonesian
 ///   * it - Italian
 ///   * ja - Japanese
 ///   * ko - Korean
 ///   * nl - Dutch
+///   * no - Norwegian
 ///   * pl - Polish
 ///   * ps - Pashto
 ///   * pt - Portuguese
@@ -280,7 +286,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
     final String template = _translationBundle.tabLabel;
     return template
       .replaceFirst(r'$tabIndex', formatDecimal(tabIndex))
-      .replaceFirst(r'tabCount', formatDecimal(tabCount));
+      .replaceFirst(r'$tabCount', formatDecimal(tabCount));
   }
 
   @override
@@ -493,22 +499,31 @@ void _loadDateIntlDataIfNotLoaded() {
 class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   const _MaterialLocalizationsDelegate();
 
+  // Watch out: this list must match the one in the GlobalMaterialLocalizations
+  // class doc and the list we test, see test/translations_test.dart.
   static const List<String> _supportedLanguages = const <String>[
-    'ar',  // Arabic
-    'de',  // German
-    'en',  // English
-    'es',  // Spanish
-    'fa',  // Farsi
-    'fr',  // French
-    'he',  // Hebrew
-    'it',  // Italian
-    'ja',  // Japanese
-    'ps',  // Pashto
-    'pt',  // Portugese
-    'ro',  // Romanian
-    'ru',  // Russian
-    'ur',  // Urdu
-    'zh',  // Simplified Chinese
+    'ar', // Arabic
+    'de', // German
+    'en', // English
+    'es', // Spanish
+    'fa', // Farsi (Persian)
+    'fr', // French
+    'he', // Hebrew
+    'id', // Indonesian
+    'it', // Italian
+    'ja', // Japanese
+    'ko', // Korean
+    'nl', // Dutch
+    'no', // Norwegian
+    'pl', // Polish
+    'ps', // Pashto
+    'pt', // Portugese
+    'ro', // Romanian
+    'ru', // Russian
+    'th', // Thai
+    'tr', // Turkish
+    'ur', // Urdu
+    'zh', // Chinese (simplified)
   ];
 
   @override

@@ -68,8 +68,8 @@ void main() {
   });
 
   test('MaterialPointArcTween', () {
-    final Offset begin = const Offset(180.0, 110.0);
-    final Offset end = const Offset(37.0, 250.0);
+    const Offset begin = const Offset(180.0, 110.0);
+    const Offset end = const Offset(37.0, 250.0);
 
     MaterialPointArcTween tween = new MaterialPointArcTween(begin: begin, end: end);
     expect(tween.lerp(0.0), begin);

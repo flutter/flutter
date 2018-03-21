@@ -55,5 +55,5 @@ void main() {
       fs.directory(fs.path.join(root, 'dev', 'tools', 'aatool')).path,
       fs.directory(fs.path.join(root, 'dev', 'tools')).path,
     ]);
-  },  overrides: <Type, Generator>{ FileSystem: () => fs } );
+  }, overrides: <Type, Generator>{ FileSystem: () => fs });
 }

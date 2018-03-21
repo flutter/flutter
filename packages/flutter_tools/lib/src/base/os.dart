@@ -166,7 +166,7 @@ class _WindowsUtils extends OperatingSystemUtils {
     final List<String> lines = result.stdout.trim().split('\n');
     if (all)
       return lines.map((String path) => fs.file(path.trim())).toList();
-    return  <File>[fs.file(lines.first.trim())];
+    return <File>[fs.file(lines.first.trim())];
   }
 
   @override

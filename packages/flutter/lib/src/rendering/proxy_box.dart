@@ -34,7 +34,7 @@ export 'package:flutter/gestures.dart' show
 /// the proxy box with its child. However, RenderProxyBox is a useful base class
 /// for render objects that wish to mimic most, but not all, of the properties
 /// of their child.
-class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin {
+class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
   /// Creates a proxy render box.
   ///
   /// Proxy render boxes are rarely created directly because they simply proxy
@@ -52,7 +52,8 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
 /// of [RenderProxyBox] is desired but inheriting from [RenderProxyBox] is
 /// impractical (e.g. because you want to mix in other classes as well).
 // TODO(ianh): Remove this class once https://github.com/dart-lang/sdk/issues/15101 is fixed
-abstract class RenderProxyBoxMixin extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+@optionalTypeArgs
+abstract class RenderProxyBoxMixin<T extends RenderBox> extends RenderBox with RenderObjectWithChildMixin<T> {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory RenderProxyBoxMixin._() => null;
@@ -170,9 +171,9 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
   bool hitTestSelf(Offset position) => behavior == HitTestBehavior.opaque;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<HitTestBehavior>('behavior', behavior, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<HitTestBehavior>('behavior', behavior, defaultValue: null));
   }
 }
 
@@ -275,9 +276,9 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<BoxConstraints>('additionalConstraints', additionalConstraints));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<BoxConstraints>('additionalConstraints', additionalConstraints));
   }
 }
 
@@ -301,8 +302,8 @@ class RenderLimitedBox extends RenderProxyBox {
   /// non-negative.
   RenderLimitedBox({
     RenderBox child,
-    double maxWidth: double.INFINITY,
-    double maxHeight: double.INFINITY
+    double maxWidth: double.infinity,
+    double maxHeight: double.infinity
   }) : assert(maxWidth != null && maxWidth >= 0.0),
        assert(maxHeight != null && maxHeight >= 0.0),
        _maxWidth = maxWidth,
@@ -351,10 +352,10 @@ class RenderLimitedBox extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.INFINITY));
-    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: double.INFINITY));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.infinity));
+    properties.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: double.infinity));
   }
 }
 
@@ -516,9 +517,9 @@ class RenderAspectRatio extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('aspectRatio', aspectRatio));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('aspectRatio', aspectRatio));
   }
 }
 
@@ -590,7 +591,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!width.isFinite)
-      width = computeMaxIntrinsicWidth(double.INFINITY);
+      width = computeMaxIntrinsicWidth(double.infinity);
     assert(width.isFinite);
     final double height = child.getMinIntrinsicHeight(width);
     return _applyStep(height, _stepHeight);
@@ -601,7 +602,7 @@ class RenderIntrinsicWidth extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!width.isFinite)
-      width = computeMaxIntrinsicWidth(double.INFINITY);
+      width = computeMaxIntrinsicWidth(double.infinity);
     assert(width.isFinite);
     final double height = child.getMaxIntrinsicHeight(width);
     return _applyStep(height, _stepHeight);
@@ -629,10 +630,10 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('stepWidth', stepWidth));
-    description.add(new DoubleProperty('stepHeight', stepHeight));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('stepWidth', stepWidth));
+    properties.add(new DoubleProperty('stepHeight', stepHeight));
   }
 }
 
@@ -657,7 +658,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!height.isFinite)
-      height = child.getMaxIntrinsicHeight(double.INFINITY);
+      height = child.getMaxIntrinsicHeight(double.infinity);
     assert(height.isFinite);
     return child.getMinIntrinsicWidth(height);
   }
@@ -667,7 +668,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     if (child == null)
       return 0.0;
     if (!height.isFinite)
-      height = child.getMaxIntrinsicHeight(double.INFINITY);
+      height = child.getMaxIntrinsicHeight(double.infinity);
     assert(height.isFinite);
     return child.getMaxIntrinsicWidth(height);
   }
@@ -771,9 +772,9 @@ class RenderOpacity extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('opacity', opacity));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('opacity', opacity));
   }
 }
 
@@ -864,9 +865,9 @@ class RenderAnimatedOpacity extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
   }
 }
 
@@ -1052,35 +1053,38 @@ abstract class CustomClipper<T> {
 class ShapeBorderClipper extends CustomClipper<Path> {
   /// Creates a [ShapeBorder] clipper.
   ///
-  /// The [shapeBorder] argument must not be null.
+  /// The [shape] argument must not be null.
   ///
-  /// The [textDirection] argument must be provided non-null if [shapeBorder]
+  /// The [textDirection] argument must be provided non-null if [shape]
   /// has a text direction dependency (for example if it is expressed in terms
   /// of "start" and "end" instead of "left" and "right"). It may be null if
   /// the border will not need the text direction to paint itself.
   const ShapeBorderClipper({
-    @required this.shapeBorder,
+    @required this.shape,
     this.textDirection,
-  }) : assert(shapeBorder != null);
+  }) : assert(shape != null);
 
   /// The shape border whose outer path this clipper clips to.
-  final ShapeBorder shapeBorder;
+  final ShapeBorder shape;
 
-  /// The text direction to use for getting the outer path for [shapeBorder].
+  /// The text direction to use for getting the outer path for [shape].
   ///
   /// [ShapeBorder]s can depend on the text direction (e.g having a "dent"
   /// towards the start of the shape).
   final TextDirection textDirection;
 
-  /// Returns the outer path of [shapeBorder] as the clip.
+  /// Returns the outer path of [shape] as the clip.
   @override
   Path getClip(Size size) {
-    return shapeBorder.getOuterPath(Offset.zero & size, textDirection: textDirection);
+    return shape.getOuterPath(Offset.zero & size, textDirection: textDirection);
   }
 
   @override
-  bool shouldReclip(covariant ShapeBorderClipper oldClipper) {
-    return oldClipper.shapeBorder != shapeBorder;
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    if (oldClipper.runtimeType != ShapeBorderClipper)
+      return true;
+    final ShapeBorderClipper typedOldClipper = oldClipper;
+    return typedOldClipper.shape != shape;
   }
 }
 
@@ -1491,6 +1495,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     super.debugFillProperties(description);
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', color));
   }
 }
 
@@ -1592,6 +1597,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
           clipPath: offsetClipPath,
           elevation: elevation,
           color: color,
+          shadowColor: shadowColor,
         );
         context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
       } else {
@@ -1698,6 +1704,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
           clipPath: offsetPath,
           elevation: elevation,
           color: color,
+          shadowColor: shadowColor,
         );
         context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
       } else {
@@ -1868,10 +1875,10 @@ class RenderDecoratedBox extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(_decoration.toDiagnosticsNode(name: 'decoration'));
-    description.add(new DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(_decoration.toDiagnosticsNode(name: 'decoration'));
+    properties.add(new DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
   }
 }
 
@@ -1895,7 +1902,7 @@ class RenderTransform extends RenderProxyBox {
     this.origin = origin;
   }
 
-  /// The origin of the coordinate system (relative to the upper left corder of
+  /// The origin of the coordinate system (relative to the upper left corner of
   /// this render object) in which to apply the matrix.
   ///
   /// Setting an origin is equivalent to conjugating the transform matrix by a
@@ -1907,6 +1914,7 @@ class RenderTransform extends RenderProxyBox {
       return;
     _origin = value;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// The alignment of the origin, relative to the size of the box.
@@ -1927,6 +1935,7 @@ class RenderTransform extends RenderProxyBox {
       return;
     _alignment = value;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// The text direction with which to resolve [alignment].
@@ -1940,6 +1949,7 @@ class RenderTransform extends RenderProxyBox {
       return;
     _textDirection = value;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// When set to true, hit tests are performed based on the position of the
@@ -1960,42 +1970,49 @@ class RenderTransform extends RenderProxyBox {
       return;
     _transform = new Matrix4.copy(value);
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// Sets the transform to the identity matrix.
   void setIdentity() {
     _transform.setIdentity();
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a rotation about the x axis into the transform.
   void rotateX(double radians) {
     _transform.rotateX(radians);
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a rotation about the y axis into the transform.
   void rotateY(double radians) {
     _transform.rotateY(radians);
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a rotation about the z axis into the transform.
   void rotateZ(double radians) {
     _transform.rotateZ(radians);
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a translation by (x, y, z) into the transform.
   void translate(double x, [double y = 0.0, double z = 0.0]) {
     _transform.translate(x, y, z);
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// Concatenates a scale into the transform.
   void scale(double x, [double y, double z]) {
     _transform.scale(x, y, z);
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   Matrix4 get _effectiveTransform {
@@ -2052,13 +2069,13 @@ class RenderTransform extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new TransformProperty('transform matrix', _transform));
-    description.add(new DiagnosticsProperty<Offset>('origin', origin));
-    description.add(new DiagnosticsProperty<Alignment>('alignment', alignment));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    description.add(new DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new TransformProperty('transform matrix', _transform));
+    properties.add(new DiagnosticsProperty<Offset>('origin', origin));
+    properties.add(new DiagnosticsProperty<Alignment>('alignment', alignment));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
   }
 }
 
@@ -2107,7 +2124,7 @@ class RenderFittedBox extends RenderProxyBox {
   /// How to align the child within its parent's bounds.
   ///
   /// An alignment of (0.0, 0.0) aligns the child to the top-left corner of its
-  /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
+  /// parent's bounds. An alignment of (1.0, 0.5) aligns the child to the middle
   /// of the right edge of its parent's bounds.
   ///
   /// If this is set to an [AlignmentDirectional] object, then
@@ -2173,7 +2190,7 @@ class RenderFittedBox extends RenderProxyBox {
       final double scaleY = sizes.destination.height / sizes.source.height;
       final Rect sourceRect = _resolvedAlignment.inscribe(sizes.source, Offset.zero & childSize);
       final Rect destinationRect = _resolvedAlignment.inscribe(sizes.destination, Offset.zero & size);
-      _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.width;
+      _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.height;
       _transform = new Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
         ..scale(scaleX, scaleY, 1.0)
         ..translate(-sourceRect.left, -sourceRect.top);
@@ -2229,11 +2246,11 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<BoxFit>('fit', fit));
-    description.add(new DiagnosticsProperty<Alignment>('alignment', alignment));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<BoxFit>('fit', fit));
+    properties.add(new DiagnosticsProperty<Alignment>('alignment', alignment));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
@@ -2312,10 +2329,10 @@ class RenderFractionalTranslation extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Offset>('translation', translation));
-    description.add(new DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Offset>('translation', translation));
+    properties.add(new DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
   }
 }
 
@@ -2390,8 +2407,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     final List<String> listeners = <String>[];
     if (onPointerDown != null)
       listeners.add('down');
@@ -2403,7 +2420,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       listeners.add('cancel');
     if (listeners.isEmpty)
       listeners.add('<none>');
-    description.add(new IterableProperty<String>('listeners', listeners));
+    properties.add(new IterableProperty<String>('listeners', listeners));
     // TODO(jacobr): add raw listeners to the diagnostics data.
   }
 }
@@ -2494,13 +2511,13 @@ class RenderRepaintBoundary extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     bool inReleaseMode = true;
     assert(() {
       inReleaseMode = false;
       if (debugSymmetricPaintCount + debugAsymmetricPaintCount == 0) {
-        description.add(new MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)'));
+        properties.add(new MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)'));
       } else {
         final double fraction = debugAsymmetricPaintCount / (debugSymmetricPaintCount + debugAsymmetricPaintCount);
         String diagnosis;
@@ -2519,13 +2536,13 @@ class RenderRepaintBoundary extends RenderProxyBox {
         } else {
           diagnosis = 'this repaint boundary is not very effective and should probably be removed';
         }
-        description.add(new PercentProperty('metrics', fraction, unit: 'useful', tooltip: '$debugSymmetricPaintCount bad vs $debugAsymmetricPaintCount good'));
-        description.add(new MessageProperty('diagnosis', diagnosis));
+        properties.add(new PercentProperty('metrics', fraction, unit: 'useful', tooltip: '$debugSymmetricPaintCount bad vs $debugAsymmetricPaintCount good'));
+        properties.add(new MessageProperty('diagnosis', diagnosis));
       }
       return true;
     }());
     if (inReleaseMode)
-      description.add(new DiagnosticsNode.message('(run in checked mode to collect repaint boundary statistics)'));
+      properties.add(new DiagnosticsNode.message('(run in checked mode to collect repaint boundary statistics)'));
   }
 }
 
@@ -2605,10 +2622,10 @@ class RenderIgnorePointer extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<bool>('ignoring', ignoring));
-    description.add(
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<bool>('ignoring', ignoring));
+    properties.add(
       new DiagnosticsProperty<bool>(
         'ignoringSemantics',
         _effectiveIgnoringSemantics,
@@ -2720,9 +2737,9 @@ class RenderOffstage extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<bool>('offstage', offstage));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<bool>('offstage', offstage));
   }
 
   @override
@@ -2773,9 +2790,9 @@ class RenderAbsorbPointer extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<bool>('absorbing', absorbing));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<bool>('absorbing', absorbing));
   }
 }
 
@@ -2799,9 +2816,9 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
   dynamic metaData;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<dynamic>('metaData', metaData));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<dynamic>('metaData', metaData));
   }
 }
 
@@ -2969,8 +2986,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     final List<String> gestures = <String>[];
     if (onTap != null)
       gestures.add('tap');
@@ -2982,7 +2999,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
       gestures.add('vertical scroll');
     if (gestures.isEmpty)
       gestures.add('<none>');
-    description.add(new IterableProperty<String>('gestures', gestures));
+    properties.add(new IterableProperty<String>('gestures', gestures));
   }
 }
 
@@ -3001,12 +3018,18 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool checked,
     bool selected,
     bool button,
+    bool header,
+    bool textField,
+    bool focused,
+    bool inMutuallyExclusiveGroup,
+    bool obscured,
     String label,
     String value,
     String increasedValue,
     String decreasedValue,
     String hint,
     TextDirection textDirection,
+    SemanticsSortKey sortKey,
     VoidCallback onTap,
     VoidCallback onLongPress,
     VoidCallback onScrollLeft,
@@ -3021,6 +3044,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     MoveCursorHandler onMoveCursorForwardByCharacter,
     MoveCursorHandler onMoveCursorBackwardByCharacter,
     SetSelectionHandler onSetSelection,
+    VoidCallback onDidGainAccessibilityFocus,
+    VoidCallback onDidLoseAccessibilityFocus,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
@@ -3028,12 +3053,18 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _checked = checked,
        _selected = selected,
        _button = button,
+       _header = header,
+       _textField = textField,
+       _focused = focused,
+       _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
+       _obscured = obscured,
        _label = label,
        _value = value,
        _increasedValue = increasedValue,
        _decreasedValue = decreasedValue,
        _hint = hint,
        _textDirection = textDirection,
+       _sortKey = sortKey,
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onScrollLeft = onScrollLeft,
@@ -3048,6 +3079,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
        _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
        _onSetSelection = onSetSelection,
+       _onDidGainAccessibilityFocus = onDidGainAccessibilityFocus,
+       _onDidLoseAccessibilityFocus = onDidLoseAccessibilityFocus,
        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
@@ -3132,6 +3165,58 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// If non-null, sets the [SemanticsNode.isHeader] semantic to the given value.
+  bool get header => _header;
+  bool _header;
+  set header(bool value) {
+    if (header == value)
+      return;
+    _header = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isTextField] semantic to the given value.
+  bool get textField => _textField;
+  bool _textField;
+  set textField(bool value) {
+    if (textField == value)
+      return;
+    _textField = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isFocused] semantic to the given value.
+  bool get focused => _focused;
+  bool _focused;
+  set focused(bool value) {
+    if (focused == value)
+      return;
+    _focused = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isInMutuallyExclusiveGroup] semantic
+  /// to the given value.
+  bool get inMutuallyExclusiveGroup => _inMutuallyExclusiveGroup;
+  bool _inMutuallyExclusiveGroup;
+  set inMutuallyExclusiveGroup(bool value) {
+    if (inMutuallyExclusiveGroup == value)
+      return;
+    _inMutuallyExclusiveGroup = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isObscured] semantic to the given
+  /// value.
+  bool get obscured => _obscured;
+  bool _obscured;
+  set obscured(bool value) {
+    if (obscured == value)
+      return;
+    _obscured = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
   ///
   /// The reading direction is given by [textDirection].
@@ -3204,6 +3289,20 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (textDirection == value)
       return;
     _textDirection = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Sets the [SemanticsNode.sortKey] to the given value.
+  ///
+  /// This defines how this node is sorted among the sibling semantics nodes
+  /// to determine the order in which they are traversed by the accessibility
+  /// services on the platform (e.g. VoiceOver on iOS and TalkBack on Android).
+  SemanticsSortKey get sortKey => _sortKey;
+  SemanticsSortKey _sortKey;
+  set sortKey(SemanticsSortKey value) {
+    if (sortKey == value)
+      return;
+    _sortKey = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3477,6 +3576,62 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handler for [SemanticsAction.didGainAccessibilityFocus].
+  ///
+  /// This handler is invoked when the node annotated with this handler gains
+  /// the accessibility focus. The accessibility focus is the
+  /// green (on Android with TalkBack) or black (on iOS with VoiceOver)
+  /// rectangle shown on screen to indicate what element an accessibility
+  /// user is currently interacting with.
+  ///
+  /// The accessibility focus is different from the input focus. The input focus
+  /// is usually held by the element that currently responds to keyboard inputs.
+  /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
+  ///    focus is removed from the node
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  VoidCallback get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
+  VoidCallback _onDidGainAccessibilityFocus;
+  set onDidGainAccessibilityFocus(VoidCallback handler) {
+    if (_onDidGainAccessibilityFocus == handler)
+      return;
+    final bool hadValue = _onDidGainAccessibilityFocus != null;
+    _onDidGainAccessibilityFocus = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
+  /// The handler for [SemanticsAction.didLoseAccessibilityFocus].
+  ///
+  /// This handler is invoked when the node annotated with this handler
+  /// loses the accessibility focus. The accessibility focus is
+  /// the green (on Android with TalkBack) or black (on iOS with VoiceOver)
+  /// rectangle shown on screen to indicate what element an accessibility
+  /// user is currently interacting with.
+  ///
+  /// The accessibility focus is different from the input focus. The input focus
+  /// is usually held by the element that currently responds to keyboard inputs.
+  /// Accessibility focus and input focus can be held by two different nodes!
+  ///
+  /// See also:
+  ///
+  ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
+  ///    accessibility focus
+  ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus
+  VoidCallback get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
+  VoidCallback _onDidLoseAccessibilityFocus;
+  set onDidLoseAccessibilityFocus(VoidCallback handler) {
+    if (_onDidLoseAccessibilityFocus == handler)
+      return;
+    final bool hadValue = _onDidLoseAccessibilityFocus != null;
+    _onDidLoseAccessibilityFocus = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -3491,6 +3646,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isSelected = selected;
     if (button != null)
       config.isButton = button;
+    if (header != null)
+      config.isHeader = header;
+    if (textField != null)
+      config.isTextField = textField;
+    if (focused != null)
+      config.isFocused = focused;
+    if (inMutuallyExclusiveGroup != null)
+      config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup;
+    if (obscured != null)
+      config.isObscured = obscured;
     if (label != null)
       config.label = label;
     if (value != null)
@@ -3503,6 +3668,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.hint = hint;
     if (textDirection != null)
       config.textDirection = textDirection;
+    if (sortKey != null)
+      config.sortKey = sortKey;
     // Registering _perform* as action handlers instead of the user provided
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.
@@ -3534,6 +3701,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.onMoveCursorBackwardByCharacter = _performMoveCursorBackwardByCharacter;
     if (onSetSelection != null)
       config.onSetSelection = _performSetSelection;
+    if (onDidGainAccessibilityFocus != null)
+      config.onDidGainAccessibilityFocus = _performDidGainAccessibilityFocus;
+    if (onDidLoseAccessibilityFocus != null)
+      config.onDidLoseAccessibilityFocus = _performDidLoseAccessibilityFocus;
   }
 
   void _performTap() {
@@ -3605,6 +3776,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (onSetSelection != null)
       onSetSelection(selection);
   }
+
+  void _performDidGainAccessibilityFocus() {
+    if (onDidGainAccessibilityFocus != null)
+      onDidGainAccessibilityFocus();
+  }
+
+  void _performDidLoseAccessibilityFocus() {
+    if (onDidLoseAccessibilityFocus != null)
+      onDidLoseAccessibilityFocus();
+  }
 }
 
 /// Causes the semantics of all earlier render objects below the same semantic
@@ -3636,9 +3817,9 @@ class RenderBlockSemantics extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<bool>('blocking', blocking));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<bool>('blocking', blocking));
   }
 }
 
@@ -3697,9 +3878,9 @@ class RenderExcludeSemantics extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<bool>('excluding', excluding));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<bool>('excluding', excluding));
   }
 }
 
@@ -3745,9 +3926,9 @@ class RenderLeaderLayer extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<LayerLink>('link', link));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<LayerLink>('link', link));
   }
 }
 
@@ -3876,10 +4057,10 @@ class RenderFollowerLayer extends RenderProxyBox {
       Offset.zero,
       childPaintBounds: new Rect.fromLTRB(
         // We don't know where we'll end up, so we have no idea what our cull rect should be.
-        double.NEGATIVE_INFINITY,
-        double.NEGATIVE_INFINITY,
-        double.INFINITY,
-        double.INFINITY,
+        double.negativeInfinity,
+        double.negativeInfinity,
+        double.infinity,
+        double.infinity,
       ),
     );
   }
@@ -3890,11 +4071,11 @@ class RenderFollowerLayer extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<LayerLink>('link', link));
-    description.add(new DiagnosticsProperty<bool>('showWhenUnlinked', showWhenUnlinked));
-    description.add(new DiagnosticsProperty<Offset>('offset', offset));
-    description.add(new TransformProperty('current transform matrix', getCurrentTransform()));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<LayerLink>('link', link));
+    properties.add(new DiagnosticsProperty<bool>('showWhenUnlinked', showWhenUnlinked));
+    properties.add(new DiagnosticsProperty<Offset>('offset', offset));
+    properties.add(new TransformProperty('current transform matrix', getCurrentTransform()));
   }
 }

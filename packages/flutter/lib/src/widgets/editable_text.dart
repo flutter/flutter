@@ -291,24 +291,24 @@ class EditableText extends StatefulWidget {
   EditableTextState createState() => new EditableTextState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<TextEditingController>('controller', controller));
-    description.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode));
-    description.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    description.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
-    style?.debugFillProperties(description);
-    description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    description.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
-    description.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
-    description.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-    description.add(new EnumProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<TextEditingController>('controller', controller));
+    properties.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode));
+    properties.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    properties.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    style?.debugFillProperties(properties);
+    properties.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
+    properties.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
+    properties.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    properties.add(new EnumProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
   }
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin implements TextInputClient {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin implements TextInputClient, TextSelectionDelegate {
   Timer _cursorTimer;
   final ValueNotifier<bool> _showCursor = new ValueNotifier<bool>(false);
   final GlobalKey _editableKey = new GlobalKey();
@@ -426,9 +426,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final double caretEnd = _isMultiline ? caretRect.bottom : caretRect.right;
     double scrollOffset = _scrollController.offset;
     final double viewportExtent = _scrollController.position.viewportDimension;
-    if (caretStart < 0.0)  // cursor before start of bounds
+    if (caretStart < 0.0) // cursor before start of bounds
       scrollOffset += caretStart;
-    else if (caretEnd >= viewportExtent)  // cursor after end of bounds
+    else if (caretEnd >= viewportExtent) // cursor after end of bounds
       scrollOffset += caretEnd - viewportExtent;
     return scrollOffset;
   }
@@ -516,8 +516,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         debugRequiredFor: widget,
         layerLink: _layerLink,
         renderObject: renderObject,
-        onSelectionOverlayChanged: _handleSelectionOverlayChanged,
         selectionControls: widget.selectionControls,
+        selectionDelegate: this,
       );
       final bool longPress = cause == SelectionChangedCause.longPress;
       if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
@@ -527,12 +527,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);
     }
-  }
-
-  void _handleSelectionOverlayChanged(TextEditingValue value, Rect caretRect) {
-    assert(!value.composing.isValid);  // composing range must be empty while selecting.
-    _formatAndSetValue(value);
-    _scrollController.jumpTo(_getScrollOffsetForCaret(caretRect));
   }
 
   bool _textChangedSinceLastCaretUpdate = false;
@@ -644,9 +638,29 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   RenderEditable get renderEditable => _editableKey.currentContext.findRenderObject();
 
   @override
+  TextEditingValue get textEditingValue => _value;
+
+  @override
+  set textEditingValue(TextEditingValue value) {
+    _selectionOverlay?.update(value);
+    _formatAndSetValue(value);
+  }
+
+  @override
+  void bringIntoView(TextPosition position) {
+    _scrollController.jumpTo(_getScrollOffsetForCaret(renderEditable.getLocalRectForCaret(position)));
+  }
+
+  @override
+  void hideToolbar() {
+    _selectionOverlay?.hide();
+  }
+
+  @override
   Widget build(BuildContext context) {
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
     super.build(context); // See AutomaticKeepAliveClientMixin.
+    final TextSelectionControls controls = widget.selectionControls;
     return new Scrollable(
       excludeFromSemantics: true,
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
@@ -655,25 +669,30 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return new CompositedTransformTarget(
           link: _layerLink,
-          child: new _Editable(
-            key: _editableKey,
-            value: _value,
-            style: widget.style,
-            cursorColor: widget.cursorColor,
-            showCursor: _showCursor,
-            hasFocus: _hasFocus,
-            maxLines: widget.maxLines,
-            selectionColor: widget.selectionColor,
-            textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
-            textAlign: widget.textAlign,
-            textDirection: _textDirection,
-            obscureText: widget.obscureText,
-            obscureShowCharacterAtIndex: _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null,
-            autocorrect: widget.autocorrect,
-            offset: offset,
-            onSelectionChanged: _handleSelectionChanged,
-            onCaretChanged: _handleCaretChanged,
-            rendererIgnoresPointer: widget.rendererIgnoresPointer,
+          child: new Semantics(
+            onCopy: _hasFocus && controls?.canCopy(this) == true ? () => controls.handleCopy(this) : null,
+            onCut: _hasFocus && controls?.canCut(this) == true ? () => controls.handleCut(this) : null,
+            onPaste: _hasFocus && controls?.canPaste(this) == true ? () => controls.handlePaste(this) : null,
+            child: new _Editable(
+              key: _editableKey,
+              value: _value,
+              style: widget.style,
+              cursorColor: widget.cursorColor,
+              showCursor: _showCursor,
+              hasFocus: _hasFocus,
+              maxLines: widget.maxLines,
+              selectionColor: widget.selectionColor,
+              textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
+              textAlign: widget.textAlign,
+              textDirection: _textDirection,
+              obscureText: widget.obscureText,
+              obscureShowCharacterAtIndex: _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null,
+              autocorrect: widget.autocorrect,
+              offset: offset,
+              onSelectionChanged: _handleSelectionChanged,
+              onCaretChanged: _handleCaretChanged,
+              rendererIgnoresPointer: widget.rendererIgnoresPointer,
+            ),
           ),
         );
       },
@@ -740,6 +759,7 @@ class _Editable extends LeafRenderObjectWidget {
       onSelectionChanged: onSelectionChanged,
       onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
+      obscureText: obscureText,
     );
   }
 
@@ -759,7 +779,8 @@ class _Editable extends LeafRenderObjectWidget {
       ..offset = offset
       ..onSelectionChanged = onSelectionChanged
       ..onCaretChanged = onCaretChanged
-      ..ignorePointer = rendererIgnoresPointer;
+      ..ignorePointer = rendererIgnoresPointer
+      ..obscureText = obscureText;
   }
 
   TextSpan get _styledTextSpan {
@@ -782,7 +803,7 @@ class _Editable extends LeafRenderObjectWidget {
 
     String text = value.text;
     if (obscureText) {
-      text = new String.fromCharCodes(new List<int>.filled(text.length, 0x2022));
+      text = RenderEditable.obscuringCharacter * text.length;
       final int o = obscureShowCharacterAtIndex;
       if (o != null && o >= 0 && o < text.length)
         text = text.replaceRange(o, o + 1, value.text.substring(o, o + 1));

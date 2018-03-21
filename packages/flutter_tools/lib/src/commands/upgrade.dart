@@ -4,13 +4,14 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../doctor.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -59,7 +60,7 @@ class UpgradeCommand extends FlutterCommand {
     printStatus('Upgrading engine...');
     code = await runCommandAndStreamOutput(
       <String>[
-        fs.path.join(Cache.flutterRoot, 'bin', 'flutter'), '--no-color', 'precache'
+        fs.path.join('bin', 'flutter'), '--no-color', 'precache',
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true
@@ -68,16 +69,22 @@ class UpgradeCommand extends FlutterCommand {
     printStatus('');
     printStatus(flutterVersion.toString());
 
-    final String projRoot = findProjectRoot();
-    if (projRoot != null) {
+    final String projectRoot = findProjectRoot();
+    if (projectRoot != null) {
       printStatus('');
-      await pubGet(context: PubContext.pubUpgrade, directory: projRoot, upgrade: true, checkLastModified: false);
+      await pubGet(context: PubContext.pubUpgrade, directory: projectRoot, upgrade: true, checkLastModified: false);
     }
 
     // Run a doctor check in case system requirements have changed.
     printStatus('');
     printStatus('Running flutter doctor...');
-    await doctor.diagnose();
+    code = await runCommandAndStreamOutput(
+      <String>[
+        fs.path.join('bin', 'flutter'), 'doctor',
+      ],
+      workingDirectory: Cache.flutterRoot,
+      allowReentrantFlutter: true,
+    );
   }
 
   //  dev/benchmarks/complex_layout/lib/main.dart        |  24 +-
@@ -88,7 +95,7 @@ class UpgradeCommand extends FlutterCommand {
   //  create mode 100644 examples/flutter_gallery/lib/gallery/demo.dart
   static final RegExp _gitChangedRegex = new RegExp(r' (rename|delete mode|create mode) .+');
 
-  // Public for testing.
+  @visibleForTesting
   static bool matchesGitLine(String line) {
     return _gitDiffRegex.hasMatch(line)
       || _gitChangedRegex.hasMatch(line)

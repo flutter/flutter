@@ -53,6 +53,9 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   }
 
   @override
+  int get childCount => children.length;
+
+  @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
     final SliverMultiBoxAdaptorParentData childParentData = child.parentData;

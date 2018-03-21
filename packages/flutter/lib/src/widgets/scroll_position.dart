@@ -452,14 +452,14 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void applyNewDimensions() {
     assert(pixels != null);
     activity.applyNewDimensions();
-    _updateSemanticActions();  // will potentially request a semantics update.
+    _updateSemanticActions(); // will potentially request a semantics update.
   }
 
   /// Animates the position such that the given object is as visible as possible
   /// by just scrolling this position.
   Future<Null> ensureVisible(RenderObject object, {
     double alignment: 0.0,
-    Duration duration: Duration.ZERO,
+    Duration duration: Duration.zero,
     Curve curve: Curves.ease,
   }) {
     assert(object.attached);
@@ -471,7 +471,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     if (target == pixels)
       return new Future<Null>.value();
 
-    if (duration == Duration.ZERO) {
+    if (duration == Duration.zero) {
       jumpTo(target);
       return new Future<Null>.value();
     }
@@ -589,19 +589,19 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Called by [beginActivity] to report when an activity has started.
   void didStartScroll() {
-    activity.dispatchScrollStartNotification(cloneMetrics(), context.notificationContext);
+    activity.dispatchScrollStartNotification(copyWith(), context.notificationContext);
   }
 
   /// Called by [setPixels] to report a change to the [pixels] position.
   void didUpdateScrollPositionBy(double delta) {
-    activity.dispatchScrollUpdateNotification(cloneMetrics(), context.notificationContext, delta);
+    activity.dispatchScrollUpdateNotification(copyWith(), context.notificationContext, delta);
   }
 
   /// Called by [beginActivity] to report when an activity has ended.
   ///
   /// This also saves the scroll offset using [saveScrollOffset].
   void didEndScroll() {
-    activity.dispatchScrollEndNotification(cloneMetrics(), context.notificationContext);
+    activity.dispatchScrollEndNotification(copyWith(), context.notificationContext);
     if (keepScrollOffset)
       saveScrollOffset();
   }
@@ -611,14 +611,14 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// not applied to the [pixels] value.
   void didOverscrollBy(double value) {
     assert(activity.isScrolling);
-    activity.dispatchOverscrollNotification(cloneMetrics(), context.notificationContext, value);
+    activity.dispatchOverscrollNotification(copyWith(), context.notificationContext, value);
   }
 
   /// Dispatches a notification that the [userScrollDirection] has changed.
   ///
   /// Subclasses should call this function when they change [userScrollDirection].
   void didUpdateScrollDirection(ScrollDirection direction) {
-    new UserScrollNotification(metrics: cloneMetrics(), context: context.notificationContext, direction: direction).dispatch(context.notificationContext);
+    new UserScrollNotification(metrics: copyWith(), context: context.notificationContext, direction: direction).dispatch(context.notificationContext);
   }
 
   @override
@@ -631,7 +631,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   @override
   void notifyListeners() {
-    _updateSemanticActions();  // will potentially request a semantics update.
+    _updateSemanticActions(); // will potentially request a semantics update.
     super.notifyListeners();
   }
 

@@ -21,6 +21,15 @@ void main() {
     renderObject.markNeedsSemanticsUpdate();
     expect(onNeedVisualUpdateCallCount, 2);
   });
+
+  test('detached RenderObject does not do semantics', () {
+    final TestRenderObject renderObject = new TestRenderObject();
+    expect(renderObject.attached, isFalse);
+    expect(renderObject.describeSemanticsConfigurationCallCount, 0);
+
+    renderObject.markNeedsSemanticsUpdate();
+    expect(renderObject.describeSemanticsConfigurationCallCount, 0);
+  });
 }
 
 class TestRenderObject extends RenderObject {
@@ -39,10 +48,13 @@ class TestRenderObject extends RenderObject {
   @override
   Rect get semanticBounds => new Rect.fromLTWH(0.0, 0.0, 10.0, 20.0);
 
+  int describeSemanticsConfigurationCallCount = 0;
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
+    describeSemanticsConfigurationCallCount++;
   }
 }
 

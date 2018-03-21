@@ -7,13 +7,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  final Color _dividerColor = const Color(0x1f333333);
+  const Color _dividerColor = const Color(0x1f333333);
 
   testWidgets('ExpansionTile initial state', (WidgetTester tester) async {
     final Key topKey = new UniqueKey();
-    final Key expandedKey = const PageStorageKey<String>('expanded');
-    final Key collapsedKey = const PageStorageKey<String>('collapsed');
-    final Key defaultKey = const PageStorageKey<String>('default');
+    const Key expandedKey = const PageStorageKey<String>('expanded');
+    const Key collapsedKey = const PageStorageKey<String>('collapsed');
+    const Key defaultKey = const PageStorageKey<String>('default');
 
     final Key tileKey = new UniqueKey();
 
@@ -50,7 +50,7 @@ void main() {
                   )
                 ]
               ),
-              new ExpansionTile(
+              const ExpansionTile(
                 key: defaultKey,
                 title: const Text('Default'),
                 children: const <Widget>[

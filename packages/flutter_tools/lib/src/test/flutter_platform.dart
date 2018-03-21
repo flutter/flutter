@@ -8,7 +8,8 @@ import 'dart:convert';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 
-import 'package:test/src/backend/test_platform.dart'; // ignore: implementation_imports
+import 'package:test/src/backend/runtime.dart'; // ignore: implementation_imports
+import 'package:test/src/backend/suite_platform.dart'; // ignore: implementation_imports
 import 'package:test/src/runner/plugin/platform.dart'; // ignore: implementation_imports
 import 'package:test/src/runner/plugin/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
@@ -59,13 +60,16 @@ void installHook({
   bool machine: false,
   bool startPaused: false,
   bool previewDart2: false,
+  int port: 0,
+  String precompiledDillPath,
+  bool trackWidgetCreation: false,
   int observatoryPort,
   InternetAddressType serverType: InternetAddressType.IP_V4,
 }) {
   if (startPaused || observatoryPort != null)
     assert(enableObservatory);
   hack.registerPlatformPlugin(
-    <TestPlatform>[TestPlatform.vm],
+    <Runtime>[Runtime.vm],
     () => new _FlutterPlatform(
       shellPath: shellPath,
       watcher: watcher,
@@ -75,6 +79,9 @@ void installHook({
       explicitObservatoryPort: observatoryPort,
       host: _kHosts[serverType],
       previewDart2: previewDart2,
+      port: port,
+      precompiledDillPath: precompiledDillPath,
+      trackWidgetCreation: trackWidgetCreation,
     ),
   );
 }
@@ -82,6 +89,112 @@ void installHook({
 enum _InitialResult { crashed, timedOut, connected }
 enum _TestResult { crashed, harnessBailed, testBailed }
 typedef Future<Null> _Finalizer();
+
+class _CompilationRequest {
+  String path;
+  Completer<String> result;
+
+  _CompilationRequest(this.path, this.result);
+}
+
+// This class is a wrapper around compiler that allows multiple isolates to
+// enqueue compilation requests, but ensures only one compilation at a time.
+class _Compiler {
+  _Compiler(bool trackWidgetCreation) {
+    // Compiler maintains and updates single incremental dill file.
+    // Incremental compilation requests done for each test copy that file away
+    // for independent execution.
+    final Directory outputDillDirectory = fs.systemTempDirectory
+        .createTempSync('output_dill');
+    final File outputDill = outputDillDirectory.childFile('output.dill');
+
+    bool suppressOutput = false;
+    void reportCompilerMessage(String message) {
+      if (suppressOutput)
+        return;
+
+      if (message.startsWith('compiler message: Error: Could not resolve the package \'test\'')) {
+        printTrace(message);
+        printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n');
+        suppressOutput = true;
+        return;
+      }
+
+      printError('$message');
+    }
+
+    ResidentCompiler createCompiler() {
+      return new ResidentCompiler(
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        packagesPath: PackageMap.globalPackagesPath,
+        trackWidgetCreation: trackWidgetCreation,
+        compilerMessageConsumer: reportCompilerMessage,
+      );
+    }
+
+    compilerController.stream.listen((_CompilationRequest request) async {
+      final bool isEmpty = compilationQueue.isEmpty;
+      compilationQueue.add(request);
+      // Only trigger processing if queue was empty - i.e. no other requests
+      // are currently being processed. This effectively enforces "one
+      // compilation request at a time".
+      if (isEmpty) {
+        while (compilationQueue.isNotEmpty) {
+          final _CompilationRequest request = compilationQueue.first;
+          printTrace('Compiling ${request.path}');
+          compiler ??= createCompiler();
+          suppressOutput = false;
+          final String outputPath = await handleTimeout(compiler.recompile(request.path,
+            <String>[request.path],
+            outputPath: outputDill.path,
+          ), request.path);
+
+          // Check if the compiler produced the output. If it failed then
+          // outputPath would be null. In this case pass null upwards to the
+          // consumer and shutdown the compiler to avoid reusing compiler
+          // that might have gotten into a weird state.
+          if (outputPath == null) {
+            request.result.complete(null);
+            await shutdown();
+          } else {
+            final File kernelReadyToRun =
+                await fs.file(outputPath).copy('${request.path}.dill');
+            request.result.complete(kernelReadyToRun.path);
+            compiler.accept();
+            compiler.reset();
+          }
+          // Only remove now when we finished processing the element
+          compilationQueue.removeAt(0);
+        }
+      }
+    }, onDone: () {
+      outputDillDirectory.deleteSync(recursive: true);
+    });
+  }
+
+  final StreamController<_CompilationRequest> compilerController =
+      new StreamController<_CompilationRequest>();
+  final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
+  ResidentCompiler compiler;
+
+  Future<String> compile(String mainDart) {
+    final Completer<String> completer = new Completer<String>();
+    compilerController.add(new _CompilationRequest(mainDart, completer));
+    return handleTimeout(completer.future, mainDart);
+  }
+
+  Future<dynamic> shutdown() async {
+    await compiler.shutdown();
+    compiler = null;
+  }
+
+  static Future<String> handleTimeout(Future<String> value, String path) {
+    return value.timeout(const Duration(minutes: 5), onTimeout: () {
+      printError('Compilation of $path timed out after 5 minutes.');
+      return null;
+    });
+  }
+}
 
 class _FlutterPlatform extends PlatformPlugin {
   _FlutterPlatform({
@@ -93,6 +206,9 @@ class _FlutterPlatform extends PlatformPlugin {
     this.explicitObservatoryPort,
     this.host,
     this.previewDart2,
+    this.port,
+    this.precompiledDillPath,
+    this.trackWidgetCreation,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -103,6 +219,11 @@ class _FlutterPlatform extends PlatformPlugin {
   final int explicitObservatoryPort;
   final InternetAddress host;
   final bool previewDart2;
+  final int port;
+  final String precompiledDillPath;
+  final bool trackWidgetCreation;
+
+  _Compiler compiler;
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
@@ -114,11 +235,14 @@ class _FlutterPlatform extends PlatformPlugin {
   int _testCount = 0;
 
   @override
-  StreamChannel<dynamic> loadChannel(String testPath, TestPlatform platform) {
-    // Fail if there will be a port conflict.
-    if (explicitObservatoryPort != null) {
-      if (_testCount > 0)
+  StreamChannel<dynamic> loadChannel(String testPath, SuitePlatform platform) {
+    if (_testCount > 0) {
+      // Fail if there will be a port conflict.
+      if (explicitObservatoryPort != null)
         throwToolExit('installHook() was called with an observatory port or debugger mode enabled, but then more than one test suite was run.');
+      // Fail if we're passing in a precompiled entry-point.
+      if (precompiledDillPath != null)
+        throwToolExit('installHook() was called with a precompiled test entry-point, but then more than one test suite was run.');
     }
     final int ourTestCount = _testCount;
     _testCount += 1;
@@ -157,7 +281,7 @@ class _FlutterPlatform extends PlatformPlugin {
       controller.sink.done.whenComplete(() { controllerSinkClosed = true; }); // ignore: unawaited_futures
 
       // Prepare our WebSocket server to talk to the engine subproces.
-      final HttpServer server = await HttpServer.bind(host, 0);
+      final HttpServer server = await HttpServer.bind(host, port);
       finalizers.add(() async {
         printTrace('test $ourTestCount: shutting down test harness socket server');
         await server.close(force: true);
@@ -181,58 +305,26 @@ class _FlutterPlatform extends PlatformPlugin {
         cancelOnError: true,
       );
 
-      // Prepare a temporary directory to store the Dart file that will talk to us.
-      final Directory temporaryDirectory = fs.systemTempDirectory.createTempSync('dart_test_listener');
-      finalizers.add(() async {
-        printTrace('test $ourTestCount: deleting temporary directory');
-        temporaryDirectory.deleteSync(recursive: true);
-      });
-
-      // Prepare the Dart file that will talk to us and start the test.
-      final File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
-      listenerFile.createSync();
-      listenerFile.writeAsStringSync(_generateTestMain(
-        testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
-        encodedWebsocketUrl: Uri.encodeComponent(_getWebSocketUrl(server)),
-      ));
-
-      // Start the engine subprocess.
       printTrace('test $ourTestCount: starting shell process${previewDart2? " in preview-dart-2 mode":""}');
 
-      String mainDart = listenerFile.path;
-      String bundlePath;
-      bool strongMode = false;
+      // [precompiledDillPath] can be set only if [previewDart2] is [true].
+      assert(precompiledDillPath == null || previewDart2);
+      // If a kernel file is given, then use that to launch the test.
+      // Otherwise create a "listener" dart that invokes actual test.
+      String mainDart = precompiledDillPath != null
+          ? precompiledDillPath
+          : _createListenerDart(finalizers, ourTestCount, testPath, server);
 
-      if (previewDart2) {
-        mainDart = await compile(
-          sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-          incrementalCompilerByteStorePath: '' /* not null is enough */,
-          mainPath: listenerFile.path,
-          packagesPath: PackageMap.globalPackagesPath,
-          strongMode: true,
-        );
+      if (previewDart2 && precompiledDillPath == null) {
+        // Lazily instantiate compiler so it is built only if it is actually used.
+        compiler ??= new _Compiler(trackWidgetCreation);
+        mainDart = await compiler.compile(mainDart);
 
-        // bundlePath needs to point to a folder with `platform.dill` file.
-        final Directory tempBundleDirectory = fs.systemTempDirectory
-            .createTempSync('flutter_bundle_directory');
-        finalizers.add(() async {
-          printTrace('test $ourTestCount: deleting temporary bundle directory');
-          tempBundleDirectory.deleteSync(recursive: true);
-        });
-
-        // copy 'vm_platform_strong.dill' into 'platform.dill'
-        final File vmPlatformStrongDill = fs.file(
-          artifacts.getArtifactPath(Artifact.platformKernelStrongDill),
-        );
-        final File platformDill = vmPlatformStrongDill.copySync(
-          tempBundleDirectory.childFile('platform.dill').path,
-        );
-        if (!platformDill.existsSync()) {
-          printError('unexpected error copying platform kernel file');
+        if (mainDart == null) {
+          controller.sink.addError(
+              _getErrorMessage('Compilation failed', testPath, shellPath));
+          return null;
         }
-
-        bundlePath = tempBundleDirectory.path;
-        strongMode = true;
       }
 
       final Process process = await _startProcess(
@@ -241,9 +333,9 @@ class _FlutterPlatform extends PlatformPlugin {
         packages: PackageMap.globalPackagesPath,
         enableObservatory: enableObservatory,
         startPaused: startPaused,
-        bundlePath: bundlePath,
-        strongMode: strongMode,
+        bundlePath: _getBundlePath(finalizers, ourTestCount),
         observatoryPort: explicitObservatoryPort,
+        serverPort: server.port,
       );
       subprocessActive = true;
       finalizers.add(() async {
@@ -334,7 +426,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
           final Completer<Null> harnessDone = new Completer<Null>();
           final StreamSubscription<dynamic> harnessToTest = controller.stream.listen(
-            (dynamic event) { testSocket.add(JSON.encode(event)); },
+            (dynamic event) { testSocket.add(json.encode(event)); },
             onDone: harnessDone.complete,
             onError: (dynamic error, dynamic stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
@@ -353,7 +445,7 @@ class _FlutterPlatform extends PlatformPlugin {
           final StreamSubscription<dynamic> testToHarness = testSocket.listen(
             (dynamic encodedEvent) {
               assert(encodedEvent is String); // we shouldn't ever get binary messages
-              controller.sink.add(JSON.decode(encodedEvent));
+              controller.sink.add(json.decode(encodedEvent));
             },
             onDone: testDone.complete,
             onError: (dynamic error, dynamic stack) {
@@ -447,10 +539,64 @@ class _FlutterPlatform extends PlatformPlugin {
     return null;
   }
 
-  String _getWebSocketUrl(HttpServer server) {
+  String _createListenerDart(List<_Finalizer> finalizers, int ourTestCount,
+      String testPath, HttpServer server) {
+    // Prepare a temporary directory to store the Dart file that will talk to us.
+    final Directory temporaryDirectory = fs.systemTempDirectory
+        .createTempSync('dart_test_listener');
+    finalizers.add(() async {
+      printTrace('test $ourTestCount: deleting temporary directory');
+      temporaryDirectory.deleteSync(recursive: true);
+    });
+
+    // Prepare the Dart file that will talk to us and start the test.
+    final File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
+    listenerFile.createSync();
+    listenerFile.writeAsStringSync(_generateTestMain(
+      testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
+      encodedWebsocketUrl: Uri.encodeComponent(_getWebSocketUrl()),
+    ));
+    return listenerFile.path;
+  }
+
+  String _getBundlePath(List<_Finalizer> finalizers, int ourTestCount) {
+    if (!previewDart2) {
+      return null;
+    }
+
+    if (precompiledDillPath != null) {
+      return artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath);
+    }
+
+    // bundlePath needs to point to a folder with `platform.dill` file.
+    final Directory tempBundleDirectory = fs.systemTempDirectory
+        .createTempSync('flutter_bundle_directory');
+    finalizers.add(() async {
+      printTrace(
+          'test $ourTestCount: deleting temporary bundle directory');
+      tempBundleDirectory.deleteSync(recursive: true);
+    });
+
+    // copy 'vm_platform_strong.dill' into 'platform.dill'
+    final File vmPlatformStrongDill = fs.file(
+      artifacts.getArtifactPath(Artifact.platformKernelDill),
+    );
+    final File platformDill = vmPlatformStrongDill.copySync(
+      tempBundleDirectory
+          .childFile('platform.dill')
+          .path,
+    );
+    if (!platformDill.existsSync()) {
+      printError('unexpected error copying platform kernel file');
+    }
+
+    return tempBundleDirectory.path;
+  }
+
+  String _getWebSocketUrl() {
     return host.type == InternetAddressType.IP_V4
-        ? 'ws://${host.address}:${server.port}'
-        : 'ws://[${host.address}]:${server.port}';
+        ? 'ws://${host.address}'
+        : 'ws://[${host.address}]';
   }
 
   String _generateTestMain({
@@ -459,7 +605,7 @@ class _FlutterPlatform extends PlatformPlugin {
   }) {
     return '''
 import 'dart:convert';
-import 'dart:io'; // ignore: dart_io_import
+import 'dart:io';  // ignore: dart_io_import
 
 // We import this library first in order to trigger an import error for
 // package:test (rather than package:stream_channel) when the developer forgets
@@ -473,20 +619,32 @@ import '$testUrl' as test;
 
 void main() {
   print('$_kStartTimeoutTimerMessage');
-  String server = Uri.decodeComponent('$encodedWebsocketUrl');
+  String serverPort = Platform.environment['SERVER_PORT'];
+  String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
   StreamChannel channel = serializeSuite(() {
     catchIsolateErrors();
     return test.main;
   });
   WebSocket.connect(server).then((WebSocket socket) {
-    socket.map(JSON.decode).pipe(channel.sink);
-    socket.addStream(channel.stream.map(JSON.encode));
+    socket.map((dynamic x) {
+      assert(x is String);
+      return json.decode(x);
+    }).pipe(channel.sink);
+    socket.addStream(channel.stream.map(json.encode));
   });
 }
 ''';
   }
 
   File _cachedFontConfig;
+
+  @override
+  Future<dynamic> close() async {
+    if (compiler != null) {
+      await compiler.shutdown();
+      compiler = null;
+    }
+  }
 
   /// Returns a Fontconfig config file that limits font fallback to the
   /// artifact cache directory.
@@ -514,8 +672,8 @@ void main() {
     String bundlePath,
     bool enableObservatory: false,
     bool startPaused: false,
-    bool strongMode: false,
     int observatoryPort,
+    int serverPort,
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
     assert(!startPaused || enableObservatory);
@@ -542,13 +700,10 @@ void main() {
     if (bundlePath != null) {
       command.add('--flutter-assets-dir=$bundlePath');
     }
-    if (strongMode) {
-      command.add('--strong');
-    }
+    command.add('--enable-checked-mode');
     command.addAll(<String>[
       '--enable-dart-profiling',
       '--non-interactive',
-      '--enable-checked-mode',
       '--use-test-fonts',
       // '--enable-txt', // enable this to test libtxt rendering
       '--packages=$packages',
@@ -558,6 +713,7 @@ void main() {
     final Map<String, String> environment = <String, String>{
       'FLUTTER_TEST': 'true',
       'FONTCONFIG_FILE': _fontConfigFile.path,
+      'SERVER_PORT': serverPort.toString(),
     };
     return processManager.start(command, environment: environment);
   }
@@ -567,11 +723,11 @@ void main() {
     void startTimeoutTimer(),
     void reportObservatoryUri(Uri uri),
   }) {
-    final String observatoryString = 'Observatory listening on ';
+    const String observatoryString = 'Observatory listening on ';
 
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
-      stream.transform(UTF8.decoder)
+      stream.transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(
           (String line) {

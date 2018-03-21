@@ -148,17 +148,17 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  hot_mode_dev_cycle__preview_dart_2_benchmark:
+  hot_mode_dev_cycle__benchmark_dart1:
     description: >
       Measures the performance of Dart VM hot patching feature under
-      --preview-dart-2 option, that enables Dart 2.0 frontend.
+      --no-preview-dart-2 option, that disables Dart 2.0 frontend.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  hot_mode_dev_cycle_ios__preview_dart_2_benchmark:
+  hot_mode_dev_cycle_ios__benchmark_dart1:
     description: >
       Measures the performance of Dart VM hot patching feature under
-      --preview-dart-2 option, that enables Dart 2.0 frontend.
+      --no-preview-dart-2 option, that disables Dart 2.0 frontend.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     flaky: true
@@ -200,6 +200,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  run_machine_concurrent_hot_reload:
+    description: >
+      Runs tests of concurrent hot reload commands via flutter run --machine.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   service_extensions_test:
     description: >
       Validates our service protocol extensions.
@@ -230,6 +236,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  plugin_test:
+    description: >
+      Checks that the project template works and supports plugins.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   flutter_gallery_instrumentation_test:
     description: >
       Same as flutter_gallery__transition_perf but uses Android instrumentation
@@ -243,6 +255,12 @@ tasks:
   flavors_test_ios:
     description: >
       Checks that flavored builds work on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  plugin_test_ios:
+    description: >
+      Checks that the project template works and supports plugins on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
@@ -276,21 +294,18 @@ tasks:
       iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   flutter_gallery_ios__start_up:
     description: >
       Measures the startup time of the Flutter Gallery app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   complex_layout_ios__start_up:
     description: >
       Measures the startup time of the Complex Layout sample app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   flutter_gallery_ios__transition_perf:
     description: >
@@ -305,14 +320,12 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 30
-    flaky: true
 
   flutter_view_ios__start_up:
     description: >
       Verifies that Flutter View can be used from an iOS project.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   integration_ui_ios:
     description: >
@@ -339,6 +352,13 @@ tasks:
       Checks that platform channels work when app is launched from Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
+
+  plugin_test_win:
+    description: >
+      Checks that the project template works and supports plugins on Windows.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows/android"]
+    flaky: true
 
   hot_mode_dev_cycle_win__benchmark:
     description: >

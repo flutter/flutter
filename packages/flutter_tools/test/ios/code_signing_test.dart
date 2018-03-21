@@ -96,8 +96,8 @@ void main() {
       when(mockProcessManager.runSync(
         argThat(contains('find-identity')), environment: any, workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
     1 valid identities found''',
@@ -108,8 +108,8 @@ void main() {
         environment: any,
         workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         'This is a mock certificate',
         '',
       ));
@@ -125,7 +125,7 @@ void main() {
       when(mockProcess.stdin).thenReturn(mockStdIn);
       when(mockProcess.stdout)
           .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
-            new Future<List<int>>.value(UTF8.encode(
+            new Future<List<int>>.value(utf8.encode(
               'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US'
             ))
           ));
@@ -151,8 +151,8 @@ void main() {
       when(mockProcessManager.runSync(
         argThat(contains('find-identity')), environment: any, workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
 2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
@@ -167,8 +167,8 @@ void main() {
         environment: any,
         workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         'This is a mock certificate',
         '',
       ));
@@ -184,12 +184,12 @@ void main() {
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
       when(mockOpenSslProcess.stdout)
           .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
-            new Future<List<int>>.value(UTF8.encode(
+            new Future<List<int>>.value(utf8.encode(
               'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'
             ))
           ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
-      when(mockOpenSslProcess.exitCode).thenReturn(0);
+      when(mockOpenSslProcess.exitCode).thenAnswer((_) => new Future<int>.value(0));
 
       final String developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
@@ -221,8 +221,8 @@ void main() {
       when(mockProcessManager.runSync(
         argThat(contains('find-identity')), environment: any, workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
 2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
@@ -237,8 +237,8 @@ void main() {
         environment: any,
         workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         'This is a mock certificate',
         '',
       ));
@@ -254,12 +254,12 @@ void main() {
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
       when(mockOpenSslProcess.stdout)
           .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
-            new Future<List<int>>.value(UTF8.encode(
+            new Future<List<int>>.value(utf8.encode(
               'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=5555EEEE55/O=My Team/C=US'
             )),
           ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
-      when(mockOpenSslProcess.exitCode).thenReturn(0);
+      when(mockOpenSslProcess.exitCode).thenAnswer((_) => new Future<int>.value(0));
 
       final String developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: false);
 
@@ -285,8 +285,8 @@ void main() {
       when(mockProcessManager.runSync(
         argThat(contains('find-identity')), environment: any, workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
 2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
@@ -299,8 +299,8 @@ void main() {
         environment: any,
         workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         'This is a mock certificate',
         '',
       ));
@@ -316,13 +316,13 @@ void main() {
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
       when(mockOpenSslProcess.stdout)
           .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
-            new Future<List<int>>.value(UTF8.encode(
+            new Future<List<int>>.value(utf8.encode(
               'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'
             ))
           ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
-      when(mockOpenSslProcess.exitCode).thenReturn(0);
-      when(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Profile 3 (3333CCCC33)');
+      when(mockOpenSslProcess.exitCode).thenAnswer((_) => new Future<int>.value(0));
+      when<String>(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Profile 3 (3333CCCC33)');
 
       final String developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
@@ -351,8 +351,8 @@ void main() {
       when(mockProcessManager.runSync(
         argThat(contains('find-identity')), environment: any, workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         '''
 1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
 2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
@@ -367,8 +367,8 @@ void main() {
         environment: any,
         workingDirectory: any,
       )).thenReturn(new ProcessResult(
-        1,     // pid
-        0,     // exitCode
+        1, // pid
+        0, // exitCode
         'This is a mock certificate',
         '',
       ));
@@ -385,13 +385,13 @@ void main() {
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
       when(mockOpenSslProcess.stdout)
           .thenAnswer((Invocation invocation) => new Stream<List<int>>.fromFuture(
-            new Future<List<int>>.value(UTF8.encode(
+            new Future<List<int>>.value(utf8.encode(
               'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'
             ))
           ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
-      when(mockOpenSslProcess.exitCode).thenReturn(0);
-      when(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Invalid Profile');
+      when(mockOpenSslProcess.exitCode).thenAnswer((_) => new Future<int>.value(0));
+      when<String>(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Invalid Profile');
 
       final String developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
@@ -415,17 +415,17 @@ void main() {
 }
 
 final ProcessResult exitsHappy = new ProcessResult(
-  1,     // pid
-  0,     // exitCode
-  '',    // stdout
-  '',    // stderr
+  1, // pid
+  0, // exitCode
+  '', // stdout
+  '', // stderr
 );
 
 final ProcessResult exitsFail = new ProcessResult(
-  2,     // pid
-  1,     // exitCode
-  '',    // stdout
-  '',    // stderr
+  2, // pid
+  1, // exitCode
+  '', // stdout
+  '', // stderr
 );
 
 class MockProcessManager extends Mock implements ProcessManager {}

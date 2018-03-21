@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show BASE64, UTF8;
+import 'dart:convert' show base64, utf8;
 
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 
@@ -33,6 +33,11 @@ abstract class DevFSContent {
   /// Return true if this is the first time this method is called
   /// or if the entry has been modified since this method was last called.
   bool get isModified;
+
+  /// Return true if this is the first time this method is called
+  /// or if the entry has been modified after the given time
+  /// or if the given time is null.
+  bool isModifiedAfter(DateTime time);
 
   int get size;
 
@@ -104,6 +109,13 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
+  bool isModifiedAfter(DateTime time) {
+    final FileStat _oldFileStat = _fileStat;
+    _stat();
+    return _oldFileStat == null || time == null || _fileStat.modified.isAfter(time);
+  }
+
+  @override
   int get size {
     if (_fileStat == null)
       _stat();
@@ -124,12 +136,14 @@ class DevFSByteContent extends DevFSContent {
   List<int> _bytes;
 
   bool _isModified = true;
+  DateTime _modificationTime = new DateTime.now();
 
   List<int> get bytes => _bytes;
 
   set bytes(List<int> value) {
     _bytes = value;
     _isModified = true;
+    _modificationTime = new DateTime.now();
   }
 
   /// Return true only once so that the content is written to the device only once.
@@ -138,6 +152,11 @@ class DevFSByteContent extends DevFSContent {
     final bool modified = _isModified;
     _isModified = false;
     return modified;
+  }
+
+  @override
+  bool isModifiedAfter(DateTime time) {
+    return time == null || _modificationTime.isAfter(time);
   }
 
   @override
@@ -153,7 +172,7 @@ class DevFSByteContent extends DevFSContent {
 
 /// String content to be copied to the device.
 class DevFSStringContent extends DevFSByteContent {
-  DevFSStringContent(String string) : _string = string, super(UTF8.encode(string));
+  DevFSStringContent(String string) : _string = string, super(utf8.encode(string));
 
   String _string;
 
@@ -161,12 +180,12 @@ class DevFSStringContent extends DevFSByteContent {
 
   set string(String value) {
     _string = value;
-    super.bytes = UTF8.encode(_string);
+    super.bytes = utf8.encode(_string);
   }
 
   @override
   set bytes(List<int> value) {
-    string = UTF8.decode(value);
+    string = utf8.decode(value);
   }
 }
 
@@ -204,7 +223,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
     } catch (e) {
       return e;
     }
-    final String fileContents = BASE64.encode(bytes);
+    final String fileContents = base64.encode(bytes);
     try {
       return await vmService.vm.invokeRpcRaw(
         '_writeDevFSFile',
@@ -280,7 +299,7 @@ class _DevFSHttpWriter {
       request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
       request.headers.add('dev_fs_name', fsName);
       request.headers.add('dev_fs_uri_b64',
-          BASE64.encode(UTF8.encode(deviceUri.toString())));
+          base64.encode(utf8.encode(deviceUri.toString())));
       final Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       final HttpClientResponse response = await request.close();
@@ -383,9 +402,12 @@ class DevFS {
     String mainPath,
     String target,
     AssetBundle bundle,
+    DateTime firstBuildTime,
+    bool bundleFirstUpload: false,
     bool bundleDirty: false,
     Set<String> fileFilter,
     ResidentCompiler generator,
+    String dillOutputPath,
     bool fullRestart: false,
   }) async {
     // Mark all entries as possibly deleted.
@@ -406,7 +428,7 @@ class DevFS {
     if (bundle != null) {
       printTrace('Scanning asset files');
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        _scanBundleEntry(archivePath, content, bundleDirty);
+        _scanBundleEntry(archivePath, content);
       });
     }
 
@@ -445,10 +467,10 @@ class DevFS {
       // that isModified does not reset last check timestamp because we
       // want to report all modified files to incremental compiler next time
       // user does hot reload.
-      if (content.isModified || (bundleDirty && archivePath != null)) {
+      if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
         dirtyEntries[deviceUri] = content;
         numBytes += content.size;
-        if (archivePath != null)
+        if (archivePath != null && (!bundleFirstUpload || content.isModifiedAfter(firstBuildTime)))
           assetPathsToEvict.add(archivePath);
       }
     });
@@ -478,10 +500,12 @@ class DevFS {
         generator.reset();
       }
       final String compiledBinary =
-          await generator.recompile(mainPath, invalidatedFiles);
+          await generator.recompile(mainPath, invalidatedFiles,
+              outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
+              packagesFilePath : _packagesFilePath);
       if (compiledBinary != null && compiledBinary.isNotEmpty)
         dirtyEntries.putIfAbsent(
-          Uri.parse(target + '.dill'),
+          fs.path.toUri(target + '.dill'),
           () => new DevFSFileContent(fs.file(compiledBinary))
         );
     }
@@ -519,7 +543,7 @@ class DevFS {
     content._exists = true;
   }
 
-  void _scanBundleEntry(String archivePath, DevFSContent content, bool bundleDirty) {
+  void _scanBundleEntry(String archivePath, DevFSContent content) {
     // We write the assets into the AssetBundle working dir so that they
     // are in the same location in DevFS and the iOS simulator.
     final Uri deviceUri = fs.path.toUri(fs.path.join(getAssetBuildDirectory(), archivePath));

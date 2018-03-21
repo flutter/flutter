@@ -111,6 +111,23 @@ class TestRecordingPaintingContext implements PaintingContext {
   }
 
   @override
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter) {
+    canvas.save();
+    canvas.clipRRect(clipRRect.shift(offset));
+    painter(this, offset);
+    canvas.restore();
+  }
+
+  @override
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter) {
+    canvas
+      ..save()
+      ..clipPath(clipPath.shift(offset));
+    painter(this, offset);
+    canvas.restore();
+  }
+
+  @override
   void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
     canvas.save();
     canvas.transform(transform.storage);
@@ -123,9 +140,10 @@ class TestRecordingPaintingContext implements PaintingContext {
 }
 
 class _MethodCall implements Invocation {
-  _MethodCall(this._name, [ this._arguments = const <dynamic>[] ]);
+  _MethodCall(this._name, [ this._arguments = const <dynamic>[], this._typeArguments = const <Type> []]);
   final Symbol _name;
   final List<dynamic> _arguments;
+  final List<Type> _typeArguments;
   @override
   bool get isAccessor => false;
   @override
@@ -140,6 +158,8 @@ class _MethodCall implements Invocation {
   Map<Symbol, dynamic> get namedArguments => <Symbol, dynamic>{};
   @override
   List<dynamic> get positionalArguments => _arguments;
+  @override
+  List<Type> get typeArguments => _typeArguments;
 }
 
 String _valueName(Object value) {

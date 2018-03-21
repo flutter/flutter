@@ -703,7 +703,7 @@ class TextStyle extends Diagnosticable {
     if (decoration != null || decorationColor != null || decorationStyle != null) {
       final List<String> decorationDescription = <String>[];
       if (decorationStyle != null)
-        decorationDescription.add(describeEnum((decorationStyle)));
+        decorationDescription.add(describeEnum(decorationStyle));
 
       // Hide decorationColor from the default text view as it is shown in the
       // terse decoration summary as well.

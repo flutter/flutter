@@ -203,8 +203,8 @@ class CachingIterable<E> extends IterableBase<E> {
   }
 
   @override
-  Iterable<E> where(bool f(E element)) {
-    return new CachingIterable<E>(super.where(f).iterator);
+  Iterable<E> where(bool test(E element)) {
+    return new CachingIterable<E>(super.where(test).iterator);
   }
 
   @override

@@ -16,7 +16,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
-import '../plugins.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
@@ -35,6 +34,14 @@ enum FlutterPluginVersion {
   v2,
   managed,
 }
+
+// Investigation documented in #13975 suggests the filter should be a subset
+// of the impact of -q, but users insist they see the error message sometimes
+// anyway.  If we can prove it really is impossible, delete the filter.
+final RegExp ndkMessageFilter = new RegExp(r'^(?!NDK is missing a ".*" directory'
+  r'|If you are not using NDK, unset the NDK variable from ANDROID_NDK_HOME or local.properties to remove this warning'
+  r'|If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to .*)');
+
 
 bool isProjectUsingGradle() {
   return fs.isFileSync('android/build.gradle');
@@ -86,7 +93,6 @@ Future<GradleProject> _gradleProject() async {
 Future<GradleProject> _readGradleProject() async {
   final String gradle = await _ensureGradle();
   updateLocalProperties();
-  injectPlugins();
   try {
     final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
     final RunResult runResult = await runCheckedAsync(
@@ -116,7 +122,7 @@ void handleKnownGradleExceptions(String exceptionString) {
   // Handle Gradle error thrown when Gradle needs to download additional
   // Android SDK components (e.g. Platform Tools), and the license
   // for that component has not been accepted.
-  final String matcher =
+  const String matcher =
     r'You have not accepted the license agreements of the following SDK components:'
     r'\s*\[(.+)\]';
   final RegExp licenseFailure = new RegExp(matcher, multiLine: true);
@@ -291,16 +297,22 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   }
   if (buildInfo.previewDart2) {
     command.add('-Ppreview-dart-2=true');
-  if (buildInfo.strongMode)
-    command.add('-Pstrong=true');
-  if (buildInfo.extraFrontEndOptions != null)
-    command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
-  if (buildInfo.extraGenSnapshotOptions != null)
-    command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions}');
+    if (buildInfo.trackWidgetCreation)
+      command.add('-Ptrack-widget-creation=true');
+    if (buildInfo.extraFrontEndOptions != null)
+      command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
+    if (buildInfo.extraGenSnapshotOptions != null)
+      command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions}');
+    if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty)
+      command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
+    if (buildInfo.fileSystemScheme != null)
+      command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
   }
   if (buildInfo.preferSharedLibrary && androidSdk.ndkCompiler != null) {
     command.add('-Pprefer-shared-library=true');
   }
+  if (buildInfo.targetPlatform == TargetPlatform.android_arm64)
+    command.add('-Ptarget-platform=android-arm64');
 
   command.add(assembleTask);
   final int exitCode = await runCommandAndStreamOutput(
@@ -308,6 +320,7 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
       workingDirectory: 'android',
       allowReentrantFlutter: true,
       environment: _gradleEnv,
+      filter: logger.isVerbose ? null : ndkMessageFilter,
   );
   status.stop();
 

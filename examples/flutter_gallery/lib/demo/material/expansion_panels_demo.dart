@@ -168,16 +168,18 @@ class DemoItem<T> {
       );
     };
   }
+
+  Widget build() => builder(this);
 }
 
-class ExpasionPanelsDemo extends StatefulWidget {
+class ExpansionPanelsDemo extends StatefulWidget {
   static const String routeName = '/material/expansion_panels';
 
   @override
   _ExpansionPanelsDemoState createState() => new _ExpansionPanelsDemoState();
 }
 
-class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
+class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
   List<DemoItem<dynamic>> _demoItems;
 
   @override
@@ -351,7 +353,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                 return new ExpansionPanel(
                   isExpanded: item.isExpanded,
                   headerBuilder: item.headerBuilder,
-                  body: item.builder(item)
+                  body: item.build()
                 );
               }).toList()
             ),

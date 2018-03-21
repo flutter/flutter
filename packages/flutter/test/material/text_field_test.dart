@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/material.dart';
@@ -303,7 +304,7 @@ void main() {
     expect(controller.selection.baseOffset, -1);
     expect(controller.selection.extentOffset, -1);
 
-    final String testValue = 'abc def ghi';
+    const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
 
@@ -328,7 +329,7 @@ void main() {
       )
     );
 
-    final String testValue = 'abc def ghi';
+    const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     expect(controller.value.text, testValue);
     await skipPastScrollingAnimation(tester);
@@ -358,7 +359,7 @@ void main() {
       ),
     );
 
-    final String testValue = 'abc def ghi';
+    const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
 
@@ -419,7 +420,7 @@ void main() {
       ),
     );
 
-    final String testValue = 'abc def ghi';
+    const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
 
@@ -477,7 +478,7 @@ void main() {
       ),
     );
 
-    final String testValue = 'abc def ghi';
+    const String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
 
@@ -586,8 +587,8 @@ void main() {
       ),
     );
 
-    final String testValue = kThreeLines;
-    final String cutValue = 'First line of stuff ';
+    const String testValue = kThreeLines;
+    const String cutValue = 'First line of stuff ';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
 
@@ -735,7 +736,9 @@ void main() {
     expect(newFirstPos.dy, firstPos.dy);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
-  });
+  },
+  // This test fails on some Mac environments when libtxt is enabled.
+  skip: Platform.isMacOS);
 
   testWidgets('TextField smoke test', (WidgetTester tester) async {
     String textFieldValue;
@@ -1084,7 +1087,7 @@ void main() {
       ),
     );
 
-    // Not focused.  The prefix and suffix should not appear, but the label should.
+    // Not focused. The prefix and suffix should not appear, but the label should.
     expect(getOpacity(tester, find.text('Prefix')), 0.0);
     expect(getOpacity(tester, find.text('Suffix')), 0.0);
     expect(find.text('Label'), findsOneWidget);
@@ -1603,11 +1606,11 @@ void main() {
 
   testWidgets('maxLength shows warning when maxLengthEnforced is false.', (WidgetTester tester) async {
     final TextEditingController textController = new TextEditingController();
-    final TextStyle testStyle = const TextStyle(color: Colors.deepPurpleAccent);
+    const TextStyle testStyle = const TextStyle(color: Colors.deepPurpleAccent);
 
     await tester.pumpWidget(boilerplate(
       child: new TextField(
-        decoration: new InputDecoration(errorStyle: testStyle),
+        decoration: const InputDecoration(errorStyle: testStyle),
         controller: textController,
         maxLength: 10,
         maxLengthEnforced: false,
@@ -1672,6 +1675,8 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
+
+    semantics.dispose();
   });
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
@@ -1686,7 +1691,7 @@ void main() {
       )
     );
 
-    final String testValue = 'x';
+    const String testValue = 'x';
     await tester.enterText(find.byType(TextField), testValue);
     await skipPastScrollingAnimation(tester);
     expect(controller.selection.baseOffset, -1);
@@ -1746,8 +1751,8 @@ void main() {
     //  ---------   rowBottomY
 
     final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
-    expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 4.0);
-    expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 2.0);
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, closeTo(rowBottomY - 4.0, 0.001));
+    expect(tester.getBottomLeft(find.text('abc')).dy, closeTo(rowBottomY - 2.0, 0.001));
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
@@ -1768,7 +1773,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
             SemanticsAction.tap,
@@ -1786,7 +1791,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           textDirection: TextDirection.ltr,
           value: 'Guten Tag',
           actions: <SemanticsAction>[
@@ -1805,7 +1810,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           textDirection: TextDirection.ltr,
           value: 'Guten Tag',
           textSelection: const TextSelection.collapsed(offset: 9),
@@ -1813,6 +1818,7 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1828,7 +1834,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           textDirection: TextDirection.ltr,
           textSelection: const TextSelection.collapsed(offset: 4),
           value: 'Guten Tag',
@@ -1837,6 +1843,7 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1853,7 +1860,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           textDirection: TextDirection.ltr,
           textSelection: const TextSelection.collapsed(offset: 0),
           value: 'Schönen Feierabend',
@@ -1861,6 +1868,7 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1891,7 +1899,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           value: 'Hello',
           textDirection: TextDirection.ltr,
           actions: <SemanticsAction>[
@@ -1911,7 +1919,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           value: 'Hello',
           textSelection: const TextSelection.collapsed(offset: 5),
           textDirection: TextDirection.ltr,
@@ -1919,6 +1927,7 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1934,7 +1943,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           value: 'Hello',
           textSelection: const TextSelection(baseOffset: 5, extentOffset: 3),
           textDirection: TextDirection.ltr,
@@ -1943,6 +1952,9 @@ void main() {
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.moveCursorForwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
+            SemanticsAction.cut,
+            SemanticsAction.copy,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -1975,7 +1987,7 @@ void main() {
     await tester.tap(find.byKey(key));
     await tester.pump();
 
-    const int inputFieldId = 2;
+    const int inputFieldId = 1;
 
     expect(controller.selection, const TextSelection.collapsed(offset: 5, affinity: TextAffinity.upstream));
     expect(semantics, hasSemantics(new TestSemantics.root(
@@ -1989,6 +2001,7 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,
@@ -2032,6 +2045,9 @@ void main() {
             SemanticsAction.tap,
             SemanticsAction.moveCursorBackwardByCharacter,
             SemanticsAction.setSelection,
+            SemanticsAction.paste,
+            SemanticsAction.cut,
+            SemanticsAction.copy,
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.isTextField,

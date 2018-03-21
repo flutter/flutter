@@ -15,13 +15,13 @@ Future<Null> main() async {
     final Stopwatch clock = new Stopwatch()..start();
     final Process analysis = await startProcess(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
-      <String>['analyze', '--flutter-repo', '--dartdocs'],
+      <String>['analyze', '--no-preamble', '--no-congratulate', '--flutter-repo', '--dartdocs'],
       workingDirectory: flutterDirectory.path,
     );
     int publicMembers = 0;
     int otherErrors = 0;
     int otherLines = 0;
-    await for (String entry in analysis.stderr.transform(UTF8.decoder).transform(const LineSplitter())) {
+    await for (String entry in analysis.stderr.transform(utf8.decoder).transform(const LineSplitter())) {
       print('analyzer stderr: $entry');
       if (entry.startsWith('[lint] Document all public members')) {
         publicMembers += 1;
@@ -33,11 +33,9 @@ Future<Null> main() async {
         otherLines += 1;
       }
     }
-    await for (String entry in analysis.stdout.transform(UTF8.decoder).transform(const LineSplitter())) {
+    await for (String entry in analysis.stdout.transform(utf8.decoder).transform(const LineSplitter())) {
       print('analyzer stdout: $entry');
       if (entry == 'Building flutter tool...') {
-        // ignore this line
-      } else if (entry.startsWith('Analyzing ')) {
         // ignore this line
       } else {
         otherLines += 1;

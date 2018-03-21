@@ -338,4 +338,117 @@ void main() {
       expect(insideBottomRight, equals(outsideBottomRight));
     }
   });
+
+  testWidgets('FittedBox layers - contain', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: const SizedBox(
+          width: 100.0,
+          height: 10.0,
+          child: const FittedBox(
+            fit: BoxFit.contain,
+            child: const SizedBox(
+              width: 50.0,
+              height: 50.0,
+              child: const RepaintBoundary(
+                child: const Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(getLayers(), <Type>[TransformLayer, TransformLayer, OffsetLayer]);
+  });
+
+  testWidgets('FittedBox layers - cover - horizontal', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: const SizedBox(
+          width: 100.0,
+          height: 10.0,
+          child: const FittedBox(
+            fit: BoxFit.cover,
+            child: const SizedBox(
+              width: 10.0,
+              height: 50.0,
+              child: const RepaintBoundary(
+                child: const Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(getLayers(), <Type>[TransformLayer, ClipRectLayer, TransformLayer, OffsetLayer]);
+  });
+
+  testWidgets('FittedBox layers - cover - vertical', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: const SizedBox(
+          width: 10.0,
+          height: 100.0,
+          child: const FittedBox(
+            fit: BoxFit.cover,
+            child: const SizedBox(
+              width: 50.0,
+              height: 10.0,
+              child: const RepaintBoundary(
+                child: const Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(getLayers(), <Type>[TransformLayer, ClipRectLayer, TransformLayer, OffsetLayer]);
+  });
+
+  testWidgets('FittedBox layers - none - clip', (WidgetTester tester) async {
+    final List<double> values = <double>[10.0, 50.0, 100.0];
+    for (double a in values) {
+      for (double b in values) {
+        for (double c in values) {
+          for (double d in values) {
+            await tester.pumpWidget(
+              new Center(
+                child: new SizedBox(
+                  width: a,
+                  height: b,
+                  child: new FittedBox(
+                    fit: BoxFit.none,
+                    child: new SizedBox(
+                      width: c,
+                      height: d,
+                      child: const RepaintBoundary(
+                        child: const Placeholder(),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+            if (a < c || b < d) {
+              expect(getLayers(), <Type>[TransformLayer, ClipRectLayer, OffsetLayer]);
+            } else {
+              expect(getLayers(), <Type>[TransformLayer, OffsetLayer]);
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+List<Type> getLayers() {
+  final List<Type> layers = <Type>[];
+  Layer layer = RendererBinding.instance.renderView.debugLayer;
+  while (layer is ContainerLayer) {
+    final ContainerLayer container = layer;
+    layers.add(container.runtimeType);
+    expect(container.firstChild, same(container.lastChild));
+    layer = container.firstChild;
+  }
+  return layers;
 }

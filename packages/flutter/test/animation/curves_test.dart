@@ -17,7 +17,7 @@ void main() {
   });
 
   test('Curve flipped control test', () {
-    final Curve ease = Curves.ease;
+    const Curve ease = Curves.ease;
     final Curve flippedEase = ease.flipped;
     expect(flippedEase.transform(0.0), lessThan(0.001));
     expect(flippedEase.transform(0.5), lessThan(ease.transform(0.5)));
@@ -26,7 +26,7 @@ void main() {
   });
 
   test('Threshold has a threshold', () {
-    final Curve step = const Threshold(0.25);
+    const Curve step = const Threshold(0.25);
     expect(step.transform(0.0), 0.0);
     expect(step.transform(0.24), 0.0);
     expect(step.transform(0.25), 1.0);

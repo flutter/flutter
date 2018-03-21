@@ -162,9 +162,19 @@ abstract class InteractiveInkFeatureFactory {
 ///
 /// If there is an opaque graphic, e.g. painted using a [Container], [Image], or
 /// [DecoratedBox], between the [Material] widget and the [InkResponse] widget,
-/// then the splash won't be visible because it will be under the opaque
-/// graphic. To avoid this problem, consider using an [Ink] widget to draw the
-/// opaque graphic itself on the [Material], under the ink splash.
+/// then the splash won't be visible because it will be under the opaque graphic.
+/// This is because ink splashes draw on the underlying [Material] itself, as
+/// if the ink was spreading inside the material.
+///
+/// The [Ink] widget can be used as a replacement for [Image], [Container], or
+/// [DecoratedBox] to ensure that the image or decoration also paints in the
+/// [Material] itself, below the ink.
+///
+/// If this is not possible for some reason, e.g. because you are using an
+/// opaque [CustomPaint] widget, alternatively consider using a second
+/// [Material] above the opaque widget but below the [InkResponse] (as an
+/// ancestor to the ink response). The [MaterialType.transparency] material
+/// kind can be used for this purpose.
 ///
 /// See also:
 ///
@@ -302,7 +312,7 @@ class InkResponse extends StatefulWidget {
   ///  * [highlightColor], the color of the highlight.
   ///  * [InkSplash.splashFactory], which defines the default splash.
   ///  * [InkRipple.splashFactory], which defines a splash that spreads out
-  ///    more aggresively than the default.
+  ///    more aggressively than the default.
   final InteractiveInkFeatureFactory splashFactory;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
@@ -354,8 +364,8 @@ class InkResponse extends StatefulWidget {
   _InkResponseState<InkResponse> createState() => new _InkResponseState<InkResponse>();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     final List<String> gestures = <String>[];
     if (onTap != null)
       gestures.add('tap');
@@ -363,9 +373,9 @@ class InkResponse extends StatefulWidget {
       gestures.add('double tap');
     if (onLongPress != null)
       gestures.add('long press');
-    description.add(new IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
-    description.add(new DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
-    description.add(new DiagnosticsProperty<BoxShape>(
+    properties.add(new IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
+    properties.add(new DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
+    properties.add(new DiagnosticsProperty<BoxShape>(
       'highlightShape',
       highlightShape,
       description: '${containedInkWell ? "clipped to " : ""}$highlightShape',
@@ -556,9 +566,19 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 ///
 /// If there is an opaque graphic, e.g. painted using a [Container], [Image], or
 /// [DecoratedBox], between the [Material] widget and the [InkWell] widget, then
-/// the splash won't be visible because it will be under the opaque graphic. To
-/// avoid this problem, consider using an [Ink] widget to draw the opaque
-/// graphic itself on the [Material], under the ink splash.
+/// the splash won't be visible because it will be under the opaque graphic.
+/// This is because ink splashes draw on the underlying [Material] itself, as
+/// if the ink was spreading inside the material.
+///
+/// The [Ink] widget can be used as a replacement for [Image], [Container], or
+/// [DecoratedBox] to ensure that the image or decoration also paints in the
+/// [Material] itself, below the ink.
+///
+/// If this is not possible for some reason, e.g. because you are using an
+/// opaque [CustomPaint] widget, alternatively consider using a second
+/// [Material] above the opaque widget but below the [InkWell] (as an
+/// ancestor to the ink well). The [MaterialType.transparency] material
+/// kind can be used for this purpose.
 ///
 /// See also:
 ///

@@ -11,7 +11,7 @@ import 'package:test/test.dart';
 import 'src/common.dart';
 import 'src/context.dart';
 
-void main()  {
+void main() {
   group('Assets', () {
     final String dataPath = fs.path.join(
       getFlutterRoot(),
@@ -29,7 +29,7 @@ void main()  {
     // This test intentionally does not use a memory file system to ensure
     // that AssetBundle with fonts also works on Windows.
     testUsingContext('app font uses local font file', () async {
-      final AssetBundle asset = new AssetBundle();
+      final AssetBundle asset = AssetBundleFactory.instance.createBundle();
       await asset.build(
         manifestPath : fs.path.join(dataPath, 'main', 'pubspec.yaml'),
         packagesPath: fs.path.join(dataPath, 'main', '.packages'),

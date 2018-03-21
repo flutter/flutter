@@ -284,7 +284,7 @@ class CalcExpression {
     final List<ExpressionToken> list = _list.toList();
     // We obey order-of-operations by computing the sum of the 'terms',
     // where a "term" is defined to be a sequence of numbers separated by
-    // multiplcation or division symbols.
+    // multiplication or division symbols.
     num currentTermValue = removeNextTerm(list);
     while (list.isNotEmpty) {
       final OperationToken opToken = list.removeAt(0);

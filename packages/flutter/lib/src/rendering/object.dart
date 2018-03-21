@@ -66,7 +66,7 @@ class PaintingContext {
   final ContainerLayer _containerLayer;
 
   /// An estimate of the bounds within which the painting context's [canvas]
-  /// will record painting commands.  This can be useful for debugging.
+  /// will record painting commands. This can be useful for debugging.
   ///
   /// The canvas will allow painting outside these bounds.
   ///
@@ -168,7 +168,7 @@ class PaintingContext {
   }
 
   bool get _isRecording {
-    final bool hasCanvas = (_canvas != null);
+    final bool hasCanvas = _canvas != null;
     assert(() {
       if (hasCanvas) {
         assert(_currentLayer != null);
@@ -277,7 +277,7 @@ class PaintingContext {
 
   /// Appends the given layer to the recording, and calls the `painter` callback
   /// with that layer, providing the `childPaintBounds` as the estimated paint
-  /// bounds of the child.  The `childPaintBounds` can be used for debugging but
+  /// bounds of the child. The `childPaintBounds` can be used for debugging but
   /// have no effect on painting.
   ///
   /// The given layer must be an unattached orphan. (Providing a newly created
@@ -502,7 +502,7 @@ abstract class Constraints {
   /// This might involve checks more detailed than [isNormalized].
   ///
   /// For example, the [BoxConstraints] subclass verifies that the constraints
-  /// are not [double.NAN].
+  /// are not [double.nan].
   ///
   /// If the `isAppliedConstraint` argument is true, then even stricter rules
   /// are enforced. This argument is set to true when checking constraints that
@@ -1854,7 +1854,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Mark this render object as having changed its visual appearance.
   ///
   /// Rather than eagerly updating this render object's display list
-  /// in response to writes, we instead mark the the render object as needing to
+  /// in response to writes, we instead mark the render object as needing to
   /// paint, which schedules a visual update. As part of the visual update, the
   /// rendering pipeline will give this render object an opportunity to update
   /// its display list.
@@ -2222,13 +2222,15 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// any way to update the semantics tree.
   void markNeedsSemanticsUpdate() {
     assert(!attached || !owner._debugDoingSemantics);
-    if ((attached && owner._semanticsOwner == null))
+    if (!attached || owner._semanticsOwner == null) {
+      _cachedSemanticsConfiguration = null;
       return;
+    }
 
     // Dirty the semantics tree starting at `this` until we have reached a
     // RenderObject that is a semantics boundary. All semantics past this
     // RenderObject are still up-to date. Therefore, we will later only rebuild
-    // the semantics subtree starting at th identified semantics boundary.
+    // the semantics subtree starting at the identified semantics boundary.
 
     final bool wasSemanticsBoundary = _semantics != null && _cachedSemanticsConfiguration?.isSemanticBoundary == true;
     _cachedSemanticsConfiguration = null;
@@ -2254,7 +2256,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       // remove it as it is no longer guaranteed that its semantics
       // node will continue to be in the tree. If it still is in the tree, the
       // ancestor `node` added to [owner._nodesNeedingSemantics] at the end of
-      // this block will ensure that the semantics of `this` node actually get
+      // this block will ensure that the semantics of `this` node actually gets
       // updated.
       // (See semantics_10_test.dart for an example why this is required).
       owner._nodesNeedingSemantics.remove(this);
@@ -2502,19 +2504,19 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   @protected
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
-    description.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
-    description.add(new DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
+    properties.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
+    properties.add(new DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));
     // don't access it via the "layer" getter since that's only valid when we don't need paint
-    description.add(new DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
-    description.add(new DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));
-    description.add(new FlagProperty(
+    properties.add(new DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
+    properties.add(new DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));
+    properties.add(new FlagProperty(
       'isBlockingSemanticsOfPreviouslyPaintedNodes',
       value: _semanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes,
       ifTrue: 'blocks semantics of earlier render objects below the common boundary',
     ));
-    description.add(new FlagProperty('isSemanticBoundary', value: _semanticsConfiguration.isSemanticBoundary, ifTrue: 'semantic boundary'));
+    properties.add(new FlagProperty('isSemanticBoundary', value: _semanticsConfiguration.isSemanticBoundary, ifTrue: 'semantic boundary'));
   }
 
   @override
@@ -3005,8 +3007,8 @@ class _ContainerSemanticsFragment extends _SemanticsFragment {
 /// A [_SemanticsFragment] that describes which concrete semantic information
 /// a [RenderObject] wants to add to the [SemanticsNode] of its parent.
 ///
-/// Specifically, it describes what children (as returned by [compileChildren])
-/// should be added to the parent's [SemanticsNode] and what [config] should be
+/// Specifically, it describes which children (as returned by [compileChildren])
+/// should be added to the parent's [SemanticsNode] and which [config] should be
 /// merged into the parent's [SemanticsNode].
 abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   _InterestingSemanticsFragment({
@@ -3082,7 +3084,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
 /// An [_InterestingSemanticsFragment] that produces the root [SemanticsNode] of
 /// the semantics tree.
 ///
-/// The root node is available as only element in the Iterable returned by
+/// The root node is available as the only element in the Iterable returned by
 /// [children].
 class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   _RootSemanticsFragment({
@@ -3144,7 +3146,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
 /// fragment it will create a new [SemanticsNode]. The newly created node will
 /// be annotated with the [SemanticsConfiguration] that - without the call to
 /// [markAsExplicit] - would have been merged into the parent's [SemanticsNode].
-/// Similarity, the new node will also take over the children that otherwise
+/// Similarly, the new node will also take over the children that otherwise
 /// would have been added to the parent's [SemanticsNode].
 ///
 /// After a call to [markAsExplicit] the only element returned by [children]

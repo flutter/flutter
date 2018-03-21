@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
 import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -314,7 +316,11 @@ class AppDomain extends Domain {
     if (!fs.isDirectorySync(projectDirectory))
       throw "'$projectDirectory' does not exist";
 
-    final BuildInfo buildInfo = new BuildInfo(getBuildModeForName(mode) ?? BuildMode.debug, flavor);
+    final BuildInfo buildInfo = new BuildInfo(
+      getBuildModeForName(mode) ?? BuildMode.debug,
+      flavor,
+      previewDart2: _getBoolArg(args, 'preview-dart-2'),
+    );
     DebuggingOptions options;
     if (buildInfo.isRelease) {
       options = new DebuggingOptions.disabled(buildInfo);
@@ -333,6 +339,7 @@ class AppDomain extends Domain {
       route,
       options,
       enableHotReload,
+      trackWidgetCreation: _getBoolArg(args, 'track-widget-creation'),
     );
 
     return <String, dynamic>{
@@ -347,11 +354,10 @@ class AppDomain extends Domain {
     Device device, String projectDirectory, String target, String route,
     DebuggingOptions options, bool enableHotReload, {
     String applicationBinary,
-    bool previewDart2: false,
-    bool strongMode: false,
+    @required bool trackWidgetCreation,
     String projectRootPath,
     String packagesFilePath,
-    String projectAssets,
+    String dillOutputPath,
     bool ipv6: false,
   }) async {
     if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator) {
@@ -362,7 +368,12 @@ class AppDomain extends Domain {
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
 
-    final FlutterDevice flutterDevice = new FlutterDevice(device);
+    final FlutterDevice flutterDevice = new FlutterDevice(
+      device,
+      previewDart2: options.buildInfo.previewDart2,
+      trackWidgetCreation: trackWidgetCreation,
+      dillOutputPath: dillOutputPath,
+    );
 
     ResidentRunner runner;
 
@@ -373,11 +384,9 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         usesTerminalUI: false,
         applicationBinary: applicationBinary,
-        previewDart2: previewDart2,
-        strongMode: strongMode,
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
-        projectAssets: projectAssets,
+        dillOutputPath: dillOutputPath,
         ipv6: ipv6,
         hostIsIde: true,
       );
@@ -388,8 +397,6 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         usesTerminalUI: false,
         applicationBinary: applicationBinary,
-        previewDart2: previewDart2,
-        strongMode: strongMode,
         ipv6: ipv6,
       );
     }
@@ -447,6 +454,8 @@ class AppDomain extends Domain {
   bool isRestartSupported(bool enableHotReload, Device device) =>
       enableHotReload && device.supportsHotMode;
 
+  Future<OperationResult> _inProgressHotReload;
+
   Future<OperationResult> restart(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
     final bool fullRestart = _getBoolArg(args, 'fullRestart') ?? false;
@@ -456,8 +465,14 @@ class AppDomain extends Domain {
     if (app == null)
       throw "app '$appId' not found";
 
-    return app._runInZone(this, () {
+    if (_inProgressHotReload != null)
+      throw 'hot restart already in progress';
+
+    _inProgressHotReload = app._runInZone(this, () {
       return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart);
+    });
+    return _inProgressHotReload.whenComplete(() {
+      _inProgressHotReload = null;
     });
   }
 
@@ -678,12 +693,12 @@ class DeviceDomain extends Domain {
 }
 
 Stream<Map<String, dynamic>> get stdinCommandStream => stdin
-  .transform(UTF8.decoder)
+  .transform(utf8.decoder)
   .transform(const LineSplitter())
   .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
   .map((String line) {
     line = line.substring(1, line.length - 1);
-    return JSON.decode(line);
+    return json.decode(line);
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {
@@ -691,7 +706,7 @@ void stdoutCommandResponse(Map<String, dynamic> command) {
 }
 
 String jsonEncodeObject(dynamic object) {
-  return JSON.encode(object, toEncodable: _toEncodable);
+  return json.encode(object, toEncodable: _toEncodable);
 }
 
 dynamic _toEncodable(dynamic object) {
@@ -757,7 +772,12 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
+  Status startProgress(
+    String message, {
+    String progressId,
+    bool expectSlowOperation: false,
+    int progressIndicatorPadding: kDefaultStatusPadding,
+  }) {
     printStatus(message);
     return new Status();
   }
@@ -792,6 +812,7 @@ class AppInstance {
 
     final AppContext appContext = new AppContext();
     appContext.setVariable(Logger, _logger);
+    appContext.setVariable(Stdio, const Stdio());
     return appContext.runInZone(method);
   }
 }
@@ -857,7 +878,12 @@ class _AppRunLogger extends Logger {
   Status _status;
 
   @override
-  Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
+  Status startProgress(
+    String message, {
+    String progressId,
+    bool expectSlowOperation: false,
+    int progressIndicatorPadding: 52,
+  }) {
     // Ignore nested progresses; return a no-op status object.
     if (_status != null)
       return new Status();
@@ -893,12 +919,15 @@ class _AppRunLogger extends Logger {
   }
 }
 
-class _AppLoggerStatus implements Status {
+class _AppLoggerStatus extends Status {
   _AppLoggerStatus(this.logger, this.id, this.progressId);
 
   final _AppRunLogger logger;
   final int id;
   final String progressId;
+
+  @override
+  void start() {}
 
   @override
   void stop() {

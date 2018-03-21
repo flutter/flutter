@@ -162,12 +162,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// A widget to display before the [title].
   ///
-  /// If this is null and [automaticallyImplyLeading] is set to true, the [AppBar] will
-  /// imply an appropriate widget. For example, if the [AppBar] is in a [Scaffold]
-  /// that also has a [Drawer], the [Scaffold] will fill this widget with an
-  /// [IconButton] that opens the drawer. If there's no [Drawer] and the parent
-  /// [Navigator] can go back, the [AppBar] will use a [BackButton] that calls
-  /// [Navigator.maybePop].
+  /// If this is null and [automaticallyImplyLeading] is set to true, the
+  /// [AppBar] will imply an appropriate widget. For example, if the [AppBar] is
+  /// in a [Scaffold] that also has a [Drawer], the [Scaffold] will fill this
+  /// widget with an [IconButton] that opens the drawer (using [Icons.menu]). If
+  /// there's no [Drawer] and the parent [Navigator] can go back, the [AppBar]
+  /// will use a [BackButton] that calls [Navigator.maybePop].
   final Widget leading;
 
   /// Controls whether we should try to imply the leading widget if null.
@@ -209,7 +209,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will
-  /// be the same as the the app bar's overall height.
+  /// be the same as the app bar's overall height.
   ///
   /// A flexible space isn't actually flexible unless the [AppBar]'s container
   /// changes the [AppBar]'s size. A [SliverAppBar] in a [CustomScrollView]
@@ -403,7 +403,7 @@ class _AppBarState extends State<AppBar> {
         icon: const Icon(Icons.menu),
         onPressed: _handleDrawerButtonEnd,
         tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-      );      
+      );
     }
 
     final Widget toolbar = new Padding(
@@ -795,7 +795,7 @@ class SliverAppBar extends StatefulWidget {
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will
-  /// be the same as the the app bar's overall height.
+  /// be the same as the app bar's overall height.
   ///
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
   final Widget flexibleSpace;

@@ -194,8 +194,8 @@ void main() {
   // This test is very similar to the '...explicit splashColor and highlightColor' test
   // in buttons_test.dart. If you change this one, you may want to also change that one.
   testWidgets('IconButton with explicit splashColor and highlightColor', (WidgetTester tester) async {
-    final Color directSplashColor = const Color(0xFF00000F);
-    final Color directHighlightColor = const Color(0xFF0000F0);
+    const Color directSplashColor = const Color(0xFF00000F);
+    const Color directHighlightColor = const Color(0xFF0000F0);
 
     Widget buttonWidget = wrap(
         child: new IconButton(
@@ -225,8 +225,8 @@ void main() {
         ..circle(color: directHighlightColor)
     );
 
-    final Color themeSplashColor1 = const Color(0xFF000F00);
-    final Color themeHighlightColor1 = const Color(0xFF00FF00);
+    const Color themeSplashColor1 = const Color(0xFF000F00);
+    const Color themeHighlightColor1 = const Color(0xFF00FF00);
 
     buttonWidget = wrap(
         child: new IconButton(
@@ -252,8 +252,8 @@ void main() {
         ..circle(color: themeHighlightColor1)
     );
 
-    final Color themeSplashColor2 = const Color(0xFF002200);
-    final Color themeHighlightColor2 = const Color(0xFF001100);
+    const Color themeSplashColor2 = const Color(0xFF002200);
+    const Color themeHighlightColor2 = const Color(0xFF001100);
 
     await tester.pumpWidget(
       new Theme(
@@ -275,7 +275,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('IconButton Semantics', (WidgetTester tester) async {
+  testWidgets('IconButton Semantics (enabled)', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -291,11 +291,45 @@ void main() {
       children: <TestSemantics>[
         new TestSemantics.rootChild(
           rect: new Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
-          actions: <SemanticsAction>[SemanticsAction.tap],
-          flags: <SemanticsFlag>[SemanticsFlag.isButton],
+          actions: <SemanticsAction>[
+            SemanticsAction.tap
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isButton
+          ],
           label: 'link',
         )
       ]
+    ), ignoreId: true, ignoreTransform: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('IconButton Semantics (disabled)', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      wrap(
+        child: const IconButton(
+          onPressed: null,
+          icon: const Icon(Icons.link, semanticLabel: 'link'),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            rect: new Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+            flags: <SemanticsFlag>[
+              SemanticsFlag.hasEnabledState,
+              SemanticsFlag.isButton
+            ],
+            label: 'link',
+          )
+        ]
     ), ignoreId: true, ignoreTransform: true));
 
     semantics.dispose();

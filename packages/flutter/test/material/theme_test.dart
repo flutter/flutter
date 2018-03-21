@@ -200,7 +200,7 @@ void main() {
                     onPressed: () {
                       showDialog<Null>(
                         context: context,
-                        child: const Text('dialog'),
+                        builder: (BuildContext context) => const Text('dialog'),
                       );
                     },
                     child: const Text('SHOW'),
@@ -232,12 +232,14 @@ void main() {
                   onTap: () {
                     showDialog<Null>(
                       context: context,
-                      child: const Scaffold(
-                        body: const SizedBox(
-                          width: 200.0,
-                          height: 200.0,
-                        ),
-                      )
+                      builder: (BuildContext context) {
+                        return const Scaffold(
+                          body: const SizedBox(
+                            width: 200.0,
+                            height: 200.0,
+                          ),
+                        );
+                      },
                     );
                   },
                   child: const Text('SHOW'),
@@ -252,7 +254,7 @@ void main() {
     await tester.tap(find.text('SHOW'));
     await tester.pump(const Duration(seconds: 1));
 
-    final List<Material> materials = tester.widgetList(find.byType(Material)).toList();
+    final List<Material> materials = tester.widgetList<Material>(find.byType(Material)).toList();
     expect(materials.length, equals(2));
     expect(materials[0].color, green); // app scaffold
     expect(materials[1].color, green); // dialog scaffold

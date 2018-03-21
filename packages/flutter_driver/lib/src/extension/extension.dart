@@ -125,10 +125,10 @@ class FlutterDriverExtension {
     });
 
     _finders.addAll(<String, FinderConstructor>{
-      'ByText': _createByTextFinder,
-      'ByTooltipMessage': _createByTooltipMessageFinder,
-      'ByValueKey': _createByValueKeyFinder,
-      'ByType': _createByTypeFinder,
+      'ByText': (SerializableFinder finder) => _createByTextFinder(finder),
+      'ByTooltipMessage': (SerializableFinder finder) => _createByTooltipMessageFinder(finder),
+      'ByValueKey': (SerializableFinder finder) => _createByValueKeyFinder(finder),
+      'ByType': (SerializableFinder finder) => _createByTypeFinder(finder),
     });
   }
 
@@ -298,7 +298,7 @@ class FlutterDriverExtension {
   Future<ScrollResult> _scroll(Command command) async {
     final Scroll scrollCommand = command;
     final Finder target = await _waitForElement(_createFinder(scrollCommand.finder));
-    final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.MICROSECONDS_PER_SECOND;
+    final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.microsecondsPerSecond;
     final Offset delta = new Offset(scrollCommand.dx, scrollCommand.dy) / totalMoves.toDouble();
     final Duration pause = scrollCommand.duration ~/ totalMoves;
     final Offset startLocation = _prober.getCenter(target);

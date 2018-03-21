@@ -196,7 +196,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         invokeCallback<void>('onCancel', onCancel);
       return;
     }
-    final bool wasAccepted = (_state == _DragState.accepted);
+    final bool wasAccepted = _state == _DragState.accepted;
     _state = _DragState.ready;
     if (wasAccepted && onEnd != null) {
       final VelocityTracker tracker = _velocityTrackers[pointer];

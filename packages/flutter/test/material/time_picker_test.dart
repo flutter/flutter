@@ -229,7 +229,7 @@ void _tests() {
     await tester.pumpWidget(
       new Localizations(
         locale: const Locale('en', 'US'),
-        delegates: <LocalizationsDelegate<dynamic>>[
+        delegates: const <LocalizationsDelegate<dynamic>>[
           DefaultMaterialLocalizations.delegate,
           DefaultWidgetsLocalizations.delegate,
         ],
@@ -388,7 +388,7 @@ void _tests() {
     dynamic dialPaint = tester.widget(findDialPaint);
     expect('${dialPaint.painter.activeRing}', '_DialRing.inner');
 
-    await tester.pumpWidget(new Container());  // make sure previous state isn't reused
+    await tester.pumpWidget(new Container()); // make sure previous state isn't reused
 
     await mediaQueryBoilerplate(tester, true, initialTime: const TimeOfDay(hour: 0, minute: 0));
     dialPaint = tester.widget(findDialPaint);
@@ -433,7 +433,7 @@ void _tests() {
       action: SemanticsAction.decrease,
       finalValue: '12',
     );
-    await tester.pumpWidget(new Container());  // clear old boilerplate
+    await tester.pumpWidget(new Container()); // clear old boilerplate
 
     // 24-hour format
     await mediaQueryBoilerplate(tester, true, initialTime: const TimeOfDay(hour: 23, minute: 0));
@@ -457,6 +457,8 @@ void _tests() {
       action: SemanticsAction.decrease,
       finalValue: '23',
     );
+
+    semantics.dispose();
   });
 
   testWidgets('can increment and decrement minutes', (WidgetTester tester) async {
@@ -501,6 +503,8 @@ void _tests() {
       action: SemanticsAction.decrease,
       finalValue: '58',
     );
+
+    semantics.dispose();
   });
 }
 

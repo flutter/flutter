@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // This is the test for the private implementation of animated icons.
-// To make the private API accessible from the test we do not import the 
+// To make the private API accessible from the test we do not import the
 // material material_animated_icons library, but instead, this test file is an
 // implementation of that library, using some of the parts of the real
 // material_animated_icons, this give the test access to the private APIs.
@@ -21,8 +21,24 @@ import 'package:test/test.dart';
 
 part 'package:flutter/src/material/animated_icons/animated_icons.dart';
 part 'package:flutter/src/material/animated_icons/animated_icons_data.dart';
+
+// We have to import all the generated files in the material library to avoid
+// analysis errors (as the generated constants are all referenced in the
+// animated_icons library).
+part 'package:flutter/src/material/animated_icons/data/add_event.g.dart';
 part 'package:flutter/src/material/animated_icons/data/arrow_menu.g.dart';
+part 'package:flutter/src/material/animated_icons/data/close_menu.g.dart';
+part 'package:flutter/src/material/animated_icons/data/ellipsis_search.g.dart';
+part 'package:flutter/src/material/animated_icons/data/event_add.g.dart';
+part 'package:flutter/src/material/animated_icons/data/home_menu.g.dart';
+part 'package:flutter/src/material/animated_icons/data/list_view.g.dart';
 part 'package:flutter/src/material/animated_icons/data/menu_arrow.g.dart';
+part 'package:flutter/src/material/animated_icons/data/menu_close.g.dart';
+part 'package:flutter/src/material/animated_icons/data/menu_home.g.dart';
+part 'package:flutter/src/material/animated_icons/data/pause_play.g.dart';
+part 'package:flutter/src/material/animated_icons/data/play_pause.g.dart';
+part 'package:flutter/src/material/animated_icons/data/search_ellipsis.g.dart';
+part 'package:flutter/src/material/animated_icons/data/view_list.g.dart';
 
 class MockCanvas extends Mock implements ui.Canvas {}
 class MockPath extends Mock implements ui.Path {}
@@ -30,7 +46,7 @@ class MockPath extends Mock implements ui.Path {}
 void main () {
   group('Interpolate points', () {
     test('- single point', () {
-      final List<Offset> points = const <Offset>[
+      const List<Offset> points = const <Offset>[
         const Offset(25.0, 1.0),
       ];
       expect(_interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
@@ -39,7 +55,7 @@ void main () {
     });
 
     test('- two points', () {
-      final List<Offset> points = const <Offset>[
+      const List<Offset> points = const <Offset>[
         const Offset(25.0, 1.0),
         const Offset(12.0, 12.0),
       ];
@@ -49,7 +65,7 @@ void main () {
     });
 
     test('- three points', () {
-      final List<Offset> points = const <Offset>[
+      const List<Offset> points = const <Offset>[
         const Offset(25.0, 1.0),
         const Offset(12.0, 12.0),
         const Offset(23.0, 9.0),
@@ -63,7 +79,7 @@ void main () {
   });
 
   group('_AnimatedIconPainter', () {
-    final Size size = const Size(48.0, 48.0);
+    const Size size = const Size(48.0, 48.0);
     final MockCanvas mockCanvas = new MockCanvas();
     List<MockPath> generatedPaths;
     final _UiPathFactory pathFactory = () {
@@ -85,10 +101,10 @@ void main () {
         shouldMirror: false,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<dynamic>[
+      verifyInOrder(<void>[
         generatedPaths[0].moveTo(0.0, 0.0),
         generatedPaths[0].lineTo(48.0, 0.0),
         generatedPaths[0].lineTo(48.0, 10.0),
@@ -107,10 +123,10 @@ void main () {
         shouldMirror: false,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<dynamic>[
+      verifyInOrder(<void>[
         generatedPaths[0].moveTo(0.0, 38.0),
         generatedPaths[0].lineTo(48.0, 38.0),
         generatedPaths[0].lineTo(48.0, 48.0),
@@ -129,10 +145,10 @@ void main () {
         shouldMirror: false,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<dynamic>[
+      verifyInOrder(<void>[
         generatedPaths[0].moveTo(0.0, 38.0),
         generatedPaths[0].lineTo(48.0, 38.0),
         generatedPaths[0].lineTo(48.0, 48.0),
@@ -151,7 +167,7 @@ void main () {
         shouldMirror: false,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       verify(mockCanvas.scale(0.5, 0.5));
     });
 
@@ -164,8 +180,8 @@ void main () {
         shouldMirror: true,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
-      verifyInOrder(<dynamic>[
+      painter.paint(mockCanvas, size);
+      verifyInOrder(<void>[
         mockCanvas.rotate(math.pi),
         mockCanvas.translate(-48.0, -48.0)
       ]);
@@ -180,10 +196,10 @@ void main () {
         shouldMirror: false,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<dynamic>[
+      verifyInOrder(<void>[
         generatedPaths[0].moveTo(0.0, 19.0),
         generatedPaths[0].lineTo(48.0, 19.0),
         generatedPaths[0].lineTo(48.0, 29.0),
@@ -202,10 +218,10 @@ void main () {
         shouldMirror: false,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<dynamic>[
+      verifyInOrder(<void>[
         generatedPaths[0].moveTo(0.0, 24.0),
         generatedPaths[0].cubicTo(16.0, 48.0, 32.0, 48.0, 48.0, 24.0),
         generatedPaths[0].lineTo(0.0, 24.0),
@@ -222,10 +238,10 @@ void main () {
         shouldMirror: false,
         uiPathFactory: pathFactory
       );
-      painter.paint(mockCanvas,  size);
+      painter.paint(mockCanvas, size);
       expect(generatedPaths.length, 1);
 
-      verifyInOrder(<dynamic>[
+      verifyInOrder(<void>[
         generatedPaths[0].moveTo(0.0, 24.0),
         generatedPaths[0].cubicTo(16.0, 17.0, 32.0, 17.0, 48.0, 24.0),
         generatedPaths[0].lineTo(0.0, 24.0),

@@ -10,8 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button.dart';
 import 'button_bar.dart';
+import 'button_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'dialog.dart';
@@ -204,7 +204,7 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
 
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
-    final int columnCount = DateTime.DAYS_PER_WEEK;
+    final int columnCount = DateTime.daysPerWeek;
     final double tileWidth = constraints.crossAxisExtent / columnCount;
     final double tileHeight = math.min(_kDayPickerRowHeight, constraints.viewportMainAxisExtent / (_kMaxDayPickerRowCount + 1));
     return new SliverGridRegularTileLayout(
@@ -319,7 +319,7 @@ class DayPicker extends StatelessWidget {
   /// This applies the leap year logic introduced by the Gregorian reforms of
   /// 1582. It will not give valid results for dates prior to that time.
   static int getDaysInMonth(int year, int month) {
-    if (month == DateTime.FEBRUARY) {
+    if (month == DateTime.february) {
       final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
       if (isLeapYear)
         return 29;
@@ -565,7 +565,7 @@ class _MonthPickerState extends State<MonthPicker> {
     _todayDate = new DateTime.now();
     final DateTime tomorrow = new DateTime(_todayDate.year, _todayDate.month, _todayDate.day + 1);
     Duration timeUntilTomorrow = tomorrow.difference(_todayDate);
-    timeUntilTomorrow += const Duration(seconds: 1);  // so we don't miss it by rounding
+    timeUntilTomorrow += const Duration(seconds: 1); // so we don't miss it by rounding
     _timer?.cancel();
     _timer = new Timer(timeUntilTomorrow, () {
       setState(() {
@@ -1042,6 +1042,6 @@ Future<DateTime> showDatePicker({
 
   return await showDialog<DateTime>(
     context: context,
-    child: child,
+    builder: (BuildContext context) => child,
   );
 }

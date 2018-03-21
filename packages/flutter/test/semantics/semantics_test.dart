@@ -4,8 +4,8 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
-import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
 
@@ -125,11 +125,88 @@ void main() {
     expect(child2.transform, isNull);
 
     expect(
-      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
-      'SemanticsNode#3(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 10.0, 5.0))\n'
-      '├SemanticsNode#1(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 5.0, 5.0))\n'
-      '└SemanticsNode#2(STALE, owner: null, Rect.fromLTRB(5.0, 0.0, 10.0, 5.0))\n',
+      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.geometricOrder),
+      'SemanticsNode#3\n'
+      ' │ STALE\n'
+      ' │ owner: null\n'
+      ' │ Rect.fromLTRB(0.0, 0.0, 10.0, 5.0)\n'
+      ' │\n'
+      ' ├─SemanticsNode#1\n'
+      ' │   STALE\n'
+      ' │   owner: null\n'
+      ' │   Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
+      ' │\n'
+      ' └─SemanticsNode#2\n'
+      '     STALE\n'
+      '     owner: null\n'
+      '     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
     );
+  });
+
+  test('OrdinalSortKey compares correctly', () {
+    const List<List<SemanticsSortKey>> tests = const <List<SemanticsSortKey>>[
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(1.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(1.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(0.0)],
+      const <SemanticsSortKey>[const CustomSortKey(0.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(0.0)],
+    ];
+    final List<int> expectedResults = <int>[0, -1, 1, 0, 0, 0, 0, 0];
+    assert(tests.length == expectedResults.length);
+    final List<int> results = <int>[];
+    for (List<SemanticsSortKey> tuple in tests) {
+      results.add(tuple[0].compareTo(tuple[1]));
+    }
+    expect(results, orderedEquals(expectedResults));
+  });
+
+  test('SemanticsSortKey sorts correctly when assigned names', () {
+    const SemanticsSortKey order1g1 = const CustomSortKey(0.0, name: 'group 1');
+    const SemanticsSortKey order2g1 = const CustomSortKey(1.0, name: 'group 1');
+    const SemanticsSortKey order2g2 = const CustomSortKey(1.0, name: 'group 2');
+    const SemanticsSortKey order3g2 = const OrdinalSortKey(1.0, name: 'group 1');
+    // Keys in the same group compare.
+    expect(order1g1.compareTo(order2g1), equals(-1));
+    // Keys with different names compare equal.
+    expect(order1g1.compareTo(order2g2), equals(0));
+    // Keys with same names but different types compare equal.
+    expect(order1g1.compareTo(order3g2), equals(0));
+  });
+
+  test('OrdinalSortKey compares correctly', () {
+    const List<List<SemanticsSortKey>> tests = const <List<SemanticsSortKey>>[
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(1.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(1.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(0.0)],
+      const <SemanticsSortKey>[const CustomSortKey(0.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(0.0)],
+    ];
+    final List<int> expectedResults = <int>[0, -1, 1, 0, 0, 0, 0, 0];
+    assert(tests.length == expectedResults.length);
+    final List<int> results = <int>[];
+    for (List<SemanticsSortKey> tuple in tests) {
+      results.add(tuple[0].compareTo(tuple[1]));
+    }
+    expect(results, orderedEquals(expectedResults));
+  });
+
+  test('SemanticsSortKey sorts correctly when assigned names', () {
+    const SemanticsSortKey order1g1 = const CustomSortKey(0.0, name: 'group 1');
+    const SemanticsSortKey order2g1 = const CustomSortKey(1.0, name: 'group 1');
+    const SemanticsSortKey order2g2 = const CustomSortKey(1.0, name: 'group 2');
+    const SemanticsSortKey order3g2 = const OrdinalSortKey(1.0, name: 'group 1');
+    // Keys in the same group compare.
+    expect(order1g1.compareTo(order2g1), equals(-1));
+    // Keys with different names compare equal.
+    expect(order1g1.compareTo(order2g2), equals(0));
+    // Keys with same names but different types compare equal.
+    expect(order1g1.compareTo(order3g2), equals(0));
   });
 
   test('toStringDeep respects childOrder parameter', () {
@@ -144,17 +221,39 @@ void main() {
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
     );
     expect(
-      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
-      'SemanticsNode#3(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 20.0, 5.0))\n'
-      '├SemanticsNode#2(STALE, owner: null, Rect.fromLTRB(10.0, 0.0, 15.0, 5.0))\n'
-      '└SemanticsNode#1(STALE, owner: null, Rect.fromLTRB(15.0, 0.0, 20.0, 5.0))\n',
+      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.geometricOrder),
+      'SemanticsNode#3\n'
+      ' │ STALE\n'
+      ' │ owner: null\n'
+      ' │ Rect.fromLTRB(0.0, 0.0, 20.0, 5.0)\n'
+      ' │\n'
+      ' ├─SemanticsNode#2\n'
+      ' │   STALE\n'
+      ' │   owner: null\n'
+      ' │   Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
+      ' │\n'
+      ' └─SemanticsNode#1\n'
+      '     STALE\n'
+      '     owner: null\n'
+      '     Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
     );
 
     expect(
       root.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest),
-      'SemanticsNode#3(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 20.0, 5.0))\n'
-      '├SemanticsNode#1(STALE, owner: null, Rect.fromLTRB(15.0, 0.0, 20.0, 5.0))\n'
-      '└SemanticsNode#2(STALE, owner: null, Rect.fromLTRB(10.0, 0.0, 15.0, 5.0))\n',
+      'SemanticsNode#3\n'
+      ' │ STALE\n'
+      ' │ owner: null\n'
+      ' │ Rect.fromLTRB(0.0, 0.0, 20.0, 5.0)\n'
+      ' │\n'
+      ' ├─SemanticsNode#1\n'
+      ' │   STALE\n'
+      ' │   owner: null\n'
+      ' │   Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
+      ' │\n'
+      ' └─SemanticsNode#2\n'
+      '     STALE\n'
+      '     owner: null\n'
+      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
     );
 
     final SemanticsNode child3 = new SemanticsNode()
@@ -177,23 +276,69 @@ void main() {
     );
 
     expect(
-      rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
-      'SemanticsNode#7(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 25.0, 5.0))\n'
-      '├SemanticsNode#4(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 10.0, 5.0))\n'
-      '│├SemanticsNode#6(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 5.0, 5.0))\n'
-      '│└SemanticsNode#5(STALE, owner: null, Rect.fromLTRB(5.0, 0.0, 10.0, 5.0))\n'
-      '├SemanticsNode#2(STALE, owner: null, Rect.fromLTRB(10.0, 0.0, 15.0, 5.0))\n'
-      '└SemanticsNode#1(STALE, owner: null, Rect.fromLTRB(15.0, 0.0, 20.0, 5.0))\n',
+      rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.geometricOrder),
+      'SemanticsNode#7\n'
+      ' │ STALE\n'
+      ' │ owner: null\n'
+      ' │ Rect.fromLTRB(0.0, 0.0, 25.0, 5.0)\n'
+      ' │\n'
+      ' ├─SemanticsNode#4\n'
+      ' │ │ STALE\n'
+      ' │ │ owner: null\n'
+      ' │ │ Rect.fromLTRB(0.0, 0.0, 10.0, 5.0)\n'
+      ' │ │\n'
+      ' │ ├─SemanticsNode#6\n'
+      ' │ │   STALE\n'
+      ' │ │   owner: null\n'
+      ' │ │   Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
+      ' │ │\n'
+      ' │ └─SemanticsNode#5\n'
+      ' │     STALE\n'
+      ' │     owner: null\n'
+      ' │     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
+      ' │\n'
+      ' ├─SemanticsNode#2\n'
+      ' │   STALE\n'
+      ' │   owner: null\n'
+      ' │   Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
+      ' │\n'
+      ' └─SemanticsNode#1\n'
+      '     STALE\n'
+      '     owner: null\n'
+      '     Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
     );
 
     expect(
       rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest),
-      'SemanticsNode#7(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 25.0, 5.0))\n'
-      '├SemanticsNode#1(STALE, owner: null, Rect.fromLTRB(15.0, 0.0, 20.0, 5.0))\n'
-      '├SemanticsNode#2(STALE, owner: null, Rect.fromLTRB(10.0, 0.0, 15.0, 5.0))\n'
-      '└SemanticsNode#4(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 10.0, 5.0))\n'
-      ' ├SemanticsNode#5(STALE, owner: null, Rect.fromLTRB(5.0, 0.0, 10.0, 5.0))\n'
-      ' └SemanticsNode#6(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 5.0, 5.0))\n',
+      'SemanticsNode#7\n'
+      ' │ STALE\n'
+      ' │ owner: null\n'
+      ' │ Rect.fromLTRB(0.0, 0.0, 25.0, 5.0)\n'
+      ' │\n'
+      ' ├─SemanticsNode#1\n'
+      ' │   STALE\n'
+      ' │   owner: null\n'
+      ' │   Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
+      ' │\n'
+      ' ├─SemanticsNode#2\n'
+      ' │   STALE\n'
+      ' │   owner: null\n'
+      ' │   Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
+      ' │\n'
+      ' └─SemanticsNode#4\n'
+      '   │ STALE\n'
+      '   │ owner: null\n'
+      '   │ Rect.fromLTRB(0.0, 0.0, 10.0, 5.0)\n'
+      '   │\n'
+      '   ├─SemanticsNode#5\n'
+      '   │   STALE\n'
+      '   │   owner: null\n'
+      '   │   Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
+      '   │\n'
+      '   └─SemanticsNode#6\n'
+      '       STALE\n'
+      '       owner: null\n'
+      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
     );
   });
 
@@ -201,12 +346,33 @@ void main() {
     final SemanticsNode minimalProperties = new SemanticsNode();
     expect(
       minimalProperties.toStringDeep(),
-      'SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n',
+      'SemanticsNode#1\n'
+      '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+      '   invisible\n'
     );
 
     expect(
       minimalProperties.toStringDeep(minLevel: DiagnosticLevel.hidden),
-      'SemanticsNode#1(owner: null, isMergedIntoParent: false, mergeAllDescendantsIntoThisNode: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), actions: [], isInMutuallyExcusiveGroup: false, isSelected: false, isFocused: false, isButton: false, isTextField: false, label: "", value: "", increasedValue: "", decreasedValue: "", hint: "", textDirection: null)\n'
+      'SemanticsNode#1\n'
+      '   owner: null\n'
+      '   isMergedIntoParent: false\n'
+      '   mergeAllDescendantsIntoThisNode: false\n'
+      '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+      '   actions: []\n'
+      '   flags: []\n'
+      '   invisible\n'
+      '   label: ""\n'
+      '   value: ""\n'
+      '   increasedValue: ""\n'
+      '   decreasedValue: ""\n'
+      '   hint: ""\n'
+      '   textDirection: null\n'
+      '   nextNodeId: null\n'
+      '   previousNodeId: null\n'
+      '   sortKey: null\n'
+      '   scrollExtentMin: null\n'
+      '   scrollPosition: null\n'
+      '   scrollExtentMax: null\n'
     );
 
     final SemanticsConfiguration config = new SemanticsConfiguration()
@@ -219,14 +385,26 @@ void main() {
       ..isSelected = true
       ..isButton = true
       ..label = 'Use all the properties'
-      ..textDirection = TextDirection.rtl;
+      ..textDirection = TextDirection.rtl
+      ..sortKey = const OrdinalSortKey(1.0);
     final SemanticsNode allProperties = new SemanticsNode()
       ..rect = new Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = new Matrix4.translation(new Vector3(10.0, 10.0, 0.0))
       ..updateWith(config: config, childrenInInversePaintOrder: null);
     expect(
       allProperties.toStringDeep(),
-      'SemanticsNode#2(STALE, owner: null, merge boundary ⛔️, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), actions: [longPress, scrollUp, showOnScreen], unchecked, selected, button, label: "Use all the properties", textDirection: rtl)\n',
+      equalsIgnoringHashCodes(
+          'SemanticsNode#2\n'
+          '   STALE\n'
+          '   owner: null\n'
+          '   merge boundary ⛔️\n'
+          '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
+          '   actions: longPress, scrollUp, showOnScreen\n'
+          '   flags: hasCheckedState, isSelected, isButton\n'
+          '   label: "Use all the properties"\n'
+          '   textDirection: rtl\n'
+          '   sortKey: OrdinalSortKey#19df5(order: 1.0)\n'
+      ),
     );
     expect(
       allProperties.getSemanticsData().toString(),
@@ -238,7 +416,10 @@ void main() {
       ..transform = new Matrix4.diagonal3(new Vector3(10.0, 10.0, 1.0));
     expect(
       scaled.toStringDeep(),
-      'SemanticsNode#3(STALE, owner: null, Rect.fromLTRB(50.0, 10.0, 70.0, 40.0) scaled by 10.0x)\n',
+      'SemanticsNode#3\n'
+      '   STALE\n'
+      '   owner: null\n'
+      '   Rect.fromLTRB(50.0, 10.0, 70.0, 40.0) scaled by 10.0x\n',
     );
     expect(
       scaled.getSemanticsData().toString(),
@@ -369,4 +550,8 @@ class TestRender extends RenderProxyBox {
     if (hasScrollDownAction)
       config.onScrollDown = () { };
   }
+}
+
+class CustomSortKey extends OrdinalSortKey {
+  const CustomSortKey(double order, {String name}) : super(order, name: name);
 }

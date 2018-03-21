@@ -6,10 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-final Border nullBorder = null; // we want these instances to be separate instances so that we're not just checking with a single object
-final BoxDecoration kBoxDecorationA = new BoxDecoration(border: nullBorder);
-final BoxDecoration kBoxDecorationB = new BoxDecoration(border: nullBorder);
-final BoxDecoration kBoxDecorationC = new BoxDecoration(border: nullBorder);
+final BoxDecoration kBoxDecorationA = new BoxDecoration(border: nonconst(null));
+final BoxDecoration kBoxDecorationB = new BoxDecoration(border: nonconst(null));
+final BoxDecoration kBoxDecorationC = new BoxDecoration(border: nonconst(null));
 
 class TestWidget extends StatelessWidget {
   const TestWidget({ this.child });

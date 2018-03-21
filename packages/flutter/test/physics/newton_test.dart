@@ -48,7 +48,7 @@ void main() {
     expect(friction.x(0.0), 10.0);
     expect(friction.dx(0.0), 600.0);
 
-    final double epsilon = 1e-4;
+    const double epsilon = 1e-4;
     expect(friction.isDone(1.0 + epsilon), true);
     expect(friction.x(1.0), closeTo(endPosition, epsilon));
     expect(friction.dx(1.0), closeTo(endVelocity, epsilon));
@@ -239,7 +239,7 @@ void main() {
       position: 100.0,
       velocity: 400.0,
       leadingExtent: 0.0,
-      trailingExtent: double.INFINITY,
+      trailingExtent: double.infinity,
       spring: spring,
     );
     scroll.tolerance = const Tolerance(velocity: 1.0);

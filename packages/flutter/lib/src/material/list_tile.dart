@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'divider.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
@@ -24,7 +25,7 @@ enum ListTileStyle {
   drawer,
 }
 
-/// An inherited widget that defines  color and style parameters for [ListTile]s
+/// An inherited widget that defines color and style parameters for [ListTile]s
 /// in this widget's subtree.
 ///
 /// Values specified here are used for [ListTile] properties that are not given
@@ -103,12 +104,12 @@ class ListTileTheme extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(ListTileTheme oldTheme) {
-    return dense != oldTheme.dense
-        || style != oldTheme.style
-        || selectedColor != oldTheme.selectedColor
-        || iconColor != oldTheme.iconColor
-        || textColor != oldTheme.textColor;
+  bool updateShouldNotify(ListTileTheme oldWidget) {
+    return dense != oldWidget.dense
+        || style != oldWidget.style
+        || selectedColor != oldWidget.selectedColor
+        || iconColor != oldWidget.iconColor
+        || textColor != oldWidget.textColor;
   }
 }
 
@@ -284,19 +285,20 @@ class ListTile extends StatelessWidget {
     assert(tiles != null);
     assert(color != null || context != null);
 
-    final Color dividerColor = color ?? Theme.of(context).dividerColor;
     final Iterator<Widget> iterator = tiles.iterator;
     final bool isNotEmpty = iterator.moveNext();
+
+    final Decoration decoration = new BoxDecoration(
+      border: new Border(
+        bottom: Divider.createBorderSide(context, color: color),
+      ),
+    );
 
     Widget tile = iterator.current;
     while (iterator.moveNext()) {
       yield new DecoratedBox(
         position: DecorationPosition.foreground,
-        decoration: new BoxDecoration(
-          border: new Border(
-            bottom: new BorderSide(color: dividerColor, width: 0.0),
-          ),
-        ),
+        decoration: decoration,
         child: tile,
       );
       tile = iterator.current;

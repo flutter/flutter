@@ -8,6 +8,9 @@ import("//build/dart/dart_tool.gni")
 dart_library("flutter_tools") {
   package_name = "flutter_tools"
 
+  # Can be left empty as analysis is disabled.
+  sources = []
+
   disable_analysis = true
 
   deps = [
@@ -41,6 +44,16 @@ dart_library("flutter_tools") {
 
 dart_tool("fuchsia_builder") {
   main_dart = "bin/fuchsia_builder.dart"
+
+  disable_analysis = true
+
+  deps = [
+    ":flutter_tools",
+  ]
+}
+
+dart_tool("fuchsia_asset_builder") {
+  main_dart = "bin/fuchsia_asset_builder.dart"
 
   disable_analysis = true
 

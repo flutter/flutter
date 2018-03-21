@@ -574,7 +574,7 @@ class DrivenScrollActivity extends ScrollActivity {
   }) : assert(from != null),
        assert(to != null),
        assert(duration != null),
-       assert(duration > Duration.ZERO),
+       assert(duration > Duration.zero),
        assert(curve != null),
        super(delegate) {
     _completer = new Completer<Null>();

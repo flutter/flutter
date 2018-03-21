@@ -883,6 +883,8 @@ abstract class DiagnosticsNode {
 
         builder.write(
             config.isNameOnOwnLine || description.contains('\n') ? '\n' : ' ');
+        if (description.contains('\n') && style == DiagnosticsTreeStyle.singleLine)
+          builder.prefixOtherLines += '  ';
       }
       builder.prefixOtherLines += children.isEmpty ?
           config.propertyPrefixNoChildren : config.propertyPrefixIfChildren;
@@ -918,7 +920,7 @@ abstract class DiagnosticsNode {
       if (i > 0)
         builder.write(config.propertySeparator);
 
-      final int kWrapWidth = 65;
+      const int kWrapWidth = 65;
       if (property.style != DiagnosticsTreeStyle.singleLine) {
         final TextTreeConfiguration propertyStyle = property.textTreeConfiguration;
         builder.writeRaw(property.toStringDeep(
@@ -1173,7 +1175,7 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
     if (value == null)
       return value.toString();
 
-    return unit != null ?  '${numberToString()}$unit' : numberToString();
+    return unit != null ? '${numberToString()}$unit' : numberToString();
   }
 }
 /// Property describing a [double] [value] with an optional [unit] of measurement.
@@ -1297,7 +1299,7 @@ class PercentProperty extends DoubleProperty {
   String valueToString({ TextTreeConfiguration parentConfiguration }) {
     if (value == null)
       return value.toString();
-    return unit != null ?  '${numberToString()} $unit' : numberToString();
+    return unit != null ? '${numberToString()} $unit' : numberToString();
   }
 
   @override
@@ -1345,7 +1347,7 @@ class PercentProperty extends DoubleProperty {
 ///  * [ObjectFlagProperty], which provides similar behavior describing whether
 ///    a [value] is null.
 class FlagProperty extends DiagnosticsProperty<bool> {
-  /// Constructs a FlagProperty with the given descriptions  with the specified descriptions.
+  /// Constructs a FlagProperty with the given descriptions with the specified descriptions.
   ///
   /// [showName] defaults to false as typically [ifTrue] and [ifFalse] should
   /// be descriptions that make the property name redundant.
@@ -2214,7 +2216,7 @@ abstract class Diagnosticable {
   /// common [DiagnosticsProperty] parameters.
   ///
   /// ```dart
-  /// class ExampleObject extends ExampleSuperclass  {
+  /// class ExampleObject extends ExampleSuperclass {
   ///
   ///   // ...various members and properties...
   ///
@@ -2236,9 +2238,9 @@ abstract class Diagnosticable {
   ///     // default value so is not relevant.
   ///     properties.add(new DoubleProperty('hitTestExtent', hitTestExtent, defaultValue: paintExtent));
   ///
-  ///     // maxWidth of double.INFINITY indicates the width is unconstrained and
+  ///     // maxWidth of double.infinity indicates the width is unconstrained and
   ///     // so maxWidth has no impact.,
-  ///     properties.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.INFINITY));
+  ///     properties.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.infinity));
   ///
   ///     // Progress is a value between 0 and 1 or null. Showing it as a
   ///     // percentage makes the meaning clear enough that the name can be

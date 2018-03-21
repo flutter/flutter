@@ -23,7 +23,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   // We need xcode (+simctl) to list simulator devices, and libimobiledevice to list real devices.
   @override
-  bool get canListDevices => xcode.isInstalledAndMeetsVersionCheck;
+  bool get canListDevices => xcode.isInstalledAndMeetsVersionCheck && xcode.isSimctlInstalled;
 
   // We need xcode to launch simulator devices, and ideviceinstaller and ios-deploy
   // for real devices.
@@ -68,10 +68,10 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
       messages.add(new ValidationMessage('Xcode at ${xcode.xcodeSelectPath}'));
 
-      xcodeVersionInfo = xcode.xcodeVersionText;
+      xcodeVersionInfo = xcode.versionText;
       if (xcodeVersionInfo.contains(','))
         xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
-      messages.add(new ValidationMessage(xcode.xcodeVersionText));
+      messages.add(new ValidationMessage(xcode.versionText));
 
       if (!xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
@@ -85,6 +85,13 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         xcodeStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.'
+        ));
+      }
+      if (!xcode.isSimctlInstalled) {
+        xcodeStatus = ValidationType.partial;
+        messages.add(new ValidationMessage.error(
+          'Xcode requires additional components to be installed in order to run.\n'
+          'Launch Xcode and install additional required components when prompted.'
         ));
       }
       if ((await macDevMode).contains('disabled')) {
@@ -206,7 +213,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       brewStatus = ValidationType.missing;
       messages.add(new ValidationMessage.error(
         'Brew not installed; use this to install tools for iOS device development.\n'
-        'Download brew at http://brew.sh/.'
+        'Download brew at https://brew.sh/.'
       ));
     }
 

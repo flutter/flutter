@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show BASE64;
+import 'dart:convert' show base64;
 import 'dart:math' as math;
 
 import 'package:file/file.dart';
@@ -248,6 +248,8 @@ class VMService {
   }
 
   Future<Null> waitForViews({int attempts = 5, int attemptSeconds = 1}) async {
+    if (!vm.isFlutterEngine)
+      return;
     await vm.refreshViews();
     for (int i = 0; (vm.firstView == null) && (i < attempts); i++) {
       // If the VM doesn't yet have a view, wait for one to show up.
@@ -269,7 +271,7 @@ bool _isServiceMap(Map<String, dynamic> m) {
   return (m != null) && (m['type'] != null);
 }
 bool _hasRef(String type) => (type != null) && type.startsWith('@');
-String _stripRef(String type) => (_hasRef(type) ? type.substring(1) : type);
+String _stripRef(String type) => _hasRef(type) ? type.substring(1) : type;
 
 /// Given a raw response from the service protocol and a [ServiceObjectOwner],
 /// recursively walk the response and replace values that are service maps with
@@ -345,7 +347,7 @@ abstract class ServiceObject {
     // fallback return a ServiceMap object.
     serviceObject ??= new ServiceMap._empty(owner);
     // We have now constructed an empty service object, call update to populate it.
-    serviceObject.update(map);
+    serviceObject.updateFromMap(map);
     return serviceObject;
   }
 
@@ -420,20 +422,21 @@ abstract class ServiceObject {
           // An object may have been collected.
           completer.complete(new ServiceObject._fromMap(owner, response));
         } else {
-          update(response);
+          updateFromMap(response);
           completer.complete(this);
         }
       } catch (e, st) {
         completer.completeError(e, st);
       }
       _inProgressReload = null;
+      return await completer.future;
     }
 
     return await _inProgressReload;
   }
 
   /// Update [this] using [map] as a source. [map] can be a service reference.
-  void update(Map<String, dynamic> map) {
+  void updateFromMap(Map<String, dynamic> map) {
     // Don't allow the type to change on an object update.
     final bool mapIsRef = _hasRef(map['type']);
     final String mapType = _stripRef(map['type']);
@@ -522,13 +525,13 @@ class ServiceEvent extends ServiceObject {
   }
 
   bool get isPauseEvent {
-    return (kind == kPauseStart ||
-            kind == kPauseExit ||
-            kind == kPauseBreakpoint ||
-            kind == kPauseInterrupted ||
-            kind == kPauseException ||
-            kind == kPausePostRequest ||
-            kind == kNone);
+    return kind == kPauseStart ||
+           kind == kPauseExit ||
+           kind == kPauseBreakpoint ||
+           kind == kPauseInterrupted ||
+           kind == kPauseException ||
+           kind == kPausePostRequest ||
+           kind == kNone;
   }
 }
 
@@ -547,7 +550,7 @@ abstract class ServiceObjectOwner extends ServiceObject {
   VMService get vmService => null;
 
   /// Builds a [ServiceObject] corresponding to the [id] from [map].
-  /// The result may come from the cache.  The result will not necessarily
+  /// The result may come from the cache. The result will not necessarily
   /// be [loaded].
   ServiceObject getFromMap(Map<String, dynamic> map);
 }
@@ -586,6 +589,7 @@ class VM extends ServiceObjectOwner {
       _heapAllocatedMemoryUsage = map['_heapAllocatedMemoryUsage'];
     }
     _maxRSS = map['_maxRSS'];
+    _embedder = map['_embedder'];
 
     // Remove any isolates which are now dead from the isolate cache.
     _removeDeadIsolates(map['isolates']);
@@ -613,6 +617,12 @@ class VM extends ServiceObjectOwner {
   /// The peak resident set size for the process.
   int _maxRSS;
   int get maxRSS => _maxRSS == null ? 0 : _maxRSS;
+
+  // The embedder's name, Flutter or dart_runner.
+  String _embedder;
+  String get embedder => _embedder;
+  bool get isFlutterEngine => embedder == 'Flutter';
+  bool get isDartRunner => embedder == 'dart_runner';
 
   int _compareIsolates(Isolate a, Isolate b) {
     final DateTime aStart = a.startTime;
@@ -662,7 +672,7 @@ class VM extends ServiceObjectOwner {
     final String type = _stripRef(map['type']);
     if (type == 'VM') {
       // Update this VM object.
-      update(map);
+      updateFromMap(map);
       return this;
     }
 
@@ -684,7 +694,7 @@ class VM extends ServiceObjectOwner {
           });
         } else {
           // Existing isolate, update data.
-          isolate.update(map);
+          isolate.updateFromMap(map);
         }
         return isolate;
       }
@@ -696,7 +706,7 @@ class VM extends ServiceObjectOwner {
           view = new ServiceObject._fromMap(this, map);
           _viewCache[mapId] = view;
         } else {
-          view.update(map);
+          view.updateFromMap(map);
         }
         return view;
       }
@@ -789,7 +799,7 @@ class VM extends ServiceObjectOwner {
       params: <String, dynamic>{
         'fsName': fsName,
         'path': path,
-        'fileContents': BASE64.encode(fileContents),
+        'fileContents': base64.encode(fileContents),
       },
     );
   }
@@ -803,7 +813,7 @@ class VM extends ServiceObjectOwner {
         'path': path,
       },
     );
-    return BASE64.decode(response['fileContents']);
+    return base64.decode(response['fileContents']);
   }
 
   /// The complete list of a file system.
@@ -849,6 +859,8 @@ class VM extends ServiceObjectOwner {
   }
 
   Future<Null> refreshViews() async {
+    if (!isFlutterEngine)
+      return;
     _viewCache.clear();
     await vmService.vm.invokeRpc('_flutter.listViews', timeout: kLongRequestTimeout);
   }
@@ -884,14 +896,14 @@ class HeapSpace extends ServiceObject {
 
   Duration get avgCollectionTime {
     final double mcs = _totalCollectionTimeInSeconds *
-      Duration.MICROSECONDS_PER_SECOND /
+      Duration.microsecondsPerSecond /
       math.max(_collections, 1);
     return new Duration(microseconds: mcs.ceil());
   }
 
   Duration get avgCollectionPeriod {
     final double mcs = _averageCollectionPeriodInMillis *
-                       Duration.MICROSECONDS_PER_MILLISECOND;
+                       Duration.microsecondsPerMillisecond;
     return new Duration(microseconds: mcs.ceil());
   }
 
@@ -965,7 +977,7 @@ class Isolate extends ServiceObjectOwner {
     final String mapId = map['id'];
     ServiceObject serviceObject = (mapId != null) ? _cache[mapId] : null;
     if (serviceObject != null) {
-      serviceObject.update(map);
+      serviceObject.updateFromMap(map);
       return serviceObject;
     }
     // Build the object from the map directly.
@@ -1045,7 +1057,7 @@ class Isolate extends ServiceObjectOwner {
       }
       final Map<String, dynamic> response = await invokeRpcRaw('_reloadSources', params: arguments);
       return response;
-    } on rpc.RpcException catch(e) {
+    } on rpc.RpcException catch (e) {
       return new Future<Map<String, dynamic>>.error(<String, dynamic>{
         'code': e.code,
         'message': e.message,
@@ -1146,8 +1158,8 @@ class Isolate extends ServiceObjectOwner {
     return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpLayerTree', timeout: kLongRequestTimeout);
   }
 
-  Future<Map<String, dynamic>> flutterDebugDumpSemanticsTreeInTraversalOrder() {
-    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpSemanticsTreeInTraversalOrder', timeout: kLongRequestTimeout);
+  Future<Map<String, dynamic>> flutterDebugDumpSemanticsTreeInGeometricOrder() {
+    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpSemanticsTreeInGeometricOrder', timeout: kLongRequestTimeout);
   }
 
   Future<Map<String, dynamic>> flutterDebugDumpSemanticsTreeInInverseHitTestOrder() {
@@ -1171,7 +1183,7 @@ class Isolate extends ServiceObjectOwner {
 
   Future<Map<String, dynamic>> flutterTogglePerformanceOverlayOverride() => _flutterToggle('showPerformanceOverlay');
 
-  Future<Map<String, dynamic>> flutterToggleWidgetInspector()  => _flutterToggle('debugWidgetInspector');
+  Future<Map<String, dynamic>> flutterToggleWidgetInspector() => _flutterToggle('debugWidgetInspector');
 
   Future<Null> flutterDebugAllowBanner(bool show) async {
     await invokeFlutterExtensionRpcRaw(
@@ -1192,7 +1204,7 @@ class Isolate extends ServiceObjectOwner {
   }
 
   Future<bool> flutterFrameworkPresent() async {
-    return (await invokeFlutterExtensionRpcRaw('ext.flutter.frameworkPresent') != null);
+    return await invokeFlutterExtensionRpcRaw('ext.flutter.frameworkPresent') != null;
   }
 
   Future<Map<String, dynamic>> uiWindowScheduleFrame() async {
@@ -1276,6 +1288,22 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   int get length => _map.length;
   @override
   String toString() => _map.toString();
+  @override
+  void addEntries(Iterable<MapEntry<String, dynamic>> entries) => _map.addEntries(entries);
+  @override
+  Map<RK, RV> cast<RK, RV>() => _map.cast<RK, RV>();
+  @override
+  void removeWhere(bool test(String key, dynamic value)) => _map.removeWhere(test);
+  @override
+  Map<K2, V2> map<K2, V2>(MapEntry<K2, V2> transform(String key, dynamic value)) => _map.map(transform);
+  @override
+  Iterable<MapEntry<String, dynamic>> get entries => _map.entries;
+  @override
+  void updateAll(dynamic update(String key, dynamic value)) => _map.updateAll(update);
+  @override
+  Map<RK, RV> retype<RK, RV>() => _map.retype<RK, RV>();
+  @override
+  dynamic update(String key, dynamic update(dynamic value), {dynamic ifAbsent()}) => _map.update(key, update, ifAbsent: ifAbsent);
 }
 
 /// Peered to a Android/iOS FlutterView widget on a device.

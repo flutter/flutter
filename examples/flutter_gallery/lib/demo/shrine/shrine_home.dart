@@ -84,9 +84,7 @@ class _ShrineGridLayout extends SliverGridLayout {
   }
 
   @override
-  double estimateMaxScrollOffset(int childCount) {
-    if (childCount == null)
-      return null;
+  double computeMaxScrollOffset(int childCount) {
     if (childCount == 0)
       return 0.0;
     final int rowCount = _rowAtIndex(childCount - 1) + 1;
@@ -101,7 +99,7 @@ class _ShrineGridDelegate extends SliverGridDelegate {
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
     final double tileWidth = (constraints.crossAxisExtent - _kSpacing) / 2.0;
-    final double tileHeight = 40.0 + 144.0 + 40.0;
+    const double tileHeight = 40.0 + 144.0 + 40.0;
     return new _ShrineGridLayout(
       tileWidth: tileWidth,
       tileHeight: tileHeight,
@@ -213,7 +211,7 @@ class _HeadingLayout extends MultiChildLayoutDelegate {
 
     final double halfWidth = size.width / 2.0;
     final double halfHeight = size.height / 2.0;
-    final double halfUnit = unitSize / 2.0;
+    const double halfUnit = unitSize / 2.0;
     const double margin = 16.0;
 
     final Size imageSize = layoutChild(image, new BoxConstraints.loose(size));
@@ -390,11 +388,10 @@ class _ShrineHomeState extends State<ShrineHome> {
       shoppingCart: _shoppingCart,
       body: new CustomScrollView(
         slivers: <Widget>[
-          new SliverToBoxAdapter(
-            child: new _Heading(product: featured),
-          ),
-          new SliverPadding(
-            padding: const EdgeInsets.all(16.0),
+          new SliverToBoxAdapter(child: new _Heading(product: featured)),
+          new SliverSafeArea(
+            top: false,
+            minimum: const EdgeInsets.all(16.0),
             sliver: new SliverGrid(
               gridDelegate: gridDelegate,
               delegate: new SliverChildListDelegate(

@@ -69,7 +69,9 @@ void main() {
 
     expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
     expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
-  }, skip: Platform.isWindows); // Ahem-based tests don't yet quite work on Windows
+  },
+  // Ahem-based tests don't yet quite work on Windows or some MacOS environments
+  skip: Platform.isWindows || Platform.isMacOS);
 
   test('getWordBoundary control test', () {
     final RenderParagraph paragraph = new RenderParagraph(
@@ -225,7 +227,7 @@ void main() {
   });
 
   test('nested TextSpans in paragraph handle textScaleFactor correctly.', () {
-    final TextSpan testSpan = const TextSpan(
+    const TextSpan testSpan = const TextSpan(
       text: 'a',
       style: const TextStyle(
         fontSize: 10.0,

@@ -14,6 +14,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../globals.dart';
+import '../runner/flutter_command.dart';
 import 'sdk.dart';
 
 /// Represents Flutter-specific data that is added to the `PUB_ENVIRONMENT`
@@ -93,7 +94,10 @@ Future<Null> pubGet({
       'Running "flutter packages $command" in ${fs.path.basename(directory)}...',
       expectSlowOperation: true,
     );
-    final List<String> args = <String>['--verbosity=warning', command, '--no-precompile'];
+    final List<String> args = <String>['--verbosity=warning'];
+    if (FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'])
+      args.add('--verbose');
+    args.addAll(<String>[command, '--no-precompile']);
     if (offline)
       args.add('--offline');
     try {
@@ -124,7 +128,8 @@ typedef String MessageFilter(String message);
 /// applying filtering. The pub process will not receive anything on its stdin stream.
 ///
 /// The `--trace` argument is passed to `pub` (by mutating the provided
-/// `arguments` list) unless `showTraceForErrors` is false.
+/// `arguments` list) when `showTraceForErrors` is true, and when `showTraceForErrors`
+/// is null/unset, and `isRunningOnBot` is true.
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage.
@@ -134,8 +139,10 @@ Future<Null> pub(List<String> arguments, {
   MessageFilter filter,
   String failureMessage: 'pub failed',
   @required bool retry,
-  bool showTraceForErrors: true,
+  bool showTraceForErrors,
 }) async {
+  showTraceForErrors ??= isRunningOnBot;
+
   if (showTraceForErrors)
     arguments.insert(0, '--trace');
   int attempts = 0;

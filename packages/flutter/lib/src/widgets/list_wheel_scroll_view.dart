@@ -130,12 +130,41 @@ class FixedExtentScrollController extends ScrollController {
 /// This is distinct from `Fixed` in the parent class name's [FixedScrollMetric]
 /// which refers to its immutability.
 class FixedExtentMetrics extends FixedScrollMetrics {
-  /// Creates fixed extent metrics that add the item index information to the
-  /// `parent` [FixedScrollMetrics].
+  /// Creates an immutable snapshot of values associated with a
+  /// [ListWheelScrollView].
   FixedExtentMetrics({
-    ScrollMetrics parent,
+    @required double minScrollExtent,
+    @required double maxScrollExtent,
+    @required double pixels,
+    @required double viewportDimension,
+    @required AxisDirection axisDirection,
     @required this.itemIndex,
-  }) : super.clone(parent);
+  }) : super(
+         minScrollExtent: minScrollExtent,
+         maxScrollExtent: maxScrollExtent,
+         pixels: pixels,
+         viewportDimension: viewportDimension,
+         axisDirection: axisDirection,
+       );
+
+  @override
+  FixedExtentMetrics copyWith({
+    double minScrollExtent,
+    double maxScrollExtent,
+    double pixels,
+    double viewportDimension,
+    AxisDirection axisDirection,
+    int itemIndex,
+  }) {
+    return new FixedExtentMetrics(
+      minScrollExtent: minScrollExtent ?? this.minScrollExtent,
+      maxScrollExtent: maxScrollExtent ?? this.maxScrollExtent,
+      pixels: pixels ?? this.pixels,
+      viewportDimension: viewportDimension ?? this.viewportDimension,
+      axisDirection: axisDirection ?? this.axisDirection,
+      itemIndex: itemIndex ?? this.itemIndex,
+    );
+  }
 
   /// The scroll view's currently selected item index.
   final int itemIndex;
@@ -160,7 +189,7 @@ double _clipOffsetToScrollableRange(
 
 /// A [ScrollPositionWithSingleContext] that can only be created based on
 /// [_FixedExtentScrollable] and can access its `itemExtent` to derive [itemIndex].
-class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext {
+class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext implements FixedExtentMetrics {
   _FixedExtentScrollPosition({
     @required ScrollPhysics physics,
     @required ScrollContext context,
@@ -188,6 +217,7 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext {
 
   double get itemExtent => _getItemExtentFromScrollContext(context);
 
+  @override
   int get itemIndex {
     return _getItemFromOffset(
       offset: pixels,
@@ -198,8 +228,22 @@ class _FixedExtentScrollPosition extends ScrollPositionWithSingleContext {
   }
 
   @override
-  FixedExtentMetrics cloneMetrics() {
-    return new FixedExtentMetrics(parent: this, itemIndex: itemIndex);
+  FixedExtentMetrics copyWith({
+    double minScrollExtent,
+    double maxScrollExtent,
+    double pixels,
+    double viewportDimension,
+    AxisDirection axisDirection,
+    int itemIndex,
+  }) {
+    return new FixedExtentMetrics(
+      minScrollExtent: minScrollExtent ?? this.minScrollExtent,
+      maxScrollExtent: maxScrollExtent ?? this.maxScrollExtent,
+      pixels: pixels ?? this.pixels,
+      viewportDimension: viewportDimension ?? this.viewportDimension,
+      axisDirection: axisDirection ?? this.axisDirection,
+      itemIndex: itemIndex ?? this.itemIndex,
+    );
   }
 }
 

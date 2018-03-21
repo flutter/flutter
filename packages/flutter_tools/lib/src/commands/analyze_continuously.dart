@@ -20,9 +20,10 @@ import '../globals.dart';
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
-  AnalyzeContinuously(ArgResults argResults, this.repoPackages) : super(argResults);
+  AnalyzeContinuously(ArgResults argResults, this.repoPackages, { this.previewDart2: false }) : super(argResults);
 
   final List<Directory> repoPackages;
+  final bool previewDart2;
 
   String analysisTarget;
   bool firstAnalysis = true;
@@ -52,7 +53,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisTarget = fs.currentDirectory.path;
     }
 
-    final AnalysisServer server = new AnalysisServer(dartSdkPath, directories);
+    final AnalysisServer server = new AnalysisServer(dartSdkPath, directories, previewDart2: previewDart2);
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
 
@@ -150,10 +151,11 @@ class AnalyzeContinuously extends AnalyzeBase {
 }
 
 class AnalysisServer {
-  AnalysisServer(this.sdk, this.directories);
+  AnalysisServer(this.sdk, this.directories, { this.previewDart2: false });
 
   final String sdk;
   final List<String> directories;
+  final bool previewDart2;
 
   Process _process;
   final StreamController<bool> _analyzingController = new StreamController<bool>.broadcast();
@@ -170,15 +172,21 @@ class AnalysisServer {
       sdk,
     ];
 
+    if (previewDart2) {
+      command.add('--preview-dart-2');
+    } else {
+      command.add('--no-preview-dart-2');
+    }
+
     printTrace('dart ${command.skip(1).join(' ')}');
     _process = await processManager.start(command);
     // This callback hookup can't throw.
     _process.exitCode.whenComplete(() => _process = null); // ignore: unawaited_futures
 
-    final Stream<String> errorStream = _process.stderr.transform(UTF8.decoder).transform(const LineSplitter());
+    final Stream<String> errorStream = _process.stderr.transform(utf8.decoder).transform(const LineSplitter());
     errorStream.listen(printError);
 
-    final Stream<String> inStream = _process.stdout.transform(UTF8.decoder).transform(const LineSplitter());
+    final Stream<String> inStream = _process.stdout.transform(utf8.decoder).transform(const LineSplitter());
     inStream.listen(_handleServerResponse);
 
     // Available options (many of these are obsolete):
@@ -206,7 +214,7 @@ class AnalysisServer {
   Future<int> get onExit => _process.exitCode;
 
   void _sendCommand(String method, Map<String, dynamic> params) {
-    final String message = JSON.encode(<String, dynamic> {
+    final String message = json.encode(<String, dynamic> {
       'id': (++_id).toString(),
       'method': method,
       'params': params
@@ -218,7 +226,7 @@ class AnalysisServer {
   void _handleServerResponse(String line) {
     printTrace('<== $line');
 
-    final dynamic response = JSON.decode(line);
+    final dynamic response = json.decode(line);
 
     if (response is Map<dynamic, dynamic>) {
       if (response['event'] != null) {

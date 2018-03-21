@@ -99,7 +99,7 @@ import 'material.dart';
 /// See also:
 ///
 ///  * [Container], a more generic form of this widget which paints itself,
-///    rather that defering to the nearest [Material] widget.
+///    rather that deferring to the nearest [Material] widget.
 ///  * [InkDecoration], the [InkFeature] subclass used by this widget to paint
 ///    on [Material] widgets.
 ///  * [InkWell] and [InkResponse], which also draw on [Material] widgets.
@@ -214,10 +214,10 @@ class Ink extends StatefulWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    description.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
   }
 
   @override
@@ -233,7 +233,7 @@ class _InkState extends State<Ink> {
 
   @override
   void deactivate() {
-    _ink.dispose();
+    _ink?.dispose();
     assert(_ink == null);
     super.deactivate();
   }

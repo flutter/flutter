@@ -39,12 +39,10 @@ class HotRunner extends ResidentRunner {
     bool usesTerminalUI: true,
     this.benchmarkMode: false,
     this.applicationBinary,
-    this.previewDart2: false,
-    this.strongMode: false,
     this.hostIsIde: false,
     String projectRootPath,
     String packagesFilePath,
-    String projectAssets,
+    this.dillOutputPath,
     bool stayResident: true,
     bool ipv6: false,
   }) : super(devices,
@@ -53,20 +51,19 @@ class HotRunner extends ResidentRunner {
              usesTerminalUI: usesTerminalUI,
              projectRootPath: projectRootPath,
              packagesFilePath: packagesFilePath,
-             projectAssets: projectAssets,
              stayResident: stayResident,
              ipv6: ipv6);
 
+  final bool benchmarkMode;
   final String applicationBinary;
   final bool hostIsIde;
   Set<String> _dartDependencies;
+  final String dillOutputPath;
 
-  final bool benchmarkMode;
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
   // The initial launch is from a snapshot.
   bool _runningFromSnapshot = true;
-  bool previewDart2 = false;
-  bool strongMode = false;
+  DateTime firstBuildTime;
 
   void _addBenchmarkData(String name, int value) {
     benchmarkData[name] ??= <int>[];
@@ -213,6 +210,8 @@ class HotRunner extends ResidentRunner {
       return 1;
     }
 
+    firstBuildTime = new DateTime.now();
+
     for (FlutterDevice device in flutterDevices) {
       final int result = await device.runHot(
         hotRunner: this,
@@ -262,6 +261,7 @@ class HotRunner extends ResidentRunner {
       // Did not update DevFS because of a Dart source error.
       return false;
     }
+    final bool isFirstUpload = assetBundle.wasBuiltOnce() == false;
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       printTrace('Updating assets');
@@ -275,7 +275,9 @@ class HotRunner extends ResidentRunner {
         mainPath: mainPath,
         target: target,
         bundle: assetBundle,
-        bundleDirty: rebuildBundle,
+        firstBuildTime: firstBuildTime,
+        bundleFirstUpload: isFirstUpload,
+        bundleDirty: isFirstUpload == false && rebuildBundle,
         fileFilter: _dartDependencies,
         fullRestart: fullRestart
       );
@@ -389,7 +391,10 @@ class HotRunner extends ResidentRunner {
     }
     // We are now running from source.
     _runningFromSnapshot = false;
-    await _launchFromDevFS(previewDart2 ? mainPath + '.dill' : mainPath);
+    final String launchPath = debuggingOptions.buildInfo.previewDart2
+        ? mainPath + '.dill'
+        : mainPath;
+    await _launchFromDevFS(launchPath);
     restartTimer.stop();
     printTrace('Restart performed in '
         '${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
@@ -446,7 +451,7 @@ class HotRunner extends ResidentRunner {
     } else {
       final bool reloadOnTopOfSnapshot = _runningFromSnapshot;
       final String progressPrefix = reloadOnTopOfSnapshot ? 'Initializing' : 'Performing';
-      final Status status =  logger.startProgress(
+      final Status status = logger.startProgress(
         '$progressPrefix hot reload...',
         progressId: 'hot.reload'
       );
@@ -508,8 +513,8 @@ class HotRunner extends ResidentRunner {
     final Stopwatch vmReloadTimer = new Stopwatch()..start();
     try {
       final String entryPath = fs.path.relative(
-        previewDart2 ? mainPath + '.dill' : mainPath,
-        from: projectRootPath
+        debuggingOptions.buildInfo.previewDart2 ? mainPath + '.dill' : mainPath,
+        from: projectRootPath,
       );
       final Completer<Map<String, dynamic>> retrieveFirstReloadReport = new Completer<Map<String, dynamic>>();
 
@@ -558,7 +563,7 @@ class HotRunner extends ResidentRunner {
         printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
         reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
       }
-    } catch (error, st) {
+    } on Map<String, dynamic> catch (error, st) {
       printError('Hot reload failed: $error\n$st');
       final int errorCode = error['code'];
       final String errorMessage = error['message'];
@@ -572,6 +577,9 @@ class HotRunner extends ResidentRunner {
 
       printError('Hot reload failed:\ncode = $errorCode\nmessage = $errorMessage\n$st');
       return new OperationResult(errorCode, errorMessage);
+    } catch (error, st) {
+      printError('Hot reload failed: $error\n$st');
+      return new OperationResult(1, '$error');
     }
     // Record time it took for the VM to reload the sources.
     _addBenchmarkData('hotReloadVMReloadMilliseconds',

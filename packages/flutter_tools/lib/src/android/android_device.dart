@@ -36,6 +36,7 @@ const Map<String, _HardwareType> _knownHardware = const <String, _HardwareType>{
   'qcom': _HardwareType.physical,
   'ranchu': _HardwareType.emulator,
   'samsungexynos7420': _HardwareType.physical,
+  'samsungexynos7870': _HardwareType.physical,
   'samsungexynos8890': _HardwareType.physical,
   'samsungexynos8895': _HardwareType.physical,
 };
@@ -80,12 +81,12 @@ class AndroidDevice extends Device {
       printTrace(propCommand.join(' '));
 
       try {
-        // We pass an encoding of LATIN1 so that we don't try and interpret the
+        // We pass an encoding of latin1 so that we don't try and interpret the
         // `adb shell getprop` result as UTF8.
         final ProcessResult result = await processManager.run(
           propCommand,
-          stdoutEncoding: LATIN1,
-          stderrEncoding: LATIN1,
+          stdoutEncoding: latin1,
+          stderrEncoding: latin1,
         ).timeout(const Duration(seconds: 5));
         if (result.exitCode == 0) {
           _properties = parseAdbDeviceProperties(result.stdout);
@@ -126,6 +127,9 @@ class AndroidDevice extends Device {
     if (_platform == null) {
       // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
       switch (await _getProperty('ro.product.cpu.abi')) {
+        case 'arm64-v8a':
+          _platform = TargetPlatform.android_arm64;
+          break;
         case 'x86_64':
           _platform = TargetPlatform.android_x64;
           break;
@@ -355,16 +359,23 @@ class AndroidDevice extends Device {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return new LaunchResult.failed();
 
-    if (await targetPlatform != TargetPlatform.android_arm && !debuggingOptions.buildInfo.isDebug) {
+    final TargetPlatform devicePlatform = await targetPlatform;
+    if (!(devicePlatform == TargetPlatform.android_arm ||
+          devicePlatform == TargetPlatform.android_arm64) &&
+        !debuggingOptions.buildInfo.isDebug) {
       printError('Profile and release builds are only supported on ARM targets.');
       return new LaunchResult.failed();
     }
+
+    BuildInfo buildInfo = debuggingOptions.buildInfo;
+    if (buildInfo.targetPlatform == null && devicePlatform == TargetPlatform.android_arm64)
+      buildInfo = buildInfo.withTargetPlatform(TargetPlatform.android_arm64);
 
     if (!prebuiltApplication) {
       printTrace('Building APK');
       await buildApk(
           target: mainPath,
-          buildInfo: debuggingOptions.buildInfo,
+          buildInfo: buildInfo,
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
@@ -378,7 +389,6 @@ class AndroidDevice extends Device {
       return new LaunchResult.failed();
 
     final bool traceStartup = platformArgs['trace-startup'] ?? false;
-    final bool strongMode = platformArgs['strong'] ?? false;
     final AndroidApk apk = package;
     printTrace('$this startApp');
 
@@ -400,20 +410,19 @@ class AndroidDevice extends Device {
     cmd = adbCommandForDevice(<String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.RUN',
-      '-f', '0x20000000',  // FLAG_ACTIVITY_SINGLE_TOP
+      '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
       '--ez', 'enable-background-compilation', 'true',
       '--ez', 'enable-dart-profiling', 'true',
     ]);
 
     if (traceStartup)
       cmd.addAll(<String>['--ez', 'trace-startup', 'true']);
-    if (strongMode) {
-      cmd.addAll(<String>['--ez', 'strong', 'true']);
-    }
     if (route != null)
       cmd.addAll(<String>['--es', 'route', route]);
     if (debuggingOptions.enableSoftwareRendering)
       cmd.addAll(<String>['--ez', 'enable-software-rendering', 'true']);
+    if (debuggingOptions.skiaDeterministicRendering)
+      cmd.addAll(<String>['--ez', 'skia-deterministic-rendering', 'true']);
     if (debuggingOptions.traceSkia)
       cmd.addAll(<String>['--ez', 'trace-skia', 'true']);
     if (debuggingOptions.debuggingEnabled) {
@@ -514,7 +523,7 @@ class AndroidDevice extends Device {
     final StreamSubscription<String> logs = getLogReader().logLines.listen((String line) {
       final Match match = discoverExp.firstMatch(line);
       if (match != null) {
-        final Map<String, dynamic> app = JSON.decode(match.group(1));
+        final Map<String, dynamic> app = json.decode(match.group(1));
         result.add(new DiscoveredApp(app['id'], app['observatoryPort']));
       }
     });
@@ -683,7 +692,7 @@ class _AdbLogReader extends DeviceLogReader {
         _timeOrigin = null;
     runCommand(device.adbCommandForDevice(args)).then<Null>((Process process) {
       _process = process;
-      final Utf8Decoder decoder = const Utf8Decoder(allowMalformed: true);
+      const Utf8Decoder decoder = const Utf8Decoder(allowMalformed: true);
       _process.stdout.transform(decoder).transform(const LineSplitter()).listen(_onLine);
       _process.stderr.transform(decoder).transform(const LineSplitter()).listen(_onLine);
       _process.exitCode.whenComplete(() {

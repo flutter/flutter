@@ -86,7 +86,7 @@ void main() {
                   onPressed: () {
                     showDialog<Null>(
                       context: context,
-                      child: new SamplePage(),
+                      builder: (BuildContext context) => new SamplePage(),
                     );
                   },
                 ),
@@ -113,7 +113,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('Sample Page'), findsOneWidget);
 
-    // Use didPopRoute() to simulate the system back button.  Check that
+    // Use didPopRoute() to simulate the system back button. Check that
     // didPopRoute() indicates that the notification was handled.
     final dynamic widgetsAppState = tester.state(find.byType(WidgetsApp));
     expect(await widgetsAppState.didPopRoute(), isTrue);
@@ -185,18 +185,20 @@ void main() {
     Future<bool> showYesNoAlert(BuildContext context) {
       return showDialog<bool>(
         context: context,
-        child: new AlertDialog(
-          actions: <Widget> [
-            new FlatButton(
-              child: const Text('YES'),
-              onPressed: () { Navigator.of(context).pop(true); },
-            ),
-            new FlatButton(
-              child: const Text('NO'),
-              onPressed: () { Navigator.of(context).pop(false); },
-            ),
-          ],
-        ),
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            actions: <Widget> [
+              new FlatButton(
+                child: const Text('YES'),
+                onPressed: () { Navigator.of(context).pop(true); },
+              ),
+              new FlatButton(
+                child: const Text('NO'),
+                onPressed: () { Navigator.of(context).pop(false); },
+              ),
+            ],
+          );
+        },
       );
     }
 

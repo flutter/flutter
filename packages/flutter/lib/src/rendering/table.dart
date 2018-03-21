@@ -97,7 +97,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     double result = 0.0;
     for (RenderBox cell in cells)
-      result = math.max(result, cell.getMinIntrinsicWidth(double.INFINITY));
+      result = math.max(result, cell.getMinIntrinsicWidth(double.infinity));
     return result;
   }
 
@@ -105,7 +105,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   double maxIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     double result = 0.0;
     for (RenderBox cell in cells)
-      result = math.max(result, cell.getMaxIntrinsicWidth(double.INFINITY));
+      result = math.max(result, cell.getMaxIntrinsicWidth(double.infinity));
     return result;
   }
 
@@ -726,7 +726,7 @@ class RenderTable extends RenderBox {
     for (int x = 0; x < columns; x += 1) {
       final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
       final Iterable<RenderBox> columnCells = column(x);
-      totalMinWidth += columnWidth.minIntrinsicWidth(columnCells, double.INFINITY);
+      totalMinWidth += columnWidth.minIntrinsicWidth(columnCells, double.infinity);
     }
     return totalMinWidth;
   }
@@ -738,7 +738,7 @@ class RenderTable extends RenderBox {
     for (int x = 0; x < columns; x += 1) {
       final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
       final Iterable<RenderBox> columnCells = column(x);
-      totalMaxWidth += columnWidth.maxIntrinsicWidth(columnCells, double.INFINITY);
+      totalMaxWidth += columnWidth.maxIntrinsicWidth(columnCells, double.infinity);
     }
     return totalMaxWidth;
   }
@@ -1160,14 +1160,14 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<TableBorder>('border', border, defaultValue: null));
-    description.add(new DiagnosticsProperty<Map<int, TableColumnWidth>>('specified column widths', _columnWidths, level: _columnWidths.isEmpty ? DiagnosticLevel.hidden : DiagnosticLevel.info));
-    description.add(new DiagnosticsProperty<TableColumnWidth>('default column width', defaultColumnWidth));
-    description.add(new MessageProperty('table size', '$columns\u00D7$rows'));
-    description.add(new IterableProperty<double>('column offsets', _columnLefts, ifNull: 'unknown'));
-    description.add(new IterableProperty<double>('row offsets', _rowTops, ifNull: 'unknown'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<TableBorder>('border', border, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Map<int, TableColumnWidth>>('specified column widths', _columnWidths, level: _columnWidths.isEmpty ? DiagnosticLevel.hidden : DiagnosticLevel.info));
+    properties.add(new DiagnosticsProperty<TableColumnWidth>('default column width', defaultColumnWidth));
+    properties.add(new MessageProperty('table size', '$columns\u00D7$rows'));
+    properties.add(new IterableProperty<double>('column offsets', _columnLefts, ifNull: 'unknown'));
+    properties.add(new IterableProperty<double>('row offsets', _rowTops, ifNull: 'unknown'));
   }
 
   @override

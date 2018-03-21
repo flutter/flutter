@@ -23,12 +23,12 @@ void main() {
 
     final List<String> log = <String>[];
 
-    horizontalDrag.onStart = (DragStartDetails details) { log.add('hoizontal-drag-start'); };
+    horizontalDrag.onStart = (DragStartDetails details) { log.add('horizontal-drag-start'); };
     verticalDrag.onStart = (DragStartDetails details) { log.add('vertical-drag-start'); };
     tap.onTap = () { log.add('tap'); };
 
     void test(Offset delta) {
-      final Offset origin = const Offset(10.0, 10.0);
+      const Offset origin = const Offset(10.0, 10.0);
       final TestPointer pointer = new TestPointer(5);
       final PointerDownEvent down = pointer.down(origin);
       horizontalDrag.addPointer(down);

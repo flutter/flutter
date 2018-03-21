@@ -15,7 +15,7 @@ import '../src/context.dart';
 void main() {
   group('android_device', () {
     testUsingContext('stores the requested id', () {
-      final String deviceId = '1234';
+      const String deviceId = '1234';
       final AndroidDevice device = new AndroidDevice(deviceId);
       expect(device.id, deviceId);
     });
@@ -109,6 +109,7 @@ Use the 'android' tool to install them:
       hardware = 'goldfish';
       final AndroidDevice device = new AndroidDevice('test');
       expect(await device.isLocalEmulator, true);
+      expect(await device.supportsHardwareRendering, true);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
@@ -125,6 +126,7 @@ Use the 'android' tool to install them:
       buildCharacteristics = 'att,emulator';
       final AndroidDevice device = new AndroidDevice('test');
       expect(await device.isLocalEmulator, true);
+      expect(await device.supportsHardwareRendering, true);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

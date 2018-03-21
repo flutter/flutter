@@ -59,9 +59,9 @@ abstract class AnimatedWidget extends StatefulWidget {
   _AnimatedState createState() => new _AnimatedState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Listenable>('animation', listenable));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Listenable>('animation', listenable));
   }
 }
 
@@ -236,7 +236,7 @@ class RotationTransition extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final double turnsValue = turns.value;
-    final Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.PI * 2.0);
+    final Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.pi * 2.0);
     return new Transform(
       transform: transform,
       alignment: Alignment.center,
@@ -331,6 +331,12 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderAnimatedOpacity renderObject) {
     renderObject
       ..opacity = opacity;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Animation<double>>('opacity', opacity));
   }
 }
 
@@ -527,13 +533,6 @@ class AlignTransition extends AnimatedWidget {
   }
 }
 
-/// A builder that builds a widget given a child.
-///
-/// The child should typically be part of the returned widget tree.
-///
-/// Used by [AnimatedBuilder.builder].
-typedef Widget TransitionBuilder(BuildContext context, Widget child);
-
 /// A general-purpose widget for building animations.
 ///
 /// AnimatedBuilder is useful for more complex widgets that wish to include
@@ -593,7 +592,7 @@ typedef Widget TransitionBuilder(BuildContext context, Widget child);
 ///       child: new Container(width: 200.0, height: 200.0, color: Colors.green),
 ///       builder: (BuildContext context, Widget child) {
 ///         return new Transform.rotate(
-///           angle: _controller.value * 2.0 * math.PI,
+///           angle: _controller.value * 2.0 * math.pi,
 ///           child: child,
 ///         );
 ///       },

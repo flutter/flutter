@@ -2,11 +2,48 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This script analyzes all the sample code in API docs in the Flutter source.
+//
+// It uses the following conventions:
+//
+// Code is denoted by markdown ```dart / ``` markers.
+//
+// Only code in "## Sample code" or "### Sample code" sections is examined.
+//
+// There are several kinds of sample code you can specify:
+//
+// * Constructor calls, typically showing what might exist in a build method.
+//   These start with "new" or "const", and will be inserted into an assignment
+//   expression assigning to a variable of type "dynamic" and followed by a
+//   semicolon, for the purposes of analysis.
+//
+// * Class definitions. These start with "class", and are analyzed verbatim.
+//
+// * Other code. It gets included verbatim, though any line that says "// ..."
+//   is considered to separate the block into multiple blocks to be processed
+//   individually.
+//
+// In addition, you can declare code that should be included in the analysis but
+// not shown in the API docs by adding a comment "// Examples can assume:" to
+// the file (usually at the top of the file, after the imports), following by
+// one or more commented-out lines of code. That code is included verbatim in
+// the analysis.
+//
+// All the sample code of every file is analyzed together. This means you can't
+// have two pieces of sample code that define the same example class.
+//
+// Also, the above means that it's tricky to include verbatim imperative code
+// (e.g. a call to a method), since it won't be valid to have such code at the
+// top level. Instead, wrap it in a function or even a whole class, or make it a
+// valid variable declaration.
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+
+// To run this: bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart
 
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String _flutter = path.join(_flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
@@ -61,7 +98,6 @@ class Section {
 const String kDartDocPrefix = '///';
 const String kDartDocPrefixWithSpace = '$kDartDocPrefix ';
 
-/// To run this: bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart
 Future<Null> main() async {
   final Directory temp = Directory.systemTemp.createTempSync('analyze_sample_code_');
   int exitCode = 1;
@@ -136,8 +172,11 @@ Future<Null> main() async {
     }
     buffer.add('// generated code');
     buffer.add('import \'dart:async\';');
+    buffer.add('import \'dart:convert\';');
     buffer.add('import \'dart:math\' as math;');
+    buffer.add('import \'dart:typed_data\';');
     buffer.add('import \'dart:ui\' as ui;');
+    buffer.add('import \'package:flutter_test/flutter_test.dart\' hide TypeMatcher;');
     for (FileSystemEntity file in flutterPackage.listSync(recursive: false, followLinks: false)) {
       if (file is File && path.extension(file.path) == '.dart') {
         buffer.add('');
@@ -158,6 +197,8 @@ name: analyze_sample_code
 dependencies:
   flutter:
     sdk: flutter
+  flutter_test:
+    sdk: flutter
 ''');
     print('Found $sampleCodeSections sample code sections.');
     final Process process = await Process.start(
@@ -166,7 +207,7 @@ dependencies:
       workingDirectory: temp.path,
     );
     stderr.addStream(process.stderr);
-    final List<String> errors = await process.stdout.transform<String>(UTF8.decoder).transform<String>(const LineSplitter()).toList();
+    final List<String> errors = await process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).toList();
     if (errors.first == 'Building flutter tool...')
       errors.removeAt(0);
     if (errors.first.startsWith('Running "flutter packages get" in '))
@@ -257,7 +298,10 @@ void processBlock(Line line, List<String> block, List<Section> sections) {
   if (block.first.startsWith('new ') || block.first.startsWith('const ')) {
     _expressionId += 1;
     sections.add(new Section(line, 'dynamic expression$_expressionId = ', block.toList(), ';'));
-  } else if (block.first.startsWith('class ') || block.first.startsWith('const ')) {
+  } else if (block.first.startsWith('await ')) {
+    _expressionId += 1;
+    sections.add(new Section(line, 'Future<Null> expression$_expressionId() async { ', block.toList(), ' }'));
+  } else if (block.first.startsWith('class ')) {
     sections.add(new Section(line, null, block.toList(), null));
   } else {
     final List<String> buffer = <String>[];

@@ -107,7 +107,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   AnimationController createAnimationController() {
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     final Duration duration = transitionDuration;
-    assert(duration != null && duration >= Duration.ZERO);
+    assert(duration != null && duration >= Duration.zero);
     return new AnimationController(
       duration: duration,
       debugLabel: debugLabel,
@@ -466,19 +466,23 @@ class _ModalScopeState extends State<_ModalScope> {
         offstage: widget.route.offstage,
         child: new IgnorePointer(
           ignoring: widget.route.animation?.status == AnimationStatus.reverse,
-          child: widget.route.buildTransitions(
-            context,
-            widget.route.animation,
-            widget.route.secondaryAnimation,
-            new RepaintBoundary(
-              child: new PageStorage(
-                key: widget.route._subtreeKey,
-                bucket: widget.route._storageBucket,
-                child: new _ModalScopeStatus(
-                  route: widget.route,
-                  isCurrent: widget.route.isCurrent,
-                  canPop: widget.route.canPop,
-                  child: widget.page,
+          // Keep the transition between repaint boundaries so we don't trigger
+          // deep repaints of the render tree above or below the transition.
+          child: new RepaintBoundary(
+            child: widget.route.buildTransitions(
+              context,
+              widget.route.animation,
+              widget.route.secondaryAnimation,
+              new RepaintBoundary(
+                child: new PageStorage(
+                  key: widget.route._subtreeKey,
+                  bucket: widget.route._storageBucket,
+                  child: new _ModalScopeStatus(
+                    route: widget.route,
+                    isCurrent: widget.route.isCurrent,
+                    canPop: widget.route.canPop,
+                    child: widget.page,
+                  ),
                 ),
               ),
             ),
@@ -652,7 +656,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// is popped, the secondaryAnimation can be used to define how the route
   /// below it reappears on the screen. When the Navigator pushes a new route
   /// on the top of its stack, the old topmost route's secondaryAnimation
-  /// runs from 0.0 to 1.0.  When the Navigator pops the topmost route, the
+  /// runs from 0.0 to 1.0. When the Navigator pops the topmost route, the
   /// secondaryAnimation for the route below it runs from 1.0 to 0.0.
   ///
   /// The example below adds a transition that's driven by the
@@ -694,7 +698,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    pops the topmost route this animation runs from 1.0 to 0.0.
   ///  * [secondaryAnimation]: When the Navigator pushes a new route
   ///    on the top of its stack, the old topmost route's [secondaryAnimation]
-  ///    runs from 0.0 to 1.0.  When the [Navigator] pops the topmost route, the
+  ///    runs from 0.0 to 1.0. When the [Navigator] pops the topmost route, the
   ///    [secondaryAnimation] for the route below it runs from 1.0 to 0.0.
   ///  * `child`, the page contents.
   ///
@@ -972,8 +976,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  void didChangePrevious(Route<dynamic> route) {
-    super.didChangePrevious(route);
+  void didChangePrevious(Route<dynamic> previousRoute) {
+    super.didChangePrevious(previousRoute);
     setState(() { /* this might affect canPop */ });
   }
 

@@ -47,6 +47,7 @@ class ChannelCommand extends FlutterCommand {
     // Beware: currentBranch could contain PII. See getBranchName().
     final String currentChannel = FlutterVersion.instance.channel;
     final String currentBranch = FlutterVersion.instance.getBranchName();
+    final Set<String> seenChannels = new Set<String>();
 
     showAll = showAll || currentChannel != currentBranch;
 
@@ -59,6 +60,10 @@ class ChannelCommand extends FlutterCommand {
         if (split.length < 2)
           return null;
         final String branchName = split[1];
+        if (seenChannels.contains(branchName)) {
+          return null;
+        }
+        seenChannels.add(branchName);
         if (branchName == currentBranch)
           return '* $branchName';
         if (!branchName.startsWith('HEAD ') &&
@@ -92,11 +97,35 @@ class ChannelCommand extends FlutterCommand {
   }
 
   static Future<Null> _checkout(String branchName) async {
-    final int result = await runCommandAndStreamOutput(
-      <String>['git', 'checkout', branchName],
+    // Get latest refs from upstream.
+    int result = await runCommandAndStreamOutput(
+      <String>['git', 'fetch'],
       workingDirectory: Cache.flutterRoot,
       prefix: 'git: ',
     );
+
+    if (result == 0) {
+      result = await runCommandAndStreamOutput(
+        <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/$branchName'],
+        workingDirectory: Cache.flutterRoot,
+        prefix: 'git: ',
+      );
+      if (result == 0) {
+        // branch already exists, try just switching to it
+        result = await runCommandAndStreamOutput(
+          <String>['git', 'checkout', branchName, '--'],
+          workingDirectory: Cache.flutterRoot,
+          prefix: 'git: ',
+        );
+      } else {
+        // branch does not exist, we have to create it
+        result = await runCommandAndStreamOutput(
+          <String>['git', 'checkout', '--track', '-b', branchName, 'origin/$branchName'],
+          workingDirectory: Cache.flutterRoot,
+          prefix: 'git: ',
+        );
+      }
+    }
     if (result != 0)
       throwToolExit('Switching channels failed with error code $result.', exitCode: result);
   }

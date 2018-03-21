@@ -365,20 +365,20 @@ class OutlineInputBorder extends InputBorder {
       center.blRadiusY * 2.0,
     );
 
-    final double cornerArcSweep = math.PI / 2.0;
+    const double cornerArcSweep = math.pi / 2.0;
     final double tlCornerArcSweep = start < center.tlRadiusX
       ? math.asin(start / center.tlRadiusX)
-      : math.PI / 2.0;
+      : math.pi / 2.0;
 
     final Path path = new Path()
-      ..addArc(tlCorner, math.PI, tlCornerArcSweep)
+      ..addArc(tlCorner, math.pi, tlCornerArcSweep)
       ..moveTo(center.left + center.tlRadiusX, center.top);
 
     if (start > center.tlRadiusX)
       path.lineTo(center.left + start, center.top);
 
-    final double trCornerArcStart = (3 * math.PI) / 2.0;
-    final double trCornerArcSweep = cornerArcSweep;
+    const double trCornerArcStart = (3 * math.pi) / 2.0;
+    const double trCornerArcSweep = cornerArcSweep;
     if (start + extent < center.width - center.trRadiusX) {
       path
         ..relativeMoveTo(extent, 0.0)
@@ -395,7 +395,7 @@ class OutlineInputBorder extends InputBorder {
       ..lineTo(center.right, center.bottom - center.brRadiusY)
       ..addArc(brCorner, 0.0, cornerArcSweep)
       ..lineTo(center.left + center.blRadiusX, center.bottom)
-      ..addArc(blCorner, math.PI / 2.0, cornerArcSweep)
+      ..addArc(blCorner, math.pi / 2.0, cornerArcSweep)
       ..lineTo(center.left, center.top + center.trRadiusY);
   }
 

@@ -24,16 +24,16 @@ const List<Color> coolColors = const <Color>[
 const List<String> coolColorNames = const <String>[
   'Sarcoline', 'Coquelicot', 'Smaragdine', 'Mikado', 'Glaucous', 'Wenge',
   'Fulvous', 'Xanadu', 'Falu', 'Eburnean', 'Amaranth', 'Australien',
-  'Banan', 'Falu', 'Gingerline', 'Incarnadine', 'Labrabor', 'Nattier',
+  'Banan', 'Falu', 'Gingerline', 'Incarnadine', 'Labrador', 'Nattier',
   'Pervenche', 'Sinoper', 'Verditer', 'Watchet', 'Zaffre',
 ];
 
 class CupertinoNavigationDemo extends StatelessWidget {
   CupertinoNavigationDemo()
-      : colorItems = new List<Color>.generate(50, (int index){
+      : colorItems = new List<Color>.generate(50, (int index) {
           return coolColors[new math.Random().nextInt(coolColors.length)];
         }) ,
-        colorNameItems = new List<String>.generate(50, (int index){
+        colorNameItems = new List<String>.generate(50, (int index) {
           return coolColorNames[new math.Random().nextInt(coolColorNames.length)];
         });
 
@@ -107,6 +107,7 @@ class ExitButton extends StatelessWidget {
       child: const Tooltip(
         message: 'Back',
         child: const Text('Exit'),
+        excludeFromSemantics: true,
       ),
       onPressed: () {
         // The demo is on the root navigator.
@@ -217,12 +218,18 @@ class Tab1RowItem extends StatelessWidget {
               ),
               new CupertinoButton(
                 padding: EdgeInsets.zero,
-                child: const Icon(CupertinoIcons.plus_circled, color: CupertinoColors.activeBlue),
+                child: const Icon(CupertinoIcons.plus_circled,
+                  color: CupertinoColors.activeBlue,
+                  semanticLabel: 'Add',
+                ),
                 onPressed: () { },
               ),
               new CupertinoButton(
                 padding: EdgeInsets.zero,
-                child: const Icon(CupertinoIcons.share, color: CupertinoColors.activeBlue),
+                child: const Icon(CupertinoIcons.share,
+                  color: CupertinoColors.activeBlue,
+                  semanticLabel: 'Share',
+                ),
                 onPressed: () { },
               ),
             ],
@@ -671,7 +678,7 @@ List<Widget> buildTab2Conversation() {
         text: 'SJ',
         color: const Color(0xFF34CAD6),
       ),
-      text: "We'll send you our\nnewest Labrabor too!",
+      text: "We'll send you our\nnewest Labrador too!",
     ),
     const Tab2ConversationRow(
       text: 'Yay',
