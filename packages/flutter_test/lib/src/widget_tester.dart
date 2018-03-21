@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -15,6 +16,7 @@ import 'all_elements.dart';
 import 'binding.dart';
 import 'controller.dart';
 import 'finders.dart';
+import 'matchers.dart';
 import 'test_async_utils.dart';
 import 'test_text_input.dart';
 
@@ -471,6 +473,19 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   void _endOfTestVerifications() {
     verifyTickersWereDisposed('at the end of the test');
+    _verifySemanticsHandlesWereDisposed();
+  }
+
+  void _verifySemanticsHandlesWereDisposed() {
+    if (binding.pipelineOwner.semanticsOwner != null) {
+      throw new FlutterError(
+        'A SemanticsHandle was active at the end of the test.\n'
+        'All SemanticsHandle instances must be disposed by calling dispose() on '
+        'the SemanticsHandle. If your test uses SemanticsTester, it is '
+        'sufficient to call dispose() on SemanticsTester. Otherwise, the '
+        'existing handle will leak into another test and alter its behavior.'
+      );
+    }
   }
 
   /// Returns the TestTextInput singleton.
@@ -517,6 +532,21 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       testTextInput.enterText(text);
       await idle();
     });
+  }
+
+  /// Makes an effort to dismiss the current page with a Material [Scaffold] or
+  /// a [CupertinoPageScaffold].
+  ///
+  /// Will throw an error if there is no back button in the page.
+  Future<void> pageBack() async {
+    Finder backButton = find.byTooltip('Back');
+    if (backButton.evaluate().isEmpty) {
+      backButton = find.widgetWithIcon(CupertinoButton, CupertinoIcons.back);
+    }
+
+    expect(backButton, findsOneWidget, reason: 'One back button expected on screen');
+
+    await tap(backButton);
   }
 }
 

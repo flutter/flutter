@@ -242,8 +242,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Dialogs removes MediaQuery padding', (WidgetTester tester) async {
+  testWidgets('Dialogs removes MediaQuery padding and view insets', (WidgetTester tester) async {
     BuildContext outerContext;
+    BuildContext routeContext;
     BuildContext dialogContext;
 
     await tester.pumpWidget(new Localizations(
@@ -255,6 +256,7 @@ void main() {
       child: new MediaQuery(
         data: const MediaQueryData(
           padding: const EdgeInsets.all(50.0),
+          viewInsets: const EdgeInsets.only(left: 25.0, bottom: 75.0),
         ),
         child: new Navigator(
           onGenerateRoute: (_) {
@@ -273,14 +275,61 @@ void main() {
       context: outerContext,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        dialogContext = context;
-        return new Container();
+        routeContext = context;
+        return new Dialog(
+          child: new Builder(
+            builder: (BuildContext context) {
+              dialogContext = context;
+              return const Placeholder();
+            },
+          ),
+        );
       },
     );
 
     await tester.pump();
 
     expect(MediaQuery.of(outerContext).padding, const EdgeInsets.all(50.0));
+    expect(MediaQuery.of(routeContext).padding, EdgeInsets.zero);
     expect(MediaQuery.of(dialogContext).padding, EdgeInsets.zero);
+    expect(MediaQuery.of(outerContext).viewInsets, const EdgeInsets.only(left: 25.0, bottom: 75.0));
+    expect(MediaQuery.of(routeContext).viewInsets, const EdgeInsets.only(left: 25.0, bottom: 75.0));
+    expect(MediaQuery.of(dialogContext).viewInsets, EdgeInsets.zero);
+  });
+
+  testWidgets('Dialog widget insets by viewInsets', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: const MediaQueryData(
+          viewInsets: const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
+        ),
+        child: const Dialog(
+          child: const Placeholder(),
+        ),
+      ),
+    );
+    expect(
+      tester.getRect(find.byType(Placeholder)),
+      new Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
+    );
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: const MediaQueryData(
+          viewInsets: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+        ),
+        child: const Dialog(
+          child: const Placeholder(),
+        ),
+      ),
+    );
+    expect( // no change because this is an animation
+      tester.getRect(find.byType(Placeholder)),
+      new Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect( // animation finished
+      tester.getRect(find.byType(Placeholder)),
+      new Rect.fromLTRB(40.0, 24.0, 800.0 - 40.0, 600.0 - 24.0),
+    );
   });
 }

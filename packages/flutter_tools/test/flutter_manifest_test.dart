@@ -345,5 +345,17 @@ flutter:
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 0);
     });
+
+    test('allows a blank flutter section', () async {
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      expect(flutterManifest.isEmpty, false);
+    });
   });
 }

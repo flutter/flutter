@@ -174,6 +174,8 @@ class AnalysisServer {
 
     if (previewDart2) {
       command.add('--preview-dart-2');
+    } else {
+      command.add('--no-preview-dart-2');
     }
 
     printTrace('dart ${command.skip(1).join(' ')}');

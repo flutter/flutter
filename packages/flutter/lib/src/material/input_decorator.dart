@@ -277,16 +277,19 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   void didUpdateWidget(_HelperError old) {
     super.didUpdateWidget(old);
 
-    final String errorText = widget.errorText;
-    final String helperText = widget.helperText;
+    final String newErrorText = widget.errorText;
+    final String newHelperText = widget.helperText;
     final String oldErrorText = old.errorText;
     final String oldHelperText = old.helperText;
 
-    if ((errorText ?? helperText) != (oldErrorText ?? oldHelperText)) {
-      if (errorText != null) {
+    final bool errorTextStateChanged = (newErrorText != null) != (oldErrorText != null);
+    final bool helperTextStateChanged = newErrorText == null && (newHelperText != null) != (oldHelperText != null);
+
+    if (errorTextStateChanged || helperTextStateChanged) {
+      if (newErrorText != null) {
         _error = _buildError();
         _controller.forward();
-      } else if (helperText != null) {
+      } else if (newHelperText != null) {
         _helper = _buildHelper();
         _controller.reverse();
       } else {
@@ -1319,12 +1322,12 @@ class InputDecorator extends StatefulWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
-    description.add(new DiagnosticsProperty<TextStyle>('baseStyle', baseStyle, defaultValue: null));
-    description.add(new DiagnosticsProperty<bool>('isFocused', isFocused));
-    description.add(new DiagnosticsProperty<bool>('isEmpty', isEmpty));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
+    properties.add(new DiagnosticsProperty<TextStyle>('baseStyle', baseStyle, defaultValue: null));
+    properties.add(new DiagnosticsProperty<bool>('isFocused', isFocused));
+    properties.add(new DiagnosticsProperty<bool>('isEmpty', isEmpty));
   }
 }
 
@@ -1818,6 +1821,9 @@ class InputDecoration {
   ///
   /// If non-null, the border's color animates to red and the [helperText] is
   /// not shown.
+  ///
+  /// In a [TextFormField], this is overridden by the value returned from
+  /// [TextFormField.validator], if that is not null.
   final String errorText;
 
   /// The style to use for the [errorText].
@@ -2313,21 +2319,21 @@ class InputDecorationTheme extends Diagnosticable {
   final InputBorder border;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     const InputDecorationTheme defaultTheme = const InputDecorationTheme();
-    description.add(new DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: defaultTheme.labelStyle));
-    description.add(new DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
-    description.add(new DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
-    description.add(new DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
-    description.add(new DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
-    description.add(new DiagnosticsProperty<EdgeInsets>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
-    description.add(new DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));
-    description.add(new DiagnosticsProperty<TextStyle>('prefixStyle', prefixStyle, defaultValue: defaultTheme.prefixStyle));
-    description.add(new DiagnosticsProperty<TextStyle>('suffixStyle', suffixStyle, defaultValue: defaultTheme.suffixStyle));
-    description.add(new DiagnosticsProperty<TextStyle>('counterStyle', counterStyle, defaultValue: defaultTheme.counterStyle));
-    description.add(new DiagnosticsProperty<bool>('filled', filled, defaultValue: defaultTheme.filled));
-    description.add(new DiagnosticsProperty<Color>('fillColor', fillColor, defaultValue: defaultTheme.fillColor));
-    description.add(new DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
+    properties.add(new DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: defaultTheme.labelStyle));
+    properties.add(new DiagnosticsProperty<TextStyle>('helperStyle', helperStyle, defaultValue: defaultTheme.helperStyle));
+    properties.add(new DiagnosticsProperty<TextStyle>('hintStyle', hintStyle, defaultValue: defaultTheme.hintStyle));
+    properties.add(new DiagnosticsProperty<TextStyle>('errorStyle', errorStyle, defaultValue: defaultTheme.errorStyle));
+    properties.add(new DiagnosticsProperty<bool>('isDense', isDense, defaultValue: defaultTheme.isDense));
+    properties.add(new DiagnosticsProperty<EdgeInsets>('contentPadding', contentPadding, defaultValue: defaultTheme.contentPadding));
+    properties.add(new DiagnosticsProperty<bool>('isCollapsed', isCollapsed, defaultValue: defaultTheme.isCollapsed));
+    properties.add(new DiagnosticsProperty<TextStyle>('prefixStyle', prefixStyle, defaultValue: defaultTheme.prefixStyle));
+    properties.add(new DiagnosticsProperty<TextStyle>('suffixStyle', suffixStyle, defaultValue: defaultTheme.suffixStyle));
+    properties.add(new DiagnosticsProperty<TextStyle>('counterStyle', counterStyle, defaultValue: defaultTheme.counterStyle));
+    properties.add(new DiagnosticsProperty<bool>('filled', filled, defaultValue: defaultTheme.filled));
+    properties.add(new DiagnosticsProperty<Color>('fillColor', fillColor, defaultValue: defaultTheme.fillColor));
+    properties.add(new DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
   }
 }

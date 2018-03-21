@@ -1346,9 +1346,9 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<SliverOverlapAbsorberHandle>('handle', handle));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<SliverOverlapAbsorberHandle>('handle', handle));
   }
 }
 
@@ -1446,9 +1446,9 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<SliverOverlapAbsorberHandle>('handle', handle));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<SliverOverlapAbsorberHandle>('handle', handle));
   }
 }
 
@@ -1495,9 +1495,9 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<SliverOverlapAbsorberHandle>('handle', handle));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<SliverOverlapAbsorberHandle>('handle', handle));
   }
 }
 
@@ -1602,9 +1602,9 @@ class RenderSliverOverlapInjector extends RenderSliver {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<SliverOverlapAbsorberHandle>('handle', handle));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<SliverOverlapAbsorberHandle>('handle', handle));
   }
 }
 
@@ -1661,9 +1661,9 @@ class NestedScrollViewViewport extends Viewport {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<SliverOverlapAbsorberHandle>('handle', handle));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<SliverOverlapAbsorberHandle>('handle', handle));
   }
 }
 
@@ -1713,8 +1713,8 @@ class RenderNestedScrollViewViewport extends RenderViewport {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<SliverOverlapAbsorberHandle>('handle', handle));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<SliverOverlapAbsorberHandle>('handle', handle));
   }
 }

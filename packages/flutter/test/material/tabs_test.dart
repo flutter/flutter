@@ -1363,6 +1363,7 @@ void main() {
               children: <TestSemantics>[
                 new TestSemantics(
                   id: 3,
+                  nextNodeId: 4,
                   actions: SemanticsAction.tap.index,
                   flags: SemanticsFlag.isSelected.index,
                   label: 'TAB #0\nTab 1 of 2',
@@ -1371,6 +1372,7 @@ void main() {
                 ),
                 new TestSemantics(
                   id: 4,
+                  previousNodeId: 3,
                   actions: SemanticsAction.tap.index,
                   label: 'TAB #1\nTab 2 of 2',
                   rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
@@ -1620,6 +1622,7 @@ void main() {
               children: <TestSemantics>[
                 new TestSemantics(
                   id: 3,
+                  nextNodeId: 4,
                   actions: SemanticsAction.tap.index,
                   flags: SemanticsFlag.isSelected.index,
                   label: 'Semantics override 0\nTab 1 of 2',
@@ -1628,6 +1631,7 @@ void main() {
                 ),
                 new TestSemantics(
                   id: 4,
+                  previousNodeId: 3,
                   actions: SemanticsAction.tap.index,
                   label: 'Semantics override 1\nTab 2 of 2',
                   rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),

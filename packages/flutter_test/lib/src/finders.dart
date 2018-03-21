@@ -26,9 +26,11 @@ class CommonFinders {
   /// Finds [Text] and [EditableText] widgets containing string equal to the
   /// `text` argument.
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.text('Back'), findsOneWidget);
+  /// ```dart
+  /// expect(find.text('Back'), findsOneWidget);
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -37,27 +39,34 @@ class CommonFinders {
   /// Looks for widgets that contain a [Text] descendant with `text`
   /// in it.
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     // Suppose you have a button with text 'Update' in it:
-  ///     new Button(
-  ///       child: new Text('Update')
-  ///     )
+  /// ```dart
+  /// // Suppose you have a button with text 'Update' in it:
+  /// new Button(
+  ///   child: new Text('Update')
+  /// )
   ///
-  ///     // You can find and tap on it like this:
-  ///     tester.tap(find.widgetWithText(Button, 'Update'));
+  /// // You can find and tap on it like this:
+  /// tester.tap(find.widgetWithText(Button, 'Update'));
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder widgetWithText(Type widgetType, String text, { bool skipOffstage: true }) {
-    return new _WidgetWithTextFinder(widgetType, text, skipOffstage: skipOffstage);
+    return find.ancestor(
+      of: find.text(text),
+      matching: find.byType(widgetType),
+    );
   }
 
   /// Finds widgets by searching for one with a particular [Key].
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.byKey(backKey), findsOneWidget);
+  /// ```dart
+  /// expect(find.byKey(backKey), findsOneWidget);
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -71,9 +80,11 @@ class CommonFinders {
   ///
   /// The `type` argument must be a subclass of [Widget].
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.byType(IconButton), findsOneWidget);
+  /// ```dart
+  /// expect(find.byType(IconButton), findsOneWidget);
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -82,13 +93,39 @@ class CommonFinders {
   /// Finds [Icon] widgets containing icon data equal to the `icon`
   /// argument.
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.byIcon(Icons.inbox), findsOneWidget);
+  /// ```dart
+  /// expect(find.byIcon(Icons.inbox), findsOneWidget);
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byIcon(IconData icon, { bool skipOffstage: true }) => new _WidgetIconFinder(icon, skipOffstage: skipOffstage);
+
+  /// Looks for widgets that contain an [Icon] descendant displaying [IconData]
+  /// `icon` in it.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// // Suppose you have a button with icon 'arrow_forward' in it:
+  /// new Button(
+  ///   child: new Icon(Icons.arrow_forward)
+  /// )
+  ///
+  /// // You can find and tap on it like this:
+  /// tester.tap(find.widgetWithIcon(Button, Icons.arrow_forward));
+  /// ```
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder widgetWithIcon(Type widgetType, IconData icon, { bool skipOffstage: true }) {
+    return find.ancestor(
+      of: find.byIcon(icon),
+      matching: find.byType(widgetType),
+    );
+  }
 
   /// Finds widgets by searching for elements with a particular type.
   ///
@@ -98,9 +135,11 @@ class CommonFinders {
   ///
   /// The `type` argument must be a subclass of [Element].
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.byElementType(SingleChildRenderObjectElement), findsOneWidget);
+  /// ```dart
+  /// expect(find.byElementType(SingleChildRenderObjectElement), findsOneWidget);
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -109,15 +148,17 @@ class CommonFinders {
   /// Finds widgets whose current widget is the instance given by the
   /// argument.
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     // Suppose you have a button created like this:
-  ///     Widget myButton = new Button(
-  ///       child: new Text('Update')
-  ///     );
+  /// ```dart
+  /// // Suppose you have a button created like this:
+  /// Widget myButton = new Button(
+  ///   child: new Text('Update')
+  /// );
   ///
-  ///     // You can find and tap on it like this:
-  ///     tester.tap(find.byWidget(myButton));
+  /// // You can find and tap on it like this:
+  /// tester.tap(find.byWidget(myButton));
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -125,12 +166,14 @@ class CommonFinders {
 
   /// Finds widgets using a widget [predicate].
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.byWidgetPredicate(
-  ///       (Widget widget) => widget is Tooltip && widget.message == 'Back',
-  ///       description: 'widget with tooltip "Back"',
-  ///     ), findsOneWidget);
+  /// ```dart
+  /// expect(find.byWidgetPredicate(
+  ///   (Widget widget) => widget is Tooltip && widget.message == 'Back',
+  ///   description: 'widget with tooltip "Back"',
+  /// ), findsOneWidget);
+  /// ```
   ///
   /// If [description] is provided, then this uses it as the description of the
   /// [Finder] and appears, for example, in the error message when the finder
@@ -145,9 +188,11 @@ class CommonFinders {
 
   /// Finds Tooltip widgets with the given message.
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.byTooltip('Back'), findsOneWidget);
+  /// ```dart
+  /// expect(find.byTooltip('Back'), findsOneWidget);
+  /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
@@ -160,15 +205,17 @@ class CommonFinders {
 
   /// Finds widgets using an element [predicate].
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.byElementPredicate(
-  ///       // finds elements of type SingleChildRenderObjectElement, including
-  ///       // those that are actually subclasses of that type.
-  ///       // (contrast with byElementType, which only returns exact matches)
-  ///       (Element element) => element is SingleChildRenderObjectElement,
-  ///       description: '$SingleChildRenderObjectElement element',
-  ///     ), findsOneWidget);
+  /// ```dart
+  /// expect(find.byElementPredicate(
+  ///   // finds elements of type SingleChildRenderObjectElement, including
+  ///   // those that are actually subclasses of that type.
+  ///   // (contrast with byElementType, which only returns exact matches)
+  ///   (Element element) => element is SingleChildRenderObjectElement,
+  ///   description: '$SingleChildRenderObjectElement element',
+  /// ), findsOneWidget);
+  /// ```
   ///
   /// If [description] is provided, then this uses it as the description of the
   /// [Finder] and appears, for example, in the error message when the finder
@@ -184,11 +231,13 @@ class CommonFinders {
   /// Finds widgets that are descendants of the [of] parameter and that match
   /// the [matching] parameter.
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     expect(find.descendant(
-  ///       of: find.widgetWithText(Row, 'label_1'), matching: find.text('value_1')
-  ///     ), findsOneWidget);
+  /// ```dart
+  /// expect(find.descendant(
+  ///   of: find.widgetWithText(Row, 'label_1'), matching: find.text('value_1')
+  /// ), findsOneWidget);
+  /// ```
   ///
   /// If the [matchRoot] argument is true then the widget(s) specified by [of]
   /// will be matched along with the descendants.
@@ -202,19 +251,21 @@ class CommonFinders {
   /// Finds widgets that are ancestors of the [of] parameter and that match
   /// the [matching] parameter.
   ///
-  /// Example:
+  /// ## Sample code
   ///
-  ///     // Test if a Text widget that contains 'faded' is the
-  ///     // descendant of an Opacity widget with opacity 0.5:
-  ///     expect(
-  ///       tester.widget<Opacity>(
-  ///         find.ancestor(
-  ///           of: find.text('faded'),
-  ///           matching: find.byType('Opacity'),
-  ///         )
-  ///       ).opacity,
-  ///       0.5
-  ///     );
+  /// ```dart
+  /// // Test if a Text widget that contains 'faded' is the
+  /// // descendant of an Opacity widget with opacity 0.5:
+  /// expect(
+  ///   tester.widget<Opacity>(
+  ///     find.ancestor(
+  ///       of: find.text('faded'),
+  ///       matching: find.byType('Opacity'),
+  ///     )
+  ///   ).opacity,
+  ///   0.5
+  /// );
+  /// ```
   ///
   /// If the [matchRoot] argument is true then the widget(s) specified by [of]
   /// will be matched along with the ancestors.
@@ -431,40 +482,6 @@ class _TextFinder extends MatchFinder {
       return editable.controller.text == text;
     }
     return false;
-  }
-}
-
-class _WidgetWithTextFinder extends Finder {
-  _WidgetWithTextFinder(this.widgetType, this.text, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
-
-  final Type widgetType;
-  final String text;
-
-  @override
-  String get description => 'type $widgetType with text "$text"';
-
-  @override
-  Iterable<Element> apply(Iterable<Element> candidates) {
-    return candidates
-      .map((Element textElement) {
-        if (textElement.widget is! Text)
-          return null;
-
-        final Text textWidget = textElement.widget;
-        if (textWidget.data == text) {
-          try {
-            textElement.visitAncestorElements((Element element) {
-              if (element.widget.runtimeType == widgetType)
-                throw element;
-              return true;
-            });
-          } on Element catch (result) {
-            return result;
-          }
-        }
-        return null;
-      })
-      .where((Element element) => element != null);
   }
 }
 

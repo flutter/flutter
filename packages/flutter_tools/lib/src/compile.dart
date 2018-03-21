@@ -8,15 +8,19 @@ import 'dart:convert';
 import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
+import 'base/common.dart';
 import 'base/io.dart';
 import 'base/process_manager.dart';
 import 'globals.dart';
 
+typedef void CompilerMessageConsumer(String message);
+
 class _StdoutHandler {
-  _StdoutHandler() {
+  _StdoutHandler({this.consumer: printError}) {
     reset();
   }
 
+  final CompilerMessageConsumer consumer;
   String boundaryKey;
   Completer<String> outputFilename;
 
@@ -30,7 +34,7 @@ class _StdoutHandler {
         ? string.substring(boundaryKey.length + 1)
         : null);
     else
-      printError('compiler message: $string');
+      consumer('compiler message: $string');
   }
 
   // This is needed to get ready to process next compilation result output,
@@ -52,7 +56,9 @@ Future<String> compile(
     bool trackWidgetCreation: false,
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath,
-    String packagesPath}) async {
+    String packagesPath,
+    List<String> fileSystemRoots,
+    String fileSystemScheme}) async {
   final String frontendServer = artifacts.getArtifactPath(
     Artifact.frontendServerSnapshotForEngineDartSdk
   );
@@ -60,8 +66,12 @@ Future<String> compile(
   // This is a URI, not a file path, so the forward slash is correct even on Windows.
   if (!sdkRoot.endsWith('/'))
     sdkRoot = '$sdkRoot/';
+  final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+  if (!processManager.canRun(engineDartPath)) {
+    throwToolExit('Unable to find Dart binary at $engineDartPath');
+  }
   final List<String> command = <String>[
-    artifacts.getArtifactPath(Artifact.engineDartBinary),
+    engineDartPath,
     frontendServer,
     '--sdk-root',
     sdkRoot,
@@ -90,8 +100,16 @@ Future<String> compile(
   if (outputFilePath != null) {
     command.addAll(<String>['--output-dill', outputFilePath]);
   }
-  if (depFilePath != null) {
+  if (depFilePath != null && (fileSystemRoots == null || fileSystemRoots.isEmpty)) {
     command.addAll(<String>['--depfile', depFilePath]);
+  }
+  if (fileSystemRoots != null) {
+    for (String root in fileSystemRoots) {
+      command.addAll(<String>['--filesystem-root', root]);
+    }
+  }
+  if (fileSystemScheme != null) {
+    command.addAll(<String>['--filesystem-scheme', fileSystemScheme]);
   }
 
   if (extraFrontEndOptions != null)
@@ -124,10 +142,14 @@ Future<String> compile(
 /// restarts the Flutter app.
 class ResidentCompiler {
   ResidentCompiler(this._sdkRoot, {bool trackWidgetCreation: false,
-      String packagesPath})
+      String packagesPath, List<String> fileSystemRoots, String fileSystemScheme ,
+      CompilerMessageConsumer compilerMessageConsumer: printError})
     : assert(_sdkRoot != null),
       _trackWidgetCreation = trackWidgetCreation,
-      _packagesPath = packagesPath {
+      _packagesPath = packagesPath,
+      _fileSystemRoots = fileSystemRoots,
+      _fileSystemScheme = fileSystemScheme,
+      stdoutHandler = new _StdoutHandler(consumer: compilerMessageConsumer) {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
@@ -135,9 +157,11 @@ class ResidentCompiler {
 
   final bool _trackWidgetCreation;
   final String _packagesPath;
+  final List<String> _fileSystemRoots;
+  final String _fileSystemScheme;
   String _sdkRoot;
   Process _server;
-  final _StdoutHandler stdoutHandler = new _StdoutHandler();
+  final _StdoutHandler stdoutHandler;
 
   /// If invoked for the first time, it compiles Dart script identified by
   /// [mainPath], [invalidatedFiles] list is ignored.
@@ -153,11 +177,13 @@ class ResidentCompiler {
     // First time recompile is called we actually have to compile the app from
     // scratch ignoring list of invalidated files.
     if (_server == null)
-      return _compile(mainPath, outputPath, packagesFilePath);
+      return _compile(_mapFilename(mainPath), outputPath, _mapFilename(packagesFilePath));
 
     final String inputKey = new Uuid().generateV4();
-    _server.stdin.writeln('recompile ${mainPath != null ? mainPath + " ": ""}$inputKey');
-    invalidatedFiles.forEach(_server.stdin.writeln);
+    _server.stdin.writeln('recompile ${mainPath != null ? _mapFilename(mainPath) + " ": ""}$inputKey');
+    for (String fileUri in invalidatedFiles) {
+      _server.stdin.writeln(_mapFileUri(fileUri));
+    }
     _server.stdin.writeln(inputKey);
 
     return stdoutHandler.outputFilename.future;
@@ -187,6 +213,14 @@ class ResidentCompiler {
     }
     if (_packagesPath != null) {
       args.addAll(<String>['--packages', _packagesPath]);
+    }
+    if (_fileSystemRoots != null) {
+      for (String root in _fileSystemRoots) {
+        args.addAll(<String>['--filesystem-root', root]);
+      }
+    }
+    if (_fileSystemScheme != null) {
+      args.addAll(<String>['--filesystem-scheme', _fileSystemScheme]);
     }
     _server = await processManager.start(args);
     _server.stdout
@@ -232,5 +266,37 @@ class ResidentCompiler {
   /// kernel file.
   void reset() {
     _server.stdin.writeln('reset');
+  }
+
+  String _mapFilename(String filename) {
+    if (_fileSystemRoots != null) {
+      for (String root in _fileSystemRoots) {
+        if (filename.startsWith(root)) {
+          return new Uri(
+              scheme: _fileSystemScheme, path: filename.substring(root.length))
+              .toString();
+        }
+      }
+    }
+    return filename;
+  }
+
+  String _mapFileUri(String fileUri) {
+    if (_fileSystemRoots != null) {
+      final String filename = Uri.parse(fileUri).toFilePath();
+      for (String root in _fileSystemRoots) {
+        if (filename.startsWith(root)) {
+          return new Uri(
+              scheme: _fileSystemScheme, path: filename.substring(root.length))
+              .toString();
+        }
+      }
+    }
+    return fileUri;
+  }
+
+  Future<dynamic> shutdown() {
+    _server.kill();
+    return _server.exitCode;
   }
 }

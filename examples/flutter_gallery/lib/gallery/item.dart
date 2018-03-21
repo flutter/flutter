@@ -55,32 +55,39 @@ List<GalleryItem> _buildGalleryItems() {
     new GalleryItem(
       title: 'Shrine',
       subtitle: 'Basic shopping app',
-      category: 'Demos',
+      category: 'Vignettes',
       routeName: ShrineDemo.routeName,
       buildRoute: (BuildContext context) => new ShrineDemo(),
     ),
     new GalleryItem(
       title: 'Contact profile',
       subtitle: 'Address book entry with a flexible appbar',
-      category: 'Demos',
+      category: 'Vignettes',
       routeName: ContactsDemo.routeName,
       buildRoute: (BuildContext context) => new ContactsDemo(),
     ),
     new GalleryItem(
       title: 'Animation',
       subtitle: 'Section organizer',
-      category: 'Demos',
+      category: 'Vignettes',
       routeName: AnimationDemo.routeName,
       buildRoute: (BuildContext context) => const AnimationDemo(),
     ),
     new GalleryItem(
       title: 'Video',
       subtitle: 'Video playback',
-      category: 'Demos',
+      category: 'Vignettes',
       routeName: VideoDemo.routeName,
       buildRoute: (BuildContext context) => const VideoDemo(),
     ),
     // Material Components
+    new GalleryItem(
+      title: 'Backdrop',
+      subtitle: 'Select a front layer from back layer',
+      category: 'Material Components',
+      routeName: BackdropDemo.routeName,
+      buildRoute: (BuildContext context) => new BackdropDemo(),
+    ),
     new GalleryItem(
       title: 'Bottom navigation',
       subtitle: 'Bottom navigation with cross-fading views',
@@ -366,7 +373,7 @@ List<GalleryItem> _buildGalleryItems() {
       new GalleryItem(
         title: 'Pesto',
         subtitle: 'Simple recipe browser',
-        category: 'Demos',
+        category: 'Vignettes',
         routeName: PestoDemo.routeName,
         buildRoute: (BuildContext context) => const PestoDemo(),
       ),

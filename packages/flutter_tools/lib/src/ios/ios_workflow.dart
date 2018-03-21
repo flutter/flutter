@@ -23,7 +23,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   // We need xcode (+simctl) to list simulator devices, and libimobiledevice to list real devices.
   @override
-  bool get canListDevices => xcode.isInstalledAndMeetsVersionCheck;
+  bool get canListDevices => xcode.isInstalledAndMeetsVersionCheck && xcode.isSimctlInstalled;
 
   // We need xcode to launch simulator devices, and ideviceinstaller and ios-deploy
   // for real devices.
@@ -85,6 +85,13 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         xcodeStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.'
+        ));
+      }
+      if (!xcode.isSimctlInstalled) {
+        xcodeStatus = ValidationType.partial;
+        messages.add(new ValidationMessage.error(
+          'Xcode requires additional components to be installed in order to run.\n'
+          'Launch Xcode and install additional required components when prompted.'
         ));
       }
       if ((await macDevMode).contains('disabled')) {

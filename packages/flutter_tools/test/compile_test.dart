@@ -32,6 +32,7 @@ void main() {
       final StreamController<String> stdErrStreamController = new StreamController<String>();
       when(mockFrontendServerStdErr.transform<String>(any)).thenReturn(stdErrStreamController.stream);
       when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
+      when(mockProcessManager.canRun(any)).thenReturn(true);
       when(mockProcessManager.start(any)).thenAnswer(
           (Invocation invocation) => new Future<Process>.value(mockFrontendServer));
       when(mockFrontendServer.exitCode).thenReturn(0);
@@ -120,6 +121,7 @@ void main() {
       when(mockFrontendServerStdErr.transform<String>(any))
           .thenAnswer((Invocation invocation) => stdErrStreamController.stream);
 
+      when(mockProcessManager.canRun(any)).thenReturn(true);
       when(mockProcessManager.start(any)).thenAnswer(
           (Invocation invocation) => new Future<Process>.value(mockFrontendServer)
       );
@@ -227,7 +229,7 @@ Future<Null> _recompile(StreamController<List<int>> streamController,
   final String output = await generator.recompile(null /* mainPath */, <String>['/path/to/main.dart']);
   expect(output, equals('/path/to/main.dart.dill'));
   final String commands = mockFrontendServerStdIn.getAndClear();
-  final RegExp re = new RegExp(r'^recompile (.*)\n/path/to/main.dart\n(.*)\n$');
+  final RegExp re = new RegExp('^recompile (.*)\\n/path/to/main.dart\\n(.*)\\n\$');
   expect(commands, matches(re));
   final Match match = re.firstMatch(commands);
   expect(match[1] == match[2], isTrue);
