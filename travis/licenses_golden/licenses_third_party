@@ -1,4 +1,4 @@
-Signature: a3593f9d3adf185eaa6a15b0f50df584
+Signature: a714ae47f09ddeaf5ab4e20e34c3743a
 
 UNUSED LICENSES:
 
@@ -17800,10 +17800,10 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.e
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Mac-Clang-x86_64-Debug-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Mac-Clang-x86_64-Debug-Metal.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Win-Clang-arm64-Release-Android.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Win-Clang-x86-Debug-Exceptions.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Win-Clang-x86_64-Debug-GDI.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Win-Clang-x86_64-Release-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Win-Clang-x86_64-Release.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Win-MSVC-x86-Debug-Exceptions.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Housekeeper-PerCommit-CheckGeneratedFiles.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Perf-Android-Clang-GalaxyS7_G930FD-GPU-MaliT880-arm64-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Perf-Android-Clang-Nexus5x-GPU-Adreno418-arm64-Debug-All-Android.json
@@ -17928,9 +17928,9 @@ FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Mac-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Mac-Clang-x86_64-Debug-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Mac-Clang-x86_64-Release.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-Clang-arm64-Release-Android.json
+FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-Clang-x86-Debug-Exceptions.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-Clang-x86_64-Release-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-MSVC-x86-Debug-ANGLE.json
-FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-MSVC-x86-Debug-Exceptions.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-MSVC-x86-Debug.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-MSVC-x86-Release-GDI.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/alternate_repo.json
@@ -20360,7 +20360,9 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzAnimatedImage.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzDrawFunctions.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzGradients.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzImage.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzNullCanvas.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathMeasure.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRasterN32Canvas.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzTextBlobDeserialize.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 Google, LLC
