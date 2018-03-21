@@ -56,7 +56,7 @@ linter:
     - avoid_init_to_null
     - avoid_null_checks_in_equality_operators
     # - avoid_positional_boolean_parameters # not yet tested
-    # - avoid_relative_lib_imports # not yet tested
+    - avoid_relative_lib_imports
     - avoid_return_types_on_setters
     # - avoid_returning_null # we do this commonly
     # - avoid_returning_this # https://github.com/dart-lang/linter/issues/842

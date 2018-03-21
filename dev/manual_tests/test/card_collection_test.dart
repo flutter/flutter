@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show createHttpClient;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:manual_tests/card_collection.dart' as card_collection;
 
-import '../lib/card_collection.dart' as card_collection;
 import 'mock_image_http.dart';
 
 void main() {

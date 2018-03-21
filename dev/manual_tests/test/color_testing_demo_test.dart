@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show createHttpClient;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:manual_tests/color_testing_demo.dart' as color_testing_demo;
 
-import '../lib/color_testing_demo.dart' as color_testing_demo;
 import 'mock_image_http.dart';
 
 void main() {
