@@ -106,6 +106,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
   DateTime _toDateTime = new DateTime.now();
   bool _allDayValue = false;
   bool _saveNeeded = false;
+  String _eventName = 'New event';
 
   Future<bool> _onWillPop() async {
     if (!_saveNeeded)
@@ -147,7 +148,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
 
     return new Scaffold(
       appBar: new AppBar(
-        title: const Text('New event'),
+        title: new Text(_eventName),
         actions: <Widget> [
           new FlatButton(
             child: new Text('SAVE', style: theme.textTheme.body1.copyWith(color: Colors.white)),
@@ -166,10 +167,19 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               alignment: Alignment.bottomLeft,
               child: new TextField(
-                decoration: const InputDecoration(hintText: 'Event name'),
-                style: theme.textTheme.display2,
+                decoration: const InputDecoration(
+                  labelText: 'Event name',
+                  hintText: 'What is the name of the event?',
+                  filled: true
+                ),
+                style: theme.textTheme.headline,
                 onChanged: (String value) {
                   setState(() {
+                    if (value.isNotEmpty) {
+                      _eventName = value;
+                    } else {
+                      _eventName = 'New event';
+                    }
                     _saveNeeded = true;
                   });
                 }
@@ -179,8 +189,11 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               alignment: Alignment.bottomLeft,
               child: new TextField(
-                decoration: const InputDecoration(hintText: 'Location'),
-                style: theme.textTheme.title.copyWith(color: Colors.black54),
+                decoration: const InputDecoration(
+                  labelText: 'Location',
+                  hintText: 'Where is the event?',
+                  filled: true
+                ),
                 onChanged: (String value) {
                   setState(() {
                     _saveNeeded = true;
