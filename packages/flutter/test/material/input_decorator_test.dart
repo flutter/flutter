@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 Widget buildInputDecorator({
   InputDecoration decoration: const InputDecoration(),
   InputDecorationTheme inputDecorationTheme,
@@ -1187,5 +1189,45 @@ void main() {
     expect(decoration.filled, false);
     expect(decoration.fillColor, Colors.blue);
     expect(decoration.border, const OutlineInputBorder());
+  });
+
+  testWidgets('InputDecorator fillColor is clipped by border', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/15742
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: new InputDecoration(
+          filled: true,
+          fillColor: const Color(0xFF00FF00),
+          border: new OutlineInputBorder(
+            borderRadius: new BorderRadius.circular(12.0),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(InputDecorator));
+
+    // Fill is the border's outer path, a rounded rectangle
+    expect(box, paints..path(
+      style: PaintingStyle.fill,
+      color: const Color(0xFF00FF00),
+      includes: <Offset>[const Offset(800.0/2.0, 56/2.0)],
+      excludes: <Offset>[
+        const Offset(1.0, 6.0), // outside the rounded corner, top left
+        const Offset(800.0 - 1.0, 6.0), // top right
+        const Offset(1.0, 56.0 - 6.0), // bottom left
+        const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
+      ],
+    ));
+
+    // Border outline. The rrect is the -center- of the 1.0 stroked outline.
+    expect(box, paints..rrect(
+      style: PaintingStyle.stroke,
+      strokeWidth: 1.0,
+      rrect: new RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
+    ));
   });
 }
