@@ -1495,6 +1495,7 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     super.debugFillProperties(description);
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', color));
   }
 }
 
@@ -1596,6 +1597,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
           clipPath: offsetClipPath,
           elevation: elevation,
           color: color,
+          shadowColor: shadowColor,
         );
         context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
       } else {
@@ -1702,6 +1704,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
           clipPath: offsetPath,
           elevation: elevation,
           color: color,
+          shadowColor: shadowColor,
         );
         context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
       } else {
