@@ -29,9 +29,8 @@ class ResponseConverter extends Converter<HttpClientResponse, Future<Uint8List>>
       final Uint8List bytes = new Uint8List(response.contentLength);
       int offset = 0;
       response.listen((List<int> chunk) {
-        for (int i = 0; i < chunk.length; i+=1, offset+=1) {
-          bytes[offset] = chunk[i];
-        }
+        bytes.setRange(offset, offset + chunk.length, chunk);
+        offset += chunk.length;
       },
       onError: completer.completeError,
       onDone: () {

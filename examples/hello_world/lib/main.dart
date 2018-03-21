@@ -4,4 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-void main() => runApp(const Center(child: const Text('Hello, world!', textDirection: TextDirection.ltr)));
+void main() {
+  runApp(new Center(child: new Image.network('https://static.pexels.com/photos/20787/pexels-photo.jpg')));
+}
