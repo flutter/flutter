@@ -908,4 +908,13 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
 - (void)textureFrameAvailable:(int64_t)textureId {
   _platformView->MarkTextureFrameAvailable(textureId);
 }
+
+- (NSString*)lookupKeyForAsset:(NSString*)asset {
+   return [FlutterDartProject lookupKeyForAsset:asset];
+}
+
+- (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package {
+   return [FlutterDartProject lookupKeyForAsset:asset fromPackage:package];
+}
+
 @end

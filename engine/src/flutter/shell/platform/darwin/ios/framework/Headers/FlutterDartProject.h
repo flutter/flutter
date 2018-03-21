@@ -23,6 +23,26 @@ FLUTTER_EXPORT
 
 - (instancetype)initFromDefaultSourceForConfiguration;
 
+/**
+ Returns the file name for the given asset.
+ The returned file name can be used to access the asset in the application's main bundle.
+
+ - Parameter asset: The name of the asset. The name can be hierarchical.
+ - Returns: the file name to be used for lookup in the main bundle.
+ */
++ (NSString*)lookupKeyForAsset:(NSString*)asset;
+
+/**
+ Returns the file name for the given asset which originates from the specified package.
+ The returned file name can be used to access the asset in the application's main bundle.
+
+ - Parameters:
+   - asset: The name of the asset. The name can be hierarchical.
+   - package: The name of the package from which the asset originates.
+ - Returns: the file name to be used for lookup in the main bundle.
+ */
++ (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package;
+
 @end
 
 #endif  // FLUTTER_FLUTTERDARTPROJECT_H_
