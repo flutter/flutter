@@ -831,6 +831,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.inMutuallyExclusiveGroup != null) {
       config.isInMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup;
     }
+    if (properties.obscured != null) {
+      config.isObscured = properties.obscured;
+    }
     if (properties.header != null) {
       config.isHeader = properties.header;
     }

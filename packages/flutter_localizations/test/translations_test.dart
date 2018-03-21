@@ -17,10 +17,12 @@ void main() {
     'fa', // Farsi (Persian)
     'fr', // French
     'he', // Hebrew
+    'id', // Indonesian
     'it', // Italian
     'ja', // Japanese
     'ko', // Korean
     'nl', // Dutch
+    'no', // Norwegian
     'pl', // Polish
     'ps', // Pashto
     'pt', // Portugese

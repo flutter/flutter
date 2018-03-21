@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -15,6 +16,7 @@ import 'all_elements.dart';
 import 'binding.dart';
 import 'controller.dart';
 import 'finders.dart';
+import 'matchers.dart';
 import 'test_async_utils.dart';
 import 'test_text_input.dart';
 
@@ -530,6 +532,21 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       testTextInput.enterText(text);
       await idle();
     });
+  }
+
+  /// Makes an effort to dismiss the current page with a Material [Scaffold] or
+  /// a [CupertinoPageScaffold].
+  ///
+  /// Will throw an error if there is no back button in the page.
+  Future<void> pageBack() async {
+    Finder backButton = find.byTooltip('Back');
+    if (backButton.evaluate().isEmpty) {
+      backButton = find.widgetWithIcon(CupertinoButton, CupertinoIcons.back);
+    }
+
+    expect(backButton, findsOneWidget, reason: 'One back button expected on screen');
+
+    await tap(backButton);
   }
 }
 
