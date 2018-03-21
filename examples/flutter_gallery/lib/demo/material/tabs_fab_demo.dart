@@ -112,11 +112,13 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
           tabs: _allPages.map((_Page page) => new Tab(text: page.label.toUpperCase())).toList(),
         )
       ),
-      floatingActionButton: !_selectedPage.fabDefined ? null : new FloatingActionButton(
+      floatingActionButton: !_selectedPage.fabDefined ? null : new FloatingActionButton.extended(
         key: _selectedPage.fabKey,
         tooltip: 'Show explanation',
         backgroundColor: _selectedPage.fabColor,
-        child: _selectedPage.fabIcon,
+        //child: _selectedPage.fabIcon,
+        icon: _selectedPage.fabIcon,
+        label: const Text('FOO'),
         onPressed: _showExplanatoryText
       ),
       body: new TabBarView(
