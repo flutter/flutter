@@ -7,10 +7,11 @@
 
 #include <memory>
 
+#include <zx/eventpair.h>
+
 #include "flutter/flow/layers/layer_tree.h"
 #include "lib/fxl/functional/closure.h"
 #include "lib/fxl/macros.h"
-#include "zircon/system/ulib/zx/include/zx/eventpair.h"
 
 namespace flutter_runner {
 
