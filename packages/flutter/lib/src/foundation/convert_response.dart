@@ -19,13 +19,13 @@ Future<Uint8List> convertResponse(HttpClientResponse response) {
       chunks.add(chunk);
       contentLength += chunk.length;
     }, onDone: () {
-     final Uint8List bytes = new Uint8List(contentLength);
-     int offset = 0;
-     for (List<int> chunk in chunks) {
-       bytes.setRange(offset, offset + chunk.length, chunk);
-       offset += chunk.length;
-     }
-     completer.complete(bytes);
+      final Uint8List bytes = new Uint8List(contentLength);
+      int offset = 0;
+      for (List<int> chunk in chunks) {
+        bytes.setRange(offset, offset + chunk.length, chunk);
+        offset += chunk.length;
+      }
+      completer.complete(bytes);
     }, onError: completer.completeError, cancelOnError: true);
   } else {
     // If the response has a content length, then allocate a buffer of the correct size.
