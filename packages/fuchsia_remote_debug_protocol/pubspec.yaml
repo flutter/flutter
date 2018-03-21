@@ -5,7 +5,7 @@ author: Flutter Authors <flutter-dev@googlegroups.com>
 
 dependencies:
   json_rpc_2: 2.0.7
-  process: 2.0.8
+  process: 2.0.9
   meta: 1.1.2
   web_socket_channel: 1.0.7
   flutter_test:
@@ -25,13 +25,13 @@ dev_dependencies:
   convert: 2.0.1 # TRANSITIVE DEPENDENCY
   crypto: 2.0.2+1 # TRANSITIVE DEPENDENCY
   csslib: 0.14.1 # TRANSITIVE DEPENDENCY
-  file: 2.3.7 # TRANSITIVE DEPENDENCY
+  file: 3.0.0 # TRANSITIVE DEPENDENCY
   glob: 1.1.5 # TRANSITIVE DEPENDENCY
   html: 0.13.3 # TRANSITIVE DEPENDENCY
   http: 0.11.3+16 # TRANSITIVE DEPENDENCY
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
-  intl: 0.15.3 # TRANSITIVE DEPENDENCY
+  intl: 0.15.4 # TRANSITIVE DEPENDENCY
   io: 0.3.2+1 # TRANSITIVE DEPENDENCY
   isolate: 1.1.0 # TRANSITIVE DEPENDENCY
   js: 0.6.1 # TRANSITIVE DEPENDENCY
@@ -64,3 +64,5 @@ dev_dependencies:
   vector_math: 2.0.5 # TRANSITIVE DEPENDENCY
   watcher: 0.9.7+7 # TRANSITIVE DEPENDENCY
   yaml: 2.1.13 # TRANSITIVE DEPENDENCY
+
+# PUBSPEC CHECKSUM: 98d5
