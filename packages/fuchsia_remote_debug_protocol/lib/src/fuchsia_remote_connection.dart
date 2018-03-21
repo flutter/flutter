@@ -240,7 +240,7 @@ class _SshPortForwarder implements PortForwarder {
 
   final String _remoteAddress;
   final int _remotePort;
-  final int _localSocket;
+  final ServerSocket _localSocket;
   final Process _process;
   final String _sshConfigPath;
   final String _interface;
@@ -256,9 +256,9 @@ class _SshPortForwarder implements PortForwarder {
   /// [_SshPortForwarder].
   static Future<_SshPortForwarder> start(String address, int remotePort,
       [String interface, String sshConfigPath]) async {
-    final ServerSocket localSocket = await _createLocalSocket();
     final bool isIpV6 = isIpV6Address(address);
-    if (localSocket.port == 0) {
+    final ServerSocket localSocket = await _createLocalSocket();
+    if (localSocket == null || localSocket.port == 0) {
       _log.warning('_SshPortForwarder failed to find a local port for '
           '$address:$remotePort');
       return null;
