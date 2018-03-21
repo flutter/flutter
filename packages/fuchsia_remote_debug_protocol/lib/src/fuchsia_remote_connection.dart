@@ -231,7 +231,7 @@ class _SshPortForwarder implements PortForwarder {
   _SshPortForwarder._(
     this._remoteAddress,
     this._remotePort,
-    this._localPort,
+    this._localSocket,
     this._process,
     this._interface,
     this._sshConfigPath,
@@ -240,14 +240,14 @@ class _SshPortForwarder implements PortForwarder {
 
   final String _remoteAddress;
   final int _remotePort;
-  final int _localPort;
+  final int _localSocket;
   final Process _process;
   final String _sshConfigPath;
   final String _interface;
   final bool _ipV6;
 
   @override
-  int get port => _localPort;
+  int get port => _localSocket.port;
 
   @override
   int get remotePort => _remotePort;
@@ -256,9 +256,9 @@ class _SshPortForwarder implements PortForwarder {
   /// [_SshPortForwarder].
   static Future<_SshPortForwarder> start(String address, int remotePort,
       [String interface, String sshConfigPath]) async {
-    final int localPort = await _potentiallyAvailablePort();
+    final ServerSocket localSocket = await _createLocalSocket();
     final bool isIpV6 = isIpV6Address(address);
-    if (localPort == 0) {
+    if (localSocket.port == 0) {
       _log.warning('_SshPortForwarder failed to find a local port for '
           '$address:$remotePort');
       return null;
@@ -269,7 +269,7 @@ class _SshPortForwarder implements PortForwarder {
     // loopback (::1). While this can be used for forwarding to the destination
     // IPv6 interface, it cannot be used to connect to a websocket.
     final String formattedForwardingUrl =
-        '$localPort:$_ipv4Loopback:$remotePort';
+        '${localSocket.port}:$_ipv4Loopback:$remotePort';
     final List<String> command = <String>['ssh'];
     if (isIpV6) {
       command.add('-6');
@@ -290,8 +290,9 @@ class _SshPortForwarder implements PortForwarder {
     process.exitCode.then((int c) {
       _log.fine("'${command.join(' ')}' exited with exit code $c");
     });
-    _log.fine('Set up forwarding from $localPort to $address port $remotePort');
-    return new _SshPortForwarder._(address, remotePort, localPort, process,
+    _log.fine(
+        'Set up forwarding from ${localSocket.port} to $address port $remotePort');
+    return new _SshPortForwarder._(address, remotePort, localSocket, process,
         interface, sshConfigPath, isIpV6);
   }
 
@@ -304,7 +305,7 @@ class _SshPortForwarder implements PortForwarder {
     // Cancel the forwarding request. See [start] for commentary about why this
     // uses the IPv4 loopback.
     final String formattedForwardingUrl =
-        '$_localPort:$_ipv4Loopback:$_remotePort';
+        '${_localSocket.port}:$_ipv4Loopback:$_remotePort';
     final List<String> command = <String>['ssh'];
     final String targetAddress = _ipV6 && _interface.isNotEmpty
         ? '$_remoteAddress%$_interface'
@@ -326,24 +327,22 @@ class _SshPortForwarder implements PortForwarder {
       _log.warning(
           'Command failed:\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
     }
+    _localSocket.close();
   }
 
   /// Attempts to find an available port.
   ///
-  /// Finds the port by binding a socket to zero on the loopback interface, and
-  /// then unbinding. If this action could not be run for whatever reason, will
-  /// log a warning and return zero.
-  static Future<int> _potentiallyAvailablePort() async {
-    int port = 0;
+  /// If successful returns a valid [ServerSocket] (which must be disconnected
+  /// later).
+  static Future<ServerSocket> _createLocalSocket() async {
     ServerSocket s;
     try {
       s = await ServerSocket.bind(_ipv4Loopback, 0);
-      port = s.port;
-      s.close();
     } catch (e) {
       // Failures are signaled by a return value of 0 from this function.
-      _log.warning('_potentiallyAvailablePort failed: $e');
+      _log.warning('_createLocalSocket failed: $e');
+      return null;
     }
-    return port;
+    return s;
   }
 }
