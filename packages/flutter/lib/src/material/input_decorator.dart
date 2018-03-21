@@ -1536,11 +1536,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ),
     );
 
-    /*
-    final Widget containerFill = new DecoratedBox(
-      decoration: new BoxDecoration(color: _getFillColor(themeData)),
-    );
-    */
     final Widget container = border == null
       ? new DecoratedBox(
           decoration: new BoxDecoration(color: _getFillColor(themeData))
@@ -1551,15 +1546,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           gapAnimation: _floatingLabelController.view,
           fillColor: _getFillColor(themeData),
         );
-
-    /*
-    final Widget container = border == null ? containerFill : new _BorderContainer(
-      border: border,
-      gap: _borderGap,
-      gapAnimation: _floatingLabelController.view,
-      child: containerFill,
-    );
-    */
 
     final TextStyle inlineLabelStyle = inlineStyle.merge(decoration.labelStyle);
     final Widget label = decoration.labelText == null ? null : new _Shaker(
