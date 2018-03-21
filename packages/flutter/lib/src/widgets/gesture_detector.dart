@@ -699,16 +699,16 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     if (_recognizers == null) {
-      description.add(new DiagnosticsNode.message('DISPOSED'));
+      properties.add(new DiagnosticsNode.message('DISPOSED'));
     } else {
       final List<String> gestures = _recognizers.values.map<String>((GestureRecognizer recognizer) => recognizer.debugDescription).toList();
-      description.add(new IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
-      description.add(new IterableProperty<GestureRecognizer>('recognizers', _recognizers.values, level: DiagnosticLevel.fine));
+      properties.add(new IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
+      properties.add(new IterableProperty<GestureRecognizer>('recognizers', _recognizers.values, level: DiagnosticLevel.fine));
     }
-    description.add(new EnumProperty<HitTestBehavior>('behavior', widget.behavior, defaultValue: null));
+    properties.add(new EnumProperty<HitTestBehavior>('behavior', widget.behavior, defaultValue: null));
   }
 }
 

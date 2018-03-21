@@ -52,9 +52,9 @@ class RawKeyboardListener extends StatefulWidget {
   _RawKeyboardListenerState createState() => new _RawKeyboardListenerState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode));
   }
 }
 

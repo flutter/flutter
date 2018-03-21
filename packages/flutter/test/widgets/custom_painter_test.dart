@@ -415,6 +415,7 @@ void _defineTests() {
             focused: true,
             inMutuallyExclusiveGroup: true,
             header: true,
+            obscured: true,
           ),
         ),
       ),

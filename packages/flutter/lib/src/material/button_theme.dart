@@ -133,7 +133,7 @@ class ButtonTheme extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(ButtonTheme oldTheme) => data != oldTheme.data;
+  bool updateShouldNotify(ButtonTheme oldWidget) => data != oldWidget.data;
 }
 
 /// Used with [ButtonTheme] to configure the color and geometry of buttons.
@@ -274,15 +274,15 @@ class ButtonThemeData extends Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     const ButtonThemeData defaultTheme = const ButtonThemeData();
-    description.add(new EnumProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: defaultTheme.textTheme));
-    description.add(new DoubleProperty('minWidth', minWidth, defaultValue: defaultTheme.minWidth));
-    description.add(new DoubleProperty('height', height, defaultValue: defaultTheme.height));
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultTheme.padding));
-    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultTheme.shape));
-    description.add(new FlagProperty('alignedDropdown',
+    properties.add(new EnumProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: defaultTheme.textTheme));
+    properties.add(new DoubleProperty('minWidth', minWidth, defaultValue: defaultTheme.minWidth));
+    properties.add(new DoubleProperty('height', height, defaultValue: defaultTheme.height));
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultTheme.padding));
+    properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultTheme.shape));
+    properties.add(new FlagProperty('alignedDropdown',
       value: alignedDropdown,
       defaultValue: defaultTheme.alignedDropdown,
       ifTrue: 'dropdown width matches button',

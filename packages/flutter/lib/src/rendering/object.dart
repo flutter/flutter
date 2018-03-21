@@ -2504,19 +2504,19 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   @protected
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
-    description.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
-    description.add(new DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
+    properties.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
+    properties.add(new DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));
     // don't access it via the "layer" getter since that's only valid when we don't need paint
-    description.add(new DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
-    description.add(new DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));
-    description.add(new FlagProperty(
+    properties.add(new DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
+    properties.add(new DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));
+    properties.add(new FlagProperty(
       'isBlockingSemanticsOfPreviouslyPaintedNodes',
       value: _semanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes,
       ifTrue: 'blocks semantics of earlier render objects below the common boundary',
     ));
-    description.add(new FlagProperty('isSemanticBoundary', value: _semanticsConfiguration.isSemanticBoundary, ifTrue: 'semantic boundary'));
+    properties.add(new FlagProperty('isSemanticBoundary', value: _semanticsConfiguration.isSemanticBoundary, ifTrue: 'semantic boundary'));
   }
 
   @override

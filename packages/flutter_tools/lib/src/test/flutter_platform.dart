@@ -144,10 +144,10 @@ class _Compiler {
           printTrace('Compiling ${request.path}');
           compiler ??= createCompiler();
           suppressOutput = false;
-          final String outputPath = await compiler.recompile(request.path,
+          final String outputPath = await handleTimeout(compiler.recompile(request.path,
             <String>[request.path],
             outputPath: outputDill.path,
-          );
+          ), request.path);
 
           // Check if the compiler produced the output. If it failed then
           // outputPath would be null. In this case pass null upwards to the
@@ -180,12 +180,19 @@ class _Compiler {
   Future<String> compile(String mainDart) {
     final Completer<String> completer = new Completer<String>();
     compilerController.add(new _CompilationRequest(mainDart, completer));
-    return completer.future;
+    return handleTimeout(completer.future, mainDart);
   }
 
   Future<dynamic> shutdown() async {
     await compiler.shutdown();
     compiler = null;
+  }
+
+  static Future<String> handleTimeout(Future<String> value, String path) {
+    return value.timeout(const Duration(minutes: 5), onTimeout: () {
+      printError('Compilation of $path timed out after 5 minutes.');
+      return null;
+    });
   }
 }
 

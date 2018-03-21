@@ -92,11 +92,11 @@ class Tooltip extends StatefulWidget {
   _TooltipState createState() => new _TooltipState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new StringProperty('message', message, showName: false));
-    description.add(new DoubleProperty('vertical offset', verticalOffset));
-    description.add(new FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new StringProperty('message', message, showName: false));
+    properties.add(new DoubleProperty('vertical offset', verticalOffset));
+    properties.add(new FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
   }
 }
 

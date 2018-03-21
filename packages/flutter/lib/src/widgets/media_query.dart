@@ -403,11 +403,11 @@ class MediaQuery extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(MediaQuery old) => data != old.data;
+  bool updateShouldNotify(MediaQuery oldWidget) => data != oldWidget.data;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
   }
 }

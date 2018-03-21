@@ -1265,9 +1265,9 @@ abstract class RenderSliver extends RenderObject {
   void handleEvent(PointerEvent event, SliverHitTestEntry entry) { }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<SliverGeometry>('geometry', geometry));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<SliverGeometry>('geometry', geometry));
   }
 }
 
