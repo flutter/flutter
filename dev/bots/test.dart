@@ -108,7 +108,9 @@ Future<Null> _analyzeRepo() async {
   );
 
   // Ensure that all package dependencies are in sync.
-  await _runCommand(flutterRoot, <String>['update-packages', '--verify-only']);
+  await _runCommand(flutterRoot, <String>['update-packages', '--verify-only'], 
+    workingDirectory: flutterRoot,
+  );
 
   // Analyze all the sample code in the repo
   await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],

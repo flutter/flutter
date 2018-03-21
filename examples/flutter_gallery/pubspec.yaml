@@ -4,7 +4,7 @@ dependencies:
     sdk: flutter
   collection: 1.14.6
   device_info: 0.2.0
-  intl: 0.15.3
+  intl: 0.15.4
   connectivity: 0.3.0
   string_scanner: 1.0.2
   url_launcher: 3.0.0
@@ -166,4 +166,4 @@ flutter:
       fonts:
         - asset: packages/flutter_gallery_assets/shrine/fonts/abrilfatface/AbrilFatface-Regular.ttf
 
-# PUBSPEC CHECKSUM: b5b7
+# PUBSPEC CHECKSUM: 5fb8

@@ -15,7 +15,7 @@ dependencies:
   crypto: 2.0.2+1
   file: 3.0.0
   http: 0.11.3+16
-  intl: 0.15.3
+  intl: 0.15.4
   json_rpc_2: 2.0.7
   json_schema: 1.0.8
   linter: 0.1.45
@@ -95,4 +95,4 @@ dependency_overrides:
   kernel:
     path: ../../bin/cache/dart-sdk/lib/kernel
 
-# PUBSPEC CHECKSUM: eea4
+# PUBSPEC CHECKSUM: 15a5
