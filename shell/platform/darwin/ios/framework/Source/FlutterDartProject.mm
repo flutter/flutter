@@ -146,14 +146,27 @@ static NSURL* URLForSwitch(const fxl::StringView name) {
 
 #pragma mark - Assets-related utilities
 
-+ (NSString*)pathForFlutterAssetsFromBundle:(NSBundle*)bundle {
++ (NSString*)flutterAssetsName:(NSBundle*)bundle {
   NSString* flutterAssetsName = [bundle objectForInfoDictionaryKey:@"FLTAssetsPath"];
   if (flutterAssetsName == nil) {
     // Default to "flutter_assets"
     flutterAssetsName = @"flutter_assets";
   }
+  return flutterAssetsName;
+}
 
++ (NSString*)pathForFlutterAssetsFromBundle:(NSBundle*)bundle {
+  NSString* flutterAssetsName = [FlutterDartProject flutterAssetsName:bundle];
   return [bundle pathForResource:flutterAssetsName ofType:nil];
+}
+
++ (NSString*)lookupKeyForAsset:(NSString*)asset {
+  NSString* flutterAssetsName = [FlutterDartProject flutterAssetsName: [NSBundle mainBundle]];
+  return [NSString stringWithFormat:@"%@/%@", flutterAssetsName, asset];
+}
+
++ (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package {
+  return [self lookupKeyForAsset:[NSString stringWithFormat:@"packages/%@/%@", package, asset]];
 }
 
 #pragma mark - Launching the project in a preconfigured engine.
