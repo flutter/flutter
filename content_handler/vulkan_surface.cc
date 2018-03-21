@@ -152,6 +152,8 @@ bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrContext> context,
     return false;
   }
 
+  const SkColorType color_type = kBGRA_8888_SkColorType;
+
   // Create the image.
   const VkImageCreateInfo image_create_info = {
       .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -255,12 +257,13 @@ bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrContext> context,
     return false;
   }
 
-  return SetupSkiaSurface(std::move(context), size, image_create_info,
-                          memory_reqs);
+  return SetupSkiaSurface(std::move(context), size, color_type,
+                          image_create_info, memory_reqs);
 }
 
 bool VulkanSurface::SetupSkiaSurface(sk_sp<GrContext> context,
                                      const SkISize& size,
+                                     SkColorType color_type,
                                      const VkImageCreateInfo& image_create_info,
                                      const VkMemoryRequirements& memory_reqs) {
   if (context == nullptr) {
@@ -286,6 +289,7 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrContext> context,
       SkSurface::MakeFromBackendRenderTarget(context.get(),             //
                                              sk_render_target,          //
                                              kTopLeft_GrSurfaceOrigin,  //
+                                             color_type,                //
                                              nullptr,                   //
                                              &sk_surface_props          //
       );

@@ -4,6 +4,9 @@
 
 #include "gpu_surface_gl.h"
 
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include "flutter/glue/trace_event.h"
 #include "lib/fxl/arraysize.h"
 #include "lib/fxl/logging.h"
@@ -71,31 +74,35 @@ bool GPUSurfaceGL::IsValid() {
   return valid_;
 }
 
-static GrPixelConfig FirstSupportedConfig(GrContext* context) {
-#define RETURN_IF_RENDERABLE(x)                          \
-  if (context->caps()->isConfigRenderable((x), false)) { \
-    return (x);                                          \
+static SkColorType FirstSupportedColorType(GrContext* context, GLenum* format) {
+#define RETURN_IF_RENDERABLE(x, y)                 \
+  if (context->colorTypeSupportedAsSurface((x))) { \
+    *format = (y);                                 \
+    return (x);                                    \
   }
-  RETURN_IF_RENDERABLE(kRGBA_8888_GrPixelConfig);
-  RETURN_IF_RENDERABLE(kRGBA_4444_GrPixelConfig);
-  RETURN_IF_RENDERABLE(kRGB_565_GrPixelConfig);
-  return kUnknown_GrPixelConfig;
+  RETURN_IF_RENDERABLE(kRGBA_8888_SkColorType, GL_RGBA8_OES);
+  RETURN_IF_RENDERABLE(kARGB_4444_SkColorType, GL_RGBA4);
+  RETURN_IF_RENDERABLE(kRGB_565_SkColorType, GL_RGB565);
+  return kUnknown_SkColorType;
 }
 
 static sk_sp<SkSurface> WrapOnscreenSurface(GrContext* context,
                                             const SkISize& size,
                                             intptr_t fbo) {
+
+  GLenum format;
+  const SkColorType color_type = FirstSupportedColorType(context, &format);
+
   const GrGLFramebufferInfo framebuffer_info = {
       .fFBOID = static_cast<GrGLuint>(fbo),
+      .fFormat = format,
   };
 
-  const GrPixelConfig pixel_config = FirstSupportedConfig(context);
 
   GrBackendRenderTarget render_target(size.fWidth,      // width
                                       size.fHeight,     // height
                                       0,                // sample count
                                       0,                // stencil bits (TODO)
-                                      pixel_config,     // pixel config
                                       framebuffer_info  // framebuffer info
   );
 
@@ -108,6 +115,7 @@ static sk_sp<SkSurface> WrapOnscreenSurface(GrContext* context,
       context,                                       // gr context
       render_target,                                 // render target
       GrSurfaceOrigin::kBottomLeft_GrSurfaceOrigin,  // origin
+      color_type,                                    // color type
       colorspace,                                    // colorspace
       &surface_props                                 // surface properties
   );
