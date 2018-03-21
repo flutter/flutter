@@ -445,7 +445,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     if (response.statusCode != HttpStatus.OK)
       throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
-    final Uint8List bytes = await const ResponseConverter().convert(response);
+    final Uint8List bytes = await convertResponse(response);
     if (bytes.lengthInBytes == 0)
       throw new Exception('NetworkImage is an empty file: $resolved');
 

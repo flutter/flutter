@@ -47,7 +47,7 @@ export 'src/foundation/observer_list.dart';
 export 'src/foundation/platform.dart';
 export 'src/foundation/print.dart';
 export 'src/foundation/profile.dart';
-export 'src/foundation/response_converter.dart';
+export 'src/foundation/convert_response.dart';
 export 'src/foundation/serialization.dart';
 export 'src/foundation/synchronous_future.dart';
 export 'src/foundation/unicode.dart';
