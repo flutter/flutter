@@ -65,6 +65,15 @@ LoggingFunction defaultLoggingFunction = (LogMessage log) {
 /// to print from the global logging function defined in
 /// [Logger.loggingFunction] (a function that can be user-defined).
 class LogMessage {
+  /// Creates a log, including the level of the log, the time it was created,
+  /// and the actual log message.
+  ///
+  /// When this message is created, it sets its [time] to [DateTime.now].
+  LogMessage(this.message, this.tag, this.level)
+      : this.levelName =
+            level.toString().substring(level.toString().indexOf('.') + 1),
+        this.time = new DateTime.now();
+
   /// The actual log message.
   final String message;
 
@@ -80,15 +89,6 @@ class LogMessage {
   /// The tag associated with the message. This is set to [Logger.tag] when
   /// emitted by a [Logger] object.
   final String tag;
-
-  /// Creates a log, including the level of the log, the time it was created,
-  /// and the actual log message.
-  ///
-  /// When this message is created, it sets its [time] to [DateTime.now].
-  LogMessage(this.message, this.tag, this.level)
-      : this.levelName =
-            level.toString().substring(level.toString().indexOf('.') + 1),
-        this.time = new DateTime.now();
 }
 
 /// Logs messages using the global [LoggingFunction] and logging level.
