@@ -9,7 +9,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
-import 'colors.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'tooltip.dart';
@@ -79,11 +78,13 @@ class FloatingActionButton extends StatefulWidget {
     this.mini: false,
     this.notchMargin: 4.0,
     this.shape: const CircleBorder(),
+    this.isExtended: false,
   }) :  assert(elevation != null),
         assert(highlightElevation != null),
         assert(mini != null),
         assert(notchMargin != null),
         assert(shape != null),
+        assert(isExtended != null),
         _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
         super(key: key);
 
@@ -103,13 +104,16 @@ class FloatingActionButton extends StatefulWidget {
     @required this.onPressed,
     this.notchMargin: 4.0,
     this.shape: const StadiumBorder(),
+    this.isExtended: true,
     @required Widget icon,
     @required Widget label,
   }) :  assert(elevation != null),
         assert(highlightElevation != null),
         assert(notchMargin != null),
         assert(shape != null),
+        assert(isExtended != null),
         _sizeConstraints = _kExtendedSizeConstraints,
+        mini = false,
         child = new Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -207,6 +211,17 @@ class FloatingActionButton extends StatefulWidget {
   /// shape as well.
   final ShapeBorder shape;
 
+  /// True if this is an "extended" floating action button.
+  ///
+  /// Typically [extended] buttons have a [StadiumBorder] [shape]
+  /// and have been created with the [FloatingActionButton.extended]
+  /// constructor.
+  ///
+  /// The [Scaffold] animates the appearance of ordinary floating
+  /// action buttons with scale and rotation transitions. Extended
+  /// floating action buttons are scaled and faded in.
+  final bool isExtended;
+
   final BoxConstraints _sizeConstraints;
 
   @override
@@ -238,13 +253,6 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       );
     }
 
-    if (widget.tooltip != null) {
-      result = new Tooltip(
-        message: widget.tooltip,
-        child: result,
-      );
-    }
-
     result = new RawMaterialButton(
       onPressed: widget.onPressed,
       onHighlightChanged: _handleHighlightChanged,
@@ -255,6 +263,13 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       shape: widget.shape,
       child: result,
     );
+
+    if (widget.tooltip != null) {
+      result = new Tooltip(
+        message: widget.tooltip,
+        child: result,
+      );
+    }
 
     if (widget.heroTag != null) {
       result = new Hero(
