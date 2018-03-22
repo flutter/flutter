@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../lib/app_bar_bottom.dart' as app_bar_bottom_sample;
+import 'package:sample_catalog/app_bar_bottom.dart' as app_bar_bottom_sample;
 
 final int choiceCount = app_bar_bottom_sample.choices.length;
 IconData iconAt(int index) => app_bar_bottom_sample.choices[index].icon;

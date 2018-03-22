@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../lib/overlay_geometry.dart' as overlay_geometry;
+import 'package:manual_tests/overlay_geometry.dart' as overlay_geometry;
 
 void main() {
   testWidgets('Overlay geometry smoke test', (WidgetTester tester) async {
