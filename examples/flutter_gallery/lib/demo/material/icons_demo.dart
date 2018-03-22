@@ -52,16 +52,16 @@ class IconsDemoState extends State<IconsDemo> {
       ),
       body: new IconTheme(
         data: new IconThemeData(color: iconColor),
-        child: new Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: new SafeArea(
-            top: false,
-            bottom: false,
-            child: new Column(
-              children: <Widget>[
-                new _IconsDemoCard(handleIconButtonPress),
-              ],
-            ),
+        child: new SafeArea(
+          top: false,
+          bottom: false,
+          child: new ListView(
+            padding: const EdgeInsets.all(24.0),
+            children: <Widget>[
+              new _IconsDemoCard(handleIconButtonPress, Icons.face), // direction-agnostic icon
+              const SizedBox(height: 24.0),
+              new _IconsDemoCard(handleIconButtonPress, Icons.battery_unknown), // direction-aware icon
+            ],
           ),
         ),
       ),
@@ -70,10 +70,10 @@ class IconsDemoState extends State<IconsDemo> {
 }
 
 class _IconsDemoCard extends StatelessWidget {
-
-  const _IconsDemoCard(this.handleIconButtonPress);
+  const _IconsDemoCard(this.handleIconButtonPress, this.icon);
 
   final VoidCallback handleIconButtonPress;
+  final IconData icon;
 
   Widget _buildIconButton(double iconSize, IconData icon, bool enabled) {
     return new IconButton(
@@ -95,8 +95,8 @@ class _IconsDemoCard extends StatelessWidget {
     return new TableRow(
       children: <Widget> [
         _centeredText(size.floor().toString()),
-        _buildIconButton(size, Icons.face, true),
-        _buildIconButton(size, Icons.face, false),
+        _buildIconButton(size, icon, true),
+        _buildIconButton(size, icon, false),
       ],
     );
   }
