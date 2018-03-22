@@ -87,7 +87,7 @@ static SkColorType FirstSupportedColorType(GrContext* context, GLenum* format) {
     *format = (y);                                 \
     return (x);                                    \
   }
-#if OS_MACOSX
+#if OS_MACOSX && !OS_IOS
   RETURN_IF_RENDERABLE(kRGBA_8888_SkColorType, GL_RGBA8);
 #else
   RETURN_IF_RENDERABLE(kRGBA_8888_SkColorType, GL_RGBA8_OES);
