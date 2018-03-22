@@ -41,26 +41,43 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 /// Used with [CustomMultiChildLayout], the widget for the
 /// [RenderCustomMultiChildLayoutBox] render object.
 ///
-/// ## Example
+/// Each child must be wrapped in a [LayoutId] widget to assign the id that
+/// identifies it to the delegate. The [LayoutId.id] needs to be unique among
+/// the children that the [CustomMultiChildLayout] manages.
+///
+/// ## Sample code
 ///
 /// Below is an example implementation of [performLayout] that causes one widget
-/// to be the same size as another:
+/// (the follower) to be the same size as another (the leader):
 ///
 /// ```dart
-/// @override
-/// void performLayout(Size size) {
-///   Size followerSize = Size.zero;
-///
-///   if (hasChild(_Slots.leader) {
-///     followerSize = layoutChild(_Slots.leader, new BoxConstraints.loose(size));
-///     positionChild(_Slots.leader, Offset.zero);
+/// // Define your own slot numbers, depending upon the id assigned by LayoutId.
+/// // Typical usage is to define an enum like the one below, and use those
+/// // values as the ids.
+/// enum _Slot {
+///   leader,
+///   follower,
+/// }
+/// 
+/// class FollowTheLeader extends MultiChildLayoutDelegate {
+///   @override
+///   void performLayout(Size size) {
+///     Size leaderSize = Size.zero;
+/// 
+///     if (hasChild(_Slot.leader)) {
+///       leaderSize = layoutChild(_Slot.leader, new BoxConstraints.loose(size));
+///       positionChild(_Slot.leader, Offset.zero);
+///     }
+/// 
+///     if (hasChild(_Slot.follower)) {
+///       layoutChild(_Slot.follower, new BoxConstraints.tight(leaderSize));
+///       positionChild(_Slot.follower, new Offset(size.width - leaderSize.width,
+///           size.height - leaderSize.height));
+///     }
 ///   }
-///
-///   if (hasChild(_Slots.follower)) {
-///     layoutChild(_Slots.follower, new BoxConstraints.tight(followerSize));
-///     positionChild(_Slots.follower, new Offset(size.width - followerSize.width,
-///                                               size.height - followerSize.height));
-///   }
+/// 
+///   @override
+///   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => false;
 /// }
 /// ```
 ///

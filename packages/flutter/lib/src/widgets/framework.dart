@@ -4462,13 +4462,17 @@ abstract class RenderObjectElement extends Element {
   @override
   void deactivate() {
     super.deactivate();
-    assert(!renderObject.attached);
+    assert(!renderObject.attached,
+      'A RenderObject was still attached when attempting to deactivate its '
+      'RenderObjectElement: $renderObject');
   }
 
   @override
   void unmount() {
     super.unmount();
-    assert(!renderObject.attached);
+    assert(!renderObject.attached,
+      'A RenderObject was still attached when attempting to unmount its '
+      'RenderObjectElement: $renderObject');
     widget.didUnmountRenderObject(renderObject);
   }
 
