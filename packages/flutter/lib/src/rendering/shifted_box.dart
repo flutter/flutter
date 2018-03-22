@@ -590,7 +590,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 /// child, the child will be clipped.
 ///
 /// In debug mode, if the child overflows the box, a warning will be printed on
-/// the console, and black and yellow striped areas will appear where theR
+/// the console, and black and yellow striped areas will appear where the
 /// overflow occurs.
 ///
 /// See also:

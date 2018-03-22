@@ -27,7 +27,7 @@ void main() {
     expect(decoration.color, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
-    expect(paragraph.text.style.color, equals(Colors.white));
+    expect(paragraph.text.style.color, equals(new ThemeData.fallback().primaryColorLight));
   });
 
   testWidgets('CircleAvatar with light background color', (WidgetTester tester) async {
@@ -50,7 +50,7 @@ void main() {
     expect(decoration.color, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
-    expect(paragraph.text.style.color, equals(Colors.black));
+    expect(paragraph.text.style.color, equals(new ThemeData.fallback().primaryColorDark));
   });
 
   testWidgets('CircleAvatar with foreground color', (WidgetTester tester) async {
@@ -71,13 +71,13 @@ void main() {
     expect(box.size.height, equals(40.0));
     final RenderDecoratedBox child = box.child;
     final BoxDecoration decoration = child.decoration;
-    expect(decoration.color, equals(fallback.primaryColor));
+    expect(decoration.color, equals(fallback.primaryColorDark));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
     expect(paragraph.text.style.color, equals(foregroundColor));
   });
 
-  testWidgets('CircleAvatar with theme', (WidgetTester tester) async {
+  testWidgets('CircleAvatar with light theme', (WidgetTester tester) async {
     final ThemeData theme = new ThemeData(
       primaryColor: Colors.grey.shade100,
       primaryColorBrightness: Brightness.light,
@@ -96,7 +96,32 @@ void main() {
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
     final RenderDecoratedBox child = box.child;
     final BoxDecoration decoration = child.decoration;
-    expect(decoration.color, equals(theme.primaryColor));
+    expect(decoration.color, equals(theme.primaryColorLight));
+
+    final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
+    expect(paragraph.text.style.color, equals(theme.primaryTextTheme.title.color));
+  });
+
+  testWidgets('CircleAvatar with dark theme', (WidgetTester tester) async {
+    final ThemeData theme = new ThemeData(
+      primaryColor: Colors.grey.shade800,
+      primaryColorBrightness: Brightness.dark,
+    );
+    await tester.pumpWidget(
+      wrap(
+        child: new Theme(
+          data: theme,
+          child: const CircleAvatar(
+            child: const Text('Z'),
+          ),
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderDecoratedBox child = box.child;
+    final BoxDecoration decoration = child.decoration;
+    expect(decoration.color, equals(theme.primaryColorDark));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
     expect(paragraph.text.style.color, equals(theme.primaryTextTheme.title.color));
@@ -143,6 +168,78 @@ void main() {
       ),
     );
     expect(tester.getSize(find.text('Z')), equals(const Size(20.0, 20.0)));
+  });
+
+  testWidgets('CircleAvatar respects minRadius', (WidgetTester tester) async {
+    final Color backgroundColor = Colors.blue.shade900;
+    await tester.pumpWidget(
+      wrap(
+        child: new UnconstrainedBox(
+          child: new CircleAvatar(
+            backgroundColor: backgroundColor,
+            minRadius: 50.0,
+            child: const Text('Z'),
+          ),
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    expect(box.size.width, equals(100.0));
+    expect(box.size.height, equals(100.0));
+    final RenderDecoratedBox child = box.child;
+    final BoxDecoration decoration = child.decoration;
+    expect(decoration.color, equals(backgroundColor));
+
+    final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
+    expect(paragraph.text.style.color, equals(new ThemeData.fallback().primaryColorLight));
+  });
+
+  testWidgets('CircleAvatar respects maxRadius', (WidgetTester tester) async {
+    final Color backgroundColor = Colors.blue.shade900;
+    await tester.pumpWidget(
+      wrap(
+        child: new CircleAvatar(
+          backgroundColor: backgroundColor,
+          maxRadius: 50.0,
+          child: const Text('Z'),
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    expect(box.size.width, equals(100.0));
+    expect(box.size.height, equals(100.0));
+    final RenderDecoratedBox child = box.child;
+    final BoxDecoration decoration = child.decoration;
+    expect(decoration.color, equals(backgroundColor));
+
+    final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
+    expect(paragraph.text.style.color, equals(new ThemeData.fallback().primaryColorLight));
+  });
+
+  testWidgets('CircleAvatar respects setting both minRadius and maxRadius', (WidgetTester tester) async {
+    final Color backgroundColor = Colors.blue.shade900;
+    await tester.pumpWidget(
+      wrap(
+        child: new CircleAvatar(
+          backgroundColor: backgroundColor,
+          maxRadius: 50.0,
+          minRadius: 50.0,
+          child: const Text('Z'),
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    expect(box.size.width, equals(100.0));
+    expect(box.size.height, equals(100.0));
+    final RenderDecoratedBox child = box.child;
+    final BoxDecoration decoration = child.decoration;
+    expect(decoration.color, equals(backgroundColor));
+
+    final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
+    expect(paragraph.text.style.color, equals(new ThemeData.fallback().primaryColorLight));
   });
 }
 
