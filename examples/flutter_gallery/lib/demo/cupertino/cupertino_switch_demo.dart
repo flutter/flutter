@@ -23,15 +23,60 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
         title: const Text('Cupertino Switch'),
       ),
       body: new Center(
-        child: new CupertinoSwitch(
-          value: _switchValue,
-          onChanged: (bool value) {
-            setState(() {
-              _switchValue = value;
-            });
-          }
-        ),
-      ),
+        child: new Container(
+          height: 300.0,
+          child: new Column(
+            children: <Widget>[
+              new Expanded(
+                flex: 1,
+                child: new Column(
+                  children: <Widget>[
+                    new CupertinoSwitch(
+                      value: _switchValue,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _switchValue = value;
+                        });
+                      },
+                    ),
+                    const Text(
+                      'Active'
+                    )
+                  ],
+                )
+              ),
+              new Expanded(
+                flex: 1,
+                child: new Column(
+                  children: <Widget>[
+                    const CupertinoSwitch(
+                      value: true,
+                      onChanged: null,
+                    ),
+                    const Text(
+                      'Disable'
+                    )
+                  ],
+                ),
+              ),
+              new Expanded(
+                flex: 1,
+                child: new Column(
+                  children: <Widget>[
+                    const CupertinoSwitch(
+                      value: false,
+                      onChanged: null,
+                    ),
+                    const Text(
+                      'Disable'
+                    )
+                  ],   
+                ),
+              )
+            ],
+          ),
+        )
+      )
     );
   }
 }
