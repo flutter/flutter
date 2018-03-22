@@ -11,7 +11,6 @@ import 'border_radius.dart';
 import 'borders.dart';
 import 'circle_border.dart';
 import 'edge_insets.dart';
-import 'stadium_border.dart';
 
 /// A rectangular border with rounded corners.
 ///
@@ -70,13 +69,6 @@ class RoundedRectangleBorder extends ShapeBorder {
         circleness: 1.0 - t,
       );
     }
-    if (a is StadiumBorder) {
-      return new _RoundedRectangleToStadiumBorder(
-        side: BorderSide.lerp(a.side, side, t),
-        borderRadius: borderRadius,
-        circleness: 1.0 - t,
-      );
-    }
     return super.lerpFrom(a, t);
   }
 
@@ -91,13 +83,6 @@ class RoundedRectangleBorder extends ShapeBorder {
     }
     if (b is CircleBorder) {
       return new _RoundedRectangleToCircleBorder(
-        side: BorderSide.lerp(side, b.side, t),
-        borderRadius: borderRadius,
-        circleness: t,
-      );
-    }
-    if (b is StadiumBorder) {
-      return new _RoundedRectangleToStadiumBorder(
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: borderRadius,
         circleness: t,
@@ -312,143 +297,5 @@ class _RoundedRectangleToCircleBorder extends ShapeBorder {
   @override
   String toString() {
     return 'RoundedRectangleBorder($side, $borderRadius, ${(circleness * 100).toStringAsFixed(1)}% of the way to being a CircleBorder)';
-  }
-}
-
-class _RoundedRectangleToStadiumBorder extends ShapeBorder {
-  const _RoundedRectangleToStadiumBorder({
-    this.side: BorderSide.none,
-    this.borderRadius: BorderRadius.zero,
-    @required this.circleness,
-  }) : assert(side != null),
-       assert(borderRadius != null),
-       assert(circleness != null);
-
-  final BorderSide side;
-
-  final BorderRadius borderRadius;
-
-  final double circleness;
-
-  @override
-  EdgeInsetsGeometry get dimensions {
-    return new EdgeInsets.all(side.width);
-  }
-
-  @override
-  ShapeBorder scale(double t) {
-    return new _RoundedRectangleToStadiumBorder(
-      side: side.scale(t),
-      borderRadius: borderRadius * t,
-      circleness: t,
-    );
-  }
-
-  @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
-    assert(t != null);
-    if (a is RoundedRectangleBorder) {
-      return new _RoundedRectangleToStadiumBorder(
-        side: BorderSide.lerp(a.side, side, t),
-        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
-        circleness: circleness * t,
-      );
-    }
-    if (a is StadiumBorder) {
-      return new _RoundedRectangleToStadiumBorder(
-        side: BorderSide.lerp(a.side, side, t),
-        borderRadius: borderRadius,
-        circleness: circleness + (1.0 - circleness) * (1.0 - t),
-      );
-    }
-    if (a is _RoundedRectangleToStadiumBorder) {
-      return new _RoundedRectangleToStadiumBorder(
-        side: BorderSide.lerp(a.side, side, t),
-        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
-        circleness: ui.lerpDouble(a.circleness, circleness, t),
-      );
-    }
-    return super.lerpFrom(a, t);
-  }
-
-  @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
-    if (b is RoundedRectangleBorder) {
-      return new _RoundedRectangleToStadiumBorder(
-        side: BorderSide.lerp(side, b.side, t),
-        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
-        circleness: circleness * (1.0 - t),
-      );
-    }
-    if (b is StadiumBorder) {
-      return new _RoundedRectangleToStadiumBorder(
-        side: BorderSide.lerp(side, b.side, t),
-        borderRadius: borderRadius,
-        circleness: circleness + (1.0 - circleness) * t,
-      );
-    }
-    if (b is _RoundedRectangleToStadiumBorder) {
-      return new _RoundedRectangleToStadiumBorder(
-        side: BorderSide.lerp(side, b.side, t),
-        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
-        circleness: ui.lerpDouble(circleness, b.circleness, t),
-      );
-    }
-    return super.lerpTo(b, t);
-  }
-
-  BorderRadius _adjustBorderRadius(Rect rect) {
-    if (circleness == 0.0)
-      return borderRadius;
-    return BorderRadius.lerp(borderRadius, new BorderRadius.circular(rect.shortestSide / 2.0), circleness);
-  }
-
-  @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()
-      ..addRRect(_adjustBorderRadius(rect).toRRect(rect).deflate(side.width));
-  }
-
-  @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()
-      ..addRRect(_adjustBorderRadius(rect).toRRect(rect));
-  }
-
-  @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
-    switch (side.style) {
-      case BorderStyle.none:
-        break;
-      case BorderStyle.solid:
-        final double width = side.width;
-        if (width == 0.0) {
-          canvas.drawRRect(_adjustBorderRadius(rect).toRRect(rect), side.toPaint());
-        } else {
-          final RRect outer = _adjustBorderRadius(rect).toRRect(rect);
-          final RRect inner = outer.deflate(width);
-          final Paint paint = new Paint()
-            ..color = side.color;
-          canvas.drawDRRect(outer, inner, paint);
-        }
-    }
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
-      return false;
-    final _RoundedRectangleToStadiumBorder typedOther = other;
-    return side == typedOther.side
-        && borderRadius == typedOther.borderRadius
-        && circleness == typedOther.circleness;
-  }
-
-  @override
-  int get hashCode => hashValues(side, borderRadius, circleness);
-
-  @override
-  String toString() {
-    return 'RoundedRectangleBorder($side, $borderRadius, ${(circleness * 100).toStringAsFixed(1)}% of the way to being a StadiumBorder)';
   }
 }
