@@ -248,10 +248,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       duration: Duration.zero,
       vsync: this,
     );
-    // Create timer in a cancelled state, so that we don't have to
-    // check for null below.
-    interactionTimer = new Timer(Duration.zero, () {});
-    interactionTimer.cancel();
     enableController.value = widget.onChanged != null ? 1.0 : 0.0;
     positionController.value = _unlerp(widget.value);
   }
@@ -643,14 +639,12 @@ class _RenderSlider extends RenderBox {
       _state.overlayController.forward();
       if (showValueIndicator) {
         _state.valueIndicatorController.forward();
-        if (_state.interactionTimer.isActive) {
-          _state.interactionTimer.cancel();
-        }
+        _state.interactionTimer?.cancel();
         _state.interactionTimer = new Timer(_minimumInteractionTime * timeDilation, () {
           if (!_active && _state.valueIndicatorController.status == AnimationStatus.completed) {
             _state.valueIndicatorController.reverse();
           }
-          _state.interactionTimer.cancel();
+          _state.interactionTimer = null;
         });
       }
     }
@@ -661,7 +655,7 @@ class _RenderSlider extends RenderBox {
       _active = false;
       _currentDragValue = 0.0;
       _state.overlayController.reverse();
-      if (showValueIndicator && !_state.interactionTimer.isActive) {
+      if (showValueIndicator && _state.interactionTimer == null) {
         _state.valueIndicatorController.reverse();
       }
     }
