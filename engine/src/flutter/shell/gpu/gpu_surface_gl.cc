@@ -9,6 +9,8 @@
 #include <OpenGLES/ES2/glext.h>
 #elif OS_MACOSX
 #include <OpenGL/gl3.h>
+#elif OS_LINUX
+#include <GL/gl.h>
 #else
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -87,7 +89,7 @@ static SkColorType FirstSupportedColorType(GrContext* context, GLenum* format) {
     *format = (y);                                 \
     return (x);                                    \
   }
-#if OS_MACOSX && !OS_IOS
+#if (OS_MACOSX && !OS_IOS) || OS_LINUX
   RETURN_IF_RENDERABLE(kRGBA_8888_SkColorType, GL_RGBA8);
 #else
   RETURN_IF_RENDERABLE(kRGBA_8888_SkColorType, GL_RGBA8_OES);
