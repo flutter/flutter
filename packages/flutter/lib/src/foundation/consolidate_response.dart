@@ -1,12 +1,15 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-
 /// Efficiently converts the response body of an [HttpClientResponse] into a [Uint8List].
 /// 
-/// The future returned by [convert] will forward all errors emitted by [response].
-Future<Uint8List> convertResponse(HttpClientResponse response) {
+/// The future returned will forward all errors emitted by [response].
+Future<Uint8List> consolidateHttpClientResponseBytes(HttpClientResponse response) {
   // dart:io guarantees that [contentLength] is -1 if the the header is missing or
   // invalid.  This could still happen if a mocked response object does not fully
   // implement the interface.

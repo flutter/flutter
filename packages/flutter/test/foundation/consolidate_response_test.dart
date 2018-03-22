@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  group(convertResponse, () {
+  group(consolidateHttpClientResponseBytes, () {
     final List<int> chunkOne = <int>[0, 1, 2, 3, 4, 5];
     final List<int> chunkTwo = <int>[6, 7, 8, 9, 10];
     MockHttpClientResponse response;
@@ -31,14 +31,14 @@ void main() {
 
     test('Converts an HttpClientResponse with contentLength to bytes', () async {
       when(response.contentLength).thenReturn(chunkOne.length + chunkTwo.length);
-      final List<int> bytes = await convertResponse(response);
+      final List<int> bytes = await consolidateHttpClientResponseBytes(response);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
 
     test('Converts an HttpClientResponse without contentLength to bytes', () async {
       when(response.contentLength).thenReturn(-1);
-      final List<int> bytes = await convertResponse(response);
+      final List<int> bytes = await consolidateHttpClientResponseBytes(response);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -60,7 +60,7 @@ void main() {
       });
       when(response.contentLength).thenReturn(-1);
 
-      expect(convertResponse(response), throwsA(const isInstanceOf<Exception>()));
+      expect(consolidateHttpClientResponseBytes(response), throwsA(const isInstanceOf<Exception>()));
     });
   });
 }
