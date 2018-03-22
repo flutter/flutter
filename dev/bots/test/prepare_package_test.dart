@@ -110,8 +110,7 @@ void main() {
       test('sets PUB_CACHE properly', () async {
         final String createBase = path.join(tmpDir.absolute.path, 'create_');
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
-          'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter':
-              null,
+          'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --abbrev=0': <ProcessResult>[new ProcessResult(0, 0, 'v1.2.3', '')],
@@ -154,8 +153,7 @@ void main() {
       test('calls the right commands for archive output', () async {
         final String createBase = path.join(tmpDir.absolute.path, 'create_');
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
-          'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter':
-              null,
+          'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --abbrev=0': <ProcessResult>[new ProcessResult(0, 0, 'v1.2.3', '')],
@@ -234,27 +232,38 @@ void main() {
         final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
         final String archiveMime = platform.isLinux ? 'application/x-gtar' : 'application/zip';
         final String archivePath = path.join(tempDir.absolute.path, archiveName);
-        final String gsArchivePath = 'gs://flutter_infra/releases/dev/$platformName/$archiveName';
+        final String gsArchivePath = 'gs://flutter_infra/releases/release/$platformName/$archiveName';
         final String jsonPath = path.join(tempDir.absolute.path, releasesName);
         final String gsJsonPath = 'gs://flutter_infra/releases/$releasesName';
         final String releasesJson = '''{
-    "base_url": "https://storage.googleapis.com/flutter_infra/releases",
-    "current_release": {
-        "beta": "6da8ec6bd0c4801b80d666869e4069698561c043",
-        "dev": "f88c60b38c3a5ef92115d24e3da4175b4890daba"
+  "base_url": "https://storage.googleapis.com/flutter_infra/releases",
+  "current_release": {
+    "beta": "3ea4d06340a97a1e9d7cae97567c64e0569dcaa2",
+    "dev": "5a58b36e36b8d7aace89d3950e6deb307956a6a0"
+  },
+  "releases": [
+    {
+      "hash": "5a58b36e36b8d7aace89d3950e6deb307956a6a0",
+      "channel": "dev",
+      "version": "v0.2.3",
+      "release_date": "2018-03-20T01:47:02.851729Z",
+      "archive": "dev/$platformName/flutter_${platformName}_v0.2.3-dev.zip"
     },
-    "releases": {
-        "6da8ec6bd0c4801b80d666869e4069698561c043": {
-            "${platformName}_archive": "dev/linux/flutter_${platformName}_0.21.0-beta.zip",
-            "release_date": "2017-12-19T10:30:00,847287019-08:00",
-            "version": "0.21.0-beta"
-        },
-        "f88c60b38c3a5ef92115d24e3da4175b4890daba": {
-            "${platformName}_archive": "dev/linux/flutter_${platformName}_0.22.0-dev.zip",
-            "release_date": "2018-01-19T13:30:09,728487019-08:00",
-            "version": "0.22.0-dev"
-        }
+    {
+      "hash": "b9bd51cc36b706215915711e580851901faebb40",
+      "channel": "beta",
+      "version": "v0.2.2",
+      "release_date": "2018-03-16T18:48:13.375013Z",
+      "archive": "dev/$platformName/flutter_${platformName}_v0.2.2-dev.zip"
+    },
+    {
+      "hash": "$testRef",
+      "channel": "release",
+      "version": "v0.0.0",
+      "release_date": "2018-03-20T01:47:02.851729Z",
+      "archive": "release/$platformName/flutter_${platformName}_v0.0.0-dev.zip"
     }
+  ]
 }
 ''';
         new File(jsonPath).writeAsStringSync(releasesJson);
@@ -271,8 +280,8 @@ void main() {
         final ArchivePublisher publisher = new ArchivePublisher(
           tempDir,
           testRef,
-          Branch.dev,
-          '1.2.3',
+          Branch.release,
+          'v1.2.3',
           outputFile,
           processManager: processManager,
           subprocessOutput: false,
@@ -285,15 +294,25 @@ void main() {
         expect(releaseFile.existsSync(), isTrue);
         final String contents = releaseFile.readAsStringSync();
         // Make sure new data is added.
-        expect(contents, contains('"dev": "$testRef"'));
-        expect(contents, contains('"$testRef": {'));
-        expect(contents, contains('"${platformName}_archive": "dev/$platformName/$archiveName"'));
+        expect(contents, contains('"hash": "$testRef"'));
+        expect(contents, contains('"channel": "release"'));
+        expect(contents, contains('"archive": "release/$platformName/$archiveName"'));
         // Make sure existing entries are preserved.
-        expect(contents, contains('"6da8ec6bd0c4801b80d666869e4069698561c043": {'));
-        expect(contents, contains('"f88c60b38c3a5ef92115d24e3da4175b4890daba": {'));
-        expect(contents, contains('"beta": "6da8ec6bd0c4801b80d666869e4069698561c043"'));
-        // Make sure it's valid JSON, and in the right format.
+        expect(contents, contains('"hash": "5a58b36e36b8d7aace89d3950e6deb307956a6a0"'));
+        expect(contents, contains('"hash": "b9bd51cc36b706215915711e580851901faebb40"'));
+        expect(contents, contains('"channel": "beta"'));
+        expect(contents, contains('"channel": "dev"'));
+        // Make sure old matching entries are removed.
+        expect(contents, isNot(contains('v0.0.0')));
         final Map<String, dynamic> jsonData = json.decode(contents);
+        final List<dynamic> releases = jsonData['releases'];
+        expect(releases.length, equals(3));
+        // Make sure the new entry is first (and hopefully it takes less than a
+        // minute to go from publishArchive above to this line!).
+        expect(
+          new DateTime.now().difference(DateTime.parse(releases[0]['release_date'])),
+          lessThan(const Duration(minutes: 1)),
+        );
         const JsonEncoder encoder = const JsonEncoder.withIndent('  ');
         expect(contents, equals(encoder.convert(jsonData)));
       });
