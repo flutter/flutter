@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show File;
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui show instantiateImageCodec, Codec;
 import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 
 import 'binding.dart';
 import 'image_stream.dart';
@@ -432,17 +431,21 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     );
   }
 
-  static final http.Client _httpClient = createHttpClient();
+  static final HttpClient _httpClient = new HttpClient();
 
   Future<ui.Codec> _loadAsync(NetworkImage key) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
-    final http.Response response = await _httpClient.get(resolved, headers: headers);
-    if (response == null || response.statusCode != 200)
+    final HttpClientRequest request = await _httpClient.getUrl(resolved);
+    headers?.forEach((String name, String value) {
+      request.headers.add(name, value);
+    });
+    final HttpClientResponse response = await request.close();
+    if (response.statusCode != HttpStatus.OK)
       throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
-    final Uint8List bytes = response.bodyBytes;
+    final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
     if (bytes.lengthInBytes == 0)
       throw new Exception('NetworkImage is an empty file: $resolved');
 
