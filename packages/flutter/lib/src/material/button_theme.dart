@@ -80,6 +80,16 @@ class ButtonTheme extends InheritedWidget {
        ),
        super(key: key, child: child);
 
+  /// Creates a button theme from [data].
+  ///
+  /// The [data] argument must not be null.
+  const ButtonTheme.fromButtonThemeData({
+    Key key,
+    @required this.data,
+    Widget child,
+  }) : assert(data != null),
+       super(key: key, child: child);
+
   /// Creates a button theme that is appropriate for button bars, as used in
   /// dialog footers and in the headers of data tables.
   ///
@@ -247,6 +257,26 @@ class ButtonThemeData extends Diagnosticable {
   ///
   /// This property only affects [DropdownButton] and its menu.
   final bool alignedDropdown;
+
+  /// Creates a copy of this button theme data object with the matching fields
+  /// replaced with the non-null parameter values.
+  ButtonThemeData copyWith({
+    ButtonTextTheme textTheme,
+    double minWidth,
+    double height,
+    EdgeInsetsGeometry padding,
+    ShapeBorder shape,
+    bool alignedDropdown,
+  }) {
+    return new ButtonThemeData(
+      textTheme: textTheme ?? this.textTheme,
+      minWidth: minWidth ?? this.minWidth,
+      height: height ?? this.height,
+      padding: padding ?? this.padding,
+      shape: shape ?? this.shape,
+      alignedDropdown: alignedDropdown ?? this.alignedDropdown,
+    );
+  }
 
   @override
   bool operator ==(dynamic other) {
