@@ -27,7 +27,7 @@ void main() {
     showModalBottomSheet<Null>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet')
-    ).then<Null>((Null result) {
+    ).then<void>((Null result) {
       expectSync(result, isNull);
       showBottomSheetThenCalled = true;
     });
@@ -49,7 +49,7 @@ void main() {
     showModalBottomSheet<Null>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet'),
-    ).then<Null>((Null result) {
+    ).then<void>((Null result) {
       expectSync(result, isNull);
       showBottomSheetThenCalled = true;
     });
@@ -172,7 +172,7 @@ void main() {
           ),
           child: new Navigator(
             onGenerateRoute: (_) {
-              return new PageRouteBuilder<Null>(
+              return new PageRouteBuilder<void>(
                 pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
                   outerContext = context;
                   return new Container();
@@ -184,7 +184,7 @@ void main() {
       ),
     ));
 
-    showModalBottomSheet<Null>(
+    showModalBottomSheet<void>(
       context: outerContext,
       builder: (BuildContext context) {
         innerContext = context;

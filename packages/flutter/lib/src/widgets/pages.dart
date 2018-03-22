@@ -12,7 +12,7 @@ import 'routes.dart';
 abstract class PageRoute<T> extends ModalRoute<T> {
   /// Creates a modal route that replaces the entire screen.
   PageRoute({
-    RouteSettings settings: const RouteSettings(),
+    RouteSettings settings,
     this.fullscreenDialog: false,
   }) : super(settings: settings);
 
@@ -71,7 +71,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   /// The [pageBuilder], [transitionsBuilder], [opaque], [barrierDismissible],
   /// and [maintainState] arguments must not be null.
   PageRouteBuilder({
-    RouteSettings settings: const RouteSettings(),
+    RouteSettings settings,
     @required this.pageBuilder,
     this.transitionsBuilder: _defaultTransitionsBuilder,
     this.transitionDuration: const Duration(milliseconds: 300),

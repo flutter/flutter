@@ -64,12 +64,12 @@ class VideoCard extends StatelessWidget {
     }
 
     void pushFullScreenWidget() {
-      final TransitionRoute<Null> route = new PageRouteBuilder<Null>(
+      final TransitionRoute<void> route = new PageRouteBuilder<void>(
         settings: new RouteSettings(name: title, isInitialRoute: false),
         pageBuilder: fullScreenRoutePageBuilder,
       );
 
-      route.completed.then((Null _) {
+      route.completed.then((void result) {
         controller.setVolume(0.0);
       });
 

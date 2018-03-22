@@ -419,7 +419,7 @@ void main() {
         )
       );
 
-      tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<Null>(
+      tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<void>(
         builder: (BuildContext context) {
           return new Scaffold(appBar: new AppBar(), body: const Text('Page 2'));
         },

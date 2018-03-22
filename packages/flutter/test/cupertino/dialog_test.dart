@@ -17,7 +17,7 @@ void main() {
             builder: (BuildContext context) {
               return new RaisedButton(
                 onPressed: () {
-                  showDialog<Null>(
+                  showDialog<void>(
                     context: context,
                     builder: (BuildContext context) {
                       return new CupertinoAlertDialog(
@@ -110,7 +110,7 @@ void main() {
           child: new Builder(builder: (BuildContext context) {
             return new RaisedButton(
               onPressed: () {
-                showDialog<Null>(
+                showDialog<void>(
                   context: context,
                   builder: (BuildContext context) {
                     return new MediaQuery(

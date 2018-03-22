@@ -108,7 +108,7 @@ void main() {
 
     final BuildContext context = tester.element(find.byType(TextField));
 
-    showDialog<Null>(
+    showDialog<void>(
       context: context,
       builder: (BuildContext context) => const SimpleDialog(title: const Text('Dialog')),
     );

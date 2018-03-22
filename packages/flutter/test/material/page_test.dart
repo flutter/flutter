@@ -156,7 +156,7 @@ void main() {
 
     final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<Null>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return const Material(child: const Text('Page 2'));
       },
@@ -355,7 +355,7 @@ void main() {
       )
     );
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<Null>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return const Scaffold(body: const Text('Page 2'));
       },

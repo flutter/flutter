@@ -81,7 +81,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
 
 };
 
-class ThreeRoute extends MaterialPageRoute<Null> {
+class ThreeRoute extends MaterialPageRoute<void> {
   ThreeRoute() : super(builder: (BuildContext context) {
     return new Material(
       key: routeThreeKey,
@@ -96,7 +96,7 @@ class ThreeRoute extends MaterialPageRoute<Null> {
   });
 }
 
-class MutatingRoute extends MaterialPageRoute<Null> {
+class MutatingRoute extends MaterialPageRoute<void> {
   MutatingRoute() : super(builder: (BuildContext context) {
     return new Hero(tag: 'a', child: const Text('MutatingRoute'), key: new UniqueKey());
   });
@@ -363,7 +363,7 @@ void main() {
   testWidgets('Popping on first frame does not cause hero observer to crash', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
-        return new MaterialPageRoute<Null>(
+        return new MaterialPageRoute<void>(
           settings: settings,
           builder: (BuildContext context) => new Hero(tag: 'test', child: new Container()),
         );
@@ -389,7 +389,7 @@ void main() {
   testWidgets('Overlapping starting and ending a hero transition works ok', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
       onGenerateRoute: (RouteSettings settings) {
-        return new MaterialPageRoute<Null>(
+        return new MaterialPageRoute<void>(
           settings: settings,
           builder: (BuildContext context) => new Hero(tag: 'test', child: new Container()),
         );
@@ -432,7 +432,7 @@ void main() {
                 return new FlatButton(
                   child: const Text('push'),
                   onPressed: () {
-                    Navigator.push(context, new PageRouteBuilder<Null>(
+                    Navigator.push(context, new PageRouteBuilder<void>(
                       pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
                         return const Text('fail');
                       },
@@ -569,9 +569,9 @@ void main() {
     // After flying in the opposite direction for 50ms Hero 'a' will
     // be smaller than it was, but bigger than its initial size.
     await tester.pump(const Duration(milliseconds: 50));
-    final double height100ms = tester.getSize(find.byKey(firstKey)).height;
-    expect(height100ms, greaterThan(height150ms));
-    expect(finalHeight, lessThan(height100ms));
+    final double height200ms = tester.getSize(find.byKey(firstKey)).height;
+    expect(height200ms, greaterThan(height150ms));
+    expect(finalHeight, lessThan(height200ms));
 
     // Hero a's return flight at 149ms. The outgoing (push) flight took
     // 150ms so we should be just about back to where Hero 'a' started.
@@ -593,7 +593,7 @@ void main() {
     StateSetter heroCardSetState;
 
     // Show a 200x200 Hero tagged 'H', with key routeHeroKey
-    final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
+    final MaterialPageRoute<void> route = new MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return new Material(
           child: new ListView(
@@ -695,7 +695,7 @@ void main() {
     const Key routeContainerKey = const Key('route hero container');
 
     // Show a 200x200 Hero tagged 'H', with key routeHeroKey
-    final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
+    final MaterialPageRoute<void> route = new MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return new Material(
           child: new ListView(
@@ -777,7 +777,7 @@ void main() {
     const Key routeContainerKey = const Key('route hero container');
 
     // Show a 200x200 Hero tagged 'H', with key routeHeroKey
-    final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
+    final MaterialPageRoute<void> route = new MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return new Material(
           child: new ListView(
@@ -855,7 +855,7 @@ void main() {
     const Key heroBCKey = const Key('BC hero');
 
     // Show a 150x150 Hero tagged 'BC'
-    final MaterialPageRoute<Null> routeC = new MaterialPageRoute<Null>(
+    final MaterialPageRoute<void> routeC = new MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return new Material(
           child: new ListView(
@@ -872,7 +872,7 @@ void main() {
     );
 
     // Show a height=200 Hero tagged 'AB' and a height=50 Hero tagged 'BC'
-    final MaterialPageRoute<Null> routeB = new MaterialPageRoute<Null>(
+    final MaterialPageRoute<void> routeB = new MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return new Material(
           child: new ListView(
@@ -956,7 +956,7 @@ void main() {
   });
 
   testWidgets('Stateful hero child state survives flight', (WidgetTester tester) async {
-    final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
+    final MaterialPageRoute<void> route = new MaterialPageRoute<void>(
       builder: (BuildContext context) {
         return new Material(
           child: new ListView(

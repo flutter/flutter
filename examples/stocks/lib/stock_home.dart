@@ -93,7 +93,7 @@ class StockHomeState extends State<StockHome> {
         });
         break;
       case _StockMenuItem.refresh:
-        showDialog<Null>(
+        showDialog<void>(
           context: context,
           builder: (BuildContext context) => new _NotImplementedDialog(),
         );
@@ -297,7 +297,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleCreateCompany() {
-    showModalBottomSheet<Null>(
+    showModalBottomSheet<void>(
       context: context,
       builder: (BuildContext context) => new _CreateCompanySheet(),
     );
