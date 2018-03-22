@@ -95,7 +95,7 @@ class FlutterProject {
       await inDirectory(
         new Directory(path.join(rootPath, 'android')),
         () async {
-          exec('gradle', <String>['--stop'], canFail: true);
+          exec('gradlew.bat', <String>['--stop'], canFail: true);
         },
       );
     }
