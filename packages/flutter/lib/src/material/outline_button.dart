@@ -454,7 +454,7 @@ class _OutlineBorder extends ShapeBorder {
     if (a is _OutlineBorder) {
       return new _OutlineBorder(
         side: BorderSide.lerp(a.side, side, t),
-        shape: shape.lerpFrom(a.shape, t),
+        shape: ShapeBorder.lerp(a.shape, shape, t),
       );
     }
     return super.lerpFrom(a, t);
@@ -466,7 +466,7 @@ class _OutlineBorder extends ShapeBorder {
     if (b is _OutlineBorder) {
       return new _OutlineBorder(
         side: BorderSide.lerp(side, b.side, t),
-        shape: shape.lerpTo(b.shape, t),
+        shape: ShapeBorder.lerp(shape, b.shape, t),
       );
     }
     return super.lerpTo(b, t);
