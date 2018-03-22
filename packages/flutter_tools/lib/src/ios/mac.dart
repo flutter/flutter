@@ -255,7 +255,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // If buildNumber is not specified, keep the project untouched.
   if (buildInfo.buildNumber != null) {
     final Status buildNumberStatus =
-    logger.startProgress('Setting CFBundleVersion...', expectSlowOperation: true);
+        logger.startProgress('Setting CFBundleVersion...', expectSlowOperation: true);
     try {
       final RunResult buildNumberResult = await runAsync(
         <String>[
@@ -279,7 +279,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // If buildName is not specified, keep the project untouched.
   if (buildInfo.buildName != null) {
     final Status buildNameStatus =
-    logger.startProgress('Setting CFBundleShortVersionString...', expectSlowOperation: true);
+        logger.startProgress('Setting CFBundleShortVersionString...', expectSlowOperation: true);
     try {
       final RunResult buildNameResult = await runAsync(
         <String>[
