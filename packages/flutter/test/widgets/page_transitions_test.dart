@@ -5,7 +5,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
-class TestOverlayRoute extends OverlayRoute<Null> {
+class TestOverlayRoute extends OverlayRoute<void> {
+  TestOverlayRoute({ RouteSettings settings }) : super(settings: settings);
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
     yield new OverlayEntry(builder: _build);
@@ -311,7 +312,7 @@ void main() {
 
     await tester.pumpWidget(new MaterialApp(routes: routes));
 
-    final PageRoute<Null> route = new MaterialPageRoute<Null>(
+    final PageRoute<void> route = new MaterialPageRoute<void>(
       settings: const RouteSettings(name: '/page'),
       builder: (BuildContext context) => const Center(child: const Text('page')),
     );

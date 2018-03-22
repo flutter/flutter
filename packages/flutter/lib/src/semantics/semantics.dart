@@ -680,6 +680,9 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(new DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
   }
+
+  @override
+  String toStringShort() => '$runtimeType'; // the hashCode isn't important since we're immutable
 }
 
 /// In tests use this function to reset the counter used to generate

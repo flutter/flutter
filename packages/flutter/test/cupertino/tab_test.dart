@@ -11,7 +11,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return new CupertinoTabView(
@@ -31,7 +31,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return new CupertinoTabView(
@@ -53,7 +53,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return new CupertinoTabView(
@@ -87,13 +87,13 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return new CupertinoTabView(
                 onGenerateRoute: (RouteSettings settings) {
                   if (settings.name == Navigator.defaultRouteName) {
-                    return new CupertinoPageRoute<Null>(
+                    return new CupertinoPageRoute<void>(
                       settings: settings,
                       builder: (BuildContext context) {
                         return const Text('generated home');
@@ -117,7 +117,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return new CupertinoTabView(

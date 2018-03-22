@@ -25,7 +25,7 @@ Widget buildShrine(BuildContext context, Widget child) {
 class ShrinePageRoute<T> extends MaterialPageRoute<T> {
   ShrinePageRoute({
     WidgetBuilder builder,
-    RouteSettings settings: const RouteSettings()
+    RouteSettings settings,
   }) : super(builder: builder, settings: settings);
 
   @override

@@ -607,10 +607,11 @@ class _MaterialAppState extends State<MaterialApp> {
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
     final String name = settings.name;
     WidgetBuilder builder;
-    if (name == Navigator.defaultRouteName && widget.home != null)
+    if (name == Navigator.defaultRouteName && widget.home != null) {
       builder = (BuildContext context) => widget.home;
-    else
+    } else {
       builder = widget.routes[name];
+    }
     if (builder != null) {
       return new MaterialPageRoute<dynamic>(
         builder: builder,

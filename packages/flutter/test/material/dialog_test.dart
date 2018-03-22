@@ -21,7 +21,7 @@ void main() {
                 child: new RaisedButton(
                   child: const Text('X'),
                   onPressed: () {
-                    showDialog<Null>(
+                    showDialog<void>(
                       context: context,
                       builder: (BuildContext context) {
                         return new AlertDialog(
@@ -71,7 +71,7 @@ void main() {
                 child: new RaisedButton(
                   child: const Text('X'),
                   onPressed: () {
-                    showDialog<Null>(
+                    showDialog<void>(
                       context: context,
                       builder: (BuildContext context) {
                         return const AlertDialog(
@@ -118,7 +118,7 @@ void main() {
 
     final BuildContext context = tester.element(find.text('Go'));
 
-    final Future<int> result = showDialog(
+    final Future<int> result = showDialog<int>(
       context: context,
       builder: (BuildContext context) {
         return new SimpleDialog(
@@ -161,7 +161,7 @@ void main() {
 
     final BuildContext context = tester.element(find.text('Go'));
 
-    showDialog<Null>(
+    showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return new Container(
@@ -182,7 +182,7 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog1'), findsNothing);
 
-    showDialog<Null>(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -227,7 +227,7 @@ void main() {
     final BuildContext context = tester.element(find.text(buttonText));
 
     const String alertText = 'A button in an overlay alert';
-    showDialog<Null>(
+    showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return const AlertDialog(title: const Text(alertText));
@@ -260,7 +260,7 @@ void main() {
         ),
         child: new Navigator(
           onGenerateRoute: (_) {
-            return new PageRouteBuilder<Null>(
+            return new PageRouteBuilder<void>(
               pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
                 outerContext = context;
                 return new Container();
@@ -271,7 +271,7 @@ void main() {
       ),
     ));
 
-    showDialog<Null>(
+    showDialog<void>(
       context: outerContext,
       barrierDismissible: false,
       builder: (BuildContext context) {

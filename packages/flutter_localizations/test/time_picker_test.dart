@@ -145,7 +145,7 @@ void main() {
               textDirection: TextDirection.ltr,
               child: new Navigator(
                 onGenerateRoute: (RouteSettings settings) {
-                  return new MaterialPageRoute<dynamic>(builder: (BuildContext context) {
+                  return new MaterialPageRoute<void>(builder: (BuildContext context) {
                     return new FlatButton(
                       onPressed: () {
                         showTimePicker(context: context, initialTime: const TimeOfDay(hour: 7, minute: 0));
