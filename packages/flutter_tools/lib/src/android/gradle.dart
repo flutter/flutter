@@ -276,10 +276,11 @@ Future<Null> findAndReplaceVersionProperties({@required BuildInfo buildInfo}) {
               final File gradleOld = appGradle.renameSync(fs.path.join('android', 'app', 'build.gradle.old'));
               appGradleTmp.renameSync(fs.path.join('android', 'app', 'build.gradle'));
               gradleOld.deleteSync();
+              completer.complete();
             } catch (error) {
               printError('Failed to change version properties. ${error.toString()}');
+              completer.completeError('Failed to change version properties. ${error.toString()}');
             }
-            completer.complete();
           },
           onError: (dynamic error, StackTrace stack) {
             printError('Failed to change version properties. ${error.toString()}');
