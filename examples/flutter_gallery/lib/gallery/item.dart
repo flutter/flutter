@@ -328,6 +328,13 @@ List<GalleryItem> _buildGalleryItems() {
       buildRoute: (BuildContext context) => new CupertinoPickerDemo(),
     ),
     new GalleryItem(
+      title: 'Pull to refresh',
+      subtitle: 'Cupertino styled refresh controls',
+      category: 'Cupertino Components',
+      routeName: CupertinoRefreshControlDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoRefreshControlDemo(),
+    ),
+    new GalleryItem(
       title: 'Sliders',
       subtitle: 'Cupertino styled sliders',
       category: 'Cupertino Components',
