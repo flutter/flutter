@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -224,15 +226,18 @@ void updateLocalProperties({String projectPath, BuildInfo buildInfo}) {
     settings.writeContents(localProperties);
 }
 
-void findAndReplaceVersionProperties({BuildInfo buildInfo}) {
+Future<Null> findAndReplaceVersionProperties({@required BuildInfo buildInfo}) {
+  assert(buildInfo != null, 'buildInfo can\'t be null');
+  final Completer<Null> completer = new Completer<Null>();
 
   // early return, if nothing has to be changed
-  if (buildInfo?.buildNumber == null && buildInfo?.buildName == null) {
-    return;
+  if (buildInfo.buildNumber == null && buildInfo.buildName == null) {
+    completer.complete();
+    return completer.future;
   }
 
-  final File appGradle = fs.file('android/app/build.gradle');
-  final File appGradleTmp = fs.file('android/app/build.gradle.tmp');
+  final File appGradle = fs.file(fs.path.join('android', 'app', 'build.gradle'));
+  final File appGradleTmp = fs.file(fs.path.join('android', 'app', 'build.gradle.tmp'));
   appGradleTmp.createSync();
 
   if (appGradle.existsSync() && appGradleTmp.existsSync()) {
@@ -268,20 +273,24 @@ void findAndReplaceVersionProperties({BuildInfo buildInfo}) {
           onDone: () {
             sink.close();
             try {
-              final File gradleOld = appGradle.renameSync('android/app/build.gradle.old');
-              appGradleTmp.renameSync('android/app/build.gradle');
+              final File gradleOld = appGradle.renameSync(fs.path.join('android', 'app', 'build.gradle.old'));
+              appGradleTmp.renameSync(fs.path.join('android', 'app', 'build.gradle'));
               gradleOld.deleteSync();
             } catch (error) {
               printError('Failed to change version properties. ${error.toString()}');
             }
+            completer.complete();
           },
           onError: (dynamic error, StackTrace stack) {
             printError('Failed to change version properties. ${error.toString()}');
             sink.close();
             appGradleTmp.deleteSync();
+            completer.completeError('Failed to change version properties. ${error.toString()}', stack);
           },
     );
   }
+
+  return completer.future;
 }
 
 Future<Null> buildGradleProject(BuildInfo buildInfo, String target) async {
@@ -290,7 +299,7 @@ Future<Null> buildGradleProject(BuildInfo buildInfo, String target) async {
   // uses the standard Android way to determine what to build, but we still
   // update local.properties, in case we want to use it in the future.
   updateLocalProperties(buildInfo: buildInfo);
-  findAndReplaceVersionProperties(buildInfo: buildInfo);
+  await findAndReplaceVersionProperties(buildInfo: buildInfo);
 
   final String gradle = await _ensureGradle();
 
