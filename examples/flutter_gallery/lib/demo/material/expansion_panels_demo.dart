@@ -254,7 +254,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                               new Radio<_Location>(
                                 value: _Location.Bahamas,
                                 groupValue: field.value,
-                                onChanged: field.onChanged,
+                                onChanged: field.didChange,
                               ),
                               const Text('Bahamas')
                             ]
@@ -265,7 +265,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                               new Radio<_Location>(
                                 value: _Location.Barbados,
                                 groupValue: field.value,
-                                onChanged: field.onChanged,
+                                onChanged: field.didChange,
                               ),
                               const Text('Barbados')
                             ]
@@ -276,7 +276,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                               new Radio<_Location>(
                                 value: _Location.Bermuda,
                                 groupValue: field.value,
-                                onChanged: field.onChanged,
+                                onChanged: field.didChange,
                               ),
                               const Text('Bermuda')
                             ]
@@ -320,7 +320,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                         activeColor: Colors.orange[100 + (field.value * 5.0).round()],
                         label: '${field.value.round()}',
                         value: field.value,
-                        onChanged: field.onChanged,
+                        onChanged: field.didChange,
                       );
                     },
                   ),
