@@ -170,9 +170,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   @override
   void deactivate() {
+    super.deactivate();
     if (_entry != null)
       _controller.reverse();
-    super.deactivate();
   }
 
   @override
