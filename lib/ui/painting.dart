@@ -2881,32 +2881,35 @@ typedef String _Callbacker<T>(_Callback<T> callback);
 /// Converts a method that receives a value-returning callback to a method that
 /// returns a Future.
 ///
+/// Return a [String] to cause an [Exception] to be sychnorously thrown with that
+/// string as a message.
+///
+/// If the callback is called with null, the future completes with an error.
+///
 /// Example usage:
+///
 /// ```dart
 /// typedef void IntCallback(int result);
 /// 
-/// void doSomethingAndCallback(IntCallback callback) {
+/// String _doSomethingAndCallback(IntCallback callback) {
 ///   new Timer(new Duration(seconds: 1), () { callback(1); });
 /// }
 /// 
 /// Future<int> doSomething() {
-///   return _futurize(domeSomethingAndCallback);
+///   return _futurize(_doSomethingAndCallback);
 /// }
 /// ```
-///
 Future<T> _futurize<T>(_Callbacker<T> callbacker) {
   final Completer<T> completer = new Completer<T>.sync();
-  final String err = callbacker((T t) {
+  final String error = callbacker((T t) {
     if (t == null) {
       completer.completeError(new Exception('operation failed'));
     } else {
       completer.complete(t);
     }
   });
-
-  if (err != null)
-    throw new Exception(err);
-
+  if (error != null)
+    throw new Exception(error);
   return completer.future;
 }
 
