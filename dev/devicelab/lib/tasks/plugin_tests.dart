@@ -92,9 +92,11 @@ class FlutterProject {
     if (Platform.isWindows) {
       // A running Gradle daemon might prevent us from deleting the project
       // folder on Windows.
-      await inDirectory(new Directory(rootPath), () async {
-        exec(path.join('android', 'gradlew.bat'), <String>['--stop'], canFail: true);
-      });
+      await exec(
+        path.absolute(path.join(rootPath, 'android', 'gradlew.bat')),
+        <String>['--stop'],
+        canFail: true,
+      );
     }
     await parent.delete(recursive: true);
   }
