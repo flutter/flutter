@@ -27,7 +27,6 @@ void main() {
     when(mockHelper.builder(
             typed(any), typed(any), typed(any), typed(any), typed(any)))
         .thenAnswer((Invocation i) {
-      BuildContext context = i.positionalArguments[0];
       RefreshIndicatorMode refreshState = i.positionalArguments[1];
       double pulledExtent = i.positionalArguments[2];
       double refreshTriggerPullDistance = i.positionalArguments[3];
