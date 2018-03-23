@@ -15,15 +15,33 @@ void main() {
       expect(configuration.actionLabel, null);
     });
 
-    test('serializes to JSON', () async {
+    test('text serializes to JSON', () async {
       const TextInputConfiguration configuration = const TextInputConfiguration(
-        inputType: TextInputType.number,
-        obscureText: true,
-        autocorrect: false,
-        actionLabel: 'xyzzy'
+          inputType: TextInputType.text,
+          obscureText: true,
+          autocorrect: false,
+          actionLabel: 'xyzzy'
       );
       final Map<String, dynamic> json = configuration.toJSON();
-      expect(json['inputType'], 'TextInputType.number');
+      expect(json['inputType'], <String, dynamic>{
+        'type': 'TextInputType.text', 'signed': null, 'decimal': null
+      });
+      expect(json['obscureText'], true);
+      expect(json['autocorrect'], false);
+      expect(json['actionLabel'], 'xyzzy');
+    });
+
+    test('number serializes to JSON', () async {
+      const TextInputConfiguration configuration = const TextInputConfiguration(
+          inputType: const TextInputType.numberWithOptions(decimal: true),
+          obscureText: true,
+          autocorrect: false,
+          actionLabel: 'xyzzy'
+      );
+      final Map<String, dynamic> json = configuration.toJSON();
+      expect(json['inputType'], <String, dynamic>{
+        'type': 'TextInputType.number', 'signed': false, 'decimal': true
+      });
       expect(json['obscureText'], true);
       expect(json['autocorrect'], false);
       expect(json['actionLabel'], 'xyzzy');
