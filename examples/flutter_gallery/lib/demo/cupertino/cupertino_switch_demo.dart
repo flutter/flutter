@@ -60,7 +60,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
                   'Disabled'
                 ),
               ],
-            )
+            ),
           ],
         ),
       )
