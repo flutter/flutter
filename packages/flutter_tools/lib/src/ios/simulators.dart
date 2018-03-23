@@ -292,7 +292,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage app, {
+    ApplicationPackage package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -303,16 +303,16 @@ class IOSSimulator extends Device {
     bool ipv6: false,
   }) async {
     if (!prebuiltApplication) {
-      printTrace('Building ${app.name} for $id.');
+      printTrace('Building ${package.name} for $id.');
 
       try {
-        await _setupUpdatedApplicationBundle(app, debuggingOptions.buildInfo);
+        await _setupUpdatedApplicationBundle(package, debuggingOptions.buildInfo);
       } on ToolExit catch (e) {
         printError(e.message);
         return new LaunchResult.failed();
       }
     } else {
-      if (!await installApp(app))
+      if (!await installApp(package))
         return new LaunchResult.failed();
     }
 
@@ -344,11 +344,11 @@ class IOSSimulator extends Device {
     ProtocolDiscovery observatoryDiscovery;
     if (debuggingOptions.debuggingEnabled)
       observatoryDiscovery = new ProtocolDiscovery.observatory(
-          getLogReader(app: app), ipv6: ipv6);
+          getLogReader(app: package), ipv6: ipv6);
 
     // Launch the updated application in the simulator.
     try {
-      await SimControl.instance.launch(id, app.id, args);
+      await SimControl.instance.launch(id, package.id, args);
     } catch (error) {
       printError('$error');
       return new LaunchResult.failed();

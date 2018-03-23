@@ -42,7 +42,7 @@ void main() {
     MockAndroidSdk.createSdkDirectory();
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
-    final LicensesAccepted result = await(androidWorkflow.licensesAccepted);
+    final LicensesAccepted result = await androidWorkflow.licensesAccepted;
     expect(result, equals(LicensesAccepted.unknown));
     expect(processManager.commands.first, equals('/foo/bar/sdkmanager'));
     expect(processManager.commands.last, equals('--licenses'));
@@ -63,7 +63,7 @@ void main() {
     ]);
 
     final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
-    final LicensesAccepted result = await(androidWorkflow.licensesAccepted);
+    final LicensesAccepted result = await androidWorkflow.licensesAccepted;
     expect(result, equals(LicensesAccepted.all));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
@@ -83,7 +83,7 @@ void main() {
     ]);
 
     final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
-    final LicensesAccepted result = await(androidWorkflow.licensesAccepted);
+    final LicensesAccepted result = await androidWorkflow.licensesAccepted;
     expect(result, equals(LicensesAccepted.some));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
@@ -103,7 +103,7 @@ void main() {
     ]);
 
     final AndroidWorkflow androidWorkflow = new AndroidWorkflow();
-    final LicensesAccepted result = await(androidWorkflow.licensesAccepted);
+    final LicensesAccepted result = await androidWorkflow.licensesAccepted;
     expect(result, equals(LicensesAccepted.none));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,

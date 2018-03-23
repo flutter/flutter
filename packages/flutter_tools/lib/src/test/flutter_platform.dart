@@ -108,6 +108,30 @@ class _Compiler {
         .createTempSync('output_dill');
     final File outputDill = outputDillDirectory.childFile('output.dill');
 
+    bool suppressOutput = false;
+    void reportCompilerMessage(String message) {
+      if (suppressOutput)
+        return;
+
+      if (message.startsWith('compiler message: Error: Could not resolve the package \'test\'')) {
+        printTrace(message);
+        printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n');
+        suppressOutput = true;
+        return;
+      }
+
+      printError('$message');
+    }
+
+    ResidentCompiler createCompiler() {
+      return new ResidentCompiler(
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        packagesPath: PackageMap.globalPackagesPath,
+        trackWidgetCreation: trackWidgetCreation,
+        compilerMessageConsumer: reportCompilerMessage,
+      );
+    }
+
     compilerController.stream.listen((_CompilationRequest request) async {
       final bool isEmpty = compilationQueue.isEmpty;
       compilationQueue.add(request);
@@ -118,16 +142,27 @@ class _Compiler {
         while (compilationQueue.isNotEmpty) {
           final _CompilationRequest request = compilationQueue.first;
           printTrace('Compiling ${request.path}');
-          final String outputPath = await compiler.recompile(request.path,
+          compiler ??= createCompiler();
+          suppressOutput = false;
+          final String outputPath = await handleTimeout(compiler.recompile(request.path,
             <String>[request.path],
             outputPath: outputDill.path,
-          );
-          // Copy output dill next to the source file.
-          final File kernelReadyToRun = await fs.file(outputPath).copy(
-              request.path + '.dill');
-          compiler.accept();
-          compiler.reset();
-          request.result.complete(kernelReadyToRun.path);
+          ), request.path);
+
+          // Check if the compiler produced the output. If it failed then
+          // outputPath would be null. In this case pass null upwards to the
+          // consumer and shutdown the compiler to avoid reusing compiler
+          // that might have gotten into a weird state.
+          if (outputPath == null) {
+            request.result.complete(null);
+            await shutdown();
+          } else {
+            final File kernelReadyToRun =
+                await fs.file(outputPath).copy('${request.path}.dill');
+            request.result.complete(kernelReadyToRun.path);
+            compiler.accept();
+            compiler.reset();
+          }
           // Only remove now when we finished processing the element
           compilationQueue.removeAt(0);
         }
@@ -135,11 +170,6 @@ class _Compiler {
     }, onDone: () {
       outputDillDirectory.deleteSync(recursive: true);
     });
-
-    compiler = new ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        packagesPath: PackageMap.globalPackagesPath,
-        trackWidgetCreation: trackWidgetCreation);
   }
 
   final StreamController<_CompilationRequest> compilerController =
@@ -150,7 +180,19 @@ class _Compiler {
   Future<String> compile(String mainDart) {
     final Completer<String> completer = new Completer<String>();
     compilerController.add(new _CompilationRequest(mainDart, completer));
-    return completer.future;
+    return handleTimeout(completer.future, mainDart);
+  }
+
+  Future<dynamic> shutdown() async {
+    await compiler.shutdown();
+    compiler = null;
+  }
+
+  static Future<String> handleTimeout(Future<String> value, String path) {
+    return value.timeout(const Duration(minutes: 5), onTimeout: () {
+      printError('Compilation of $path timed out after 5 minutes.');
+      return null;
+    });
   }
 }
 
@@ -293,6 +335,7 @@ class _FlutterPlatform extends PlatformPlugin {
         startPaused: startPaused,
         bundlePath: _getBundlePath(finalizers, ourTestCount),
         observatoryPort: explicitObservatoryPort,
+        serverPort: server.port,
       );
       subprocessActive = true;
       finalizers.add(() async {
@@ -511,7 +554,7 @@ class _FlutterPlatform extends PlatformPlugin {
     listenerFile.createSync();
     listenerFile.writeAsStringSync(_generateTestMain(
       testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
-      encodedWebsocketUrl: Uri.encodeComponent(_getWebSocketUrl(server))
+      encodedWebsocketUrl: Uri.encodeComponent(_getWebSocketUrl()),
     ));
     return listenerFile.path;
   }
@@ -550,10 +593,10 @@ class _FlutterPlatform extends PlatformPlugin {
     return tempBundleDirectory.path;
   }
 
-  String _getWebSocketUrl(HttpServer server) {
+  String _getWebSocketUrl() {
     return host.type == InternetAddressType.IP_V4
-        ? 'ws://${host.address}:${server.port}'
-        : 'ws://[${host.address}]:${server.port}';
+        ? 'ws://${host.address}'
+        : 'ws://[${host.address}]';
   }
 
   String _generateTestMain({
@@ -562,7 +605,7 @@ class _FlutterPlatform extends PlatformPlugin {
   }) {
     return '''
 import 'dart:convert';
-import 'dart:io'; // ignore: dart_io_import
+import 'dart:io';  // ignore: dart_io_import
 
 // We import this library first in order to trigger an import error for
 // package:test (rather than package:stream_channel) when the developer forgets
@@ -576,7 +619,8 @@ import '$testUrl' as test;
 
 void main() {
   print('$_kStartTimeoutTimerMessage');
-  String server = Uri.decodeComponent('$encodedWebsocketUrl');
+  String serverPort = Platform.environment['SERVER_PORT'];
+  String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
   StreamChannel channel = serializeSuite(() {
     catchIsolateErrors();
     return test.main;
@@ -593,6 +637,14 @@ void main() {
   }
 
   File _cachedFontConfig;
+
+  @override
+  Future<dynamic> close() async {
+    if (compiler != null) {
+      await compiler.shutdown();
+      compiler = null;
+    }
+  }
 
   /// Returns a Fontconfig config file that limits font fallback to the
   /// artifact cache directory.
@@ -621,6 +673,7 @@ void main() {
     bool enableObservatory: false,
     bool startPaused: false,
     int observatoryPort,
+    int serverPort,
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
     assert(!startPaused || enableObservatory);
@@ -660,6 +713,7 @@ void main() {
     final Map<String, String> environment = <String, String>{
       'FLUTTER_TEST': 'true',
       'FONTCONFIG_FILE': _fontConfigFile.path,
+      'SERVER_PORT': serverPort.toString(),
     };
     return processManager.start(command, environment: environment);
   }

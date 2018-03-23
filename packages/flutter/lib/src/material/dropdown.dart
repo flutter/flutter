@@ -438,7 +438,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(DropdownButtonHideUnderline old) => false;
+  bool updateShouldNotify(DropdownButtonHideUnderline oldWidget) => false;
 }
 
 /// A material design button for selecting from a list of items.
@@ -600,7 +600,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     Navigator.push(context, _dropdownRoute).then<void>((_DropdownRouteResult<T> newValue) {
       _dropdownRoute = null;
       if (!mounted || newValue == null)
-        return null;
+        return;
       if (widget.onChanged != null)
         widget.onChanged(newValue.result);
     });

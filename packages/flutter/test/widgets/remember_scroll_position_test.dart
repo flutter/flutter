@@ -37,13 +37,13 @@ Future<Null> performTest(WidgetTester tester, bool maintainState) async {
         key: navigatorKey,
         onGenerateRoute: (RouteSettings settings) {
           if (settings.name == '/') {
-            return new MaterialPageRoute<Null>(
+            return new MaterialPageRoute<void>(
               settings: settings,
               builder: (_) => new Container(child: const ThePositiveNumbers(from: 0)),
               maintainState: maintainState,
             );
           } else if (settings.name == '/second') {
-            return new MaterialPageRoute<Null>(
+            return new MaterialPageRoute<void>(
               settings: settings,
               builder: (_) => new Container(child: const ThePositiveNumbers(from: 10000)),
               maintainState: maintainState,

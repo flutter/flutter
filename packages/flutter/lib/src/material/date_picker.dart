@@ -1042,6 +1042,6 @@ Future<DateTime> showDatePicker({
 
   return await showDialog<DateTime>(
     context: context,
-    child: child,
+    builder: (BuildContext context) => child,
   );
 }

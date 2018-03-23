@@ -327,7 +327,7 @@ class ShrineOrderRoute extends ShrinePageRoute<Order> {
   ShrineOrderRoute({
     @required this.order,
     WidgetBuilder builder,
-    RouteSettings settings: const RouteSettings(),
+    RouteSettings settings,
   }) : assert(order != null),
        super(builder: builder, settings: settings);
 
@@ -336,5 +336,5 @@ class ShrineOrderRoute extends ShrinePageRoute<Order> {
   @override
   Order get currentResult => order;
 
-  static ShrineOrderRoute of(BuildContext context) => ModalRoute.of(context);
+  static ShrineOrderRoute of(BuildContext context) => ModalRoute.of<Order>(context);
 }

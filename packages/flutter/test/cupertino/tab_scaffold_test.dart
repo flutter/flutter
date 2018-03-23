@@ -23,7 +23,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return new CupertinoTabScaffold(
@@ -85,7 +85,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return new CupertinoTabScaffold(
@@ -129,7 +129,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return new CupertinoTabScaffold(
@@ -171,7 +171,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return new Material(

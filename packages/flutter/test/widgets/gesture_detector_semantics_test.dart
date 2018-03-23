@@ -39,6 +39,8 @@ void main() {
     expect(callCount, 1);
     tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollDown);
     expect(callCount, 2);
+
+    semantics.dispose();
   });
 
   testWidgets('Horizontal gesture detector has up/down actions', (WidgetTester tester) async {
@@ -71,5 +73,7 @@ void main() {
     expect(callCount, 1);
     tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollRight);
     expect(callCount, 2);
+
+    semantics.dispose();
   });
 }

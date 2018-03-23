@@ -74,6 +74,31 @@ void main() {
     expect(tester.getSize(find.byType(Material)), const Size(88.0, 36.0));
   });
 
+  test('ButtonThemeData.copyWith', () {
+    ButtonThemeData theme = const ButtonThemeData().copyWith();
+    expect(theme.textTheme, ButtonTextTheme.normal);
+    expect(theme.constraints, const BoxConstraints(minWidth: 88.0, minHeight: 36.0));
+    expect(theme.padding, const EdgeInsets.symmetric(horizontal: 16.0));
+    expect(theme.shape, const RoundedRectangleBorder(
+      borderRadius: const BorderRadius.all(const Radius.circular(2.0)),
+    ));
+    expect(theme.alignedDropdown, false);
+
+    theme = const ButtonThemeData().copyWith(
+      textTheme: ButtonTextTheme.primary,
+      minWidth: 100.0,
+      height: 200.0,
+      padding: EdgeInsets.zero,
+      shape: const StadiumBorder(),
+      alignedDropdown: true,
+    );
+    expect(theme.textTheme, ButtonTextTheme.primary);
+    expect(theme.constraints, const BoxConstraints(minWidth: 100.0, minHeight: 200.0));
+    expect(theme.padding, EdgeInsets.zero);
+    expect(theme.shape, const StadiumBorder());
+    expect(theme.alignedDropdown, true);
+  });
+
   testWidgets('Theme buttonTheme defaults', (WidgetTester tester) async {
     final ThemeData lightTheme = new ThemeData.light();
     ButtonTextTheme textTheme;

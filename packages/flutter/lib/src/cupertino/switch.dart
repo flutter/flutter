@@ -88,10 +88,10 @@ class CupertinoSwitch extends StatefulWidget {
   _CupertinoSwitchState createState() => new _CupertinoSwitchState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true));
-    description.add(new ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true));
+    properties.add(new ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
   }
 }
 

@@ -63,9 +63,9 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
     });
   }
 
-  ShapeDecoration getIndicator() {
+  Decoration getIndicator() {
     if (!_customIndicator)
-      return null;
+      return const UnderlineTabIndicator();
 
     switch(_demoStyle) {
       case TabsDemoStyle.iconsAndText:

@@ -118,7 +118,7 @@ class ThemeData extends Diagnosticable {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
     primarySwatch ??= Colors.blue;
-    primaryColor ??= isDark ? Colors.grey[900] : primarySwatch[500];
+    primaryColor ??= isDark ? Colors.grey[900] : primarySwatch;
     primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
     primaryColorLight ??= isDark ? Colors.grey[500] : primarySwatch[100];
     primaryColorDark ??= isDark ? Colors.black : primarySwatch[700];
@@ -146,7 +146,7 @@ class ThemeData extends Diagnosticable {
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     dialogBackgroundColor ??= isDark ? Colors.grey[800] : Colors.white;
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
-    hintColor ??= isDark ? const Color(0x42FFFFFF) : const Color(0x4C000000);
+    hintColor ??= isDark ?  const Color(0x80FFFFFF) : const Color(0x8A000000);
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
@@ -166,6 +166,7 @@ class ThemeData extends Diagnosticable {
       primaryColor: primaryColor,
       primaryColorLight: primaryColorLight,
       primaryColorDark: primaryColorDark,
+      valueIndicatorTextStyle: accentTextTheme.body2,
     );
     return new ThemeData.raw(
       brightness: brightness,
@@ -759,43 +760,43 @@ class ThemeData extends Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     final ThemeData defaultData = new ThemeData.fallback();
-    description.add(new EnumProperty<TargetPlatform>('platform', platform, defaultValue: defaultTargetPlatform));
-    description.add(new EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
-    description.add(new DiagnosticsProperty<Color>('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
-    description.add(new EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness));
-    description.add(new DiagnosticsProperty<Color>('accentColor', accentColor, defaultValue: defaultData.accentColor));
-    description.add(new EnumProperty<Brightness>('accentColorBrightness', accentColorBrightness, defaultValue: defaultData.accentColorBrightness));
-    description.add(new DiagnosticsProperty<Color>('canvasColor', canvasColor, defaultValue: defaultData.canvasColor));
-    description.add(new DiagnosticsProperty<Color>('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
-    description.add(new DiagnosticsProperty<Color>('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor));
-    description.add(new DiagnosticsProperty<Color>('cardColor', cardColor, defaultValue: defaultData.cardColor));
-    description.add(new DiagnosticsProperty<Color>('dividerColor', dividerColor, defaultValue: defaultData.dividerColor));
-    description.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: defaultData.highlightColor));
-    description.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: defaultData.splashColor));
-    description.add(new DiagnosticsProperty<Color>('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor));
-    description.add(new DiagnosticsProperty<Color>('unselectedWidgetColor', unselectedWidgetColor, defaultValue: defaultData.unselectedWidgetColor));
-    description.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: defaultData.disabledColor));
-    description.add(new DiagnosticsProperty<Color>('buttonColor', buttonColor, defaultValue: defaultData.buttonColor));
-    description.add(new DiagnosticsProperty<Color>('secondaryHeaderColor', secondaryHeaderColor, defaultValue: defaultData.secondaryHeaderColor));
-    description.add(new DiagnosticsProperty<Color>('textSelectionColor', textSelectionColor, defaultValue: defaultData.textSelectionColor));
-    description.add(new DiagnosticsProperty<Color>('textSelectionHandleColor', textSelectionHandleColor, defaultValue: defaultData.textSelectionHandleColor));
-    description.add(new DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
-    description.add(new DiagnosticsProperty<Color>('dialogBackgroundColor', dialogBackgroundColor, defaultValue: defaultData.dialogBackgroundColor));
-    description.add(new DiagnosticsProperty<Color>('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor));
-    description.add(new DiagnosticsProperty<Color>('hintColor', hintColor, defaultValue: defaultData.hintColor));
-    description.add(new DiagnosticsProperty<Color>('errorColor', errorColor, defaultValue: defaultData.errorColor));
-    description.add(new DiagnosticsProperty<ButtonThemeData>('buttonTheme', buttonTheme));
-    description.add(new DiagnosticsProperty<TextTheme>('textTheme', textTheme));
-    description.add(new DiagnosticsProperty<TextTheme>('primaryTextTheme', primaryTextTheme));
-    description.add(new DiagnosticsProperty<TextTheme>('accentTextTheme', accentTextTheme));
-    description.add(new DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme));
-    description.add(new DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme));
-    description.add(new DiagnosticsProperty<IconThemeData>('primaryIconTheme', primaryIconTheme));
-    description.add(new DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
-    description.add(new DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
+    properties.add(new EnumProperty<TargetPlatform>('platform', platform, defaultValue: defaultTargetPlatform));
+    properties.add(new EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
+    properties.add(new DiagnosticsProperty<Color>('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
+    properties.add(new EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness));
+    properties.add(new DiagnosticsProperty<Color>('accentColor', accentColor, defaultValue: defaultData.accentColor));
+    properties.add(new EnumProperty<Brightness>('accentColorBrightness', accentColorBrightness, defaultValue: defaultData.accentColorBrightness));
+    properties.add(new DiagnosticsProperty<Color>('canvasColor', canvasColor, defaultValue: defaultData.canvasColor));
+    properties.add(new DiagnosticsProperty<Color>('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
+    properties.add(new DiagnosticsProperty<Color>('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor));
+    properties.add(new DiagnosticsProperty<Color>('cardColor', cardColor, defaultValue: defaultData.cardColor));
+    properties.add(new DiagnosticsProperty<Color>('dividerColor', dividerColor, defaultValue: defaultData.dividerColor));
+    properties.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: defaultData.highlightColor));
+    properties.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: defaultData.splashColor));
+    properties.add(new DiagnosticsProperty<Color>('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor));
+    properties.add(new DiagnosticsProperty<Color>('unselectedWidgetColor', unselectedWidgetColor, defaultValue: defaultData.unselectedWidgetColor));
+    properties.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: defaultData.disabledColor));
+    properties.add(new DiagnosticsProperty<Color>('buttonColor', buttonColor, defaultValue: defaultData.buttonColor));
+    properties.add(new DiagnosticsProperty<Color>('secondaryHeaderColor', secondaryHeaderColor, defaultValue: defaultData.secondaryHeaderColor));
+    properties.add(new DiagnosticsProperty<Color>('textSelectionColor', textSelectionColor, defaultValue: defaultData.textSelectionColor));
+    properties.add(new DiagnosticsProperty<Color>('textSelectionHandleColor', textSelectionHandleColor, defaultValue: defaultData.textSelectionHandleColor));
+    properties.add(new DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
+    properties.add(new DiagnosticsProperty<Color>('dialogBackgroundColor', dialogBackgroundColor, defaultValue: defaultData.dialogBackgroundColor));
+    properties.add(new DiagnosticsProperty<Color>('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor));
+    properties.add(new DiagnosticsProperty<Color>('hintColor', hintColor, defaultValue: defaultData.hintColor));
+    properties.add(new DiagnosticsProperty<Color>('errorColor', errorColor, defaultValue: defaultData.errorColor));
+    properties.add(new DiagnosticsProperty<ButtonThemeData>('buttonTheme', buttonTheme));
+    properties.add(new DiagnosticsProperty<TextTheme>('textTheme', textTheme));
+    properties.add(new DiagnosticsProperty<TextTheme>('primaryTextTheme', primaryTextTheme));
+    properties.add(new DiagnosticsProperty<TextTheme>('accentTextTheme', accentTextTheme));
+    properties.add(new DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme));
+    properties.add(new DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme));
+    properties.add(new DiagnosticsProperty<IconThemeData>('primaryIconTheme', primaryIconTheme));
+    properties.add(new DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
+    properties.add(new DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
   }
 }
 

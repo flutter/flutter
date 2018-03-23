@@ -14,7 +14,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
@@ -36,7 +36,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
@@ -56,7 +56,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
@@ -76,7 +76,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
@@ -98,7 +98,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoPageScaffold(
@@ -126,7 +126,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return new MediaQuery(
@@ -178,7 +178,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return new CupertinoPageScaffold(
@@ -266,7 +266,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return new CupertinoPageScaffold(
@@ -337,7 +337,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
@@ -351,7 +351,7 @@ void main() {
 
     expect(find.byType(CupertinoButton), findsNothing);
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<Null>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<void>(
       builder: (BuildContext context) {
         return const CupertinoNavigationBar(
           middle: const Text('Page 2'),
@@ -365,7 +365,7 @@ void main() {
     expect(find.byType(CupertinoButton), findsOneWidget);
     expect(find.byType(Icon), findsOneWidget);
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<Null>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<void>(
       fullscreenDialog: true,
       builder: (BuildContext context) {
         return const CupertinoNavigationBar(
@@ -401,7 +401,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
@@ -428,7 +428,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
@@ -462,7 +462,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(

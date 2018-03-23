@@ -196,15 +196,44 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   bool represents(T value) => value == this.value;
 
   @override
-  _PopupMenuItemState<PopupMenuItem<T>> createState() => new _PopupMenuItemState<PopupMenuItem<T>>();
+  PopupMenuItemState<T, PopupMenuItem<T>> createState() => new PopupMenuItemState<T, PopupMenuItem<T>>();
 }
 
-class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
-  // Override this to put something else in the menu entry.
+/// The [State] for [PopupMenuItem] subclasses.
+///
+/// By default this implements the basic styling and layout of Material Design
+/// popup menu items.
+///
+/// The [buildChild] method can be overridden to adjust exactly what gets placed
+/// in the menu. By default it returns [PopupMenuItem.child].
+///
+/// The [handleTap] method can be overridden to adjust exactly what happens when
+/// the item is tapped. By default, it uses [Navigator.pop] to return the
+/// [PopupMenuItem.value] from the menu route.
+///
+/// This class takes two type arguments. The second, `W`, is the exact type of
+/// the [Widget] that is using this [State]. It must be a subclass of
+/// [PopupMenuItem]. The first, `T`, must match the type argument of that widget
+/// class, and is the type of values returned from this menu.
+class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
+  /// The menu item contents.
+  ///
+  /// Used by the [build] method.
+  ///
+  /// By default, this returns [PopupMenuItem.child]. Override this to put
+  /// something else in the menu entry.
+  @protected
   Widget buildChild() => widget.child;
 
+  /// The handler for when the user selects the menu item.
+  ///
+  /// Used by the [InkWell] inserted by the [build] method.
+  ///
+  /// By default, uses [Navigator.pop] to return the [PopupMenuItem.value] from
+  /// the menu route.
+  @protected
   void handleTap() {
-    Navigator.pop(context, widget.value);
+    Navigator.pop<T>(context, widget.value);
   }
 
   @override
@@ -238,8 +267,8 @@ class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
           height: widget.height,
           padding: const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
           child: item,
-        )
-      )
+        ),
+      ),
     );
   }
 }
@@ -349,7 +378,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   _CheckedPopupMenuItemState<T> createState() => new _CheckedPopupMenuItemState<T>();
 }
 
-class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenuItem<T>> with SingleTickerProviderStateMixin {
+class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMenuItem<T>> with SingleTickerProviderStateMixin {
   static const Duration _kFadeDuration = const Duration(milliseconds: 150);
   AnimationController _controller;
   Animation<double> get _opacity => _controller.view;

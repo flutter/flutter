@@ -80,6 +80,16 @@ class ButtonTheme extends InheritedWidget {
        ),
        super(key: key, child: child);
 
+  /// Creates a button theme from [data].
+  ///
+  /// The [data] argument must not be null.
+  const ButtonTheme.fromButtonThemeData({
+    Key key,
+    @required this.data,
+    Widget child,
+  }) : assert(data != null),
+       super(key: key, child: child);
+
   /// Creates a button theme that is appropriate for button bars, as used in
   /// dialog footers and in the headers of data tables.
   ///
@@ -133,7 +143,7 @@ class ButtonTheme extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(ButtonTheme oldTheme) => data != oldTheme.data;
+  bool updateShouldNotify(ButtonTheme oldWidget) => data != oldWidget.data;
 }
 
 /// Used with [ButtonTheme] to configure the color and geometry of buttons.
@@ -248,6 +258,26 @@ class ButtonThemeData extends Diagnosticable {
   /// This property only affects [DropdownButton] and its menu.
   final bool alignedDropdown;
 
+  /// Creates a copy of this button theme data object with the matching fields
+  /// replaced with the non-null parameter values.
+  ButtonThemeData copyWith({
+    ButtonTextTheme textTheme,
+    double minWidth,
+    double height,
+    EdgeInsetsGeometry padding,
+    ShapeBorder shape,
+    bool alignedDropdown,
+  }) {
+    return new ButtonThemeData(
+      textTheme: textTheme ?? this.textTheme,
+      minWidth: minWidth ?? this.minWidth,
+      height: height ?? this.height,
+      padding: padding ?? this.padding,
+      shape: shape ?? this.shape,
+      alignedDropdown: alignedDropdown ?? this.alignedDropdown,
+    );
+  }
+
   @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
@@ -274,15 +304,15 @@ class ButtonThemeData extends Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     const ButtonThemeData defaultTheme = const ButtonThemeData();
-    description.add(new EnumProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: defaultTheme.textTheme));
-    description.add(new DoubleProperty('minWidth', minWidth, defaultValue: defaultTheme.minWidth));
-    description.add(new DoubleProperty('height', height, defaultValue: defaultTheme.height));
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultTheme.padding));
-    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultTheme.shape));
-    description.add(new FlagProperty('alignedDropdown',
+    properties.add(new EnumProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: defaultTheme.textTheme));
+    properties.add(new DoubleProperty('minWidth', minWidth, defaultValue: defaultTheme.minWidth));
+    properties.add(new DoubleProperty('height', height, defaultValue: defaultTheme.height));
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultTheme.padding));
+    properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultTheme.shape));
+    properties.add(new FlagProperty('alignedDropdown',
       value: alignedDropdown,
       defaultValue: defaultTheme.alignedDropdown,
       ifTrue: 'dropdown width matches button',

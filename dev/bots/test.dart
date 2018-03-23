@@ -29,7 +29,6 @@ const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
   'docs': _generateDocs,
   'analyze': _analyzeRepo,
   'tests': _runTests,
-  'tests_dart2': _runTestsDart2,
   'coverage': _runCoverage,
 };
 
@@ -108,6 +107,11 @@ Future<Null> _analyzeRepo() async {
     options: <String>['--flutter-repo'],
   );
 
+  // Ensure that all package dependencies are in sync.
+  await _runCommand(flutter, <String>['update-packages', '--verify-only'], 
+    workingDirectory: flutterRoot,
+  );
+
   // Analyze all the sample code in the repo
   await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
     workingDirectory: flutterRoot,
@@ -128,15 +132,6 @@ Future<Null> _analyzeRepo() async {
   );
 
   print('${bold}DONE: Analysis successful.$reset');
-}
-
-Future<Null> _runTestsDart2() async {
-  if (Platform.isWindows) {
-    // AppVeyor platform is overloaded, won't be able to handle additional
-    // load of dart2 testing.
-    return;
-  }
-  _runTests(options: <String>['--preview-dart-2']);
 }
 
 Future<Null> _runTests({List<String> options: const <String>[]}) async {
@@ -194,6 +189,8 @@ Future<Null> _runTests({List<String> options: const <String>[]}) async {
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: options);
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), options: options);
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'packages',
+        'fuchsia_remote_debug_protocol'), options: options);
   await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
 
@@ -228,7 +225,7 @@ Future<Null> _runCoverage() async {
   }
   coverageFile.deleteSync();
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
-    options: const <String>['--coverage'],
+    options: const <String>['--coverage', '--no-preview-dart-2'],
   );
   if (!coverageFile.existsSync()) {
     print('${red}Coverage file not found.$reset');

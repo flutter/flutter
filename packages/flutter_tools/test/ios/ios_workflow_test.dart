@@ -33,8 +33,10 @@ void main() {
       cocoaPods = new MockCocoaPods();
       fs = new MemoryFileSystem();
 
-      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck).thenReturn(true);
-      when(cocoaPods.isCocoaPodsInitialized).thenReturn(true);
+      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck)
+          .thenAnswer((_) => new Future<bool>.value(true));
+      when(cocoaPods.isCocoaPodsInitialized)
+          .thenAnswer((_) => new Future<bool>.value(true));
     });
 
     testUsingContext('Emit missing status when nothing is installed', () async {
@@ -83,6 +85,7 @@ void main() {
           .thenReturn('Xcode 7.0.1\nBuild version 7C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
       when(xcode.eulaSigned).thenReturn(true);
+      when(xcode.isSimctlInstalled).thenReturn(true);
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
@@ -98,6 +101,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(false);
+      when(xcode.isSimctlInstalled).thenReturn(true);
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
@@ -113,6 +117,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
+      when(xcode.isSimctlInstalled).thenReturn(true);
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(macDevMode: 'Developer mode is currently disabled.');
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
@@ -128,6 +133,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
+      when(xcode.isSimctlInstalled).thenReturn(true);
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasPythonSixModule: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
@@ -143,6 +149,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
+      when(xcode.isSimctlInstalled).thenReturn(true);
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasHomebrew: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
@@ -158,6 +165,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
+      when(xcode.isSimctlInstalled).thenReturn(true);
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
@@ -173,6 +181,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
+      when(xcode.isSimctlInstalled).thenReturn(true);
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
@@ -187,6 +196,7 @@ void main() {
       when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(xcode.isSimctlInstalled).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasIosDeploy: false);
       final ValidationResult result = await workflow.validate();
@@ -203,6 +213,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
+      when(xcode.isSimctlInstalled).thenReturn(true);
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(iosDeployVersionText: '1.8.0');
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
@@ -218,8 +229,10 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck).thenReturn(false);
-      when(cocoaPods.hasCocoaPods).thenReturn(false);
+      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck)
+          .thenAnswer((_) => new Future<bool>.value(false));
+      when(cocoaPods.hasCocoaPods).thenAnswer((_) => new Future<bool>.value(false));
+      when(xcode.isSimctlInstalled).thenReturn(true);
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
@@ -235,9 +248,12 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck).thenReturn(false);
-      when(cocoaPods.hasCocoaPods).thenReturn(true);
-      when(cocoaPods.cocoaPodsVersionText).thenReturn('0.39.0');
+      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck)
+          .thenAnswer((_) => new Future<bool>.value(false));
+      when(cocoaPods.hasCocoaPods).thenAnswer((_) => new Future<bool>.value(true));
+      when(cocoaPods.cocoaPodsVersionText)
+          .thenAnswer((_) => new Future<String>.value('0.39.0'));
+      when(xcode.isSimctlInstalled).thenReturn(true);
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
@@ -256,6 +272,7 @@ void main() {
       when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck).thenReturn(false);
       when(cocoaPods.hasCocoaPods).thenReturn(true);
       when(cocoaPods.isCocoaPodsInitialized).thenReturn(false);
+      when(xcode.isSimctlInstalled).thenReturn(true);
 
       final ValidationResult result = await new IOSWorkflowTestTarget().validate();
       expect(result.type, ValidationType.partial);
@@ -267,12 +284,30 @@ void main() {
       ProcessManager: () => processManager,
     });
 
+    testUsingContext('Emits partial status when simctl is not installed', () async {
+      when(xcode.isInstalled).thenReturn(true);
+      when(xcode.versionText)
+          .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
+      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(xcode.eulaSigned).thenReturn(true);
+      when(xcode.isSimctlInstalled).thenReturn(false);
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final ValidationResult result = await workflow.validate();
+      expect(result.type, ValidationType.partial);
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => iMobileDevice,
+      Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
+    });
+
+
     testUsingContext('Succeeds when all checks pass', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
+      when(xcode.isSimctlInstalled).thenReturn(true);
 
       ensureDirectoryExists(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master', 'README.md'));
 

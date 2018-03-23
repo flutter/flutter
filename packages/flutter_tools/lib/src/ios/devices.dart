@@ -149,7 +149,7 @@ class IOSDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage app, {
+    ApplicationPackage package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -161,11 +161,11 @@ class IOSDevice extends Device {
   }) async {
     if (!prebuiltApplication) {
       // TODO(chinmaygarde): Use mainPath, route.
-      printTrace('Building ${app.name} for $id');
+      printTrace('Building ${package.name} for $id');
 
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
-          app: app,
+          app: package,
           buildInfo: debuggingOptions.buildInfo,
           target: mainPath,
           buildForDevice: true,
@@ -178,12 +178,12 @@ class IOSDevice extends Device {
         return new LaunchResult.failed();
       }
     } else {
-      if (!await installApp(app))
+      if (!await installApp(package))
         return new LaunchResult.failed();
     }
 
     // Step 2: Check that the application exists at the specified path.
-    final IOSApp iosApp = app;
+    final IOSApp iosApp = package;
     final Directory bundle = fs.directory(iosApp.deviceBundlePath);
     if (!bundle.existsSync()) {
       printError('Could not find the built application bundle at ${bundle.path}.');
@@ -256,7 +256,7 @@ class IOSDevice extends Device {
       // TODO(danrubel): The Android device class does something similar to this code below.
       // The various Device subclasses should be refactored and common code moved into the superclass.
       final ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(
-        getLogReader(app: app),
+        getLogReader(app: package),
         portForwarder: portForwarder,
         hostPort: debuggingOptions.observatoryPort,
         ipv6: ipv6,

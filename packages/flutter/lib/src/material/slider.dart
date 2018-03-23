@@ -204,11 +204,11 @@ class Slider extends StatefulWidget {
   _SliderState createState() => new _SliderState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('value', value));
-    description.add(new DoubleProperty('min', min));
-    description.add(new DoubleProperty('max', max));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('value', value));
+    properties.add(new DoubleProperty('min', min));
+    properties.add(new DoubleProperty('max', max));
   }
 }
 
@@ -578,7 +578,10 @@ class _RenderSlider extends RenderBox {
   void _updateLabelPainter() {
     if (label != null) {
       _labelPainter
-        ..text = new TextSpan(style: _theme.accentTextTheme.body2, text: label)
+        ..text = new TextSpan(
+          style: _sliderTheme.valueIndicatorTextStyle,
+          text: label,
+        )
         ..textDirection = textDirection
         ..textScaleFactor = _mediaQueryData.textScaleFactor
         ..layout();
@@ -849,31 +852,31 @@ class _RenderSlider extends RenderBox {
         _valueIndicatorAnimation.status != AnimationStatus.dismissed) {
       if (showValueIndicator) {
         _sliderTheme.valueIndicatorShape.paint(
-          this,
           context,
-          isDiscrete,
           thumbCenter,
-          _valueIndicatorAnimation,
-          _enableAnimation,
-          _labelPainter,
-          _sliderTheme,
-          _textDirection,
-          value,
+          activationAnimation: _valueIndicatorAnimation,
+          enableAnimation: _enableAnimation,
+          isDiscrete: isDiscrete,
+          labelPainter: _labelPainter,
+          parentBox: this,
+          sliderTheme: _sliderTheme,
+          textDirection: _textDirection,
+          value: _value,
         );
       }
     }
 
     _sliderTheme.thumbShape.paint(
-      this,
       context,
-      isDiscrete,
       thumbCenter,
-      _overlayAnimation,
-      _enableAnimation,
-      label != null ? _labelPainter : null,
-      _sliderTheme,
-      _textDirection,
-      value,
+      activationAnimation: _valueIndicatorAnimation,
+      enableAnimation: _enableAnimation,
+      isDiscrete: isDiscrete,
+      labelPainter: _labelPainter,
+      parentBox: this,
+      sliderTheme: _sliderTheme,
+      textDirection: _textDirection,
+      value: _value,
     );
   }
 

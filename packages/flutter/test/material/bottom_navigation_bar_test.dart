@@ -521,7 +521,6 @@ void main() {
           actions: <SemanticsAction>[SemanticsAction.tap],
           label: 'AC\nTab 1 of 3',
           textDirection: TextDirection.ltr,
-          nextNodeId: -1,
           previousNodeId: 3, // Should be 2
         ),
         new TestSemantics(

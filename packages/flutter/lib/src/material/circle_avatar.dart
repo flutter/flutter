@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -44,8 +43,8 @@ import 'theme_data.dart';
 /// See also:
 ///
 ///  * [Chip], for representing users or concepts in long form.
-///  * [ListTile], which can combine an icon (such as a [CircleAvatar]) with some
-///    text for a fixed height list entry.
+///  * [ListTile], which can combine an icon (such as a [CircleAvatar]) with
+///    some text for a fixed height list entry.
 ///  * <https://material.google.com/components/chips.html#chips-contact-chips>
 class CircleAvatar extends StatelessWidget {
   /// Creates a circle that represents a user.
@@ -55,8 +54,11 @@ class CircleAvatar extends StatelessWidget {
     this.backgroundColor,
     this.backgroundImage,
     this.foregroundColor,
-    this.radius: 20.0,
-  }) : super(key: key);
+    this.radius,
+    this.minRadius,
+    this.maxRadius,
+  })  : assert(radius == null || (minRadius == null && maxRadius == null)),
+        super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -67,13 +69,18 @@ class CircleAvatar extends StatelessWidget {
   /// The color with which to fill the circle. Changing the background
   /// color will cause the avatar to animate to the new color.
   ///
-  /// If a background color is not specified, the theme's primary color is used.
+  /// If a [backgroundColor] is not specified, the theme's
+  /// [ThemeData.primaryColorLight] is used with dark foreground colors, and
+  /// [ThemeData.primaryColorDark] with light foreground colors.
   final Color backgroundColor;
 
   /// The default text color for text in the circle.
   ///
-  /// Falls back to white if a background color is specified, or the primary
-  /// text theme color otherwise.
+  /// Defaults to the primary text theme color if no [backgroundColor] is
+  /// specified.
+  ///
+  /// Defaults to [ThemeData.primaryColorLight] for dark background colors, and
+  /// [ThemeData.primaryColorDark] for light background colors.
   final Color foregroundColor;
 
   /// The background image of the circle. Changing the background
@@ -85,48 +92,112 @@ class CircleAvatar extends StatelessWidget {
   /// The size of the avatar. Changing the radius will cause the
   /// avatar to animate to the new size.
   ///
+  /// If [radius] is specified, then neither [minRadius] nor [maxRadius] may be
+  /// specified. Specifying [radius] is equivalent to specifying a [minRadius]
+  /// and [maxRadius], both with the value of [radius].
+  ///
   /// Defaults to 20 logical pixels.
   final double radius;
+
+  /// The minimum size of the avatar.
+  ///
+  /// Changing the minRadius may cause the avatar to animate to the new size, if
+  /// constraints allow.
+  ///
+  /// If minRadius is specified, then [radius] must not also be specified.
+  ///
+  /// Defaults to zero.
+  final double minRadius;
+
+  /// The maximum size of the avatar.
+  ///
+  /// Changing the maxRadius will cause the avatar to animate to the new size,
+  /// if constraints allow.
+  ///
+  /// If maxRadius is specified, then [radius] must not also be specified.
+  ///
+  /// Defaults to [double.infinity].
+  final double maxRadius;
+
+  // The default radius if nothing is specified.
+  static const double _defaultRadius = 20.0;
+
+  // The default min if only the max is specified.
+  static const double _defaultMinRadius = 0.0;
+
+  // The default max if only the min is specified.
+  static const double _defaultMaxRadius = double.infinity;
+
+  double get _minDiameter {
+    if (radius == null && minRadius == null && maxRadius == null) {
+      return _defaultRadius * 2.0;
+    }
+    return 2.0 * (radius ?? minRadius ?? _defaultMinRadius);
+  }
+
+  double get _maxDiameter {
+    if (radius == null && minRadius == null && maxRadius == null) {
+      return _defaultRadius * 2.0;
+    }
+    return 2.0 * (radius ?? maxRadius ?? _defaultMaxRadius);
+  }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
-    TextStyle textStyle = theme.primaryTextTheme.title;
-    if (foregroundColor != null) {
-      textStyle = textStyle.copyWith(color: foregroundColor);
-    } else if (backgroundColor != null) {
-      switch (ThemeData.estimateBrightnessForColor(backgroundColor)) {
+    TextStyle textStyle = theme.primaryTextTheme.title.copyWith(color: foregroundColor);
+    Color effectiveBackgroundColor = backgroundColor;
+    if (effectiveBackgroundColor == null) {
+      switch (ThemeData.estimateBrightnessForColor(textStyle.color)) {
         case Brightness.dark:
-          textStyle = textStyle.copyWith(color: Colors.white);
+          effectiveBackgroundColor = theme.primaryColorLight;
           break;
         case Brightness.light:
-          textStyle = textStyle.copyWith(color: Colors.black);
+          effectiveBackgroundColor = theme.primaryColorDark;
+          break;
+      }
+    } else if (foregroundColor == null) {
+      switch (ThemeData.estimateBrightnessForColor(backgroundColor)) {
+        case Brightness.dark:
+          textStyle = textStyle.copyWith(color: theme.primaryColorLight);
+          break;
+        case Brightness.light:
+          textStyle = textStyle.copyWith(color: theme.primaryColorDark);
           break;
       }
     }
+    final double minDiameter = _minDiameter;
+    final double maxDiameter = _maxDiameter;
     return new AnimatedContainer(
-      width: radius * 2.0,
-      height: radius * 2.0,
+      constraints: new BoxConstraints(
+        minHeight: minDiameter,
+        minWidth: minDiameter,
+        maxWidth: maxDiameter,
+        maxHeight: maxDiameter,
+      ),
       duration: kThemeChangeDuration,
       decoration: new BoxDecoration(
-        color: backgroundColor ?? theme.primaryColor,
-        image: backgroundImage != null ? new DecorationImage(
-          image: backgroundImage
-        ) : null,
+        color: effectiveBackgroundColor,
+        image: backgroundImage != null ? new DecorationImage(image: backgroundImage) : null,
         shape: BoxShape.circle,
       ),
-      child: child != null ? new Center(
-        child: new MediaQuery(
-          // Need to reset the textScaleFactor here so that the
-          // text doesn't escape the avatar when the textScaleFactor is large.
-          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-          child: new DefaultTextStyle(
-            style: textStyle.copyWith(color: foregroundColor),
-            child: child,
-          ),
-        )
-      ) : null,
+      child: child == null
+          ? null
+          : new Center(
+              child: new MediaQuery(
+                // Need to ignore the ambient textScaleFactor here so that the
+                // text doesn't escape the avatar when the textScaleFactor is large.
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                child: new IconTheme(
+                  data: theme.iconTheme.copyWith(color: textStyle.color),
+                  child: new DefaultTextStyle(
+                    style: textStyle,
+                    child: child,
+                  ),
+                ),
+              ),
+            ),
     );
   }
 }

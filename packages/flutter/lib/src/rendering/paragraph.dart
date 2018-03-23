@@ -431,13 +431,13 @@ class RenderParagraph extends RenderBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<TextAlign>('textAlign', textAlign));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection));
-    description.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
-    description.add(new EnumProperty<TextOverflow>('overflow', overflow));
-    description.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
-    description.add(new IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<TextAlign>('textAlign', textAlign));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection));
+    properties.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    properties.add(new EnumProperty<TextOverflow>('overflow', overflow));
+    properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    properties.add(new IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
   }
 }

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'basic_messaging.dart';
 import 'test_step.dart';
 
 Future<TestStepResult> methodCallJsonSuccessHandshake(dynamic payload) async {
@@ -27,22 +28,28 @@ Future<TestStepResult> methodCallJsonNotImplementedHandshake() async {
 
 Future<TestStepResult> methodCallStandardSuccessHandshake(
     dynamic payload) async {
-  const MethodChannel channel =
-      const MethodChannel('std-method', const StandardMethodCodec());
+  const MethodChannel channel = const MethodChannel(
+    'std-method',
+    const StandardMethodCodec(const ExtendedStandardMessageCodec()),
+  );
   return _methodCallSuccessHandshake(
       'Standard success($payload)', channel, payload);
 }
 
 Future<TestStepResult> methodCallStandardErrorHandshake(dynamic payload) async {
-  const MethodChannel channel =
-      const MethodChannel('std-method', const StandardMethodCodec());
+  const MethodChannel channel = const MethodChannel(
+    'std-method',
+    const StandardMethodCodec(const ExtendedStandardMessageCodec()),
+  );
   return _methodCallErrorHandshake(
       'Standard error($payload)', channel, payload);
 }
 
 Future<TestStepResult> methodCallStandardNotImplementedHandshake() async {
-  const MethodChannel channel =
-      const MethodChannel('std-method', const StandardMethodCodec());
+  const MethodChannel channel = const MethodChannel(
+    'std-method',
+    const StandardMethodCodec(const ExtendedStandardMessageCodec()),
+  );
   return _methodCallNotImplementedHandshake(
       'Standard notImplemented()', channel);
 }

@@ -5,16 +5,15 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
-
-import '../lib/src/asset.dart';
-import '../lib/src/base/file_system.dart' as libfs;
-import '../lib/src/base/io.dart';
-import '../lib/src/base/platform.dart';
-import '../lib/src/cache.dart';
-import '../lib/src/context_runner.dart';
-import '../lib/src/devfs.dart';
-import '../lib/src/flx.dart';
-import '../lib/src/globals.dart';
+import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/file_system.dart' as libfs;
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/flx.dart';
+import 'package:flutter_tools/src/globals.dart';
 
 const String _kOptionPackages = 'packages';
 const String _kOptionWorking = 'working-dir';

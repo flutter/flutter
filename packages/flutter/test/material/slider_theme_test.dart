@@ -104,11 +104,13 @@ void main() {
     const Color customColor1 = const Color(0xcafefeed);
     const Color customColor2 = const Color(0xdeadbeef);
     const Color customColor3 = const Color(0xdecaface);
+    const Color customColor4 = const Color(0xfeedcafe);
 
     final SliderThemeData sliderTheme = new SliderThemeData.fromPrimaryColors(
       primaryColor: customColor1,
       primaryColorDark: customColor2,
       primaryColorLight: customColor3,
+      valueIndicatorTextStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor4),
     );
 
     expect(sliderTheme.activeRailColor, equals(customColor1.withAlpha(0xff)));
@@ -126,6 +128,7 @@ void main() {
     expect(sliderTheme.thumbShape, equals(const isInstanceOf<RoundSliderThumbShape>()));
     expect(sliderTheme.valueIndicatorShape, equals(const isInstanceOf<PaddleSliderValueIndicatorShape>()));
     expect(sliderTheme.showValueIndicator, equals(ShowValueIndicator.onlyForDiscrete));
+    expect(sliderTheme.valueIndicatorTextStyle.color, equals(customColor4));
   });
 
   testWidgets('SliderThemeData lerps correctly', (WidgetTester tester) async {
@@ -133,11 +136,13 @@ void main() {
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
       primaryColorLight: Colors.black,
+      valueIndicatorTextStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.black),
     );
     final SliderThemeData sliderThemeWhite = new SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.white,
       primaryColorDark: Colors.white,
       primaryColorLight: Colors.white,
+      valueIndicatorTextStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
     );
     final SliderThemeData lerp = SliderThemeData.lerp(sliderThemeBlack, sliderThemeWhite, 0.5);
     const Color middleGrey = const Color(0xff7f7f7f);
@@ -153,6 +158,7 @@ void main() {
     expect(lerp.disabledThumbColor, equals(middleGrey.withAlpha(0x52)));
     expect(lerp.overlayColor, equals(middleGrey.withAlpha(0x29)));
     expect(lerp.valueIndicatorColor, equals(middleGrey.withAlpha(0xff)));
+    expect(lerp.valueIndicatorTextStyle.color, equals(middleGrey.withAlpha(0xff)));
   });
 
   testWidgets('Default slider thumb shape draws correctly', (WidgetTester tester) async {

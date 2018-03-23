@@ -16,8 +16,6 @@ dart_library("flutter") {
     "//third_party/dart/third_party/pkg/intl",
     "//third_party/dart-pkg/pub/async",
     "//third_party/dart-pkg/pub/collection",
-    "//third_party/dart-pkg/pub/http",
-    "//third_party/dart-pkg/pub/http_parser",
     "//third_party/dart-pkg/pub/meta",
     "//third_party/dart-pkg/pub/vector_math",
   ]

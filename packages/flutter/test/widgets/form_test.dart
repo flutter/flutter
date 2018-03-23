@@ -204,8 +204,8 @@ void main() {
     expect(editableText.widget.controller.text, equals('world'));
   });
 
-  testWidgets('Provide initial value to input when controller is specified', (WidgetTester tester) async {
-    final TextEditingController controller = new TextEditingController();
+  testWidgets('Controller defines initial value', (WidgetTester tester) async {
+    final TextEditingController controller = new TextEditingController(text: 'hello');
     const String initialValue = 'hello';
     final GlobalKey<FormFieldState<String>> inputKey = new GlobalKey<FormFieldState<String>>();
 
@@ -217,7 +217,6 @@ void main() {
             child: new Form(
               child: new TextFormField(
                 key: inputKey,
-                initialValue: 'hello',
                 controller: controller,
               ),
             ),
@@ -251,7 +250,6 @@ void main() {
     final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
     final GlobalKey<FormFieldState<String>> inputKey = new GlobalKey<FormFieldState<String>>();
     final TextEditingController controller = new TextEditingController(text: 'Plover');
-    const String initialValue = 'Plugh';
 
     Widget builder() {
       return new Directionality(
@@ -263,7 +261,7 @@ void main() {
               child: new TextFormField(
                 key: inputKey,
                 controller: controller,
-                initialValue: initialValue,
+                // initialValue is 'Plover'
               ),
             ),
           ),
@@ -284,9 +282,9 @@ void main() {
     // verify value resets to initialValue on reset.
     formKey.currentState.reset();
     await tester.idle();
-    expect(inputKey.currentState.value, equals(initialValue));
-    expect(editableText.widget.controller.text, equals(initialValue));
-    expect(controller.text, equals(initialValue));
+    expect(inputKey.currentState.value, equals('Plover'));
+    expect(editableText.widget.controller.text, equals('Plover'));
+    expect(controller.text, equals('Plover'));
   });
 
   testWidgets('TextEditingController updates to/from form field value', (WidgetTester tester) async {

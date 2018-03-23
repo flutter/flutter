@@ -149,6 +149,23 @@ class Xcode {
     return _eulaSigned;
   }
 
+  bool _isSimctlInstalled;
+
+  /// Verifies that simctl is installed by trying to run it.
+  bool get isSimctlInstalled {
+    if (_isSimctlInstalled == null) {
+      try {
+        // This command will error if additional components need to be installed in
+        // xcode 9.2 and above.
+        final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'simctl', 'list']);
+        _isSimctlInstalled = result.stderr == null || result.stderr == '';
+      } on ProcessException {
+        _isSimctlInstalled = false;
+      }
+    }
+    return _isSimctlInstalled;
+  }
+
   bool get isVersionSatisfactory {
     if (!xcodeProjectInterpreter.isInstalled)
       return false;
@@ -231,7 +248,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       appIosDirectory: appDirectory,
       iosEngineDir: flutterFrameworkDir(buildInfo.mode),
       isSwift: app.isSwift,
-      flutterPodChanged: (previousGeneratedXcconfig != currentGeneratedXcconfig),
+      flutterPodChanged: previousGeneratedXcconfig != currentGeneratedXcconfig,
     );
   }
 
