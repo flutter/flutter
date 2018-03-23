@@ -52,8 +52,6 @@ class GPUSurfaceGL : public Surface {
 
   bool PresentSurface(SkCanvas* canvas);
 
-  bool SelectPixelConfig(GrPixelConfig* config);
-
   FXL_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceGL);
 };
 
