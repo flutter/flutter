@@ -49,7 +49,6 @@ void main() {
       }
       return refreshIndicator;
     });
-    // Make the function reference itself concrete.
     when(mockHelper.refreshTask()).thenReturn(refreshCompleter.future);
   });
 
@@ -85,8 +84,6 @@ void main() {
         ),
       );
 
-      // The function is referenced once while passing into CupertinoRefreshControl
-      // but never called.
       verifyNoMoreInteractions(mockHelper);
 
       expect(
@@ -119,7 +116,7 @@ void main() {
       await tester.pump();
 
       // The function is referenced once while passing into CupertinoRefreshControl
-      // but never called.
+      // and is called.
       verify(mockHelper.builder(
         typed(any),
         RefreshIndicatorMode.drag,
@@ -160,8 +157,6 @@ void main() {
         await tester.drag(find.text('0'), const Offset(0.0, 50.0));
         await tester.pump();
 
-        // The function is referenced once while passing into CupertinoRefreshControl
-        // but never called.
         verifyNoMoreInteractions(mockHelper);
 
         expect(
