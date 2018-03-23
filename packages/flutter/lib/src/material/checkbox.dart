@@ -253,17 +253,24 @@ class _RenderCheckbox extends RenderToggleable {
 
   void _drawCheck(Canvas canvas, Offset origin, double t, Paint paint) {
     assert(t >= 0.0 && t <= 1.0);
-    // As t goes from 0.0 to 1.0, animate the two checkmark strokes from the
-    // mid point outwards.
+    // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
+    // short side to the long side.
     final Path path = new Path();
     const Offset start = const Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
     const Offset mid = const Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
     const Offset end = const Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
-    final Offset drawStart = Offset.lerp(start, mid, 1.0 - t);
-    final Offset drawEnd = Offset.lerp(mid, end, t);
-    path.moveTo(origin.dx + drawStart.dx, origin.dy + drawStart.dy);
-    path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
-    path.lineTo(origin.dx + drawEnd.dx, origin.dy + drawEnd.dy);
+    if (t < 0.5) {
+      final double strokeT = t * 2.0;
+      final Offset drawMid = Offset.lerp(start, mid, strokeT);
+      path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
+      path.lineTo(origin.dx + drawMid.dx, origin.dy + drawMid.dy);
+    } else {
+      final double strokeT = (t - 0.5) * 2.0;
+      final Offset drawEnd = Offset.lerp(mid, end, strokeT);
+      path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
+      path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
+      path.lineTo(origin.dx + drawEnd.dx, origin.dy + drawEnd.dy);
+    }
     canvas.drawPath(path, paint);
   }
 
