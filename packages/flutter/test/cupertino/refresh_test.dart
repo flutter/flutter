@@ -24,43 +24,32 @@ void main() {
     refreshCompleter = new Completer<void>.sync();
     refreshIndicator = new Container();
 
-    when(mockHelper.builder).thenReturn(
-      (
-        BuildContext context,
-        RefreshIndicatorMode refreshState,
-        double pulledExtent,
-        double refreshTriggerPullDistance,
-        double refreshIndicatorExtent,
-      ) {
-        if (refreshState == RefreshIndicatorMode.inactive) {
-          throw new TestFailure(
-            'RefreshControlIndicatorBuilder should never be called with the '
-            "inactive state because there's nothing to build in that case"
-          );
-        }
-        if (pulledExtent < 0.0) {
-          throw new TestFailure('The pulledExtent should never be less than 0.0');
-        }
-        if (refreshTriggerPullDistance < 0.0) {
-          throw new TestFailure('The refreshTriggerPullDistance should never be less than 0.0');
-        }
-        if (refreshIndicatorExtent < 0.0) {
-          throw new TestFailure('The refreshIndicatorExtent should never be less than 0.0');
-        }
-        // This closure is now shadowing the mock implementation which logs.
-        // Pass the call to the mock to log.
-        mockHelper.builder(
-          context,
-          refreshState,
-          pulledExtent,
-          refreshTriggerPullDistance,
-          refreshIndicatorExtent,
+    when(mockHelper.builder(
+            typed(any), typed(any), typed(any), typed(any), typed(any)))
+        .thenAnswer((Invocation i) {
+      BuildContext context = i.positionalArguments[0];
+      RefreshIndicatorMode refreshState = i.positionalArguments[1];
+      double pulledExtent = i.positionalArguments[2];
+      double refreshTriggerPullDistance = i.positionalArguments[3];
+      double refreshIndicatorExtent = i.positionalArguments[4];
+      if (refreshState == RefreshIndicatorMode.inactive) {
+        throw new TestFailure(
+          'RefreshControlIndicatorBuilder should never be called with the '
+          "inactive state because there's nothing to build in that case"
         );
-        return refreshIndicator;
-      },
-    );
+      }
+      if (pulledExtent < 0.0) {
+        throw new TestFailure('The pulledExtent should never be less than 0.0');
+      }
+      if (refreshTriggerPullDistance < 0.0) {
+        throw new TestFailure('The refreshTriggerPullDistance should never be less than 0.0');
+      }
+      if (refreshIndicatorExtent < 0.0) {
+        throw new TestFailure('The refreshIndicatorExtent should never be less than 0.0');
+      }
+      return refreshIndicator;
+    });
     // Make the function reference itself concrete.
-    when(mockHelper.refreshTask).thenReturn(() => mockHelper.refreshTask());
     when(mockHelper.refreshTask()).thenReturn(refreshCompleter.future);
   });
 
@@ -98,7 +87,6 @@ void main() {
 
       // The function is referenced once while passing into CupertinoRefreshControl
       // but never called.
-      verify(mockHelper.builder);
       verifyNoMoreInteractions(mockHelper);
 
       expect(
@@ -132,7 +120,6 @@ void main() {
 
       // The function is referenced once while passing into CupertinoRefreshControl
       // but never called.
-      verify(mockHelper.builder);
       verify(mockHelper.builder(
         typed(any),
         RefreshIndicatorMode.drag,
@@ -175,7 +162,6 @@ void main() {
 
         // The function is referenced once while passing into CupertinoRefreshControl
         // but never called.
-        verify(mockHelper.builder);
         verifyNoMoreInteractions(mockHelper);
 
         expect(
@@ -807,8 +793,6 @@ void main() {
 
         await tester.fling(find.byType(Container).first, const Offset(0.0, -200.0), 3000.0);
 
-        verify(mockHelper.builder);
-        verify(mockHelper.refreshTask);
         verifyNoMoreInteractions(mockHelper);
 
         debugDefaultTargetPlatformOverride = null;
