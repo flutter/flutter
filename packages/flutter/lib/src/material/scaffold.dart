@@ -605,7 +605,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     final Animation<double> previousExitRotationAnimation = new Tween<double>(begin: 1.0, end: 1.0).animate(
       new CurvedAnimation(
         parent: _previousController,
-        curve: Curves.easeIn
+        curve: Curves.easeIn,
       ),
     );
 
@@ -617,7 +617,10 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       begin: 1.0 - kFloatingActionButtonTurnInterval,
       end: 1.0,
     ).animate(
-      new CurvedAnimation(parent: _currentController, curve: Curves.easeIn),
+      new CurvedAnimation(
+        parent: _currentController,
+        curve: Curves.easeIn
+      ),
     );
 
     // Get the animations for when the FAB is moving.
