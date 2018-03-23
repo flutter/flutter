@@ -78,8 +78,8 @@ enum _RefreshIndicatorMode {
 ///    the inner circular progress spinner during refreshes.
 ///  * [CupertinoRefreshControl], an iOS equivalent of the pull-to-refresh pattern.
 ///    Must be used as a sliver inside a [CustomScrollView] instead of wrapping
-///    around a [ScrollView] like the [RefreshIndicator] because it's a part
-///    of the scrollable instead of being overlaid on top of it.
+///    around a [ScrollView] because it's a part of the scrollable instead of
+///    being overlaid on top of it.
 class RefreshIndicator extends StatefulWidget {
   /// Creates a refresh indicator.
   ///
