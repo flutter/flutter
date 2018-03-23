@@ -19,6 +19,17 @@ void main() {
   /// returns.
   Widget refreshIndicator;
 
+  /// These two Functions are required to avoid tearing off of the MockHelper object,
+  /// which is not supported when using Dart 2 runtime semantics.
+  Function builder = (BuildContext context, RefreshIndicatorMode refreshState,
+          double pulledExtent,
+          double refreshTriggerPullDistance,
+          double refreshIndicatorExtent) =>
+      mockHelper.builder(context, refreshState, pulledExtent, refreshTriggerPullDistance,
+          refreshIndicatorExtent);
+
+  Function onRefresh = () => mockHelper.refreshTask();
+
   setUp(() {
     mockHelper = new MockHelper();
     refreshCompleter = new Completer<void>.sync();
@@ -75,7 +86,7 @@ void main() {
           child: new CustomScrollView(
             slivers: <Widget>[
               new CupertinoRefreshControl(
-                builder: mockHelper.builder,
+                builder: builder,
               ),
               buildAListOfStuff(),
             ],
@@ -102,7 +113,7 @@ void main() {
           child: new CustomScrollView(
             slivers: <Widget>[
               new CupertinoRefreshControl(
-                builder: mockHelper.builder,
+                builder: builder,
               ),
               buildAListOfStuff(),
             ],
@@ -144,7 +155,7 @@ void main() {
             child: new CustomScrollView(
               slivers: <Widget>[
                 new CupertinoRefreshControl(
-                  builder: mockHelper.builder,
+                  builder: builder,
                 ),
                 buildAListOfStuff(),
               ],
@@ -176,7 +187,7 @@ void main() {
           child: new CustomScrollView(
             slivers: <Widget>[
               new CupertinoRefreshControl(
-                builder: mockHelper.builder,
+                builder: builder,
               ),
               buildAListOfStuff(),
             ],
@@ -192,7 +203,6 @@ void main() {
       await tester.pump(const Duration(seconds: 3));
 
       verifyInOrder(<void>[
-        mockHelper.builder,
         mockHelper.builder(
           typed(any),
           RefreshIndicatorMode.drag,
@@ -241,8 +251,8 @@ void main() {
           child: new CustomScrollView(
             slivers: <Widget>[
               new CupertinoRefreshControl(
-                builder: mockHelper.builder,
-                onRefresh: mockHelper.refreshTask,
+                builder: builder,
+                onRefresh: onRefresh,
               ),
               buildAListOfStuff(),
             ],
@@ -259,8 +269,6 @@ void main() {
       await tester.pump();
 
       verifyInOrder(<void>[
-        mockHelper.builder,
-        mockHelper.refreshTask,
         mockHelper.builder(
           typed(any),
           RefreshIndicatorMode.drag,
@@ -305,8 +313,8 @@ void main() {
             child: new CustomScrollView(
               slivers: <Widget>[
                 new CupertinoRefreshControl(
-                  builder: mockHelper.builder,
-                  onRefresh: mockHelper.refreshTask,
+                  builder: builder,
+                  onRefresh: onRefresh,
                 ),
                 buildAListOfStuff(),
               ],
@@ -320,8 +328,6 @@ void main() {
         await tester.pump(const Duration(milliseconds: 50));
 
         verifyInOrder(<void>[
-          mockHelper.builder,
-          mockHelper.refreshTask,
           mockHelper.builder(
             typed(any),
             RefreshIndicatorMode.armed,
@@ -384,8 +390,8 @@ void main() {
           child: new CustomScrollView(
             slivers: <Widget>[
               new CupertinoRefreshControl(
-                builder: mockHelper.builder,
-                onRefresh: mockHelper.refreshTask,
+                builder: builder,
+                onRefresh: onRefresh,
               ),
               buildAListOfStuff(),
             ],
@@ -464,8 +470,8 @@ void main() {
           child: new CustomScrollView(
             slivers: <Widget>[
               new CupertinoRefreshControl(
-                builder: mockHelper.builder,
-                onRefresh: mockHelper.refreshTask,
+                builder: builder,
+                onRefresh: onRefresh,
               ),
               buildAListOfStuff(),
             ],
@@ -541,8 +547,8 @@ void main() {
             child: new CustomScrollView(
               slivers: <Widget>[
                 new CupertinoRefreshControl(
-                  builder: mockHelper.builder,
-                  onRefresh: mockHelper.refreshTask,
+                  builder: builder,
+                  onRefresh: onRefresh,
                 ),
                 buildAListOfStuff(),
               ],
@@ -630,8 +636,8 @@ void main() {
             child: new CustomScrollView(
               slivers: <Widget>[
                 new CupertinoRefreshControl(
-                  builder: mockHelper.builder,
-                  onRefresh: mockHelper.refreshTask,
+                  builder: builder,
+                  onRefresh: onRefresh,
                 ),
                 buildAListOfStuff(),
               ],
@@ -686,8 +692,8 @@ void main() {
             child: new CustomScrollView(
               slivers: <Widget>[
                 new CupertinoRefreshControl(
-                  builder: mockHelper.builder,
-                  onRefresh: mockHelper.refreshTask,
+                  builder: builder,
+                  onRefresh: onRefresh,
                 ),
                 buildAListOfStuff(),
               ],
@@ -774,8 +780,8 @@ void main() {
               slivers: <Widget>[
                 buildAListOfStuff(),
                 new CupertinoRefreshControl( // it's in the middle now.
-                  builder: mockHelper.builder,
-                  onRefresh: mockHelper.refreshTask,
+                  builder: builder,
+                  onRefresh: onRefresh,
                 ),
                 buildAListOfStuff(),
               ],
@@ -806,7 +812,7 @@ void main() {
             child: new CustomScrollView(
               slivers: <Widget>[
                 new CupertinoRefreshControl(
-                  builder: mockHelper.builder,
+                  builder: builder,
                 ),
                 buildAListOfStuff(),
               ],
@@ -857,7 +863,7 @@ void main() {
           child: new CustomScrollView(
             slivers: <Widget>[
               new CupertinoRefreshControl(
-                builder: mockHelper.builder,
+                builder: builder,
               ),
               buildAListOfStuff(),
             ],
@@ -882,7 +888,7 @@ void main() {
           child: new CustomScrollView(
             slivers: <Widget>[
               new CupertinoRefreshControl(
-                builder: mockHelper.builder,
+                builder: builder,
               ),
               buildAListOfStuff(),
             ],
@@ -917,7 +923,7 @@ void main() {
           child: new CustomScrollView(
             slivers: <Widget>[
               new CupertinoRefreshControl(
-                builder: mockHelper.builder,
+                builder: builder,
                 refreshTriggerPullDistance: 80.0,
               ),
               buildAListOfStuff(),
@@ -955,8 +961,8 @@ void main() {
             child: new CustomScrollView(
               slivers: <Widget>[
                 new CupertinoRefreshControl(
-                  builder: mockHelper.builder,
-                  onRefresh: mockHelper.refreshTask,
+                  builder: builder,
+                  onRefresh: onRefresh,
                   refreshTriggerPullDistance: 90.0,
                   refreshIndicatorExtent: 50.0,
                 ),
@@ -1000,8 +1006,8 @@ void main() {
             child: new CustomScrollView(
               slivers: <Widget>[
                 new CupertinoRefreshControl(
-                  builder: mockHelper.builder,
-                  onRefresh: mockHelper.refreshTask,
+                  builder: builder,
+                  onRefresh: onRefresh,
                 ),
                 buildAListOfStuff(),
               ],
@@ -1052,8 +1058,8 @@ void main() {
             child: new CustomScrollView(
               slivers: <Widget>[
                 new CupertinoRefreshControl(
-                  builder: mockHelper.builder,
-                  onRefresh: mockHelper.refreshTask,
+                  builder: builder,
+                  onRefresh: onRefresh,
                 ),
                 buildAListOfStuff(),
               ],
@@ -1115,8 +1121,8 @@ void main() {
             child: new CustomScrollView(
               slivers: <Widget>[
                 new CupertinoRefreshControl(
-                  builder: mockHelper.builder,
-                  onRefresh: mockHelper.refreshTask,
+                  builder: builder,
+                  onRefresh: onRefresh,
                 ),
                 buildAListOfStuff(),
               ],
@@ -1182,7 +1188,7 @@ void main() {
               slivers: <Widget>[
                 new CupertinoRefreshControl(
                   builder: null,
-                  onRefresh: mockHelper.refreshTask,
+                  onRefresh: onRefresh,
                   refreshIndicatorExtent: 0.0,
                 ),
                 buildAListOfStuff(),
