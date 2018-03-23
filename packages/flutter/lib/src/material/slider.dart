@@ -254,11 +254,11 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    interactionTimer?.cancel();
     overlayController.dispose();
     valueIndicatorController.dispose();
     enableController.dispose();
     positionController.dispose();
-    interactionTimer?.cancel();
     super.dispose();
   }
 
@@ -641,17 +641,18 @@ class _RenderSlider extends RenderBox {
         _state.valueIndicatorController.forward();
         _state.interactionTimer?.cancel();
         _state.interactionTimer = new Timer(_minimumInteractionTime * timeDilation, () {
-          if (!_active && _state.valueIndicatorController.status == AnimationStatus.completed) {
+          _state.interactionTimer = null;
+          if (!_active &&
+              _state.valueIndicatorController.status == AnimationStatus.completed) {
             _state.valueIndicatorController.reverse();
           }
-          _state.interactionTimer = null;
         });
       }
     }
   }
 
   void _endInteraction() {
-    if (_active) {
+    if (_active && _state.mounted) {
       _active = false;
       _currentDragValue = 0.0;
       _state.overlayController.reverse();
