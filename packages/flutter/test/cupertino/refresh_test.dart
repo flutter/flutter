@@ -27,10 +27,10 @@ void main() {
     when(mockHelper.builder(
             typed(any), typed(any), typed(any), typed(any), typed(any)))
         .thenAnswer((Invocation i) {
-      RefreshIndicatorMode refreshState = i.positionalArguments[1];
-      double pulledExtent = i.positionalArguments[2];
-      double refreshTriggerPullDistance = i.positionalArguments[3];
-      double refreshIndicatorExtent = i.positionalArguments[4];
+      final RefreshIndicatorMode refreshState = i.positionalArguments[1];
+      final double pulledExtent = i.positionalArguments[2];
+      final double refreshTriggerPullDistance = i.positionalArguments[3];
+      final double refreshIndicatorExtent = i.positionalArguments[4];
       if (refreshState == RefreshIndicatorMode.inactive) {
         throw new TestFailure(
           'RefreshControlIndicatorBuilder should never be called with the '
