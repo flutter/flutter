@@ -189,6 +189,8 @@ Future<Null> _runTests({List<String> options: const <String>[]}) async {
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: options);
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), options: options);
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'packages',
+        'fuchsia_remote_debug_protocol'), options: options);
   await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
 
