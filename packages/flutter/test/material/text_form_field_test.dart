@@ -68,7 +68,7 @@ void main() {
 
     expect(_validateCalled, 1);
     await tester.showKeyboard(find.byType(TextField));
-    tester.enterText(find.byType(TextField), 'a');
+    await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
     expect(_validateCalled, 2);
   });
