@@ -17,11 +17,11 @@ export 'dart:ui' show TextAffinity;
 ///
 /// On Android, behavior may vary across device and keyboard provider.
 ///
-/// This class allows additional flags for some input types. For example,
-/// numeric input can specify whether it supports decimal numbers and/or
-/// signed numbers.
+/// This class stays as close to [Enum] interface as possible, and allows
+/// for additional flags for some input types. For example, numeric input
+/// can specify whether it supports decimal numbers and/or signed numbers.
 class TextInputType {
-  const TextInputType._(this.type) : signed = null, decimal = null;
+  const TextInputType._(this.index) : signed = null, decimal = null;
 
   /// Optimize for textual information.
   ///
@@ -30,16 +30,21 @@ class TextInputType {
   const TextInputType.numberWithOptions({
     this.signed: false,
     this.decimal: false,
-  }) : type = 2;
+  }) : index = 2;
 
-  final int type;
+  /// Enum value index, corresponds to one of the [values].
+  final int index;
 
   /// The number is signed, allowing a positive or negative sign at the start.
-  /// This flag is only used for numeric input type.
+  ///
+  /// This flag is only used for the [number] input type, otherwise `null`.
+  /// Use `const TextInputType.numberWithOptions(signed: true)` to set this.
   final bool signed;
 
   /// The number is decimal, allowing a decimal point to provide fractional.
-  /// This flag is only used for numeric input type.
+  ///
+  /// This flag is only used for the [number] input type, otherwise `null`.
+  /// Use `const TextInputType.numberWithOptions(decimal: true)` to set this.
   final bool decimal;
 
   /// Optimize for textual information.
@@ -57,8 +62,8 @@ class TextInputType {
   /// Optimize for numerical information.
   ///
   /// Requests a default keyboard with ready access to the number keys.
-  /// Additional settings, such as decimal point and/or positive/negative
-  /// signs, can be requested by using the [numberWithOptions] constructor.
+  /// Additional options, such as decimal point and/or positive/negative
+  /// signs, can be requested using [new TextInputType.numberWithOptions].
   static const TextInputType number = const TextInputType.numberWithOptions();
 
   /// Optimize for telephone numbers.
@@ -84,50 +89,48 @@ class TextInputType {
   /// Requests a keyboard with ready access to the "/" and "." keys.
   static const TextInputType url = const TextInputType._(6);
 
+  /// All possible enum values.
   static const List<TextInputType> values = const <TextInputType>[
     text, multiline, number, phone, datetime, emailAddress, url,
   ];
 
+  // Corresponding string name for each the [values].
   static const List<String> _names = const <String>[
     'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url',
   ];
 
-  /// Enum value name, this is what enum.toString() would normally return.
-  String get _name => 'TextInputType.${_names[type]}';
+  // Enum value name, this is what enum.toString() would normally return.
+  String get _name => 'TextInputType.${_names[index]}';
 
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
-      'type': _name,
+      'name': _name,
       'signed': signed,
       'decimal': decimal,
     };
   }
 
   @override
-  String toString() => '$runtimeType('
-      'type: \u2524$_name\u251C, '
-      'signed: $signed, '
-      'decimal: $decimal)';
+  String toString() {
+    return '$runtimeType('
+        'name: $_name, '
+        'signed: $signed, '
+        'decimal: $decimal)';
+  }
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
     if (other is! TextInputType)
       return false;
     final TextInputType typedOther = other;
-    return typedOther.type == type
+    return typedOther.index == index
         && typedOther.signed == signed
         && typedOther.decimal == decimal;
   }
 
   @override
-  int get hashCode => hashValues(
-      type.hashCode,
-      signed.hashCode,
-      decimal.hashCode
-  );
+  int get hashCode => hashValues(index, signed, decimal);
 }
 
 /// An action the user has requested the text input control to perform.
