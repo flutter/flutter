@@ -239,8 +239,8 @@ the following steps.
 1. Follow the instructions above for creating a working copy of this repository.
 
 2. Follow the [contributing instructions](https://github.com/flutter/engine/blob/master/CONTRIBUTING.md)
-   for the engine repository to create a working copy of the engine. The instructions
-   also explain how to use the locally built engine instead of the one bundled with
+   in the engine repository to create a working copy of the engine. The instructions
+   also explain how to use a locally-built engine instead of the one bundled with
    your installation of the Flutter framework.
 
 Making a breaking change to the engine
