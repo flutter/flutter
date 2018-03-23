@@ -12,7 +12,6 @@
 #include "flutter/vulkan/vulkan_surface.h"
 #include "flutter/vulkan/vulkan_utilities.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
-#include "third_party/skia/src/gpu/vk/GrVkUtil.h"
 
 namespace vulkan {
 
@@ -260,65 +259,46 @@ std::vector<VkQueueFamilyProperties> VulkanDevice::GetQueueFamilyProperties()
   return properties;
 }
 
-bool VulkanDevice::ChooseSurfaceFormat(const VulkanSurface& surface,
-                                       VkSurfaceFormatKHR* format) const {
+int VulkanDevice::ChooseSurfaceFormat(const VulkanSurface& surface,
+                                      std::vector<VkFormat> desired_formats,
+                                      VkSurfaceFormatKHR* format) const {
   if (!surface.IsValid() || format == nullptr) {
-    return false;
+    return -1;
   }
 
   uint32_t format_count = 0;
   if (VK_CALL_LOG_ERROR(vk.GetPhysicalDeviceSurfaceFormatsKHR(
           physical_device_, surface.Handle(), &format_count, nullptr)) !=
       VK_SUCCESS) {
-    return false;
+    return -1;
   }
 
   if (format_count == 0) {
-    return false;
+    return -1;
   }
 
   VkSurfaceFormatKHR formats[format_count];
   if (VK_CALL_LOG_ERROR(vk.GetPhysicalDeviceSurfaceFormatsKHR(
           physical_device_, surface.Handle(), &format_count, formats)) !=
       VK_SUCCESS) {
-    return false;
+    return -1;
   }
 
   std::map<VkFormat, VkSurfaceFormatKHR> supported_formats;
-
   for (uint32_t i = 0; i < format_count; i++) {
-    GrPixelConfig pixel_config = GrVkFormatToPixelConfig(formats[i].format);
-    if (pixel_config != kUnknown_GrPixelConfig) {
-      supported_formats[formats[i].format] = formats[i];
-    }
+    supported_formats[formats[i].format] = formats[i];
   }
-
-  if (supported_formats.size() == 0) {
-    return false;
-  }
-
-  const std::vector<VkFormat> desired_formats = {
-      VK_FORMAT_R8G8B8A8_SRGB,        // kSRGBA_8888_GrPixelConfig
-      VK_FORMAT_B8G8R8A8_SRGB,        // kSBGRA_8888_GrPixelConfig
-      VK_FORMAT_R16G16B16A16_SFLOAT,  // kRGBA_half_GrPixelConfig
-      VK_FORMAT_R8G8B8A8_UNORM,       // kRGBA_8888_GrPixelConfig
-      VK_FORMAT_B8G8R8A8_UNORM,       // kBGRA_8888_GrPixelConfig
-  };
 
   // Try to find the first supported format in the list of desired formats.
-  for (VkFormat current_format : desired_formats) {
-    auto found = supported_formats.find(current_format);
+  for (size_t i = 0; i < desired_formats.size(); ++i) {
+    auto found = supported_formats.find(desired_formats[i]);
     if (found != supported_formats.end()) {
       *format = found->second;
-      return true;
+      return static_cast<int>(i);
     }
   }
 
-  // None of the desired formats were supported. Return the first supported
-  // format even if we don't like it all that much (it has already returned true
-  // for GrVkFormatToPixelConfig).
-  *format = supported_formats.begin()->second;
-  return true;
+  return -1;
 }
 
 bool VulkanDevice::ChoosePresentMode(const VulkanSurface& surface,

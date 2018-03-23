@@ -6,9 +6,9 @@
 
 #include <limits>
 
+#include "flutter/vulkan/skia_vulkan_header.h"
 #include "flutter/vulkan/vulkan_proc_table.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
-#include "third_party/skia/src/gpu/vk/GrVkUtil.h"
 
 namespace vulkan {
 

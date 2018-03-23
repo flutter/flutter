@@ -49,8 +49,9 @@ class VulkanDevice {
       uint32_t* /* mask of GrVkFeatureFlags */ features) const;
 
   FXL_WARN_UNUSED_RESULT
-  bool ChooseSurfaceFormat(const VulkanSurface& surface,
-                           VkSurfaceFormatKHR* format) const;
+  int ChooseSurfaceFormat(const VulkanSurface& surface,
+                          std::vector<VkFormat> desired_formats,
+                          VkSurfaceFormatKHR* format) const;
 
   FXL_WARN_UNUSED_RESULT
   bool ChoosePresentMode(const VulkanSurface& surface,
