@@ -182,11 +182,7 @@ void main() {
         r'   owner: RenderView#[0-9a-f]{5}\n'
         r'   creator: RenderView\n'
         r'   offset: Offset\(0\.0, 0\.0\)\n'
-        r'   transform:\n'
-        r'     \[0] 3\.0,0\.0,0\.0,0\.0\n'
-        r'     \[1] 0\.0,3\.0,0\.0,0\.0\n'
-        r'     \[2] 0\.0,0\.0,1\.0,0\.0\n'
-        r'     \[3] 0\.0,0\.0,0\.0,1\.0\n'
+        r'   transform: scale\(3\.0\)\n'
         r'$'
       ),
     ]);

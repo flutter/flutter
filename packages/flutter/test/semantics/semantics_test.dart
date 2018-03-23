@@ -408,7 +408,7 @@ void main() {
     );
     expect(
       allProperties.getSemanticsData().toString(),
-      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], actions: [longPress, scrollUp, showOnScreen], flags: [hasCheckedState, isSelected, isButton], label: "Use all the properties", textDirection: rtl)',
+      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), translate(10.0, 10.0), actions: [longPress, scrollUp, showOnScreen], flags: [hasCheckedState, isSelected, isButton], label: "Use all the properties", textDirection: rtl)',
     );
 
     final SemanticsNode scaled = new SemanticsNode()
@@ -423,7 +423,7 @@ void main() {
     );
     expect(
       scaled.getSemanticsData().toString(),
-      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [10.0,0.0,0.0,0.0; 0.0,10.0,0.0,0.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0])',
+      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), scale(10.0))',
     );
   });
 
