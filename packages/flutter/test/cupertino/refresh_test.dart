@@ -21,14 +21,14 @@ void main() {
 
   /// These two Functions are required to avoid tearing off of the MockHelper object,
   /// which is not supported when using Dart 2 runtime semantics.
-  Function builder = (BuildContext context, RefreshIndicatorMode refreshState,
+  final Function builder = (BuildContext context, RefreshIndicatorMode refreshState,
           double pulledExtent,
           double refreshTriggerPullDistance,
           double refreshIndicatorExtent) =>
       mockHelper.builder(context, refreshState, pulledExtent, refreshTriggerPullDistance,
           refreshIndicatorExtent);
 
-  Function onRefresh = () => mockHelper.refreshTask();
+  final Function onRefresh = () => mockHelper.refreshTask();
 
   setUp(() {
     mockHelper = new MockHelper();
