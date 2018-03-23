@@ -242,7 +242,9 @@ typedef Future<void> RefreshCallback();
 /// Only one refresh can be triggered until the previous refresh has completed
 /// and the indicator sliver has retracted at least 90% of the way back.
 ///
-/// Can only be used in downward scrolling vertical lists.
+/// Can only be used in downward-scrolling vertical lists that overscrolls. In
+/// other words, refreshes can't be triggered with lists using
+/// [ClampingScrollPhysics].
 ///
 /// See also:
 ///
