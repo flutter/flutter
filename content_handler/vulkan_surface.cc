@@ -10,7 +10,6 @@
 #include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrContext.h"
-#include "third_party/skia/src/gpu/vk/GrVkImage.h"
 
 namespace flutter_runner {
 

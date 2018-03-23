@@ -11,7 +11,6 @@
 #include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
-#include "third_party/skia/src/gpu/vk/GrVkUtil.h"
 
 namespace flutter_runner {
 

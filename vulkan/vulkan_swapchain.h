@@ -77,11 +77,15 @@ class VulkanSwapchain {
 
   std::vector<VkImage> GetImages() const;
 
-  bool CreateSwapchainImages(GrContext* skia_context);
+  bool CreateSwapchainImages(GrContext* skia_context,
+                             SkColorType color_type,
+                             sk_sp<SkColorSpace> color_space);
 
   sk_sp<SkSurface> CreateSkiaSurface(GrContext* skia_context,
                                      VkImage image,
-                                     const SkISize& size) const;
+                                     const SkISize& size,
+                                     SkColorType color_type,
+                                     sk_sp<SkColorSpace> color_space) const;
 
   VulkanBackbuffer* GetNextBackbuffer();
 
