@@ -1,4 +1,4 @@
-Signature: a714ae47f09ddeaf5ab4e20e34c3743a
+Signature: 1c586b7cec7bcad97600f92debbb310c
 
 UNUSED LICENSES:
 
@@ -6062,6 +6062,9 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.h
 FILE: ../../../third_party/dart/runtime/vm/datastream.cc
 FILE: ../../../third_party/dart/runtime/vm/finalizable_data.h
+FILE: ../../../third_party/dart/sdk/lib/js/_js.dart
+FILE: ../../../third_party/dart/sdk/lib/js/_js_client.dart
+FILE: ../../../third_party/dart/sdk/lib/js/_js_server.dart
 FILE: ../../../third_party/dart/sdk/lib/typed_data/unmodifiable_typed_data.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2018, the Dart project authors.  Please see the AUTHORS file
