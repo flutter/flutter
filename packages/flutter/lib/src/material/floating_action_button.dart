@@ -119,9 +119,9 @@ class FloatingActionButton extends StatefulWidget {
           children: <Widget>[
             const SizedBox(width: 16.0),
             icon,
-            const SizedBox(width: 16.0),
+            const SizedBox(width: 8.0),
             label,
-            const SizedBox(width: 24.0),
+            const SizedBox(width: 20.0),
           ],
         ),
         super(key: key);
@@ -259,7 +259,10 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       elevation: _highlight ? widget.highlightElevation : widget.elevation,
       constraints: widget._sizeConstraints,
       fillColor: widget.backgroundColor ?? theme.accentColor,
-      textStyle: theme.accentTextTheme.button.copyWith(color: foregroundColor),
+      textStyle: theme.accentTextTheme.button.copyWith(
+        color: foregroundColor,
+        letterSpacing: 1.2,
+      ),
       shape: widget.shape,
       child: result,
     );

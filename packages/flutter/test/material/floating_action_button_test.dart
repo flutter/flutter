@@ -105,7 +105,7 @@ void main() {
     expect(find.byType(Icon), findsOneWidget);
 
     // Verify that the widget's height is 48 and that its internal
-    /// horizontal layout is: 16 icon 16 label 24
+    /// horizontal layout is: 16 icon 8 label 20
     expect(tester.getSize(fabFinder).height, 48.0);
     final double fabLeft = tester.getTopLeft(fabFinder).dx;
     final double fabRight = tester.getTopRight(fabFinder).dx;
@@ -114,8 +114,8 @@ void main() {
     final double labelLeft = tester.getTopLeft(find.text('label')).dx;
     final double labelRight = tester.getTopRight(find.text('label')).dx;
     expect(iconLeft - fabLeft, 16.0);
-    expect(labelLeft - iconRight, 16.0);
-    expect(fabRight - labelRight, 24.0);
+    expect(labelLeft - iconRight, 8.0);
+    expect(fabRight - labelRight, 20.0);
   });
 
   testWidgets('Floating Action Button heroTag', (WidgetTester tester) async {
