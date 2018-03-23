@@ -385,6 +385,39 @@ void main() {
         ]),
       ));
     });
+
+    testWidgets('Painting creates layers', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new ListWheelScrollView(
+            itemExtent: 100.0,
+            children: <Widget>[
+              new Container(
+                width: 200.0,
+                child: const Center(
+                  child: const Text('blah'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        new List<TransformLayer>.from(
+          tester.layers.where((Layer layer) => layer is TransformLayer)
+        )
+          .map((TransformLayer layer) => layer.transform.storage)
+          .toList(),
+        contains(equals(<dynamic>[
+          1.0, 0.0, 0.0, 0.0,
+          0.0, 1.0, 0.0, 0.0,
+          -1.2, -0.9, 1.0, -0.003,
+          moreOrLessEquals(0.0), moreOrLessEquals(0.0), 0.0, moreOrLessEquals(1.0),
+        ])),
+      );
+    });
   });
 
   group('scroll notifications', () {
