@@ -249,6 +249,7 @@ tasks:
       test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   # iOS on-device tests
 
