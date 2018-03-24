@@ -279,7 +279,8 @@ class HotRunner extends ResidentRunner {
         bundleFirstUpload: isFirstUpload,
         bundleDirty: isFirstUpload == false && rebuildBundle,
         fileFilter: _dartDependencies,
-        fullRestart: fullRestart
+        fullRestart: fullRestart,
+        projectRootPath: projectRootPath,
       );
       if (!result)
         return false;

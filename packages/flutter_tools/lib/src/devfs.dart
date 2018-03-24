@@ -409,6 +409,7 @@ class DevFS {
     ResidentCompiler generator,
     String dillOutputPath,
     bool fullRestart: false,
+    String projectRootPath,
   }) async {
     // Mark all entries as possibly deleted.
     for (DevFSContent content in _entries.values) {
@@ -503,11 +504,16 @@ class DevFS {
           await generator.recompile(mainPath, invalidatedFiles,
               outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
               packagesFilePath : _packagesFilePath);
-      if (compiledBinary != null && compiledBinary.isNotEmpty)
+      if (compiledBinary != null && compiledBinary.isNotEmpty) {
+        final String entryUri = projectRootPath != null ?
+            fs.path.relative(mainPath, from: projectRootPath):
+            mainPath;
         dirtyEntries.putIfAbsent(
-          fs.path.toUri(target + '.dill'),
+          fs.path.toUri(entryUri + '.dill'),
           () => new DevFSFileContent(fs.file(compiledBinary))
         );
+      }
+
     }
     if (dirtyEntries.isNotEmpty) {
       printTrace('Updating files');

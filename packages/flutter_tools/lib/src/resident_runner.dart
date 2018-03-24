@@ -376,7 +376,8 @@ class FlutterDevice {
     bool bundleFirstUpload: false,
     bool bundleDirty: false,
     Set<String> fileFilter,
-    bool fullRestart: false
+    bool fullRestart: false,
+    String projectRootPath,
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
@@ -395,6 +396,7 @@ class FlutterDevice {
         generator: generator,
         fullRestart: fullRestart,
         dillOutputPath: dillOutputPath,
+        projectRootPath: projectRootPath,
       );
     } on DevFSException {
       devFSStatus.cancel();
