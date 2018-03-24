@@ -16,7 +16,7 @@
         <activity android:name="com.yourcompany.platforminteraction.MainActivity"
                   android:launchMode="singleTop"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
-                  android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale"
+                  android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density"
                   android:hardwareAccelerated="true"
                   android:windowSoftInputMode="adjustResize">
             <intent-filter>
