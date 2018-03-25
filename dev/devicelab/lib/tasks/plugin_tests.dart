@@ -98,7 +98,7 @@ class FlutterProject {
         canFail: true,
       );
       // TODO(mravn): Investigating if flakiness is timing dependent.
-      await new Future<Null>.delayed(new Duration(seconds: 10));
+      await new Future<Null>.delayed(const Duration(seconds: 10));
     }
     await parent.delete(recursive: true);
   }
