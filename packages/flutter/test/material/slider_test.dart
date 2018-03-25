@@ -1208,4 +1208,45 @@ void main() {
     await expectValueIndicator(isVisible: false, theme: theme, enabled: true);
     await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
   });
+
+  testWidgets("Slider doesn't start any animations after dispose", (WidgetTester tester) async {
+    final Key sliderKey = new UniqueKey();
+    double value = 0.0;
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new MediaQuery(
+              data: new MediaQueryData.fromWindow(window),
+              child: new Material(
+                child: new Center(
+                  child: new Slider(
+                    key: sliderKey,
+                    value: value,
+                    divisions: 4,
+                    onChanged: (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(sliderKey)));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    expect(value, equals(0.5));
+    await gesture.moveBy(const Offset(-500.0, 0.0));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    // Change the tree to dispose the original widget.
+    await tester.pumpWidget(new Container());
+    expect(await tester.pumpAndSettle(const Duration(milliseconds: 100)), equals(1));
+    await gesture.up();
+  });
 }
