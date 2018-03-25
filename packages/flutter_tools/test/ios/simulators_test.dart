@@ -94,6 +94,20 @@ void main() {
     });
   });
 
+  group('sdkMajorVersion', () {
+    test('can be parsed from iOS-11-3', () async {
+      final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3');
+
+      expect(await device.sdkMajorVersion, 11);
+    });
+
+    test('can be parsed from iOS 11.2', () async {
+      final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.2');
+
+      expect(await device.sdkMajorVersion, 11);
+    });
+  });
+
   group('IOSSimulator.isSupported', () {
     testUsingContext('Apple TV is unsupported', () {
       expect(new IOSSimulator('x', name: 'Apple TV').isSupported(), false);
