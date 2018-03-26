@@ -8,4 +8,4 @@
 #endif  // VK_USE_PLATFORM_ANDROID_KHR
 #endif  // __ANDROID__
 
-#include "vulkan/vulkan.h"
+#include "third_party/vulkan/src/vulkan/vulkan.h"
