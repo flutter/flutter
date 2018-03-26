@@ -37,9 +37,9 @@ void main() {
       mockVM = new MockVM();
       mockIsolate = new MockIsolate();
       mockPeer = new MockPeer();
-      when(mockClient.getVM()).thenReturn(new Future.value(mockVM));
+      when(mockClient.getVM()).thenReturn(new Future.value<MockVM>(mockVM));
       when(mockVM.isolates).thenReturn(<VMRunnableIsolate>[mockIsolate]);
-      when(mockIsolate.loadRunnable()).thenReturn(new Future.value(mockIsolate));
+      when(mockIsolate.loadRunnable()).thenReturn(new Future.value<MockIsolate>(mockIsolate));
       when(mockIsolate.invokeExtension(typed(any), typed(any))).thenAnswer(
           (Invocation invocation) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
       vmServiceConnectFunction = (String url) {
