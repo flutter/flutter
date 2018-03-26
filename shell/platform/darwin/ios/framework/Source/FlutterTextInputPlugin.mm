@@ -9,13 +9,17 @@
 static const char _kTextAffinityDownstream[] = "TextAffinity.downstream";
 static const char _kTextAffinityUpstream[] = "TextAffinity.upstream";
 
-static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
+static UIKeyboardType ToUIKeyboardType(NSDictionary* type) {
+  NSString* inputType = type[@"name"];
   if ([inputType isEqualToString:@"TextInputType.text"])
     return UIKeyboardTypeDefault;
   if ([inputType isEqualToString:@"TextInputType.multiline"])
     return UIKeyboardTypeDefault;
-  if ([inputType isEqualToString:@"TextInputType.number"])
+  if ([inputType isEqualToString:@"TextInputType.number"]) {
+    if ([type[@"signed"] boolValue])
+      return UIKeyboardTypeNumbersAndPunctuation;
     return UIKeyboardTypeDecimalPad;
+  }
   if ([inputType isEqualToString:@"TextInputType.phone"])
     return UIKeyboardTypePhonePad;
   if ([inputType isEqualToString:@"TextInputType.emailAddress"])
@@ -606,9 +610,10 @@ static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inp
 }
 
 - (void)setTextInputClient:(int)client withConfiguration:(NSDictionary*)configuration {
-  _view.keyboardType = ToUIKeyboardType(configuration[@"inputType"]);
-  _view.returnKeyType = ToUIReturnKeyType(configuration[@"inputType"]);
-  _view.autocapitalizationType = ToUITextAutocapitalizationType(configuration[@"inputType"]);
+  NSDictionary* inputType = configuration[@"inputType"];
+  _view.keyboardType = ToUIKeyboardType(inputType);
+  _view.returnKeyType = ToUIReturnKeyType(inputType[@"name"]);
+  _view.autocapitalizationType = ToUITextAutocapitalizationType(inputType[@"name"]);
   _view.secureTextEntry = [configuration[@"obscureText"] boolValue];
   NSString* autocorrect = configuration[@"autocorrect"];
   _view.autocorrectionType = autocorrect && ![autocorrect boolValue]
