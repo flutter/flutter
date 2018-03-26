@@ -77,13 +77,20 @@ public class TextInputPlugin implements MethodCallHandler {
         }
     }
 
-    private static int inputTypeFromTextInputType(String inputType,
-                                                  boolean obscureText,
-                                                  boolean autocorrect) {
+    private static int inputTypeFromTextInputType(
+        JSONObject type, boolean obscureText, boolean autocorrect) throws JSONException {
+
+        String inputType = type.getString("name");
         if (inputType.equals("TextInputType.datetime"))
             return InputType.TYPE_CLASS_DATETIME;
-        if (inputType.equals("TextInputType.number"))
-            return InputType.TYPE_CLASS_NUMBER;
+        if (inputType.equals("TextInputType.number")) {
+            int textType = InputType.TYPE_CLASS_NUMBER;
+            if (type.optBoolean("signed"))
+                textType |= InputType.TYPE_NUMBER_FLAG_SIGNED;
+            if (type.optBoolean("decimal"))
+                textType |= InputType.TYPE_NUMBER_FLAG_DECIMAL;
+            return textType;
+        }
         if (inputType.equals("TextInputType.phone"))
             return InputType.TYPE_CLASS_PHONE;
 
@@ -119,7 +126,7 @@ public class TextInputPlugin implements MethodCallHandler {
             return null;
 
         outAttrs.inputType = inputTypeFromTextInputType(
-            mConfiguration.getString("inputType"),
+            mConfiguration.getJSONObject("inputType"),
             mConfiguration.optBoolean("obscureText"),
             mConfiguration.optBoolean("autocorrect", true));
         outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN;
