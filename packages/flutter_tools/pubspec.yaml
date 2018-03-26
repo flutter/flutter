@@ -81,7 +81,7 @@ dependencies:
 
 dev_dependencies:
   collection: 1.14.6
-  mockito: 2.2.3
+  mockito: 3.0.0-alpha+2
 
 dartdoc:
   # Exclude this package from the hosted API docs.
