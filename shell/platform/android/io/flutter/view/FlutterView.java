@@ -767,7 +767,9 @@ public class FlutterView extends SurfaceView
 
     // Called by native to notify first Flutter frame rendered.
     public void onFirstFrame() {
-        for (FirstFrameListener listener : mFirstFrameListeners) {
+        // Allow listeners to remove themselves when they are called.
+        List<FirstFrameListener> listeners = new ArrayList<>(mFirstFrameListeners);
+        for (FirstFrameListener listener : listeners) {
             listener.onFirstFrame();
         }
     }
