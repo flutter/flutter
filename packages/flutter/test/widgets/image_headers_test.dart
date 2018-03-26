@@ -27,9 +27,9 @@ void main() {
       verify(headers.add('flutter', 'flutter')).called(1);
 
     }, createHttpClient: (SecurityContext _) {
-      when(client.getUrl(typed(any))).thenReturn(new Future<HttpClientRequest>.value(request));
+      when(client.getUrl(typed(any))).thenAnswer((_) => new Future<HttpClientRequest>.value(request));
       when(request.headers).thenReturn(headers);
-      when(request.close()).thenReturn(new Future<HttpClientResponse>.value(response));
+      when(request.close()).thenAnswer((_) => new Future<HttpClientResponse>.value(response));
       when(response.contentLength).thenReturn(kTransparentImage.length);
       when(response.statusCode).thenReturn(HttpStatus.OK);
       when(response.listen(typed(any))).thenAnswer((Invocation invocation) {
