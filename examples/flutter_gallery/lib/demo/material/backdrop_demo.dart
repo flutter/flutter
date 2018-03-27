@@ -14,6 +14,8 @@ class Category {
   const Category({ this.title, this.assets });
   final String title;
   final List<String> assets;
+  @override
+  String toString() => '$runtimeType("$title")';
 }
 
 const List<Category> allCategories = const <Category>[

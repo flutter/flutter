@@ -24,6 +24,7 @@ final List<String> _kAllDemos = kAllGalleryItems.map((GalleryItem item) => item.
 const List<String> _kUnsynchronizedDemos = const <String>[
   'Progress indicators',
   'Activity Indicator',
+  'Video',
 ];
 
 // These demos can't be backed out of by tapping a button whose
@@ -37,8 +38,8 @@ Future<Null> main() async {
   try {
     // Verify that _kUnsynchronizedDemos and _kSkippedDemos identify
     // demos that actually exist.
-    assert(new Set.from(_kAllDemos).containsAll(_kUnsynchronizedDemos));
-    assert(new Set.from(_kAllDemos).containsAll(_kSkippedDemos));
+    assert(new Set<String>.from(_kAllDemos).containsAll(_kUnsynchronizedDemos));
+    assert(new Set<String>.from(_kAllDemos).containsAll(_kSkippedDemos));
 
     runApp(const GalleryApp());
     final _LiveWidgetController controller = new _LiveWidgetController();

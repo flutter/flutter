@@ -42,6 +42,7 @@ const List<String> kProfiledDemos = const <String>[
 const List<String> kUnsynchronizedDemos = const <String>[
   'Progress indicators',
   'Activity Indicator',
+  'Video',
 ];
 
 // All of the gallery demo titles in the order they appear on the
@@ -120,7 +121,7 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
 /// Scrolls each demo menu item into view, launches it, then returns to the
 /// home screen twice.
 Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
-  for (Demo demo in demos) {
+  for (String demo in demos) {
     print('Testing "$demo" demo');
     final SerializableFinder menuItem = find.text(demo);
     await driver.scrollUntilVisible(find.byType('CustomScrollView'), menuItem, alignment: 0.5);
