@@ -17,7 +17,7 @@ import 'context.dart';
 import 'file_system.dart';
 import 'process.dart';
 
-GenSnapshot get genSnapshot => context.putIfAbsent(GenSnapshot, () => const GenSnapshot());
+GenSnapshot get genSnapshot => context[GenSnapshot];
 
 /// A snapshot build configuration.
 class SnapshotType {

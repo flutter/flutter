@@ -31,7 +31,7 @@ const String cocoaPodsUpgradeInstructions = '''
   brew upgrade cocoapods
   pod setup''';
 
-CocoaPods get cocoaPods => context.putIfAbsent(CocoaPods, () => const CocoaPods());
+CocoaPods get cocoaPods => context[CocoaPods];
 
 class CocoaPods {
   const CocoaPods();
