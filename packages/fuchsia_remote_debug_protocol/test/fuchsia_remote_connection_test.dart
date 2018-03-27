@@ -100,7 +100,7 @@ void main() {
           mockPeerConnections.add(mp);
           uriConnections.add(uri);
           when(mp.sendRequest(typed<String>(any), typed<String>(any)))
-              .thenAnswer((_) => new Future<Map<String, dynamic>>(
+              .thenReturn(new Future<Map<String, dynamic>>(
                   () => flutterViewCannedResponses[flutterViewIndex++]));
           return mp;
         });
