@@ -118,7 +118,7 @@ List<GalleryItem> _buildGalleryItems() {
     ),
     new GalleryItem(
       title: 'Data tables',
-      subtitle: 'Data tables',
+      subtitle: 'Rows and columns',
       category: 'Material Components',
       routeName: DataTableDemo.routeName,
       buildRoute: (BuildContext context) => new DataTableDemo(),

@@ -11,30 +11,55 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gallery/gallery/app.dart';
+import 'package:flutter_gallery/gallery/item.dart';
 
-/// Reports success or failure to the native code.
+// Reports success or failure to the native code.
 const MethodChannel _kTestChannel = const MethodChannel('io.flutter.demo.gallery/TestLifecycleListener');
+
+// The titles for all of the Gallery demos.
+final List<String> _kAllDemos = kAllGalleryItems.map((GalleryItem item) => item.title).toList();
+
+// We don't want to wait for animations to complete before tapping the
+// back button in the demos with these titles.
+const List<String> _kUnsynchronizedDemos = const <String>[
+  'Progress indicators',
+  'Activity Indicator',
+  'Video',
+];
+
+// These demos can't be backed out of by tapping a button whose
+// tooltip is 'Back'.
+const List<String> _kSkippedDemos = const <String>[
+  'Backdrop',
+  'Pull to refresh',
+];
 
 Future<Null> main() async {
   try {
+    // Verify that _kUnsynchronizedDemos and _kSkippedDemos identify
+    // demos that actually exist.
+    if (!new Set<String>.from(_kAllDemos).containsAll(_kUnsynchronizedDemos))
+      fail('Unrecognized demo names in _kUnsynchronizedDemos: $_kUnsynchronizedDemos');
+    if (!new Set<String>.from(_kAllDemos).containsAll(_kSkippedDemos))
+      fail('Unrecognized demo names in _kSkippedDemos: $_kSkippedDemos');
+
     runApp(const GalleryApp());
-
-    const Duration kWaitBetweenActions = const Duration(milliseconds: 250);
     final _LiveWidgetController controller = new _LiveWidgetController();
-
-    for (Demo demo in demos) {
-      print('Testing "${demo.title}" demo');
-      final Finder menuItem = find.text(demo.title);
+    for (String demo in _kAllDemos) {
+      print('Testing "$demo" demo');
+      final Finder menuItem = find.text(demo);
       await controller.scrollIntoView(menuItem, alignment: 0.5);
-      await new Future<Null>.delayed(kWaitBetweenActions);
+
+      if (_kSkippedDemos.contains(demo)) {
+        print('> skipped $demo');
+        continue;
+      }
 
       for (int i = 0; i < 2; i += 1) {
         await controller.tap(menuItem); // Launch the demo
-        await new Future<Null>.delayed(kWaitBetweenActions);
-        controller.frameSync = demo.synchronized;
+        controller.frameSync = !_kUnsynchronizedDemos.contains(demo);
         await controller.tap(find.byTooltip('Back'));
         controller.frameSync = true;
-        await new Future<Null>.delayed(kWaitBetweenActions);
       }
       print('Success');
     }
@@ -44,70 +69,6 @@ Future<Null> main() async {
     _kTestChannel.invokeMethod('failure');
   }
 }
-
-class Demo {
-  const Demo(this.title, {this.synchronized = true});
-
-  /// The title of the demo.
-  final String title;
-
-  /// True if frameSync should be enabled for this test.
-  final bool synchronized;
-}
-
-// Warning: this list must be kept in sync with the value of
-// kAllGalleryItems.map((GalleryItem item) => item.title).toList();
-const List<Demo> demos = const <Demo>[
-  // Demos
-  const Demo('Shrine'),
-  const Demo('Contact profile'),
-  const Demo('Animation'),
-
-  // Material Components
-  const Demo('Bottom navigation'),
-  const Demo('Buttons'),
-  const Demo('Cards'),
-  const Demo('Chips'),
-  const Demo('Date and time pickers'),
-  const Demo('Dialog'),
-  const Demo('Drawer'),
-  const Demo('Expand/collapse list control'),
-  const Demo('Expansion panels'),
-  const Demo('Floating action button'),
-  const Demo('Grid'),
-  const Demo('Icons'),
-  const Demo('Leave-behind list items'),
-  const Demo('List'),
-  const Demo('Menus'),
-  const Demo('Modal bottom sheet'),
-  const Demo('Page selector'),
-  const Demo('Persistent bottom sheet'),
-  const Demo('Progress indicators', synchronized: false),
-  const Demo('Pull to refresh'),
-  const Demo('Scrollable tabs'),
-  const Demo('Selection controls'),
-  const Demo('Sliders'),
-  const Demo('Snackbar'),
-  const Demo('Tabs'),
-  const Demo('Text fields'),
-  const Demo('Tooltips'),
-
-  // Cupertino Components
-  const Demo('Activity Indicator', synchronized: false),
-  const Demo('Buttons'),
-  const Demo('Dialogs'),
-  const Demo('Navigation'),
-  const Demo('Sliders'),
-  const Demo('Switches'),
-
-  // Media
-  const Demo('Animated images'),
-
-  // Style
-  const Demo('Colors'),
-  const Demo('Typography'),
-];
-
 
 class _LiveWidgetController {
 
