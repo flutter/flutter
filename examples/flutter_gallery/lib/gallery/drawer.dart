@@ -240,7 +240,7 @@ class GalleryDrawer extends StatelessWidget {
 
     final Widget aboutItem = new AboutListTile(
       icon: const FlutterLogo(),
-      applicationVersion: 'March 2018 Preview',
+      applicationVersion: 'April 2018 Preview',
       applicationIcon: const FlutterLogo(),
       applicationLegalese: '© 2017 The Chromium Authors',
       aboutBoxChildren: <Widget>[
@@ -251,7 +251,7 @@ class GalleryDrawer extends StatelessWidget {
               children: <TextSpan>[
                 new TextSpan(
                   style: aboutTextStyle,
-                  text: 'Flutter is an early-stage, open-source project to help developers'
+                  text: 'Flutter is an early-stage, open-source project to help developers '
                         'build high-performance, high-fidelity, mobile apps for '
                         '${defaultTargetPlatform == TargetPlatform.iOS ? 'multiple platforms' : 'iOS and Android'} '
                         'from a single codebase. This gallery is a preview of '
