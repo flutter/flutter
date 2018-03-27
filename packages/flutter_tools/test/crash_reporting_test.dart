@@ -36,7 +36,7 @@ void main() {
 
     tearDown(() {
       tools.crashFileSystem = const LocalFileSystem();
-      tools.writelnStderr = stderr.writeln;
+      tools.writelnStderr = const Stdio().stderr.writeln;
       restoreExitFunction();
     });
 

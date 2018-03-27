@@ -28,7 +28,7 @@ void main() {
   testUsingContext('pub get 69', () async {
     String error;
 
-    final MockProcessManager processMock = context.getVariable(ProcessManager);
+    final MockProcessManager processMock = context[ProcessManager];
 
     new FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironment, isNull);
@@ -96,8 +96,8 @@ void main() {
   testUsingContext('pub cache in root is used', () async {
     String error;
 
-    final MockProcessManager processMock = context.getVariable(ProcessManager);
-    final MockFileSystem fsMock = context.getVariable(FileSystem);
+    final MockProcessManager processMock = context[ProcessManager];
+    final MockFileSystem fsMock = context[FileSystem];
 
     new FakeAsync().run((FakeAsync time) {
       MockDirectory.findCache = true;
@@ -123,7 +123,7 @@ void main() {
   testUsingContext('pub cache in environment is used', () async {
     String error;
 
-    final MockProcessManager processMock = context.getVariable(ProcessManager);
+    final MockProcessManager processMock = context[ProcessManager];
 
     new FakeAsync().run((FakeAsync time) {
       MockDirectory.findCache = true;
