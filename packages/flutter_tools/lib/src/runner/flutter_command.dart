@@ -222,46 +222,49 @@ abstract class FlutterCommand extends Command<Null> {
   /// and [runCommand] to execute the command
   /// so that this method can record and report the overall time to analytics.
   @override
-  Future<Null> run() async {
+  Future<Null> run() {
     final DateTime startTime = clock.now();
 
-    context.setVariable(FlutterCommand, this);
+    return context.run<Future<Null>>(
+      name: 'command',
+      overrides: <Type, Generator>{FlutterCommand: () => this},
+      body: () async {
+        if (flutterUsage.isFirstRun)
+          flutterUsage.printWelcome();
 
-    if (flutterUsage.isFirstRun)
-      flutterUsage.printWelcome();
+        FlutterCommandResult commandResult;
+        try {
+          commandResult = await verifyThenRunCommand();
+        } on ToolExit {
+          commandResult = const FlutterCommandResult(ExitStatus.fail);
+          rethrow;
+        } finally {
+          final DateTime endTime = clock.now();
+          printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
+          if (usagePath != null) {
+            final List<String> labels = <String>[];
+            if (commandResult?.exitStatus != null)
+              labels.add(getEnumName(commandResult.exitStatus));
+            if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
+              labels.addAll(commandResult.timingLabelParts);
 
-    FlutterCommandResult commandResult;
-    try {
-      commandResult = await verifyThenRunCommand();
-    } on ToolExit {
-      commandResult = const FlutterCommandResult(ExitStatus.fail);
-      rethrow;
-    } finally {
-      final DateTime endTime = clock.now();
-      printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
-      if (usagePath != null) {
-        final List<String> labels = <String>[];
-        if (commandResult?.exitStatus != null)
-          labels.add(getEnumName(commandResult.exitStatus));
-        if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
-          labels.addAll(commandResult.timingLabelParts);
-
-        final String label = labels
-            .where((String label) => !isBlank(label))
-            .join('-');
-        flutterUsage.sendTiming(
-          'flutter',
-          name,
-          // If the command provides its own end time, use it. Otherwise report
-          // the duration of the entire execution.
-          (commandResult?.endTimeOverride ?? endTime).difference(startTime),
-          // Report in the form of `success-[parameter1-parameter2]`, all of which
-          // can be null if the command doesn't provide a FlutterCommandResult.
-          label: label == '' ? null : label,
-        );
-      }
-    }
-
+            final String label = labels
+                .where((String label) => !isBlank(label))
+                .join('-');
+            flutterUsage.sendTiming(
+              'flutter',
+              name,
+              // If the command provides its own end time, use it. Otherwise report
+              // the duration of the entire execution.
+              (commandResult?.endTimeOverride ?? endTime).difference(startTime),
+              // Report in the form of `success-[parameter1-parameter2]`, all of which
+              // can be null if the command doesn't provide a FlutterCommandResult.
+              label: label == '' ? null : label,
+            );
+          }
+        }
+      },
+    );
   }
 
   /// Perform validation then call [runCommand] to execute the command.
