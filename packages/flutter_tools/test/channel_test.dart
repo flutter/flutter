@@ -46,14 +46,14 @@ void main() {
       ]);
       final Process process = new MockProcess();
 
-      when(process.stdout).thenAnswer((_) => stdout);
-      when(process.stderr).thenAnswer((_) => const Stream<List<int>>.empty());
-      when(process.exitCode).thenAnswer((_) => new Future<int>.value(0));
+      when(process.stdout).thenReturn(stdout);
+      when(process.stderr).thenReturn(const Stream<List<int>>.empty());
+      when(process.exitCode).thenReturn(new Future<int>.value(0));
       when(mockProcessManager.start(
         <String>['git', 'branch', '-r'],
         workingDirectory: typed(any, named: 'workingDirectory'),
         environment: typed(any, named: 'environment')))
-      .thenAnswer((_) => new Future<Process>.value(process));
+      .thenReturn(new Future<Process>.value(process));
 
       final ChannelCommand command = new ChannelCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
