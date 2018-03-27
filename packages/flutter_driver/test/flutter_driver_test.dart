@@ -29,7 +29,7 @@ void main() {
     void expectLogContains(String message) {
       expect(log.map((LogRecord r) => '$r'), anyElement(contains(message)));
     }
-
+    
     setUp(() {
       log = <LogRecord>[];
       logSub = flutterDriverLog.listen(log.add);
@@ -37,9 +37,9 @@ void main() {
       mockVM = new MockVM();
       mockIsolate = new MockIsolate();
       mockPeer = new MockPeer();
-      when(mockClient.getVM()).thenReturn(mockVM);
+      when(mockClient.getVM()).thenReturn(new Future<MockVM>.value(mockVM));
       when(mockVM.isolates).thenReturn(<VMRunnableIsolate>[mockIsolate]);
-      when(mockIsolate.loadRunnable()).thenReturn(mockIsolate);
+      when(mockIsolate.loadRunnable()).thenReturn(new Future<MockIsolate>.value(mockIsolate));
       when(mockIsolate.invokeExtension(typed(any), typed(any))).thenAnswer(
           (Invocation invocation) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
       vmServiceConnectFunction = (String url) {
