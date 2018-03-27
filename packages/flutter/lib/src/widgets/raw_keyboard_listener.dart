@@ -9,6 +9,8 @@ import 'basic.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 
+export 'package:flutter/services.dart' show RawKeyEvent;
+
 /// A widget that calls a callback whenever the user presses or releases a key
 /// on a keyboard.
 ///
