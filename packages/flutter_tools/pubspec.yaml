@@ -96,4 +96,4 @@ dependency_overrides:
     path: ../../bin/cache/dart-sdk/lib/kernel
   mockito: 3.0.0-alpha+2
 
-# PUBSPEC CHECKSUM: 4b4d
+# PUBSPEC CHECKSUM: d060

@@ -1192,4 +1192,7 @@ const List<String> _ignoreForChecksum = const <String>[
   'front_end',
   'kernel',
   'sky_engine',
+  // depending on an alpha is breaking some assumptions we made. need to get on
+  // stable so this can be removed.
+  'mockito',
 ];
