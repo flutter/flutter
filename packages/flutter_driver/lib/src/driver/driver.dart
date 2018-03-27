@@ -409,8 +409,68 @@ class FlutterDriver {
 
   /// Scrolls the Scrollable ancestor of the widget located by [finder]
   /// until the widget is completely visible.
+  ///
+  /// If the widget located by [finder] is contained by a scrolling widget
+  /// that lazily creates its children, like [ListView] or [CustomScrollView],
+  /// then this method may fail because [finder] doesn't actually exist.
+  /// The [scrollUntilVisible] method can be used in this case.
   Future<Null> scrollIntoView(SerializableFinder finder, { double alignment: 0.0, Duration timeout }) async {
     return await _sendCommand(new ScrollIntoView(finder, alignment: alignment, timeout: timeout)).then((Map<String, dynamic> _) => null);
+  }
+
+  /// If widget located by [item] is not visible then repeatedly [scroll] the
+  /// widget located by [scroller] by [dxScroll] and [dyScroll] until [item]
+  /// is visible, and then use [scrollIntoView] to ensure the item's final
+  /// position matches [alignment].
+  ///
+  /// The [scroller] must locate the scrolling widget that contains [item].
+  /// Typically `find.byType('ListView') or `find.byType('CustomScrollView')`.
+  ///
+  /// If [item] is below the currently visible items, then specify a negative
+  /// value for [dyScroll] that's a small enough increment to expose [item]
+  /// without potentially scrolling it up and completely out of view. Similarly
+  /// if [item] is above, then specify a positve value for [dyScroll].
+  ///
+  /// If [item] is to the right of the the currently visible items, then
+  /// specify a negative value for [dxScroll] that's a small enough increment to
+  /// expose [item] without potentially scrolling it up and completely out of
+  /// view. Similarly if [item] is to the left, then specify a positve value
+  /// for [dyScroll].
+  ///
+  /// The [timeout] value should be long enough to accomodate as many scrolls
+  /// as needed to bring an item into view. The default is 10 seconds.
+  Future<Null> scrollUntilVisible (SerializableFinder scroller, SerializableFinder item, {
+    double alignment: 0.0,
+    double dxScroll: 0.0,
+    double dyScroll: -48.0,
+    Duration timeout: const Duration(seconds: 10),
+  }) async {
+    assert(scroller != null);
+    assert(item != null);
+    assert(alignment != null);
+    assert(dxScroll != null);
+    assert(dyScroll != null);
+    assert(dxScroll != 0.0 || dyScroll != 0.0);
+    assert(timeout != null);
+
+    // If the item is already visible then we're done.
+    bool isVisible = false;
+    try {
+      await waitFor(item, timeout: const Duration(milliseconds: 100));
+      isVisible = true;
+    } on DriverError {
+      // Assume that that waitFor timed out because the item isn't visible.
+    }
+
+    if (!isVisible) {
+      waitFor(item, timeout: timeout).then((Null _) { isVisible = true; });
+      while (!isVisible) {
+        await scroll(scroller, dxScroll, dyScroll, const Duration(milliseconds: 100));
+        await new Future<Null>.delayed(const Duration(milliseconds: 500));
+      }
+    }
+
+    return scrollIntoView(item, alignment: alignment);
   }
 
   /// Returns the text in the `Text` widget located by [finder].

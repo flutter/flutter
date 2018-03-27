@@ -178,7 +178,10 @@ class BackdropPanel extends StatelessWidget {
               alignment: AlignmentDirectional.centerStart,
               child: new DefaultTextStyle(
                 style: theme.textTheme.subhead,
-                child: title,
+                child: new Tooltip(
+                  message: 'Tap to dismiss',
+                  child: title,
+                ),
               ),
             ),
           ),
