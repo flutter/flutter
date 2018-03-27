@@ -438,7 +438,7 @@ class FlutterDriver {
   ///
   /// The [timeout] value should be long enough to accommodate as many scrolls
   /// as needed to bring an item into view. The default is 10 seconds.
-  Future<Null> scrollUntilVisible (SerializableFinder scrollable, SerializableFinder item, {
+  Future<Null> scrollUntilVisible(SerializableFinder scrollable, SerializableFinder item, {
     double alignment: 0.0,
     double dxScroll: 0.0,
     double dyScroll: -48.0,
