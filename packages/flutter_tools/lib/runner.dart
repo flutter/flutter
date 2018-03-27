@@ -46,7 +46,7 @@ Future<int> run(
   final FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp);
   commands.forEach(runner.addCommand);
 
-  return runInContext<Future<int>>(() async {
+  return runInContext<int>(() async {
     // Initialize the system locale.
     await intl.findSystemLocale();
 

@@ -36,7 +36,7 @@ const List<String> _kRequiredOptions = const <String>[
 ];
 
 Future<Null> main(List<String> args) {
-  return runInContext<Future<Null>>(() => run(args), overrides: <Type, dynamic>{
+  return runInContext<Null>(() => run(args), overrides: <Type, dynamic>{
     Usage: new DisabledUsage(),
   });
 }

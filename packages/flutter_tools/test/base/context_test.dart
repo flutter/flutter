@@ -10,6 +10,12 @@ import 'package:test/test.dart';
 void main() {
   group('AppContext', () {
     group('global getter', () {
+      bool called;
+
+      setUp(() {
+        called = false;
+      });
+
       test('returns non-null context in the root zone', () {
         expect(context, isNotNull);
       });
@@ -21,7 +27,9 @@ void main() {
           expect(Zone.current, isNot(rootZone));
           expect(Zone.current.parent, rootZone);
           expect(context, rootContext);
+          called = true;
         });
+        expect(called, isTrue);
       });
 
       test('returns child context after run', () {
@@ -29,7 +37,9 @@ void main() {
         rootContext.run(name: 'child', body: () {
           expect(context, isNot(rootContext));
           expect(context.name, 'child');
+          called = true;
         });
+        expect(called, isTrue);
       });
 
       test('returns grandchild context after nested run', () {
@@ -40,8 +50,10 @@ void main() {
             expect(context, isNot(rootContext));
             expect(context, isNot(childContext));
             expect(context.name, 'grandchild');
+            called = true;
           });
         });
+        expect(called, isTrue);
       });
 
       test('scans up zone hierarchy for first context', () {
@@ -52,8 +64,10 @@ void main() {
             expect(context, isNot(rootContext));
             expect(context, same(childContext));
             expect(context.name, 'child');
+            called = true;
           });
         });
+        expect(called, isTrue);
       });
     });
 

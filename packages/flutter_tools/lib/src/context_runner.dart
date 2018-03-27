@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:quiver/time.dart';
 
 import 'android/android_sdk.dart';
@@ -32,13 +34,13 @@ import 'run_hot.dart';
 import 'usage.dart';
 import 'version.dart';
 
-T runInContext<T>(
-  T runner(), {
+Future<T> runInContext<T>(
+  FutureOr<T> runner(), {
   Map<Type, dynamic> overrides,
-}) {
-  return context.run<T>(
+}) async {
+  return await context.run<Future<T>>(
     name: 'global fallbacks',
-    body: () => runner(),
+    body: () async => await runner(),
     overrides: overrides,
     fallbacks: <Type, Generator>{
       AndroidSdk: AndroidSdk.locateAndroidSdk,
