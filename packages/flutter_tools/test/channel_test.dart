@@ -46,7 +46,7 @@ void main() {
       ]);
       final Process process = new MockProcess();
 
-      when(process.stdout).thenReturn(stdout);
+      when(process.stdout).thenAnswer((_) => stdout);
       when(process.stderr).thenReturn(const Stream<List<int>>.empty());
       when(process.exitCode).thenReturn(new Future<int>.value(0));
       when(mockProcessManager.start(
