@@ -30,7 +30,7 @@ void main() {
       when(mockFrontendServer.stderr)
           .thenAnswer((Invocation invocation) => mockFrontendServerStdErr);
       final StreamController<String> stdErrStreamController = new StreamController<String>();
-      when(mockFrontendServerStdErr.transform<String>(any)).thenAnswer((_) => stdErrStreamController.stream);
+      when(mockFrontendServerStdErr.transform<String>(any)).thenReturn(stdErrStreamController.stream);
       when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
       when(mockProcessManager.canRun(any)).thenReturn(true);
       when(mockProcessManager.start(any)).thenAnswer(
