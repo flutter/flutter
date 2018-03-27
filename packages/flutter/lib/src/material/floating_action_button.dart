@@ -5,19 +5,28 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
-import 'ink_well.dart';
-import 'material.dart';
+import 'button.dart';
 import 'scaffold.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
-// TODO(eseidel): This needs to change based on device size?
-// http://material.google.com/layout/metrics-keylines.html#metrics-keylines-keylines-spacing
-const double _kSize = 56.0;
-const double _kSizeMini = 40.0;
+const BoxConstraints _kSizeConstraints = const BoxConstraints.tightFor(
+  width: 56.0,
+  height: 56.0,
+);
+
+const BoxConstraints _kMiniSizeConstraints = const BoxConstraints.tightFor(
+  width: 40.0,
+  height: 40.0,
+);
+
+const BoxConstraints _kExtendedSizeConstraints = const BoxConstraints(
+  minHeight: 48.0,
+  maxHeight: 48.0,
+);
 
 class _DefaultHeroTag {
   const _DefaultHeroTag();
@@ -52,13 +61,15 @@ class _DefaultHeroTag {
 ///  * [FlatButton]
 ///  * <https://material.google.com/components/buttons-floating-action-button.html>
 class FloatingActionButton extends StatefulWidget {
-  /// Creates a floating action button.
+  /// Creates a circular floating action button.
   ///
-  /// Most commonly used in the [Scaffold.floatingActionButton] field.
+  /// The [elevation], [highlightElevation], [mini], [notchMargin], and [shape]
+  /// arguments must not be null.
   const FloatingActionButton({
     Key key,
     this.child,
     this.tooltip,
+    this.foregroundColor,
     this.backgroundColor,
     this.heroTag: const _DefaultHeroTag(),
     this.elevation: 6.0,
@@ -66,7 +77,54 @@ class FloatingActionButton extends StatefulWidget {
     @required this.onPressed,
     this.mini: false,
     this.notchMargin: 4.0,
-  }) : super(key: key);
+    this.shape: const CircleBorder(),
+    this.isExtended: false,
+  }) :  assert(elevation != null),
+        assert(highlightElevation != null),
+        assert(mini != null),
+        assert(notchMargin != null),
+        assert(shape != null),
+        assert(isExtended != null),
+        _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
+        super(key: key);
+
+  /// Creates a wider [StadiumBorder] shaped floating action button with both
+  /// an [icon] and a [label].
+  ///
+  /// The [label], [icon], [elevation], [highlightElevation]
+  /// [notchMargin], and [shape] arguments must not be null.
+  FloatingActionButton.extended({
+    Key key,
+    this.tooltip,
+    this.foregroundColor,
+    this.backgroundColor,
+    this.heroTag: const _DefaultHeroTag(),
+    this.elevation: 6.0,
+    this.highlightElevation: 12.0,
+    @required this.onPressed,
+    this.notchMargin: 4.0,
+    this.shape: const StadiumBorder(),
+    this.isExtended: true,
+    @required Widget icon,
+    @required Widget label,
+  }) :  assert(elevation != null),
+        assert(highlightElevation != null),
+        assert(notchMargin != null),
+        assert(shape != null),
+        assert(isExtended != null),
+        _sizeConstraints = _kExtendedSizeConstraints,
+        mini = false,
+        child = new Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const SizedBox(width: 16.0),
+            icon,
+            const SizedBox(width: 8.0),
+            label,
+            const SizedBox(width: 20.0),
+          ],
+        ),
+        super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -79,9 +137,14 @@ class FloatingActionButton extends StatefulWidget {
   /// used for accessibility.
   final String tooltip;
 
+  /// The default icon and text color.
+  ///
+  /// Defaults to [ThemeData.accentIconTheme.color] for the current theme.
+  final Color foregroundColor;
+
   /// The color to use when filling the button.
   ///
-  /// Defaults to the accent color of the current theme.
+  /// Defaults to [ThemeData.accentColor] for the current theme.
   final Color backgroundColor;
 
   /// The tag to apply to the button's [Hero] widget.
@@ -141,13 +204,32 @@ class FloatingActionButton extends StatefulWidget {
   ///    floating action button.
   final double notchMargin;
 
+  /// The shape of the button's [Material].
+  ///
+  /// The button's highlight and splash are clipped to this shape. If the
+  /// button has an elevation, then its drop shadow is defined by this
+  /// shape as well.
+  final ShapeBorder shape;
+
+  /// True if this is an "extended" floating action button.
+  ///
+  /// Typically [extended] buttons have a [StadiumBorder] [shape]
+  /// and have been created with the [FloatingActionButton.extended]
+  /// constructor.
+  ///
+  /// The [Scaffold] animates the appearance of ordinary floating
+  /// action buttons with scale and rotation transitions. Extended
+  /// floating action buttons are scaled and faded in.
+  final bool isExtended;
+
+  final BoxConstraints _sizeConstraints;
+
   @override
   _FloatingActionButtonState createState() => new _FloatingActionButtonState();
 }
 
 class _FloatingActionButtonState extends State<FloatingActionButton> {
   bool _highlight = false;
-
   VoidCallback _clearComputeNotch;
 
   void _handleHighlightChanged(bool value) {
@@ -158,24 +240,32 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
 
   @override
   Widget build(BuildContext context) {
-    Color iconColor = Colors.white;
-    Color materialColor = widget.backgroundColor;
-    if (materialColor == null) {
-      final ThemeData themeData = Theme.of(context);
-      materialColor = themeData.accentColor;
-      iconColor = themeData.accentIconTheme.color;
-    }
-
+    final ThemeData theme = Theme.of(context);
+    final Color foregroundColor = widget.foregroundColor ?? theme.accentIconTheme.color;
     Widget result;
 
     if (widget.child != null) {
-      result = new Center(
-        child: IconTheme.merge(
-          data: new IconThemeData(color: iconColor),
-          child: widget.child,
+      result = IconTheme.merge(
+        data: new IconThemeData(
+          color: foregroundColor,
         ),
+        child: widget.child,
       );
     }
+
+    result = new RawMaterialButton(
+      onPressed: widget.onPressed,
+      onHighlightChanged: _handleHighlightChanged,
+      elevation: _highlight ? widget.highlightElevation : widget.elevation,
+      constraints: widget._sizeConstraints,
+      fillColor: widget.backgroundColor ?? theme.accentColor,
+      textStyle: theme.accentTextTheme.button.copyWith(
+        color: foregroundColor,
+        letterSpacing: 1.2,
+      ),
+      shape: widget.shape,
+      child: result,
+    );
 
     if (widget.tooltip != null) {
       result = new Tooltip(
@@ -183,25 +273,6 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
         child: result,
       );
     }
-
-    result = new Material(
-      color: materialColor,
-      type: MaterialType.circle,
-      elevation: _highlight ? widget.highlightElevation : widget.elevation,
-      child: new Container(
-        width: widget.mini ? _kSizeMini : _kSize,
-        height: widget.mini ? _kSizeMini : _kSize,
-        child: new Semantics(
-          button: true,
-          enabled: widget.onPressed != null,
-          child: new InkWell(
-            onTap: widget.onPressed,
-            onHighlightChanged: _handleHighlightChanged,
-            child: result,
-          ),
-        ),
-      ),
-    );
 
     if (widget.heroTag != null) {
       result = new Hero(
