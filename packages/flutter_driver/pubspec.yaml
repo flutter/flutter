@@ -69,7 +69,4 @@ dev_dependencies:
   mockito: 3.0.0-alpha+2
   quiver: 0.28.2
 
-dependency_overrides:
-  mockito: 3.0.0-alpha+2
-
 # PUBSPEC CHECKSUM: d8a2
