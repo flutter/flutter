@@ -37,8 +37,8 @@
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkDrawLooper.h"
+#include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkPaint.h"
-#include "third_party/skia/include/effects/SkBlurMaskFilter.h"
 
 namespace blink {
 
@@ -100,11 +100,9 @@ void DrawLooperBuilder::addShadow(const FloatSize& offset,
 
   if (blur) {
     const SkScalar sigma = RadiusToSigma(blur / 2);
-    uint32_t mfFlags = SkBlurMaskFilter::kHighQuality_BlurFlag;
-    if (shadowTransformMode == ShadowIgnoresTransforms)
-      mfFlags |= SkBlurMaskFilter::kIgnoreTransform_BlurFlag;
+    bool respectCTM = (shadowTransformMode != ShadowIgnoresTransforms);
     paint->setMaskFilter(
-        SkBlurMaskFilter::Make(kNormal_SkBlurStyle, sigma, mfFlags));
+        SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, sigma, respectCTM));
   }
 
   paint->setColorFilter(
