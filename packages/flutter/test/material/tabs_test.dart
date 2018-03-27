@@ -1721,4 +1721,15 @@ void main() {
     ));
   });
 
+  testWidgets('Default tab indicator color is white', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/15958
+    final List<String> tabs = <String>['LEFT', 'RIGHT'];
+    await tester.pumpWidget(buildLeftRightApp(tabs: tabs, value: 'LEFT'));
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox, paints..line(
+      color: Colors.white,
+    ));
+
+  });
+
 }
