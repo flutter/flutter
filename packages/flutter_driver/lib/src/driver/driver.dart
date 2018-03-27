@@ -425,6 +425,8 @@ class FlutterDriver {
   /// The [scrollable] must locate the scrolling widget that contains [item].
   /// Typically `find.byType('ListView') or `find.byType('CustomScrollView')`.
   ///
+  /// Atleast one of [dxScroll] and [dyScroll] must be non-zero.
+  ///
   /// If [item] is below the currently visible items, then specify a negative
   /// value for [dyScroll] that's a small enough increment to expose [item]
   /// without potentially scrolling it up and completely out of view. Similarly
@@ -441,7 +443,7 @@ class FlutterDriver {
   Future<Null> scrollUntilVisible(SerializableFinder scrollable, SerializableFinder item, {
     double alignment: 0.0,
     double dxScroll: 0.0,
-    double dyScroll: -48.0,
+    double dyScroll: 0.0,
     Duration timeout: const Duration(seconds: 10),
   }) async {
     assert(scrollable != null);

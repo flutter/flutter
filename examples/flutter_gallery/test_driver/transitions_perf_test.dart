@@ -124,7 +124,10 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
   for (String demo in demos) {
     print('Testing "$demo" demo');
     final SerializableFinder menuItem = find.text(demo);
-    await driver.scrollUntilVisible(find.byType('CustomScrollView'), menuItem, alignment: 0.5);
+    await driver.scrollUntilVisible(find.byType('CustomScrollView'), menuItem,
+      dyScroll: -48.0,
+      alignment: 0.5,
+    );
 
     for (int i = 0; i < 2; i += 1) {
       await driver.tap(menuItem); // Launch the demo
@@ -188,9 +191,7 @@ void main([List<String> args = const <String>[]]) {
       await saveDurationsHistogram(timeline.json['traceEvents'], histogramPath);
 
       // Scroll back to the top
-      await driver.scrollUntilVisible(
-        find.byType('CustomScrollView'),
-        find.text(_allDemos[0]),
+      await driver.scrollUntilVisible(find.byType('CustomScrollView'), find.text(_allDemos[0]),
         dyScroll: 200.0,
         alignment: 0.0
       );
