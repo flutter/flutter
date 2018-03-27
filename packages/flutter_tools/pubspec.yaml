@@ -18,14 +18,14 @@ dependencies:
   intl: 0.15.4
   json_rpc_2: 2.0.7
   json_schema: 1.0.8
-  linter: 0.1.45
+  linter: 0.1.46
   meta: 1.1.2
   mustache: 1.0.0
   package_config: 1.0.3
   platform: 2.1.2
   plugin: 0.2.0+2
   process: 2.0.9
-  quiver: 0.28.0
+  quiver: 0.28.2
   stack_trace: 1.9.2
   stream_channel: 1.6.4
   usage: 3.3.0
@@ -37,7 +37,7 @@ dependencies:
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
-  test: 0.12.32+2
+  test: 0.12.33
 
   # Version from the vended Dart SDK as defined in `dependency_overrides`.
   analyzer: any
@@ -81,7 +81,7 @@ dependencies:
 
 dev_dependencies:
   collection: 1.14.6
-  mockito: 3.0.0-alpha+2
+  mockito: 2.2.3
 
 dartdoc:
   # Exclude this package from the hosted API docs.
@@ -95,4 +95,4 @@ dependency_overrides:
   kernel:
     path: ../../bin/cache/dart-sdk/lib/kernel
 
-# PUBSPEC CHECKSUM: d6a6
+# PUBSPEC CHECKSUM: 4b4d
