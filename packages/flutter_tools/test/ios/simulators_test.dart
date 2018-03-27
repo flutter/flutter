@@ -95,6 +95,7 @@ void main() {
   });
 
   group('sdkMajorVersion', () {
+    // This new version string appears in SimulatorApp-850 CoreSimulator-518.16 beta.
     test('can be parsed from iOS-11-3', () async {
       final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3');
 
