@@ -418,12 +418,11 @@ class FlutterDriver {
     return await _sendCommand(new ScrollIntoView(finder, alignment: alignment, timeout: timeout)).then((Map<String, dynamic> _) => null);
   }
 
-  /// If widget located by [item] is not visible then repeatedly [scroll] the
-  /// widget located by [scroller] by [dxScroll] and [dyScroll] until [item]
-  /// is visible, and then use [scrollIntoView] to ensure the item's final
-  /// position matches [alignment].
+  /// Repeatedly [scroll] the widget located by [scrollable] by [dxScroll] and
+  /// [dyScroll] until [item] is visible, and then use [scrollIntoView] to
+  /// ensure the item's final position matches [alignment].
   ///
-  /// The [scroller] must locate the scrolling widget that contains [item].
+  /// The [scrollable] must locate the scrolling widget that contains [item].
   /// Typically `find.byType('ListView') or `find.byType('CustomScrollView')`.
   ///
   /// If [item] is below the currently visible items, then specify a negative
@@ -437,15 +436,15 @@ class FlutterDriver {
   /// view. Similarly if [item] is to the left, then specify a positve value
   /// for [dyScroll].
   ///
-  /// The [timeout] value should be long enough to accomodate as many scrolls
+  /// The [timeout] value should be long enough to accommodate as many scrolls
   /// as needed to bring an item into view. The default is 10 seconds.
-  Future<Null> scrollUntilVisible (SerializableFinder scroller, SerializableFinder item, {
+  Future<Null> scrollUntilVisible (SerializableFinder scrollable, SerializableFinder item, {
     double alignment: 0.0,
     double dxScroll: 0.0,
     double dyScroll: -48.0,
     Duration timeout: const Duration(seconds: 10),
   }) async {
-    assert(scroller != null);
+    assert(scrollable != null);
     assert(item != null);
     assert(alignment != null);
     assert(dxScroll != null);
@@ -465,7 +464,7 @@ class FlutterDriver {
     if (!isVisible) {
       waitFor(item, timeout: timeout).then((Null _) { isVisible = true; });
       while (!isVisible) {
-        await scroll(scroller, dxScroll, dyScroll, const Duration(milliseconds: 100));
+        await scroll(scrollable, dxScroll, dyScroll, const Duration(milliseconds: 100));
         await new Future<Null>.delayed(const Duration(milliseconds: 500));
       }
     }

@@ -188,7 +188,12 @@ void main([List<String> args = const <String>[]]) {
       await saveDurationsHistogram(timeline.json['traceEvents'], histogramPath);
 
       // Scroll back to the top
-      await driver.scroll(find.byType('CustomScrollView'), 0.0, 1000.0, const Duration(milliseconds: 100));
+      await driver.scrollUntilVisible(
+        find.byType('CustomScrollView'),
+        find.text(_allDemos[0]),
+        dyScroll: 200.0,
+        alignment: 0.0
+      );
 
       // Execute the remaining tests.
       final Set<String> unprofiledDemos = new Set<String>.from(_allDemos)..removeAll(kProfiledDemos);

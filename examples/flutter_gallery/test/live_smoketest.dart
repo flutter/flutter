@@ -38,8 +38,10 @@ Future<Null> main() async {
   try {
     // Verify that _kUnsynchronizedDemos and _kSkippedDemos identify
     // demos that actually exist.
-    assert(new Set<String>.from(_kAllDemos).containsAll(_kUnsynchronizedDemos));
-    assert(new Set<String>.from(_kAllDemos).containsAll(_kSkippedDemos));
+    if (!new Set<String>.from(_kAllDemos).containsAll(_kUnsynchronizedDemos))
+      fail('Unrecognized demo names in _kUnsynchronizedDemos: $_kUnsynchronizedDemos');
+    if (!new Set<String>.from(_kAllDemos).containsAll(_kSkippedDemos))
+      fail('Unrecognized demo names in _kSkippedDemos: $_kSkippedDemos');
 
     runApp(const GalleryApp());
     final _LiveWidgetController controller = new _LiveWidgetController();
