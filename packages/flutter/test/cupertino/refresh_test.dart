@@ -59,7 +59,7 @@ void main() {
       }
       return refreshIndicator;
     });
-    when(mockHelper.refreshTask()).thenReturn(refreshCompleter.future);
+    when(mockHelper.refreshTask()).thenAnswer((_) => refreshCompleter.future);
   });
 
   SliverList buildAListOfStuff() {
