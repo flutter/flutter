@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:flutter/semantics.dart';
 
 import 'home.dart';
 import 'item.dart';
@@ -166,6 +167,11 @@ class GalleryAppState extends State<GalleryApp> {
       checkerboardOffscreenLayers: _checkerboardOffscreenLayers,
       routes: _kRoutes,
       home: home,
+      navigatorObservers: <NavigatorObserver>[
+        new AccessibilityNavigatorObserver(routeNames: <String, String>{
+          '/': 'home',
+        }),
+      ],
       builder: (BuildContext context, Widget child) {
         return new Directionality(
           textDirection: _overrideDirection,

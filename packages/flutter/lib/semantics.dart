@@ -15,3 +15,4 @@ library semantics;
 
 export 'src/semantics/semantics.dart';
 export 'src/semantics/semantics_service.dart';
+export 'src/semantics/window_accessibility.dart';
