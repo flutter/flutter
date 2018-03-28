@@ -98,6 +98,7 @@ Run the following steps, from the `src` directory created in the steps above:
 * `./flutter/tools/gn --android --unoptimized` to prepare your build files for device-side executables (or `--android --android-cpu [x86|x64] --unoptimized` for x86/x64 emulators) .
 * `./flutter/tools/gn --unoptimized` to prepare the build files for host-side executables.
 * `ninja -C out/android_debug_unopt -C out/host_debug_unopt` to build all executables (use `out/android_debug_unopt_x64` for x86/x64 emulators).
+    * For Googlers, consider also using the option `-j 1000` to parallelize the build using Goma.
 
 This builds a debug-enabled ("unoptimized") binary configured to run Dart in
 checked mode ("debug"). There are other versions, [discussed on the wiki](https://github.com/flutter/flutter/wiki/Flutter's-modes).
@@ -143,6 +144,7 @@ to test the engine.
   * This also produces an Xcode project for working with the engine source code at `out/ios_debug_unopt`
 * `./flutter/tools/gn --unoptimized` to prepare the build files for host-side executables.
 * `ninja -C out/ios_debug_unopt -C out/host_debug_unopt` to build all artifacts (use `out/ios_debug_sim_unopt` for Simulator).
+    * For Googlers, consider also using the option `-j 1000` to parallelize the build using Goma.
 
 Once the artifacts are built, you can start using them in your application by following these steps:
 * `cd /path/to/flutter/examples/hello_world`
@@ -162,6 +164,7 @@ of the engine. Follow the next steps to run tests using the locally-built engine
 * `gclient sync` to update your dependencies.
 * `./flutter/tools/gn --unoptimized` to prepare your build files.
 * `ninja -C out/host_debug_unopt` to build a desktop unoptimized binary.
+    * For Googlers, consider also using the option `-j 1000` to parallelize the build using Goma.
 * `--unoptimized` disables C++ compiler optimizations and does not strip debug symbols. You may skip the flag and invoke `ninja -C out/host_debug` if you would rather have the native components optimized.
 * `flutter test --local-engine=host_debug_unopt` will run tests using the locally-built `flutter_tester`.
 
