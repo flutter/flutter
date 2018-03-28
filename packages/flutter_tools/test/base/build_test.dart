@@ -432,26 +432,30 @@ void main() {
         snapshotPath: 'output.snapshot',
         depfileContent: 'output.snapshot : main.dart other.dart',
       );
-      context.setVariable(GenSnapshot, genSnapshot);
 
-      await fs.file('main.dart').writeAsString('import "other.dart";\nvoid main() {}');
-      await fs.file('other.dart').writeAsString('import "main.dart";\nvoid main() {}');
-      await fs.file('output.snapshot').create();
-      await fs.file('output.snapshot.d').writeAsString('output.snapshot : main.dart');
-      await writeFingerprint(files: <String, String>{
-        'main.dart': 'bc096b33f14dde5e0ffaf93a1d03395c',
-        'other.dart': 'e0c35f083f0ad76b2d87100ec678b516',
-        'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
-      });
-      await buildSnapshot(mainPath: 'other.dart');
+      await context.run(
+        overrides: <Type, Generator>{GenSnapshot: () => genSnapshot},
+        body: () async {
+          await fs.file('main.dart').writeAsString('import "other.dart";\nvoid main() {}');
+          await fs.file('other.dart').writeAsString('import "main.dart";\nvoid main() {}');
+          await fs.file('output.snapshot').create();
+          await fs.file('output.snapshot.d').writeAsString('output.snapshot : main.dart');
+          await writeFingerprint(files: <String, String>{
+            'main.dart': 'bc096b33f14dde5e0ffaf93a1d03395c',
+            'other.dart': 'e0c35f083f0ad76b2d87100ec678b516',
+            'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
+          });
+          await buildSnapshot(mainPath: 'other.dart');
 
-      expect(genSnapshot.callCount, 1);
-      expectFingerprintHas(
-        entryPoint: 'other.dart',
-        checksums: <String, String>{
-          'main.dart': 'bc096b33f14dde5e0ffaf93a1d03395c',
-          'other.dart': 'e0c35f083f0ad76b2d87100ec678b516',
-          'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
+          expect(genSnapshot.callCount, 1);
+          expectFingerprintHas(
+            entryPoint: 'other.dart',
+            checksums: <String, String>{
+              'main.dart': 'bc096b33f14dde5e0ffaf93a1d03395c',
+              'other.dart': 'e0c35f083f0ad76b2d87100ec678b516',
+              'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
+            },
+          );
         },
       );
     }, overrides: contextOverrides);

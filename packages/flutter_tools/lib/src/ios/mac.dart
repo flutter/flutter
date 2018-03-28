@@ -35,9 +35,9 @@ const int kXcodeRequiredVersionMinor = 0;
 // Homebrew.
 const PythonModule kPythonSix = const PythonModule('six');
 
-IMobileDevice get iMobileDevice => context.putIfAbsent(IMobileDevice, () => const IMobileDevice());
+IMobileDevice get iMobileDevice => context[IMobileDevice];
 
-Xcode get xcode => context.putIfAbsent(Xcode, () => new Xcode());
+Xcode get xcode => context[Xcode];
 
 class PythonModule {
   const PythonModule(this.name);
