@@ -66,7 +66,7 @@ void main() {
       expect(logMessage['message'], 'daemon.logMessage test');
       responses.close();
       commands.close();
-    }, skip: true, overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Logger: () => notifyingLogger,
     });
 
