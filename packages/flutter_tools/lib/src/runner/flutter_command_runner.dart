@@ -246,7 +246,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       });
     }
 
-    await context.run<Future<Null>>(
+    await context.run<Null>(
       overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
         return new MapEntry<Type, Generator>(type, () => value);
       }),

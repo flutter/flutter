@@ -54,7 +54,7 @@ class DaemonCommand extends FlutterCommand {
 
     Cache.releaseLockEarly();
 
-    return context.run<Future<Null>>(
+    return context.run<Null>(
       body: () async {
         final Daemon daemon = new Daemon(
             stdinCommandStream, stdoutCommandResponse,
