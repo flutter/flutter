@@ -239,6 +239,10 @@ bool Paragraph::ComputeLineBreaks() {
       StyledRuns::Run run = runs_.GetRun(run_index);
       if (run.start >= block_end)
         break;
+      if (run.end < block_start) {
+        run_index++;
+        continue;
+      }
 
       minikin::FontStyle font;
       minikin::MinikinPaint paint;
