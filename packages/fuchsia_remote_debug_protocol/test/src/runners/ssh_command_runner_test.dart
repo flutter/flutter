@@ -40,8 +40,8 @@ void main() {
     setUp(() {
       mockProcessManager = new MockProcessManager();
       mockProcessResult = new MockProcessResult();
-      when(mockProcessManager.run(typed(any))).thenReturn(
-          new Future<MockProcessResult>.value(mockProcessResult));
+      when(mockProcessManager.run(typed(any))).thenAnswer(
+          (_) => new Future<MockProcessResult>.value(mockProcessResult));
     });
 
     test('verify interface is appended to ipv6 address', () async {

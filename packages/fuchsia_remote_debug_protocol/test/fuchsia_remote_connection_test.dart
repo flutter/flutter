@@ -31,7 +31,7 @@ void main() {
       const String interface = 'eno1';
       // Adds some extra junk to make sure the strings will be cleaned up.
       when(mockRunner.run(typed(any)))
-      .thenReturn(new Future<List<String>>.value(
+      .thenAnswer((_) => new Future<List<String>>.value(
           <String>['123\n\n\n', '456  ', '789']));
       when(mockRunner.address).thenReturn(address);
       when(mockRunner.interface).thenReturn(interface);
