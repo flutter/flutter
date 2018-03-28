@@ -1459,6 +1459,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getDefaultIconColor(ThemeData themeData) {
+    if (!decoration.enabled)
+      return themeData.disabledColor;
+
     switch (themeData.brightness) {
       case Brightness.dark:
         return Colors.white70;
@@ -1478,7 +1481,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   // i.e. when they appear in place of the empty text field.
   TextStyle _getInlineStyle(ThemeData themeData) {
     return themeData.textTheme.subhead.merge(widget.baseStyle)
-      .copyWith(color: themeData.hintColor);
+      .copyWith(color: decoration.enabled ? themeData.hintColor : themeData.disabledColor);
   }
 
   TextStyle _getFloatingLabelStyle(ThemeData themeData) {
@@ -1487,16 +1490,18 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       : _getActiveColor(themeData);
     final TextStyle style = themeData.textTheme.subhead.merge(widget.baseStyle);
     return style
-      .copyWith(color: color)
+      .copyWith(color: decoration.enabled ? color : themeData.disabledColor)
       .merge(decoration.labelStyle);
   }
 
   TextStyle _getHelperStyle(ThemeData themeData) {
-    return themeData.textTheme.caption.copyWith(color: themeData.hintColor).merge(decoration.helperStyle);
+    final Color color = decoration.enabled ? themeData.hintColor : Colors.transparent;
+    return themeData.textTheme.caption.copyWith(color: color).merge(decoration.helperStyle);
   }
 
   TextStyle _getErrorStyle(ThemeData themeData) {
-    return themeData.textTheme.caption.copyWith(color: themeData.errorColor).merge(decoration.errorStyle);
+    final Color color = decoration.enabled ? themeData.errorColor : Colors.transparent;
+    return themeData.textTheme.caption.copyWith(color: color).merge(decoration.errorStyle);
   }
 
   double get _borderWeight {
@@ -1506,6 +1511,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getBorderColor(ThemeData themeData) {
+    if (!decoration.enabled) {
+      if (decoration.filled == true && !decoration.border.isOutline)
+        return Colors.transparent;
+      return themeData.disabledColor;
+    }
     return decoration.errorText == null
       ? _getActiveColor(themeData)
       : themeData.errorColor;

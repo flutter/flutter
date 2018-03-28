@@ -199,6 +199,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     hintText: 'Where can we reach you?',
                     labelText: 'Phone Number *',
                     prefixText: '+1',
+                    enabled: true,
                   ),
                   keyboardType: TextInputType.phone,
                   onSaved: (String value) { person.phoneNumber = value; },
@@ -224,6 +225,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 ),
                 const SizedBox(height: 24.0),
                 new TextFormField(
+                  enabled: false,
                   decoration: const InputDecoration(
                     border: const OutlineInputBorder(),
                     hintText: 'Tell us about yourself',
