@@ -83,11 +83,15 @@ import 'bottom_tab_bar.dart';
 class CupertinoTabScaffold extends StatefulWidget {
   /// Creates a layout for applications with a tab bar at the bottom.
   ///
-  /// The [tabBar] and [tabBuilder] arguments must not be null.
+  /// The [tabBar], [tabBuilder] and [currentTabIndex] arguments must not be null.
+  ///
+  /// The [currentTabIndex] argument can be used to programmatically change the
+  /// currently selected tab.
   const CupertinoTabScaffold({
     Key key,
     @required this.tabBar,
     @required this.tabBuilder,
+    this.currentTabIndex: 0,
   }) : assert(tabBar != null),
        assert(tabBuilder != null),
        super(key: key);
@@ -106,6 +110,8 @@ class CupertinoTabScaffold extends StatefulWidget {
   ///
   /// If translucent, the main content may slide behind it.
   /// Otherwise, the main content's bottom margin will be offset by its height.
+  ///
+  /// Must not be null.
   final CupertinoTabBar tabBar;
 
   /// An [IndexedWidgetBuilder] that's called when tabs become active.
@@ -121,14 +127,42 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// In that case, the child's [BuildContext]'s [MediaQuery] will have a
   /// bottom padding indicating the area of obstructing overlap from the
   /// [tabBar].
+  ///
+  /// Must not be null.
   final IndexedWidgetBuilder tabBuilder;
+
+  /// The index of the currently active tab.
+  ///
+  /// Setting and changing this value programmatically will change the currently
+  /// selected tab item in the [tabBar] as well as change the currently focused
+  /// tab from the [tabBuilder].
+  ///
+  /// [CupertinoTabBar.onTap] will not trigger when changing tabs
+  /// programmatically.
+  ///
+  /// Value must not be null.
+  final int currentTabIndex;
 
   @override
   _CupertinoTabScaffoldState createState() => new _CupertinoTabScaffoldState();
 }
 
 class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
-  int _currentPage = 0;
+  int _currentPage;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPage = widget.currentTabIndex;
+  }
+
+  @override
+  void didUpdateWidget(CupertinoTabScaffold oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.currentTabIndex != oldWidget.currentTabIndex) {
+      setState(() => _currentPage = widget.currentTabIndex);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
