@@ -225,7 +225,7 @@ abstract class FlutterCommand extends Command<Null> {
   Future<Null> run() {
     final DateTime startTime = clock.now();
 
-    return context.run<Future<Null>>(
+    return context.run<Null>(
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {

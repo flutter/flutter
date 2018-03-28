@@ -59,7 +59,7 @@ void testUsingContext(String description, dynamic testMethod(), {
 
   test(description, () async {
     await runInContext<dynamic>(() {
-      return context.run<Future<dynamic>>(
+      return context.run<dynamic>(
         name: 'mocks',
         overrides: <Type, Generator>{
           Config: () => buildConfig(fs),
@@ -84,7 +84,7 @@ void testUsingContext(String description, dynamic testMethod(), {
 
           return runZoned(() {
             try {
-              return context.run<Future<dynamic>>(
+              return context.run<dynamic>(
                 // Apply the overrides to the test context in the zone since their
                 // instantiation may reference items already stored on the context.
                 overrides: overrides,

@@ -126,20 +126,20 @@ class AppContext {
   /// If [name] is specified, the child context will be assigned the given
   /// name. This is useful for debugging purposes and is analogous to naming a
   /// thread in Java.
-  V run<V>({
-    @required V body(),
+  Future<V> run<V>({
+    @required FutureOr<V> body(),
     String name,
     Map<Type, Generator> overrides,
     Map<Type, Generator> fallbacks,
-  }) {
+  }) async {
     final AppContext child = new AppContext._(
       this,
       name,
       new Map<Type, Generator>.unmodifiable(overrides ?? const <Type, Generator>{}),
       new Map<Type, Generator>.unmodifiable(fallbacks ?? const <Type, Generator>{}),
     );
-    return runZoned<V>(
-      body,
+    return await runZoned<Future<V>>(
+      () async => await body(),
       zoneValues: <_Key, AppContext>{_Key.key: child},
     );
   }
