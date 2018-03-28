@@ -270,7 +270,7 @@ class TextField extends StatefulWidget {
     properties.add(new DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
     properties.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
     properties.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
-    properties.add(new EnumProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
+    properties.add(new DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
     properties.add(new DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
