@@ -69,7 +69,7 @@ $assetsSection
 
     for (String packageName in packages) {
       for (String asset in assets) {
-        final String entryKey = 'packages/$packageName/$asset';
+        final String entryKey = Uri.encodeFull('packages/$packageName/$asset');
         expect(bundle.entries.containsKey(entryKey), true);
         expect(
           utf8.decode(await bundle.entries[entryKey].contentsAsBytes()),
@@ -414,5 +414,30 @@ $assetsSection
         expectedAssetManifest,
       );
     });
+  });
+
+  testUsingContext('Asset paths can contain URL reserved characters', () async {
+    establishFlutterRoot();
+
+    writePubspecFile('pubspec.yaml', 'test');
+    writePackagesFile('test_package:p/p/lib/');
+
+    final List<String> assets = <String>['a/foo', 'a/foo[x]'];
+    writePubspecFile(
+      'p/p/pubspec.yaml',
+      'test_package',
+      assets: assets,
+    );
+
+    writeAssets('p/p/', assets);
+    const String expectedAssetManifest =
+        '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
+        '"packages/test_package/a/foo%5Bx%5D":["packages/test_package/a/foo%5Bx%5D"]}';
+
+    await buildAndVerifyAssets(
+      assets,
+      <String>['test_package'],
+      expectedAssetManifest,
+    );
   });
 }
