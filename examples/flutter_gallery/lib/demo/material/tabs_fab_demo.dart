@@ -44,7 +44,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
 
   TabController _controller;
   _Page _selectedPage;
-  bool _extendedButtons;
+  bool _extendedButtons = false;
 
   @override
   void initState() {
