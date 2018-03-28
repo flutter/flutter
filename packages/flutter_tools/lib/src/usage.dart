@@ -49,7 +49,7 @@ class Usage {
   }
 
   /// Returns [Usage] active in the current app context.
-  static Usage get instance => context.putIfAbsent(Usage, () => new Usage());
+  static Usage get instance => context[Usage];
 
   Analytics _analytics;
 

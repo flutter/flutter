@@ -155,23 +155,8 @@ class Stdio {
   io.IOSink get stderr => io.stderr;
 }
 
-io.IOSink get stderr {
-  if (context == null)
-    return io.stderr;
-  final Stdio contextStreams = context[Stdio];
-  return contextStreams.stderr;
-}
+io.IOSink get stderr => context[Stdio].stderr;
 
-Stream<List<int>> get stdin {
-  if (context == null)
-    return io.stdin;
-  final Stdio contextStreams = context[Stdio];
-  return contextStreams.stdin;
-}
+Stream<List<int>> get stdin => context[Stdio].stdin;
 
-io.IOSink get stdout {
-  if (context == null)
-    return io.stdout;
-  final Stdio contextStreams = context[Stdio];
-  return contextStreams.stdout;
-}
+io.IOSink get stdout => context[Stdio].stdout;

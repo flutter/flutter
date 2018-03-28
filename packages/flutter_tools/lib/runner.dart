@@ -7,26 +7,18 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:intl/intl_standalone.dart' as intl;
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
-import 'src/artifacts.dart';
 import 'src/base/common.dart';
-import 'src/base/config.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
-import 'src/base/platform.dart';
 import 'src/base/process.dart';
 import 'src/base/utils.dart';
-import 'src/cache.dart';
+import 'src/context_runner.dart';
 import 'src/crash_reporting.dart';
-import 'src/devfs.dart';
-import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
-import 'src/ios/simulators.dart';
-import 'src/run_hot.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 import 'src/usage.dart';
@@ -41,7 +33,7 @@ Future<int> run(
   bool verboseHelp: false,
   bool reportCrashes,
   String flutterVersion,
-}) async {
+}) {
   reportCrashes ??= !isRunningOnBot;
 
   if (muteCommandLogging) {
@@ -54,35 +46,7 @@ Future<int> run(
   final FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp);
   commands.forEach(runner.addCommand);
 
-  // Construct a context.
-  final AppContext _executableContext = new AppContext();
-
-  // Make the context current.
-  return await _executableContext.runInZone(() async {
-    // Initialize the context with some defaults.
-    // NOTE: Similar lists also exist in `bin/fuchsia_builder.dart` and
-    // `test/src/context.dart`. If you update this list of defaults, look
-    // in those locations as well to see if you need a similar update there.
-
-    // Seed these context entries first since others depend on them
-    context.putIfAbsent(Stdio, () => const Stdio());
-    context.putIfAbsent(Platform, () => const LocalPlatform());
-    context.putIfAbsent(FileSystem, () => const LocalFileSystem());
-    context.putIfAbsent(ProcessManager, () => const LocalProcessManager());
-    context.putIfAbsent(Logger, () => platform.isWindows ? new WindowsStdoutLogger() : new StdoutLogger());
-    context.putIfAbsent(Config, () => new Config());
-
-    // Order-independent context entries
-    context.putIfAbsent(BotDetector, () => const BotDetector());
-    context.putIfAbsent(DeviceManager, () => new DeviceManager());
-    context.putIfAbsent(DevFSConfig, () => new DevFSConfig());
-    context.putIfAbsent(Doctor, () => new Doctor());
-    context.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
-    context.putIfAbsent(Cache, () => new Cache());
-    context.putIfAbsent(Artifacts, () => new CachedArtifacts());
-    context.putIfAbsent(IOSSimulatorUtils, () => new IOSSimulatorUtils());
-    context.putIfAbsent(SimControl, () => new SimControl());
-
+  return runInContext<int>(() async {
     // Initialize the system locale.
     await intl.findSystemLocale();
 
@@ -104,6 +68,7 @@ typedef void WriteCallback([String string]);
 /// Writes a line to STDERR.
 ///
 /// Overwrite this in tests to avoid spurious test output.
+// TODO(tvolkert): Remove this in favor of context[Stdio]
 @visibleForTesting
 WriteCallback writelnStderr = stderr.writeln;
 
@@ -230,11 +195,13 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrac
 Future<String> _doctorText() async {
   try {
     final BufferLogger logger = new BufferLogger();
-    final AppContext appContext = new AppContext();
 
-    appContext.setVariable(Logger, logger);
-
-    await appContext.runInZone(() => doctor.diagnose(verbose: true));
+    await context.run<Future<bool>>(
+      body: () => doctor.diagnose(verbose: true),
+      overrides: <Type, Generator>{
+        Logger: () => logger,
+      },
+    );
 
     return logger.statusText;
   } catch (error, trace) {

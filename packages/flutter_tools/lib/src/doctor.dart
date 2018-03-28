@@ -197,7 +197,7 @@ enum ValidationType {
 }
 
 abstract class DoctorValidator {
-  DoctorValidator(this.title);
+  const DoctorValidator(this.title);
 
   final String title;
 

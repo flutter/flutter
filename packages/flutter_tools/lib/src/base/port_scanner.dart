@@ -7,14 +7,9 @@ import 'dart:async';
 import 'context.dart';
 import 'io.dart';
 
-const PortScanner _kLocalPortScanner = const HostPortScanner();
 const int _kMaxSearchIterations = 20;
 
-PortScanner get portScanner {
-  return context == null
-      ? _kLocalPortScanner
-      : context.putIfAbsent(PortScanner, () => _kLocalPortScanner);
-}
+PortScanner get portScanner => context[PortScanner];
 
 abstract class PortScanner {
   const PortScanner();

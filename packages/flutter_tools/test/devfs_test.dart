@@ -27,7 +27,7 @@ void main() {
   Directory tempDir;
   String basePath;
   DevFS devFS;
-  final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+  final AssetBundle assetBundle = AssetBundleFactory.defaultInstance.createBundle();
 
   setUpAll(() {
     fs = new MemoryFileSystem();

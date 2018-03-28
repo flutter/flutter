@@ -50,21 +50,24 @@ class DaemonCommand extends FlutterCommand {
   Future<Null> runCommand() {
     printStatus('Starting device daemon...');
 
-    final AppContext appContext = new AppContext();
     final NotifyingLogger notifyingLogger = new NotifyingLogger();
-    appContext.setVariable(Logger, notifyingLogger);
 
     Cache.releaseLockEarly();
 
-    return appContext.runInZone(() async {
-      final Daemon daemon = new Daemon(
-          stdinCommandStream, stdoutCommandResponse,
-          daemonCommand: this, notifyingLogger: notifyingLogger);
+    return context.run<Future<Null>>(
+      body: () async {
+        final Daemon daemon = new Daemon(
+            stdinCommandStream, stdoutCommandResponse,
+            daemonCommand: this, notifyingLogger: notifyingLogger);
 
-      final int code = await daemon.onExit;
-      if (code != 0)
-        throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
-    });
+        final int code = await daemon.onExit;
+        if (code != 0)
+          throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
+      },
+      overrides: <Type, Generator>{
+        Logger: () => notifyingLogger,
+      },
+    );
   }
 }
 
@@ -810,10 +813,12 @@ class AppInstance {
   dynamic _runInZone(AppDomain domain, dynamic method()) {
     _logger ??= new _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
 
-    final AppContext appContext = new AppContext();
-    appContext.setVariable(Logger, _logger);
-    appContext.setVariable(Stdio, const Stdio());
-    return appContext.runInZone(method);
+    return context.run<dynamic>(
+      body: method,
+      overrides: <Type, Generator>{
+        Logger: () => _logger,
+      },
+    );
   }
 }
 
