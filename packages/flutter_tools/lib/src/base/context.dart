@@ -23,11 +23,7 @@ class ContextDependencyCycleException implements Exception {
   final List<Type> cycle;
 
   @override
-  String toString() {
-    final StringBuffer buf = new StringBuffer('Dependency cycle detected: ');
-    buf.write(cycle.join(' -> '));
-    return buf.toString();
-  }
+  String toString() => 'Dependency cycle detected: ${cycle.join(' -> ')}';
 }
 
 /// The current [AppContext], as determined by the [Zone] hierarchy.
