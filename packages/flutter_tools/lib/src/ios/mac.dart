@@ -225,9 +225,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     return new XcodeBuildResult(success: false);
   }
 
-  String developmentTeam;
+  Map<String, String> autoSigningConfigs;
   if (codesign && buildForDevice)
-    developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: usesTerminalUi);
+    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: usesTerminalUi);
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -287,8 +287,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('-quiet');
   }
 
-  if (developmentTeam != null) {
-    buildCommands.add('DEVELOPMENT_TEAM=$developmentTeam');
+  if (autoSigningConfigs != null) {
+    for (MapEntry<String, String> signingConfig in autoSigningConfigs.entries) {
+      buildCommands.add('${signingConfig.key}=${signingConfig.value}');
+    }
     buildCommands.add('-allowProvisioningUpdates');
     buildCommands.add('-allowProvisioningDeviceRegistration');
   }
