@@ -194,7 +194,8 @@ void main() {
       verify(mockStdIn.write('This is a mock certificate'));
       expect(signingConfigs, <String, String> {
         'DEVELOPMENT_TEAM': '3333CCCC33',
-        'PROVISIONING_PROFILE_SPECIFIER': 'Google Development'
+        'PROVISIONING_PROFILE_SPECIFIER': 'Google Development',
+        'CODE_SIGN_STYLE': 'Manual',
       });
     },
     overrides: <Type, Generator>{
