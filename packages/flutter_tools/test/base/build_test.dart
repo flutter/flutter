@@ -433,7 +433,7 @@ void main() {
         depfileContent: 'output.snapshot : main.dart other.dart',
       );
 
-      await context.run(
+      await context.run<void>(
         overrides: <Type, Generator>{GenSnapshot: () => genSnapshot},
         body: () async {
           await fs.file('main.dart').writeAsString('import "other.dart";\nvoid main() {}');

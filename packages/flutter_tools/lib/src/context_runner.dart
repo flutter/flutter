@@ -38,9 +38,9 @@ Future<T> runInContext<T>(
   FutureOr<T> runner(), {
   Map<Type, dynamic> overrides,
 }) async {
-  return await context.run<Future<T>>(
+  return await context.run<T>(
     name: 'global fallbacks',
-    body: () async => await runner(),
+    body: runner,
     overrides: overrides,
     fallbacks: <Type, Generator>{
       AndroidSdk: AndroidSdk.locateAndroidSdk,
