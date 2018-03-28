@@ -199,7 +199,6 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     hintText: 'Where can we reach you?',
                     labelText: 'Phone Number *',
                     prefixText: '+1',
-                    enabled: true,
                   ),
                   keyboardType: TextInputType.phone,
                   onSaved: (String value) { person.phoneNumber = value; },
@@ -225,7 +224,6 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 ),
                 const SizedBox(height: 24.0),
                 new TextFormField(
-                  enabled: false,
                   decoration: const InputDecoration(
                     border: const OutlineInputBorder(),
                     hintText: 'Tell us about yourself',
@@ -251,17 +249,21 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   fieldKey: _passwordFieldKey,
                   helperText: 'No more than 8 characters.',
                   labelText: 'Password *',
-                  onSaved: (String value) { person.password = value; },
+                  onFieldSubmitted: (String value) {
+                    setState(() {
+                      person.password = value;
+                    });
+                  },
                 ),
                 const SizedBox(height: 24.0),
                 new TextFormField(
+                  enabled: person.password != null && !person.password.isEmpty,
                   decoration: const InputDecoration(
                     border: const UnderlineInputBorder(),
                     filled: true,
                     labelText: 'Re-type password',
                   ),
                   maxLength: 8,
-                  onFieldSubmitted: (String value) { person.password = value; },
                   obscureText: true,
                   validator: _validatePassword,
                 ),
