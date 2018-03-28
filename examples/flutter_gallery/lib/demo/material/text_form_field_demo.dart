@@ -257,7 +257,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 ),
                 const SizedBox(height: 24.0),
                 new TextFormField(
-                  enabled: person.password != null && !person.password.isEmpty,
+                  enabled: person.password != null && person.password.isNotEmpty,
                   decoration: const InputDecoration(
                     border: const UnderlineInputBorder(),
                     filled: true,
