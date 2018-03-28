@@ -267,8 +267,7 @@ void main() {
         color: const Color(0xFFFFFFFF),
         builder: (BuildContext context, Widget child) {
           return new CupertinoTabScaffold(
-            currentTabIndex: 1, // Programmatically change the tab now.
-            tabBar: _buildTabBar(),
+            tabBar: _buildTabBar(selectedTab: 1), // Programmatically change the tab now.
             tabBuilder: (BuildContext context, int index) {
               return new CustomPaint(
                 child: new Text('Page ${index + 1}'),
@@ -295,7 +294,7 @@ void main() {
   });
 }
 
-CupertinoTabBar _buildTabBar() {
+CupertinoTabBar _buildTabBar({ int selectedTab: 0 }) {
   return new CupertinoTabBar(
     items: const <BottomNavigationBarItem>[
       const BottomNavigationBarItem(
@@ -308,6 +307,7 @@ CupertinoTabBar _buildTabBar() {
       ),
     ],
     backgroundColor: CupertinoColors.white,
+    currentIndex: selectedTab,
     onTap: (int newTab) => selectedTabs.add(newTab),
   );
 }

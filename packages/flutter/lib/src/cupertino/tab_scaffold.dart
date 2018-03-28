@@ -91,7 +91,6 @@ class CupertinoTabScaffold extends StatefulWidget {
     Key key,
     @required this.tabBar,
     @required this.tabBuilder,
-    this.currentTabIndex: 0,
   }) : assert(tabBar != null),
        assert(tabBuilder != null),
        super(key: key);
@@ -100,10 +99,12 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// that lets the user switch between different tabs in the main content area
   /// when present.
   ///
-  /// When provided, [CupertinoTabBar.currentIndex] will be ignored and will
-  /// be managed by the [CupertinoTabScaffold] to show the currently selected page
-  /// as the active item index. If [CupertinoTabBar.onTap] is provided, it will
-  /// still be called. [CupertinoTabScaffold] automatically also listen to the
+  /// Setting and changing [CupertinoTabBar.currentIndex] programmatically will
+  /// change the currently selected tab item in the [tabBar] as well as change
+  /// the currently focused tab from the [tabBuilder].
+
+  /// If [CupertinoTabBar.onTap] is provided, it will still be called.
+  /// [CupertinoTabScaffold] automatically also listen to the
   /// [CupertinoTabBar]'s `onTap` to change the [CupertinoTabBar]'s `currentIndex`
   /// and change the actively displayed tab in [CupertinoTabScaffold]'s own
   /// main content area.
@@ -131,18 +132,6 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// Must not be null.
   final IndexedWidgetBuilder tabBuilder;
 
-  /// The index of the currently active tab.
-  ///
-  /// Setting and changing this value programmatically will change the currently
-  /// selected tab item in the [tabBar] as well as change the currently focused
-  /// tab from the [tabBuilder].
-  ///
-  /// [CupertinoTabBar.onTap] will not trigger when changing tabs
-  /// programmatically.
-  ///
-  /// Value must not be null.
-  final int currentTabIndex;
-
   @override
   _CupertinoTabScaffoldState createState() => new _CupertinoTabScaffoldState();
 }
@@ -153,14 +142,14 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   @override
   void initState() {
     super.initState();
-    _currentPage = widget.currentTabIndex;
+    _currentPage = widget.tabBar.currentIndex;
   }
 
   @override
   void didUpdateWidget(CupertinoTabScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.currentTabIndex != oldWidget.currentTabIndex) {
-      setState(() => _currentPage = widget.currentTabIndex);
+    if (widget.tabBar.currentIndex != oldWidget.tabBar.currentIndex) {
+      setState(() => _currentPage = widget.tabBar.currentIndex);
     }
   }
 
