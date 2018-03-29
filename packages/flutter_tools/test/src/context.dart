@@ -40,6 +40,7 @@ typedef void ContextInitializer(AppContext testContext);
 void testUsingContext(String description, dynamic testMethod(), {
   Timeout timeout,
   Map<Type, Generator> overrides: const <Type, Generator>{},
+  bool initializeFlutterRoot: true,
   String testOn,
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
@@ -90,9 +91,11 @@ void testUsingContext(String description, dynamic testMethod(), {
                 overrides: overrides,
                 name: 'test-specific overrides',
                 body: () async {
-                  // Provide a sane default for the flutterRoot directory. Individual
-                  // tests can override this either in the test or during setup.
-                  Cache.flutterRoot ??= flutterRoot;
+                  if (initializeFlutterRoot) {
+                    // Provide a sane default for the flutterRoot directory. Individual
+                    // tests can override this either in the test or during setup.
+                    Cache.flutterRoot ??= flutterRoot;
+                  }
 
                   return await testMethod();
                 },
