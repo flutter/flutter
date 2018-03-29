@@ -22,14 +22,9 @@ if [ "$SHARD" = "build_and_deploy_gallery" ]; then
     echo "Building Flutter Gallery for iOS..."
     (cd examples/flutter_gallery; flutter build ios --release --no-codesign)
     echo "iOS Flutter Gallery built"
-    if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
-      if [[ "$TRAVIS_BRANCH" == "dev" && $version != *"pre"* ]]; then
-        echo "Archiving with distribution profile and deploying to TestFlight..."
-        (cd examples/flutter_gallery/ios; bundle install && bundle exec fastlane build_and_deploy_testflight upload:true)
-      else
-        echo "Archiving with distribution profile..."
-        (cd examples/flutter_gallery/ios; bundle install && bundle exec fastlane build_and_deploy_testflight)
-      fi
+    if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "dev" && $version != *"pre"* ]]; then
+      echo "Re-building with distribution profile and deploying to TestFlight..."
+      (cd examples/flutter_gallery/ios; bundle install && bundle exec fastlane build_and_deploy_testflight)
     else
       echo "Flutter Gallery is only deployed to the TestFlight on merged and tagged dev branch commits"
     fi
