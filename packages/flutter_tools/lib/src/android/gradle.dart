@@ -278,8 +278,8 @@ Future<Null> findAndReplaceVersionProperties({@required BuildInfo buildInfo}) {
               gradleOld.deleteSync();
               completer.complete();
             } catch (error) {
-              printError('Failed to change version properties. ${error.toString()}');
-              completer.completeError('Failed to change version properties. ${error.toString()}');
+              printError('Failed to change version properties. $error');
+              completer.completeError('Failed to change version properties. $error');
             }
           },
           onError: (dynamic error, StackTrace stack) {
