@@ -254,6 +254,8 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     }
 
     if (widget.tooltip != null) {
+      // The long-pressable area for the tooltip should always be as big as
+      // the tooltip even if there is no child.
       result = new SizedBox.expand(
         child: new Tooltip(
           message: widget.tooltip,
