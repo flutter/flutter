@@ -122,7 +122,26 @@ abstract class FlutterCommand extends Command<Null> {
     _usesPubOption = true;
   }
 
-  void addBuildModeFlags({ bool defaultToRelease: true }) {
+  void usesBuildNumberOption() {
+    argParser.addOption('build-number',
+        help: 'An integer used as an internal version number.\n'
+              'Each build must have a unique number to differentiate it from previous builds.\n'
+              'It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.\n'
+              'On Android it is used as \'versionCode\'.\n'
+              'On Xcode builds it is used as \'CFBundleVersion\'',
+        valueHelp: 'int');
+  }
+
+  void usesBuildNameOption() {
+    argParser.addOption('build-name',
+        help: 'A "x.y.z" string used as the version number shown to users.\n'
+              'For each new version of your app, you will provide a version number to differentiate it from previous versions.\n'
+              'On Android it is used as \'versionName\'.\n'
+              'On Xcode builds it is used as \'CFBundleShortVersionString\'',
+        valueHelp: 'x.y.z');
+  }
+
+  void addBuildModeFlags({bool defaultToRelease: true}) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     argParser.addFlag('debug',
@@ -181,6 +200,16 @@ abstract class FlutterCommand extends Command<Null> {
           '--track-widget-creation is valid only when --preview-dart-2 is specified.', null);
     }
 
+    int buildNumber;
+    try {
+      buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
+          ? int.parse(argResults['build-number'])
+          : null;
+    } catch (e) {
+      throw new UsageException(
+          '--build-number (${argResults['build-number']}) must be an int.', null);
+    }
+
     return new BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
         ? argResults['flavor']
@@ -201,6 +230,10 @@ abstract class FlutterCommand extends Command<Null> {
           ? argResults[FlutterOptions.kFileSystemRoot] : null,
       fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
           ? argResults[FlutterOptions.kFileSystemScheme] : null,
+      buildNumber: buildNumber,
+      buildName: argParser.options.containsKey('build-name')
+          ? argResults['build-name']
+          : null,
     );
   }
 

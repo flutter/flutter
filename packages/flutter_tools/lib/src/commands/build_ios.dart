@@ -17,6 +17,8 @@ class BuildIOSCommand extends BuildSubCommand {
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
+    usesBuildNumberOption();
+    usesBuildNameOption();
     argParser
       ..addFlag('debug',
         negatable: false,
