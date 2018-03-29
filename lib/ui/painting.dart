@@ -1513,6 +1513,9 @@ class Path extends NativeFieldWrapperClass2 {
 
   /// Adds a new subpath that consists of a curve that forms the
   /// ellipse that fills the given rectangle.
+  /// 
+  /// To add a circle, pass an appropriate rectangle as `oval`. [Rect.fromCircle] 
+  /// can be used to easily describe the circle's center [Offset] and radius.
   void addOval(Rect oval) {
     assert(_rectIsValid(oval));
     _addOval(oval.left, oval.top, oval.right, oval.bottom);
