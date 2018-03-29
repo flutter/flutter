@@ -131,8 +131,7 @@ Future<Null> main(List<String> arguments) async {
     '--exclude',
   'package:Flutter/temp_doc.dart,package:http/browser_client.dart,package:intl/intl_browser.dart,package:matcher/mirror_matchers.dart,package:quiver/mirrors.dart,package:quiver/io.dart,package:vm_service_client/vm_service_client.dart,package:web_socket_channel/html.dart',
     '--favicon=favicon.ico',
-    '--use-categories',
-    '--category-order', 'flutter,Dart Core,flutter_test,flutter_driver',
+    '--package-order', 'flutter,Dart,flutter_test,flutter_driver',
     '--show-warnings',
     '--auto-include-dependencies',
   ]);
@@ -143,6 +142,18 @@ Future<Null> main(List<String> arguments) async {
     dartdocArgs.add('--include-external');
     dartdocArgs.add(libraryRef);
   }
+
+  Iterable<String> quoteArgs(Iterable<String> args) sync* {
+    for (String arg in args) {
+      if (arg.contains(' ')) {
+        yield "'$arg'";
+      } else {
+        yield arg;
+      }
+    }
+  }
+
+  print('Executing: (cd dev/docs ; $pubExecutable ${quoteArgs(dartdocArgs).join(' ')})');
 
   process = await Process.start(
     pubExecutable,
@@ -208,32 +219,15 @@ void createFooter(String footerPath) {
 }
 
 void sanityCheckDocs() {
-  // TODO(jcollins-g): remove old_sdk_canaries for dartdoc >= 0.10.0
-  final List<String> oldSdkCanaries = <String>[
-    '$kDocRoot/api/dart.io/File-class.html',
-    '$kDocRoot/api/dart.ui/Canvas-class.html',
-    '$kDocRoot/api/dart.ui/Canvas/drawRect.html',
-  ];
-  final List<String> newSdkCanaries = <String>[
+  final List<String> canaries = <String>[
     '$kDocRoot/api/dart-io/File-class.html',
     '$kDocRoot/api/dart-ui/Canvas-class.html',
     '$kDocRoot/api/dart-ui/Canvas/drawRect.html',
-  ];
-  final List<String> canaries = <String>[
     '$kDocRoot/api/flutter_test/WidgetTester/pumpWidget.html',
     '$kDocRoot/api/material/Material-class.html',
     '$kDocRoot/api/material/Tooltip-class.html',
     '$kDocRoot/api/widgets/Widget-class.html',
   ];
-  bool oldMissing = false;
-  for (String canary in oldSdkCanaries) {
-    if (!new File(canary).existsSync()) {
-      oldMissing = true;
-      break;
-    }
-  }
-  if (oldMissing)
-    canaries.addAll(newSdkCanaries);
   for (String canary in canaries) {
     if (!new File(canary).existsSync())
       throw new Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
@@ -248,6 +242,7 @@ void createIndexAndCleanup() {
   renameApiDir();
   copyIndexToRootOfDocs();
   addHtmlBaseToIndex();
+  changePackageToSdkInTitlebar();
   putRedirectInOldIndexLocation();
   print('\nDocs ready to go!');
 }
@@ -266,6 +261,17 @@ void renameApiDir() {
 
 void copyIndexToRootOfDocs() {
   new File('$kDocRoot/flutter/index.html').copySync('$kDocRoot/index.html');
+}
+
+void changePackageToSdkInTitlebar() {
+  final File indexFile = new File('$kDocRoot/index.html');
+  String indexContents = indexFile.readAsStringSync();
+  indexContents = indexContents.replaceFirst(
+    '<li><a href="https://flutter.io">Flutter package</a></li>',
+    '<li><a href="https://flutter.io">Flutter SDK</a></li>',
+  );
+
+  indexFile.writeAsStringSync(indexContents);
 }
 
 void addHtmlBaseToIndex() {
