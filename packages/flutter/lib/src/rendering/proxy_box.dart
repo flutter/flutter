@@ -3028,6 +3028,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     String increasedValue,
     String decreasedValue,
     String hint,
+    String routeName,
     TextDirection textDirection,
     SemanticsSortKey sortKey,
     VoidCallback onTap,
@@ -3063,6 +3064,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _increasedValue = increasedValue,
        _decreasedValue = decreasedValue,
        _hint = hint,
+       _routeName = routeName,
        _textDirection = textDirection,
        _sortKey = sortKey,
        _onTap = onTap,
@@ -3278,6 +3280,18 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     _hint = value;
     markNeedsSemanticsUpdate();
   }
+
+  /// If non-null, sets the [SemanticsNode.hint] semantic to the given value.
+  ///
+  /// The name of a visible route is given by [routeName].
+  String get routeName => _routeName;
+  String _routeName;
+  set routeName(String value) {
+    if (_routeName == value)
+      return;
+    _routeName = value;
+    markNeedsSemanticsUpdate();
+  } 
 
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given value.
   ///
@@ -3666,6 +3680,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.decreasedValue = decreasedValue;
     if (hint != null)
       config.hint = hint;
+    if (routeName != null)
+      config.routeName = routeName;
     if (textDirection != null)
       config.textDirection = textDirection;
     if (sortKey != null)

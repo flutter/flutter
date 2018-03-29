@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
-import 'package:flutter/semantics.dart';
 
 import 'home.dart';
 import 'item.dart';
@@ -154,7 +153,7 @@ class GalleryAppState extends State<GalleryApp> {
       // using named routes, consider the example in the Navigator class documentation:
       // https://docs.flutter.io/flutter/widgets/Navigator-class.html
       _kRoutes[item.routeName] = (BuildContext context) {
-        return item.buildRoute(context);
+        return new Semantics(routeName: item.routeName, child: item.buildRoute(context));
       };
     }
 
@@ -166,12 +165,7 @@ class GalleryAppState extends State<GalleryApp> {
       checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
       checkerboardOffscreenLayers: _checkerboardOffscreenLayers,
       routes: _kRoutes,
-      home: home,
-      navigatorObservers: <NavigatorObserver>[
-        new AccessibilityNavigatorObserver(routeNames: <String, String>{
-          '/': 'home',
-        }),
-      ],
+      home: new Semantics(routeName: 'home', child: home),
       builder: (BuildContext context, Widget child) {
         return new Directionality(
           textDirection: _overrideDirection,
