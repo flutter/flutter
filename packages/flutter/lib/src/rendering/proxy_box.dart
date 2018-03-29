@@ -3281,9 +3281,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.hint] semantic to the given value.
+  /// If non-null, sets the [SemanticsNode.routeName] semantic to the given value.
   ///
-  /// The name of a visible route is given by [routeName].
+  /// The name of a widget subtree.
   String get routeName => _routeName;
   String _routeName;
   set routeName(String value) {
