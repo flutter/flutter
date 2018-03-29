@@ -19,6 +19,8 @@ class BuildInfo {
     this.targetPlatform,
     this.fileSystemRoots,
     this.fileSystemScheme,
+    this.buildNumber,
+    this.buildName,
   });
 
   final BuildMode mode;
@@ -51,6 +53,19 @@ class BuildInfo {
 
   /// Target platform for the build (e.g. android_arm versus android_arm64).
   final TargetPlatform targetPlatform;
+
+  /// Internal version number (not displayed to users).
+  /// Each build must have a unique number to differentiate it from previous builds.
+  /// It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.
+  /// On Android it is used as versionCode.
+  /// On Xcode builds it is used as CFBundleVersion.
+  final int buildNumber;
+
+  /// A "x.y.z" string used as the version number shown to users.
+  /// For each new version of your app, you will provide a version number to differentiate it from previous versions.
+  /// On Android it is used as versionName.
+  /// On Xcode builds it is used as CFBundleShortVersionString,
+  final String buildName;
 
   static const BuildInfo debug = const BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = const BuildInfo(BuildMode.profile, null);

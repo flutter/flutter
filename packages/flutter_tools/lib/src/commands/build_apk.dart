@@ -13,6 +13,8 @@ class BuildApkCommand extends BuildSubCommand {
     addBuildModeFlags();
     usesFlavorOption();
     usesPubOption();
+    usesBuildNumberOption();
+    usesBuildNameOption();
 
     argParser
       ..addFlag('preview-dart-2',
