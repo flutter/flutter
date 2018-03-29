@@ -149,7 +149,8 @@ class SemanticsData extends Diagnosticable {
   ///
   /// The reading direction is given by [textDirection].
   final String hint;
-
+  
+  /// The name of a widget subtree.
   final String routeName;
 
   /// The reading direction for the text in [label], [value], [hint],
@@ -480,7 +481,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// Defaults to the ambient [Directionality].
   final TextDirection textDirection;
 
-
+  /// The name of a widget subtree.
   final String routeName;
 
   /// Determines the position of this node among its siblings in the traversal
@@ -1113,6 +1114,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   String get hint => _hint;
   String _hint = _kEmptyConfig.hint;
 
+  /// The name of a widget subtree.
   String get routeName => _routeName;
   String _routeName = _kEmptyConfig.routeName;
 
@@ -2356,6 +2358,11 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// The name of a widget subtree.
+  /// 
+  /// Changes to the most specific route name will prompt an accessibility
+  /// announcement when enabled.  On iOS this produces a `UIAccessibilityScreenChangedNotification`
+  /// and on Android a `TYPE_WINDOW_STATE_CHANGED`.
   String get routeName => _routeName;
   String _routeName = '';
   set routeName(String value) {
