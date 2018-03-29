@@ -253,6 +253,17 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       );
     }
 
+    if (widget.tooltip != null) {
+      // The long-pressable area for the tooltip should always be as big as
+      // the tooltip even if there is no child.
+      result = new SizedBox.expand(
+        child: new Tooltip(
+          message: widget.tooltip,
+          child: result,
+        ),
+      );
+    }
+
     result = new RawMaterialButton(
       onPressed: widget.onPressed,
       onHighlightChanged: _handleHighlightChanged,
@@ -266,13 +277,6 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       shape: widget.shape,
       child: result,
     );
-
-    if (widget.tooltip != null) {
-      result = new Tooltip(
-        message: widget.tooltip,
-        child: result,
-      );
-    }
 
     if (widget.heroTag != null) {
       result = new Hero(
