@@ -2,58 +2,76 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'feedback_tester.dart';
 
-void main() {
-  /// Tests that a [Chip] that has its size constrained by its parent is
-  /// further constraining the size of its child, the label widget.
-  /// Optionally, adding an avatar or delete icon to the chip should not
-  /// cause the chip or label to exceed its constrained height.
-  Future<Null> _testConstrainedLabel(
-    WidgetTester tester, {
-    CircleAvatar avatar,
-    VoidCallback onDeleted,
-  }) async {
-    const double labelWidth = 100.0;
-    const double labelHeight = 50.0;
-    const double chipParentWidth = 75.0;
-    const double chipParentHeight = 25.0;
-    final Key labelKey = new UniqueKey();
+Finder findRenderChipElement() {
+  return find.byElementPredicate((Element e) => '${e.runtimeType}' == '_RenderChipElement');
+}
 
-    await tester.pumpWidget(
-      new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new Container(
-              width: chipParentWidth,
-              height: chipParentHeight,
-              child: new Chip(
-                avatar: avatar,
-                label: new Container(
-                  key: labelKey,
-                  width: labelWidth,
-                  height: labelHeight,
-                ),
-                onDeleted: onDeleted,
+dynamic getRenderChip(WidgetTester tester) {
+  if (!tester.any(findRenderChipElement())) {
+    return null;
+  }
+  final Element element = tester.element(findRenderChipElement());
+  return element.renderObject;
+}
+
+double getSelectProgress(WidgetTester tester) => getRenderChip(tester)?.selectController?.value;
+double getAvatarDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.avatarDrawerController?.value;
+double getDeleteDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.deleteDrawerController?.value;
+double getEnableProgress(WidgetTester tester) => getRenderChip(tester)?.enableController?.value;
+
+/// Tests that a [Chip] that has its size constrained by its parent is
+/// further constraining the size of its child, the label widget.
+/// Optionally, adding an avatar or delete icon to the chip should not
+/// cause the chip or label to exceed its constrained height.
+Future<Null> _testConstrainedLabel(
+    WidgetTester tester, {
+      CircleAvatar avatar,
+      VoidCallback onDeleted,
+    }) async {
+  const double labelWidth = 100.0;
+  const double labelHeight = 50.0;
+  const double chipParentWidth = 75.0;
+  const double chipParentHeight = 25.0;
+  final Key labelKey = new UniqueKey();
+
+  await tester.pumpWidget(
+    new MaterialApp(
+      home: new Material(
+        child: new Center(
+          child: new Container(
+            width: chipParentWidth,
+            height: chipParentHeight,
+            child: new Chip(
+              avatar: avatar,
+              label: new Container(
+                key: labelKey,
+                width: labelWidth,
+                height: labelHeight,
               ),
+              onDeleted: onDeleted,
             ),
           ),
         ),
       ),
-    );
+    ),
+  );
 
-    final Size labelSize = tester.getSize(find.byKey(labelKey));
-    expect(labelSize.width, lessThan(chipParentWidth));
-    expect(labelSize.height, lessThanOrEqualTo(chipParentHeight));
+  final Size labelSize = tester.getSize(find.byKey(labelKey));
+  expect(labelSize.width, lessThan(chipParentWidth));
+  expect(labelSize.height, lessThanOrEqualTo(chipParentHeight));
 
-    final Size chipSize = tester.getSize(find.byType(Chip));
-    expect(chipSize.width, chipParentWidth);
-    expect(chipSize.height, chipParentHeight);
-  }
+  final Size chipSize = tester.getSize(find.byType(Chip));
+  expect(chipSize.width, chipParentWidth);
+  expect(chipSize.height, chipParentHeight);
+}
 
+void main() {
   testWidgets('Chip control test', (WidgetTester tester) async {
     final FeedbackTester feedback = new FeedbackTester();
     final List<String> deletedChipLabels = <String>[];
@@ -523,9 +541,9 @@ void main() {
     expect(tester.getBottomRight(find.byType(Icon)), const Offset(365.0, 309.0));
   });
 
-  testWidgets('Avatar area works as expected on RawChip', (WidgetTester tester) async {
+  testWidgets('Avatar drawer works as expected on RawChip', (WidgetTester tester) async {
     final GlobalKey labelKey = new GlobalKey();
-    Future<Null> pushChip({Widget avatar, ValueChanged<bool> onSelected, bool selected}) async {
+    Future<Null> pushChip({Widget avatar}) async {
       return tester.pumpWidget(
         new MaterialApp(
           home: new Material(
@@ -533,8 +551,6 @@ void main() {
               children: <Widget>[
                 new RawChip(
                   avatar: avatar,
-                  onSelected: onSelected,
-                  selected: selected,
                   label: new Text('Chip', key: labelKey),
                   border: const StadiumBorder(),
                 ),
@@ -561,7 +577,6 @@ void main() {
     );
     // Avatar drawer should start out closed.
     expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 32.0)));
-    // The avatar should be there already.
     expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
     expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 4.0)));
     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 9.0)));
@@ -598,5 +613,212 @@ void main() {
     expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
     expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 4.0)));
     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(36.0, 9.0)));
+
+    // Remove the avatar again
+    await pushChip();
+    // Avatar drawer should start out open.
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 32.0)));
+    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 4.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(36.0, 9.0)));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    // Avatar drawer should start contracting.
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(103.8, 0.1));
+    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 4.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(35.8, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(102.9, 0.1));
+    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 4.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(34.9, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(101.0, 0.1));
+    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 4.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(33.0, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(97.5, 0.1));
+    expect(tester.getSize(find.byKey(avatarKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(avatarKey)), equals(const Offset(4.0, 4.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)).dx, closeTo(29.5, 0.1));
+
+    // Wait for being done with animation, make sure it didn't change
+    // height, and make sure that the avatar is no longer drawn.
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 32.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 9.0)));
+    expect(find.byKey(avatarKey), findsNothing);
+  });
+
+  testWidgets('Delete button drawer works as expected on RawChip', (WidgetTester tester) async {
+    final GlobalKey labelKey = new GlobalKey();
+    final GlobalKey deleteButtonKey = new GlobalKey();
+    Future<Null> pushChip({VoidCallback onDeleted}) async {
+      return tester.pumpWidget(
+        new MaterialApp(
+          home: new Material(
+            child: new Wrap(
+              children: <Widget>[
+                new RawChip(
+                  onDeleted: onDeleted,
+                  deleteIcon: new Container(width: 40.0, height: 40.0, key: deleteButtonKey),
+                  label: new Text('Chip', key: labelKey),
+                  border: const StadiumBorder(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // No delete button
+    await pushChip();
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 32.0)));
+
+    // Add a delete button
+    await pushChip(onDeleted: () {});
+    // Delete button drawer should start out closed.
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 32.0)));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)), equals(const Offset(52.0, 4.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 9.0)));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    // Delete button drawer should start expanding.
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(81.2, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(53.2, 0.1));
+    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 9.0)));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(86.7, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(58.7, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(94.7, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(66.7, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(99.5, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(71.5, 0.1));
+
+    // Wait for being done with animation, and make sure it didn't change
+    // height.
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 32.0)));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)), equals(const Offset(76.0, 4.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 9.0)));
+
+    // Remove the delete button again
+    await pushChip();
+    // Delete button drawer should start out open.
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 32.0)));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)), equals(const Offset(76.0, 4.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 9.0)));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    // Delete button drawer should start contracting.
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(103.8, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(75.8, 0.1));
+    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 9.0)));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(102.9, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(74.9, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(101.0, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(73.0, 0.1));
+
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(tester.getSize(find.byType(RawChip)).width, closeTo(97.5, 0.1));
+    expect(tester.getSize(find.byKey(deleteButtonKey)), equals(const Size(24.0, 24.0)));
+    expect(tester.getTopLeft(find.byKey(deleteButtonKey)).dx, closeTo(69.5, 0.1));
+
+    // Wait for being done with animation, make sure it didn't change
+    // height, and make sure that the delete button is no longer drawn.
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 32.0)));
+    expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 9.0)));
+    expect(find.byKey(deleteButtonKey), findsNothing);
+  });
+
+  testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
+    final UniqueKey labelKey = new UniqueKey();
+    Future<Null> pushChip({Widget avatar, ValueChanged<bool> onSelected, bool selected}) async {
+      return tester.pumpWidget(
+        new MaterialApp(
+          home: new Material(
+            child: new Wrap(
+              children: <Widget>[
+                new InputChip(
+                  avatar: avatar,
+                  onSelected: onSelected,
+                  selected: selected,
+                  label: new Text('Chip', key: labelKey),
+                  border: const StadiumBorder(),
+                  //showCheckmark: true,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // With avatar, but not selectable.
+    final UniqueKey avatarKey = new UniqueKey();
+    bool selected = false;
+    await pushChip(
+      avatar: new Container(width: 40.0, height: 40.0, key: avatarKey),
+      selected: selected,
+    );
+    expect(tester.getSize(find.byType(RawChip)), equals(const Size(104.0, 32.0)));
+
+    // Turn on selection.
+    await pushChip(
+      avatar: new Container(width: 40.0, height: 40.0, key: avatarKey),
+      onSelected: (bool value) {
+        selected = value;
+      },
+      selected: selected,
+    );
+    await tester.pumpAndSettle();
+
+    // Simulate a tap on the label to select the chip.
+    await tester.tap(find.byKey(labelKey));
+    expect(selected, equals(true));
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(2));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(getSelectProgress(tester), closeTo(0.0, 0.01));
+    expect(getAvatarDrawerProgress(tester), equals(1.0));
+    expect(getDeleteDrawerProgress(tester), equals(0.0));
+    await tester.pump(const Duration(milliseconds: 50));
+//    expect(getSelectProgress(tester), closeTo(0.51, 0.01));
+    expect(getAvatarDrawerProgress(tester), equals(1.0));
+    expect(getDeleteDrawerProgress(tester), equals(0.0));
+    await tester.pump(const Duration(milliseconds: 50));
+//    expect(getSelectProgress(tester), closeTo(0.77, 0.01));
+    expect(getAvatarDrawerProgress(tester), equals(1.0));
+    expect(getDeleteDrawerProgress(tester), equals(0.0));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(getSelectProgress(tester), equals(1.0));
+    expect(getAvatarDrawerProgress(tester), equals(1.0));
+    expect(getDeleteDrawerProgress(tester), equals(0.0));
   });
 }

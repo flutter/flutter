@@ -156,7 +156,6 @@ class Chip extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return new RawChip(
-      key: key,
       avatar: avatar,
       label: label,
       labelStyle: labelStyle,
@@ -407,7 +406,6 @@ class InputChip extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return new RawChip(
-      key: key,
       avatar: avatar,
       label: label,
       labelStyle: labelStyle,
@@ -589,7 +587,6 @@ class ChoiceChip extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return new RawChip(
-      key: key,
       avatar: avatar,
       label: label,
       labelStyle: labelStyle,
@@ -765,7 +762,6 @@ class FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return new RawChip(
-      key: key,
       avatar: avatar,
       label: label,
       labelStyle: labelStyle,
@@ -904,7 +900,6 @@ class ActionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return new RawChip(
-      key: key,
       avatar: avatar,
       label: label,
       onPressed: onPressed,
@@ -1120,7 +1115,7 @@ class RawChip extends StatefulWidget {
   _RawChipState createState() => new _RawChipState();
 }
 
-class _RawChipState extends State<RawChip> with TickerProviderStateMixin {
+class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip> {
   static const Duration pressedAnimationDuration = const Duration(milliseconds: 75);
 
   AnimationController selectController;
@@ -1216,13 +1211,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin {
     if (!canTap) {
       return;
     }
-    if (widget.onSelected != null) {
-      if (widget.selected) {
-        selectController.forward();
-      } else {
-        selectController.reverse();
-      }
-    }
     setState(() {
       _isTapping = false;
     });
@@ -1231,13 +1219,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin {
   void _handleTap() {
     if (!canTap) {
       return;
-    }
-    if (widget.onSelected != null) {
-      if (widget.selected) {
-        selectController.reverse();
-      } else {
-        selectController.forward();
-      }
     }
     setState(() {
       _isTapping = false;
@@ -1278,6 +1259,15 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin {
           avatarDrawerController.reverse();
         }
         _hadAvatar = hasAvatar;
+      });
+    }
+    if (_wasSelected != isSelected) {
+      setState(() {
+        if (isSelected) {
+          selectController.forward();
+        } else {
+          selectController.reverse();
+        }
         _wasSelected = isSelected;
       });
     }
@@ -1345,7 +1335,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin {
             ),
             child: _wrapWithTooltip(
                 new _ChipRenderWidget(
-                  key: widget.key,
                   theme: new _ChipRenderTheme(
                     label: widget.label,
                     avatar: new AutoFade(
@@ -1361,8 +1350,8 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin {
                     padding: widget.padding?.resolve(textDirection) ?? EdgeInsets.zero,
                     labelPadding: widget.labelPadding?.resolve(textDirection) ?? EdgeInsets.zero,
                     showAvatar: hasAvatar,
-                    showDelete: hasDeleteButton,
                     showCheckmark: widget.showCheckmark,
+                    canTapBody: canTap,
                   ),
                   value: widget.selected,
                   selectController: selectController,
@@ -1554,8 +1543,8 @@ class _ChipRenderTheme {
     @required this.padding,
     @required this.labelPadding,
     @required this.showAvatar,
-    @required this.showDelete,
     @required this.showCheckmark,
+    @required this.canTapBody,
   });
 
   final Widget avatar;
@@ -1564,8 +1553,8 @@ class _ChipRenderTheme {
   final EdgeInsets padding;
   final EdgeInsets labelPadding;
   final bool showAvatar;
-  final bool showDelete;
   final bool showCheckmark;
+  final bool canTapBody;
 
   @override
   bool operator ==(dynamic other) {
@@ -1582,8 +1571,8 @@ class _ChipRenderTheme {
         typedOther.padding == padding &&
         typedOther.labelPadding == labelPadding &&
         typedOther.showAvatar == showAvatar &&
-        typedOther.showDelete == showDelete &&
-        typedOther.showCheckmark == showCheckmark;
+        typedOther.showCheckmark == showCheckmark &&
+        typedOther.canTapBody == canTapBody;
   }
 
   @override
@@ -1595,8 +1584,8 @@ class _ChipRenderTheme {
       padding,
       labelPadding,
       showAvatar,
-      showDelete,
       showCheckmark,
+      canTapBody,
     );
   }
 }
@@ -1616,6 +1605,8 @@ class _RenderChip extends RenderBox {
         _theme = theme,
         _textDirection = textDirection {
     if (selectController != null) {
+      // These will delay the start of some animations, and/or reduce their
+      // length compared to the overall select animation, using Intervals.
       final double checkmarkPercentage =
           _kCheckmarkDuration.inMilliseconds / _kSelectDuration.inMilliseconds;
       final double checkmarkReversePercentage =
@@ -1748,9 +1739,8 @@ class _RenderChip extends RenderBox {
     }
   }
 
-  bool get isDrawingCheckMark => theme.showCheckmark && !(selectController?.isDismissed ?? !value);
-
-  bool get tapEnabled => isEnabled;
+  bool get isDrawingCheckmark => theme.showCheckmark && !(selectController?.isDismissed ?? !value);
+  bool get deleteButtonShowing => !deleteDrawerAnimation.isDismissed;
 
   @override
   void attach(PipelineOwner owner) {
@@ -1922,7 +1912,7 @@ class _RenderChip extends RenderBox {
         start -= _iconPadding.left + theme.labelPadding.right;
         start -= centerLayout(label, start - label.size.width);
         start -= theme.labelPadding.left + _iconPadding.right;
-        if (deleteIcon != null) {
+        if (deleteButtonShowing && deleteIcon != null) {
           deleteButtonRect = new Rect.fromLTWH(
             0.0,
             0.0,
@@ -1938,12 +1928,16 @@ class _RenderChip extends RenderBox {
           deleteButtonRect = Rect.zero;
           start -= deleteDrawerAnimation.value * iconSize;
         }
-        _pressRect = new Rect.fromLTWH(
-          deleteButtonRect.width,
-          0.0,
-          overallWidth - deleteButtonRect.width,
-          iconPlusPadding + theme.padding.vertical,
-        );
+        if (theme.canTapBody) {
+          _pressRect = new Rect.fromLTWH(
+            deleteButtonRect.width,
+            0.0,
+            overallWidth - deleteButtonRect.width,
+            iconPlusPadding + theme.padding.vertical,
+          );
+        } else {
+          _pressRect = Rect.zero;
+        }
         break;
       case TextDirection.ltr:
         double start = left + theme.padding.left + _iconPadding.left;
@@ -1957,13 +1951,17 @@ class _RenderChip extends RenderBox {
         start += _iconPadding.right + theme.labelPadding.left;
         start += centerLayout(label, start);
         start += theme.labelPadding.right;
-        _pressRect = new Rect.fromLTWH(
-          0.0,
-          0.0,
-          deleteIcon != null ? start : overallWidth,
-          iconPlusPadding + theme.padding.vertical,
-        );
-        if (deleteIcon != null) {
+        if (theme.canTapBody) {
+          _pressRect = new Rect.fromLTWH(
+            0.0,
+            0.0,
+            deleteButtonShowing ? start : overallWidth,
+            iconPlusPadding + theme.padding.vertical,
+          );
+        } else {
+          _pressRect = Rect.zero;
+        }
+        if (deleteButtonShowing && deleteIcon != null) {
           deleteButtonRect = new Rect.fromLTWH(
             start,
             0.0,
@@ -2017,7 +2015,11 @@ class _RenderChip extends RenderBox {
     final double t = checkmarkAnimation.status == AnimationStatus.reverse
         ? 1.0
         : checkmarkAnimation.value;
-    assert(t >= 0.0 && t <= 1.0);
+    if (t == 0.0) {
+      // Nothing to draw.
+      return;
+    }
+    assert(t > 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
     // short side to the long side.
     final Path path = new Path();
@@ -2040,7 +2042,7 @@ class _RenderChip extends RenderBox {
   }
 
   void _paintSelectionOverlay(PaintingContext context, Offset offset) {
-    if (isDrawingCheckMark) {
+    if (isDrawingCheckmark) {
       final Rect avatarRect = _boxRect(avatar).shift(offset);
       final Paint darkenPaint = new Paint()
         ..color = selectionScrimTween.evaluate(checkmarkAnimation)
@@ -2062,9 +2064,7 @@ class _RenderChip extends RenderBox {
         new OpacityLayer(alpha: _disabledColor.alpha),
         (PaintingContext context, Offset offset) {
           context.paintChild(avatar, _boxParentData(avatar).offset + offset);
-          if (isDrawingCheckMark) {
-            _paintSelectionOverlay(context, offset);
-          }
+          _paintSelectionOverlay(context, offset);
         },
         offset,
       );
@@ -2130,7 +2130,7 @@ class _RenderChip extends RenderBox {
   }
 
   @override
-  bool hitTestSelf(Offset position) => true;
+  bool hitTestSelf(Offset position) => deleteButtonRect.contains(position) || _pressRect.contains(position);
 
   @override
   bool hitTestChildren(HitTestResult result, {@required Offset position}) {
