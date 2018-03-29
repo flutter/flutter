@@ -254,9 +254,11 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     }
 
     if (widget.tooltip != null) {
-      result = new Tooltip(
-        message: widget.tooltip,
-        child: result,
+      result = new SizedBox.expand(
+        child: new Tooltip(
+          message: widget.tooltip,
+          child: result,
+        ),
       );
     }
 
