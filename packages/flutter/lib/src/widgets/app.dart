@@ -44,6 +44,42 @@ typedef Locale LocaleResolutionCallback(Locale locale, Iterable<Locale> supporte
 /// This function must not return null.
 typedef String GenerateAppTitle(BuildContext context);
 
+/// Allows external libraries to overlay crucial content inside of every
+/// [WidgetsApp].
+///
+/// For performance reasons, adding and removing overlays will not update
+/// existing [WidgetsApp] instances.
+class PlatformOverlay {
+  const PlatformOverlay._();
+
+  static final List<TransitionBuilder> _overlays = <TransitionBuilder>[];
+
+  /// Adds [entry] to the list of overlays.
+  ///
+  /// This will not update existing [WidgetsApp] instances.
+  static void addOverlay(TransitionBuilder entry) {
+    _overlays.add(entry);
+  }
+
+  /// Removes [entry] from the list of overlays.
+  ///
+  /// This will not update existing [WidgetsApp] instances.
+  static void removeOverlay(TransitionBuilder entry) {
+    _overlays.remove(entry);
+  }
+
+  /// Wraps the given widget in the current list of overlays.
+  static Widget wrap(Widget child) {
+    for (TransitionBuilder overlay in _overlays.reversed) {
+      final Widget previousChild = child;
+      child = new Builder(
+        builder: (BuildContext context) => overlay(context, previousChild),
+      );
+    }
+    return child;
+  }
+}
+
 /// A convenience class that wraps a number of widgets that are commonly
 /// required for an application.
 ///
@@ -627,7 +663,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       child: new Localizations(
         locale: widget.locale ?? _locale,
         delegates: _localizationsDelegates.toList(),
-        child: title,
+        child: PlatformOverlay.wrap(title),
       ),
     );
   }
