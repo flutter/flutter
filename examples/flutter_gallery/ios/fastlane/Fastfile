@@ -19,7 +19,7 @@ end
 # rebuild the app by:
 # 1- Signing using the publishing credentials; and
 # 2- xcodebuild with archive option
-platform :ios do |options|
+platform :ios do
   desc 'Push a new release to TestFlight'
   lane :build_and_deploy_testflight do
     # Doesn't do anything when not on Travis.
@@ -73,8 +73,6 @@ platform :ios do |options|
       codesigning_identity: 'iPhone Distribution: Store Ladd (S8QB4VV633)',
     )
 
-    if options[:upload]
-      upload_to_testflight
-    end
+    upload_to_testflight
   end
 end
