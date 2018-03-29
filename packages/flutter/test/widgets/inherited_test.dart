@@ -52,6 +52,22 @@ class ExpectFailState extends State<ExpectFail> {
   Widget build(BuildContext context) => new Container();
 }
 
+class OverrideInheritedType extends InheritedWidget {
+  const OverrideInheritedType({
+    Key key,
+    this.model,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  final Object model;
+
+  @override
+  bool updateShouldNotify(OverrideInheritedType oldWidget) => model != oldWidget.model;
+
+  @override
+  Type get inheritedType => model.runtimeType;
+}
+
 void main() {
   testWidgets('Inherited notifies dependents', (WidgetTester tester) async {
     final List<TestInherited> log = <TestInherited>[];
@@ -471,5 +487,45 @@ void main() {
     await tester.pumpWidget(parent);
 
     expect(exceptionCaught, isTrue);
+  });
+
+  testWidgets('OverrideInheritedType', (WidgetTester tester) async {
+    final String hello = 'hello';
+    final Widget child = new Directionality(
+      textDirection: TextDirection.rtl,
+      child: new Builder(
+        builder: (BuildContext context) {
+          final OverrideInheritedType widget = context.inheritFromWidgetOfExactType(hello.runtimeType);
+          if (widget == null)
+            return new Text('<null>');
+          return new Text(widget.model.toString());
+        },
+      ),
+    );
+
+    await tester.pumpWidget(new OverrideInheritedType(
+      model: hello,
+      child: child,
+    ));
+
+    expect(find.text(hello), findsOneWidget);
+
+    await tester.pumpWidget(new OverrideInheritedType(
+      model: 'goodbye',
+      child: child,
+    ));
+
+    expect(find.text(hello), findsNothing);
+    expect(find.text('goodbye'), findsOneWidget);
+
+    await tester.pumpWidget(new OverrideInheritedType(
+      model: 5,
+      child: child,
+    ));
+
+    expect(find.text(hello), findsNothing);
+    expect(find.text('goodbye'), findsNothing);
+    expect(find.text('5'), findsNothing);
+    expect(find.text('<null>'), findsOneWidget);
   });
 }

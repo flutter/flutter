@@ -1552,6 +1552,15 @@ abstract class InheritedWidget extends ProxyWidget {
   /// object.
   @protected
   bool updateShouldNotify(covariant InheritedWidget oldWidget);
+
+  /// The type of this inherited widget.
+  ///
+  /// Used by [BuildContext.inheritFromWidgetOfExactType] to find this widget.
+  ///
+  /// Defaults to [runtimeType], but subclasses can override to use another
+  /// type (e.g., the type of an object held by the subclass).
+  @protected
+  Type get inheritedType => runtimeType;
 }
 
 /// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
@@ -1853,8 +1862,9 @@ abstract class BuildContext {
   /// render object is usually short.
   Size get size;
 
-  /// Obtains the nearest widget of the given type, which must be the type of a
-  /// concrete [InheritedWidget] subclass, and registers this build context with
+  /// Obtains the nearest widget of the given type, which must be a type
+  /// returned by [InheritedWidget.inheritedType] (typically a concrete
+  /// [InheritedWidget]), and registers this build context with
   /// that widget such that when that widget changes (or a new widget of that
   /// type is introduced, or the widget goes away), this build context is
   /// rebuilt so that it can obtain new values from that widget.
@@ -2721,7 +2731,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       final GlobalKey key = widget.key;
       key._register(this);
     }
-    _updateInheritance();
+    _updateInheritance(widget);
     assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; }());
   }
 
@@ -2986,7 +2996,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // Since we're going to be reused, let's clear our list now.
     _dependencies?.clear();
     _hadUnsatisfiedDependencies = false;
-    _updateInheritance();
+    _updateInheritance(widget);
     assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; }());
     if (_dirty)
       owner.scheduleBuildFor(this);
@@ -3218,7 +3228,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return ancestor;
   }
 
-  void _updateInheritance() {
+  void _updateInheritance(covariant Widget newWidget) {
     assert(_active);
     _inheritedWidgets = _parent?._inheritedWidgets;
   }
@@ -4006,14 +4016,24 @@ class InheritedElement extends ProxyElement {
   final Set<Element> _dependents = new HashSet<Element>();
 
   @override
-  void _updateInheritance() {
+  void update(covariant InheritedWidget newWidget) {
+    if (widget.inheritedType != newWidget.inheritedType) {
+      _child = updateChild(_child, null, slot);
+      _inheritedWidgets = null;
+      _updateInheritance(newWidget);
+    }
+    super.update(newWidget);
+  }
+
+  @override
+  void _updateInheritance(covariant InheritedWidget newWidget) {
     assert(_active);
     final Map<Type, InheritedElement> incomingWidgets = _parent?._inheritedWidgets;
     if (incomingWidgets != null)
       _inheritedWidgets = new HashMap<Type, InheritedElement>.from(incomingWidgets);
     else
       _inheritedWidgets = new HashMap<Type, InheritedElement>();
-    _inheritedWidgets[widget.runtimeType] = this;
+    _inheritedWidgets[newWidget.inheritedType] = this;
   }
 
   @override
