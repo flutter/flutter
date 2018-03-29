@@ -411,7 +411,7 @@ void main() {
   });
 
   group('close button', () {
-    Future<Null> expectCloseIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon) async {
+    Future<Null> expectCloseIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon, PageRoute<void> routeBuilder()) async {
       await tester.pumpWidget(
         new MaterialApp(
           theme: new ThemeData(platform: platform),
@@ -419,30 +419,56 @@ void main() {
         )
       );
 
-      tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return new Scaffold(appBar: new AppBar(), body: const Text('Page 2'));
-        },
-        fullscreenDialog: true,
-      ));
+      tester.state<NavigatorState>(find.byType(Navigator)).push(routeBuilder());
 
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
       final Icon icon = tester.widget(find.byType(Icon));
       expect(icon.icon, expectedIcon);
+      expect(find.byType(CloseButton), findsOneWidget);
+    }
+
+    PageRoute<void> materialRouteBuilder() {
+      return new MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return new Scaffold(appBar: new AppBar(), body: const Text('Page 2'));
+        },
+        fullscreenDialog: true,
+      );
+    }
+
+    PageRoute<void> customPageRouteBuilder() {
+      return new _CustomPageRoute<void>(
+        builder: (BuildContext context) {
+          return new Scaffold(appBar: new AppBar(), body: const Text('Page 2'));
+        },
+        fullscreenDialog: true,
+      );
     }
 
     testWidgets('Close button shows correctly on Android', (WidgetTester tester) async {
-      await expectCloseIcon(tester, TargetPlatform.android, Icons.close);
+      await expectCloseIcon(tester, TargetPlatform.android, Icons.close, materialRouteBuilder);
     });
 
     testWidgets('Close button shows correctly on Fuchsia', (WidgetTester tester) async {
-      await expectCloseIcon(tester, TargetPlatform.fuchsia, Icons.close);
+      await expectCloseIcon(tester, TargetPlatform.fuchsia, Icons.close, materialRouteBuilder);
     });
 
     testWidgets('Close button shows correctly on iOS', (WidgetTester tester) async {
-      await expectCloseIcon(tester, TargetPlatform.iOS, Icons.close);
+      await expectCloseIcon(tester, TargetPlatform.iOS, Icons.close, materialRouteBuilder);
+    });
+
+    testWidgets('Close button shows correctly with custom page route on Android', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.android, Icons.close, customPageRouteBuilder);
+    });
+
+    testWidgets('Close button shows correctly with custom page route on Fuchsia', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.fuchsia, Icons.close, customPageRouteBuilder);
+    });
+
+    testWidgets('Close button shows correctly with custom page route on iOS', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.iOS, Icons.close, customPageRouteBuilder);
     });
   });
 
@@ -1117,5 +1143,39 @@ class _ComputeNotchSetterState extends State<_ComputeNotchSetter> {
   @override
   Widget build(BuildContext context) {
     return new Container();
+  }
+}
+
+class _CustomPageRoute<T> extends PageRoute<T> {
+  _CustomPageRoute({
+    @required this.builder,
+    RouteSettings settings: const RouteSettings(),
+    this.maintainState: true,
+    bool fullscreenDialog: false,
+  }) : assert(builder != null),
+       super(settings: settings, fullscreenDialog: fullscreenDialog);
+
+  final WidgetBuilder builder;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 300);
+
+  @override
+  Color get barrierColor => null;
+
+  @override
+  String get barrierLabel => null;
+
+  @override
+  final bool maintainState;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return builder(context);
+  }
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    return child;
   }
 }
