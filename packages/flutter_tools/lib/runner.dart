@@ -61,17 +61,6 @@ Future<int> run(
   });
 }
 
-/// Writes the [string] to one of the standard output streams.
-@visibleForTesting
-typedef void WriteCallback([String string]);
-
-/// Writes a line to STDERR.
-///
-/// Overwrite this in tests to avoid spurious test output.
-// TODO(tvolkert): Remove this in favor of context[Stdio]
-@visibleForTesting
-WriteCallback writelnStderr = stderr.writeln;
-
 Future<int> _handleToolError(
     dynamic error,
     StackTrace stackTrace,
@@ -81,9 +70,9 @@ Future<int> _handleToolError(
     String getFlutterVersion(),
     ) async {
   if (error is UsageException) {
-    writelnStderr(error.message);
-    writelnStderr();
-    writelnStderr(
+    stderr.writeln(error.message);
+    stderr.writeln();
+    stderr.writeln(
         "Run 'flutter -h' (or 'flutter <command> -h') for available "
             'flutter commands and options.'
     );
@@ -91,11 +80,11 @@ Future<int> _handleToolError(
     return _exit(64);
   } else if (error is ToolExit) {
     if (error.message != null)
-      writelnStderr(error.message);
+      stderr.writeln(error.message);
     if (verbose) {
-      writelnStderr();
-      writelnStderr(stackTrace.toString());
-      writelnStderr();
+      stderr.writeln();
+      stderr.writeln(stackTrace.toString());
+      stderr.writeln();
     }
     return _exit(error.exitCode ?? 1);
   } else if (error is ProcessExit) {
@@ -108,20 +97,20 @@ Future<int> _handleToolError(
     }
   } else {
     // We've crashed; emit a log report.
-    writelnStderr();
+    stderr.writeln();
 
     if (!reportCrashes) {
       // Print the stack trace on the bots - don't write a crash report.
-      writelnStderr('$error');
-      writelnStderr(stackTrace.toString());
+      stderr.writeln('$error');
+      stderr.writeln(stackTrace.toString());
       return _exit(1);
     } else {
       flutterUsage.sendException(error, stackTrace);
 
       if (error is String)
-        writelnStderr('Oops; flutter has exited unexpectedly: "$error".');
+        stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
       else
-        writelnStderr('Oops; flutter has exited unexpectedly.');
+        stderr.writeln('Oops; flutter has exited unexpectedly.');
 
       await CrashReportSender.instance.sendReport(
         error: error,
@@ -130,13 +119,13 @@ Future<int> _handleToolError(
       );
       try {
         final File file = await _createLocalCrashReport(args, error, stackTrace);
-        writelnStderr(
+        stderr.writeln(
           'Crash report written to ${file.path};\n'
               'please let us know at https://github.com/flutter/flutter/issues.',
         );
         return _exit(1);
       } catch (error) {
-        writelnStderr(
+        stderr.writeln(
           'Unable to generate crash report due to secondary error: $error\n'
               'please let us know at https://github.com/flutter/flutter/issues.',
         );
