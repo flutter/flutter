@@ -20,33 +20,42 @@ class _AutoFadeChildEntry {
 }
 
 /// A widget that automatically does a [FadeTransition] between a new widget and
-/// any widgets previously set on the [AutoFade] as a child.
+/// the widget previously set on the [AutoFade] as a child.
+///
+/// More than one previous child can exist and be fading out while the newest
+/// one is fading in if they are swapped fast enough (i.e. before [duration]
+/// elapses).
 ///
 /// See also:
 ///
+///  * [AnimatedCrossFade], which only fades between two children, but also
+///    interpolates their sizes, and is reversible.
 ///  * [FadeTransition] which [AutoFade] uses to perform the transition.
 class AutoFade extends StatefulWidget {
   const AutoFade({
     Key key,
     this.child,
-    this.curve: Curves.linear,
+    this.fadeInCurve: Curves.linear,
+    this.fadeOutCurve: Curves.linear,
     this.alignment: Alignment.center,
     @required this.duration,
-  })  : assert(curve != null),
+  })  : assert(fadeInCurve != null),
         assert(duration != null),
         super(key: key);
 
   /// The current child widget to display.  If there was a previous child,
   /// then that child will be cross faded with this child using a
-  /// [FadeTransition] using the [curve].
+  /// [FadeTransition] using the [fadeInCurve].
   ///
   /// If there was no previous child, then this child will fade in over the
   /// [duration].
   final Widget child;
 
-  /// The animation curve to use when performing the cross fade between the
-  /// the current and previous widgets.
-  final Curve curve;
+  /// The animation curve to use when fading in the current widget.
+  final Curve fadeInCurve;
+
+  /// The animation curve to use when fading out the previous widgets.
+  final Curve fadeOutCurve;
 
   /// The duration over which to perform the cross fade using [FadeTransition].
   final Duration duration;
@@ -87,7 +96,8 @@ class _AutoFadeState extends State<AutoFade> with TickerProviderStateMixin {
     }
     final Animation<double> animation = new CurvedAnimation(
       parent: controller,
-      curve: widget.curve,
+      curve: widget.fadeInCurve,
+      reverseCurve: widget.fadeOutCurve,
     );
     final _AutoFadeChildEntry entry = new _AutoFadeChildEntry(
       widget.child,

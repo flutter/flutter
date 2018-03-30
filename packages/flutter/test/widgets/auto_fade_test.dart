@@ -11,7 +11,7 @@ void main() {
       new AutoFade(
         duration: const Duration(milliseconds: 100),
         child: new Container(color: const Color(0x00000000)),
-        curve: Curves.linear,
+        fadeInCurve: Curves.linear,
       ),
     );
     // First one just appears.
@@ -22,7 +22,7 @@ void main() {
       new AutoFade(
         duration: const Duration(milliseconds: 100),
         child: new Container(color: const Color(0xff000000)),
-        curve: Curves.linear,
+        fadeInCurve: Curves.linear,
       ),
     );
     // Second one cross-fades with the first.
@@ -45,7 +45,7 @@ void main() {
             color: const Color(0xff000000),
           ),
           alignment: Alignment.centerLeft,
-          curve: Curves.linear,
+          fadeInCurve: Curves.linear,
         ),
       ),
     );
@@ -63,7 +63,7 @@ void main() {
             color: const Color(0xff000000),
           ),
           alignment: Alignment.bottomRight,
-          curve: Curves.linear,
+          fadeInCurve: Curves.linear,
         ),
       ),
     );
@@ -75,7 +75,7 @@ void main() {
     await tester.pumpWidget(new AutoFade(
       duration: const Duration(milliseconds: 100),
       child: new Container(color: const Color(0xff000000)),
-      curve: Curves.linear,
+      fadeInCurve: Curves.linear,
     ));
     await tester.pump(const Duration(milliseconds: 50));
 

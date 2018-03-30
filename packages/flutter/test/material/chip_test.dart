@@ -200,8 +200,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSize(find.byType(Text)), const Size(56.0, 14.0));
-    expect(tester.getSize(find.byType(Chip)), const Size(80.0, 32.0));
+    expect(tester.getSize(find.byType(Text)), const Size(40.0, 24.0));
+    expect(tester.getSize(find.byType(Chip)), const Size(64.0, 32.0));
     await tester.pumpWidget(
       new MaterialApp(
         home: new Material(
@@ -213,8 +213,8 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSize(find.byType(Text)), const Size(56.0, 14.0));
-    expect(tester.getSize(find.byType(Chip)), const Size(80.0, 32.0));
+    expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
+    expect(tester.getSize(find.byType(Chip)), const Size(64.0, 32.0));
     await tester.pumpWidget(
       new MaterialApp(
         home: new Material(
@@ -226,7 +226,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSize(find.byType(Text)), const Size(56.0, 14.0));
+    expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
     expect(tester.getSize(find.byType(Chip)), const Size(800.0, 32.0));
   });
 
@@ -341,10 +341,10 @@ void main() {
     // https://github.com/flutter/flutter/issues/12357
     expect(tester.getSize(find.text('Chip A')), anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
     expect(tester.getSize(find.text('Chip B')), anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
-    expect(tester.getSize(find.byType(Chip).first).width, anyOf(310.0, 309.0));
-    expect(tester.getSize(find.byType(Chip).first).height, equals(42.0));
-    expect(tester.getSize(find.byType(Chip).last).width, anyOf(310.0, 309.0));
-    expect(tester.getSize(find.byType(Chip).last).height, equals(42.0));
+    expect(tester.getSize(find.byType(Chip).first).width, anyOf(318.0, 319.0));
+    expect(tester.getSize(find.byType(Chip).first).height, equals(50.0));
+    expect(tester.getSize(find.byType(Chip).last).width, anyOf(318.0, 319.0));
+    expect(tester.getSize(find.byType(Chip).last).height, equals(50.0));
 
     // Check that individual text scales are taken into account.
     await tester.pumpWidget(
@@ -370,8 +370,8 @@ void main() {
     // https://github.com/flutter/flutter/issues/12357
     expect(tester.getSize(find.text('Chip A')), anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
     expect(tester.getSize(find.text('Chip B')), anyOf(const Size(84.0, 14.0), const Size(83.0, 14.0)));
-    expect(tester.getSize(find.byType(Chip).first).width, anyOf(310.0, 309.0));
-    expect(tester.getSize(find.byType(Chip).first).height, equals(42.0));
+    expect(tester.getSize(find.byType(Chip).first).width, anyOf(318.0, 319.0));
+    expect(tester.getSize(find.byType(Chip).first).height, equals(50.0));
     expect(tester.getSize(find.byType(Chip).last), anyOf(const Size(132.0, 32.0), const Size(131.0, 32.0)));
   });
 
@@ -488,12 +488,12 @@ void main() {
         ),
       ),
     );
-    expect(tester.getTopLeft(find.byKey(keyA)), const Offset(340.0, 284.0));
-    expect(tester.getBottomRight(find.byKey(keyA)), const Offset(372.0, 316.0));
+    expect(tester.getTopLeft(find.byKey(keyA)), const Offset(332.0, 280.0));
+    expect(tester.getBottomRight(find.byKey(keyA)), const Offset(372.0, 320.0));
     expect(tester.getTopLeft(find.byKey(keyB)), const Offset(380.0, 280.0));
     expect(tester.getBottomRight(find.byKey(keyB)), const Offset(420.0, 320.0));
-    expect(tester.getTopLeft(find.byType(Icon)), const Offset(435.0, 291.0));
-    expect(tester.getBottomRight(find.byType(Icon)), const Offset(453.0, 309.0));
+    expect(tester.getTopLeft(find.byType(Icon)), const Offset(439.0, 291.0));
+    expect(tester.getBottomRight(find.byType(Icon)), const Offset(457.0, 309.0));
   });
 
   testWidgets('Chip padding - RTL', (WidgetTester tester) async {
@@ -533,12 +533,12 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.byKey(keyA)), const Offset(428.0, 284.0));
-    expect(tester.getBottomRight(find.byKey(keyA)), const Offset(460.0, 316.0));
+    expect(tester.getTopLeft(find.byKey(keyA)), const Offset(428.0, 280.0));
+    expect(tester.getBottomRight(find.byKey(keyA)), const Offset(468.0, 320.0));
     expect(tester.getTopLeft(find.byKey(keyB)), const Offset(380.0, 280.0));
     expect(tester.getBottomRight(find.byKey(keyB)), const Offset(420.0, 320.0));
-    expect(tester.getTopLeft(find.byType(Icon)), const Offset(347.0, 291.0));
-    expect(tester.getBottomRight(find.byType(Icon)), const Offset(365.0, 309.0));
+    expect(tester.getTopLeft(find.byType(Icon)), const Offset(343.0, 291.0));
+    expect(tester.getBottomRight(find.byType(Icon)), const Offset(361.0, 309.0));
   });
 
   testWidgets('Avatar drawer works as expected on RawChip', (WidgetTester tester) async {
@@ -817,7 +817,7 @@ void main() {
     expect(getAvatarDrawerProgress(tester), equals(1.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(getSelectProgress(tester), equals(1.0));
+    expect(getSelectProgress(tester), equals(0.0));
     expect(getAvatarDrawerProgress(tester), equals(1.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
   });

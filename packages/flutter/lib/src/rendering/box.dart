@@ -1820,9 +1820,10 @@ abstract class RenderBox extends RenderObject {
   /// absorbs the hit (preventing objects below this one from being hit).
   /// Returns false if the hit can continue to other objects below this one.
   ///
-  /// The caller is responsible for transforming [position] into the local
-  /// coordinate space of the callee. The callee is responsible for checking
-  /// whether the given position is within its bounds.
+  /// The caller is responsible for transforming [position] from global
+  /// coordinates to its location relative to the origin of this [RenderBox].
+  /// This [RenderBox] is responsible for checking whether the given position is
+  /// within its bounds.
   ///
   /// Hit testing requires layout to be up-to-date but does not require painting
   /// to be up-to-date. That means a render object can rely upon [performLayout]
@@ -1870,9 +1871,10 @@ abstract class RenderBox extends RenderObject {
   /// Override this method if this render object can be hit even if its
   /// children were not hit.
   ///
-  /// The caller is responsible for transforming [position] into the local
-  /// coordinate space of the callee. The callee is responsible for checking
-  /// whether the given position is within its bounds.
+  /// The caller is responsible for transforming [position] from global
+  /// coordinates to its location relative to the origin of this [RenderBox].
+  /// This [RenderBox] is responsible for checking whether the given position is
+  /// within its bounds.
   ///
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.
@@ -1886,9 +1888,10 @@ abstract class RenderBox extends RenderObject {
   /// hit tests at locations where children overlap hit the child that is
   /// visually "on top" (i.e., paints later).
   ///
-  /// The caller is responsible for transforming [position] into the local
-  /// coordinate space of the callee. The callee is responsible for checking
-  /// whether the given position is within its bounds.
+  /// The caller is responsible for transforming [position] from global
+  /// coordinates to its location relative to the origin of this [RenderBox].
+  /// This [RenderBox] is responsible for checking whether the given position is
+  /// within its bounds.
   ///
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.
