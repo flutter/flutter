@@ -75,7 +75,7 @@ vars = {
   'dart_plugin_tag': '0.2.0+2',
   'dart_pool_tag': '1.3.4',
   'dart_protobuf_tag': '0.7.1',
-  'dart_pub_rev': 'bc2b5ff80e50b4b1c317230e8963c1fada3cfe73',
+  'dart_pub_rev': '875d35005a7d33f367d70a3e31e9d3bad5d1ebd8',
   'dart_pub_semver_tag': '1.3.2',
   'dart_quiver_tag': '5aaa3f58c48608af5b027444d561270b53f15dbf',
   'dart_resource_rev': 'af5a5bf65511943398146cf146e466e5f0b95cb9',
