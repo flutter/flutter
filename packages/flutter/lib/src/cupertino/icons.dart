@@ -99,4 +99,10 @@ class CupertinoIcons {
 
   /// A solid down arrow.
   static const IconData down_arrow = const IconData(0xf35d, fontFamily: iconFont, fontPackage: iconFontPackage);
+  
+  /// A cog.
+  static const IconData settings = const IconData(0xf43c, fontFamily: iconFont, fontPackage: iconFontPackage);
+  
+  /// Three rows of a dot and a dash inside a rectangle.
+  static const IconData list = const IconData(0xf453, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
