@@ -45,7 +45,7 @@ class Layer {
 
   struct PrerollContext {
 #if defined(OS_FUCHSIA)
-    ui::gfx::Metrics* metrics = nullptr;
+    gfx::Metrics* metrics = nullptr;
 #endif
     RasterCache* raster_cache;
     GrContext* gr_context;

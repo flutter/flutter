@@ -74,7 +74,7 @@ RasterCacheResult RasterizePicture(SkPicture* picture,
                                    const MatrixDecomposition& matrix,
                                    SkColorSpace* dst_color_space,
 #if defined(OS_FUCHSIA)
-                                   ui::gfx::Metrics* metrics,
+                                   gfx::Metrics* metrics,
 #endif
                                    bool checkerboard) {
   TRACE_EVENT0("flutter", "RasterCachePopulate");
@@ -154,7 +154,7 @@ RasterCacheResult RasterCache::GetPrerolledImage(
     const SkMatrix& transformation_matrix,
     SkColorSpace* dst_color_space,
 #if defined(OS_FUCHSIA)
-    ui::gfx::Metrics* metrics,
+    gfx::Metrics* metrics,
 #endif
     bool is_complex,
     bool will_change) {

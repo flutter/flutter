@@ -61,8 +61,8 @@ void ExportNode::Bind(SceneUpdateContext& context,
     container.AddChild(*node_);
     node_->SetTranslation(offset.x(), offset.y(), 0.f);
     node_->SetHitTestBehavior(hit_testable
-                                  ? ui::gfx::HitTestBehavior::kDefault
-                                  : ui::gfx::HitTestBehavior::kSuppress);
+                                  ? gfx::HitTestBehavior::kDefault
+                                  : gfx::HitTestBehavior::kSuppress);
   }
 }
 
