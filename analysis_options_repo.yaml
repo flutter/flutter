@@ -57,11 +57,13 @@ linter:
     - avoid_null_checks_in_equality_operators
     # - avoid_positional_boolean_parameters # not yet tested
     - avoid_relative_lib_imports
+    - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
     # - avoid_returning_null # we do this commonly
     # - avoid_returning_this # https://github.com/dart-lang/linter/issues/842
     # - avoid_setters_without_getters # not yet tested
     - avoid_slow_async_io
+    # - avoid_types_as_parameter_names # https://github.com/dart-lang/linter/pull/954/files
     # - avoid_types_on_closure_parameters # conflicts with always_specify_types
     # - avoid_unused_constructor_parameters # https://github.com/dart-lang/linter/pull/847
     - await_only_futures
