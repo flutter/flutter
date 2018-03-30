@@ -100,16 +100,15 @@ void main() {
       ),
     );
 
-    await tester.pump(const Duration(milliseconds: 750));
-
-    final double animationValue = Curves.fastOutSlowIn.transform(0.5);
-    final double startX = 200.0 * (1.5 * animationValue - 0.5);
+    await tester.pump(const Duration(milliseconds: 300));
+    final double animationValue = const Interval(0.0, 750.0 / 1800.0, curve: const Cubic(0.2, 0.0, 0.8, 1.0))
+      .transform(300.0 / 1800.0);
 
     expect(
       find.byType(LinearProgressIndicator),
       paints
         ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(startX, 0.0, 200.0, 6.0))
+        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, animationValue * 200.0, 6.0))
     );
 
     expect(tester.binding.transientCallbackCount, 1);
@@ -128,16 +127,15 @@ void main() {
       ),
     );
 
-    await tester.pump(const Duration(milliseconds: 750));
-
-    final double animationValue = Curves.fastOutSlowIn.transform(0.5);
-    final double startX = 200.0 * (1.5 * animationValue - 0.5);
+    await tester.pump(const Duration(milliseconds: 300));
+    final double animationValue = const Interval(0.0, 750.0 / 1800.0, curve: const Cubic(0.2, 0.0, 0.8, 1.0))
+      .transform(300.0 / 1800.0);
 
     expect(
       find.byType(LinearProgressIndicator),
       paints
         ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
-        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0 - startX, 6.0))
+        ..rect(rect: new Rect.fromLTRB(200.0 - animationValue * 200.0, 0.0, 200.0, 6.0))
     );
 
     expect(tester.binding.transientCallbackCount, 1);
