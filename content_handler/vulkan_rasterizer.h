@@ -22,7 +22,7 @@ class VulkanRasterizer : public Rasterizer {
 
   bool IsValid() const;
 
-  void SetScene(f1dl::InterfaceHandle<ui::Scenic> scenic,
+  void SetScene(fidl::InterfaceHandle<ui::Scenic> scenic,
                 zx::eventpair import_token,
                 fxl::Closure metrics_changed_callback) override;
 

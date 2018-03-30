@@ -83,7 +83,7 @@ source_set("flow") {
       "scene_update_context.h",
     ]
 
-    deps += [
+    public_deps += [
       "//garnet/public/lib/ui/scenic:client",
       "//garnet/public/lib/ui/scenic/fidl",
       "//topaz/public/dart-pkg/zircon",

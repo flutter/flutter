@@ -9,15 +9,15 @@
 
 #include <fdio/namespace.h>
 
-#include "lib/app/fidl/application_controller.fidl.h"
-#include "lib/app/fidl/application_runner.fidl.h"
-#include "lib/app/fidl/service_provider.fidl.h"
-#include "lib/fidl/cpp/bindings/binding.h"
-#include "lib/fidl/cpp/bindings/binding_set.h"
+#include <fuchsia/cpp/component.h>
+#include <fuchsia/cpp/ui.h>
+#include <fuchsia/cpp/views_v1.h>
+
+#include "lib/fidl/cpp/binding.h"
+#include "lib/fidl/cpp/binding_set.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/synchronization/waitable_event.h"
 #include "lib/svc/cpp/service_provider_bridge.h"
-#include "lib/ui/views/fidl/view_provider.fidl.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
 namespace flutter_runner {
@@ -25,13 +25,13 @@ class App;
 class RuntimeHolder;
 
 class ApplicationControllerImpl : public component::ApplicationController,
-                                  public mozart::ViewProvider {
+                                  public views_v1::ViewProvider {
  public:
   ApplicationControllerImpl(
       App* app,
-      component::ApplicationPackagePtr application,
-      component::ApplicationStartupInfoPtr startup_info,
-      f1dl::InterfaceRequest<component::ApplicationController> controller);
+      component::ApplicationPackage application,
+      component::ApplicationStartupInfo startup_info,
+      fidl::InterfaceRequest<component::ApplicationController> controller);
 
   ~ApplicationControllerImpl() override;
 
@@ -39,13 +39,13 @@ class ApplicationControllerImpl : public component::ApplicationController,
 
   void Kill() override;
   void Detach() override;
-  void Wait(const WaitCallback& callback) override;
+  void Wait(WaitCallback callback) override;
 
-  // |mozart::ViewProvider| implementation
+  // |views_v1::ViewProvider| implementation
 
   void CreateView(
-      f1dl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-      f1dl::InterfaceRequest<component::ServiceProvider> services) override;
+      fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner_request,
+      fidl::InterfaceRequest<component::ServiceProvider> services) override;
 
   Dart_Port GetUIIsolateMainPort();
   std::string GetUIIsolateName();
@@ -54,14 +54,14 @@ class ApplicationControllerImpl : public component::ApplicationController,
   void StartRuntimeIfReady();
   void SendReturnCode(int32_t return_code);
 
-  fdio_ns_t* SetupNamespace(const component::FlatNamespacePtr& flat);
+  fdio_ns_t* SetupNamespace(component::FlatNamespace flat);
 
   App* app_;
-  f1dl::Binding<component::ApplicationController> binding_;
+  fidl::Binding<component::ApplicationController> binding_;
 
   component::ServiceProviderBridge service_provider_bridge_;
 
-  f1dl::BindingSet<mozart::ViewProvider> view_provider_bindings_;
+  fidl::BindingSet<views_v1::ViewProvider> view_provider_bindings_;
 
   std::string url_;
   std::unique_ptr<RuntimeHolder> runtime_holder_;

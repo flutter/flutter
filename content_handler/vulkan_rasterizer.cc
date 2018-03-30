@@ -53,7 +53,7 @@ bool VulkanRasterizer::IsValid() const {
   return valid_;
 }
 
-void VulkanRasterizer::SetScene(f1dl::InterfaceHandle<ui::Scenic> scenic,
+void VulkanRasterizer::SetScene(fidl::InterfaceHandle<ui::Scenic> scenic,
                                 zx::eventpair import_token,
                                 fxl::Closure metrics_changed_callback) {
   ASSERT_IS_GPU_THREAD;

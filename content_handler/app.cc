@@ -79,7 +79,7 @@ App::App() {
   }
 
   context_->outgoing_services()->AddService<component::ApplicationRunner>(
-      [this](f1dl::InterfaceRequest<component::ApplicationRunner> request) {
+      [this](fidl::InterfaceRequest<component::ApplicationRunner> request) {
         runner_bindings_.AddBinding(this, std::move(request));
       });
 }
@@ -129,12 +129,12 @@ void App::WaitForPlatformViewsIdsUIThread(
 }
 
 void App::StartApplication(
-    component::ApplicationPackagePtr application,
-    component::ApplicationStartupInfoPtr startup_info,
-    f1dl::InterfaceRequest<component::ApplicationController> controller) {
+    component::ApplicationPackage application,
+    component::ApplicationStartupInfo startup_info,
+    fidl::InterfaceRequest<component::ApplicationController> controller) {
   if (controllers_.empty()) {
     // Name this process after the url of the first application being launched.
-    base_label_ = "flutter:" + GetLabelFromURL(startup_info->launch_info->url);
+    base_label_ = "flutter:" + GetLabelFromURL(startup_info.launch_info.url);
   }
 
   std::unique_ptr<ApplicationControllerImpl> impl =

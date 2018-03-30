@@ -308,15 +308,15 @@ bool VulkanSurface::PushSessionImageSetupOps(scenic_lib::Session* session,
   }
 
   scenic_lib::Memory memory(session, std::move(exported_vmo),
-                            ui::gfx::MemoryType::VK_DEVICE_MEMORY);
+                            images::MemoryType::VK_DEVICE_MEMORY);
 
-  auto image_info = ui::gfx::ImageInfo::New();
-  image_info->width = sk_surface_->width();
-  image_info->height = sk_surface_->height();
-  image_info->stride = 4 * sk_surface_->width();
-  image_info->pixel_format = ui::gfx::ImageInfo::PixelFormat::BGRA_8;
-  image_info->color_space = ui::gfx::ImageInfo::ColorSpace::SRGB;
-  image_info->tiling = ui::gfx::ImageInfo::Tiling::LINEAR;
+  images::ImageInfo image_info;
+  image_info.width = sk_surface_->width();
+  image_info.height = sk_surface_->height();
+  image_info.stride = 4 * sk_surface_->width();
+  image_info.pixel_format = images::PixelFormat::BGRA_8;
+  image_info.color_space = images::ColorSpace::SRGB;
+  image_info.tiling = images::Tiling::LINEAR;
 
   session_image_ = std::make_unique<scenic_lib::Image>(
       memory, 0 /* memory offset */, std::move(image_info));

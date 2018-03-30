@@ -60,21 +60,21 @@ void SetThreadName(fxl::RefPtr<fxl::TaskRunner> runner, std::string name) {
 }
 
 blink::PointerData::Change GetChangeFromPointerEventPhase(
-    mozart::PointerEvent::Phase phase) {
+    input::PointerEventPhase phase) {
   switch (phase) {
-    case mozart::PointerEvent::Phase::ADD:
+    case input::PointerEventPhase::ADD:
       return blink::PointerData::Change::kAdd;
-    case mozart::PointerEvent::Phase::HOVER:
+    case input::PointerEventPhase::HOVER:
       return blink::PointerData::Change::kHover;
-    case mozart::PointerEvent::Phase::DOWN:
+    case input::PointerEventPhase::DOWN:
       return blink::PointerData::Change::kDown;
-    case mozart::PointerEvent::Phase::MOVE:
+    case input::PointerEventPhase::MOVE:
       return blink::PointerData::Change::kMove;
-    case mozart::PointerEvent::Phase::UP:
+    case input::PointerEventPhase::UP:
       return blink::PointerData::Change::kUp;
-    case mozart::PointerEvent::Phase::REMOVE:
+    case input::PointerEventPhase::REMOVE:
       return blink::PointerData::Change::kRemove;
-    case mozart::PointerEvent::Phase::CANCEL:
+    case input::PointerEventPhase::CANCEL:
       return blink::PointerData::Change::kCancel;
     default:
       return blink::PointerData::Change::kCancel;
@@ -82,11 +82,11 @@ blink::PointerData::Change GetChangeFromPointerEventPhase(
 }
 
 blink::PointerData::DeviceKind GetKindFromPointerType(
-    mozart::PointerEvent::Type type) {
+    input::PointerEventType type) {
   switch (type) {
-    case mozart::PointerEvent::Type::TOUCH:
+    case input::PointerEventType::TOUCH:
       return blink::PointerData::DeviceKind::kTouch;
-    case mozart::PointerEvent::Type::MOUSE:
+    case input::PointerEventType::MOUSE:
       return blink::PointerData::DeviceKind::kMouse;
     default:
       return blink::PointerData::DeviceKind::kTouch;
@@ -111,7 +111,7 @@ RuntimeHolder::~RuntimeHolder() {
 void RuntimeHolder::Init(
     fdio_ns_t* namespc,
     std::unique_ptr<component::ApplicationContext> context,
-    f1dl::InterfaceRequest<component::ServiceProvider> outgoing_services,
+    fidl::InterfaceRequest<component::ServiceProvider> outgoing_services,
     std::vector<char> bundle) {
   FXL_DCHECK(!rasterizer_);
   rasterizer_ = Rasterizer::Create();
@@ -193,8 +193,8 @@ void RuntimeHolder::Init(
 
 void RuntimeHolder::CreateView(
     const std::string& script_uri,
-    f1dl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-    f1dl::InterfaceRequest<component::ServiceProvider> services) {
+    fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner_request,
+    fidl::InterfaceRequest<component::ServiceProvider> services) {
   if (view_listener_binding_.is_bound()) {
     // TODO(jeffbrown): Refactor this to support multiple view instances
     // sharing the same underlying root bundle (but with different runtimes).
@@ -220,7 +220,7 @@ void RuntimeHolder::CreateView(
     FXL_LOG(ERROR) << "Could not create an event pair.";
     return;
   }
-  mozart::ViewListenerPtr view_listener;
+  views_v1::ViewListenerPtr view_listener;
   view_listener_binding_.Bind(view_listener.NewRequest());
   view_manager_->CreateView(view_.NewRequest(),             // view
                             std::move(view_owner_request),  // view owner
@@ -233,12 +233,12 @@ void RuntimeHolder::CreateView(
 
   // Listen for input events.
   ConnectToService(view_services.get(), input_connection_.NewRequest());
-  mozart::InputListenerPtr input_listener;
+  input::InputListenerPtr input_listener;
   input_listener_binding_.Bind(input_listener.NewRequest());
   input_connection_->SetEventListener(std::move(input_listener));
 
   // Setup the session.
-  f1dl::InterfaceHandle<ui::Scenic> scenic;
+  fidl::InterfaceHandle<ui::Scenic> scenic;
   view_manager_->GetScenic(scenic.NewRequest());
 
   blink::Threads::Gpu()->PostTask(fxl::MakeCopyable([
@@ -444,7 +444,7 @@ void RuntimeHolder::InitDartIoInternal() {
 }
 
 void RuntimeHolder::InitFuchsia() {
-  f1dl::InterfaceHandle<component::ApplicationEnvironment> environment;
+  fidl::InterfaceHandle<component::ApplicationEnvironment> environment;
   context_->ConnectToEnvironmentService(environment.NewRequest());
   fuchsia::dart::Initialize(std::move(environment),
                             std::move(outgoing_services_));
@@ -467,7 +467,7 @@ void RuntimeHolder::InitZircon() {
 }
 
 void RuntimeHolder::InitScenicInternal() {
-  f1dl::InterfaceHandle<mozart::ViewContainer> view_container;
+  fidl::InterfaceHandle<views_v1::ViewContainer> view_container;
   view_->GetContainer(view_container.NewRequest());
 
   Dart_Handle mozart_internal =
@@ -509,7 +509,7 @@ void RuntimeHolder::InitRootBundle(std::vector<char> bundle) {
   }
 }
 
-mozart::View* RuntimeHolder::GetMozartView() {
+views_v1::View* RuntimeHolder::GetMozartView() {
   return view_.get();
 }
 
@@ -558,13 +558,13 @@ bool RuntimeHolder::HandleFlutterPlatformMessage(
     clipboard_->Push(text);
     response->CompleteEmpty();
   } else if (method->value == "Clipboard.getData") {
-    clipboard_->Peek([response](const ::f1dl::String& text) {
+    clipboard_->Peek([response](fidl::StringPtr text) {
       rapidjson::StringBuffer json_buffer;
       rapidjson::Writer<rapidjson::StringBuffer> writer(json_buffer);
       writer.StartArray();
       writer.StartObject();
       writer.Key("text");
-      writer.String(text);
+      writer.String(text.get());
       writer.EndObject();
       writer.EndArray();
 
@@ -613,12 +613,10 @@ bool RuntimeHolder::HandleTextInputPlatformMessage(
       return false;
     // TODO(abarth): Read the keyboard type form the configuration.
     current_text_input_client_ = args->value[0].GetInt();
-    mozart::TextInputStatePtr state = mozart::TextInputState::New();
-    state->text = std::string();
-    state->selection = mozart::TextSelection::New();
-    state->composing = mozart::TextRange::New();
+    input::TextInputState state;
+    state.text = std::string();
     input_connection_->GetInputMethodEditor(
-        mozart::KeyboardType::TEXT, mozart::InputMethodAction::DONE,
+        input::KeyboardType::TEXT, input::InputMethodAction::DONE,
         std::move(state), text_input_binding_.NewBinding(),
         input_method_editor_.NewRequest());
   } else if (method->value == "TextInput.setEditingState") {
@@ -627,36 +625,34 @@ bool RuntimeHolder::HandleTextInputPlatformMessage(
       if (args_it == root.MemberEnd() || !args_it->value.IsObject())
         return false;
       const auto& args = args_it->value;
-      mozart::TextInputStatePtr state = mozart::TextInputState::New();
-      state->selection = mozart::TextSelection::New();
-      state->composing = mozart::TextRange::New();
+      input::TextInputState state;
       // TODO(abarth): Deserialize state.
       auto text = args.FindMember("text");
       if (text != args.MemberEnd() && text->value.IsString())
-        state->text = text->value.GetString();
+        state.text = text->value.GetString();
       auto selection_base = args.FindMember("selectionBase");
       if (selection_base != args.MemberEnd() && selection_base->value.IsInt())
-        state->selection->base = selection_base->value.GetInt();
+        state.selection.base = selection_base->value.GetInt();
       auto selection_extent = args.FindMember("selectionExtent");
       if (selection_extent != args.MemberEnd() &&
           selection_extent->value.IsInt())
-        state->selection->extent = selection_extent->value.GetInt();
+        state.selection.extent = selection_extent->value.GetInt();
       auto selection_affinity = args.FindMember("selectionAffinity");
       if (selection_affinity != args.MemberEnd() &&
           selection_affinity->value.IsString() &&
           selection_affinity->value == "TextAffinity.upstream")
-        state->selection->affinity = mozart::TextAffinity::UPSTREAM;
+        state.selection.affinity = input::TextAffinity::UPSTREAM;
       else
-        state->selection->affinity = mozart::TextAffinity::DOWNSTREAM;
+        state.selection.affinity = input::TextAffinity::DOWNSTREAM;
       // We ignore selectionIsDirectional because that concept doesn't exist on
       // Fuchsia.
       auto composing_base = args.FindMember("composingBase");
       if (composing_base != args.MemberEnd() && composing_base->value.IsInt())
-        state->composing->start = composing_base->value.GetInt();
+        state.composing.start = composing_base->value.GetInt();
       auto composing_extent = args.FindMember("composingExtent");
       if (composing_extent != args.MemberEnd() &&
           composing_extent->value.IsInt())
-        state->composing->end = composing_extent->value.GetInt();
+        state.composing.end = composing_extent->value.GetInt();
       input_method_editor_->SetState(std::move(state));
     }
   } else if (method->value == "TextInput.clearClient") {
@@ -680,20 +676,20 @@ blink::UnzipperProvider RuntimeHolder::GetUnzipperProviderForRootBundle() {
   };
 }
 
-void RuntimeHolder::OnEvent(mozart::InputEventPtr event,
-                            const OnEventCallback& callback) {
+void RuntimeHolder::OnEvent(input::InputEvent event,
+                            OnEventCallback callback) {
   bool handled = false;
-  if (event->is_pointer()) {
-    const mozart::PointerEventPtr& pointer = event->get_pointer();
+  if (event.is_pointer()) {
+    const input::PointerEvent& pointer = event.pointer();
     blink::PointerData pointer_data;
-    pointer_data.time_stamp = pointer->event_time / 1000;
-    pointer_data.change = GetChangeFromPointerEventPhase(pointer->phase);
-    pointer_data.kind = GetKindFromPointerType(pointer->type);
-    pointer_data.device = pointer->pointer_id;
-    pointer_data.physical_x = pointer->x * viewport_metrics_.device_pixel_ratio;
-    pointer_data.physical_y = pointer->y * viewport_metrics_.device_pixel_ratio;
+    pointer_data.time_stamp = pointer.event_time / 1000;
+    pointer_data.change = GetChangeFromPointerEventPhase(pointer.phase);
+    pointer_data.kind = GetKindFromPointerType(pointer.type);
+    pointer_data.device = pointer.pointer_id;
+    pointer_data.physical_x = pointer.x * viewport_metrics_.device_pixel_ratio;
+    pointer_data.physical_y = pointer.y * viewport_metrics_.device_pixel_ratio;
     // Buttons are single bit values starting with kMousePrimaryButton = 1.
-    pointer_data.buttons = static_cast<uint64_t>(pointer->buttons);
+    pointer_data.buttons = static_cast<uint64_t>(pointer.buttons);
 
     switch (pointer_data.change) {
       case blink::PointerData::Change::kDown:
@@ -729,14 +725,14 @@ void RuntimeHolder::OnEvent(mozart::InputEventPtr event,
     runtime_->DispatchPointerDataPacket(packet);
 
     handled = true;
-  } else if (event->is_keyboard()) {
-    const mozart::KeyboardEventPtr& keyboard = event->get_keyboard();
+  } else if (event.is_keyboard()) {
+    const input::KeyboardEvent& keyboard = event.keyboard();
     const char* type = nullptr;
-    if (keyboard->phase == mozart::KeyboardEvent::Phase::PRESSED)
+    if (keyboard.phase == input::KeyboardEventPhase::PRESSED)
       type = "keydown";
-    else if (keyboard->phase == mozart::KeyboardEvent::Phase::REPEAT)
+    else if (keyboard.phase == input::KeyboardEventPhase::REPEAT)
       type = "keydown";  // TODO change this to keyrepeat
-    else if (keyboard->phase == mozart::KeyboardEvent::Phase::RELEASED)
+    else if (keyboard.phase == input::KeyboardEventPhase::RELEASED)
       type = "keyup";
 
     if (type) {
@@ -746,9 +742,9 @@ void RuntimeHolder::OnEvent(mozart::InputEventPtr event,
       document.AddMember("type", rapidjson::Value(type, strlen(type)),
                          allocator);
       document.AddMember("keymap", rapidjson::Value("fuchsia"), allocator);
-      document.AddMember("hidUsage", keyboard->hid_usage, allocator);
-      document.AddMember("codePoint", keyboard->code_point, allocator);
-      document.AddMember("modifiers", keyboard->modifiers, allocator);
+      document.AddMember("hidUsage", keyboard.hid_usage, allocator);
+      document.AddMember("codePoint", keyboard.code_point, allocator);
+      document.AddMember("modifiers", keyboard.modifiers, allocator);
       rapidjson::StringBuffer buffer;
       rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
       document.Accept(writer);
@@ -766,26 +762,24 @@ void RuntimeHolder::OnEvent(mozart::InputEventPtr event,
 }
 
 void RuntimeHolder::OnPropertiesChanged(
-    mozart::ViewPropertiesPtr properties,
-    const OnPropertiesChangedCallback& callback) {
-  FXL_DCHECK(properties);
-
+    views_v1::ViewProperties properties,
+    OnPropertiesChangedCallback callback) {
   // Attempt to read the device pixel ratio.
   float pixel_ratio = 1.f;
-  if (auto& metrics = properties->display_metrics) {
+  if (auto& metrics = properties.display_metrics) {
     pixel_ratio = metrics->device_pixel_ratio;
   }
 
   // Apply view property changes.
-  if (auto& layout = properties->view_layout) {
-    viewport_metrics_.physical_width = layout->size->width * pixel_ratio;
-    viewport_metrics_.physical_height = layout->size->height * pixel_ratio;
-    viewport_metrics_.physical_padding_top = layout->inset->top * pixel_ratio;
+  if (auto& layout = properties.view_layout) {
+    viewport_metrics_.physical_width = layout->size.width * pixel_ratio;
+    viewport_metrics_.physical_height = layout->size.height * pixel_ratio;
+    viewport_metrics_.physical_padding_top = layout->inset.top * pixel_ratio;
     viewport_metrics_.physical_padding_right =
-        layout->inset->right * pixel_ratio;
+        layout->inset.right * pixel_ratio;
     viewport_metrics_.physical_padding_bottom =
-        layout->inset->bottom * pixel_ratio;
-    viewport_metrics_.physical_padding_left = layout->inset->left * pixel_ratio;
+        layout->inset.bottom * pixel_ratio;
+    viewport_metrics_.physical_padding_left = layout->inset.left * pixel_ratio;
     viewport_metrics_.device_pixel_ratio = pixel_ratio;
     runtime_->SetViewportMetrics(viewport_metrics_);
   }
@@ -795,31 +789,31 @@ void RuntimeHolder::OnPropertiesChanged(
   callback();
 }
 
-void RuntimeHolder::DidUpdateState(mozart::TextInputStatePtr state,
-                                   mozart::InputEventPtr event) {
+void RuntimeHolder::DidUpdateState(input::TextInputState state,
+                                   input::InputEventPtr event) {
   rapidjson::Document document;
   auto& allocator = document.GetAllocator();
 
   rapidjson::Value encoded_state(rapidjson::kObjectType);
-  encoded_state.AddMember("text", state->text.get(), allocator);
-  encoded_state.AddMember("selectionBase", state->selection->base, allocator);
-  encoded_state.AddMember("selectionExtent", state->selection->extent,
+  encoded_state.AddMember("text", state.text.get(), allocator);
+  encoded_state.AddMember("selectionBase", state.selection.base, allocator);
+  encoded_state.AddMember("selectionExtent", state.selection.extent,
                           allocator);
-  switch (state->selection->affinity) {
-    case mozart::TextAffinity::UPSTREAM:
+  switch (state.selection.affinity) {
+    case input::TextAffinity::UPSTREAM:
       encoded_state.AddMember("selectionAffinity",
                               rapidjson::Value("TextAffinity.upstream"),
                               allocator);
       break;
-    case mozart::TextAffinity::DOWNSTREAM:
+    case input::TextAffinity::DOWNSTREAM:
       encoded_state.AddMember("selectionAffinity",
                               rapidjson::Value("TextAffinity.downstream"),
                               allocator);
       break;
   }
   encoded_state.AddMember("selectionIsDirectional", true, allocator);
-  encoded_state.AddMember("composingBase", state->composing->start, allocator);
-  encoded_state.AddMember("composingExtent", state->composing->end, allocator);
+  encoded_state.AddMember("composingBase", state.composing.start, allocator);
+  encoded_state.AddMember("composingExtent", state.composing.end, allocator);
 
   rapidjson::Value args(rapidjson::kArrayType);
   args.PushBack(current_text_input_client_, allocator);
@@ -841,7 +835,7 @@ void RuntimeHolder::DidUpdateState(mozart::TextInputStatePtr state,
       nullptr));
 }
 
-void RuntimeHolder::OnAction(mozart::InputMethodAction action) {
+void RuntimeHolder::OnAction(input::InputMethodAction action) {
   rapidjson::Document document;
   auto& allocator = document.GetAllocator();
 

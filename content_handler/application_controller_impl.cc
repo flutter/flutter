@@ -19,9 +19,9 @@ namespace flutter_runner {
 
 ApplicationControllerImpl::ApplicationControllerImpl(
     App* app,
-    component::ApplicationPackagePtr application,
-    component::ApplicationStartupInfoPtr startup_info,
-    f1dl::InterfaceRequest<component::ApplicationController> controller)
+    component::ApplicationPackage application,
+    component::ApplicationStartupInfo startup_info,
+    fidl::InterfaceRequest<component::ApplicationController> controller)
     : app_(app), binding_(this) {
   if (controller.is_valid()) {
     binding_.Bind(std::move(controller));
@@ -32,8 +32,8 @@ ApplicationControllerImpl::ApplicationControllerImpl(
   }
 
   std::vector<char> bundle;
-  if (application->data) {
-    if (!fsl::VectorFromVmo(std::move(application->data), &bundle)) {
+  if (application.data) {
+    if (!fsl::VectorFromVmo(std::move(*application.data), &bundle)) {
       FXL_LOG(ERROR) << "Failed to receive bundle.";
       return;
     }
@@ -42,13 +42,13 @@ ApplicationControllerImpl::ApplicationControllerImpl(
   // TODO(jeffbrown): Decide what to do with command-line arguments and
   // startup handles.
 
-  if (startup_info->launch_info->directory_request.is_valid()) {
+  if (startup_info.launch_info.directory_request.is_valid()) {
     service_provider_bridge_.ServeDirectory(
-        std::move(startup_info->launch_info->directory_request));
+        std::move(startup_info.launch_info.directory_request));
   }
 
-  service_provider_bridge_.AddService<mozart::ViewProvider>(
-      [this](f1dl::InterfaceRequest<mozart::ViewProvider> request) {
+  service_provider_bridge_.AddService<views_v1::ViewProvider>(
+      [this](fidl::InterfaceRequest<views_v1::ViewProvider> request) {
         view_provider_bindings_.AddBinding(this, std::move(request));
       });
 
@@ -56,13 +56,13 @@ ApplicationControllerImpl::ApplicationControllerImpl(
   auto request = service_provider.NewRequest();
   service_provider_bridge_.set_backend(std::move(service_provider));
 
-  fdio_ns_t* fdio_ns = SetupNamespace(startup_info->flat_namespace);
+  fdio_ns_t* fdio_ns = SetupNamespace(std::move(startup_info.flat_namespace));
   if (fdio_ns == nullptr) {
     FXL_LOG(ERROR) << "Failed to initialize namespace";
     return;
   }
 
-  url_ = startup_info->launch_info->url;
+  url_ = startup_info.launch_info.url;
   runtime_holder_.reset(new RuntimeHolder());
   runtime_holder_->SetMainIsolateShutdownCallback([this]() { Kill(); });
   runtime_holder_->Init(
@@ -75,24 +75,24 @@ ApplicationControllerImpl::~ApplicationControllerImpl() = default;
 constexpr char kServiceRootPath[] = "/svc";
 
 fdio_ns_t* ApplicationControllerImpl::SetupNamespace(
-    const component::FlatNamespacePtr& flat) {
+    component::FlatNamespace flat) {
   fdio_ns_t* fdio_namespc;
   zx_status_t status = fdio_ns_create(&fdio_namespc);
   if (status != ZX_OK) {
     FXL_LOG(ERROR) << "Failed to create namespace";
     return nullptr;
   }
-  for (size_t i = 0; i < flat->paths->size(); ++i) {
-    if (flat->paths->at(i) == kServiceRootPath) {
+  for (size_t i = 0; i < flat.paths->size(); ++i) {
+    if (flat.paths->at(i) == kServiceRootPath) {
       // Ownership of /svc goes to the ApplicationContext created above.
       continue;
     }
-    zx::channel dir = std::move(flat->directories->at(i));
+    zx::channel dir = std::move(flat.directories->at(i));
     zx_handle_t dir_handle = dir.release();
-    const char* path = flat->paths->at(i)->data();
+    const char* path = flat.paths->at(i)->data();
     status = fdio_ns_bind(fdio_namespc, path, dir_handle);
     if (status != ZX_OK) {
-      FXL_LOG(ERROR) << "Failed to bind " << flat->paths->at(i)
+      FXL_LOG(ERROR) << "Failed to bind " << flat.paths->at(i)
                      << " to namespace";
       zx_handle_close(dir_handle);
       fdio_ns_destroy(fdio_namespc);
@@ -113,8 +113,8 @@ void ApplicationControllerImpl::Detach() {
   binding_.set_error_handler(fxl::Closure());
 }
 
-void ApplicationControllerImpl::Wait(const WaitCallback& callback) {
-  wait_callbacks_.push_back(callback);
+void ApplicationControllerImpl::Wait(WaitCallback callback) {
+  wait_callbacks_.push_back(std::move(callback));
 }
 
 void ApplicationControllerImpl::SendReturnCode(int32_t return_code) {
@@ -125,8 +125,8 @@ void ApplicationControllerImpl::SendReturnCode(int32_t return_code) {
 }
 
 void ApplicationControllerImpl::CreateView(
-    f1dl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-    f1dl::InterfaceRequest<component::ServiceProvider> services) {
+    fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner_request,
+    fidl::InterfaceRequest<component::ServiceProvider> services) {
   runtime_holder_->CreateView(url_, std::move(view_owner_request),
                               std::move(services));
 }

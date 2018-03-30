@@ -5,7 +5,7 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_FUCHSIA_FONT_CACHE_FUCHSIA_H_
 #define SKY_ENGINE_PLATFORM_FONTS_FUCHSIA_FONT_CACHE_FUCHSIA_H_
 
-#include "lib/fonts/fidl/font_provider.fidl.h"
+#include <fuchsia/cpp/fonts.h>
 
 namespace blink {
 

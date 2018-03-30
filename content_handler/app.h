@@ -10,7 +10,7 @@
 
 #include "flutter/content_handler/application_controller_impl.h"
 #include "lib/app/cpp/application_context.h"
-#include "lib/app/fidl/application_runner.fidl.h"
+#include <fuchsia/cpp/component.h>
 #include "lib/fsl/threading/thread.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/synchronization/waitable_event.h"
@@ -27,9 +27,9 @@ class App : public component::ApplicationRunner {
   // |component::ApplicationRunner| implementation:
 
   void StartApplication(
-      component::ApplicationPackagePtr application,
-      component::ApplicationStartupInfoPtr startup_info,
-      f1dl::InterfaceRequest<component::ApplicationController> controller) override;
+      component::ApplicationPackage application,
+      component::ApplicationStartupInfo startup_info,
+      fidl::InterfaceRequest<component::ApplicationController> controller) override;
 
   void Destroy(ApplicationControllerImpl* controller);
 
@@ -50,7 +50,7 @@ class App : public component::ApplicationRunner {
   std::unique_ptr<component::ApplicationContext> context_;
   std::unique_ptr<fsl::Thread> gpu_thread_;
   std::unique_ptr<fsl::Thread> io_thread_;
-  f1dl::BindingSet<component::ApplicationRunner> runner_bindings_;
+  fidl::BindingSet<component::ApplicationRunner> runner_bindings_;
   std::unordered_map<ApplicationControllerImpl*,
                      std::unique_ptr<ApplicationControllerImpl>>
       controllers_;

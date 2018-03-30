@@ -9,7 +9,7 @@
 
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #include "lib/app/cpp/application_context.h"
-#include "lib/context/fidl/context_writer.fidl.h"
+#include <fuchsia/cpp/modular.h>
 
 namespace flutter_runner {
 
@@ -34,7 +34,7 @@ class AccessibilityBridge {
   void EraseUnvisitedNodes(const std::vector<int>& visited_nodes);
 
   std::map<int, blink::SemanticsNode> semantics_nodes_;
-  maxwell::ContextWriterPtr writer_;
+  modular::ContextWriterPtr writer_;
 };
 
 }  // namespace flutter_runner

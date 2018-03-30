@@ -14,7 +14,7 @@
 #include "lib/fxl/macros.h"
 #include "lib/fxl/time/time_delta.h"
 #if defined(OS_FUCHSIA)
-#include "lib/ui/scenic/fidl/events.fidl.h"
+#include <fuchsia/cpp/ui.h>
 #endif
 #include "third_party/skia/include/core/SkSize.h"
 
@@ -29,13 +29,13 @@ class LayerTree {
   // Raster includes both Preroll and Paint.
   void Raster(CompositorContext::ScopedFrame& frame,
 #if defined(OS_FUCHSIA)
-              ui::gfx::Metrics* metrics,
+              gfx::Metrics* metrics,
 #endif
               bool ignore_raster_cache = false);
 
   void Preroll(CompositorContext::ScopedFrame& frame,
 #if defined(OS_FUCHSIA)
-               ui::gfx::Metrics* metrics,
+               gfx::Metrics* metrics,
 #endif
                bool ignore_raster_cache = false);
 

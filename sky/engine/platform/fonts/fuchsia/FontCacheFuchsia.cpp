@@ -13,7 +13,7 @@
 #include "flutter/sky/engine/platform/fonts/AlternateFontFamily.h"
 #include "flutter/sky/engine/platform/fonts/FontCache.h"
 #include "flutter/sky/engine/platform/fonts/FontDescription.h"
-#include "lib/fonts/fidl/font_provider.fidl.h"
+#include <fuchsia/cpp/fonts.h>
 #include "lib/fsl/vmo/sized_vmo.h"
 #include "lib/fxl/logging.h"
 #include "third_party/skia/include/core/SkData.h"
@@ -65,14 +65,14 @@ void UnmapMemory(const void* buffer, void* context) {
   zx::vmar::root_self().unmap(reinterpret_cast<uintptr_t>(buffer), size);
 }
 
-sk_sp<SkData> MakeSkDataFromVMO(const fsl::SizedVmoTransportPtr& vmo) {
-  if (!fsl::SizedVmo::IsSizeValid(vmo->vmo, vmo->size) ||
-      vmo->size > std::numeric_limits<size_t>::max()) {
+sk_sp<SkData> MakeSkDataFromVMO(const fsl::SizedVmoTransport& vmo) {
+  if (!fsl::SizedVmo::IsSizeValid(vmo.vmo, vmo.size) ||
+      vmo.size > std::numeric_limits<size_t>::max()) {
     return nullptr;
   }
-  uint64_t size = vmo->size;
+  uint64_t size = vmo.size;
   uintptr_t buffer = 0;
-  zx_status_t status = zx::vmar::root_self().map(0, vmo->vmo, 0, size,
+  zx_status_t status = zx::vmar::root_self().map(0, vmo.vmo, 0, size,
                                                  ZX_VM_FLAG_PERM_READ, &buffer);
   if (status != ZX_OK)
     return nullptr;
@@ -111,11 +111,11 @@ sk_sp<SkTypeface> FontCache::createTypeface(
     name = family.utf8();
   }
 
-  auto request = fonts::FontRequest::New();
-  request->family = name.data();
-  request->weight = ToIntegerWeight(fontDescription.weight());
-  request->width = static_cast<uint32_t>(fontDescription.stretch());
-  request->slant = ToFontSlant(fontDescription.style());
+  fonts::FontRequest request;
+  request.family = name.data();
+  request.weight = ToIntegerWeight(fontDescription.weight());
+  request.width = static_cast<uint32_t>(fontDescription.stretch());
+  request.slant = ToFontSlant(fontDescription.style());
 
   fonts::FontResponsePtr response;
   auto& font_provider = GetFontProvider();
@@ -132,7 +132,7 @@ sk_sp<SkTypeface> FontCache::createTypeface(
   if (!response)
     return nullptr;
 
-  sk_sp<SkData> data = MakeSkDataFromVMO(response->data->vmo);
+  sk_sp<SkData> data = MakeSkDataFromVMO(response->data.vmo);
   if (!data)
     return nullptr;
 

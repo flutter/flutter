@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/content_handler/session_connection.h"
+#include "lib/fidl/cpp/optional.h"
 #include "lib/ui/scenic/fidl_helpers.h"
 
 namespace flutter_runner {
@@ -21,8 +22,8 @@ SessionConnection::SessionConnection(ui::ScenicPtr scenic,
                                        this, std::placeholders::_1));
 
   root_node_.Bind(std::move(import_token));
-  root_node_.SetEventMask(ui::gfx::kMetricsEventMask);
-  session_.Present(0, [](ui::PresentationInfoPtr info) {});
+  root_node_.SetEventMask(gfx::kMetricsEventMask);
+  session_.Present(0, [](images::PresentationInfo info) {});
 
   present_callback_ =
       std::bind(&SessionConnection::OnPresent, this, std::placeholders::_1);
@@ -38,18 +39,18 @@ void SessionConnection::OnSessionError() {
   FXL_CHECK(false) << "Session connection was terminated.";
 }
 
-void SessionConnection::OnSessionEvents(f1dl::Array<ui::EventPtr> events) {
-  ui::gfx::MetricsPtr new_metrics;
-  for (const auto& event : *events) {
-    if (event->is_gfx() && event->get_gfx()->is_metrics() &&
-        event->get_gfx()->get_metrics()->node_id == root_node_.id()) {
-      new_metrics = std::move(event->get_gfx()->get_metrics()->metrics);
+void SessionConnection::OnSessionEvents(fidl::VectorPtr<ui::Event> events) {
+  gfx::Metrics* new_metrics;
+  for (auto& event : *events) {
+    if (event.is_gfx() && event.gfx().is_metrics() &&
+        event.gfx().metrics().node_id == root_node_.id()) {
+      new_metrics = &event.gfx().metrics().metrics;
     }
   }
   if (!new_metrics)
     return;
 
-  scene_update_context_.set_metrics(std::move(new_metrics));
+  scene_update_context_.set_metrics(fidl::MakeOptional(std::move(*new_metrics)));
 
   if (metrics_changed_callback_)
     metrics_changed_callback_();
@@ -80,7 +81,7 @@ void SessionConnection::Present(flow::CompositorContext::ScopedFrame& frame,
   EnqueueClearCommands();
 }
 
-void SessionConnection::OnPresent(ui::PresentationInfoPtr info) {
+void SessionConnection::OnPresent(images::PresentationInfo info) {
   ASSERT_IS_GPU_THREAD;
   auto callback = pending_on_present_callback_;
   pending_on_present_callback_ = nullptr;
