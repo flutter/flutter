@@ -101,6 +101,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isVerifyOnly = argResults['verify-only'];
 
     if (isVerifyOnly) {
+      bool needsUpdate = false;
       printStatus('Verifying pubspecs...');
       for (Directory directory in packages) {
         final PubspecYaml pubspec = new PubspecYaml(directory);
@@ -126,14 +127,22 @@ class UpdatePackagesCommand extends FlutterCommand {
         if (checksum != pubspec.checksum.value) {
           // If the checksum doesn't match, they may have added or removed some dependencies.
           // we need to run update-packages to recapture the transitive deps.
-          printStatus(
+          printError(
             'Warning: pubspec in ${directory.path} has invalid dependencies. '
-            'Please run "flutter update-packages" --force-upgrade to update them correctly.'  
+            'Please run "flutter update-packages --force-upgrade" to update them correctly.'
           );
+          needsUpdate = true;
          } else {
            // everything is correct in the pubspec.
            printStatus('pubspec in ${directory.path} is up to date!');
          }
+      }
+      if (needsUpdate) {
+        throwToolExit(
+          'Warning: one or more pubspecs have invalid dependencies. '
+          'Please run "flutter update-packages --force-upgrade" to update them correctly.',
+          exitCode: 1,
+        );
       }
       return;
     }
