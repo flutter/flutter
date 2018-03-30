@@ -143,17 +143,8 @@ Future<Null> main(List<String> arguments) async {
     dartdocArgs.add(libraryRef);
   }
 
-  Iterable<String> quoteArgs(Iterable<String> args) sync* {
-    for (String arg in args) {
-      if (arg.contains(' ')) {
-        yield "'$arg'";
-      } else {
-        yield arg;
-      }
-    }
-  }
-
-  print('Executing: (cd dev/docs ; $pubExecutable ${quoteArgs(dartdocArgs).join(' ')})');
+  String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
+  print('Executing: (cd dev/docs ; $pubExecutable ${dartdocArgs.map(quote).join(' ')})');
 
   process = await Process.start(
     pubExecutable,
@@ -223,6 +214,7 @@ void sanityCheckDocs() {
     '$kDocRoot/api/dart-io/File-class.html',
     '$kDocRoot/api/dart-ui/Canvas-class.html',
     '$kDocRoot/api/dart-ui/Canvas/drawRect.html',
+    '$kDocRoot/api/flutter_driver/FlutterDriver/FlutterDriver.connectedTo.html',
     '$kDocRoot/api/flutter_test/WidgetTester/pumpWidget.html',
     '$kDocRoot/api/material/Material-class.html',
     '$kDocRoot/api/material/Tooltip-class.html',
