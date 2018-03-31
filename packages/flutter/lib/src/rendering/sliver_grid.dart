@@ -327,7 +327,7 @@ class SliverGridDelegateWithFixedCrossAxisCount extends SliverGridDelegate {
     assert(_debugAssertIsValid());
     final double usableCrossAxisExtent = constraints.crossAxisExtent - crossAxisSpacing * (crossAxisCount - 1);
     final double childCrossAxisExtent = usableCrossAxisExtent / crossAxisCount;
-    final double childMainAxisExtent = childCrossAxisExtent / childAspectRatio;
+    final double childMainAxisExtent = (childCrossAxisExtent / childAspectRatio).roundToDouble();
     return new SliverGridRegularTileLayout(
       crossAxisCount: crossAxisCount,
       mainAxisStride: childMainAxisExtent + mainAxisSpacing,
@@ -425,7 +425,7 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
     final int crossAxisCount = (constraints.crossAxisExtent / (maxCrossAxisExtent + crossAxisSpacing)).ceil();
     final double usableCrossAxisExtent = constraints.crossAxisExtent - crossAxisSpacing * (crossAxisCount - 1);
     final double childCrossAxisExtent = usableCrossAxisExtent / crossAxisCount;
-    final double childMainAxisExtent = childCrossAxisExtent / childAspectRatio;
+    final double childMainAxisExtent = (childCrossAxisExtent / childAspectRatio).roundToDouble();
     return new SliverGridRegularTileLayout(
       crossAxisCount: crossAxisCount,
       mainAxisStride: childMainAxisExtent + mainAxisSpacing,
