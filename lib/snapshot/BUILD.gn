@@ -7,6 +7,7 @@ import("//third_party/dart/utils/compile_platform.gni")
 import("//third_party/dart/utils/generate_entry_points_json.gni")
 
 if (is_fuchsia) {
+  import("//build/dart/dart_library.gni")
   import("//build/dart/toolchain.gni")
   import("//topaz/public/dart-pkg/fuchsia/sdk_ext.gni")
   import("//topaz/public/dart-pkg/zircon/sdk_ext.gni")
@@ -24,39 +25,18 @@ copy("generate_dart_ui") {
 }
 
 if (is_fuchsia) {
-  action("generate_package_map") {
-    dart_deps = [
+  dart_library("generate_package_map") {
+    # The sole purpose of this target is to generate a .packages file.
+    sources = []
+
+    infer_package_name = true
+
+    disable_analysis = true
+
+    deps = [
       "//topaz/public/dart/fuchsia",
       "//topaz/public/dart/zircon",
     ]
-
-    dot_packages_file = "$target_gen_dir/snapshot.packages"
-    outputs = [
-      dot_packages_file
-    ]
-    deps = []
-    foreach(dep, dart_deps) {
-      deps += [ "$dep($dart_toolchain)" ]
-    }
-
-    depfile = "$dot_packages_file.d"
-
-    script = "//build/dart/gen_dot_packages.py"
-    args = [
-      "--out",
-      rebase_path(dot_packages_file, root_build_dir),
-      "--source-dir",
-      rebase_path("."),
-      "--root-build-dir",
-      rebase_path(root_build_dir),
-      "--root-gen-dir",
-      rebase_path(dart_root_gen_dir),
-      "--package-name",
-      "snapshot_root",
-      "--depfile",
-      rebase_path(depfile),
-      "--deps",
-    ] + dart_deps
   }
 }
 
@@ -157,7 +137,7 @@ action("generate_snapshot_bin") {
       "--url_mapping=dart:fuchsia,$fuchsia_path",
       "--url_mapping=dart:mozart.internal,$mozart_internal_path",
       "--packages",
-      rebase_path("$target_gen_dir/snapshot.packages"),
+      rebase_path("$target_gen_dir/generate_package_map.packages"),
       "--load_compilation_trace",
       rebase_path("fuchsia_compilation_trace.txt"),
     ]
