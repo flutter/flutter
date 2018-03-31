@@ -29,6 +29,7 @@ if [ "$SHARD" = "build_and_deploy_gallery" ]; then
       else
         echo "Archiving with distribution profile..."
         (cd examples/flutter_gallery/ios; bundle install && bundle exec fastlane build_and_deploy_testflight)
+        echo "Archive is only deployed to TestFlight on tagged dev branch commits"
       fi
     else
       echo "Flutter Gallery is only deployed to the TestFlight on merged and tagged dev branch commits"
