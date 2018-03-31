@@ -73,7 +73,7 @@ platform :ios do |options|
       codesigning_identity: 'iPhone Distribution: Store Ladd (S8QB4VV633)',
     )
 
-    if options[:upload]
+    if options && options[:upload]
       upload_to_testflight
     end
   end
