@@ -128,7 +128,10 @@ action("generate_snapshot_bin") {
   }
 
   if (is_fuchsia) {
-    inputs += zircon_sdk_ext_files + mozart_dart_sdk_ext_files
+    package_gen_dir = get_label_info(":bogus($dart_toolchain)",
+          "target_gen_dir")
+    package_file = "$package_gen_dir/generate_package_map.packages"
+    inputs += zircon_sdk_ext_files + mozart_dart_sdk_ext_files + [package_file]
     zircon_path = rebase_path(zircon_sdk_ext_lib)
     fuchsia_path = rebase_path(fuchsia_sdk_ext_lib)
     mozart_internal_path = rebase_path(mozart_dart_sdk_ext_lib)
@@ -137,7 +140,7 @@ action("generate_snapshot_bin") {
       "--url_mapping=dart:fuchsia,$fuchsia_path",
       "--url_mapping=dart:mozart.internal,$mozart_internal_path",
       "--packages",
-      rebase_path("$target_gen_dir/generate_package_map.packages"),
+      rebase_path(package_file),
       "--load_compilation_trace",
       rebase_path("fuchsia_compilation_trace.txt"),
     ]
