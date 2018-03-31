@@ -68,7 +68,7 @@ class CommonFinders {
   ///
   /// Example:
   ///
-  ///     // Suppose you have an IconButton with some icon in it with IconData 'Icons.arrow_upward':
+  ///     // Suppose you have an IconButton with some icon data 'Icons.arrow_upward':
   ///     new IconButton(
   ///       icon: new Icon(Icons.arrow_upward)
   ///     )
