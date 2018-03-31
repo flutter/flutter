@@ -190,7 +190,6 @@ class IconButton extends StatelessWidget {
       currentColor = color;
     else
       currentColor = disabledColor ?? Theme.of(context).disabledColor;
-
     Widget result = new Semantics(
       button: true,
       enabled: onPressed != null,
