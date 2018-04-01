@@ -13,10 +13,10 @@ import '../doctor.dart';
 import 'cocoapods.dart';
 import 'mac.dart';
 
-IOSWorkflow get iosWorkflow => context.putIfAbsent(IOSWorkflow, () => new IOSWorkflow());
+IOSWorkflow get iosWorkflow => context[IOSWorkflow];
 
 class IOSWorkflow extends DoctorValidator implements Workflow {
-  IOSWorkflow() : super('iOS toolchain - develop for iOS devices');
+  const IOSWorkflow() : super('iOS toolchain - develop for iOS devices');
 
   @override
   bool get appliesToHostPlatform => platform.isMacOS;

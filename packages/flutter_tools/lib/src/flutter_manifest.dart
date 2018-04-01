@@ -59,7 +59,7 @@ class FlutterManifest {
   }
 
   List<Uri> get assets {
-    return _flutterDescriptor['assets']?.map(Uri.parse)?.toList() ?? const <Uri>[];
+    return _flutterDescriptor['assets']?.map(Uri.encodeFull)?.map(Uri.parse)?.toList() ?? const <Uri>[];
   }
 
   List<Font> _fonts;

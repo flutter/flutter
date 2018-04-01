@@ -85,10 +85,7 @@ void updateGeneratedXcodeProperties({
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
 
-XcodeProjectInterpreter get xcodeProjectInterpreter => context.putIfAbsent(
-  XcodeProjectInterpreter,
-  () => new XcodeProjectInterpreter(),
-);
+XcodeProjectInterpreter get xcodeProjectInterpreter => context[XcodeProjectInterpreter];
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {

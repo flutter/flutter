@@ -167,7 +167,7 @@ class FlutterVersion {
       await _run(<String>['git', 'remote', 'remove', _kVersionCheckRemote]);
   }
 
-  static FlutterVersion get instance => context.putIfAbsent(FlutterVersion, () => new FlutterVersion(const Clock()));
+  static FlutterVersion get instance => context[FlutterVersion];
 
   /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
   String getVersionString({bool redactUnknownBranches: false}) {

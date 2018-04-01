@@ -11,7 +11,7 @@ import 'process.dart';
 import 'process_manager.dart';
 
 /// Returns [OperatingSystemUtils] active in the current app context (i.e. zone).
-OperatingSystemUtils get os => context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
+OperatingSystemUtils get os => context[OperatingSystemUtils];
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils() {

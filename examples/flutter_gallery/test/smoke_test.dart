@@ -102,11 +102,19 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 400));
 
+  // This demo's back button isn't initially visible.
+  if (routeName == '/material/backdrop') {
+    await tester.tap(find.byTooltip('Tap to dismiss'));
+    await tester.pumpAndSettle();
+  }
+
   // Go back
   await tester.pageBack();
+  await tester.pumpAndSettle();
   await tester.pump(); // Start the pop "back" operation.
   await tester.pump(); // Complete the willPop() Future.
   await tester.pump(const Duration(milliseconds: 400)); // Wait until it has finished.
+
   return null;
 }
 
@@ -126,8 +134,6 @@ Future<Null> runSmokeTest(WidgetTester tester) async {
     final Finder finder = findGalleryItemByRouteName(tester, routeName);
     Scrollable.ensureVisible(tester.element(finder), alignment: 0.5);
     await tester.pumpAndSettle();
-    if (routeName == '/material/backdrop')
-      continue;
     await smokeDemo(tester, routeName);
     tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after leaving route $routeName');
   }
