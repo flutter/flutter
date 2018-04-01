@@ -5,9 +5,11 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_GRADIENT_H_
 #define FLUTTER_LIB_UI_PAINTING_GRADIENT_H_
 
+#include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/painting/shader.h"
 #include "lib/tonic/dart_wrappable.h"
 #include "lib/tonic/typed_data/float32_list.h"
+#include "lib/tonic/typed_data/float64_list.h"
 #include "lib/tonic/typed_data/int32_list.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
 
@@ -38,7 +40,8 @@ class CanvasGradient : public Shader {
                   double radius,
                   const tonic::Int32List& colors,
                   const tonic::Float32List& color_stops,
-                  SkShader::TileMode tile_mode);
+                  SkShader::TileMode tile_mode,
+                  const tonic::Float64List& matrix4);
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
