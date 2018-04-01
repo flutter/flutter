@@ -17,7 +17,7 @@ import '../doctor.dart';
 import '../globals.dart';
 import 'android_sdk.dart';
 
-AndroidWorkflow get androidWorkflow => context.putIfAbsent(AndroidWorkflow, () => new AndroidWorkflow());
+AndroidWorkflow get androidWorkflow => context[AndroidWorkflow];
 
 enum LicensesAccepted {
   none,

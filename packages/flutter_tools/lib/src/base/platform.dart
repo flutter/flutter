@@ -14,26 +14,29 @@ export 'package:platform/platform.dart';
 const Platform _kLocalPlatform = const LocalPlatform();
 const String _kRecordingType = 'platform';
 
-Platform get platform => context == null ? _kLocalPlatform : context[Platform];
+Platform get platform => context[Platform] ?? _kLocalPlatform;
 
-/// Enables serialization of the current [platform] to the specified base
-/// recording [location].
+/// Serializes the current [platform] to the specified base recording
+/// [location].
 ///
 /// Platform metadata will be recorded in a subdirectory of [location] named
 /// `"platform"`. It is permissible for [location] to represent an existing
 /// non-empty directory as long as there is no collision with the `"platform"`
 /// subdirectory.
-Future<Null> enableRecordingPlatform(String location) async {
+///
+/// Returns the existing platform.
+Future<Platform> getRecordingPlatform(String location) async {
   final Directory dir = getRecordingSink(location, _kRecordingType);
   final File file = _getPlatformManifest(dir);
   await file.writeAsString(platform.toJson(), flush: true);
+  return platform;
 }
 
-Future<Null> enableReplayPlatform(String location) async {
+Future<FakePlatform> getReplayPlatform(String location) async {
   final Directory dir = getReplaySource(location, _kRecordingType);
   final File file = _getPlatformManifest(dir);
   final String json = await file.readAsString();
-  context.setVariable(Platform, new FakePlatform.fromJson(json));
+  return new FakePlatform.fromJson(json);
 }
 
 File _getPlatformManifest(Directory dir) {

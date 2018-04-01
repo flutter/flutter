@@ -32,11 +32,6 @@ void main() {
   });
 
   group('flags', () {
-    test('returns no-op flags when not inside Flutter runner', () {
-      expect(flags, isNotNull);
-      expect(flags['foo'], isNull);
-    });
-
     testUsingContext('returns null for undefined flags', () async {
       await runCommand(<String>[], () {
         expect(flags['undefined-flag'], isNull);

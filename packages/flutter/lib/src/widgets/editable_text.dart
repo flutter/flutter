@@ -303,7 +303,7 @@ class EditableText extends StatefulWidget {
     properties.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-    properties.add(new EnumProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
+    properties.add(new DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
   }
 }
 

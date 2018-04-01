@@ -253,6 +253,40 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Tooltip is used as semantics label', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          floatingActionButton: new FloatingActionButton(
+            onPressed: () { },
+            tooltip: 'Add Photo',
+            child: const Icon(Icons.add_a_photo),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'Add Photo',
+          actions: <SemanticsAction>[
+            SemanticsAction.tap
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
   group('ComputeNotch', () {
     testWidgets('host and guest must intersect', (WidgetTester tester) async {
       final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null));

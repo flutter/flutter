@@ -60,16 +60,20 @@ double getBorderBottom(WidgetTester tester) {
   return box.size.height;
 }
 
-double getBorderWeight(WidgetTester tester) {
+BorderSide getBorderSide(WidgetTester tester) {
   if (!tester.any(findBorderPainter()))
-    return 0.0;
+    return null;
   final CustomPaint customPaint = tester.widget(findBorderPainter());
   final dynamic/* _InputBorderPainter */ inputBorderPainter = customPaint.foregroundPainter;
   final dynamic/*_InputBorderTween */ inputBorderTween = inputBorderPainter.border;
   final Animation<double> animation = inputBorderPainter.borderAnimation;
   final dynamic/*_InputBorder */ border = inputBorderTween.evaluate(animation);
-  return border.borderSide.width;
+  return border.borderSide;
 }
+
+double getBorderWeight(WidgetTester tester) => getBorderSide(tester)?.width;
+
+Color getBorderColor(WidgetTester tester) => getBorderSide(tester)?.color;
 
 double getHintOpacity(WidgetTester tester) {
   final Opacity opacityWidget = tester.widget<Opacity>(
@@ -190,7 +194,8 @@ void main() {
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
 
-    // enabled: false causes the border to disappear
+    // enabled: false produces a hairline border if filled: false (the default)
+    // The widget's size and layout is the same as for enabled: true.
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
@@ -208,6 +213,27 @@ void main() {
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderWeight(tester), 0.0);
+
+    // enabled: false produces a transparent border if filled: true.
+    // The widget's size and layout is the same as for enabled: true.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        isFocused: false,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          enabled: false,
+          filled: true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopLeft(find.text('text')).dy, 28.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
+    expect(getBorderColor(tester), Colors.transparent);
   });
 
   // Overall height for this InputDecorator is 40.0dps

@@ -12,8 +12,7 @@ import '../base/version.dart';
 import '../globals.dart';
 import '../ios/plist_utils.dart';
 
-AndroidStudio get androidStudio =>
-    context.putIfAbsent(AndroidStudio, AndroidStudio.latestValid);
+AndroidStudio get androidStudio => context[AndroidStudio];
 
 // Android Studio layout:
 

@@ -45,7 +45,7 @@ class BotDetector {
 }
 
 bool get isRunningOnBot {
-  final BotDetector botDetector = context?.getVariable(BotDetector) ?? _kBotDetector;
+  final BotDetector botDetector = context[BotDetector] ?? _kBotDetector;
   return botDetector.isRunningOnBot;
 }
 
@@ -231,7 +231,7 @@ class Uuid {
       value.toRadixString(16).padLeft(count, '0');
 }
 
-Clock get clock => context.putIfAbsent(Clock, () => const Clock());
+Clock get clock => context[Clock];
 
 typedef Future<Null> AsyncCallback();
 
