@@ -2061,7 +2061,7 @@ void main() {
   });
 
   testWidgets('TextField throws when not descended from a Material widget', (WidgetTester tester) async {
-    Widget textField = const TextField();
+    final Widget textField = const TextField();
     await tester.pumpWidget(textField);
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
