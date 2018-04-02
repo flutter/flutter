@@ -174,6 +174,18 @@ class MethodChannel {
   ///     throw 'Unable to play ${song.title}: ${e.message}';
   ///   }
   /// }
+  ///
+  /// class Song {
+  ///   Song(this.id, this.title, this.artist);
+  ///
+  ///   final String id;
+  ///   final String title;
+  ///   final String artist;
+  ///
+  ///   static Song fromJson(dynamic json) {
+  ///     return new Song(json['id'], json['title'], json['artist']);
+  ///   }
+  /// }
   /// ```
   ///
   /// ```java
