@@ -201,7 +201,7 @@ class MethodChannel {
   ///         final List<MusicApi.Track> tracks = MusicApi.getTracks();
   ///         final List<Object> json = new ArrayList<>(tracks.size());
   ///         for (MusicApi.Track track : tracks) {
-  ///           json.add(track.toJson());
+  ///           json.add(track.toJson()); // Map<String, Object> entries
   ///         }
   ///         result.success(json);
   ///         break;
