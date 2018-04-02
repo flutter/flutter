@@ -26,8 +26,10 @@
 
 namespace flow {
 
+static const SkRect kGiantRect = SkRect::MakeLTRB( -1E9F, -1E9F, 1E9F, 1E9F );
+
 DefaultLayerBuilder::DefaultLayerBuilder() {
-  cull_rects_.push(SkRect::MakeLargest());
+  cull_rects_.push(kGiantRect);
 }
 
 DefaultLayerBuilder::~DefaultLayerBuilder() = default;
@@ -38,7 +40,7 @@ void DefaultLayerBuilder::PushTransform(const SkMatrix& sk_matrix) {
   if (sk_matrix.invert(&inverse_sk_matrix)) {
     inverse_sk_matrix.mapRect(&cullRect, cull_rects_.top());
   } else {
-    cullRect = SkRect::MakeLargest();
+    cullRect = kGiantRect;
   }
 
   auto layer = std::make_unique<flow::TransformLayer>();
