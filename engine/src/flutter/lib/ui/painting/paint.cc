@@ -11,7 +11,6 @@
 #include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/core/SkString.h"
-#include "third_party/skia/include/effects/SkBlurMaskFilter.h"
 
 using namespace blink;
 
@@ -140,7 +139,7 @@ Paint DartConverter<Paint>::FromArguments(Dart_NativeArguments args,
       SkBlurStyle blur_style =
           static_cast<SkBlurStyle>(uint_data[kMaskFilterBlurStyleIndex]);
       double sigma = float_data[kMaskFilterSigmaIndex];
-      paint.setMaskFilter(SkBlurMaskFilter::Make(blur_style, sigma));
+      paint.setMaskFilter(SkMaskFilter::MakeBlur(blur_style, sigma));
       break;
   }
 
