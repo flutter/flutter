@@ -132,14 +132,16 @@ void main() {
           return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
-              return new CupertinoTabScaffold(
-                tabBar: _buildTabBar(),
-                tabBuilder: (BuildContext context, int index) {
-                  return new TextField(
-                    focusNode: focusNodes[index],
-                    autofocus: true,
-                  );
-                },
+              return new Material(
+                child: new CupertinoTabScaffold(
+                  tabBar: _buildTabBar(),
+                  tabBuilder: (BuildContext context, int index) {
+                    return new TextField(
+                      focusNode: focusNodes[index],
+                      autofocus: true,
+                    );
+                  },
+                ),
               );
             },
           );
