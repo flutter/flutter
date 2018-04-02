@@ -135,6 +135,80 @@ class MethodChannel {
   /// * a [MissingPluginException], if the method has not been implemented by a
   ///   platform plugin.
   ///
+  /// ## Sample code
+  ///
+  /// The following code snippets demonstrate how to invoke platform methods
+  /// in Dart using a MethodChannel and how to implement those methods in Java
+  /// (for Android) and Objective-C (for iOS). The code might be packaged up as
+  /// a musical plugin, see <https://flutter.io/developing-packages/>:
+  ///
+  /// ```dart
+  /// const MethodChannel _channel = const MethodChannel('music');
+  ///
+  /// Future<bool> isLicensed() async {
+  ///   // invokeMethod returns a Future<dynamic> and we cannot pass that for
+  ///   // a Future<bool>, hence the indirection.
+  ///   final bool result = await _channel.invokeMethod('isLicensed');
+  ///   return result;
+  /// }
+  ///
+  /// Future<List<Song>> songs() async {
+  ///   // invokeMethod deserializes compound invocation results using
+  ///   // List<dynamic> and Map<dynamic, dynamic>. Post-processing code thus
+  ///   // cannot assume e.g. List<Map<String, dynamic>> even though the actual
+  ///   // simple values involved would support such a typed container.
+  ///   final List<dynamic> songs = await _channel.invokeMethod('getSongs');
+  ///   return songs.map(Song.fromJson).toList();
+  /// }
+  ///
+  /// Future<void> play(Song song, double volume) async {
+  ///   // Errors occurring on the platform side may be relayed to Dart using
+  ///   // specially marked replies, and then result in PlatformExceptions
+  ///   // being thrown during deserialization.
+  ///   try {
+  ///     await _channel.invokeMethod('play', <String, dynamic>{
+  ///       'song': song.id,
+  ///       'volume': volume,
+  ///     });
+  ///   } on PlatformException catch (e) {
+  ///     throw 'Unable to play ${song.title}: ${e.message}';
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ```java
+  /// public class MusicPlugin implements MethodCallHandler {
+  ///   @Override
+  ///   public void onMethodCall(MethodCall call, Result result) {
+  ///     switch (call.method) {
+  ///       case "isLicensed":
+  ///         result.success(MusicApi.checkLicense());
+  ///         break;
+  ///       case "getSongs":
+  ///         final List<MusicApi.Track> tracks = MusicApi.getTracks();
+  ///         final List<Object> json = new ArrayList<>(tracks.size());
+  ///         for (MusicApi.Track track : tracks) {
+  ///           json.add(track.toJson());
+  ///         }
+  ///         result.success(json);
+  ///         break;
+  ///       case "play":
+  ///         final String song = call.argument("song");
+  ///         final double volume = call.argument("volume");
+  ///         try {
+  ///           MusicApi.playSongAtVolume(song, volume);
+  ///           result.success(null);
+  ///         } catch (MusicalException e) {
+  ///           result.error("playError", e.getMessage(), null);
+  ///         }
+  ///         break;
+  ///       default:
+  ///         result.notImplemented();
+  ///     }
+  ///   }
+  /// }
+  /// ```
+  ///
   /// See also:
   ///
   /// * [StandardMessageCodec] which defines the payload values supported by
