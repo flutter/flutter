@@ -54,7 +54,7 @@ class ApplicationControllerImpl : public component::ApplicationController,
   void StartRuntimeIfReady();
   void SendReturnCode(int32_t return_code);
 
-  fdio_ns_t* SetupNamespace(component::FlatNamespace flat);
+  fdio_ns_t* SetupNamespace(component::FlatNamespace* flat);
 
   App* app_;
   fidl::Binding<component::ApplicationController> binding_;
