@@ -143,35 +143,37 @@ class MethodChannel {
   /// a musical plugin, see <https://flutter.io/developing-packages/>:
   ///
   /// ```dart
-  /// const MethodChannel _channel = const MethodChannel('music');
+  /// class Music {
+  ///   static const MethodChannel _channel = const MethodChannel('music');
   ///
-  /// Future<bool> isLicensed() async {
-  ///   // invokeMethod returns a Future<dynamic> and we cannot pass that for
-  ///   // a Future<bool>, hence the indirection.
-  ///   final bool result = await _channel.invokeMethod('isLicensed');
-  ///   return result;
-  /// }
+  ///   static Future<bool> isLicensed() async {
+  ///     // invokeMethod returns a Future<dynamic>, and we cannot pass that for
+  ///     // a Future<bool>, hence the indirection.
+  ///     final bool result = await _channel.invokeMethod('isLicensed');
+  ///     return result;
+  ///   }
   ///
-  /// Future<List<Song>> songs() async {
-  ///   // invokeMethod deserializes compound invocation results using
-  ///   // List<dynamic> and Map<dynamic, dynamic>. Post-processing code thus
-  ///   // cannot assume e.g. List<Map<String, dynamic>> even though the actual
-  ///   // simple values involved would support such a typed container.
-  ///   final List<dynamic> songs = await _channel.invokeMethod('getSongs');
-  ///   return songs.map(Song.fromJson).toList();
-  /// }
+  ///   static Future<List<Song>> songs() async {
+  ///     // invokeMethod deserializes compound invocation results using
+  ///     // List<dynamic> and Map<dynamic, dynamic>. Post-processing code thus
+  ///     // cannot assume e.g. List<Map<String, dynamic>> even though the
+  ///     // simple values involved would support such a typed container.
+  ///     final List<dynamic> songs = await _channel.invokeMethod('getSongs');
+  ///     return songs.map(Song.fromJson).toList();
+  ///   }
   ///
-  /// Future<void> play(Song song, double volume) async {
-  ///   // Errors occurring on the platform side may be relayed to Dart using
-  ///   // specially marked replies, and then result in PlatformExceptions
-  ///   // being thrown during deserialization.
-  ///   try {
-  ///     await _channel.invokeMethod('play', <String, dynamic>{
-  ///       'song': song.id,
-  ///       'volume': volume,
-  ///     });
-  ///   } on PlatformException catch (e) {
-  ///     throw 'Unable to play ${song.title}: ${e.message}';
+  ///   static Future<void> play(Song song, double volume) async {
+  ///     // Errors occurring on the platform side may be relayed to Dart
+  ///     // using specially marked results, causing invokeMethod to throw
+  ///     // PlatformExceptions.
+  ///     try {
+  ///       await _channel.invokeMethod('play', <String, dynamic>{
+  ///         'song': song.id,
+  ///         'volume': volume,
+  ///       });
+  ///     } on PlatformException catch (e) {
+  ///       throw 'Unable to play ${song.title}: ${e.message}';
+  ///     }
   ///   }
   /// }
   ///
