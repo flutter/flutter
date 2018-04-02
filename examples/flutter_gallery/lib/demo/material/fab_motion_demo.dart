@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 const String _explanatoryText =
   "When the Scaffold's floating action button location changes, "
-  'the floating action button animates to its new position';
+  'the floating action button animates to its new position.'
+  'The BottomAppBar adapts its shape appropriately.';
 
 class FabMotionDemo extends StatefulWidget {
   static const String routeName = '/material/fab-motion';
@@ -22,6 +26,8 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
     FloatingActionButtonLocation.endFloat, 
     FloatingActionButtonLocation.centerFloat,
     const _TopStartFloatingActionButtonLocation(),
+    const _CenterDockedFloatingActionButtonLocation(),
+    const _EndDockedFloatingActionButtonLocation(),
   ];
 
   bool _showFab = true;
@@ -29,6 +35,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     final Widget floatingActionButton = _showFab 
       ? new Builder(builder: (BuildContext context) {
         // We use a widget builder here so that this inner context can find the Scaffold.
@@ -42,7 +49,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
       : null;
     return new Scaffold(
       appBar: new AppBar(
-        title: const Text('FAB Location'), 
+        title: const Text('FAB Location with Bottom App Bar'), 
         // Add 48dp of space onto the bottom of the appbar.
         // This gives space for the top-start location to attach to without
         // blocking the 'back' button.
@@ -50,6 +57,10 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
           preferredSize: const Size.fromHeight(48.0), 
           child: const SizedBox(),
         ),
+      ),
+      bottomNavigationBar: new BottomAppBar(
+        color: theme.primaryColor, 
+        child: const SizedBox(height: 48.0),
       ),
       floatingActionButtonLocation: _floatingActionButtonLocation,
       floatingActionButton: floatingActionButton,
@@ -144,4 +155,72 @@ class _TopStartFloatingActionButtonLocation extends FloatingActionButtonLocation
     final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
     return new Offset(fabX, fabY);
   }
+}
+
+/// Provider of common logic for [FloatingActionButtonLocation]s that
+/// dock to the [BottomAppBar].
+abstract class _DockedFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _DockedFloatingActionButtonLocation();
+
+  /// Positions the Y coordinate of the [FloatingActionButton] at a height
+  /// where it docks to the [BottomAppBar].
+  /// 
+  /// If there is no [BottomAppBar], this could go off the bottom of the screen.
+  @protected
+  double getDockedY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final double contentBottom = scaffoldGeometry.contentBottom;
+    final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
+    final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
+    final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
+
+    double fabY = contentBottom - fabHeight / 2.0;
+    // The FAB should sit with a margin between it and the snack bar.
+    if (snackBarHeight > 0.0)
+      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - kFloatingActionButtonMargin);
+    // The FAB should sit with its center in front of the top of the bottom sheet.
+    if (bottomSheetHeight > 0.0)
+      fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
+    return fabY;
+  }
+}
+
+// Places the Floating Action Button at the end of the screen, docked on top
+// of the Bottom App Bar.
+//
+// This positioning logic is the opposite of the _TopStartFloatingActionButtonPositioner
+class _EndDockedFloatingActionButtonLocation extends _DockedFloatingActionButtonLocation {
+  const _EndDockedFloatingActionButtonLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    // Compute the x-axis offset.
+    double fabX;
+    assert(scaffoldGeometry.textDirection != null);
+    switch (scaffoldGeometry.textDirection) {
+      case TextDirection.rtl:
+        // In RTL, the end of the screen is the left.
+        final double endPadding = scaffoldGeometry.minInsets.left;
+        fabX = kFloatingActionButtonMargin + endPadding;
+        break;
+      case TextDirection.ltr:
+        // In LTR, the end of the screen is the right.
+        final double endPadding = scaffoldGeometry.minInsets.right;
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - kFloatingActionButtonMargin - endPadding;
+      break;
+    }
+    // Return an offset with a docked Y coordinate.
+    return new Offset(fabX, getDockedY(scaffoldGeometry));
+  }
+}
+
+class _CenterDockedFloatingActionButtonLocation extends _DockedFloatingActionButtonLocation {
+  const _CenterDockedFloatingActionButtonLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
+    // Return an offset with a docked Y coordinate.
+    return new Offset(fabX, getDockedY(scaffoldGeometry));
+  }
+
 }

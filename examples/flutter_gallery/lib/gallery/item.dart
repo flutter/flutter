@@ -166,8 +166,8 @@ List<GalleryItem> _buildGalleryItems() {
       buildRoute: (BuildContext context) => new TabsFabDemo(),
     ),
     new GalleryItem(
-      title: 'Floating action button motion',
-      subtitle: 'Action buttons with customized positions',
+      title: 'Floating action button with bottom app bar',
+      subtitle: 'Action buttons with customized positions and a bottom app bar',
       category: 'Material Components',
       routeName: FabMotionDemo.routeName,
       buildRoute: (BuildContext context) => new FabMotionDemo(),
