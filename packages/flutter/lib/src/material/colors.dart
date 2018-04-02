@@ -200,7 +200,7 @@ class Colors {
   ///
   /// See also:
   ///
-  ///  * [black87], [black54], [black45], [black38], [black26], [black12], which
+  ///  * [black87], [black70], [black54], [black45], [black38], [black26], [black12], which
   ///    are variants on this color but with different opacities.
   ///  * [white], a solid white color.
   ///  * [transparent], a fully-transparent color.
@@ -217,9 +217,23 @@ class Colors {
   ///  * [Typography.black], which uses this color for its text styles.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [black], [black54], [black45], [black38], [black26], [black12], which
+  ///  * [black], [black70], [black54], [black45], [black38], [black26], [black12], which
   ///    are variants on this color but with different opacities.
   static const Color black87 = const Color(0xDD000000);
+
+
+  /// Black with 70% opacity.
+  /// 
+  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blacks.png)
+  /// 
+  /// see also:
+  /// 
+  ///  * [Typography.black], which uses this color for its text styles.
+  ///  * [Theme.of], which allows you to select colors from the current theme
+  ///    rather than hard-coding colors in your build methods.
+  ///  * [black], [black87], [black54], [black45], [black38], [black26], [black12], which
+  ///    are variants on this color but with different opacities.
+  static const Color black70 = const Color(0xB3000000);
 
   /// Black with 54% opacity.
   ///
@@ -233,9 +247,26 @@ class Colors {
   ///  * [Typography.black], which uses this color for its text styles.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [black], [black87], [black45], [black38], [black26], [black12], which
+  ///  * [black], [black87], [black70], [black45], [black38], [black26], [black12], which
   ///    are variants on this color but with different opacities.
   static const Color black54 = const Color(0x8A000000);
+
+  /// Black with 50% opacity.
+  ///
+  /// This is a color commonly used for headings in light themes. It's also used
+  /// as the mask color behind dialogs.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/material/Colors.blacks.png)
+  ///
+  /// See also:
+  ///
+  ///  * [Typography.black], which uses this color for its text styles.
+  ///  * [Theme.of], which allows you to select colors from the current theme
+  ///    rather than hard-coding colors in your build methods.
+  ///  * [black], [black87], [black70], [black54], [black45], [black38], 
+  ///    [black26], [black12], which are variants on this color but with 
+  ///    different opacities.
+  static const Color black50 = const Color(0x8A000000);
 
   /// Black with 45% opacity.
   ///
@@ -245,7 +276,7 @@ class Colors {
   ///
   /// See also:
   ///
-  ///  * [black], [black87], [black54], [black38], [black26], [black12], which
+  ///  * [black], [black87], [black70], [black54], [black38], [black26], [black12], which
   ///    are variants on this color but with different opacities.
   static const Color black45 = const Color(0x73000000);
 
@@ -257,7 +288,7 @@ class Colors {
   ///
   /// See also:
   ///
-  ///  * [black], [black87], [black54], [black45], [black26], [black12], which
+  ///  * [black], [black87], [black70], [black54], [black45], [black26], [black12], which
   ///    are variants on this color but with different opacities.
   static const Color black38 = const Color(0x61000000);
 

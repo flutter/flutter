@@ -25,9 +25,9 @@ class IconThemeData extends Diagnosticable {
 
   /// Creates an icon them with some reasonable default values.
   ///
-  /// The [color] is black, the [opacity] is 0.54, and the [size] is 24.0.
+  /// The [color] is black, the [opacity] is 0.7, and the [size] is 24.0.
   const IconThemeData.fallback()
-      : color = Colors.black54,
+      : color = const Color(0xB3000000),
         _opacity = 1.0,
         size = 24.0;
 
