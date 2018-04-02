@@ -441,11 +441,11 @@ class IOSSimulator extends Device {
   @override
   Future<String> get sdkNameAndVersion async => category;
 
-  final RegExp _iosSdkRegExp = new RegExp(r'iOS (\d+)');
+  final RegExp _iosSdkRegExp = new RegExp(r'iOS( |-)(\d+)');
 
   Future<int> get sdkMajorVersion async {
     final Match sdkMatch = _iosSdkRegExp.firstMatch(await sdkNameAndVersion);
-    return int.parse(sdkMatch.group(1) ?? 11);
+    return int.parse(sdkMatch?.group(2) ?? 11);
   }
 
   @override
