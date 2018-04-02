@@ -6,15 +6,16 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('PhysicalModel - creates a physical model layer when it needs compositing', (WidgetTester tester) async {
     await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new PhysicalModel(
-        shape: BoxShape.rectangle,
-        color: Colors.grey,
-        shadowColor: Colors.red,
-        elevation: 1.0,
-        child: new TextField(controller: new TextEditingController()),
+        textDirection: TextDirection.ltr,
+        child: new PhysicalModel(
+          shape: BoxShape.rectangle,
+          color: Colors.grey,
+          shadowColor: Colors.red,
+          elevation: 1.0,
+          child: new Material(child: new TextField(controller: new TextEditingController())),
+        ),
       ),
-    ));
+    );
     await tester.pump();
 
     final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects.firstWhere((RenderObject object) => object is RenderPhysicalModel);
