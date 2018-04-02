@@ -237,9 +237,64 @@ void main() {
       1,
     );
   });
+
+  testWidgets('Programmatic tab switching', (WidgetTester tester) async {
+    final List<int> tabsPainted = <int>[];
+
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        builder: (BuildContext context, Widget child) {
+          return new CupertinoTabScaffold(
+            tabBar: _buildTabBar(),
+            tabBuilder: (BuildContext context, int index) {
+              return new CustomPaint(
+                child: new Text('Page ${index + 1}'),
+                painter: new TestCallbackPainter(
+                  onPaint: () { tabsPainted.add(index); }
+                )
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    expect(tabsPainted, <int>[0]);
+
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        builder: (BuildContext context, Widget child) {
+          return new CupertinoTabScaffold(
+            tabBar: _buildTabBar(selectedTab: 1), // Programmatically change the tab now.
+            tabBuilder: (BuildContext context, int index) {
+              return new CustomPaint(
+                child: new Text('Page ${index + 1}'),
+                painter: new TestCallbackPainter(
+                  onPaint: () { tabsPainted.add(index); }
+                )
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    expect(tabsPainted, <int>[0, 1]);
+    // onTap is not called when changing tabs programmatically.
+    expect(selectedTabs, isEmpty);
+
+    // Can still tap out of the programmatically selected tab.
+    await tester.tap(find.text('Tab 1'));
+    await tester.pump();
+
+    expect(tabsPainted, <int>[0, 1, 0]);
+    expect(selectedTabs, <int>[0]);
+  });
 }
 
-CupertinoTabBar _buildTabBar() {
+CupertinoTabBar _buildTabBar({ int selectedTab: 0 }) {
   return new CupertinoTabBar(
     items: const <BottomNavigationBarItem>[
       const BottomNavigationBarItem(
@@ -252,6 +307,7 @@ CupertinoTabBar _buildTabBar() {
       ),
     ],
     backgroundColor: CupertinoColors.white,
+    currentIndex: selectedTab,
     onTap: (int newTab) => selectedTabs.add(newTab),
   );
 }
