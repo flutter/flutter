@@ -41,8 +41,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
           );
         }),
       ),
-      new _FabShapeConfiguration(
-        'Diamond',
+      new _FabShapeConfiguration('Diamond',
         new Builder(builder: (BuildContext context) {
           return new _DiamondFab(
             onPressed: () => _showSnackbar(context),
