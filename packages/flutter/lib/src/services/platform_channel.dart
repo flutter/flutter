@@ -154,17 +154,16 @@ class MethodChannel {
   ///   }
   ///
   ///   static Future<List<Song>> songs() async {
-  ///     // invokeMethod deserializes compound invocation results using
-  ///     // List<dynamic> and Map<dynamic, dynamic>. Post-processing code thus
-  ///     // cannot assume e.g. List<Map<String, dynamic>> even though the
-  ///     // simple values involved would support such a typed container.
+  ///     // invokeMethod here returns a Future<dynamic> that completes to a
+  ///     // List<dynamic> with Map<dynamic, dynamic> entries. Post-processing
+  ///     // code thus cannot assume e.g. List<Map<String, String>> even though
+  ///     // the actual values involved would support such a typed container.
   ///     final List<dynamic> songs = await _channel.invokeMethod('getSongs');
   ///     return songs.map(Song.fromJson).toList();
   ///   }
   ///
   ///   static Future<void> play(Song song, double volume) async {
-  ///     // Errors occurring on the platform side may be relayed to Dart
-  ///     // using specially marked results, causing invokeMethod to throw
+  ///     // Errors occurring on the platform side cause invokeMethod to throw
   ///     // PlatformExceptions.
   ///     try {
   ///       await _channel.invokeMethod('play', <String, dynamic>{
