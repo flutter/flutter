@@ -149,7 +149,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   void didUpdateWidget(CupertinoTabScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.tabBar.currentIndex != oldWidget.tabBar.currentIndex) {
-      setState(() => _currentPage = widget.tabBar.currentIndex);
+      _currentPage = widget.tabBar.currentIndex;
     }
   }
 
