@@ -44,7 +44,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
       new _FabShapeConfiguration(
         'Diamond',
         new Builder(builder: (BuildContext context) {
-          return new DiamondFab(
+          return new _DiamondFab(
             onPressed: () => _showSnackbar(context),
             child: const Icon(Icons.add),
           );
@@ -104,7 +104,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
             new Container(width: 96.0,
               child: const Text('Shape: '),
             ),
-            new Expanded(child: fabShapePicker()),
+            new Expanded(child: buildFabShapePicker()),
           ],
         ),
         new Row(
@@ -113,7 +113,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
             new Container(width: 96.0,
               child: const Text('Location: '),
             ),
-            new Expanded(child: fabLocationPicker()),
+            new Expanded(child: buildFabLocationPicker()),
           ],
         ),
         const Divider(),
@@ -121,7 +121,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
           'Bottom app bar options',
           style: Theme.of(context).textTheme.title,
         ),
-        babColorSelection(),
+        buildBabColorPicker(),
         new CheckboxListTile(
           title: const Text('Enable notch'),
           value: notchEnabled,
@@ -132,7 +132,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     );
   }
 
-  Widget fabShapePicker() {
+  Widget buildFabShapePicker() {
     final List<DropdownMenuItem<int>> options = <DropdownMenuItem<int>>[];
     for (int i = 0; i < _fabShapeConfigurations.length; i++) {
       final _FabShapeConfiguration configuration = _fabShapeConfigurations[i];
@@ -150,7 +150,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     );
   }
 
-  Widget fabLocationPicker() {
+  Widget buildFabLocationPicker() {
     final List<DropdownMenuItem<int>> options = <DropdownMenuItem<int>> [];
     for (int i = 0; i < _fabLocationConfigurations.length; i++) {
       final _FabLocationConfiguration configuration = _fabLocationConfigurations[i];
@@ -168,7 +168,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     );
   }
 
-  Widget babColorSelection() {
+  Widget buildBabColorPicker() {
     final List<Widget> colors = <Widget> [
       const Text('Color:'),
     ];
@@ -195,20 +195,23 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     );
   }
 
-  
-
   static void _showSnackbar(BuildContext context) {
     Scaffold.of(context).showSnackBar(const SnackBar(content: const Text(_explanatoryText)));
   }
 }
-
-
 
 const String _explanatoryText =
   "When the Scaffold's floating action button location changes, "
   'the floating action button animates to its new position.'
   'The BottomAppBar adapts its shape appropriately.';
 
+// Whether the Bottom App Bar's menu should keep icons away from the center or from the end of the screen.
+//
+// When the Floating Action Button is positioned at the end of the screen,
+// it would cover icons at the end of the screen, so the END_FAB mode tells 
+// the MyBottomAppBar to place icons away from the end.
+//
+// Similar logic applies to the CENTER_FAB mode.
 enum _BabMode {
   END_FAB,
   CENTER_FAB
@@ -236,6 +239,7 @@ class _FabShapeConfiguration {
   final Widget fab;
 }
 
+// A bottom app bar with a menu inside it.
 class MyBottomAppBar extends StatelessWidget {
   const MyBottomAppBar(this.babMode, this.color, this.enableNotch);
 
@@ -303,6 +307,7 @@ class MyBottomAppBar extends StatelessWidget {
   }
 }
 
+// A drawer that pops up from the bottom of the screen.
 class MyDrawer extends StatelessWidget {
   const MyDrawer();
 
@@ -325,8 +330,9 @@ class MyDrawer extends StatelessWidget {
   }
 }
 
-class DiamondFab extends StatefulWidget {
-  const DiamondFab({
+// A diamond-shaped floating action button.
+class _DiamondFab extends StatefulWidget {
+  const _DiamondFab({
     this.child,
     this.notchMargin: 6.0,
     this.onPressed,
@@ -337,17 +343,17 @@ class DiamondFab extends StatefulWidget {
   final VoidCallback onPressed;
 
   @override
-  State createState() => new DiamondFabState();
+  State createState() => new _DiamondFabState();
 }
 
-class DiamondFabState extends State<DiamondFab> {
+class _DiamondFabState extends State<_DiamondFab> {
 
   VoidCallback _clearComputeNotch;
 
   @override
   Widget build(BuildContext context) {
     return new Material(
-      shape: const DiamondBorder(),
+      shape: const _DiamondBorder(),
       color: Colors.orange,
       //onPressed: widget.onPressed,
       child: new InkWell(
@@ -408,8 +414,8 @@ class DiamondFabState extends State<DiamondFab> {
   }
 }
 
-class DiamondBorder extends ShapeBorder {
-  const DiamondBorder();
+class _DiamondBorder extends ShapeBorder {
+  const _DiamondBorder();
 
   @override
   EdgeInsetsGeometry get dimensions {
@@ -434,6 +440,7 @@ class DiamondBorder extends ShapeBorder {
   @override
   void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {}
 
+  // This border doesn't support scaling.
   @override
   ShapeBorder scale(double t) {
     return null;
@@ -496,6 +503,7 @@ class _TopStartFloatingActionButtonLocation extends FloatingActionButtonLocation
 }
 
 // TODO: Add support for making these docked configurations handle the Bottom App Bar being absent.
+// And then refactor them back into FloatingActionButtonLocation.
 
 /// Provider of common logic for [FloatingActionButtonLocation]s that
 /// dock to the [BottomAppBar].
