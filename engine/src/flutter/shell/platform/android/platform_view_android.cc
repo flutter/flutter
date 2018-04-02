@@ -727,6 +727,7 @@ void PlatformViewAndroid::GetBitmapGpuTask(jobject* pixels_out,
       image_info, pixels, frame_size.width() * sizeof(jint));
 
   flow::CompositorContext compositor_context(nullptr);
+  compositor_context.SetTextureRegistry(&texture_registry_);
   SkCanvas* canvas = surface->getCanvas();
   flow::CompositorContext::ScopedFrame frame =
       compositor_context.AcquireFrame(nullptr, canvas, false);
