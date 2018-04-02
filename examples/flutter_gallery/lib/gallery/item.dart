@@ -166,11 +166,11 @@ List<GalleryItem> _buildGalleryItems() {
       buildRoute: (BuildContext context) => new TabsFabDemo(),
     ),
     new GalleryItem(
-      title: 'Floating action button with bottom app bar',
-      subtitle: 'Action buttons with customized positions and a bottom app bar',
+      title: 'Bottom App Bar',
+      subtitle: 'With repositionable floating action button',
       category: 'Material Components',
-      routeName: FabMotionDemo.routeName,
-      buildRoute: (BuildContext context) => new FabMotionDemo(),
+      routeName: BottomAppBarDemo.routeName,
+      buildRoute: (BuildContext context) => new BottomAppBarDemo(),
     ),
     new GalleryItem(
       title: 'Grid',
