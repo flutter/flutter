@@ -16,8 +16,18 @@ class BottomAppBarDemo extends StatefulWidget {
 
 class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
 
-  int babFabIndex = 1;
+  // The index of the currently-selected _FabLocationConfiguration.
+  int fabLocationIndex = 1;
 
+  static const List<_FabLocationConfiguration> _fabLocationConfigurations = const <_FabLocationConfiguration>[
+    const _FabLocationConfiguration('Center, undocked above the bottom app bar', _BabMode.CENTER_FAB, FloatingActionButtonLocation.centerFloat),
+    const _FabLocationConfiguration('End, undocked above the bottom app bar', _BabMode.END_FAB, FloatingActionButtonLocation.endFloat),
+    const _FabLocationConfiguration('Center, docked to the bottom app bar', _BabMode.CENTER_FAB, const _CenterDockedFloatingActionButtonLocation()),
+    const _FabLocationConfiguration('End, docked to the bottom app bar', _BabMode.END_FAB, const _EndDockedFloatingActionButtonLocation()),
+    const _FabLocationConfiguration('Start, docked to the top app bar', _BabMode.CENTER_FAB, const _TopStartFloatingActionButtonLocation()),
+  ];
+  
+  // The index of the currently-selected _FabShapeConfiguration.
   int fabShapeIndex = 0;
 
   final List<_FabShapeConfiguration> _fabShapeConfigurations =  <_FabShapeConfiguration>[
@@ -62,7 +72,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: const Text('FAB Location with Bottom App Bar'), 
+        title: const Text('Bottom App Bar with FAB location'), 
         // Add 48dp of space onto the bottom of the appbar.
         // This gives space for the top-start location to attach to without
         // blocking the 'back' button.
@@ -72,12 +82,12 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         ),
       ),
       body: new SingleChildScrollView(
-        padding: const EdgeInsets.only(top: 16.0),
+        padding: const EdgeInsets.all(16.0),
         child: controls(context),
       ),
-      bottomNavigationBar: new MyBottomAppBar(_babFabConfigurations[babFabIndex].babMode, babColor, notchEnabled),
+      bottomNavigationBar: new MyBottomAppBar(_fabLocationConfigurations[fabLocationIndex].babMode, babColor, notchEnabled),
       floatingActionButton: _fabShapeConfigurations[fabShapeIndex].fab,
-      floatingActionButtonLocation: _babFabConfigurations[babFabIndex].fabLocation,
+      floatingActionButtonLocation: _fabLocationConfigurations[fabLocationIndex].fabLocation,
     );
   }
 
@@ -88,13 +98,24 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
           'Floating action button',
           style: Theme.of(context).textTheme.title,
         ),
-        fabOptions(),
-        const Divider(),
-        new Text(
-          'Bottom app bar mode',
-          style: Theme.of(context).textTheme.title,
+        new Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            new Container(width: 96.0,
+              child: const Text('Shape: '),
+            ),
+            new Expanded(child: fabShapePicker()),
+          ],
         ),
-        babConfigModes(),
+        new Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            new Container(width: 96.0,
+              child: const Text('Location: '),
+            ),
+            new Expanded(child: fabLocationPicker()),
+          ],
+        ),
         const Divider(),
         new Text(
           'Bottom app bar options',
@@ -111,36 +132,40 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     );
   }
 
-  Widget fabOptions() {
-    final List<Widget> options = <Widget>[];
+  Widget fabShapePicker() {
+    final List<DropdownMenuItem<int>> options = <DropdownMenuItem<int>>[];
     for (int i = 0; i < _fabShapeConfigurations.length; i++) {
       final _FabShapeConfiguration configuration = _fabShapeConfigurations[i];
       options.add(
-        new RadioListTile<int>(
-          title: new Text(configuration.name),
+        new DropdownMenuItem<int>(
+          child: new Text(configuration.name),
           value: i,
-          groupValue: fabShapeIndex,
-          onChanged: (int newIdx) { setState(() { fabShapeIndex = newIdx; }); },
-        )
+        ),
       );
     }
-    return new Column(children: options);
+    return new SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      primary: false,
+      child: new DropdownButton<int>(items: options, onChanged: (int newIdx) { setState(() { fabShapeIndex = newIdx; }); }, value: fabShapeIndex),
+    );
   }
 
-  Widget babConfigModes() {
-    final List<Widget> modes = <Widget> [];
-    for (int i = 0; i < _babFabConfigurations.length; i++) {
-      final _BabFabConfiguration configuration = _babFabConfigurations[i];
-      modes.add(
-        new RadioListTile<int>(
-          title: new Text(configuration.name),
+  Widget fabLocationPicker() {
+    final List<DropdownMenuItem<int>> options = <DropdownMenuItem<int>> [];
+    for (int i = 0; i < _fabLocationConfigurations.length; i++) {
+      final _FabLocationConfiguration configuration = _fabLocationConfigurations[i];
+      options.add(
+          new DropdownMenuItem<int>(
+          child: new Text(configuration.name, overflow: TextOverflow.ellipsis),
           value: i,
-          groupValue: babFabIndex,
-          onChanged: (int newIdx) { setState(() { babFabIndex = newIdx; }); },
-        )
+        ),
       );
     }
-    return new Column(children: modes);
+    return new SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      primary: false,
+      child: DropdownButton<int>(items: options, onChanged: (int newIdx) { setState(() { fabLocationIndex = newIdx; }); }, value: fabLocationIndex),
+    );
   }
 
   Widget babColorSelection() {
@@ -190,8 +215,8 @@ enum _BabMode {
 }
 
 // Pairs the Bottom App Bar's menu mode with a Floating Action Button Location.
-class _BabFabConfiguration {
-  const _BabFabConfiguration(this.name, this.babMode, this.fabLocation);
+class _FabLocationConfiguration {
+  const _FabLocationConfiguration(this.name, this.babMode, this.fabLocation);
 
   // The name of this configuration.
   final String name;
@@ -202,14 +227,6 @@ class _BabFabConfiguration {
   // The location for the Floating Action Button.
   final FloatingActionButtonLocation fabLocation;
 }
-
-const List<_BabFabConfiguration> _babFabConfigurations = const <_BabFabConfiguration>[
-  const _BabFabConfiguration('Center, undocked FAB', _BabMode.CENTER_FAB, FloatingActionButtonLocation.centerFloat),
-  const _BabFabConfiguration('End, undocked FAB', _BabMode.END_FAB, FloatingActionButtonLocation.endFloat),
-  const _BabFabConfiguration('Center, docked FAB', _BabMode.CENTER_FAB, const _CenterDockedFloatingActionButtonLocation()),
-  const _BabFabConfiguration('End, docked FAB', _BabMode.END_FAB, const _EndDockedFloatingActionButtonLocation()),
-  const _BabFabConfiguration('Start, FAB docked to the top app bar', _BabMode.CENTER_FAB, const _TopStartFloatingActionButtonLocation()),
-];
 
 // Map of names to the different shapes of Floating Action Button in this demo.
 class _FabShapeConfiguration {
@@ -477,6 +494,8 @@ class _TopStartFloatingActionButtonLocation extends FloatingActionButtonLocation
     return new Offset(fabX, fabY);
   }
 }
+
+// TODO: Add support for making these docked configurations handle the Bottom App Bar being absent.
 
 /// Provider of common logic for [FloatingActionButtonLocation]s that
 /// dock to the [BottomAppBar].
