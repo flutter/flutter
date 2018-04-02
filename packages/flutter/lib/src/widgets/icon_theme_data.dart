@@ -6,7 +6,6 @@ import 'dart:ui' show Color, hashValues;
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 /// Defines the color, opacity, and size of icons.
 ///
@@ -28,7 +27,7 @@ class IconThemeData extends Diagnosticable {
   /// The [color] is black, the [opacity] is 0.7, and the [size] is 24.0.
   const IconThemeData.fallback()
       : color = const Color(0xB3000000),
-        _opacity = 1.0,
+        _opacity = 0.7,
         size = 24.0;
 
   /// Creates a copy of this icon theme but with the given fields replaced with
