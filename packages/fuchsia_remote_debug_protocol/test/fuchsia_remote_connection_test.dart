@@ -31,7 +31,8 @@ void main() {
       const String interface = 'eno1';
       // Adds some extra junk to make sure the strings will be cleaned up.
       when(mockRunner.run(typed(any)))
-          .thenReturn(<String>['123\n\n\n', '456  ', '789']);
+      .thenAnswer((_) => new Future<List<String>>.value(
+          <String>['123\n\n\n', '456  ', '789']));
       when(mockRunner.address).thenReturn(address);
       when(mockRunner.interface).thenReturn(interface);
       int port = 0;
@@ -99,7 +100,7 @@ void main() {
           mockPeerConnections.add(mp);
           uriConnections.add(uri);
           when(mp.sendRequest(typed<String>(any), typed<String>(any)))
-              .thenReturn(new Future<Map<String, dynamic>>(
+              .thenAnswer((_) => new Future<Map<String, dynamic>>(
                   () => flutterViewCannedResponses[flutterViewIndex++]));
           return mp;
         });

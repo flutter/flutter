@@ -84,8 +84,8 @@ class EngineBuildPaths {
 abstract class Artifacts {
   static Artifacts get instance => context[Artifacts];
 
-  static void useLocalEngine(String engineSrcPath, EngineBuildPaths engineBuildPaths) {
-    context.setVariable(Artifacts, new LocalEngineArtifacts(engineSrcPath, engineBuildPaths.targetEngine, engineBuildPaths.hostEngine));
+  static LocalEngineArtifacts getLocalEngine(String engineSrcPath, EngineBuildPaths engineBuildPaths) {
+    return new LocalEngineArtifacts(engineSrcPath, engineBuildPaths.targetEngine, engineBuildPaths.hostEngine);
   }
 
   // Returns the requested [artifact] for the [platform] and [mode] combination.

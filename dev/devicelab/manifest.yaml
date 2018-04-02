@@ -249,7 +249,6 @@ tasks:
       test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   # iOS on-device tests
 
@@ -359,7 +358,6 @@ tasks:
       Checks that the project template works and supports plugins on Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
-    flaky: true
 
   hot_mode_dev_cycle_win__benchmark:
     description: >

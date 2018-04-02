@@ -249,17 +249,21 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                   fieldKey: _passwordFieldKey,
                   helperText: 'No more than 8 characters.',
                   labelText: 'Password *',
-                  onSaved: (String value) { person.password = value; },
+                  onFieldSubmitted: (String value) {
+                    setState(() {
+                      person.password = value;
+                    });
+                  },
                 ),
                 const SizedBox(height: 24.0),
                 new TextFormField(
+                  enabled: person.password != null && person.password.isNotEmpty,
                   decoration: const InputDecoration(
                     border: const UnderlineInputBorder(),
                     filled: true,
                     labelText: 'Re-type password',
                   ),
                   maxLength: 8,
-                  onFieldSubmitted: (String value) { person.password = value; },
                   obscureText: true,
                   validator: _validatePassword,
                 ),

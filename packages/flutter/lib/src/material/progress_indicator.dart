@@ -12,6 +12,7 @@ import 'theme.dart';
 
 const double _kLinearProgressIndicatorHeight = 6.0;
 const double _kMinCircularProgressIndicatorSize = 36.0;
+const int _kIndeterminateLinearDuration = 1800;
 
 // TODO(hansmuller): implement the support for buffer indicator
 
@@ -68,6 +69,29 @@ abstract class ProgressIndicator extends StatefulWidget {
 }
 
 class _LinearProgressIndicatorPainter extends CustomPainter {
+  // The indeterminate progress animation displays two lines whose leading (head)
+  // and trailing (tail) endpoints are defined by the following four curves.
+  static const Curve line1Head = const Interval(
+    0.0,
+    750.0 / _kIndeterminateLinearDuration,
+    curve: const Cubic(0.2, 0.0, 0.8, 1.0),
+  );
+  static const Curve line1Tail = const Interval(
+    333.0 / _kIndeterminateLinearDuration,
+    (333.0 + 750.0) / _kIndeterminateLinearDuration,
+    curve: const Cubic(0.4, 0.0, 1.0, 1.0),
+  );
+  static const Curve line2Head = const Interval(
+    1000.0 / _kIndeterminateLinearDuration,
+    (1000.0 + 567.0) / _kIndeterminateLinearDuration,
+    curve: const Cubic(0.0, 0.0, 0.65, 1.0),
+  );
+  static const Curve line2Tail = const Interval(
+    1267.0 / _kIndeterminateLinearDuration,
+    (1267.0 + 533.0) / _kIndeterminateLinearDuration,
+    curve: const Cubic(0.10, 0.0, 0.45, 1.0),
+  );
+
   const _LinearProgressIndicatorPainter({
     this.backgroundColor,
     this.valueColor,
@@ -90,25 +114,10 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     canvas.drawRect(Offset.zero & size, paint);
 
     paint.color = valueColor;
-    if (value != null) {
-      final double width = value.clamp(0.0, 1.0) * size.width;
 
-      double left;
-      switch (textDirection) {
-        case TextDirection.rtl:
-          left = size.width - width;
-          break;
-        case TextDirection.ltr:
-          left = 0.0;
-          break;
-      }
-
-      canvas.drawRect(new Offset(left, 0.0) & new Size(width, size.height), paint);
-    } else {
-      final double startX = size.width * (1.5 * animationValue - 0.5);
-      final double endX = startX + 0.5 * size.width;
-      final double x = startX.clamp(0.0, size.width);
-      final double width = endX.clamp(0.0, size.width) - x;
+    void drawBar(double x, double width) {
+      if (width <= 0.0)
+        return;
 
       double left;
       switch (textDirection) {
@@ -119,8 +128,20 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
           left = x;
           break;
       }
-
       canvas.drawRect(new Offset(left, 0.0) & new Size(width, size.height), paint);
+    }
+
+    if (value != null) {
+      drawBar(0.0, value.clamp(0.0, 1.0) * size.width);
+    } else {
+      final double x1 = size.width * line1Tail.transform(animationValue);
+      final double width1 = size.width * line1Head.transform(animationValue) - x1;
+
+      final double x2 = size.width * line2Tail.transform(animationValue);
+      final double width2 = size.width * line2Head.transform(animationValue) - x2;
+
+      drawBar(x1, width1);
+      drawBar(x2, width2);
     }
   }
 
@@ -170,18 +191,15 @@ class LinearProgressIndicator extends ProgressIndicator {
 }
 
 class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with SingleTickerProviderStateMixin {
-  Animation<double> _animation;
   AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
     _controller = new AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: _kIndeterminateLinearDuration),
       vsync: this,
     );
-    _animation = new CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
-
     if (widget.value == null)
       _controller.repeat();
   }
@@ -224,12 +242,12 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
     final TextDirection textDirection = Directionality.of(context);
 
     if (widget.value != null)
-      return _buildIndicator(context, _animation.value, textDirection);
+      return _buildIndicator(context, _controller.value, textDirection);
 
     return new AnimatedBuilder(
-      animation: _animation,
+      animation: _controller.view,
       builder: (BuildContext context, Widget child) {
-        return _buildIndicator(context, _animation.value, textDirection);
+        return _buildIndicator(context, _controller.value, textDirection);
       },
     );
   }

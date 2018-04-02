@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'debug.dart';
 import 'feedback.dart';
 import 'ink_well.dart' show InteractiveInkFeature;
 import 'input_decorator.dart';
@@ -42,7 +43,9 @@ export 'package:flutter/services.dart' show TextInputType;
 /// extra padding introduced by the decoration to save space for the labels.
 ///
 /// If [decoration] is non-null (which is the default), the text field requires
-/// one of its ancestors to be a [Material] widget.
+/// one of its ancestors to be a [Material] widget. When the [TextField] is
+/// tapped an ink splash that paints on the material is triggered, see
+/// [ThemeData.splashFactory].
 ///
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
 /// consider using [TextFormField].
@@ -111,6 +114,7 @@ class TextField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.inputFormatters,
+    this.enabled,
   }) : assert(keyboardType != null),
        assert(textAlign != null),
        assert(autofocus != null),
@@ -137,7 +141,7 @@ class TextField extends StatefulWidget {
   /// By default, draws a horizontal line under the text field but can be
   /// configured to show an icon, label, hint text, and error text.
   ///
-  /// Set this field to null to remove the decoration entirely (including the
+  /// Specify null to remove the decoration entirely (including the
   /// extra padding introduced by the decoration to save space for the labels).
   final InputDecoration decoration;
 
@@ -261,6 +265,13 @@ class TextField extends StatefulWidget {
   /// Formatters are run in the provided order when the text input changes.
   final List<TextInputFormatter> inputFormatters;
 
+  /// If false the textfield is "disabled": it ignores taps and its
+  /// [decoration] is rendered in grey.
+  ///
+  /// If non-null this property overrides the [decoration]'s
+  /// [Decoration.enabled] property.
+  final bool enabled;
+
   @override
   _TextFieldState createState() => new _TextFieldState();
 
@@ -270,7 +281,7 @@ class TextField extends StatefulWidget {
     properties.add(new DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
     properties.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
     properties.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
-    properties.add(new EnumProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
+    properties.add(new DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
     properties.add(new DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
     properties.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
@@ -299,7 +310,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   InputDecoration _getEffectiveDecoration() {
     final InputDecoration effectiveDecoration = (widget.decoration ?? const InputDecoration())
-      .applyDefaults(Theme.of(context).inputDecorationTheme);
+      .applyDefaults(Theme.of(context).inputDecorationTheme)
+      .copyWith(
+        enabled: widget.enabled,
+      );
 
     if (!needsCounter)
       return effectiveDecoration;
@@ -439,6 +453,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   @override
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
+    assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;
     final TextEditingController controller = _effectiveController;
@@ -495,14 +510,17 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           _controller.selection = new TextSelection.collapsed(offset: _controller.text.length);
         _requestKeyboard();
       },
-      child: new GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTapDown: _handleTapDown,
-        onTap: _handleTap,
-        onTapCancel: _handleTapCancel,
-        onLongPress: _handleLongPress,
-        excludeFromSemantics: true,
-        child: child,
+      child: new IgnorePointer(
+        ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
+        child: new GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTapDown: _handleTapDown,
+          onTap: _handleTap,
+          onTapCancel: _handleTapCancel,
+          onLongPress: _handleLongPress,
+          excludeFromSemantics: true,
+          child: child,
+        ),
       ),
     );
   }

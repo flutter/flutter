@@ -2060,5 +2060,13 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('TextField throws when not descended from a Material widget', (WidgetTester tester) async {
+    const Widget textField = const TextField();
+    await tester.pumpWidget(textField);
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), startsWith('No Material widget found.'));
+    expect(exception.toString(), endsWith(':\n  $textField\nThe ancestors of this widget were:\n  [root]'));
+  });
 
 }

@@ -16,29 +16,60 @@ export 'dart:ui' show TextAffinity;
 /// The type of information for which to optimize the text input control.
 ///
 /// On Android, behavior may vary across device and keyboard provider.
-enum TextInputType {
+///
+/// This class stays as close to [Enum] interface as possible, and allows
+/// for additional flags for some input types. For example, numeric input
+/// can specify whether it supports decimal numbers and/or signed numbers.
+class TextInputType {
+  const TextInputType._(this.index) : signed = null, decimal = null;
+
+  /// Optimize for textual information.
+  ///
+  /// Requests a numeric keyboard with additional settings.
+  /// The [signed] and [decimal] parameters are optional.
+  const TextInputType.numberWithOptions({
+    this.signed: false,
+    this.decimal: false,
+  }) : index = 2;
+
+  /// Enum value index, corresponds to one of the [values].
+  final int index;
+
+  /// The number is signed, allowing a positive or negative sign at the start.
+  ///
+  /// This flag is only used for the [number] input type, otherwise `null`.
+  /// Use `const TextInputType.numberWithOptions(signed: true)` to set this.
+  final bool signed;
+
+  /// The number is decimal, allowing a decimal point to provide fractional.
+  ///
+  /// This flag is only used for the [number] input type, otherwise `null`.
+  /// Use `const TextInputType.numberWithOptions(decimal: true)` to set this.
+  final bool decimal;
+
   /// Optimize for textual information.
   ///
   /// Requests the default platform keyboard.
-  text,
+  static const TextInputType text = const TextInputType._(0);
 
   /// Optimize for multi-line textual information.
   ///
   /// Requests the default platform keyboard, but accepts newlines when the
   /// enter key is pressed. This is the input type used for all multi-line text
   /// fields.
-  multiline,
+  static const TextInputType multiline = const TextInputType._(1);
 
   /// Optimize for numerical information.
   ///
-  /// Requests a keyboard with ready access to the decimal point and number
-  /// keys.
-  number,
+  /// Requests a default keyboard with ready access to the number keys.
+  /// Additional options, such as decimal point and/or positive/negative
+  /// signs, can be requested using [new TextInputType.numberWithOptions].
+  static const TextInputType number = const TextInputType.numberWithOptions();
 
   /// Optimize for telephone numbers.
   ///
   /// Requests a keyboard with ready access to the number keys, "*", and "#".
-  phone,
+  static const TextInputType phone = const TextInputType._(3);
 
   /// Optimize for date and time information.
   ///
@@ -46,17 +77,60 @@ enum TextInputType {
   ///
   /// On Android, requests a keyboard with ready access to the number keys,
   /// ":", and "-".
-  datetime,
+  static const TextInputType datetime = const TextInputType._(4);
 
   /// Optimize for email addresses.
   ///
   /// Requests a keyboard with ready access to the "@" and "." keys.
-  emailAddress,
+  static const TextInputType emailAddress = const TextInputType._(5);
 
   /// Optimize for URLs.
   ///
   /// Requests a keyboard with ready access to the "/" and "." keys.
-  url,
+  static const TextInputType url = const TextInputType._(6);
+
+  /// All possible enum values.
+  static const List<TextInputType> values = const <TextInputType>[
+    text, multiline, number, phone, datetime, emailAddress, url,
+  ];
+
+  // Corresponding string name for each the [values].
+  static const List<String> _names = const <String>[
+    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url',
+  ];
+
+  // Enum value name, this is what enum.toString() would normally return.
+  String get _name => 'TextInputType.${_names[index]}';
+
+  /// Returns a representation of this object as a JSON object.
+  Map<String, dynamic> toJSON() {
+    return <String, dynamic>{
+      'name': _name,
+      'signed': signed,
+      'decimal': decimal,
+    };
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType('
+        'name: $_name, '
+        'signed: $signed, '
+        'decimal: $decimal)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! TextInputType)
+      return false;
+    final TextInputType typedOther = other;
+    return typedOther.index == index
+        && typedOther.signed == signed
+        && typedOther.decimal == decimal;
+  }
+
+  @override
+  int get hashCode => hashValues(index, signed, decimal);
 }
 
 /// An action the user has requested the text input control to perform.
@@ -113,7 +187,7 @@ class TextInputConfiguration {
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
-      'inputType': inputType.toString(),
+      'inputType': inputType.toJSON(),
       'obscureText': obscureText,
       'autocorrect': autocorrect,
       'actionLabel': actionLabel,

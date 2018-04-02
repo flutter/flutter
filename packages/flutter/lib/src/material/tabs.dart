@@ -691,7 +691,7 @@ class _TabBarState extends State<TabBar> {
     // When that happens, automatic transitions of the theme will likely look
     // ugly as the indicator color suddenly snaps to white at one end, but it's
     // not clear how to avoid that any further.
-    if (color == Material.of(context).color)
+    if (color.value == Material.of(context).color.value)
       color = Colors.white;
 
     return new UnderlineTabIndicator(

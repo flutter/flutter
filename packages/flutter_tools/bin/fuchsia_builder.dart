@@ -12,8 +12,10 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/disabled_usage.dart';
 import 'package:flutter_tools/src/flx.dart';
 import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/usage.dart';
 
 const String _kOptionPackages = 'packages';
 const String _kOptionOutput = 'output-file';
@@ -33,8 +35,10 @@ const List<String> _kRequiredOptions = const <String>[
   _kOptionBuildRoot,
 ];
 
-Future<Null> main(List<String> args) async {
-  await runInContext(args, run);
+Future<Null> main(List<String> args) {
+  return runInContext<Null>(() => run(args), overrides: <Type, dynamic>{
+    Usage: new DisabledUsage(),
+  });
 }
 
 Future<Null> run(List<String> args) async {
