@@ -21,7 +21,7 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
   static const List<FloatingActionButtonLocation> _floatingActionButtonLocations = const <FloatingActionButtonLocation>[
     FloatingActionButtonLocation.endFloat,
     FloatingActionButtonLocation.centerFloat,
-    FloatingActionButtonLocation.startTop,
+    const _StartTopFloatingActionButtonLocation(),
   ];
 
   bool _showFab = true;
@@ -88,5 +88,60 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
 
   void _showSnackbar(BuildContext context) {
     Scaffold.of(context).showSnackBar(const SnackBar(content: const Text(_explanatoryText)));
+  }
+}
+
+// Places the Floating Action Button at the top of the content area of the
+// app, on the border between the body and the app bar.
+class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _StartTopFloatingActionButtonLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    // First, we'll place the X coordinate for the Floating Action Button
+    // at the start of the screen, based on the text direction.
+    double fabX;
+    assert(scaffoldGeometry.textDirection != null);
+    switch (scaffoldGeometry.textDirection) {
+      case TextDirection.rtl:
+        // In RTL layouts, the start of the screen is on the right side,
+        // and the end of the screen is on the left.
+        //
+        // We need to align the right edge of the floating action button with
+        // the right edge of the screen, then move it inwards by the designated padding.
+        //
+        // The Scaffold's origin is at its top-left, so we need to offset fabX
+        // by the Scaffold's width to get the right edge of the screen.
+        //
+        // The Floating Action Button's origin is at its top-left, so we also need
+        // to subtract the Floating Action Button's width to align the right edge
+        // of the Floating Action Button instead of the left edge.
+        final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.right;
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - startPadding;
+        break;
+      case TextDirection.ltr:
+        // In LTR layouts, the start of the screen is on the left side,
+        // and the end of the screen is on the right.
+        //
+        // Placing the fabX at 0.0 will align the left edge of the
+        // Floating Action Button with the left edge of the screen, so all
+        // we need to do is offset fabX by the designated padding.
+        final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.left;
+        fabX = startPadding;
+        break;
+    }
+    // Finally, we'll place the Y coordinate for the Floating Action Button
+    // at the top of the content body.
+    //
+    // We want to place the middle of the Floating Action Button on the
+    // border between the Scaffold's app bar and its body. To do this,
+    // we place fabY at the scaffold geometry's contentTop, then subtract
+    // half of the Floating Action Button's height to place the center
+    // over the contentTop.
+    //
+    // We don't have to worry about which way is the top like we did
+    // for left and right, so we place fabY in this one-liner.
+    final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
+    return new Offset(fabX, fabY);
   }
 }

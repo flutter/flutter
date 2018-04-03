@@ -51,7 +51,7 @@ void main() {
     });
 
     testWidgets('moves to and from custom-defined positions', (WidgetTester tester) async {
-      await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.startTop));
+      await tester.pumpWidget(buildFrame(location: const _StartTopFloatingActionButtonLocation()));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 56.0));
 
@@ -63,7 +63,7 @@ void main() {
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(400.0, 356.0));
       expect(tester.binding.transientCallbackCount, 0);
 
-      await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.startTop));
+      await tester.pumpWidget(buildFrame(location: const _StartTopFloatingActionButtonLocation()));
 
       expect(tester.binding.transientCallbackCount, greaterThan(0));
 
@@ -110,7 +110,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Moving the fab to the top start after finishing the previous motion
-      await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.startTop, listener: geometryListener));
+      await tester.pumpWidget(buildFrame(location: const _StartTopFloatingActionButtonLocation(), listener: geometryListener));
 
       // Interrupting motion to move to the end float
       await tester.pumpWidget(buildFrame(location: FloatingActionButtonLocation.endFloat, listener: geometryListener));
@@ -256,4 +256,26 @@ Widget buildFrame({
       ),
     ),
   );
+}
+
+class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _StartTopFloatingActionButtonLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    double fabX;
+    assert(scaffoldGeometry.textDirection != null);
+    switch (scaffoldGeometry.textDirection) {
+      case TextDirection.rtl:
+        final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.right;
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - startPadding;
+        break;
+      case TextDirection.ltr:
+        final double startPadding = kFloatingActionButtonMargin + scaffoldGeometry.minInsets.left;
+        fabX = startPadding;
+        break;
+    }
+    final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
+    return new Offset(fabX, fabY);
+  }
 }
