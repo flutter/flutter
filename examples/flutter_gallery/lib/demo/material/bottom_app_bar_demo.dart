@@ -55,7 +55,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   // The currently-selected Color for the Bottom App Bar.
   Color babColor;
 
-  List<Color> babColors = <Color> [
+  static const List<Color> babColors = const <Color> [
     null,
     Colors.orange,
     Colors.green,
@@ -99,7 +99,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         new Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            new Container(width: 96.0,
+            const SizedBox(width: 96.0,
               child: const Text('Shape: '),
             ),
             new Expanded(child: buildFabShapePicker()),
@@ -108,7 +108,8 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         new Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            new Container(width: 96.0,
+            const SizedBox(
+              width: 96.0,
               child: const Text('Location: '),
             ),
             new Expanded(child: buildFabLocationPicker()),
