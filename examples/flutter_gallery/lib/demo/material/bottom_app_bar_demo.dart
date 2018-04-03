@@ -259,7 +259,7 @@ class MyBottomAppBar extends StatelessWidget {
           new IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () {
-              showModalBottomSheet<Null>(context: context, builder: (BuildContext context) => const MyDrawer()); },
+              showModalBottomSheet<Null>(context: context, builder: (BuildContext context) => const _MyDrawer()); },
           ),
           new Expanded(
             child: new AnimatedCrossFade(
@@ -306,8 +306,8 @@ class MyBottomAppBar extends StatelessWidget {
 }
 
 // A drawer that pops up from the bottom of the screen.
-class MyDrawer extends StatelessWidget {
-  const MyDrawer();
+class _MyDrawer extends StatelessWidget {
+  const _MyDrawer();
 
   @override
   Widget build(BuildContext context) {
