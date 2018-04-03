@@ -15,6 +15,8 @@ class BottomAppBarDemo extends StatefulWidget {
 }
 
 class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
+  // The key given to the Scaffold so that _showSnackbar can find it.
+  static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   // The index of the currently-selected _FabLocationConfiguration.
   int fabLocationIndex = 1;
@@ -34,21 +36,17 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   final List<_FabShapeConfiguration> _fabShapeConfigurations =  <_FabShapeConfiguration>[
       const _FabShapeConfiguration('None', null),
       new _FabShapeConfiguration('Circular', 
-        new Builder(builder: (BuildContext context) {
-          return new FloatingActionButton(
-            onPressed: () => _showSnackbar(context),
-            child: const Icon(Icons.add),
-            backgroundColor: Colors.orange,
-          );
-        }),
+        new FloatingActionButton(
+          onPressed: () => _showSnackbar(),
+          child: const Icon(Icons.add),
+          backgroundColor: Colors.orange,
+        ),
       ),
       new _FabShapeConfiguration('Diamond',
-        new Builder(builder: (BuildContext context) {
-          return new _DiamondFab(
-            onPressed: () => _showSnackbar(context),
-            child: const Icon(Icons.add),
-          );
-        }),
+        new _DiamondFab(
+          onPressed: () => _showSnackbar(),
+          child: const Icon(Icons.add),
+        ),
       ),
     ];
 
@@ -69,6 +67,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      key: _scaffoldKey,
       appBar: new AppBar(
         title: const Text('Bottom App Bar with FAB location'), 
         // Add 48dp of space onto the bottom of the appbar.
@@ -210,8 +209,10 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     );
   }
 
-  static void _showSnackbar(BuildContext context) {
-    Scaffold.of(context).showSnackBar(const SnackBar(content: const Text(_explanatoryText)));
+  static void _showSnackbar() {
+    _scaffoldKey.currentState.showSnackBar(
+      const SnackBar(content: const Text(_explanatoryText)),
+    );
   }
 }
 
