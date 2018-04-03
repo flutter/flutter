@@ -22,10 +22,10 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   int fabLocationIndex = 1;
 
   static const List<_FabLocationConfiguration> _fabLocationConfigurations = const <_FabLocationConfiguration>[
-    const _FabLocationConfiguration('Center, undocked above the bottom app bar', _BabMode.CENTER_FAB, FloatingActionButtonLocation.centerFloat),
     const _FabLocationConfiguration('End, undocked above the bottom app bar', _BabMode.END_FAB, FloatingActionButtonLocation.endFloat),
-    const _FabLocationConfiguration('Center, docked to the bottom app bar', _BabMode.CENTER_FAB, const _CenterDockedFloatingActionButtonLocation()),
     const _FabLocationConfiguration('End, docked to the bottom app bar', _BabMode.END_FAB, const _EndDockedFloatingActionButtonLocation()),
+    const _FabLocationConfiguration('Center, docked to the bottom app bar', _BabMode.CENTER_FAB, const _CenterDockedFloatingActionButtonLocation()),
+    const _FabLocationConfiguration('Center, undocked above the bottom app bar', _BabMode.CENTER_FAB, FloatingActionButtonLocation.centerFloat),
     // This configuration uses a custom FloatingActionButtonLocation.
     const _FabLocationConfiguration('Start, docked to the top app bar', _BabMode.CENTER_FAB, const _TopStartFloatingActionButtonLocation()),
   ];
@@ -131,25 +131,13 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   }
 
   Widget buildFabShapePicker() {
-    final List<DropdownMenuItem<int>> options = <DropdownMenuItem<int>>[];
-    for (int i = 0; i < _fabShapeConfigurations.length; i++) {
-      final _FabShapeConfiguration configuration = _fabShapeConfigurations[i];
-      options.add(
-        new DropdownMenuItem<int>(
-          child: new Text(configuration.name),
-          value: i,
-        ),
-      );
-    }
-    return new SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      primary: false,
-      child: new DropdownButton<int>(
-        items: options, 
-        value: fabShapeIndex,
-        onChanged: (int newIndex) {
+    return new Padding(
+      padding: const EdgeInsets.all(8.0), 
+      child: new RaisedButton(
+        child: const Text('Change'),
+        onPressed: () {
           setState(() {
-            fabShapeIndex = newIndex;
+            fabShapeIndex = (fabShapeIndex + 1) % _fabShapeConfigurations.length;
           });
         },
       ),
@@ -157,25 +145,13 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   }
 
   Widget buildFabLocationPicker() {
-    final List<DropdownMenuItem<int>> options = <DropdownMenuItem<int>> [];
-    for (int i = 0; i < _fabLocationConfigurations.length; i++) {
-      final _FabLocationConfiguration configuration = _fabLocationConfigurations[i];
-      options.add(
-          new DropdownMenuItem<int>(
-          child: new Text(configuration.name, overflow: TextOverflow.ellipsis),
-          value: i,
-        ),
-      );
-    }
-    return new SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      primary: false,
-      child: new DropdownButton<int>(
-        items: options,
-        value: fabLocationIndex,
-        onChanged: (int newIndex) {
+    return new Padding(
+      padding: const EdgeInsets.all(8.0), 
+      child: new RaisedButton(
+        child: const Text('Move'),
+        onPressed: () {
           setState(() {
-            fabLocationIndex = newIndex;
+            fabLocationIndex = (fabLocationIndex + 1) % _fabLocationConfigurations.length;
           });
         },
       ),
