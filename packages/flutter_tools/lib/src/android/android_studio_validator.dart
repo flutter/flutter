@@ -4,11 +4,10 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/intellij/intellij.dart';
-
 import '../base/version.dart';
 import '../doctor.dart';
 import '../globals.dart';
+import '../intellij/intellij.dart';
 import 'android_studio.dart';
 
 class AndroidStudioValidator extends DoctorValidator {
