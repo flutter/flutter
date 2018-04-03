@@ -220,6 +220,7 @@ class MethodChannel {
   ///         result.notImplemented();
   ///     }
   ///   }
+  ///   // Other methods elided.
   /// }
   /// ```
   ///
@@ -229,32 +230,33 @@ class MethodChannel {
   ///
   /// // Assumes existence of an iOS Broadway Play Api.
   /// @implementation MusicPlugin
-  ///   - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
-  ///     if ([@"isLicensed" isEqualToString:call.method]) {
-  ///       result([NSNumber numberWithBool:[BWPlayApi isLicensed]]);
-  ///     } else if ([@"getSongs" isEqualToString:call.method]) {
-  ///       NSArray* items = [BWPlayApi items];
-  ///       NSMutableArray* json = [NSMutableArray arrayWithCapacity:items.count];
-  ///       for (BWPlayItem* item in items) {
-  ///         [json addObject:@{@"id":item.itemId, @"title":item.name, @"artist":item.artist}];
-  ///       }
-  ///       result(json);
-  ///     } else if ([@"play" isEqualToString:call.method]) {
-  ///       NSString* itemId = call.arguments[@"song"];
-  ///       NSNumber* volume = call.arguments[@"volume"];
-  ///       NSError* error = nil;
-  ///       BOOL success = [BWPlayApi playItem:itemId volume:volume.doubleValue error:&error];
-  ///       if (success) {
-  ///         result(nil);
-  ///       } else {
-  ///         result([FlutterError errorWithCode:[NSString stringWithFormat:@"Error %ld", error.code]
-  ///                                    message:error.domain
-  ///                                    details:error.localizedDescription]);
-  ///       }
-  ///     } else {
-  ///       result(FlutterMethodNotImplemented);
+  /// - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
+  ///   if ([@"isLicensed" isEqualToString:call.method]) {
+  ///     result([NSNumber numberWithBool:[BWPlayApi isLicensed]]);
+  ///   } else if ([@"getSongs" isEqualToString:call.method]) {
+  ///     NSArray* items = [BWPlayApi items];
+  ///     NSMutableArray* json = [NSMutableArray arrayWithCapacity:items.count];
+  ///     for (BWPlayItem* item in items) {
+  ///       [json addObject:@{@"id":item.itemId, @"title":item.name, @"artist":item.artist}];
   ///     }
+  ///     result(json);
+  ///   } else if ([@"play" isEqualToString:call.method]) {
+  ///     NSString* itemId = call.arguments[@"song"];
+  ///     NSNumber* volume = call.arguments[@"volume"];
+  ///     NSError* error = nil;
+  ///     BOOL success = [BWPlayApi playItem:itemId volume:volume.doubleValue error:&error];
+  ///     if (success) {
+  ///       result(nil);
+  ///     } else {
+  ///       result([FlutterError errorWithCode:[NSString stringWithFormat:@"Error %ld", error.code]
+  ///                                  message:error.domain
+  ///                                  details:error.localizedDescription]);
+  ///     }
+  ///   } else {
+  ///     result(FlutterMethodNotImplemented);
   ///   }
+  /// }
+  /// // Other methods elided.
   /// @end
   /// ```
   ///
