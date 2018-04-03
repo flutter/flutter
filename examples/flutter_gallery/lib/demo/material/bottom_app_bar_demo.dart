@@ -51,10 +51,8 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
       ),
     ];
 
-  Map<_BabMode, String> babModeToName = <_BabMode, String>{
-    _BabMode.END_FAB: 'Right aligned floating action button',
-    _BabMode.CENTER_FAB: 'Center aligned floating action button',
-  };
+  // The currently-selected Color for the Bottom App Bar.
+  Color babColor;
 
   List<Color> babColors = <Color> [
     null,
@@ -63,8 +61,8 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     Colors.lightBlue,
   ];
 
-  Color babColor;
-
+  // Whether or not to show a notch in the Bottom App Bar around the
+  // Floating Action Button when it is docked.
   bool notchEnabled = true;
 
   @override
