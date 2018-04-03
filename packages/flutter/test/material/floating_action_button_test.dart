@@ -91,7 +91,10 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           floatingActionButton: new FloatingActionButton.extended(
-            label: const Text('label'),
+            label: const SizedBox(
+              width: 100.0,
+              child: const Text('label'),
+            ),
             icon: const Icon(Icons.android),
             onPressed: null,
           ),
@@ -107,6 +110,7 @@ void main() {
     // Verify that the widget's height is 48 and that its internal
     /// horizontal layout is: 16 icon 8 label 20
     expect(tester.getSize(fabFinder).height, 48.0);
+
     final double fabLeft = tester.getTopLeft(fabFinder).dx;
     final double fabRight = tester.getTopRight(fabFinder).dx;
     final double iconLeft = tester.getTopLeft(find.byType(Icon)).dx;
@@ -116,6 +120,12 @@ void main() {
     expect(iconLeft - fabLeft, 16.0);
     expect(labelLeft - iconRight, 8.0);
     expect(fabRight - labelRight, 20.0);
+
+    // The overall width of the button is:
+    // 168 = 16 + 24(icon) + 8 + 100(label) + 20
+    expect(tester.getSize(find.byType(Icon)).width, 24.0);
+    expect(tester.getSize(find.text('label')).width, 100.0);
+    expect(tester.getSize(fabFinder).width, 168);
   });
 
   testWidgets('Floating Action Button heroTag', (WidgetTester tester) async {

@@ -12,37 +12,37 @@ import 'scaffold.dart';
 // TODO(hmuller): should be device dependent.
 /// The margin that a [FloatingActionButton] should leave between it and the
 /// edge of the screen.
-/// 
+///
 /// [FloatingActionButtonLocation.endFloat] uses this to set the appropriate margin
 /// between the [FloatingActionButton] and the end of the screen.
-const double kFloatingActionButtonMargin = 16.0; 
+const double kFloatingActionButtonMargin = 16.0;
 
 /// The amount of time the [FloatingActionButton] takes to transition in or out.
-/// 
-/// The [Scaffold] uses this to set the duration of [FloatingActionButton] 
+///
+/// The [Scaffold] uses this to set the duration of [FloatingActionButton]
 /// motion, entrance, and exit animations.
 const Duration kFloatingActionButtonSegue = const Duration(milliseconds: 200);
 
 /// The fraction of a circle the [FloatingActionButton] should turn when it enters.
-/// 
+///
 /// Its value corresponds to 0.125 of a full circle, equivalent to 45 degrees or pi/4 radians.
 const double kFloatingActionButtonTurnInterval = 0.125;
 
 /// An object that defines a position for the [FloatingActionButton]
 /// based on the [Scaffold]'s [ScaffoldPrelayoutGeometry].
-/// 
+///
 /// Flutter provides [FloatingActionButtonLocation]s for the common
 /// [FloatingActionButton] placements in Material Design applications. These
 /// locations are available as static members of this class.
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [FloatingActionButton], which is a circular button typically shown in the
 ///    bottom right corner of the app.
 ///  * [FloatingActionButtonAnimator], which is used to animate the
-///    [Scaffold.floatingActionButton] from one [FloatingActionButtonLocation] to 
+///    [Scaffold.floatingActionButton] from one [FloatingActionButtonLocation] to
 ///    another.
-///  * [ScaffoldPrelayoutGeometry], the geometry that 
+///  * [ScaffoldPrelayoutGeometry], the geometry that
 ///    [FloatingActionButtonLocation]s use to position the [FloatingActionButton].
 abstract class FloatingActionButtonLocation {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -50,15 +50,39 @@ abstract class FloatingActionButtonLocation {
   const FloatingActionButtonLocation();
 
   /// End-aligned [FloatingActionButton], floating at the bottom of the screen.
-  /// 
+  ///
   /// This is the default alignment of [FloatingActionButton]s in Material applications.
   static const FloatingActionButtonLocation endFloat = const _EndFloatFabLocation();
 
   /// Centered [FloatingActionButton], floating at the bottom of the screen.
   static const FloatingActionButtonLocation centerFloat = const _CenterFloatFabLocation();
 
+  /// End-aligned [FloatingActionButton], floating over the
+  /// [Scaffold.bottomNavigationBar] so that the center of the floating
+  /// action button lines up with the top of the bottom navigation bar.
+  ///
+  /// If the value of [Scaffold.bottomNavigationBar] is a [BottomAppBar],
+  /// the bottom app bar can include a "notch" in its shape that accommodates
+  /// the overlapping floating action button.
+  ///
+  /// This is unlikely to be a useful location for apps that lack a bottom
+  /// navigation bar.
+  static FloatingActionButtonLocation endDocked = const _EndDockedFloatingActionButtonLocation();
+
+  /// Center-aligned [FloatingActionButton], floating over the
+  /// [Scaffold.bottomNavigationBar] so that the center of the floating
+  /// action button lines up with the top of the bottom navigation bar.
+  ///
+  /// If the value of [Scaffold.bottomNavigationBar] is a [BottomAppBar],
+  /// the bottom app bar can include a "notch" in its shape that accomodates
+  /// the overlapping floating action button.
+  ///
+  /// This is unlikely to be a useful location for apps that lack a bottom
+  /// navigation bar.
+  static FloatingActionButtonLocation centerDocked = const _CenterDockedFloatingActionButtonLocation();
+
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
-  /// 
+  ///
   /// This uses a [ScaffoldPrelayoutGeometry], which the [Scaffold] constructs
   /// during its layout phase after it has laid out every widget it can lay out
   /// except the [FloatingActionButton]. The [Scaffold] uses the [Offset]
@@ -130,8 +154,70 @@ class _EndFloatFabLocation extends FloatingActionButtonLocation {
   }
 }
 
+// Provider of common logic for [FloatingActionButtonLocation]s that
+// dock to the [BottomAppBar].
+abstract class _DockedFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _DockedFloatingActionButtonLocation();
+
+  // Positions the Y coordinate of the [FloatingActionButton] at a height
+  // where it docks to the [BottomAppBar].
+  @protected
+  double getDockedY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final double contentBottom = scaffoldGeometry.contentBottom;
+    final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
+    final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
+    final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
+
+    double fabY = contentBottom - fabHeight / 2.0;
+    // The FAB should sit with a margin between it and the snack bar.
+    if (snackBarHeight > 0.0)
+      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - kFloatingActionButtonMargin);
+    // The FAB should sit with its center in front of the top of the bottom sheet.
+    if (bottomSheetHeight > 0.0)
+      fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
+
+    final double maxFabY = scaffoldGeometry.scaffoldSize.height - fabHeight;
+    return math.min(maxFabY, fabY);
+  }
+}
+
+class _EndDockedFloatingActionButtonLocation extends _DockedFloatingActionButtonLocation {
+  const _EndDockedFloatingActionButtonLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    // Compute the x-axis offset.
+    double fabX;
+    assert(scaffoldGeometry.textDirection != null);
+    switch (scaffoldGeometry.textDirection) {
+      case TextDirection.rtl:
+        // In RTL, the end of the screen is the left.
+        final double endPadding = scaffoldGeometry.minInsets.left;
+        fabX = kFloatingActionButtonMargin + endPadding;
+        break;
+      case TextDirection.ltr:
+        // In LTR, the end of the screen is the right.
+        final double endPadding = scaffoldGeometry.minInsets.right;
+        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - kFloatingActionButtonMargin - endPadding;
+      break;
+    }
+    // Return an offset with a docked Y coordinate.
+    return new Offset(fabX, getDockedY(scaffoldGeometry));
+  }
+}
+
+class _CenterDockedFloatingActionButtonLocation extends _DockedFloatingActionButtonLocation {
+  const _CenterDockedFloatingActionButtonLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
+    return new Offset(fabX, getDockedY(scaffoldGeometry));
+  }
+}
+
 /// Provider of animations to move the [FloatingActionButton] between [FloatingActionButtonLocation]s.
-/// 
+///
 /// The [Scaffold] uses [Scaffold.floatingActionButtonAnimator] to define:
 ///
 ///  * The [Offset] of the [FloatingActionButton] between the old and new
@@ -139,48 +225,48 @@ class _EndFloatFabLocation extends FloatingActionButtonLocation {
 ///  * An [Animation] to scale the [FloatingActionButton] during the transition.
 ///  * An [Animation] to rotate the [FloatingActionButton] during the transition.
 ///  * Where to start a new animation from if an animation is interrupted.
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [FloatingActionButton], which is a circular button typically shown in the
 ///    bottom right corner of the app.
-///  * [FloatingActionButtonLocation], which the [Scaffold] uses to place the 
-///    [Scaffold.floatingActionButton] within the [Scaffold]'s layout. 
+///  * [FloatingActionButtonLocation], which the [Scaffold] uses to place the
+///    [Scaffold.floatingActionButton] within the [Scaffold]'s layout.
 abstract class FloatingActionButtonAnimator {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const FloatingActionButtonAnimator();
 
-  /// Moves the [FloatingActionButton] by scaling out and then in at a new 
+  /// Moves the [FloatingActionButton] by scaling out and then in at a new
   /// [FloatingActionButtonLocation].
-  /// 
+  ///
   /// This animator shrinks the [FloatingActionButton] down until it disappears, then
   /// grows it back to full size at its new [FloatingActionButtonLocation].
-  /// 
+  ///
   /// This is the default [FloatingActionButton] motion animation.
   static const FloatingActionButtonAnimator scaling = const _ScalingFabMotionAnimator();
 
   /// Gets the [FloatingActionButton]'s position relative to the origin of the
   /// [Scaffold] based on [progress].
-  /// 
-  /// [begin] is the [Offset] provided by the previous 
+  ///
+  /// [begin] is the [Offset] provided by the previous
   /// [FloatingActionButtonLocation].
-  /// 
-  /// [end] is the [Offset] provided by the new 
+  ///
+  /// [end] is the [Offset] provided by the new
   /// [FloatingActionButtonLocation].
-  /// 
+  ///
   /// [progress] is the current progress of the transition animation.
   /// When [progress] is 0.0, the returned [Offset] should be equal to [begin].
   /// when [progress] is 1.0, the returned [Offset] should be equal to [end].
   Offset getOffset({@required Offset begin, @required Offset end, @required double progress});
 
   /// Animates the scale of the [FloatingActionButton].
-  /// 
+  ///
   /// The animation should both start and end with a value of 1.0.
-  /// 
+  ///
   /// For example, to create an animation that linearly scales out and then back in,
   /// you could join animations that pass each other:
-  /// 
+  ///
   /// ```dart
   ///   @override
   ///   Animation<double> getScaleAnimation({@required Animation<double> parent}) {
@@ -194,15 +280,15 @@ abstract class FloatingActionButtonAnimator {
   Animation<double> getScaleAnimation({@required Animation<double> parent});
 
   /// Animates the rotation of [Scaffold.floatingActionButton].
-  /// 
+  ///
   /// The animation should both start and end with a value of 0.0 or 1.0.
-  /// 
+  ///
   /// The animation values are a fraction of a full circle, with 0.0 and 1.0
   /// corresponding to 0 and 360 degrees, while 0.5 corresponds to 180 degrees.
-  /// 
-  /// For example, to create a rotation animation that rotates the 
+  ///
+  /// For example, to create a rotation animation that rotates the
   /// [FloatingActionButton] through a full circle:
-  /// 
+  ///
   /// ```dart
   ///   @override
   ///   Animation<double> getRotationAnimation({@required Animation<double> parent}) {
@@ -212,15 +298,15 @@ abstract class FloatingActionButtonAnimator {
   Animation<double> getRotationAnimation({@required Animation<double> parent});
 
   /// Gets the progress value to restart a motion animation from when the animation is interrupted.
-  /// 
+  ///
   /// [previousValue] is the value of the animation before it was interrupted.
-  /// 
+  ///
   /// The restart of the animation will affect all three parts of the motion animation:
   /// offset animation, scale animation, and rotation animation.
-  /// 
+  ///
   /// An interruption triggers if the [Scaffold] is given a new [FloatingActionButtonLocation]
   /// while it is still animating a transition between two previous [FloatingActionButtonLocation]s.
-  /// 
+  ///
   /// A sensible default is usually 0.0, which is the same as restarting
   /// the animation from the beginning, regardless of the original state of the animation.
   double getAnimationRestart(double previousValue) => 0.0;
@@ -256,10 +342,10 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
 
   @override
   Animation<double> getRotationAnimation({Animation<double> parent}) {
-    // Because we only see the last half of the rotation tween, 
+    // Because we only see the last half of the rotation tween,
     // it needs to go twice as far.
     final Tween<double> rotationTween = new Tween<double>(
-      begin: 1.0 - kFloatingActionButtonTurnInterval * 2, 
+      begin: 1.0 - kFloatingActionButtonTurnInterval * 2,
       end: 1.0,
     );
     // This rotation will turn on the way in, but not on the way out.
