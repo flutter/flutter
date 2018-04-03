@@ -75,11 +75,12 @@ Future<Null> _verifyInternationalizations() async {
 
   final String localizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'localizations.dart');
 
-  final EvalResult sourceContents = await _evalCommand(
-    'cat',
-    <String>[localizationsFile],
-    workingDirectory: flutterRoot,
-  );
+  final String executable = Platform.isWindows ? 'powershell' : 'cat';
+  final List<String> args = Platform.isWindows ?
+      <String>['\$PSDefaultParameterValues["*:Encoding"]="utf8";(gc $localizationsFile) -join "`n"']:
+      <String>[localizationsFile];
+
+  final EvalResult sourceContents = await _evalCommand(executable, args, workingDirectory: flutterRoot);
 
   if (genResult.stdout.trim() != sourceContents.stdout.trim()) {
     stderr
