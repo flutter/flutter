@@ -75,7 +75,7 @@ Future<Null> _verifyInternationalizations() async {
 
   final String localizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'localizations.dart');
 
-  final String executable = Platform.isWindows ? "powershell" : "cat";
+  final String executable = Platform.isWindows ? 'powershell' : 'cat';
   final List<String> args = Platform.isWindows ?
       <String>['\$PSDefaultParameterValues["*:Encoding"]="utf8";(gc $localizationsFile) -join "`n"']:
       <String>[localizationsFile];
