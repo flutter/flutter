@@ -153,7 +153,8 @@ FlutterResult FlutterEngineRun(size_t version,
     shell::Shell::InitStandalone(
         std::move(command_line),
         icu_data_path,  // icu data path default lookup.
-        ""              // application library not supported in JIT mode.
+        "",             // application library not supported in JIT mode.
+        args->assets_path
     );
   });
 
