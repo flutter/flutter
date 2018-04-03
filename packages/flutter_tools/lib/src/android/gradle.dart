@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+
+import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
@@ -223,12 +226,81 @@ void updateLocalProperties({String projectPath, BuildInfo buildInfo}) {
     settings.writeContents(localProperties);
 }
 
+Future<Null> findAndReplaceVersionProperties({@required BuildInfo buildInfo}) {
+  assert(buildInfo != null, 'buildInfo can\'t be null');
+  final Completer<Null> completer = new Completer<Null>();
+
+  // early return, if nothing has to be changed
+  if (buildInfo.buildNumber == null && buildInfo.buildName == null) {
+    completer.complete();
+    return completer.future;
+  }
+
+  final File appGradle = fs.file(fs.path.join('android', 'app', 'build.gradle'));
+  final File appGradleTmp = fs.file(fs.path.join('android', 'app', 'build.gradle.tmp'));
+  appGradleTmp.createSync();
+
+  if (appGradle.existsSync() && appGradleTmp.existsSync()) {
+    final Stream<List<int>> inputStream = appGradle.openRead();
+    final IOSink sink = appGradleTmp.openWrite();
+
+    inputStream.transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .map((String line) {
+
+          // find and replace build number
+          if (buildInfo.buildNumber != null) {
+            if (line.contains(new RegExp(r'^[ |\t]*(versionCode)[ =\t]*\d*'))) {
+              return line.splitMapJoin(new RegExp(r'(versionCode)[ =\t]*\d*'), onMatch: (Match m) {
+                return 'versionCode ${buildInfo.buildNumber}';
+              });
+            }
+          }
+
+          // find and replace build name
+          if (buildInfo.buildName != null) {
+            if (line.contains(new RegExp(r'^[ |\t]*(versionName)[ =\t]*\"[0-9.]*"'))) {
+              return line.splitMapJoin(new RegExp(r'(versionName)[ =\t]*\"[0-9.]*"'), onMatch: (Match m) {
+                return 'versionName "${buildInfo.buildName}"';
+              });
+            }
+          }
+          return line;
+        })
+        .listen((String line) {
+            sink.writeln(line);
+          },
+          onDone: () {
+            sink.close();
+            try {
+              final File gradleOld = appGradle.renameSync(fs.path.join('android', 'app', 'build.gradle.old'));
+              appGradleTmp.renameSync(fs.path.join('android', 'app', 'build.gradle'));
+              gradleOld.deleteSync();
+              completer.complete();
+            } catch (error) {
+              printError('Failed to change version properties. $error');
+              completer.completeError('Failed to change version properties. $error');
+            }
+          },
+          onError: (dynamic error, StackTrace stack) {
+            printError('Failed to change version properties. ${error.toString()}');
+            sink.close();
+            appGradleTmp.deleteSync();
+            completer.completeError('Failed to change version properties. ${error.toString()}', stack);
+          },
+    );
+  }
+
+  return completer.future;
+}
+
 Future<Null> buildGradleProject(BuildInfo buildInfo, String target) async {
   // Update the local.properties file with the build mode.
   // FlutterPlugin v1 reads local.properties to determine build mode. Plugin v2
   // uses the standard Android way to determine what to build, but we still
   // update local.properties, in case we want to use it in the future.
   updateLocalProperties(buildInfo: buildInfo);
+  await findAndReplaceVersionProperties(buildInfo: buildInfo);
 
   final String gradle = await _ensureGradle();
 

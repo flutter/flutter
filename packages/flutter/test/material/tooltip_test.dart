@@ -543,7 +543,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: new Navigator(
             onGenerateRoute: (RouteSettings settings) {
-              return new MaterialPageRoute<dynamic>(
+              return new MaterialPageRoute<void>(
                 builder: (BuildContext context) {
                   return new Center(
                     child: new Tooltip(

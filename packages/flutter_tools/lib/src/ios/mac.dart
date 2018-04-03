@@ -35,9 +35,9 @@ const int kXcodeRequiredVersionMinor = 0;
 // Homebrew.
 const PythonModule kPythonSix = const PythonModule('six');
 
-IMobileDevice get iMobileDevice => context.putIfAbsent(IMobileDevice, () => const IMobileDevice());
+IMobileDevice get iMobileDevice => context[IMobileDevice];
 
-Xcode get xcode => context.putIfAbsent(Xcode, () => new Xcode());
+Xcode get xcode => context[Xcode];
 
 class PythonModule {
   const PythonModule(this.name);
@@ -225,9 +225,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     return new XcodeBuildResult(success: false);
   }
 
-  String developmentTeam;
+  Map<String, String> autoSigningConfigs;
   if (codesign && buildForDevice)
-    developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: usesTerminalUi);
+    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: usesTerminalUi);
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -250,6 +250,53 @@ Future<XcodeBuildResult> buildXcodeProject({
       isSwift: app.isSwift,
       flutterPodChanged: previousGeneratedXcconfig != currentGeneratedXcconfig,
     );
+  }
+
+  // If buildNumber is not specified, keep the project untouched.
+  if (buildInfo.buildNumber != null) {
+    final Status buildNumberStatus =
+        logger.startProgress('Setting CFBundleVersion...', expectSlowOperation: true);
+    try {
+      final RunResult buildNumberResult = await runAsync(
+        <String>[
+          '/usr/bin/env',
+          'xcrun',
+          'agvtool',
+          'new-version',
+          '-all',
+          buildInfo.buildNumber.toString(),
+        ],
+        workingDirectory: app.appDirectory,
+      );
+      if (buildNumberResult.exitCode != 0) {
+        throwToolExit('Xcode failed to set new version\n${buildNumberResult.stderr}');
+      }
+    } finally {
+      buildNumberStatus.stop();
+    }
+  }
+
+  // If buildName is not specified, keep the project untouched.
+  if (buildInfo.buildName != null) {
+    final Status buildNameStatus =
+        logger.startProgress('Setting CFBundleShortVersionString...', expectSlowOperation: true);
+    try {
+      final RunResult buildNameResult = await runAsync(
+        <String>[
+          '/usr/bin/env',
+          'xcrun',
+          'agvtool',
+          'new-marketing-version',
+          buildInfo.buildName,
+        ],
+        workingDirectory: app.appDirectory,
+      );
+      if (buildNameResult.exitCode != 0) {
+        throwToolExit('Xcode failed to set new marketing version\n${buildNameResult.stderr}');
+      }
+    } finally {
+      buildNameStatus.stop();
+    }
   }
 
   final Status cleanStatus =
@@ -287,8 +334,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('-quiet');
   }
 
-  if (developmentTeam != null) {
-    buildCommands.add('DEVELOPMENT_TEAM=$developmentTeam');
+  if (autoSigningConfigs != null) {
+    for (MapEntry<String, String> signingConfig in autoSigningConfigs.entries) {
+      buildCommands.add('${signingConfig.key}=${signingConfig.value}');
+    }
     buildCommands.add('-allowProvisioningUpdates');
     buildCommands.add('-allowProvisioningDeviceRegistration');
   }

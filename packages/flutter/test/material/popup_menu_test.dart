@@ -453,7 +453,7 @@ class _TestAppState extends State<TestApp> {
           child: new Navigator(
             onGenerateRoute: (RouteSettings settings) {
               assert(settings.name == '/');
-              return new MaterialPageRoute<dynamic>(
+              return new MaterialPageRoute<void>(
                 settings: settings,
                 builder: (BuildContext context) => new Material(
                   child: widget.child,

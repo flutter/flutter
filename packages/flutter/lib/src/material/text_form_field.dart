@@ -67,6 +67,7 @@ class TextFormField extends FormField<String> {
     FormFieldSetter<String> onSaved,
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
+    bool enabled,
   }) : assert(initialValue == null || controller == null),
        assert(keyboardType != null),
        assert(textAlign != null),
@@ -98,9 +99,10 @@ class TextFormField extends FormField<String> {
         maxLengthEnforced: maxLengthEnforced,
         maxLines: maxLines,
         maxLength: maxLength,
-        onChanged: field.onChanged,
+        onChanged: field.didChange,
         onSubmitted: onFieldSubmitted,
         inputFormatters: inputFormatters,
+        enabled: enabled,
       );
     },
   );
@@ -173,6 +175,6 @@ class _TextFormFieldState extends FormFieldState<String> {
     // example, the reset() method. In such cases, the FormField value will
     // already have been set.
     if (_effectiveController.text != value)
-      onChanged(_effectiveController.text);
+      didChange(_effectiveController.text);
   }
 }

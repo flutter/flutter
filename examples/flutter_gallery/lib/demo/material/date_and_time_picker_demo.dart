@@ -138,8 +138,10 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
             padding: const EdgeInsets.all(16.0),
             children: <Widget>[
               new TextField(
+                enabled: true,
                 decoration: const InputDecoration(
                   labelText: 'Event name',
+                  border: const OutlineInputBorder(),
                 ),
                 style: Theme.of(context).textTheme.display1,
               ),

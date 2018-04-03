@@ -65,8 +65,57 @@ void main() {
 
     expect(find.byType(Text), findsNothing);
     await tester.longPress(find.byType(FloatingActionButton));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.byType(Text), findsOneWidget);
+  });
+
+  testWidgets('FloatingActionButton.isExtended', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          floatingActionButton: const FloatingActionButton(onPressed: null),
+        ),
+      ),
+    );
+
+    final Finder fabFinder = find.byType(FloatingActionButton);
+
+    FloatingActionButton getFabWidget() {
+      return tester.widget<FloatingActionButton>(fabFinder);
+    }
+
+    expect(getFabWidget().isExtended, false);
+    expect(getFabWidget().shape, const CircleBorder());
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          floatingActionButton: new FloatingActionButton.extended(
+            label: const Text('label'),
+            icon: const Icon(Icons.android),
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(getFabWidget().isExtended, true);
+    expect(getFabWidget().shape, const StadiumBorder());
+    expect(find.text('label'), findsOneWidget);
+    expect(find.byType(Icon), findsOneWidget);
+
+    // Verify that the widget's height is 48 and that its internal
+    /// horizontal layout is: 16 icon 8 label 20
+    expect(tester.getSize(fabFinder).height, 48.0);
+    final double fabLeft = tester.getTopLeft(fabFinder).dx;
+    final double fabRight = tester.getTopRight(fabFinder).dx;
+    final double iconLeft = tester.getTopLeft(find.byType(Icon)).dx;
+    final double iconRight = tester.getTopRight(find.byType(Icon)).dx;
+    final double labelLeft = tester.getTopLeft(find.text('label')).dx;
+    final double labelRight = tester.getTopRight(find.text('label')).dx;
+    expect(iconLeft - fabLeft, 16.0);
+    expect(labelLeft - iconRight, 8.0);
+    expect(fabRight - labelRight, 20.0);
   });
 
   testWidgets('Floating Action Button heroTag', (WidgetTester tester) async {
@@ -84,7 +133,7 @@ void main() {
         ),
       ),
     );
-    Navigator.push(theContext, new PageRouteBuilder<Null>(
+    Navigator.push(theContext, new PageRouteBuilder<void>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         return const Placeholder();
       },
@@ -107,7 +156,7 @@ void main() {
         ),
       ),
     );
-    Navigator.push(theContext, new PageRouteBuilder<Null>(
+    Navigator.push(theContext, new PageRouteBuilder<void>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         return const Placeholder();
       },
@@ -131,7 +180,7 @@ void main() {
         ),
       ),
     );
-    Navigator.push(theContext, new PageRouteBuilder<Null>(
+    Navigator.push(theContext, new PageRouteBuilder<void>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         return const Placeholder();
       },
@@ -196,6 +245,40 @@ void main() {
           flags: <SemanticsFlag>[
             SemanticsFlag.isButton,
             SemanticsFlag.hasEnabledState,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Tooltip is used as semantics label', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          floatingActionButton: new FloatingActionButton(
+            onPressed: () { },
+            tooltip: 'Add Photo',
+            child: const Icon(Icons.add_a_photo),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'Add Photo',
+          actions: <SemanticsAction>[
+            SemanticsAction.tap
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
           ],
         ),
       ],
@@ -372,7 +455,7 @@ class GeometryListenerState extends State<GeometryListener> {
     final ValueListenable<ScaffoldGeometry> newListenable = Scaffold.geometryOf(context);
     if (geometryListenable == newListenable)
       return;
-    
+
     geometryListenable = newListenable;
     cache = new GeometryCachePainter(geometryListenable);
   }

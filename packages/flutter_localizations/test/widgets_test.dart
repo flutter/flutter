@@ -153,7 +153,7 @@ Widget buildFrame({
     localeResolutionCallback: localeResolutionCallback,
     supportedLocales: supportedLocales,
     onGenerateRoute: (RouteSettings settings) {
-      return new PageRouteBuilder<Null>(
+      return new PageRouteBuilder<void>(
         pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
           return buildContent(context);
         }

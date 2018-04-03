@@ -86,7 +86,7 @@ class BackButton extends StatelessWidget {
       color: color,
       tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () {
-        Navigator.of(context).maybePop();
+        Navigator.maybePop(context);
       }
     );
   }
@@ -118,7 +118,7 @@ class CloseButton extends StatelessWidget {
       icon: const Icon(Icons.close),
       tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
       onPressed: () {
-        Navigator.of(context).maybePop();
+        Navigator.maybePop(context);
       },
     );
   }

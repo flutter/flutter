@@ -22,19 +22,15 @@ const FileSystem _kLocalFs = const LocalFileSystem();
 ///
 /// By default it uses local disk-based implementation. Override this in tests
 /// with [MemoryFileSystem].
-FileSystem get fs => context == null ? _kLocalFs : context[FileSystem];
+FileSystem get fs => context[FileSystem] ?? _kLocalFs;
 
-/// Enables recording of file system activity to the specified base recording
-/// [location].
-///
-/// This sets the [active file system](fs) to one that records all invocation
-/// activity before delegating to a [LocalFileSystem].
+/// Gets a [FileSystem] that will record file system activity to the specified
+/// base recording [location].
 ///
 /// Activity will be recorded in a subdirectory of [location] named `"file"`.
 /// It is permissible for [location] to represent an existing non-empty
 /// directory as long as there is no collision with the `"file"` subdirectory.
-void enableRecordingFileSystem(String location) {
-  final FileSystem originalFileSystem = fs;
+RecordingFileSystem getRecordingFileSystem(String location) {
   final Directory dir = getRecordingSink(location, _kRecordingType);
   final RecordingFileSystem fileSystem = new RecordingFileSystem(
       delegate: _kLocalFs, destination: dir);
@@ -42,22 +38,19 @@ void enableRecordingFileSystem(String location) {
     await fileSystem.recording.flush(
       pendingResultTimeout: const Duration(seconds: 5),
     );
-    context.setVariable(FileSystem, originalFileSystem);
   }, ShutdownStage.SERIALIZE_RECORDING);
-  context.setVariable(FileSystem, fileSystem);
+  return fileSystem;
 }
 
-/// Enables file system replay mode.
-///
-/// This sets the [active file system](fs) to one that replays invocation
-/// activity from a previously recorded set of invocations.
+/// Gets a [FileSystem] that replays invocation activity from a previously
+/// recorded set of invocations.
 ///
 /// [location] must represent a directory to which file system activity has
 /// been recorded (i.e. the result of having been previously passed to
-/// [enableRecordingFileSystem]), or a [ToolExit] will be thrown.
-void enableReplayFileSystem(String location) {
+/// [getRecordingFileSystem]), or a [ToolExit] will be thrown.
+ReplayFileSystem getReplayFileSystem(String location) {
   final Directory dir = getReplaySource(location, _kRecordingType);
-  context.setVariable(FileSystem, new ReplayFileSystem(recording: dir));
+  return new ReplayFileSystem(recording: dir);
 }
 
 /// Create the ancestor directories of a file path if they do not already exist.

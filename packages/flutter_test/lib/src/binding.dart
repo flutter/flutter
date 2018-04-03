@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -12,8 +13,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart' as http;
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
 import 'package:test/test.dart' as test_package;
@@ -140,13 +139,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @override
   void initInstances() {
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
-    createHttpClient = () {
-      return new http.MockClient((http.BaseRequest request) {
-        return new Future<http.Response>.value(
-          new http.Response('Mocked: Unavailable.', 404, request: request)
-        );
-      });
-    };
+    HttpOverrides.global = new _MockHttpOverrides();
     _testTextInput = new TestTextInput()..register();
     super.initInstances();
   }
@@ -1165,4 +1158,256 @@ StackTrace _unmangle(StackTrace stack) {
   if (stack is stack_trace.Chain)
     return stack.toTrace().vmTrace;
   return stack;
+}
+
+/// Provides a default [HttpClient] which always returns empty 400 responses.
+///
+/// If another [HttpClient] is provided using [HttpOverrides.runZoned], that will
+/// take precedence over this provider.
+class _MockHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext _) {
+    return new _MockHttpClient();
+  }
+}
+
+/// A mocked [HttpClient] which always returns a [_MockHttpRequest].
+class _MockHttpClient implements HttpClient {
+  @override
+  bool autoUncompress;
+
+  @override
+  Duration idleTimeout;
+
+  @override
+  int maxConnectionsPerHost;
+
+  @override
+  String userAgent;
+
+  @override
+  void addCredentials(Uri url, String realm, HttpClientCredentials credentials) {}
+
+  @override
+  void addProxyCredentials(String host, int port, String realm, HttpClientCredentials credentials) {}
+
+  @override
+  set authenticate(Future<bool> Function(Uri url, String scheme, String realm) f) {}
+
+  @override
+  set authenticateProxy(Future<bool> Function(String host, int port, String scheme, String realm) f) {}
+
+  @override
+  set badCertificateCallback(bool Function(X509Certificate cert, String host, int port) callback) {}
+
+  @override
+  void close({bool force: false}) {}
+
+  @override
+  Future<HttpClientRequest> delete(String host, int port, String path) {
+    return new Future<HttpClientRequest>.value(new _MockHttpRequest());
+  }
+
+  @override
+  Future<HttpClientRequest> deleteUrl(Uri url) {
+    return new Future<HttpClientRequest>.value(new _MockHttpRequest());
+  }
+
+  @override
+  set findProxy(String Function(Uri url) f) {}
+
+  @override
+  Future<HttpClientRequest> get(String host, int port, String path) {
+    return new Future<HttpClientRequest>.value(new _MockHttpRequest());
+  }
+
+  @override
+  Future<HttpClientRequest> getUrl(Uri url) {
+    return new Future<HttpClientRequest>.value(new _MockHttpRequest());
+  }
+
+  @override
+  Future<HttpClientRequest> head(String host, int port, String path) {
+    return new Future<HttpClientRequest>.value(new _MockHttpRequest());
+  }
+
+  @override
+  Future<HttpClientRequest> headUrl(Uri url) {
+    return new Future<HttpClientRequest>.value(new _MockHttpRequest());
+  }
+
+  @override
+  Future<HttpClientRequest> open(String method, String host, int port, String path) {
+    return new Future<HttpClientRequest>.value(new _MockHttpRequest());
+  }
+
+  @override
+  Future<HttpClientRequest> openUrl(String method, Uri url) {
+    return new Future<HttpClientRequest>.value(new _MockHttpRequest());
+  }
+
+  @override
+  Future<HttpClientRequest> patch(String host, int port, String path) {
+    return new Future<HttpClientRequest>.value(new _MockHttpRequest());
+  }
+
+  @override
+  Future<HttpClientRequest> patchUrl(Uri url) {
+    return new Future<HttpClientRequest>.value(new _MockHttpRequest());
+  }
+
+  @override
+  Future<HttpClientRequest> post(String host, int port, String path) {
+    return new Future<HttpClientRequest>.value(new _MockHttpRequest());
+  }
+
+  @override
+  Future<HttpClientRequest> postUrl(Uri url) {
+    return new Future<HttpClientRequest>.value(new _MockHttpRequest());
+  }
+
+  @override
+  Future<HttpClientRequest> put(String host, int port, String path) {
+    return new Future<HttpClientRequest>.value(new _MockHttpRequest());
+  }
+
+  @override
+  Future<HttpClientRequest> putUrl(Uri url) {
+    return new Future<HttpClientRequest>.value(new _MockHttpRequest());
+  }
+}
+
+/// A mocked [HttpClientRequest] which always returns a [_MockHttpClientResponse].
+class _MockHttpRequest extends HttpClientRequest {
+  @override
+  Encoding encoding;
+
+  @override
+  final HttpHeaders headers = new _MockHttpHeaders();
+
+  @override
+  void add(List<int> data) {}
+
+  @override
+  void addError(Object error, [StackTrace stackTrace]) {}
+
+  @override
+  Future<Null> addStream(Stream<List<int>> stream) {
+    return new Future<Null>.value(null);
+  }
+
+  @override
+  Future<HttpClientResponse> close() {
+    return new Future<HttpClientResponse>.value(new _MockHttpResponse());
+  }
+
+  @override
+  HttpConnectionInfo get connectionInfo => null;
+
+  @override
+  List<Cookie> get cookies => null;
+
+  @override
+  Future<HttpClientResponse> get done => null;
+
+  @override
+  Future<Null> flush() {
+    return new Future<Null>.value(null);
+  }
+
+  @override
+  String get method => null;
+
+  @override
+  Uri get uri => null;
+
+  @override
+  void write(Object obj) {}
+
+  @override
+  void writeAll(Iterable<Object> objects, [String separator = '']) {}
+
+  @override
+  void writeCharCode(int charCode) {}
+
+  @override
+  void writeln([Object obj = '']) {}
+}
+
+/// A mocked [HttpClientResponse] which is empty and has a [statusCode] of 400.
+class _MockHttpResponse extends Stream<List<int>> implements HttpClientResponse {
+  @override
+  final HttpHeaders headers = new _MockHttpHeaders();
+
+  @override
+  X509Certificate get certificate => null;
+
+  @override
+  HttpConnectionInfo get connectionInfo => null;
+
+  @override
+  int get contentLength => -1;
+
+  @override
+  List<Cookie> get cookies => null;
+
+  @override
+  Future<Socket> detachSocket() {
+    return new Future<Socket>.error(new UnsupportedError('Mocked response'));
+  }
+
+  @override
+  bool get isRedirect => false;
+
+  @override
+  StreamSubscription<List<int>> listen(void Function(List<int> event) onData, {Function onError, void Function() onDone, bool cancelOnError}) {
+    return const Stream<List<int>>.empty().listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
+
+  @override
+  bool get persistentConnection => null;
+
+  @override
+  String get reasonPhrase => null;
+
+  @override
+  Future<HttpClientResponse> redirect([String method, Uri url, bool followLoops]) {
+    return new Future<HttpClientResponse>.error(new UnsupportedError('Mocked response'));
+  }
+
+  @override
+  List<RedirectInfo> get redirects => <RedirectInfo>[];
+
+  @override
+  int get statusCode => 400;
+}
+
+/// A mocked [HttpHeaders] that ignores all writes.
+class _MockHttpHeaders extends HttpHeaders {
+  @override
+  List<String> operator [](String name) => <String>[];
+
+  @override
+  void add(String name, Object value) {}
+
+  @override
+  void clear() {}
+
+  @override
+  void forEach(void Function(String name, List<String> values) f) {}
+
+  @override
+  void noFolding(String name) {}
+
+  @override
+  void remove(String name, Object value) {}
+
+  @override
+  void removeAll(String name) {}
+
+  @override
+  void set(String name, Object value) {}
+
+  @override
+  String value(String name) => null;
 }

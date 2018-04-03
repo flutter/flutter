@@ -62,8 +62,7 @@ void main() {
         tester.firstWidget(find.byType(EditableText));
     expect(editableText.maxLines, equals(1));
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType'],
-        equals('TextInputType.text'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs['inputAction'],
         equals('TextInputAction.done'));
   });
@@ -88,7 +87,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType'], equals('TextInputType.multiline'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.multiline'));
     expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.newline'));
   });
 
@@ -113,7 +112,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType'], equals('TextInputType.phone'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.phone'));
     expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.done'));
   });
 
@@ -137,7 +136,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType'], equals('TextInputType.multiline'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.multiline'));
     expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.newline'));
   });
 
@@ -161,7 +160,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType'], equals('TextInputType.text'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.done'));
   });
 

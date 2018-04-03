@@ -397,7 +397,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
               )
               : const Text('Close'),
           padding: EdgeInsets.zero,
-          onPressed: () { Navigator.of(context).maybePop(); },
+          onPressed: () { Navigator.maybePop(context); },
         );
       }
     }

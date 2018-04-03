@@ -173,7 +173,7 @@ class Tab1RowItem extends StatelessWidget {
     final Widget row = new GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
-        Navigator.of(context).push(new CupertinoPageRoute<Null>(
+        Navigator.of(context).push(new CupertinoPageRoute<void>(
           builder: (BuildContext context) => new Tab1ItemPage(
             color: color,
             colorName: colorName,
@@ -778,7 +778,7 @@ class Tab3Dialog extends StatelessWidget {
               color: CupertinoColors.activeBlue,
               child: const Text('Sign in'),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.pop(context);
               },
             ),
           ],

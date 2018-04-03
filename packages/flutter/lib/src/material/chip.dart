@@ -53,7 +53,7 @@ const double _kEdgePadding = 4.0;
 ///  * [CircleAvatar], which shows images or initials of people.
 ///  * <https://material.google.com/components/chips.html>
 class Chip extends StatelessWidget {
-  /// Creates a material design chip
+  /// Creates a material design chip.
   ///
   /// The [label] and [border] arguments may not be null.
   const Chip({
@@ -714,6 +714,14 @@ class _RenderChip extends RenderBox {
       }
     }
 
+    doPaint(container);
+    doPaint(avatar);
+    doPaint(deleteIcon);
+    doPaint(label);
+  }
+
+  @override
+  void debugPaint(PaintingContext context, Offset offset) {
     assert(!_debugShowTapTargetOutlines ||
         () {
           // Draws a rect around the tap targets to help with visualizing where
@@ -731,11 +739,6 @@ class _RenderChip extends RenderBox {
           );
           return true;
         }());
-
-    doPaint(container);
-    doPaint(avatar);
-    doPaint(deleteIcon);
-    doPaint(label);
   }
 
   @override

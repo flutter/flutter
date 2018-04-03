@@ -161,7 +161,7 @@ void main() {
                 builder: (BuildContext context) {
                   return new RaisedButton(
                     onPressed: () {
-                      showModalBottomSheet<Null>(
+                      showModalBottomSheet<void>(
                         context: context,
                         builder: (BuildContext context) => const Text('bottomSheet'),
                       );
@@ -198,7 +198,7 @@ void main() {
                 builder: (BuildContext context) {
                   return new RaisedButton(
                     onPressed: () {
-                      showDialog<Null>(
+                      showDialog<void>(
                         context: context,
                         builder: (BuildContext context) => const Text('dialog'),
                       );
@@ -230,7 +230,7 @@ void main() {
               builder: (BuildContext context) {
                 return new GestureDetector(
                   onTap: () {
-                    showDialog<Null>(
+                    showDialog<void>(
                       context: context,
                       builder: (BuildContext context) {
                         return const Scaffold(

@@ -16,43 +16,32 @@ const String _kRecordingType = 'process';
 const ProcessManager _kLocalProcessManager = const LocalProcessManager();
 
 /// The active process manager.
-ProcessManager get processManager {
-  return context == null
-      ? _kLocalProcessManager
-      : context[ProcessManager];
-}
+ProcessManager get processManager => context[ProcessManager] ?? _kLocalProcessManager;
 
-/// Enables recording of process invocation activity to the specified base
-/// recording [location].
-///
-/// This sets the [active process manager](processManager) to one that records
-/// all process activity before delegating to a [LocalProcessManager].
+/// Gets a [ProcessManager] that will record process invocation activity to the
+/// specified base recording [location].
 ///
 /// Activity will be recorded in a subdirectory of [location] named `"process"`.
 /// It is permissible for [location] to represent an existing non-empty
 /// directory as long as there is no collision with the `"process"`
 /// subdirectory.
-void enableRecordingProcessManager(String location) {
-  final ProcessManager originalProcessManager = processManager;
+RecordingProcessManager getRecordingProcessManager(String location) {
   final Directory dir = getRecordingSink(location, _kRecordingType);
   const ProcessManager delegate = const LocalProcessManager();
   final RecordingProcessManager manager = new RecordingProcessManager(delegate, dir);
   addShutdownHook(() async {
     await manager.flush(finishRunningProcesses: true);
-    context.setVariable(ProcessManager, originalProcessManager);
   }, ShutdownStage.SERIALIZE_RECORDING);
-  context.setVariable(ProcessManager, manager);
+  return manager;
 }
 
-/// Enables process invocation replay mode.
-///
-/// This sets the [active process manager](processManager) to one that replays
-/// process activity from a previously recorded set of invocations.
+/// Gets a [ProcessManager] that replays process activity from a previously
+/// recorded set of invocations.
 ///
 /// [location] must represent a directory to which process activity has been
 /// recorded (i.e. the result of having been previously passed to
-/// [enableRecordingProcessManager]), or a [ToolExit] will be thrown.
-Future<Null> enableReplayProcessManager(String location) async {
+/// [getRecordingProcessManager]), or a [ToolExit] will be thrown.
+Future<ReplayProcessManager> getReplayProcessManager(String location) async {
   final Directory dir = getReplaySource(location, _kRecordingType);
 
   ProcessManager manager;
@@ -69,5 +58,5 @@ Future<Null> enableReplayProcessManager(String location) async {
     throwToolExit('Invalid replay-from: $error');
   }
 
-  context.setVariable(ProcessManager, manager);
+  return manager;
 }

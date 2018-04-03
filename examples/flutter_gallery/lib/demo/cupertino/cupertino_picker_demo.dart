@@ -112,7 +112,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
               const Padding(padding: const EdgeInsets.only(top: 32.0)),
               new GestureDetector(
                 onTap: () async {
-                  await showModalBottomSheet<Null>(
+                  await showModalBottomSheet<void>(
                     context: context,
                     builder: (BuildContext context) {
                       return _buildBottomPicker();

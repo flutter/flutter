@@ -5,7 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-final RouteFactory generateRoute = (RouteSettings settings) => new PageRouteBuilder<Null>(
+final RouteFactory generateRoute = (RouteSettings settings) => new PageRouteBuilder<void>(
   settings: settings,
   pageBuilder: (BuildContext context, Animation<double> animation1, Animation<double> animation2) {
     return const Placeholder();

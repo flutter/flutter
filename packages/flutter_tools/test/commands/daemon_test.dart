@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/globals.dart';
@@ -18,14 +17,11 @@ import '../src/mocks.dart';
 
 void main() {
   Daemon daemon;
-  AppContext appContext;
   NotifyingLogger notifyingLogger;
 
   group('daemon', () {
     setUp(() {
-      appContext = new AppContext();
       notifyingLogger = new NotifyingLogger();
-      appContext.setVariable(Logger, notifyingLogger);
     });
 
     tearDown(() {
@@ -51,51 +47,51 @@ void main() {
       commands.close();
     });
 
-    testUsingContext('printError should send daemon.logMessage event', () {
-      return appContext.runInZone(() async {
-        final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
-        final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
-        daemon = new Daemon(
-          commands.stream,
-          responses.add,
-          notifyingLogger: notifyingLogger
-        );
-        printError('daemon.logMessage test');
-        final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> map) {
-          return map['event'] == 'daemon.logMessage' && map['params']['level'] == 'error';
-        });
-        expect(response['id'], isNull);
-        expect(response['event'], 'daemon.logMessage');
-        final Map<String, String> logMessage = response['params'];
-        expect(logMessage['level'], 'error');
-        expect(logMessage['message'], 'daemon.logMessage test');
-        responses.close();
-        commands.close();
+    testUsingContext('printError should send daemon.logMessage event', () async {
+      final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+      daemon = new Daemon(
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+      );
+      printError('daemon.logMessage test');
+      final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> map) {
+        return map['event'] == 'daemon.logMessage' && map['params']['level'] == 'error';
       });
+      expect(response['id'], isNull);
+      expect(response['event'], 'daemon.logMessage');
+      final Map<String, String> logMessage = response['params'];
+      expect(logMessage['level'], 'error');
+      expect(logMessage['message'], 'daemon.logMessage test');
+      responses.close();
+      commands.close();
+    }, overrides: <Type, Generator>{
+      Logger: () => notifyingLogger,
     });
 
     testUsingContext('printStatus should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = new StringBuffer();
 
       await runZoned(() async {
-        return appContext.runInZone(() async {
-          final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
-          final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
-          daemon = new Daemon(
-            commands.stream,
-            responses.add,
-            notifyingLogger: notifyingLogger,
-            logToStdout: true
-          );
-          printStatus('daemon.logMessage test');
-          // Service the event loop.
-          await new Future<Null>.value();
-        });
+        final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+        final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+        daemon = new Daemon(
+          commands.stream,
+          responses.add,
+          notifyingLogger: notifyingLogger,
+          logToStdout: true,
+        );
+        printStatus('daemon.logMessage test');
+        // Service the event loop.
+        await new Future<Null>.value();
       }, zoneSpecification: new ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
         buffer.writeln(line);
       }));
 
       expect(buffer.toString().trim(), 'daemon.logMessage test');
+    }, overrides: <Type, Generator>{
+      Logger: () => notifyingLogger,
     });
 
     testUsingContext('daemon.shutdown command should stop daemon', () async {
