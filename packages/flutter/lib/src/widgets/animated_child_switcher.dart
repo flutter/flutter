@@ -10,8 +10,8 @@ import 'framework.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
-class _AutoFadeChildEntry {
-  _AutoFadeChildEntry(this.widget, this.controller, this.animation);
+class _AnimatedChildSwitcherChildEntry {
+  _AnimatedChildSwitcherChildEntry(this.widget, this.controller, this.animation);
 
   Widget widget;
 
@@ -20,7 +20,7 @@ class _AutoFadeChildEntry {
 }
 
 /// A widget that automatically does a [FadeTransition] between a new widget and
-/// the widget previously set on the [AutoFade] as a child.
+/// the widget previously set on the [AnimatedChildSwitcher] as a child.
 ///
 /// More than one previous child can exist and be fading out while the newest
 /// one is fading in if they are swapped fast enough (i.e. before [duration]
@@ -30,9 +30,9 @@ class _AutoFadeChildEntry {
 ///
 ///  * [AnimatedCrossFade], which only fades between two children, but also
 ///    interpolates their sizes, and is reversible.
-///  * [FadeTransition] which [AutoFade] uses to perform the transition.
-class AutoFade extends StatefulWidget {
-  const AutoFade({
+///  * [FadeTransition] which [AnimatedChildSwitcher] uses to perform the transition.
+class AnimatedChildSwitcher extends StatefulWidget {
+  const AnimatedChildSwitcher({
     Key key,
     this.child,
     this.fadeInCurve: Curves.linear,
@@ -65,12 +65,12 @@ class AutoFade extends StatefulWidget {
   final AlignmentGeometry alignment;
 
   @override
-  _AutoFadeState createState() => new _AutoFadeState();
+  _AnimatedChildSwitcherState createState() => new _AnimatedChildSwitcherState();
 }
 
-class _AutoFadeState extends State<AutoFade> with TickerProviderStateMixin {
-  final Set<_AutoFadeChildEntry> _children = new Set<_AutoFadeChildEntry>();
-  _AutoFadeChildEntry _currentChild;
+class _AnimatedChildSwitcherState extends State<AnimatedChildSwitcher> with TickerProviderStateMixin {
+  final Set<_AnimatedChildSwitcherChildEntry> _children = new Set<_AnimatedChildSwitcherChildEntry>();
+  _AnimatedChildSwitcherChildEntry _currentChild;
 
   @override
   void initState() {
@@ -99,7 +99,7 @@ class _AutoFadeState extends State<AutoFade> with TickerProviderStateMixin {
       curve: widget.fadeInCurve,
       reverseCurve: widget.fadeOutCurve,
     );
-    final _AutoFadeChildEntry entry = new _AutoFadeChildEntry(
+    final _AnimatedChildSwitcherChildEntry entry = new _AnimatedChildSwitcherChildEntry(
       widget.child,
       controller,
       animation,
@@ -121,7 +121,7 @@ class _AutoFadeState extends State<AutoFade> with TickerProviderStateMixin {
     if (_currentChild != null) {
       _currentChild.controller.dispose();
     }
-    for (_AutoFadeChildEntry child in _children) {
+    for (_AnimatedChildSwitcherChildEntry child in _children) {
       child.controller.dispose();
     }
     super.dispose();
@@ -133,7 +133,7 @@ class _AutoFadeState extends State<AutoFade> with TickerProviderStateMixin {
       addEntry(true);
     }
     final List<Widget> children = <Widget>[];
-    for (_AutoFadeChildEntry child in _children) {
+    for (_AnimatedChildSwitcherChildEntry child in _children) {
       children.add(
         new FadeTransition(
           opacity: child.animation,

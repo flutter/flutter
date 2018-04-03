@@ -14,12 +14,12 @@ library widgets;
 
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
+export 'src/widgets/animated_child_switcher.dart';
 export 'src/widgets/animated_cross_fade.dart';
 export 'src/widgets/animated_list.dart';
 export 'src/widgets/animated_size.dart';
 export 'src/widgets/app.dart';
 export 'src/widgets/async.dart';
-export 'src/widgets/auto_fade.dart';
 export 'src/widgets/automatic_keep_alive.dart';
 export 'src/widgets/banner.dart';
 export 'src/widgets/basic.dart';

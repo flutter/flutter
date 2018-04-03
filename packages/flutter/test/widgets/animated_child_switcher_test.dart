@@ -6,9 +6,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AutoFade fades in a new child.', (WidgetTester tester) async {
+  testWidgets('AnimatedChildSwitcher fades in a new child.', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new AutoFade(
+      new AnimatedChildSwitcher(
         duration: const Duration(milliseconds: 100),
         child: new Container(color: const Color(0x00000000)),
         fadeInCurve: Curves.linear,
@@ -19,7 +19,7 @@ void main() {
     expect(transition.opacity.value, equals(1.0));
 
     await tester.pumpWidget(
-      new AutoFade(
+      new AnimatedChildSwitcher(
         duration: const Duration(milliseconds: 100),
         child: new Container(color: const Color(0xff000000)),
         fadeInCurve: Curves.linear,
@@ -32,12 +32,12 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('AutoFade respects alignment.', (WidgetTester tester) async {
+  testWidgets('AnimatedChildSwitcher respects alignment.', (WidgetTester tester) async {
     final UniqueKey containerKey = new UniqueKey();
     await tester.pumpWidget(
       new Container(
         constraints: new BoxConstraints.tight(const Size.square(200.0)),
-        child: new AutoFade(
+        child: new AnimatedChildSwitcher(
           duration: const Duration(milliseconds: 100),
           child: new Container(
             key: containerKey,
@@ -55,7 +55,7 @@ void main() {
     await tester.pumpWidget(
       new Container(
         constraints: new BoxConstraints.tight(const Size.square(200.0)),
-        child: new AutoFade(
+        child: new AnimatedChildSwitcher(
           duration: const Duration(milliseconds: 100),
           child: new Container(
             key: containerKey,
@@ -71,8 +71,8 @@ void main() {
     expect(tester.getTopLeft(find.byKey(containerKey).first), equals(const Offset(790.0, 590.0)));
   });
 
-  testWidgets("AutoFade doesn't start any animations after dispose.", (WidgetTester tester) async {
-    await tester.pumpWidget(new AutoFade(
+  testWidgets("AnimatedChildSwitcher doesn't start any animations after dispose.", (WidgetTester tester) async {
+    await tester.pumpWidget(new AnimatedChildSwitcher(
       duration: const Duration(milliseconds: 100),
       child: new Container(color: const Color(0xff000000)),
       fadeInCurve: Curves.linear,
