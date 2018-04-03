@@ -264,9 +264,9 @@ class MyBottomAppBar extends StatelessWidget {
           new Expanded(
             child: new AnimatedCrossFade(
               duration: const Duration(milliseconds: 225),
-              firstChild: babContents(context, _BabMode.END_FAB),
+              firstChild: buildBabContents(context, _BabMode.END_FAB),
               firstCurve: showsFirst ? fadeOutCurve  : fadeInCurve,
-              secondChild: babContents(context, _BabMode.CENTER_FAB),
+              secondChild: buildBabContents(context, _BabMode.CENTER_FAB),
               secondCurve: showsFirst ? fadeInCurve  : fadeOutCurve,
               crossFadeState: showsFirst ? CrossFadeState.showFirst : CrossFadeState.showSecond,
             ),
@@ -276,7 +276,7 @@ class MyBottomAppBar extends StatelessWidget {
     );
   }
 
-  Widget babContents(BuildContext context, _BabMode babMode) {
+  Widget buildBabContents(BuildContext context, _BabMode babMode) {
     final List<Widget> rowContents = <Widget> [];
     if (babMode == _BabMode.CENTER_FAB) {
       rowContents.add(
