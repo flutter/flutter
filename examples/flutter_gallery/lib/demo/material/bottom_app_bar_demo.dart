@@ -81,7 +81,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
       ),
       body: new SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: controls(context),
+        child: buildControls(context),
       ),
       bottomNavigationBar: new _DemoBottomAppBar(_fabLocationConfigurations[fabLocationIndex].babMode, babColor, notchEnabled),
       floatingActionButton: _fabShapeConfigurations[fabShapeIndex].fab,
@@ -89,7 +89,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     );
   }
 
-  Widget controls(BuildContext context) {
+  Widget buildControls(BuildContext context) {
     return new Column(
       children: <Widget> [
         new Text(
