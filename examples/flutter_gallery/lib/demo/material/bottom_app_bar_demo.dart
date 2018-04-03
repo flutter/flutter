@@ -170,7 +170,15 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     return new SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       primary: false,
-      child: new DropdownButton<int>(items: options, onChanged: (int newIdx) { setState(() { fabLocationIndex = newIdx; }); }, value: fabLocationIndex),
+      child: new DropdownButton<int>(
+        items: options,
+        value: fabLocationIndex,
+        onChanged: (int newIndex) {
+          setState(() {
+            fabLocationIndex = newIndex;
+          });
+        },
+      ),
     );
   }
 
