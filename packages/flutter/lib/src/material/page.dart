@@ -8,6 +8,10 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+/// The default route name provided to [Semantics] when [RouteSettings.isInitialRoute]
+/// is true.
+const String kDefaultInitialRouteName = 'home';
+
 // Fractional offset from 1/4 screen below the top to fully on screen.
 final Tween<Offset> _kBottomUpTween = new Tween<Offset>(
   begin: const Offset(0.0, 0.25),
@@ -57,7 +61,7 @@ class _MountainViewPageTransition extends StatelessWidget {
 /// The transition is adaptive to the platform and on iOS, the page slides in
 /// from the right and exits in reverse. The page also shifts to the left in
 /// parallax when another page enters to cover it. (These directions are flipped
-/// in environements with a right-to-left reading direction.)
+/// in environments with a right-to-left reading direction.)
 ///
 /// By default, when a modal route is replaced by another, the previous route
 /// remains in memory. To free all the resources when this is not necessary, set
@@ -151,7 +155,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget result = builder(context);
+    final Widget result = new Semantics(route: true, explicitChildNodes: true, value: _routeName(), child: builder(context));
     assert(() {
       if (result == null) {
         throw new FlutterError(
@@ -179,4 +183,12 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   String get debugLabel => '${super.debugLabel}(${settings.name})';
+
+  String _routeName() {
+    if (_useCupertinoTransitions)
+      return '';
+    if (settings.isInitialRoute)
+      return 'home';
+    return settings.name;
+  }
 }

@@ -3023,12 +3023,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
+    bool route,
     String label,
     String value,
     String increasedValue,
     String decreasedValue,
     String hint,
-    String routeName,
     TextDirection textDirection,
     SemanticsSortKey sortKey,
     VoidCallback onTap,
@@ -3059,12 +3059,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _focused = focused,
        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _obscured = obscured,
+       _route = route,
        _label = label,
        _value = value,
        _increasedValue = increasedValue,
        _decreasedValue = decreasedValue,
        _hint = hint,
-       _routeName = routeName,
        _textDirection = textDirection,
        _sortKey = sortKey,
        _onTap = onTap,
@@ -3219,6 +3219,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+
+  bool get route => _route;
+  bool _route;
+  set route(bool value) {
+    if (route == value)
+      return;
+    _route = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
   ///
   /// The reading direction is given by [textDirection].
@@ -3280,18 +3290,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     _hint = value;
     markNeedsSemanticsUpdate();
   }
-
-  /// If non-null, sets the [SemanticsNode.routeName] semantic to the given value.
-  ///
-  /// The name of a widget subtree.
-  String get routeName => _routeName;
-  String _routeName;
-  set routeName(String value) {
-    if (_routeName == value)
-      return;
-    _routeName = value;
-    markNeedsSemanticsUpdate();
-  } 
 
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given value.
   ///
@@ -3680,8 +3678,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.decreasedValue = decreasedValue;
     if (hint != null)
       config.hint = hint;
-    if (routeName != null)
-      config.routeName = routeName;
+    if (route != null)
+      config.isRoute = route;
     if (textDirection != null)
       config.textDirection = textDirection;
     if (sortKey != null)

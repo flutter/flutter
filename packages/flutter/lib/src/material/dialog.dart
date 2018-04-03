@@ -166,6 +166,7 @@ class AlertDialog extends StatelessWidget {
     this.content,
     this.contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
     this.actions,
+    this.semanticName,
   }) : assert(contentPadding != null),
        super(key: key);
 
@@ -216,6 +217,16 @@ class AlertDialog extends StatelessWidget {
   /// from the [actions].
   final List<Widget> actions;
 
+  /// An (optional) name for the dialog used by accessibility frameworks.
+  ///
+  /// On android this would usually be a short summary of the contents. For
+  /// example - "App permissions" for a dialog containing permission
+  /// information.
+  ///
+  /// On iOS it is not common to provide a semantic name, since an announcement
+  /// chime is expected instead.
+  final String semanticName;
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
@@ -252,10 +263,14 @@ class AlertDialog extends StatelessWidget {
 
     return new Dialog(
       child: new IntrinsicWidth(
-        child: new Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children,
+        child: new Semantics(
+          route: true,
+          value: semanticName,
+          child: new Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          ),
         ),
       ),
     );

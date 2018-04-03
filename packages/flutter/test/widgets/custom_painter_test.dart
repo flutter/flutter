@@ -416,6 +416,7 @@ void _defineTests() {
             inMutuallyExclusiveGroup: true,
             header: true,
             obscured: true,
+            route: true,
           ),
         ),
       ),

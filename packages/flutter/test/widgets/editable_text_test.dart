@@ -591,17 +591,26 @@ void main() {
 
     final String expectedValue = '•' * controller.text.length;
 
-    expect(semantics, hasSemantics(new TestSemantics(
+    expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics(
-          flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isObscured],
-          value: expectedValue,
-          textDirection: TextDirection.ltr,
-          nextNodeId: -1,
-          previousNodeId: -1,
+        new TestSemantics.rootChild(
+            id: 1,
+            flags: <SemanticsFlag>[
+              SemanticsFlag.isRoute,
+            ],
+            value: 'home',
+            textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              new TestSemantics(
+                id: 2,
+                flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isObscured],
+                value: expectedValue,
+                textDirection: TextDirection.ltr,
+              ),
+            ]
         ),
       ],
-    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+    ), ignoreRect: true, ignoreTransform: true));
 
     semantics.dispose();
   });
@@ -713,26 +722,36 @@ void main() {
       await tester.pump();
 
       final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner;
-      const int expectedNodeId = 2;
+      const int expectedNodeId = 3;
 
       expect(semantics, hasSemantics(new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: expectedNodeId,
+            id: 1,
             flags: <SemanticsFlag>[
-              SemanticsFlag.isTextField,
-              SemanticsFlag.isFocused
+              SemanticsFlag.isRoute,
             ],
-            actions: <SemanticsAction>[
-              SemanticsAction.moveCursorBackwardByCharacter,
-              SemanticsAction.setSelection,
-              SemanticsAction.copy,
-              SemanticsAction.cut,
-              SemanticsAction.paste
-            ],
-            value: 'test',
-            textSelection: new TextSelection.collapsed(offset: controller.text.length),
+            value: 'home',
             textDirection: TextDirection.ltr,
+            children: <TestSemantics>[
+              new TestSemantics(
+                id: expectedNodeId,
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isTextField,
+                  SemanticsFlag.isFocused
+                ],
+                actions: <SemanticsAction>[
+                  SemanticsAction.moveCursorBackwardByCharacter,
+                  SemanticsAction.setSelection,
+                  SemanticsAction.copy,
+                  SemanticsAction.cut,
+                  SemanticsAction.paste
+                ],
+                value: 'test',
+                textSelection: new TextSelection.collapsed(offset: controller.text.length),
+                textDirection: TextDirection.ltr,
+              )
+            ]
           ),
         ],
       ), ignoreRect: true, ignoreTransform: true));

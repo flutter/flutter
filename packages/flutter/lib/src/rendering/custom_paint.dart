@@ -837,6 +837,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.header != null) {
       config.isHeader = properties.header;
     }
+    if (properties.route != null) {
+      config.isRoute = properties.route;
+    }
     if (properties.label != null) {
       config.label = properties.label;
     }

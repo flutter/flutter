@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
+
 
 void main() {
   testWidgets('test Android page transition', (WidgetTester tester) async {
@@ -451,5 +455,56 @@ void main() {
 
     // Page 1 is back where it started.
     expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
+  });
+
+  testWidgets('MaterialPage transitions on iOS have a route Semantics flag', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(
+        new MaterialApp(
+          theme: new ThemeData(platform: TargetPlatform.iOS),
+          home: const Material(child: const Text('Page 1')),
+          routes: <String, WidgetBuilder>{
+            '/next': (BuildContext context) {
+              return const Material(child: const Text('Page 2'));
+            },
+          },
+        )
+    );
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute], value: ''));
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute], value: ''));
+
+    semantics.dispose();
+  });
+
+
+  testWidgets('MaterialPage transitions on Android have a route Semantics flag and value', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(
+        new MaterialApp(
+          theme: new ThemeData(platform: TargetPlatform.android),
+          home: const Material(child: const Text('Page 1')),
+          routes: <String, WidgetBuilder>{
+            '/next': (BuildContext context) {
+              return const Material(child: const Text('Page 2'));
+            },
+          },
+        )
+    );
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute], value: 'home'));
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute], value: '/next'));
+
+    semantics.dispose();
   });
 }

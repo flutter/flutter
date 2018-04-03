@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -54,10 +56,21 @@ void main() {
       children: <TestSemantics>[
         new TestSemantics.rootChild(
           id: 2,
-          label: 'Hello!',
+          value: 'home',
           textDirection: TextDirection.ltr,
-          rect: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-          transform: new Matrix4.translationValues(395.0, 295.0, 0.0),
+          rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isRoute,
+          ],
+          children: <TestSemantics>[
+            new TestSemantics(
+              id: 3,
+              label: 'Hello!',
+              textDirection: TextDirection.ltr,
+              rect: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+              transform: new Matrix4.translationValues(395.0, 295.0, 0.0),
+            )
+          ]
         )
       ],
     )));

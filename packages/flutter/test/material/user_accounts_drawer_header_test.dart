@@ -332,32 +332,41 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-        new TestSemantics(
+        new TestSemantics.root(
           children: <TestSemantics>[
-            new TestSemantics(
-              label: 'Signed in\nname\nemail',
+            new TestSemantics.rootChild(
+              value: 'home',
               textDirection: TextDirection.ltr,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isRoute,
+              ],
               children: <TestSemantics>[
                 new TestSemantics(
-                  label: r'B',
+                  label: 'Signed in\nname\nemail',
                   textDirection: TextDirection.ltr,
+                  children: <TestSemantics>[
+                    new TestSemantics(
+                      label: r'B',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    new TestSemantics(
+                      label: r'C',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    new TestSemantics(
+                      label: r'D',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    new TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                      actions: <SemanticsAction>[SemanticsAction.tap],
+                      label: r'Show accounts',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
-                new TestSemantics(
-                  label: r'C',
-                  textDirection: TextDirection.ltr,
-                ),
-                new TestSemantics(
-                  label: r'D',
-                  textDirection: TextDirection.ltr,
-                ),
-                new TestSemantics(
-                  flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                  actions: <SemanticsAction>[SemanticsAction.tap],
-                  label: r'Show accounts',
-                  textDirection: TextDirection.ltr,
-                ),
-              ],
-            ),
+              ]
+            )
           ],
         ),
         ignoreId: true, ignoreTransform: true, ignoreRect: true,
@@ -379,23 +388,32 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-        new TestSemantics(
+        new TestSemantics.root(
           children: <TestSemantics>[
-            new TestSemantics(
-              label: 'Signed in',
+            new TestSemantics.rootChild(
+              value: 'home',
               textDirection: TextDirection.ltr,
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isRoute,
+              ],
               children: <TestSemantics>[
                 new TestSemantics(
-                  label: r'B',
+                  label: 'Signed in',
                   textDirection: TextDirection.ltr,
-                ),
-                new TestSemantics(
-                  label: r'C',
-                  textDirection: TextDirection.ltr,
-                ),
-                new TestSemantics(
-                  label: r'D',
-                  textDirection: TextDirection.ltr,
+                  children: <TestSemantics>[
+                    new TestSemantics(
+                      label: r'B',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    new TestSemantics(
+                      label: r'C',
+                      textDirection: TextDirection.ltr,
+                    ),
+                    new TestSemantics(
+                      label: r'D',
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
                 ),
               ],
             ),

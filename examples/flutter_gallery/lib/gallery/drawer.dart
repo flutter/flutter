@@ -344,9 +344,6 @@ class GalleryDrawer extends StatelessWidget {
       aboutItem,
     ]);
 
-    return new Semantics(
-      routeName: 'navigation',
-      child: new Drawer(child: new ListView(primary: false, children: allDrawerItems))
-    );
+    return new Drawer(child: new ListView(primary: false, children: allDrawerItems));
   }
 }

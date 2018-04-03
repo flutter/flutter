@@ -271,15 +271,23 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          label: 'Add Photo',
-          actions: <SemanticsAction>[
-            SemanticsAction.tap
-          ],
           flags: <SemanticsFlag>[
-            SemanticsFlag.isButton,
-            SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
+            SemanticsFlag.isRoute,
           ],
+          value: 'home',
+          children: <TestSemantics>[
+            new TestSemantics(
+              label: 'Add Photo',
+              actions: <SemanticsAction>[
+                SemanticsAction.tap
+              ],
+              flags: <SemanticsFlag>[
+                SemanticsFlag.isButton,
+                SemanticsFlag.hasEnabledState,
+                SemanticsFlag.isEnabled,
+              ]
+            ),
+          ]
         ),
       ],
     ), ignoreTransform: true, ignoreId: true, ignoreRect: true));

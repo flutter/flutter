@@ -42,6 +42,8 @@ const double _kEdgeDragWidth = 20.0;
 const double _kMinFlingVelocity = 365.0;
 const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 
+const String _kDefaultDrawerRouteNameSemantics = 'navigation menu';
+
 /// A material design panel that slides in horizontally from the edge of a
 /// [Scaffold] to show navigation links in an application.
 ///
@@ -83,6 +85,7 @@ class Drawer extends StatelessWidget {
   /// Typically used in the [Scaffold.drawer] property.
   const Drawer({
     Key key,
+    this.semanticValue = _kDefaultDrawerRouteNameSemantics,
     this.elevation: 16.0,
     this.child,
   }) : super(key: key);
@@ -100,13 +103,23 @@ class Drawer extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// A name to announce in accessibility frameworks when opening this drawer.
+  ///
+  /// The name is used in Android TalkBack but ignored in iOS.
+  ///
+  /// See also:
+  ///
+  ///   * [Semantics.route]
+  final String semanticValue;
+
   @override
   Widget build(BuildContext context) {
+    final String value = defaultTargetPlatform == TargetPlatform.iOS ? '' : semanticValue;
     return new ConstrainedBox(
       constraints: const BoxConstraints.expand(width: _kWidth),
       child: new Material(
         elevation: elevation,
-        child: child,
+        child: new Semantics(route: true, explicitChildNodes: true, value: value, child: child),
       ),
     );
   }

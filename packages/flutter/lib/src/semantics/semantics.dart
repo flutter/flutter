@@ -91,7 +91,6 @@ class SemanticsData extends Diagnosticable {
     @required this.value,
     @required this.decreasedValue,
     @required this.hint,
-    @required this.routeName,
     @required this.textDirection,
     @required this.nextNodeId,
     @required this.previousNodeId,
@@ -109,7 +108,6 @@ class SemanticsData extends Diagnosticable {
        assert(decreasedValue != null),
        assert(increasedValue != null),
        assert(hint != null),
-       assert(routeName != null),
        assert(label == '' || textDirection != null, 'A SemanticsData object with label "$label" had a null textDirection.'),
        assert(value == '' || textDirection != null, 'A SemanticsData object with value "$value" had a null textDirection.'),
        assert(hint == '' || textDirection != null, 'A SemanticsData object with hint "$hint" had a null textDirection.'),
@@ -149,9 +147,6 @@ class SemanticsData extends Diagnosticable {
   ///
   /// The reading direction is given by [textDirection].
   final String hint;
-  
-  /// The name of a widget subtree.
-  final String routeName;
 
   /// The reading direction for the text in [label], [value], [hint],
   /// [increasedValue], and [decreasedValue].
@@ -246,7 +241,6 @@ class SemanticsData extends Diagnosticable {
     properties.add(new StringProperty('increasedValue', increasedValue, defaultValue: ''));
     properties.add(new StringProperty('decreasedValue', decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', hint, defaultValue: ''));
-    properties.add(new StringProperty('routeName', hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(new IntProperty('nextNodeId', nextNodeId, defaultValue: null));
     properties.add(new IntProperty('previousNodeId', previousNodeId, defaultValue: null));
@@ -269,7 +263,6 @@ class SemanticsData extends Diagnosticable {
         && typedOther.increasedValue == increasedValue
         && typedOther.decreasedValue == decreasedValue
         && typedOther.hint == hint
-        && typedOther.routeName == routeName
         && typedOther.textDirection == textDirection
         && typedOther.nextNodeId == nextNodeId
         && typedOther.previousNodeId == previousNodeId
@@ -283,7 +276,7 @@ class SemanticsData extends Diagnosticable {
   }
 
   @override
-  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, routeName, textDirection, nextNodeId, previousNodeId, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform);
+  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, nextNodeId, previousNodeId, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform);
 }
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
@@ -327,13 +320,13 @@ class SemanticsProperties extends DiagnosticableTree {
     this.focused,
     this.inMutuallyExclusiveGroup,
     this.obscured,
+    this.route,
     this.label,
     this.value,
     this.increasedValue,
     this.decreasedValue,
     this.hint,
     this.textDirection,
-    this.routeName,
     this.sortKey,
     this.onTap,
     this.onLongPress,
@@ -415,6 +408,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// Doing so instructs screen readers to not read out the [value].
   final bool obscured;
 
+  final bool route;
+
   /// Provides a textual description of the widget.
   ///
   /// If a label is provided, there must either by an ambient [Directionality]
@@ -480,9 +475,6 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// Defaults to the ambient [Directionality].
   final TextDirection textDirection;
-
-  /// The name of a widget subtree.
-  final String routeName;
 
   /// Determines the position of this node among its siblings in the traversal
   /// sort order.
@@ -1042,7 +1034,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   bool _isDifferentFromCurrentSemanticAnnotation(SemanticsConfiguration config) {
     return _label != config.label ||
         _hint != config.hint ||
-        _routeName != config.routeName ||
         _decreasedValue != config.decreasedValue ||
         _value != config.value ||
         _increasedValue != config.increasedValue ||
@@ -1113,10 +1104,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// The reading direction is given by [textDirection].
   String get hint => _hint;
   String _hint = _kEmptyConfig.hint;
-
-  /// The name of a widget subtree.
-  String get routeName => _routeName;
-  String _routeName = _kEmptyConfig.routeName;
 
   /// The reading direction for [label], [value], [hint], [increasedValue], and
   /// [decreasedValue].
@@ -1240,7 +1227,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _value = config.value;
     _increasedValue = config.increasedValue;
     _hint = config.hint;
-    _routeName = config.routeName;
     _flags = config._flags;
     _textDirection = config.textDirection;
     _sortKey = config.sortKey;
@@ -1275,7 +1261,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     String label = _label;
     String hint = _hint;
     String value = _value;
-    String routeName = _routeName;
     String increasedValue = _increasedValue;
     String decreasedValue = _decreasedValue;
     TextDirection textDirection = _textDirection;
@@ -1321,7 +1306,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           otherString: node._hint,
           otherTextDirection: node._textDirection,
         );
-        routeName ??= node._routeName;
         return true;
       });
     }
@@ -1334,7 +1318,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       increasedValue: increasedValue,
       decreasedValue: decreasedValue,
       hint: hint,
-      routeName: routeName,
       textDirection: textDirection,
       nextNodeId: nextNodeId,
       previousNodeId: previousNodeId,
@@ -1378,7 +1361,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       decreasedValue: data.decreasedValue,
       increasedValue: data.increasedValue,
       hint: data.hint,
-      routeName: data.routeName,
       textDirection: data.textDirection,
       nextNodeId: data.nextNodeId,
       previousNodeId: data.previousNodeId,
@@ -1447,7 +1429,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(new StringProperty('increasedValue', _increasedValue, defaultValue: ''));
     properties.add(new StringProperty('decreasedValue', _decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', _hint, defaultValue: ''));
-    properties.add(new StringProperty('routeName', _routeName, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
     properties.add(new IntProperty('nextNodeId', _nextNodeId, defaultValue: null));
     properties.add(new IntProperty('previousNodeId', _previousNodeId, defaultValue: null));
@@ -2363,12 +2344,9 @@ class SemanticsConfiguration {
   /// Changes to the most specific route name will prompt an accessibility
   /// announcement when enabled.  On iOS this produces a `UIAccessibilityScreenChangedNotification`
   /// and on Android a `TYPE_WINDOW_STATE_CHANGED`.
-  String get routeName => _routeName;
-  String _routeName = '';
-  set routeName(String value) {
-    assert(value != null);
-    _routeName = value;
-    _hasBeenAnnotated = true;
+  bool get isRoute => _hasFlag(SemanticsFlag.isRoute);
+  set isRoute(bool value) {
+    _setFlag(SemanticsFlag.isRoute, value);
   }
 
   /// The reading direction for the text in [label], [value], [hint],
@@ -2647,7 +2625,6 @@ class SemanticsConfiguration {
       .._value = _value
       .._decreasedValue = _decreasedValue
       .._hint = _hint
-      .._routeName = _routeName
       .._flags = _flags
       .._tagsForChildren = _tagsForChildren
       .._textSelection = _textSelection

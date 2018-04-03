@@ -306,11 +306,24 @@ class RouteSettings {
   /// The name of the route (e.g., "/settings").
   ///
   /// If null, the route is anonymous.
+  ///
+  /// The is also used to create a default semantic value for the route
+  /// transition used by accessibility frameworks.
+  ///
+  /// See also:
+  ///
+  ///   * [Semantics.route]
   final String name;
 
   /// Whether this route is the very first route being pushed onto this [Navigator].
   ///
   /// The initial route typically skips any entrance transition to speed startup.
+  ///
+  /// The semantic value of the initial route defaults to "home".
+  ///
+  /// See also:
+  ///
+  ///   * [Semantics.route]
   final bool isInitialRoute;
 
   @override

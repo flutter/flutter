@@ -153,7 +153,7 @@ class GalleryAppState extends State<GalleryApp> {
       // using named routes, consider the example in the Navigator class documentation:
       // https://docs.flutter.io/flutter/widgets/Navigator-class.html
       _kRoutes[item.routeName] = (BuildContext context) {
-        return new Semantics(routeName: item.routeName, child: item.buildRoute(context));
+        return item.buildRoute(context);
       };
     }
 
@@ -165,7 +165,7 @@ class GalleryAppState extends State<GalleryApp> {
       checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
       checkerboardOffscreenLayers: _checkerboardOffscreenLayers,
       routes: _kRoutes,
-      home: new Semantics(routeName: 'home', child: home),
+      home: home,
       builder: (BuildContext context, Widget child) {
         return new Directionality(
           textDirection: _overrideDirection,
