@@ -408,6 +408,19 @@ class SemanticsProperties extends DiagnosticableTree {
   /// Doing so instructs screen readers to not read out the [value].
   final bool obscured;
 
+  /// If non-null, whether the node corresponds to a visually distinct subtree
+  ///
+  /// When the most specific route semantics node changes, the platform
+  /// accessibility framework will make an edge-triggered announcement.
+  /// Specificity is defined as the last child in a pre-order traversal - left
+  /// to right, root first.
+  ///
+  /// The announcement will contain the text in the [value] semantic.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.isRoute] for a description of how this is
+  ///    exposed in TalkBack and VoiceOver.
   final bool route;
 
   /// Provides a textual description of the widget.
@@ -2342,8 +2355,9 @@ class SemanticsConfiguration {
   /// The name of a widget subtree.
   /// 
   /// Changes to the most specific route name will prompt an accessibility
-  /// announcement when enabled.  On iOS this produces a `UIAccessibilityScreenChangedNotification`
-  /// and on Android a `TYPE_WINDOW_STATE_CHANGED`.
+  /// announcement when enabled.  On iOS this produces a
+  /// `UIAccessibilityScreenChangedNotification` and on Android a
+  /// `TYPE_WINDOW_STATE_CHANGED`.
   bool get isRoute => _hasFlag(SemanticsFlag.isRoute);
   set isRoute(bool value) {
     _setFlag(SemanticsFlag.isRoute, value);

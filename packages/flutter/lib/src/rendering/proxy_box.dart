@@ -3219,7 +3219,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-
+  /// If non-null, sets the [SemanticsNode.route] semantic to the give value.
   bool get route => _route;
   bool _route;
   set route(bool value) {
