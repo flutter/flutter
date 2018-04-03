@@ -32,37 +32,35 @@ class _AnimatedChildSwitcherChildEntry {
 ///    interpolates their sizes, and is reversible.
 ///  * [FadeTransition] which [AnimatedChildSwitcher] uses to perform the transition.
 class AnimatedChildSwitcher extends StatefulWidget {
+  /// The [duration], [switchInCurve], and [switchOutCurve] parameters must not
+  /// be null.
   const AnimatedChildSwitcher({
     Key key,
     this.child,
-    this.fadeInCurve: Curves.linear,
-    this.fadeOutCurve: Curves.linear,
-    this.alignment: Alignment.center,
+    this.switchInCurve: Curves.linear,
+    this.switchOutCurve: Curves.linear,
     @required this.duration,
-  })  : assert(fadeInCurve != null),
+  })  : assert(switchInCurve != null),
+        assert(switchOutCurve != null),
         assert(duration != null),
         super(key: key);
 
   /// The current child widget to display.  If there was a previous child,
   /// then that child will be cross faded with this child using a
-  /// [FadeTransition] using the [fadeInCurve].
+  /// [FadeTransition] using the [switchInCurve].
   ///
   /// If there was no previous child, then this child will fade in over the
   /// [duration].
   final Widget child;
 
   /// The animation curve to use when fading in the current widget.
-  final Curve fadeInCurve;
+  final Curve switchInCurve;
 
   /// The animation curve to use when fading out the previous widgets.
-  final Curve fadeOutCurve;
+  final Curve switchOutCurve;
 
   /// The duration over which to perform the cross fade using [FadeTransition].
   final Duration duration;
-
-  /// The alignment of the current and previous [child] widgets inside of this
-  /// widget.
-  final AlignmentGeometry alignment;
 
   @override
   _AnimatedChildSwitcherState createState() => new _AnimatedChildSwitcherState();
@@ -96,8 +94,8 @@ class _AnimatedChildSwitcherState extends State<AnimatedChildSwitcher> with Tick
     }
     final Animation<double> animation = new CurvedAnimation(
       parent: controller,
-      curve: widget.fadeInCurve,
-      reverseCurve: widget.fadeOutCurve,
+      curve: widget.switchInCurve,
+      reverseCurve: widget.switchOutCurve,
     );
     final _AnimatedChildSwitcherChildEntry entry = new _AnimatedChildSwitcherChildEntry(
       widget.child,
@@ -151,7 +149,7 @@ class _AnimatedChildSwitcherState extends State<AnimatedChildSwitcher> with Tick
     }
     return new Stack(
       children: children,
-      alignment: widget.alignment,
+      alignment: Alignment.center,
     );
   }
 }

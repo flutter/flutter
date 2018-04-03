@@ -11,7 +11,7 @@ void main() {
       new AnimatedChildSwitcher(
         duration: const Duration(milliseconds: 100),
         child: new Container(color: const Color(0x00000000)),
-        fadeInCurve: Curves.linear,
+        switchInCurve: Curves.linear,
       ),
     );
     // First one just appears.
@@ -22,7 +22,7 @@ void main() {
       new AnimatedChildSwitcher(
         duration: const Duration(milliseconds: 100),
         child: new Container(color: const Color(0xff000000)),
-        fadeInCurve: Curves.linear,
+        switchInCurve: Curves.linear,
       ),
     );
     // Second one cross-fades with the first.
@@ -32,50 +32,11 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('AnimatedChildSwitcher respects alignment.', (WidgetTester tester) async {
-    final UniqueKey containerKey = new UniqueKey();
-    await tester.pumpWidget(
-      new Container(
-        constraints: new BoxConstraints.tight(const Size.square(200.0)),
-        child: new AnimatedChildSwitcher(
-          duration: const Duration(milliseconds: 100),
-          child: new Container(
-            key: containerKey,
-            constraints: new BoxConstraints.tight(const Size.square(10.0)),
-            color: const Color(0xff000000),
-          ),
-          alignment: Alignment.centerLeft,
-          fadeInCurve: Curves.linear,
-        ),
-      ),
-    );
-    expect(tester.getSize(find.byKey(containerKey)), equals(const Size(10.0, 10.0)));
-    expect(tester.getTopLeft(find.byKey(containerKey)), equals(const Offset(0.0, 295.0)));
-
-    await tester.pumpWidget(
-      new Container(
-        constraints: new BoxConstraints.tight(const Size.square(200.0)),
-        child: new AnimatedChildSwitcher(
-          duration: const Duration(milliseconds: 100),
-          child: new Container(
-            key: containerKey,
-            constraints: new BoxConstraints.tight(const Size.square(10.0)),
-            color: const Color(0xff000000),
-          ),
-          alignment: Alignment.bottomRight,
-          fadeInCurve: Curves.linear,
-        ),
-      ),
-    );
-    expect(tester.getSize(find.byKey(containerKey).first), equals(const Size(10.0, 10.0)));
-    expect(tester.getTopLeft(find.byKey(containerKey).first), equals(const Offset(790.0, 590.0)));
-  });
-
   testWidgets("AnimatedChildSwitcher doesn't start any animations after dispose.", (WidgetTester tester) async {
     await tester.pumpWidget(new AnimatedChildSwitcher(
       duration: const Duration(milliseconds: 100),
       child: new Container(color: const Color(0xff000000)),
-      fadeInCurve: Curves.linear,
+      switchInCurve: Curves.linear,
     ));
     await tester.pump(const Duration(milliseconds: 50));
 
