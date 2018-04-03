@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'material.dart';
+import 'theme.dart';
 
 /// A material design card. A card has slightly rounded corners and a shadow.
 ///
@@ -62,23 +63,38 @@ class Card extends StatelessWidget {
   const Card({
     Key key,
     this.color,
-    this.elevation: 2.0,
+    this.elevation,
+    this.shape,
     this.child,
   }) : super(key: key);
 
-  /// The widget below this widget in the tree.
+  /// The card's background color.
   ///
-  /// {@macro flutter.widgets.child}
-  final Widget child;
-
-  /// The color of material used for this card.
+  /// Defines the card's [Material.color].
+  ///
+  /// The default color is defined by the ambient [Theme]: [ThemeData.cardColor].
   final Color color;
 
   /// The z-coordinate at which to place this card. This controls the size of
   /// the shadow below the card.
   ///
-  /// Defaults to 2, the appropriate elevation for cards.
+  /// Defines the card's [Material.elevation].
+  ///
+  /// The default elevation is 1.0.
   final double elevation;
+
+  /// The shape of the card's [Material].
+  ///
+  /// Defines the card's [Material.shape].
+  ///
+  /// The default shape is a [RoundedRectangleBorder] with a circular corner
+  /// radius of 4.0.
+  final ShapeBorder shape;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -87,11 +103,14 @@ class Card extends StatelessWidget {
       child: new Container(
         margin: const EdgeInsets.all(4.0),
         child: new Material(
-          color: color,
           type: MaterialType.card,
-          elevation: elevation,
-          child: child
-        )
+          color: color ?? Theme.of(context).cardColor,
+          elevation: elevation ?? 1.0,
+          shape: shape ?? const RoundedRectangleBorder(
+            borderRadius: const BorderRadius.all(const Radius.circular(4.0)),
+          ),
+          child: child,
+        ),
       ),
     );
   }
