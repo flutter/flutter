@@ -23,8 +23,8 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
 
   static const List<_FabLocationConfiguration> _fabLocationConfigurations = const <_FabLocationConfiguration>[
     const _FabLocationConfiguration('End, undocked above the bottom app bar', _BabMode.END_FAB, FloatingActionButtonLocation.endFloat),
-    const _FabLocationConfiguration('End, docked to the bottom app bar', _BabMode.END_FAB, const _EndDockedFloatingActionButtonLocation()),
-    const _FabLocationConfiguration('Center, docked to the bottom app bar', _BabMode.CENTER_FAB, const _CenterDockedFloatingActionButtonLocation()),
+    const _FabLocationConfiguration('End, docked to the bottom app bar', _BabMode.END_FAB, FloatingActionButtonLocation.endDocked),
+    const _FabLocationConfiguration('Center, docked to the bottom app bar', _BabMode.CENTER_FAB, FloatingActionButtonLocation.centerDocked),
     const _FabLocationConfiguration('Center, undocked above the bottom app bar', _BabMode.CENTER_FAB, FloatingActionButtonLocation.centerFloat),
     // This configuration uses a custom FloatingActionButtonLocation.
     const _FabLocationConfiguration('Start, docked to the top app bar', _BabMode.CENTER_FAB, const _TopStartFloatingActionButtonLocation()),
