@@ -353,7 +353,6 @@ class _DiamondFabState extends State<_DiamondFab> {
     return new Material(
       shape: const _DiamondBorder(),
       color: Colors.orange,
-      //onPressed: widget.onPressed,
       child: new InkWell(
         onTap: widget.onPressed,
         child: new Container(
