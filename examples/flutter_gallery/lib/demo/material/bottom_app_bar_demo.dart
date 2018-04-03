@@ -27,7 +27,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     const _FabLocationConfiguration('Center, docked to the bottom app bar', _BabMode.CENTER_FAB, FloatingActionButtonLocation.centerDocked),
     const _FabLocationConfiguration('Center, undocked above the bottom app bar', _BabMode.CENTER_FAB, FloatingActionButtonLocation.centerFloat),
     // This configuration uses a custom FloatingActionButtonLocation.
-    const _FabLocationConfiguration('Start, docked to the top app bar', _BabMode.CENTER_FAB, const _TopStartFloatingActionButtonLocation()),
+    const _FabLocationConfiguration('Start, docked to the top app bar', _BabMode.CENTER_FAB, const _StartTopFloatingActionButtonLocation()),
   ];
   
   // The index of the currently-selected _FabShapeConfiguration.
@@ -440,8 +440,8 @@ class _DiamondBorder extends ShapeBorder {
 
 // Places the Floating Action Button at the top of the content area of the
 // app, on the border between the body and the app bar.
-class _TopStartFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _TopStartFloatingActionButtonLocation();
+class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _StartTopFloatingActionButtonLocation();
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
