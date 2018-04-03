@@ -62,6 +62,12 @@ std::string VulkanResultToString(VkResult result) {
       return "VK_RESULT_RANGE_SIZE";
     case VK_RESULT_MAX_ENUM:
       return "VK_RESULT_MAX_ENUM";
+
+#if VK_HEADER_VERSION >= 63
+    case VK_ERROR_NOT_PERMITTED_EXT:
+      return "VK_ERROR_NOT_PERMITTED_EXT";
+#endif
+
 #if OS_FUCHSIA
 #if VK_KHR_external_memory
     case VK_ERROR_INVALID_EXTERNAL_HANDLE_KHR:
