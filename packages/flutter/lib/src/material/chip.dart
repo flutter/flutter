@@ -48,12 +48,16 @@ const Icon _kDefaultDeleteIcon = const Icon(Icons.cancel, size: _kDeleteIconSize
 /// Chips are compact elements that represent an attribute, text, entity, or
 /// action.
 ///
+/// The defaults mentioned in the documentation for each attribute are what
+/// the implementing classes typically use for defaults (but this class doesn't
+/// provide or enforce them).
+///
 /// See also:
 ///
 ///  * [Chip], a chip that displays information and can be deleted.
-///  * [InputChip], a chip represents a complex piece of information, such as an
-///    entity (person, place, or thing) or conversational text, in a compact
-///    form.
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
 ///  * [ChoiceChip], allows a single selection from a set of options. Choice
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
@@ -105,12 +109,16 @@ abstract class ChipAttributes {
 
 /// An interface for material design chips that can be deleted.
 ///
+/// The defaults mentioned in the documentation for each attribute are what
+/// the implementing classes typically use for defaults (but this class doesn't
+/// provide or enforce them).
+///
 /// See also:
 ///
 ///  * [Chip], a chip that displays information and can be deleted.
-///  * [InputChip], a chip represents a complex piece of information, such as an
-///    entity (person, place, or thing) or conversational text, in a compact
-///    form.
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
 ///  * <https://material.google.com/components/chips.html>
 abstract class DeletableChipAttributes {
   /// The icon displayed when [onDeleted] is set.
@@ -141,7 +149,7 @@ abstract class DeletableChipAttributes {
   /// }
   ///
   /// class CastListState extends State<CastList> {
-  ///   List<Actor> _cast = <Actor>[
+  ///   final List<Actor> _cast = <Actor>[
   ///     const Actor('Aaron Burr', 'AB'),
   ///     const Actor('Alexander Hamilton', 'AH'),
   ///     const Actor('Eliza Hamilton', 'EH'),
@@ -190,11 +198,15 @@ abstract class DeletableChipAttributes {
 
 /// An interface for material design chips that can be selected.
 ///
+/// The defaults mentioned in the documentation for each attribute are what
+/// the implementing classes typically use for defaults (but this class doesn't
+/// provide or enforce them).
+///
 /// See also:
 ///
-///  * [InputChip], a chip represents a complex piece of information, such as an
-///    entity (person, place, or thing) or conversational text, in a compact
-///    form.
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
 ///  * [ChoiceChip], allows a single selection from a set of options. Choice
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
@@ -233,7 +245,7 @@ abstract class SelectableChipAttributes {
   /// }
   ///
   /// class WoodState extends State<Wood> {
-  ///   bool _useChisel;
+  ///   bool _useChisel = false;
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
@@ -264,11 +276,15 @@ abstract class SelectableChipAttributes {
 
 /// An interface for material design chips that can be enabled and disabled.
 ///
+/// The defaults mentioned in the documentation for each attribute are what
+/// the implementing classes typically use for defaults (but this class doesn't
+/// provide or enforce them).
+///
 /// See also:
 ///
-///  * [InputChip], a chip represents a complex piece of information, such as an
-///    entity (person, place, or thing) or conversational text, in a compact
-///    form.
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
 ///  * [ChoiceChip], allows a single selection from a set of options. Choice
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
@@ -302,11 +318,15 @@ abstract class DisabledChipAttributes {
 
 /// An interface for material design chips that can be tapped.
 ///
+/// The defaults mentioned in the documentation for each attribute are what
+/// the implementing classes typically use for defaults (but this class doesn't
+/// provide or enforce them).
+///
 /// See also:
 ///
-///  * [InputChip], a chip represents a complex piece of information, such as an
-///    entity (person, place, or thing) or conversational text, in a compact
-///    form.
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
 ///  * [ChoiceChip], allows a single selection from a set of options. Choice
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
@@ -318,9 +338,6 @@ abstract class TappableChipAttributes {
   /// If [onPressed] is set, then this callback will be called when the user
   /// taps on the label or avatar parts of the chip. If [onPressed] is null,
   /// then the chip will be disabled.
-  ///
-  /// The [onPressed] and [SelectableChipAttributes.onSelected] callbacks must
-  /// not both be specified at the same time.
   ///
   /// ## Sample code
   ///
@@ -371,9 +388,9 @@ abstract class TappableChipAttributes {
 ///
 /// See also:
 ///
-///  * [InputChip], a chip represents a complex piece of information, such as an
-///    entity (person, place, or thing) or conversational text, in a compact
-///    form.
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
 ///  * [ChoiceChip], allows a single selection from a set of options. Choice
 ///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
@@ -501,12 +518,15 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 ///  * <https://material.google.com/components/chips.html>
 class InputChip extends StatelessWidget
     implements
-        ChipAttributes, //
+        ChipAttributes,
         DeletableChipAttributes,
         SelectableChipAttributes,
         DisabledChipAttributes,
         TappableChipAttributes {
   /// Creates an [InputChip].
+  ///
+  /// The [onPressed] and [onSelected] callbacks must not both be specified at
+  /// the same time.
   ///
   /// The [label], [isEnabled], [selected], and [border] arguments must not be
   /// null.
@@ -625,7 +645,7 @@ class InputChip extends StatelessWidget
 /// }
 ///
 /// class _MyThreeOptionsState extends State<MyThreeOptions> {
-///   int _value;
+///   int _value = 1;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -650,9 +670,9 @@ class InputChip extends StatelessWidget
 /// See also:
 ///
 ///  * [Chip], a chip that displays information and can be deleted.
-///  * [InputChip], a chip represents a complex piece of information, such as an
-///    entity (person, place, or thing) or conversational text, in a compact
-///    form.
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
 ///  * [ActionChip], represents an action related to primary content.
 ///  * [CircleAvatar], which shows images or initials of people.
@@ -661,7 +681,7 @@ class InputChip extends StatelessWidget
 ///  * <https://material.google.com/components/chips.html>
 class ChoiceChip extends StatelessWidget
     implements
-        ChipAttributes, //
+        ChipAttributes,
         SelectableChipAttributes,
         DisabledChipAttributes {
   const ChoiceChip({
@@ -752,21 +772,71 @@ class ChoiceChip extends StatelessWidget
 /// ## Sample code
 ///
 /// ```dart
-/// new Chip(
-///   avatar: new CircleAvatar(
-///     backgroundColor: Colors.grey.shade800,
-///     child: new Text('AB'),
-///   ),
-///   label: new Text('Aaron Burr'),
-/// )
+/// class ActorFilterEntry {
+///   const ActorFilterEntry(this.name, this.initials);
+///   final String name;
+///   final String initials;
+/// }
+///
+/// class CastFilter extends StatefulWidget {
+///   @override
+///   State createState() => new CastFilterState();
+/// }
+///
+/// class CastFilterState extends State<CastFilter> {
+///   final List<ActorFilterEntry> _cast = <ActorFilterEntry>[
+///     const ActorFilterEntry('Aaron Burr', 'AB'),
+///     const ActorFilterEntry('Alexander Hamilton', 'AH'),
+///     const ActorFilterEntry('Eliza Hamilton', 'EH'),
+///     const ActorFilterEntry('James Madison', 'JM'),
+///   ];
+///   List<String> _filters = <String>[];
+///
+///   Iterable<Widget> get actorWidgets sync* {
+///     for (ActorFilterEntry actor in _cast) {
+///       yield new Padding(
+///         padding: const EdgeInsets.all(4.0),
+///         child: new FilterChip(
+///           avatar: new CircleAvatar(child: new Text(actor.initials)),
+///           label: new Text(actor.name),
+///           selected: _filters.contains(actor.name),
+///           onSelected: (bool value) {
+///             setState(() {
+///               if (value) {
+///                 _filters.add(actor.name);
+///               } else {
+///                 _filters.removeWhere((String name) {
+///                   return name == actor.name;
+///                 });
+///               }
+///             });
+///           },
+///         ),
+///       );
+///     }
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Column(
+///       mainAxisAlignment: MainAxisAlignment.center,
+///       children: <Widget>[
+///         new Wrap(
+///           children: actorWidgets.toList(),
+///         ),
+///         new Text('Look for: ${_filters.join(', ')}'),
+///       ],
+///     );
+///   }
+/// }
 /// ```
 ///
 /// See also:
 ///
 ///  * [Chip], a chip that displays information and can be deleted.
-///  * [InputChip], a chip represents a complex piece of information, such as an
-///    entity (person, place, or thing) or conversational text, in a compact
-///    form.
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
 ///  * [ChoiceChip], allows a single selection from a set of options. Choice
 ///    chips contain related descriptive text or categories.
 ///  * [ActionChip], represents an action related to primary content.
@@ -776,7 +846,7 @@ class ChoiceChip extends StatelessWidget
 ///  * <https://material.google.com/components/chips.html>
 class FilterChip extends StatelessWidget
     implements
-        ChipAttributes, //
+        ChipAttributes,
         SelectableChipAttributes,
         DisabledChipAttributes {
   const FilterChip({
@@ -887,9 +957,9 @@ class FilterChip extends StatelessWidget
 /// See also:
 ///
 ///  * [Chip], a chip that displays information and can be deleted.
-///  * [InputChip], a chip represents a complex piece of information, such as an
-///    entity (person, place, or thing) or conversational text, in a compact
-///    form.
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
 ///  * [ChoiceChip], allows a single selection from a set of options. Choice
 ///    chips contain related descriptive text or categories.
 ///  * [CircleAvatar], which shows images or initials of people.
@@ -986,12 +1056,15 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 ///  * <https://material.google.com/components/chips.html>
 class RawChip extends StatefulWidget
     implements
-        ChipAttributes, //
+        ChipAttributes,
         DeletableChipAttributes,
         SelectableChipAttributes,
         DisabledChipAttributes,
         TappableChipAttributes {
   /// Creates a RawChip
+  ///
+  /// The [onPressed] and [onSelected] callbacks must not both be specified at
+  /// the same time.
   ///
   /// The [label], [isEnabled], and [border] arguments must not be null.
   const RawChip({
@@ -1115,9 +1188,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   bool get hasAvatar => widget.avatar != null;
 
   bool get canTap {
-    return widget.isEnabled && //
-        widget.tapEnabled &&
-        (widget.onPressed != null || widget.onSelected != null);
+    return widget.isEnabled
+        && widget.tapEnabled
+        && (widget.onPressed != null || widget.onSelected != null);
   }
 
   bool _isTapping = false;
@@ -1154,11 +1227,11 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
 
     // These will delay the start of some animations, and/or reduce their
     // length compared to the overall select animation, using Intervals.
-    final double checkmarkPercentage = _kCheckmarkDuration.inMilliseconds / //
+    final double checkmarkPercentage = _kCheckmarkDuration.inMilliseconds /
         _kSelectDuration.inMilliseconds;
-    final double checkmarkReversePercentage = _kCheckmarkReverseDuration.inMilliseconds / //
+    final double checkmarkReversePercentage = _kCheckmarkReverseDuration.inMilliseconds /
         _kSelectDuration.inMilliseconds;
-    final double avatarDrawerReversePercentage = _kReverseDrawerDuration.inMilliseconds / //
+    final double avatarDrawerReversePercentage = _kReverseDrawerDuration.inMilliseconds /
         _kSelectDuration.inMilliseconds;
     checkmarkAnimation = new CurvedAnimation(
       parent: selectController,
@@ -1340,24 +1413,25 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
               new _ChipRenderWidget(
                 theme: new _ChipRenderTheme(
                   label: new DefaultTextStyle(
-                      overflow: TextOverflow.fade,
-                      textAlign: TextAlign.start,
-                      maxLines: 1,
-                      softWrap: false,
-                      style: widget.labelStyle ??
-                          theme.textTheme.body2.copyWith(
-                            color: Colors.black.withAlpha(_kTextLabelAlpha),
-                          ),
-                      child: widget.label),
-                  avatar: new AutoFade(
+                    overflow: TextOverflow.fade,
+                    textAlign: TextAlign.start,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: widget.labelStyle ??
+                        theme.textTheme.body2.copyWith(
+                          color: Colors.black.withAlpha(_kTextLabelAlpha),
+                        ),
+                    child: widget.label,
+                  ),
+                  avatar: new AnimatedChildSwitcher(
                     child: widget.avatar,
                     duration: _kDrawerDuration,
-                    fadeInCurve: Curves.fastOutSlowIn,
+                    switchInCurve: Curves.fastOutSlowIn,
                   ),
-                  deleteIcon: new AutoFade(
+                  deleteIcon: new AnimatedChildSwitcher(
                     child: _buildDeleteIcon(context, theme),
                     duration: _kDrawerDuration,
-                    fadeInCurve: Curves.fastOutSlowIn,
+                    switchInCurve: Curves.fastOutSlowIn,
                   ),
                   padding: widget.padding?.resolve(textDirection),
                   labelPadding: widget.labelPadding?.resolve(textDirection),
@@ -1582,16 +1656,16 @@ class _ChipRenderTheme {
       return false;
     }
     final _ChipRenderTheme typedOther = other;
-    return typedOther.avatar == avatar &&
-        typedOther.label == label &&
-        typedOther.deleteIcon == deleteIcon &&
-        typedOther.padding == padding &&
-        typedOther.labelPadding == labelPadding &&
-        typedOther.avatarPadding == avatarPadding &&
-        typedOther.deleteIconPadding == deleteIconPadding &&
-        typedOther.showAvatar == showAvatar &&
-        typedOther.showCheckmark == showCheckmark &&
-        typedOther.canTapBody == canTapBody;
+    return typedOther.avatar == avatar
+        && typedOther.label == label
+        && typedOther.deleteIcon == deleteIcon
+        && typedOther.padding == padding
+        && typedOther.labelPadding == labelPadding
+        && typedOther.avatarPadding == avatarPadding
+        && typedOther.deleteIconPadding == deleteIconPadding
+        && typedOther.showAvatar == showAvatar
+        && typedOther.showCheckmark == showCheckmark
+        && typedOther.canTapBody == canTapBody;
   }
 
   @override
@@ -1778,11 +1852,11 @@ class _RenderChip extends RenderBox {
     // The overall padding isn't affected by missing avatar or delete icon
     // because we add the padding regardless to give extra padding for the label
     // when they're missing.
-    final double overallPadding = theme.padding.horizontal + //
+    final double overallPadding = theme.padding.horizontal +
         theme.labelPadding.horizontal +
         theme.deleteIconPadding.horizontal +
         theme.avatarPadding.horizontal;
-    return overallPadding + //
+    return overallPadding +
         _minWidth(avatar, height) +
         _minWidth(label, height) +
         _minWidth(deleteIcon, height);
@@ -1790,11 +1864,11 @@ class _RenderChip extends RenderBox {
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double overallPadding = theme.padding.vertical + //
+    final double overallPadding = theme.padding.vertical +
         theme.labelPadding.horizontal +
         theme.deleteIconPadding.horizontal +
         theme.avatarPadding.horizontal;
-    return overallPadding + //
+    return overallPadding +
         _maxWidth(avatar, height) +
         _maxWidth(label, height) +
         _maxWidth(deleteIcon, height);
@@ -1970,7 +2044,7 @@ class _RenderChip extends RenderBox {
           pressRect = new Rect.fromLTWH(
             0.0,
             0.0,
-            deleteIconShowing //
+            deleteIconShowing
                 ? start + theme.padding.left
                 : overallSize.width + theme.padding.horizontal,
             overallSize.height + theme.padding.vertical,
@@ -2038,7 +2112,7 @@ class _RenderChip extends RenderBox {
     Color paintColor = theme.showAvatar ? Colors.white : Colors.black87;
     final ColorTween fadeTween = new ColorTween(begin: Colors.transparent, end: paintColor);
 
-    paintColor = checkmarkAnimation.status == AnimationStatus.reverse //
+    paintColor = checkmarkAnimation.status == AnimationStatus.reverse
         ? fadeTween.evaluate(checkmarkAnimation)
         : paintColor;
 
@@ -2046,7 +2120,7 @@ class _RenderChip extends RenderBox {
       ..color = paintColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = _kCheckmarkStrokeWidth * (avatar != null ? avatar.size.height / 24.0 : 1.0);
-    final double t = checkmarkAnimation.status == AnimationStatus.reverse //
+    final double t = checkmarkAnimation.status == AnimationStatus.reverse
         ? 1.0
         : checkmarkAnimation.value;
     if (t == 0.0) {
@@ -2084,7 +2158,7 @@ class _RenderChip extends RenderBox {
       context.canvas.drawRect(avatarRect, darkenPaint);
       // Need to make the check mark be a little smaller than the avatar.
       final double checkSize = avatar.size.height * 0.75;
-      final Offset checkOffset = _boxParentData(avatar).offset + //
+      final Offset checkOffset = _boxParentData(avatar).offset +
           new Offset(avatar.size.height * 0.125, avatar.size.height * 0.125);
       _paintCheck(context.canvas, offset + checkOffset, checkSize);
     }

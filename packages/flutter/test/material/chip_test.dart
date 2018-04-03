@@ -237,12 +237,10 @@ void main() {
         new OverlayEntry(
           builder: (BuildContext context) {
             return new Material(
-              child: new Center(
-                child: new Chip(
-                  deleteIcon: new Icon(Icons.delete, key: iconKey),
-                  onDeleted: () {},
-                  label: const Text('ABC'),
-                ),
+              child: new Chip(
+                deleteIcon: new Icon(Icons.delete, key: iconKey),
+                onDeleted: () {},
+                label: const Text('ABC'),
               ),
             );
           },
