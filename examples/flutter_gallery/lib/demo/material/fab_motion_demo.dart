@@ -19,9 +19,9 @@ class FabMotionDemo extends StatefulWidget {
 
 class _FabMotionDemoState extends State<FabMotionDemo> {
   static const List<FloatingActionButtonLocation> _floatingActionButtonLocations = const <FloatingActionButtonLocation>[
-    FloatingActionButtonLocation.endFloat, 
+    FloatingActionButtonLocation.endFloat,
     FloatingActionButtonLocation.centerFloat,
-    const _TopStartFloatingActionButtonLocation(),
+    const _StartTopFloatingActionButtonLocation(),
   ];
 
   bool _showFab = true;
@@ -29,25 +29,25 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget floatingActionButton = _showFab 
+    final Widget floatingActionButton = _showFab
       ? new Builder(builder: (BuildContext context) {
         // We use a widget builder here so that this inner context can find the Scaffold.
         // This makes it possible to show the snackbar.
         return new FloatingActionButton(
           backgroundColor: Colors.yellow.shade900,
           onPressed: () => _showSnackbar(context),
-          child: const Icon(Icons.add), 
+          child: const Icon(Icons.add),
         );
-      }) 
+      })
       : null;
     return new Scaffold(
       appBar: new AppBar(
-        title: const Text('FAB Location'), 
+        title: const Text('FAB Location'),
         // Add 48dp of space onto the bottom of the appbar.
         // This gives space for the top-start location to attach to without
         // blocking the 'back' button.
         bottom: const PreferredSize(
-          preferredSize: const Size.fromHeight(48.0), 
+          preferredSize: const Size.fromHeight(48.0),
           child: const SizedBox(),
         ),
       ),
@@ -93,8 +93,8 @@ class _FabMotionDemoState extends State<FabMotionDemo> {
 
 // Places the Floating Action Button at the top of the content area of the
 // app, on the border between the body and the app bar.
-class _TopStartFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _TopStartFloatingActionButtonLocation();
+class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _StartTopFloatingActionButtonLocation();
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
@@ -130,7 +130,7 @@ class _TopStartFloatingActionButtonLocation extends FloatingActionButtonLocation
         fabX = startPadding;
         break;
     }
-    // Finally, we'll place the Y coordinate for the Floating Action Button 
+    // Finally, we'll place the Y coordinate for the Floating Action Button
     // at the top of the content body.
     //
     // We want to place the middle of the Floating Action Button on the
