@@ -130,7 +130,7 @@ void main() {
           'version': kVersion,
           'properties': <String, String>{
             'buildMode': BuildMode.release.toString(),
-            'targetPlatform': TargetPlatform.ios.toString(),
+            'targetPlatform': TargetPlatform.ios_arm64.toString(),
             'entryPoint': 'a.dart',
           },
           'files': <String, dynamic>{
@@ -144,7 +144,7 @@ void main() {
         expect(content['version'], mockVersion.frameworkRevision);
         expect(content['properties'], hasLength(3));
         expect(content['properties']['buildMode'], BuildMode.release.toString());
-        expect(content['properties']['targetPlatform'], TargetPlatform.ios.toString());
+        expect(content['properties']['targetPlatform'], TargetPlatform.ios_arm64.toString());
         expect(content['properties']['entryPoint'], 'a.dart');
         expect(content['files'], hasLength(2));
         expect(content['files']['a.dart'], '8a21a15fad560b799f6731d436c1b698');
@@ -245,7 +245,7 @@ void main() {
           'version': kVersion,
           'properties': <String, String>{
             'buildMode': BuildMode.debug.toString(),
-            'targetPlatform': TargetPlatform.ios.toString(),
+            'targetPlatform': TargetPlatform.ios_arm64.toString(),
             'entryPoint': 'a.dart',
           },
           'files': <String, dynamic>{

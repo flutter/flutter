@@ -35,7 +35,7 @@ class BuildAotCommand extends BuildSubCommand {
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'ios']
+        allowed: <String>['android-arm', 'android-arm64', 'ios-arm64']
       )
       ..addFlag('interpreter')
       ..addFlag('quiet', defaultsTo: false)
@@ -159,7 +159,7 @@ Future<String> _buildAotSnapshot(
 
   if (!(platform == TargetPlatform.android_arm ||
         platform == TargetPlatform.android_arm64 ||
-        platform == TargetPlatform.ios)) {
+        platform == TargetPlatform.ios_arm64)) {
     printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
     return null;
   }
@@ -239,7 +239,7 @@ Future<String> _buildAotSnapshot(
         ]);
       }
       break;
-    case TargetPlatform.ios:
+    case TargetPlatform.ios_arm64:
       snapshotDartIOS = artifacts.getArtifactPath(Artifact.snapshotDart, platform, buildMode);
       inputPaths.add(snapshotDartIOS);
       break;
@@ -320,7 +320,7 @@ Future<String> _buildAotSnapshot(
         ]);
       }
       break;
-    case TargetPlatform.ios:
+    case TargetPlatform.ios_arm64:
       if (interpreter) {
         genSnapshotCmd.add('--snapshot_kind=core');
         genSnapshotCmd.add(snapshotDartIOS);
@@ -417,7 +417,7 @@ Future<String> _buildAotSnapshot(
 
   // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
   // end-developer can link into their app.
-  if (platform == TargetPlatform.ios) {
+  if (platform == TargetPlatform.ios_arm64) {
     printStatus('Building App.framework...');
 
     final List<String> commonBuildOptions = <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];

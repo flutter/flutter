@@ -201,7 +201,7 @@ abstract class Device {
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         return true;
-      case TargetPlatform.ios:
+      case TargetPlatform.ios_arm64:
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
@@ -306,7 +306,7 @@ abstract class Device {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
       final TargetPlatform targetPlatform = await device.targetPlatform;
       if (await device.isLocalEmulator) {
-        final String type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
+        final String type = targetPlatform == TargetPlatform.ios_arm64 ? 'simulator' : 'emulator';
         supportIndicator += ' ($type)';
       }
       table.add(<String>[

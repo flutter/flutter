@@ -391,9 +391,9 @@ class FlutterEngine extends CachedArtifact {
   ];
 
   List<List<String>> get _iosBinaryDirs => <List<String>>[
-    <String>['ios', 'ios/artifacts.zip'],
-    <String>['ios-profile', 'ios-profile/artifacts.zip'],
-    <String>['ios-release', 'ios-release/artifacts.zip'],
+    <String>['ios-arm64', 'ios/artifacts.zip'],
+    <String>['ios-arm64-profile', 'ios-profile/artifacts.zip'],
+    <String>['ios-arm64-release', 'ios-release/artifacts.zip'],
   ];
 
   List<List<String>> get _dartSdks => <List<String>> [
@@ -405,7 +405,7 @@ class FlutterEngine extends CachedArtifact {
   // A list of cache directory paths to which the LICENSE file should be copied.
   List<String> _getLicenseDirs() {
     if (cache.includeAllPlatforms || platform.isMacOS) {
-      return const <String>['ios', 'ios-profile', 'ios-release'];
+      return const <String>['ios-arm64', 'ios-arm64-profile', 'ios-arm64-release'];
     }
     return const <String>[];
   }

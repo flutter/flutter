@@ -60,7 +60,7 @@ class BuildIOSCommand extends BuildSubCommand {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
       throwToolExit('Building for iOS is only supported on the Mac.');
 
-    final BuildableIOSApp app = await applicationPackages.getPackageForPlatform(TargetPlatform.ios);
+    final BuildableIOSApp app = await applicationPackages.getPackageForPlatform(TargetPlatform.ios_arm64);
 
     if (app == null)
       throwToolExit('Application not configured for iOS');
@@ -77,7 +77,7 @@ class BuildIOSCommand extends BuildSubCommand {
 
     final String logTarget = forSimulator ? 'simulator' : 'device';
 
-    final String typeName = artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
+    final String typeName = artifacts.getEngineType(TargetPlatform.ios_arm64, buildInfo.mode);
     printStatus('Building $app for $logTarget ($typeName)...');
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,

@@ -28,8 +28,8 @@ void main() {
 
     testUsingContext('getArtifactPath', () {
       expect(
-          artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),
-          fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'ios-release', 'Flutter.framework')
+          artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios_arm64, BuildMode.release),
+          fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'ios-arm64-release', 'Flutter.framework')
       );
       expect(
           artifacts.getArtifactPath(Artifact.entryPointsExtraJson, TargetPlatform.android_arm64, BuildMode.release),
@@ -50,8 +50,8 @@ void main() {
           'android-arm'
       );
       expect(
-          artifacts.getEngineType(TargetPlatform.ios, BuildMode.release),
-          'ios-release'
+          artifacts.getEngineType(TargetPlatform.ios_arm64, BuildMode.release),
+          'ios-arm64-release'
       );
       expect(
           artifacts.getEngineType(TargetPlatform.darwin_x64),
@@ -90,7 +90,7 @@ void main() {
           fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'dart_entry_points', 'entry_points.json')
       );
       expect(
-          artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),
+          artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios_arm64, BuildMode.release),
           fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'Flutter.framework')
       );
       expect(
@@ -111,7 +111,7 @@ void main() {
           'android_debug_unopt'
       );
       expect(
-          artifacts.getEngineType(TargetPlatform.ios, BuildMode.release),
+          artifacts.getEngineType(TargetPlatform.ios_arm64, BuildMode.release),
           'android_debug_unopt'
       );
       expect(

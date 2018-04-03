@@ -21,7 +21,7 @@ final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = new RegExp(r'\$\((.*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
-  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
+  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios_arm64, mode)));
 }
 
 String _generatedXcodePropertiesPath(String projectPath) {

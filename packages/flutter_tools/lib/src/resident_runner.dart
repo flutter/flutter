@@ -900,7 +900,7 @@ String getMissingPackageHintForPlatform(TargetPlatform platform) {
         manifest = gradleManifestPath;
       }
       return 'Is your project missing an $manifest?\nConsider running "flutter create ." to create one.';
-    case TargetPlatform.ios:
+    case TargetPlatform.ios_arm64:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
     default:
       return null;
