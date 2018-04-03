@@ -83,7 +83,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         padding: const EdgeInsets.all(16.0),
         child: controls(context),
       ),
-      bottomNavigationBar: new MyBottomAppBar(_fabLocationConfigurations[fabLocationIndex].babMode, babColor, notchEnabled),
+      bottomNavigationBar: new _DemoBottomAppBar(_fabLocationConfigurations[fabLocationIndex].babMode, babColor, notchEnabled),
       floatingActionButton: _fabShapeConfigurations[fabShapeIndex].fab,
       floatingActionButtonLocation: _fabLocationConfigurations[fabLocationIndex].fabLocation,
     );
@@ -238,8 +238,8 @@ class _FabShapeConfiguration {
 }
 
 // A bottom app bar with a menu inside it.
-class MyBottomAppBar extends StatelessWidget {
-  const MyBottomAppBar(this.babMode, this.color, this.enableNotch);
+class _DemoBottomAppBar extends StatelessWidget {
+  const _DemoBottomAppBar(this.babMode, this.color, this.enableNotch);
 
   final _BabMode babMode;
   final Color color;
@@ -259,7 +259,7 @@ class MyBottomAppBar extends StatelessWidget {
           new IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () {
-              showModalBottomSheet<Null>(context: context, builder: (BuildContext context) => const _MyDrawer()); },
+              showModalBottomSheet<Null>(context: context, builder: (BuildContext context) => const _DemoDrawer()); },
           ),
           new Expanded(
             child: new AnimatedCrossFade(
@@ -306,8 +306,8 @@ class MyBottomAppBar extends StatelessWidget {
 }
 
 // A drawer that pops up from the bottom of the screen.
-class _MyDrawer extends StatelessWidget {
-  const _MyDrawer();
+class _DemoDrawer extends StatelessWidget {
+  const _DemoDrawer();
 
   @override
   Widget build(BuildContext context) {
