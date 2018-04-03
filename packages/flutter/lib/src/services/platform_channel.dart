@@ -135,6 +135,131 @@ class MethodChannel {
   /// * a [MissingPluginException], if the method has not been implemented by a
   ///   platform plugin.
   ///
+  /// ## Sample code
+  ///
+  /// The following code snippets demonstrate how to invoke platform methods
+  /// in Dart using a MethodChannel and how to implement those methods in Java
+  /// (for Android) and Objective-C (for iOS). The code might be packaged up as
+  /// a musical plugin, see <https://flutter.io/developing-packages/>:
+  ///
+  /// ```dart
+  /// class Music {
+  ///   static const MethodChannel _channel = const MethodChannel('music');
+  ///
+  ///   static Future<bool> isLicensed() async {
+  ///     // invokeMethod returns a Future<dynamic>, and we cannot pass that for
+  ///     // a Future<bool>, hence the indirection.
+  ///     final bool result = await _channel.invokeMethod('isLicensed');
+  ///     return result;
+  ///   }
+  ///
+  ///   static Future<List<Song>> songs() async {
+  ///     // invokeMethod here returns a Future<dynamic> that completes to a
+  ///     // List<dynamic> with Map<dynamic, dynamic> entries. Post-processing
+  ///     // code thus cannot assume e.g. List<Map<String, String>> even though
+  ///     // the actual values involved would support such a typed container.
+  ///     final List<dynamic> songs = await _channel.invokeMethod('getSongs');
+  ///     return songs.map(Song.fromJson).toList();
+  ///   }
+  ///
+  ///   static Future<void> play(Song song, double volume) async {
+  ///     // Errors occurring on the platform side cause invokeMethod to throw
+  ///     // PlatformExceptions.
+  ///     try {
+  ///       await _channel.invokeMethod('play', <String, dynamic>{
+  ///         'song': song.id,
+  ///         'volume': volume,
+  ///       });
+  ///     } on PlatformException catch (e) {
+  ///       throw 'Unable to play ${song.title}: ${e.message}';
+  ///     }
+  ///   }
+  /// }
+  ///
+  /// class Song {
+  ///   Song(this.id, this.title, this.artist);
+  ///
+  ///   final String id;
+  ///   final String title;
+  ///   final String artist;
+  ///
+  ///   static Song fromJson(dynamic json) {
+  ///     return new Song(json['id'], json['title'], json['artist']);
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// ```java
+  /// // Assumes existence of an Android MusicApi.
+  /// public class MusicPlugin implements MethodCallHandler {
+  ///   @Override
+  ///   public void onMethodCall(MethodCall call, Result result) {
+  ///     switch (call.method) {
+  ///       case "isLicensed":
+  ///         result.success(MusicApi.checkLicense());
+  ///         break;
+  ///       case "getSongs":
+  ///         final List<MusicApi.Track> tracks = MusicApi.getTracks();
+  ///         final List<Object> json = new ArrayList<>(tracks.size());
+  ///         for (MusicApi.Track track : tracks) {
+  ///           json.add(track.toJson()); // Map<String, Object> entries
+  ///         }
+  ///         result.success(json);
+  ///         break;
+  ///       case "play":
+  ///         final String song = call.argument("song");
+  ///         final double volume = call.argument("volume");
+  ///         try {
+  ///           MusicApi.playSongAtVolume(song, volume);
+  ///           result.success(null);
+  ///         } catch (MusicalException e) {
+  ///           result.error("playError", e.getMessage(), null);
+  ///         }
+  ///         break;
+  ///       default:
+  ///         result.notImplemented();
+  ///     }
+  ///   }
+  ///   // Other methods elided.
+  /// }
+  /// ```
+  ///
+  /// ```objective-c
+  /// @interface MusicPlugin : NSObject<FlutterPlugin>
+  /// @end
+  ///
+  /// // Assumes existence of an iOS Broadway Play Api.
+  /// @implementation MusicPlugin
+  /// - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
+  ///   if ([@"isLicensed" isEqualToString:call.method]) {
+  ///     result([NSNumber numberWithBool:[BWPlayApi isLicensed]]);
+  ///   } else if ([@"getSongs" isEqualToString:call.method]) {
+  ///     NSArray* items = [BWPlayApi items];
+  ///     NSMutableArray* json = [NSMutableArray arrayWithCapacity:items.count];
+  ///     for (BWPlayItem* item in items) {
+  ///       [json addObject:@{@"id":item.itemId, @"title":item.name, @"artist":item.artist}];
+  ///     }
+  ///     result(json);
+  ///   } else if ([@"play" isEqualToString:call.method]) {
+  ///     NSString* itemId = call.arguments[@"song"];
+  ///     NSNumber* volume = call.arguments[@"volume"];
+  ///     NSError* error = nil;
+  ///     BOOL success = [BWPlayApi playItem:itemId volume:volume.doubleValue error:&error];
+  ///     if (success) {
+  ///       result(nil);
+  ///     } else {
+  ///       result([FlutterError errorWithCode:[NSString stringWithFormat:@"Error %ld", error.code]
+  ///                                  message:error.domain
+  ///                                  details:error.localizedDescription]);
+  ///     }
+  ///   } else {
+  ///     result(FlutterMethodNotImplemented);
+  ///   }
+  /// }
+  /// // Other methods elided.
+  /// @end
+  /// ```
+  ///
   /// See also:
   ///
   /// * [StandardMessageCodec] which defines the payload values supported by
