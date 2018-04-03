@@ -98,6 +98,7 @@ class DialogDemoState extends State<DialogDemo> {
               showDemoDialog<DialogDemoAction>(
                 context: context,
                 child: new AlertDialog(
+                  semanticName: 'alert',
                   content: new Text(
                     _alertWithoutTitleText,
                     style: dialogTextStyle
@@ -122,6 +123,7 @@ class DialogDemoState extends State<DialogDemo> {
               showDemoDialog<DialogDemoAction>(
                 context: context,
                 child: new AlertDialog(
+                  semanticName: 'location permissions',
                   title: const Text('Use Google\'s location service?'),
                   content: new Text(
                     _alertWithTitleText,
