@@ -659,13 +659,13 @@ class Rect {
   /// A rectangle with left, top, right, and bottom edges all at zero.
   static final Rect zero = new Rect._();
 
-  static const double _skScalarMax = 3.402823466e+38; // from Skia's SkScalar.h
+  static const double _giantScalar = 1.0E+9; // matches kGiantRect from default_layer_builder.cc
 
   /// A rectangle that covers the entire coordinate space.
   ///
-  /// This actually covers the space from about -3e38,-3e38 to about 3e38,3e38.
+  /// This covers the space from -1e9,-1e9 to 1e9,1e9.
   /// This is the space over which graphics operations are valid.
-  static final Rect largest = new Rect.fromLTRB(-_skScalarMax, -_skScalarMax, _skScalarMax, _skScalarMax);
+  static final Rect largest = new Rect.fromLTRB(-_giantScalar, -_giantScalar, _giantScalar, _giantScalar);
 
   /// Whether any of the coordinates of this rectangle are equal to positive infinity.
   // included for consistency with Offset and Size
