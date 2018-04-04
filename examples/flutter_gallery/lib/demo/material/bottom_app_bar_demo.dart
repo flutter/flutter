@@ -209,9 +209,12 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         ),
       );
     }
-    return new Row(
-      children: colors,
-      mainAxisAlignment: MainAxisAlignment.center,
+    return new SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: new Row(
+        children: colors,
+        mainAxisAlignment: MainAxisAlignment.center,
+      ),
     );
   }
 
