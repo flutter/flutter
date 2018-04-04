@@ -308,7 +308,9 @@ class RouteSettings {
   /// If null, the route is anonymous.
   ///
   /// The is also used to create a default semantic value for the route
-  /// transition used by accessibility frameworks.
+  /// transition used by accessibility frameworks. For example, "home/abc" will
+  /// be read as "home, abc" by TalkBack. On iOS, the route name is ignored by
+  /// default.
   ///
   /// See also:
   ///

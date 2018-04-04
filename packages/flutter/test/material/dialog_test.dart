@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matcher/matcher.dart';
@@ -335,46 +336,57 @@ void main() {
     );
   });
 
-  testWidgets('Dialog widget contains route semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
-    await tester.pumpWidget(
-      new MaterialApp(
-        theme: new ThemeData(brightness: Brightness.dark),
-        home: new Material(
-          child: new Builder(
-            builder: (BuildContext context) {
-              return new Center(
-                child: new RaisedButton(
-                  child: const Text('X'),
-                  onPressed: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return const AlertDialog(
-                          title: const Text('Title'),
-                          content: const Text('Y'),
-                          actions: const <Widget>[ ],
-                          semanticName: 'alert',
-                        );
-                      },
-                    );
-                  },
-                ),
-              );
-            },
+  for (TargetPlatform platform in [TargetPlatform.iOS, TargetPlatform.android]) {
+    testWidgets(
+        'Dialog widget contains route semantics on $platform', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = platform;
+      final SemanticsTester semantics = new SemanticsTester(tester);
+
+      await tester.pumpWidget(
+        new MaterialApp(
+          theme: new ThemeData(brightness: Brightness.dark),
+          home: new Material(
+            child: new Builder(
+              builder: (BuildContext context) {
+                return new Center(
+                  child: new RaisedButton(
+                    child: const Text('X'),
+                    onPressed: () {
+                      showDialog<void>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return const AlertDialog(
+                            title: const Text('Title'),
+                            content: const Text('Y'),
+                            actions: const <Widget>[],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(semantics, isNot(includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute], value: 'alert')));
+      expect(semantics, isNot(includesNodeWith(
+        flags: <SemanticsFlag>[SemanticsFlag.isRoute],
+        value: 'alert')
+      ));
 
-    await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.text('X'));
+      await tester.pump(); // start animation
+      await tester.pump(const Duration(seconds: 1));
 
-    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute], value: 'alert'));
+      expect(semantics, includesNodeWith(
+        flags: <SemanticsFlag>[SemanticsFlag.isRoute],
+        value: 'alert')
+      );
 
-    semantics.dispose();
-  });
+      debugDefaultTargetPlatformOverride = null;
+      semantics.dispose();
+    });
+  }
 }

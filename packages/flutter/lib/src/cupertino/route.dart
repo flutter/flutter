@@ -237,7 +237,11 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget result = new Semantics(route: true, explicitChildNodes: true, child: builder(context));
+    final Widget result = new Semantics(
+      route: true,
+      explicitChildNodes: true,
+      child: builder(context)
+    );
     assert(() {
       if (result == null) {
         throw new FlutterError(

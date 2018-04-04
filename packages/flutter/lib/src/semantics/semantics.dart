@@ -408,7 +408,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// Doing so instructs screen readers to not read out the [value].
   final bool obscured;
 
-  /// If non-null, whether the node corresponds to a visually distinct subtree
+  /// If non-null, whether the node corresponds to a visually distinct subtree.
   ///
   /// When the most specific route semantics node changes, the platform
   /// accessibility framework will make an edge-triggered announcement.
@@ -2352,7 +2352,7 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// The name of a widget subtree.
+  /// Whether this node is part of a visually distinct subtree.
   /// 
   /// Changes to the most specific route name will prompt an accessibility
   /// announcement when enabled.  On iOS this produces a

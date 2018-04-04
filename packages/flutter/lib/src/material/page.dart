@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-/// The default route name provided to [Semantics] when [RouteSettings.isInitialRoute]
-/// is true.
+/// The default route name provided to [Semantics] when
+/// [RouteSettings.isInitialRoute] is true.
 const String kDefaultInitialRouteName = 'home';
 
 // Fractional offset from 1/4 screen below the top to fully on screen.
@@ -155,7 +155,12 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget result = new Semantics(route: true, explicitChildNodes: true, value: _routeName(), child: builder(context));
+    final Widget result = new Semantics(
+      route: true,
+      explicitChildNodes: true,
+      value: _routeName(),
+      child: builder(context),
+    );
     assert(() {
       if (result == null) {
         throw new FlutterError(

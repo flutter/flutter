@@ -19,6 +19,9 @@ import 'theme.dart';
 // Examples can assume:
 // enum Department { treasury, state }
 
+/// The default for the [SemanticsProperty.value] of a dialog.
+const String _kDefaultAlertDialogValue = 'alert';
+
 /// A material design dialog.
 ///
 /// This dialog widget does not have any opinion about the contents of the
@@ -166,7 +169,7 @@ class AlertDialog extends StatelessWidget {
     this.content,
     this.contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
     this.actions,
-    this.semanticName,
+    this.routeName = _kDefaultAlertDialogValue,
   }) : assert(contentPadding != null),
        super(key: key);
 
@@ -219,13 +222,12 @@ class AlertDialog extends StatelessWidget {
 
   /// An (optional) name for the dialog used by accessibility frameworks.
   ///
-  /// On android this would usually be a short summary of the contents. For
-  /// example - "App permissions" for a dialog containing permission
-  /// information.
+  /// Defaults to "alert" on both iOS and Android.
   ///
-  /// On iOS it is not common to provide a semantic name, since an announcement
-  /// chime is expected instead.
-  final String semanticName;
+  /// This name is announced by TalkBack or VoiceOver when the dialog becomes
+  /// visible For example - "App permissions" for a dialog containing permission
+  /// information.
+  final String routeName;
 
   @override
   Widget build(BuildContext context) {
@@ -265,7 +267,7 @@ class AlertDialog extends StatelessWidget {
       child: new IntrinsicWidth(
         child: new Semantics(
           route: true,
-          value: semanticName,
+          value: routeName,
           child: new Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
