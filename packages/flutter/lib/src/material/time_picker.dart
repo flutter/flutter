@@ -1523,6 +1523,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     final MediaQueryData media = MediaQuery.of(context);
     final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: media.alwaysUse24HourFormat);
     final bool use24HourDials = hourFormat(of: timeOfDayFormat) != HourFormat.h;
+    final ThemeData theme = Theme.of(context);
 
     final Widget picker = new Padding(
       padding: const EdgeInsets.all(16.0),
@@ -1552,7 +1553,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
       )
     );
 
-    return new Dialog(
+    final Dialog dialog = new Dialog(
       child: new OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
           final Widget header = new _TimePickerHeader(
@@ -1562,6 +1563,17 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
             onModeChanged: _handleModeChanged,
             onChanged: _handleTimeChanged,
             use24HourDials: use24HourDials,
+          );
+
+          final Widget pickerAndActions = new Container(
+            color: theme.dialogBackgroundColor,
+            child: new Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                new Expanded(child: picker), // picker grows and shrinks with the available space
+                actions,
+              ],
+            ),
           );
 
           assert(orientation != null);
@@ -1575,8 +1587,9 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     header,
-                    new Expanded(child: picker),
-                    actions,
+                    new Expanded(
+                      child: pickerAndActions,
+                    ),
                   ]
                 )
               );
@@ -1590,12 +1603,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                   children: <Widget>[
                     header,
                     new Flexible(
-                      child: new Column(
-                        children: <Widget>[
-                          new Expanded(child: picker),
-                          actions,
-                        ]
-                      )
+                      child: pickerAndActions,
                     ),
                   ]
                 )
@@ -1604,6 +1612,13 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
           return null;
         }
       )
+    );
+
+    return new Theme(
+      data: theme.copyWith(
+        dialogBackgroundColor: Colors.transparent,
+      ),
+      child: dialog,
     );
   }
 
