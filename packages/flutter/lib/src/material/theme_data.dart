@@ -296,7 +296,7 @@ class ThemeData extends Diagnosticable {
        assert(iconTheme != null),
        assert(primaryIconTheme != null),
        assert(accentIconTheme != null),
-       assert(sliderTheme != null), 
+       assert(sliderTheme != null),
        assert(chipTheme != null),
        assert(platform != null);
 
