@@ -107,16 +107,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
           style: Theme.of(context).textTheme.title,
         ),
         buildFabShapePicker(),
-        new Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            const SizedBox(
-              width: 96.0,
-              child: const Text('Location: '),
-            ),
-            new Expanded(child: buildFabLocationPicker()),
-          ],
-        ),
+        buildFabLocationPicker(),
         const Divider(),
         new Text(
           'Bottom app bar options',
@@ -163,19 +154,33 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         ],
       ),
     );
-    return;
   }
 
   Widget buildFabLocationPicker() {
-    return new Padding(
-      padding: const EdgeInsets.all(8.0), 
-      child: new RaisedButton(
-        child: const Text('Move'),
-        onPressed: () {
-          setState(() {
-            fabLocationIndex = (fabLocationIndex + 1) % _fabLocationConfigurations.length;
-          });
-        },
+    return new Semantics(
+      container: true,
+      explicitChildNodes: false,
+      child: new Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          const SizedBox(
+            width: 96.0,
+            child: const Text('Location: '),
+          ),
+          new Expanded(
+            child: new Padding(
+              padding: const EdgeInsets.all(8.0), 
+              child: new RaisedButton(
+                child: const Text('Move'),
+                onPressed: () {
+                  setState(() {
+                    fabLocationIndex = (fabLocationIndex + 1) % _fabLocationConfigurations.length;
+                  });
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
