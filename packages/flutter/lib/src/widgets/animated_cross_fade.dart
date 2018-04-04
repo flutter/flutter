@@ -100,6 +100,8 @@ typedef Widget AnimatedCrossFadeBuilder(Widget topChild, Key topChildKey, Widget
 ///
 ///  * [AnimatedSize], the lower-level widget which [AnimatedCrossFade] uses to
 ///    automatically change size.
+///  * [AnimatedChildSwitcher], which switches out a child for a new one with a
+///    customizable transition.
 class AnimatedCrossFade extends StatefulWidget {
   /// Creates a cross-fade animation widget.
   ///
