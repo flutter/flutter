@@ -421,11 +421,11 @@ class _PathMatcher extends Matcher {
     final List<String> errors = <String>[];
     for (Offset offset in includes) {
       if (!path.contains(offset))
-        errors.add('Offset $offset should be inside the path, but is not.');
+        errors.add('Offset ${prettyOffset(offset)} should be inside the path, but is not.');
     }
     for (Offset offset in excludes) {
       if (path.contains(offset))
-        errors.add('Offset $offset should be outside the path, but is not.');
+        errors.add('Offset ${prettyOffset(offset)} should be outside the path, but is not.');
     }
     if (errors.isEmpty)
       return true;
@@ -839,7 +839,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
     if (color != null && paintArgument.color != color)
       throw 'It called $methodName with a paint whose color, ${paintArgument.color}, was not exactly the expected color ($color).';
     if (strokeWidth != null && paintArgument.strokeWidth != strokeWidth)
-      throw 'It called $methodName with a paint whose strokeWidth, ${paintArgument.strokeWidth}, was not exactly the expected strokeWidth ($strokeWidth).';
+      throw 'It called $methodName with a paint whose strokeWidth, ${prettyDouble(paintArgument.strokeWidth)}, was not exactly the expected strokeWidth (${prettyDouble(strokeWidth)}).';
     if (hasMaskFilter != null && (paintArgument.maskFilter != null) != hasMaskFilter) {
       if (hasMaskFilter)
         throw 'It called $methodName with a paint that did not have a mask filter, despite expecting one.';
@@ -866,7 +866,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
     if (color != null)
       description.add('$color');
     if (strokeWidth != null)
-      description.add('strokeWidth: $strokeWidth');
+      description.add('strokeWidth: ${prettyDouble(strokeWidth)}');
     if (hasMaskFilter != null)
       description.add(hasMaskFilter ? 'a mask filter' : 'no mask filter');
     if (style != null)
@@ -1003,34 +1003,36 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
     final Offset pointArgument = arguments[0];
+
     if (x != null && y != null) {
       final Offset point = new Offset(x, y);
-      if (point != pointArgument)
-        throw 'It called $methodName with a center coordinate, $pointArgument, which was not exactly the expected coordinate ($point).';
+      if (point != pointArgument) {
+        throw 'It called $methodName with a center coordinate, ${prettyOffset(pointArgument)}, which was not exactly the expected coordinate (${prettyOffset(point)}).';
+      }
     } else {
       if (x != null && pointArgument.dx != x)
-        throw 'It called $methodName with a center coordinate, $pointArgument, whose x-coordinate not exactly the expected coordinate (${x.toStringAsFixed(1)}).';
+        throw 'It called $methodName with a center coordinate, ${prettyOffset(pointArgument)}, whose x-coordinate not exactly the expected coordinate (${prettyDouble(x)}).';
       if (y != null && pointArgument.dy != y)
-        throw 'It called $methodName with a center coordinate, $pointArgument, whose y-coordinate not exactly the expected coordinate (${y.toStringAsFixed(1)}).';
+        throw 'It called $methodName with a center coordinate, ${prettyOffset(pointArgument)}, whose y-coordinate not exactly the expected coordinate (${prettyDouble(y)}).';
     }
     final double radiusArgument = arguments[1];
     if (radius != null && radiusArgument != radius)
-      throw 'It called $methodName with radius, ${radiusArgument.toStringAsFixed(1)}, which was not exactly the expected radius (${radius.toStringAsFixed(1)}).';
+      throw 'It called $methodName with radius, ${prettyDouble(radiusArgument)}, which was not exactly the expected radius (${prettyDouble(radius)}).';
   }
 
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (x != null && y != null) {
-      description.add('point ${new Offset(x, y)}');
+      description.add('point ${prettyOffset(new Offset(x, y))}');
     } else {
       if (x != null)
-        description.add('x-coordinate ${x.toStringAsFixed(1)}');
+        description.add('x-coordinate ${prettyDouble(x)}');
       if (y != null)
-        description.add('y-coordinate ${y.toStringAsFixed(1)}');
+        description.add('y-coordinate ${prettyDouble(y)}');
     }
     if (radius != null)
-      description.add('radius ${radius.toStringAsFixed(1)}');
+      description.add('radius ${prettyDouble(radius)}');
   }
 }
 
@@ -1049,13 +1051,13 @@ class _PathPaintPredicate extends _DrawCommandPaintPredicate {
     if (includes != null) {
       for (Offset offset in includes) {
         if (!pathArgument.contains(offset))
-          throw 'It called $methodName with a path that unexpectedly did not contain $offset.';
+          throw 'It called $methodName with a path that unexpectedly did not contain ${prettyOffset(offset)}.';
       }
     }
     if (excludes != null) {
       for (Offset offset in excludes) {
         if (pathArgument.contains(offset))
-          throw 'It called $methodName with a path that unexpectedly contained $offset.';
+          throw 'It called $methodName with a path that unexpectedly contained ${prettyOffset(offset)}.';
       }
     }
   }
@@ -1064,9 +1066,9 @@ class _PathPaintPredicate extends _DrawCommandPaintPredicate {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (includes != null && excludes != null) {
-      description.add('that contains $includes and does not contain $excludes');
+      description.add('that contains ${includes.map(prettyOffset).toList()} and does not contain ${excludes.map(prettyOffset).toList()}');
     } else if (includes != null) {
-      description.add('that contains $includes');
+      description.add('that contains ${includes.map(prettyOffset).toList()}');
     } else if (excludes != null) {
       description.add('that does not contain $excludes');
     }
@@ -1090,10 +1092,10 @@ class _LinePaintPredicate extends _DrawCommandPaintPredicate {
     final Offset p1Argument = arguments[0];
     final Offset p2Argument = arguments[1];
     if (p1 != null && p1Argument != p1) {
-        throw 'It called $methodName with p1 endpoint, $p1Argument, which was not exactly the expected endpoint ($p1).';
+        throw 'It called $methodName with p1 endpoint, ${prettyOffset(p1Argument)}, which was not exactly the expected endpoint (${prettyOffset(p1)}).';
     }
     if (p2 != null && p2Argument != p2) {
-        throw 'It called $methodName with p2 endpoint, $p2Argument, which was not exactly the expected endpoint ($p2).';
+        throw 'It called $methodName with p2 endpoint, ${prettyOffset(p2Argument)}, which was not exactly the expected endpoint (${prettyOffset(p2)}).';
     }
   }
 
@@ -1101,9 +1103,9 @@ class _LinePaintPredicate extends _DrawCommandPaintPredicate {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (p1 != null)
-      description.add('end point p1: $p1');
+      description.add('end point p1: ${prettyOffset(p1)}');
     if (p2 != null)
-      description.add('end point p2: $p2');
+      description.add('end point p2: ${prettyOffset(p2)}');
   }
 }
 
@@ -1133,13 +1135,13 @@ class _ShadowPredicate extends _PaintPredicate {
     if (includes != null) {
       for (Offset offset in includes) {
         if (!pathArgument.contains(offset))
-          throw 'It called $methodName with a path that unexpectedly did not contain $offset.';
+          throw 'It called $methodName with a path that unexpectedly did not contain ${prettyOffset(offset)}.';
       }
     }
     if (excludes != null) {
       for (Offset offset in excludes) {
         if (pathArgument.contains(offset))
-          throw 'It called $methodName with a path that unexpectedly contained $offset.';
+          throw 'It called $methodName with a path that unexpectedly contained ${prettyOffset(offset)}.';
       }
     }
     final Color actualColor = arguments[1];
@@ -1147,7 +1149,7 @@ class _ShadowPredicate extends _PaintPredicate {
       throw 'It called $methodName with a color, $actualColor, which was not exactly the expected color ($color).';
     final double actualElevation = arguments[2];
     if (elevation != null && actualElevation != elevation)
-      throw 'It called $methodName with an elevation, $actualElevation, which was not exactly the expected value ($elevation).';
+      throw 'It called $methodName with an elevation, ${prettyDouble(actualElevation)}, which was not exactly the expected value (${prettyDouble(elevation)}).';
     final bool actualTransparentOccluder = arguments[3];
     if (transparentOccluder != null && actualTransparentOccluder != transparentOccluder)
       throw 'It called $methodName with a transparentOccluder value, $actualTransparentOccluder, which was not exactly the expected value ($transparentOccluder).';
@@ -1163,11 +1165,11 @@ class _ShadowPredicate extends _PaintPredicate {
   @protected
   void debugFillDescription(List<String> description) {
     if (includes != null && excludes != null) {
-      description.add('that contains $includes and does not contain $excludes');
+      description.add('that contains ${includes.map(prettyOffset).toList()} and does not contain ${excludes.map(prettyOffset).toList()}');
     } else if (includes != null) {
-      description.add('that contains $includes');
+      description.add('that contains ${includes.map(prettyOffset).toList()}');
     } else if (excludes != null) {
-      description.add('that does not contain $excludes');
+      description.add('that does not contain ${excludes.map(prettyOffset).toList()}');
     }
     if (color != null)
       description.add('$color');
@@ -1207,12 +1209,12 @@ class _DrawImagePaintPredicate extends _DrawCommandPaintPredicate {
     if (x != null && y != null) {
       final Offset point = new Offset(x, y);
       if (point != pointArgument)
-        throw 'It called $methodName with an offset coordinate, $pointArgument, which was not exactly the expected coordinate ($point).';
+        throw 'It called $methodName with an offset coordinate, ${prettyOffset(pointArgument)}, which was not exactly the expected coordinate (${prettyOffset(point)}).';
     } else {
       if (x != null && pointArgument.dx != x)
-        throw 'It called $methodName with an offset coordinate, $pointArgument, whose x-coordinate not exactly the expected coordinate (${x.toStringAsFixed(1)}).';
+        throw 'It called $methodName with an offset coordinate, ${prettyOffset(pointArgument)}, whose x-coordinate not exactly the expected coordinate (${prettyDouble(x)}).';
       if (y != null && pointArgument.dy != y)
-        throw 'It called $methodName with an offset coordinate, $pointArgument, whose y-coordinate not exactly the expected coordinate (${y.toStringAsFixed(1)}).';
+        throw 'It called $methodName with an offset coordinate, ${prettyOffset(pointArgument)}, whose y-coordinate not exactly the expected coordinate (${prettyDouble(y)}).';
     }
   }
 
@@ -1222,12 +1224,12 @@ class _DrawImagePaintPredicate extends _DrawCommandPaintPredicate {
     if (image != null)
       description.add('image $image');
     if (x != null && y != null) {
-      description.add('point ${new Offset(x, y)}');
+      description.add('point ${prettyOffset(new Offset(x, y))}');
     } else {
       if (x != null)
-        description.add('x-coordinate ${x.toStringAsFixed(1)}');
+        description.add('x-coordinate ${prettyDouble(x)}');
       if (y != null)
-        description.add('y-coordinate ${y.toStringAsFixed(1)}');
+        description.add('y-coordinate ${prettyDouble(y)}');
     }
   }
 }
@@ -1357,7 +1359,9 @@ class _SaveRestorePairPaintPredicate extends _PaintPredicate {
 
 String _valueName(Object value) {
   if (value is double)
-    return value.toStringAsFixed(1);
+    return prettyDouble(value);
+  if (value is Offset)
+    return prettyOffset(value);
   return value.toString();
 }
 
