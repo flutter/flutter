@@ -65,6 +65,7 @@ class Card extends StatelessWidget {
     this.color,
     this.elevation,
     this.shape,
+    this.margin: const EdgeInsets.all(4.0),
     this.child,
   }) : super(key: key);
 
@@ -91,6 +92,14 @@ class Card extends StatelessWidget {
   /// radius of 4.0.
   final ShapeBorder shape;
 
+  /// The empty space that surrounds the card.
+  ///
+  /// Defines the card's outer [Container.margin].
+  ///
+  /// The default margin is 4.0 logical pixels on all sides:
+  /// `EdgeInsets.all(4.0)`.
+  final EdgeInsetsGeometry margin;
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
@@ -101,7 +110,7 @@ class Card extends StatelessWidget {
     return new Semantics(
       container: true,
       child: new Container(
-        margin: const EdgeInsets.all(4.0),
+        margin: margin ?? const EdgeInsets.all(4.0),
         child: new Material(
           type: MaterialType.card,
           color: color ?? Theme.of(context).cardColor,
