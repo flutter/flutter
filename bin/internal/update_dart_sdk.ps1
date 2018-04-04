@@ -44,7 +44,11 @@ if (Test-Path $dartSdkPath) {
 New-Item $dartSdkPath -force -type directory | Out-Null
 $dartSdkZip = "$cachePath\$dartZipName"
 Import-Module BitsTransfer
-Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
+if (-Not (Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip -errorAction SilentlyContinue)) {
+    Write-Host "Failed to retrieve the Dart SDK at $DART_SDK_URL"
+    Write-Host "If you're located in China, please follow"
+    Write-Host "https://github.com/flutter/flutter/wiki/Using-Flutter-in-China"
+}
 
 Write-Host "Unzipping Dart SDK..."
 If (Get-Command 7z -errorAction SilentlyContinue) {

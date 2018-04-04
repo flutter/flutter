@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show InternetAddress, SocketException;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -76,6 +77,31 @@ void main() {
       verifyNever(artifact1.update());
       verify(artifact2.update());
     });
+    testUsingContext('failed storage.googleapis.com download shows China warning', () async {
+      final CachedArtifact artifact1 = new MockCachedArtifact();
+      final CachedArtifact artifact2 = new MockCachedArtifact();
+      when(artifact1.isUpToDate()).thenReturn(false);
+      when(artifact2.isUpToDate()).thenReturn(false);
+      final MockInternetAddress address = new MockInternetAddress();
+      when(address.host).thenReturn('storage.googleapis.com');
+      when(artifact1.update()).thenThrow(new SocketException(
+        'Connection reset by peer',
+        address: address,
+      ));
+      final Cache cache = new Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
+      try {
+        await cache.updateAll();
+        fail('Mock thrown exception expected');
+      } catch (e) {
+        verify(artifact1.update());
+        // Don't continue when retrieval fails.
+        verifyNever(artifact2.update());
+        expect(
+          testLogger.errorText,
+          contains('https://github.com/flutter/flutter/wiki/Using-Flutter-in-China'),
+        );
+      }
+    });
   });
 
   testUsingContext('flattenNameSubdirs', () {
@@ -103,3 +129,4 @@ class MockFile extends Mock implements File {
 
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 class MockCachedArtifact extends Mock implements CachedArtifact {}
+class MockInternetAddress extends Mock implements InternetAddress {}
