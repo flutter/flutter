@@ -168,15 +168,17 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
           value: color,
           groupValue: babColor,
           onChanged: (Color color) { setState(() { babColor = color; }); },
-        )
+        ),
       );
-      colors.add(new Container(
+      colors.add(
+        new Container(
           decoration: new BoxDecoration(
             color: color,
             border: new Border.all(width:2.0, color: Colors.black),
           ),
-          child: const SizedBox(width: 20.0, height: 20.0)
-      ));
+          child: const SizedBox(width: 20.0, height: 20.0),
+        ),
+      );
       colors.add(const Padding(padding: const EdgeInsets.only(left: 12.0)));
     }
     return new Row(
@@ -491,75 +493,4 @@ class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation
     final double fabY = scaffoldGeometry.contentTop - (scaffoldGeometry.floatingActionButtonSize.height / 2.0);
     return new Offset(fabX, fabY);
   }
-}
-
-// TODO: Add support for making these docked configurations handle the Bottom App Bar being absent.
-// And then refactor them back into FloatingActionButtonLocation.
-
-/// Provider of common logic for [FloatingActionButtonLocation]s that
-/// dock to the [BottomAppBar].
-abstract class _DockedFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _DockedFloatingActionButtonLocation();
-
-  /// Positions the Y coordinate of the [FloatingActionButton] at a height
-  /// where it docks to the [BottomAppBar].
-  /// 
-  /// If there is no [BottomAppBar], this could go off the bottom of the screen.
-  @protected
-  double getDockedY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    final double contentBottom = scaffoldGeometry.contentBottom;
-    final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
-    final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
-    final double snackBarHeight = scaffoldGeometry.snackBarSize.height;
-
-    double fabY = contentBottom - fabHeight / 2.0;
-    // The FAB should sit with a margin between it and the snack bar.
-    if (snackBarHeight > 0.0)
-      fabY = math.min(fabY, contentBottom - snackBarHeight - fabHeight - kFloatingActionButtonMargin);
-    // The FAB should sit with its center in front of the top of the bottom sheet.
-    if (bottomSheetHeight > 0.0)
-      fabY = math.min(fabY, contentBottom - bottomSheetHeight - fabHeight / 2.0);
-    return fabY;
-  }
-}
-
-// Places the Floating Action Button at the end of the screen, docked on top
-// of the Bottom App Bar.
-//
-// This positioning logic is the opposite of the _TopStartFloatingActionButtonPositioner
-class _EndDockedFloatingActionButtonLocation extends _DockedFloatingActionButtonLocation {
-  const _EndDockedFloatingActionButtonLocation();
-
-  @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    // Compute the x-axis offset.
-    double fabX;
-    assert(scaffoldGeometry.textDirection != null);
-    switch (scaffoldGeometry.textDirection) {
-      case TextDirection.rtl:
-        // In RTL, the end of the screen is the left.
-        final double endPadding = scaffoldGeometry.minInsets.left;
-        fabX = kFloatingActionButtonMargin + endPadding;
-        break;
-      case TextDirection.ltr:
-        // In LTR, the end of the screen is the right.
-        final double endPadding = scaffoldGeometry.minInsets.right;
-        fabX = scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width - kFloatingActionButtonMargin - endPadding;
-      break;
-    }
-    // Return an offset with a docked Y coordinate.
-    return new Offset(fabX, getDockedY(scaffoldGeometry));
-  }
-}
-
-class _CenterDockedFloatingActionButtonLocation extends _DockedFloatingActionButtonLocation {
-  const _CenterDockedFloatingActionButtonLocation();
-
-  @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    final double fabX = (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
-    // Return an offset with a docked Y coordinate.
-    return new Offset(fabX, getDockedY(scaffoldGeometry));
-  }
-
 }
