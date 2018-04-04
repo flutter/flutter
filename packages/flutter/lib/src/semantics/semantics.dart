@@ -411,11 +411,13 @@ class SemanticsProperties extends DiagnosticableTree {
   /// If non-null, whether the node corresponds to a visually distinct subtree.
   ///
   /// When the most specific route semantics node changes, the platform
-  /// accessibility framework will make an edge-triggered announcement.
-  /// Specificity is defined as the last child in a pre-order traversal - left
-  /// to right, root first.
+  /// accessibility framework will make an edge-triggered announcement and clear
+  /// the current accessibility focus. Specificity is defined as the last child
+  /// in a pre-order traversal - left to right, root first.
   ///
-  /// The announcement will contain the text in the [value] semantic.
+  /// The announcement will contain the text in the [value] semantic. If this
+  /// value is null or empty, VoiceOver will still provide a notification chime
+  /// while TalkBack will make no announcement.
   ///
   /// See also:
   ///

@@ -98,7 +98,7 @@ class DialogDemoState extends State<DialogDemo> {
               showDemoDialog<DialogDemoAction>(
                 context: context,
                 child: new AlertDialog(
-                  semanticName: 'alert',
+                  routeName: null,
                   content: new Text(
                     _alertWithoutTitleText,
                     style: dialogTextStyle
