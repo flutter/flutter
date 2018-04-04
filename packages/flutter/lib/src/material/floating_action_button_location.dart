@@ -67,7 +67,7 @@ abstract class FloatingActionButtonLocation {
   ///
   /// This is unlikely to be a useful location for apps that lack a bottom
   /// navigation bar.
-  static FloatingActionButtonLocation endDocked = const _EndDockedFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation endDocked = const _EndDockedFloatingActionButtonLocation();
 
   /// Center-aligned [FloatingActionButton], floating over the
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
@@ -79,7 +79,7 @@ abstract class FloatingActionButtonLocation {
   ///
   /// This is unlikely to be a useful location for apps that lack a bottom
   /// navigation bar.
-  static FloatingActionButtonLocation centerDocked = const _CenterDockedFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation centerDocked = const _CenterDockedFloatingActionButtonLocation();
 
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
   ///

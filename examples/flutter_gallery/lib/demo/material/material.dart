@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 export 'backdrop_demo.dart';
+export 'bottom_app_bar_demo.dart';
 export 'bottom_navigation_demo.dart';
 export 'buttons_demo.dart';
 export 'cards_demo.dart';
@@ -12,7 +13,6 @@ export 'date_and_time_picker_demo.dart';
 export 'dialog_demo.dart';
 export 'drawer_demo.dart';
 export 'expansion_panels_demo.dart';
-export 'fab_motion_demo.dart';
 export 'grid_list_demo.dart';
 export 'icons_demo.dart';
 export 'leave_behind_demo.dart';
