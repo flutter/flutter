@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 FLUTTER_EXPORT
 @protocol FlutterTexture<NSObject>
-- (CVPixelBufferRef)copyPixelBuffer;
+- (CVPixelBufferRef _Nullable)copyPixelBuffer;
 @end
 
 FLUTTER_EXPORT
