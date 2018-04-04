@@ -280,16 +280,11 @@ class _DemoBottomAppBar extends StatelessWidget {
       hasNotch: enableNotch,
       child: new Row(
         children: <Widget> [
-          new Semantics(
-            label: 'Menu',
-            container: true,
-            explicitChildNodes: false,
-            child: new IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {
-                showModalBottomSheet<Null>(context: context, builder: (BuildContext context) => const _DemoDrawer());
-              },
-            ),
+          new IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () {
+              showModalBottomSheet<Null>(context: context, builder: (BuildContext context) => const _DemoDrawer());
+            },
           ),
           new Expanded(
             child: new AnimatedCrossFade(
