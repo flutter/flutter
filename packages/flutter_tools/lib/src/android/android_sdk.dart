@@ -332,7 +332,6 @@ class AndroidSdk {
     if (_sdkManagerEnv == null) {
       // If we can locate Java, then add it to the path used to run the Android SDK manager.
       _sdkManagerEnv = <String, String>{};
-      _sdkManagerEnv['SDKMANAGER_OPTS'] = '--add-modules java.se.ee';
       final String javaBinary = findJavaBinary();
       if (javaBinary != null) {
         _sdkManagerEnv['PATH'] =
