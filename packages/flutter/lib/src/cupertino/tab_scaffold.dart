@@ -154,6 +154,15 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Tab bar current index as default value if it exist.
+    if (widget.tabBar.currentIndex != null) {
+      _currentPage = widget.tabBar.currentIndex;
+    }
+  }
+  
+  @override
   Widget build(BuildContext context) {
     final List<Widget> stacked = <Widget>[];
 
