@@ -9,7 +9,7 @@ dependencies:
   string_scanner: 1.0.2
   url_launcher: 3.0.0
   cupertino_icons: 0.1.1
-  video_player: 0.3.0
+  video_player: 0.4.0
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets:
@@ -79,6 +79,7 @@ flutter:
   uses-material-design: true
   assets:
     - lib/gallery/example_code.dart
+    - packages/flutter_gallery_assets/videos/butterfly.mp4
     - packages/flutter_gallery_assets/animated_flutter_lgtm.gif
     - packages/flutter_gallery_assets/animated_flutter_stickers.webp
     - packages/flutter_gallery_assets/appbar_background.jpg
