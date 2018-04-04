@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -123,7 +121,11 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         new CheckboxListTile(
           title: const Text('Enable notch'),
           value: notchEnabled,
-          onChanged: (bool value) { setState(() { notchEnabled = value; }); },
+          onChanged: (bool value) {
+            setState(() {
+              notchEnabled = value;
+            });
+          },
           controlAffinity: ListTileControlAffinity.leading,
         ),
       ],
@@ -167,7 +169,11 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         new Radio<Color>(
           value: color,
           groupValue: babColor,
-          onChanged: (Color color) { setState(() { babColor = color; }); },
+          onChanged: (Color color) {
+            setState(() {
+              babColor = color;
+            });
+          },
         ),
       );
       colors.add(
@@ -208,7 +214,7 @@ const String _explanatoryText =
 // Similar logic applies to the CENTER_FAB mode.
 enum _BabMode {
   END_FAB,
-  CENTER_FAB
+  CENTER_FAB,
 }
 
 // Pairs the Bottom App Bar's menu mode with a Floating Action Button Location.
@@ -277,10 +283,8 @@ class _DemoBottomAppBar extends StatelessWidget {
     if (babMode == _BabMode.CENTER_FAB) {
       rowContents.add(
         new Expanded(
-          child: new
-          ConstrainedBox(
-            constraints:
-            const BoxConstraints(maxHeight: 0.0),
+          child: new ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 0.0),
           ),
         ),
       );
@@ -296,7 +300,7 @@ class _DemoBottomAppBar extends StatelessWidget {
       )
     ]);
     return new Row(
-      children: rowContents
+      children: rowContents,
     );
   }
 }
