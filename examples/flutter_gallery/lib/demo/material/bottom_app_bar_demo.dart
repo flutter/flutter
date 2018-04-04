@@ -39,7 +39,6 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
           child: const Icon(Icons.add),
           backgroundColor: Colors.orange,
         ),
-      
       ),
       const _FabShapeConfiguration('Diamond',
         const _DiamondFab(
