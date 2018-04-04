@@ -166,10 +166,14 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
       ?.group(1),
   };
 
+  // A special non-automatic signing handler for Googlers.
   if (opensslOutput.contains('iPhone Developer: Google Development')) {
     signingConfigs['PROVISIONING_PROFILE_SPECIFIER'] = 'Google Development';
     signingConfigs['CODE_SIGN_STYLE'] = 'Manual';
-    printStatus("Manually selecting Google's mobile provisioning profile (see go/google-flutter-signing).");
+    printStatus(
+      "Manually selecting Google's mobile provisioning profile (see go/google-flutter-signing).",
+      emphasis: true,
+    );
   }
 
   return signingConfigs;
