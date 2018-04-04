@@ -313,6 +313,15 @@ class _DemoBottomAppBar extends StatelessWidget {
       );
     }
     rowContents.addAll(<Widget> [
+      // Generally, an icon button does not need to be wrapped in a Semantics object.
+      // When the button has a null onPressed callback, it will be disabled by default.
+      //
+      // However, for the purposes of this demo, we don't want the button to appear disabled.
+      // To achieve this we use a no-op callback instead of a null callback. This allows
+      // the buttons to appear active, but perform no actions.
+      //
+      // To tell the accessibility service that the callback is a no-op, the Semantics widget
+      // wraps these buttons with `enabled: false`.
       new Semantics(
         label: 'Search',
         container: true,
