@@ -129,59 +129,51 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   }
 
   Widget buildFabShapePicker() {
-    return new Semantics(
-      container: true,
-      explicitChildNodes: false,
-      child: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          const SizedBox(width: 96.0,
-            child: const Text('Shape: '),
-          ),
-          new Expanded(
-            child: new Padding(
-              padding: const EdgeInsets.all(8.0), 
-              child: new RaisedButton(
-                child: const Text('Change shape'),
-                onPressed: () {
-                  setState(() {
-                    fabShapeIndex = (fabShapeIndex + 1) % _fabShapeConfigurations.length;
-                  });
-                },
-              ),
+    return new Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        const SizedBox(width: 96.0,
+          child: const Text('Shape: '),
+        ),
+        new Expanded(
+          child: new Padding(
+            padding: const EdgeInsets.all(8.0), 
+            child: new RaisedButton(
+              child: const Text('Change shape'),
+              onPressed: () {
+                setState(() {
+                  fabShapeIndex = (fabShapeIndex + 1) % _fabShapeConfigurations.length;
+                });
+              },
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget buildFabLocationPicker() {
-    return new Semantics(
-      container: true,
-      explicitChildNodes: false,
-      child: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          const SizedBox(
-            width: 96.0,
-            child: const Text('Location: '),
-          ),
-          new Expanded(
-            child: new Padding(
-              padding: const EdgeInsets.all(8.0), 
-              child: new RaisedButton(
-                child: const Text('Move'),
-                onPressed: () {
-                  setState(() {
-                    fabLocationIndex = (fabLocationIndex + 1) % _fabLocationConfigurations.length;
-                  });
-                },
-              ),
+    return new Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        const SizedBox(
+          width: 96.0,
+          child: const Text('Location: '),
+        ),
+        new Expanded(
+          child: new Padding(
+            padding: const EdgeInsets.all(8.0), 
+            child: new RaisedButton(
+              child: const Text('Move'),
+              onPressed: () {
+                setState(() {
+                  fabLocationIndex = (fabLocationIndex + 1) % _fabLocationConfigurations.length;
+                });
+              },
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
