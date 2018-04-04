@@ -43,10 +43,31 @@
 namespace txt {
 namespace {
 
-const sk_sp<SkTypeface>& GetTypefaceForGlyph(const minikin::Layout& layout,
-                                             size_t index) {
+class GlyphTypeface {
+ public:
+  GlyphTypeface(sk_sp<SkTypeface> typeface, minikin::FontFakery fakery)
+      : typeface_(std::move(typeface)), fake_bold_(fakery.isFakeBold()) {}
+
+  bool operator==(GlyphTypeface& other) {
+    return other.typeface_.get() == typeface_.get() &&
+           other.fake_bold_ == fake_bold_;
+  }
+
+  bool operator!=(GlyphTypeface& other) { return !(*this == other); }
+
+  void apply(SkPaint& paint) {
+    paint.setTypeface(typeface_);
+    paint.setFakeBoldText(fake_bold_);
+  }
+
+ private:
+  sk_sp<SkTypeface> typeface_;
+  bool fake_bold_;
+};
+
+GlyphTypeface GetGlyphTypeface(const minikin::Layout& layout, size_t index) {
   const FontSkia* font = static_cast<const FontSkia*>(layout.getFont(index));
-  return font->GetSkTypeface();
+  return GlyphTypeface(font->GetSkTypeface(), layout.getFakery(index));
 }
 
 // Return ranges of text that have the same typeface in the layout.
@@ -56,9 +77,9 @@ std::vector<Paragraph::Range<size_t>> GetLayoutTypefaceRuns(
   if (layout.nGlyphs() == 0)
     return result;
   size_t run_start = 0;
-  const SkTypeface* run_typeface = GetTypefaceForGlyph(layout, run_start).get();
+  GlyphTypeface run_typeface = GetGlyphTypeface(layout, run_start);
   for (size_t i = 1; i < layout.nGlyphs(); ++i) {
-    const SkTypeface* typeface = GetTypefaceForGlyph(layout, i).get();
+    GlyphTypeface typeface = GetGlyphTypeface(layout, i);
     if (typeface != run_typeface) {
       result.emplace_back(run_start, i);
       run_start = i;
@@ -524,7 +545,7 @@ void Paragraph::Layout(double width, bool force) {
       for (const Range<size_t>& glyph_blob : glyph_blobs) {
         std::vector<GlyphPosition> glyph_positions;
 
-        paint.setTypeface(GetTypefaceForGlyph(layout, glyph_blob.start));
+        GetGlyphTypeface(layout, glyph_blob.start).apply(paint);
         const SkTextBlobBuilder::RunBuffer& blob_buffer =
             builder.allocRunPos(paint, glyph_blob.end - glyph_blob.start);
 
