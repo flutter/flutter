@@ -280,10 +280,16 @@ class _DemoBottomAppBar extends StatelessWidget {
       hasNotch: enableNotch,
       child: new Row(
         children: <Widget> [
-          new IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              showModalBottomSheet<Null>(context: context, builder: (BuildContext context) => const _DemoDrawer()); },
+          new Semantics(
+            label: 'Menu',
+            container: true,
+            explicitChildNodes: false,
+            child: new IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () {
+                showModalBottomSheet<Null>(context: context, builder: (BuildContext context) => const _DemoDrawer());
+              },
+            ),
           ),
           new Expanded(
             child: new AnimatedCrossFade(
@@ -312,14 +318,26 @@ class _DemoBottomAppBar extends StatelessWidget {
       );
     }
     rowContents.addAll(<Widget> [
-      new IconButton(
-        icon: const Icon(Icons.search),
-        onPressed: () {},
+      new Semantics(
+        label: 'Search',
+        container: true,
+        explicitChildNodes: false,
+        enabled: false,
+        child: new IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: () {},
+        ),
       ),
-      new IconButton(
-        icon: const Icon(Icons.more_vert),
-        onPressed: () {},
-      )
+      new Semantics(
+        label: 'Show more',
+        container: true,
+        explicitChildNodes: false,
+        enabled: false,
+        child: new IconButton(
+          icon: const Icon(Icons.more_vert),
+          onPressed: () {},
+        ),
+      ),
     ]);
     return new Row(
       children: rowContents,
