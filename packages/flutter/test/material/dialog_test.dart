@@ -336,7 +336,7 @@ void main() {
     );
   });
 
-  for (TargetPlatform platform in [TargetPlatform.iOS, TargetPlatform.android]) {
+  for (TargetPlatform platform in <TargetPlatform>[TargetPlatform.iOS, TargetPlatform.android]) {
     testWidgets(
         'Dialog widget contains route semantics on $platform', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = platform;
