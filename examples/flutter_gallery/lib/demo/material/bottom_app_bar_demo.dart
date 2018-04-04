@@ -31,13 +31,18 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   // The index of the currently-selected _FabShapeConfiguration.
   int fabShapeIndex = 1;
 
-  static const List<_FabShapeConfiguration> _fabShapeConfigurations =  const <_FabShapeConfiguration>[
+  static final List<_FabShapeConfiguration> _fabShapeConfigurations = <_FabShapeConfiguration>[
       const _FabShapeConfiguration('None', null),
-      const _FabShapeConfiguration('Circular', 
-        const FloatingActionButton(
-          onPressed: _showSnackbar,
-          child: const Icon(Icons.add),
-          backgroundColor: Colors.orange,
+      new _FabShapeConfiguration('Circular', 
+        new Semantics(
+          label: 'Floating Action Button',
+          container: true,
+          explicitChildNodes: false,
+          child: const FloatingActionButton(
+            onPressed: _showSnackbar,
+            child: const Icon(Icons.add),
+            backgroundColor: Colors.orange,
+          ),
         ),
       ),
       const _FabShapeConfiguration('Diamond',
@@ -51,6 +56,14 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   // The currently-selected Color for the Bottom App Bar.
   Color babColor;
 
+  // Accessible names for the colors that a Screen Reader can use to
+  // identify them.
+  static final Map<Color, String> colorToName = <Color, String> {
+    null: 'White',
+    Colors.orange: 'Orange',
+    Colors.green: 'Green',
+    Colors.lightBlue: 'Light blue',
+  };
   static const List<Color> babColors = const <Color> [
     null,
     Colors.orange,
@@ -93,15 +106,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
           'Floating action button',
           style: Theme.of(context).textTheme.title,
         ),
-        new Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            const SizedBox(width: 96.0,
-              child: const Text('Shape: '),
-            ),
-            new Expanded(child: buildFabShapePicker()),
-          ],
-        ),
+        buildFabShapePicker(),
         new Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -133,17 +138,32 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   }
 
   Widget buildFabShapePicker() {
-    return new Padding(
-      padding: const EdgeInsets.all(8.0), 
-      child: new RaisedButton(
-        child: const Text('Change'),
-        onPressed: () {
-          setState(() {
-            fabShapeIndex = (fabShapeIndex + 1) % _fabShapeConfigurations.length;
-          });
-        },
+    return new Semantics(
+      container: true,
+      explicitChildNodes: false,
+      child: new Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          const SizedBox(width: 96.0,
+            child: const Text('Shape: '),
+          ),
+          new Expanded(
+            child: new Padding(
+              padding: const EdgeInsets.all(8.0), 
+              child: new RaisedButton(
+                child: const Text('Change shape'),
+                onPressed: () {
+                  setState(() {
+                    fabShapeIndex = (fabShapeIndex + 1) % _fabShapeConfigurations.length;
+                  });
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
+    return;
   }
 
   Widget buildFabLocationPicker() {
@@ -166,26 +186,31 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     ];
     for (Color color in babColors) {
       colors.add(
-        new Radio<Color>(
-          value: color,
-          groupValue: babColor,
-          onChanged: (Color color) {
-            setState(() {
-              babColor = color;
-            });
-          },
+        new Semantics(
+          label: 'Set Bottom App Bar color to ${colorToName[color]}',
+          container: true,
+          explicitChildNodes: false,
+          child: new Row(children: <Widget> [
+            new Radio<Color>(
+              value: color,
+              groupValue: babColor,
+              onChanged: (Color color) {
+                setState(() {
+                  babColor = color;
+                });
+              },
+            ),
+            new Container(
+              decoration: new BoxDecoration(
+                color: color,
+                border: new Border.all(width:2.0, color: Colors.black),
+              ),
+              child: const SizedBox(width: 20.0, height: 20.0),
+            ),
+            const Padding(padding: const EdgeInsets.only(left: 12.0)),
+          ]),
         ),
       );
-      colors.add(
-        new Container(
-          decoration: new BoxDecoration(
-            color: color,
-            border: new Border.all(width:2.0, color: Colors.black),
-          ),
-          child: const SizedBox(width: 20.0, height: 20.0),
-        ),
-      );
-      colors.add(const Padding(padding: const EdgeInsets.only(left: 12.0)));
     }
     return new Row(
       children: colors,
