@@ -31,18 +31,18 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   // The index of the currently-selected _FabShapeConfiguration.
   int fabShapeIndex = 1;
 
-  final List<_FabShapeConfiguration> _fabShapeConfigurations =  <_FabShapeConfiguration>[
+  static const List<_FabShapeConfiguration> _fabShapeConfigurations =  const <_FabShapeConfiguration>[
       const _FabShapeConfiguration('None', null),
-      new _FabShapeConfiguration('Circular', 
-        new FloatingActionButton(
-          onPressed: () => _showSnackbar(),
+      const _FabShapeConfiguration('Circular', 
+        const FloatingActionButton(
+          onPressed: _showSnackbar,
           child: const Icon(Icons.add),
           backgroundColor: Colors.orange,
         ),
       ),
-      new _FabShapeConfiguration('Diamond',
-        new _DiamondFab(
-          onPressed: () => _showSnackbar(),
+      const _FabShapeConfiguration('Diamond',
+        const _DiamondFab(
+          onPressed: _showSnackbar,
           child: const Icon(Icons.add),
         ),
       ),
