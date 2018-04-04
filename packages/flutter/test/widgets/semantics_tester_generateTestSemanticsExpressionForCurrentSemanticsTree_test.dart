@@ -119,7 +119,6 @@ void _tests() {
                           tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
                           label: 'Plain text',
                           textDirection: TextDirection.ltr,
-                          nextNodeId: 4,
                         ),
                         new TestSemantics(
                           id: 4,
@@ -132,7 +131,6 @@ void _tests() {
                           decreasedValue: 'test-decreasedValue',
                           hint: 'test-hint',
                           textDirection: TextDirection.rtl,
-                          previousNodeId: 3,
                         ),
                       ],
                     ),

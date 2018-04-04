@@ -482,10 +482,14 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
-    return new Material(
-      color: widget.backgroundColor ?? themeData.primaryColor,
-      elevation: widget.elevation,
-      child: appBar,
+    return new Semantics(
+      container: true,
+      explicitChildNodes: true,
+      child: new Material(
+        color: widget.backgroundColor ?? themeData.primaryColor,
+        elevation: widget.elevation,
+        child: appBar,
+      ),
     );
   }
 }

@@ -143,37 +143,16 @@ void main() {
     );
   });
 
-  test('OrdinalSortKey compares correctly', () {
-    const List<List<SemanticsSortKey>> tests = const <List<SemanticsSortKey>>[
-      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(0.0)],
-      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
-      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
-      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(1.0)],
-      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(1.0)],
-      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(0.0)],
-      const <SemanticsSortKey>[const CustomSortKey(0.0), const OrdinalSortKey(0.0)],
-      const <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(0.0)],
-    ];
-    final List<int> expectedResults = <int>[0, -1, 1, 0, 0, 0, 0, 0];
-    assert(tests.length == expectedResults.length);
-    final List<int> results = <int>[];
-    for (List<SemanticsSortKey> tuple in tests) {
-      results.add(tuple[0].compareTo(tuple[1]));
-    }
-    expect(results, orderedEquals(expectedResults));
-  });
+  test('Incompatible OrdinalSortKey throw AssertionError when compared', () {
+    // Different types.
+    expect(() {
+      const OrdinalSortKey(0.0).compareTo(const CustomSortKey(0.0));
+    }, throwsAssertionError);
 
-  test('SemanticsSortKey sorts correctly when assigned names', () {
-    const SemanticsSortKey order1g1 = const CustomSortKey(0.0, name: 'group 1');
-    const SemanticsSortKey order2g1 = const CustomSortKey(1.0, name: 'group 1');
-    const SemanticsSortKey order2g2 = const CustomSortKey(1.0, name: 'group 2');
-    const SemanticsSortKey order3g2 = const OrdinalSortKey(1.0, name: 'group 1');
-    // Keys in the same group compare.
-    expect(order1g1.compareTo(order2g1), equals(-1));
-    // Keys with different names compare equal.
-    expect(order1g1.compareTo(order2g2), equals(0));
-    // Keys with same names but different types compare equal.
-    expect(order1g1.compareTo(order3g2), equals(0));
+    // Different names.
+    expect(() {
+      const OrdinalSortKey(0.0, name: 'a').compareTo(const OrdinalSortKey(0.0, name: 'b'));
+    }, throwsAssertionError);
   });
 
   test('OrdinalSortKey compares correctly', () {
@@ -182,12 +161,8 @@ void main() {
       const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
       const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
       const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(1.0)],
-      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(1.0)],
-      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const CustomSortKey(0.0)],
-      const <SemanticsSortKey>[const CustomSortKey(0.0), const OrdinalSortKey(0.0)],
-      const <SemanticsSortKey>[const CustomSortKey(1.0), const OrdinalSortKey(0.0)],
     ];
-    final List<int> expectedResults = <int>[0, -1, 1, 0, 0, 0, 0, 0];
+    final List<int> expectedResults = <int>[0, -1, 1, 0];
     assert(tests.length == expectedResults.length);
     final List<int> results = <int>[];
     for (List<SemanticsSortKey> tuple in tests) {
@@ -196,17 +171,20 @@ void main() {
     expect(results, orderedEquals(expectedResults));
   });
 
-  test('SemanticsSortKey sorts correctly when assigned names', () {
-    const SemanticsSortKey order1g1 = const CustomSortKey(0.0, name: 'group 1');
-    const SemanticsSortKey order2g1 = const CustomSortKey(1.0, name: 'group 1');
-    const SemanticsSortKey order2g2 = const CustomSortKey(1.0, name: 'group 2');
-    const SemanticsSortKey order3g2 = const OrdinalSortKey(1.0, name: 'group 1');
-    // Keys in the same group compare.
-    expect(order1g1.compareTo(order2g1), equals(-1));
-    // Keys with different names compare equal.
-    expect(order1g1.compareTo(order2g2), equals(0));
-    // Keys with same names but different types compare equal.
-    expect(order1g1.compareTo(order3g2), equals(0));
+  test('OrdinalSortKey compares correctly', () {
+    const List<List<SemanticsSortKey>> tests = const <List<SemanticsSortKey>>[
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(0.0), const OrdinalSortKey(1.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(0.0)],
+      const <SemanticsSortKey>[const OrdinalSortKey(1.0), const OrdinalSortKey(1.0)],
+    ];
+    final List<int> expectedResults = <int>[0, -1, 1, 0];
+    assert(tests.length == expectedResults.length);
+    final List<int> results = <int>[];
+    for (List<SemanticsSortKey> tuple in tests) {
+      results.add(tuple[0].compareTo(tuple[1]));
+    }
+    expect(results, orderedEquals(expectedResults));
   });
 
   test('toStringDeep respects childOrder parameter', () {

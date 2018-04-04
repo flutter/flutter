@@ -43,8 +43,9 @@ class TestSemantics {
     this.decreasedValue: '',
     this.hint: '',
     this.textDirection,
-    this.nextNodeId: -1,
-    this.previousNodeId: -1,
+    // TODO(yjbanov): remove nextNodeId and previousNodeId.
+    int nextNodeId: -1,
+    int previousNodeId: -1,
     this.rect,
     this.transform,
     this.textSelection,
@@ -87,8 +88,6 @@ class TestSemantics {
        assert(hint != null),
        rect = TestSemantics.rootRect,
        assert(children != null),
-       nextNodeId = null,
-       previousNodeId = null,
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
@@ -110,8 +109,9 @@ class TestSemantics {
     this.increasedValue: '',
     this.decreasedValue: '',
     this.textDirection,
-    this.nextNodeId: -1,
-    this.previousNodeId: -1,
+    // TODO(yjbanov): remove nextNodeId and previousNodeId.
+    int nextNodeId: -1,
+    int previousNodeId: -1,
     this.rect,
     Matrix4 transform,
     this.textSelection,
@@ -179,14 +179,6 @@ class TestSemantics {
   /// label is present on the [SemanticsNode], a [SemanticsNode.textDirection]
   /// is also set.
   final TextDirection textDirection;
-
-  /// The ID of the node that is next in the semantics traversal order after
-  /// this node.
-  final int nextNodeId;
-
-  /// The ID of the node that is previous in the semantics traversal order before
-  /// this node.
-  final int previousNodeId;
 
   /// The bounding box for this node in its coordinate system.
   ///
@@ -269,10 +261,6 @@ class TestSemantics {
       return fail('expected node id $id to have hint "$hint" but found hint "${nodeData.hint}".');
     if (textDirection != null && textDirection != nodeData.textDirection)
       return fail('expected node id $id to have textDirection "$textDirection" but found "${nodeData.textDirection}".');
-    if (!ignoreId && nextNodeId != nodeData.nextNodeId)
-      return fail('expected node id $id to have nextNodeId "$nextNodeId" but found "${nodeData.nextNodeId}".');
-    if (!ignoreId && previousNodeId != nodeData.previousNodeId)
-      return fail('expected node id $id to have previousNodeId "$previousNodeId" but found "${nodeData.previousNodeId}".');
     if ((nodeData.label != '' || nodeData.value != '' || nodeData.hint != '' || node.increasedValue != '' || node.decreasedValue != '') && nodeData.textDirection == null)
       return fail('expected node id $id, which has a label, value, or hint, to have a textDirection, but it did not.');
     if (!ignoreRect && rect != nodeData.rect)
@@ -324,10 +312,6 @@ class TestSemantics {
       buf.writeln('$indent  hint: \'$hint\',');
     if (textDirection != null)
       buf.writeln('$indent  textDirection: $textDirection,');
-    if (nextNodeId != null)
-      buf.writeln('$indent  nextNodeId: $nextNodeId,');
-    if (previousNodeId != null)
-      buf.writeln('$indent  previousNodeId: $previousNodeId,');
     if (textSelection?.isValid == true)
       buf.writeln('$indent  textSelection:\n[${textSelection.start}, ${textSelection.end}],');
     if (rect != null)
