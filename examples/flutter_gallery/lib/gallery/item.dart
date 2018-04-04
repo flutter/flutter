@@ -89,6 +89,13 @@ List<GalleryItem> _buildGalleryItems() {
       buildRoute: (BuildContext context) => new BackdropDemo(),
     ),
     new GalleryItem(
+      title: 'Bottom App Bar',
+      subtitle: 'With repositionable floating action button',
+      category: 'Material Components',
+      routeName: BottomAppBarDemo.routeName,
+      buildRoute: (BuildContext context) => new BottomAppBarDemo(),
+    ),
+    new GalleryItem(
       title: 'Bottom navigation',
       subtitle: 'Bottom navigation with cross-fading views',
       category: 'Material Components',
@@ -164,13 +171,6 @@ List<GalleryItem> _buildGalleryItems() {
       category: 'Material Components',
       routeName: TabsFabDemo.routeName,
       buildRoute: (BuildContext context) => new TabsFabDemo(),
-    ),
-    new GalleryItem(
-      title: 'Floating action button motion',
-      subtitle: 'Action buttons with customized positions',
-      category: 'Material Components',
-      routeName: FabMotionDemo.routeName,
-      buildRoute: (BuildContext context) => new FabMotionDemo(),
     ),
     new GalleryItem(
       title: 'Grid',
