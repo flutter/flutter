@@ -174,6 +174,9 @@ class JSONMethodCodec implements MethodCodec {
 ///  * [List]s of supported values
 ///  * [Map]s from supported values to supported values
 ///
+/// Decoded values will use `List<dynamic>` and `Map<dynamic, dynamic>`
+/// irrespective of content.
+///
 /// On Android, messages are represented as follows:
 ///
 ///  * null: null

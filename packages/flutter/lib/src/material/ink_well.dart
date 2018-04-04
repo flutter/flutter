@@ -192,6 +192,8 @@ class InkResponse extends StatefulWidget {
     Key key,
     this.child,
     this.onTap,
+    this.onTapDown,
+    this.onTapCancel,
     this.onDoubleTap,
     this.onLongPress,
     this.onHighlightChanged,
@@ -217,6 +219,13 @@ class InkResponse extends StatefulWidget {
 
   /// Called when the user taps this part of the material.
   final GestureTapCallback onTap;
+
+  /// Called when the user taps down this part of the material.
+  final GestureTapDownCallback onTapDown;
+
+  /// Called when the user cancels a tap that was started on this part of the
+  /// material.
+  final GestureTapCallback onTapCancel;
 
   /// Called when the user double taps this part of the material.
   final GestureTapCallback onDoubleTap;
@@ -464,6 +473,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     _splashes ??= new HashSet<InteractiveInkFeature>();
     _splashes.add(splash);
     _currentSplash = splash;
+    if (widget.onTapDown != null) {
+      widget.onTapDown(details);
+    }
     updateKeepAlive();
     updateHighlight(true);
   }
@@ -482,6 +494,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   void _handleTapCancel() {
     _currentSplash?.cancel();
     _currentSplash = null;
+    if (widget.onTapCancel != null) {
+      widget.onTapCancel();
+    }
     updateHighlight(false);
   }
 
@@ -548,7 +563,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 ///
 /// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
 ///
-/// The [InkResponse] widget must have a [Material] widget as an ancestor. The
+/// The [InkWell] widget must have a [Material] widget as an ancestor. The
 /// [Material] widget is where the ink reactions are actually painted. This
 /// matches the material design premise wherein the [Material] is what is
 /// actually reacting to touches by spreading ink.
@@ -599,6 +614,8 @@ class InkWell extends InkResponse {
     GestureTapCallback onTap,
     GestureTapCallback onDoubleTap,
     GestureLongPressCallback onLongPress,
+    GestureTapDownCallback onTapDown,
+    GestureTapCancelCallback onTapCancel,
     ValueChanged<bool> onHighlightChanged,
     Color highlightColor,
     Color splashColor,
@@ -613,6 +630,8 @@ class InkWell extends InkResponse {
     onTap: onTap,
     onDoubleTap: onDoubleTap,
     onLongPress: onLongPress,
+    onTapDown: onTapDown,
+    onTapCancel: onTapCancel,
     onHighlightChanged: onHighlightChanged,
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,

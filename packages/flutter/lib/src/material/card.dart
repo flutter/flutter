@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'material.dart';
+import 'theme.dart';
 
 /// A material design card. A card has slightly rounded corners and a shadow.
 ///
@@ -62,36 +63,63 @@ class Card extends StatelessWidget {
   const Card({
     Key key,
     this.color,
-    this.elevation: 2.0,
+    this.elevation,
+    this.shape,
+    this.margin: const EdgeInsets.all(4.0),
     this.child,
   }) : super(key: key);
+
+  /// The card's background color.
+  ///
+  /// Defines the card's [Material.color].
+  ///
+  /// The default color is defined by the ambient [Theme]: [ThemeData.cardColor].
+  final Color color;
+
+  /// The z-coordinate at which to place this card. This controls the size of
+  /// the shadow below the card.
+  ///
+  /// Defines the card's [Material.elevation].
+  ///
+  /// The default elevation is 1.0.
+  final double elevation;
+
+  /// The shape of the card's [Material].
+  ///
+  /// Defines the card's [Material.shape].
+  ///
+  /// The default shape is a [RoundedRectangleBorder] with a circular corner
+  /// radius of 4.0.
+  final ShapeBorder shape;
+
+  /// The empty space that surrounds the card.
+  ///
+  /// Defines the card's outer [Container.margin].
+  ///
+  /// The default margin is 4.0 logical pixels on all sides:
+  /// `EdgeInsets.all(4.0)`.
+  final EdgeInsetsGeometry margin;
 
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  /// The color of material used for this card.
-  final Color color;
-
-  /// The z-coordinate at which to place this card. This controls the size of
-  /// the shadow below the card.
-  ///
-  /// Defaults to 2, the appropriate elevation for cards.
-  final double elevation;
-
   @override
   Widget build(BuildContext context) {
     return new Semantics(
       container: true,
       child: new Container(
-        margin: const EdgeInsets.all(4.0),
+        margin: margin ?? const EdgeInsets.all(4.0),
         child: new Material(
-          color: color,
           type: MaterialType.card,
-          elevation: elevation,
-          child: child
-        )
+          color: color ?? Theme.of(context).cardColor,
+          elevation: elevation ?? 1.0,
+          shape: shape ?? const RoundedRectangleBorder(
+            borderRadius: const BorderRadius.all(const Radius.circular(4.0)),
+          ),
+          child: child,
+        ),
       ),
     );
   }
