@@ -155,8 +155,8 @@ class Ticker {
     }());
     assert(_startTime == null);
     _future = new TickerFuture._();
-    if (!muted && !scheduled) {
-      _animationId = SchedulerBinding.instance.scheduleFrameCallback(_tick, rescheduling: false);
+    if (shouldScheduleTick) {
+      scheduleTick();
     }
     if (SchedulerBinding.instance.schedulerPhase.index > SchedulerPhase.idle.index &&
         SchedulerBinding.instance.schedulerPhase.index < SchedulerPhase.postFrameCallbacks.index)
@@ -217,7 +217,7 @@ class Ticker {
   /// * The ticker is not active ([start] has not been called).
   /// * The ticker is not ticking, e.g. because it is [muted] (see [isTicking]).
   @protected
-  bool get shouldScheduleTick => isTicking && !scheduled;
+  bool get shouldScheduleTick => !muted && isActive && !scheduled;
 
   void _tick(Duration timeStamp) {
     assert(isTicking);
@@ -239,7 +239,6 @@ class Ticker {
   /// This should only be called if [shouldScheduleTick] is true.
   @protected
   void scheduleTick({ bool rescheduling: false }) {
-    assert(isTicking);
     assert(!scheduled);
     assert(shouldScheduleTick);
     _animationId = SchedulerBinding.instance.scheduleFrameCallback(_tick, rescheduling: rescheduling);
