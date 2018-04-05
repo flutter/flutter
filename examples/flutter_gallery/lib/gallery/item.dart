@@ -89,7 +89,7 @@ List<GalleryItem> _buildGalleryItems() {
       buildRoute: (BuildContext context) => new BackdropDemo(),
     ),
     new GalleryItem(
-      title: 'Bottom App Bar',
+      title: 'Bottom app bar',
       subtitle: 'With repositionable floating action button',
       category: 'Material Components',
       routeName: BottomAppBarDemo.routeName,
