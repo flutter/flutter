@@ -155,8 +155,10 @@ class Ticker {
     }());
     assert(_startTime == null);
     _future = new TickerFuture._();
-    if (shouldScheduleTick)
-      scheduleTick();
+    if (!muted && !scheduled) {
+      assert(!scheduled);
+      _animationId = SchedulerBinding.instance.scheduleFrameCallback(_tick, rescheduling: false);
+    }
     if (SchedulerBinding.instance.schedulerPhase.index > SchedulerPhase.idle.index &&
         SchedulerBinding.instance.schedulerPhase.index < SchedulerPhase.postFrameCallbacks.index)
       _startTime = SchedulerBinding.instance.currentFrameTimeStamp;
