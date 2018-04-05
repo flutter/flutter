@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show utf8;
-
-import 'package:archive/archive.dart';
 
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
@@ -21,6 +18,7 @@ import 'base/version.dart';
 import 'cache.dart';
 import 'device.dart';
 import 'globals.dart';
+import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
 import 'version.dart';
@@ -316,7 +314,6 @@ abstract class IntelliJValidator extends DoctorValidator {
   };
 
   static final Version kMinIdeaVersion = new Version(2017, 1, 0);
-  static final Version kMinFlutterPluginVersion = new Version(16, 0, 0);
 
   static Iterable<DoctorValidator> get installedValidators {
     if (platform.isLinux || platform.isWindows)
@@ -332,9 +329,10 @@ abstract class IntelliJValidator extends DoctorValidator {
 
     messages.add(new ValidationMessage('IntelliJ at $installPath'));
 
-    _validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
-        'Flutter', minVersion: kMinFlutterPluginVersion);
-    _validatePackage(messages, <String>['Dart'], 'Dart');
+    final IntelliJPlugins plugins = new IntelliJPlugins(pluginsPath);
+    plugins.validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
+        'Flutter', minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
+    plugins.validatePackage(messages, <String>['Dart'], 'Dart');
 
     if (_hasIssues(messages)) {
       messages.add(new ValidationMessage(
@@ -371,70 +369,16 @@ abstract class IntelliJValidator extends DoctorValidator {
       ));
     }
   }
-
-  void _validatePackage(List<ValidationMessage> messages, List<String> packageNames, String title, {
-    Version minVersion
-  }) {
-    for (String packageName in packageNames) {
-      if (!hasPackage(packageName)) {
-        continue;
-      }
-
-      final String versionText = _readPackageVersion(packageName);
-      final Version version = new Version.parse(versionText);
-      if (version != null && minVersion != null && version < minVersion) {
-        messages.add(new ValidationMessage.error(
-          '$title plugin version $versionText - the recommended minimum version is $minVersion'
-        ));
-      } else {
-        messages.add(new ValidationMessage(
-          '$title plugin ${version != null ? "version $version" : "installed"}'
-        ));
-      }
-
-      return;
-    }
-
-    messages.add(new ValidationMessage.error(
-      '$title plugin not installed; this adds $title specific functionality.'
-    ));
-  }
-
-  String _readPackageVersion(String packageName) {
-    final String jarPath = packageName.endsWith('.jar')
-        ? fs.path.join(pluginsPath, packageName)
-        : fs.path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
-    // TODO(danrubel) look for a better way to extract a single 2K file from the zip
-    // rather than reading the entire file into memory.
-    try {
-      final Archive archive = new ZipDecoder().decodeBytes(fs.file(jarPath).readAsBytesSync());
-      final ArchiveFile file = archive.findFile('META-INF/plugin.xml');
-      final String content = utf8.decode(file.content);
-      const String versionStartTag = '<version>';
-      final int start = content.indexOf(versionStartTag);
-      final int end = content.indexOf('</version>', start);
-      return content.substring(start + versionStartTag.length, end);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  bool hasPackage(String packageName) {
-    final String packagePath = fs.path.join(pluginsPath, packageName);
-    if (packageName.endsWith('.jar'))
-      return fs.isFileSync(packagePath);
-    return fs.isDirectorySync(packagePath);
-  }
 }
 
 class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
   IntelliJValidatorOnLinuxAndWindows(String title, this.version, String installPath, this.pluginsPath) : super(title, installPath);
 
   @override
-  String version;
+  final String version;
 
   @override
-  String pluginsPath;
+  final String pluginsPath;
 
   static Iterable<DoctorValidator> get installed {
     final List<DoctorValidator> validators = <DoctorValidator>[];

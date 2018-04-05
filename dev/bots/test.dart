@@ -75,11 +75,12 @@ Future<Null> _verifyInternationalizations() async {
 
   final String localizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'localizations.dart');
 
-  final EvalResult sourceContents = await _evalCommand(
-    'cat',
-    <String>[localizationsFile],
-    workingDirectory: flutterRoot,
-  );
+  final String executable = Platform.isWindows ? 'powershell' : 'cat';
+  final List<String> args = Platform.isWindows ?
+      <String>['\$PSDefaultParameterValues["*:Encoding"]="utf8";(gc $localizationsFile) -join "`n"']:
+      <String>[localizationsFile];
+
+  final EvalResult sourceContents = await _evalCommand(executable, args, workingDirectory: flutterRoot);
 
   if (genResult.stdout.trim() != sourceContents.stdout.trim()) {
     stderr
@@ -225,7 +226,7 @@ Future<Null> _runCoverage() async {
   }
   coverageFile.deleteSync();
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
-    options: const <String>['--coverage', '--no-preview-dart-2'],
+    options: const <String>['--coverage'],
   );
   if (!coverageFile.existsSync()) {
     print('${red}Coverage file not found.$reset');

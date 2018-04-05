@@ -307,7 +307,7 @@ class StockHomeState extends State<StockHome> {
     return new FloatingActionButton(
       tooltip: 'Create company',
       child: const Icon(Icons.add),
-      backgroundColor: Colors.redAccent,
+      backgroundColor: Theme.of(context).accentColor,
       onPressed: _handleCreateCompany,
     );
   }

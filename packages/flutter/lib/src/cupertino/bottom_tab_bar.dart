@@ -47,11 +47,14 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.iconSize: 30.0,
   }) : assert(items != null),
        assert(items.length >= 2),
+       assert(currentIndex != null),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
        super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
+  ///
+  /// Must not be null.
   final List<BottomNavigationBarItem> items;
 
   /// The callback that is called when a item is tapped.
@@ -62,6 +65,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   final ValueChanged<int> onTap;
 
   /// The index into [items] of the current active item.
+  ///
+  /// Must not be null.
   final int currentIndex;
 
   /// The background color of the tab bar. If it contains transparency, the
@@ -82,6 +87,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// This value is used to to configure the [IconTheme] for the navigation
   /// bar. When a [BottomNavigationBarItem.icon] widget is not an [Icon] the widget
   /// should configure itself to match the icon theme's size and color.
+  ///
+  /// Must not be null.
   final double iconSize;
 
   /// True if the tab bar's background color has no transparency.
