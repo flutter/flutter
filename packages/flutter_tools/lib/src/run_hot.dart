@@ -14,6 +14,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'compile.dart';
 import 'dart/dependencies.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -112,11 +113,13 @@ class HotRunner extends ResidentRunner {
       ) async {
     for (FlutterDevice device in flutterDevices) {
       if (device.generator != null) {
-        final String filename = await device.generator.compileExpression(
-            expression, definitions, typeDefinitions, libraryUri, klass,
+        final CompilerOutput compilerOutput =
+            await device.generator.compileExpression(expression, definitions,
+                typeDefinitions, libraryUri, klass,
             isStatic);
-        if (filename != null) {
-          return base64.encode(fs.file(filename).readAsBytesSync());
+        if (compilerOutput.outputFilename != null) {
+          return base64.encode(fs.file(compilerOutput.outputFilename)
+              .readAsBytesSync());
         }
       }
     }

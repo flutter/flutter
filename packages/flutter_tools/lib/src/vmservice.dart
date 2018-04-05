@@ -160,10 +160,10 @@ class VMService {
         if (expression is! String || expression.isEmpty)
           throw new rpc.RpcException.invalidParams(
               'Invalid \'expression\': $expression');
-        final List<String> definitions = params['definitions'].asList;
-        final List<String> typeDefinitions = params['typeDefinitions'].asList;
-        final String libraryUri = params['libraryUri'].asString;
-        final String klass = params['klass'].asString;
+        final List<String> definitions = params['definitions'].asListOr(null);
+        final List<String> typeDefinitions = params['typeDefinitions'].asListOr(null);
+        final String libraryUri = params['libraryUri'].asStringOr(null);
+        final String klass = params['klass'].asStringOr(null);
         final bool isStatic = params['isStatic'].asBoolOr(false);
 
         try {

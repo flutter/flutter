@@ -299,7 +299,7 @@ class ResidentCompiler {
     return stdoutHandler.compilerOutput.future;
   }
 
-  Future<String> compileExpression(String expression, List<String> definitions,
+  Future<CompilerOutput> compileExpression(String expression, List<String> definitions,
       List<String> typeDefinitions, String libraryUri, String klass, bool isStatic) {
     stdoutHandler.reset();
 
@@ -311,20 +311,20 @@ class ResidentCompiler {
     final String inputKey = new Uuid().generateV4();
     _server.stdin.writeln('compile-expression $inputKey');
     _server.stdin.writeln(expression);
-    definitions.forEach(_server.stdin.writeln);
+    definitions?.forEach(_server.stdin.writeln);
     _server.stdin.writeln(inputKey);
-    typeDefinitions.forEach(_server.stdin.writeln);
+    typeDefinitions?.forEach(_server.stdin.writeln);
     _server.stdin.writeln(inputKey);
-    _server.stdin.writeln(libraryUri);
-    _server.stdin.writeln(klass);
-    _server.stdin.writeln(isStatic);
+    _server.stdin.writeln(libraryUri ?? '');
+    _server.stdin.writeln(klass ?? '');
+    _server.stdin.writeln(isStatic ?? false);
 
     _server.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((String s) { printError('compiler message: $s'); });
 
-    return stdoutHandler.outputFilename.future;
+    return stdoutHandler.compilerOutput.future;
   }
 
   /// Should be invoked when results of compilation are accepted by the client.
