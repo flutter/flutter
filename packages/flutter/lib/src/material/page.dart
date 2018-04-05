@@ -8,10 +8,6 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-/// The default route name provided to [Semantics] when
-/// [RouteSettings.isInitialRoute] is true.
-const String kDefaultInitialRouteName = 'home';
-
 // Fractional offset from 1/4 screen below the top to fully on screen.
 final Tween<Offset> _kBottomUpTween = new Tween<Offset>(
   begin: const Offset(0.0, 0.25),
