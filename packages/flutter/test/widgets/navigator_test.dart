@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+
+import 'semantics_tester.dart';
 
 class FirstWidget extends StatelessWidget {
   @override
@@ -768,5 +772,42 @@ void main() {
     key.currentState.pop<void>();
     await tester.pumpAndSettle(const Duration(milliseconds: 10));
     expect(log, <String>['building B', 'building C', 'found C', 'building D', 'building C', 'found C']);
+  });
+
+
+  testWidgets('route semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.pushNamed(context, '/B/C'); }),
+      '/B/C': (BuildContext context) => const OnTapPage(id: 'B'),
+    };
+
+    await tester.pumpWidget(new MaterialApp(routes: routes));
+
+    expect(semantics, includesNodeWith(
+      value: 'home',
+      flags: <SemanticsFlag>[SemanticsFlag.isRoute],
+    ));
+
+    await tester.tap(find.text('/')); // pushNamed('/A')
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(semantics, includesNodeWith(
+      value: 'A',
+      flags: <SemanticsFlag>[SemanticsFlag.isRoute],
+    ));
+
+    await tester.tap(find.text('A')); // pushNamed('/B/C')
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(semantics, includesNodeWith(
+      value: 'C',
+      flags: <SemanticsFlag>[SemanticsFlag.isRoute],
+    ));
+
+    semantics.dispose();
   });
 }

@@ -158,7 +158,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     final Widget result = new Semantics(
       route: true,
       explicitChildNodes: true,
-      value: _routeName(),
+      value: settings.accessibilityName,
       child: builder(context),
     );
     assert(() {
@@ -188,12 +188,4 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   String get debugLabel => '${super.debugLabel}(${settings.name})';
-
-  String _routeName() {
-    if (_useCupertinoTransitions)
-      return '';
-    if (settings.isInitialRoute)
-      return 'home';
-    return settings.name;
-  }
 }

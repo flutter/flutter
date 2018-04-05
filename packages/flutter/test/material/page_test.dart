@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
@@ -459,16 +460,17 @@ void main() {
 
   testWidgets('MaterialPage transitions on iOS have a route Semantics flag', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
     await tester.pumpWidget(
-        new MaterialApp(
-          theme: new ThemeData(platform: TargetPlatform.iOS),
-          home: const Material(child: const Text('Page 1')),
-          routes: <String, WidgetBuilder>{
-            '/next': (BuildContext context) {
-              return const Material(child: const Text('Page 2'));
-            },
+      new MaterialApp(
+        home: const Material(child: const Text('Page 1')),
+        routes: <String, WidgetBuilder>{
+          '/next': (BuildContext context) {
+            return const Material(child: const Text('Page 2'));
           },
-        )
+        },
+      )
     );
 
     expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute], value: ''));
@@ -479,22 +481,24 @@ void main() {
 
     expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute], value: ''));
 
+    debugDefaultTargetPlatformOverride = null;
     semantics.dispose();
   });
 
 
   testWidgets('MaterialPage transitions on Android have a route Semantics flag and value', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+
     await tester.pumpWidget(
-        new MaterialApp(
-          theme: new ThemeData(platform: TargetPlatform.android),
-          home: const Material(child: const Text('Page 1')),
-          routes: <String, WidgetBuilder>{
-            '/next': (BuildContext context) {
-              return const Material(child: const Text('Page 2'));
-            },
+      new MaterialApp(
+        home: const Material(child: const Text('Page 1')),
+        routes: <String, WidgetBuilder>{
+          '/next': (BuildContext context) {
+            return const Material(child: const Text('Page 2'));
           },
-        )
+        },
+      )
     );
 
     expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute], value: 'home'));
@@ -503,8 +507,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute], value: '/next'));
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute], value: 'next'));
 
+    debugDefaultTargetPlatformOverride = null;
     semantics.dispose();
   });
 }
