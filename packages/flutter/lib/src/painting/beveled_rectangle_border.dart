@@ -31,6 +31,14 @@ class BeveledRectangleBorder extends ShapeBorder {
   final BorderSide side;
 
   /// The radii for each corner.
+  ///
+  /// Each corner [Radius] defines the endpoints of a line segment that
+  /// spans the corner. The endpoints are located in the same place as
+  /// they would be for [RoundedRectangleBorder], but they're connected
+  /// by a straight line instead of an arc.
+  ///
+  /// Negative radius values are clamped to 0.0 by [getInnerPath] and
+  /// [getOuterPath].
   final BorderRadiusGeometry borderRadius;
 
   @override
