@@ -29,6 +29,11 @@ class _PointerState {
   }
 
   Offset lastPosition;
+
+  @override
+  String toString() {
+    return '_PointerState(pointer: $pointer, down: $down, lastPosition: $lastPosition)';
+  }
 }
 
 /// Converts from engine pointer data to framework pointer events.
