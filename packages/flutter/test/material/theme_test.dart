@@ -462,6 +462,7 @@ class _TextStyleProxy implements TextStyle {
   @override FontStyle get fontStyle => _delegate.fontStyle;
   @override FontWeight get fontWeight => _delegate.fontWeight;
   @override double get height => _delegate.height;
+  @override ui.Locale get locale => _delegate.locale;
   @override bool get inherit => _delegate.inherit;
   @override double get letterSpacing => _delegate.letterSpacing;
   @override TextBaseline get textBaseline => _delegate.textBaseline;
@@ -488,7 +489,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
+  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, ui.Locale locale, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
     throw new UnimplementedError();
   }
 
@@ -498,7 +499,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  ui.ParagraphStyle getParagraphStyle({TextAlign textAlign, TextDirection textDirection, double textScaleFactor: 1.0, String ellipsis, int maxLines}) {
+  ui.ParagraphStyle getParagraphStyle({TextAlign textAlign, TextDirection textDirection, double textScaleFactor: 1.0, String ellipsis, int maxLines, ui.Locale locale}) {
     throw new UnimplementedError();
   }
 
