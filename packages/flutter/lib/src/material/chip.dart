@@ -80,10 +80,10 @@ abstract class ChipAttributes {
   /// such as [Text].
   TextStyle get labelStyle;
 
-  /// The border to draw around the chip.
+  /// The [ShapeBorder] to draw around the chip.
   ///
   /// Defaults to a [StadiumBorder]. Must not be null.
-  ShapeBorder get border;
+  ShapeBorder get shape;
 
   /// Color to be used for the unselected, enabled chip's background.
   ///
@@ -415,11 +415,11 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.onDeleted,
     this.deleteIconColor,
     this.deleteButtonTooltipMessage,
-    this.border: const StadiumBorder(),
+    this.shape: const StadiumBorder(),
     this.backgroundColor,
     this.padding,
   })  : assert(label != null),
-        assert(border != null),
+        assert(shape != null),
         super(key: key);
 
   @override
@@ -433,7 +433,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   @override
   final EdgeInsetsGeometry avatarPadding;
   @override
-  final ShapeBorder border;
+  final ShapeBorder shape;
   @override
   final Color backgroundColor;
   @override
@@ -464,7 +464,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       deleteIconColor: deleteIconColor,
       deleteButtonTooltipMessage: deleteButtonTooltipMessage,
       tapEnabled: false,
-      border: border,
+      shape: shape,
       backgroundColor: backgroundColor,
       padding: padding,
       isEnabled: true,
@@ -549,13 +549,13 @@ class InputChip extends StatelessWidget
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
-    this.border: const StadiumBorder(),
+    this.shape: const StadiumBorder(),
     this.backgroundColor,
     this.padding,
   })  : assert(selected != null),
         assert(isEnabled != null),
         assert(label != null),
-        assert(border != null),
+        assert(shape != null),
         super(key: key);
 
   @override
@@ -593,7 +593,7 @@ class InputChip extends StatelessWidget
   @override
   final String tooltip;
   @override
-  final ShapeBorder border;
+  final ShapeBorder shape;
   @override
   final Color backgroundColor;
   @override
@@ -620,7 +620,7 @@ class InputChip extends StatelessWidget
       disabledColor: disabledColor,
       selectedColor: selectedColor,
       tooltip: tooltip,
-      border: border,
+      shape: shape,
       backgroundColor: backgroundColor,
       padding: padding,
       isEnabled: isEnabled && (onSelected != null || onDeleted != null || onPressed != null),
@@ -696,12 +696,12 @@ class ChoiceChip extends StatelessWidget
     this.selectedColor,
     this.disabledColor,
     this.tooltip,
-    this.border: const StadiumBorder(),
+    this.shape: const StadiumBorder(),
     this.backgroundColor,
     this.padding,
   })  : assert(selected != null),
         assert(label != null),
-        assert(border != null),
+        assert(shape != null),
         super(key: key);
 
   @override
@@ -725,7 +725,7 @@ class ChoiceChip extends StatelessWidget
   @override
   final String tooltip;
   @override
-  final ShapeBorder border;
+  final ShapeBorder shape;
   @override
   final Color backgroundColor;
   @override
@@ -748,7 +748,7 @@ class ChoiceChip extends StatelessWidget
       showCheckmark: false,
       onDeleted: null,
       tooltip: tooltip,
-      border: border,
+      shape: shape,
       disabledColor: disabledColor,
       selectedColor: selectedColor,
       backgroundColor: backgroundColor,
@@ -861,12 +861,12 @@ class FilterChip extends StatelessWidget
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
-    this.border: const StadiumBorder(),
+    this.shape: const StadiumBorder(),
     this.backgroundColor,
     this.padding,
   })  : assert(selected != null),
         assert(label != null),
-        assert(border != null),
+        assert(shape != null),
         super(key: key);
 
   @override
@@ -890,7 +890,7 @@ class FilterChip extends StatelessWidget
   @override
   final String tooltip;
   @override
-  final ShapeBorder border;
+  final ShapeBorder shape;
   @override
   final Color backgroundColor;
   @override
@@ -911,7 +911,7 @@ class FilterChip extends StatelessWidget
       onSelected: onSelected,
       selected: selected,
       tooltip: tooltip,
-      border: border,
+      shape: shape,
       backgroundColor: backgroundColor,
       disabledColor: disabledColor,
       selectedColor: selectedColor,
@@ -976,11 +976,11 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.avatarPadding,
     @required this.onPressed,
     this.tooltip,
-    this.border: const StadiumBorder(),
+    this.shape: const StadiumBorder(),
     this.backgroundColor,
     this.padding,
   })  : assert(label != null),
-        assert(border != null),
+        assert(shape != null),
         assert(onPressed != null),
         super(key: key);
 
@@ -999,7 +999,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   @override
   final String tooltip;
   @override
-  final ShapeBorder border;
+  final ShapeBorder shape;
   @override
   final Color backgroundColor;
   @override
@@ -1015,7 +1015,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       tooltip: tooltip,
       labelStyle: labelStyle,
       backgroundColor: backgroundColor,
-      border: border,
+      shape: shape,
       padding: padding,
       labelPadding: labelPadding,
       avatarPadding: avatarPadding,
@@ -1089,10 +1089,10 @@ class RawChip extends StatefulWidget
     Color disabledColor,
     Color selectedColor,
     this.tooltip,
-    @required this.border,
+    @required this.shape,
     Color backgroundColor,
   })  : assert(label != null),
-        assert(border != null),
+        assert(shape != null),
         assert(isEnabled != null),
         padding = padding ?? _kDefaultPadding,
         labelPadding = labelPadding ?? _kDefaultLabelPadding,
@@ -1139,7 +1139,7 @@ class RawChip extends StatefulWidget
   @override
   final String tooltip;
   @override
-  final ShapeBorder border;
+  final ShapeBorder shape;
   @override
   final Color backgroundColor;
   @override
@@ -1393,7 +1393,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     return new Material(
       elevation: isTapping ? _kPressElevation : 0.0,
       animationDuration: pressedAnimationDuration,
-      shape: widget.border,
+      shape: widget.shape,
       child: new InkResponse(
         onTap: canTap ? _handleTap : null,
         onTapDown: canTap ? _handleTapDown : null,
@@ -1403,7 +1403,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
           builder: (BuildContext context, Widget child) {
             return new Container(
               decoration: new ShapeDecoration(
-                shape: widget.border,
+                shape: widget.shape,
                 color: backgroundColor,
               ),
               child: child,
