@@ -181,7 +181,6 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         new Semantics(
           label: 'Set Bottom App Bar color to ${colorToName[color]}',
           container: true,
-          explicitChildNodes: false,
           child: new Row(children: <Widget> [
             new Radio<Color>(
               value: color,
@@ -323,7 +322,6 @@ class _DemoBottomAppBar extends StatelessWidget {
       new Semantics(
         label: 'Search',
         container: true,
-        explicitChildNodes: false,
         enabled: false,
         child: new IconButton(
           icon: const Icon(Icons.search),
@@ -333,7 +331,6 @@ class _DemoBottomAppBar extends StatelessWidget {
       new Semantics(
         label: 'Show more',
         container: true,
-        explicitChildNodes: false,
         enabled: false,
         child: new IconButton(
           icon: const Icon(Icons.more_vert),
