@@ -104,7 +104,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       // Print an analysis summary.
       String errorsMessage;
 
-      final int issueCount = errors.length;
+      int issueCount = errors.length;
       final int issueDiff = issueCount - lastErrorCount;
       lastErrorCount = issueCount;
 
@@ -128,6 +128,9 @@ class AnalyzeContinuously extends AnalyzeBase {
       printStatus('$errorsMessage • analyzed $files in $seconds seconds');
 
       if (firstAnalysis && isBenchmarking) {
+        // We don't want to return a failing exit code based on missing documentation.
+        issueCount -= undocumentedCount;
+
         writeBenchmark(analysisTimer, issueCount, undocumentedCount);
         server.dispose().whenComplete(() { exit(issueCount > 0 ? 1 : 0); });
       }
