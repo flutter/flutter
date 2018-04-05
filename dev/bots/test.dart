@@ -226,7 +226,7 @@ Future<Null> _runCoverage() async {
   }
   coverageFile.deleteSync();
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
-    options: const <String>['--coverage', '--no-preview-dart-2'],
+    options: const <String>['--coverage'],
   );
   if (!coverageFile.existsSync()) {
     print('${red}Coverage file not found.$reset');
