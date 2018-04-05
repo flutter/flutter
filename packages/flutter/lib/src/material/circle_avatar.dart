@@ -179,7 +179,14 @@ class CircleAvatar extends StatelessWidget {
       duration: kThemeChangeDuration,
       decoration: new BoxDecoration(
         color: effectiveBackgroundColor,
-        image: backgroundImage != null ? new DecorationImage(image: backgroundImage) : null,
+        image: backgroundImage != null
+			? new DecorationImage(
+				image: backgroundImage,
+				// Otherwise rectangular images are shrunk down
+				// and do not cover the entire avatar.
+				fit: BoxFit.cover
+			),
+			: null,
         shape: BoxShape.circle,
       ),
       child: child == null
