@@ -225,8 +225,12 @@ class AlertDialog extends StatelessWidget {
   /// Defaults to "alert" on both iOS and Android.
   ///
   /// This name is announced by TalkBack or VoiceOver when the dialog becomes
-  /// visible For example - "App permissions" for a dialog containing permission
+  /// visible. For example, "App permissions" for a dialog containing permission
   /// information.
+  ///
+  /// See also:
+  ///   * [Semantics.route], the semantics flag which controls screen
+  ///     accessibility.
   final String routeName;
 
   @override

@@ -109,7 +109,8 @@ class Drawer extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///   * [Semantics.route]
+  ///   * [Semantics.route], the semantics flag which controls screen
+  ///     accessibility.
   final String routeName;
 
   @override
@@ -119,7 +120,12 @@ class Drawer extends StatelessWidget {
       constraints: const BoxConstraints.expand(width: _kWidth),
       child: new Material(
         elevation: elevation,
-        child: new Semantics(route: true, explicitChildNodes: true, value: value, child: child),
+        child: new Semantics(
+          route: true,
+          explicitChildNodes: true,
+          value: value,
+          child: child,
+        ),
       ),
     );
   }

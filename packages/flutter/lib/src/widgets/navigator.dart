@@ -314,7 +314,8 @@ class RouteSettings {
   ///
   /// See also:
   ///
-  ///   * [Semantics.route]
+  ///   * [Semantics.route] the semantics flag which controls screen
+  ///     accessibility.
   final String name;
 
   /// Whether this route is the very first route being pushed onto this [Navigator].
@@ -325,7 +326,8 @@ class RouteSettings {
   ///
   /// See also:
   ///
-  ///   * [Semantics.route]
+  ///   * [Semantics.route] the semantics flag which controls screen
+  ///     accessibility.
   final bool isInitialRoute;
 
   @override
