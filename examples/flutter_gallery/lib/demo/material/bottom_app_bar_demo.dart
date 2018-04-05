@@ -312,11 +312,19 @@ class _DemoBottomAppBar extends StatelessWidget {
     rowContents.addAll(<Widget> [
       new IconButton(
         icon: const Icon(Icons.search),
-        onPressed: () {},
+        onPressed: () {
+          Scaffold.of(context).showSnackBar(
+            const SnackBar(content: const Text('This is a dummy search action.')),
+          );
+        },
       ),
       new IconButton(
         icon: const Icon(Icons.more_vert),
-        onPressed: () {},
+        onPressed: () {
+          Scaffold.of(context).showSnackBar(
+            const SnackBar(content: const Text('This is a dummy menu action.')),
+          );
+        },
       ),
     ]);
     return new Row(
