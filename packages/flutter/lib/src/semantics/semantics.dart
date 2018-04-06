@@ -413,7 +413,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// When the most specific route semantics node changes, the platform
   /// accessibility framework will make an edge-triggered announcement and clear
   /// the current accessibility focus. Specificity is defined as the last child
-  /// in a pre-order traversal - left to right, root first.
+  /// in inverse hit-test order.
   ///
   /// The announcement will contain the text in the [value] semantic. If this
   /// value is null or empty, VoiceOver will still provide a notification chime
