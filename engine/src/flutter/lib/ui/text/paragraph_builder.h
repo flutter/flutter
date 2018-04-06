@@ -31,7 +31,8 @@ class ParagraphBuilder : public fxl::RefCountedThreadSafe<ParagraphBuilder>,
                                               const std::string& fontFamily,
                                               double fontSize,
                                               double lineHeight,
-                                              const std::u16string& ellipsis);
+                                              const std::u16string& ellipsis,
+                                              const std::string& locale);
 
   ~ParagraphBuilder() override;
 
@@ -40,7 +41,8 @@ class ParagraphBuilder : public fxl::RefCountedThreadSafe<ParagraphBuilder>,
                  double fontSize,
                  double letterSpacing,
                  double wordSpacing,
-                 double height);
+                 double height,
+                 const std::string& locale);
 
   void pop();
 
@@ -55,7 +57,8 @@ class ParagraphBuilder : public fxl::RefCountedThreadSafe<ParagraphBuilder>,
                             const std::string& fontFamily,
                             double fontSize,
                             double lineHeight,
-                            const std::u16string& ellipsis);
+                            const std::u16string& ellipsis,
+                            const std::string& locale);
 
   void createRenderView();
 

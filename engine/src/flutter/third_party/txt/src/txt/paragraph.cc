@@ -28,6 +28,7 @@
 #include "font_collection.h"
 #include "font_skia.h"
 #include "lib/fxl/logging.h"
+#include "minikin/FontLanguageListCache.h"
 #include "minikin/HbFontCache.h"
 #include "minikin/LayoutUtils.h"
 #include "minikin/LineBreaker.h"
@@ -130,7 +131,12 @@ bool GetItalic(const TextStyle& style) {
 }
 
 minikin::FontStyle GetMinikinFontStyle(const TextStyle& style) {
-  return minikin::FontStyle(GetWeight(style), GetItalic(style));
+  uint32_t language_list_id =
+      style.locale.empty()
+          ? minikin::FontLanguageListCache::kEmptyListId
+          : minikin::FontStyle::registerLanguageList(style.locale);
+  return minikin::FontStyle(language_list_id, 0, GetWeight(style),
+                            GetItalic(style));
 }
 
 void GetFontAndMinikinPaint(const TextStyle& style,

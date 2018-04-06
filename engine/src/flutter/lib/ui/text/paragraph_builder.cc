@@ -41,6 +41,7 @@ const int tsFontSizeIndex = 9;
 const int tsLetterSpacingIndex = 10;
 const int tsWordSpacingIndex = 11;
 const int tsHeightIndex = 12;
+const int tsLocaleIndex = 13;
 
 const int tsColorMask = 1 << tsColorIndex;
 const int tsTextDecorationMask = 1 << tsTextDecorationIndex;
@@ -54,6 +55,7 @@ const int tsFontSizeMask = 1 << tsFontSizeIndex;
 const int tsLetterSpacingMask = 1 << tsLetterSpacingIndex;
 const int tsWordSpacingMask = 1 << tsWordSpacingIndex;
 const int tsHeightMask = 1 << tsHeightIndex;
+const int tsLocaleMask = 1 << tsLocaleIndex;
 
 // ParagraphStyle
 
@@ -66,6 +68,7 @@ const int psFontFamilyIndex = 6;
 const int psFontSizeIndex = 7;
 const int psLineHeightIndex = 8;
 const int psEllipsisIndex = 9;
+const int psLocaleIndex = 10;
 
 const int psTextAlignMask = 1 << psTextAlignIndex;
 const int psTextDirectionMask = 1 << psTextDirectionIndex;
@@ -76,6 +79,7 @@ const int psFontFamilyMask = 1 << psFontFamilyIndex;
 const int psFontSizeMask = 1 << psFontSizeIndex;
 const int psLineHeightMask = 1 << psLineHeightIndex;
 const int psEllipsisMask = 1 << psEllipsisIndex;
+const int psLocaleMask = 1 << psLocaleIndex;
 
 float getComputedSizeFromSpecifiedSize(float specifiedSize) {
   if (specifiedSize < std::numeric_limits<float>::epsilon())
@@ -191,7 +195,7 @@ FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
 void ParagraphBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register(
-      {{"ParagraphBuilder_constructor", ParagraphBuilder_constructor, 6, true},
+      {{"ParagraphBuilder_constructor", ParagraphBuilder_constructor, 7, true},
        FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
@@ -200,16 +204,18 @@ fxl::RefPtr<ParagraphBuilder> ParagraphBuilder::create(
     const std::string& fontFamily,
     double fontSize,
     double lineHeight,
-    const std::u16string& ellipsis) {
+    const std::u16string& ellipsis,
+    const std::string& locale) {
   return fxl::MakeRefCounted<ParagraphBuilder>(encoded, fontFamily, fontSize,
-                                               lineHeight, ellipsis);
+                                               lineHeight, ellipsis, locale);
 }
 
 ParagraphBuilder::ParagraphBuilder(tonic::Int32List& encoded,
                                    const std::string& fontFamily,
                                    double fontSize,
                                    double lineHeight,
-                                   const std::u16string& ellipsis) {
+                                   const std::u16string& ellipsis,
+                                   const std::string& locale) {
   if (!Settings::Get().using_blink) {
     int32_t mask = encoded[0];
     txt::ParagraphStyle style;
@@ -240,6 +246,10 @@ ParagraphBuilder::ParagraphBuilder(tonic::Int32List& encoded,
 
     if (mask & psEllipsisMask) {
       style.ellipsis = ellipsis;
+    }
+
+    if (mask & psLocaleMask) {
+      style.locale = locale;
     }
 
     m_paragraphBuilder = std::make_unique<txt::ParagraphBuilder>(
@@ -274,7 +284,8 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
                                  double fontSize,
                                  double letterSpacing,
                                  double wordSpacing,
-                                 double height) {
+                                 double height,
+                                 const std::string& locale) {
   FXL_DCHECK(encoded.num_elements() == 8);
 
   int32_t mask = encoded[0];
@@ -329,6 +340,10 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
 
     if (mask & tsHeightMask) {
       style.height = height;
+    }
+
+    if (mask & tsLocaleMask) {
+      style.locale = locale;
     }
 
     m_paragraphBuilder->PushStyle(style);
