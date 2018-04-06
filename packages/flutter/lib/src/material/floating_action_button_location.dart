@@ -74,7 +74,7 @@ abstract class FloatingActionButtonLocation {
   /// action button lines up with the top of the bottom navigation bar.
   ///
   /// If the value of [Scaffold.bottomNavigationBar] is a [BottomAppBar],
-  /// the bottom app bar can include a "notch" in its shape that accomodates
+  /// the bottom app bar can include a "notch" in its shape that accommodates
   /// the overlapping floating action button.
   ///
   /// This is unlikely to be a useful location for apps that lack a bottom
