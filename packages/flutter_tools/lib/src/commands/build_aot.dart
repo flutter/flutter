@@ -260,7 +260,16 @@ Future<String> _buildAotSnapshot(
     return null;
   }
 
-  final List<String> genSnapshotCmd = <String>[
+  final List<String> genSnapshotCmd = <String>[];
+  // iOS gen_snapshot is a multi-arch binary. Running as an i386 binary will
+  // generate armv7 code. Running as an x86_64 binary will generate arm64
+  // code. /usr/bin/arch can be used to run binaries with the specified
+  // architecture.
+  //
+  // TODO(cbracken): update the GenSnapshot class to handle AOT builds.
+  if (platform == TargetPlatform.ios)
+    genSnapshotCmd.addAll(<String>['arch', '-x86_64']);
+  genSnapshotCmd.addAll(<String>[
     genSnapshot,
     '--await_is_keyword',
     '--vm_snapshot_data=$vmSnapshotData',
@@ -271,7 +280,7 @@ Future<String> _buildAotSnapshot(
     '--print_snapshot_sizes',
     '--dependencies=$dependencies',
     '--causal_async_stacks',
-  ];
+  ]);
 
   if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
     printTrace('Extra front-end options: $extraFrontEndOptions');
