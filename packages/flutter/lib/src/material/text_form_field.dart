@@ -134,6 +134,7 @@ class _TextFormFieldState extends FormFieldState<String> {
     if (widget.controller == null) {
       _controller = new TextEditingController(text: widget.initialValue);
     } else {
+      setValue(widget.controller.text);
       widget.controller.addListener(_handleControllerChanged);
     }
   }
