@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -489,12 +487,12 @@ void main() {
 
     final TestSemantics expected = new TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics(
+        new TestSemantics.rootChild(
           id: 1,
           label: 'TIP',
           textDirection: TextDirection.ltr,
         ),
-      ],
+      ]
     );
 
     expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
@@ -622,7 +620,6 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 2,
           label: 'Foo\nBar',
           textDirection: TextDirection.ltr,
         ),
@@ -649,8 +646,7 @@ void main() {
 
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics(
-          id: 2,
+        new TestSemantics.rootChild(
           label: 'Bar',
           textDirection: TextDirection.ltr,
         ),

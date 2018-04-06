@@ -601,7 +601,7 @@ void main() {
           previousNodeId: -1,
         ),
       ],
-    ), ignoreRect: true, ignoreTransform: true, ignoreId: true));
+    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
 
     semantics.dispose();
   });
@@ -717,7 +717,7 @@ void main() {
 
       expect(semantics, hasSemantics(new TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics(
+          new TestSemantics.rootChild(
             id: expectedNodeId,
             flags: <SemanticsFlag>[
               SemanticsFlag.isTextField,
@@ -733,7 +733,7 @@ void main() {
             value: 'test',
             textSelection: new TextSelection.collapsed(offset: controller.text.length),
             textDirection: TextDirection.ltr,
-          )
+          ),
         ],
       ), ignoreRect: true, ignoreTransform: true));
 

@@ -332,7 +332,7 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-        new TestSemantics.root(
+        new TestSemantics(
           children: <TestSemantics>[
             new TestSemantics(
               label: 'Signed in\nname\nemail',
@@ -358,7 +358,7 @@ void main() {
                 ),
               ],
             ),
-          ]
+          ],
         ),
         ignoreId: true, ignoreTransform: true, ignoreRect: true,
       ),
@@ -379,7 +379,7 @@ void main() {
     expect(
       semantics,
       hasSemantics(
-        new TestSemantics.root(
+        new TestSemantics(
           children: <TestSemantics>[
             new TestSemantics(
               label: 'Signed in',

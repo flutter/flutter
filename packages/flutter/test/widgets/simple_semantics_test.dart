@@ -59,7 +59,7 @@ void main() {
           rect: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
           transform: new Matrix4.translationValues(395.0, 295.0, 0.0),
         )
-      ]
+      ],
     )));
 
     semantics.dispose();

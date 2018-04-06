@@ -289,7 +289,7 @@ void main() {
             SemanticsFlag.isButton,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isEnabled,
-          ]
+          ],
         ),
       ],
     ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
