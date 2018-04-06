@@ -14,32 +14,26 @@ def main():
   parser = argparse.ArgumentParser(description='Creates Flutter.framework')
 
   parser.add_argument('--dst', type=str, required=True)
-  # TODO(cbracken) eliminate --device-out-dir and make armv7-out-dir and
-  # arm64-out-dir required once bot recipe is updated.
-  parser.add_argument('--device-out-dir', type=str, required=False)
-  parser.add_argument('--arm64-out-dir', type=str, required=False)
-  parser.add_argument('--armv7-out-dir', type=str, required=False)
+  parser.add_argument('--arm64-out-dir', type=str, required=True)
+  parser.add_argument('--armv7-out-dir', type=str, required=True)
   parser.add_argument('--simulator-out-dir', type=str, required=True)
 
   args = parser.parse_args()
-  if not (args.arm64_out_dir or args.device_out_dir):
-    print 'One of --device-out-dir or --arm64-out-dir must be specified'
 
   fat_framework = os.path.join(args.dst, 'Flutter.framework')
-  arm64_framework = os.path.join(args.arm64_out_dir if args.arm64_out_dir else args.device_out_dir, 'Flutter.framework')
-  armv7_framework = os.path.join(args.armv7_out_dir, 'Flutter.framework') if args.armv7_out_dir else None
+  arm64_framework = os.path.join(args.arm64_out_dir, 'Flutter.framework')
+  armv7_framework = os.path.join(args.armv7_out_dir, 'Flutter.framework')
   simulator_framework = os.path.join(args.simulator_out_dir, 'Flutter.framework')
 
   arm64_dylib = os.path.join(arm64_framework, 'Flutter')
-  armv7_dylib = os.path.join(armv7_framework, 'Flutter') if args.armv7_out_dir else None
+  armv7_dylib = os.path.join(armv7_framework, 'Flutter')
   simulator_dylib = os.path.join(simulator_framework, 'Flutter')
 
   if not os.path.isdir(arm64_framework):
     print 'Cannot find iOS arm64 Framework at', arm64_framework
     return 1
 
-  # TODO(cbracken): require armv7 once bot recipe is updated.
-  if armv7_framework and not os.path.isdir(armv7_framework):
+  if not os.path.isdir(armv7_framework):
     print 'Cannot find iOS armv7 Framework at', armv7_framework
     return 1
 
@@ -51,8 +45,7 @@ def main():
     print 'Cannot find iOS arm64 dylib at', arm64_dylib
     return 1
 
-  # TODO(cbracken): require armv7 once bot recipe is updated.
-  if armv7_dylib and not os.path.isfile(armv7_dylib):
+  if not os.path.isfile(armv7_dylib):
     print 'Cannot find iOS armv7 dylib at', armv7_dylib
     return 1
 
@@ -63,12 +56,11 @@ def main():
   shutil.rmtree(fat_framework, True)
   shutil.copytree(arm64_framework, fat_framework)
 
-  # TODO(cbracken): require armv7 once bot recipe is updated.
-  dylibs = [arm64_dylib, simulator_dylib]
-  if armv7_dylib:
-    dylibs += [armv7_dylib]
-
-  subprocess.call(['lipo'] + dylibs + [
+  subprocess.call([
+    'lipo',
+    arm64_dylib,
+    armv7_dylib,
+    simulator_dylib,
     '-create',
     '-output',
     os.path.join(fat_framework, 'Flutter')
