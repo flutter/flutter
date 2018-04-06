@@ -1196,6 +1196,80 @@ class Paint {
   }
 }
 
+/// An encoding format to use with the [Image.toByteData].
+class EncodingFormat {
+  /// PNG format.
+  ///
+  /// A loss-less compression format for images. This format is well suited for
+  /// images with hard edges, such as screenshots or sprites, and images with
+  /// text. Transparency is supported. The PNG format supports images up to
+  /// 2,147,483,647 pixels in either dimension, though in practice available
+  /// memory provides a more immediate limitation on maximum image size.
+  ///
+  /// PNG images normally use the `.png` file extension and the `image/png` MIME
+  /// type.
+  ///
+  /// See also:
+  ///
+  ///  * <https://en.wikipedia.org/wiki/Portable_Network_Graphics>, the Wikipedia page on PNG.
+  ///  * <https://tools.ietf.org/rfc/rfc2083.txt>, the PNG standard.
+  const EncodingFormat.png()
+      : _format = _pngFormat,
+        _quality = 0;
+
+  /// JPEG format.
+  ///
+  /// This format, strictly speaking called JFIF, is a lossy compression
+  /// graphics format that can handle images up to 65,535 pixels in either
+  /// dimension. The [quality] metric is a value in the range 0 to 100 that
+  /// controls the compression ratio. Values in the range of about 50 to 90 are
+  /// somewhat reasonable; values above 95 increase the file size with little
+  /// noticeable improvement to the quality, values below 50 drop the quality
+  /// substantially.
+  ///
+  /// This format is well suited for photographs. It is very poorly suited for
+  /// images with hard edges or text. It does not support transparency.
+  ///
+  /// JPEG images normally use the `.jpeg` file extension and the `image/jpeg`
+  /// MIME type.
+  ///
+  /// See also:
+  ///
+  ///  * <https://en.wikipedia.org/wiki/JPEG>, the Wikipedia page on JPEG.
+  const EncodingFormat.jpeg({int quality = 80})
+      : _format = _jpegFormat,
+        _quality = quality;
+
+  /// WebP format.
+  ///
+  /// The WebP format supports both lossy and lossless compression; however, the
+  /// [Image.toByteData] method always uses lossy compression when [webp] is
+  /// specified. The [quality] metric is a value in the range 0 to 100 that
+  /// controls the compression ratio; higher values result in better quality but
+  /// larger file sizes, and vice versa. WebP images are limited to 16,383
+  /// pixels in each direction (width and height).
+  ///
+  /// WebP images normally use the `.webp` file extension and the `image/webp`
+  /// MIME type.
+  ///
+  /// See also:
+  ///
+  ///  * <https://en.wikipedia.org/wiki/WebP>, the Wikipedia page on WebP.
+  const EncodingFormat.webp({int quality = 80})
+      : _format = _webpFormat,
+        _quality = quality;
+
+  final int _format;
+  final int _quality;
+
+  // Be conservative with the formats we expose. It is easy to add new formats
+  // in future but difficult to remove.
+  // These values must be kept in sync with the logic in ToSkEncodedImageFormat.
+  static const int _jpegFormat = 0;
+  static const int _pngFormat = 1;
+  static const int _webpFormat = 2;
+}
+
 /// Opaque handle to raw decoded image data (pixels).
 ///
 /// To obtain an [Image] object, use [instantiateImageCodec].
@@ -1214,6 +1288,23 @@ class Image extends NativeFieldWrapperClass2 {
 
   /// The number of image pixels along the image's vertical axis.
   int get height native 'Image_height';
+
+  /// Converts the [Image] object into a byte array.
+  ///
+  /// The [format] is encoding format to be used.
+  ///
+  /// Returns a future which complete with the binary image data (e.g a PNG or JPEG binary data) or
+  /// an error if encoding fails.
+  Future<ByteData> toByteData({EncodingFormat format: const EncodingFormat.jpeg()}) {
+    return _futurize((_Callback<ByteData> callback) {
+      return _toByteData(format._format, format._quality, (Uint8List encoded) {
+        callback(encoded.buffer.asByteData());
+      });
+    });
+  }
+
+  /// Returns an error message on failure, null on success.
+  String _toByteData(int format, int quality, _Callback<Uint8List> callback) native 'Image_toByteData';
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.

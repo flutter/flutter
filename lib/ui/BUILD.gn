@@ -24,6 +24,8 @@ source_set("ui") {
     "painting/gradient.h",
     "painting/image.cc",
     "painting/image.h",
+    "painting/image_encoding.cc",
+    "painting/image_encoding.h",
     "painting/image_filter.cc",
     "painting/image_filter.h",
     "painting/image_shader.cc",
