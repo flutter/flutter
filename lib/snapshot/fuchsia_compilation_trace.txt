@@ -1845,6 +1845,7 @@ dart:ui,TextStyle,get:_fontSize
 dart:ui,TextStyle,get:_letterSpacing
 dart:ui,TextStyle,get:_wordSpacing
 dart:ui,TextStyle,get:_height
+dart:ui,TextStyle,get:_locale
 dart:ui,FilterQuality,get:index
 dart:ui,ParagraphStyle,ParagraphStyle.
 dart:ui,ParagraphStyle,get:_encoded
@@ -1852,6 +1853,7 @@ dart:ui,ParagraphStyle,get:_fontFamily
 dart:ui,ParagraphStyle,get:_fontSize
 dart:ui,ParagraphStyle,get:_lineHeight
 dart:ui,ParagraphStyle,get:_ellipsis
+dart:ui,ParagraphStyle,get:_locale
 dart:ui,_Jenkins,combine
 dart:ui,_Jenkins,finish
 dart:ui,_HashEnd,_HashEnd.

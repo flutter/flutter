@@ -45,6 +45,7 @@ class TextStyle {
   double letter_spacing = 0.0;
   double word_spacing = 0.0;
   double height = 1.0;
+  std::string locale;
 
   TextStyle();
 
