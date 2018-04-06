@@ -5,6 +5,7 @@
 #include "flutter/lib/ui/painting/image.h"
 
 #include "flutter/common/threads.h"
+#include "flutter/lib/ui/painting/image_encoding.h"
 #include "flutter/lib/ui/painting/utils.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
@@ -20,6 +21,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Image);
 #define FOR_EACH_BINDING(V) \
   V(Image, width)           \
   V(Image, height)          \
+  V(Image, toByteData)      \
   V(Image, dispose)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
@@ -34,6 +36,12 @@ CanvasImage::~CanvasImage() {
   // Skia objects must be deleted on the IO thread so that any associated GL
   // objects will be cleaned up through the IO thread's GL context.
   SkiaUnrefOnIOThread(&image_);
+}
+
+Dart_Handle CanvasImage::toByteData(int format,
+                                    int quality,
+                                    Dart_Handle callback) {
+  return EncodeImage(this, format, quality, callback);
 }
 
 void CanvasImage::dispose() {

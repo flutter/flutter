@@ -27,6 +27,7 @@ class CanvasImage final : public fxl::RefCountedThreadSafe<CanvasImage>,
 
   int width() { return image_->width(); }
   int height() { return image_->height(); }
+  Dart_Handle toByteData(int format, int quality, Dart_Handle callback);
   void dispose();
 
   const sk_sp<SkImage>& image() const { return image_; }
