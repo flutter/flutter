@@ -74,14 +74,17 @@ class OnTapPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(title: new Text('Page $id')),
-      body: new GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: new Container(
-          child: new Center(
-            child: new Text(id, style: Theme.of(context).textTheme.display2),
+    return new RouteName(
+      name: id,
+      child: new Scaffold(
+        appBar: new AppBar(title: new Text('Page $id')),
+        body: new GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: new Container(
+            child: new Center(
+              child: new Text(id, style: Theme.of(context).textTheme.display2),
+            ),
           ),
         ),
       ),
@@ -786,7 +789,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(routes: routes));
 
     expect(semantics, includesNodeWith(
-      value: 'home',
+      value: '/',
       flags: <SemanticsFlag>[SemanticsFlag.isRoute],
     ));
 
@@ -804,7 +807,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(semantics, includesNodeWith(
-      value: 'C',
+      value: 'B',
       flags: <SemanticsFlag>[SemanticsFlag.isRoute],
     ));
 

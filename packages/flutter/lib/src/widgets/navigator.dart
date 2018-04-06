@@ -35,24 +35,6 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// [ModalRoute.removeScopedWillPopCallback], and [WillPopScope].
 typedef Future<bool> WillPopCallback();
 
-/// Signature for a callback which creates a name for each route for the
-/// platform accessibility framework.
-typedef String RouteAccessibilityNameCallback(String routeName, bool isInitialRoute);
-
-/// The default [RouteAccessibilityNameCallback] used in the navigator.
-String _kDefaultAccessibilityNameCallback(String name, bool isInitialRoute) {
-  if (defaultTargetPlatform == TargetPlatform.iOS)
-    return '';
-  if (isInitialRoute)
-    return 'home';
-  if (name.contains('/')) {
-    return name
-      .split('/')
-      .lastWhere((String chunk) => chunk?.isNotEmpty == true, orElse: () => '');
-  }
-  return name;
-}
-
 /// Indicates whether the current route should be popped.
 ///
 /// Used as the return value for [Route.willPop].
@@ -306,7 +288,6 @@ class RouteSettings {
   /// Creates data used to construct routes.
   const RouteSettings({
     this.name,
-    this.accessibilityName,
     this.isInitialRoute: false,
   });
 
@@ -315,12 +296,10 @@ class RouteSettings {
   RouteSettings copyWith({
     String name,
     bool isInitialRoute,
-    String accessibilityName,
   }) {
     return new RouteSettings(
       name: name ?? this.name,
       isInitialRoute: isInitialRoute ?? this.isInitialRoute,
-      accessibilityName: accessibilityName ?? this.accessibilityName,
     );
   }
 
@@ -333,17 +312,6 @@ class RouteSettings {
   ///
   /// The initial route typically skips any entrance transition to speed startup.
   final bool isInitialRoute;
-
-  /// The semantic value for the route transition used by accessibility
-  /// frameworks. (e.g., "settings"),
-  ///
-  /// On iOS, the route name is ignored by default.
-  ///
-  /// See also:
-  ///
-  ///   * [Semantics.route] the semantics flag which controls screen
-  ///     accessibility.
-  final String accessibilityName;
 
   @override
   String toString() => '"$name"';
@@ -593,7 +561,6 @@ class Navigator extends StatefulWidget {
     this.initialRoute,
     @required this.onGenerateRoute,
     this.onUnknownRoute,
-    this.generateAccessibility = _kDefaultAccessibilityNameCallback,
     this.observers: const <NavigatorObserver>[]
   }) : assert(onGenerateRoute != null),
        super(key: key);
@@ -627,20 +594,6 @@ class Navigator extends StatefulWidget {
 
   /// A list of observers for this navigator.
   final List<NavigatorObserver> observers;
-
-  /// Called by the navigator to generate the semantic route name for
-  /// accessibility frameworks.
-  ///
-  /// By default, will return the empty string for iOS routes. On Android, the
-  /// initial route is named "home".  Subsequent route names are split on "/"
-  /// and the last piece is returned. For example, "home/login" will produce
-  /// a route name of "login."  Trailing and leading slashes are ignored.
-  ///
-  /// See also:
-  ///
-  ///   * [Semantics.route], the semantics flag which controls screen
-  ///     accessibility.
-  final RouteAccessibilityNameCallback generateAccessibility;
 
   /// The default name for the [initialRoute].
   ///
@@ -1355,11 +1308,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Route<T> _routeNamed<T>(String name, { bool allowNull: false }) {
     assert(!_debugLocked);
     assert(name != null);
-    final bool isInitialRoute = _history.isEmpty;
     final RouteSettings settings = new RouteSettings(
       name: name,
-      isInitialRoute: isInitialRoute,
-      accessibilityName: widget.generateAccessibility(name, isInitialRoute),
+      isInitialRoute: _history.isEmpty,
     );
     Route<T> route = widget.onGenerateRoute(settings);
     if (route == null && !allowNull) {

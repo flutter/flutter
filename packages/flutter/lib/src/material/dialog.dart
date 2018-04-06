@@ -19,9 +19,6 @@ import 'theme.dart';
 // Examples can assume:
 // enum Department { treasury, state }
 
-/// The default for the [SemanticsProperty.value] of a dialog.
-const String _kDefaultAlertDialogValue = 'alert';
-
 /// A material design dialog.
 ///
 /// This dialog widget does not have any opinion about the contents of the
@@ -86,7 +83,11 @@ class Dialog extends StatelessWidget {
               elevation: 24.0,
               color: _getColor(context),
               type: MaterialType.card,
-              child: child,
+              child: new Semantics(
+                route: true,
+                explicitChildNodes: true,
+                child: child,
+              ),
             ),
           ),
         ),
@@ -169,7 +170,6 @@ class AlertDialog extends StatelessWidget {
     this.content,
     this.contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
     this.actions,
-    this.routeName = _kDefaultAlertDialogValue,
   }) : assert(contentPadding != null),
        super(key: key);
 
@@ -220,19 +220,6 @@ class AlertDialog extends StatelessWidget {
   /// from the [actions].
   final List<Widget> actions;
 
-  /// An (optional) name for the dialog used by accessibility frameworks.
-  ///
-  /// Defaults to "alert" on both iOS and Android.
-  ///
-  /// This name is announced by TalkBack or VoiceOver when the dialog becomes
-  /// visible. For example, "App permissions" for a dialog containing permission
-  /// information.
-  ///
-  /// See also:
-  ///   * [Semantics.route], the semantics flag which controls screen
-  ///     accessibility.
-  final String routeName;
-
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
@@ -269,14 +256,10 @@ class AlertDialog extends StatelessWidget {
 
     return new Dialog(
       child: new IntrinsicWidth(
-        child: new Semantics(
-          route: true,
-          value: routeName,
-          child: new Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: children,
-          ),
+        child: new Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
         ),
       ),
     );

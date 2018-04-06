@@ -622,17 +622,9 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-            flags: <SemanticsFlag>[
-              SemanticsFlag.isRoute,
-            ],
-            value: 'home',
-            children: <TestSemantics>[
-              new TestSemantics(
-                id: 2,
-                label: 'Foo\nBar',
-                textDirection: TextDirection.ltr,
-              )
-            ]
+          id: 2,
+          label: 'Foo\nBar',
+          textDirection: TextDirection.ltr,
         ),
       ],
     ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
@@ -657,18 +649,10 @@ void main() {
 
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
-          flags: <SemanticsFlag>[
-            SemanticsFlag.isRoute,
-          ],
-          value: 'home',
-          children: <TestSemantics>[
-            new TestSemantics(
-              id: 2,
-              label: 'Bar',
-              textDirection: TextDirection.ltr,
-            )
-          ]
+        new TestSemantics(
+          id: 2,
+          label: 'Bar',
+          textDirection: TextDirection.ltr,
         ),
       ],
     ), ignoreRect: true, ignoreId: true, ignoreTransform: true));

@@ -287,9 +287,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Drawer contains route semantics flag and default value on Android', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.android;
-
+  testWidgets('Drawer contains route semantics flags', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -312,41 +310,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute], value: 'navigation menu'));
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute]));
 
     semantics.dispose();
-    debugDefaultTargetPlatformOverride = null;
-  });
-
-  testWidgets('Drawer contains route semantics flag and no default value on iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
-    final SemanticsTester semantics = new SemanticsTester(tester);
-    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
-
-    await tester.pumpWidget(
-      new MaterialApp(
-        home: new Builder(
-          builder: (BuildContext context) {
-            return new Scaffold(
-              key: scaffoldKey,
-              drawer: const Drawer(),
-              body: new Container(),
-            );
-          },
-        ),
-      ),
-    );
-
-    // Open the drawer.
-    scaffoldKey.currentState.openDrawer();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(semantics, isNot(includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute], value: 'navigation menu')));
-
-    semantics.dispose();
-    debugDefaultTargetPlatformOverride = null;
   });
 }
 

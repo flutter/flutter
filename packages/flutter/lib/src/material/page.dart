@@ -151,12 +151,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget result = new Semantics(
-      route: true,
-      explicitChildNodes: true,
-      value: settings.accessibilityName,
-      child: builder(context),
-    );
+    final Widget result = builder(context);
     assert(() {
       if (result == null) {
         throw new FlutterError(
