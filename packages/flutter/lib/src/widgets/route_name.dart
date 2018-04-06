@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-/// A widget which provides a semantic name route name for accessibility
-/// frameworks.
+/// A widget which provides a semantic name route name.
 ///
 /// See also:
 ///
@@ -27,8 +26,6 @@ class RouteName extends StatelessWidget {
   final Widget child;
 
   /// A semantic name for the route.
-  ///
-  /// This value is ignored on iOS platforms.
   final String name;
 
   @override
@@ -36,7 +33,7 @@ class RouteName extends StatelessWidget {
     return new Semantics(
       route: true,
       explicitChildNodes: true,
-      value: defaultTargetPlatform != TargetPlatform.iOS ? name : '',
+      value: name,
       child: child,
     );
   }
