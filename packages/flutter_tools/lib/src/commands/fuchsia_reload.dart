@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -355,11 +356,16 @@ class FuchsiaReloadCommand extends FlutterCommand {
     return <String>[path, name];
   }
 
-  Future<List<_PortForwarder>> _forwardPorts(List<int> remotePorts) {
+  Future<List<_PortForwarder>> _forwardPorts(List<int> remotePorts) async {
     final String config = '$_buildDir/ssh-keys/ssh_config';
-    return Future.wait(remotePorts.map((int remotePort) {
-      return _PortForwarder.start(config, _address, remotePort);
-    }));
+    final List<_PortForwarder> forwarders = <_PortForwarder>[];
+    for (int port in remotePorts) {
+      final _PortForwarder f =
+          await _PortForwarder.start(config, _address, port);
+      forwarders.add(f);
+      await new Future.delayed(const Duration(milliseconds:5000));
+    }
+    return forwarders;
   }
 
   Future<List<int>> _getServicePorts() async {
@@ -421,10 +427,14 @@ class _PortForwarder {
       return new _PortForwarder._(null, 0, 0, null, null);
     }
     final List<String> command = <String>[
-        'ssh', '-F', sshConfig, '-nNT',
+        'ssh', '-F', sshConfig, '-nNT', '-vvv',
         '-L', '$localPort:$ipv4Loopback:$remotePort', address];
     printTrace("_PortForwarder running '${command.join(' ')}'");
     final Process process = await processManager.start(command);
+    process.stderr
+        .transform(utf8.decoder)
+        .transform(new LineSplitter())
+        .listen((data) { printTrace(data); });
     process.exitCode.then((int c) {
       printTrace("'${command.join(' ')}' exited with exit code $c");
     });
@@ -440,7 +450,7 @@ class _PortForwarder {
     }
     // Cancel the forwarding request.
     final List<String> command = <String>[
-        'ssh', '-F', _sshConfig, '-O', 'cancel',
+        'ssh', '-F', _sshConfig, '-O', 'cancel', '-vvv',
         '-L', '$_localPort:$ipv4Loopback:$_remotePort', _remoteAddress];
     final ProcessResult result = await processManager.run(command);
     printTrace(command.join(' '));
