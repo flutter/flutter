@@ -197,4 +197,53 @@ void main() {
     expect(confirmCount, 0);
     expect(cancelCount, 2);
   });
+
+  testWidgets('Tap and no focus does not cause a splash when splash disabled', (WidgetTester tester) async {
+    final Key textField1 = new UniqueKey();
+    final Key textField2 = new UniqueKey();
+
+    await tester.pumpWidget(
+        new MaterialApp(
+          home: new Theme(
+            data: new ThemeData.light().copyWith(splashFactory: const TestInkSplashFactory()),
+            child: new Material(
+              child: new Container(
+                alignment: Alignment.topLeft,
+                child: new Column(
+                  children: <Widget>[
+                    new TextField(
+                      key: textField1,
+                      decoration: const InputDecoration(
+                        labelText: 'label',
+                      ),
+                    ),
+                    new TextField(
+                      key: textField2,
+                      splashOnTap: false,
+                      decoration: const InputDecoration(
+                        labelText: 'label',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        )
+    );
+
+    confirmCount = 0;
+    cancelCount = 0;
+
+    await tester.tap(find.byKey(textField1));
+    await tester.pumpAndSettle();
+    expect(confirmCount, 1);
+    expect(cancelCount, 0);
+
+    // textField2 gets the focus but no splash
+    await tester.tap(find.byKey(textField2));
+    await tester.pumpAndSettle();
+    expect(confirmCount, 1);
+    expect(cancelCount, 0);
+  });
 }
