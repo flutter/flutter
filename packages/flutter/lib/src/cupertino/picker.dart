@@ -32,12 +32,10 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 class CupertinoPicker extends StatefulWidget {
   /// Creates a control used for selecting values.
   ///
-  /// The [diameterRatio] and [itemExtent] arguments must not be null. The
+  /// The [backgroundColor], [diameterRatio] and [itemExtent] arguments must not be null. The
   /// [itemExtent] must be greater than zero.
   ///
-  /// The [backgroundColor] defaults to light gray. It can be set to null to
-  /// disable the background painting entirely; this is mildly more efficient
-  /// than using [Colors.transparent].
+  /// The [backgroundColor] defaults to light gray.
   const CupertinoPicker({
     Key key,
     this.diameterRatio: _kDefaultDiameterRatio,
@@ -46,7 +44,8 @@ class CupertinoPicker extends StatefulWidget {
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required this.children,
-  }) : assert(diameterRatio != null),
+  }) : assert(backgroundColor != null),
+       assert(diameterRatio != null),
        assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(itemExtent != null),
        assert(itemExtent > 0),
@@ -64,9 +63,6 @@ class CupertinoPicker extends StatefulWidget {
   /// Background color behind the children.
   ///
   /// Defaults to a gray color in the iOS color palette.
-  ///
-  /// This can be set to null to disable the background painting entirely; this
-  /// is mildly more efficient than using [Colors.transparent].
   final Color backgroundColor;
 
   /// A [FixedExtentScrollController] to read and control the current item.
@@ -113,22 +109,22 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     }
   }
 
-  /// Makes the fade to white edge gradients.
+  /// Makes the fade to edge gradients according to the background color.
   Widget _buildGradientScreen() {
     return new Positioned.fill(
       child: new IgnorePointer(
         child: new Container(
-          decoration: const BoxDecoration(
-            gradient: const LinearGradient(
-              colors: const <Color>[
-                const Color(0xFFFFFFFF),
-                const Color(0xF2FFFFFF),
-                const Color(0xDDFFFFFF),
-                const Color(0x00FFFFFF),
-                const Color(0x00FFFFFF),
-                const Color(0xDDFFFFFF),
-                const Color(0xF2FFFFFF),
-                const Color(0xFFFFFFFF),
+          decoration: new BoxDecoration(
+            gradient: new LinearGradient(
+              colors: <Color>[
+                widget.backgroundColor,
+                widget.backgroundColor.withAlpha(0xF2),
+                widget.backgroundColor.withAlpha(0xDD),
+                widget.backgroundColor.withAlpha(0x00),
+                widget.backgroundColor.withAlpha(0x00),
+                widget.backgroundColor.withAlpha(0xDD),
+                widget.backgroundColor.withAlpha(0xF2),
+                widget.backgroundColor,
               ],
               stops: const <double>[
                 0.0, 0.05, 0.09, 0.22, 0.78, 0.91, 0.95, 1.0,
