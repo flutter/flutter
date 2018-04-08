@@ -396,15 +396,13 @@ class _RectangleDemoState extends State<_RectangleDemo> {
   }
 }
 
-typedef Widget _DemoBuilder(_ArcDemo demo);
-
 class _ArcDemo {
   _ArcDemo(this.title, this.builder, TickerProvider vsync)
     : controller = new AnimationController(duration: const Duration(milliseconds: 500), vsync: vsync),
       key = new GlobalKey(debugLabel: title);
 
   final String title;
-  final _DemoBuilder builder;
+  final Widget Function(_ArcDemo demo) builder;
   final AnimationController controller;
   final GlobalKey key;
 }

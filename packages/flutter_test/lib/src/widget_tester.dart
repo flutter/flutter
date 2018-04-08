@@ -550,12 +550,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 }
 
-typedef void _TickerDisposeCallback(_TestTicker ticker);
-
 class _TestTicker extends Ticker {
   _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);
 
-  _TickerDisposeCallback _onDispose;
+  void Function(_TestTicker ticker) _onDispose;
 
   @override
   void dispose() {

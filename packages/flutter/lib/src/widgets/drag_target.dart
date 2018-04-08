@@ -462,7 +462,6 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
 }
 
 enum _DragEndKind { dropped, canceled }
-typedef void _OnDragEnd(Velocity velocity, Offset offset, bool wasAccepted);
 
 // The lifetime of this object is a little dubious right now. Specifically, it
 // lives as long as the pointer is down. Arguably it should self-immolate if the
@@ -490,7 +489,7 @@ class _DragAvatar<T> extends Drag {
   final Offset dragStartPoint;
   final Widget feedback;
   final Offset feedbackOffset;
-  final _OnDragEnd onDragEnd;
+  final void Function(Velocity velocity, Offset offset, bool wasAccepted) onDragEnd;
   final OverlayState overlayState;
 
   _DragTargetState<T> _activeTarget;

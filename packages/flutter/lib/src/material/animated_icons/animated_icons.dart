@@ -284,7 +284,11 @@ class _PathClose extends _PathCommand {
 // not be smooth enough we can try applying spline instead.
 //
 // [progress] is expected to be between 0.0 and 1.0.
-T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator) {
+T _interpolate<T>(
+  List<T> values,
+  double progress,
+  T Function(T a, T b, double progress) interpolator,
+) {
   assert(progress <= 1.0);
   assert(progress >= 0.0);
   if (values.length == 1)
@@ -295,5 +299,3 @@ T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator
   final double t = targetIdx - lowIdx;
   return interpolator(values[lowIdx], values[highIdx], t);
 }
-
-typedef T _Interpolator<T>(T a, T b, double progress);

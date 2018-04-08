@@ -455,8 +455,6 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
   final double correctionOffset;
 }
 
-typedef ScrollActivity _NestedScrollActivityGetter(_NestedScrollPosition position);
-
 class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldController {
   _NestedScrollCoordinator(this._state, this._parent, this._onHasScrolledBodyChanged) {
     final double initialScrollOffset = _parent?.initialScrollOffset ?? 0.0;
@@ -516,7 +514,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   ScrollDragController _currentDrag;
 
-  void beginActivity(ScrollActivity newOuterActivity, _NestedScrollActivityGetter innerActivityGetter) {
+  void beginActivity(
+    ScrollActivity newOuterActivity,
+    ScrollActivity Function(_NestedScrollPosition position) innerActivityGetter,
+  ) {
     _outerPosition.beginActivity(newOuterActivity);
     bool scrolling = newOuterActivity.isScrolling;
     for (_NestedScrollPosition position in _innerPositions) {

@@ -20,8 +20,6 @@ import 'transitions.dart';
 /// [MaterialRectArcTween].
 typedef Tween<Rect> CreateRectTween(Rect begin, Rect end);
 
-typedef void _OnFlightEnded(_HeroFlight flight);
-
 enum _HeroFlightType {
   push, // Fly the "to" hero and animate with the "to" route.
   pop, // Fly the "to" hero and animate with the "from" route.
@@ -236,7 +234,7 @@ class _HeroFlight {
     _proxyAnimation = new ProxyAnimation()..addStatusListener(_handleAnimationUpdate);
   }
 
-  final _OnFlightEnded onFlightEnded;
+  final void Function(_HeroFlight flight) onFlightEnded;
 
   Tween<Rect> heroRect;
   Animation<double> _heroOpacity = kAlwaysCompleteAnimation;

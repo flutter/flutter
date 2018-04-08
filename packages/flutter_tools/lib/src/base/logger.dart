@@ -53,8 +53,6 @@ abstract class Logger {
   });
 }
 
-typedef void _FinishCallback();
-
 class StdoutLogger extends Logger {
 
   Status _status;
@@ -357,7 +355,7 @@ class AnsiStatus extends AnsiSpinner {
 
   final String message;
   final bool expectSlowOperation;
-  final _FinishCallback onFinish;
+  final void Function() onFinish;
   final int padding;
 
   Stopwatch stopwatch;

@@ -212,8 +212,6 @@ bool _startIsTopLeft(Axis direction, TextDirection textDirection, VerticalDirect
   return null;
 }
 
-typedef double _ChildSizingFunction(RenderBox child, double extent);
-
 /// Displays its children in a one-dimensional array.
 ///
 /// ## Layout algorithm
@@ -480,7 +478,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   double _getIntrinsicSize({
     Axis sizingDirection,
     double extent, // the extent in the direction that isn't the sizing direction
-    _ChildSizingFunction childSize // a method to find the size in the sizing direction
+    double Function(RenderBox child, double extent) childSize, // a method to find the size in the sizing direction
   }) {
     if (_direction == sizingDirection) {
       // INTRINSIC MAIN SIZE
