@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 
-import 'package:meta/meta.dart' show required;
+import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
 import 'android/android_sdk.dart';
@@ -321,6 +322,8 @@ class ApkManifestData {
     // launchable-activity: name='io.flutter.app.FlutterActivity'  label='' icon=''
     final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
 
+    final RegExp keyValueRegex = new RegExp(r"(\S+?)='(.*?)'");
+
     for (String line in data.split('\n')) {
       final int index = line.indexOf(':');
       if (index != -1) {
@@ -330,16 +333,8 @@ class ApkManifestData {
         final Map<String, String> entries = <String, String>{};
         map[name] = entries;
 
-        for (String entry in line.split(' ')) {
-          entry = entry.trim();
-          if (entry.isNotEmpty && entry.contains('=')) {
-            final int split = entry.indexOf('=');
-            final String key = entry.substring(0, split);
-            String value = entry.substring(split + 1);
-            if (value.startsWith("'") && value.endsWith("'"))
-              value = value.substring(1, value.length - 1);
-            entries[key] = value;
-          }
+        for (Match m in keyValueRegex.allMatches(line)) {
+          entries[m.group(1)] = m.group(2);
         }
       }
     }
@@ -348,6 +343,10 @@ class ApkManifestData {
   }
 
   final Map<String, Map<String, String>> _data;
+
+  @visibleForTesting
+  Map<String, Map<String, String>> get data =>
+      new UnmodifiableMapView<String, Map<String, String>>(_data);
 
   String get packageName => _data['package'] == null ? null : _data['package']['name'];
 

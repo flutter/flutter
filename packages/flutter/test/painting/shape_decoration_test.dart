@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -121,4 +123,9 @@ class TestImage implements ui.Image {
 
   @override
   void dispose() { }
+
+  @override
+  Future<ByteData> toByteData({ui.EncodingFormat format}) async {
+    throw new UnsupportedError('Cannot encode test image');
+  }
 }

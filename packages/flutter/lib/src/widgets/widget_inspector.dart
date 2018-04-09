@@ -564,10 +564,8 @@ class _WidgetInspectorState extends State<WidgetInspector>
     Matrix4 transform,
   ) {
     bool hit = false;
-    Matrix4 inverse;
-    try {
-      inverse = new Matrix4.inverted(transform);
-    } on ArgumentError {
+    final Matrix4 inverse = Matrix4.tryInvert(transform);
+    if (inverse == null) {
       // We cannot invert the transform. That means the object doesn't appear on
       // screen and cannot be hit.
       return false;
