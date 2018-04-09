@@ -81,7 +81,7 @@ dependencies:
 
 dev_dependencies:
   collection: 1.14.6
-  mockito: 3.0.0-alpha+2
+  mockito: 3.0.0-alpha+3
 
 dartdoc:
   # Exclude this package from the hosted API docs.
@@ -95,4 +95,4 @@ dependency_overrides:
   kernel:
     path: ../../bin/cache/dart-sdk/lib/kernel
 
-# PUBSPEC CHECKSUM: 7834
+# PUBSPEC CHECKSUM: 9735
