@@ -9,6 +9,10 @@ profile
 
 DerivedData/
 build/
+GeneratedPluginRegistrant.h
+GeneratedPluginRegistrant.m
+
+.generated/
 
 *.pbxuser
 *.mode1v3
@@ -29,3 +33,4 @@ xcuserdata
 Icon?
 .tags*
 
+/Flutter/Generated.xcconfig
