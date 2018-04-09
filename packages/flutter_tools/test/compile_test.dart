@@ -35,7 +35,7 @@ void main() {
       when(mockProcessManager.canRun(any)).thenReturn(true);
       when(mockProcessManager.start(any)).thenAnswer(
           (Invocation invocation) => new Future<Process>.value(mockFrontendServer));
-      when(mockFrontendServer.exitCode).thenReturn(0);
+      when(mockFrontendServer.exitCode).thenAnswer((_) async => 0);
     });
 
     testUsingContext('single dart successful compilation', () async {
@@ -77,7 +77,7 @@ void main() {
     });
 
     testUsingContext('single dart abnormal compiler termination', () async {
-      when(mockFrontendServer.exitCode).thenReturn(255);
+      when(mockFrontendServer.exitCode).thenAnswer((_) async => 255);
 
       final BufferLogger logger = context[Logger];
 
