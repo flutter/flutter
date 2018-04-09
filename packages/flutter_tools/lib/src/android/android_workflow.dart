@@ -245,9 +245,10 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
 
   static void _ensureCanRunSdkManager() {
     assert(androidSdk != null);
-    if (!processManager.canRun(androidSdk.sdkManagerPath))
+    final String sdkManagerPath = androidSdk.sdkManagerPath;
+    if (!processManager.canRun(sdkManagerPath))
       throwToolExit(
-        'Android sdkmanager tool not found.\n'
+        'Android sdkmanager tool not found ($sdkManagerPath).\n'
         'Try re-installing or updating your Android SDK,\n'
         'visit https://flutter.io/setup/#android-setup for detailed instructions.'
       );
