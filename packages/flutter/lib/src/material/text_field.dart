@@ -90,8 +90,8 @@ class TextField extends StatefulWidget {
   /// characters may be entered, and the error counter and divider will
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
-  /// The [keyboardType], [textAlign], [autofocus], [obscureText], and
-  /// [autocorrect] arguments must not be null.
+  /// The [keyboardType], [textAlign], [autofocus], [obscureText],[autocorrect],
+  /// and [splashOnTap] arguments must not be null.
   ///
   /// See also:
   ///
@@ -108,6 +108,7 @@ class TextField extends StatefulWidget {
     this.autofocus: false,
     this.obscureText: false,
     this.autocorrect: true,
+    this.splashOnTap: true,
     this.maxLines: 1,
     this.maxLength,
     this.maxLengthEnforced: true,
@@ -120,6 +121,7 @@ class TextField extends StatefulWidget {
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(splashOnTap != null),
        assert(maxLengthEnforced != null),
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
@@ -187,6 +189,11 @@ class TextField extends StatefulWidget {
   ///
   /// Defaults to true. Cannot be null.
   final bool autocorrect;
+
+  /// Whether to show splash effect on tap (only on focus).
+  ///
+  /// Defaults to true. Cannot be null.
+  final bool splashOnTap;
 
   /// The maximum number of lines for the text to span, wrapping if necessary.
   ///
@@ -286,6 +293,7 @@ class TextField extends StatefulWidget {
     properties.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
+    properties.add(new DiagnosticsProperty<bool>('splashOnTap', splashOnTap, defaultValue: true));
     properties.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(new IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(new FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
@@ -397,7 +405,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   void _handleTapDown(TapDownDetails details) {
     _renderEditable.handleTapDown(details);
-    _startSplash(details);
+    if (widget.splashOnTap) {
+      _startSplash(details);
+    }
   }
 
   void _handleTap() {
