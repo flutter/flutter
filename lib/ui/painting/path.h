@@ -10,6 +10,7 @@
 #include "lib/tonic/typed_data/float32_list.h"
 #include "lib/tonic/typed_data/float64_list.h"
 #include "third_party/skia/include/core/SkPath.h"
+#include "third_party/skia/include/pathops/SkPathOps.h"
 
 namespace tonic {
 class DartLibraryNatives;
@@ -26,6 +27,12 @@ class CanvasPath : public fxl::RefCountedThreadSafe<CanvasPath>,
   ~CanvasPath() override;
   static fxl::RefPtr<CanvasPath> Create() {
     return fxl::MakeRefCounted<CanvasPath>();
+  }
+
+  static fxl::RefPtr<CanvasPath> CreateFrom(const SkPath& src) {
+    fxl::RefPtr<CanvasPath> path = CanvasPath::Create();
+    path->path_ = src;
+    return path;
   }
 
   int getFillType();
@@ -78,12 +85,23 @@ class CanvasPath : public fxl::RefCountedThreadSafe<CanvasPath>,
   void addPolygon(const tonic::Float32List& points, bool close);
   void addRRect(const RRect& rrect);
   void addPath(CanvasPath* path, double dx, double dy);
+  void addPathWithMatrix(CanvasPath* path, 
+                         double dx, 
+                         double dy, 
+                         tonic::Float64List& matrix4);
   void extendWithPath(CanvasPath* path, double dx, double dy);
+  void extendWithPathAndMatrix(CanvasPath* path, 
+                               double dx, 
+                               double dy, 
+                               tonic::Float64List& matrix4);
   void close();
   void reset();
   bool contains(double x, double y);
   fxl::RefPtr<CanvasPath> shift(double dx, double dy);
   fxl::RefPtr<CanvasPath> transform(tonic::Float64List& matrix4);
+  tonic::Float32List getBounds();
+  bool op(CanvasPath* path1, CanvasPath* path2, int operation);
+  fxl::RefPtr<CanvasPath> clone();
 
   const SkPath& path() const { return path_; }
 
