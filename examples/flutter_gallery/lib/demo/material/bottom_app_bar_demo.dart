@@ -283,16 +283,7 @@ class _DemoBottomAppBar extends StatelessWidget {
               showModalBottomSheet<Null>(context: context, builder: (BuildContext context) => const _DemoDrawer());
             },
           ),
-          new Expanded(
-            child: new AnimatedCrossFade(
-              duration: const Duration(milliseconds: 225),
-              firstChild: buildBabContents(context, _BabMode.END_FAB),
-              firstCurve: showsFirst ? fadeOutCurve  : fadeInCurve,
-              secondChild: buildBabContents(context, _BabMode.CENTER_FAB),
-              secondCurve: showsFirst ? fadeInCurve  : fadeOutCurve,
-              crossFadeState: showsFirst ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-            ),
-          ),
+          buildBabContents(context, _BabMode.END_FAB),
         ],
       ),
     );
