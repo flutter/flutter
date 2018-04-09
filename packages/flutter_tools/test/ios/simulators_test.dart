@@ -306,8 +306,7 @@ void main() {
         when(mockProcess.exitCode)
             .thenAnswer((Invocation invocation) => new Future<int>.delayed(Duration.zero, () => 0));
         return new Future<Process>.value(mockProcess);
-      })
-          .thenThrow(new TestFailure('Should start one process only'));
+      });
 
       final IOSSimulator device = new IOSSimulator('123456', category: 'iOS 11.0');
       final DeviceLogReader logReader = device.getLogReader(

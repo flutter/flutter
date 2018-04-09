@@ -130,7 +130,7 @@ void main() {
             ))
           ));
       when(mockProcess.stderr).thenAnswer((Invocation invocation) => mockStdErr);
-      when(mockProcess.exitCode).thenReturn(0);
+      when(mockProcess.exitCode).thenAnswer((_) async => 0);
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
@@ -185,7 +185,7 @@ void main() {
             ))
           ));
       when(mockProcess.stderr).thenAnswer((Invocation invocation) => mockStdErr);
-      when(mockProcess.exitCode).thenReturn(0);
+      when(mockProcess.exitCode).thenAnswer((_) async => 0);
 
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
