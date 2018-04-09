@@ -16,7 +16,7 @@ import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
-import '../test/flutter_platform.dart' as loader;
+import 'flutter_platform.dart' as loader;
 import 'watcher.dart';
 
 /// Runs tests using package:test and the Flutter engine.

@@ -66,8 +66,7 @@ void installHook({
   int observatoryPort,
   InternetAddressType serverType: InternetAddressType.IP_V4,
 }) {
-  if (startPaused || observatoryPort != null)
-    assert(enableObservatory);
+  assert(!enableObservatory || (!startPaused && observatoryPort == null));
   hack.registerPlatformPlugin(
     <Runtime>[Runtime.vm],
     () => new _FlutterPlatform(
@@ -705,7 +704,6 @@ void main() {
       '--enable-dart-profiling',
       '--non-interactive',
       '--use-test-fonts',
-      // '--enable-txt', // enable this to test libtxt rendering
       '--packages=$packages',
       testPath,
     ]);
