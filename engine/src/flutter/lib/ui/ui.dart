@@ -13,7 +13,6 @@ library dart.ui;
 
 import 'dart:_internal' hide Symbol;
 import 'dart:async';
-import 'dart:collection' as collection;
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;

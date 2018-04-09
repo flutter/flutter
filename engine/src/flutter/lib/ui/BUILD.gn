@@ -36,8 +36,6 @@ source_set("ui") {
     "painting/paint.h",
     "painting/path.cc",
     "painting/path.h",
-    "painting/path_measure.cc",
-    "painting/path_measure.h",
     "painting/picture.cc",
     "painting/picture.h",
     "painting/picture_recorder.cc",
