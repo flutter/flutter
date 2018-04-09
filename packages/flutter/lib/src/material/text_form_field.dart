@@ -60,6 +60,7 @@ class TextFormField extends FormField<String> {
     bool autofocus: false,
     bool obscureText: false,
     bool autocorrect: true,
+    bool autovalidate: false,
     bool maxLengthEnforced: true,
     int maxLines: 1,
     int maxLength,
@@ -74,6 +75,7 @@ class TextFormField extends FormField<String> {
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(autovalidate != null),
        assert(maxLengthEnforced != null),
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
@@ -82,6 +84,7 @@ class TextFormField extends FormField<String> {
     initialValue: controller != null ? controller.text : (initialValue ?? ''),
     onSaved: onSaved,
     validator: validator,
+    autovalidate: autovalidate,
     builder: (FormFieldState<String> field) {
       final _TextFormFieldState state = field;
       final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
