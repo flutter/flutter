@@ -21,6 +21,14 @@ import 'theme_data.dart';
 ///
 /// See also:
 ///
+///  * [Chip], a chip that displays information and can be deleted.
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
+///  * [ChoiceChip], allows a single selection from a set of options. Choice
+///    chips contain related descriptive text or categories.
+///  * [FilterChip], uses tags or descriptive words as a way to filter content.
+///  * [ActionChip], represents an action related to primary content.
 ///  * [ChipThemeData], which describes the actual configuration of a chip
 ///    theme.
 class ChipTheme extends InheritedWidget {
@@ -47,14 +55,14 @@ class ChipTheme extends InheritedWidget {
   /// ## Sample code
   ///
   /// ```dart
-  /// class Launch extends StatelessWidget {
+  /// class Spaceship extends StatelessWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return new ChipTheme(
   ///       data: ChipTheme.of(context).copyWith(backgroundColor: const Color(0xff804040)),
   ///       child: new ActionChip(
-  ///         onPressed: () { print('Launch!'); },
-  ///         value: _rocketThrust,
+  ///         label: const Text('Launch'),
+  ///         onPressed: () { print('We have liftoff!'); },
   ///       ),
   ///     );
   ///   }
@@ -85,15 +93,26 @@ class ChipTheme extends InheritedWidget {
 /// The parts of a chip are:
 ///
 ///  * The "avatar", which is a widget that appears at the beginning of the
-///    chip.
-///  * The "label", which is the widget displayed in the center of the chip,
-///    typically this is a [Text] widget.
+///    chip. This is typically a [CircleAvatar] widget.
+///  * The "label", which is the widget displayed in the center of the chip.
+///    Typically this is a [Text] widget.
 ///  * The "delete icon", which is a widget that appears at the end of the chip.
 ///  * The chip is disabled when it is not accepting user input. Only some chips
 ///    have a disabled state (i.e. [InputChip], [ChoiceChip], [FilterChip]).
 ///
 /// See also:
 ///
+///  * [Chip], a chip that displays information and can be deleted.
+///  * [InputChip], a chip that represents a complex piece of information, such
+///    as an entity (person, place, or thing) or conversational text, in a
+///    compact form.
+///  * [ChoiceChip], allows a single selection from a set of options. Choice
+///    chips contain related descriptive text or categories.
+///  * [FilterChip], uses tags or descriptive words as a way to filter content.
+///  * [ActionChip], represents an action related to primary content.
+///  * [CircleAvatar], which shows images or initials of entities.
+///  * [Wrap], A widget that displays its children in multiple horizontal or
+///    vertical runs.
 ///  * [ChipTheme] widget, which can override the chip theme of its
 ///    children.
 ///  * [Theme] widget, which performs a similar function to [ChipTheme],
@@ -113,47 +132,54 @@ class ChipThemeData extends Diagnosticable {
   /// ## Sample code
   ///
   /// ```dart
-  /// class Blissful extends StatefulWidget {
+  /// class CarColor extends StatefulWidget {
   ///   @override
   ///   State createState() => new BlissfulState();
   /// }
   ///
-  /// class BlissfulState extends State<Blissful> {
-  ///   bool _bliss = false;
+  /// class CarColorState extends State<CarColor> {
+  ///   Color _color = const Color(0xffff0000);
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return new ChipTheme(
-  ///       data: ChipTheme.of(context).copyWith(backgroundColor: const Color(0xff404080)),
+  ///       data: ChipTheme.of(context).copyWith(backgroundColor: Colors.lightBlue),
   ///       child: new ChoiceChip(
-  ///         onSelected: (bool value) { setState(() { _bliss = value; }); },
-  ///         selected: _bliss,
+  ///         label: new Text('Light Blue'),
+  ///         onSelected: (bool value) {
+  ///           setState(() {
+  ///             if (value) {
+  ///               _color = Colors.lightBlue;
+  ///             }
+  ///           });
+  ///         },
+  ///         selected: _color == Colors.lightBlue,
   ///       ),
   ///     );
   ///   }
   /// }
   /// ```
   const ChipThemeData({
-    @required this.labelStyle,
-    @required this.secondaryLabelStyle,
-    @required this.shape,
     @required this.backgroundColor,
-    @required this.padding,
-    @required this.labelPadding,
-    @required this.deleteIconColor,
+    this.deleteIconColor,
+    @required this.disabledColor,
     @required this.selectedColor,
     @required this.secondarySelectedColor,
-    @required this.disabledColor,
+    @required this.labelPadding,
+    @required this.padding,
+    @required this.shape,
+    @required this.labelStyle,
+    @required this.secondaryLabelStyle,
     @required this.brightness,
-  })  : assert(labelStyle != null),
-        assert(secondaryLabelStyle != null),
-        assert(shape != null),
-        assert(backgroundColor != null),
-        assert(padding != null),
-        assert(labelPadding != null),
-        assert(deleteIconColor != null),
-        assert(selectedColor != null),
+  })  : assert(backgroundColor != null),
         assert(disabledColor != null),
+        assert(selectedColor != null),
+        assert(secondarySelectedColor != null),
+        assert(labelPadding != null),
+        assert(padding != null),
+        assert(shape != null),
+        assert(labelStyle != null),
+        assert(secondaryLabelStyle != null),
         assert(brightness != null);
 
   /// Generates a ChipThemeData from a brightness and a text style.
@@ -170,34 +196,36 @@ class ChipThemeData extends Diagnosticable {
     // These are Material Design defaults, and are used to derive
     // component Colors (with opacity) from base colors.
     const int backgroundAlpha = 0x1f; // 12%
-    const int textLabelAlpha = 0xde; // 87%
     const int deleteIconAlpha = 0xde; // 87%
-    const int selectAlpha = 0x3d; // 12% + 12% = 24%
     const int disabledAlpha = 0x0c; // 38% * 12% = 5%
-    const EdgeInsetsGeometry padding = const EdgeInsets.all(4.0);
-    const EdgeInsetsGeometry labelPadding = const EdgeInsets.symmetric(horizontal: 8.0);
+    const int selectAlpha = 0x3d; // 12% + 12% = 24%
+    const int textLabelAlpha = 0xde; // 87%
     const ShapeBorder shape = const StadiumBorder();
+    const EdgeInsetsGeometry labelPadding = const EdgeInsets.symmetric(horizontal: 8.0);
+    const EdgeInsetsGeometry padding = const EdgeInsets.all(4.0);
 
     final Color baseColor = brightness == Brightness.light ? Colors.black : Colors.white;
     final Color backgroundColor = baseColor.withAlpha(backgroundAlpha);
     final Color deleteIconColor = baseColor.withAlpha(deleteIconAlpha);
     final Color disabledColor = baseColor.withAlpha(disabledAlpha);
     final Color selectedColor = baseColor.withAlpha(selectAlpha);
-    final Color secondartSelectedColor = primaryColor.withAlpha(selectAlpha);
-    final TextStyle secondaryLabelStyle = labelStyle.copyWith(color: primaryColor.withAlpha(textLabelAlpha));
+    final Color secondarySelectedColor = primaryColor.withAlpha(selectAlpha);
+    final TextStyle secondaryLabelStyle = labelStyle.copyWith(
+      color: primaryColor.withAlpha(textLabelAlpha),
+    );
     labelStyle = labelStyle.copyWith(color: baseColor.withAlpha(textLabelAlpha));
 
     return new ChipThemeData(
+      backgroundColor: backgroundColor,
+      deleteIconColor: deleteIconColor,
+      disabledColor: disabledColor,
+      selectedColor: selectedColor,
+      secondarySelectedColor: secondarySelectedColor,
+      labelPadding: labelPadding,
+      padding: padding,
+      shape: shape,
       labelStyle: labelStyle,
       secondaryLabelStyle: secondaryLabelStyle,
-      shape: shape,
-      backgroundColor: backgroundColor,
-      padding: padding,
-      labelPadding: labelPadding,
-      deleteIconColor: deleteIconColor,
-      selectedColor: selectedColor,
-      secondarySelectedColor: secondartSelectedColor,
-      disabledColor: disabledColor,
       brightness: brightness,
     );
   }
@@ -207,8 +235,11 @@ class ChipThemeData extends Diagnosticable {
   /// The default is light grey.
   final Color backgroundColor;
 
-  /// The [Color] for the delete icon. The default is based on the ambient
-  /// [IconTheme.color].
+  /// The [Color] for the delete icon. The default is Color(0xde000000)
+  /// (slightly transparent black) for light themes, and Color(0xdeffffff)
+  /// (slightly transparent white) for dark themes.
+  ///
+  /// May be set to null, in which case the ambient [IconTheme.color] is used.
   final Color deleteIconColor;
 
   /// Color to be used for the chip's background indicating that it is disabled.
@@ -292,7 +323,7 @@ class ChipThemeData extends Diagnosticable {
       labelPadding: labelPadding ?? this.labelPadding,
       deleteIconColor: deleteIconColor ?? this.deleteIconColor,
       selectedColor: selectedColor ?? this.selectedColor,
-      secondarySelectedColor: secondarySelectedColor ?? this.selectedColor,
+      secondarySelectedColor: secondarySelectedColor ?? this.secondarySelectedColor,
       disabledColor: disabledColor ?? this.disabledColor,
       brightness: brightness ?? this.brightness,
     );
@@ -358,17 +389,17 @@ class ChipThemeData extends Diagnosticable {
       return false;
     }
     final ChipThemeData otherData = other;
-    return otherData.backgroundColor == backgroundColor &&
-        otherData.deleteIconColor == deleteIconColor &&
-        otherData.disabledColor == disabledColor &&
-        otherData.selectedColor == selectedColor &&
-        otherData.secondarySelectedColor == secondarySelectedColor &&
-        otherData.labelPadding == labelPadding &&
-        otherData.padding == padding &&
-        otherData.shape == shape &&
-        otherData.labelStyle == labelStyle &&
-        otherData.secondaryLabelStyle == secondaryLabelStyle &&
-        otherData.brightness == brightness;
+    return otherData.backgroundColor == backgroundColor
+        && otherData.deleteIconColor == deleteIconColor
+        && otherData.disabledColor == disabledColor
+        && otherData.selectedColor == selectedColor
+        && otherData.secondarySelectedColor == secondarySelectedColor
+        && otherData.labelPadding == labelPadding
+        && otherData.padding == padding
+        && otherData.shape == shape
+        && otherData.labelStyle == labelStyle
+        && otherData.secondaryLabelStyle == secondaryLabelStyle
+        && otherData.brightness == brightness;
   }
 
   @override

@@ -15,6 +15,36 @@ Finder findRenderChipElement() {
   return find.byElementPredicate((Element e) => '${e.runtimeType}' == '_RenderChipElement');
 }
 
+RenderBox getMaterialBox(WidgetTester tester) {
+  return tester.firstRenderObject<RenderBox>(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(CustomPaint),
+    ),
+  );
+}
+
+IconThemeData getIconData(WidgetTester tester) {
+  final IconTheme iconTheme = tester.firstWidget(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(IconTheme),
+    ),
+  );
+  return iconTheme.data;
+}
+
+DefaultTextStyle getLabelStyle(WidgetTester tester) {
+  return tester.widget(
+    find
+        .descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(DefaultTextStyle),
+    )
+        .last,
+  );
+}
+
 dynamic getRenderChip(WidgetTester tester) {
   if (!tester.any(findRenderChipElement())) {
     return null;
@@ -995,8 +1025,6 @@ void main() {
   });
 
   testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
-    const Color customColor1 = const Color(0xcafefeed);
-    const Color customColor2 = const Color(0xdeadbeef);
     final ThemeData themeData = new ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -1052,52 +1080,69 @@ void main() {
 
     await tester.pumpWidget(buildApp());
 
-    RenderBox materialBox;
-    IconThemeData iconData;
-    DefaultTextStyle labelStyle;
-    void fetchValues({bool hasIcon: true}) {
-      materialBox = tester.firstRenderObject<RenderBox>(
-        find.descendant(
-          of: find.byType(RawChip),
-          matching: find.byType(CustomPaint),
-        ),
-      );
-      if (hasIcon) {
-        final IconTheme iconTheme = tester.firstWidget(
-          find.descendant(
-            of: find.byType(RawChip),
-            matching: find.byType(IconTheme),
-          ),
-        );
-        iconData = iconTheme.data;
-      } else {
-        iconData = null;
-      }
-
-      labelStyle = tester.widget(
-        find
-            .descendant(
-              of: find.byType(RawChip),
-              matching: find.byType(DefaultTextStyle),
-            )
-            .last,
-      );
-    }
-
-    fetchValues();
+    RenderBox materialBox = getMaterialBox(tester);
+    IconThemeData iconData = getIconData(tester);
+    DefaultTextStyle labelStyle = getLabelStyle(tester);
 
     // Check default theme for enabled widget.
     expect(materialBox, paints..path(color: chipTheme.backgroundColor));
-    expect(iconData.color, equals(Colors.black));
-    expect(iconData.opacity, closeTo(0.87, 0.01));
+    expect(iconData.color, equals(const Color(0xde000000)));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
+    await tester.tap(find.byType(RawChip));
+    await tester.pumpAndSettle();
+    materialBox = getMaterialBox(tester);
+    expect(materialBox, paints..path(color: chipTheme.selectedColor));
+    await tester.tap(find.byType(RawChip));
+    await tester.pumpAndSettle();
 
     // Check default theme with disabled widget.
     await tester.pumpWidget(buildApp(isSelectable: false, isPressable: false, isDeletable: true));
     await tester.pumpAndSettle();
-    debugDumpApp();
-    fetchValues(hasIcon: false);
+    materialBox = getMaterialBox(tester);
+    labelStyle = getLabelStyle(tester);
     expect(materialBox, paints..path(color: chipTheme.disabledColor));
+    expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
+
+    // Apply a custom theme.
+    const Color customColor1 = const Color(0xcafefeed);
+    const Color customColor2 = const Color(0xdeadbeef);
+    const Color customColor3 = const Color(0xbeefcafe);
+    const Color customColor4 = const Color(0xaddedabe);
+    final ChipThemeData customTheme = chipTheme.copyWith(
+      brightness: Brightness.dark,
+      backgroundColor: customColor1,
+      disabledColor: customColor2,
+      selectedColor: customColor3,
+      deleteIconColor: customColor4,
+    );
+    await tester.pumpWidget(buildApp(theme: customTheme));
+    await tester.pumpAndSettle();
+    materialBox = getMaterialBox(tester);
+    iconData = getIconData(tester);
+    labelStyle = getLabelStyle(tester);
+
+    // Check custom theme for enabled widget.
+    expect(materialBox, paints..path(color: customTheme.backgroundColor));
+    expect(iconData.color, equals(customTheme.deleteIconColor));
+    expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
+    await tester.tap(find.byType(RawChip));
+    await tester.pumpAndSettle();
+    materialBox = getMaterialBox(tester);
+    expect(materialBox, paints..path(color: customTheme.selectedColor));
+    await tester.tap(find.byType(RawChip));
+    await tester.pumpAndSettle();
+
+    // Check custom theme with disabled widget.
+    await tester.pumpWidget(buildApp(
+      theme: customTheme,
+      isSelectable: false,
+      isPressable: false,
+      isDeletable: true,
+    ));
+    await tester.pumpAndSettle();
+    materialBox = getMaterialBox(tester);
+    labelStyle = getLabelStyle(tester);
+    expect(materialBox, paints..path(color: customTheme.disabledColor));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
   });
 }

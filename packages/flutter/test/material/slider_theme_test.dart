@@ -100,7 +100,7 @@ void main() {
     expect(sliderBox, paints..rect(color: customTheme.disabledActiveRailColor)..rect(color: customTheme.disabledInactiveRailColor));
   });
 
-  testWidgets('SliderThemeData generates correct opacities for materialDefaults', (WidgetTester tester) async {
+  testWidgets('SliderThemeData generates correct opacities for fromPrimaryColors', (WidgetTester tester) async {
     const Color customColor1 = const Color(0xcafefeed);
     const Color customColor2 = const Color(0xdeadbeef);
     const Color customColor3 = const Color(0xdecaface);

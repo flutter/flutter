@@ -25,7 +25,6 @@ const double _kChipHeight = 32.0;
 const double _kDeleteIconSize = 18.0;
 
 const int _kCheckmarkAlpha = 0xde; // 87%
-const double _kDeleteIconOpacity = 0.87;
 const int _kDisabledAlpha = 0x61; // 38%
 const double _kCheckmarkStrokeWidth = 2.0;
 const double _kPressElevation = 8.0;
@@ -83,7 +82,7 @@ abstract class ChipAttributes {
 
   /// The [ShapeBorder] to draw around the chip.
   ///
-  /// Defaults to a [StadiumBorder]. Must not be null.
+  /// Defaults to the shape in the ambient [ChipThemeData].
   ShapeBorder get shape;
 
   /// Color to be used for the unselected, enabled chip's background.
@@ -411,7 +410,7 @@ abstract class TappableChipAttributes {
 class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttributes {
   /// Creates a material design chip.
   ///
-  /// The [label], [deleteIcon], and [border] arguments must not be null.
+  /// The [label] argument must not be null.
   const Chip({
     Key key,
     this.avatar,
@@ -422,11 +421,10 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.onDeleted,
     this.deleteIconColor,
     this.deleteButtonTooltipMessage,
-    this.shape: const StadiumBorder(),
+    this.shape,
     this.backgroundColor,
     this.padding,
   })  : assert(label != null),
-        assert(shape != null),
         super(key: key);
 
   @override
@@ -529,8 +527,7 @@ class InputChip extends StatelessWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], [selected], and [border] arguments must not be
-  /// null.
+  /// The [label], [isEnabled] and [selected] arguments must not be null.
   const InputChip({
     Key key,
     this.avatar,
@@ -548,13 +545,12 @@ class InputChip extends StatelessWidget
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
-    this.shape: const StadiumBorder(),
+    this.shape,
     this.backgroundColor,
     this.padding,
   })  : assert(selected != null),
         assert(isEnabled != null),
         assert(label != null),
-        assert(shape != null),
         super(key: key);
 
   @override
@@ -679,7 +675,7 @@ class ChoiceChip extends StatelessWidget
         DisabledChipAttributes {
   /// Create a chip that acts like a radio button.
   ///
-  /// The [selected], [label], and [border] arguments must not be null.
+  /// The [label] and [selected] attributes must not be null.
   const ChoiceChip({
     Key key,
     this.avatar,
@@ -691,12 +687,11 @@ class ChoiceChip extends StatelessWidget
     this.selectedColor,
     this.disabledColor,
     this.tooltip,
-    this.shape: const StadiumBorder(),
+    this.shape,
     this.backgroundColor,
     this.padding,
   })  : assert(selected != null),
         assert(label != null),
-        assert(shape != null),
         super(key: key);
 
   @override
@@ -759,8 +754,7 @@ class ChoiceChip extends StatelessWidget
 /// Unlike these alternatives, filter chips allow for clearly delineated and
 /// exposed options in a compact area.
 ///
-/// Requires one of its ancestors to be a [Material] widget. The [label]
-/// and [border] arguments must not be null.
+/// Requires one of its ancestors to be a [Material] widget.
 ///
 /// ## Sample code
 ///
@@ -844,7 +838,7 @@ class FilterChip extends StatelessWidget
         DisabledChipAttributes {
   /// Create a chip that acts like a checkbox.
   ///
-  /// The [selected], [label], and [border] arguments must not be null.
+  /// The [selected] and [label] attributes must not be null.
   const FilterChip({
     Key key,
     this.avatar,
@@ -856,12 +850,11 @@ class FilterChip extends StatelessWidget
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
-    this.shape: const StadiumBorder(),
+    this.shape,
     this.backgroundColor,
     this.padding,
   })  : assert(selected != null),
         assert(label != null),
-        assert(shape != null),
         super(key: key);
 
   @override
@@ -930,8 +923,7 @@ class FilterChip extends StatelessWidget
 /// [OutlineButton], are an alternative to action chips, which should appear
 /// statically and consistently in a UI.
 ///
-/// Requires one of its ancestors to be a [Material] widget. The [onPressed],
-/// [label], and [border] arguments must not be null.
+/// Requires one of its ancestors to be a [Material] widget.
 ///
 /// ## Sample code
 ///
@@ -963,7 +955,7 @@ class FilterChip extends StatelessWidget
 class ActionChip extends StatelessWidget implements ChipAttributes, TappableChipAttributes {
   /// Create a chip that acts like a button.
   ///
-  /// The [label], [border], and [onPressed] arguments must not be null.
+  /// The [label] and [onPressed] arguments must not be null.
   const ActionChip({
     Key key,
     this.avatar,
@@ -972,11 +964,10 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.labelPadding,
     @required this.onPressed,
     this.tooltip,
-    this.shape: const StadiumBorder(),
+    this.shape,
     this.backgroundColor,
     this.padding,
   })  : assert(label != null),
-        assert(shape != null),
         assert(
           onPressed != null,
           'Rather than disabling an ActionChip by setting onPressed to null, '
@@ -1063,7 +1054,7 @@ class RawChip extends StatefulWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], and [border] arguments must not be null.
+  /// The [label] and [isEnabled] arguments must not be null.
   const RawChip({
     Key key,
     this.avatar,
@@ -1084,10 +1075,9 @@ class RawChip extends StatefulWidget
     this.disabledColor,
     this.selectedColor,
     this.tooltip,
-    @required this.shape,
+    this.shape,
     this.backgroundColor,
   })  : assert(label != null),
-        assert(shape != null),
         assert(isEnabled != null),
         deleteIcon = deleteIcon ?? _kDefaultDeleteIcon,
         super(key: key);
@@ -1349,7 +1339,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     );
   }
 
-  Widget _buildDeleteIcon(BuildContext context, ThemeData theme) {
+  Widget _buildDeleteIcon(BuildContext context, ThemeData theme, ChipThemeData chipTheme) {
     if (!hasDeleteButton) {
       return null;
     }
@@ -1358,13 +1348,12 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         onTap: widget.isEnabled ? widget.onDeleted : null,
         child: new IconTheme(
           data: theme.iconTheme.copyWith(
-            color: widget.deleteIconColor ?? theme.iconTheme.color,
-            opacity: _kDeleteIconOpacity,
+            color: (widget.deleteIconColor ?? chipTheme.deleteIconColor) ?? theme.iconTheme.color,
           ),
           child: widget.deleteIcon,
         ),
       ),
-      widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context).deleteButtonTooltip,
+      widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context)?.deleteButtonTooltip,
       widget.onDeleted,
     );
   }
@@ -1377,11 +1366,12 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final ThemeData theme = Theme.of(context);
     final ChipThemeData chipTheme = ChipTheme.of(context);
     final TextDirection textDirection = Directionality.of(context);
+    final ShapeBorder shape = widget.shape ?? chipTheme.shape;
 
     return new Material(
       elevation: isTapping ? _kPressElevation : 0.0,
       animationDuration: pressedAnimationDuration,
-      shape: widget.shape,
+      shape: shape,
       child: new InkResponse(
         onTap: canTap ? _handleTap : null,
         onTapDown: canTap ? _handleTapDown : null,
@@ -1391,14 +1381,14 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
           builder: (BuildContext context, Widget child) {
             return new Container(
               decoration: new ShapeDecoration(
-                shape: widget.shape ?? chipTheme.shape,
+                shape: shape,
                 color: getBackgroundColor(chipTheme),
               ),
               child: child,
             );
           },
           child: _wrapWithTooltip(
-              new ChipRenderWidget(
+              new _ChipRenderWidget(
                 theme: new _ChipRenderTheme(
                   label: new DefaultTextStyle(
                     overflow: TextOverflow.fade,
@@ -1414,7 +1404,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                     switchInCurve: Curves.fastOutSlowIn,
                   ),
                   deleteIcon: new AnimatedChildSwitcher(
-                    child: _buildDeleteIcon(context, theme),
+                    child: _buildDeleteIcon(context, theme, chipTheme),
                     duration: _kDrawerDuration,
                     switchInCurve: Curves.fastOutSlowIn,
                   ),
@@ -1440,8 +1430,8 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   }
 }
 
-class ChipRenderWidget extends RenderObjectWidget {
-  const ChipRenderWidget({
+class _ChipRenderWidget extends RenderObjectWidget {
+  const _ChipRenderWidget({
     Key key,
     @required this.theme,
     this.value,
@@ -1499,13 +1489,13 @@ enum _ChipSlot {
 }
 
 class _RenderChipElement extends RenderObjectElement {
-  _RenderChipElement(ChipRenderWidget chip) : super(chip);
+  _RenderChipElement(_ChipRenderWidget chip) : super(chip);
 
   final Map<_ChipSlot, Element> slotToChild = <_ChipSlot, Element>{};
   final Map<Element, _ChipSlot> childToSlot = <Element, _ChipSlot>{};
 
   @override
-  ChipRenderWidget get widget => super.widget;
+  _ChipRenderWidget get widget => super.widget;
 
   @override
   _RenderChip get renderObject => super.renderObject;
@@ -1559,7 +1549,7 @@ class _RenderChipElement extends RenderObjectElement {
   }
 
   @override
-  void update(ChipRenderWidget newWidget) {
+  void update(_ChipRenderWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     _updateChild(widget.theme.label, _ChipSlot.label);
