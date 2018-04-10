@@ -32,7 +32,11 @@ void main() {
     });
 
     tearDownAll(() {
-      tempDir?.deleteSync(recursive: true);
+      try {
+        tempDir?.deleteSync(recursive: true);
+      } catch (e) {
+        // ignore errors deleting the temporary directory
+      }
     });
 
     // Create a project to be analyzed
