@@ -108,8 +108,7 @@ void main() {
         ],
       );
       return _runFlutterTest(projectDir);
-      // TODO(devoncarew): Unskip this on the next Dart SDK roll (github.com/dart-lang/sdk/issues/32772).
-    }, timeout: allowForRemotePubInvocation, skip: true);
+    }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('plugin project', () async {
       await _createAndAnalyzeProject(
