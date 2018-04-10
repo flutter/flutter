@@ -106,9 +106,12 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
   DateTime _toDateTime = new DateTime.now();
   bool _allDayValue = false;
   bool _saveNeeded = false;
-  String _eventName = 'New event';
+  bool _hasLocation = false;
+  bool _hasName = false;
+  String _eventName;
 
   Future<bool> _onWillPop() async {
+    _saveNeeded = _hasLocation || _hasName || _saveNeeded;
     if (!_saveNeeded)
       return true;
 
@@ -148,7 +151,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
 
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text(_eventName),
+        title: new Text(_hasName ? _eventName : 'Event Name TBD'),
         actions: <Widget> [
           new FlatButton(
             child: new Text('SAVE', style: theme.textTheme.body1.copyWith(color: Colors.white)),
@@ -169,18 +172,15 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               child: new TextField(
                 decoration: const InputDecoration(
                   labelText: 'Event name',
-                  hintText: 'What is the name of the event?',
                   filled: true
                 ),
                 style: theme.textTheme.headline,
                 onChanged: (String value) {
                   setState(() {
-                    if (value.isNotEmpty) {
+                    _hasName = value.isNotEmpty;
+                    if (_hasName) {
                       _eventName = value;
-                    } else {
-                      _eventName = 'New event';
                     }
-                    _saveNeeded = true;
                   });
                 }
               )
@@ -196,7 +196,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                 ),
                 onChanged: (String value) {
                   setState(() {
-                    _saveNeeded = true;
+                    _hasLocation = value.isNotEmpty;
                   });
                 }
               )
