@@ -174,7 +174,7 @@ void main() {
       test('returns the value returned by body', () async {
         expect(await context.run<int>(body: () => 123), 123);
         expect(await context.run<String>(body: () => 'value'), 'value');
-        expect(await context.run<Future<int>>(body: () async => 456), 456);
+        expect(await context.run<int>(body: () async => 456), 456);
       });
 
       test('passes name to child context', () async {

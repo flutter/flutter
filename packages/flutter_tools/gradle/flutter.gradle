@@ -289,7 +289,7 @@ class FlutterPlugin implements Plugin<Project> {
             targetPlatformValue = project.property('target-platform')
         }
 
-        project.android.applicationVariants.all { variant ->
+        def addFlutterDeps = { variant ->
             String flutterBuildMode = buildModeFor(variant.buildType)
             if (flutterBuildMode == 'debug' && project.tasks.findByName('flutterBuildX86Jar')) {
                 Task task = project.tasks.findByName("compile${variant.name.capitalize()}JavaWithJavac")
@@ -349,6 +349,11 @@ class FlutterPlugin implements Plugin<Project> {
                 with flutterTask.assets
             }
             variant.outputs[0].processResources.dependsOn(copyFlxTask)
+        }
+        if (project.android.hasProperty("applicationVariants")) {
+            project.android.applicationVariants.all addFlutterDeps
+        } else {
+            project.android.libraryVariants.all addFlutterDeps
         }
     }
 }

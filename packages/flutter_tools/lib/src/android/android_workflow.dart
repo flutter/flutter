@@ -185,10 +185,23 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       }
     }
 
-    final Process process = await runCommand(<String>[androidSdk.sdkManagerPath, '--licenses'], environment: androidSdk.sdkManagerEnv);
+    _ensureCanRunSdkManager();
+
+    final Process process = await runCommand(
+      <String>[androidSdk.sdkManagerPath, '--licenses'],
+      environment: androidSdk.sdkManagerEnv,
+    );
     process.stdin.write('n\n');
-    final Future<void> output = process.stdout.transform(const Utf8Decoder(allowMalformed: true)).transform(const LineSplitter()).listen(_onLine).asFuture<void>(null);
-    final Future<void> errors = process.stderr.transform(const Utf8Decoder(allowMalformed: true)).transform(const LineSplitter()).listen(_onLine).asFuture<void>(null);
+    final Future<void> output = process.stdout
+        .transform(const Utf8Decoder(allowMalformed: true))
+        .transform(const LineSplitter())
+        .listen(_onLine)
+        .asFuture<void>(null);
+    final Future<void> errors = process.stderr
+        .transform(const Utf8Decoder(allowMalformed: true))
+        .transform(const LineSplitter())
+        .listen(_onLine)
+        .asFuture<void>(null);
     try {
       await Future.wait<void>(<Future<void>>[output, errors]).timeout(const Duration(seconds: 30));
     } catch (TimeoutException) {
@@ -205,12 +218,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       return false;
     }
 
-    if (!processManager.canRun(androidSdk.sdkManagerPath))
-      throwToolExit(
-        'Android sdkmanager tool not found.\n'
-        'Try re-installing or updating your Android SDK,\n'
-        'visit https://flutter.io/setup/#android-setup for detailed instructions.'
-      );
+    _ensureCanRunSdkManager();
 
     final Version sdkManagerVersion = new Version.parse(androidSdk.sdkManagerVersion);
     if (sdkManagerVersion == null || sdkManagerVersion.major < 26)
@@ -233,5 +241,16 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
 
     final int exitCode = await process.exitCode;
     return exitCode == 0;
+  }
+
+  static void _ensureCanRunSdkManager() {
+    assert(androidSdk != null);
+    final String sdkManagerPath = androidSdk.sdkManagerPath;
+    if (!processManager.canRun(sdkManagerPath))
+      throwToolExit(
+        'Android sdkmanager tool not found ($sdkManagerPath).\n'
+        'Try re-installing or updating your Android SDK,\n'
+        'visit https://flutter.io/setup/#android-setup for detailed instructions.'
+      );
   }
 }
