@@ -38,7 +38,7 @@ class CocoaPods {
 
   Future<bool> get hasCocoaPods => exitsHappyAsync(<String>['pod', '--version']);
 
-  String get cocoaPodsMinimumVersion => '1.0.0';
+  String get cocoaPodsMinimumVersion => '1.5.0';
 
   Future<String> get cocoaPodsVersionText async => (await runAsync(<String>['pod', '--version'])).processResult.stdout.trim();
 
