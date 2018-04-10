@@ -386,7 +386,10 @@ class _AppBarState extends State<AppBar> {
         style: centerStyle,
         softWrap: false,
         overflow: TextOverflow.ellipsis,
-        child: title,
+        child: new Semantics(
+          route: true,
+          child: title,
+        ),
       );
     }
 
