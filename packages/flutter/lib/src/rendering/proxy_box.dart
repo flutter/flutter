@@ -2038,10 +2038,8 @@ class RenderTransform extends RenderProxyBox {
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
     if (transformHitTests) {
-      Matrix4 inverse;
-      try {
-        inverse = new Matrix4.inverted(_effectiveTransform);
-      } on ArgumentError {
+      final Matrix4 inverse = Matrix4.tryInvert(_effectiveTransform);
+      if (inverse == null) {
         // We cannot invert the effective transform. That means the child
         // doesn't appear on screen and cannot be hit.
         return false;
@@ -2223,10 +2221,8 @@ class RenderFittedBox extends RenderProxyBox {
     if (size.isEmpty)
       return false;
     _updatePaintData();
-    Matrix4 inverse;
-    try {
-      inverse = new Matrix4.inverted(_transform);
-    } on ArgumentError {
+    final Matrix4 inverse = Matrix4.tryInvert(_transform);
+    if (inverse == null) {
       // We cannot invert the effective transform. That means the child
       // doesn't appear on screen and cannot be hit.
       return false;
@@ -4030,10 +4026,8 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
-    Matrix4 inverse;
-    try {
-      inverse = new Matrix4.inverted(getCurrentTransform());
-    } on ArgumentError {
+    final Matrix4 inverse = Matrix4.tryInvert(getCurrentTransform());
+    if (inverse == null) {
       // We cannot invert the effective transform. That means the child
       // doesn't appear on screen and cannot be hit.
       return false;
