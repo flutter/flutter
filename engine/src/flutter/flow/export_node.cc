@@ -4,28 +4,27 @@
 
 #include "flutter/flow/export_node.h"
 
-#include "flutter/common/threads.h"
 #include "lib/fxl/functional/make_copyable.h"
 
 namespace flow {
 
 ExportNodeHolder::ExportNodeHolder(
+    fxl::RefPtr<fxl::TaskRunner> gpu_task_runner,
     fxl::RefPtr<zircon::dart::Handle> export_token_handle)
-    : export_node_(std::make_unique<ExportNode>(export_token_handle)) {
-  ASSERT_IS_UI_THREAD;
+    : gpu_task_runner_(std::move(gpu_task_runner)),
+      export_node_(std::make_unique<ExportNode>(export_token_handle)) {
+  FXL_DCHECK(gpu_task_runner_);
 }
 
 void ExportNodeHolder::Bind(SceneUpdateContext& context,
                             scenic_lib::ContainerNode& container,
                             const SkPoint& offset,
                             bool hit_testable) {
-  ASSERT_IS_GPU_THREAD;
   export_node_->Bind(context, container, offset, hit_testable);
 }
 
 ExportNodeHolder::~ExportNodeHolder() {
-  ASSERT_IS_UI_THREAD;
-  blink::Threads::Gpu()->PostTask(
+  gpu_task_runner_->PostTask(
       fxl::MakeCopyable([export_node = std::move(export_node_)]() {
         export_node->Dispose(true);
       }));
@@ -44,8 +43,6 @@ void ExportNode::Bind(SceneUpdateContext& context,
                       scenic_lib::ContainerNode& container,
                       const SkPoint& offset,
                       bool hit_testable) {
-  ASSERT_IS_GPU_THREAD;
-
   if (export_token_) {
     // Happens first time we bind.
     node_.reset(new scenic_lib::EntityNode(container.session()));
@@ -67,8 +64,6 @@ void ExportNode::Bind(SceneUpdateContext& context,
 }
 
 void ExportNode::Dispose(bool remove_from_scene_update_context) {
-  ASSERT_IS_GPU_THREAD;
-
   // If scene_update_context_ is set, then we should still have a node left to
   // dereference.
   // If scene_update_context_ is null, then either:

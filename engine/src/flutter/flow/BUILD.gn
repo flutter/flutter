@@ -48,11 +48,12 @@ source_set("flow") {
     "matrix_decomposition.h",
     "paint_utils.cc",
     "paint_utils.h",
-    "process_info.h",
     "raster_cache.cc",
     "raster_cache.h",
     "raster_cache_key.cc",
     "raster_cache_key.h",
+    "skia_gpu_object.cc",
+    "skia_gpu_object.h",
     "texture.cc",
     "texture.h",
   ]
@@ -61,12 +62,11 @@ source_set("flow") {
     "//garnet/public/lib/fxl",
   ]
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
+  public_configs = [ "$flutter_root:config" ]
 
   deps = [
     "$flutter_root/common",
+    "$flutter_root/fml",
     "$flutter_root/glue",
     "$flutter_root/synchronization",
     "//third_party/skia",
@@ -103,8 +103,8 @@ executable("flow_unittests") {
 
   deps = [
     ":flow",
-    "//third_party/dart/runtime:libdart_jit",  # for tracing
     "$flutter_root/testing",
+    "//third_party/dart/runtime:libdart_jit",  # for tracing
     "//third_party/skia",
   ]
 }

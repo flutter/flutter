@@ -6,14 +6,12 @@
 
 #include <utility>
 
-#include "flutter/common/threads.h"
 #include "lib/fxl/logging.h"
 #include "lib/fxl/memory/ref_ptr.h"
 
 namespace shell {
 
-static fxl::RefPtr<AndroidContextGL> GlobalResourceLoadingContext(
-    PlatformView::SurfaceConfig offscreen_config) {
+static fxl::RefPtr<AndroidContextGL> GlobalResourceLoadingContext() {
   // AndroidSurfaceGL instances are only ever created on the platform thread. So
   // there is no need to lock here.
 
@@ -29,11 +27,7 @@ static fxl::RefPtr<AndroidContextGL> GlobalResourceLoadingContext(
     return nullptr;
   }
 
-  // TODO(chinmaygarde): We should check that the configurations are stable
-  // across multiple invocations.
-
-  auto context =
-      fxl::MakeRefCounted<AndroidContextGL>(environment, offscreen_config);
+  auto context = fxl::MakeRefCounted<AndroidContextGL>(environment);
 
   if (!context->IsValid()) {
     return nullptr;
@@ -43,10 +37,9 @@ static fxl::RefPtr<AndroidContextGL> GlobalResourceLoadingContext(
   return global_context;
 }
 
-AndroidSurfaceGL::AndroidSurfaceGL(
-    PlatformView::SurfaceConfig offscreen_config) {
+AndroidSurfaceGL::AndroidSurfaceGL() {
   // Acquire the offscreen context.
-  offscreen_context_ = GlobalResourceLoadingContext(offscreen_config);
+  offscreen_context_ = GlobalResourceLoadingContext();
 
   if (!offscreen_context_ || !offscreen_context_->IsValid()) {
     offscreen_context_ = nullptr;
@@ -60,14 +53,9 @@ bool AndroidSurfaceGL::IsOffscreenContextValid() const {
 }
 
 void AndroidSurfaceGL::TeardownOnScreenContext() {
-  fxl::AutoResetWaitableEvent latch;
-  blink::Threads::Gpu()->PostTask([this, &latch]() {
-    if (IsValid()) {
-      GLContextClearCurrent();
-    }
-    latch.Signal();
-  });
-  latch.Wait();
+  if (onscreen_context_) {
+    onscreen_context_->ClearCurrent();
+  }
   onscreen_context_ = nullptr;
 }
 
@@ -84,11 +72,6 @@ std::unique_ptr<Surface> AndroidSurfaceGL::CreateGPUSurface() {
   return surface->IsValid() ? std::move(surface) : nullptr;
 }
 
-SkISize AndroidSurfaceGL::OnScreenSurfaceSize() const {
-  FXL_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
-  return onscreen_context_->GetSize();
-}
-
 bool AndroidSurfaceGL::OnScreenSurfaceResize(const SkISize& size) const {
   FXL_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
   return onscreen_context_->Resize(size);
@@ -99,8 +82,8 @@ bool AndroidSurfaceGL::ResourceContextMakeCurrent() {
   return offscreen_context_->MakeCurrent();
 }
 
-bool AndroidSurfaceGL::SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window,
-                                       PlatformView::SurfaceConfig config) {
+bool AndroidSurfaceGL::SetNativeWindow(
+    fxl::RefPtr<AndroidNativeWindow> window) {
   // In any case, we want to get rid of our current onscreen context.
   onscreen_context_ = nullptr;
 
@@ -112,7 +95,7 @@ bool AndroidSurfaceGL::SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window,
 
   // Create the onscreen context.
   onscreen_context_ = fxl::MakeRefCounted<AndroidContextGL>(
-      offscreen_context_->Environment(), config,
+      offscreen_context_->Environment(),
       offscreen_context_.get() /* sharegroup */);
 
   if (!onscreen_context_->IsValid()) {

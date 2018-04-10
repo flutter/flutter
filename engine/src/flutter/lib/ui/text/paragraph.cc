@@ -5,7 +5,7 @@
 #include "flutter/lib/ui/text/paragraph.h"
 
 #include "flutter/common/settings.h"
-#include "flutter/common/threads.h"
+#include "flutter/common/task_runners.h"
 #include "flutter/sky/engine/core/rendering/PaintInfo.h"
 #include "flutter/sky/engine/core/rendering/RenderParagraph.h"
 #include "flutter/sky/engine/core/rendering/RenderText.h"
@@ -53,7 +53,8 @@ Paragraph::Paragraph(std::unique_ptr<txt::Paragraph> paragraph)
 Paragraph::~Paragraph() {
   if (m_renderView) {
     RenderView* renderView = m_renderView.leakPtr();
-    Threads::UI()->PostTask([renderView]() { renderView->destroy(); });
+    destruction_task_runner_->PostTask(
+        [renderView]() { renderView->destroy(); });
   }
 }
 

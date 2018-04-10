@@ -44,9 +44,6 @@ class Layer {
   virtual ~Layer();
 
   struct PrerollContext {
-#if defined(OS_FUCHSIA)
-    gfx::Metrics* metrics = nullptr;
-#endif
     RasterCache* raster_cache;
     GrContext* gr_context;
     SkColorSpace* dst_color_space;
@@ -59,7 +56,6 @@ class Layer {
     SkCanvas& canvas;
     const Stopwatch& frame_time;
     const Stopwatch& engine_time;
-    const CounterValues& memory_usage;
     TextureRegistry& texture_registry;
     const bool checkerboard_offscreen_layers;
   };

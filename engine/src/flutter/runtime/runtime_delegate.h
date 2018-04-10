@@ -18,14 +18,14 @@ namespace blink {
 class RuntimeDelegate {
  public:
   virtual std::string DefaultRouteName() = 0;
-  virtual void ScheduleFrame(bool regenerate_layer_tree = true) = 0;
-  virtual void Render(std::unique_ptr<flow::LayerTree> layer_tree) = 0;
-  virtual void UpdateSemantics(blink::SemanticsNodeUpdates update) = 0;
-  virtual void HandlePlatformMessage(fxl::RefPtr<PlatformMessage> message) = 0;
 
-  virtual void DidCreateMainIsolate(Dart_Isolate isolate);
-  virtual void DidCreateSecondaryIsolate(Dart_Isolate isolate);
-  virtual void DidShutdownMainIsolate();
+  virtual void ScheduleFrame(bool regenerate_layer_tree = true) = 0;
+
+  virtual void Render(std::unique_ptr<flow::LayerTree> layer_tree) = 0;
+
+  virtual void UpdateSemantics(blink::SemanticsNodeUpdates update) = 0;
+
+  virtual void HandlePlatformMessage(fxl::RefPtr<PlatformMessage> message) = 0;
 
  protected:
   virtual ~RuntimeDelegate();

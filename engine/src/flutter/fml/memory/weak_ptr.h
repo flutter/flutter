@@ -10,11 +10,16 @@
 
 #include <utility>
 
+#include "flutter/fml/memory/thread_checker.h"
 #include "flutter/fml/memory/weak_ptr_internal.h"
 #include "lib/fxl/logging.h"
 #include "lib/fxl/memory/ref_counted.h"
 
 namespace fml {
+
+struct DebugThreadChecker {
+  FML_DECLARE_THREAD_CHECKER(checker);
+};
 
 // Forward declaration, so |WeakPtr<T>| can friend it.
 template <typename T>
@@ -41,13 +46,17 @@ class WeakPtr {
   WeakPtr(const WeakPtr<T>& r) = default;
 
   template <typename U>
-  WeakPtr(const WeakPtr<U>& r) : ptr_(r.ptr_), flag_(r.flag_) {}
+  WeakPtr(const WeakPtr<U>& r)
+      : ptr_(static_cast<T*>(r.ptr_)), flag_(r.flag_), checker_(r.checker_) {}
 
   // Move constructor.
   WeakPtr(WeakPtr<T>&& r) = default;
 
   template <typename U>
-  WeakPtr(WeakPtr<U>&& r) : ptr_(r.ptr_), flag_(std::move(r.flag_)) {}
+  WeakPtr(WeakPtr<U>&& r)
+      : ptr_(static_cast<T*>(r.ptr_)),
+        flag_(std::move(r.flag_)),
+        checker_(r.checker_) {}
 
   ~WeakPtr() = default;
 
@@ -65,16 +74,24 @@ class WeakPtr {
   // The following methods should only be called on the same thread as the
   // "originating" |WeakPtrFactory|.
 
-  explicit operator bool() const { return flag_ && flag_->is_valid(); }
+  explicit operator bool() const {
+    FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
+    return flag_ && flag_->is_valid();
+  }
 
-  T* get() const { return *this ? ptr_ : nullptr; }
+  T* get() const {
+    FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
+    return *this ? ptr_ : nullptr;
+  }
 
   T& operator*() const {
+    FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
     FXL_DCHECK(*this);
     return *get();
   }
 
   T* operator->() const {
+    FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
     FXL_DCHECK(*this);
     return get();
   }
@@ -85,11 +102,14 @@ class WeakPtr {
 
   friend class WeakPtrFactory<T>;
 
-  explicit WeakPtr(T* ptr, fxl::RefPtr<fml::internal::WeakPtrFlag>&& flag)
-      : ptr_(ptr), flag_(std::move(flag)) {}
+  explicit WeakPtr(T* ptr,
+                   fxl::RefPtr<fml::internal::WeakPtrFlag>&& flag,
+                   DebugThreadChecker checker)
+      : ptr_(ptr), flag_(std::move(flag)), checker_(checker) {}
 
   T* ptr_;
   fxl::RefPtr<fml::internal::WeakPtrFlag> flag_;
+  DebugThreadChecker checker_;
 
   // Copy/move construction/assignment supported.
 };
@@ -140,19 +160,22 @@ template <typename T>
 class WeakPtrFactory {
  public:
   explicit WeakPtrFactory(T* ptr) : ptr_(ptr) { FXL_DCHECK(ptr_); }
+
   ~WeakPtrFactory() { InvalidateWeakPtrs(); }
 
   // Gets a new weak pointer, which will be valid until either
   // |InvalidateWeakPtrs()| is called or this object is destroyed.
   WeakPtr<T> GetWeakPtr() {
+    FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
     if (!flag_)
       flag_ = fxl::MakeRefCounted<fml::internal::WeakPtrFlag>();
-    return WeakPtr<T>(ptr_, flag_.Clone());
+    return WeakPtr<T>(ptr_, flag_.Clone(), checker_);
   }
 
   // Call this method to invalidate all existing weak pointers. (Note that
   // additional weak pointers can be produced even after this is called.)
   void InvalidateWeakPtrs() {
+    FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
     if (!flag_)
       return;
     flag_->Invalidate();
@@ -162,13 +185,17 @@ class WeakPtrFactory {
   // Call this method to determine if any weak pointers exist. (Note that a
   // "false" result is definitive, but a "true" result may not be if weak
   // pointers are held/reset/destroyed/reassigned on other threads.)
-  bool HasWeakPtrs() const { return flag_ && !flag_->HasOneRef(); }
+  bool HasWeakPtrs() const {
+    FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
+    return flag_ && !flag_->HasOneRef();
+  }
 
  private:
   // Note: See weak_ptr_internal.h for an explanation of why we store the
   // pointer here, instead of in the "flag".
   T* const ptr_;
   fxl::RefPtr<fml::internal::WeakPtrFlag> flag_;
+  DebugThreadChecker checker_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(WeakPtrFactory);
 };

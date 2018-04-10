@@ -6,14 +6,14 @@
 
 #include <CoreVideo/CoreVideo.h>
 
-#include "flutter/common/threads.h"
 #include "lib/fxl/logging.h"
 
 namespace shell {
 
 #define link_ (reinterpret_cast<CVDisplayLinkRef>(opaque_))
 
-VsyncWaiterMac::VsyncWaiterMac() : opaque_(nullptr) {
+VsyncWaiterMac::VsyncWaiterMac(blink::TaskRunners task_runners)
+    : VsyncWaiter(std::move(task_runners)), opaque_(nullptr) {
   // Create the link.
   CVDisplayLinkRef link = nullptr;
   CVDisplayLinkCreateWithActiveCGDisplays(&link);
@@ -48,18 +48,10 @@ void VsyncWaiterMac::OnDisplayLink() {
 
   CVDisplayLinkStop(link_);
 
-  auto callback = std::move(callback_);
-  callback_ = Callback();
-
-  blink::Threads::UI()->PostTask(
-      [callback, frame_start_time, frame_target_time] {
-        callback(frame_start_time, frame_target_time);
-      });
+  FireCallback(frame_start_time, frame_target_time);
 }
 
-void VsyncWaiterMac::AsyncWaitForVsync(Callback callback) {
-  FXL_DCHECK(!callback_);
-  callback_ = std::move(callback);
+void VsyncWaiterMac::AwaitVSync() {
   CVDisplayLinkStart(link_);
 }
 

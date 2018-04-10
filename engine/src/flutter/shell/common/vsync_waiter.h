@@ -6,7 +6,10 @@
 #define FLUTTER_SHELL_COMMON_VSYNC_WAITER_H_
 
 #include <functional>
+#include <memory>
+#include <mutex>
 
+#include "flutter/common/task_runners.h"
 #include "lib/fxl/time/time_point.h"
 
 namespace shell {
@@ -16,9 +19,23 @@ class VsyncWaiter {
   using Callback = std::function<void(fxl::TimePoint frame_start_time,
                                       fxl::TimePoint frame_target_time)>;
 
-  virtual void AsyncWaitForVsync(Callback callback) = 0;
-
   virtual ~VsyncWaiter();
+
+  void AsyncWaitForVsync(Callback callback);
+
+ protected:
+  const blink::TaskRunners task_runners_;
+  std::mutex callback_mutex_;
+  Callback callback_;
+
+  VsyncWaiter(blink::TaskRunners task_runners);
+
+  virtual void AwaitVSync() = 0;
+
+  void FireCallback(fxl::TimePoint frame_start_time,
+                    fxl::TimePoint frame_target_time);
+
+  FXL_DISALLOW_COPY_AND_ASSIGN(VsyncWaiter);
 };
 
 }  // namespace shell
