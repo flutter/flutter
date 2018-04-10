@@ -5,82 +5,40 @@
 #ifndef FLUTTER_COMMON_SETTINGS_H_
 #define FLUTTER_COMMON_SETTINGS_H_
 
-#include <fcntl.h>
 #include <stdint.h>
 
-#include <memory>
 #include <string>
 #include <vector>
 
-#include "flutter/fml/unique_fd.h"
-#include "lib/fxl/functional/closure.h"
-
 namespace blink {
 
-using TaskObserverAdd =
-    std::function<void(intptr_t /* key */, fxl::Closure /* callback */)>;
-using TaskObserverRemove = std::function<void(intptr_t /* key */)>;
-
 struct Settings {
-  // VM settings
-  std::string script_snapshot_path;
-  std::string kernel_snapshot_path;
-
-  std::string aot_snapshot_path;
-  std::string aot_vm_snapshot_data_filename;
-  std::string aot_vm_snapshot_instr_filename;
-  std::string aot_isolate_snapshot_data_filename;
-  std::string aot_isolate_snapshot_instr_filename;
-
-  std::string application_library_path;
-  std::string application_kernel_asset;
-
-  std::string main_dart_file_path;
-  std::string packages_file_path;
-
-  std::string temp_directory_path;
-  std::vector<std::string> dart_flags;
-
-  // Isolate settings
-  bool start_paused = false;
-  bool trace_skia = false;
-  bool trace_startup = false;
-  bool endless_trace_buffer = false;
-  bool enable_dart_profiling = false;
-  bool dart_non_checked_mode = false;
-
-  // Observatory settings
   bool enable_observatory = false;
   // Port on target will be auto selected by the OS. A message will be printed
   // on the target with the port after it has been selected.
   uint32_t observatory_port = 0;
   bool ipv6 = false;
-
-  // Font settings
+  bool start_paused = false;
+  bool trace_startup = false;
+  bool endless_trace_buffer = false;
+  bool enable_dart_profiling = false;
   bool use_test_fonts = false;
-
-  // Engine settings
-  TaskObserverAdd task_observer_add;
-  TaskObserverRemove task_observer_remove;
-  // The main isolate is current when this callback is made. This is a good spot
-  // to perform native Dart bindings for libraries not built in.
-  fxl::Closure root_isolate_create_callback;
-  // The isolate is not current and may have already been destroyed when this
-  // call is made.
-  fxl::Closure root_isolate_shutdown_callback;
+  bool dart_non_checked_mode = false;
   bool enable_software_rendering = false;
-  bool using_blink = false;
-  bool skia_deterministic_rendering_on_cpu = false;
+  bool using_blink = true;
+  std::string aot_shared_library_path;
+  std::string aot_snapshot_path;
+  std::string aot_vm_snapshot_data_filename;
+  std::string aot_vm_snapshot_instr_filename;
+  std::string aot_isolate_snapshot_data_filename;
+  std::string aot_isolate_snapshot_instr_filename;
+  std::string application_library_path;
+  std::string temp_directory_path;
+  std::vector<std::string> dart_flags;
   std::string log_tag = "flutter";
-  std::string icu_data_path;
 
-  // Assets settings
-  fml::UniqueFD::element_type assets_dir =
-      fml::UniqueFD::traits_type::InvalidValue();
-  std::string assets_path;
-  std::string flx_path;
-
-  std::string ToString() const;
+  static const Settings& Get();
+  static void Set(const Settings& settings);
 };
 
 }  // namespace blink

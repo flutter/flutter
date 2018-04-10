@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
-#include <iterator>
 #include <sstream>
 #include <string>
 
@@ -89,127 +88,6 @@ const fxl::StringView FlagForSwitch(Switch swtch) {
     }
   }
   return fxl::StringView();
-}
-
-template <typename T>
-static bool GetSwitchValue(const fxl::CommandLine& command_line,
-                           shell::Switch sw,
-                           T* result) {
-  std::string switch_string;
-
-  if (!command_line.GetOptionValue(shell::FlagForSwitch(sw), &switch_string)) {
-    return false;
-  }
-
-  std::stringstream stream(switch_string);
-  T value = 0;
-  if (stream >> value) {
-    *result = value;
-    return true;
-  }
-
-  return false;
-}
-
-blink::Settings SettingsFromCommandLine(const fxl::CommandLine& command_line) {
-  blink::Settings settings = {};
-
-  // Enable Observatory
-  settings.enable_observatory =
-      !command_line.HasOption(FlagForSwitch(Switch::DisableObservatory));
-
-  // Set Observatory Port
-  if (command_line.HasOption(FlagForSwitch(Switch::DeviceObservatoryPort))) {
-    if (!GetSwitchValue(command_line, Switch::DeviceObservatoryPort,
-                        &settings.observatory_port)) {
-      FXL_LOG(INFO)
-          << "Observatory port specified was malformed. Will default to "
-          << settings.observatory_port;
-    }
-  }
-
-  // Checked mode overrides.
-  settings.dart_non_checked_mode =
-      command_line.HasOption(FlagForSwitch(Switch::DartNonCheckedMode));
-
-  settings.ipv6 = command_line.HasOption(FlagForSwitch(Switch::IPv6));
-
-  settings.start_paused =
-      command_line.HasOption(FlagForSwitch(Switch::StartPaused));
-
-  settings.enable_dart_profiling =
-      command_line.HasOption(FlagForSwitch(Switch::EnableDartProfiling));
-
-  settings.enable_software_rendering =
-      command_line.HasOption(FlagForSwitch(Switch::EnableSoftwareRendering));
-
-  settings.using_blink =
-      command_line.HasOption(FlagForSwitch(Switch::EnableBlink));
-
-  settings.endless_trace_buffer =
-      command_line.HasOption(FlagForSwitch(Switch::EndlessTraceBuffer));
-
-  settings.trace_startup =
-      command_line.HasOption(FlagForSwitch(Switch::TraceStartup));
-
-  settings.skia_deterministic_rendering_on_cpu =
-      command_line.HasOption(FlagForSwitch(Switch::SkiaDeterministicRendering));
-
-  command_line.GetOptionValue(FlagForSwitch(Switch::FLX), &settings.flx_path);
-
-  command_line.GetOptionValue(FlagForSwitch(Switch::FlutterAssetsDir),
-                              &settings.assets_path);
-
-  command_line.GetOptionValue(FlagForSwitch(Switch::Snapshot),
-                              &settings.script_snapshot_path);
-
-  command_line.GetOptionValue(FlagForSwitch(Switch::MainDartFile),
-                              &settings.main_dart_file_path);
-
-  command_line.GetOptionValue(FlagForSwitch(Switch::Packages),
-                              &settings.packages_file_path);
-
-  command_line.GetOptionValue(FlagForSwitch(Switch::AotSnapshotPath),
-                              &settings.aot_snapshot_path);
-
-  command_line.GetOptionValue(FlagForSwitch(Switch::AotVmSnapshotData),
-                              &settings.aot_vm_snapshot_data_filename);
-
-  command_line.GetOptionValue(FlagForSwitch(Switch::AotVmSnapshotInstructions),
-                              &settings.aot_vm_snapshot_instr_filename);
-
-  command_line.GetOptionValue(FlagForSwitch(Switch::AotIsolateSnapshotData),
-                              &settings.aot_isolate_snapshot_data_filename);
-
-  command_line.GetOptionValue(
-      FlagForSwitch(Switch::AotIsolateSnapshotInstructions),
-      &settings.aot_isolate_snapshot_instr_filename);
-
-  command_line.GetOptionValue(FlagForSwitch(Switch::CacheDirPath),
-                              &settings.temp_directory_path);
-
-  command_line.GetOptionValue(FlagForSwitch(Switch::ICUDataFilePath),
-                              &settings.icu_data_path);
-
-  settings.use_test_fonts =
-      command_line.HasOption(FlagForSwitch(Switch::UseTestFonts));
-
-  command_line.GetOptionValue(FlagForSwitch(Switch::LogTag), &settings.log_tag);
-  std::string all_dart_flags;
-  if (command_line.GetOptionValue(FlagForSwitch(Switch::DartFlags),
-                                  &all_dart_flags)) {
-    std::stringstream stream(all_dart_flags);
-    std::istream_iterator<std::string> end;
-    for (std::istream_iterator<std::string> it(stream); it != end; ++it)
-      settings.dart_flags.push_back(*it);
-  }
-
-#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
-  settings.trace_skia =
-      command_line.HasOption(FlagForSwitch(Switch::TraceSkia));
-#endif
-
-  return settings;
 }
 
 }  // namespace shell

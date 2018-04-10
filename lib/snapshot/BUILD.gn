@@ -29,40 +29,20 @@ if (is_fuchsia) {
     # The sole purpose of this target is to generate a .packages file.
     sources = []
 
-    dot_packages_file = "$target_gen_dir/snapshot.packages"
-    outputs = [
-      dot_packages_file,
-    ]
-    deps = []
-    foreach(dep, dart_deps) {
-      deps += [ "$dep($dart_toolchain)" ]
-    }
+    infer_package_name = true
 
     disable_analysis = true
 
-    script = "//build/dart/gen_dot_packages.py"
-    args = [
-             "--out",
-             rebase_path(dot_packages_file, root_build_dir),
-             "--source-dir",
-             rebase_path("."),
-             "--root-build-dir",
-             rebase_path(root_build_dir),
-             "--root-gen-dir",
-             rebase_path(dart_root_gen_dir),
-             "--package-name",
-             "snapshot_root",
-             "--depfile",
-             rebase_path(depfile),
-             "--deps",
-           ] + dart_deps
+    deps = [
+      "//topaz/public/dart/fuchsia",
+      "//topaz/public/dart/zircon",
+    ]
   }
 }
 
 action("generate_snapshot_bin") {
   if (is_fuchsia) {
     snapshot_dart = "snapshot_fuchsia.dart"
-
     # TODO(rmacnak): Fuchsia cross builds use the wrong Dart target
     # architecture, and have added steps that depend on this error for
     # reasonable build times (e.g., invoking the analyzer).
@@ -105,9 +85,9 @@ action("generate_snapshot_bin") {
 
   rebased_dart_ui_path = rebase_path(dart_ui_path)
 
-  gen_snapshot_dir = get_label_info(
-          "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)",
-          "root_out_dir")
+  gen_snapshot_dir =
+      get_label_info("//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)",
+                     "root_out_dir")
   script = "//third_party/dart/runtime/tools/create_snapshot_bin.py"
 
   args = [
@@ -229,7 +209,7 @@ bin_to_assembly("isolate_snapshot_data_assembly") {
   ]
   input = "$target_gen_dir/isolate_snapshot.bin"
   output = "$target_gen_dir/isolate_snapshot_data.S"
-  symbol = "kDartIsolateSnapshotData"
+  symbol = "kDartIsolateCoreSnapshotData"
   executable = false
 }
 
@@ -239,7 +219,7 @@ bin_to_assembly("isolate_snapshot_instructions_assembly") {
   ]
   input = "$target_gen_dir/isolate_snapshot_instructions.bin"
   output = "$target_gen_dir/isolate_snapshot_instructions.S"
-  symbol = "kDartIsolateSnapshotInstructions"
+  symbol = "kDartIsolateCoreSnapshotInstructions"
   executable = true
 }
 
@@ -269,9 +249,9 @@ compile_platform("non_strong_platform") {
   ]
 
   args = [
-    "--target=flutter",
-    "dart:core",
-  ]
+            "--target=flutter",
+            "dart:core",
+         ]
 }
 
 compile_platform("strong_platform") {
@@ -285,10 +265,10 @@ compile_platform("strong_platform") {
   ]
 
   args = [
-    "--target=flutter",
-    "--strong",
-    "dart:core",
-  ]
+            "--target=flutter",
+            "--strong",
+            "dart:core"
+         ]
 }
 
 group("kernel_platform_files") {

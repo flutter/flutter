@@ -9,11 +9,11 @@
 	<key>CFBundleIconFile</key>
 	<string></string>
 	<key>CFBundleIdentifier</key>
-	<string>io.flutter.engine</string>
+	<string>io.flutter</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Flutter Engine</string>
+	<string>Flutter</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -26,7 +26,9 @@
 	<string>10.6</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright 2015 The Flutter Authors. All rights reserved.</string>
+	<key>NSMainNibFile</key>
+	<string>flutter_mac</string>
 	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
+	<string>FlutterApplication</string>
 </dict>
 </plist>

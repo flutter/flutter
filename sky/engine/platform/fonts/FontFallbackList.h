@@ -103,8 +103,6 @@ class PLATFORM_EXPORT FontFallbackList : public RefCounted<FontFallbackList> {
       m_pageZero = node;
   }
 
-  static void SetUseTestFonts(bool useTestFonts);
-
  private:
   FontFallbackList();
 
@@ -127,7 +125,6 @@ class PLATFORM_EXPORT FontFallbackList : public RefCounted<FontFallbackList> {
   unsigned short m_generation;
   mutable unsigned m_pitch : 3;  // Pitch
   mutable bool m_hasLoadingFallback : 1;
-  bool m_useTestFonts = false;
 };
 
 }  // namespace blink

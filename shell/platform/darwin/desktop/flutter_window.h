@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SHELL_PLATFORM_DARWIN_DESKTOP_FLUTTER_WINDOW_H_
-#define SHELL_PLATFORM_DARWIN_DESKTOP_FLUTTER_WINDOW_H_
+#ifndef __SHELL_PLATFORM_DARWIN_DESKTOP_FLUTTER_WINDOW__
+#define __SHELL_PLATFORM_DARWIN_DESKTOP_FLUTTER_WINDOW__
 
 #import <Cocoa/Cocoa.h>
 
@@ -11,4 +11,4 @@
 
 @end
 
-#endif  // SHELL_PLATFORM_DARWIN_DESKTOP_FLUTTER_WINDOW_H_
+#endif /* defined(__SHELL_PLATFORM_DARWIN_DESKTOP_FLUTTER_WINDOW__) */

@@ -10,19 +10,19 @@
 
 namespace shell {
 
-class VsyncWaiterMac final : public VsyncWaiter {
+class VsyncWaiterMac : public VsyncWaiter {
  public:
-  VsyncWaiterMac(blink::TaskRunners task_runners);
+  VsyncWaiterMac();
 
   ~VsyncWaiterMac() override;
 
+  void AsyncWaitForVsync(Callback callback) override;
+
  private:
   void* opaque_;
-
-  void AwaitVSync() override;
+  Callback callback_;
 
   static void OnDisplayLink(void* context);
-
   void OnDisplayLink();
 
   FXL_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterMac);

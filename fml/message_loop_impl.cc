@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#define FML_USED_ON_EMBEDDER
-
 #include "flutter/fml/message_loop_impl.h"
 
 #include <algorithm>
@@ -13,29 +11,35 @@
 #include "lib/fxl/build_config.h"
 
 #if OS_MACOSX
+
 #include "flutter/fml/platform/darwin/message_loop_darwin.h"
+using PlatformMessageLoopImpl = fml::MessageLoopDarwin;
+
 #elif OS_ANDROID
+
 #include "flutter/fml/platform/android/message_loop_android.h"
+using PlatformMessageLoopImpl = fml::MessageLoopAndroid;
+
 #elif OS_LINUX
+
 #include "flutter/fml/platform/linux/message_loop_linux.h"
+using PlatformMessageLoopImpl = fml::MessageLoopLinux;
+
 #elif OS_WIN
+
 #include "flutter/fml/platform/win/message_loop_win.h"
+using PlatformMessageLoopImpl = fml::MessageLoopWin;
+
+#else
+
+#error This platform does not have a message loop implementation.
+
 #endif
 
 namespace fml {
 
 fxl::RefPtr<MessageLoopImpl> MessageLoopImpl::Create() {
-#if OS_MACOSX
-  return fxl::MakeRefCounted<MessageLoopDarwin>();
-#elif OS_ANDROID
-  return fxl::MakeRefCounted<MessageLoopAndroid>();
-#elif OS_LINUX
-  return fxl::MakeRefCounted<MessageLoopLinux>();
-#elif OS_WIN
-  return fxl::MakeRefCounted<MessageLoopWin>();
-#else
-  return nullptr;
-#endif
+  return fxl::MakeRefCounted<::PlatformMessageLoopImpl>();
 }
 
 MessageLoopImpl::MessageLoopImpl() : order_(0), terminated_(false) {}
@@ -51,19 +55,20 @@ void MessageLoopImpl::RunExpiredTasksNow() {
   RunExpiredTasks();
 }
 
-void MessageLoopImpl::AddTaskObserver(intptr_t key, fxl::Closure callback) {
-  FXL_DCHECK(callback != nullptr);
+void MessageLoopImpl::AddTaskObserver(TaskObserver* observer) {
+  FXL_DCHECK(observer != nullptr);
   FXL_DCHECK(MessageLoop::GetCurrent().GetLoopImpl().get() == this)
       << "Message loop task observer must be added on the same thread as the "
          "loop.";
-  task_observers_[key] = std::move(callback);
+  task_observers_.insert(observer);
 }
 
-void MessageLoopImpl::RemoveTaskObserver(intptr_t key) {
+void MessageLoopImpl::RemoveTaskObserver(TaskObserver* observer) {
+  FXL_DCHECK(observer != nullptr);
   FXL_DCHECK(MessageLoop::GetCurrent().GetLoopImpl().get() == this)
       << "Message loop task observer must be removed from the same thread as "
          "the loop.";
-  task_observers_.erase(key);
+  task_observers_.erase(observer);
 }
 
 void MessageLoopImpl::DoRun() {
@@ -139,7 +144,7 @@ void MessageLoopImpl::RunExpiredTasks() {
   for (const auto& invocation : invocations) {
     invocation();
     for (const auto& observer : task_observers_) {
-      observer.second();
+      observer->DidProcessTask();
     }
   }
 }

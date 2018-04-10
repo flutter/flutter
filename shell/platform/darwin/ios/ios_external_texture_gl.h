@@ -25,8 +25,6 @@ class IOSExternalTextureGL : public flow::Texture {
 
   virtual void OnGrContextDestroyed() override;
 
-  virtual void MarkNewFrameAvailable() override;
-
  private:
   NSObject<FlutterTexture>* external_texture_;
   fml::CFRef<CVOpenGLESTextureCacheRef> cache_ref_;

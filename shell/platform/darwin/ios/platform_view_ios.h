@@ -8,66 +8,95 @@
 #include <memory>
 
 #include "flutter/fml/memory/weak_ptr.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterTexture.h"
-#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
-#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
 #include "lib/fxl/functional/closure.h"
 #include "lib/fxl/macros.h"
 
+@class CALayer;
+@class UIView;
+
 namespace shell {
 
-class PlatformViewIOS final : public PlatformView {
+class PlatformViewIOS : public PlatformView {
  public:
-  explicit PlatformViewIOS(PlatformView::Delegate& delegate,
-                           blink::TaskRunners task_runners,
-                           FlutterViewController* owner_controller_,
-                           FlutterView* owner_view_);
+  explicit PlatformViewIOS(CALayer* layer,
+                           NSObject<FlutterBinaryMessenger>* binaryMessenger);
 
   ~PlatformViewIOS() override;
 
-  PlatformMessageRouter& GetPlatformMessageRouter();
+  void Attach() override;
 
-  FlutterViewController* GetOwnerViewController() const;
+  void Attach(fxl::Closure firstFrameCallback);
 
-  void RegisterExternalTexture(int64_t id, NSObject<FlutterTexture>* texture);
+  void NotifyCreated();
 
-  fml::scoped_nsprotocol<FlutterTextInputPlugin*> GetTextInputPlugin() const;
+  void ToggleAccessibility(UIView* view, bool enabled);
 
-  void SetTextInputPlugin(
-      fml::scoped_nsprotocol<FlutterTextInputPlugin*> plugin);
+  PlatformMessageRouter& platform_message_router() {
+    return platform_message_router_;
+  }
 
- private:
-  FlutterViewController* owner_controller_;  // weak reference.
-  FlutterView* owner_view_;                  // weak reference.
-  std::unique_ptr<IOSSurface> ios_surface_;
-  PlatformMessageRouter platform_message_router_;
-  std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
-  fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin_;
-  fxl::Closure firstFrameCallback_;
+  fml::WeakPtr<PlatformViewIOS> GetWeakPtr();
 
-  // |shell::PlatformView|
-  std::unique_ptr<Surface> CreateRenderingSurface() override;
+  void UpdateSurfaceSize();
 
-  // |shell::PlatformView|
-  sk_sp<GrContext> CreateResourceContext() const override;
+  VsyncWaiter* GetVsyncWaiter() override;
 
-  // |shell::PlatformView|
-  void SetSemanticsEnabled(bool enabled) override;
+  bool ResourceContextMakeCurrent() override;
 
-  // |shell::PlatformView|
   void HandlePlatformMessage(
       fxl::RefPtr<blink::PlatformMessage> message) override;
 
-  // |shell::PlatformView|
+  void RegisterExternalTexture(int64_t id, NSObject<FlutterTexture>* texture);
+
   void UpdateSemantics(blink::SemanticsNodeUpdates update) override;
 
-  // |shell::PlatformView|
-  std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
+  void RunFromSource(const std::string& assets_directory,
+                     const std::string& main,
+                     const std::string& packages) override;
+
+  void SetAssetBundlePath(const std::string& assets_directory) override;
+
+  /**
+   * Exposes the `FlutterTextInputPlugin` singleton for the
+   * `AccessibilityBridge` to be able to interact with the text entry system.
+   */
+  fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin() {
+    return text_input_plugin_;
+  }
+
+  /**
+   * Sets the `FlutterTextInputPlugin` singleton returned by
+   * `text_input_plugin`.
+   */
+  void SetTextInputPlugin(
+      fml::scoped_nsprotocol<FlutterTextInputPlugin*> textInputPlugin) {
+    text_input_plugin_ = textInputPlugin;
+  }
+
+  NSObject<FlutterBinaryMessenger>* binary_messenger() const {
+    return binary_messenger_;
+  }
+
+ private:
+  std::unique_ptr<IOSSurface> ios_surface_;
+  PlatformMessageRouter platform_message_router_;
+  std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
+  fxl::Closure firstFrameCallback_;
+  fml::WeakPtrFactory<PlatformViewIOS> weak_factory_;
+  NSObject<FlutterBinaryMessenger>* binary_messenger_;
+  fml::scoped_nsprotocol<FlutterTextInputPlugin*> text_input_plugin_;
+
+  void SetupAndLoadFromSource(const std::string& assets_directory,
+                              const std::string& main,
+                              const std::string& packages);
+
+  void SetAssetBundlePathOnUI(const std::string& assets_directory);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
 };

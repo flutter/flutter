@@ -7,10 +7,14 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
-#include "flutter/fml//unique_fd.h"
 #include "lib/fxl/build_config.h"
+
+#if OS_WIN
+#include <windows.h>
+#endif
+
+#include "lib/fxl/files/unique_fd.h"
 #include "lib/fxl/macros.h"
 
 namespace fml {
@@ -35,9 +39,12 @@ std::unique_ptr<Mapping> GetResourceMapping(const std::string& resource_name);
 
 class FileMapping : public Mapping {
  public:
-  FileMapping(const std::string& path, bool executable = false);
+  FileMapping(const std::string& path);
 
-  FileMapping(const fml::UniqueFD& fd, bool executable = false);
+// fxl::UniqueFD isn't supported for Windows handles.
+#if !OS_WIN
+  FileMapping(const fxl::UniqueFD& fd);
+#endif
 
   ~FileMapping() override;
 
@@ -46,30 +53,14 @@ class FileMapping : public Mapping {
   const uint8_t* GetMapping() const override;
 
  private:
-  size_t size_ = 0;
-  uint8_t* mapping_ = nullptr;
+  size_t size_;
+  uint8_t* mapping_;
 
 #if OS_WIN
-  fml::UniqueFD mapping_handle_;
+  HANDLE mapping_handle_;
 #endif
 
   FXL_DISALLOW_COPY_AND_ASSIGN(FileMapping);
-};
-
-class DataMapping : public Mapping {
- public:
-  DataMapping(std::vector<uint8_t> data);
-
-  ~DataMapping() override;
-
-  size_t GetSize() const override;
-
-  const uint8_t* GetMapping() const override;
-
- private:
-  std::vector<uint8_t> data_;
-
-  FXL_DISALLOW_COPY_AND_ASSIGN(DataMapping);
 };
 
 }  // namespace fml

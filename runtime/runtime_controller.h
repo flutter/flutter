@@ -7,108 +7,71 @@
 
 #include <memory>
 
-#include "flutter/common/task_runners.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/window.h"
-#include "flutter/runtime/dart_vm.h"
 #include "lib/fxl/macros.h"
 
 namespace blink {
+class DartController;
+class DartLibraryProvider;
 class Scene;
 class RuntimeDelegate;
 class View;
 class Window;
 
-class RuntimeController final : public WindowClient {
+class RuntimeController : public WindowClient, public IsolateClient {
  public:
-  RuntimeController(RuntimeDelegate& client,
-                    const DartVM* vm,
-                    TaskRunners task_runners,
-                    fml::WeakPtr<GrContext> resource_context,
-                    fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue);
-
+  static std::unique_ptr<RuntimeController> Create(RuntimeDelegate* client);
   ~RuntimeController();
 
-  std::unique_ptr<RuntimeController> Clone() const;
+  void CreateDartController(const std::string& script_uri,
+                            const uint8_t* isolate_snapshot_data,
+                            const uint8_t* isolate_snapshot_instr,
+                            int dirfd = -1);
+  DartController* dart_controller() const { return dart_controller_.get(); }
 
-  bool SetViewportMetrics(const ViewportMetrics& metrics);
-
-  bool SetLocale(const std::string& language_code,
+  void SetViewportMetrics(const ViewportMetrics& metrics);
+  void SetLocale(const std::string& language_code,
                  const std::string& country_code);
+  void SetUserSettingsData(const std::string& data);
+  void SetSemanticsEnabled(bool enabled);
 
-  bool SetUserSettingsData(const std::string& data);
+  void BeginFrame(fxl::TimePoint frame_time);
+  void NotifyIdle(int64_t deadline);
 
-  bool SetSemanticsEnabled(bool enabled);
-
-  bool BeginFrame(fxl::TimePoint frame_time);
-
-  bool NotifyIdle(int64_t deadline);
-
-  bool DispatchPlatformMessage(fxl::RefPtr<PlatformMessage> message);
-
-  bool DispatchPointerDataPacket(const PointerDataPacket& packet);
-
-  bool DispatchSemanticsAction(int32_t id,
+  void DispatchPlatformMessage(fxl::RefPtr<PlatformMessage> message);
+  void DispatchPointerDataPacket(const PointerDataPacket& packet);
+  void DispatchSemanticsAction(int32_t id,
                                SemanticsAction action,
                                std::vector<uint8_t> args);
 
   Dart_Port GetMainPort();
-
   std::string GetIsolateName();
-
   bool HasLivePorts();
-
   tonic::DartErrorHandleType GetLastError();
 
-  fml::WeakPtr<DartIsolate> GetRootIsolate();
-
-  std::pair<bool, uint32_t> GetRootIsolateReturnCode();
-
  private:
-  struct WindowData {
-    ViewportMetrics viewport_metrics;
-    std::string language_code;
-    std::string country_code;
-    std::string user_settings_data = "{}";
-    bool semantics_enabled = false;
-  };
+  explicit RuntimeController(RuntimeDelegate* client);
 
-  RuntimeDelegate& client_;
-  const DartVM* vm_;
-  TaskRunners task_runners_;
-  fml::WeakPtr<GrContext> resource_context_;
-  fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue_;
-  WindowData window_data_;
-  fml::WeakPtr<DartIsolate> root_isolate_;
-  std::pair<bool, uint32_t> root_isolate_return_code_ = {false, 0};
+  Window* GetWindow();
 
-  RuntimeController(RuntimeDelegate& client,
-                    const DartVM* vm,
-                    TaskRunners task_runners,
-                    fml::WeakPtr<GrContext> resource_context,
-                    fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue,
-                    WindowData data);
-
-  Window* GetWindowIfAvailable();
-
-  bool FlushRuntimeStateToIsolate();
-
-  // |blink::WindowClient|
   std::string DefaultRouteName() override;
-
-  // |blink::WindowClient|
   void ScheduleFrame() override;
-
-  // |blink::WindowClient|
   void Render(Scene* scene) override;
-
-  // |blink::WindowClient|
   void UpdateSemantics(SemanticsUpdate* update) override;
-
-  // |blink::WindowClient|
   void HandlePlatformMessage(fxl::RefPtr<PlatformMessage> message) override;
+
+  void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
+  void DidShutdownMainIsolate() override;
+
+  RuntimeDelegate* client_;
+  std::string language_code_;
+  std::string country_code_;
+  std::string user_settings_data_ = "{}";
+  bool semantics_enabled_ = false;
+  std::unique_ptr<DartController> dart_controller_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(RuntimeController);
 };

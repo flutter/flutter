@@ -16,43 +16,35 @@
 
 namespace shell {
 
-class AndroidSurfaceGL final : public GPUSurfaceGLDelegate,
-                               public AndroidSurface {
+class AndroidSurfaceGL : public GPUSurfaceGLDelegate, public AndroidSurface {
  public:
-  AndroidSurfaceGL();
+  explicit AndroidSurfaceGL(PlatformView::SurfaceConfig offscreen_config);
 
   ~AndroidSurfaceGL() override;
 
-  bool IsOffscreenContextValid() const;
-
-  // |shell::AndroidSurface|
   bool IsValid() const override;
 
-  // |shell::AndroidSurface|
+  bool IsOffscreenContextValid() const;
+
   std::unique_ptr<Surface> CreateGPUSurface() override;
 
-  // |shell::AndroidSurface|
   void TeardownOnScreenContext() override;
 
-  // |shell::AndroidSurface|
+  SkISize OnScreenSurfaceSize() const override;
+
   bool OnScreenSurfaceResize(const SkISize& size) const override;
 
-  // |shell::AndroidSurface|
   bool ResourceContextMakeCurrent() override;
 
-  // |shell::AndroidSurface|
-  bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window) override;
+  bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window,
+                       PlatformView::SurfaceConfig config) override;
 
-  // |shell::GPUSurfaceGLDelegate|
   bool GLContextMakeCurrent() override;
 
-  // |shell::GPUSurfaceGLDelegate|
   bool GLContextClearCurrent() override;
 
-  // |shell::GPUSurfaceGLDelegate|
   bool GLContextPresent() override;
 
-  // |shell::GPUSurfaceGLDelegate|
   intptr_t GLContextFBO() const override;
 
  private:

@@ -4,10 +4,11 @@
 
 #include "flutter/shell/platform/darwin/ios/ios_external_texture_gl.h"
 
-#import <OpenGLES/EAGL.h>
+#include <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
-
+#include "flutter/common/threads.h"
+#include "flutter/lib/ui/painting/resource_context.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
@@ -25,6 +26,7 @@ IOSExternalTextureGL::IOSExternalTextureGL(int64_t textureId,
 IOSExternalTextureGL::~IOSExternalTextureGL() = default;
 
 void IOSExternalTextureGL::Paint(SkCanvas& canvas, const SkRect& bounds) {
+  ASSERT_IS_GPU_THREAD;
   if (!cache_ref_) {
     CVOpenGLESTextureCacheRef cache;
     CVReturn err = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL,
@@ -55,8 +57,10 @@ void IOSExternalTextureGL::Paint(SkCanvas& canvas, const SkRect& bounds) {
     return;
   }
   GrGLTextureInfo textureInfo = {CVOpenGLESTextureGetTarget(texture_ref_),
-                                 CVOpenGLESTextureGetName(texture_ref_), GL_RGBA8_OES};
-  GrBackendTexture backendTexture(bounds.width(), bounds.height(), GrMipMapped::kNo, textureInfo);
+                                 CVOpenGLESTextureGetName(texture_ref_),
+                                 GL_RGBA8_OES};
+  GrBackendTexture backendTexture(bounds.width(), bounds.height(), GrMipMapped::kNo,
+                                  textureInfo);
   sk_sp<SkImage> image =
       SkImage::MakeFromTexture(canvas.getGrContext(), backendTexture, kTopLeft_GrSurfaceOrigin,
                                kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr);
@@ -65,13 +69,14 @@ void IOSExternalTextureGL::Paint(SkCanvas& canvas, const SkRect& bounds) {
   }
 }
 
-void IOSExternalTextureGL::OnGrContextCreated() {}
+void IOSExternalTextureGL::OnGrContextCreated() {
+  ASSERT_IS_GPU_THREAD
+}
 
 void IOSExternalTextureGL::OnGrContextDestroyed() {
+  ASSERT_IS_GPU_THREAD
   texture_ref_.Reset(nullptr);
   cache_ref_.Reset(nullptr);
 }
-
-void IOSExternalTextureGL::MarkNewFrameAvailable() {}
 
 }  // namespace shell

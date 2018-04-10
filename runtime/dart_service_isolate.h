@@ -13,6 +13,8 @@ namespace blink {
 
 class DartServiceIsolate {
  public:
+  static bool Bootstrap();
+
   static bool Startup(std::string server_ip,
                       intptr_t server_port,
                       Dart_LibraryTagHandler embedder_tag_handler,
