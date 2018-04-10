@@ -72,8 +72,6 @@ GPUSurfaceGL::~GPUSurfaceGL() {
     return;
   }
 
-  GetCompositorContext().OnGrContextDestroyed();
-
   onscreen_surface_ = nullptr;
   context_->releaseResourcesAndAbandonContext();
   context_ = nullptr;
@@ -212,11 +210,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
     return nullptr;
   }
 
-  SurfaceFrame::SubmitCallback submit_callback = [weak = weak_factory_
-                                                             .GetWeakPtr()](
-      const SurfaceFrame& surface_frame, SkCanvas* canvas) {
-    return weak ? weak->PresentSurface(canvas) : false;
-  };
+  auto weak_this = weak_factory_.GetWeakPtr();
+
+  SurfaceFrame::SubmitCallback submit_callback =
+      [weak_this](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
+        return weak_this ? weak_this->PresentSurface(canvas) : false;
+      };
 
   return std::make_unique<SurfaceFrame>(surface, submit_callback);
 }

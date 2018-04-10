@@ -12,8 +12,7 @@
 
 namespace shell {
 
-class PlatformViewEmbedder final : public PlatformView,
-                                   public GPUSurfaceGLDelegate {
+class PlatformViewEmbedder : public PlatformView, public GPUSurfaceGLDelegate {
  public:
   using PlatformMessageResponseCallback =
       std::function<void(fxl::RefPtr<blink::PlatformMessage>)>;
@@ -27,11 +26,9 @@ class PlatformViewEmbedder final : public PlatformView,
     std::function<bool(void)> gl_make_resource_current_callback;  // optional
   };
 
-  PlatformViewEmbedder(PlatformView::Delegate& delegate,
-                       blink::TaskRunners task_runners,
-                       DispatchTable dispatch_table);
+  PlatformViewEmbedder(DispatchTable dispatch_table);
 
-  ~PlatformViewEmbedder() override;
+  ~PlatformViewEmbedder();
 
   // |shell::GPUSurfaceGLDelegate|
   bool GLContextMakeCurrent() override;
@@ -46,17 +43,25 @@ class PlatformViewEmbedder final : public PlatformView,
   intptr_t GLContextFBO() const override;
 
   // |shell::PlatformView|
+  void Attach() override;
+
+  // |shell::PlatformView|
+  bool ResourceContextMakeCurrent() override;
+
+  // |shell::PlatformView|
+  void RunFromSource(const std::string& assets_directory,
+                     const std::string& main,
+                     const std::string& packages) override;
+
+  // |shell::PlatformView|
+  void SetAssetBundlePath(const std::string& assets_directory) override;
+
+  // |shell::PlatformView|
   void HandlePlatformMessage(
       fxl::RefPtr<blink::PlatformMessage> message) override;
 
  private:
   DispatchTable dispatch_table_;
-
-  // |shell::PlatformView|
-  std::unique_ptr<Surface> CreateRenderingSurface() override;
-
-  // |shell::PlatformView|
-  sk_sp<GrContext> CreateResourceContext() const override;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(PlatformViewEmbedder);
 };

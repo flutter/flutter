@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#define FML_USED_ON_EMBEDDER
-
 #include <thread>
 
 #include "flutter/fml/message_loop.h"
-#include "flutter/fml/task_runner.h"
 #include "gtest/gtest.h"
 #include "lib/fxl/synchronization/waitable_event.h"
 
@@ -247,6 +244,22 @@ TEST(MessageLoop, TIME_SENSITIVE(MultipleDelayedTasksWithDecreasingDeltas)) {
   ASSERT_EQ(checked, count);
 }
 
+class CustomTaskObserver : public fml::TaskObserver {
+ public:
+  CustomTaskObserver(std::function<void()> lambda) : lambda_(lambda){};
+
+  ~CustomTaskObserver() override = default;
+
+  void DidProcessTask() override {
+    if (lambda_) {
+      lambda_();
+    }
+  };
+
+ private:
+  std::function<void()> lambda_;
+};
+
 TEST(MessageLoop, TaskObserverFire) {
   bool started = false;
   bool terminated = false;
@@ -256,7 +269,8 @@ TEST(MessageLoop, TaskObserverFire) {
     auto& loop = fml::MessageLoop::GetCurrent();
     size_t task_count = 0;
     size_t obs_count = 0;
-    auto obs = PLATFORM_SPECIFIC_CAPTURE(&obs_count)() { obs_count++; };
+    CustomTaskObserver obs(
+        PLATFORM_SPECIFIC_CAPTURE(&obs_count)() { obs_count++; });
     for (size_t i = 0; i < count; i++) {
       loop.GetTaskRunner()->PostTask(
           PLATFORM_SPECIFIC_CAPTURE(&terminated, i, &task_count)() {
@@ -268,7 +282,7 @@ TEST(MessageLoop, TaskObserverFire) {
             }
           });
     }
-    loop.AddTaskObserver(0, obs);
+    loop.AddTaskObserver(&obs);
     loop.Run();
     ASSERT_EQ(task_count, count);
     ASSERT_EQ(obs_count, count);

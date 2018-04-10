@@ -5,8 +5,6 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_SHADER_H_
 #define FLUTTER_LIB_UI_PAINTING_SHADER_H_
 
-#include "flutter/flow/skia_gpu_object.h"
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "lib/tonic/dart_wrappable.h"
 #include "third_party/skia/include/core/SkShader.h"
 
@@ -20,17 +18,14 @@ class Shader : public fxl::RefCountedThreadSafe<Shader>,
  public:
   ~Shader() override;
 
-  sk_sp<SkShader> shader() { return shader_.get(); }
-
-  void set_shader(flow::SkiaGPUObject<SkShader> shader) {
-    shader_ = std::move(shader);
-  }
+  const sk_sp<SkShader>& shader() { return shader_; }
+  void set_shader(sk_sp<SkShader> shader) { shader_ = std::move(shader); }
 
  protected:
-  Shader(flow::SkiaGPUObject<SkShader> shader = {});
+  Shader(sk_sp<SkShader> shader);
 
  private:
-  flow::SkiaGPUObject<SkShader> shader_;
+  sk_sp<SkShader> shader_;
 };
 
 }  // namespace blink

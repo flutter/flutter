@@ -2,30 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#define FML_USED_ON_EMBEDDER
-
-#include "lib/fxl/build_config.h"
-
-#if OS_WIN
-#define FLUTTER_EXPORT __declspec(dllexport)
-#else  // OS_WIN
 #define FLUTTER_EXPORT __attribute__((visibility("default")))
-#endif  // OS_WIN
 
 #include "flutter/shell/platform/embedder/embedder.h"
 
 #include <type_traits>
-
-#include "flutter/assets/directory_asset_bundle.h"
-#include "flutter/common/task_runners.h"
-#include "flutter/fml/file.h"
+#include "flutter/common/threads.h"
 #include "flutter/fml/message_loop.h"
-#include "flutter/shell/common/rasterizer.h"
-#include "flutter/shell/common/switches.h"
-#include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
-#include "lib/fxl/command_line.h"
 #include "lib/fxl/functional/make_copyable.h"
 
 #define SAFE_ACCESS(pointer, member, default_value)                      \
@@ -57,6 +41,21 @@ bool IsRendererValid(const FlutterRendererConfig* config) {
   return true;
 }
 
+class PlatformViewHolder {
+ public:
+  PlatformViewHolder(std::shared_ptr<shell::PlatformViewEmbedder> ptr)
+      : platform_view_(std::move(ptr)) {}
+
+  std::shared_ptr<shell::PlatformViewEmbedder> view() const {
+    return platform_view_;
+  }
+
+ private:
+  std::shared_ptr<shell::PlatformViewEmbedder> platform_view_;
+
+  FXL_DISALLOW_COPY_AND_ASSIGN(PlatformViewHolder);
+};
+
 struct _FlutterPlatformMessageResponseHandle {
   fxl::RefPtr<blink::PlatformMessage> message;
 };
@@ -66,7 +65,6 @@ FlutterResult FlutterEngineRun(size_t version,
                                const FlutterProjectArgs* args,
                                void* user_data,
                                FlutterEngine* engine_out) {
-  // Step 0: Figure out arguments for shell creation.
   if (version != FLUTTER_ENGINE_VERSION) {
     return kInvalidLibraryVersion;
   }
@@ -89,44 +87,51 @@ FlutterResult FlutterEngineRun(size_t version,
     return kInvalidArguments;
   }
 
-  auto make_current = [ptr = config->open_gl.make_current,
-                       user_data]() -> bool { return ptr(user_data); };
-
-  auto clear_current = [ptr = config->open_gl.clear_current,
-                        user_data]() -> bool { return ptr(user_data); };
-
-  auto present = [ptr = config->open_gl.present, user_data]() -> bool {
+  auto make_current =
+      [ ptr = config->open_gl.make_current, user_data ]()->bool {
     return ptr(user_data);
   };
 
-  auto fbo_callback = [ptr = config->open_gl.fbo_callback,
-                       user_data]() -> intptr_t { return ptr(user_data); };
+  auto clear_current =
+      [ ptr = config->open_gl.clear_current, user_data ]()->bool {
+    return ptr(user_data);
+  };
+
+  auto present = [ ptr = config->open_gl.present, user_data ]()->bool {
+    return ptr(user_data);
+  };
+
+  auto fbo_callback =
+      [ ptr = config->open_gl.fbo_callback, user_data ]()->intptr_t {
+    return ptr(user_data);
+  };
 
   shell::PlatformViewEmbedder::PlatformMessageResponseCallback
       platform_message_response_callback = nullptr;
   if (SAFE_ACCESS(args, platform_message_callback, nullptr) != nullptr) {
     platform_message_response_callback =
-        [ptr = args->platform_message_callback,
-         user_data](fxl::RefPtr<blink::PlatformMessage> message) {
-          auto handle = new FlutterPlatformMessageResponseHandle();
-          const FlutterPlatformMessage incoming_message = {
-              .struct_size = sizeof(FlutterPlatformMessage),
-              .channel = message->channel().c_str(),
-              .message = message->data().data(),
-              .message_size = message->data().size(),
-              .response_handle = handle,
-          };
-          handle->message = std::move(message);
-          return ptr(&incoming_message, user_data);
-        };
+        [ ptr = args->platform_message_callback,
+          user_data ](fxl::RefPtr<blink::PlatformMessage> message) {
+      auto handle = new FlutterPlatformMessageResponseHandle();
+      const FlutterPlatformMessage incoming_message = {
+          .struct_size = sizeof(FlutterPlatformMessage),
+          .channel = message->channel().c_str(),
+          .message = message->data().data(),
+          .message_size = message->data().size(),
+          .response_handle = handle,
+      };
+      handle->message = std::move(message);
+      return ptr(&incoming_message, user_data);
+    };
   }
 
   const FlutterOpenGLRendererConfig* open_gl_config = &config->open_gl;
   std::function<bool()> make_resource_current_callback = nullptr;
   if (SAFE_ACCESS(open_gl_config, make_resource_current, nullptr) != nullptr) {
-    make_resource_current_callback = [ptr =
-                                          config->open_gl.make_resource_current,
-                                      user_data]() { return ptr(user_data); };
+    make_resource_current_callback =
+        [ ptr = config->open_gl.make_resource_current, user_data ]() {
+      return ptr(user_data);
+    };
   }
 
   std::string icu_data_path;
@@ -142,33 +147,18 @@ FlutterResult FlutterEngineRun(size_t version,
         SAFE_ACCESS(args, command_line_argv, nullptr));
   }
 
-  blink::Settings settings = shell::SettingsFromCommandLine(command_line);
-  settings.icu_data_path = icu_data_path;
-  settings.main_dart_file_path = args->main_path;
-  settings.packages_file_path = args->packages_path;
-  settings.assets_path = args->assets_path;
-  settings.task_observer_add = [](intptr_t key, fxl::Closure callback) {
-    fml::MessageLoop::GetCurrent().AddTaskObserver(key, std::move(callback));
-  };
-  settings.task_observer_remove = [](intptr_t key) {
-    fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
-  };
+  static std::once_flag once_shell_initialization;
+  std::call_once(once_shell_initialization, [&]() {
+    fxl::CommandLine null_command_line;
+    shell::Shell::InitStandalone(
+        std::move(command_line),
+        icu_data_path,  // icu data path default lookup.
+        "",             // application library not supported in JIT mode.
+        args->assets_path
+    );
+  });
 
-  // Create a thread host with the current thread as the platform thread and all
-  // other threads managed.
-  shell::ThreadHost thread_host("io.flutter", shell::ThreadHost::Type::GPU |
-                                                  shell::ThreadHost::Type::IO |
-                                                  shell::ThreadHost::Type::UI);
-  fml::MessageLoop::EnsureInitializedForCurrentThread();
-  blink::TaskRunners task_runners(
-      "io.flutter",
-      fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
-      thread_host.gpu_thread->GetTaskRunner(),         // gpu
-      thread_host.ui_thread->GetTaskRunner(),          // ui
-      thread_host.io_thread->GetTaskRunner()           // io
-  );
-
-  shell::PlatformViewEmbedder::DispatchTable dispatch_table = {
+  shell::PlatformViewEmbedder::DispatchTable table = {
       .gl_make_current_callback = make_current,
       .gl_clear_current_callback = clear_current,
       .gl_present_callback = present,
@@ -177,55 +167,31 @@ FlutterResult FlutterEngineRun(size_t version,
       .gl_make_resource_current_callback = make_resource_current_callback,
   };
 
-  shell::Shell::CreateCallback<shell::PlatformView> on_create_platform_view =
-      [dispatch_table](shell::Shell& shell) {
-        return std::make_unique<shell::PlatformViewEmbedder>(
-            shell,                   // delegate
-            shell.GetTaskRunners(),  // task runners
-            dispatch_table           // embedder dispatch table
-        );
-      };
+  auto platform_view = std::make_shared<shell::PlatformViewEmbedder>(table);
+  platform_view->Attach();
 
-  shell::Shell::CreateCallback<shell::Rasterizer> on_create_rasterizer =
-      [](shell::Shell& shell) {
-        return std::make_unique<shell::Rasterizer>(shell.GetTaskRunners());
-      };
+  std::string assets(args->assets_path);
+  std::string main(args->main_path);
+  std::string packages(args->packages_path);
 
-  // Step 1: Create the engine.
-  auto embedder_engine =
-      std::make_unique<shell::EmbedderEngine>(std::move(thread_host),   //
-                                              std::move(task_runners),  //
-                                              settings,                 //
-                                              on_create_platform_view,  //
-                                              on_create_rasterizer      //
-      );
+  blink::Threads::UI()->PostTask([
+    weak_engine = platform_view->engine().GetWeakPtr(),  //
+    assets = std::move(assets),                          //
+    main = std::move(main),                              //
+    packages = std::move(packages)                       //
+  ] {
+    if (auto engine = weak_engine) {
+      if (main.empty()) {
+        engine->RunBundle(assets);
+      } else {
+        engine->RunBundleAndSource(assets, main, packages);
+      }
+    }
+  });
 
-  if (!embedder_engine->IsValid()) {
-    return kInvalidArguments;
-  }
+  *engine_out = reinterpret_cast<FlutterEngine>(
+      new PlatformViewHolder(std::move(platform_view)));
 
-  // Step 2: Setup the rendering surface.
-  if (!embedder_engine->NotifyCreated()) {
-    return kInvalidArguments;
-  }
-
-  // Step 3: Run the engine.
-  auto run_configuration = shell::RunConfiguration::InferFromSettings(settings);
-
-  run_configuration.AddAssetResolver(
-      std::make_unique<blink::DirectoryAssetBundle>(
-          fml::Duplicate(settings.assets_dir)));
-
-  run_configuration.AddAssetResolver(
-      std::make_unique<blink::DirectoryAssetBundle>(fml::OpenFile(
-          settings.assets_path.c_str(), fml::OpenPermission::kRead, true)));
-
-  if (!embedder_engine->Run(std::move(run_configuration))) {
-    return kInvalidArguments;
-  }
-
-  // Finally! Release the ownership of the embedder engine to the caller.
-  *engine_out = reinterpret_cast<FlutterEngine>(embedder_engine.release());
   return kSuccess;
 }
 
@@ -233,9 +199,7 @@ FlutterResult FlutterEngineShutdown(FlutterEngine engine) {
   if (engine == nullptr) {
     return kInvalidArguments;
   }
-  auto embedder_engine = reinterpret_cast<shell::EmbedderEngine*>(engine);
-  embedder_engine->NotifyDestroyed();
-  delete embedder_engine;
+  delete reinterpret_cast<PlatformViewHolder*>(engine);
   return kSuccess;
 }
 
@@ -246,16 +210,21 @@ FlutterResult FlutterEngineSendWindowMetricsEvent(
     return kInvalidArguments;
   }
 
+  auto holder = reinterpret_cast<PlatformViewHolder*>(engine);
+
   blink::ViewportMetrics metrics;
 
   metrics.physical_width = SAFE_ACCESS(flutter_metrics, width, 0.0);
   metrics.physical_height = SAFE_ACCESS(flutter_metrics, height, 0.0);
   metrics.device_pixel_ratio = SAFE_ACCESS(flutter_metrics, pixel_ratio, 1.0);
 
-  return reinterpret_cast<shell::EmbedderEngine*>(engine)->SetViewportMetrics(
-             std::move(metrics))
-             ? kSuccess
-             : kInvalidArguments;
+  blink::Threads::UI()->PostTask(
+      [ weak_engine = holder->view()->engine().GetWeakPtr(), metrics ] {
+        if (auto engine = weak_engine) {
+          engine->SetViewportMetrics(metrics);
+        }
+      });
+  return kSuccess;
 }
 
 inline blink::PointerData::Change ToPointerDataChange(
@@ -298,10 +267,19 @@ FlutterResult FlutterEngineSendPointerEvent(FlutterEngine engine,
         reinterpret_cast<const uint8_t*>(current) + current->struct_size);
   }
 
-  return reinterpret_cast<shell::EmbedderEngine*>(engine)
-                 ->DispatchPointerDataPacket(std::move(packet))
-             ? kSuccess
-             : kInvalidArguments;
+  blink::Threads::UI()->PostTask(fxl::MakeCopyable([
+    weak_engine = reinterpret_cast<PlatformViewHolder*>(engine)
+                      ->view()
+                      ->engine()
+                      .GetWeakPtr(),
+    packet = std::move(packet)
+  ] {
+    if (auto engine = weak_engine) {
+      engine->DispatchPointerDataPacket(*packet);
+    }
+  }));
+
+  return kSuccess;
 }
 
 FlutterResult FlutterEngineSendPlatformMessage(
@@ -316,6 +294,8 @@ FlutterResult FlutterEngineSendPlatformMessage(
     return kInvalidArguments;
   }
 
+  auto holder = reinterpret_cast<PlatformViewHolder*>(engine);
+
   auto message = fxl::MakeRefCounted<blink::PlatformMessage>(
       flutter_message->channel,
       std::vector<uint8_t>(
@@ -323,10 +303,13 @@ FlutterResult FlutterEngineSendPlatformMessage(
           flutter_message->message + flutter_message->message_size),
       nullptr);
 
-  return reinterpret_cast<shell::EmbedderEngine*>(engine)->SendPlatformMessage(
-             std::move(message))
-             ? kSuccess
-             : kInvalidArguments;
+  blink::Threads::UI()->PostTask(
+      [ weak_engine = holder->view()->engine().GetWeakPtr(), message ] {
+        if (auto engine = weak_engine) {
+          engine->DispatchPlatformMessage(message);
+        }
+      });
+  return kSuccess;
 }
 
 FlutterResult FlutterEngineSendPlatformMessageResponse(
