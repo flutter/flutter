@@ -80,24 +80,28 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     handle.addListener(_handles[handle]);
     if (!_keepingAlive) {
       _keepingAlive = true;
-      // We use Element.visitChildren rather than context.visitChildElements
-      // because we might be called during build, and context.visitChildElements
-      // verifies that it is not called during build. Element.visitChildren does
-      // not, instead it assumes that the caller will be careful. (See the
-      // documentation for these methods for more details.)
-      //
-      // Here we know it's safe because we just received a notification, which
-      // we wouldn't be able to do if we hadn't built our child and its child --
-      // our build method always builds the same subtree and it always includes
-      // the node we're looking for (KeepAlive) as the parent of the node that
-      // reports the notifications (NotificationListener).
-      //
-      // (We're only going down one level, to get our direct child.)
-      final Element element = context;
-      element.visitChildren((Element child) {
-        assert(child is ParentDataElement<SliverMultiBoxAdaptorWidget>);
-        final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = child;
-        childElement.applyWidgetOutOfTurn(build(context));
+      // We are most likely in the middle of building our children. In order to
+      // access them below we need to wait until the build is complete.
+      scheduleMicrotask(() {
+        // We use Element.visitChildren rather than context.visitChildElements
+        // because we might be called during build, and context.visitChildElements
+        // verifies that it is not called during build. Element.visitChildren does
+        // not, instead it assumes that the caller will be careful. (See the
+        // documentation for these methods for more details.)
+        //
+        // Here we know it's safe because we just received a notification, which
+        // we wouldn't be able to do if we hadn't built our child and its child --
+        // our build method always builds the same subtree and it always includes
+        // the node we're looking for (KeepAlive) as the parent of the node that
+        // reports the notifications (NotificationListener).
+        //
+        // (We're only going down one level, to get our direct child.)
+        final Element element = context;
+        element.visitChildren((Element child) {
+          assert(child is ParentDataElement<SliverMultiBoxAdaptorWidget>);
+          final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = child;
+          childElement.applyWidgetOutOfTurn(build(context));
+        });
       });
     }
     return false;
