@@ -19,8 +19,11 @@ import '../globals.dart';
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
-  AnalyzeContinuously(ArgResults argResults, this.repoPackages, { this.previewDart2: false }) : super(argResults);
+  AnalyzeContinuously(ArgResults argResults, this.repoRoots, this.repoPackages, {
+    this.previewDart2: false,
+  }) : super(argResults);
 
+  final List<String> repoRoots;
   final List<Directory> repoPackages;
   final bool previewDart2;
 
@@ -42,7 +45,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     if (argResults['flutter-repo']) {
       final PackageDependencyTracker dependencies = new PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
-      directories = repoPackages.map((Directory dir) => dir.path).toList();
+      directories = repoRoots;
       analysisTarget = 'Flutter repository';
       printTrace('Analyzing Flutter repository:');
       for (String projectPath in directories)

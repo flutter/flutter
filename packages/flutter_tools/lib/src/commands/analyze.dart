@@ -80,12 +80,14 @@ class AnalyzeCommand extends FlutterCommand {
     if (argResults['watch']) {
       return new AnalyzeContinuously(
         argResults,
+        runner.getRepoRoots(),
         runner.getRepoPackages(),
         previewDart2: argResults['preview-dart-2'],
       ).analyze();
     } else {
       return new AnalyzeOnce(
         argResults,
+        runner.getRepoRoots(),
         runner.getRepoPackages(),
         workingDirectory: workingDirectory,
         previewDart2: argResults['preview-dart-2'],

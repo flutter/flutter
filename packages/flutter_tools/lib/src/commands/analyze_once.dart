@@ -21,11 +21,13 @@ import 'analyze_base.dart';
 class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(
     ArgResults argResults,
+    this.repoRoots,
     this.repoPackages, {
     this.workingDirectory,
     this.previewDart2: false,
   }) : super(argResults);
 
+  final List<String> repoRoots;
   final List<Directory> repoPackages;
 
   /// The working directory for testing analysis using dartanalyzer.
@@ -58,7 +60,7 @@ class AnalyzeOnce extends AnalyzeBase {
       new PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
 
-      directories.addAll(repoPackages.map((Directory directory) => directory.path));
+      directories.addAll(repoRoots);
 
       if (argResults.wasParsed('current-package') && argResults['current-package']) {
         directories.add(currentDirectory);
