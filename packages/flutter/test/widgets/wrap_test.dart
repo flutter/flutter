@@ -872,7 +872,6 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 10.0)));
     verify(tester, <Offset>[const Offset(0.0, 0.0)]);
 
-
     await tester.pumpWidget(
       new Column(
         children: <Widget>[
