@@ -629,7 +629,9 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
     }
     if (childCount > 0) {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
-      crossAxisExtent += runCrossAxisExtent + runSpacing;
+      crossAxisExtent += runCrossAxisExtent;
+      if (runMetrics.isNotEmpty)
+        crossAxisExtent += runSpacing;
       runMetrics.add(new _RunMetrics(runMainAxisExtent, runCrossAxisExtent, childCount));
     }
 

@@ -710,7 +710,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(270.0, 258.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(270.0, 250.0)));
     verify(tester, <Offset>[
       const Offset(0.0, 0.0),
       const Offset(22.0, 0.0),
@@ -853,17 +853,46 @@ void main() {
   });
 
   testWidgets('Object exactly matches container width', (WidgetTester tester) async {
-    await tester.pumpWidget(new Wrap(
-      direction: Axis.horizontal,
-      textDirection: TextDirection.ltr,
-      spacing: 10.0,
-      runSpacing: 10.0,
-      children: const <Widget>[
-        const SizedBox(width: 800.0, height: 0.0),
-      ],
-    ));
+    await tester.pumpWidget(
+      new Column(
+        children: <Widget>[
+          new Wrap(
+            direction: Axis.horizontal,
+            textDirection: TextDirection.ltr,
+            spacing: 10.0,
+            runSpacing: 10.0,
+            children: const <Widget>[
+              const SizedBox(width: 800.0, height: 10.0),
+            ],
+          ),
+        ],
+      )
+    );
 
-    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 10.0)));
     verify(tester, <Offset>[const Offset(0.0, 0.0)]);
+
+    await tester.pumpWidget(
+      new Column(
+        children: <Widget>[
+          new Wrap(
+            direction: Axis.horizontal,
+            textDirection: TextDirection.ltr,
+            spacing: 10.0,
+            runSpacing: 10.0,
+            children: const <Widget>[
+              const SizedBox(width: 800.0, height: 10.0),
+              const SizedBox(width: 800.0, height: 10.0),
+            ],
+          ),
+        ],
+      )
+    );
+
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 30.0)));
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 20.0),
+    ]);
   });
 }
