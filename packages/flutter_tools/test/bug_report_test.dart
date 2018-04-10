@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/testing.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/executable.dart' as tools;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/io.dart';
