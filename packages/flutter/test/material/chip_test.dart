@@ -200,7 +200,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSize(find.byType(Text)), const Size(40.0, 24.0));
+    expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
     expect(tester.getSize(find.byType(Chip)), const Size(64.0, 32.0));
     await tester.pumpWidget(
       new MaterialApp(
