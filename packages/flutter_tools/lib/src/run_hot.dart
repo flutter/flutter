@@ -541,7 +541,7 @@ class HotRunner extends ResidentRunner {
             // This could happen if the isolate is not actually running,
             // failed to start for some reason. For example, if main method
             // is not found in the app.
-            retrieveFirstReloadReport.completeError("Dart VM failed to provide reload report");
+            retrieveFirstReloadReport.completeError('Dart VM failed to provide reload report');
             return;
           }
           // Don't print errors because they will be printed further down when
