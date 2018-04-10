@@ -4,15 +4,14 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
@@ -33,10 +32,10 @@ class FlutterTesterApp extends ApplicationPackage {
         super(id: directory);
 
   @override
-  String get name => path.basename(_directory);
+  String get name => fs.path.basename(_directory);
 
   @override
-  String get packagePath => path.join(_directory, '.packages');
+  String get packagePath => fs.path.join(_directory, '.packages');
 }
 
 // TODO(devoncarew): This device does not currently work with full restarts.
