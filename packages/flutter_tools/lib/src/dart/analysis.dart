@@ -8,6 +8,7 @@ import 'dart:convert';
 import '../base/file_system.dart' hide IOSink;
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../globals.dart';
 import 'sdk.dart';
@@ -152,6 +153,8 @@ class AnalysisError implements Comparable<AnalysisError> {
     'INFO': 1
   };
 
+  static final String _separator = platform.isWindows ? '-' : '•';
+
   // "severity":"INFO","type":"TODO","location":{
   //   "file":"/Users/.../lib/test.dart","offset":362,"length":72,"startLine":15,"startColumn":4
   // },"message":"...","hasFix":false}
@@ -194,8 +197,10 @@ class AnalysisError implements Comparable<AnalysisError> {
 
   @override
   String toString() {
-    final String relativePath = fs.path.relative(file);
-    return '${severity.toLowerCase().padLeft(7)} • $messageSentenceFragment • $relativePath:$startLine:$startColumn';
+    return
+      '${severity.toLowerCase().padLeft(7)} $_separator '
+      '$messageSentenceFragment $_separator '
+      '${fs.path.relative(file)}:$startLine:$startColumn';
   }
 
   String toLegacyString() {
