@@ -66,9 +66,9 @@ BuildApp() {
 
   local artifact_variant="unknown"
   case "$build_mode" in
-    release) artifact_variant="ios-release";;
-    profile) artifact_variant="ios-profile";;
-    debug) artifact_variant="ios";;
+    release) artifact_variant="ios-arm64-release";;
+    profile) artifact_variant="ios-arm64-profile";;
+    debug) artifact_variant="ios-arm64";;
     *) echo "Unknown FLUTTER_BUILD_MODE: $FLUTTER_BUILD_MODE";;
   esac
 
@@ -116,7 +116,7 @@ BuildApp() {
     StreamOutput " ├─Building Dart code..."
     RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build aot \
       --output-dir="${build_dir}/aot"                                       \
-      --target-platform=ios                                                 \
+      --target-platform=ios-arm64                                           \
       --target="${target_path}"                                             \
       ${aot_flags}                                                          \
       ${local_engine_flag}                                                  \

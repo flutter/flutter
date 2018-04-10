@@ -304,7 +304,7 @@ class IOSDevice extends Device {
   }
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios_arm64;
 
   @override
   Future<String> get sdkNameAndVersion async => 'iOS $_sdkVersion';

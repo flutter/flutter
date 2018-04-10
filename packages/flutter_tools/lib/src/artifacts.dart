@@ -108,7 +108,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         return _getAndroidArtifactPath(artifact, platform, mode);
-      case TargetPlatform.ios:
+      case TargetPlatform.ios_arm64:
         return _getIosArtifactPath(artifact, platform, mode);
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
@@ -207,7 +207,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.fuchsia:
         assert(mode == null, 'Platform $platform does not support different build modes.');
         return fs.path.join(engineDir, platformName);
-      case TargetPlatform.ios:
+      case TargetPlatform.ios_arm64:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:

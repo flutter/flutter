@@ -152,7 +152,7 @@ enum TargetPlatform {
   android_arm64,
   android_x64,
   android_x86,
-  ios,
+  ios_arm64,
   darwin_x64,
   linux_x64,
   windows_x64,
@@ -169,8 +169,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'android-x64';
     case TargetPlatform.android_x86:
       return 'android-x86';
-    case TargetPlatform.ios:
-      return 'ios';
+    case TargetPlatform.ios_arm64:
+      return 'ios-arm64';
     case TargetPlatform.darwin_x64:
       return 'darwin-x64';
     case TargetPlatform.linux_x64:
@@ -194,8 +194,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.android_x64;
     case 'android-x86':
       return TargetPlatform.android_x86;
-    case 'ios':
-      return TargetPlatform.ios;
+    case 'ios-arm64':
+      return TargetPlatform.ios_arm64;
     case 'darwin-x64':
       return TargetPlatform.darwin_x64;
     case 'linux-x64':

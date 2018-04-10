@@ -270,7 +270,7 @@ Future<ApplicationPackage> getApplicationPackageForPlatform(TargetPlatform platf
       return applicationBinary == null
           ? await AndroidApk.fromCurrentDirectory()
           : new AndroidApk.fromApk(applicationBinary);
-    case TargetPlatform.ios:
+    case TargetPlatform.ios_arm64:
       return applicationBinary == null
           ? new IOSApp.fromCurrentDirectory()
           : new IOSApp.fromIpa(applicationBinary);
@@ -298,7 +298,7 @@ class ApplicationPackageStore {
       case TargetPlatform.android_x86:
         android ??= await AndroidApk.fromCurrentDirectory();
         return android;
-      case TargetPlatform.ios:
+      case TargetPlatform.ios_arm64:
         iOS ??= new IOSApp.fromCurrentDirectory();
         return iOS;
       case TargetPlatform.darwin_x64:
