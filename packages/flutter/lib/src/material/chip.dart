@@ -1892,22 +1892,33 @@ class _RenderChip extends RenderBox {
   }
 
   Size _layoutLabel(double iconSizes, Size size) {
+    final Size rawSize = _boxSize(label);
     // Now that we know the label height and the width of the icons, we can
     // determine how much to shrink the width constraints for the "real" layout.
     if (constraints.maxWidth.isFinite) {
       label.layout(
-        constraints.loosen().copyWith(
-            maxWidth: math.max(
-              0.0,
-              constraints.maxWidth - iconSizes - theme.labelPadding.horizontal,
-            ),
-            maxHeight: size.height),
+        constraints.copyWith(
+          minWidth: 0.0,
+          maxWidth: math.max(
+            0.0,
+            constraints.maxWidth - iconSizes - theme.labelPadding.horizontal,
+          ),
+          minHeight: rawSize.height,
+          maxHeight: size.height,
+        ),
         parentUsesSize: true,
       );
     } else {
-      label.layout(new BoxConstraints.tight(size), parentUsesSize: true);
+      label.layout(
+        new BoxConstraints(
+          minHeight: rawSize.height,
+          maxHeight: size.height,
+          minWidth: 0.0,
+          maxWidth: size.width,
+        ),
+        parentUsesSize: true,
+      );
     }
-    final Size rawSize = _boxSize(label);
     return new Size(
       rawSize.width + theme.labelPadding.horizontal,
       rawSize.height + theme.labelPadding.vertical,
@@ -2064,7 +2075,6 @@ class _RenderChip extends RenderBox {
         } else {
           deleteButtonRect = Rect.zero;
         }
-        //assert(start + deleteIconSize.width == overallSize.width);
         break;
     }
     // Center the label vertically.
