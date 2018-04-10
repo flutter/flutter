@@ -19,7 +19,7 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../flx.dart' as flx;
+import '../bundle.dart' as bundle;
 import '../globals.dart';
 import '../plugins.dart';
 import '../services.dart';
@@ -180,7 +180,7 @@ class Xcode {
 Future<XcodeBuildResult> buildXcodeProject({
   BuildableIOSApp app,
   BuildInfo buildInfo,
-  String target: flx.defaultMainPath,
+  String target: bundle.defaultMainPath,
   bool buildForDevice,
   bool codesign: true,
   bool usesTerminalUi: true,

@@ -14,7 +14,7 @@ import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../flx.dart' as flx;
+import '../bundle.dart' as bundle;
 import '../globals.dart';
 
 final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
@@ -36,7 +36,7 @@ void generateXcodeProperties(String projectPath) {
   updateGeneratedXcodeProperties(
       projectPath: projectPath,
       buildInfo: BuildInfo.debug,
-      target: flx.defaultMainPath,
+      target: bundle.defaultMainPath,
       previewDart2: false,
   );
 }

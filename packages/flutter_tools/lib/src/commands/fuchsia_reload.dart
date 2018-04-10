@@ -13,7 +13,7 @@ import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../device.dart';
-import '../flx.dart' as flx;
+import '../bundle.dart' as bundle;
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../resident_runner.dart';
@@ -59,7 +59,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
       help: 'Preview Dart 2.0 functionality.');
     argParser.addOption('target',
       abbr: 't',
-      defaultsTo: flx.defaultMainPath,
+      defaultsTo: bundle.defaultMainPath,
       help: 'Target app path / main entry-point file. '
             'Relative to --gn-target path, e.g. lib/main.dart.');
   }

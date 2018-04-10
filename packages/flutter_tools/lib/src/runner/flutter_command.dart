@@ -19,7 +19,7 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../doctor.dart';
-import '../flx.dart' as flx;
+import '../bundle.dart' as bundle;
 import '../globals.dart';
 import '../project.dart';
 import '../usage.dart';
@@ -98,7 +98,7 @@ abstract class FlutterCommand extends Command<Null> {
   void usesTargetOption() {
     argParser.addOption('target',
       abbr: 't',
-      defaultsTo: flx.defaultMainPath,
+      defaultsTo: bundle.defaultMainPath,
       help: 'The main entry-point file of the application, as run on the device.\n'
             'If the --target option is omitted, but a file name is provided on\n'
             'the command line, then that is used instead.',
@@ -112,7 +112,7 @@ abstract class FlutterCommand extends Command<Null> {
     else if (argResults.rest.isNotEmpty)
       return argResults.rest.first;
     else
-      return flx.defaultMainPath;
+      return bundle.defaultMainPath;
   }
 
   void usesPubOption() {
