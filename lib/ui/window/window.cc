@@ -22,23 +22,6 @@ using tonic::ToDart;
 namespace blink {
 namespace {
 
-Dart_Handle ToByteData(const std::vector<uint8_t>& buffer) {
-  Dart_Handle data_handle =
-      Dart_NewTypedData(Dart_TypedData_kByteData, buffer.size());
-  if (Dart_IsError(data_handle))
-    return data_handle;
-
-  Dart_TypedData_Type type;
-  void* data = nullptr;
-  intptr_t num_bytes = 0;
-  FXL_CHECK(!Dart_IsError(
-      Dart_TypedDataAcquireData(data_handle, &type, &data, &num_bytes)));
-
-  memcpy(data, buffer.data(), num_bytes);
-  Dart_TypedDataReleaseData(data_handle);
-  return data_handle;
-}
-
 void DefaultRouteName(Dart_NativeArguments args) {
   std::string routeName =
       UIDartState::Current()->window()->client()->DefaultRouteName();
@@ -118,6 +101,23 @@ void _RespondToPlatformMessage(Dart_NativeArguments args) {
 }
 
 }  // namespace
+
+Dart_Handle ToByteData(const std::vector<uint8_t>& buffer) {
+  Dart_Handle data_handle =
+      Dart_NewTypedData(Dart_TypedData_kByteData, buffer.size());
+  if (Dart_IsError(data_handle))
+    return data_handle;
+
+  Dart_TypedData_Type type;
+  void* data = nullptr;
+  intptr_t num_bytes = 0;
+  FXL_CHECK(!Dart_IsError(
+      Dart_TypedDataAcquireData(data_handle, &type, &data, &num_bytes)));
+
+  memcpy(data, buffer.data(), num_bytes);
+  Dart_TypedDataReleaseData(data_handle);
+  return data_handle;
+}
 
 WindowClient::~WindowClient() {}
 

@@ -21,6 +21,8 @@ class DartLibraryNatives;
 namespace blink {
 class Scene;
 
+Dart_Handle ToByteData(const std::vector<uint8_t>& buffer);
+
 class WindowClient {
  public:
   virtual std::string DefaultRouteName() = 0;

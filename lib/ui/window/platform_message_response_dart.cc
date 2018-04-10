@@ -7,11 +7,40 @@
 #include <utility>
 
 #include "flutter/common/threads.h"
+#include "flutter/lib/ui/window/window.h"
 #include "lib/fxl/functional/make_copyable.h"
 #include "lib/tonic/dart_state.h"
 #include "lib/tonic/logging/dart_invoke.h"
 
 namespace blink {
+
+namespace {
+
+// Avoid copying the contents of messages beyond a certain size.
+const int kMessageCopyThreshold = 1000;
+
+void MessageDataFinalizer(void* isolate_callback_data,
+                          Dart_WeakPersistentHandle handle,
+                          void* peer) {
+  std::vector<uint8_t>* data = reinterpret_cast<std::vector<uint8_t>*>(peer);
+  delete data;
+}
+
+Dart_Handle WrapByteData(std::vector<uint8_t> data) {
+  if (data.size() < kMessageCopyThreshold) {
+    return ToByteData(data);
+  } else {
+    std::vector<uint8_t>* heap_data = new std::vector<uint8_t>(std::move(data));
+    Dart_Handle data_handle = Dart_NewExternalTypedData(
+        Dart_TypedData_kByteData, heap_data->data(), heap_data->size());
+    DART_CHECK_VALID(data_handle);
+    Dart_NewWeakPersistentHandle(data_handle, heap_data, heap_data->size(),
+                                 MessageDataFinalizer);
+    return data_handle;
+  }
+}
+
+}  // anonymous namespace
 
 PlatformMessageResponseDart::PlatformMessageResponseDart(
     tonic::DartPersistentValue callback)
@@ -38,19 +67,7 @@ void PlatformMessageResponseDart::Complete(std::vector<uint8_t> data) {
           return;
         tonic::DartState::Scope scope(dart_state);
 
-        Dart_Handle byte_buffer =
-            Dart_NewTypedData(Dart_TypedData_kByteData, data.size());
-        DART_CHECK_VALID(byte_buffer);
-
-        void* buffer;
-        intptr_t length;
-        Dart_TypedData_Type type;
-        DART_CHECK_VALID(
-            Dart_TypedDataAcquireData(byte_buffer, &type, &buffer, &length));
-        FXL_CHECK(type == Dart_TypedData_kByteData);
-        FXL_CHECK(static_cast<size_t>(length) == data.size());
-        memcpy(buffer, data.data(), length);
-        Dart_TypedDataReleaseData(byte_buffer);
+        Dart_Handle byte_buffer = WrapByteData(std::move(data));
         tonic::DartInvoke(callback.Release(), {byte_buffer});
       }));
 }
