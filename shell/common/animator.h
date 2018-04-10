@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_COMMON_ANIMATOR_H_
 #define FLUTTER_SHELL_COMMON_ANIMATOR_H_
 
-#include "flutter/shell/common/engine.h"
+#include "flutter/common/task_runners.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/vsync_waiter.h"
 #include "flutter/synchronization/pipeline.h"
@@ -16,17 +16,28 @@
 
 namespace shell {
 
-class Animator {
+class Animator final {
  public:
-  Animator(fml::WeakPtr<Rasterizer> rasterizer,
-           VsyncWaiter* waiter,
-           Engine* engine);
+  class Delegate {
+   public:
+    virtual void OnAnimatorBeginFrame(const Animator& animator,
+                                      fxl::TimePoint frame_time) = 0;
+
+    virtual void OnAnimatorNotifyIdle(const Animator& animator,
+                                      int64_t deadline) = 0;
+
+    virtual void OnAnimatorDraw(
+        const Animator& animator,
+        fxl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) = 0;
+
+    virtual void OnAnimatorDrawLastLayerTree(const Animator& animator) = 0;
+  };
+
+  Animator(Delegate& delegate,
+           blink::TaskRunners task_runners,
+           std::unique_ptr<VsyncWaiter> waiter);
 
   ~Animator();
-
-  void set_rasterizer(fml::WeakPtr<Rasterizer> rasterizer) {
-    rasterizer_ = rasterizer;
-  }
 
   void RequestFrame(bool regenerate_layer_tree = true);
 
@@ -51,9 +62,9 @@ class Animator {
 
   const char* FrameParity();
 
-  fml::WeakPtr<Rasterizer> rasterizer_;
-  VsyncWaiter* waiter_;
-  Engine* engine_;
+  Delegate& delegate_;
+  blink::TaskRunners task_runners_;
+  std::unique_ptr<VsyncWaiter> waiter_;
 
   fxl::TimePoint last_begin_frame_time_;
   int64_t dart_frame_deadline_;
@@ -67,7 +78,7 @@ class Animator {
   bool dimension_change_pending_;
   SkISize last_layer_tree_size_;
 
-  fml::WeakPtrFactory<Animator> weak_factory_;
+  fxl::WeakPtrFactory<Animator> weak_factory_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(Animator);
 };

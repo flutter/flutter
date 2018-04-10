@@ -34,15 +34,9 @@ std::shared_ptr<txt::FontCollection> FontCollection::GetFontCollection() const {
   return collection_;
 }
 
-void FontCollection::RegisterFontsFromAssetProvider(
-    fxl::RefPtr<blink::AssetProvider> asset_provider) {
-
-  if (!asset_provider){
-    return;
-  }
-
+void FontCollection::RegisterFonts(const AssetManager& asset_manager) {
   std::vector<uint8_t> manifest_data;
-  if (!asset_provider->GetAsBuffer("FontManifest.json", &manifest_data)) {
+  if (!asset_manager.GetAsBuffer("FontManifest.json", &manifest_data)) {
     FXL_DLOG(WARNING) << "Could not find the font manifest in the asset store.";
     return;
   }
@@ -92,8 +86,8 @@ void FontCollection::RegisterFontsFromAssetProvider(
 
       // TODO: Handle weights and styles.
       std::vector<uint8_t> font_data;
-      if (asset_provider->GetAsBuffer(font_asset->value.GetString(),
-                                      &font_data)) {
+      if (asset_manager.GetAsBuffer(font_asset->value.GetString(),
+                                    &font_data)) {
         // The data must be copied because it needs to be moved into the
         // typeface as a stream.
         auto data =

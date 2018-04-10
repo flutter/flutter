@@ -7,9 +7,34 @@
 
 #include <jni.h>
 
+#include "flutter/common/settings.h"
+#include "lib/fxl/macros.h"
+
 namespace shell {
 
-bool RegisterFlutterMain(JNIEnv* env);
+class FlutterMain {
+ public:
+  ~FlutterMain();
+
+  static bool Register(JNIEnv* env);
+
+  static FlutterMain& Get();
+
+  const blink::Settings& GetSettings() const;
+
+ private:
+  const blink::Settings settings_;
+
+  FlutterMain(blink::Settings settings);
+
+  static void Init(JNIEnv* env,
+                   jclass clazz,
+                   jobject context,
+                   jobjectArray jargs,
+                   jstring bundlePath);
+
+  FXL_DISALLOW_COPY_AND_ASSIGN(FlutterMain);
+};
 
 }  // namespace shell
 

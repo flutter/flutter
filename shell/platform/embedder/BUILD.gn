@@ -4,16 +4,21 @@
 
 import("$flutter_root/testing/testing.gni")
 
-source_set("embedder") {
+static_library("embedder") {
+  complete_static_lib = true
+
   sources = [
     "embedder.cc",
     "embedder.h",
+    "embedder_engine.cc",
+    "embedder_engine.h",
     "embedder_include.c",
     "platform_view_embedder.cc",
     "platform_view_embedder.h",
   ]
 
   deps = [
+    "$flutter_root/assets",
     "$flutter_root/common",
     "$flutter_root/fml",
     "$flutter_root/shell/common",
@@ -22,6 +27,7 @@ source_set("embedder") {
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/bin:embedded_dart_io",
     "//third_party/skia",
+    "//third_party/skia:gpu",
     "//topaz/lib/tonic",
   ]
 

@@ -18,20 +18,13 @@ bool GPUSurfaceSoftware::IsValid() {
   return delegate_ != nullptr;
 }
 
-bool GPUSurfaceSoftware::SupportsScaling() const {
-  return true;
-}
-
 std::unique_ptr<SurfaceFrame> GPUSurfaceSoftware::AcquireFrame(
     const SkISize& logical_size) {
   if (!IsValid()) {
     return nullptr;
   }
 
-  // Check if we need to support surface scaling.
-  const auto scale = SupportsScaling() ? GetScale() : 1.0;
-  const auto size = SkISize::Make(logical_size.width() * scale,
-                                  logical_size.height() * scale);
+  const auto size = SkISize::Make(logical_size.width(), logical_size.height());
 
   sk_sp<SkSurface> backing_store = delegate_->AcquireBackingStore(size);
 
@@ -48,12 +41,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceSoftware::AcquireFrame(
   // irrespective of surface scaling.
   SkCanvas* canvas = backing_store->getCanvas();
   canvas->resetMatrix();
-  canvas->scale(scale, scale);
 
-  SurfaceFrame::SubmitCallback
-      on_submit = [self = weak_factory_.GetWeakPtr()](
-                      const SurfaceFrame& surface_frame, SkCanvas* canvas)
-                      ->bool {
+  SurfaceFrame::SubmitCallback on_submit =
+      [self = weak_factory_.GetWeakPtr()](const SurfaceFrame& surface_frame,
+                                          SkCanvas* canvas) -> bool {
     // If the surface itself went away, there is nothing more to do.
     if (!self || !self->IsValid() || canvas == nullptr) {
       return false;

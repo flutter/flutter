@@ -120,10 +120,11 @@ void SceneBuilder::addPicture(double dx,
                               double dy,
                               Picture* picture,
                               int hints) {
-  layer_builder_->PushPicture(SkPoint::Make(dx, dy),  //
-                              picture->picture(),     //
-                              !!(hints & 1),          // picture is complex
-                              !!(hints & 2)           // picture will change
+  layer_builder_->PushPicture(
+      SkPoint::Make(dx, dy),                             //
+      UIDartState::CreateGPUObject(picture->picture()),  //
+      !!(hints & 1),                                     // picture is complex
+      !!(hints & 2)                                      // picture will change
   );
 }
 

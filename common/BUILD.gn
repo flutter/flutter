@@ -12,11 +12,12 @@ source_set("common") {
   sources = [
     "settings.cc",
     "settings.h",
-    "threads.cc",
-    "threads.h",
+    "task_runners.cc",
+    "task_runners.h",
   ]
 
   deps = [
+    "$flutter_root/fml",
     "//garnet/public/lib/fxl",
   ]
 

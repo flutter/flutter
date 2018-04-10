@@ -43,11 +43,16 @@ class MultiFrameCodec : public Codec {
 
  private:
   MultiFrameCodec(std::unique_ptr<SkCodec> codec);
+
   ~MultiFrameCodec() {}
 
-  sk_sp<SkImage> GetNextFrameImage();
+  sk_sp<SkImage> GetNextFrameImage(fml::WeakPtr<GrContext> resourceContext);
+
   void GetNextFrameAndInvokeCallback(
       std::unique_ptr<DartPersistentValue> callback,
+      fxl::RefPtr<fxl::TaskRunner> ui_task_runner,
+      fml::WeakPtr<GrContext> resourceContext,
+      fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue,
       size_t trace_id);
 
   const std::unique_ptr<SkCodec> codec_;

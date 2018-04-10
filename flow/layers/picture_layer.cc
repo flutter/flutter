@@ -4,39 +4,30 @@
 
 #include "flutter/flow/layers/picture_layer.h"
 
-#include "flutter/common/threads.h"
 #include "lib/fxl/logging.h"
 
 namespace flow {
 
 PictureLayer::PictureLayer() = default;
 
-PictureLayer::~PictureLayer() {
-  // The picture may contain references to textures that are associated
-  // with the IO thread's context.
-  SkPicture* picture = picture_.release();
-  if (picture) {
-    blink::Threads::IO()->PostTask([picture]() { picture->unref(); });
-  }
-}
+PictureLayer::~PictureLayer() = default;
 
 void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
+  SkPicture* sk_picture = picture();
+
   if (auto cache = context->raster_cache) {
     raster_cache_result_ = cache->GetPrerolledImage(
-        context->gr_context, picture_.get(), matrix, context->dst_color_space,
-#if defined(OS_FUCHSIA)
-        context->metrics,
-#endif
+        context->gr_context, sk_picture, matrix, context->dst_color_space,
         is_complex_, will_change_);
   }
 
-  SkRect bounds = picture_->cullRect().makeOffset(offset_.x(), offset_.y());
+  SkRect bounds = sk_picture->cullRect().makeOffset(offset_.x(), offset_.y());
   set_paint_bounds(bounds);
 }
 
 void PictureLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "PictureLayer::Paint");
-  FXL_DCHECK(picture_);
+  FXL_DCHECK(picture_.get());
   FXL_DCHECK(needs_painting());
 
   SkAutoCanvasRestore save(&context.canvas, true);
@@ -53,7 +44,7 @@ void PictureLayer::Paint(PaintContext& context) const {
         SkCanvas::kStrict_SrcRectConstraint       // source constraint
     );
   } else {
-    context.canvas.drawPicture(picture_.get());
+    context.canvas.drawPicture(picture());
   }
 }
 

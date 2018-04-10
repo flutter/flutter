@@ -15,21 +15,28 @@
 #include <utility>
 
 #include "flutter/glue/trace_event.h"
-#include "lib/fxl/files/eintr_wrapper.h"
-#include "lib/fxl/files/unique_fd.h"
-#include "lib/zip/unique_unzipper.h"
 
 namespace blink {
 
-ZipAssetStore::ZipAssetStore(UnzipperProvider unzipper_provider)
-    : unzipper_provider_(std::move(unzipper_provider)) {
+ZipAssetStore::ZipAssetStore(std::string file_path)
+    : file_path_(std::move(file_path)) {
   BuildStatCache();
 }
 
 ZipAssetStore::~ZipAssetStore() = default;
 
+zip::UniqueUnzipper ZipAssetStore::CreateUnzipper() const {
+  return zip::UniqueUnzipper{::unzOpen2(file_path_.c_str(), nullptr)};
+}
+
+// |blink::AssetResolver|
+bool ZipAssetStore::IsValid() const {
+  return stat_cache_.size() > 0;
+}
+
+// |blink::AssetResolver|
 bool ZipAssetStore::GetAsBuffer(const std::string& asset_name,
-                                std::vector<uint8_t>* data) {
+                                std::vector<uint8_t>* data) const {
   TRACE_EVENT0("flutter", "ZipAssetStore::GetAsBuffer");
   auto found = stat_cache_.find(asset_name);
 
@@ -37,7 +44,7 @@ bool ZipAssetStore::GetAsBuffer(const std::string& asset_name,
     return false;
   }
 
-  auto unzipper = unzipper_provider_();
+  auto unzipper = CreateUnzipper();
 
   if (!unzipper.is_valid()) {
     return false;
@@ -73,7 +80,8 @@ bool ZipAssetStore::GetAsBuffer(const std::string& asset_name,
 
 void ZipAssetStore::BuildStatCache() {
   TRACE_EVENT0("flutter", "ZipAssetStore::BuildStatCache");
-  auto unzipper = unzipper_provider_();
+
+  auto unzipper = CreateUnzipper();
 
   if (!unzipper.is_valid()) {
     return;

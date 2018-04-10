@@ -4,9 +4,12 @@
 
 source_set("fml") {
   sources = [
+    "file.h",
     "icu_util.cc",
     "icu_util.h",
+    "mapping.cc",
     "mapping.h",
+    "memory/thread_checker.h",
     "memory/weak_ptr.h",
     "memory/weak_ptr_internal.cc",
     "memory/weak_ptr_internal.h",
@@ -14,8 +17,9 @@ source_set("fml") {
     "message_loop.h",
     "message_loop_impl.cc",
     "message_loop_impl.h",
+    "native_library.h",
+    "paths.cc",
     "paths.h",
-    "task_observer.h",
     "task_runner.cc",
     "task_runner.h",
     "thread.cc",
@@ -23,6 +27,9 @@ source_set("fml") {
     "thread_local.h",
     "trace_event.cc",
     "trace_event.h",
+    "unique_fd.cc",
+    "unique_fd.h",
+    "unique_object.h",
   ]
 
   deps = [
@@ -95,16 +102,25 @@ source_set("fml") {
     ]
   }
 
+  if (is_fuchsia) {
+    sources += [ "platform/fuchsia/paths_fuchsia.cc" ]
+  }
+
   if (is_win) {
     sources += [
+      "platform/win/file_win.cc",
       "platform/win/mapping_win.cc",
       "platform/win/message_loop_win.cc",
       "platform/win/message_loop_win.h",
+      "platform/win/native_library_win.cc",
       "platform/win/paths_win.cc",
+      "platform/win/wstring_conversion.h",
     ]
   } else {
     sources += [
+      "platform/posix/file_posix.cc",
       "platform/posix/mapping_posix.cc",
+      "platform/posix/native_library_posix.cc",
     ]
   }
 }

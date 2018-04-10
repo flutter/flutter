@@ -17,43 +17,18 @@ LayerTree::LayerTree()
 
 LayerTree::~LayerTree() = default;
 
-void LayerTree::Raster(CompositorContext::ScopedFrame& frame,
-#if defined(OS_FUCHSIA)
-                       gfx::Metrics* metrics,
-#endif
-                       bool ignore_raster_cache) {
-#if defined(OS_FUCHSIA)
-  FXL_DCHECK(metrics);
-#endif
-  Preroll(frame,
-#if defined(OS_FUCHSIA)
-          metrics,
-#endif
-          ignore_raster_cache);
-  Paint(frame);
-}
-
 void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
-#if defined(OS_FUCHSIA)
-                        gfx::Metrics* metrics,
-#endif
                         bool ignore_raster_cache) {
-#if defined(OS_FUCHSIA)
-  FXL_DCHECK(metrics);
-#endif
   TRACE_EVENT0("flutter", "LayerTree::Preroll");
   SkColorSpace* color_space =
       frame.canvas() ? frame.canvas()->imageInfo().colorSpace() : nullptr;
   frame.context().raster_cache().SetCheckboardCacheImages(
       checkerboard_raster_cache_images_);
   Layer::PrerollContext context = {
-#if defined(OS_FUCHSIA)
-    metrics,
-#endif
-    ignore_raster_cache ? nullptr : &frame.context().raster_cache(),
-    frame.gr_context(),
-    color_space,
-    SkRect::MakeEmpty(),
+      ignore_raster_cache ? nullptr : &frame.context().raster_cache(),
+      frame.gr_context(),
+      color_space,
+      SkRect::MakeEmpty(),
   };
 
   root_layer_->Preroll(&context, SkMatrix::I());
@@ -63,9 +38,12 @@ void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
 void LayerTree::UpdateScene(SceneUpdateContext& context,
                             scenic_lib::ContainerNode& container) {
   TRACE_EVENT0("flutter", "LayerTree::UpdateScene");
-
-  SceneUpdateContext::Transform transform(context, 1.f / device_pixel_ratio_,
-                                          1.f / device_pixel_ratio_, 1.f);
+  const auto& metrics = context.metrics();
+  SceneUpdateContext::Transform transform(context,                  // context
+                                          1.0f / metrics->scale_x,  // X
+                                          1.0f / metrics->scale_y,  // Y
+                                          1.0f / metrics->scale_z   // Z
+  );
   SceneUpdateContext::Frame frame(
       context,
       SkRRect::MakeRect(
@@ -82,12 +60,13 @@ void LayerTree::UpdateScene(SceneUpdateContext& context,
 #endif
 
 void LayerTree::Paint(CompositorContext::ScopedFrame& frame) const {
-  Layer::PaintContext context = {*frame.canvas(),
-                                 frame.context().frame_time(),
-                                 frame.context().engine_time(),
-                                 frame.context().memory_usage(),
-                                 frame.context().texture_registry(),
-                                 checkerboard_offscreen_layers_};
+  Layer::PaintContext context = {
+      *frame.canvas(),                     //
+      frame.context().frame_time(),        //
+      frame.context().engine_time(),       //
+      frame.context().texture_registry(),  //
+      checkerboard_offscreen_layers_       //
+  };
   TRACE_EVENT0("flutter", "LayerTree::Paint");
 
   if (root_layer_->needs_painting())

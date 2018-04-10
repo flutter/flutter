@@ -6,13 +6,16 @@ import("$flutter_root/shell/config.gni")
 
 source_set("gpu") {
   sources = [
-    "gpu_rasterizer.cc",
-    "gpu_rasterizer.h",
-    "gpu_surface_gl.cc",
-    "gpu_surface_gl.h",
     "gpu_surface_software.cc",
     "gpu_surface_software.h",
   ]
+
+  if (!is_fuchsia) {
+    sources += [
+      "gpu_surface_gl.cc",
+      "gpu_surface_gl.h",
+    ]
+  }
 
   if (shell_enable_vulkan) {
     sources += [

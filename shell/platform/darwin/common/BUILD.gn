@@ -9,28 +9,23 @@ source_set("common") {
   sources = [
     "buffer_conversions.h",
     "buffer_conversions.mm",
-    "platform_mac.h",
-    "platform_mac.mm",
-    "process_info_mac.cc",
-    "process_info_mac.h",
+    "command_line.h",
+    "command_line.mm",
   ]
   set_sources_assignment_filter(sources_assignment_filter)
 
   deps = [
-    "//third_party/dart/runtime:dart_api",
     "$flutter_root/common",
     "$flutter_root/flow",
     "$flutter_root/fml",
     "$flutter_root/runtime",
     "$flutter_root/shell/common",
     "$flutter_root/shell/gpu",
-    "$flutter_root/shell/testing",
     "$flutter_root/sky/engine/wtf",
     "//garnet/public/lib/fxl",
+    "//third_party/dart/runtime:dart_api",
     "//third_party/skia",
   ]
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
+  public_configs = [ "$flutter_root:config" ]
 }

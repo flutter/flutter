@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/common/surface.h"
+
 #include "lib/fxl/logging.h"
 #include "third_party/skia/include/core/SkColorSpaceXformCanvas.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -59,27 +60,22 @@ bool SurfaceFrame::PerformSubmit() {
   return false;
 }
 
-Surface::Surface() : scale_(1.0) {}
+Surface::Surface() : Surface(std::make_unique<flow::CompositorContext>()) {}
 
-Surface::~Surface() = default;
-
-bool Surface::SupportsScaling() const {
-  return false;
+Surface::Surface(std::unique_ptr<flow::CompositorContext> compositor_context)
+    : compositor_context_(std::move(compositor_context)) {
+  FXL_DCHECK(compositor_context_);
+  // TODO: Get rid of these explicit calls and move the logic to the c/dtors of
+  // the compositor context.
+  compositor_context_->OnGrContextCreated();
 }
 
-double Surface::GetScale() const {
-  return scale_;
+Surface::~Surface() {
+  compositor_context_->OnGrContextDestroyed();
 }
 
-void Surface::SetScale(double scale) {
-  static constexpr double kMaxScale = 1.0;
-  static constexpr double kMinScale = 0.25;
-  if (scale > kMaxScale) {
-    scale = kMaxScale;
-  } else if (scale < kMinScale) {
-    scale = kMinScale;
-  }
-  scale_ = scale;
+flow::CompositorContext& Surface::GetCompositorContext() {
+  return *compositor_context_;
 }
 
 }  // namespace shell

@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "flutter/flow/layers/layer.h"
+#include "flutter/flow/skia_gpu_object.h"
 #include "garnet/public/lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
 #include "third_party/skia/include/core/SkColor.h"
@@ -57,7 +58,7 @@ class LayerBuilder {
                                       const SkRect& rect) = 0;
 
   virtual void PushPicture(const SkPoint& offset,
-                           sk_sp<SkPicture> picture,
+                           SkiaGPUObject<SkPicture> picture,
                            bool picture_is_complex,
                            bool picture_will_change) = 0;
 
