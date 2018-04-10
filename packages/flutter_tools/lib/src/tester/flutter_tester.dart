@@ -38,7 +38,7 @@ class FlutterTesterApp extends ApplicationPackage {
   String get packagePath => fs.path.join(_directory, '.packages');
 }
 
-// TODO(devoncarew): This device does not currently work with full restarts.
+// TODO(scheglov): This device does not currently work with full restarts.
 class FlutterTesterDevice extends Device {
   final _FlutterTesterDeviceLogReader _logReader =
       new _FlutterTesterDeviceLogReader();
@@ -84,15 +84,17 @@ class FlutterTesterDevice extends Device {
   bool isSupported() => true;
 
   @override
-  Future<LaunchResult> startApp(ApplicationPackage package,
-      {@required String mainPath,
-      String route,
-      @required DebuggingOptions debuggingOptions,
-      Map<String, dynamic> platformArgs,
-      bool prebuiltApplication: false,
-      bool applicationNeedsRebuild: false,
-      bool usesTerminalUi: true,
-      bool ipv6: false}) async {
+  Future<LaunchResult> startApp(
+    ApplicationPackage package, {
+    @required String mainPath,
+    String route,
+    @required DebuggingOptions debuggingOptions,
+    Map<String, dynamic> platformArgs,
+    bool prebuiltApplication: false,
+    bool applicationNeedsRebuild: false,
+    bool usesTerminalUi: true,
+    bool ipv6: false,
+  }) async {
     if (!debuggingOptions.buildInfo.isDebug) {
       printError('This device only supports debug mode.');
       return new LaunchResult.failed();
