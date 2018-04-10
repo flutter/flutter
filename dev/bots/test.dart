@@ -337,8 +337,10 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
 
   Future<List<List<int>>> savedStdout, savedStderr;
   if (printOutput) {
-    stdout.addStream(process.stdout);
-    stderr.addStream(process.stderr);
+    await Future.wait(<Future<Null>>[
+      stdout.addStream(process.stdout),
+      stderr.addStream(process.stderr)
+    ]);
   } else {
     savedStdout = process.stdout.toList();
     savedStderr = process.stderr.toList();
