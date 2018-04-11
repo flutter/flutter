@@ -422,10 +422,6 @@ class DevFS {
     await _scanDirectory(rootDirectory,
                          recursive: true,
                          fileFilter: fileFilter);
-    if (fs.isFileSync(_packagesFilePath)) {
-      printTrace('Scanning package files');
-      await _scanPackages(fileFilter);
-    }
     if (bundle != null) {
       printTrace('Scanning asset files');
       bundle.entries.forEach((String archivePath, DevFSContent content) {
@@ -491,6 +487,7 @@ class DevFS {
             invalidatedFiles.add(content.file.uri.toString());
             numBytes -= content.size;
           }
+
         }
       }
       // No need to send source files because all compilation is done on the
@@ -581,8 +578,8 @@ class DevFS {
     }
     assert((file is Link) || (file is File));
     if (ignoreDotFiles && fs.path.basename(file.path).startsWith('.')) {
-      // Skip dot files.
-      return true;
+      // Skip dot files, but not the '.packages' file.
+      return fs.path.basename(file.path) != '.packages';
     }
     return false;
   }
@@ -687,49 +684,7 @@ class DevFS {
         '$e\n'
     );
   }
-
-  Future<Null> _scanPackages(Set<String> fileFilter) async {
-    StringBuffer sb;
-    final PackageMap packageMap = new PackageMap(_packagesFilePath);
-
-    for (String packageName in packageMap.map.keys) {
-      final Uri packageUri = packageMap.map[packageName];
-      final String packagePath = fs.path.fromUri(packageUri);
-      final Directory packageDirectory = fs.directory(packageUri);
-      Uri directoryUriOnDevice = fs.path.toUri(fs.path.join('packages', packageName) + fs.path.separator);
-      bool packageExists = packageDirectory.existsSync();
-
-      if (!packageExists) {
-        // If the package directory doesn't exist at all, we ignore it.
-        continue;
-      }
-
-      if (fs.path.isWithin(rootDirectory.path, packagePath)) {
-        // We already scanned everything under the root directory.
-        directoryUriOnDevice = fs.path.toUri(
-            fs.path.relative(packagePath, from: rootDirectory.path) + fs.path.separator
-        );
-      } else {
-        packageExists =
-            await _scanDirectory(packageDirectory,
-                                 directoryUriOnDevice: directoryUriOnDevice,
-                                 recursive: true,
-                                 fileFilter: fileFilter);
-      }
-      if (packageExists) {
-        sb ??= new StringBuffer();
-        sb.writeln('$packageName:$directoryUriOnDevice');
-      }
-    }
-    if (sb != null) {
-      final DevFSContent content = _entries[fs.path.toUri('.packages')];
-      if (content is DevFSStringContent && content.string == sb.toString()) {
-        content._exists = true;
-        return;
-      }
-      _entries[fs.path.toUri('.packages')] = new DevFSStringContent(sb.toString());
-    }
-  }
 }
+
 /// Converts a platform-specific file path to a platform-independent Uri path.
 String _asUriPath(String filePath) => fs.path.toUri(filePath).path + '/';
