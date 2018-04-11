@@ -422,9 +422,10 @@ class DevFS {
     await _scanDirectory(rootDirectory,
                          recursive: true,
                          fileFilter: fileFilter);
+    final bool previewDart2 = generator != null;
     if (fs.isFileSync(_packagesFilePath)) {
       printTrace('Scanning package files');
-      await _scanPackages(fileFilter);
+      await _scanPackages(fileFilter, previewDart2);
     }
     if (bundle != null) {
       printTrace('Scanning asset files');
@@ -475,7 +476,7 @@ class DevFS {
           assetPathsToEvict.add(archivePath);
       }
     });
-    if (generator != null) {
+    if (previewDart2) {
       // We run generator even if [dirtyEntries] was empty because we want
       // to keep logic of accepting/rejecting generator's output simple:
       // we must accept/reject generator's output after every [update] call.
@@ -580,9 +581,11 @@ class DevFS {
       return true;
     }
     assert((file is Link) || (file is File));
-    if (ignoreDotFiles && fs.path.basename(file.path).startsWith('.')) {
-      // Skip dot files.
-      return true;
+    final String basename = fs.path.basename(file.path);
+    if (ignoreDotFiles && basename.startsWith('.')) {
+      // Skip dot files, but not the '.packages' file (even though in dart1
+      // mode devfs['.packages'] will be overwritten with synthesized string content).
+      return basename != '.packages';
     }
     return false;
   }
@@ -688,7 +691,7 @@ class DevFS {
     );
   }
 
-  Future<Null> _scanPackages(Set<String> fileFilter) async {
+  Future<Null> _scanPackages(Set<String> fileFilter, bool previewDart2) async {
     StringBuffer sb;
     final PackageMap packageMap = new PackageMap(_packagesFilePath);
 
@@ -720,6 +723,14 @@ class DevFS {
         sb ??= new StringBuffer();
         sb.writeln('$packageName:$directoryUriOnDevice');
       }
+    }
+    if (previewDart2) {
+      // When in previewDart2 mode we don't update .packages-file entry
+      // so actual file will get invalidated in frontend.
+      // We don't need to synthesize device-correct .packages file because
+      // it is not going to be used on the device anyway - compilation
+      // is done on the host.
+      return;
     }
     if (sb != null) {
       final DevFSContent content = _entries[fs.path.toUri('.packages')];
