@@ -24,6 +24,7 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../tester/flutter_tester.dart';
 import '../vmservice.dart';
 
 const String protocolVersion = '0.2.0';
@@ -570,6 +571,7 @@ class DeviceDomain extends Domain {
     addDeviceDiscoverer(new AndroidDevices());
     addDeviceDiscoverer(new IOSDevices());
     addDeviceDiscoverer(new IOSSimulators());
+    addDeviceDiscoverer(new FlutterTesterDevices());
   }
 
   void addDeviceDiscoverer(PollingDeviceDiscovery discoverer) {

@@ -26,6 +26,7 @@ import '../cache.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../tester/flutter_tester.dart';
 import '../usage.dart';
 import '../version.dart';
 import '../vmservice.dart';
@@ -79,6 +80,11 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         help:
             'Captures a bug report file to submit to the Flutter team '
             '(contains local paths, device\nidentifiers, and log snippets).');
+    argParser.addFlag('show-test-device',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'List the special \'flutter-tester\' device in device listings. '
+              'This headless device is used to\ntest Flutter tooling.');
 
     String packagesHelp;
     if (fs.isFileSync(kPackagesFileName))
@@ -178,6 +184,11 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     if (topLevelResults['verbose']) {
       // Override the logger.
       contextOverrides[Logger] = new VerboseLogger(logger);
+    }
+
+    if (topLevelResults['show-test-device'] ||
+        topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
+      FlutterTesterDevices.showFlutterTesterDevice = true;
     }
 
     String recordTo = topLevelResults['record-to'];

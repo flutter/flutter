@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, Locale;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -48,6 +48,7 @@ class TextPainter {
     double textScaleFactor: 1.0,
     int maxLines,
     String ellipsis,
+    ui.Locale locale,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
@@ -57,7 +58,8 @@ class TextPainter {
        _textDirection = textDirection,
        _textScaleFactor = textScaleFactor,
        _maxLines = maxLines,
-       _ellipsis = ellipsis;
+       _ellipsis = ellipsis,
+       _locale = locale;
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -167,6 +169,17 @@ class TextPainter {
     _needsLayout = true;
   }
 
+  /// The locale used to select region-specific glyphs.
+  ui.Locale get locale => _locale;
+  ui.Locale _locale;
+  set locale(ui.Locale value) {
+    if (_locale == value)
+      return;
+    _locale = value;
+    _paragraph = null;
+    _needsLayout = true;
+  }
+
   /// An optional maximum number of lines for the text to span, wrapping if
   /// necessary.
   ///
@@ -199,11 +212,13 @@ class TextPainter {
       textScaleFactor: textScaleFactor,
       maxLines: _maxLines,
       ellipsis: _ellipsis,
+      locale: _locale,
     ) ?? new ui.ParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
       maxLines: maxLines,
       ellipsis: ellipsis,
+      locale: locale,
     );
   }
 
