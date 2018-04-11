@@ -271,35 +271,24 @@ class _DemoBottomAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool showsFirst = babMode == _BabMode.END_FAB;
     return new BottomAppBar(
       color: color,
       hasNotch: enableNotch,
-      child: new Row(
-        children: <Widget> [
-          new IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              showModalBottomSheet<Null>(context: context, builder: (BuildContext context) => const _DemoDrawer());
-            },
-          ),
-          new Expanded(
-            child: new AnimatedCrossFade(
-              duration: const Duration(milliseconds: 225),
-              firstChild: buildBabContents(context, _BabMode.END_FAB),
-              firstCurve: showsFirst ? fadeOutCurve  : fadeInCurve,
-              secondChild: buildBabContents(context, _BabMode.CENTER_FAB),
-              secondCurve: showsFirst ? fadeInCurve  : fadeOutCurve,
-              crossFadeState: showsFirst ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-            ),
-          ),
-        ],
-      ),
+      // TODO: Use an AnimatedCrossFade to build contents for centered FAB performantly.
+      // Using AnimatedCrossFade here previously was causing https://github.com/flutter/flutter/issues/16377.
+      child: buildBabContents(context, _BabMode.END_FAB),  
     );
   }
 
   Widget buildBabContents(BuildContext context, _BabMode babMode) {
-    final List<Widget> rowContents = <Widget> [];
+    final List<Widget> rowContents = <Widget> [
+      new IconButton(
+        icon: const Icon(Icons.menu),
+        onPressed: () {
+          showModalBottomSheet<Null>(context: context, builder: (BuildContext context) => const _DemoDrawer());
+        },
+      ),
+    ];
     if (babMode == _BabMode.CENTER_FAB) {
       rowContents.add(
         new Expanded(
