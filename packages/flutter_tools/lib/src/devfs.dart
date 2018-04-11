@@ -423,7 +423,8 @@ class DevFS {
                          recursive: true,
                          fileFilter: fileFilter);
     if (fs.isFileSync(_packagesFilePath)) {
-      await _scanPackages(fileFilter);
+      printTrace('Scanning package files');
+      await _scanPackages(fileFilter, generator != null);
     }
     if (bundle != null) {
       printTrace('Scanning asset files');
@@ -488,12 +489,8 @@ class DevFS {
           if (content is DevFSFileContent) {
             filesUris.add(uri);
             invalidatedFiles.add(content.file.uri.toString());
-            printTrace('Invalidating ${content.file.uri.toString()} file');
             numBytes -= content.size;
-          } else {
-            printTrace('Ignoring non-file content: $content');
           }
-
         }
       }
       // No need to send source files because all compilation is done on the
@@ -584,7 +581,8 @@ class DevFS {
     }
     assert((file is Link) || (file is File));
     if (ignoreDotFiles && fs.path.basename(file.path).startsWith('.')) {
-      // Skip dot files, but not the '.packages' file.
+      // Skip dot files, but not the '.packages' file (even though in dart1
+      // mode devfs['.packages'] will be overwritten with synthesized string content).
       return fs.path.basename(file.path) != '.packages';
     }
     return false;
@@ -691,31 +689,54 @@ class DevFS {
     );
   }
 
-  // Scan all packages and ensure their contents(including non-dart sources)
-  // gets accounted for for syncing.
-  Future<Null> _scanPackages(Set<String> fileFilter) async {
+  Future<Null> _scanPackages(Set<String> fileFilter, bool previewDart2) async {
+    StringBuffer sb;
     final PackageMap packageMap = new PackageMap(_packagesFilePath);
 
     for (String packageName in packageMap.map.keys) {
       final Uri packageUri = packageMap.map[packageName];
       final String packagePath = fs.path.fromUri(packageUri);
       final Directory packageDirectory = fs.directory(packageUri);
-      final Uri directoryUriOnDevice = fs.path.toUri(
-          fs.path.join('packages', packageName) + fs.path.separator);
-      final bool packageExists = packageDirectory.existsSync();
+      Uri directoryUriOnDevice = fs.path.toUri(fs.path.join('packages', packageName) + fs.path.separator);
+      bool packageExists = packageDirectory.existsSync();
 
       if (!packageExists) {
         // If the package directory doesn't exist at all, we ignore it.
         continue;
       }
 
-      if (!fs.path.isWithin(rootDirectory.path, packagePath)) {
+      if (fs.path.isWithin(rootDirectory.path, packagePath)) {
         // We already scanned everything under the root directory.
-        await _scanDirectory(packageDirectory,
-                             directoryUriOnDevice: directoryUriOnDevice,
-                             recursive: true,
-                             fileFilter: fileFilter);
+        directoryUriOnDevice = fs.path.toUri(
+            fs.path.relative(packagePath, from: rootDirectory.path) + fs.path.separator
+        );
+      } else {
+        packageExists =
+            await _scanDirectory(packageDirectory,
+                                 directoryUriOnDevice: directoryUriOnDevice,
+                                 recursive: true,
+                                 fileFilter: fileFilter);
       }
+      if (packageExists) {
+        sb ??= new StringBuffer();
+        sb.writeln('$packageName:$directoryUriOnDevice');
+      }
+    }
+    if (sb != null) {
+      if (previewDart2) {
+        // When in previewDart2 mode we don't update .packages-file entry
+        // so actual file will get invalidated in frontend.
+        // We don't need to synthesize device-correct .packages file because
+        // it is not going to be used on the device anyway - compilation
+        // is done on the host.
+        return;
+      }
+      final DevFSContent content = _entries[fs.path.toUri('.packages')];
+      if (content is DevFSStringContent && content.string == sb.toString()) {
+        content._exists = true;
+        return;
+      }
+      _entries[fs.path.toUri('.packages')] = new DevFSStringContent(sb.toString());
     }
   }
 }
