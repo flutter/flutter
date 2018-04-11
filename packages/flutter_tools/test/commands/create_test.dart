@@ -431,13 +431,14 @@ Future<Null> _createAndAnalyzeProject(
     { List<String> unexpectedPaths = const <String>[], bool plugin = false }) async {
   await _createProject(dir, createArgs, expectedPaths, unexpectedPaths: unexpectedPaths, plugin: plugin);
   if (plugin) {
-    await _analyzeProject(dir.path);
+    await _analyzeProject(dir.path, target: fs.path.join(dir.path, 'lib', 'flutter_project.dart'));
+    await _analyzeProject(fs.path.join(dir.path, 'example'));
   } else {
     await _analyzeProject(dir.path);
   }
 }
 
-Future<Null> _analyzeProject(String workingDir) async {
+Future<Null> _analyzeProject(String workingDir, {String target}) async {
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',
@@ -447,6 +448,8 @@ Future<Null> _analyzeProject(String workingDir) async {
     ..addAll(dartVmFlags)
     ..add(flutterToolsPath)
     ..add('analyze');
+  if (target != null)
+    args.add(target);
 
   final ProcessResult exec = await Process.run(
     '$dartSdkPath/bin/dart',
