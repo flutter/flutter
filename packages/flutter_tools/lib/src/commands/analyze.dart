@@ -14,7 +14,8 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('flutter-repo',
         negatable: false,
         help: 'Include all the examples and tests from the Flutter repository.',
-        defaultsTo: false);
+        defaultsTo: false,
+        hide: !verboseHelp);
     argParser.addFlag('current-package',
         help: 'Analyze the current project, if applicable.', defaultsTo: true);
     argParser.addFlag('dartdocs',

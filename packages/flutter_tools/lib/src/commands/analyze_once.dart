@@ -56,8 +56,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (argResults['flutter-repo']) {
       // check for conflicting dependencies
-      final PackageDependencyTracker dependencies =
-      new PackageDependencyTracker();
+      final PackageDependencyTracker dependencies = new PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
 
       directories.addAll(repoRoots);
