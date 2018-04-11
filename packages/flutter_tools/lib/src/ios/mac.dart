@@ -299,10 +299,28 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
   }
 
+  final Status cleanStatus =
+      logger.startProgress('Running Xcode clean...', expectSlowOperation: true);
+  final RunResult cleanResult = await runAsync(
+    <String>[
+      '/usr/bin/env',
+      'xcrun',
+      'xcodebuild',
+      'clean',
+      '-configuration', configuration,
+    ],
+    workingDirectory: app.appDirectory,
+  );
+  cleanStatus.stop();
+  if (cleanResult.exitCode != 0) {
+    throwToolExit('Xcode failed to clean\n${cleanResult.stderr}');
+  }
+
   final List<String> buildCommands = <String>[
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
+    'build',
     '-configuration', configuration,
     'ONLY_ACTIVE_ARCH=YES',
   ];
