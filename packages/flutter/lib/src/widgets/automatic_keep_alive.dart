@@ -88,7 +88,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
         // If the child doesn't exist yet, we got called during the very first
         // build of this subtree. Wait until the end of the frame to update
         // the child when the child is guaranteed to be present.
-        SchedulerBinding.instance.addPostFrameCallback((_) {
+        SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
           final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = _getChildElement();
           assert(childElement != null);
           _updateParentDataOfChild(childElement);
@@ -121,7 +121,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     // If we are called during the first build of this subtree the links to the
     // children will not be hooked up yet. In that case this method returns
     // null despite the fact that we will have a child after the build
-    // completes. It's the callers responsibility to deal with this case.
+    // completes. It's the caller's responsibility to deal with this case.
     //
     // (We're only going down one level, to get our direct child.)
     element.visitChildren((Element child) {
