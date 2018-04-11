@@ -1217,7 +1217,7 @@ void main() {
     expect(decoration.border, const OutlineInputBorder());
   });
 
-  testWidgets('InputDecorator fillColor is clipped by border', (WidgetTester tester) async {
+  testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/15742
 
     await tester.pumpWidget(
@@ -1254,6 +1254,38 @@ void main() {
       style: PaintingStyle.stroke,
       strokeWidth: 1.0,
       rrect: new RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
+    ));
+  });
+
+  testWidgets('InputDecorator UnderlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: const Color(0xFF00FF00),
+          border: const UnderlineInputBorder(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: const Radius.circular(12.0),
+              bottomRight: const Radius.circular(12.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(InputDecorator));
+
+    // Fill is the border's outer path, a rounded rectangle
+    expect(box, paints..path(
+      style: PaintingStyle.fill,
+      color: const Color(0xFF00FF00),
+      includes: <Offset>[const Offset(800.0/2.0, 56/2.0)],
+      excludes: <Offset>[
+        const Offset(1.0, 56.0 - 6.0), // bottom left
+        const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
+      ],
     ));
   });
 }

@@ -253,9 +253,9 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck).thenReturn(false);
-      when(cocoaPods.hasCocoaPods).thenReturn(true);
-      when(cocoaPods.isCocoaPodsInitialized).thenReturn(false);
+      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck).thenAnswer((_) async => false);
+      when(cocoaPods.hasCocoaPods).thenAnswer((_) async => true);
+      when(cocoaPods.isCocoaPodsInitialized).thenAnswer((_) async => false);
       when(xcode.isSimctlInstalled).thenReturn(true);
 
       final ValidationResult result = await new IOSWorkflowTestTarget().validate();

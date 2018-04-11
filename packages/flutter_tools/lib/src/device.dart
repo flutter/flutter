@@ -16,6 +16,7 @@ import 'build_info.dart';
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
+import 'tester/flutter_tester.dart';
 
 DeviceManager get deviceManager => context[DeviceManager];
 
@@ -28,6 +29,7 @@ class DeviceManager {
     _deviceDiscoverers.add(new AndroidDevices());
     _deviceDiscoverers.add(new IOSDevices());
     _deviceDiscoverers.add(new IOSSimulators());
+    _deviceDiscoverers.add(new FlutterTesterDevices());
   }
 
   final List<DeviceDiscovery> _deviceDiscoverers = <DeviceDiscovery>[];

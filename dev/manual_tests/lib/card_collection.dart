@@ -344,7 +344,7 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   Shader _createShader(Rect bounds) {
-    return new LinearGradient(
+    return const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: const <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
