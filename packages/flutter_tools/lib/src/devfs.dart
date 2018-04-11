@@ -422,9 +422,10 @@ class DevFS {
     await _scanDirectory(rootDirectory,
                          recursive: true,
                          fileFilter: fileFilter);
+    final bool previewDart2 = generator != null;
     if (fs.isFileSync(_packagesFilePath)) {
       printTrace('Scanning package files');
-      await _scanPackages(fileFilter, generator != null);
+      await _scanPackages(fileFilter, previewDart2);
     }
     if (bundle != null) {
       printTrace('Scanning asset files');
@@ -475,7 +476,7 @@ class DevFS {
           assetPathsToEvict.add(archivePath);
       }
     });
-    if (generator != null) {
+    if (previewDart2) {
       // We run generator even if [dirtyEntries] was empty because we want
       // to keep logic of accepting/rejecting generator's output simple:
       // we must accept/reject generator's output after every [update] call.
@@ -723,15 +724,15 @@ class DevFS {
         sb.writeln('$packageName:$directoryUriOnDevice');
       }
     }
+    if (previewDart2) {
+      // When in previewDart2 mode we don't update .packages-file entry
+      // so actual file will get invalidated in frontend.
+      // We don't need to synthesize device-correct .packages file because
+      // it is not going to be used on the device anyway - compilation
+      // is done on the host.
+      return;
+    }
     if (sb != null) {
-      if (previewDart2) {
-        // When in previewDart2 mode we don't update .packages-file entry
-        // so actual file will get invalidated in frontend.
-        // We don't need to synthesize device-correct .packages file because
-        // it is not going to be used on the device anyway - compilation
-        // is done on the host.
-        return;
-      }
       final DevFSContent content = _entries[fs.path.toUri('.packages')];
       if (content is DevFSStringContent && content.string == sb.toString()) {
         content._exists = true;
