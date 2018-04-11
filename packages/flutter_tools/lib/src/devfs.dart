@@ -422,6 +422,9 @@ class DevFS {
     await _scanDirectory(rootDirectory,
                          recursive: true,
                          fileFilter: fileFilter);
+    if (fs.isFileSync(_packagesFilePath)) {
+      await _scanPackages(fileFilter);
+    }
     if (bundle != null) {
       printTrace('Scanning asset files');
       bundle.entries.forEach((String archivePath, DevFSContent content) {
@@ -485,7 +488,10 @@ class DevFS {
           if (content is DevFSFileContent) {
             filesUris.add(uri);
             invalidatedFiles.add(content.file.uri.toString());
+            printTrace('Invalidating ${content.file.uri.toString()} file');
             numBytes -= content.size;
+          } else {
+            printTrace('Ignoring non-file content: $content');
           }
 
         }
@@ -684,7 +690,34 @@ class DevFS {
         '$e\n'
     );
   }
-}
 
+  // Scan all packages and ensure their contents(including non-dart sources)
+  // gets accounted for for syncing.
+  Future<Null> _scanPackages(Set<String> fileFilter) async {
+    final PackageMap packageMap = new PackageMap(_packagesFilePath);
+
+    for (String packageName in packageMap.map.keys) {
+      final Uri packageUri = packageMap.map[packageName];
+      final String packagePath = fs.path.fromUri(packageUri);
+      final Directory packageDirectory = fs.directory(packageUri);
+      final Uri directoryUriOnDevice = fs.path.toUri(
+          fs.path.join('packages', packageName) + fs.path.separator);
+      final bool packageExists = packageDirectory.existsSync();
+
+      if (!packageExists) {
+        // If the package directory doesn't exist at all, we ignore it.
+        continue;
+      }
+
+      if (!fs.path.isWithin(rootDirectory.path, packagePath)) {
+        // We already scanned everything under the root directory.
+        await _scanDirectory(packageDirectory,
+                             directoryUriOnDevice: directoryUriOnDevice,
+                             recursive: true,
+                             fileFilter: fileFilter);
+      }
+    }
+  }
+}
 /// Converts a platform-specific file path to a platform-independent Uri path.
 String _asUriPath(String filePath) => fs.path.toUri(filePath).path + '/';
