@@ -9,7 +9,7 @@ import 'build.dart';
 
 class BuildFlxCommand extends BuildSubCommand {
 
-  BuildFlxCommand({bool verboseHelp: false}) {}
+  BuildFlxCommand({bool verboseHelp: false});
   @override
   final String name = 'flx';
 
@@ -25,6 +25,6 @@ class BuildFlxCommand extends BuildSubCommand {
 
     printError("'build flx' is no longer supported. Instead, use 'build "
                "bundle' to build and assemble the application code and resources "
-               "for your app.");
+               'for your app.');
   }
 }
