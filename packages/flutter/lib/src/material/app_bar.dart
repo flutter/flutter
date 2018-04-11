@@ -388,7 +388,7 @@ class _AppBarState extends State<AppBar> {
         overflow: TextOverflow.ellipsis,
         child: new Semantics(
           route: true,
-          child: title,
+          child: new Semantics(route: true, child: title),
         ),
       );
     }
