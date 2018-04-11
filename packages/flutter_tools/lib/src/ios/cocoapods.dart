@@ -24,11 +24,11 @@ const String noCocoaPodsConsequence = '''
   For more info, see https://flutter.io/platform-plugins''';
 
 const String cocoaPodsInstallInstructions = '''
-  brew install cocoapods
+  gem install cocoapods
   pod setup''';
 
 const String cocoaPodsUpgradeInstructions = '''
-  brew upgrade cocoapods
+  gem install cocoapods
   pod setup''';
 
 CocoaPods get cocoaPods => context[CocoaPods];
