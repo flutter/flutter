@@ -708,7 +708,7 @@ class SweepGradient extends Gradient {
   const SweepGradient({
     this.center: Alignment.center,
     this.startAngle: 0.0,
-    this.endAngle: 360.0,
+    this.endAngle: math.pi * 2,
     @required List<Color> colors,
     List<double> stops,
     this.tileMode: TileMode.clamp,
@@ -734,18 +734,18 @@ class SweepGradient extends Gradient {
   /// method will need to be given a [TextDirection].
   final AlignmentGeometry center;
 
-  /// The angle at which stop 0.0 of the gradient is placed.
+  /// The angle in radians at which stop 0.0 of the gradient is placed.
   ///
   /// Defaults to 0.0.
   final double startAngle;
 
-  /// The angle at which stop 1.0 of the gradient is placed.
+  /// The angle in radians at which stop 1.0 of the gradient is placed.
   ///
   /// Defaults to 0.0.
   final double endAngle;
 
   /// How this gradient should tile the plane beyond in the region before
-  /// [begin] and after [end].
+  /// [startAngle] and after [endAngle].
   ///
   /// For details, see [TileMode].
   ///
