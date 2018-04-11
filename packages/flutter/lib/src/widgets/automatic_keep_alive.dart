@@ -131,8 +131,6 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     return childElement;
   }
 
-  /// Update the parent data of the KeepAlive widget with the new value of
-  /// [_keepingAlive] without requiring an extra frame.
   void _updateParentDataOfChild(ParentDataElement<SliverMultiBoxAdaptorWidget> childElement) {
     childElement.applyWidgetOutOfTurn(build(context));
   }
