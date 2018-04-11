@@ -580,10 +580,11 @@ class DevFS {
       return true;
     }
     assert((file is Link) || (file is File));
-    if (ignoreDotFiles && fs.path.basename(file.path).startsWith('.')) {
+    final String basename = fs.path.basename(file.path);
+    if (ignoreDotFiles && basename.startsWith('.')) {
       // Skip dot files, but not the '.packages' file (even though in dart1
       // mode devfs['.packages'] will be overwritten with synthesized string content).
-      return fs.path.basename(file.path) != '.packages';
+      return basename != '.packages';
     }
     return false;
   }
