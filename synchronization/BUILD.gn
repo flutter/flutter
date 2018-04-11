@@ -4,16 +4,13 @@
 
 source_set("synchronization") {
   sources = [
-    "debug_thread_checker.h",
     "pipeline.cc",
     "pipeline.h",
     "semaphore.cc",
     "semaphore.h",
   ]
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
+  public_configs = [ "$flutter_root:config" ]
 
   public_deps = [
     "$flutter_root/glue",

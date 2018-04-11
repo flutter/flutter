@@ -2,16 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#define FML_USED_ON_EMBEDDER
+
 #import "flutter_window.h"
 
-#include "flutter/common/threads.h"
+#include <sstream>
+
+#include "flutter/common/task_runners.h"
+#include "flutter/fml/message_loop.h"
+#include "flutter/shell/common/rasterizer.h"
+#include "flutter/shell/common/switches.h"
+#include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
+#include "flutter/shell/platform/darwin/common/command_line.h"
 #include "flutter/shell/platform/darwin/desktop/platform_view_mac.h"
+#include "lib/fxl/functional/make_copyable.h"
 
-@interface FlutterWindow ()<NSWindowDelegate>
+@interface FlutterWindow () <NSWindowDelegate>
 
-@property(assign) IBOutlet NSOpenGLView* renderSurface;
-@property(getter=isSurfaceSetup) BOOL surfaceSetup;
+@property(strong) NSOpenGLView* renderSurface;
 
 @end
 
@@ -37,34 +46,130 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(NSEventPh
 }
 
 @implementation FlutterWindow {
-  std::shared_ptr<shell::PlatformViewMac> _platformView;
+  shell::ThreadHost _thread_host;
+  std::unique_ptr<shell::Shell> _shell;
   bool _mouseIsDown;
 }
 
-@synthesize renderSurface = _renderSurface;
-@synthesize surfaceSetup = _surfaceSetup;
+- (instancetype)init {
+  self =
+      [super initWithContentRect:NSMakeRect(10.0, 10.0, 800.0, 600.0)
+                       styleMask:NSTitledWindowMask | NSClosableWindowMask | NSResizableWindowMask
+                         backing:NSBackingStoreBuffered
+                           defer:YES];
+  if (self) {
+    self.delegate = self;
+    [self setupRenderSurface];
+    [self setupShell];
+    [self updateWindowSize];
+  }
 
-- (void)awakeFromNib {
-  [super awakeFromNib];
-
-  self.delegate = self;
-
-  [self updateWindowSize];
+  return self;
 }
 
-- (void)setupPlatformView {
-  FXL_DCHECK(_platformView == nullptr) << "The platform view must not already be set.";
-
-  _platformView = std::make_shared<shell::PlatformViewMac>(self.renderSurface);
-  _platformView->Attach();
-  _platformView->SetupResourceContextOnIOThread();
-  _platformView->NotifyCreated(std::make_unique<shell::GPUSurfaceGL>(_platformView.get()));
+- (void)setupRenderSurface {
+  NSOpenGLView* renderSurface = [[[NSOpenGLView alloc] init] autorelease];
+  const NSOpenGLPixelFormatAttribute attrs[] = {
+      NSOpenGLPFADoubleBuffer,           //
+      NSOpenGLPFAAllowOfflineRenderers,  //
+      0                                  //
+  };
+  renderSurface.pixelFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes:attrs] autorelease];
+  renderSurface.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+  renderSurface.frame =
+      NSMakeRect(0.0, 0.0, self.contentView.bounds.size.width, self.contentView.bounds.size.height);
+  [self.contentView addSubview:renderSurface];
+  self.renderSurface = renderSurface;
 }
 
-// TODO(eseidel): This does not belong in flutter_window!
-// Probably belongs in NSApplicationDelegate didFinishLaunching.
-- (void)setupAndLoadDart {
-  _platformView->SetupAndLoadDart();
+static std::string CreateThreadLabel() {
+  std::stringstream stream;
+  static int index = 1;
+  stream << "io.flutter." << index++;
+  return stream.str();
+}
+
+- (void)setupShell {
+  FXL_DCHECK(!_shell) << "The shell must not already be set.";
+
+  auto thread_label = CreateThreadLabel();
+
+  // Create the threads on which to run the shell.
+  _thread_host = {thread_label, shell::ThreadHost::Type::GPU | shell::ThreadHost::Type::UI |
+                                    shell::ThreadHost::Type::IO};
+
+  // Grab the task runners for the newly created threads.
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  blink::TaskRunners task_runners(thread_label,                                    // label
+                                  fml::MessageLoop::GetCurrent().GetTaskRunner(),  // platform
+                                  _thread_host.gpu_thread->GetTaskRunner(),        // GPU
+                                  _thread_host.ui_thread->GetTaskRunner(),         // UI
+                                  _thread_host.io_thread->GetTaskRunner()          // IO
+  );
+
+  // Figure out the settings from the command line arguments.
+  auto settings = shell::SettingsFromCommandLine(shell::CommandLineFromNSProcessInfo());
+
+  if (settings.icu_data_path.size() == 0) {
+    settings.icu_data_path =
+        [[NSBundle mainBundle] pathForResource:@"icudtl.dat" ofType:@""].UTF8String;
+  }
+
+  settings.using_blink = false;
+
+  settings.task_observer_add = [](intptr_t key, fxl::Closure callback) {
+    fml::MessageLoop::GetCurrent().AddTaskObserver(key, std::move(callback));
+  };
+
+  settings.task_observer_remove = [](intptr_t key) {
+    fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
+  };
+
+  // Setup the callback that will be run on the appropriate threads.
+  shell::Shell::CreateCallback<shell::PlatformView> on_create_platform_view =
+      [render_surface = self.renderSurface](shell::Shell& shell) {
+        return std::make_unique<shell::PlatformViewMac>(shell, render_surface);
+      };
+
+  shell::Shell::CreateCallback<shell::Rasterizer> on_create_rasterizer = [](shell::Shell& shell) {
+    return std::make_unique<shell::Rasterizer>(shell.GetTaskRunners());
+  };
+
+  // Finally, create the shell.
+  _shell = shell::Shell::Create(std::move(task_runners), settings, on_create_platform_view,
+                                on_create_rasterizer);
+
+  // Launch the engine with the inferred run configuration.
+  _shell->GetTaskRunners().GetUITaskRunner()->PostTask(fxl::MakeCopyable(
+      [engine = _shell->GetEngine(),
+       config = shell::RunConfiguration::InferFromSettings(_shell->GetSettings())]() mutable {
+        if (engine) {
+          auto result = engine->Run(std::move(config));
+          if (!result) {
+            FXL_LOG(ERROR) << "Could not launch the engine with configuration.";
+          }
+        }
+      }));
+
+  [self notifySurfaceCreated];
+}
+
+- (void)notifySurfaceCreated {
+  if (!_shell || !_shell->IsSetup()) {
+    return;
+  }
+
+  // Tell the platform view that it has a GL surface.
+  _shell->GetPlatformView()->NotifyCreated();
+}
+
+- (void)notifySurfaceDestroyed {
+  if (!_shell || !_shell->IsSetup()) {
+    return;
+  }
+
+  // Tell the platform view that its surface is about to be lost.
+  _shell->GetPlatformView()->NotifyDestroyed();
 }
 
 - (void)windowDidResize:(NSNotification*)notification {
@@ -72,34 +177,28 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(NSEventPh
 }
 
 - (void)updateWindowSize {
-  [self setupSurfaceIfNecessary];
+  if (!_shell) {
+    return;
+  }
 
   blink::ViewportMetrics metrics;
   auto size = self.renderSurface.frame.size;
   metrics.physical_width = size.width;
   metrics.physical_height = size.height;
-
-  blink::Threads::UI()->PostTask([ engine = _platformView->engine().GetWeakPtr(), metrics ] {
-    if (engine.get()) {
+  _shell->GetTaskRunners().GetUITaskRunner()->PostTask([engine = _shell->GetEngine(), metrics]() {
+    if (engine) {
       engine->SetViewportMetrics(metrics);
     }
   });
 }
 
-- (void)setupSurfaceIfNecessary {
-  if (self.isSurfaceSetup) {
-    return;
-  }
-
-  self.surfaceSetup = YES;
-
-  [self setupPlatformView];
-  [self setupAndLoadDart];
-}
-
 #pragma mark - Responder overrides
 
 - (void)dispatchEvent:(NSEvent*)event phase:(NSEventPhase)phase {
+  if (!_shell) {
+    return;
+  }
+
   NSPoint location = [_renderSurface convertPoint:event.locationInWindow fromView:nil];
   location.y = _renderSurface.frame.size.height - location.y;
 
@@ -134,13 +233,14 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(NSEventPh
       break;
   }
 
-  blink::Threads::UI()->PostTask([ engine = _platformView->engine().GetWeakPtr(), pointer_data ] {
-    if (engine.get()) {
-      blink::PointerDataPacket packet(1);
-      packet.SetPointerData(0, pointer_data);
-      engine->DispatchPointerDataPacket(packet);
-    }
-  });
+  _shell->GetTaskRunners().GetUITaskRunner()->PostTask(
+      [engine = _shell->GetEngine(), pointer_data] {
+        if (engine) {
+          blink::PointerDataPacket packet(1);
+          packet.SetPointerData(0, pointer_data);
+          engine->DispatchPointerDataPacket(packet);
+        }
+      });
 }
 
 - (void)mouseDown:(NSEvent*)event {
@@ -155,11 +255,18 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(NSEventPh
   [self dispatchEvent:event phase:NSEventPhaseEnded];
 }
 
-- (void)dealloc {
-  if (_platformView) {
-    _platformView->NotifyDestroyed();
-  }
+- (void)reset {
+  [self notifySurfaceDestroyed];
+  _shell.reset();
+  _thread_host.Reset();
+}
 
+- (void)windowWillClose:(NSNotification*)notification {
+  [self reset];
+}
+
+- (void)dealloc {
+  [self reset];
   [super dealloc];
 }
 

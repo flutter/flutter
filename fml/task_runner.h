@@ -13,7 +13,7 @@ namespace fml {
 
 class MessageLoopImpl;
 
-class TaskRunner : public fxl::TaskRunner {
+class TaskRunner final : public fxl::TaskRunner {
  public:
   void PostTask(fxl::Closure task) override;
 
@@ -23,12 +23,15 @@ class TaskRunner : public fxl::TaskRunner {
 
   bool RunsTasksOnCurrentThread() override;
 
+  static void RunNowOrPostTask(fxl::RefPtr<fxl::TaskRunner> runner,
+                               fxl::Closure task);
+
  private:
   fxl::RefPtr<MessageLoopImpl> loop_;
 
   TaskRunner(fxl::RefPtr<MessageLoopImpl> loop);
 
-  ~TaskRunner();
+  ~TaskRunner() override;
 
   FRIEND_MAKE_REF_COUNTED(TaskRunner);
   FRIEND_REF_COUNTED_THREAD_SAFE(TaskRunner);

@@ -2,17 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/content_handler/vulkan_surface_producer.h"
+#include "vulkan_surface_producer.h"
 
 #include <memory>
 #include <string>
 #include <vector>
+
 #include "flutter/glue/trace_event.h"
 #include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
 
-namespace flutter_runner {
+namespace flutter {
 
 VulkanSurfaceProducer::VulkanSurfaceProducer(
     scenic_lib::Session* mozart_session) {
@@ -42,7 +43,7 @@ bool VulkanSurfaceProducer::Initialize(scenic_lib::Session* mozart_session) {
       VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME,
   };
   application_ = std::make_unique<vulkan::VulkanApplication>(
-      *vk_, "FlutterContentHandler", std::move(extensions));
+      *vk_, "FlutterApplicationRunner", std::move(extensions));
 
   if (!application_->IsValid() || !vk_->AreInstanceProcsSetup()) {
     // Make certain the application instance was created and it setup the
@@ -200,4 +201,4 @@ void VulkanSurfaceProducer::SubmitSurface(
   surface_pool_->SubmitSurface(std::move(surface));
 }
 
-}  // namespace flutter_runner
+}  // namespace flutter

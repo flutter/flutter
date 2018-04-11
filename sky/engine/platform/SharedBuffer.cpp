@@ -26,7 +26,6 @@
 
 #include "flutter/sky/engine/platform/SharedBuffer.h"
 
-#include "flutter/common/threads.h"
 #include "flutter/sky/engine/public/platform/Platform.h"
 #include "flutter/sky/engine/wtf/unicode/UTF8.h"
 #include "flutter/sky/engine/wtf/unicode/Unicode.h"

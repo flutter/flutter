@@ -9,8 +9,8 @@
 namespace fml {
 
 ResourceMappingDarwin::ResourceMappingDarwin(const std::string& resource)
-    : actual_([[[NSBundle mainBundle] pathForResource:@(resource.c_str()) ofType:nil] UTF8String]) {
-}
+    : actual_([[[NSBundle mainBundle] pathForResource:@(resource.c_str()) ofType:nil] UTF8String],
+              false) {}
 
 ResourceMappingDarwin::~ResourceMappingDarwin() = default;
 

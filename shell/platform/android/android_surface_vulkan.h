@@ -20,20 +20,23 @@ class AndroidSurfaceVulkan : public AndroidSurface {
 
   ~AndroidSurfaceVulkan() override;
 
+  // |shell::AndroidSurface|
   bool IsValid() const override;
 
-  void TeardownOnScreenContext() override;
-
+  // |shell::AndroidSurface|
   std::unique_ptr<Surface> CreateGPUSurface() override;
 
-  SkISize OnScreenSurfaceSize() const override;
+  // |shell::AndroidSurface|
+  void TeardownOnScreenContext() override;
 
+  // |shell::AndroidSurface|
   bool OnScreenSurfaceResize(const SkISize& size) const override;
 
+  // |shell::AndroidSurface|
   bool ResourceContextMakeCurrent() override;
 
-  bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window,
-                       PlatformView::SurfaceConfig config) override;
+  // |shell::AndroidSurface|
+  bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window) override;
 
  private:
   fxl::RefPtr<vulkan::VulkanProcTable> proc_table_;

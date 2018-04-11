@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/content_handler/accessibility_bridge.h"
+#include "accessibility_bridge.h"
 
 #include <unordered_set>
 
-#include "flutter/lib/ui/semantics/semantics_node.h"
 #include "lib/app/cpp/application_context.h"
-#include "lib/fxl/macros.h"
+#include "lib/context/fidl/context_writer.fidl.h"
 #include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/rapidjson/rapidjson/stringbuffer.h"
 #include "third_party/rapidjson/rapidjson/writer.h"
 
-namespace flutter_runner {
+namespace flutter {
 
-AccessibilityBridge::AccessibilityBridge(component::ApplicationContext* context)
-    : writer_(context->ConnectToEnvironmentService<modular::ContextWriter>()) {}
+AccessibilityBridge::AccessibilityBridge(maxwell::ContextWriterPtr writer)
+    : writer_(std::move(writer)) {}
+
+AccessibilityBridge::~AccessibilityBridge() = default;
 
 void AccessibilityBridge::UpdateSemantics(
     const blink::SemanticsNodeUpdates& update) {
@@ -77,4 +78,4 @@ void AccessibilityBridge::EraseUnvisitedNodes(
   }
 }
 
-}  // namespace flutter_runner
+}  // namespace flutter

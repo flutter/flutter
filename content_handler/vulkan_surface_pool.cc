@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "vulkan_surface_pool.h"
+
 #include <trace/event.h>
 
-#include "flutter/content_handler/vulkan_surface_pool.h"
 #include "flutter/glue/trace_event.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
-namespace flutter_runner {
+namespace flutter {
 
 VulkanSurfacePool::VulkanSurfacePool(vulkan::VulkanProvider& vulkan_provider,
                                      sk_sp<GrContext> context,
@@ -177,4 +178,4 @@ void VulkanSurfacePool::TraceStats() {
   trace_surfaces_reused_ = 0;
 }
 
-}  // namespace flutter_runner
+}  // namespace flutter

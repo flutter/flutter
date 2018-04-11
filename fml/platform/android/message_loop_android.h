@@ -10,7 +10,7 @@
 #include <atomic>
 
 #include "flutter/fml/message_loop_impl.h"
-#include "lib/fxl/files/unique_fd.h"
+#include "flutter/fml/unique_fd.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/unique_object.h"
 
@@ -24,8 +24,8 @@ struct UniqueLooperTraits {
 
 class MessageLoopAndroid : public MessageLoopImpl {
  private:
-  fxl::UniqueObject<ALooper*, UniqueLooperTraits> looper_;
-  fxl::UniqueFD timer_fd_;
+  fml::UniqueObject<ALooper*, UniqueLooperTraits> looper_;
+  fml::UniqueFD timer_fd_;
   bool running_;
 
   MessageLoopAndroid();

@@ -2,70 +2,62 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_CONTENT_HANDLER_SESSION_CONNECTION_H_
-#define FLUTTER_CONTENT_HANDLER_SESSION_CONNECTION_H_
+#pragma once
 
 #include <zx/eventpair.h>
 
-#include "flutter/common/threads.h"
-#include "flutter/content_handler/vulkan_surface_producer.h"
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/scene_update_context.h"
-#include "lib/fidl/cpp/interface_handle.h"
+#include "lib/fidl/cpp/bindings/interface_handle.h"
 #include "lib/fxl/functional/closure.h"
 #include "lib/fxl/macros.h"
 #include "lib/ui/scenic/client/resources.h"
 #include "lib/ui/scenic/client/session.h"
+#include "vulkan_surface_producer.h"
 
-namespace flutter_runner {
+namespace flutter {
 
-class SessionConnection {
+using OnMetricsUpdate = std::function<void(double /* device pixel ratio */)>;
+
+// The component residing on the GPU thread that is responsible for
+// maintaining the Scenic session connection and presenting node updates.
+class SessionConnection final {
  public:
-  SessionConnection(ui::ScenicPtr scenic, zx::eventpair import_token);
+  SessionConnection(const ui::ScenicPtr& scenic,
+                    std::string debug_label,
+                    zx::eventpair import_token,
+                    OnMetricsUpdate session_metrics_did_change_callback,
+                    fxl::Closure session_error_callback);
 
   ~SessionConnection();
 
   bool has_metrics() const { return scene_update_context_.has_metrics(); }
 
-  const gfx::MetricsPtr& metrics() const {
+  const ui::gfx::MetricsPtr& metrics() const {
     return scene_update_context_.metrics();
-  }
-
-  void set_metrics_changed_callback(fxl::Closure callback) {
-    metrics_changed_callback_ = std::move(callback);
   }
 
   flow::SceneUpdateContext& scene_update_context() {
     return scene_update_context_;
   }
 
-  scenic_lib::ImportNode& root_node() {
-    ASSERT_IS_GPU_THREAD;
-    return root_node_;
-  }
+  scenic_lib::ImportNode& root_node() { return root_node_; }
 
-  void Present(flow::CompositorContext::ScopedFrame& frame,
-               fxl::Closure on_present_callback);
+  void Present(flow::CompositorContext::ScopedFrame& frame);
 
  private:
+  const std::string debug_label_;
   scenic_lib::Session session_;
   scenic_lib::ImportNode root_node_;
-  scenic_lib::Session::PresentCallback present_callback_;
-  fxl::Closure pending_on_present_callback_;
   std::unique_ptr<VulkanSurfaceProducer> surface_producer_;
   flow::SceneUpdateContext scene_update_context_;
-  fxl::Closure metrics_changed_callback_;
+  OnMetricsUpdate metrics_changed_callback_;
 
-  void OnSessionError();
-  void OnSessionEvents(fidl::VectorPtr<ui::Event> events);
+  void OnSessionEvents(f1dl::Array<ui::EventPtr> events);
 
-  void EnqueueClearCommands();
-
-  void OnPresent(images::PresentationInfo info);
+  void EnqueueClearOps();
 
   FXL_DISALLOW_COPY_AND_ASSIGN(SessionConnection);
 };
 
-}  // namespace flutter_runner
-
-#endif  // FLUTTER_CONTENT_HANDLER_SESSION_CONNECTION_H_
+}  // namespace flutter

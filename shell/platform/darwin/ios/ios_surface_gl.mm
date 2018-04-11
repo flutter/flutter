@@ -4,13 +4,12 @@
 
 #include "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
 
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 
 namespace shell {
 
-IOSSurfaceGL::IOSSurfaceGL(PlatformView::SurfaceConfig surface_config, CAEAGLLayer* layer)
-    : IOSSurface(surface_config, reinterpret_cast<CALayer*>(layer)),
-      context_(surface_config, layer) {}
+IOSSurfaceGL::IOSSurfaceGL(fml::scoped_nsobject<CAEAGLLayer> layer) : context_(std::move(layer)) {}
 
 IOSSurfaceGL::~IOSSurfaceGL() = default;
 

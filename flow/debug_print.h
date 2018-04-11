@@ -15,14 +15,15 @@
 
 #define DEF_PRINTER(x) std::ostream& operator<<(std::ostream&, const x&);
 
-DEF_PRINTER(flow::RasterCacheKey);
 DEF_PRINTER(flow::MatrixDecomposition);
+DEF_PRINTER(flow::RasterCacheKey);
+DEF_PRINTER(SkISize);
 DEF_PRINTER(SkMatrix);
 DEF_PRINTER(SkMatrix44);
-DEF_PRINTER(SkVector3);
-DEF_PRINTER(SkVector4);
+DEF_PRINTER(SkPoint);
 DEF_PRINTER(SkRect);
 DEF_PRINTER(SkRRect);
-DEF_PRINTER(SkPoint);
+DEF_PRINTER(SkVector3);
+DEF_PRINTER(SkVector4);
 
 #endif  // FLUTTER_FLOW_DEBUG_PRINT_H_

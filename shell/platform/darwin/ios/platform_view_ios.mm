@@ -8,104 +8,36 @@
 
 #include <utility>
 
-#include "flutter/common/threads.h"
+#include "flutter/common/task_runners.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/shell/gpu/gpu_rasterizer.h"
-#include "flutter/shell/platform/darwin/common/process_info_mac.h"
+#include "flutter/shell/common/io_manager.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #include "flutter/shell/platform/darwin/ios/ios_external_texture_gl.h"
 #include "lib/fxl/synchronization/waitable_event.h"
 
 namespace shell {
 
-PlatformViewIOS::PlatformViewIOS(CALayer* layer, NSObject<FlutterBinaryMessenger>* binaryMessenger)
-    : PlatformView(std::make_unique<GPURasterizer>(std::make_unique<ProcessInfoMac>())),
-      ios_surface_(IOSSurface::Create(surface_config_, layer)),
-      weak_factory_(this),
-      binary_messenger_(binaryMessenger) {}
+PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
+                                 blink::TaskRunners task_runners,
+                                 FlutterViewController* owner_controller,
+                                 FlutterView* owner_view)
+    : PlatformView(delegate, std::move(task_runners)),
+      owner_controller_(owner_controller),
+      owner_view_(owner_view),
+      ios_surface_(owner_view_.createSurface) {
+  FXL_DCHECK(ios_surface_ != nullptr);
+  FXL_DCHECK(owner_controller_ != nullptr);
+  FXL_DCHECK(owner_view_ != nullptr);
+}
 
 PlatformViewIOS::~PlatformViewIOS() = default;
 
-void PlatformViewIOS::Attach() {
-  Attach(NULL);
+FlutterViewController* PlatformViewIOS::GetOwnerViewController() const {
+  return owner_controller_;
 }
 
-void PlatformViewIOS::Attach(fxl::Closure firstFrameCallback) {
-  CreateEngine();
-
-  if (firstFrameCallback) {
-    firstFrameCallback_ = firstFrameCallback;
-    rasterizer_->AddNextFrameCallback([weakSelf = GetWeakPtr()] {
-      if (weakSelf) {
-        weakSelf->firstFrameCallback_();
-        weakSelf->firstFrameCallback_ = nullptr;
-      }
-    });
-  }
-}
-
-void PlatformViewIOS::NotifyCreated() {
-  PlatformView::NotifyCreated(ios_surface_->CreateGPUSurface());
-}
-
-void PlatformViewIOS::ToggleAccessibility(UIView* view, bool enabled) {
-  if (enabled) {
-    if (!accessibility_bridge_) {
-      accessibility_bridge_.reset(new shell::AccessibilityBridge(view, this));
-    }
-  } else {
-    accessibility_bridge_ = nullptr;
-  }
-  SetSemanticsEnabled(enabled);
-}
-
-void PlatformViewIOS::SetupAndLoadFromSource(const std::string& assets_directory,
-                                             const std::string& main,
-                                             const std::string& packages) {
-  blink::Threads::UI()->PostTask(
-      [ engine = engine().GetWeakPtr(), assets_directory, main, packages ] {
-        if (engine)
-          engine->RunBundleAndSource(assets_directory, main, packages);
-      });
-}
-
-void PlatformViewIOS::SetAssetBundlePathOnUI(const std::string& assets_directory) {
-  blink::Threads::UI()->PostTask([ engine = engine().GetWeakPtr(), assets_directory ] {
-    if (engine)
-      engine->SetAssetBundlePath(assets_directory);
-  });
-}
-
-fml::WeakPtr<PlatformViewIOS> PlatformViewIOS::GetWeakPtr() {
-  return weak_factory_.GetWeakPtr();
-}
-
-void PlatformViewIOS::UpdateSurfaceSize() {
-  blink::Threads::Gpu()->PostTask([self = GetWeakPtr()]() {
-    if (self && self->ios_surface_ != nullptr) {
-      self->ios_surface_->UpdateStorageSizeIfNecessary();
-    }
-  });
-}
-
-VsyncWaiter* PlatformViewIOS::GetVsyncWaiter() {
-  if (!vsync_waiter_) {
-    vsync_waiter_ = std::make_unique<VsyncWaiterIOS>();
-  }
-  return vsync_waiter_.get();
-}
-
-bool PlatformViewIOS::ResourceContextMakeCurrent() {
-  return ios_surface_ != nullptr ? ios_surface_->ResourceContextMakeCurrent() : false;
-}
-
-void PlatformViewIOS::UpdateSemantics(blink::SemanticsNodeUpdates update) {
-  if (accessibility_bridge_)
-    accessibility_bridge_->UpdateSemantics(std::move(update));
-}
-
-void PlatformViewIOS::HandlePlatformMessage(fxl::RefPtr<blink::PlatformMessage> message) {
-  platform_message_router_.HandlePlatformMessage(std::move(message));
+PlatformMessageRouter& PlatformViewIOS::GetPlatformMessageRouter() {
+  return platform_message_router_;
 }
 
 void PlatformViewIOS::RegisterExternalTexture(int64_t texture_id,
@@ -113,30 +45,55 @@ void PlatformViewIOS::RegisterExternalTexture(int64_t texture_id,
   RegisterTexture(std::make_shared<IOSExternalTextureGL>(texture_id, texture));
 }
 
-void PlatformViewIOS::RunFromSource(const std::string& assets_directory,
-                                    const std::string& main,
-                                    const std::string& packages) {
-  auto latch = new fxl::ManualResetWaitableEvent();
-
-  dispatch_async(dispatch_get_main_queue(), ^{
-    SetupAndLoadFromSource(assets_directory, main, packages);
-    latch->Signal();
-  });
-
-  latch->Wait();
-  delete latch;
+// |shell::PlatformView|
+std::unique_ptr<Surface> PlatformViewIOS::CreateRenderingSurface() {
+  return ios_surface_->CreateGPUSurface();
 }
 
-void PlatformViewIOS::SetAssetBundlePath(const std::string& assets_directory) {
-  auto latch = new fxl::ManualResetWaitableEvent();
+// |shell::PlatformView|
+sk_sp<GrContext> PlatformViewIOS::CreateResourceContext() const {
+  if (!ios_surface_->ResourceContextMakeCurrent()) {
+    FXL_DLOG(INFO) << "Could not make resource context current on IO thread. Async texture uploads "
+                      "will be disabled.";
+    return nullptr;
+  }
 
-  dispatch_async(dispatch_get_main_queue(), ^{
-    SetAssetBundlePathOnUI(assets_directory);
-    latch->Signal();
-  });
+  return IOManager::CreateCompatibleResourceLoadingContext(GrBackend::kOpenGL_GrBackend);
+}
 
-  latch->Wait();
-  delete latch;
+// |shell::PlatformView|
+void PlatformViewIOS::SetSemanticsEnabled(bool enabled) {
+  if (enabled && !accessibility_bridge_) {
+    accessibility_bridge_ = std::make_unique<AccessibilityBridge>(owner_view_, this);
+  } else {
+    accessibility_bridge_.reset();
+  }
+  PlatformView::SetSemanticsEnabled(enabled);
+}
+
+// |shell::PlatformView|
+void PlatformViewIOS::UpdateSemantics(blink::SemanticsNodeUpdates update) {
+  if (accessibility_bridge_) {
+    accessibility_bridge_->UpdateSemantics(std::move(update));
+  }
+}
+
+// |shell::PlatformView|
+void PlatformViewIOS::HandlePlatformMessage(fxl::RefPtr<blink::PlatformMessage> message) {
+  platform_message_router_.HandlePlatformMessage(std::move(message));
+}
+
+// |shell::PlatformView|
+std::unique_ptr<VsyncWaiter> PlatformViewIOS::CreateVSyncWaiter() {
+  return std::make_unique<VsyncWaiterIOS>(task_runners_);
+}
+
+fml::scoped_nsprotocol<FlutterTextInputPlugin*> PlatformViewIOS::GetTextInputPlugin() const {
+  return text_input_plugin_;
+}
+
+void PlatformViewIOS::SetTextInputPlugin(fml::scoped_nsprotocol<FlutterTextInputPlugin*> plugin) {
+  text_input_plugin_ = plugin;
 }
 
 }  // namespace shell

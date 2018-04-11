@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_TEXT_PARAGRAPH_IMPL_BLINK_H_
 #define FLUTTER_LIB_UI_TEXT_PARAGRAPH_IMPL_BLINK_H_
 
+#include "flutter/fml/message_loop.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/text/paragraph_impl.h"
 #include "flutter/lib/ui/text/text_box.h"
@@ -41,6 +42,10 @@ class ParagraphImplBlink : public ParagraphImpl {
 
   int absoluteOffsetForPosition(const PositionWithAffinity& position);
 
+  // TODO: This can be removed when the render view association for the legacy
+  // runtime is removed.
+  fxl::RefPtr<fxl::TaskRunner> destruction_task_runner_ =
+      UIDartState::Current()->GetTaskRunners().GetUITaskRunner();
   OwnPtr<RenderView> m_renderView;
 };
 

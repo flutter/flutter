@@ -137,20 +137,20 @@ void DefaultLayerBuilder::PushPerformanceOverlay(uint64_t enabled_options,
 }
 
 void DefaultLayerBuilder::PushPicture(const SkPoint& offset,
-                                      sk_sp<SkPicture> picture,
+                                      SkiaGPUObject<SkPicture> picture,
                                       bool picture_is_complex,
                                       bool picture_will_change) {
   if (!current_layer_) {
     return;
   }
-  SkRect pictureRect = picture->cullRect();
+  SkRect pictureRect = picture.get()->cullRect();
   pictureRect.offset(offset.x(), offset.y());
   if (!SkRect::Intersects(pictureRect, cull_rects_.top())) {
     return;
   }
   auto layer = std::make_unique<flow::PictureLayer>();
   layer->set_offset(offset);
-  layer->set_picture(picture);
+  layer->set_picture(std::move(picture));
   layer->set_is_complex(picture_is_complex);
   layer->set_will_change(picture_will_change);
   current_layer_->Add(std::move(layer));

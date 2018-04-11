@@ -13,13 +13,11 @@ group("platform") {
     ]
   } else if (is_linux) {
     deps = [
-      "linux",
       "embedder",
     ]
   } else if (is_win) {
-    deps = [
-      "win"
-    ]
+    # There is no platform target on windows. Instead, only a tester is used.
+    deps = []
   } else {
     assert(false, "Unknown/Unsupported platform.")
   }

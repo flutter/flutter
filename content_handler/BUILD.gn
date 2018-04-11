@@ -20,23 +20,28 @@ template("flutter_content_handler") {
     sources = [
       "accessibility_bridge.cc",
       "accessibility_bridge.h",
-      "app.cc",
-      "app.h",
-      "application_controller_impl.cc",
-      "application_controller_impl.h",
+      "application.cc",
+      "application.h",
+      "application_runner.cc",
+      "application_runner.h",
+      "compositor_context.cc",
+      "compositor_context.h",
+      "engine.cc",
+      "engine.h",
       "fuchsia_font_manager.cc",
       "fuchsia_font_manager.h",
+      "isolate_configurator.cc",
+      "isolate_configurator.h",
       "main.cc",
-      "rasterizer.cc",
-      "rasterizer.h",
-      "runtime_holder.cc",
-      "runtime_holder.h",
-      "service_protocol_hooks.cc",
-      "service_protocol_hooks.h",
+      "platform_view.cc",
+      "platform_view.h",
       "session_connection.cc",
       "session_connection.h",
-      "vulkan_rasterizer.cc",
-      "vulkan_rasterizer.h",
+      "surface.cc",
+      "surface.h",
+      "task_observers.cc",
+      "task_observers.h",
+      "unique_fdio_ns.h",
       "vulkan_surface.cc",
       "vulkan_surface.h",
       "vulkan_surface_pool.cc",
@@ -45,18 +50,26 @@ template("flutter_content_handler") {
       "vulkan_surface_producer.h",
     ]
 
+    # The use of these dependencies is temporary and will be moved behind the
+    # embedder API.
+    flutter_deps = [
+      "$flutter_root/assets",
+      "$flutter_root/common",
+      "$flutter_root/flow",
+      "$flutter_root/glue",
+      "$flutter_root/lib/ui",
+      "$flutter_root/runtime",
+      "$flutter_root/sky/engine/platform",
+      "$flutter_root/third_party/txt",
+      "$flutter_root/vulkan",
+      "$flutter_root/fml",
+      "$flutter_root/shell/common",
+      "$flutter_root/shell/gpu",
+    ]
+
     deps = [
              "//third_party/dart/runtime/bin:libdart_builtin",
              "//third_party/dart/runtime/platform:libdart_platform",
-             "$flutter_root/assets",
-             "$flutter_root/common",
-             "$flutter_root/flow",
-             "$flutter_root/glue",
-             "$flutter_root/lib/ui",
-             "$flutter_root/runtime",
-             "$flutter_root/sky/engine/platform",
-             "$flutter_root/third_party/txt",
-             "$flutter_root/vulkan",
              "//garnet/public/lib/app/cpp",
              "//garnet/public/lib/fsl",
              "//garnet/public/lib/fxl",
@@ -73,8 +86,10 @@ template("flutter_content_handler") {
              "//topaz/lib/tonic",
              "//topaz/public/dart-pkg/fuchsia",
              "//topaz/public/lib/ui/flutter/sdk_ext",
+             "//third_party/skia:gpu",
+             "//third_party/zlib:minizip",
              "//zircon/public/lib/trace-provider",
-           ] + extra_deps
+           ] + extra_deps + flutter_deps
 
     # The flags below are needed so that Dart's CPU profiler can walk the
     # C++ stack.
