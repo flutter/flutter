@@ -8,15 +8,15 @@
 #include <atomic>
 
 #include "flutter/fml/message_loop_impl.h"
-#include "lib/fxl/files/unique_fd.h"
+#include "flutter/fml/unique_fd.h"
 #include "lib/fxl/macros.h"
 
 namespace fml {
 
 class MessageLoopLinux : public MessageLoopImpl {
  private:
-  fxl::UniqueFD epoll_fd_;
-  fxl::UniqueFD timer_fd_;
+  fml::UniqueFD epoll_fd_;
+  fml::UniqueFD timer_fd_;
   bool running_;
 
   MessageLoopLinux();

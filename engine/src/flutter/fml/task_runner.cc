@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#define FML_USED_ON_EMBEDDER
+
 #include "flutter/fml/task_runner.h"
 
 #include <utility>
@@ -36,6 +38,16 @@ bool TaskRunner::RunsTasksOnCurrentThread() {
     return false;
   }
   return MessageLoop::GetCurrent().GetLoopImpl() == loop_;
+}
+
+void TaskRunner::RunNowOrPostTask(fxl::RefPtr<fxl::TaskRunner> runner,
+                                  fxl::Closure task) {
+  FXL_DCHECK(runner);
+  if (runner->RunsTasksOnCurrentThread()) {
+    task();
+  } else {
+    runner->PostTask(std::move(task));
+  }
 }
 
 }  // namespace fml

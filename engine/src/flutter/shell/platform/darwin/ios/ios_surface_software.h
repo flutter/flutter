@@ -5,17 +5,19 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_SOFTWARE_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_SOFTWARE_H_
 
+#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/gpu/gpu_surface_software.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
 #include "lib/fxl/macros.h"
 
+@class CALayer;
+
 namespace shell {
 
-class IOSSurfaceSoftware : public IOSSurface,
-                           public GPUSurfaceSoftwareDelegate {
+class IOSSurfaceSoftware final : public IOSSurface,
+                                 public GPUSurfaceSoftwareDelegate {
  public:
-  IOSSurfaceSoftware(PlatformView::SurfaceConfig surface_config,
-                     CALayer* layer);
+  IOSSurfaceSoftware(fml::scoped_nsobject<CALayer> layer);
 
   ~IOSSurfaceSoftware() override;
 
@@ -32,6 +34,7 @@ class IOSSurfaceSoftware : public IOSSurface,
   bool PresentBackingStore(sk_sp<SkSurface> backing_store) override;
 
  private:
+  fml::scoped_nsobject<CALayer> layer_;
   sk_sp<SkSurface> sk_surface_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceSoftware);

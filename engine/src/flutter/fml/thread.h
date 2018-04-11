@@ -9,8 +9,8 @@
 #include <memory>
 #include <thread>
 
+#include "flutter/fml/task_runner.h"
 #include "lib/fxl/macros.h"
-#include "lib/fxl/tasks/task_runner.h"
 
 namespace fml {
 
@@ -20,13 +20,13 @@ class Thread {
 
   ~Thread();
 
-  fxl::RefPtr<fxl::TaskRunner> GetTaskRunner() const;
+  fxl::RefPtr<fml::TaskRunner> GetTaskRunner() const;
 
   void Join();
 
  private:
   std::unique_ptr<std::thread> thread_;
-  fxl::RefPtr<fxl::TaskRunner> task_runner_;
+  fxl::RefPtr<fml::TaskRunner> task_runner_;
   std::atomic_bool joined_;
 
   static void SetCurrentThreadName(const std::string& name);

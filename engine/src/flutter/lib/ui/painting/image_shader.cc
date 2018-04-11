@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/image_shader.h"
 
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
@@ -37,15 +38,17 @@ void ImageShader::initWithImage(CanvasImage* image,
                                 SkShader::TileMode tmx,
                                 SkShader::TileMode tmy,
                                 const tonic::Float64List& matrix4) {
-  if (!image)
+  if (!image) {
     Dart_ThrowException(
         ToDart("ImageShader constructor called with non-genuine Image."));
+  }
   SkMatrix sk_matrix = ToSkMatrix(matrix4);
-  set_shader(image->image()->makeShader(tmx, tmy, &sk_matrix));
+  set_shader(UIDartState::CreateGPUObject(
+      image->image()->makeShader(tmx, tmy, &sk_matrix)));
 }
 
-ImageShader::ImageShader() : Shader(nullptr) {}
+ImageShader::ImageShader() = default;
 
-ImageShader::~ImageShader() {}
+ImageShader::~ImageShader() = default;
 
 }  // namespace blink

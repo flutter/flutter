@@ -7,7 +7,13 @@
 
 #include <UIKit/UIKit.h>
 
+#include <memory>
+
+#include "flutter/shell/platform/darwin/ios/ios_surface.h"
+
 @interface FlutterView : UIView
+
+- (std::unique_ptr<shell::IOSSurface>)createSurface;
 
 @end
 

@@ -8,10 +8,8 @@ source_set("mac_desktop_platform") {
   visibility = [ ":*" ]
 
   sources = [
-    "flutter_app_delegate.h",
-    "flutter_app_delegate.m",
-    "flutter_application.h",
-    "flutter_application.mm",
+    "flutter_application_delegate.h",
+    "flutter_application_delegate.mm",
     "flutter_window.h",
     "flutter_window.mm",
     "main_mac.mm",
@@ -22,32 +20,22 @@ source_set("mac_desktop_platform") {
   ]
 
   deps = [
-    "//third_party/dart/runtime:libdart_jit",
     "$flutter_root/common",
     "$flutter_root/fml",
     "$flutter_root/shell/common",
     "$flutter_root/shell/gpu",
     "$flutter_root/shell/platform/darwin/common",
-    "$flutter_root/shell/testing",
     "$flutter_root/synchronization",
     "//garnet/public/lib/fxl",
+    "//third_party/dart/runtime:libdart_jit",
     "//third_party/skia",
+    "//third_party/skia:gpu",
   ]
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
-}
-
-executable("shell_standalone") {
-  output_name = "flutter_tester"
-  deps = [
-    ":mac_desktop_platform",
-  ]
+  public_configs = [ "$flutter_root:config" ]
 }
 
 if (!is_fuchsia_host) {
-
   import("//build/config/mac/rules.gni")
 
   resource_copy_mac("mac_desktop_resources") {

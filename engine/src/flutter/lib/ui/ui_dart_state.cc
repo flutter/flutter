@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/ui_dart_state.h"
 
+#include "flutter/fml/message_loop.h"
 #include "flutter/lib/ui/window/window.h"
 #include "flutter/sky/engine/platform/fonts/FontSelector.h"
 #include "lib/tonic/converter/dart_converter.h"
@@ -12,34 +13,44 @@ using tonic::ToDart;
 
 namespace blink {
 
-IsolateClient::~IsolateClient() {}
-
-UIDartState::UIDartState(IsolateClient* isolate_client,
-                         std::unique_ptr<Window> window,
-                         int dirfd)
-    : tonic::DartState(dirfd),
-      isolate_client_(isolate_client),
-      main_port_(ILLEGAL_PORT),
-      window_(std::move(window)) {}
-
-UIDartState::~UIDartState() {
-  main_port_ = ILLEGAL_PORT;
-  // We've already destroyed the isolate. Revoke any weak ptrs held by
-  // DartPersistentValues so they don't try to enter the destroyed isolate to
-  // clean themselves up.
-  // TODO(abarth): Can we do this work in the base class?
-  weak_factory_.InvalidateWeakPtrs();
+UIDartState::UIDartState(TaskRunners task_runners,
+                         TaskObserverAdd add_callback,
+                         TaskObserverRemove remove_callback,
+                         fml::WeakPtr<GrContext> resource_context,
+                         fxl::RefPtr<flow::SkiaUnrefQueue> skia_unref_queue,
+                         std::string advisory_script_uri,
+                         std::string advisory_script_entrypoint,
+                         std::string logger_prefix)
+    : task_runners_(std::move(task_runners)),
+      add_callback_(std::move(add_callback)),
+      remove_callback_(std::move(remove_callback)),
+      resource_context_(std::move(resource_context)),
+      advisory_script_uri_(std::move(advisory_script_uri)),
+      advisory_script_entrypoint_(std::move(advisory_script_entrypoint)),
+      logger_prefix_(std::move(logger_prefix)),
+      skia_unref_queue_(std::move(skia_unref_queue)),
+      weak_factory_(this) {
+  AddOrRemoveTaskObserver(true /* add */);
 }
 
-UIDartState* UIDartState::CreateForChildIsolate() {
-  return new UIDartState(isolate_client_, nullptr);
+UIDartState::~UIDartState() {
+  AddOrRemoveTaskObserver(false /* remove */);
+}
+
+const std::string& UIDartState::GetAdvisoryScriptURI() const {
+  return advisory_script_uri_;
+}
+
+const std::string& UIDartState::GetAdvisoryScriptEntrypoint() const {
+  return advisory_script_entrypoint_;
 }
 
 void UIDartState::DidSetIsolate() {
-  FXL_DCHECK(!debug_name_prefix_.empty());
   main_port_ = Dart_GetMainPortId();
   std::ostringstream debug_name;
-  debug_name << debug_name_prefix_ << "$main-" << main_port_;
+  // main.dart$main-1234
+  debug_name << advisory_script_uri_ << "$" << advisory_script_entrypoint_
+             << "-" << main_port_;
   debug_name_ = debug_name.str();
 }
 
@@ -55,8 +66,48 @@ PassRefPtr<FontSelector> UIDartState::font_selector() {
   return font_selector_;
 }
 
-void UIDartState::set_debug_name_prefix(const std::string& debug_name_prefix) {
-  debug_name_prefix_ = debug_name_prefix;
+void UIDartState::SetWindow(std::unique_ptr<Window> window) {
+  window_ = std::move(window);
+}
+
+const TaskRunners& UIDartState::GetTaskRunners() const {
+  return task_runners_;
+}
+
+fxl::RefPtr<flow::SkiaUnrefQueue> UIDartState::GetSkiaUnrefQueue() const {
+  return skia_unref_queue_;
+}
+
+void UIDartState::ScheduleMicrotask(Dart_Handle closure) {
+  if (tonic::LogIfError(closure) || !Dart_IsClosure(closure)) {
+    return;
+  }
+
+  microtask_queue_.ScheduleMicrotask(closure);
+}
+
+void UIDartState::FlushMicrotasksNow() {
+  microtask_queue_.RunMicrotasks();
+}
+
+void UIDartState::AddOrRemoveTaskObserver(bool add) {
+  auto task_runner = task_runners_.GetUITaskRunner();
+  if (!task_runner) {
+    // This may happen in case the isolate has no thread affinity (for example,
+    // the service isolate).
+    return;
+  }
+  FXL_DCHECK(add_callback_ && remove_callback_);
+  if (add) {
+    add_callback_(reinterpret_cast<intptr_t>(this),
+                  [this]() { this->FlushMicrotasksNow(); });
+  } else {
+    remove_callback_(reinterpret_cast<intptr_t>(this));
+  }
+}
+
+fml::WeakPtr<GrContext> UIDartState::GetResourceContext() const {
+  return resource_context_;
 }
 
 }  // namespace blink

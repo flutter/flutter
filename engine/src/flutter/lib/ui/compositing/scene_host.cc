@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/compositing/scene_host.h"
 
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/dart_library_natives.h"
@@ -37,8 +38,9 @@ fxl::RefPtr<SceneHost> SceneHost::create(
 }
 
 SceneHost::SceneHost(fxl::RefPtr<zircon::dart::Handle> export_token_handle) {
-  export_node_holder_ =
-      fxl::MakeRefCounted<flow::ExportNodeHolder>(export_token_handle);
+  export_node_holder_ = fxl::MakeRefCounted<flow::ExportNodeHolder>(
+      blink::UIDartState::Current()->GetTaskRunners().GetGPUTaskRunner(),
+      export_token_handle);
 }
 #else
 fxl::RefPtr<SceneHost> SceneHost::create(Dart_Handle export_token_handle) {

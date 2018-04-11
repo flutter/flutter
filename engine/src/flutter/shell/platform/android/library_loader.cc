@@ -16,7 +16,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved) {
   bool result = false;
 
   // Register FlutterMain.
-  result = shell::RegisterFlutterMain(env);
+  result = shell::FlutterMain::Register(env);
   FXL_CHECK(result);
 
   // Register PlatformView

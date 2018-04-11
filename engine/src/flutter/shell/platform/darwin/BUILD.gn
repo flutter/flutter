@@ -6,11 +6,8 @@ assert(is_mac || is_ios)
 
 group("darwin") {
   if (is_mac) {
-    deps = [
-      "desktop:shell_standalone",
-    ]
     if (!is_fuchsia_host) {
-      deps += [
+      deps = [
         "desktop:shell_application_bundle",
       ]
     }
@@ -45,15 +42,12 @@ source_set("flutter_channels") {
     "$flutter_root/runtime",
     "$flutter_root/shell/common",
     "$flutter_root/shell/gpu",
-    "$flutter_root/shell/testing",
     "$flutter_root/sky/engine/wtf",
     "//garnet/public/lib/fxl",
     "//third_party/skia",
   ]
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
+  public_configs = [ "$flutter_root:config" ]
 }
 
 executable("flutter_channels_unittests") {
@@ -68,7 +62,7 @@ executable("flutter_channels_unittests") {
 
   deps = [
     ":flutter_channels",
-    "//third_party/dart/runtime:libdart_jit",
     "$flutter_root/testing",
+    "//third_party/dart/runtime:libdart_jit",
   ]
 }

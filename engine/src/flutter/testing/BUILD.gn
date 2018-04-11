@@ -9,9 +9,13 @@ source_set("testing") {
     "$flutter_root/testing/run_all_unittests.cc",
     "$flutter_root/testing/testing.cc",
     "$flutter_root/testing/testing.h",
+    "$flutter_root/testing/thread_test.cc",
+    "$flutter_root/testing/thread_test.h",
   ]
 
   public_deps = [
+    "$flutter_root/fml",
+    "//garnet/public/lib/fxl",
     "//third_party/googletest:gtest",
   ]
 

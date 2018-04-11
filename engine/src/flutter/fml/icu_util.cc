@@ -22,8 +22,6 @@ static constexpr char kPathSeparator = '\\';
 static constexpr char kPathSeparator = '/';
 #endif
 
-static constexpr char kIcuDataFileName[] = "icudtl.dat";
-
 class ICUContext {
  public:
   ICUContext(const std::string& icu_data_path) : valid_(false) {
@@ -34,15 +32,15 @@ class ICUContext {
 
   bool SetupMapping(const std::string& icu_data_path) {
     // Check if the explicit path specified exists.
-    auto overriden_path_mapping = std::make_unique<FileMapping>(icu_data_path);
-    if (overriden_path_mapping->GetSize() != 0) {
-      mapping_ = std::move(overriden_path_mapping);
+    auto path_mapping = std::make_unique<FileMapping>(icu_data_path, false);
+    if (path_mapping->GetSize() != 0) {
+      mapping_ = std::move(path_mapping);
       return true;
     }
 
     // Check to see if the mapping is in the resources bundle.
     if (PlatformHasResourcesBundle()) {
-      auto resource = GetResourceMapping(kIcuDataFileName);
+      auto resource = GetResourceMapping(icu_data_path);
       if (resource != nullptr && resource->GetSize() != 0) {
         mapping_ = std::move(resource);
         return true;
@@ -57,10 +55,8 @@ class ICUContext {
       return false;
     }
 
-    // FIXME(chinmaygarde): There is no Path::Join in FXL. So a non-portable
-    // version is used here. Patch FXL and update.
     auto file = std::make_unique<FileMapping>(
-        directory.second + kPathSeparator + kIcuDataFileName);
+        directory.second + kPathSeparator + icu_data_path, false);
     if (file->GetSize() != 0) {
       mapping_ = std::move(file);
       return true;
@@ -96,7 +92,8 @@ class ICUContext {
 
 void InitializeICUOnce(const std::string& icu_data_path) {
   static ICUContext* context = new ICUContext(icu_data_path);
-  FXL_CHECK(context->IsValid()) << "Must be able to initialize the ICU context";
+  FXL_CHECK(context->IsValid())
+      << "Must be able to initialize the ICU context. Tried: " << icu_data_path;
 }
 
 std::once_flag g_icu_init_flag;

@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("$flutter_root/testing/testing.gni")
+
 # Template to generate a dart embedder resource.cc file.
 # Required invoker inputs:
 #   String output (name of output file)
@@ -61,18 +63,18 @@ source_set("common") {
     "animator.h",
     "engine.cc",
     "engine.h",
-    "null_platform_view.cc",
-    "null_platform_view.h",
-    "null_rasterizer.cc",
-    "null_rasterizer.h",
+    "io_manager.cc",
+    "io_manager.h",
+    "isolate_configuration.cc",
+    "isolate_configuration.h",
     "picture_serializer.cc",
     "picture_serializer.h",
     "platform_view.cc",
     "platform_view.h",
-    "platform_view_service_protocol.cc",
-    "platform_view_service_protocol.h",
     "rasterizer.cc",
     "rasterizer.h",
+    "run_configuration.cc",
+    "run_configuration.h",
     "shell.cc",
     "shell.h",
     "skia_event_tracer_impl.cc",
@@ -81,8 +83,8 @@ source_set("common") {
     "surface.h",
     "switches.cc",
     "switches.h",
-    "tracing_controller.cc",
-    "tracing_controller.h",
+    "thread_host.cc",
+    "thread_host.h",
     "vsync_waiter.cc",
     "vsync_waiter.h",
     "vsync_waiter_fallback.cc",
@@ -90,8 +92,6 @@ source_set("common") {
   ]
 
   deps = [
-    "//third_party/dart/runtime:dart_api",
-    "//third_party/dart/runtime/platform:libdart_platform",
     "$flutter_root/assets",
     "$flutter_root/common",
     "$flutter_root/flow",
@@ -99,10 +99,13 @@ source_set("common") {
     "$flutter_root/glue",
     "$flutter_root/lib/ui",
     "$flutter_root/runtime",
+    "$flutter_root/sky/engine/platform",
     "$flutter_root/sky/engine/wtf",
     "$flutter_root/synchronization",
     "$flutter_root/third_party/txt",
     "//garnet/public/lib/fxl",
+    "//third_party/dart/runtime:dart_api",
+    "//third_party/dart/runtime/platform:libdart_platform",
     "//third_party/rapidjson",
     "//third_party/skia",
     "//third_party/skia:gpu",
@@ -112,7 +115,23 @@ source_set("common") {
     "//topaz/lib/tonic",
   ]
 
-  public_configs = [
-    "$flutter_root:config",
+  public_configs = [ "$flutter_root:config" ]
+}
+
+executable("shell_unittests") {
+  testonly = true
+
+  sources = [
+    "shell_unittests.cc",
+  ]
+  deps = [
+    ":common",
+    "$flutter_root/fml",
+    "$flutter_root/lib/snapshot",
+    "$flutter_root/testing",
+    "//garnet/public/lib/fxl",
+    "//third_party/dart/runtime:libdart_jit",
+    "//third_party/skia",
+    "//topaz/lib/tonic",
   ]
 }
