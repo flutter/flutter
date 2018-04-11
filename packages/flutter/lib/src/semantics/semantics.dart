@@ -320,6 +320,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.focused,
     this.inMutuallyExclusiveGroup,
     this.obscured,
+    this.edge,
     this.route,
     this.label,
     this.value,
@@ -407,6 +408,8 @@ class SemanticsProperties extends DiagnosticableTree {
   /// that the text field contains a password (or other sensitive information).
   /// Doing so instructs screen readers to not read out the [value].
   final bool obscured;
+
+  final bool edge;
 
   /// If non-null, whether the node corresponds to a visually distinct subtree.
   ///
@@ -2352,6 +2355,11 @@ class SemanticsConfiguration {
     assert(hint != null);
     _hint = hint;
     _hasBeenAnnotated = true;
+  }
+
+  bool get isEdge => _hasFlag(SemanticsFlag.isEdge);
+  set isEdge(bool value) {
+    _setFlag(SemanticsFlag.isEdge, value);
   }
 
   /// Whether this node is part of a visually distinct subtree.

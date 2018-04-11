@@ -96,7 +96,7 @@ class DrawerHeader extends StatelessWidget {
           child: new MediaQuery.removePadding(
             context: context,
             removeTop: true,
-            child: new Semantics(route: true, child: child),
+            child: child,
           ),
         ),
       ),

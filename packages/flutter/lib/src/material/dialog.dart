@@ -85,7 +85,6 @@ class Dialog extends StatelessWidget {
               type: MaterialType.card,
               child: new Semantics(
                 route: true,
-                explicitChildNodes: true,
                 child: child,
               ),
             ),
@@ -229,7 +228,7 @@ class AlertDialog extends StatelessWidget {
         padding: titlePadding ?? new EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
-          child: title,
+          child: new Semantics(child: title, route: true),
         ),
       ));
     }

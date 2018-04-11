@@ -3019,6 +3019,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
+    bool edge,
     bool route,
     String label,
     String value,
@@ -3056,6 +3057,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _obscured = obscured,
        _route = route,
+       _edge = edge,
        _label = label,
        _value = value,
        _increasedValue = increasedValue,
@@ -3212,6 +3214,15 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (obscured == value)
       return;
     _obscured = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  bool get edge => _edge;
+  bool _edge;
+  set edge(bool value) {
+    if (edge == value)
+      return;
+    _edge = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3676,6 +3687,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.hint = hint;
     if (route != null)
       config.isRoute = route;
+    if (edge != null)
+      config.isEdge = edge;
     if (textDirection != null)
       config.textDirection = textDirection;
     if (sortKey != null)

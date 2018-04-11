@@ -13,7 +13,7 @@ void main() {
       const Directionality(
         textDirection: TextDirection.ltr,
         child: const RouteName(
-          name: 'login',
+          routeName: 'login',
           child: const Text('foo')
         )
       )

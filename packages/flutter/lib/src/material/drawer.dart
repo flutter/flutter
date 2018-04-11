@@ -107,7 +107,9 @@ class Drawer extends StatelessWidget {
       child: new Material(
         elevation: elevation,
         child: new Semantics(
+          edge: true,
           route: true,
+          value: 'Navigation Menu', // just for testing
           explicitChildNodes: true,
           child: child,
         ),
