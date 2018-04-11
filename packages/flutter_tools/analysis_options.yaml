@@ -1,0 +1,4 @@
+# Use the analysis options settings from the top level of the repo (not
+# the ones from above, which include the `public_member_api_docs` rule).
+
+include: ../../analysis_options.yaml

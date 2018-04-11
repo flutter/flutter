@@ -185,6 +185,8 @@ Future<Null> main() async {
       }
     }
     buffer.add('');
+    buffer.add('// ignore_for_file: unused_element');
+    buffer.add('');
     final List<Line> lines = new List<Line>.filled(buffer.length, null, growable: true);
     for (Section section in sections) {
       buffer.addAll(section.strings);
@@ -203,7 +205,7 @@ dependencies:
     print('Found $sampleCodeSections sample code sections.');
     final Process process = await Process.start(
       _flutter,
-      <String>['analyze', '--no-preamble', mainDart.path],
+      <String>['analyze', '--no-preamble', '--no-congratulate', mainDart.parent.path],
       workingDirectory: temp.path,
     );
     stderr.addStream(process.stderr);
@@ -212,10 +214,6 @@ dependencies:
       errors.removeAt(0);
     if (errors.first.startsWith('Running "flutter packages get" in '))
       errors.removeAt(0);
-    if (errors.first.startsWith('Analyzing '))
-      errors.removeAt(0);
-    if (errors.last.endsWith(' issues found.') || errors.last.endsWith(' issue found.'))
-      errors.removeLast();
     int errorCount = 0;
     for (String error in errors) {
       final String kBullet = Platform.isWindows ? ' - ' : ' • ';
