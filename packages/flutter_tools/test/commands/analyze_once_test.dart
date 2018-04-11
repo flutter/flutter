@@ -17,6 +17,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
+
   final String analyzerSeparator = platform.isWindows ? '-' : '•';
 
   group('analyze once', () {
@@ -32,11 +33,7 @@ void main() {
     });
 
     tearDownAll(() {
-      try {
-        tempDir?.deleteSync(recursive: true);
-      } catch (e) {
-        // ignore errors deleting the temporary directory
-      }
+      tempDir?.deleteSync(recursive: true);
     });
 
     // Create a project to be analyzed
@@ -53,7 +50,7 @@ void main() {
     }, timeout: allowForRemotePubInvocation);
 
     // Analyze in the current directory - no arguments
-    testUsingContext('working directory', () async {
+    testUsingContext('flutter analyze working directory', () async {
       await runCommand(
         command: new AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
         arguments: <String>['analyze'],
@@ -62,17 +59,17 @@ void main() {
     });
 
     // Analyze a specific file outside the current directory
-    testUsingContext('passing one file throws', () async {
+    testUsingContext('flutter analyze one file', () async {
       await runCommand(
         command: new AnalyzeCommand(),
         arguments: <String>['analyze', libMain.path],
-        toolExit: true,
-        exitMessageContains: 'is not a directory',
+        statusTextContains: <String>['No issues found!'],
       );
     });
 
     // Analyze in the current directory - no arguments
-    testUsingContext('working directory with errors', () async {
+    testUsingContext('flutter analyze working directory with errors', () async {
+
       // Break the code to produce the "The parameter 'onPressed' is required" hint
       // that is upgraded to a warning in package:flutter/analysis_options_user.yaml
       // to assert that we are using the default Flutter analysis options.
@@ -96,7 +93,22 @@ void main() {
         statusTextContains: <String>[
           'Analyzing',
           'warning $analyzerSeparator The parameter \'onPressed\' is required',
-          'info $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
+          'hint $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
+          '2 issues found.',
+        ],
+        toolExit: true,
+      );
+    });
+
+    // Analyze a specific file outside the current directory
+    testUsingContext('flutter analyze one file with errors', () async {
+      await runCommand(
+        command: new AnalyzeCommand(),
+        arguments: <String>['analyze', libMain.path],
+        statusTextContains: <String>[
+          'Analyzing',
+          'warning $analyzerSeparator The parameter \'onPressed\' is required',
+          'hint $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
           '2 issues found.',
         ],
         toolExit: true,
@@ -104,7 +116,8 @@ void main() {
     });
 
     // Analyze in the current directory - no arguments
-    testUsingContext('working directory with local options', () async {
+    testUsingContext('flutter analyze working directory with local options', () async {
+
       // Insert an analysis_options.yaml file in the project
       // which will trigger a lint for broken code that was inserted earlier
       final File optionsFile = fs.file(fs.path.join(projectPath, 'analysis_options.yaml'));
@@ -122,15 +135,15 @@ void main() {
         statusTextContains: <String>[
           'Analyzing',
           'warning $analyzerSeparator The parameter \'onPressed\' is required',
-          'info $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
-          'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
+          'hint $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
+          'lint $analyzerSeparator Only throw instances of classes extending either Exception or Error',
           '3 issues found.',
         ],
         toolExit: true,
       );
     });
 
-    testUsingContext('no duplicate issues', () async {
+    testUsingContext('flutter analyze no duplicate issues', () async {
       final Directory tempDir = fs.systemTempDirectory.createTempSync('analyze_once_test_').absolute;
 
       try {
@@ -162,6 +175,22 @@ void bar() {
       } finally {
         tempDir.deleteSync(recursive: true);
       }
+    });
+
+    // Analyze a specific file outside the current directory
+    testUsingContext('flutter analyze one file with local options', () async {
+      await runCommand(
+        command: new AnalyzeCommand(),
+        arguments: <String>['analyze', libMain.path],
+        statusTextContains: <String>[
+          'Analyzing',
+          'warning $analyzerSeparator The parameter \'onPressed\' is required',
+          'hint $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
+          'lint $analyzerSeparator Only throw instances of classes extending either Exception or Error',
+          '3 issues found.',
+        ],
+        toolExit: true,
+      );
     });
 
     testUsingContext('--preview-dart-2', () async {
@@ -221,23 +250,18 @@ Future<Null> runCommand({
   List<String> statusTextContains,
   List<String> errorTextContains,
   bool toolExit: false,
-  String exitMessageContains,
 }) async {
   try {
     arguments.insert(0, '--flutter-root=${Cache.flutterRoot}');
     await createTestCommandRunner(command).run(arguments);
     expect(toolExit, isFalse, reason: 'Expected ToolExit exception');
-  } on ToolExit catch (e) {
+  } on ToolExit {
     if (!toolExit) {
       testLogger.clear();
       rethrow;
     }
-    if (exitMessageContains != null) {
-      expect(e.message, contains(exitMessageContains));
-    }
   }
   assertContains(testLogger.statusText, statusTextContains);
   assertContains(testLogger.errorText, errorTextContains);
-
   testLogger.clear();
 }
