@@ -152,9 +152,9 @@ class _ListItem extends StatelessWidget {
           new Container(
             width: 38.0,
             child: called
-                ? new Align(
+                ? const Align(
                     alignment: Alignment.topCenter,
-                    child: new Icon(
+                    child: const Icon(
                       CupertinoIcons.phone_solid,
                       color: CupertinoColors.inactiveGray,
                       size: 18.0,
@@ -207,9 +207,9 @@ class _ListItem extends StatelessWidget {
                       letterSpacing: -0.41,
                     ),
                   ),
-                  new Padding(
+                  const Padding(
                     padding: const EdgeInsets.only(left: 9.0),
-                    child: new Icon(
+                    child: const Icon(
                       CupertinoIcons.info,
                       color: CupertinoColors.activeBlue
                     ),
