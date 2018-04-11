@@ -20,8 +20,8 @@ class AnalyzeCommand extends FlutterCommand {
         help: 'Analyze the current project, if applicable.', defaultsTo: true);
     argParser.addFlag('dartdocs',
         negatable: false,
-        help:
-            'List every public member that is lacking documentation (only works with --flutter-repo).',
+        help: 'List every public member that is lacking documentation '
+            '(only works with --flutter-repo).',
         hide: !verboseHelp);
     argParser.addFlag('watch',
         help: 'Run analysis continuously, watching the filesystem for changes.',
@@ -30,8 +30,8 @@ class AnalyzeCommand extends FlutterCommand {
         defaultsTo: true, help: 'Preview Dart 2.0 functionality.');
     argParser.addOption('write',
         valueHelp: 'file',
-        help:
-            'Also output the results to a file. This is useful with --watch if you want a file to always contain the latest results.');
+        help: 'Also output the results to a file. This is useful with --watch '
+            'if you want a file to always contain the latest results.');
 
     // Hidden option to enable a benchmarking mode.
     argParser.addFlag('benchmark',
@@ -43,13 +43,13 @@ class AnalyzeCommand extends FlutterCommand {
 
     // Not used by analyze --watch
     argParser.addFlag('congratulate',
-        help:
-            'When analyzing the flutter repository, show output even when there are no errors, warnings, hints, or lints.',
+        help: 'When analyzing the flutter repository, show output even when '
+            'there are no errors, warnings, hints, or lints.',
         defaultsTo: true);
     argParser.addFlag('preamble',
         defaultsTo: true,
-        help:
-            'When analyzing the flutter repository, display the number of files that will be analyzed.');
+        help: 'When analyzing the flutter repository, display the number of '
+            'files that will be analyzed.');
   }
 
   /// The working directory for testing analysis using dartanalyzer.

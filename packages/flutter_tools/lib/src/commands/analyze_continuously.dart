@@ -45,11 +45,14 @@ class AnalyzeContinuously extends AnalyzeBase {
     if (argResults['flutter-repo']) {
       final PackageDependencyTracker dependencies = new PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
+
       directories = repoRoots;
       analysisTarget = 'Flutter repository';
+
       printTrace('Analyzing Flutter repository:');
-      for (String projectPath in directories)
+      for (String projectPath in repoRoots) {
         printTrace('  ${fs.path.relative(projectPath)}');
+      }
     } else {
       directories = <String>[fs.currentDirectory.path];
       analysisTarget = fs.currentDirectory.path;
