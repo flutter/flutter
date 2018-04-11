@@ -7,6 +7,7 @@ import 'dart:async';
 import '../base/version.dart';
 import '../doctor.dart';
 import '../globals.dart';
+import '../intellij/intellij.dart';
 import 'android_studio.dart';
 
 class AndroidStudioValidator extends DoctorValidator {
@@ -30,11 +31,18 @@ class AndroidStudioValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType type = ValidationType.missing;
+
     final String studioVersionText = _studio.version == Version.unknown
         ? null
         : 'version ${_studio.version}';
     messages
         .add(new ValidationMessage('Android Studio at ${_studio.directory}'));
+
+    final IntelliJPlugins plugins = new IntelliJPlugins(_studio.pluginsPath);
+    plugins.validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
+        'Flutter', minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
+    plugins.validatePackage(messages, <String>['Dart'], 'Dart');
+
     if (_studio.isValid) {
       type = ValidationType.installed;
       messages.addAll(_studio.validationMessages

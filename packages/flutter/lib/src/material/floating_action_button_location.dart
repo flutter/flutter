@@ -67,19 +67,19 @@ abstract class FloatingActionButtonLocation {
   ///
   /// This is unlikely to be a useful location for apps that lack a bottom
   /// navigation bar.
-  static FloatingActionButtonLocation endDocked = const _EndDockedFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation endDocked = const _EndDockedFloatingActionButtonLocation();
 
   /// Center-aligned [FloatingActionButton], floating over the
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
   /// action button lines up with the top of the bottom navigation bar.
   ///
   /// If the value of [Scaffold.bottomNavigationBar] is a [BottomAppBar],
-  /// the bottom app bar can include a "notch" in its shape that accomodates
+  /// the bottom app bar can include a "notch" in its shape that accommodates
   /// the overlapping floating action button.
   ///
   /// This is unlikely to be a useful location for apps that lack a bottom
   /// navigation bar.
-  static FloatingActionButtonLocation centerDocked = const _CenterDockedFloatingActionButtonLocation();
+  static const FloatingActionButtonLocation centerDocked = const _CenterDockedFloatingActionButtonLocation();
 
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
   ///

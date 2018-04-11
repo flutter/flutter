@@ -27,7 +27,7 @@ import '../runner/flutter_command.dart';
 /// ```
 const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
   // Add pinned packages here.
-  'mockito': '3.0.0-alpha+2', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
+  'mockito': '3.0.0-alpha+3', // TODO(aam): https://github.com/dart-lang/mockito/issues/110
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -101,6 +101,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final bool isVerifyOnly = argResults['verify-only'];
 
     if (isVerifyOnly) {
+      bool needsUpdate = false;
       printStatus('Verifying pubspecs...');
       for (Directory directory in packages) {
         final PubspecYaml pubspec = new PubspecYaml(directory);
@@ -108,10 +109,11 @@ class UpdatePackagesCommand extends FlutterCommand {
         if (pubspec.checksum.value == -1) {
           // If the checksum is invalid or missing, we can just ask them run to run
           // upgrade again to compute it.
-          printStatus(
+          printError(
             'Warning: pubspec in ${directory.path} has out of date dependencies. '
-            'Please run "flutter update-packages" --force-upgrade to update them correctly.'  
+            'Please run "flutter update-packages --force-upgrade" to update them correctly.'  
           );
+          needsUpdate = true;
         }
         // all dependencies in the pubspec sorted lexically.
         final Set<String> checksumDependencies = new Set<String>();
@@ -134,6 +136,13 @@ class UpdatePackagesCommand extends FlutterCommand {
            // everything is correct in the pubspec.
            printStatus('pubspec in ${directory.path} is up to date!');
          }
+      }
+      if (needsUpdate) {
+        throwToolExit(
+          'Warning: one or more pubspecs have invalid dependencies. '
+          'Please run "flutter update-packages --force-upgrade" to update them correctly.',
+          exitCode: 1,
+        );
       }
       return;
     }

@@ -14,6 +14,7 @@ void main() {
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.gallery');
       expect(data.launchableActivityName, 'io.flutter.app.FlutterActivity');
+      expect(data.data['application']['label'], 'Flutter Gallery');
     });
   });
 

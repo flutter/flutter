@@ -896,6 +896,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     final Widget picker = new Flexible(
       child: new SizedBox(
         height: _kMaxDayPickerHeight,
@@ -916,7 +917,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         ],
       ),
     );
-    return new Dialog(
+    final Dialog dialog = new Dialog(
       child: new OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
           assert(orientation != null);
@@ -933,7 +934,20 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                 child: new Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[header, picker, actions],
+                  children: <Widget>[
+                    header,
+                    new Container(
+                      color: theme.dialogBackgroundColor,
+                      child: new Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          picker,
+                          actions,
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               );
             case Orientation.landscape:
@@ -945,8 +959,9 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                   children: <Widget>[
                     header,
                     new Flexible(
-                      child: new SizedBox(
+                      child: new Container(
                         width: _kMonthPickerLandscapeWidth,
+                        color: theme.dialogBackgroundColor,
                         child: new Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -961,6 +976,13 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           return null;
         }
       )
+    );
+
+    return new Theme(
+      data: theme.copyWith(
+        dialogBackgroundColor: Colors.transparent,
+      ),
+      child: dialog,
     );
   }
 }

@@ -50,6 +50,15 @@ class GenSnapshot {
       '--print_snapshot_sizes',
     ]..addAll(additionalArgs);
     final String snapshotterPath = artifacts.getArtifactPath(Artifact.genSnapshot, snapshotType.platform, snapshotType.mode);
+
+    // iOS gen_snapshot is a multi-arch binary. Running as an i386 binary will
+    // generate armv7 code. Running as an x86_64 binary will generate arm64
+    // code. /usr/bin/arch can be used to run binaries with the specified
+    // architecture.
+    if (snapshotType.platform == TargetPlatform.ios) {
+      // TODO(cbracken): for the moment, always generate only arm64 code.
+      return runCommandAndStreamOutput(<String>['/usr/bin/arch', '-x86_64', snapshotterPath]..addAll(args));
+    }
     return runCommandAndStreamOutput(<String>[snapshotterPath]..addAll(args));
   }
 }

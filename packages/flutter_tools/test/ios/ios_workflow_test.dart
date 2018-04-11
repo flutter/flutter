@@ -111,22 +111,6 @@ void main() {
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when Mac dev mode was never enabled', () async {
-      when(xcode.isInstalled).thenReturn(true);
-      when(xcode.versionText)
-          .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
-      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
-      when(xcode.eulaSigned).thenReturn(true);
-      when(xcode.isSimctlInstalled).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(macDevMode: 'Developer mode is currently disabled.');
-      final ValidationResult result = await workflow.validate();
-      expect(result.type, ValidationType.partial);
-    }, overrides: <Type, Generator>{
-      IMobileDevice: () => iMobileDevice,
-      Xcode: () => xcode,
-      CocoaPods: () => cocoaPods,
-    });
-
     testUsingContext('Emits partial status when python six not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText)
@@ -269,9 +253,9 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck).thenReturn(false);
-      when(cocoaPods.hasCocoaPods).thenReturn(true);
-      when(cocoaPods.isCocoaPodsInitialized).thenReturn(false);
+      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck).thenAnswer((_) async => false);
+      when(cocoaPods.hasCocoaPods).thenAnswer((_) async => true);
+      when(cocoaPods.isCocoaPodsInitialized).thenAnswer((_) async => false);
       when(xcode.isSimctlInstalled).thenReturn(true);
 
       final ValidationResult result = await new IOSWorkflowTestTarget().validate();
@@ -354,11 +338,9 @@ class IOSWorkflowTestTarget extends IOSWorkflow {
     bool hasIosDeploy: true,
     String iosDeployVersionText: '1.9.2',
     bool hasIDeviceInstaller: true,
-    String macDevMode: 'Developer mode is already enabled.',
   }) : hasIosDeploy = new Future<bool>.value(hasIosDeploy),
        iosDeployVersionText = new Future<String>.value(iosDeployVersionText),
-       hasIDeviceInstaller = new Future<bool>.value(hasIDeviceInstaller),
-       macDevMode = new Future<String>.value(macDevMode);
+       hasIDeviceInstaller = new Future<bool>.value(hasIDeviceInstaller);
 
   @override
   final bool hasPythonSixModule;
@@ -374,7 +356,4 @@ class IOSWorkflowTestTarget extends IOSWorkflow {
 
   @override
   final Future<bool> hasIDeviceInstaller;
-
-  @override
-  final Future<String> macDevMode;
 }
