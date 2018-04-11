@@ -1,4 +1,4 @@
-Signature: f15f70e4cdde38e61887aa34721faf73
+Signature: 51b000c3ae8a9d5678ad4183dbf86328
 
 UNUSED LICENSES:
 
@@ -6028,12 +6028,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.cc + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/code_statistics.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.h
 FILE: ../../../third_party/dart/runtime/vm/datastream.cc
 FILE: ../../../third_party/dart/runtime/vm/finalizable_data.h
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.cc
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.h
 FILE: ../../../third_party/dart/sdk/lib/js/_js.dart
 FILE: ../../../third_party/dart/sdk/lib/js/_js_client.dart
 FILE: ../../../third_party/dart/sdk/lib/js/_js_server.dart
