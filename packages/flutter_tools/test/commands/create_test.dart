@@ -42,7 +42,11 @@ void main() {
     });
 
     tearDown(() {
-      temp.deleteSync(recursive: true);
+      try {
+        temp.deleteSync(recursive: true);
+      } catch (e) {
+        // ignore errors deleting the temporary directory
+      }
     });
 
     // Verify that we create a project that is well-formed.
