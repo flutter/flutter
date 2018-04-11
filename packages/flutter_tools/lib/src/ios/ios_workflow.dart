@@ -120,9 +120,18 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       pythonStatus = ValidationType.missing;
       messages.add(new ValidationMessage.error(kPythonSix.errorMessage));
     }
+    bool requireHomeBrew = true
+    
+    if (iMobileDevice.isInstalled && (await iMobileDevice.isWorking) && (await hasIDeviceInstaller)) {
+      if (await hasIosDeploy && await _iosDeployIsInstalledAndMeetsVersionCheck) {
+        if (await cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck && await cocoaPods.isCocoaPodsInitialized) {
+          requireHomeBrew = false
+        }
+      }
+    }
 
     // brew installed
-    if (hasHomebrew) {
+    if (requireHomeBrew && hasHomebrew) {
       brewStatus = ValidationType.installed;
 
       if (!iMobileDevice.isInstalled) {
