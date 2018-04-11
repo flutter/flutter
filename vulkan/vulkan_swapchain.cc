@@ -223,12 +223,12 @@ sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(
   }
 
   const GrVkImageInfo image_info = {
-      .fImage = image,
-      .fAlloc = GrVkAlloc(),
-      .fImageTiling = VK_IMAGE_TILING_OPTIMAL,
-      .fImageLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-      .fFormat = surface_format_.format,
-      .fLevelCount = 1,
+      image,                     // image
+      GrVkAlloc(),               // alloc
+      VK_IMAGE_TILING_OPTIMAL,   // tiling
+      VK_IMAGE_LAYOUT_UNDEFINED, // layout
+      surface_format_.format,    // format
+      1,                         // level count
   };
 
   // TODO(chinmaygarde): Setup the stencil buffer and the sampleCnt.
