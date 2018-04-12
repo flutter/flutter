@@ -90,6 +90,7 @@ Future<CompilerOutput> compile(
     '--sdk-root',
     sdkRoot,
     '--strong',
+    '--sync-async',
     '--target=flutter',
   ];
   if (trackWidgetCreation)
