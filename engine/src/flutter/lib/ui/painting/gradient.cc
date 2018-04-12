@@ -48,10 +48,10 @@ void CanvasGradient::initLinear(const tonic::Float32List& end_points,
   static_assert(sizeof(SkColor) == sizeof(int32_t),
                 "SkColor doesn't use int32_t.");
 
-  set_shader(UIDartState::CreateGPUObject(SkGradientShader::MakeLinear(
+  set_shader(SkGradientShader::MakeLinear(
       reinterpret_cast<const SkPoint*>(end_points.data()),
       reinterpret_cast<const SkColor*>(colors.data()), color_stops.data(),
-      colors.num_elements(), tile_mode)));
+      colors.num_elements(), tile_mode));
 }
 
 void CanvasGradient::initRadial(double center_x,
@@ -73,14 +73,14 @@ void CanvasGradient::initRadial(double center_x,
     sk_matrix = ToSkMatrix(matrix4);
   }
 
-  set_shader(UIDartState::CreateGPUObject(SkGradientShader::MakeRadial(
+  set_shader(SkGradientShader::MakeRadial(
       SkPoint::Make(center_x, center_y), radius,
       reinterpret_cast<const SkColor*>(colors.data()), color_stops.data(),
-      colors.num_elements(), tile_mode, 0, has_matrix ? &sk_matrix : nullptr)));
+      colors.num_elements(), tile_mode, 0, has_matrix ? &sk_matrix : nullptr));
 }
 
-CanvasGradient::CanvasGradient() = default;
+CanvasGradient::CanvasGradient() : Shader(nullptr) {}
 
-CanvasGradient::~CanvasGradient() = default;
+CanvasGradient::~CanvasGradient() {}
 
 }  // namespace blink

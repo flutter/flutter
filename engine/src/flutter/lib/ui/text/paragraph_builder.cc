@@ -5,7 +5,7 @@
 #include "flutter/lib/ui/text/paragraph_builder.h"
 
 #include "flutter/common/settings.h"
-#include "flutter/common/task_runners.h"
+#include "flutter/common/threads.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/sky/engine/core/rendering/RenderInline.h"
@@ -205,11 +205,9 @@ fxl::RefPtr<ParagraphBuilder> ParagraphBuilder::create(
     double fontSize,
     double lineHeight,
     const std::u16string& ellipsis,
-    const std::string& locale,
-    bool use_blink) {
-  return fxl::MakeRefCounted<ParagraphBuilder>(
-      encoded, fontFamily, fontSize, lineHeight, ellipsis, locale,
-      UIDartState::Current()->use_blink());
+    const std::string& locale) {
+  return fxl::MakeRefCounted<ParagraphBuilder>(encoded, fontFamily, fontSize,
+                                               lineHeight, ellipsis, locale);
 }
 
 ParagraphBuilder::ParagraphBuilder(tonic::Int32List& encoded,
@@ -217,10 +215,8 @@ ParagraphBuilder::ParagraphBuilder(tonic::Int32List& encoded,
                                    double fontSize,
                                    double lineHeight,
                                    const std::u16string& ellipsis,
-                                   const std::string& locale,
-                                   bool use_blink)
-    : m_useBlink(use_blink) {
-  if (!m_useBlink) {
+                                   const std::string& locale) {
+  if (!Settings::Get().using_blink) {
     int32_t mask = encoded[0];
     txt::ParagraphStyle style;
     if (mask & psTextAlignMask)
@@ -279,8 +275,7 @@ ParagraphBuilder::ParagraphBuilder(tonic::Int32List& encoded,
 ParagraphBuilder::~ParagraphBuilder() {
   if (m_renderView) {
     RenderView* renderView = m_renderView.leakPtr();
-    destruction_task_runner_->PostTask(
-        [renderView]() { renderView->destroy(); });
+    Threads::UI()->PostTask([renderView]() { renderView->destroy(); });
   }
 }
 
@@ -295,7 +290,7 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
 
   int32_t mask = encoded[0];
 
-  if (!m_useBlink) {
+  if (!Settings::Get().using_blink) {
     // Set to use the properties of the previous style if the property is not
     // explicitly given.
     txt::TextStyle style = m_paragraphBuilder->PeekStyle();
@@ -428,7 +423,7 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
 }
 
 void ParagraphBuilder::pop() {
-  if (!m_useBlink) {
+  if (!Settings::Get().using_blink) {
     m_paragraphBuilder->Pop();
   } else {
     // Blink Version.
@@ -450,7 +445,7 @@ Dart_Handle ParagraphBuilder::addText(const std::u16string& text) {
   if (error_code != U_BUFFER_OVERFLOW_ERROR)
     return tonic::ToDart("string is not well-formed UTF-16");
 
-  if (!m_useBlink) {
+  if (!Settings::Get().using_blink) {
     m_paragraphBuilder->AddText(text);
   } else {
     // Blink Version.
@@ -469,7 +464,7 @@ Dart_Handle ParagraphBuilder::addText(const std::u16string& text) {
 
 fxl::RefPtr<Paragraph> ParagraphBuilder::build() {
   m_currentRenderObject = nullptr;
-  if (!m_useBlink) {
+  if (!Settings::Get().using_blink) {
     return Paragraph::Create(m_paragraphBuilder->Build());
   } else {
     return Paragraph::Create(m_renderView.release());

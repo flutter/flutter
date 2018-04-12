@@ -5,13 +5,13 @@
 #include "flutter/fml/mapping.h"
 
 #include <fcntl.h>
-#include <io.h>
-#include <windows.h>
 
 #include <type_traits>
 
-#include "flutter/fml/file.h"
-#include "flutter/fml/platform/win/wstring_conversion.h"
+#include "lib/fxl/build_config.h"
+
+#include <io.h>
+#include <windows.h>
 
 using PlatformResourceMapping = fml::FileMapping;
 
@@ -29,50 +29,47 @@ std::unique_ptr<Mapping> GetResourceMapping(const std::string& resource_name) {
   return std::make_unique<PlatformResourceMapping>(resource_name);
 }
 
-FileMapping::FileMapping(const std::string& path, bool executable)
-    : FileMapping(OpenFile(path.c_str(),
-                           executable ? OpenPermission::kExecute
-                                      : OpenPermission::kRead,
-                           false),
-                  executable) {}
-
-FileMapping::FileMapping(const fml::UniqueFD& fd, bool executable)
+FileMapping::FileMapping(const std::string& path)
     : size_(0), mapping_(nullptr) {
-  if (!fd.is_valid()) {
+  HANDLE file_handle_ =
+      CreateFileA(reinterpret_cast<LPCSTR>(path.c_str()), GENERIC_READ,
+                  FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+                  FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, nullptr);
+
+  if (file_handle_ == INVALID_HANDLE_VALUE) {
     return;
   }
 
-  if (auto size = ::GetFileSize(fd.get(), nullptr)) {
-    if (size > 0) {
-      size_ = size;
-    } else {
-      return;
-    }
-  }
-
-  const DWORD protect = executable ? PAGE_EXECUTE_READ : PAGE_READONLY;
-
-  mapping_handle_.reset(::CreateFileMapping(fd.get(),  // hFile
-                                            nullptr,   // lpAttributes
-                                            protect,   // flProtect
-                                            0,         // dwMaximumSizeHigh
-                                            0,         // dwMaximumSizeLow
-                                            nullptr    // lpName
-                                            ));
-
-  if (!mapping_handle_.is_valid()) {
+  size_ = GetFileSize(file_handle_, nullptr);
+  if (size_ == INVALID_FILE_SIZE) {
+    size_ = 0;
     return;
   }
 
-  const DWORD desired_access = executable ? FILE_MAP_ALL_ACCESS : FILE_MAP_READ;
+  mapping_handle_ = CreateFileMapping(file_handle_, nullptr, PAGE_READONLY, 0,
+                                      size_, nullptr);
 
-  mapping_ = reinterpret_cast<uint8_t*>(
-      MapViewOfFile(mapping_handle_.get(), desired_access, 0, 0, size_));
+  CloseHandle(file_handle_);
+
+  if (mapping_handle_ == INVALID_HANDLE_VALUE) {
+    return;
+  }
+
+  auto mapping = MapViewOfFile(mapping_handle_, FILE_MAP_READ, 0, 0, size_);
+
+  if (mapping == INVALID_HANDLE_VALUE) {
+    CloseHandle(mapping_handle_);
+    mapping_handle_ = INVALID_HANDLE_VALUE;
+    return;
+  }
+
+  mapping_ = static_cast<uint8_t*>(mapping);
 }
 
 FileMapping::~FileMapping() {
   if (mapping_ != nullptr) {
     UnmapViewOfFile(mapping_);
+    CloseHandle(mapping_handle_);
   }
 }
 

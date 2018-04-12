@@ -5,7 +5,6 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_GL_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_GL_H_
 
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/darwin/ios/ios_gl_context.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
@@ -17,7 +16,7 @@ namespace shell {
 
 class IOSSurfaceGL : public IOSSurface, public GPUSurfaceGLDelegate {
  public:
-  IOSSurfaceGL(fml::scoped_nsobject<CAEAGLLayer> layer);
+  IOSSurfaceGL(PlatformView::SurfaceConfig surface_config, CAEAGLLayer* layer);
 
   ~IOSSurfaceGL() override;
 

@@ -4,18 +4,19 @@
 
 #include "flutter/shell/common/animator.h"
 
-#include "flutter/glue/trace_event.h"
+#include "flutter/common/threads.h"
+#include "flutter/fml/trace_event.h"
 #include "lib/fxl/time/stopwatch.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 
 namespace shell {
 
-Animator::Animator(Delegate& delegate,
-                   blink::TaskRunners task_runners,
-                   std::unique_ptr<VsyncWaiter> waiter)
-    : delegate_(delegate),
-      task_runners_(std::move(task_runners)),
-      waiter_(std::move(waiter)),
+Animator::Animator(fml::WeakPtr<Rasterizer> rasterizer,
+                   VsyncWaiter* waiter,
+                   Engine* engine)
+    : rasterizer_(rasterizer),
+      waiter_(waiter),
+      engine_(engine),
       last_begin_frame_time_(),
       dart_frame_deadline_(0),
       layer_tree_pipeline_(fxl::MakeRefCounted<LayerTreePipeline>(2)),
@@ -78,6 +79,7 @@ void Animator::BeginFrame(fxl::TimePoint frame_start_time,
       // If we still don't have valid continuation, the pipeline is currently
       // full because the consumer is being too slow. Try again at the next
       // frame interval.
+      TRACE_EVENT_INSTANT0("flutter", "ConsumerSlowDefer");
       RequestFrame();
       return;
     }
@@ -92,13 +94,13 @@ void Animator::BeginFrame(fxl::TimePoint frame_start_time,
   {
     TRACE_EVENT2("flutter", "Framework Workload", "mode", "basic", "frame",
                  FrameParity());
-    delegate_.OnAnimatorBeginFrame(*this, last_begin_frame_time_);
+    engine_->BeginFrame(last_begin_frame_time_);
   }
 
   if (!frame_scheduled_) {
     // We don't have another frame pending, so we're waiting on user input
     // or I/O. Allow the Dart VM 100 ms.
-    delegate_.OnAnimatorNotifyIdle(*this, dart_frame_deadline_ + 100000);
+    engine_->NotifyIdle(dart_frame_deadline_ + 100000);
   }
 }
 
@@ -118,7 +120,15 @@ void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   // Commit the pending continuation.
   producer_continuation_.Complete(std::move(layer_tree));
 
-  delegate_.OnAnimatorDraw(*this, layer_tree_pipeline_);
+  blink::Threads::Gpu()->PostTask([
+    rasterizer = rasterizer_, pipeline = layer_tree_pipeline_,
+    frame_id = FrameParity()
+  ]() {
+    if (!rasterizer.get())
+      return;
+    TRACE_EVENT2("flutter", "GPU Workload", "mode", "basic", "frame", frame_id);
+    rasterizer->Draw(pipeline);
+  });
 }
 
 bool Animator::CanReuseLastLayerTree() {
@@ -127,7 +137,10 @@ bool Animator::CanReuseLastLayerTree() {
 
 void Animator::DrawLastLayerTree() {
   pending_frame_semaphore_.Signal();
-  delegate_.OnAnimatorDrawLastLayerTree(*this);
+  blink::Threads::Gpu()->PostTask([rasterizer = rasterizer_]() {
+    if (rasterizer.get())
+      rasterizer->DrawLastLayerTree();
+  });
 }
 
 void Animator::RequestFrame(bool regenerate_layer_tree) {
@@ -151,31 +164,31 @@ void Animator::RequestFrame(bool regenerate_layer_tree) {
   // started an expensive operation right after posting this message however.
   // To support that, we need edge triggered wakes on VSync.
 
-  task_runners_.GetUITaskRunner()->PostTask([self = weak_factory_.GetWeakPtr(),
-                                             frame_number = frame_number_]() {
-    if (!self.get()) {
-      return;
-    }
-    TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending", frame_number);
-    self->AwaitVSync();
-  });
+  blink::Threads::UI()->PostTask(
+      [ self = weak_factory_.GetWeakPtr(), frame_number = frame_number_ ]() {
+        if (!self.get()) {
+          return;
+        }
+        TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending",
+                                 frame_number);
+        self->AwaitVSync();
+      });
   frame_scheduled_ = true;
 }
 
 void Animator::AwaitVSync() {
-  waiter_->AsyncWaitForVsync(
-      [self = weak_factory_.GetWeakPtr()](fxl::TimePoint frame_start_time,
-                                          fxl::TimePoint frame_target_time) {
-        if (self) {
-          if (self->CanReuseLastLayerTree()) {
-            self->DrawLastLayerTree();
-          } else {
-            self->BeginFrame(frame_start_time, frame_target_time);
-          }
-        }
-      });
+  waiter_->AsyncWaitForVsync([self = weak_factory_.GetWeakPtr()](
+      fxl::TimePoint frame_start_time, fxl::TimePoint frame_target_time) {
+    if (self) {
+      if (self->CanReuseLastLayerTree()) {
+        self->DrawLastLayerTree();
+      } else {
+        self->BeginFrame(frame_start_time, frame_target_time);
+      }
+    }
+  });
 
-  delegate_.OnAnimatorNotifyIdle(*this, dart_frame_deadline_);
+  engine_->NotifyIdle(dart_frame_deadline_);
 }
 
 }  // namespace shell

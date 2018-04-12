@@ -59,7 +59,7 @@ class DefaultLayerBuilder final : public LayerBuilder {
 
   // |flow::LayerBuilder|
   void PushPicture(const SkPoint& offset,
-                   SkiaGPUObject<SkPicture> picture,
+                   sk_sp<SkPicture> picture,
                    bool picture_is_complex,
                    bool picture_will_change) override;
 

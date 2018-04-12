@@ -9,6 +9,7 @@
 #include <string>
 
 #include "flutter/flow/instrumentation.h"
+#include "flutter/flow/process_info.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/flow/texture.h"
 #include "lib/fxl/macros.h"
@@ -17,26 +18,19 @@
 
 namespace flow {
 
-class LayerTree;
-
 class CompositorContext {
  public:
   class ScopedFrame {
    public:
-    ScopedFrame(CompositorContext& context,
-                GrContext* gr_context,
-                SkCanvas* canvas,
-                bool instrumentation_enabled);
-
-    virtual ~ScopedFrame();
-
     SkCanvas* canvas() { return canvas_; }
 
     CompositorContext& context() const { return context_; }
 
     GrContext* gr_context() const { return gr_context_; }
 
-    virtual bool Raster(LayerTree& layer_tree, bool ignore_raster_cache);
+    ScopedFrame(ScopedFrame&& frame);
+
+    ~ScopedFrame();
 
    private:
     CompositorContext& context_;
@@ -44,17 +38,23 @@ class CompositorContext {
     SkCanvas* canvas_;
     const bool instrumentation_enabled_;
 
+    ScopedFrame(CompositorContext& context,
+                GrContext* gr_context,
+                SkCanvas* canvas,
+                bool instrumentation_enabled);
+
+    friend class CompositorContext;
+
     FXL_DISALLOW_COPY_AND_ASSIGN(ScopedFrame);
   };
 
-  CompositorContext();
+  CompositorContext(std::unique_ptr<ProcessInfo> info);
 
-  virtual ~CompositorContext();
+  ~CompositorContext();
 
-  virtual std::unique_ptr<ScopedFrame> AcquireFrame(
-      GrContext* gr_context,
-      SkCanvas* canvas,
-      bool instrumentation_enabled);
+  ScopedFrame AcquireFrame(GrContext* gr_context,
+                           SkCanvas* canvas,
+                           bool instrumentation_enabled = true);
 
   void OnGrContextCreated();
 
@@ -62,7 +62,7 @@ class CompositorContext {
 
   RasterCache& raster_cache() { return raster_cache_; }
 
-  TextureRegistry& texture_registry() { return texture_registry_; }
+  TextureRegistry& texture_registry() { return *texture_registry_; }
 
   const Counter& frame_count() const { return frame_count_; }
 
@@ -70,12 +70,20 @@ class CompositorContext {
 
   Stopwatch& engine_time() { return engine_time_; }
 
+  const CounterValues& memory_usage() const { return memory_usage_; }
+
+  void SetTextureRegistry(TextureRegistry* textureRegistry) {
+    texture_registry_ = textureRegistry;
+  }
+
  private:
   RasterCache raster_cache_;
-  TextureRegistry texture_registry_;
+  TextureRegistry* texture_registry_;
+  std::unique_ptr<ProcessInfo> process_info_;
   Counter frame_count_;
   Stopwatch frame_time_;
   Stopwatch engine_time_;
+  CounterValues memory_usage_;
 
   void BeginFrame(ScopedFrame& frame, bool enable_instrumentation);
 

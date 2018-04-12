@@ -13,6 +13,9 @@
 #include "flutter/flow/layers/layer.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/time/time_delta.h"
+#if defined(OS_FUCHSIA)
+#include <fuchsia/cpp/ui.h>
+#endif
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace flow {
@@ -23,10 +26,24 @@ class LayerTree {
 
   ~LayerTree();
 
+  // Raster includes both Preroll and Paint.
+  void Raster(CompositorContext::ScopedFrame& frame,
+#if defined(OS_FUCHSIA)
+              gfx::Metrics* metrics,
+#endif
+              bool ignore_raster_cache = false);
+
   void Preroll(CompositorContext::ScopedFrame& frame,
+#if defined(OS_FUCHSIA)
+               gfx::Metrics* metrics,
+#endif
                bool ignore_raster_cache = false);
 
 #if defined(OS_FUCHSIA)
+  void set_device_pixel_ratio(float device_pixel_ratio) {
+    device_pixel_ratio_ = device_pixel_ratio;
+  }
+
   void UpdateScene(SceneUpdateContext& context,
                    scenic_lib::ContainerNode& container);
 #endif
@@ -75,6 +92,10 @@ class LayerTree {
   uint32_t rasterizer_tracing_threshold_;
   bool checkerboard_raster_cache_images_;
   bool checkerboard_offscreen_layers_;
+
+#if defined(OS_FUCHSIA)
+  float device_pixel_ratio_ = 1.f;
+#endif
 
   FXL_DISALLOW_COPY_AND_ASSIGN(LayerTree);
 };

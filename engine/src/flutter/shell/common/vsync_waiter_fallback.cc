@@ -4,6 +4,7 @@
 
 #include "flutter/shell/common/vsync_waiter_fallback.h"
 
+#include "flutter/common/threads.h"
 #include "lib/fxl/logging.h"
 
 namespace shell {
@@ -20,25 +21,28 @@ fxl::TimePoint SnapToNextTick(fxl::TimePoint value,
 
 }  // namespace
 
-VsyncWaiterFallback::VsyncWaiterFallback(blink::TaskRunners task_runners)
-    : VsyncWaiter(std::move(task_runners)),
-      phase_(fxl::TimePoint::Now()),
-      weak_factory_(this) {}
+VsyncWaiterFallback::VsyncWaiterFallback()
+    : phase_(fxl::TimePoint::Now()), weak_factory_(this) {}
 
 VsyncWaiterFallback::~VsyncWaiterFallback() = default;
 
 constexpr fxl::TimeDelta interval = fxl::TimeDelta::FromSecondsF(1.0 / 60.0);
 
-void VsyncWaiterFallback::AwaitVSync() {
+void VsyncWaiterFallback::AsyncWaitForVsync(Callback callback) {
+  FXL_DCHECK(!callback_);
+  callback_ = std::move(callback);
+
   fxl::TimePoint now = fxl::TimePoint::Now();
   fxl::TimePoint next = SnapToNextTick(now, phase_, interval);
 
-  task_runners_.GetUITaskRunner()->PostDelayedTask(
+  blink::Threads::UI()->PostDelayedTask(
       [self = weak_factory_.GetWeakPtr()] {
-        if (self) {
-          const auto frame_time = fxl::TimePoint::Now();
-          self->FireCallback(frame_time, frame_time + interval);
-        }
+        if (!self)
+          return;
+        fxl::TimePoint frame_time = fxl::TimePoint::Now();
+        Callback callback = std::move(self->callback_);
+        self->callback_ = Callback();
+        callback(frame_time, frame_time + interval);
       },
       next - now);
 }
