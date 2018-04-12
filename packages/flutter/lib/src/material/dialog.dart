@@ -41,6 +41,7 @@ class Dialog extends StatelessWidget {
     this.child,
     this.insetAnimationDuration: const Duration(milliseconds: 100),
     this.insetAnimationCurve: Curves.decelerate,
+    this.semanticName,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -60,18 +61,20 @@ class Dialog extends StatelessWidget {
   /// Defaults to [Curves.fastOutSlowIn].
   final Curve insetAnimationCurve;
 
+  /// The semantic name of the dialog used by accessibility frameworks
+  /// 
+  /// See also:
+  /// 
+  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///    value is used.
+  final String semanticName;
+
   Color _getColor(BuildContext context) {
     return Theme.of(context).dialogBackgroundColor;
   }
 
   @override
   Widget build(BuildContext context) {
-    String value = '';
-    if (defaultTargetPlatform != TargetPlatform.iOS) {
-      final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-      value = localizations.dialogName;
-    }
-
     return new AnimatedPadding(
       padding: MediaQuery.of(context).viewInsets + const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
       duration: insetAnimationDuration,
@@ -92,9 +95,10 @@ class Dialog extends StatelessWidget {
               child: new Semantics(
                 route: true,
                 routeName: true,
-                value: value,
+                value: semanticName,
+                explicitChildNodes: true,
                 child: child,
-              ),
+              )
             ),
           ),
         ),
@@ -177,6 +181,7 @@ class AlertDialog extends StatelessWidget {
     this.content,
     this.contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
     this.actions,
+    this.semanticName,
   }) : assert(contentPadding != null),
        super(key: key);
 
@@ -227,6 +232,8 @@ class AlertDialog extends StatelessWidget {
   /// from the [actions].
   final List<Widget> actions;
 
+  final String semanticName;
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
@@ -263,10 +270,16 @@ class AlertDialog extends StatelessWidget {
 
     return new Dialog(
       child: new IntrinsicWidth(
-        child: new Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: children,
+        child: new Semantics(
+          route: true,
+          routeName: semanticName != null,
+          explicitChildNodes: true,
+          value: semanticName,
+          child: new Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          ),
         ),
       ),
     );
@@ -413,6 +426,7 @@ class SimpleDialog extends StatelessWidget {
     this.titlePadding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
     this.children,
     this.contentPadding: const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
+    this.semanticName,
   }) : assert(titlePadding != null),
        assert(contentPadding != null),
        super(key: key);
@@ -454,6 +468,8 @@ class SimpleDialog extends StatelessWidget {
   /// the top padding ends up being 24 pixels.
   final EdgeInsetsGeometry contentPadding;
 
+  final String semanticName;
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> body = <Widget>[];
@@ -482,10 +498,16 @@ class SimpleDialog extends StatelessWidget {
         stepWidth: 56.0,
         child: new ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 280.0),
-          child: new Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: body,
+          child: new Semantics(
+            route: true,
+            routeName: semanticName != null,
+            value: semanticName,
+            explicitChildNodes: true,
+            child: new Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: body,
+            )
           )
         )
       )
@@ -581,9 +603,9 @@ Future<T> showDialog<T>({
   ) Widget child,
   WidgetBuilder builder,
 }) {
-  assert(child == null || builder == null); // ignore: deprecated_member_use
+  assert(child == null || builder == null);
   return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
-    child: child ?? new Builder(builder: builder), // ignore: deprecated_member_use
+    child: child ?? new Builder(builder: builder),
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierDismissible: barrierDismissible,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,

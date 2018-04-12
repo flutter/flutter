@@ -382,14 +382,15 @@ class _AppBarState extends State<AppBar> {
 
     Widget title = widget.title;
     if (title != null) {
+      if (defaultTargetPlatform != TargetPlatform.iOS) {
+        title = new Semantics(routeName: true, child: title);
+      }
+
       title = new DefaultTextStyle(
         style: centerStyle,
         softWrap: false,
         overflow: TextOverflow.ellipsis,
-        child: new Semantics(
-          route: true,
-          child: new Semantics(route: true, child: title),
-        ),
+        child: title,
       );
     }
 

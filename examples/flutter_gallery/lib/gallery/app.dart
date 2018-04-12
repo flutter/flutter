@@ -153,10 +153,7 @@ class GalleryAppState extends State<GalleryApp> {
       // using named routes, consider the example in the Navigator class documentation:
       // https://docs.flutter.io/flutter/widgets/Navigator-class.html
       _kRoutes[item.routeName] = (BuildContext context) {
-        return new RouteName(
-          routeName: item.routeName,
-          child: item.buildRoute(context)
-        );
+        return item.buildRoute(context);
       };
     }
 

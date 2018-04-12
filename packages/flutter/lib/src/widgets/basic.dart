@@ -5009,7 +5009,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return new RenderSemanticsAnnotations(
       container: container,
-      explicitChildNodes: explicitChildNodes || properties.route,
+      explicitChildNodes: explicitChildNodes,
       enabled: properties.enabled,
       checked: properties.checked,
       selected: properties.selected,
@@ -5063,7 +5063,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSemanticsAnnotations renderObject) {
     renderObject
       ..container = container
-      ..explicitChildNodes = explicitChildNodes || properties.route
+      ..explicitChildNodes = explicitChildNodes
       ..enabled = properties.enabled
       ..checked = properties.checked
       ..selected = properties.selected

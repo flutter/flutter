@@ -2362,9 +2362,9 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// Whether this node is part of a visually distinct subtree.
+  /// Whether this node is the root of a route.
   /// 
-  /// Changes to the most specific route name will prompt an accessibility
+  /// Changes to the most specific route will prompt an accessibility
   /// announcement when enabled.  On iOS this produces a
   /// `UIAccessibilityScreenChangedNotification` and on Android a
   /// `TYPE_WINDOW_STATE_CHANGED`.
@@ -2373,6 +2373,10 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isRoute, value);
   }
 
+  /// Whether this node contains the semantic value of a route.
+  ///
+  /// On iOS routes frequently do not have names given. On Android, the route 
+  /// name is produced from [label] [text] [hint].
   bool get isRouteName => _hasFlag(SemanticsFlag.isRouteName);
   set isRouteName(bool value) {
     _setFlag(SemanticsFlag.isRouteName, value);

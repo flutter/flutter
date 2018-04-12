@@ -90,12 +90,14 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
             ));
           },
         ),
-        body: new CustomScrollView(
+        body: new RouteName(
+          routeName: 'pesto',
+          child: new CustomScrollView(
           slivers: <Widget>[
             _buildAppBar(context, statusBarHeight),
             _buildBody(context, statusBarHeight),
           ],
-        ),
+        )),
       )
     );
   }

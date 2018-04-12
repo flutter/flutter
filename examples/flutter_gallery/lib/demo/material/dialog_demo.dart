@@ -98,14 +98,9 @@ class DialogDemoState extends State<DialogDemo> {
               showDemoDialog<DialogDemoAction>(
                 context: context,
                 child: new AlertDialog(
-                  content: new Semantics(
-                    route: true,
-                    explicitChildNodes: true,
-                    value: 'Alert',
-                    child: new Text(
-                      _alertWithoutTitleText,
-                      style: dialogTextStyle
-                    ),
+                  content: new Text(
+                    _alertWithoutTitleText,
+                    style: dialogTextStyle,
                   ),
                   actions: <Widget>[
                     new FlatButton(
@@ -128,14 +123,9 @@ class DialogDemoState extends State<DialogDemo> {
                 context: context,
                 child: new AlertDialog(
                   title: const Text('Use Google\'s location service?'),
-                  content: new Semantics(
-                    route: true,
-                    explicitChildNodes: true,
-                    value: 'Location permissions',
-                    child: new Text(
-                      _alertWithTitleText,
-                      style: dialogTextStyle
-                    ),
+                  content: new Text(
+                    _alertWithTitleText,
+                    style: dialogTextStyle
                   ),
                   actions: <Widget>[
                     new FlatButton(

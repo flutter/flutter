@@ -4,10 +4,12 @@ import 'package:flutter/widgets.dart';
 
 /// A widget which provides a semantic name route name.
 ///
+/// On iOS, no additional semantic information is inserted.
+///
 /// See also:
 ///
-///   * [SemanticsProperties.route], for a description of how route name
-///     semantics work.
+///  * [SemanticsProperties.routeName], for a description of how route name
+///    semantics work.
 class RouteName extends StatelessWidget  {
 
   /// Creates a widget which provides a semantic route name.
@@ -15,7 +17,7 @@ class RouteName extends StatelessWidget  {
   /// [child] and [routeName] are required arguments.
   const RouteName({
     Key key,
-    @required this.child,
+    this.child,
     @required this.routeName,
   }) : super(key: key);
 
@@ -31,10 +33,13 @@ class RouteName extends StatelessWidget  {
 
   @override
   Widget build(BuildContext context) {
-    final String value = defaultTargetPlatform == TargetPlatform.iOS ? '' : routeName;
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return child;
+    }
     return new Semantics(
-      route: true,
-      value: value,
+      routeName: true,
+      explicitChildNodes: true,
+      value: routeName,
       child: child,
     );
   }

@@ -86,6 +86,7 @@ class Drawer extends StatelessWidget {
     Key key,
     this.elevation: 16.0,
     this.child,
+    this.semanticName,
   }) : super(key: key);
 
   /// The z-coordinate at which to place this drawer. This controls the size of
@@ -101,11 +102,16 @@ class Drawer extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// The semantic name of the drawer used by accessibility frameworks
+  /// 
+  /// See also:
+  /// 
+  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///    value is used.
+  final String semanticName;
+
   @override
   Widget build(BuildContext context) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final String value = defaultTargetPlatform == TargetPlatform.iOS ? '' : localizations.drawerName;
-
     return new ConstrainedBox(
       constraints: const BoxConstraints.expand(width: _kWidth),
       child: new Material(
@@ -113,7 +119,7 @@ class Drawer extends StatelessWidget {
         child: new Semantics(
           routeName: true,
           route: true,
-          value: value,
+          value: semanticName,
           child: child,
         ),
       ),
