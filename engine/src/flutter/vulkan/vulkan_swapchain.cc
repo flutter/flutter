@@ -460,16 +460,15 @@ VulkanSwapchain::AcquireResult VulkanSwapchain::AcquireSurface() {
     FXL_DLOG(INFO) << "Could not access surface at the image index.";
     return error;
   }
-
-  GrVkImageInfo* image_info = nullptr;
-  if (!surface->getRenderTargetHandle(
-          reinterpret_cast<GrBackendObject*>(&image_info),
-          SkSurface::kFlushRead_BackendHandleAccess)) {
-    FXL_DLOG(INFO) << "Could not get render target handle.";
+  
+  GrBackendRenderTarget backendRT = surface->getBackendRenderTarget(
+      SkSurface::kFlushRead_BackendHandleAccess);
+  if (!backendRT.isValid()) {
+    FXL_DLOG(INFO) << "Could not get backend render target.";
     return error;
   }
+  backendRT.setVkImageLayout(destination_image_layout);
 
-  image_info->updateImageLayout(destination_image_layout);
   current_image_index_ = next_image_index;
 
   return {AcquireStatus::Success, surface};
