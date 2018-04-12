@@ -149,7 +149,7 @@ class _Compiler {
                   <String>[request.path],
                   outputPath: outputDill.path),
               request.path);
-          final String outputPath = compilerOutput != null ? compilerOutput.outputFilename : null;
+          final String outputPath = compilerOutput?.outputFilename;
 
           // Check if the compiler produced the output. If it failed then
           // outputPath would be null. In this case pass null upwards to the

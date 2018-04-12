@@ -398,7 +398,7 @@ Future<String> _buildAotSnapshot(
       entryPointsJsonFiles: entryPointsJsonFiles,
       trackWidgetCreation: false,
     );
-    mainPath = compilerOutput != null ? compilerOutput.outputFilename : null;
+    mainPath = compilerOutput?.outputFilename;
     if (mainPath == null) {
       printError('Compiler terminated unexpectedly.');
       return null;

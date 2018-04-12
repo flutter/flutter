@@ -116,7 +116,7 @@ Future<void> build({
         fileSystemScheme: fileSystemScheme,
         packagesPath: packagesPath,
       );
-      kernelBinaryFilename = compilerOutput != null ? compilerOutput.outputFilename : null;
+      kernelBinaryFilename = compilerOutput?.outputFilename;
       if (kernelBinaryFilename == null) {
         throwToolExit('Compiler failed on $mainPath');
       }
