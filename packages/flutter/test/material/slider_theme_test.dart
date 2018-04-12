@@ -19,8 +19,8 @@ void main() {
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    expect(sliderTheme.activeRailColor.value, equals(Colors.red.value));
-    expect(sliderTheme.inactiveRailColor.value, equals(Colors.red.withAlpha(0x3d).value));
+    expect(sliderTheme.activeTrackColor.value, equals(Colors.red.value));
+    expect(sliderTheme.inactiveTrackColor.value, equals(Colors.red.withAlpha(0x3d).value));
   });
 
   testWidgets('Slider uses ThemeData slider theme if present', (WidgetTester tester) async {
@@ -55,7 +55,7 @@ void main() {
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
-    expect(sliderBox, paints..rect(color: sliderTheme.disabledActiveRailColor)..rect(color: sliderTheme.disabledInactiveRailColor));
+    expect(sliderBox, paints..rect(color: sliderTheme.disabledActiveTrackColor)..rect(color: sliderTheme.disabledInactiveTrackColor));
   });
 
   testWidgets('Slider overrides ThemeData theme if SliderTheme present', (WidgetTester tester) async {
@@ -65,8 +65,8 @@ void main() {
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
     final SliderThemeData customTheme = sliderTheme.copyWith(
-      activeRailColor: Colors.purple,
-      inactiveRailColor: Colors.purple.withAlpha(0x3d),
+      activeTrackColor: Colors.purple,
+      inactiveTrackColor: Colors.purple.withAlpha(0x3d),
     );
 
     Widget buildSlider(SliderThemeData data) {
@@ -97,7 +97,7 @@ void main() {
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
-    expect(sliderBox, paints..rect(color: customTheme.disabledActiveRailColor)..rect(color: customTheme.disabledInactiveRailColor));
+    expect(sliderBox, paints..rect(color: customTheme.disabledActiveTrackColor)..rect(color: customTheme.disabledInactiveTrackColor));
   });
 
   testWidgets('SliderThemeData generates correct opacities for fromPrimaryColors', (WidgetTester tester) async {
@@ -113,10 +113,10 @@ void main() {
       valueIndicatorTextStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor4),
     );
 
-    expect(sliderTheme.activeRailColor, equals(customColor1.withAlpha(0xff)));
-    expect(sliderTheme.inactiveRailColor, equals(customColor1.withAlpha(0x3d)));
-    expect(sliderTheme.disabledActiveRailColor, equals(customColor2.withAlpha(0x52)));
-    expect(sliderTheme.disabledInactiveRailColor, equals(customColor2.withAlpha(0x1f)));
+    expect(sliderTheme.activeTrackColor, equals(customColor1.withAlpha(0xff)));
+    expect(sliderTheme.inactiveTrackColor, equals(customColor1.withAlpha(0x3d)));
+    expect(sliderTheme.disabledActiveTrackColor, equals(customColor2.withAlpha(0x52)));
+    expect(sliderTheme.disabledInactiveTrackColor, equals(customColor2.withAlpha(0x1f)));
     expect(sliderTheme.activeTickMarkColor, equals(customColor3.withAlpha(0x8a)));
     expect(sliderTheme.inactiveTickMarkColor, equals(customColor1.withAlpha(0x8a)));
     expect(sliderTheme.disabledActiveTickMarkColor, equals(customColor3.withAlpha(0x1f)));
@@ -146,10 +146,10 @@ void main() {
     );
     final SliderThemeData lerp = SliderThemeData.lerp(sliderThemeBlack, sliderThemeWhite, 0.5);
     const Color middleGrey = const Color(0xff7f7f7f);
-    expect(lerp.activeRailColor, equals(middleGrey.withAlpha(0xff)));
-    expect(lerp.inactiveRailColor, equals(middleGrey.withAlpha(0x3d)));
-    expect(lerp.disabledActiveRailColor, equals(middleGrey.withAlpha(0x52)));
-    expect(lerp.disabledInactiveRailColor, equals(middleGrey.withAlpha(0x1f)));
+    expect(lerp.activeTrackColor, equals(middleGrey.withAlpha(0xff)));
+    expect(lerp.inactiveTrackColor, equals(middleGrey.withAlpha(0x3d)));
+    expect(lerp.disabledActiveTrackColor, equals(middleGrey.withAlpha(0x52)));
+    expect(lerp.disabledInactiveTrackColor, equals(middleGrey.withAlpha(0x1f)));
     expect(lerp.activeTickMarkColor, equals(middleGrey.withAlpha(0x8a)));
     expect(lerp.inactiveTickMarkColor, equals(middleGrey.withAlpha(0x8a)));
     expect(lerp.disabledActiveTickMarkColor, equals(middleGrey.withAlpha(0x1f)));
