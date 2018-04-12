@@ -21,7 +21,7 @@ class RouteName extends StatelessWidget  {
 
   /// A semantic name for the route.
   /// 
-  // On iOS platforms this value is ignored.
+  /// On iOS platforms this value is ignored.
   final String routeName;
 
   /// The widget below this widget in the tree.
@@ -33,7 +33,6 @@ class RouteName extends StatelessWidget  {
   Widget build(BuildContext context) {
     final String value = defaultTargetPlatform == TargetPlatform.iOS ? '' : routeName;
     return new Semantics(
-      explicitChildNodes: true,
       route: true,
       value: value,
       child: child,
