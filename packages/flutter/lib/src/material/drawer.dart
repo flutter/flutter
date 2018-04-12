@@ -102,6 +102,7 @@ class Drawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String semanticValue = defaultTargetPlatform == TargetPlatform.iOS ? '' : 'Navigation Menu';
     return new ConstrainedBox(
       constraints: const BoxConstraints.expand(width: _kWidth),
       child: new Material(
@@ -109,7 +110,7 @@ class Drawer extends StatelessWidget {
         child: new Semantics(
           edge: true,
           route: true,
-          value: 'Navigation Menu', // just for testing
+          value: semanticValue, // just for testing
           explicitChildNodes: true,
           child: child,
         ),
