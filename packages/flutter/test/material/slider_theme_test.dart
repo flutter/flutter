@@ -198,7 +198,7 @@ void main() {
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
-    expect(sliderBox, paints..circle(color: sliderTheme.thumbColor, radius: 6.0));
+    expect(sliderBox, paints..circle(color: sliderTheme.thumbColor, radius: 10.0));
 
     await tester.pumpWidget(buildApp(enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
@@ -213,7 +213,7 @@ void main() {
           ..circle(color: sliderTheme.activeTickMarkColor)
           ..circle(color: sliderTheme.inactiveTickMarkColor)
           ..circle(color: sliderTheme.inactiveTickMarkColor)
-          ..circle(color: sliderTheme.thumbColor, radius: 6.0));
+          ..circle(color: sliderTheme.thumbColor, radius: 10.0));
 
     await tester.pumpWidget(buildApp(divisions: 3, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
