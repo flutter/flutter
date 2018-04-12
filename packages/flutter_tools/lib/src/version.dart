@@ -499,7 +499,7 @@ class GitTagVersion {
       return const GitTagVersion.unknown();
     }
     final List<int> parsedParts = parts.take(4).map<int>(
-      (String value) => int.parse(value, onError: (String value) => null),
+      (String value) => int.tryParse(value),
     ).toList();
     return new GitTagVersion(parsedParts[0], parsedParts[1], parsedParts[2], parsedParts[3], parts[4]);
   }
