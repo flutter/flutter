@@ -501,10 +501,11 @@ class DevFS {
       if (fullRestart) {
         generator.reset();
       }
-      final String compiledBinary =
+      final CompilerOutput compilerOutput =
           await generator.recompile(mainPath, invalidatedFiles,
               outputPath:  dillOutputPath ?? fs.path.join(getBuildDirectory(), 'app.dill'),
               packagesFilePath : _packagesFilePath);
+      final String compiledBinary = compilerOutput?.outputFilename;
       if (compiledBinary != null && compiledBinary.isNotEmpty) {
         final String entryUri = projectRootPath != null ?
             fs.path.relative(mainPath, from: projectRootPath):
