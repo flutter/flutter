@@ -46,7 +46,6 @@ void main() {
         temp.deleteSync(recursive: true);
       });
 
-
       testUsingContext('in project', () async {
         final String projectPath = await createProject(temp);
         expect(findProjectRoot(projectPath), projectPath);
