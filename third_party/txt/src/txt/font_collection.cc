@@ -156,7 +156,10 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
 
   const auto default_font_family = GetDefaultFontFamily();
   if (family != default_font_family) {
-    return GetMinikinFontCollectionForFamily(default_font_family);
+    std::shared_ptr<minikin::FontCollection> default_collection =
+        GetMinikinFontCollectionForFamily(default_font_family);
+    font_collections_cache_[family] = default_collection;
+    return default_collection;
   }
 
   // No match found in any of our font managers.
