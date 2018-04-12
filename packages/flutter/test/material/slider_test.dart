@@ -555,30 +555,30 @@ void main() {
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     // Check default theme for enabled widget.
-    expect(sliderBox, paints..rect(color: sliderTheme.activeRailColor)..rect(color: sliderTheme.inactiveRailColor));
+    expect(sliderBox, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: sliderTheme.inactiveTrackColor));
     expect(sliderBox, paints..circle(color: sliderTheme.thumbColor));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveRailColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
 
     // Test setting only the activeColor.
     await tester.pumpWidget(buildApp(activeColor: customColor1));
-    expect(sliderBox, paints..rect(color: customColor1)..rect(color: sliderTheme.inactiveRailColor));
+    expect(sliderBox, paints..rect(color: customColor1)..rect(color: sliderTheme.inactiveTrackColor));
     expect(sliderBox, paints..circle(color: customColor1));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveRailColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
 
     // Test setting only the inactiveColor.
     await tester.pumpWidget(buildApp(inactiveColor: customColor1));
-    expect(sliderBox, paints..rect(color: sliderTheme.activeRailColor)..rect(color: customColor1));
+    expect(sliderBox, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: customColor1));
     expect(sliderBox, paints..circle(color: sliderTheme.thumbColor));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveRailColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
 
     // Test setting both activeColor and inactiveColor.
     await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2));
@@ -586,12 +586,12 @@ void main() {
     expect(sliderBox, paints..circle(color: customColor1));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveRailColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
 
     // Test colors for discrete slider.
     await tester.pumpWidget(buildApp(divisions: 3));
-    expect(sliderBox, paints..rect(color: sliderTheme.activeRailColor)..rect(color: sliderTheme.inactiveRailColor));
+    expect(sliderBox, paints..rect(color: sliderTheme.activeTrackColor)..rect(color: sliderTheme.inactiveTrackColor));
     expect(
         sliderBox,
         paints
@@ -601,8 +601,8 @@ void main() {
           ..circle(color: sliderTheme.inactiveTickMarkColor)
           ..circle(color: sliderTheme.thumbColor));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveRailColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
 
     // Test colors for discrete slider with inactiveColor and activeColor set.
     await tester.pumpWidget(buildApp(
@@ -621,8 +621,8 @@ void main() {
           ..circle(color: customColor1));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.disabledThumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveRailColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledActiveTrackColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.activeTickMarkColor)));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
 
@@ -632,24 +632,24 @@ void main() {
     expect(
         sliderBox,
         paints
-          ..rect(color: sliderTheme.disabledActiveRailColor)
-          ..rect(color: sliderTheme.disabledInactiveRailColor));
+          ..rect(color: sliderTheme.disabledActiveTrackColor)
+          ..rect(color: sliderTheme.disabledInactiveTrackColor));
     expect(sliderBox, paints..circle(color: sliderTheme.disabledThumbColor));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeRailColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
 
     // Test setting the activeColor and inactiveColor for disabled widget.
     await tester.pumpWidget(buildApp(activeColor: customColor1, inactiveColor: customColor2, enabled: false));
     expect(
         sliderBox,
         paints
-          ..rect(color: sliderTheme.disabledActiveRailColor)
-          ..rect(color: sliderTheme.disabledInactiveRailColor));
+          ..rect(color: sliderTheme.disabledActiveTrackColor)
+          ..rect(color: sliderTheme.disabledInactiveTrackColor));
     expect(sliderBox, paints..circle(color: sliderTheme.disabledThumbColor));
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.thumbColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeRailColor)));
-    expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveRailColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.activeTrackColor)));
+    expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
 
     // Test that the default value indicator has the right colors.
     await tester.pumpWidget(buildApp(divisions: 3));
@@ -661,8 +661,8 @@ void main() {
     expect(
       sliderBox,
       paints
-        ..rect(color: sliderTheme.activeRailColor)
-        ..rect(color: sliderTheme.inactiveRailColor)
+        ..rect(color: sliderTheme.activeTrackColor)
+        ..rect(color: sliderTheme.inactiveTrackColor)
         ..circle(color: sliderTheme.overlayColor)
         ..circle(color: sliderTheme.activeTickMarkColor)
         ..circle(color: sliderTheme.activeTickMarkColor)
@@ -998,7 +998,7 @@ void main() {
           ..circle(x: 400.0, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 16.0, y: 16.0, radius: 6.0),
+          ..circle(x: 16.0, y: 16.0, radius: 10.0),
       );
 
       gesture = await tester.startGesture(center);
@@ -1015,7 +1015,7 @@ void main() {
           ..circle(x: 400.0, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 105.0625, y: 16.0, radius: 6.0),
+          ..circle(x: 105.0625, y: 16.0, radius: 10.0),
       );
 
       // Reparenting in the middle of an animation should do nothing.
@@ -1035,7 +1035,7 @@ void main() {
           ..circle(x: 400.0, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 185.5457763671875, y: 16.0, radius: 6.0),
+          ..circle(x: 185.5457763671875, y: 16.0, radius: 10.0),
       );
       // Wait for animations to finish.
       await tester.pumpAndSettle();
@@ -1048,7 +1048,7 @@ void main() {
           ..circle(x: 208.5, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 400.0, y: 16.0, radius: 6.0),
+          ..circle(x: 400.0, y: 16.0, radius: 10.0),
       );
       await gesture.up();
       await tester.pumpAndSettle();
@@ -1060,7 +1060,7 @@ void main() {
           ..circle(x: 208.5, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 400.0, y: 16.0, radius: 6.0),
+          ..circle(x: 400.0, y: 16.0, radius: 10.0),
       );
     }
 

@@ -107,6 +107,60 @@ void main() {
     expect(s5.height, 123.0);
     expect(s5.color, isNull);
 
+    expect(TextStyle.lerp(null, null, 0.5), isNull);
+
+    final TextStyle s6 = TextStyle.lerp(null, s3, 0.25);
+    expect(s3.fontFamily, isNull);
+    expect(s3.fontSize, 18.0);
+    expect(s3.fontWeight, FontWeight.w400);
+    expect(s3.height, 123.0);
+    expect(s3.color, isNull);
+    expect(s3, isNot(equals(s6)));
+    expect(s6.fontFamily, isNull);
+    expect(s6.fontSize, isNull);
+    expect(s6.fontWeight, FontWeight.w400);
+    expect(s6.height, isNull);
+    expect(s6.color, isNull);
+
+    final TextStyle s7 = TextStyle.lerp(null, s3, 0.75);
+    expect(s3.fontFamily, isNull);
+    expect(s3.fontSize, 18.0);
+    expect(s3.fontWeight, FontWeight.w400);
+    expect(s3.height, 123.0);
+    expect(s3.color, isNull);
+    expect(s3, equals(s7));
+    expect(s7.fontFamily, isNull);
+    expect(s7.fontSize, 18.0);
+    expect(s7.fontWeight, FontWeight.w400);
+    expect(s7.height, 123.0);
+    expect(s7.color, isNull);
+
+    final TextStyle s8 = TextStyle.lerp(s3, null, 0.25);
+    expect(s3.fontFamily, isNull);
+    expect(s3.fontSize, 18.0);
+    expect(s3.fontWeight, FontWeight.w400);
+    expect(s3.height, 123.0);
+    expect(s3.color, isNull);
+    expect(s3, equals(s8));
+    expect(s8.fontFamily, isNull);
+    expect(s8.fontSize, 18.0);
+    expect(s8.fontWeight, FontWeight.w400);
+    expect(s8.height, 123.0);
+    expect(s8.color, isNull);
+
+    final TextStyle s9 = TextStyle.lerp(s3, null, 0.75);
+    expect(s3.fontFamily, isNull);
+    expect(s3.fontSize, 18.0);
+    expect(s3.fontWeight, FontWeight.w400);
+    expect(s3.height, 123.0);
+    expect(s3.color, isNull);
+    expect(s3, isNot(equals(s9)));
+    expect(s9.fontFamily, isNull);
+    expect(s9.fontSize, isNull);
+    expect(s9.fontWeight, FontWeight.w400);
+    expect(s9.height, isNull);
+    expect(s9.color, isNull);
+
     final ui.TextStyle ts5 = s5.getTextStyle();
     expect(ts5, equals(new ui.TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
     expect(ts5.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontSize: 12.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 123.0x, locale: unspecified)');

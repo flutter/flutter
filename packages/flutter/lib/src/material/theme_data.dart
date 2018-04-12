@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
+import 'chip_theme.dart';
 import 'colors.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
@@ -113,6 +114,7 @@ class ThemeData extends Diagnosticable {
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
     SliderThemeData sliderTheme,
+    ChipThemeData chipTheme,
     TargetPlatform platform,
   }) {
     brightness ??= Brightness.light;
@@ -168,6 +170,11 @@ class ThemeData extends Diagnosticable {
       primaryColorDark: primaryColorDark,
       valueIndicatorTextStyle: accentTextTheme.body2,
     );
+    chipTheme ??= new ChipThemeData.fromDefaults(
+      secondaryColor: primaryColor,
+      brightness: brightness,
+      labelStyle: textTheme.body2,
+    );
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
@@ -205,6 +212,7 @@ class ThemeData extends Diagnosticable {
       primaryIconTheme: primaryIconTheme,
       accentIconTheme: accentIconTheme,
       sliderTheme: sliderTheme,
+      chipTheme: chipTheme,
       platform: platform,
     );
   }
@@ -252,6 +260,7 @@ class ThemeData extends Diagnosticable {
     @required this.primaryIconTheme,
     @required this.accentIconTheme,
     @required this.sliderTheme,
+    @required this.chipTheme,
     @required this.platform,
   }) : assert(brightness != null),
        assert(primaryColor != null),
@@ -287,7 +296,8 @@ class ThemeData extends Diagnosticable {
        assert(iconTheme != null),
        assert(primaryIconTheme != null),
        assert(accentIconTheme != null),
-       assert(sliderTheme != null),
+       assert(sliderTheme != null), 
+       assert(chipTheme != null),
        assert(platform != null);
 
   /// A default light blue theme.
@@ -463,6 +473,11 @@ class ThemeData extends Diagnosticable {
   /// This is the value returned from [SliderTheme.of].
   final SliderThemeData sliderTheme;
 
+  /// The colors and styles used to render [Chip], [
+  ///
+  /// This is the value returned from [ChipTheme.of].
+  final ChipThemeData chipTheme;
+
   /// The platform the material widgets should adapt to target.
   ///
   /// Defaults to the current platform.
@@ -506,6 +521,7 @@ class ThemeData extends Diagnosticable {
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
     SliderThemeData sliderTheme,
+    ChipThemeData chipTheme,
     TargetPlatform platform,
   }) {
     return new ThemeData.raw(
@@ -545,6 +561,7 @@ class ThemeData extends Diagnosticable {
       primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
       accentIconTheme: accentIconTheme ?? this.accentIconTheme,
       sliderTheme: sliderTheme ?? this.sliderTheme,
+      chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
     );
   }
@@ -670,6 +687,7 @@ class ThemeData extends Diagnosticable {
       primaryIconTheme: IconThemeData.lerp(a.primaryIconTheme, b.primaryIconTheme, t),
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
+      chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
     );
   }
@@ -713,6 +731,7 @@ class ThemeData extends Diagnosticable {
            (otherData.primaryIconTheme == primaryIconTheme) &&
            (otherData.accentIconTheme == accentIconTheme) &&
            (otherData.sliderTheme == sliderTheme) &&
+           (otherData.chipTheme == chipTheme) &&
            (otherData.platform == platform);
   }
 
@@ -754,6 +773,7 @@ class ThemeData extends Diagnosticable {
         primaryIconTheme,
         accentIconTheme,
         sliderTheme,
+        chipTheme,
         platform,
       ),
     );
@@ -797,6 +817,7 @@ class ThemeData extends Diagnosticable {
     properties.add(new DiagnosticsProperty<IconThemeData>('primaryIconTheme', primaryIconTheme));
     properties.add(new DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
     properties.add(new DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
+    properties.add(new DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
   }
 }
 
