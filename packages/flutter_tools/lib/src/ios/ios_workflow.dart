@@ -120,7 +120,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       pythonStatus = ValidationType.missing;
       messages.add(new ValidationMessage.error(kPythonSix.errorMessage));
     }
-    bool requireHomeBrew = true
+    bool requireHomeBrew = true;
     
     if (iMobileDevice.isInstalled && (await iMobileDevice.isWorking) && (await hasIDeviceInstaller)) {
       if (await hasIosDeploy && await _iosDeployIsInstalledAndMeetsVersionCheck) {
