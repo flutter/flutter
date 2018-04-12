@@ -4896,8 +4896,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
-    bool edge,
     bool route,
+    bool routeName,
     String label,
     String value,
     String increasedValue,
@@ -4936,8 +4936,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       focused: focused,
       inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
       obscured: obscured,
-      edge: edge,
       route: route,
+      routeName: routeName,
       label: label,
       value: value,
       increasedValue: increasedValue,
@@ -5009,7 +5009,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return new RenderSemanticsAnnotations(
       container: container,
-      explicitChildNodes: explicitChildNodes,
+      explicitChildNodes: explicitChildNodes || properties.route,
       enabled: properties.enabled,
       checked: properties.checked,
       selected: properties.selected,
@@ -5019,8 +5019,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       focused: properties.focused,
       inMutuallyExclusiveGroup: properties.inMutuallyExclusiveGroup,
       obscured: properties.obscured,
-      edge: properties.edge,
       route: properties.route,
+      routeName: properties.routeName,
       label: properties.label,
       value: properties.value,
       increasedValue: properties.increasedValue,
@@ -5063,7 +5063,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSemanticsAnnotations renderObject) {
     renderObject
       ..container = container
-      ..explicitChildNodes = explicitChildNodes
+      ..explicitChildNodes = explicitChildNodes || properties.route
       ..enabled = properties.enabled
       ..checked = properties.checked
       ..selected = properties.selected
@@ -5073,6 +5073,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..decreasedValue = properties.decreasedValue
       ..hint = properties.hint
       ..route = properties.route
+      ..routeName = properties.routeName
       ..textDirection = _getTextDirection(context)
       ..sortKey = properties.sortKey
       ..onTap = properties.onTap

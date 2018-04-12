@@ -3021,6 +3021,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool obscured,
     bool edge,
     bool route,
+    bool routeName,
     String label,
     String value,
     String increasedValue,
@@ -3057,7 +3058,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _obscured = obscured,
        _route = route,
-       _edge = edge,
+       _routeName = routeName,
        _label = label,
        _value = value,
        _increasedValue = increasedValue,
@@ -3217,15 +3218,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  bool get edge => _edge;
-  bool _edge;
-  set edge(bool value) {
-    if (edge == value)
-      return;
-    _edge = value;
-    markNeedsSemanticsUpdate();
-  }
-
   /// If non-null, sets the [SemanticsNode.route] semantic to the give value.
   bool get route => _route;
   bool _route;
@@ -3233,6 +3225,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (route == value)
       return;
     _route = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.routeName] semantic to the give value.
+  bool get routeName => _routeName;
+  bool _routeName;
+  set routeName(bool value) {
+    if (routeName == value)
+      return;
+    _routeName = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3687,8 +3689,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.hint = hint;
     if (route != null)
       config.isRoute = route;
-    if (edge != null)
-      config.isEdge = edge;
+    if (routeName != null)
+      config.isRouteName = routeName;
     if (textDirection != null)
       config.textDirection = textDirection;
     if (sortKey != null)

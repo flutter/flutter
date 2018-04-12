@@ -417,13 +417,22 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
 class _PopupMenu<T> extends StatelessWidget {
   const _PopupMenu({
     Key key,
-    this.route
+    this.route,
+    this.semanticName,
   }) : super(key: key);
 
   final _PopupMenuRoute<T> route;
+  final String semanticName;
 
   @override
   Widget build(BuildContext context) {
+    String value = '';
+    if (semanticName == null && defaultTargetPlatform != TargetPlatform.iOS) {
+      final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+      value = localizations.popupMenuName;
+    }
+    
+
     final double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
     final List<Widget> children = <Widget>[];
 
@@ -479,7 +488,7 @@ class _PopupMenu<T> extends StatelessWidget {
               alignment: AlignmentDirectional.topEnd,
               widthFactor: width.evaluate(route.animation),
               heightFactor: height.evaluate(route.animation),
-              child: child,
+              child: new Semantics(route: true, routeName: true, value: value, child: child),
             ),
           ),
         );
@@ -577,6 +586,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.elevation,
     this.theme,
     this.barrierLabel,
+    this.semanticName,
   });
 
   final RelativeRect position;
@@ -584,6 +594,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final dynamic initialValue;
   final double elevation;
   final ThemeData theme;
+  final String semanticName;
 
   @override
   Animation<double> createAnimation() {
@@ -694,6 +705,7 @@ Future<T> showMenu<T>({
   @required List<PopupMenuEntry<T>> items,
   T initialValue,
   double elevation: 8.0,
+  String semanticName,
 }) {
   assert(context != null);
   assert(items != null && items.isNotEmpty);
@@ -702,6 +714,7 @@ Future<T> showMenu<T>({
     items: items,
     initialValue: initialValue,
     elevation: elevation,
+    semanticName: semanticName,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   ));

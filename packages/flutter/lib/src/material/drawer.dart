@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/material/material_localizations.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -102,15 +103,17 @@ class Drawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String value = defaultTargetPlatform == TargetPlatform.iOS ? '' : localizations.drawerName;
+
     return new ConstrainedBox(
       constraints: const BoxConstraints.expand(width: _kWidth),
       child: new Material(
         elevation: elevation,
         child: new Semantics(
-          edge: true,
+          routeName: true,
           route: true,
-          value: 'Navigation Menu', // just for testing
-          explicitChildNodes: true,
+          value: value,
           child: child,
         ),
       ),

@@ -75,7 +75,7 @@ class OnTapPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new RouteName(
-      name: id,
+      routeName: id,
       child: new Scaffold(
         appBar: new AppBar(title: new Text('Page $id')),
         body: new GestureDetector(

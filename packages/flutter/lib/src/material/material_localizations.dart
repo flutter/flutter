@@ -259,6 +259,18 @@ abstract class MaterialLocalizations {
   /// shows the list of accounts.
   String get showAccountsLabel;
 
+  /// The default semantic value used for the [Drawer] widget's edge triggered
+  /// semantics.
+  String get drawerName;
+
+  /// The default semantic value used for the [Dialog] widget's edge triggered
+  /// semantics
+  String get dialogName;
+
+  /// The default semantic value used for the popup menu widget's edge
+  /// triggered semantics.
+  String get popupMenuName;
+
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -605,6 +617,15 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get showAccountsLabel => 'Show accounts';
+
+  @override
+  String get drawerName => 'Navigation menu';
+
+  @override
+  String get dialogName => 'Dialog';
+
+  @override
+  String get popupMenuName => 'Popup menu';
 
   /// Creates an object that provides US English resource values for the material
   /// library widgets.

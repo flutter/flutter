@@ -66,6 +66,12 @@ class Dialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String value = '';
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
+      final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+      value = localizations.dialogName;
+    }
+
     return new AnimatedPadding(
       padding: MediaQuery.of(context).viewInsets + const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
       duration: insetAnimationDuration,
@@ -85,6 +91,8 @@ class Dialog extends StatelessWidget {
               type: MaterialType.card,
               child: new Semantics(
                 route: true,
+                routeName: true,
+                value: value,
                 child: child,
               ),
             ),
@@ -228,7 +236,7 @@ class AlertDialog extends StatelessWidget {
         padding: titlePadding ?? new EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
-          child: new Semantics(child: title, route: true),
+          child: new Semantics(child: title, routeName: true),
         ),
       ));
     }
@@ -455,7 +463,7 @@ class SimpleDialog extends StatelessWidget {
         padding: titlePadding,
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
-          child: title,
+          child: new Semantics(routeName: true, child: title),
         )
       ));
     }

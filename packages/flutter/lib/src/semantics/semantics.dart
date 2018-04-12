@@ -320,8 +320,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.focused,
     this.inMutuallyExclusiveGroup,
     this.obscured,
-    this.edge,
     this.route,
+    this.routeName,
     this.label,
     this.value,
     this.increasedValue,
@@ -409,8 +409,6 @@ class SemanticsProperties extends DiagnosticableTree {
   /// Doing so instructs screen readers to not read out the [value].
   final bool obscured;
 
-  final bool edge;
-
   /// If non-null, whether the node corresponds to a visually distinct subtree.
   ///
   /// When the most specific route semantics node changes, the platform
@@ -418,15 +416,22 @@ class SemanticsProperties extends DiagnosticableTree {
   /// the current accessibility focus. Specificity is defined as the last child
   /// in inverse hit-test order.
   ///
-  /// The announcement will contain the text in the [value] semantic. If this
-  /// value is null or empty, VoiceOver will still provide a notification chime
-  /// while TalkBack will make no announcement.
-  ///
   /// See also:
   ///
-  ///  * [SemanticsConfiguration.isRoute] for a description of how this is
-  ///    exposed in TalkBack and VoiceOver.
+  ///  * [routeName] for a description of how the announced value is selected.
   final bool route;
+
+  /// If non-null, whether the node contains the semantic name for a route.
+  ///
+  /// When the most specific route semantics node changes, the platform will
+  /// search for the first child in inverse hit test order with a routeName 
+  /// flag and a non empty semantic value. If no value is found VoiceOver will
+  /// still provide a notification chime while TalkBack will make no announcement.
+  ///
+  /// See also:
+  /// 
+  ///  * [route] for a description of how the route is selected.
+  final bool routeName;
 
   /// Provides a textual description of the widget.
   ///
@@ -2357,11 +2362,6 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  bool get isEdge => _hasFlag(SemanticsFlag.isEdge);
-  set isEdge(bool value) {
-    _setFlag(SemanticsFlag.isEdge, value);
-  }
-
   /// Whether this node is part of a visually distinct subtree.
   /// 
   /// Changes to the most specific route name will prompt an accessibility
@@ -2371,6 +2371,11 @@ class SemanticsConfiguration {
   bool get isRoute => _hasFlag(SemanticsFlag.isRoute);
   set isRoute(bool value) {
     _setFlag(SemanticsFlag.isRoute, value);
+  }
+
+  bool get isRouteName => _hasFlag(SemanticsFlag.isRouteName);
+  set isRouteName(bool value) {
+    _setFlag(SemanticsFlag.isRouteName, value);
   }
 
   /// The reading direction for the text in [label], [value], [hint],
