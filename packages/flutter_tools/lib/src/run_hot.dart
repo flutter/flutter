@@ -500,6 +500,7 @@ class HotRunner extends ResidentRunner {
     // change from host path to a device path). Subsequent reloads will
     // not be affected, so we resume reporting reload times on the second
     // reload.
+    final bool previewDart2 = debuggingOptions.buildInfo.previewDart2;
     final bool shouldReportReloadTime = !_runningFromSnapshot;
     final Stopwatch reloadTimer = new Stopwatch()..start();
 
@@ -514,7 +515,7 @@ class HotRunner extends ResidentRunner {
     final Stopwatch vmReloadTimer = new Stopwatch()..start();
     try {
       final String entryPath = fs.path.relative(
-        debuggingOptions.buildInfo.previewDart2 ? mainPath + '.dill' : mainPath,
+         previewDart2 ? mainPath + '.dill' : mainPath,
         from: projectRootPath,
       );
       final Completer<Map<String, dynamic>> retrieveFirstReloadReport = new Completer<Map<String, dynamic>>();
@@ -660,7 +661,7 @@ class HotRunner extends ResidentRunner {
       flutterUsage.sendTiming('hot', 'reload', reloadTimer.elapsed);
 
     String unusedElementMessage;
-    if (!reassembleAndScheduleErrors && !reassembleTimedOut) {
+    if (!reassembleAndScheduleErrors && !reassembleTimedOut && !previewDart2) {
       final List<Future<List<ProgramElement>>> unusedReports =
         <Future<List<ProgramElement>>>[];
       for (FlutterDevice device in flutterDevices)
