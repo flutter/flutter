@@ -219,11 +219,6 @@ public final class FlutterActivityDelegate
     }
 
     @Override
-    public void onStop() {
-        flutterView.onStop();
-    }
-
-    @Override
     public void onPostResume() {
         if (flutterView != null) {
             flutterView.onPostResume();
