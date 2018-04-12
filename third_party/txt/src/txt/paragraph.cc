@@ -29,6 +29,7 @@
 #include "font_skia.h"
 #include "lib/fxl/logging.h"
 #include "minikin/FontLanguageListCache.h"
+#include "minikin/GraphemeBreak.h"
 #include "minikin/HbFontCache.h"
 #include "minikin/LayoutUtils.h"
 #include "minikin/LineBreaker.h"
@@ -409,14 +410,6 @@ void Paragraph::Layout(double width, bool force) {
   if (!ComputeBidiRuns(&bidi_runs))
     return;
 
-  if (!grapheme_breaker_) {
-    UErrorCode icu_status = U_ZERO_ERROR;
-    grapheme_breaker_.reset(
-        icu::BreakIterator::createCharacterInstance(icu::Locale(), icu_status));
-    if (!U_SUCCESS(icu_status))
-      return;
-  }
-
   SkPaint paint;
   paint.setAntiAlias(true);
   paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
@@ -537,13 +530,11 @@ void Paragraph::Layout(double width, bool force) {
       if (layout.nGlyphs() == 0)
         continue;
 
+      std::vector<float> layout_advances(text_count);
+      layout.getAdvances(layout_advances.data());
+
       // Break the layout into blobs that share the same SkPaint parameters.
       std::vector<Range<size_t>> glyph_blobs = GetLayoutTypefaceRuns(layout);
-
-      grapheme_breaker_->setText(
-          icu::UnicodeString(false, text_ptr + text_start, text_count));
-      if (run.is_rtl())
-        grapheme_breaker_->last();
 
       double word_start_position = std::numeric_limits<double>::quiet_NaN();
 
@@ -556,58 +547,78 @@ void Paragraph::Layout(double width, bool force) {
             builder.allocRunPos(paint, glyph_blob.end - glyph_blob.start);
 
         for (size_t glyph_index = glyph_blob.start;
-             glyph_index < glyph_blob.end; ++glyph_index) {
-          size_t blob_index = glyph_index - glyph_blob.start;
-          blob_buffer.glyphs[blob_index] = layout.getGlyphId(glyph_index);
+             glyph_index < glyph_blob.end;) {
+          size_t cluster_start_glyph_index = glyph_index;
+          uint32_t cluster = layout.getGlyphCluster(cluster_start_glyph_index);
+          double glyph_x_offset;
 
-          size_t pos_index = blob_index * 2;
-          double glyph_x_offset = layout.getX(glyph_index) + justify_x_offset;
-          blob_buffer.pos[pos_index] = glyph_x_offset;
-          blob_buffer.pos[pos_index + 1] = layout.getY(glyph_index);
+          // Add all the glyphs in this cluster to the text blob.
+          do {
+            size_t blob_index = glyph_index - glyph_blob.start;
+            blob_buffer.glyphs[blob_index] = layout.getGlyphId(glyph_index);
 
-          // The glyph may be a ligature.  Determine how many input characters
-          // are joined into this glyph.  Note that each character may be
-          // encoded as multiple UTF-16 code units.
-          Range<int32_t> glyph_code_units;
-          std::vector<size_t> subglyph_code_unit_counts;
+            size_t pos_index = blob_index * 2;
+            blob_buffer.pos[pos_index] =
+                layout.getX(glyph_index) + justify_x_offset;
+            blob_buffer.pos[pos_index + 1] = layout.getY(glyph_index);
+
+            if (glyph_index == cluster_start_glyph_index)
+              glyph_x_offset = blob_buffer.pos[pos_index];
+
+            glyph_index++;
+          } while (glyph_index < glyph_blob.end &&
+                   layout.getGlyphCluster(glyph_index) == cluster);
+
+          Range<int32_t> glyph_code_units(cluster, 0);
+          std::vector<size_t> grapheme_code_unit_counts;
           if (run.is_rtl()) {
-            glyph_code_units.end = grapheme_breaker_->current();
-            glyph_code_units.start = grapheme_breaker_->previous();
-            if (glyph_code_units.start == icu::BreakIterator::DONE)
-              break;
-            subglyph_code_unit_counts.push_back(glyph_code_units.width());
-          } else {
-            glyph_code_units.start = grapheme_breaker_->current();
-            glyph_code_units.end = grapheme_breaker_->next();
-            if (glyph_code_units.end == icu::BreakIterator::DONE)
-              break;
-            subglyph_code_unit_counts.push_back(glyph_code_units.width());
-            while (glyph_code_units.end < static_cast<int32_t>(text_count)) {
-              if (layout.getCharAdvance(glyph_code_units.end) != 0)
-                break;
-              if (grapheme_breaker_->next() == icu::BreakIterator::DONE)
-                break;
-              subglyph_code_unit_counts.push_back(grapheme_breaker_->current() -
-                                                  glyph_code_units.end);
-              glyph_code_units.end = grapheme_breaker_->current();
+            if (cluster_start_glyph_index > 0) {
+              glyph_code_units.end =
+                  layout.getGlyphCluster(cluster_start_glyph_index - 1);
+            } else {
+              glyph_code_units.end = text_count;
             }
+            grapheme_code_unit_counts.push_back(glyph_code_units.width());
+          } else {
+            if (glyph_index < layout.nGlyphs()) {
+              glyph_code_units.end = layout.getGlyphCluster(glyph_index);
+            } else {
+              glyph_code_units.end = text_count;
+            }
+
+            // The glyph may be a ligature.  Determine how many graphemes are
+            // joined into this glyph and how many input code units map to
+            // each grapheme.
+            size_t code_unit_count = 1;
+            for (int32_t offset = glyph_code_units.start + 1;
+                 offset < glyph_code_units.end; ++offset) {
+              if (minikin::GraphemeBreak::isGraphemeBreak(
+                      layout_advances.data(), text_ptr, text_start, text_count,
+                      offset)) {
+                grapheme_code_unit_counts.push_back(code_unit_count);
+                code_unit_count = 1;
+              } else {
+                code_unit_count++;
+              }
+            }
+            grapheme_code_unit_counts.push_back(code_unit_count);
           }
           float glyph_advance = layout.getCharAdvance(glyph_code_units.start);
-          float subglyph_advance =
-              glyph_advance / subglyph_code_unit_counts.size();
+          float grapheme_advance =
+              glyph_advance / grapheme_code_unit_counts.size();
 
           glyph_positions.emplace_back(run_x_offset + glyph_x_offset,
-                                       subglyph_advance,
+                                       grapheme_advance,
                                        run.start() + glyph_code_units.start,
-                                       subglyph_code_unit_counts[0]);
+                                       grapheme_code_unit_counts[0]);
 
-          // Compute positions for the additional characters in the ligature.
-          for (size_t i = 1; i < subglyph_code_unit_counts.size(); ++i) {
+          // Compute positions for the additional graphemes in the ligature.
+          for (size_t i = 1; i < grapheme_code_unit_counts.size(); ++i) {
             glyph_positions.emplace_back(
-                glyph_positions.back().x_pos.end, subglyph_advance,
+                glyph_positions.back().x_pos.end, grapheme_advance,
                 glyph_positions.back().code_units.start +
-                    subglyph_code_unit_counts[i - 1],
-                subglyph_code_unit_counts[i]);
+                    grapheme_code_unit_counts[i - 1],
+                grapheme_code_unit_counts[i]);
           }
 
           if (word_index < words.size() &&
