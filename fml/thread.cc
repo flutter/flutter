@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#define FML_USED_ON_EMBEDDER
-
 #include "flutter/fml/thread.h"
 
 #include "lib/fxl/build_config.h"
@@ -24,7 +22,7 @@ namespace fml {
 
 Thread::Thread(const std::string& name) : joined_(false) {
   fxl::AutoResetWaitableEvent latch;
-  fxl::RefPtr<fml::TaskRunner> runner;
+  fxl::RefPtr<fxl::TaskRunner> runner;
   thread_ = std::make_unique<std::thread>([&latch, &runner, name]() -> void {
     SetCurrentThreadName(name);
     fml::MessageLoop::EnsureInitializedForCurrentThread();
@@ -41,7 +39,7 @@ Thread::~Thread() {
   Join();
 }
 
-fxl::RefPtr<fml::TaskRunner> Thread::GetTaskRunner() const {
+fxl::RefPtr<fxl::TaskRunner> Thread::GetTaskRunner() const {
   return task_runner_;
 }
 
@@ -86,8 +84,7 @@ void Thread::SetCurrentThreadName(const std::string& name) {
   } __except (EXCEPTION_CONTINUE_EXECUTION) {
   }
 #else
-  FXL_DLOG(INFO) << "Could not set the thread name to '" << name
-                 << "' on this platform.";
+#error Unsupported Platform
 #endif
 }
 

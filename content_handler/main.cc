@@ -1,26 +1,16 @@
-// Copyright 2018 The Fuchsia Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 #include <trace-provider/provider.h>
-#include <cstdlib>
 
-#include "application_runner.h"
+#include "flutter/content_handler/app.h"
 #include "lib/fsl/tasks/message_loop.h"
 
-int main(int argc, char const* argv[]) {
+int main(int argc, const char** argv) {
   fsl::MessageLoop loop;
-
   trace::TraceProvider provider(loop.async());
-  FXL_DCHECK(provider.is_valid()) << "Trace provider must be valid.";
-
-  FXL_LOG(INFO) << "Flutter application services initialized.";
-  flutter::ApplicationRunner runner([&loop]() {
-    loop.PostQuitTask();
-    FXL_LOG(INFO) << "Flutter application services terminated. Good bye...";
-  });
-
+  flutter_runner::App app;
   loop.Run();
-
-  return EXIT_SUCCESS;
+  return 0;
 }

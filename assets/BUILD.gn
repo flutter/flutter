@@ -4,18 +4,16 @@
 
 source_set("assets") {
   sources = [
-    "asset_manager.cc",
-    "asset_manager.h",
-    "asset_resolver.h",
+    "asset_provider.h",
     "directory_asset_bundle.cc",
     "directory_asset_bundle.h",
+    "unzipper_provider.cc",
+    "unzipper_provider.h",
     "zip_asset_store.cc",
     "zip_asset_store.h",
   ]
 
   deps = [
-    "$flutter_root/common",
-    "$flutter_root/fml",
     "$flutter_root/glue",
     "//garnet/public/lib/fxl",
     "//garnet/public/lib/zip",
@@ -25,5 +23,7 @@ source_set("assets") {
     "//third_party/zlib:minizip",
   ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [
+    "$flutter_root:config",
+  ]
 }

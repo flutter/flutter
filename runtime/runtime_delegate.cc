@@ -6,6 +6,12 @@
 
 namespace blink {
 
-RuntimeDelegate::~RuntimeDelegate() = default;
+RuntimeDelegate::~RuntimeDelegate() {}
+
+void RuntimeDelegate::DidCreateMainIsolate(Dart_Isolate isolate) {}
+
+void RuntimeDelegate::DidCreateSecondaryIsolate(Dart_Isolate isolate) {}
+
+void RuntimeDelegate::DidShutdownMainIsolate() {}
 
 }  // namespace blink

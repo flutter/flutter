@@ -3,12 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/android_context_gl.h"
-
 #include <EGL/eglext.h>
-
 #include <utility>
-
-#include "flutter/fml/trace_event.h"
 
 namespace shell {
 
@@ -69,17 +65,19 @@ static EGLResult<EGLSurface> CreateContext(EGLDisplay display,
   return {context != EGL_NO_CONTEXT, context};
 }
 
-static EGLResult<EGLConfig> ChooseEGLConfiguration(EGLDisplay display) {
+static EGLResult<EGLConfig> ChooseEGLConfiguration(
+    EGLDisplay display,
+    PlatformView::SurfaceConfig config) {
   EGLint attributes[] = {
       // clang-format off
       EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
       EGL_SURFACE_TYPE,    EGL_WINDOW_BIT,
-      EGL_RED_SIZE,        8,
-      EGL_GREEN_SIZE,      8,
-      EGL_BLUE_SIZE,       8,
-      EGL_ALPHA_SIZE,      8,
-      EGL_DEPTH_SIZE,      0,
-      EGL_STENCIL_SIZE,    0,
+      EGL_RED_SIZE,        config.red_bits,
+      EGL_GREEN_SIZE,      config.green_bits,
+      EGL_BLUE_SIZE,       config.blue_bits,
+      EGL_ALPHA_SIZE,      config.alpha_bits,
+      EGL_DEPTH_SIZE,      config.depth_bits,
+      EGL_STENCIL_SIZE,    config.stencil_bits,
       EGL_NONE,            // termination sentinel
       // clang-format on
   };
@@ -144,6 +142,7 @@ bool AndroidContextGL::CreatePBufferSurface() {
 }
 
 AndroidContextGL::AndroidContextGL(fxl::RefPtr<AndroidEnvironmentGL> env,
+                                   PlatformView::SurfaceConfig config,
                                    const AndroidContextGL* share_context)
     : environment_(env),
       window_(nullptr),
@@ -159,7 +158,8 @@ AndroidContextGL::AndroidContextGL(fxl::RefPtr<AndroidEnvironmentGL> env,
 
   // Choose a valid configuration.
 
-  std::tie(success, config_) = ChooseEGLConfiguration(environment_->Display());
+  std::tie(success, config_) =
+      ChooseEGLConfiguration(environment_->Display(), config);
 
   if (!success) {
     FXL_LOG(ERROR) << "Could not choose an EGL configuration.";

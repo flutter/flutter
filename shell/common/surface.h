@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "flutter/flow/compositor_context.h"
+#include "lib/fxl/compiler_specific.h"
 #include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
@@ -45,8 +45,6 @@ class Surface {
  public:
   Surface();
 
-  Surface(std::unique_ptr<flow::CompositorContext> compositor_context);
-
   virtual ~Surface();
 
   virtual bool IsValid() = 0;
@@ -55,12 +53,14 @@ class Surface {
 
   virtual GrContext* GetContext() = 0;
 
-  flow::CompositorContext& GetCompositorContext();
+  virtual bool SupportsScaling() const;
+
+  double GetScale() const;
+
+  void SetScale(double scale);
 
  private:
-  std::unique_ptr<flow::CompositorContext> compositor_context_;
-
-  FXL_DISALLOW_COPY_AND_ASSIGN(Surface);
+  double scale_;
 };
 
 }  // namespace shell

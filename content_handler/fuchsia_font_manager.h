@@ -26,7 +26,7 @@
 
 namespace txt {
 
-class FuchsiaFontManager final : public SkFontMgr {
+class FuchsiaFontManager : public SkFontMgr {
  public:
   FuchsiaFontManager(fonts::FontProviderPtr provider);
 

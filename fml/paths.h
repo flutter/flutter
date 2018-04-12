@@ -8,14 +8,10 @@
 #include <string>
 #include <utility>
 
-#include "lib/fxl/strings/string_view.h"
-
 namespace fml {
 namespace paths {
 
 std::pair<bool, std::string> GetExecutableDirectoryPath();
-
-std::string JoinPaths(std::initializer_list<fxl::StringView> components);
 
 }  // namespace paths
 }  // namespace fml

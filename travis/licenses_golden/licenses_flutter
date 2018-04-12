@@ -1059,10 +1059,14 @@ USED LICENSES:
 ====================================================================================================
 LIBRARY: engine
 LIBRARY: txt
-ORIGIN: ../../../flutter/content_handler/session_connection.cc + ../../../LICENSE
+ORIGIN: ../../../flutter/content_handler/service_protocol_hooks.cc + ../../../LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/content_handler/service_protocol_hooks.cc
+FILE: ../../../flutter/content_handler/service_protocol_hooks.h
 FILE: ../../../flutter/content_handler/session_connection.cc
 FILE: ../../../flutter/content_handler/session_connection.h
+FILE: ../../../flutter/content_handler/vulkan_rasterizer.cc
+FILE: ../../../flutter/content_handler/vulkan_rasterizer.h
 FILE: ../../../flutter/content_handler/vulkan_surface_producer.cc
 FILE: ../../../flutter/content_handler/vulkan_surface_producer.h
 FILE: ../../../flutter/flow/debug_print.cc
@@ -1122,6 +1126,7 @@ FILE: ../../../flutter/fml/platform/win/mapping_win.cc
 FILE: ../../../flutter/fml/platform/win/message_loop_win.cc
 FILE: ../../../flutter/fml/platform/win/message_loop_win.h
 FILE: ../../../flutter/fml/platform/win/paths_win.cc
+FILE: ../../../flutter/fml/task_observer.h
 FILE: ../../../flutter/fml/task_runner.cc
 FILE: ../../../flutter/fml/task_runner.h
 FILE: ../../../flutter/fml/thread.cc
@@ -1137,10 +1142,13 @@ FILE: ../../../flutter/lib/ui/painting/codec.cc
 FILE: ../../../flutter/lib/ui/painting/codec.h
 FILE: ../../../flutter/lib/ui/painting/frame_info.cc
 FILE: ../../../flutter/lib/ui/painting/frame_info.h
+FILE: ../../../flutter/lib/ui/painting/utils.cc
 FILE: ../../../flutter/lib/ui/painting/vertices.cc
 FILE: ../../../flutter/lib/ui/painting/vertices.h
 FILE: ../../../flutter/lib/ui/text/font_collection.cc
 FILE: ../../../flutter/lib/ui/text/font_collection.h
+FILE: ../../../flutter/shell/common/null_platform_view.cc
+FILE: ../../../flutter/shell/common/null_platform_view.h
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.cc
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.h
 FILE: ../../../flutter/shell/platform/android/android_external_texture_gl.cc
@@ -1187,6 +1195,8 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterStandar
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterStandardCodec_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterUmbrellaImport.m
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/flutter_codecs_unittest.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/flutter_main_ios.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/flutter_main_ios.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/flutter_standard_codec_unittest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_external_texture_gl.h
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_external_texture_gl.mm
@@ -1553,6 +1563,7 @@ FILE: ../../../flutter/shell/common/skia_event_tracer_impl.cc
 FILE: ../../../flutter/shell/platform/android/apk_asset_provider.cc
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONUtil.java
 FILE: ../../../flutter/shell/platform/darwin/desktop/Info.plist
+FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_mac.xib
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Flutter.podspec
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/module.modulemap
@@ -1627,48 +1638,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: engine
-ORIGIN: ../../../flutter/assets/asset_manager.cc + ../../../LICENSE
+ORIGIN: ../../../flutter/assets/asset_provider.h + ../../../LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../flutter/assets/asset_manager.cc
-FILE: ../../../flutter/assets/asset_manager.h
-FILE: ../../../flutter/assets/asset_resolver.h
-FILE: ../../../flutter/common/task_runners.cc
-FILE: ../../../flutter/common/task_runners.h
-FILE: ../../../flutter/flow/layers/default_layer_builder.cc
-FILE: ../../../flutter/flow/layers/default_layer_builder.h
-FILE: ../../../flutter/flow/layers/layer_builder.cc
-FILE: ../../../flutter/flow/layers/layer_builder.h
-FILE: ../../../flutter/flow/skia_gpu_object.cc
-FILE: ../../../flutter/flow/skia_gpu_object.h
-FILE: ../../../flutter/runtime/dart_isolate.cc
-FILE: ../../../flutter/runtime/dart_isolate.h
-FILE: ../../../flutter/runtime/dart_isolate_unittests.cc
-FILE: ../../../flutter/runtime/dart_snapshot.cc
-FILE: ../../../flutter/runtime/dart_snapshot.h
-FILE: ../../../flutter/runtime/dart_snapshot_buffer.cc
-FILE: ../../../flutter/runtime/dart_snapshot_buffer.h
-FILE: ../../../flutter/runtime/dart_vm.cc
-FILE: ../../../flutter/runtime/dart_vm.h
-FILE: ../../../flutter/runtime/dart_vm_unittests.cc
-FILE: ../../../flutter/runtime/service_protocol.cc
-FILE: ../../../flutter/runtime/service_protocol.h
-FILE: ../../../flutter/shell/common/io_manager.cc
-FILE: ../../../flutter/shell/common/io_manager.h
-FILE: ../../../flutter/shell/common/run_configuration.cc
-FILE: ../../../flutter/shell/common/run_configuration.h
-FILE: ../../../flutter/shell/common/shell_unittests.cc
-FILE: ../../../flutter/shell/common/thread_host.cc
-FILE: ../../../flutter/shell/common/thread_host.h
-FILE: ../../../flutter/shell/platform/darwin/common/command_line.h
-FILE: ../../../flutter/shell/platform/darwin/common/command_line.mm
-FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_application_delegate.h
-FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_application_delegate.mm
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h
-FILE: ../../../flutter/shell/platform/embedder/embedder.h
-FILE: ../../../flutter/shell/platform/embedder/embedder_engine.cc
-FILE: ../../../flutter/shell/platform/embedder/embedder_engine.h
+FILE: ../../../flutter/assets/asset_provider.h
+FILE: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_locations.dart
+FILE: ../../../flutter/lib/ui/painting/image_encoding.cc
+FILE: ../../../flutter/lib/ui/painting/image_encoding.h
+FILE: ../../../flutter/shell/platform/android/apk_asset_provider.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.mm
 ----------------------------------------------------------------------------------------------------
-Copyright 2017 The Flutter Authors. All rights reserved.
+Copyright 2018 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -1703,10 +1683,23 @@ ORIGIN: ../../../flutter/assets/directory_asset_bundle.cc + ../../../LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/assets/directory_asset_bundle.cc
 FILE: ../../../flutter/assets/directory_asset_bundle.h
+FILE: ../../../flutter/assets/unzipper_provider.cc
+FILE: ../../../flutter/assets/unzipper_provider.h
 FILE: ../../../flutter/assets/zip_asset_store.cc
 FILE: ../../../flutter/assets/zip_asset_store.h
 FILE: ../../../flutter/common/settings.cc
 FILE: ../../../flutter/common/settings.h
+FILE: ../../../flutter/common/threads.cc
+FILE: ../../../flutter/common/threads.h
+FILE: ../../../flutter/content_handler/app.cc
+FILE: ../../../flutter/content_handler/app.h
+FILE: ../../../flutter/content_handler/application_controller_impl.cc
+FILE: ../../../flutter/content_handler/application_controller_impl.h
+FILE: ../../../flutter/content_handler/main.cc
+FILE: ../../../flutter/content_handler/rasterizer.cc
+FILE: ../../../flutter/content_handler/rasterizer.h
+FILE: ../../../flutter/content_handler/runtime_holder.cc
+FILE: ../../../flutter/content_handler/runtime_holder.h
 FILE: ../../../flutter/flow/export_node.cc
 FILE: ../../../flutter/flow/layers/backdrop_filter_layer.cc
 FILE: ../../../flutter/flow/layers/backdrop_filter_layer.h
@@ -1714,6 +1707,7 @@ FILE: ../../../flutter/flow/layers/child_scene_layer.cc
 FILE: ../../../flutter/flow/layers/child_scene_layer.h
 FILE: ../../../flutter/flow/layers/shader_mask_layer.cc
 FILE: ../../../flutter/flow/layers/shader_mask_layer.h
+FILE: ../../../flutter/flow/process_info.h
 FILE: ../../../flutter/flow/raster_cache.cc
 FILE: ../../../flutter/flow/raster_cache.h
 FILE: ../../../flutter/flow/scene_update_context.cc
@@ -1724,6 +1718,9 @@ FILE: ../../../flutter/glue/stack_trace_fuchsia.cc
 FILE: ../../../flutter/glue/trace_event.h
 FILE: ../../../flutter/lib/ui/painting/image_filter.cc
 FILE: ../../../flutter/lib/ui/painting/image_filter.h
+FILE: ../../../flutter/lib/ui/painting/resource_context.cc
+FILE: ../../../flutter/lib/ui/painting/resource_context.h
+FILE: ../../../flutter/lib/ui/painting/utils.h
 FILE: ../../../flutter/lib/ui/semantics.dart
 FILE: ../../../flutter/lib/ui/semantics/semantics_node.cc
 FILE: ../../../flutter/lib/ui/semantics/semantics_node.h
@@ -1745,13 +1742,18 @@ FILE: ../../../flutter/runtime/asset_font_selector.cc
 FILE: ../../../flutter/runtime/asset_font_selector.h
 FILE: ../../../flutter/runtime/embedder_resources.cc
 FILE: ../../../flutter/runtime/embedder_resources.h
-FILE: ../../../flutter/runtime/fixtures/simple_main.dart
+FILE: ../../../flutter/runtime/runtime_init.cc
+FILE: ../../../flutter/runtime/runtime_init.h
 FILE: ../../../flutter/runtime/start_up.cc
 FILE: ../../../flutter/runtime/start_up.h
 FILE: ../../../flutter/runtime/test_font_data.cc
 FILE: ../../../flutter/runtime/test_font_data.h
 FILE: ../../../flutter/runtime/test_font_selector.cc
 FILE: ../../../flutter/runtime/test_font_selector.h
+FILE: ../../../flutter/shell/common/null_rasterizer.cc
+FILE: ../../../flutter/shell/common/null_rasterizer.h
+FILE: ../../../flutter/shell/common/platform_view_service_protocol.cc
+FILE: ../../../flutter/shell/common/platform_view_service_protocol.h
 FILE: ../../../flutter/shell/common/skia_event_tracer_impl.h
 FILE: ../../../flutter/shell/common/surface.cc
 FILE: ../../../flutter/shell/common/surface.h
@@ -1780,6 +1782,8 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/view/VsyncWaiter.java
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.cc
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.h
 FILE: ../../../flutter/shell/platform/darwin/common/buffer_conversions.mm
+FILE: ../../../flutter/shell/platform/darwin/common/process_info_mac.cc
+FILE: ../../../flutter/shell/platform/darwin/common/process_info_mac.h
 FILE: ../../../flutter/shell/platform/darwin/desktop/vsync_waiter_mac.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/Flutter.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h
@@ -1788,6 +1792,8 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterMacros
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterDartSource.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterDartSource.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h
@@ -1810,6 +1816,7 @@ FILE: ../../../flutter/sky/engine/platform/text/ICUError.cpp
 FILE: ../../../flutter/sky/engine/platform/text/ICUError.h
 FILE: ../../../flutter/sky/engine/platform/text/TextBox.h
 FILE: ../../../flutter/sky/packages/flutter_services/lib/empty.dart
+FILE: ../../../flutter/synchronization/debug_thread_checker.h
 FILE: ../../../flutter/synchronization/pipeline.cc
 FILE: ../../../flutter/synchronization/pipeline.h
 FILE: ../../../flutter/synchronization/semaphore.cc
@@ -1877,68 +1884,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: engine
-ORIGIN: ../../../flutter/content_handler/application.cc + ../../../garnet/LICENSE
+ORIGIN: ../../../flutter/flow/layers/default_layer_builder.cc + ../../../LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../flutter/content_handler/application.cc
-FILE: ../../../flutter/content_handler/application.h
-FILE: ../../../flutter/content_handler/application_runner.cc
-FILE: ../../../flutter/content_handler/application_runner.h
-FILE: ../../../flutter/content_handler/compositor_context.cc
-FILE: ../../../flutter/content_handler/compositor_context.h
-FILE: ../../../flutter/content_handler/engine.cc
-FILE: ../../../flutter/content_handler/engine.h
-FILE: ../../../flutter/content_handler/isolate_configurator.cc
-FILE: ../../../flutter/content_handler/isolate_configurator.h
-FILE: ../../../flutter/content_handler/main.cc
-FILE: ../../../flutter/content_handler/platform_view.cc
-FILE: ../../../flutter/content_handler/platform_view.h
-FILE: ../../../flutter/content_handler/surface.cc
-FILE: ../../../flutter/content_handler/surface.h
-FILE: ../../../flutter/content_handler/task_observers.cc
-FILE: ../../../flutter/content_handler/task_observers.h
-FILE: ../../../flutter/content_handler/unique_fdio_ns.h
+FILE: ../../../flutter/flow/layers/default_layer_builder.cc
+FILE: ../../../flutter/flow/layers/default_layer_builder.h
+FILE: ../../../flutter/flow/layers/layer_builder.cc
+FILE: ../../../flutter/flow/layers/layer_builder.h
+FILE: ../../../flutter/shell/platform/embedder/embedder.h
 ----------------------------------------------------------------------------------------------------
-Copyright 2018 The Fuchsia Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: engine
-ORIGIN: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_locations.dart + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_locations.dart
-FILE: ../../../flutter/lib/ui/painting/image_encoding.cc
-FILE: ../../../flutter/lib/ui/painting/image_encoding.h
-FILE: ../../../flutter/shell/platform/android/apk_asset_provider.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/accessibility_text_entry.mm
-----------------------------------------------------------------------------------------------------
-Copyright 2018 The Chromium Authors. All rights reserved.
+Copyright 2017 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -1975,62 +1929,6 @@ FILE: ../../../flutter/fml/platform/darwin/scoped_block.h
 FILE: ../../../flutter/sky/engine/wtf/allocator/PartitionAllocator.h
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2013 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: engine
-ORIGIN: ../../../flutter/fml/platform/fuchsia/paths_fuchsia.cc + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../flutter/fml/file.h
-FILE: ../../../flutter/fml/macros.h
-FILE: ../../../flutter/fml/mapping.cc
-FILE: ../../../flutter/fml/native_library.h
-FILE: ../../../flutter/fml/paths.cc
-FILE: ../../../flutter/fml/platform/fuchsia/paths_fuchsia.cc
-FILE: ../../../flutter/fml/platform/posix/file_posix.cc
-FILE: ../../../flutter/fml/platform/posix/native_library_posix.cc
-FILE: ../../../flutter/fml/platform/win/file_win.cc
-FILE: ../../../flutter/fml/platform/win/native_library_win.cc
-FILE: ../../../flutter/fml/platform/win/wstring_conversion.h
-FILE: ../../../flutter/fml/unique_fd.cc
-FILE: ../../../flutter/fml/unique_fd.h
-FILE: ../../../flutter/fml/unique_object.h
-FILE: ../../../flutter/shell/common/isolate_configuration.cc
-FILE: ../../../flutter/shell/common/isolate_configuration.h
-FILE: ../../../flutter/shell/platform/android/android_shell_holder.cc
-FILE: ../../../flutter/shell/platform/android/android_shell_holder.h
-FILE: ../../../flutter/shell/platform/android/platform_message_response_android.cc
-FILE: ../../../flutter/shell/platform/android/platform_message_response_android.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.mm
-----------------------------------------------------------------------------------------------------
-Copyright 2018 The Flutter Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -9975,6 +9873,10 @@ FILE: ../../../flutter/lib/ui/window.dart
 FILE: ../../../flutter/lib/ui/window/pointer_data.cc
 FILE: ../../../flutter/lib/ui/window/pointer_data_packet.cc
 FILE: ../../../flutter/lib/ui/window/window.cc
+FILE: ../../../flutter/runtime/dart_controller.cc
+FILE: ../../../flutter/runtime/dart_controller.h
+FILE: ../../../flutter/runtime/dart_init.cc
+FILE: ../../../flutter/runtime/dart_init.h
 FILE: ../../../flutter/runtime/dart_service_isolate.cc
 FILE: ../../../flutter/runtime/dart_service_isolate.h
 FILE: ../../../flutter/runtime/platform_impl.cc
@@ -9994,9 +9896,13 @@ FILE: ../../../flutter/shell/common/rasterizer.cc
 FILE: ../../../flutter/shell/common/rasterizer.h
 FILE: ../../../flutter/shell/common/shell.cc
 FILE: ../../../flutter/shell/common/shell.h
+FILE: ../../../flutter/shell/common/tracing_controller.cc
+FILE: ../../../flutter/shell/common/tracing_controller.h
 FILE: ../../../flutter/shell/common/vsync_waiter.cc
 FILE: ../../../flutter/shell/common/vsync_waiter.h
 FILE: ../../../flutter/shell/common/vsync_waiter_fallback.h
+FILE: ../../../flutter/shell/gpu/gpu_rasterizer.cc
+FILE: ../../../flutter/shell/gpu/gpu_rasterizer.h
 FILE: ../../../flutter/shell/platform/android/AndroidManifest.xml
 FILE: ../../../flutter/shell/platform/android/flutter_main.cc
 FILE: ../../../flutter/shell/platform/android/flutter_main.h
@@ -10009,6 +9915,12 @@ FILE: ../../../flutter/shell/platform/android/library_loader.cc
 FILE: ../../../flutter/shell/platform/android/platform_view_android.cc
 FILE: ../../../flutter/shell/platform/android/platform_view_android.h
 FILE: ../../../flutter/shell/platform/darwin/common/buffer_conversions.h
+FILE: ../../../flutter/shell/platform/darwin/common/platform_mac.h
+FILE: ../../../flutter/shell/platform/darwin/common/platform_mac.mm
+FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_app_delegate.h
+FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_app_delegate.m
+FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_application.h
+FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_application.mm
 FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_window.h
 FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_window.mm
 FILE: ../../../flutter/shell/platform/darwin/desktop/main_mac.mm
@@ -10018,6 +9930,8 @@ FILE: ../../../flutter/shell/platform/darwin/desktop/vsync_waiter_mac.cc
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.mm
+FILE: ../../../flutter/shell/platform/linux/main_linux.cc
+FILE: ../../../flutter/shell/platform/win/main_win.cc
 FILE: ../../../flutter/sky/engine/wtf/Allocator.h
 FILE: ../../../flutter/sky/engine/wtf/MakeUnique.h
 ----------------------------------------------------------------------------------------------------
@@ -10054,7 +9968,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: engine
 ORIGIN: ../../../topaz/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../flutter/fml/memory/thread_checker.h
 FILE: ../../../flutter/fml/memory/weak_ptr.h
 FILE: ../../../flutter/fml/memory/weak_ptr_internal.cc
 FILE: ../../../flutter/fml/memory/weak_ptr_internal.h
@@ -10088,4 +10001,4 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
-Total license count: 218
+Total license count: 216

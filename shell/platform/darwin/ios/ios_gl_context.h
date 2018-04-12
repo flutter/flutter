@@ -18,7 +18,7 @@ namespace shell {
 
 class IOSGLContext {
  public:
-  IOSGLContext(fml::scoped_nsobject<CAEAGLLayer> layer);
+  IOSGLContext(PlatformView::SurfaceConfig config, CAEAGLLayer* layer);
 
   ~IOSGLContext();
 

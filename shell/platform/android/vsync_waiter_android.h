@@ -12,17 +12,22 @@
 
 namespace shell {
 
-class VsyncWaiterAndroid final : public VsyncWaiter {
+class VsyncWaiterAndroid : public VsyncWaiter {
  public:
-  static bool Register(JNIEnv* env);
-
-  VsyncWaiterAndroid(blink::TaskRunners task_runners);
+  VsyncWaiterAndroid();
 
   ~VsyncWaiterAndroid() override;
 
+  static bool Register(JNIEnv* env);
+
+  void AsyncWaitForVsync(Callback callback) override;
+
+  void OnVsync(int64_t frameTimeNanos, int64_t frameTargetTimeNanos);
+
  private:
-  // |shell::VsyncWaiter|
-  void AwaitVSync() override;
+  Callback callback_;
+  fml::WeakPtr<VsyncWaiterAndroid> self_;
+  fml::WeakPtrFactory<VsyncWaiterAndroid> weak_factory_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterAndroid);
 };
