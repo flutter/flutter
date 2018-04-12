@@ -149,17 +149,22 @@ bool VulkanSurfaceProducer::TransitionSurfacesToExternal(
     if (!command_buffer->Begin())
       return false;
 
-    GrVkImageInfo* imageInfo;
-    vk_surface->GetSkiaSurface()->getRenderTargetHandle(
-        reinterpret_cast<GrBackendObject*>(&imageInfo),
+    GrBackendRenderTarget backendRT = vk_surface->GetSkiaSurface()->getBackendRenderTarget(
         SkSurface::kFlushRead_BackendHandleAccess);
+    if (!backendRT.isValid()) {
+      return false;
+    }
+    GrVkImageInfo imageInfo;
+    if(!backendRT.getVkImageInfo(&imageInfo)) {
+      return false;
+    }
 
     VkImageMemoryBarrier image_barrier = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
         .pNext = nullptr,
         .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
         .dstAccessMask = 0,
-        .oldLayout = imageInfo->fImageLayout,
+        .oldLayout = imageInfo.fImageLayout,
         .newLayout = VK_IMAGE_LAYOUT_GENERAL,
         .srcQueueFamilyIndex = 0,
         .dstQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR,
@@ -175,7 +180,7 @@ bool VulkanSurfaceProducer::TransitionSurfacesToExternal(
             1, &image_barrier))
       return false;
 
-    imageInfo->updateImageLayout(image_barrier.newLayout);
+    backendRT.setVkImageLayout(image_barrier.newLayout);
 
     if (!command_buffer->End())
       return false;
