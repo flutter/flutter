@@ -128,7 +128,14 @@ public class FlutterNativeView implements BinaryMessenger {
 
     // Called by native to send us a platform message.
     private void handlePlatformMessage(final String channel, byte[] message, final int replyId) {
-        assertAttached();
+        // The platform may not be attached immediately in certain cases where a new bundle is run -
+        // the native view is created in a separate thread. This mostly happens when the app restarts in dev
+        // mode when switching into split-screen mode. Preventing app restarts on layout and density
+        // changes will prevent this, and afterwards this can be changed back to an assert.
+        if (!isAttached()) {
+            Log.d(TAG, "PlatformView is not attached");
+            return;
+        }
         BinaryMessageHandler handler = mMessageHandlers.get(channel);
         if (handler != null) {
             try {
