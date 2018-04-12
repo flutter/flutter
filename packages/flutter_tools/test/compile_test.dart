@@ -46,12 +46,12 @@ void main() {
               'result abc\nline1\nline2\nabc /path/to/main.dart.dill'
             ))
           ));
-      final String output = await compile(sdkRoot: '/path/to/sdkroot',
+      final CompilerOutput output = await compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart'
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals('compiler message: line1\ncompiler message: line2\n'));
-      expect(output, equals('/path/to/main.dart.dill'));
+      expect(output.outputFilename, equals('/path/to/main.dart.dill'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
@@ -66,7 +66,7 @@ void main() {
             ))
           ));
 
-      final String output = await compile(sdkRoot: '/path/to/sdkroot',
+      final CompilerOutput output = await compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart'
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
@@ -88,7 +88,7 @@ void main() {
           ))
       ));
 
-      final String output = await compile(sdkRoot: '/path/to/sdkroot',
+      final CompilerOutput output = await compile(sdkRoot: '/path/to/sdkroot',
           mainPath: '/path/to/main.dart'
       );
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
@@ -141,13 +141,13 @@ void main() {
             ))
           ));
 
-      final String output = await generator.recompile(
+      final CompilerOutput output = await generator.recompile(
         '/path/to/main.dart', null /* invalidatedFiles */
       );
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(logger.errorText, equals('compiler message: line1\ncompiler message: line2\n'));
-      expect(output, equals('/path/to/main.dart.dill'));
+      expect(output.outputFilename, equals('/path/to/main.dart.dill'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
@@ -157,7 +157,7 @@ void main() {
           .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty()
       );
 
-      final String output = await generator.recompile(
+      final CompilerOutput output = await generator.recompile(
           '/path/to/main.dart', null /* invalidatedFiles */
       );
       expect(output, equals(null));
@@ -226,8 +226,8 @@ Future<Null> _recompile(StreamController<List<int>> streamController,
   new Future<List<int>>(() {
     streamController.add(utf8.encode(mockCompilerOutput));
   });
-  final String output = await generator.recompile(null /* mainPath */, <String>['/path/to/main.dart']);
-  expect(output, equals('/path/to/main.dart.dill'));
+  final CompilerOutput output = await generator.recompile(null /* mainPath */, <String>['/path/to/main.dart']);
+  expect(output.outputFilename, equals('/path/to/main.dart.dill'));
   final String commands = mockFrontendServerStdIn.getAndClear();
   final RegExp re = new RegExp('^recompile (.*)\\n/path/to/main.dart\\n(.*)\\n\$');
   expect(commands, matches(re));
