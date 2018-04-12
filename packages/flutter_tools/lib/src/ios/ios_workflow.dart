@@ -125,7 +125,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     if (iMobileDevice.isInstalled && (await iMobileDevice.isWorking) && (await hasIDeviceInstaller)) {
       if (await hasIosDeploy && await _iosDeployIsInstalledAndMeetsVersionCheck) {
         if (await cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck && await cocoaPods.isCocoaPodsInitialized) {
-          requireHomeBrew = false
+          requireHomeBrew = false;
         }
       }
     }
