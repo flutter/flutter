@@ -184,8 +184,8 @@ class _SliderDemoState extends State<SliderDemo> {
               children: <Widget>[
                 new SliderTheme(
                   data: theme.sliderTheme.copyWith(
-                    activeRailColor: Colors.deepPurple,
-                    inactiveRailColor: Colors.black26,
+                    activeTrackColor: Colors.deepPurple,
+                    inactiveTrackColor: Colors.black26,
                     activeTickMarkColor: Colors.white70,
                     inactiveTickMarkColor: Colors.black,
                     overlayColor: Colors.black12,
