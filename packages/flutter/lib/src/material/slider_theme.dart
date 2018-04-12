@@ -62,7 +62,7 @@ class SliderTheme extends InheritedWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return new SliderTheme(
-  ///       data: SliderTheme.of(context).copyWith(activeRailColor: const Color(0xff804040)),
+  ///       data: SliderTheme.of(context).copyWith(activeTrackColor: const Color(0xff804040)),
   ///       child: new Slider(
   ///         onChanged: (double value) { setState(() { _rocketThrust = value; }); },
   ///         value: _rocketThrust,
@@ -121,7 +121,7 @@ enum ShowValueIndicator {
 ///
 ///  * The "thumb", which is a shape that slides horizontally when the user
 ///    drags it.
-///  * The "rail", which is the line that the slider thumb slides along.
+///  * The "track", which is the line that the slider thumb slides along.
 ///  * The "value indicator", which is a shape that pops up when the user
 ///    is dragging the thumb to indicate the value being selected.
 ///  * The "active" side of the slider is the side between the thumb and the
@@ -169,7 +169,7 @@ class SliderThemeData extends Diagnosticable {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return new SliderTheme(
-  ///       data: SliderTheme.of(context).copyWith(activeRailColor: const Color(0xff404080)),
+  ///       data: SliderTheme.of(context).copyWith(activeTrackColor: const Color(0xff404080)),
   ///       child: new Slider(
   ///         onChanged: (double value) { setState(() { _bliss = value; }); },
   ///         value: _bliss,
@@ -179,10 +179,10 @@ class SliderThemeData extends Diagnosticable {
   /// }
   /// ```
   const SliderThemeData({
-    @required this.activeRailColor,
-    @required this.inactiveRailColor,
-    @required this.disabledActiveRailColor,
-    @required this.disabledInactiveRailColor,
+    @required this.activeTrackColor,
+    @required this.inactiveTrackColor,
+    @required this.disabledActiveTrackColor,
+    @required this.disabledInactiveTrackColor,
     @required this.activeTickMarkColor,
     @required this.inactiveTickMarkColor,
     @required this.disabledActiveTickMarkColor,
@@ -195,10 +195,10 @@ class SliderThemeData extends Diagnosticable {
     @required this.valueIndicatorShape,
     @required this.showValueIndicator,
     @required this.valueIndicatorTextStyle,
-  })  : assert(activeRailColor != null),
-        assert(inactiveRailColor != null),
-        assert(disabledActiveRailColor != null),
-        assert(disabledInactiveRailColor != null),
+  })  : assert(activeTrackColor != null),
+        assert(inactiveTrackColor != null),
+        assert(disabledActiveTrackColor != null),
+        assert(disabledInactiveTrackColor != null),
         assert(activeTickMarkColor != null),
         assert(inactiveTickMarkColor != null),
         assert(disabledActiveTickMarkColor != null),
@@ -234,10 +234,10 @@ class SliderThemeData extends Diagnosticable {
 
     // These are Material Design defaults, and are used to derive
     // component Colors (with opacity) from base colors.
-    const int activeRailAlpha = 0xff;
-    const int inactiveRailAlpha = 0x3d; // 24% opacity
-    const int disabledActiveRailAlpha = 0x52; // 32% opacity
-    const int disabledInactiveRailAlpha = 0x1f; // 12% opacity
+    const int activeTrackAlpha = 0xff;
+    const int inactiveTrackAlpha = 0x3d; // 24% opacity
+    const int disabledActiveTrackAlpha = 0x52; // 32% opacity
+    const int disabledInactiveTrackAlpha = 0x1f; // 12% opacity
     const int activeTickMarkAlpha = 0x8a; // 54% opacity
     const int inactiveTickMarkAlpha = 0x8a; // 54% opacity
     const int disabledActiveTickMarkAlpha = 0x1f; // 12% opacity
@@ -254,10 +254,10 @@ class SliderThemeData extends Diagnosticable {
     const int overlayLightAlpha = 0x29; // 16% opacity
 
     return new SliderThemeData(
-      activeRailColor: primaryColor.withAlpha(activeRailAlpha),
-      inactiveRailColor: primaryColor.withAlpha(inactiveRailAlpha),
-      disabledActiveRailColor: primaryColorDark.withAlpha(disabledActiveRailAlpha),
-      disabledInactiveRailColor: primaryColorDark.withAlpha(disabledInactiveRailAlpha),
+      activeTrackColor: primaryColor.withAlpha(activeTrackAlpha),
+      inactiveTrackColor: primaryColor.withAlpha(inactiveTrackAlpha),
+      disabledActiveTrackColor: primaryColorDark.withAlpha(disabledActiveTrackAlpha),
+      disabledInactiveTrackColor: primaryColorDark.withAlpha(disabledInactiveTrackAlpha),
       activeTickMarkColor: primaryColorLight.withAlpha(activeTickMarkAlpha),
       inactiveTickMarkColor: primaryColor.withAlpha(inactiveTickMarkAlpha),
       disabledActiveTickMarkColor: primaryColorLight.withAlpha(disabledActiveTickMarkAlpha),
@@ -273,35 +273,35 @@ class SliderThemeData extends Diagnosticable {
     );
   }
 
-  /// The color of the [Slider] rail between the [Slider.min] position and the
+  /// The color of the [Slider] track between the [Slider.min] position and the
   /// current thumb position.
-  final Color activeRailColor;
+  final Color activeTrackColor;
 
-  /// The color of the [Slider] rail between the current thumb position and the
+  /// The color of the [Slider] track between the current thumb position and the
   /// [Slider.max] position.
-  final Color inactiveRailColor;
+  final Color inactiveTrackColor;
 
-  /// The color of the [Slider] rail between the [Slider.min] position and the
+  /// The color of the [Slider] track between the [Slider.min] position and the
   /// current thumb position when the [Slider] is disabled.
-  final Color disabledActiveRailColor;
+  final Color disabledActiveTrackColor;
 
-  /// The color of the [Slider] rail between the current thumb position and the
+  /// The color of the [Slider] track between the current thumb position and the
   /// [Slider.max] position when the [Slider] is disabled.
-  final Color disabledInactiveRailColor;
+  final Color disabledInactiveTrackColor;
 
-  /// The color of the rail's tick marks that are drawn between the [Slider.min]
+  /// The color of the track's tick marks that are drawn between the [Slider.min]
   /// position and the current thumb position.
   final Color activeTickMarkColor;
 
-  /// The color of the rail's tick marks that are drawn between the current
+  /// The color of the track's tick marks that are drawn between the current
   /// thumb position and the [Slider.max] position.
   final Color inactiveTickMarkColor;
 
-  /// The color of the rail's tick marks that are drawn between the [Slider.min]
+  /// The color of the track's tick marks that are drawn between the [Slider.min]
   /// position and the current thumb position when the [Slider] is disabled.
   final Color disabledActiveTickMarkColor;
 
-  /// The color of the rail's tick marks that are drawn between the current
+  /// The color of the track's tick marks that are drawn between the current
   /// thumb position and the [Slider.max] position when the [Slider] is
   /// disabled.
   final Color disabledInactiveTickMarkColor;
@@ -350,10 +350,10 @@ class SliderThemeData extends Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SliderThemeData copyWith({
-    Color activeRailColor,
-    Color inactiveRailColor,
-    Color disabledActiveRailColor,
-    Color disabledInactiveRailColor,
+    Color activeTrackColor,
+    Color inactiveTrackColor,
+    Color disabledActiveTrackColor,
+    Color disabledInactiveTrackColor,
     Color activeTickMarkColor,
     Color inactiveTickMarkColor,
     Color disabledActiveTickMarkColor,
@@ -368,10 +368,10 @@ class SliderThemeData extends Diagnosticable {
     TextStyle valueIndicatorTextStyle,
   }) {
     return new SliderThemeData(
-      activeRailColor: activeRailColor ?? this.activeRailColor,
-      inactiveRailColor: inactiveRailColor ?? this.inactiveRailColor,
-      disabledActiveRailColor: disabledActiveRailColor ?? this.disabledActiveRailColor,
-      disabledInactiveRailColor: disabledInactiveRailColor ?? this.disabledInactiveRailColor,
+      activeTrackColor: activeTrackColor ?? this.activeTrackColor,
+      inactiveTrackColor: inactiveTrackColor ?? this.inactiveTrackColor,
+      disabledActiveTrackColor: disabledActiveTrackColor ?? this.disabledActiveTrackColor,
+      disabledInactiveTrackColor: disabledInactiveTrackColor ?? this.disabledInactiveTrackColor,
       activeTickMarkColor: activeTickMarkColor ?? this.activeTickMarkColor,
       inactiveTickMarkColor: inactiveTickMarkColor ?? this.inactiveTickMarkColor,
       disabledActiveTickMarkColor: disabledActiveTickMarkColor ?? this.disabledActiveTickMarkColor,
@@ -407,10 +407,10 @@ class SliderThemeData extends Diagnosticable {
     assert(b != null);
     assert(t != null);
     return new SliderThemeData(
-      activeRailColor: Color.lerp(a.activeRailColor, b.activeRailColor, t),
-      inactiveRailColor: Color.lerp(a.inactiveRailColor, b.inactiveRailColor, t),
-      disabledActiveRailColor: Color.lerp(a.disabledActiveRailColor, b.disabledActiveRailColor, t),
-      disabledInactiveRailColor: Color.lerp(a.disabledInactiveRailColor, b.disabledInactiveRailColor, t),
+      activeTrackColor: Color.lerp(a.activeTrackColor, b.activeTrackColor, t),
+      inactiveTrackColor: Color.lerp(a.inactiveTrackColor, b.inactiveTrackColor, t),
+      disabledActiveTrackColor: Color.lerp(a.disabledActiveTrackColor, b.disabledActiveTrackColor, t),
+      disabledInactiveTrackColor: Color.lerp(a.disabledInactiveTrackColor, b.disabledInactiveTrackColor, t),
       activeTickMarkColor: Color.lerp(a.activeTickMarkColor, b.activeTickMarkColor, t),
       inactiveTickMarkColor: Color.lerp(a.inactiveTickMarkColor, b.inactiveTickMarkColor, t),
       disabledActiveTickMarkColor: Color.lerp(a.disabledActiveTickMarkColor, b.disabledActiveTickMarkColor, t),
@@ -429,10 +429,10 @@ class SliderThemeData extends Diagnosticable {
   @override
   int get hashCode {
     return hashValues(
-      activeRailColor,
-      inactiveRailColor,
-      disabledActiveRailColor,
-      disabledInactiveRailColor,
+      activeTrackColor,
+      inactiveTrackColor,
+      disabledActiveTrackColor,
+      disabledInactiveTrackColor,
       activeTickMarkColor,
       inactiveTickMarkColor,
       disabledActiveTickMarkColor,
@@ -457,10 +457,10 @@ class SliderThemeData extends Diagnosticable {
       return false;
     }
     final SliderThemeData otherData = other;
-    return otherData.activeRailColor == activeRailColor &&
-        otherData.inactiveRailColor == inactiveRailColor &&
-        otherData.disabledActiveRailColor == disabledActiveRailColor &&
-        otherData.disabledInactiveRailColor == disabledInactiveRailColor &&
+    return otherData.activeTrackColor == activeTrackColor &&
+        otherData.inactiveTrackColor == inactiveTrackColor &&
+        otherData.disabledActiveTrackColor == disabledActiveTrackColor &&
+        otherData.disabledInactiveTrackColor == disabledInactiveTrackColor &&
         otherData.activeTickMarkColor == activeTickMarkColor &&
         otherData.inactiveTickMarkColor == inactiveTickMarkColor &&
         otherData.disabledActiveTickMarkColor == disabledActiveTickMarkColor &&
@@ -485,10 +485,10 @@ class SliderThemeData extends Diagnosticable {
       primaryColorLight: defaultTheme.primaryColorLight,
       valueIndicatorTextStyle: defaultTheme.accentTextTheme.body2,
     );
-    properties.add(new DiagnosticsProperty<Color>('activeRailColor', activeRailColor, defaultValue: defaultData.activeRailColor));
-    properties.add(new DiagnosticsProperty<Color>('inactiveRailColor', inactiveRailColor, defaultValue: defaultData.inactiveRailColor));
-    properties.add(new DiagnosticsProperty<Color>('disabledActiveRailColor', disabledActiveRailColor, defaultValue: defaultData.disabledActiveRailColor, level: DiagnosticLevel.debug));
-    properties.add(new DiagnosticsProperty<Color>('disabledInactiveRailColor', disabledInactiveRailColor, defaultValue: defaultData.disabledInactiveRailColor, level: DiagnosticLevel.debug));
+    properties.add(new DiagnosticsProperty<Color>('activeTrackColor', activeTrackColor, defaultValue: defaultData.activeTrackColor));
+    properties.add(new DiagnosticsProperty<Color>('inactiveTrackColor', inactiveTrackColor, defaultValue: defaultData.inactiveTrackColor));
+    properties.add(new DiagnosticsProperty<Color>('disabledActiveTrackColor', disabledActiveTrackColor, defaultValue: defaultData.disabledActiveTrackColor, level: DiagnosticLevel.debug));
+    properties.add(new DiagnosticsProperty<Color>('disabledInactiveTrackColor', disabledInactiveTrackColor, defaultValue: defaultData.disabledInactiveTrackColor, level: DiagnosticLevel.debug));
     properties.add(new DiagnosticsProperty<Color>('activeTickMarkColor', activeTickMarkColor, defaultValue: defaultData.activeTickMarkColor, level: DiagnosticLevel.debug));
     properties.add(new DiagnosticsProperty<Color>('inactiveTickMarkColor', inactiveTickMarkColor, defaultValue: defaultData.inactiveTickMarkColor, level: DiagnosticLevel.debug));
     properties.add(new DiagnosticsProperty<Color>('disabledActiveTickMarkColor', disabledActiveTickMarkColor, defaultValue: defaultData.disabledActiveTickMarkColor, level: DiagnosticLevel.debug));
