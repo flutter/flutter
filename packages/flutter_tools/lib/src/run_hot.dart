@@ -541,6 +541,9 @@ class HotRunner extends ResidentRunner {
             // This could happen if the isolate is not actually running,
             // failed to start for some reason. For example, if main method
             // is not found in the app.
+            // TODO(aam): In one known case, where Flutter app failed to
+            // start due to absence of 'main' entry point, Flutter tools should
+            // recognize that fact and don't allow user to progress further.
             retrieveFirstReloadReport.completeError('Dart VM failed to provide reload report');
             return;
           }
