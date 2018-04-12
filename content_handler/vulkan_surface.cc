@@ -44,8 +44,7 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
 
   wait_.set_object(release_event_.get());
   wait_.set_trigger(ZX_EVENT_SIGNALED);
-  async_ = async_get_default();
-  wait_.Begin(async_);
+  wait_.Begin(async_get_default());
 
   // Probably not necessary as the events should be in the unsignalled state
   // already.
@@ -56,11 +55,8 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
 
 VulkanSurface::~VulkanSurface() {
   ASSERT_IS_GPU_THREAD;
-  if (async_) {
-    wait_.Cancel(async_);
-    wait_.set_object(ZX_HANDLE_INVALID);
-    async_ = nullptr;
-  }
+  wait_.Cancel();
+  wait_.set_object(ZX_HANDLE_INVALID);
 }
 
 bool VulkanSurface::IsValid() const {
@@ -410,15 +406,16 @@ void VulkanSurface::Reset() {
   }
 }
 
-async_wait_result_t VulkanSurface::OnHandleReady(async_t* async,
-                                                 zx_status_t status,
-                                                 const zx_packet_signal_t* signal) {
+void VulkanSurface::OnHandleReady(async_t* async,
+                                  async::WaitBase* wait,
+                                  zx_status_t status,
+                                  const zx_packet_signal_t* signal) {
   ASSERT_IS_GPU_THREAD;
   if (status != ZX_OK)
-    return ASYNC_WAIT_FINISHED;
+    return;
   FXL_DCHECK(signal->observed & ZX_EVENT_SIGNALED);
   Reset();
-  return ASYNC_WAIT_AGAIN;
+  wait->Begin(async);
 }
 
 }  // namespace flutter_runner

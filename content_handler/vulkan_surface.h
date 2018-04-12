@@ -70,9 +70,10 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface {
   }
 
  private:
-  async_wait_result_t OnHandleReady(async_t* async,
-                                    zx_status_t status,
-                                    const zx_packet_signal_t* signal);
+  void OnHandleReady(async_t* async,
+                     async::WaitBase* wait,
+                     zx_status_t status,
+                     const zx_packet_signal_t* signal);
 
   bool AllocateDeviceMemory(sk_sp<GrContext> context,
                             const SkISize& size,
@@ -106,7 +107,6 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface {
   vulkan::VulkanHandle<VkSemaphore> acquire_semaphore_;
   std::unique_ptr<vulkan::VulkanCommandBuffer> command_buffer_;
   zx::event release_event_;
-  async_t* async_;
   async::WaitMethod<VulkanSurface, &VulkanSurface::OnHandleReady> wait_;
   std::function<void()> pending_on_writes_committed_;
   size_t age_ = 0;
