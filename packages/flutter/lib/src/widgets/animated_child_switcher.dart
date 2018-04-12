@@ -80,7 +80,7 @@ typedef Widget AnimatedChildSwitcherLayoutBuilder(List<Widget> children);
 /// }
 ///
 /// class _ClickCounterState extends State<ClickCounter> {
-///   int count = 0;
+///   int _count = 0;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -94,9 +94,9 @@ typedef Widget AnimatedChildSwitcherLayoutBuilder(List<Widget> children);
 ///               return new ScaleTransition(child: child, scale: animation);
 ///             },
 ///             child: new Text(
-///               '$count',
-///               // Must have this key to build a unique widget when count changes.
-///               key: new ValueKey<int>(count),
+///               '$_count',
+///               // Must have this key to build a unique widget when _count changes.
+///               key: new ValueKey<int>(_count),
 ///               textScaleFactor: 3.0,
 ///             ),
 ///           ),
@@ -104,7 +104,7 @@ typedef Widget AnimatedChildSwitcherLayoutBuilder(List<Widget> children);
 ///             child: new Text('Click!'),
 ///             onPressed: () {
 ///               setState(() {
-///                 count += 1;
+///                 _count += 1;
 ///               });
 ///             },
 ///           ),
@@ -148,17 +148,18 @@ class AnimatedChildSwitcher extends StatefulWidget {
   /// [duration].
   final Widget child;
 
-  /// The duration over which to perform the cross fade using [FadeTransition].
+  /// The duration of the transition from the old [child] value to the new one.
   final Duration duration;
 
-  /// The animation curve to use when fading in the current widget.
+  /// The animation curve to use when transitioning in [child].
   final Curve switchInCurve;
 
-  /// The animation curve to use when fading out the previous widgets.
+  /// The animation curve to use when transitioning the previous [child] out.
   final Curve switchOutCurve;
 
-  /// The builder function used to generate custom transitions for
-  /// [AnimatedChildSwitcher].
+  /// A function that wraps the new [child] with an animation that transitions
+  /// the [child] in when the animation runs in the forward direction and out
+  /// when the animation runs in the reverse direction.
   ///
   /// The default is [AnimatedChildSwitcher.defaultTransitionBuilder].
   ///
@@ -168,8 +169,9 @@ class AnimatedChildSwitcher extends StatefulWidget {
   ///    how a transition builder should function.
   final AnimatedChildSwitcherTransitionBuilder transitionBuilder;
 
-  /// The builder function used to generate custom child layouts for
-  /// [AnimatedChildSwitcher].
+  /// A function that wraps all of the children that are transitioning out, and
+  /// the [child] that's transitioning in, with a widget that lays all of them
+  /// out.
   ///
   /// The default is [AnimatedChildSwitcher.defaultLayoutBuilder].
   ///
@@ -188,8 +190,8 @@ class AnimatedChildSwitcher extends StatefulWidget {
   /// the animation goes from 0.0 to 1.0, and decreases when the animation is
   /// reversed.
   ///
-  /// This is the default value for [transitionBuilder]. It implements
-  /// [AnimatedChildSwitcherTransitionBuilder].
+  /// The default value for the [transitionBuilder], an
+  /// [AnimatedChildSwitcherTransitionBuilder] function.
   static Widget defaultTransitionBuilder(Widget child, Animation<double> animation) {
     return new FadeTransition(
       opacity: animation,
@@ -220,7 +222,7 @@ class _AnimatedChildSwitcherState extends State<AnimatedChildSwitcher> with Tick
   @override
   void initState() {
     super.initState();
-    addEntry(animate: false);
+    _addEntry(animate: false);
   }
 
   Widget _generateTransition(Animation<double> animation) {
@@ -252,13 +254,12 @@ class _AnimatedChildSwitcherState extends State<AnimatedChildSwitcher> with Tick
     return entry;
   }
 
-  void addEntry({@required bool animate}) {
+  void _addEntry({@required bool animate}) {
     if (widget.child == null) {
-      if (animate) {
-        if (_currentChild != null) {
-          _currentChild.controller.reverse();
-          _children.add(_currentChild);
-        }
+      if (animate && _currentChild != null) {
+        _currentChild.controller.reverse();
+        assert(!_children.contains(_currentChild));
+        _children.add(_currentChild);
       }
       _currentChild = null;
       return;
@@ -270,6 +271,7 @@ class _AnimatedChildSwitcherState extends State<AnimatedChildSwitcher> with Tick
     if (animate) {
       if (_currentChild != null) {
         _currentChild.controller.reverse();
+        assert(!_children.contains(_currentChild));
         _children.add(_currentChild);
       }
       controller.forward();
@@ -305,7 +307,7 @@ class _AnimatedChildSwitcherState extends State<AnimatedChildSwitcher> with Tick
     super.didUpdateWidget(oldWidget);
     if (hasNewChild != hasOldChild || hasNewChild &&
         !Widget.canUpdate(widget.child, _currentChild.widgetChild)) {
-      addEntry(animate: true);
+      _addEntry(animate: true);
     } else {
       if (_currentChild != null) {
         _currentChild.widgetChild = widget.child;
