@@ -1362,6 +1362,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMediaQuery(context));
+    assert(debugCheckHasDirectionality(context));
 
     final ThemeData theme = Theme.of(context);
     final ChipThemeData chipTheme = ChipTheme.of(context);

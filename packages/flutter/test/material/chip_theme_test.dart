@@ -154,8 +154,8 @@ void main() {
     const Color customColor2 = const Color(0xdeadbeef);
     final TextStyle customStyle = new ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor2);
 
-    final ChipThemeData lightTheme = new ChipThemeData.defaults(
-      primaryColor: customColor1,
+    final ChipThemeData lightTheme = new ChipThemeData.fromDefaults(
+      secondaryColor: customColor1,
       brightness: Brightness.light,
       labelStyle: customStyle,
     );
@@ -172,8 +172,8 @@ void main() {
     expect(lightTheme.secondaryLabelStyle.color, equals(customColor1.withAlpha(0xde)));
     expect(lightTheme.brightness, equals(Brightness.light));
 
-    final ChipThemeData darkTheme = new ChipThemeData.defaults(
-      primaryColor: customColor1,
+    final ChipThemeData darkTheme = new ChipThemeData.fromDefaults(
+      secondaryColor: customColor1,
       brightness: Brightness.dark,
       labelStyle: customStyle,
     );
@@ -189,21 +189,38 @@ void main() {
     expect(darkTheme.labelStyle.color, equals(Colors.white.withAlpha(0xde)));
     expect(darkTheme.secondaryLabelStyle.color, equals(customColor1.withAlpha(0xde)));
     expect(darkTheme.brightness, equals(Brightness.dark));
+
+    final ChipThemeData customTheme = new ChipThemeData.fromDefaults(
+      primaryColor: customColor1,
+      secondaryColor: customColor2,
+      labelStyle: customStyle,
+    );
+
+    expect(customTheme.backgroundColor, equals(customColor1.withAlpha(0x1f)));
+    expect(customTheme.deleteIconColor, equals(customColor1.withAlpha(0xde)));
+    expect(customTheme.disabledColor, equals(customColor1.withAlpha(0x0c)));
+    expect(customTheme.selectedColor, equals(customColor1.withAlpha(0x3d)));
+    expect(customTheme.secondarySelectedColor, equals(customColor2.withAlpha(0x3d)));
+    expect(customTheme.labelPadding, equals(const EdgeInsets.symmetric(horizontal: 8.0)));
+    expect(customTheme.padding, equals(const EdgeInsets.all(4.0)));
+    expect(customTheme.shape, equals(const isInstanceOf<StadiumBorder>()));
+    expect(customTheme.labelStyle.color, equals(customColor1.withAlpha(0xde)));
+    expect(customTheme.secondaryLabelStyle.color, equals(customColor2.withAlpha(0xde)));
+    expect(customTheme.brightness, equals(Brightness.light));
   });
 
   testWidgets('ChipThemeData lerps correctly', (WidgetTester tester) async {
-    final ChipThemeData chipThemeBlack = new ChipThemeData.defaults(
-      primaryColor: Colors.black,
+    final ChipThemeData chipThemeBlack = new ChipThemeData.fromDefaults(
+      secondaryColor: Colors.black,
       brightness: Brightness.dark,
       labelStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.black),
     );
-    final ChipThemeData chipThemeWhite = new ChipThemeData.defaults(
-      primaryColor: Colors.white,
+    final ChipThemeData chipThemeWhite = new ChipThemeData.fromDefaults(
+      secondaryColor: Colors.white,
       brightness: Brightness.light,
       labelStyle: new ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
     ).copyWith(padding: const EdgeInsets.all(2.0), labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0));
     final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5);
-    print ('$lerp');
     const Color middleGrey = const Color(0xff7f7f7f);
     expect(lerp.backgroundColor, equals(middleGrey.withAlpha(0x1f)));
     expect(lerp.deleteIconColor, equals(middleGrey.withAlpha(0xde)));
@@ -216,5 +233,59 @@ void main() {
     expect(lerp.labelStyle.color, equals(middleGrey.withAlpha(0xde)));
     expect(lerp.secondaryLabelStyle.color, equals(middleGrey.withAlpha(0xde)));
     expect(lerp.brightness, equals(Brightness.light));
+
+    expect(ChipThemeData.lerp(null, null, 0.25), isNull);
+
+    final ChipThemeData lerpANull25 = ChipThemeData.lerp(null, chipThemeWhite, 0.25);
+    expect(lerpANull25.backgroundColor, equals(Colors.black.withAlpha(0x08)));
+    expect(lerpANull25.deleteIconColor, equals(Colors.black.withAlpha(0x38)));
+    expect(lerpANull25.disabledColor, equals(Colors.black.withAlpha(0x03)));
+    expect(lerpANull25.selectedColor, equals(Colors.black.withAlpha(0x0f)));
+    expect(lerpANull25.secondarySelectedColor, equals(Colors.white.withAlpha(0x0f)));
+    expect(lerpANull25.labelPadding, equals(const EdgeInsets.only(left: 0.0, top: 2.0, right: 0.0, bottom: 2.0)));
+    expect(lerpANull25.padding, equals(const EdgeInsets.all(0.5)));
+    expect(lerpANull25.shape, equals(const isInstanceOf<StadiumBorder>()));
+    expect(lerpANull25.labelStyle.color, equals(Colors.black.withAlpha(0x38)));
+    expect(lerpANull25.secondaryLabelStyle.color, equals(Colors.white.withAlpha(0x38)));
+    expect(lerpANull25.brightness, equals(Brightness.light));
+
+    final ChipThemeData lerpANull75 = ChipThemeData.lerp(null, chipThemeWhite, 0.75);
+    expect(lerpANull75.backgroundColor, equals(Colors.black.withAlpha(0x17)));
+    expect(lerpANull75.deleteIconColor, equals(Colors.black.withAlpha(0xa7)));
+    expect(lerpANull75.disabledColor, equals(Colors.black.withAlpha(0x09)));
+    expect(lerpANull75.selectedColor, equals(Colors.black.withAlpha(0x2e)));
+    expect(lerpANull75.secondarySelectedColor, equals(Colors.white.withAlpha(0x2e)));
+    expect(lerpANull75.labelPadding, equals(const EdgeInsets.only(left: 0.0, top: 6.0, right: 0.0, bottom: 6.0)));
+    expect(lerpANull75.padding, equals(const EdgeInsets.all(1.5)));
+    expect(lerpANull75.shape, equals(const isInstanceOf<StadiumBorder>()));
+    expect(lerpANull75.labelStyle.color, equals(Colors.black.withAlpha(0xa7)));
+    expect(lerpANull75.secondaryLabelStyle.color, equals(Colors.white.withAlpha(0xa7)));
+    expect(lerpANull75.brightness, equals(Brightness.light));
+
+    final ChipThemeData lerpBNull25 = ChipThemeData.lerp(chipThemeBlack, null, 0.25);
+    expect(lerpBNull25.backgroundColor, equals(Colors.white.withAlpha(0x17)));
+    expect(lerpBNull25.deleteIconColor, equals(Colors.white.withAlpha(0xa7)));
+    expect(lerpBNull25.disabledColor, equals(Colors.white.withAlpha(0x09)));
+    expect(lerpBNull25.selectedColor, equals(Colors.white.withAlpha(0x2e)));
+    expect(lerpBNull25.secondarySelectedColor, equals(Colors.black.withAlpha(0x2e)));
+    expect(lerpBNull25.labelPadding, equals(const EdgeInsets.only(left: 6.0, top: 0.0, right: 6.0, bottom: 0.0)));
+    expect(lerpBNull25.padding, equals(const EdgeInsets.all(3.0)));
+    expect(lerpBNull25.shape, equals(const isInstanceOf<StadiumBorder>()));
+    expect(lerpBNull25.labelStyle.color, equals(Colors.white.withAlpha(0xa7)));
+    expect(lerpBNull25.secondaryLabelStyle.color, equals(Colors.black.withAlpha(0xa7)));
+    expect(lerpBNull25.brightness, equals(Brightness.dark));
+
+    final ChipThemeData lerpBNull75 = ChipThemeData.lerp(chipThemeBlack, null, 0.75);
+    expect(lerpBNull75.backgroundColor, equals(Colors.white.withAlpha(0x08)));
+    expect(lerpBNull75.deleteIconColor, equals(Colors.white.withAlpha(0x38)));
+    expect(lerpBNull75.disabledColor, equals(Colors.white.withAlpha(0x03)));
+    expect(lerpBNull75.selectedColor, equals(Colors.white.withAlpha(0x0f)));
+    expect(lerpBNull75.secondarySelectedColor, equals(Colors.black.withAlpha(0x0f)));
+    expect(lerpBNull75.labelPadding, equals(const EdgeInsets.only(left: 2.0, top: 0.0, right: 2.0, bottom: 0.0)));
+    expect(lerpBNull75.padding, equals(const EdgeInsets.all(1.0)));
+    expect(lerpBNull75.shape, equals(const isInstanceOf<StadiumBorder>()));
+    expect(lerpBNull75.labelStyle.color, equals(Colors.white.withAlpha(0x38)));
+    expect(lerpBNull75.secondaryLabelStyle.color, equals(Colors.black.withAlpha(0x38)));
+    expect(lerpBNull75.brightness, equals(Brightness.light));
   });
 }

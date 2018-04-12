@@ -10,14 +10,19 @@ import 'colors.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-/// Applies a chip theme to descendant [RawChip]-based widgets.
+/// Applies a chip theme to descendant [RawChip]-based widgets, like [Chip],
+/// [InputChip], [ChoiceChip], [FilterChip], and [ActionChip].
 ///
-/// A chip theme describes the color, shape and text choices for the chips it is
+/// A chip theme describes the color, shape and text styles for the chips it is
 /// applied to
 ///
 /// Descendant widgets obtain the current theme's [ChipThemeData] object using
 /// [ChipTheme.of]. When a widget uses [ChipTheme.of], it is automatically
 /// rebuilt if the theme later changes.
+///
+/// The [ThemeData] object given by the [Theme.of] call also contains a default
+/// [Theme.chipTheme] that can be customized by copying it (using
+/// [ChipThemeData.copyWith]).
 ///
 /// See also:
 ///
@@ -31,6 +36,8 @@ import 'theme_data.dart';
 ///  * [ActionChip], represents an action related to primary content.
 ///  * [ChipThemeData], which describes the actual configuration of a chip
 ///    theme.
+///  * [ThemeData], which describes the overall theme information for the
+///    application.
 class ChipTheme extends InheritedWidget {
   /// Applies the given theme [data] to [child].
   ///
@@ -43,7 +50,8 @@ class ChipTheme extends InheritedWidget {
         assert(data != null),
         super(key: key, child: child);
 
-  /// Specifies the color and shape values for descendant chip widgets.
+  /// Specifies the color, shape, and text style values for descendant chip
+  /// widgets.
   final ChipThemeData data;
 
   /// Returns the data from the closest [ChipTheme] instance that encloses
@@ -59,7 +67,7 @@ class ChipTheme extends InheritedWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return new ChipTheme(
-  ///       data: ChipTheme.of(context).copyWith(backgroundColor: const Color(0xff804040)),
+  ///       data: ChipTheme.of(context).copyWith(backgroundColor: Colors.red),
   ///       child: new ActionChip(
   ///         label: const Text('Launch'),
   ///         onPressed: () { print('We have liftoff!'); },
@@ -75,15 +83,14 @@ class ChipTheme extends InheritedWidget {
   ///    theme.
   static ChipThemeData of(BuildContext context) {
     final ChipTheme inheritedTheme = context.inheritFromWidgetOfExactType(ChipTheme);
-    return inheritedTheme != null ? inheritedTheme.data : Theme.of(context).chipTheme;
+    return inheritedTheme?.data ?? Theme.of(context).chipTheme;
   }
 
   @override
   bool updateShouldNotify(ChipTheme oldWidget) => data != oldWidget.data;
 }
 
-/// Holds the color, shape, and typography values for a material design chip
-/// theme.
+/// Holds the color, shape, and text styles for a material design chip theme.
 ///
 /// Use this class to configure a [ChipTheme] widget, or to set the
 /// [ThemeData.chipTheme] for a [Theme] widget.
@@ -98,7 +105,40 @@ class ChipTheme extends InheritedWidget {
 ///    Typically this is a [Text] widget.
 ///  * The "delete icon", which is a widget that appears at the end of the chip.
 ///  * The chip is disabled when it is not accepting user input. Only some chips
-///    have a disabled state (i.e. [InputChip], [ChoiceChip], [FilterChip]).
+///    have a disabled state: [InputChip], [ChoiceChip], and [FilterChip].
+///
+/// The simplest way to create a ChipThemeData is to use [copyWith] on the one
+/// you get from [ChipTheme.of], or create an entirely new one with
+/// [ChipThemeData..fromDefaults].
+///
+/// ## Sample code
+///
+/// ```dart
+/// class CarColor extends StatefulWidget {
+///   @override
+///   State createState() => new _CarColorState();
+/// }
+///
+/// class _CarColorState extends State<CarColor> {
+///   Color _color = Colors.red;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new ChipTheme(
+///       data: ChipTheme.of(context).copyWith(backgroundColor: Colors.lightBlue),
+///       child: new ChoiceChip(
+///         label: new Text('Light Blue'),
+///         onSelected: (bool value) {
+///           setState(() {
+///             _color = value ? Colors.lightBlue : Colors.red;
+///           });
+///         },
+///         selected: _color == Colors.lightBlue,
+///       ),
+///     );
+///   }
+/// }
+/// ```
 ///
 /// See also:
 ///
@@ -124,41 +164,6 @@ class ChipThemeData extends Diagnosticable {
   ///
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes.
-  ///
-  /// The simplest way to create a ChipThemeData is to use
-  /// [copyWith] on the one you get from [ChipTheme.of], or create an
-  /// entirely new one with [ChipThemeData.fromPrimaryColors].
-  ///
-  /// ## Sample code
-  ///
-  /// ```dart
-  /// class CarColor extends StatefulWidget {
-  ///   @override
-  ///   State createState() => new BlissfulState();
-  /// }
-  ///
-  /// class CarColorState extends State<CarColor> {
-  ///   Color _color = const Color(0xffff0000);
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return new ChipTheme(
-  ///       data: ChipTheme.of(context).copyWith(backgroundColor: Colors.lightBlue),
-  ///       child: new ChoiceChip(
-  ///         label: new Text('Light Blue'),
-  ///         onSelected: (bool value) {
-  ///           setState(() {
-  ///             if (value) {
-  ///               _color = Colors.lightBlue;
-  ///             }
-  ///           });
-  ///         },
-  ///         selected: _color == Colors.lightBlue,
-  ///       ),
-  ///     );
-  ///   }
-  /// }
-  /// ```
   const ChipThemeData({
     @required this.backgroundColor,
     this.deleteIconColor,
@@ -182,16 +187,39 @@ class ChipThemeData extends Diagnosticable {
         assert(secondaryLabelStyle != null),
         assert(brightness != null);
 
-  /// Generates a ChipThemeData from a brightness and a text style.
+  /// Generates a ChipThemeData from a brightness, a primary color, and a text
+  /// style.
+  ///
+  /// The [brightness] is used to select a primary color from the default
+  /// values.
+  ///
+  /// The optional [primaryColor] is used as the base color for the other
+  /// colors. The opacity of the [primaryColor] is ignored. If a [primaryColor]
+  /// is specified, then the [brightness] is ignored, and the theme brightness
+  /// is determined from the [primaryColor].
+  ///
+  /// Only one of [primaryColor] or [brightness] may be specified.
+  ///
+  /// The [secondaryColor] is used for the selection colors needed by
+  /// [ChoiceChip].
   ///
   /// This is used to generate the default chip theme for a [ThemeData].
-  factory ChipThemeData.defaults({
-    @required Color primaryColor,
-    @required Brightness brightness,
+  factory ChipThemeData.fromDefaults({
+    Brightness brightness,
+    Color primaryColor,
+    @required Color secondaryColor,
     @required TextStyle labelStyle,
   }) {
-    assert(brightness != null);
+    assert(primaryColor != null || brightness != null,
+      'One of primaryColor or brightness must be specified');
+    assert(primaryColor == null || brightness == null,
+      'Only one of primaryColor or brightness may be specified');
+    assert(secondaryColor != null);
     assert(labelStyle != null);
+
+    if (primaryColor != null) {
+      brightness = ThemeData.estimateBrightnessForColor(primaryColor);
+    }
 
     // These are Material Design defaults, and are used to derive
     // component Colors (with opacity) from base colors.
@@ -204,16 +232,16 @@ class ChipThemeData extends Diagnosticable {
     const EdgeInsetsGeometry labelPadding = const EdgeInsets.symmetric(horizontal: 8.0);
     const EdgeInsetsGeometry padding = const EdgeInsets.all(4.0);
 
-    final Color baseColor = brightness == Brightness.light ? Colors.black : Colors.white;
-    final Color backgroundColor = baseColor.withAlpha(backgroundAlpha);
-    final Color deleteIconColor = baseColor.withAlpha(deleteIconAlpha);
-    final Color disabledColor = baseColor.withAlpha(disabledAlpha);
-    final Color selectedColor = baseColor.withAlpha(selectAlpha);
-    final Color secondarySelectedColor = primaryColor.withAlpha(selectAlpha);
+    primaryColor = primaryColor ?? (brightness == Brightness.light ? Colors.black : Colors.white);
+    final Color backgroundColor = primaryColor.withAlpha(backgroundAlpha);
+    final Color deleteIconColor = primaryColor.withAlpha(deleteIconAlpha);
+    final Color disabledColor = primaryColor.withAlpha(disabledAlpha);
+    final Color selectedColor = primaryColor.withAlpha(selectAlpha);
+    final Color secondarySelectedColor = secondaryColor.withAlpha(selectAlpha);
     final TextStyle secondaryLabelStyle = labelStyle.copyWith(
-      color: primaryColor.withAlpha(textLabelAlpha),
+      color: secondaryColor.withAlpha(textLabelAlpha),
     );
-    labelStyle = labelStyle.copyWith(color: baseColor.withAlpha(textLabelAlpha));
+    labelStyle = labelStyle.copyWith(color: primaryColor.withAlpha(textLabelAlpha));
 
     return new ChipThemeData(
       backgroundColor: backgroundColor,
@@ -309,22 +337,21 @@ class ChipThemeData extends Diagnosticable {
     EdgeInsetsGeometry labelPadding,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
-    String deleteButtonTooltipMessage,
     TextStyle labelStyle,
     TextStyle secondaryLabelStyle,
     Brightness brightness,
   }) {
     return new ChipThemeData(
-      labelStyle: labelStyle ?? this.labelStyle,
-      secondaryLabelStyle: secondaryLabelStyle ?? this.secondaryLabelStyle,
-      shape: shape ?? this.shape,
       backgroundColor: backgroundColor ?? this.backgroundColor,
-      padding: padding ?? this.padding,
-      labelPadding: labelPadding ?? this.labelPadding,
       deleteIconColor: deleteIconColor ?? this.deleteIconColor,
+      disabledColor: disabledColor ?? this.disabledColor,
       selectedColor: selectedColor ?? this.selectedColor,
       secondarySelectedColor: secondarySelectedColor ?? this.secondarySelectedColor,
-      disabledColor: disabledColor ?? this.disabledColor,
+      labelPadding: labelPadding ?? this.labelPadding,
+      padding: padding ?? this.padding,
+      shape: shape ?? this.shape,
+      labelStyle: labelStyle ?? this.labelStyle,
+      secondaryLabelStyle: secondaryLabelStyle ?? this.secondaryLabelStyle,
       brightness: brightness ?? this.brightness,
     );
   }
@@ -345,21 +372,21 @@ class ChipThemeData extends Diagnosticable {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static ChipThemeData lerp(ChipThemeData a, ChipThemeData b, double t) {
-    assert(a != null);
-    assert(b != null);
     assert(t != null);
+    if (a == null && b == null)
+      return null;
     return new ChipThemeData(
-      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      deleteIconColor: Color.lerp(a.deleteIconColor, b.deleteIconColor, t),
-      disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t),
-      selectedColor: Color.lerp(a.selectedColor, b.selectedColor, t),
-      secondarySelectedColor: Color.lerp(a.secondarySelectedColor, b.secondarySelectedColor, t),
-      labelPadding: EdgeInsetsGeometry.lerp(a.labelPadding, b.labelPadding, t),
-      padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
-      shape: ShapeBorder.lerp(a.shape, b.shape, t),
-      labelStyle: TextStyle.lerp(a.labelStyle, b.labelStyle, t),
-      secondaryLabelStyle: TextStyle.lerp(a.secondaryLabelStyle, b.secondaryLabelStyle, t),
-      brightness: t < 0.5 ? a.brightness : b.brightness,
+      backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
+      deleteIconColor: Color.lerp(a?.deleteIconColor, b?.deleteIconColor, t),
+      disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
+      selectedColor: Color.lerp(a?.selectedColor, b?.selectedColor, t),
+      secondarySelectedColor: Color.lerp(a?.secondarySelectedColor, b?.secondarySelectedColor, t),
+      labelPadding: EdgeInsetsGeometry.lerp(a?.labelPadding, b?.labelPadding, t),
+      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
+      shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
+      labelStyle: TextStyle.lerp(a?.labelStyle, b?.labelStyle, t),
+      secondaryLabelStyle: TextStyle.lerp(a?.secondaryLabelStyle, b?.secondaryLabelStyle, t),
+      brightness: t < 0.5 ? a?.brightness ?? Brightness.light : b?.brightness ?? Brightness.light,
     );
   }
 
@@ -406,8 +433,8 @@ class ChipThemeData extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final ThemeData defaultTheme = new ThemeData.fallback();
-    final ChipThemeData defaultData = new ChipThemeData.defaults(
-      primaryColor: defaultTheme.primaryColor,
+    final ChipThemeData defaultData = new ChipThemeData.fromDefaults(
+      secondaryColor: defaultTheme.primaryColor,
       brightness: defaultTheme.brightness,
       labelStyle: defaultTheme.textTheme.body2,
     );
@@ -421,5 +448,6 @@ class ChipThemeData extends Diagnosticable {
     properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));
     properties.add(new DiagnosticsProperty<TextStyle>('labelStyle', labelStyle, defaultValue: defaultData.labelStyle));
     properties.add(new DiagnosticsProperty<TextStyle>('secondaryLabelStyle', secondaryLabelStyle, defaultValue: defaultData.secondaryLabelStyle));
+    properties.add(new EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
   }
 }

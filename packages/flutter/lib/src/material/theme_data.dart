@@ -170,8 +170,8 @@ class ThemeData extends Diagnosticable {
       primaryColorDark: primaryColorDark,
       valueIndicatorTextStyle: accentTextTheme.body2,
     );
-    chipTheme ??= new ChipThemeData.defaults(
-      primaryColor: primaryColor,
+    chipTheme ??= new ChipThemeData.fromDefaults(
+      secondaryColor: primaryColor,
       brightness: brightness,
       labelStyle: textTheme.body2,
     );
@@ -473,7 +473,7 @@ class ThemeData extends Diagnosticable {
   /// This is the value returned from [SliderTheme.of].
   final SliderThemeData sliderTheme;
 
-  /// The colors and styles used to render a [RawChip].
+  /// The colors and styles used to render [Chip], [
   ///
   /// This is the value returned from [ChipTheme.of].
   final ChipThemeData chipTheme;
