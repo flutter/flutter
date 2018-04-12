@@ -14,12 +14,10 @@ import 'compile.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'globals.dart';
-import 'zip.dart';
 
 const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
-String get defaultFlxOutputPath => fs.path.join(getBuildDirectory(), 'app.flx');
 String get defaultSnapshotPath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin');
 String get defaultDepfilePath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 String get defaultApplicationKernelPath => fs.path.join(getBuildDirectory(), 'app.dill');
@@ -30,15 +28,14 @@ const String _kSnapshotKey = 'snapshot_blob.bin';
 const String _kDylibKey = 'libapp.so';
 const String _kPlatformKernelKey = 'platform.dill';
 
-Future<Null> build({
+Future<void> build({
   String mainPath: defaultMainPath,
   String manifestPath: defaultManifestPath,
-  String outputPath,
   String snapshotPath,
   String applicationKernelFilePath,
   String depfilePath,
   String privateKeyPath: defaultPrivateKeyPath,
-  String workingDirPath,
+  String assetDirPath,
   String packagesPath,
   bool previewDart2 : false,
   bool precompiledSnapshot: false,
@@ -47,10 +44,9 @@ Future<Null> build({
   List<String> fileSystemRoots,
   String fileSystemScheme,
 }) async {
-  outputPath ??= defaultFlxOutputPath;
   snapshotPath ??= defaultSnapshotPath;
   depfilePath ??= defaultDepfilePath;
-  workingDirPath ??= getAssetBuildDirectory();
+  assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   applicationKernelFilePath ??= defaultApplicationKernelPath;
   File snapshotFile;
@@ -142,38 +138,37 @@ Future<Null> build({
 
   final AssetBundle assets = await buildAssets(
     manifestPath: manifestPath,
-    workingDirPath: workingDirPath,
+    assetDirPath: assetDirPath,
     packagesPath: packagesPath,
     reportLicensedPackages: reportLicensedPackages,
   );
   if (assets == null)
-    throwToolExit('Error building assets for $outputPath', exitCode: 1);
+    throwToolExit('Error building assets', exitCode: 1);
 
-  return assemble(
+  await assemble(
     assetBundle: assets,
     kernelContent: kernelContent,
     snapshotFile: snapshotFile,
-    outputPath: outputPath,
     privateKeyPath: privateKeyPath,
-    workingDirPath: workingDirPath,
-  ).then((_) => null);
+    assetDirPath: assetDirPath,
+  );
 }
 
 Future<AssetBundle> buildAssets({
   String manifestPath,
-  String workingDirPath,
+  String assetDirPath,
   String packagesPath,
   bool includeDefaultFonts: true,
   bool reportLicensedPackages: false
 }) async {
-  workingDirPath ??= getAssetBuildDirectory();
+  assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
 
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   final int result = await assetBundle.build(
     manifestPath: manifestPath,
-    workingDirPath: workingDirPath,
+    assetDirPath: assetDirPath,
     packagesPath: packagesPath,
     includeDefaultFonts: includeDefaultFonts,
     reportLicensedPackages: reportLicensedPackages
@@ -184,48 +179,48 @@ Future<AssetBundle> buildAssets({
   return assetBundle;
 }
 
-Future<List<String>> assemble({
+Future<void> assemble({
   AssetBundle assetBundle,
   DevFSContent kernelContent,
   File snapshotFile,
   File dylibFile,
-  String outputPath,
   String privateKeyPath: defaultPrivateKeyPath,
-  String workingDirPath,
+  String assetDirPath,
 }) async {
-  outputPath ??= defaultFlxOutputPath;
-  workingDirPath ??= getAssetBuildDirectory();
-  printTrace('Building $outputPath');
+  assetDirPath ??= getAssetBuildDirectory();
+  printTrace('Building bundle');
 
-  final ZipBuilder zipBuilder = new ZipBuilder();
-
-  // Add all entries from the asset bundle.
-  zipBuilder.entries.addAll(assetBundle.entries);
-
-  final List<String> fileDependencies = assetBundle.entries.values
-      .expand((DevFSContent content) => content.fileDependencies)
-      .toList();
+  final Map<String, DevFSContent> assetEntries = new Map<String, DevFSContent>.from(assetBundle.entries);
 
   if (kernelContent != null) {
     final String platformKernelDill = artifacts.getArtifactPath(Artifact.platformKernelDill);
-    zipBuilder.entries[_kKernelKey] = kernelContent;
-    zipBuilder.entries[_kPlatformKernelKey] = new DevFSFileContent(fs.file(platformKernelDill));
+    assetEntries[_kKernelKey] = kernelContent;
+    assetEntries[_kPlatformKernelKey] = new DevFSFileContent(fs.file(platformKernelDill));
   }
   if (snapshotFile != null)
-    zipBuilder.entries[_kSnapshotKey] = new DevFSFileContent(snapshotFile);
+    assetEntries[_kSnapshotKey] = new DevFSFileContent(snapshotFile);
   if (dylibFile != null)
-    zipBuilder.entries[_kDylibKey] = new DevFSFileContent(dylibFile);
+    assetEntries[_kDylibKey] = new DevFSFileContent(dylibFile);
 
-  ensureDirectoryExists(outputPath);
+  printTrace('Writing asset files to $assetDirPath');
+  ensureDirectoryExists(assetDirPath);
 
-  printTrace('Encoding zip file to $outputPath');
-
-  // TODO(zarah): Remove the zipBuilder and write the files directly once FLX
-  // is deprecated.
-
-  await zipBuilder.createZip(fs.file(outputPath), fs.directory(workingDirPath));
-
-  printTrace('Built $outputPath.');
-
-  return fileDependencies;
+  await writeBundle(fs.directory(assetDirPath), assetEntries);
+  printTrace('Wrote $assetDirPath');
 }
+
+Future<void> writeBundle(
+    Directory bundleDir, Map<String, DevFSContent> assetEntries) async {
+  if (bundleDir.existsSync())
+    bundleDir.deleteSync(recursive: true);
+  bundleDir.createSync(recursive: true);
+
+  await Future.wait(
+      assetEntries.entries.map((MapEntry<String, DevFSContent> entry) async {
+    final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
+    file.parent.createSync(recursive: true);
+    await file.writeAsBytes(await entry.value.contentsAsBytes());
+  }));
+}
+
+

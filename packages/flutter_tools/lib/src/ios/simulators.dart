@@ -15,8 +15,8 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../bundle.dart' as bundle;
 import '../device.dart';
-import '../flx.dart' as flx;
 import '../globals.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
@@ -416,7 +416,7 @@ class IOSSimulator extends Device {
   Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) {
     // When running in previewDart2 mode, we still need to run compiler to
     // produce kernel file for the application.
-    return flx.build(
+    return bundle.build(
       precompiledSnapshot: !buildInfo.previewDart2,
       previewDart2: buildInfo.previewDart2,
       trackWidgetCreation: buildInfo.trackWidgetCreation,

@@ -12,6 +12,7 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 import 'build_aot.dart';
 import 'build_apk.dart';
+import 'build_bundle.dart';
 import 'build_flx.dart';
 import 'build_ios.dart';
 
@@ -21,6 +22,7 @@ class BuildCommand extends FlutterCommand {
     addSubcommand(new BuildAotCommand(verboseHelp: verboseHelp));
     addSubcommand(new BuildIOSCommand(verboseHelp: verboseHelp));
     addSubcommand(new BuildFlxCommand(verboseHelp: verboseHelp));
+    addSubcommand(new BuildBundleCommand(verboseHelp: verboseHelp));
   }
 
   @override
