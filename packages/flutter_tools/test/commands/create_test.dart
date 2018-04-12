@@ -44,8 +44,9 @@ void main() {
     tearDown(() {
       try {
         temp.deleteSync(recursive: true);
-      } catch (e) {
+      } on FileSystemException catch (e) {
         // ignore errors deleting the temporary directory
+        print('Ignored exception during tearDown: $e');
       }
     });
 
