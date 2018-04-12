@@ -998,7 +998,7 @@ void main() {
           ..circle(x: 400.0, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 16.0, y: 16.0, radius: 6.0),
+          ..circle(x: 16.0, y: 16.0, radius: 10.0),
       );
 
       gesture = await tester.startGesture(center);
@@ -1015,7 +1015,7 @@ void main() {
           ..circle(x: 400.0, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 105.0625, y: 16.0, radius: 6.0),
+          ..circle(x: 105.0625, y: 16.0, radius: 10.0),
       );
 
       // Reparenting in the middle of an animation should do nothing.
@@ -1035,7 +1035,7 @@ void main() {
           ..circle(x: 400.0, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 185.5457763671875, y: 16.0, radius: 6.0),
+          ..circle(x: 185.5457763671875, y: 16.0, radius: 10.0),
       );
       // Wait for animations to finish.
       await tester.pumpAndSettle();
@@ -1048,7 +1048,7 @@ void main() {
           ..circle(x: 208.5, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 400.0, y: 16.0, radius: 6.0),
+          ..circle(x: 400.0, y: 16.0, radius: 10.0),
       );
       await gesture.up();
       await tester.pumpAndSettle();
@@ -1060,7 +1060,7 @@ void main() {
           ..circle(x: 208.5, y: 16.0, radius: 1.0)
           ..circle(x: 591.5, y: 16.0, radius: 1.0)
           ..circle(x: 783.0, y: 16.0, radius: 1.0)
-          ..circle(x: 400.0, y: 16.0, radius: 6.0),
+          ..circle(x: 400.0, y: 16.0, radius: 10.0),
       );
     }
 
