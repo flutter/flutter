@@ -55,6 +55,11 @@ public interface FlutterActivityEvents
     void onDestroy();
 
     /**
+     * @see android.app.Activity#onStop()
+     */
+    void onStop();
+    
+    /**
      * Invoked when the activity has detected the user's press of the back key.
      *
      * @return {@code true} if the listener handled the event; {@code false}
