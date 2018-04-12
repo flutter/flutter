@@ -387,7 +387,7 @@ Future<String> _buildAotSnapshot(
   }
 
   if (previewDart2) {
-    mainPath = await compile(
+    final CompilerOutput compilerOutput = await compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
       outputFilePath: kApplicationKernelPath,
@@ -398,6 +398,7 @@ Future<String> _buildAotSnapshot(
       entryPointsJsonFiles: entryPointsJsonFiles,
       trackWidgetCreation: false,
     );
+    mainPath = compilerOutput?.outputFilename;
     if (mainPath == null) {
       printError('Compiler terminated unexpectedly.');
       return null;

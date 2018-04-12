@@ -238,8 +238,14 @@ dependencies:
           throw 'failed to parse error message: $error';
         }
         final String column = error.substring(colon2 + kColon.length, bullet2);
-        final int lineNumber = int.parse(line, radix: 10, onError: (String source) => throw 'failed to parse error message: $error');
-        final int columnNumber = int.parse(column, radix: 10, onError: (String source) => throw 'failed to parse error message: $error');
+        final int lineNumber = int.tryParse(line, radix: 10);
+        if (lineNumber == null) {
+          throw 'failed to parse error message: $error';
+        }
+        final int columnNumber = int.tryParse(column, radix: 10);
+        if (columnNumber == null) {
+          throw 'failed to parse error message: $error';
+        }
         if (lineNumber < 1 || lineNumber > lines.length) {
           keepMain = true;
           throw 'failed to parse error message (read line number as $lineNumber; total number of lines is ${lines.length}): $error';
