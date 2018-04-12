@@ -1078,7 +1078,7 @@ void Layout::doLayoutRun(const uint16_t* buf,
         xoff += yoff * ctx->paint.skewX;
         LayoutGlyph glyph = {
             font_ix, glyph_ix, x + xoff, y + yoff,
-            static_cast<ssize_t>(info[i].cluster - clusterOffset)};
+            static_cast<uint32_t>(info[i].cluster - clusterOffset)};
         mGlyphs.push_back(glyph);
         float xAdvance = HBFixedToFloat(positions[i].x_advance);
         if ((ctx->paint.paintFlags & LinearTextFlag) == 0) {
@@ -1140,7 +1140,7 @@ void Layout::appendLayout(Layout* src, size_t start, float extraAdvance) {
     float x = x0 + srcGlyph.x;
     float y = srcGlyph.y;
     LayoutGlyph glyph = {font_ix, glyph_id, x, y,
-                         static_cast<ssize_t>(srcGlyph.cluster + start)};
+                         static_cast<uint32_t>(srcGlyph.cluster + start)};
     mGlyphs.push_back(glyph);
   }
   for (size_t i = 0; i < src->mAdvances.size(); i++) {
