@@ -100,7 +100,7 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
   }
 
   for (sk_sp<SkFontMgr>& manager : GetFontManagerOrder()) {
-    auto font_style_set = manager->matchFamily(family.c_str());
+    sk_sp<SkFontStyleSet> font_style_set(manager->matchFamily(family.c_str()));
     if (font_style_set == nullptr || font_style_set->count() == 0) {
       continue;
     }
@@ -111,8 +111,8 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
     for (int i = 0, style_count = font_style_set->count(); i < style_count;
          ++i) {
       // Create the skia typeface.
-      auto skia_typeface =
-          sk_ref_sp<SkTypeface>(font_style_set->createTypeface(i));
+      sk_sp<SkTypeface> skia_typeface(
+          sk_sp<SkTypeface>(font_style_set->createTypeface(i)));
       if (skia_typeface == nullptr) {
         continue;
       }

@@ -37,7 +37,7 @@ AssetFontStyleSet* AssetDataProvider::MatchFamily(
   if (found == registered_families_.end()) {
     return nullptr;
   }
-  return &found->second;
+  return SkRef(&found->second);
 }
 
 void AssetDataProvider::RegisterTypeface(sk_sp<SkTypeface> typeface) {

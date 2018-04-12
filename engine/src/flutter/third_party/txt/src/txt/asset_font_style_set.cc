@@ -31,7 +31,7 @@ SkTypeface* AssetFontStyleSet::createTypeface(int index) {
   if (index_cast >= typefaces_.size()) {
     return nullptr;
   }
-  return typefaces_[index_cast].get();
+  return SkRef(typefaces_[index_cast].get());
 }
 
 SkTypeface* AssetFontStyleSet::matchStyle(const SkFontStyle& pattern) {
@@ -42,7 +42,7 @@ SkTypeface* AssetFontStyleSet::matchStyle(const SkFontStyle& pattern) {
     if (typeface->fontStyle() == pattern)
       return typeface.get();
 
-  return typefaces_[0].get();
+  return SkRef(typefaces_[0].get());
 }
 
 }  // namespace txt
