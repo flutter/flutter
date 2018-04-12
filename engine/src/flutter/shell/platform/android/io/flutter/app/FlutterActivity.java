@@ -99,12 +99,6 @@ public class FlutterActivity extends Activity implements FlutterView.Provider, P
             super.onBackPressed();
         }
     }
-    
-    @Override
-    protected void onStop() {
-        eventDelegate.onStop();
-        super.onStop();
-    }
 
     @Override
     protected void onPause() {

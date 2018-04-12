@@ -267,7 +267,7 @@ public class FlutterView extends SurfaceView
     }
 
     public void onPause() {
-        mFlutterLifecycleChannel.send("AppLifecycleState.inactive");
+        mFlutterLifecycleChannel.send("AppLifecycleState.paused");
     }
 
     public void onPostResume() {
@@ -278,7 +278,7 @@ public class FlutterView extends SurfaceView
     }
 
     public void onStop() {
-        mFlutterLifecycleChannel.send("AppLifecycleState.paused");
+        mFlutterLifecycleChannel.send("AppLifecycleState.suspending");
     }
 
     public void onMemoryPressure() {
