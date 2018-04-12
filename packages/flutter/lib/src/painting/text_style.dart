@@ -504,16 +504,57 @@ class TextStyle extends Diagnosticable {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static TextStyle lerp(TextStyle a, TextStyle b, double t) {
-    assert(a != null);
-    assert(b != null);
     assert(t != null);
-    assert(a.inherit == b.inherit);
+    assert(a == null || b == null || a.inherit == b.inherit);
+    if (a == null && b == null) {
+      return null;
+    }
 
     String lerpDebugLabel;
     assert(() {
-      lerpDebugLabel = 'lerp(${a.debugLabel ?? _kDefaultDebugLabel} ⎯${t.toStringAsFixed(1)}→ ${b.debugLabel ?? _kDefaultDebugLabel})';
+      lerpDebugLabel = 'lerp(${a?.debugLabel ?? _kDefaultDebugLabel} ⎯${t.toStringAsFixed(1)}→ ${b?.debugLabel ?? _kDefaultDebugLabel})';
       return true;
     }());
+
+    if (a == null) {
+      return new TextStyle(
+        inherit: b.inherit,
+        color: Color.lerp(null, b.color, t),
+        fontFamily: t < 0.5 ? null : b.fontFamily,
+        fontSize: t < 0.5 ? null : b.fontSize,
+        fontWeight: FontWeight.lerp(null, b.fontWeight, t),
+        fontStyle: t < 0.5 ? null : b.fontStyle,
+        letterSpacing: t < 0.5 ? null : b.letterSpacing,
+        wordSpacing: t < 0.5 ? null : b.wordSpacing,
+        textBaseline: t < 0.5 ? null : b.textBaseline,
+        height: t < 0.5 ? null : b.height,
+        locale: t < 0.5 ? null : b.locale,
+        decoration: t < 0.5 ? null : b.decoration,
+        decorationColor: Color.lerp(null, b.decorationColor, t),
+        decorationStyle: t < 0.5 ? null : b.decorationStyle,
+        debugLabel: lerpDebugLabel,
+      );
+    }
+
+    if (b == null) {
+      return new TextStyle(
+        inherit: a.inherit,
+        color: Color.lerp(a.color, null, t),
+        fontFamily: t < 0.5 ? a.fontFamily : null,
+        fontSize: t < 0.5 ? a.fontSize : null,
+        fontWeight: FontWeight.lerp(a.fontWeight, null, t),
+        fontStyle: t < 0.5 ? a.fontStyle : null,
+        letterSpacing: t < 0.5 ? a.letterSpacing : null,
+        wordSpacing: t < 0.5 ? a.wordSpacing : null,
+        textBaseline: t < 0.5 ? a.textBaseline : null,
+        height: t < 0.5 ? a.height : null,
+        locale: t < 0.5 ? a.locale : null,
+        decoration: t < 0.5 ? a.decoration : null,
+        decorationColor: Color.lerp(a.decorationColor, null, t),
+        decorationStyle: t < 0.5 ? a.decorationStyle : null,
+        debugLabel: lerpDebugLabel,
+      );
+    }
 
     return new TextStyle(
       inherit: b.inherit,

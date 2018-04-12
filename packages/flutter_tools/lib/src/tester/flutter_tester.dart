@@ -126,7 +126,7 @@ class FlutterTesterDevice extends Device {
     }
 
     try {
-      printTrace('$shellPath ${command.join(' ')}');
+      printTrace(command.join(' '));
 
       _process = await processManager.start(command);
       _process.stdout

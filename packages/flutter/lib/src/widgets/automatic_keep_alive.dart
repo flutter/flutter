@@ -80,27 +80,59 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     handle.addListener(_handles[handle]);
     if (!_keepingAlive) {
       _keepingAlive = true;
-      // We use Element.visitChildren rather than context.visitChildElements
-      // because we might be called during build, and context.visitChildElements
-      // verifies that it is not called during build. Element.visitChildren does
-      // not, instead it assumes that the caller will be careful. (See the
-      // documentation for these methods for more details.)
-      //
-      // Here we know it's safe because we just received a notification, which
-      // we wouldn't be able to do if we hadn't built our child and its child --
-      // our build method always builds the same subtree and it always includes
-      // the node we're looking for (KeepAlive) as the parent of the node that
-      // reports the notifications (NotificationListener).
-      //
-      // (We're only going down one level, to get our direct child.)
-      final Element element = context;
-      element.visitChildren((Element child) {
-        assert(child is ParentDataElement<SliverMultiBoxAdaptorWidget>);
-        final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = child;
-        childElement.applyWidgetOutOfTurn(build(context));
-      });
+      final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = _getChildElement();
+      if (childElement != null) {
+        // If the child already exists, update it synchronously.
+        _updateParentDataOfChild(childElement);
+      } else {
+        // If the child doesn't exist yet, we got called during the very first
+        // build of this subtree. Wait until the end of the frame to update
+        // the child when the child is guaranteed to be present.
+        SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+          final ParentDataElement<SliverMultiBoxAdaptorWidget> childElement = _getChildElement();
+          assert(childElement != null);
+          _updateParentDataOfChild(childElement);
+        });
+      }
     }
     return false;
+  }
+
+  /// Get the [Element] for the only [KeepAlive] child.
+  ///
+  /// While this widget is guaranteed to have a child, this may return null if
+  /// the first build of that child has not completed yet.
+  ParentDataElement<SliverMultiBoxAdaptorWidget> _getChildElement() {
+    final Element element = context;
+    Element childElement;
+    // We use Element.visitChildren rather than context.visitChildElements
+    // because we might be called during build, and context.visitChildElements
+    // verifies that it is not called during build. Element.visitChildren does
+    // not, instead it assumes that the caller will be careful. (See the
+    // documentation for these methods for more details.)
+    //
+    // Here we know it's safe (with the exception outlined below) because we
+    // just received a notification, which we wouldn't be able to do if we
+    // hadn't built our child and its child -- our build method always builds
+    // the same subtree and it always includes the node we're looking for
+    // (KeepAlive) as the parent of the node that reports the notifications
+    // (NotificationListener).
+    //
+    // If we are called during the first build of this subtree the links to the
+    // children will not be hooked up yet. In that case this method returns
+    // null despite the fact that we will have a child after the build
+    // completes. It's the caller's responsibility to deal with this case.
+    //
+    // (We're only going down one level, to get our direct child.)
+    element.visitChildren((Element child) {
+      childElement = child;
+    });
+    assert(childElement == null || childElement is ParentDataElement<SliverMultiBoxAdaptorWidget>);
+    return childElement;
+  }
+
+  void _updateParentDataOfChild(ParentDataElement<SliverMultiBoxAdaptorWidget> childElement) {
+    childElement.applyWidgetOutOfTurn(build(context));
   }
 
   VoidCallback _createCallback(Listenable handle) {
