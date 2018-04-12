@@ -7,20 +7,16 @@
 # See the configuration guide for more
 # https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
 #
-# There are four similar analysis options files in the flutter repos:
-#   - analysis_options.yaml (this file)
-#   - analysis_options_repo.yaml
+# There are three similar analysis options files in the flutter repo:
+#   - analysis_options.yaml
+#   - analysis_options_repo.yaml (this file)
 #   - packages/flutter/lib/analysis_options_user.yaml
-#   - https://github.com/flutter/plugins/blob/master/analysis_options.yaml
 #
-# This file contains the analysis options used by Flutter tools, such as IntelliJ,
-# Android Studio, and the `flutter analyze` command.
-# It is very similar to the analysis_options_repo.yaml file in this same directory;
+# This file contains the analysis options used by 'flutter analyze' when analyzing
+# the flutter repository. It is very similar to analysis_options.yaml;
 # the only difference (currently) is the public_member_api_docs option,
-# which triggers too many messages to be used in editors.
-#
-# The flutter/plugins repo contains a copy of this file, which should be kept
-# in sync with this file.
+# which is turned on and programmatically reduced to a single output line
+# indicating the # of violations for that rule.
 
 analyzer:
   language:
@@ -35,12 +31,9 @@ analyzer:
     missing_return: warning
     # allow having TODOs in the code
     todo: ignore
-  exclude:
-    - 'bin/cache/**'
-    # the following two are relative to the stocks example and the flutter package respectively
-    # see https://github.com/dart-lang/sdk/issues/28463
-    - 'lib/i18n/stock_messages_*.dart'
-    - 'lib/src/http/**'
+  # `flutter analyze` (without `--watch`) just ignores directories
+  # that contain a .dartignore file, and this file does not have any
+  # effect on what files are actually analyzed.
 
 linter:
   rules:
@@ -131,7 +124,7 @@ linter:
     - prefer_is_not_empty
     - prefer_single_quotes
     - prefer_typing_uninitialized_variables
-    # - public_member_api_docs # this is the only difference from analysis_options_repo.yaml
+    - public_member_api_docs # this is the only difference from analysis_options.yaml
     - recursive_getters
     - slash_for_doc_comments
     - sort_constructors_first
