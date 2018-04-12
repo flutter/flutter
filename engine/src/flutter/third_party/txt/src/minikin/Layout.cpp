@@ -1076,7 +1076,9 @@ void Layout::doLayoutRun(const uint16_t* buf,
         float xoff = HBFixedToFloat(positions[i].x_offset);
         float yoff = -HBFixedToFloat(positions[i].y_offset);
         xoff += yoff * ctx->paint.skewX;
-        LayoutGlyph glyph = {font_ix, glyph_ix, x + xoff, y + yoff};
+        LayoutGlyph glyph = {
+            font_ix, glyph_ix, x + xoff, y + yoff,
+            static_cast<ssize_t>(info[i].cluster - clusterOffset)};
         mGlyphs.push_back(glyph);
         float xAdvance = HBFixedToFloat(positions[i].x_advance);
         if ((ctx->paint.paintFlags & LinearTextFlag) == 0) {
@@ -1137,7 +1139,8 @@ void Layout::appendLayout(Layout* src, size_t start, float extraAdvance) {
     unsigned int glyph_id = srcGlyph.glyph_id;
     float x = x0 + srcGlyph.x;
     float y = srcGlyph.y;
-    LayoutGlyph glyph = {font_ix, glyph_id, x, y};
+    LayoutGlyph glyph = {font_ix, glyph_id, x, y,
+                         static_cast<ssize_t>(srcGlyph.cluster + start)};
     mGlyphs.push_back(glyph);
   }
   for (size_t i = 0; i < src->mAdvances.size(); i++) {
@@ -1172,6 +1175,12 @@ FontFakery Layout::getFakery(int i) const {
 unsigned int Layout::getGlyphId(int i) const {
   const LayoutGlyph& glyph = mGlyphs[i];
   return glyph.glyph_id;
+}
+
+// libtxt extension
+unsigned int Layout::getGlyphCluster(int i) const {
+  const LayoutGlyph& glyph = mGlyphs[i];
+  return glyph.cluster;
 }
 
 float Layout::getX(int i) const {
