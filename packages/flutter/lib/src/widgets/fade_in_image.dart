@@ -308,8 +308,6 @@ enum FadeInImagePhase {
   completed,
 }
 
-typedef void _ImageProviderResolverListener();
-
 class _ImageProviderResolver {
   _ImageProviderResolver({
     @required this.state,
@@ -317,7 +315,7 @@ class _ImageProviderResolver {
   });
 
   final _FadeInImageState state;
-  final _ImageProviderResolverListener listener;
+  final void Function() listener;
 
   FadeInImage get widget => state.widget;
 

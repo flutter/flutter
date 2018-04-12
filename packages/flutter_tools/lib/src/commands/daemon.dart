@@ -554,8 +554,6 @@ class AppDomain extends Domain {
   }
 }
 
-typedef void _DeviceEventHandler(Device device);
-
 /// This domain lets callers list and monitor connected devices.
 ///
 /// It exports a `getDevices()` call, as well as firing `device.added` and
@@ -601,7 +599,7 @@ class DeviceDomain extends Domain {
 
   Future<Null> _serializeDeviceEvents = new Future<Null>.value();
 
-  _DeviceEventHandler _onDeviceEvent(String eventName) {
+  void Function(Device device) _onDeviceEvent(String eventName) {
     return (Device device) {
       _serializeDeviceEvents = _serializeDeviceEvents.then((_) async {
         sendEvent(eventName, await _deviceToMap(device));

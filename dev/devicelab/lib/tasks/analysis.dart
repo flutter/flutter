@@ -13,10 +13,6 @@ import '../framework/utils.dart';
 /// Run each benchmark this many times and compute average.
 const int _kRunsPerBenchmark = 3;
 
-/// Runs a benchmark once and reports the result as a lower-is-better numeric
-/// value.
-typedef Future<double> _Benchmark();
-
 /// Path to the generated "mega gallery" app.
 Directory get _megaGalleryDirectory => dir(path.join(Directory.systemTemp.path, 'mega_gallery'));
 
@@ -89,7 +85,7 @@ class _MegaGalleryBenchmark {
 }
 
 /// Runs a [benchmark] several times and reports the average result.
-Future<double> _run(_Benchmark benchmark) async {
+Future<double> _run(Future<double> Function() benchmark) async {
   double total = 0.0;
   for (int i = 0; i < _kRunsPerBenchmark; i++) {
     // Delete cached analysis results.

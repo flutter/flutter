@@ -12,8 +12,6 @@ import 'object.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
 
-typedef double _ChildSizingFunction(RenderBox child);
-
 /// [ParentData] for use with [RenderListWheelViewport].
 class ListWheelParentData extends ContainerBoxParentData<RenderBox> { }
 
@@ -404,7 +402,7 @@ class RenderListWheelViewport
     return math.asin(1.0 / _diameterRatio);
   }
 
-  double _getIntrinsicCrossAxis(_ChildSizingFunction childSize) {
+  double _getIntrinsicCrossAxis(double Function(RenderBox child) childSize) {
     double extent = 0.0;
     RenderBox child = firstChild;
     while (child != null) {

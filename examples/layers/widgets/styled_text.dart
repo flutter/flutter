@@ -4,8 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-typedef Widget _TextTransformer(String name, String text);
-
 // From https://en.wikiquote.org/wiki/2001:_A_Space_Odyssey_(film)
 const String _kDialogText = '''
 Dave: Open the pod bay doors, please, HAL. Open the pod bay doors, please, HAL. Hello, HAL. Do you read me? Hello, HAL. Do you read me? Do you read me, HAL?
@@ -84,7 +82,7 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
     _toText = toStyledText;
   }
 
-  _TextTransformer _toText;
+  Widget Function(String name, String text) _toText;
 
   void _handleTap() {
     setState(() {

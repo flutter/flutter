@@ -19,10 +19,7 @@ import 'base/file_system.dart';
 import 'globals.dart';
 import 'vmservice_record_replay.dart';
 
-/// A function that opens a two-way communication channel to the specified [uri].
-typedef StreamChannel<String> _OpenChannel(Uri uri);
-
-_OpenChannel _openChannel = _defaultOpenChannel;
+StreamChannel<String> Function(Uri uri) _openChannel = _defaultOpenChannel;
 
 /// A function that reacts to the invocation of the 'reloadSources' service.
 ///
