@@ -40,7 +40,7 @@ struct LayoutGlyph {
 
   // libtxt extension: record the cluster (character index) that corresponds
   // to this glyph
-  ssize_t cluster;
+  uint32_t cluster;
 };
 
 // Internal state used during layout operation
