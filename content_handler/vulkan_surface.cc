@@ -44,10 +44,6 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
 
   wait_.set_object(release_event_.get());
   wait_.set_trigger(ZX_EVENT_SIGNALED);
-  wait_.Begin(async_get_default());
-
-  // Probably not necessary as the events should be in the unsignalled state
-  // already.
   Reset();
 
   valid_ = true;
@@ -398,6 +394,8 @@ void VulkanSurface::Reset() {
     FXL_DLOG(ERROR) << "failed to create acquire semaphore";
   }
 
+  wait_.Begin(async_get_default());
+
   // It is safe for the caller to collect the surface in the callback.
   auto callback = pending_on_writes_committed_;
   pending_on_writes_committed_ = nullptr;
@@ -415,7 +413,6 @@ void VulkanSurface::OnHandleReady(async_t* async,
     return;
   FXL_DCHECK(signal->observed & ZX_EVENT_SIGNALED);
   Reset();
-  wait->Begin(async);
 }
 
 }  // namespace flutter_runner
