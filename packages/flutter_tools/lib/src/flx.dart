@@ -79,19 +79,14 @@ Future<Null> build({
     final List<String> inputPaths = <String>[
       mainPath,
     ];
-    final List<String> outputPaths = <String>[
-      applicationKernelFilePath,
-    ];
 
     bool needBuild = true;
     final List<File> fingerprintFiles = <File>[fingerprintFile, fs.file(depfilePath)]
-      ..addAll(inputPaths.map(fs.file))
-      ..addAll(outputPaths.map(fs.file));
+      ..addAll(inputPaths.map(fs.file));
 
     Future<Fingerprint> makeFingerprint() async {
       final Set<String> compilerInputPaths = await readDepfile(depfilePath)
-        ..add(mainPath)
-        ..addAll(outputPaths);
+        ..add(mainPath);
       final Map<String, String> properties = <String, String>{
         'entryPoint': mainPath,
       };
@@ -111,33 +106,23 @@ Future<Null> build({
       }
     }
 
-    ensureDirectoryExists(applicationKernelFilePath);
-    final String kernelBinaryFilename =
-      needBuild ?
-          await compile(
-            sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-            incrementalCompilerByteStorePath: fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
-            mainPath: fs.file(mainPath).absolute.path,
-            outputFilePath: applicationKernelFilePath,
-            depFilePath: depfilePath,
-            trackWidgetCreation: trackWidgetCreation,
-            fileSystemRoots: fileSystemRoots,
-            fileSystemScheme: fileSystemScheme,
-            packagesPath: packagesPath,
-          )
-          : applicationKernelFilePath;
-
-
-    if (kernelBinaryFilename == null) {
-      throwToolExit('Compiler failed on $mainPath');
-    }
-
-    await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
-        .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
-
-    kernelContent = new DevFSFileContent(fs.file(kernelBinaryFilename));
-
+    String kernelBinaryFilename;
     if (needBuild) {
+      ensureDirectoryExists(applicationKernelFilePath);
+      kernelBinaryFilename = await compile(
+        sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        incrementalCompilerByteStorePath: fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
+        mainPath: fs.file(mainPath).absolute.path,
+        outputFilePath: applicationKernelFilePath,
+        depFilePath: depfilePath,
+        trackWidgetCreation: trackWidgetCreation,
+        fileSystemRoots: fileSystemRoots,
+        fileSystemScheme: fileSystemScheme,
+        packagesPath: packagesPath,
+      );
+      if (kernelBinaryFilename == null) {
+        throwToolExit('Compiler failed on $mainPath');
+      }
       // Compute and record build fingerprint.
       try {
         final Fingerprint fingerprint = await makeFingerprint();
@@ -146,8 +131,13 @@ Future<Null> build({
         // Log exception and continue, this step is a performance improvement only.
         printStatus('Error during compilation output fingerprinting: $e\n$s');
       }
-
+    } else {
+      kernelBinaryFilename = applicationKernelFilePath;
     }
+    kernelContent = new DevFSFileContent(fs.file(kernelBinaryFilename));
+
+    await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
+        .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
   }
 
   final AssetBundle assets = await buildAssets(
