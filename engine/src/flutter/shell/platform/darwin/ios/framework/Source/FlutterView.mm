@@ -7,6 +7,7 @@
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/layers/layer_tree.h"
+#include "flutter/fml/platform/darwin/cf_utils.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
@@ -76,61 +77,13 @@
   return YES;
 }
 
-static void SnapshotRasterizer(fml::WeakPtr<shell::Rasterizer> rasterizer,
-                               CGContextRef context,
-                               bool is_opaque) {
-  if (!rasterizer) {
-    return;
-  }
-
-  // Access the layer tree and assess the description of the backing store to
-  // create for this snapshot.
-  flow::LayerTree* layer_tree = rasterizer->GetLastLayerTree();
-  if (layer_tree == nullptr) {
-    return;
-  }
-  auto size = layer_tree->frame_size();
-  if (size.isEmpty()) {
-    return;
-  }
-  auto info = SkImageInfo::MakeN32(
-      size.width(), size.height(),
-      is_opaque ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kPremul_SkAlphaType);
-
-  // Create the backing store and prepare for use.
-  SkBitmap bitmap;
-  bitmap.setInfo(info);
-  if (!bitmap.tryAllocPixels()) {
-    return;
-  }
-
-  // Create a canvas from the backing store and a single use compositor context
-  // to draw into the canvas.
-
-  SkCanvas canvas(bitmap);
-
-  flow::CompositorContext compositor_context;
-
-  if (auto frame = compositor_context.AcquireFrame(nullptr, &canvas, false /* instrumentation */)) {
-    layer_tree->Preroll(*frame, true /* ignore raster cache */);
-    layer_tree->Paint(*frame);
-  }
-
-  canvas.flush();
-
-  // Draw the bitmap to the system provided snapshotting context.
-  SkCGDrawBitmap(context, bitmap, 0, 0);
-}
-
-// Override the default CALayerDelegate method so that APIs that attempt to
-// screenshot the view display contents correctly. We cannot depend on
-// reading
-// GPU pixels directly because:
-// 1: We dont use retained backing on the CAEAGLLayer.
-// 2: The call is made of the platform thread and not the GPU thread.
-// 3: There may be a software rasterizer.
 - (void)drawLayer:(CALayer*)layer inContext:(CGContextRef)context {
   TRACE_EVENT0("flutter", "SnapshotFlutterView");
+
+  if (layer != self.layer || context == nullptr) {
+    return;
+  }
+
   FlutterViewController* controller = [self flutterViewController];
 
   if (controller == nil) {
@@ -139,13 +92,44 @@ static void SnapshotRasterizer(fml::WeakPtr<shell::Rasterizer> rasterizer,
 
   auto& shell = [controller shell];
 
-  fxl::AutoResetWaitableEvent latch;
-  shell.GetTaskRunners().GetGPUTaskRunner()->PostTask(
-      [&latch, rasterizer = shell.GetRasterizer(), context, opaque = layer.opaque]() {
-        SnapshotRasterizer(std::move(rasterizer), context, opaque);
-        latch.Signal();
-      });
-  latch.Wait();
+  auto screenshot = shell.Screenshot(shell::Rasterizer::ScreenshotType::UncompressedImage,
+                                     false /* base64 encode */);
+
+  if (!screenshot.data || screenshot.data->isEmpty() || screenshot.frame_size.isEmpty()) {
+    return;
+  }
+
+  NSData* data = [NSData dataWithBytes:const_cast<void*>(screenshot.data->data())
+                                length:screenshot.data->size()];
+
+  fml::CFRef<CGDataProviderRef> image_data_provider(
+      CGDataProviderCreateWithCFData(reinterpret_cast<CFDataRef>(data)));
+
+  fml::CFRef<CGColorSpaceRef> colorspace(CGColorSpaceCreateDeviceRGB());
+
+  fml::CFRef<CGImageRef> image(CGImageCreate(
+      screenshot.frame_size.width(),      // size_t width
+      screenshot.frame_size.height(),     // size_t height
+      8,                                  // size_t bitsPerComponent
+      32,                                 // size_t bitsPerPixel,
+      4 * screenshot.frame_size.width(),  // size_t bytesPerRow
+      colorspace,                         // CGColorSpaceRef space
+      static_cast<CGBitmapInfo>(kCGImageAlphaPremultipliedLast |
+                                kCGBitmapByteOrder32Big),  // CGBitmapInfo bitmapInfo
+      image_data_provider,                                 // CGDataProviderRef provider
+      nullptr,                                             // const CGFloat* decode
+      false,                                               // bool shouldInterpolate
+      kCGRenderingIntentDefault                            // CGColorRenderingIntent intent
+      ));
+
+  const CGRect frame_rect =
+      CGRectMake(0.0, 0.0, screenshot.frame_size.width(), screenshot.frame_size.height());
+
+  CGContextSaveGState(context);
+  CGContextTranslateCTM(context, 0.0, CGBitmapContextGetHeight(context));
+  CGContextScaleCTM(context, 1.0, -1.0);
+  CGContextDrawImage(context, frame_rect, image);
+  CGContextRestoreGState(context);
 }
 
 @end

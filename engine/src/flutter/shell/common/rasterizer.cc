@@ -10,6 +10,7 @@
 #include "third_party/skia/include/core/SkImageEncoder.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/core/SkSurfaceCharacterization.h"
 #include "third_party/skia/src/utils/SkBase64.h"
 
 namespace shell {
@@ -130,27 +131,67 @@ static sk_sp<SkPicture> ScreenshotLayerTreeAsPicture(flow::LayerTree* tree) {
   return recorder.finishRecordingAsPicture();
 }
 
+static sk_sp<SkSurface> CreateSnapshotSurface(GrContext* surface_context,
+                                              const SkISize& size) {
+  const auto image_info = SkImageInfo::MakeN32Premul(size);
+  if (surface_context) {
+    // There is a rendering surface that may contain textures that are going to
+    // be referenced in the layer tree about to be drawn.
+    return SkSurface::MakeRenderTarget(surface_context,  //
+                                       SkBudgeted::kNo,  //
+                                       image_info        //
+    );
+  }
+
+  // There is no rendering surface, assume no GPU textures are present and
+  // create a raster surface.
+  return SkSurface::MakeRaster(image_info);
+}
+
 static sk_sp<SkData> ScreenshotLayerTreeAsImage(flow::LayerTree* tree,
+                                                GrContext* surface_context,
                                                 bool compressed) {
-  const SkISize& frame_size = tree->frame_size();
-  SkBitmap bitmap;
-  if (!bitmap.tryAllocN32Pixels(frame_size.width(), frame_size.height())) {
+  // Attempt to create a snapshot surface depending on whether we have access to
+  // a valid GPU rendering context.
+  auto snapshot_surface =
+      CreateSnapshotSurface(surface_context, tree->frame_size());
+  if (snapshot_surface == nullptr) {
     return nullptr;
   }
-  auto bitmap_surface = SkSurface::MakeRasterDirect(
-      bitmap.info(), bitmap.getPixels(), bitmap.rowBytes());
+
+  // Draw the current layer tree into the snapshot surface.
   flow::CompositorContext compositor_context;
-  auto canvas = bitmap_surface->getCanvas();
-  auto frame = compositor_context.AcquireFrame(nullptr, canvas, false);
+  auto canvas = snapshot_surface->getCanvas();
+  auto frame = compositor_context.AcquireFrame(surface_context, canvas, false);
   canvas->clear(SK_ColorBLACK);
   frame->Raster(*tree, true);
   canvas->flush();
-  if (compressed) {
-    return SkEncodeBitmap(bitmap, SkEncodedImageFormat::kPNG, 100);
-  } else {
-    return SkData::MakeWithCopy(bitmap.getPixels(), bitmap.computeByteSize());
+
+  // Prepare an image from the surface, this image may potentially be on th GPU.
+  auto potentially_gpu_snapshot = snapshot_surface->makeImageSnapshot();
+  if (!potentially_gpu_snapshot) {
+    return nullptr;
   }
-  return nullptr;
+
+  // Copy the GPU image snapshot into CPU memory.
+  auto cpu_snapshot = potentially_gpu_snapshot->makeRasterImage();
+  if (!cpu_snapshot) {
+    return nullptr;
+  }
+
+  // If the caller want the pixels to be compressed, there is a Skia utilitiy to
+  // compress to PNG. Use that.
+  if (compressed) {
+    return cpu_snapshot->encodeToData();
+  }
+
+  // Copy it into a bitmap and return the same.
+  SkPixmap pixmap;
+  if (!cpu_snapshot->peekPixels(&pixmap)) {
+    return nullptr;
+  }
+
+  return SkData::MakeWithCopy(pixmap.addr32(), pixmap.computeByteSize());
 }
 
 Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
@@ -164,15 +205,17 @@ Rasterizer::Screenshot Rasterizer::ScreenshotLastLayerTree(
 
   sk_sp<SkData> data = nullptr;
 
+  GrContext* surface_context = surface_ ? surface_->GetContext() : nullptr;
+
   switch (type) {
     case ScreenshotType::SkiaPicture:
       data = ScreenshotLayerTreeAsPicture(layer_tree)->serialize();
       break;
     case ScreenshotType::UncompressedImage:
-      data = ScreenshotLayerTreeAsImage(layer_tree, false);
+      data = ScreenshotLayerTreeAsImage(layer_tree, surface_context, false);
       break;
     case ScreenshotType::CompressedImage:
-      data = ScreenshotLayerTreeAsImage(layer_tree, true);
+      data = ScreenshotLayerTreeAsImage(layer_tree, surface_context, true);
       break;
   }
 
