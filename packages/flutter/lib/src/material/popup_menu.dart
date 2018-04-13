@@ -584,6 +584,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.elevation,
     this.theme,
     this.barrierLabel,
+    this.semanticLabel,
   });
 
   final RelativeRect position;
@@ -613,6 +614,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   @override
   final String barrierLabel;
 
+  final String semanticLabel;
+
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     double selectedItemOffset;
@@ -627,7 +630,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       }
     }
 
-    Widget menu = new _PopupMenu<T>(route: this);
+    Widget menu = new _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
     if (theme != null)
       menu = new Theme(data: theme, child: menu);
 

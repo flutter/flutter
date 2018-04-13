@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/material/material_localizations.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
