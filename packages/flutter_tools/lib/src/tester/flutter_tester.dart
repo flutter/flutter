@@ -14,6 +14,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../bundle.dart' as bundle;
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -95,7 +96,9 @@ class FlutterTesterDevice extends Device {
     bool usesTerminalUi: true,
     bool ipv6: false,
   }) async {
-    if (!debuggingOptions.buildInfo.isDebug) {
+    final BuildInfo buildInfo = debuggingOptions.buildInfo;
+
+    if (!buildInfo.isDebug) {
       printError('This device only supports debug mode.');
       return new LaunchResult.failed();
     }
@@ -119,8 +122,24 @@ class FlutterTesterDevice extends Device {
             .add('--observatory-port=${debuggingOptions.hasObservatoryPort}');
     }
 
-    // TODO(scheglov): Provide assets location, once it is possible.
+    // Build assets and perform initial compilation.
+    final String assetDirPath = getAssetBuildDirectory();
+    final String applicationKernelFilePath = bundle.defaultApplicationKernelPath;
+    await bundle.build(
+      mainPath: mainPath,
+      assetDirPath: assetDirPath,
+      applicationKernelFilePath: applicationKernelFilePath,
+      precompiledSnapshot: !buildInfo.previewDart2,
+      previewDart2: buildInfo.previewDart2,
+      trackWidgetCreation: buildInfo.trackWidgetCreation,
+    );
+    if (buildInfo.previewDart2) {
+      mainPath = applicationKernelFilePath;
+    }
 
+    command.add('--flutter-assets-dir=$assetDirPath');
+
+    // TODO(scheglov): Either remove the check, or make it fail earlier.
     if (mainPath != null) {
       command.add(mainPath);
     }
