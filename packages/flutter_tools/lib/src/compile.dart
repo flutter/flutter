@@ -216,6 +216,7 @@ class ResidentCompiler {
       _sdkRoot,
       '--incremental',
       '--strong',
+      '--sync-async',
       '--target=flutter',
     ];
     if (outputPath != null) {
