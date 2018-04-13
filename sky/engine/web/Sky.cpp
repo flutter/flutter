@@ -53,56 +53,6 @@
 
 namespace blink {
 
-namespace {
-
-void didProcessTask() {
-  tonic::DartMicrotaskQueue::GetForCurrentThread()->RunMicrotasks();
-  // FIXME: Report memory usage to dart?
-}
-
-#if defined(OS_FUCHSIA)
-
-void addMessageLoopObservers() {
-  fsl::MessageLoop::GetCurrent()->SetAfterTaskCallback(didProcessTask);
-}
-
-void removeMessageLoopObservers() {
-  fsl::MessageLoop::GetCurrent()->ClearAfterTaskCallback();
-}
-
-#else  // defined(OS_FUCHSIA)
-
-class RunMicrotasksTaskObserver : public fml::TaskObserver {
- public:
-  RunMicrotasksTaskObserver() = default;
-
-  ~RunMicrotasksTaskObserver() override = default;
-
-  void DidProcessTask() override { didProcessTask(); }
-};
-
-// FIXME(chinmaygarde): The awkward use of the global here is be cause we cannot
-// introduce the fml::TaskObserver subclass in common code because Fuchsia does
-// not support the same. Unify the API and remove hack.
-static RunMicrotasksTaskObserver* g_run_microtasks_task_observer = nullptr;
-
-void addMessageLoopObservers() {
-  g_run_microtasks_task_observer = new RunMicrotasksTaskObserver();
-  fml::MessageLoop::GetCurrent().AddTaskObserver(
-      g_run_microtasks_task_observer);
-}
-
-void removeMessageLoopObservers() {
-  fml::MessageLoop::GetCurrent().RemoveTaskObserver(
-      g_run_microtasks_task_observer);
-  delete g_run_microtasks_task_observer;
-  g_run_microtasks_task_observer = nullptr;
-}
-
-#endif  // defined(OS_FUCHSIA)
-
-}  // namespace
-
 // Make sure we are not re-initialized in the same address space.
 // Doing so may cause hard to reproduce crashes.
 static bool s_webKitInitialized = false;
@@ -130,15 +80,9 @@ void InitEngine(Platform* platform) {
   // the initialization thread-safe, but given that so many code paths use
   // this, initializing this lazily probably doesn't buy us much.
   WTF::UTF8Encoding();
-
-  tonic::DartMicrotaskQueue::StartForCurrentThread();
-  addMessageLoopObservers();
 }
 
 void ShutdownEngine() {
-  removeMessageLoopObservers();
-  tonic::DartMicrotaskQueue::GetForCurrentThread()->Destroy();
-
   // FIXME: Shutdown dart?
 
   CoreInitializer::shutdown();

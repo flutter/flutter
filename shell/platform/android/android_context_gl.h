@@ -44,7 +44,6 @@ class AndroidContextGL : public fxl::RefCountedThreadSafe<AndroidContextGL> {
   bool valid_;
 
   AndroidContextGL(fxl::RefPtr<AndroidEnvironmentGL> env,
-                   PlatformView::SurfaceConfig config,
                    const AndroidContextGL* share_context = nullptr);
 
   ~AndroidContextGL();

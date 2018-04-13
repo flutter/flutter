@@ -50,8 +50,9 @@ SkCanvas* PictureRecorder::BeginRecording(SkRect bounds) {
 fxl::RefPtr<Picture> PictureRecorder::endRecording() {
   if (!isRecording())
     return nullptr;
-  fxl::RefPtr<Picture> picture =
-      Picture::Create(picture_recorder_.finishRecordingAsPicture());
+
+  fxl::RefPtr<Picture> picture = Picture::Create(UIDartState::CreateGPUObject(
+      picture_recorder_.finishRecordingAsPicture()));
   canvas_->Clear();
   canvas_->ClearDartWrapper();
   canvas_ = nullptr;

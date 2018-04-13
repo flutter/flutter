@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_PICTURE_H_
 #define FLUTTER_LIB_UI_PAINTING_PICTURE_H_
 
+#include "flutter/flow/skia_gpu_object.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "lib/tonic/dart_wrappable.h"
 #include "third_party/skia/include/core/SkPicture.h"
@@ -23,9 +24,9 @@ class Picture : public fxl::RefCountedThreadSafe<Picture>,
 
  public:
   ~Picture() override;
-  static fxl::RefPtr<Picture> Create(sk_sp<SkPicture> picture);
+  static fxl::RefPtr<Picture> Create(flow::SkiaGPUObject<SkPicture> picture);
 
-  const sk_sp<SkPicture>& picture() const { return picture_; }
+  sk_sp<SkPicture> picture() const { return picture_.get(); }
 
   fxl::RefPtr<CanvasImage> toImage(int width, int height);
 
@@ -36,9 +37,9 @@ class Picture : public fxl::RefCountedThreadSafe<Picture>,
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
-  explicit Picture(sk_sp<SkPicture> picture);
+  explicit Picture(flow::SkiaGPUObject<SkPicture> picture);
 
-  sk_sp<SkPicture> picture_;
+  flow::SkiaGPUObject<SkPicture> picture_;
 };
 
 }  // namespace blink

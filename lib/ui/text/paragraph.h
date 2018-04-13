@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_TEXT_PARAGRAPH_H_
 #define FLUTTER_LIB_UI_TEXT_PARAGRAPH_H_
 
+#include "flutter/fml/message_loop.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/text/paragraph_impl.h"
 #include "flutter/lib/ui/text/paragraph_impl_blink.h"
@@ -66,6 +67,10 @@ class Paragraph : public fxl::RefCountedThreadSafe<Paragraph>,
 
   explicit Paragraph(std::unique_ptr<txt::Paragraph> paragraph);
 
+  // TODO: This can be removed when the render view association for the legacy
+  // runtime is removed.
+  fxl::RefPtr<fxl::TaskRunner> destruction_task_runner_ =
+      UIDartState::Current()->GetTaskRunners().GetUITaskRunner();
   OwnPtr<RenderView> m_renderView;
 };
 

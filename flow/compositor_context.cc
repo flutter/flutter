@@ -4,12 +4,12 @@
 
 #include "flutter/flow/compositor_context.h"
 
+#include "flutter/flow/layers/layer_tree.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace flow {
 
-CompositorContext::CompositorContext(std::unique_ptr<ProcessInfo> info)
-    : process_info_(std::move(info)) {}
+CompositorContext::CompositorContext() = default;
 
 CompositorContext::~CompositorContext() = default;
 
@@ -18,10 +18,6 @@ void CompositorContext::BeginFrame(ScopedFrame& frame,
   if (enable_instrumentation) {
     frame_count_.Increment();
     frame_time_.Start();
-
-    if (process_info_ && process_info_->SampleNow()) {
-      memory_usage_.Add(process_info_->GetResidentMemorySize());
-    }
   }
 }
 
@@ -33,11 +29,12 @@ void CompositorContext::EndFrame(ScopedFrame& frame,
   }
 }
 
-CompositorContext::ScopedFrame CompositorContext::AcquireFrame(
+std::unique_ptr<CompositorContext::ScopedFrame> CompositorContext::AcquireFrame(
     GrContext* gr_context,
     SkCanvas* canvas,
     bool instrumentation_enabled) {
-  return ScopedFrame(*this, gr_context, canvas, instrumentation_enabled);
+  return std::make_unique<ScopedFrame>(*this, gr_context, canvas,
+                                       instrumentation_enabled);
 }
 
 CompositorContext::ScopedFrame::ScopedFrame(CompositorContext& context,
@@ -51,18 +48,23 @@ CompositorContext::ScopedFrame::ScopedFrame(CompositorContext& context,
   context_.BeginFrame(*this, instrumentation_enabled_);
 }
 
-CompositorContext::ScopedFrame::ScopedFrame(ScopedFrame&& frame) = default;
-
 CompositorContext::ScopedFrame::~ScopedFrame() {
   context_.EndFrame(*this, instrumentation_enabled_);
 }
 
+bool CompositorContext::ScopedFrame::Raster(flow::LayerTree& layer_tree,
+                                            bool ignore_raster_cache) {
+  layer_tree.Preroll(*this, ignore_raster_cache);
+  layer_tree.Paint(*this);
+  return true;
+}
+
 void CompositorContext::OnGrContextCreated() {
-  texture_registry_->OnGrContextCreated();
+  texture_registry_.OnGrContextCreated();
 }
 
 void CompositorContext::OnGrContextDestroyed() {
-  texture_registry_->OnGrContextDestroyed();
+  texture_registry_.OnGrContextDestroyed();
   raster_cache_.Clear();
 }
 

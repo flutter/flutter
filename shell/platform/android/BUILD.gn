@@ -17,21 +17,25 @@ shared_library("flutter_shell_native") {
     "android_context_gl.h",
     "android_environment_gl.cc",
     "android_environment_gl.h",
-    "android_external_texture_gl.h",
     "android_external_texture_gl.cc",
+    "android_external_texture_gl.h",
     "android_native_window.cc",
     "android_native_window.h",
+    "android_shell_holder.cc",
+    "android_shell_holder.h",
     "android_surface.cc",
     "android_surface.h",
     "android_surface_gl.cc",
     "android_surface_gl.h",
-    "android_surface_software.h",
     "android_surface_software.cc",
-    "apk_asset_provider.h",
+    "android_surface_software.h",
     "apk_asset_provider.cc",
+    "apk_asset_provider.h",
     "flutter_main.cc",
     "flutter_main.h",
     "library_loader.cc",
+    "platform_message_response_android.cc",
+    "platform_message_response_android.h",
     "platform_view_android.cc",
     "platform_view_android.h",
     "platform_view_android_jni.cc",
@@ -41,10 +45,10 @@ shared_library("flutter_shell_native") {
   ]
 
   deps = [
+    "$flutter_root/assets",
     "$flutter_root/common",
     "$flutter_root/flow",
     "$flutter_root/fml",
-    "$flutter_root/assets",
     "$flutter_root/lib/ui",
     "$flutter_root/runtime",
     "$flutter_root/shell/common",
@@ -59,9 +63,7 @@ shared_library("flutter_shell_native") {
     deps += [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]
   }
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
+  public_configs = [ "$flutter_root:config" ]
 
   defines = []
 

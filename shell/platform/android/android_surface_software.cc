@@ -3,15 +3,14 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/android_surface_software.h"
-#include "flutter/common/threads.h"
-#include "flutter/fml/platform/android/jni_weak_ref.h"
-#include "flutter/fml/platform/android/scoped_java_ref.h"
-#include "flutter/shell/platform/android/platform_view_android_jni.h"
 
 #include <memory>
 #include <vector>
 
+#include "flutter/fml/platform/android/jni_weak_ref.h"
+#include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/shell/platform/android/platform_view_android_jni.h"
 #include "lib/fxl/logging.h"
 
 namespace shell {
@@ -132,17 +131,12 @@ bool AndroidSurfaceSoftware::PresentBackingStore(
 
 void AndroidSurfaceSoftware::TeardownOnScreenContext() {}
 
-SkISize AndroidSurfaceSoftware::OnScreenSurfaceSize() const {
-  return SkISize();
-}
-
 bool AndroidSurfaceSoftware::OnScreenSurfaceResize(const SkISize& size) const {
   return true;
 }
 
 bool AndroidSurfaceSoftware::SetNativeWindow(
-    fxl::RefPtr<AndroidNativeWindow> window,
-    PlatformView::SurfaceConfig config) {
+    fxl::RefPtr<AndroidNativeWindow> window) {
   native_window_ = std::move(window);
   if (!(native_window_ && native_window_->IsValid()))
     return false;

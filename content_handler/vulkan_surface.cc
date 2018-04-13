@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "vulkan_surface.h"
+
 #include <lib/async/default.h>
 
-#include "flutter/content_handler/vulkan_surface.h"
-#include "flutter/common/threads.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
-namespace flutter_runner {
+namespace flutter {
 
 VulkanSurface::VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
                              sk_sp<GrContext> context,
@@ -22,8 +22,6 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
       backend_context_(std::move(backend_context)),
       session_(session),
       wait_(this) {
-  ASSERT_IS_GPU_THREAD;
-
   FXL_DCHECK(session_);
 
   zx::vmo exported_vmo;
@@ -50,9 +48,11 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
 }
 
 VulkanSurface::~VulkanSurface() {
-  ASSERT_IS_GPU_THREAD;
-  wait_.Cancel();
-  wait_.set_object(ZX_HANDLE_INVALID);
+  if (async_) {
+    wait_.Cancel(async_);
+    wait_.set_object(ZX_HANDLE_INVALID);
+    async_ = nullptr;
+  }
 }
 
 bool VulkanSurface::IsValid() const {
@@ -317,7 +317,6 @@ bool VulkanSurface::PushSessionImageSetupOps(scenic_lib::Session* session,
 }
 
 scenic_lib::Image* VulkanSurface::GetImage() {
-  ASSERT_IS_GPU_THREAD;
   if (!valid_) {
     return 0;
   }
@@ -325,7 +324,6 @@ scenic_lib::Image* VulkanSurface::GetImage() {
 }
 
 sk_sp<SkSurface> VulkanSurface::GetSkiaSurface() const {
-  ASSERT_IS_GPU_THREAD;
   return valid_ ? sk_surface_ : nullptr;
 }
 
@@ -350,7 +348,6 @@ bool VulkanSurface::FlushSessionAcquireAndReleaseEvents() {
 
 void VulkanSurface::SignalWritesFinished(
     std::function<void(void)> on_writes_committed) {
-  ASSERT_IS_GPU_THREAD;
   FXL_DCHECK(on_writes_committed);
 
   if (!valid_) {
@@ -366,8 +363,6 @@ void VulkanSurface::SignalWritesFinished(
 }
 
 void VulkanSurface::Reset() {
-  ASSERT_IS_GPU_THREAD;
-
   if (acquire_event_.signal(ZX_EVENT_SIGNALED, 0u) != ZX_OK ||
       release_event_.signal(ZX_EVENT_SIGNALED, 0u) != ZX_OK) {
     valid_ = false;
@@ -404,15 +399,14 @@ void VulkanSurface::Reset() {
   }
 }
 
-void VulkanSurface::OnHandleReady(async_t* async,
-                                  async::WaitBase* wait,
-                                  zx_status_t status,
-                                  const zx_packet_signal_t* signal) {
-  ASSERT_IS_GPU_THREAD;
+async_wait_result_t VulkanSurface::OnHandleReady(
+    async_t* async,
+    zx_status_t status,
+    const zx_packet_signal_t* signal) {
   if (status != ZX_OK)
     return;
   FXL_DCHECK(signal->observed & ZX_EVENT_SIGNALED);
   Reset();
 }
 
-}  // namespace flutter_runner
+}  // namespace flutter

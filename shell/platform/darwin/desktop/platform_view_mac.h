@@ -7,6 +7,7 @@
 
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
+#include "flutter/shell/common/shell.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "lib/fxl/memory/weak_ptr.h"
 
@@ -15,15 +16,13 @@
 
 namespace shell {
 
-class PlatformViewMac : public PlatformView, public GPUSurfaceGLDelegate {
+class PlatformViewMac final : public PlatformView, public GPUSurfaceGLDelegate {
  public:
-  PlatformViewMac(NSOpenGLView* gl_view);
+  PlatformViewMac(Shell& shell, NSOpenGLView* gl_view);
 
   ~PlatformViewMac() override;
 
-  virtual void Attach() override;
-
-  void SetupAndLoadDart();
+  std::unique_ptr<VsyncWaiter> CreateVSyncWaiter() override;
 
   bool GLContextMakeCurrent() override;
 
@@ -33,27 +32,17 @@ class PlatformViewMac : public PlatformView, public GPUSurfaceGLDelegate {
 
   intptr_t GLContextFBO() const override;
 
-  VsyncWaiter* GetVsyncWaiter() override;
-
-  bool ResourceContextMakeCurrent() override;
-
-  void RunFromSource(const std::string& assets_directory,
-                     const std::string& main,
-                     const std::string& packages) override;
-
-  void SetAssetBundlePath(const std::string& assets_directory) override;
-
  private:
   fml::scoped_nsobject<NSOpenGLView> opengl_view_;
   fml::scoped_nsobject<NSOpenGLContext> resource_loading_context_;
 
   bool IsValid() const;
 
-  void SetupAndLoadFromSource(const std::string& assets_directory,
-                              const std::string& main,
-                              const std::string& packages);
+  // |shell::PlatformView|
+  std::unique_ptr<Surface> CreateRenderingSurface() override;
 
-  void SetAssetBundlePathOnUI(const std::string& assets_directory);
+  // |shell::PlatformView|
+  sk_sp<GrContext> CreateResourceContext() const override;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(PlatformViewMac);
 };

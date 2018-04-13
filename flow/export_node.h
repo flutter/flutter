@@ -15,6 +15,7 @@
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/ref_counted.h"
 #include "lib/ui/scenic/client/resources.h"
+#include "third_party/flutter/fml/task_runner.h"
 #include "third_party/skia/include/core/SkPoint.h"
 
 namespace flow {
@@ -24,7 +25,8 @@ namespace flow {
 // held by the ExportNode.
 class ExportNodeHolder : public fxl::RefCountedThreadSafe<ExportNodeHolder> {
  public:
-  ExportNodeHolder(fxl::RefPtr<zircon::dart::Handle> export_token_handle);
+  ExportNodeHolder(fxl::RefPtr<fxl::TaskRunner> gpu_task_runner,
+                   fxl::RefPtr<zircon::dart::Handle> export_token_handle);
   ~ExportNodeHolder();
 
   // Calls Bind() on the wrapped ExportNode.
@@ -36,6 +38,7 @@ class ExportNodeHolder : public fxl::RefCountedThreadSafe<ExportNodeHolder> {
   ExportNode* export_node() { return export_node_.get(); }
 
  private:
+  fxl::RefPtr<fxl::TaskRunner> gpu_task_runner_;
   std::unique_ptr<ExportNode> export_node_;
 
   FRIEND_MAKE_REF_COUNTED(ExportNodeHolder);

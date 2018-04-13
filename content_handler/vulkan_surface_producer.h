@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_CONTENT_HANDLER_VULKAN_SURFACE_PRODUCER_H_
-#define FLUTTER_CONTENT_HANDLER_VULKAN_SURFACE_PRODUCER_H_
+#pragma once
 
-#include "flutter/content_handler/vulkan_surface.h"
-#include "flutter/content_handler/vulkan_surface_pool.h"
 #include "flutter/flow/scene_update_context.h"
 #include "flutter/vulkan/vulkan_application.h"
 #include "flutter/vulkan/vulkan_device.h"
@@ -17,11 +14,14 @@
 #include "lib/ui/scenic/client/resources.h"
 #include "lib/ui/scenic/client/session.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
+#include "vulkan_surface.h"
+#include "vulkan_surface_pool.h"
 
-namespace flutter_runner {
+namespace flutter {
 
-class VulkanSurfaceProducer : public flow::SceneUpdateContext::SurfaceProducer,
-                              public vulkan::VulkanProvider {
+class VulkanSurfaceProducer final
+    : public flow::SceneUpdateContext::SurfaceProducer,
+      public vulkan::VulkanProvider {
  public:
   VulkanSurfaceProducer(scenic_lib::Session* mozart_session);
 
@@ -74,6 +74,4 @@ class VulkanSurfaceProducer : public flow::SceneUpdateContext::SurfaceProducer,
   FXL_DISALLOW_COPY_AND_ASSIGN(VulkanSurfaceProducer);
 };
 
-}  // namespace flutter_runner
-
-#endif  // FLUTTER_CONTENT_HANDLER_VULKAN_SURFACE_PRODUCER_H_
+}  // namespace flutter

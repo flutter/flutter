@@ -5,19 +5,40 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 
 #include "flutter/common/settings.h"
-#include "flutter/common/threads.h"
+#include "flutter/common/task_runners.h"
 #include "flutter/flow/layers/layer_tree.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
+#include "flutter/shell/platform/darwin/ios/ios_surface_gl.h"
+#include "flutter/shell/platform/darwin/ios/ios_surface_software.h"
 #include "lib/fxl/synchronization/waitable_event.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
 
-@interface FlutterView ()<UIInputViewAudioFeedback>
+@interface FlutterView () <UIInputViewAudioFeedback>
 
 @end
 
 @implementation FlutterView
+
+- (FlutterViewController*)flutterViewController {
+  // Find the first view controller in the responder chain and see if it is a FlutterViewController.
+  for (UIResponder* responder = self.nextResponder; responder != nil;
+       responder = responder.nextResponder) {
+    if ([responder isKindOfClass:[UIViewController class]]) {
+      if ([responder isKindOfClass:[FlutterViewController class]]) {
+        return reinterpret_cast<FlutterViewController*>(responder);
+      } else {
+        // Should only happen if a non-FlutterViewController tries to somehow (via dynamic class
+        // resolution or reparenting) set a FlutterView as its view.
+        return nil;
+      }
+    }
+  }
+  return nil;
+}
 
 - (void)layoutSubviews {
   if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
@@ -40,13 +61,24 @@
 #endif  // TARGET_IPHONE_SIMULATOR
 }
 
+- (std::unique_ptr<shell::IOSSurface>)createSurface {
+  if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
+    fml::scoped_nsobject<CAEAGLLayer> eagl_layer(
+        reinterpret_cast<CAEAGLLayer*>([self.layer retain]));
+    return std::make_unique<shell::IOSSurfaceGL>(std::move(eagl_layer));
+  } else {
+    fml::scoped_nsobject<CALayer> layer(reinterpret_cast<CALayer*>([self.layer retain]));
+    return std::make_unique<shell::IOSSurfaceSoftware>(std::move(layer));
+  }
+}
+
 - (BOOL)enableInputClicksWhenVisible {
   return YES;
 }
 
-void SnapshotRasterizer(fml::WeakPtr<shell::Rasterizer> rasterizer,
-                        CGContextRef context,
-                        bool is_opaque) {
+static void SnapshotRasterizer(fml::WeakPtr<shell::Rasterizer> rasterizer,
+                               CGContextRef context,
+                               bool is_opaque) {
   if (!rasterizer) {
     return;
   }
@@ -77,51 +109,17 @@ void SnapshotRasterizer(fml::WeakPtr<shell::Rasterizer> rasterizer,
 
   SkCanvas canvas(bitmap);
 
-  {
-    flow::CompositorContext compositor_context(nullptr);
-    auto frame = compositor_context.AcquireFrame(nullptr, &canvas, false /* instrumentation */);
-    layer_tree->Raster(frame, false /* ignore raster cache. */);
+  flow::CompositorContext compositor_context;
+
+  if (auto frame = compositor_context.AcquireFrame(nullptr, &canvas, false /* instrumentation */)) {
+    layer_tree->Preroll(*frame, true /* ignore raster cache */);
+    layer_tree->Paint(*frame);
   }
 
   canvas.flush();
 
   // Draw the bitmap to the system provided snapshotting context.
   SkCGDrawBitmap(context, bitmap, 0, 0);
-}
-
-static fml::WeakPtr<shell::Rasterizer> GetRandomRasterizer() {
-  fml::WeakPtr<shell::Rasterizer> rasterizer;
-  shell::Shell::Shared().IteratePlatformViews([&rasterizer](shell::PlatformView* view) -> bool {
-    rasterizer = view->rasterizer().GetWeakRasterizerPtr();
-    // We just grab the first rasterizer so there is no need to iterate
-    // further.
-    return false;
-  });
-  return rasterizer;
-}
-
-void SnapshotContents(CGContextRef context, bool is_opaque) {
-  // TODO(chinmaygarde): Currently, there is no way to get the rasterizer for
-  // a particular platform view from the shell. But, for now, we only have one
-  // platform view. So use that. Once we support multiple platform views, the
-  // shell will need to provide a way to get the rasterizer for a specific
-  // platform view.
-  SnapshotRasterizer(GetRandomRasterizer(), context, is_opaque);
-}
-
-void SnapshotContentsSync(CGContextRef context, UIView* view) {
-  auto gpu_thread = blink::Threads::Gpu();
-
-  if (!gpu_thread) {
-    return;
-  }
-
-  fxl::AutoResetWaitableEvent latch;
-  gpu_thread->PostTask([&latch, context, view]() {
-    SnapshotContents(context, [view isOpaque]);
-    latch.Signal();
-  });
-  latch.Wait();
 }
 
 // Override the default CALayerDelegate method so that APIs that attempt to
@@ -132,7 +130,22 @@ void SnapshotContentsSync(CGContextRef context, UIView* view) {
 // 2: The call is made of the platform thread and not the GPU thread.
 // 3: There may be a software rasterizer.
 - (void)drawLayer:(CALayer*)layer inContext:(CGContextRef)context {
-  SnapshotContentsSync(context, self);
+  TRACE_EVENT0("flutter", "SnapshotFlutterView");
+  FlutterViewController* controller = [self flutterViewController];
+
+  if (controller == nil) {
+    return;
+  }
+
+  auto& shell = [controller shell];
+
+  fxl::AutoResetWaitableEvent latch;
+  shell.GetTaskRunners().GetGPUTaskRunner()->PostTask(
+      [&latch, rasterizer = shell.GetRasterizer(), context, opaque = layer.opaque]() {
+        SnapshotRasterizer(std::move(rasterizer), context, opaque);
+        latch.Signal();
+      });
+  latch.Wait();
 }
 
 @end

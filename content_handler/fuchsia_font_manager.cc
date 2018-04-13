@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "flutter/content_handler/fuchsia_font_manager.h"
+#include "fuchsia_font_manager.h"
 
 #include <zx/vmar.h>
 
@@ -32,14 +32,14 @@ void UnmapMemory(const void* buffer, void* context) {
   zx::vmar::root_self().unmap(reinterpret_cast<uintptr_t>(buffer), size);
 }
 
-sk_sp<SkData> MakeSkDataFromBuffer(mem::Buffer data) {
-  if (!fsl::SizedVmo::IsSizeValid(data.vmo, data.size) ||
-      data.size > std::numeric_limits<size_t>::max()) {
+sk_sp<SkData> MakeSkDataFromVMO(const fsl::SizedVmoTransportPtr& vmo) {
+  if (!fsl::SizedVmo::IsSizeValid(vmo->vmo, vmo->size) ||
+      vmo->size > std::numeric_limits<size_t>::max()) {
     return nullptr;
   }
-  uint64_t size = data.size;
+  uint64_t size = vmo->size;
   uintptr_t buffer = 0;
-  zx_status_t status = zx::vmar::root_self().map(0, data.vmo, 0, size,
+  zx_status_t status = zx::vmar::root_self().map(0, vmo->vmo, 0, size,
                                                  ZX_VM_FLAG_PERM_READ, &buffer);
   if (status != ZX_OK)
     return nullptr;
@@ -49,7 +49,7 @@ sk_sp<SkData> MakeSkDataFromBuffer(mem::Buffer data) {
 
 fonts::FontSlant ToFontSlant(SkFontStyle::Slant slant) {
   return (slant == SkFontStyle::kItalic_Slant) ? fonts::FontSlant::ITALIC
-      : fonts::FontSlant::UPRIGHT;
+                                               : fonts::FontSlant::UPRIGHT;
 }
 
 }  // anonymous namespace
@@ -64,7 +64,8 @@ int FuchsiaFontManager::onCountFamilies() const {
   return 0;
 }
 
-void FuchsiaFontManager::onGetFamilyName(int index, SkString* familyName) const {
+void FuchsiaFontManager::onGetFamilyName(int index,
+                                         SkString* familyName) const {
   FXL_DCHECK(false);
 }
 
@@ -87,12 +88,13 @@ SkFontStyleSet* FuchsiaFontManager::onMatchFamily(
 }
 
 SkTypeface* FuchsiaFontManager::onMatchFamilyStyle(
-    const char family_name[], const SkFontStyle& style) const {
-  fonts::FontRequest request;
-  request.family = family_name;
-  request.weight = style.weight();
-  request.width = style.width();
-  request.slant = ToFontSlant(style.slant());
+    const char family_name[],
+    const SkFontStyle& style) const {
+  auto request = fonts::FontRequest::New();
+  request->family = family_name;
+  request->weight = style.weight();
+  request->width = style.width();
+  request->slant = ToFontSlant(style.slant());
 
   fonts::FontResponsePtr response;
   font_provider_->GetFont(
@@ -100,14 +102,13 @@ SkTypeface* FuchsiaFontManager::onMatchFamilyStyle(
       [&response](fonts::FontResponsePtr r) { response = std::move(r); });
   font_provider_.WaitForResponse();
 
-  FXL_DCHECK(response)
-      << "Unable to contact the font provider. Did you run "
-         "Flutter in an environment that has a font manager?\n";
-
-  if (!response)
+  if (!response) {
+    FXL_DLOG(ERROR) << "Unable to contact the font provider. Did you run "
+                       "Flutter in an environment that has a font manager?";
     return nullptr;
+  }
 
-  sk_sp<SkData> data = MakeSkDataFromBuffer(std::move(response->data.buffer));
+  sk_sp<SkData> data = MakeSkDataFromVMO(response->data->vmo);
   if (!data)
     return nullptr;
 
@@ -127,13 +128,13 @@ SkTypeface* FuchsiaFontManager::onMatchFamilyStyleCharacter(
 }
 
 SkTypeface* FuchsiaFontManager::onMatchFaceStyle(const SkTypeface*,
-                                               const SkFontStyle&) const {
+                                                 const SkFontStyle&) const {
   FXL_DCHECK(false);
   return nullptr;
 }
 
 sk_sp<SkTypeface> FuchsiaFontManager::onMakeFromData(sk_sp<SkData>,
-                                                   int ttcIndex) const {
+                                                     int ttcIndex) const {
   FXL_DCHECK(false);
   return nullptr;
 }
@@ -153,7 +154,7 @@ sk_sp<SkTypeface> FuchsiaFontManager::onMakeFromStreamArgs(
 }
 
 sk_sp<SkTypeface> FuchsiaFontManager::onMakeFromFile(const char path[],
-                                                   int ttcIndex) const {
+                                                     int ttcIndex) const {
   FXL_DCHECK(false);
   return nullptr;
 }

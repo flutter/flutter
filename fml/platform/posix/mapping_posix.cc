@@ -11,6 +11,7 @@
 
 #include <type_traits>
 
+#include "flutter/fml/unique_fd.h"
 #include "lib/fxl/build_config.h"
 #include "lib/fxl/files/eintr_wrapper.h"
 
@@ -39,11 +40,11 @@ std::unique_ptr<Mapping> GetResourceMapping(const std::string& resource_name) {
   return std::make_unique<PlatformResourceMapping>(resource_name);
 }
 
-FileMapping::FileMapping(const std::string& path)
-    : FileMapping(fxl::UniqueFD{HANDLE_EINTR(::open(path.c_str(), O_RDONLY))}) {
-}
+FileMapping::FileMapping(const std::string& path, bool executable)
+    : FileMapping(fml::UniqueFD{HANDLE_EINTR(::open(path.c_str(), O_RDONLY))},
+                  executable) {}
 
-FileMapping::FileMapping(const fxl::UniqueFD& handle)
+FileMapping::FileMapping(const fml::UniqueFD& handle, bool executable)
     : size_(0), mapping_(nullptr) {
   if (!handle.is_valid()) {
     return;
@@ -59,8 +60,13 @@ FileMapping::FileMapping(const fxl::UniqueFD& handle)
     return;
   }
 
-  auto mapping = ::mmap(nullptr, stat_buffer.st_size, PROT_READ, MAP_PRIVATE,
-                        handle.get(), 0);
+  int flags = PROT_READ;
+  if (executable) {
+    flags |= PROT_EXEC;
+  }
+
+  auto mapping =
+      ::mmap(nullptr, stat_buffer.st_size, flags, MAP_PRIVATE, handle.get(), 0);
 
   if (mapping == MAP_FAILED) {
     return;

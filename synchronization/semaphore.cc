@@ -15,9 +15,12 @@ namespace flutter {
 class PlatformSemaphore {
  public:
   explicit PlatformSemaphore(uint32_t count)
-      : _sem(dispatch_semaphore_create(count)) {}
+      : _sem(dispatch_semaphore_create(count)), _initial(count) {}
 
   ~PlatformSemaphore() {
+    for (uint32_t i = 0; i < _initial; ++i) {
+      Signal();
+    }
     if (_sem != nullptr) {
       dispatch_release(reinterpret_cast<dispatch_object_t>(_sem));
       _sem = nullptr;
@@ -42,6 +45,7 @@ class PlatformSemaphore {
 
  private:
   dispatch_semaphore_t _sem;
+  const uint32_t _initial;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(PlatformSemaphore);
 };

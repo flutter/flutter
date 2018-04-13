@@ -4,7 +4,6 @@
 
 #include "flutter/flow/scene_update_context.h"
 
-#include "flutter/common/threads.h"
 #include "flutter/flow/export_node.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/matrix_decomposition.h"
@@ -19,9 +18,7 @@ SceneUpdateContext::SceneUpdateContext(scenic_lib::Session* session,
 }
 
 SceneUpdateContext::~SceneUpdateContext() {
-  ASSERT_IS_GPU_THREAD;
-
-  // Release Scenic session resources for all ExportNodes.
+  // Release Mozart session resources for all ExportNodes.
   for (auto export_node : export_nodes_) {
     export_node->Dispose(false);
   }
@@ -30,21 +27,16 @@ SceneUpdateContext::~SceneUpdateContext() {
 void SceneUpdateContext::AddChildScene(ExportNode* export_node,
                                        SkPoint offset,
                                        bool hit_testable) {
-  ASSERT_IS_GPU_THREAD;
   FXL_DCHECK(top_entity_);
 
   export_node->Bind(*this, top_entity_->entity_node(), offset, hit_testable);
 }
 
 void SceneUpdateContext::AddExportNode(ExportNode* export_node) {
-  ASSERT_IS_GPU_THREAD;
-
   export_nodes_.insert(export_node);  // Might already have been added.
 }
 
 void SceneUpdateContext::RemoveExportNode(ExportNode* export_node) {
-  ASSERT_IS_GPU_THREAD;
-
   export_nodes_.erase(export_node);
 }
 
@@ -195,12 +187,9 @@ SceneUpdateContext::ExecutePaintTasks(CompositorContext::ScopedFrame& frame) {
   for (auto& task : paint_tasks_) {
     FXL_DCHECK(task.surface);
     SkCanvas* canvas = task.surface->GetSkiaSurface()->getCanvas();
-    Layer::PaintContext context = {*canvas,
-                                   frame.context().frame_time(),
+    Layer::PaintContext context = {*canvas, frame.context().frame_time(),
                                    frame.context().engine_time(),
-                                   frame.context().memory_usage(),
-                                   frame.context().texture_registry(),
-                                   false};
+                                   frame.context().texture_registry(), false};
     canvas->restoreToCount(1);
     canvas->save();
     canvas->clear(task.background_color);

@@ -5,131 +5,144 @@
 #ifndef SHELL_COMMON_ENGINE_H_
 #define SHELL_COMMON_ENGINE_H_
 
-#include "flutter/assets/zip_asset_store.h"
-#include "flutter/assets/asset_provider.h"
+#include <memory>
+#include <string>
+
+#include "flutter/assets/asset_manager.h"
+#include "flutter/common/task_runners.h"
+#include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
+#include "flutter/runtime/dart_vm.h"
+#include "flutter/runtime/platform_impl.h"
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
+#include "flutter/shell/common/animator.h"
 #include "flutter/shell/common/rasterizer.h"
+#include "flutter/shell/common/run_configuration.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/weak_ptr.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
-namespace blink {
-class DirectoryAssetBundle;
-class ZipAssetBundle;
-}  // namespace blink
-
 namespace shell {
-class PlatformView;
-class Animator;
-using PointerDataPacket = blink::PointerDataPacket;
 
-class Engine : public blink::RuntimeDelegate {
+class Engine final : public blink::RuntimeDelegate {
  public:
-  explicit Engine(PlatformView* platform_view);
+  class Delegate {
+   public:
+    virtual void OnEngineUpdateSemantics(
+        const Engine& engine,
+        blink::SemanticsNodeUpdates update) = 0;
+
+    virtual void OnEngineHandlePlatformMessage(
+        const Engine& engine,
+        fxl::RefPtr<blink::PlatformMessage> message) = 0;
+  };
+
+  Engine(Delegate& delegate,
+         const blink::DartVM& vm,
+         blink::TaskRunners task_runners,
+         blink::Settings settings,
+         std::unique_ptr<Animator> animator,
+         fml::WeakPtr<GrContext> resource_context,
+         fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue);
 
   ~Engine() override;
 
-  fml::WeakPtr<Engine> GetWeakPtr();
+  fml::WeakPtr<Engine> GetWeakPtr() const;
 
-  static void Init(const std::string& bundle_path);
+  FXL_WARN_UNUSED_RESULT
+  bool Run(RunConfiguration configuration);
 
-  void RunBundle(const std::string& bundle_path,
-                 const std::string& entrypoint = main_entrypoint_,
-                 bool reuse_runtime_controller = false);
+  // Used to "cold reload" a running application where the shell (along with the
+  // platform view and its rasterizer bindings) remains the same but the root
+  // isolate is torn down and restarted with the new configuration. Only used in
+  // the development workflow.
+  FXL_WARN_UNUSED_RESULT
+  bool Restart(RunConfiguration configuration);
 
-  // Uses the given provider to locate assets.
-  void RunBundleWithAssets(fxl::RefPtr<blink::AssetProvider> asset_provider,
-                           const std::string& bundle_path,
-                           const std::string& entrypoint = main_entrypoint_,
-                           bool reuse_runtime_controller = false);
-
-  // Uses the given source code instead of looking inside the bundle for the
-  // source code.
-  void RunBundleAndSource(const std::string& bundle_path,
-                          const std::string& main,
-                          const std::string& packages,
-                          bool reuse_runtime_controller = false);
+  bool UpdateAssetManager(fxl::RefPtr<blink::AssetManager> asset_manager);
 
   void BeginFrame(fxl::TimePoint frame_time);
+
   void NotifyIdle(int64_t deadline);
 
-  void RunFromSource(const std::string& main,
-                     const std::string& packages,
-                     const std::string& bundle);
-  void SetAssetBundlePath(const std::string& bundle_path);
-
   Dart_Port GetUIIsolateMainPort();
+
   std::string GetUIIsolateName();
+
   bool UIIsolateHasLivePorts();
+
   tonic::DartErrorHandleType GetUIIsolateLastError();
+
   tonic::DartErrorHandleType GetLoadScriptError();
 
-  void OnOutputSurfaceCreated(const fxl::Closure& gpu_continuation);
-  void OnOutputSurfaceDestroyed(const fxl::Closure& gpu_continuation);
+  std::pair<bool, uint32_t> GetUIIsolateReturnCode();
+
+  void OnOutputSurfaceCreated();
+
+  void OnOutputSurfaceDestroyed();
+
   void SetViewportMetrics(const blink::ViewportMetrics& metrics);
+
   void DispatchPlatformMessage(fxl::RefPtr<blink::PlatformMessage> message);
-  void DispatchPointerDataPacket(const PointerDataPacket& packet);
+
+  void DispatchPointerDataPacket(const blink::PointerDataPacket& packet);
+
   void DispatchSemanticsAction(int id,
                                blink::SemanticsAction action,
                                std::vector<uint8_t> args);
+
   void SetSemanticsEnabled(bool enabled);
+
   void ScheduleFrame(bool regenerate_layer_tree = true) override;
 
-  void set_rasterizer(fml::WeakPtr<Rasterizer> rasterizer);
-
  private:
-  // RuntimeDelegate methods:
-  std::string DefaultRouteName() override;
-  void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
-  void UpdateSemantics(blink::SemanticsNodeUpdates update) override;
-  void HandlePlatformMessage(
-      fxl::RefPtr<blink::PlatformMessage> message) override;
-  void DidCreateMainIsolate(Dart_Isolate isolate) override;
-  void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
-
-  void StopAnimator();
-  void StartAnimatorIfPossible();
-
-  void DoRunBundle(const std::string& script_uri,
-                   const std::string& entrypoint,
-                   bool reuse_runtime_controller);
-
-  void ConfigureAssetBundle(const std::string& path);
-  void ConfigureRuntime(const std::string& script_uri,
-                        bool reuse_runtime_controller = false);
-
-  bool HandleLifecyclePlatformMessage(blink::PlatformMessage* message);
-  bool HandleNavigationPlatformMessage(
-      fxl::RefPtr<blink::PlatformMessage> message);
-  bool HandleLocalizationPlatformMessage(blink::PlatformMessage* message);
-  void HandleSettingsPlatformMessage(blink::PlatformMessage* message);
-
-  void HandleAssetPlatformMessage(fxl::RefPtr<blink::PlatformMessage> message);
-  bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
-
-  static const std::string main_entrypoint_;
-
-  fxl::RefPtr<blink::AssetProvider> asset_provider_;
-  std::weak_ptr<PlatformView> platform_view_;
+  Engine::Delegate& delegate_;
+  const blink::Settings settings_;
   std::unique_ptr<Animator> animator_;
-  std::unique_ptr<blink::RuntimeController> runtime_;
+  std::unique_ptr<blink::RuntimeController> runtime_controller_;
+  std::unique_ptr<blink::PlatformImpl> legacy_sky_platform_;
   tonic::DartErrorHandleType load_script_error_;
   std::string initial_route_;
   blink::ViewportMetrics viewport_metrics_;
-  std::string language_code_;
-  std::string country_code_;
-  std::string user_settings_data_;
-  bool semantics_enabled_ = false;
-  // TODO(zarah): Remove usage of asset_store_ once app.flx is removed.
-  fxl::RefPtr<blink::ZipAssetStore> asset_store_;
-  fxl::RefPtr<blink::DirectoryAssetBundle> directory_asset_bundle_;
-  // TODO(eseidel): This should move into an AnimatorStateMachine.
+  fxl::RefPtr<blink::AssetManager> asset_manager_;
   bool activity_running_;
   bool have_surface_;
+  fml::WeakPtr<Engine> weak_prototype_;
   fml::WeakPtrFactory<Engine> weak_factory_;
+
+  // |blink::RuntimeDelegate|
+  std::string DefaultRouteName() override;
+
+  // |blink::RuntimeDelegate|
+  void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
+
+  // |blink::RuntimeDelegate|
+  void UpdateSemantics(blink::SemanticsNodeUpdates update) override;
+
+  // |blink::RuntimeDelegate|
+  void HandlePlatformMessage(
+      fxl::RefPtr<blink::PlatformMessage> message) override;
+
+  void StopAnimator();
+
+  void StartAnimatorIfPossible();
+
+  bool HandleLifecyclePlatformMessage(blink::PlatformMessage* message);
+
+  bool HandleNavigationPlatformMessage(
+      fxl::RefPtr<blink::PlatformMessage> message);
+
+  bool HandleLocalizationPlatformMessage(blink::PlatformMessage* message);
+
+  void HandleSettingsPlatformMessage(blink::PlatformMessage* message);
+
+  void HandleAssetPlatformMessage(fxl::RefPtr<blink::PlatformMessage> message);
+
+  bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
+
+  bool PrepareAndLaunchIsolate(RunConfiguration configuration);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(Engine);
 };

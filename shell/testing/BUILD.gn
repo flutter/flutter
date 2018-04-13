@@ -2,24 +2,30 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source_set("testing") {
+executable("testing") {
+  testonly = true
+
+  output_name = "flutter_tester"
+
+  public_configs = [ "$flutter_root:config" ]
+
   sources = [
-    "platform_view_test.cc",
-    "platform_view_test.h",
-    "test_runner.cc",
-    "test_runner.h",
-    "testing.cc",
-    "testing.h",
+    "tester_main.cc",
   ]
 
   deps = [
+    "$flutter_root/assets",
     "$flutter_root/common",
+    "$flutter_root/fml",
     "$flutter_root/shell/common",
     "//garnet/public/lib/fxl",
+    "//third_party/dart/runtime:libdart_jit",
+    "//third_party/dart/runtime/bin:embedded_dart_io",
     "//third_party/skia",
+    "//topaz/lib/tonic",
   ]
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
+  if (is_linux) {
+    ldflags = [ "-rdynamic" ]
+  }
 }

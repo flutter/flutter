@@ -6,12 +6,13 @@
 
 #include <list>
 #include <unordered_map>
-#include "flutter/content_handler/vulkan_surface.h"
+
 #include "lib/fxl/macros.h"
+#include "vulkan_surface.h"
 
-namespace flutter_runner {
+namespace flutter {
 
-class VulkanSurfacePool {
+class VulkanSurfacePool final {
  public:
   static const size_t kMaxSurfacesOfSameSize = 3;
   static const size_t kMaxSurfaceAge = 3;
@@ -74,4 +75,4 @@ class VulkanSurfacePool {
   FXL_DISALLOW_COPY_AND_ASSIGN(VulkanSurfacePool);
 };
 
-}  // namespace flutter_runner
+}  // namespace flutter

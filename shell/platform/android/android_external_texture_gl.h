@@ -25,8 +25,7 @@ class AndroidExternalTextureGL : public flow::Texture {
 
   virtual void OnGrContextDestroyed() override;
 
-  // Called on GPU thread.
-  void MarkNewFrameAvailable();
+  void MarkNewFrameAvailable() override;
 
  private:
   void Attach(jint textureName);

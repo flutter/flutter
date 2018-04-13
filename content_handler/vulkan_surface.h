@@ -20,9 +20,10 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
 
-namespace flutter_runner {
+namespace flutter {
 
-class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface {
+class VulkanSurface final
+    : public flow::SceneUpdateContext::SurfaceProducerSurface {
  public:
   VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
                 sk_sp<GrContext> context,
@@ -32,12 +33,16 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface {
 
   ~VulkanSurface() override;
 
+  // |flow::SceneUpdateContext::SurfaceProducerSurface|
   size_t AdvanceAndGetAge() override;
 
+  // |flow::SceneUpdateContext::SurfaceProducerSurface|
   bool FlushSessionAcquireAndReleaseEvents() override;
 
+  // |flow::SceneUpdateContext::SurfaceProducerSurface|
   bool IsValid() const override;
 
+  // |flow::SceneUpdateContext::SurfaceProducerSurface|
   SkISize GetSize() const override;
 
   // Note: It is safe for the caller to collect the surface in the
@@ -115,4 +120,4 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface {
   FXL_DISALLOW_COPY_AND_ASSIGN(VulkanSurface);
 };
 
-}  // namespace flutter_runner
+}  // namespace flutter
