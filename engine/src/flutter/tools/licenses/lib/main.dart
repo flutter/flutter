@@ -2106,6 +2106,7 @@ class RepositoryFlutterDirectory extends RepositoryDirectory {
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'testing'
         && entry.name != 'tools'
+        && entry.name != 'docs'
         && entry.name != 'examples'
         && entry.name != 'build'
         && entry.name != 'travis'
