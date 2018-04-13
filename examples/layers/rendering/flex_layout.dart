@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'src/solid_color_box.dart';
 
 void main() {
-  final RenderFlex table = new RenderFlex(direction: Axis.vertical);
+  final RenderFlex table = new RenderFlex(direction: Axis.vertical, textDirection: TextDirection.ltr);
 
   void addAlignmentRow(CrossAxisAlignment crossAxisAlignment) {
     TextStyle style = const TextStyle(color: const Color(0xFF000000));
