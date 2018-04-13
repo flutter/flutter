@@ -342,14 +342,12 @@ DartVM::DartVM(const Settings& settings,
   const bool is_preview_dart2 =
       platform_kernel_ != nullptr || isolate_snapshot_is_dart_2;
 
-  if (is_preview_dart2) {
-    FXL_DLOG(INFO) << "Dart 2 is enabled.";
-  } else {
-    FXL_DLOG(INFO) << "Dart 2 is NOT enabled. Platform kernel: "
-                   << static_cast<bool>(platform_kernel_)
-                   << " Isolate Snapshot is Dart 2: "
-                   << isolate_snapshot_is_dart_2;
-  }
+  FXL_DLOG(INFO) << "Dart 2 " << (is_preview_dart2 ? " is" : "is NOT")
+                 << "enabled. Platform kernel: "
+                 << static_cast<bool>(platform_kernel_)
+                 << " Isolate Snapshot is Dart 2: "
+                 << isolate_snapshot_is_dart_2;
+
   if (is_preview_dart2) {
     PushBackAll(&args, kDartStrongModeArgs, arraysize(kDartStrongModeArgs));
     if (use_checked_mode) {
