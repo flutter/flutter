@@ -78,27 +78,28 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
-    return new Theme(
-      data: _kTheme.copyWith(platform: Theme.of(context).platform),
-      child: new Scaffold(
-        key: scaffoldKey,
-        floatingActionButton: new FloatingActionButton(
-          child: const Icon(Icons.edit),
-          onPressed: () {
-            scaffoldKey.currentState.showSnackBar(const SnackBar(
-              content: const Text('Not supported.'),
-            ));
-          },
+    return new RouteName(
+      routeName: 'pesto',
+      child: new Theme(
+        data: _kTheme.copyWith(platform: Theme.of(context).platform),
+        child: new Scaffold(
+          key: scaffoldKey,
+          floatingActionButton: new FloatingActionButton(
+            child: const Icon(Icons.edit),
+            onPressed: () {
+              scaffoldKey.currentState.showSnackBar(const SnackBar(
+                content: const Text('Not supported.'),
+              ));
+            },
+          ),
+          body: new CustomScrollView(
+            slivers: <Widget>[
+              _buildAppBar(context, statusBarHeight),
+              _buildBody(context, statusBarHeight),
+            ],
+          ),
         ),
-        body: new RouteName(
-          routeName: 'pesto',
-          child: new CustomScrollView(
-          slivers: <Widget>[
-            _buildAppBar(context, statusBarHeight),
-            _buildBody(context, statusBarHeight),
-          ],
-        )),
-      )
+      ),
     );
   }
 
