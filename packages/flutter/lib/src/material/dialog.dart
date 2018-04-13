@@ -468,6 +468,12 @@ class SimpleDialog extends StatelessWidget {
   /// the top padding ends up being 24 pixels.
   final EdgeInsetsGeometry contentPadding;
 
+  /// The semantic name of the dialog used by accessibility frameworks.
+  /// 
+  /// See also:
+  /// 
+  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///    value is used.
   final String semanticName;
 
   @override

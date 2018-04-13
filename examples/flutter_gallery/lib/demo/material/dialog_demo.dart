@@ -100,7 +100,7 @@ class DialogDemoState extends State<DialogDemo> {
                 child: new AlertDialog(
                   content: new Text(
                     _alertWithoutTitleText,
-                    style: dialogTextStyle,
+                    style: dialogTextStyle
                   ),
                   actions: <Widget>[
                     new FlatButton(

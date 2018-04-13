@@ -426,13 +426,6 @@ class _PopupMenu<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String value = '';
-    if (semanticName == null && defaultTargetPlatform != TargetPlatform.iOS) {
-      final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-      value = localizations.popupMenuName;
-    }
-    
-
     final double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
     final List<Widget> children = <Widget>[];
 
@@ -488,7 +481,12 @@ class _PopupMenu<T> extends StatelessWidget {
               alignment: AlignmentDirectional.topEnd,
               widthFactor: width.evaluate(route.animation),
               heightFactor: height.evaluate(route.animation),
-              child: new Semantics(route: true, routeName: true, value: value, child: child),
+              child: new Semantics(
+                route: true,
+                routeName: true,
+                value: semanticName,
+                child: child,
+              ),
             ),
           ),
         );
@@ -691,6 +689,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// The `context` argument is used to look up the [Navigator] and [Theme] for
 /// the menu. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the popup menu is closed.
+/// 
+/// The `semanticName` argument overrides the default semantic value used by
+/// accessibility frameworks.
 ///
 /// See also:
 ///
@@ -699,6 +700,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///  * [CheckedPopupMenuItem], a popup menu item with a checkmark.
 ///  * [PopupMenuButton], which provides an [IconButton] that shows a menu by
 ///    calling this method automatically.
+///  * [SemanticsConfiguration.isRouteName], for a description of how the
+///    `semanticName` is used.
 Future<T> showMenu<T>({
   @required BuildContext context,
   RelativeRect position,
