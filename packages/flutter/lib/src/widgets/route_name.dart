@@ -8,11 +8,14 @@ import 'package:flutter/widgets.dart';
 
 /// A widget which provides a semantic name for a route.
 ///
-/// On iOS, no additional semantic information is inserted.
+/// On Android, TalkBack uses [routeName] as the text value for an edge 
+/// triggered semantics  update. On iOS, no additional semantic information
+/// is inserted since by convention VoiceOver uses a standard chime sound 
+/// effect for most navigation events.
 ///
 /// See also:
 ///
-///  * [SemanticsProperties.routeName], for a description of how route name
+///  * [SemanticsProperties.namesRoute], for a description of how route name
 ///    semantics work.
 class RouteName extends StatelessWidget  {
   /// Creates a widget which provides a semantic route name.
@@ -24,7 +27,7 @@ class RouteName extends StatelessWidget  {
     @required this.routeName,
   }) : super(key: key);
 
-  /// A semantic name for the route.
+  /// A semantic label for the route.
   /// 
   /// On iOS platforms this value is ignored.
   final String routeName;

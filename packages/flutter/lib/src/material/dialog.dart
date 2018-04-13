@@ -280,7 +280,7 @@ class AlertDialog extends StatelessWidget {
           scopesRoute: true,
           namesRoute: semanticLabel != null,
           explicitChildNodes: true,
-          value: semanticLabel,
+          label: semanticLabel,
           child: new Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -513,7 +513,7 @@ class SimpleDialog extends StatelessWidget {
           child: new Semantics(
             scopesRoute: true,
             namesRoute: semanticLabel != null,
-            value: semanticLabel,
+            label: semanticLabel,
             explicitChildNodes: true,
             child: new Column(
               mainAxisSize: MainAxisSize.min,

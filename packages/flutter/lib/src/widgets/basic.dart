@@ -5001,8 +5001,6 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///
   /// This setting is often used in combination with [SemanticsConfiguration.isSemanticBoundary]
   /// to create semantic boundaries that are either writable or not for children.
-  /// 
-  /// Setting [properties.route] to true will force this value to be true as well.
   final bool explicitChildNodes;
 
   @override

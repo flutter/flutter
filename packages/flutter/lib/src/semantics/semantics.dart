@@ -409,28 +409,35 @@ class SemanticsProperties extends DiagnosticableTree {
   /// Doing so instructs screen readers to not read out the [value].
   final bool obscured;
 
-  /// If non-null, whether the node corresponds to a visually distinct subtree.
+  /// If non-null, whether the node corresponds to a route subtree.
   ///
-  /// When the most specific route semantics node changes, the platform
-  /// accessibility framework will make an edge-triggered announcement and clear
-  /// the current accessibility focus. Specificity is defined as the last child
-  /// in inverse hit-test order.
+  /// When a node with [scopesRoute] set to true is added or removed from the 
+  /// semantics tree, an edge triggered semantic update may occur. Either the
+  /// last node added or the last node remaining, in preorder inverse hit test
+  /// order, determines the node used to search for a semantic node with a 
+  /// [namesRoute] property.
+  /// 
+  /// Nodes with a [scopesRoute] property set to true are not considered 
+  /// focusable by Android or iOS.
   ///
   /// See also:
   ///
-  ///  * [routeName] for a description of how the announced value is selected.
+  ///  * [namesRoute] for a description of how the announced value is selected.
   final bool scopesRoute;
 
   /// If non-null, whether the node contains the semantic name for a route.
   ///
-  /// When the most specific route semantics node changes, the platform will
-  /// search for the first child in inverse hit test order with a routeName 
-  /// flag and a non empty semantic value. If no value is found VoiceOver will
-  /// still provide a notification chime while TalkBack will make no announcement.
+  /// When a node with the [scopesRoute] property set to true is selected, a
+  /// preorder traversal from this node is performed. The first node with a 
+  /// [scopesRoute] property set to true and a non-null and non-empty semantic
+  /// [label] provides the value for the edge triggered semantic updated. 
+  /// If there are no non-null or non-empty labels, TalkBack will not make an
+  /// announcement, but VoiceOver will produce a chime sound.
   ///
   /// See also:
   /// 
-  ///  * [route] for a description of how the route is selected.
+  ///  * [scopesRoute] for a description of how the initial subtree is
+  ///    selected.
   final bool namesRoute;
 
   /// Provides a textual description of the widget.

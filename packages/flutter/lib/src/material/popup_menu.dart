@@ -484,7 +484,8 @@ class _PopupMenu<T> extends StatelessWidget {
               child: new Semantics(
                 scopesRoute: true,
                 namesRoute: true,
-                value: semanticLabel,
+                explicitChildNodes: true,
+                label: semanticLabel,
                 child: child,
               ),
             ),

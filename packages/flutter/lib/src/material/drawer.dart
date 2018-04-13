@@ -116,7 +116,7 @@ class Drawer extends StatelessWidget {
       child: new Material(
         elevation: elevation,
         child: new Semantics(
-          namesRoute: true,
+          namesRoute: semanticLabel != null,
           scopesRoute: true,
           explicitChildNodes: true,
           label: semanticLabel,
