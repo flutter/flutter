@@ -533,20 +533,12 @@ class HotRunner extends ResidentRunner {
           pause: pause
         );
         countExpectedReports += reports.length;
-        Future.wait(reports).then((List<Map<String, dynamic>> list) {
+        Future.wait(reports).catchError((dynamic error) {
+          return <Map<String, dynamic>>[error];
+        }).then((List<Map<String, dynamic>> list) {
           // TODO(aam): Investigate why we are validating only first reload report,
           // which seems to be current behavior
           final Map<String, dynamic> firstReport = list.first;
-          if (firstReport == null) {
-            // This could happen if the isolate is not actually running,
-            // failed to start for some reason. For example, if main method
-            // is not found in the app.
-            // TODO(aam): In one known case, where Flutter app failed to
-            // start due to absence of 'main' entry point, Flutter tools should
-            // recognize that fact and don't allow user to progress further.
-            retrieveFirstReloadReport.completeError('Dart VM failed to provide reload report');
-            return;
-          }
           // Don't print errors because they will be printed further down when
           // `validateReloadReport` is called again.
           device.updateReloadStatus(validateReloadReport(firstReport,
