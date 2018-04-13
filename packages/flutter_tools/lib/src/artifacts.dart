@@ -31,7 +31,7 @@ enum Artifact {
   engineDartBinary,
 }
 
-String _artifactToFileName(Artifact artifact) {
+String _artifactToFileName(Artifact artifact, [TargetPlatform platform]) {
   switch (artifact) {
     case Artifact.dartIoEntriesTxt:
       return 'dart_io_entries.txt';
@@ -44,6 +44,9 @@ String _artifactToFileName(Artifact artifact) {
     case Artifact.genSnapshot:
       return 'gen_snapshot';
     case Artifact.flutterTester:
+      if (platform == TargetPlatform.windows_x64) {
+        return 'flutter_tester.exe';
+      }
       return 'flutter_tester';
     case Artifact.snapshotDart:
       return 'snapshot.dart';
@@ -114,6 +117,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.tester:
         return _getHostArtifactPath(artifact, platform);
     }
     assert(false, 'Invalid platform $platform.');
@@ -180,7 +184,7 @@ class CachedArtifacts extends Artifacts {
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
         final String platformDirName = getNameForTargetPlatform(platform);
-        return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
+        return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform));
       case Artifact.engineDartSdkPath:
         return dartSdkPath;
       case Artifact.engineDartBinary:
@@ -205,6 +209,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.darwin_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.tester:
         assert(mode == null, 'Platform $platform does not support different build modes.');
         return fs.path.join(engineDir, platformName);
       case TargetPlatform.ios:

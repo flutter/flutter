@@ -85,7 +85,6 @@ BuildApp() {
 
   RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
   RunCommand rm -rf -- "${derived_dir}/App.framework"
-  RunCommand rm -f -- "${derived_dir}/app.flx"
   RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
   RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
   RunCommand pushd "${project_path}" > /dev/null
@@ -146,14 +145,13 @@ BuildApp() {
   fi
 
   StreamOutput " ├─Assembling Flutter resources..."
-  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build flx \
-    --target="${target_path}"                                             \
-    --output-file="${derived_dir}/app.flx"                                \
-    --snapshot="${build_dir}/snapshot_blob.bin"                           \
-    --depfile="${build_dir}/snapshot_blob.bin.d"                          \
-    --working-dir="${derived_dir}/flutter_assets"                         \
-    ${precompilation_flag}                                                \
-    ${local_engine_flag}                                                  \
+  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build bundle \
+    --target="${target_path}"                                                \
+    --snapshot="${build_dir}/snapshot_blob.bin"                              \
+    --depfile="${build_dir}/snapshot_blob.bin.d"                             \
+    --asset-dir="${derived_dir}/flutter_assets"                              \
+    ${precompilation_flag}                                                   \
+    ${local_engine_flag}                                                     \
     ${preview_dart_2_flag}
 
   if [[ $? -ne 0 ]]; then
