@@ -1135,7 +1135,7 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
     this.transformHitTests: true,
     Widget child
   }) : assert(translation != null),
-       super(key: key, child: child);
+        super(key: key, child: child);
 
   /// The translation to apply to the child, scaled to the child's size.
   ///
@@ -1156,6 +1156,56 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderFractionalTranslation renderObject) {
+    renderObject
+      ..translation = translation
+      ..transformHitTests = transformHitTests;
+  }
+}
+
+/// Applies a translation transformation before painting its child.
+///
+/// The translation is expressed as a [Offset] of logical pixels. For
+/// example, an [Offset] with a `dx` of 25 will result in a horizontal
+/// translation of 25 logical pixels of the child.
+///
+/// Hit tests will only be detected inside the bounds of the
+/// [LinearTranslation], even if the contents are offset such that
+/// they overflow.
+///
+/// See also:
+///
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+class LinearTranslation extends SingleChildRenderObjectWidget {
+  /// Creates a widget that translates its child's painting.
+  ///
+  /// The [translation] argument must not be null.
+  const LinearTranslation({
+    Key key,
+    @required this.translation,
+    this.transformHitTests: true,
+    Widget child
+  }) : assert(translation != null),
+        super(key: key, child: child);
+
+  /// The translation to apply to the child, scaled to the child's size.
+  ///
+  /// For example, an [Offset] with a `dx` of 25 will result in a horizontal
+  /// translation of 25 logical pixels of the child.
+  final Offset translation;
+
+  /// Whether to apply the translation when performing hit tests.
+  final bool transformHitTests;
+
+  @override
+  RenderLinearTranslation createRenderObject(BuildContext context) {
+    return new RenderLinearTranslation(
+      translation: translation,
+      transformHitTests: transformHitTests,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderLinearTranslation renderObject) {
     renderObject
       ..translation = translation
       ..transformHitTests = transformHitTests;
