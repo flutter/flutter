@@ -17,6 +17,7 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
+#include "lib/fxl/files/path.h"
 #include "lib/fxl/functional/make_copyable.h"
 #include "lib/fxl/synchronization/waitable_event.h"
 #include "third_party/dart/runtime/bin/embedded_dart_io.h"
@@ -89,6 +90,19 @@ class ScriptCompletionTaskObserver {
   FXL_DISALLOW_COPY_AND_ASSIGN(ScriptCompletionTaskObserver);
 };
 
+static bool FileNameIsDill(const std::string& name) {
+  const std::string suffix = ".dill";
+
+  if (name.size() < suffix.size()) {
+    return false;
+  }
+
+  if (name.rfind(suffix, name.size()) == name.size() - suffix.size()) {
+    return true;
+  }
+  return false;
+}
+
 int RunTester(const blink::Settings& settings, bool run_forever) {
   const auto thread_label = "io.flutter.test";
 
@@ -124,8 +138,18 @@ int RunTester(const blink::Settings& settings, bool run_forever) {
     return EXIT_FAILURE;
   }
 
-  auto isolate_configuration = IsolateConfiguration::CreateForSource(
-      settings.main_dart_file_path, settings.packages_file_path);
+  if (settings.main_dart_file_path.empty()) {
+    FXL_LOG(ERROR) << "Main dart file not specified.";
+    return EXIT_FAILURE;
+  }
+
+  auto isolate_configuration =
+      FileNameIsDill(settings.main_dart_file_path)
+          ? IsolateConfiguration::CreateForSnapshot(
+                std::make_unique<fml::FileMapping>(
+                    files::AbsolutePath(settings.main_dart_file_path), false))
+          : IsolateConfiguration::CreateForSource(settings.main_dart_file_path,
+                                                  settings.packages_file_path);
 
   if (!isolate_configuration) {
     FXL_LOG(ERROR) << "Could create isolate configuration.";
