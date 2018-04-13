@@ -2083,7 +2083,7 @@ class RenderTransform extends RenderProxyBox {
       }
       position = MatrixUtils.transformPoint(inverse, position);
     }
-    return super.hitTest(result, position: position);
+    return hitTestChildren(result, position: position) ||super.hitTest(result, position: position);
   }
 
   @override
@@ -2265,7 +2265,7 @@ class RenderFittedBox extends RenderProxyBox {
       return false;
     }
     position = MatrixUtils.transformPoint(inverse, position);
-    return super.hitTest(result, position: position);
+    return hitTestChildren(result, position: position) || super.hitTest(result, position: position);
   }
 
   @override
@@ -2339,7 +2339,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
         position.dy - translation.dy * size.height,
       );
     }
-    return super.hitTest(result, position: position);
+    return hitTestChildren(result, position: position) || super.hitTest(result, position: position);
   }
 
   @override
@@ -4181,7 +4181,7 @@ class RenderFollowerLayer extends RenderProxyBox {
       return false;
     }
     position = MatrixUtils.transformPoint(inverse, position);
-    return super.hitTest(result, position: position);
+    return hitTestChildren(result, position: position) || super.hitTest(result, position: position);
   }
 
   @override
