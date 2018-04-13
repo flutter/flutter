@@ -2369,21 +2369,20 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// Whether this node is the root of a route.
+  /// Whether the semantics node is the root of a subtree for which values
+  /// should be announced.
   /// 
-  /// Changes to the most specific route will prompt an accessibility
-  /// announcement when enabled.  On iOS this produces a
-  /// `UIAccessibilityScreenChangedNotification` and on Android a
-  /// `TYPE_WINDOW_STATE_CHANGED`.
+  /// See also:
+  ///  * [SemanticsFlag.scopesRoute], for a full description of route scoping.
   bool get scopesRoute => _hasFlag(SemanticsFlag.scopesRoute);
   set scopesRoute(bool value) {
     _setFlag(SemanticsFlag.scopesRoute, value);
   }
 
-  /// Whether this node contains the semantic value of a route.
-  ///
-  /// On iOS routes frequently do not have names given. On Android, the route 
-  /// name is produced from the [label] property.
+  /// Whether the semantics node contains the label of a route.
+  /// 
+  /// See also:
+  ///  * [SemanticsFlag.namesRoute], for a full description of route naming.
   bool get namesRoute => _hasFlag(SemanticsFlag.namesRoute);
   set namesRoute(bool value) {
     _setFlag(SemanticsFlag.namesRoute, value);

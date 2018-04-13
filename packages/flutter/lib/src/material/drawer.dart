@@ -101,11 +101,12 @@ class Drawer extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  /// The semantic label of the drawer used by accessibility frameworks.
+  /// The semantic label of the dialog used by accessibility frameworks to 
+  /// announce screen transitions when the drawer is opened and closed.
   /// 
   /// See also:
   /// 
-  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///  * [SemanticsConfiguration.namesRoute], for a description of how this
   ///    value is used.
   final String semanticLabel;
 

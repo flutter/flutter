@@ -688,9 +688,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// the menu. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the popup menu is closed.
 /// 
-/// The `semanticLabel` argument overrides the default semantic label used by
-/// accessibility frameworks for edge triggered semantic updates.
-///
+/// The `semanticLabel` argument is used by accessibility frameworks to 
+/// announce screen transitions when the menu is opened and closed.
+/// 
 /// See also:
 ///
 ///  * [PopupMenuItem], a popup menu entry for a single value.

@@ -61,7 +61,8 @@ class Dialog extends StatelessWidget {
   /// Defaults to [Curves.fastOutSlowIn].
   final Curve insetAnimationCurve;
 
-  /// The semantic label of the dialog used by accessibility frameworks.
+  /// The semantic label of the dialog used by accessibility frameworks to 
+  /// announce screen transitions when the dialog is opened and closed.
   /// 
   /// See also:
   /// 
@@ -229,7 +230,8 @@ class AlertDialog extends StatelessWidget {
   /// from the [actions].
   final List<Widget> actions;
 
-  /// The semantic label of the dialog used by accessibility frameworks.
+  /// The semantic label of the dialog used by accessibility frameworks to 
+  /// announce screen transitions when the dialog is opened and closed.
   /// 
   /// See also:
   /// 
@@ -468,7 +470,8 @@ class SimpleDialog extends StatelessWidget {
   /// the top padding ends up being 24 pixels.
   final EdgeInsetsGeometry contentPadding;
 
-  /// The semantic label of the dialog used by accessibility frameworks.
+  /// The semantic label of the dialog used by accessibility frameworks to 
+  /// announce screen transitions when the dialog is opened and closed.
   /// 
   /// See also:
   /// 
