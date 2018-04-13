@@ -4,7 +4,6 @@
 
 #include "flutter/lib/ui/text/paragraph_impl_blink.h"
 
-#include "flutter/common/threads.h"
 #include "flutter/lib/ui/text/paragraph.h"
 #include "flutter/lib/ui/text/paragraph_impl.h"
 #include "flutter/sky/engine/core/rendering/PaintInfo.h"
@@ -30,7 +29,8 @@ ParagraphImplBlink::ParagraphImplBlink(PassOwnPtr<RenderView> renderView)
 ParagraphImplBlink::~ParagraphImplBlink() {
   if (m_renderView) {
     RenderView* renderView = m_renderView.leakPtr();
-    Threads::UI()->PostTask([renderView]() { renderView->destroy(); });
+    destruction_task_runner_->PostTask(
+        [renderView]() { renderView->destroy(); });
   }
 }
 

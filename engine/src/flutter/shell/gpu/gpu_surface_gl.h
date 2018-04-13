@@ -5,10 +5,9 @@
 #ifndef SHELL_GPU_GPU_SURFACE_GL_H_
 #define SHELL_GPU_GPU_SURFACE_GL_H_
 
-#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/surface.h"
-#include "flutter/synchronization/debug_thread_checker.h"
 #include "lib/fxl/macros.h"
+#include "lib/fxl/memory/weak_ptr.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
 namespace shell {
@@ -44,7 +43,7 @@ class GPUSurfaceGL : public Surface {
   sk_sp<SkSurface> onscreen_surface_;
   sk_sp<SkSurface> offscreen_surface_;
   bool valid_ = false;
-  fml::WeakPtrFactory<GPUSurfaceGL> weak_factory_;
+  fxl::WeakPtrFactory<GPUSurfaceGL> weak_factory_;
 
   bool CreateOrUpdateSurfaces(const SkISize& size);
 

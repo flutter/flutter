@@ -55,7 +55,7 @@ void MessageLoop::Terminate() {
   loop_->DoTerminate();
 }
 
-fxl::RefPtr<fxl::TaskRunner> MessageLoop::GetTaskRunner() const {
+fxl::RefPtr<fml::TaskRunner> MessageLoop::GetTaskRunner() const {
   return task_runner_;
 }
 
@@ -63,12 +63,12 @@ fxl::RefPtr<MessageLoopImpl> MessageLoop::GetLoopImpl() const {
   return loop_;
 }
 
-void MessageLoop::AddTaskObserver(TaskObserver* observer) {
-  loop_->AddTaskObserver(observer);
+void MessageLoop::AddTaskObserver(intptr_t key, fxl::Closure callback) {
+  loop_->AddTaskObserver(key, callback);
 }
 
-void MessageLoop::RemoveTaskObserver(TaskObserver* observer) {
-  loop_->RemoveTaskObserver(observer);
+void MessageLoop::RemoveTaskObserver(intptr_t key) {
+  loop_->RemoveTaskObserver(key);
 }
 
 void MessageLoop::RunExpiredTasksNow() {

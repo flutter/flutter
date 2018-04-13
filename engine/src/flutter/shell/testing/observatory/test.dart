@@ -111,12 +111,20 @@ Future testStartPaused(Uri uri) async {
   }
 
   // Grab the isolate.
-  Map isolate = await serviceClient.invokeRPC('getIsolate', {
-    'isolateId': isolateId,
-  });
-  Expect.equals(isolate['type'], 'Isolate');
-  // Verify that it is paused at start.
-  Expect.isNotNull(isolate['pauseEvent']);
+  Map isolate;
+  while(true) {
+    isolate = await serviceClient.invokeRPC('getIsolate', {
+      'isolateId': isolateId,
+    });
+    Expect.equals(isolate['type'], 'Isolate');
+    // Verify that it is paused at start.
+    Expect.isNotNull(isolate['pauseEvent']);
+    if (isolate['pauseEvent']['kind'] != 'None') {
+      break;
+    }
+  }
+
+  Expect.isNotNull(isolate);
   Expect.equals(isolate['pauseEvent']['kind'], 'PauseStart');
 
   // Resume the isolate.

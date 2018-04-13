@@ -4,13 +4,15 @@
 
 #include "flutter/lib/ui/painting/image_encoding.h"
 
-#include "flutter/common/threads.h"
+#include <memory>
+#include <utility>
+
+#include "flutter/common/task_runners.h"
 #include "flutter/lib/ui/painting/image.h"
-#include "flutter/lib/ui/painting/resource_context.h"
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "lib/fxl/build_config.h"
 #include "lib/fxl/functional/make_copyable.h"
 #include "lib/tonic/dart_persistent_value.h"
-#include "lib/tonic/dart_state.h"
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "third_party/skia/include/core/SkEncodedImageFormat.h"
@@ -52,10 +54,11 @@ void EncodeImageAndInvokeDataCallback(
     std::unique_ptr<DartPersistentValue> callback,
     sk_sp<SkImage> image,
     SkEncodedImageFormat format,
-    int quality) {
+    int quality,
+    fxl::RefPtr<fxl::TaskRunner> ui_task_runner) {
   sk_sp<SkData> encoded = EncodeImage(std::move(image), format, quality);
 
-  Threads::UI()->PostTask(
+  ui_task_runner->PostTask(
       fxl::MakeCopyable([callback = std::move(callback), encoded]() mutable {
         InvokeDataCallback(std::move(callback), std::move(encoded));
       }));
@@ -101,10 +104,14 @@ Dart_Handle EncodeImage(CanvasImage* canvas_image,
       tonic::DartState::Current(), callback_handle);
   sk_sp<SkImage> image = canvas_image->image();
 
-  Threads::IO()->PostTask(fxl::MakeCopyable(
-      [callback = std::move(callback), image, image_format, quality]() mutable {
+  const auto& task_runners = UIDartState::Current()->GetTaskRunners();
+
+  task_runners.GetIOTaskRunner()->PostTask(fxl::MakeCopyable(
+      [callback = std::move(callback), image, image_format, quality,
+       ui_task_runner = task_runners.GetUITaskRunner()]() mutable {
         EncodeImageAndInvokeDataCallback(std::move(callback), std::move(image),
-                                         image_format, quality);
+                                         image_format, quality,
+                                         std::move(ui_task_runner));
       }));
 
   return Dart_Null();

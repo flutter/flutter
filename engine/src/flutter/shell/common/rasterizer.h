@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "flutter/common/task_runners.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/surface.h"
@@ -16,34 +17,64 @@
 
 namespace shell {
 
-class Rasterizer {
+class Rasterizer final {
  public:
-  virtual ~Rasterizer();
+  Rasterizer(blink::TaskRunners task_runners);
 
-  virtual void Setup(std::unique_ptr<Surface> surface_or_null,
-                     fxl::Closure rasterizer_continuation,
-                     fxl::AutoResetWaitableEvent* setup_completion_event) = 0;
+  ~Rasterizer();
 
-  virtual void Teardown(
-      fxl::AutoResetWaitableEvent* teardown_completion_event) = 0;
+  void Setup(std::unique_ptr<Surface> surface);
 
-  virtual void Clear(SkColor color, const SkISize& size) = 0;
+  void Teardown();
 
-  virtual fml::WeakPtr<Rasterizer> GetWeakRasterizerPtr() = 0;
+  fml::WeakPtr<Rasterizer> GetWeakPtr() const;
 
-  virtual flow::LayerTree* GetLastLayerTree() = 0;
+  flow::LayerTree* GetLastLayerTree();
 
-  virtual void DrawLastLayerTree() = 0;
+  void DrawLastLayerTree();
 
-  virtual flow::TextureRegistry& GetTextureRegistry() = 0;
+  flow::TextureRegistry* GetTextureRegistry();
 
-  virtual void Draw(
-      fxl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) = 0;
+  void Draw(fxl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline);
 
-  // Set a callback to be called once when the next frame is drawn.
-  virtual void AddNextFrameCallback(fxl::Closure nextFrameCallback) = 0;
+  enum class ScreenshotType {
+    SkiaPicture,
+    UncompressedImage,  // In kN32_SkColorType format
+    CompressedImage,
+  };
 
-  virtual void SetTextureRegistry(flow::TextureRegistry* textureRegistry) = 0;
+  struct Screenshot {
+    sk_sp<SkData> data;
+    SkISize frame_size = SkISize::MakeEmpty();
+
+    Screenshot() {}
+
+    Screenshot(sk_sp<SkData> p_data, SkISize p_size)
+        : data(std::move(p_data)), frame_size(p_size) {}
+  };
+
+  Screenshot ScreenshotLastLayerTree(ScreenshotType type, bool base64_encode);
+
+  // Sets a callback that will be executed after the next frame is submitted to
+  // the surface on the GPU task runner.
+  void SetNextFrameCallback(fxl::Closure callback);
+
+ private:
+  blink::TaskRunners task_runners_;
+  std::unique_ptr<Surface> surface_;
+  std::unique_ptr<flow::CompositorContext> compositor_context_;
+  std::unique_ptr<flow::LayerTree> last_layer_tree_;
+  fxl::Closure next_frame_callback_;
+  fml::WeakPtr<Rasterizer> weak_prototype_;
+  fml::WeakPtrFactory<Rasterizer> weak_factory_;
+
+  void DoDraw(std::unique_ptr<flow::LayerTree> layer_tree);
+
+  bool DrawToSurface(flow::LayerTree& layer_tree);
+
+  void FireNextFrameCallbackIfPresent();
+
+  FXL_DISALLOW_COPY_AND_ASSIGN(Rasterizer);
 };
 
 }  // namespace shell

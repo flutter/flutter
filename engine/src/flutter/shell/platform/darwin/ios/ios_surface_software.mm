@@ -15,15 +15,15 @@
 
 namespace shell {
 
-IOSSurfaceSoftware::IOSSurfaceSoftware(PlatformView::SurfaceConfig surface_config, CALayer* layer)
-    : IOSSurface(surface_config, layer) {
+IOSSurfaceSoftware::IOSSurfaceSoftware(fml::scoped_nsobject<CALayer> layer)
+    : layer_(std::move(layer)) {
   UpdateStorageSizeIfNecessary();
 }
 
 IOSSurfaceSoftware::~IOSSurfaceSoftware() = default;
 
 bool IOSSurfaceSoftware::IsValid() const {
-  return GetLayer() != nullptr;
+  return layer_;
 }
 
 bool IOSSurfaceSoftware::ResourceContextMakeCurrent() {
@@ -120,8 +120,7 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
     return false;
   }
 
-  CALayer* layer = GetLayer();
-  layer.contents = reinterpret_cast<id>(static_cast<CGImageRef>(pixmap_image));
+  layer_.get().contents = reinterpret_cast<id>(static_cast<CGImageRef>(pixmap_image));
 
   return true;
 }

@@ -40,14 +40,10 @@ source_set("ui") {
     "painting/picture.h",
     "painting/picture_recorder.cc",
     "painting/picture_recorder.h",
-    "painting/resource_context.cc",
-    "painting/resource_context.h",
     "painting/rrect.cc",
     "painting/rrect.h",
     "painting/shader.cc",
     "painting/shader.h",
-    "painting/utils.cc",
-    "painting/utils.h",
     "painting/vertices.cc",
     "painting/vertices.h",
     "semantics/semantics_node.cc",
@@ -87,19 +83,18 @@ source_set("ui") {
     "window/window.h",
   ]
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
+  public_configs = [ "$flutter_root:config" ]
 
   deps = [
-    "//third_party/dart/runtime/bin:embedded_dart_io",
     "$flutter_root/assets",
     "$flutter_root/common",
     "$flutter_root/flow",
+    "$flutter_root/fml",
     "$flutter_root/glue",
     "$flutter_root/runtime:test_font",
     "$flutter_root/sky/engine",
     "$flutter_root/third_party/txt",
+    "//third_party/dart/runtime/bin:embedded_dart_io",
     "//third_party/rapidjson",
     "//third_party/skia",
     "//third_party/skia:gpu",

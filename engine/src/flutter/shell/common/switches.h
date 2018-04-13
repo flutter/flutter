@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/common/settings.h"
+#include "lib/fxl/command_line.h"
 #include "lib/fxl/strings/string_view.h"
 
 #ifndef SHELL_COMMON_SWITCHES_H_
@@ -23,12 +25,29 @@ namespace shell {
 
 DEF_SWITCHES_START
 DEF_SWITCH(AotSharedLibraryPath, "aot-shared-library-path", "Path to the *.so.")
-DEF_SWITCH(AotSnapshotPath, "aot-snapshot-path", "Path to the AOT snapshot.")
-DEF_SWITCH(AotVmSnapshotData, "vm-snapshot-data", "")
-DEF_SWITCH(AotVmSnapshotInstructions, "vm-snapshot-instr", "")
-DEF_SWITCH(AotIsolateSnapshotData, "isolate-snapshot-data", "")
-DEF_SWITCH(AotIsolateSnapshotInstructions, "isolate-snapshot-instr", "")
+DEF_SWITCH(AotSnapshotPath,
+           "aot-snapshot-path",
+           "Path to the directory containing the four files specified by "
+           "AotVmSnapshotData, AotVmSnapshotInstructions, "
+           "AotVmSnapshotInstructions and AotIsolateSnapshotInstructions.")
+DEF_SWITCH(AotVmSnapshotData,
+           "vm-snapshot-data",
+           "The VM snapshot data that will be memory mapped as read-only. "
+           "AotSnapshotPath must be present.")
+DEF_SWITCH(AotVmSnapshotInstructions,
+           "vm-snapshot-instr",
+           "The VM instructions snapshot that will be memory mapped as read "
+           "and executable. AotSnapshotPath must be present.")
+DEF_SWITCH(AotIsolateSnapshotData,
+           "isolate-snapshot-data",
+           "The isolate snapshot data that will be memory mapped as read-only. "
+           "AotSnapshotPath must be present.")
+DEF_SWITCH(AotIsolateSnapshotInstructions,
+           "isolate-snapshot-instr",
+           "The isolate instructions snapshot that will be memory mapped as "
+           "read and executable. AotSnapshotPath must be present.")
 DEF_SWITCH(CacheDirPath, "cache-dir-path", "Path to the cache directory.")
+DEF_SWITCH(ICUDataFilePath, "icu-data-file-path", "Path to the ICU data file.")
 DEF_SWITCH(DartFlags,
            "dart-flags",
            "Flags passed directly to the Dart VM without being interpreted "
@@ -73,10 +92,6 @@ DEF_SWITCH(FlutterAssetsDir,
 DEF_SWITCH(Help, "help", "Display this help text.")
 DEF_SWITCH(LogTag, "log-tag", "Tag associated with log messages.")
 DEF_SWITCH(MainDartFile, "dart-main", "The path to the main Dart file.")
-DEF_SWITCH(NonInteractive,
-           "non-interactive",
-           "Make the shell non-interactive. By default, the shell attempts "
-           "to setup a window and create an OpenGL context.")
 DEF_SWITCH(Packages, "packages", "Specify the path to the packages.")
 DEF_SWITCH(Snapshot, "snapshot-blob", "Specify the path to the snapshot blob")
 DEF_SWITCH(StartPaused,
@@ -113,7 +128,9 @@ DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);
 
-const fxl::StringView FlagForSwitch(Switch sw);
+const fxl::StringView FlagForSwitch(Switch swtch);
+
+blink::Settings SettingsFromCommandLine(const fxl::CommandLine& command_line);
 
 }  // namespace shell
 

@@ -80,3 +80,8 @@ std::ostream& operator<<(std::ostream& os, const flow::RasterCacheKey& k) {
       ;
   return os;
 }
+
+std::ostream& operator<<(std::ostream& os, const SkISize& size) {
+  os << size.width() << ", " << size.height();
+  return os;
+}

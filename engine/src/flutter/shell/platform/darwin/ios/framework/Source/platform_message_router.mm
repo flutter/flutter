@@ -14,7 +14,8 @@ PlatformMessageRouter::PlatformMessageRouter() = default;
 
 PlatformMessageRouter::~PlatformMessageRouter() = default;
 
-void PlatformMessageRouter::HandlePlatformMessage(fxl::RefPtr<blink::PlatformMessage> message) {
+void PlatformMessageRouter::HandlePlatformMessage(
+    fxl::RefPtr<blink::PlatformMessage> message) const {
   fxl::RefPtr<blink::PlatformMessageResponse> completer = message->response();
   auto it = message_handlers_.find(message->channel());
   if (it != message_handlers_.end()) {
@@ -41,14 +42,10 @@ void PlatformMessageRouter::HandlePlatformMessage(fxl::RefPtr<blink::PlatformMes
 
 void PlatformMessageRouter::SetMessageHandler(const std::string& channel,
                                               FlutterBinaryMessageHandler handler) {
-  if (handler)
-    message_handlers_[channel] = [handler copy];
-  else {
-    auto it = message_handlers_.find(channel);
-    if (it != message_handlers_.end()) {
-      [it->second release];
-      message_handlers_.erase(it);
-    }
+  message_handlers_.erase(channel);
+  if (handler) {
+    message_handlers_[channel] =
+        fml::ScopedBlock<FlutterBinaryMessageHandler>{handler, fml::OwnershipPolicy::Retain};
   }
 }
 

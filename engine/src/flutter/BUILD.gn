@@ -10,14 +10,12 @@ group("flutter") {
   public_deps = [
     "$flutter_root/lib/snapshot:generate_snapshot_bin",
     "$flutter_root/lib/snapshot:kernel_platform_files",
+    "$flutter_root/shell/testing",
     "$flutter_root/sky",
-    "$flutter_root/third_party/txt",
   ]
 
   if (flutter_runtime_mode != "debug") {
-    public_deps += [
-      "$flutter_root/lib/snapshot:entry_points_json_files",
-    ]
+    public_deps += [ "$flutter_root/lib/snapshot:entry_points_json_files" ]
   }
 
   if (!is_fuchsia && !is_fuchsia_host) {
@@ -45,20 +43,24 @@ group("flutter") {
         "$flutter_root/shell/platform/embedder:flutter_embedder_framework",
       ]
     }
+
+    public_deps += [
+      "$flutter_root/flow:flow_unittests",
+      "$flutter_root/fml:fml_unittests",
+      "$flutter_root/runtime:runtime_unittests",
+      "$flutter_root/shell/common:shell_unittests",
+      "$flutter_root/sky/engine/wtf:wtf_unittests",
+      "$flutter_root/synchronization:synchronization_unittests",
+      "$flutter_root/third_party/txt:txt_unittests",
+      "//garnet/public/lib/fxl:fxl_unittests",
+    ]
+
     if (!is_win) {
       public_deps += [
         "$flutter_root/shell/platform/embedder:embedder_unittests",
         "$flutter_root/shell/platform/embedder:flutter_engine",
       ]
     }
-    public_deps += [
-      "$flutter_root/flow:flow_unittests",
-      "$flutter_root/fml:fml_unittests",
-      "$flutter_root/sky/engine/wtf:wtf_unittests",
-      "$flutter_root/synchronization:synchronization_unittests",
-      "$flutter_root/third_party/txt:txt_unittests",
-      "//garnet/public/lib/fxl:fxl_unittests",
-    ]
   }
 }
 
@@ -74,29 +76,23 @@ if (is_fuchsia) {
       "$flutter_root/content_handler:aot",
     ]
     if (flutter_runtime_mode != "release") {
-      deps += [
-        "//third_party/dart/runtime/observatory:embedded_archive_observatory",
-      ]
+      deps += [ "//third_party/dart/runtime/observatory:embedded_archive_observatory" ]
     }
 
     binary = "flutter_aot_runner"
 
     if (flutter_runtime_mode != "release") {
-      resources = [
-        {
-          path = rebase_path(
-                  "$root_gen_dir/observatory/embedded_archive_observatory.tar")
-          dest = "observatory.tar"
-        },
-      ]
+      resources = [ {
+            path = rebase_path(
+                    "$root_gen_dir/observatory/embedded_archive_observatory.tar")
+            dest = "observatory.tar"
+          } ]
     }
 
-    meta = [
-      {
-        path = rebase_path("content_handler/meta/sandbox")
-        dest = "sandbox"
-      },
-    ]
+    meta = [ {
+          path = rebase_path("content_handler/meta/sandbox")
+          dest = "sandbox"
+        } ]
   }
 
   package("flutter_jit_runner") {
@@ -104,29 +100,23 @@ if (is_fuchsia) {
       "$flutter_root/content_handler:jit",
     ]
     if (flutter_runtime_mode != "release") {
-      deps += [
-        "//third_party/dart/runtime/observatory:embedded_archive_observatory",
-      ]
+      deps += [ "//third_party/dart/runtime/observatory:embedded_archive_observatory" ]
     }
 
     binary = "flutter_jit_runner"
 
     if (flutter_runtime_mode != "release") {
-      resources = [
-        {
-          path = rebase_path(
-                  "$root_gen_dir/observatory/embedded_archive_observatory.tar")
-          dest = "observatory.tar"
-        },
-      ]
+      resources = [ {
+            path = rebase_path(
+                    "$root_gen_dir/observatory/embedded_archive_observatory.tar")
+            dest = "observatory.tar"
+          } ]
     }
 
-    meta = [
-      {
-        path = rebase_path("content_handler/meta/sandbox")
-        dest = "sandbox"
-      },
-    ]
+    meta = [ {
+          path = rebase_path("content_handler/meta/sandbox")
+          dest = "sandbox"
+        } ]
   }
 } else {
   group("dist") {

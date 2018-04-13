@@ -63,7 +63,8 @@ void SendPlatformMessage(Dart_Handle window,
   fxl::RefPtr<PlatformMessageResponse> response;
   if (!Dart_IsNull(callback)) {
     response = fxl::MakeRefCounted<PlatformMessageResponseDart>(
-        tonic::DartPersistentValue(dart_state, callback));
+        tonic::DartPersistentValue(dart_state, callback),
+        dart_state->GetTaskRunners().GetUITaskRunner());
   }
   if (Dart_IsNull(data.dart_handle())) {
     UIDartState::Current()->window()->client()->HandlePlatformMessage(
@@ -254,7 +255,7 @@ void Window::BeginFrame(fxl::TimePoint frameTime) {
                       Dart_NewInteger(microseconds),
                   });
 
-  tonic::DartMicrotaskQueue::GetForCurrentThread()->RunMicrotasks();
+  UIDartState::Current()->FlushMicrotasksNow();
 
   DartInvokeField(library_.value(), "_drawFrame", {});
 }

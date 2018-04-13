@@ -13,35 +13,39 @@
 
 namespace shell {
 
-class AndroidSurfaceSoftware : public AndroidSurface,
-                               public GPUSurfaceSoftwareDelegate {
+class AndroidSurfaceSoftware final : public AndroidSurface,
+                                     public GPUSurfaceSoftwareDelegate {
  public:
   AndroidSurfaceSoftware();
 
   ~AndroidSurfaceSoftware() override;
 
+  // |shell::AndroidSurface|
   bool IsValid() const override;
 
+  // |shell::AndroidSurface|
   bool ResourceContextMakeCurrent() override;
 
+  // |shell::AndroidSurface|
   std::unique_ptr<Surface> CreateGPUSurface() override;
 
-  sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override;
-
-  bool PresentBackingStore(sk_sp<SkSurface> backing_store) override;
-
+  // |shell::AndroidSurface|
   void TeardownOnScreenContext() override;
 
-  SkISize OnScreenSurfaceSize() const override;
-
+  // |shell::AndroidSurface|
   bool OnScreenSurfaceResize(const SkISize& size) const override;
 
-  bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window,
-                       PlatformView::SurfaceConfig config) override;
+  // |shell::AndroidSurface|
+  bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window) override;
+
+  // |shell::GPUSurfaceSoftwareDelegate|
+  sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override;
+
+  // |shell::GPUSurfaceSoftwareDelegate|
+  bool PresentBackingStore(sk_sp<SkSurface> backing_store) override;
 
  private:
   sk_sp<SkSurface> sk_surface_;
-
   fxl::RefPtr<AndroidNativeWindow> native_window_;
   SkColorType target_color_type_;
   SkAlphaType target_alpha_type_;

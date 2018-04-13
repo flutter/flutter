@@ -21,10 +21,12 @@ bool AndroidSurfaceVulkan::IsValid() const {
   return proc_table_->HasAcquiredMandatoryProcAddresses();
 }
 
+// |shell::AndroidSurface|
 void AndroidSurfaceVulkan::TeardownOnScreenContext() {
-  //
+  // Nothing to do.
 }
 
+// |shell::AndroidSurface|
 std::unique_ptr<Surface> AndroidSurfaceVulkan::CreateGPUSurface() {
   if (!IsValid()) {
     return nullptr;
@@ -52,21 +54,20 @@ std::unique_ptr<Surface> AndroidSurfaceVulkan::CreateGPUSurface() {
   return gpu_surface;
 }
 
-SkISize AndroidSurfaceVulkan::OnScreenSurfaceSize() const {
-  return native_window_ ? native_window_->GetSize() : SkISize::Make(0, 0);
-}
-
+// |shell::AndroidSurface|
 bool AndroidSurfaceVulkan::OnScreenSurfaceResize(const SkISize& size) const {
   return true;
 }
 
+// |shell::AndroidSurface|
 bool AndroidSurfaceVulkan::ResourceContextMakeCurrent() {
+  FXL_DLOG(ERROR) << "The vulkan backend does not support resource contexts.";
   return false;
 }
 
+// |shell::AndroidSurface|
 bool AndroidSurfaceVulkan::SetNativeWindow(
-    fxl::RefPtr<AndroidNativeWindow> window,
-    PlatformView::SurfaceConfig config) {
+    fxl::RefPtr<AndroidNativeWindow> window) {
   native_window_ = std::move(window);
   return native_window_ && native_window_->IsValid();
 }

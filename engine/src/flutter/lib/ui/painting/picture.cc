@@ -4,9 +4,8 @@
 
 #include "flutter/lib/ui/painting/picture.h"
 
-#include "flutter/common/threads.h"
 #include "flutter/lib/ui/painting/canvas.h"
-#include "flutter/lib/ui/painting/utils.h"
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
@@ -23,24 +22,20 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
 DART_BIND_ALL(Picture, FOR_EACH_BINDING)
 
-fxl::RefPtr<Picture> Picture::Create(sk_sp<SkPicture> picture) {
+fxl::RefPtr<Picture> Picture::Create(flow::SkiaGPUObject<SkPicture> picture) {
   return fxl::MakeRefCounted<Picture>(std::move(picture));
 }
 
-Picture::Picture(sk_sp<SkPicture> picture) : picture_(std::move(picture)) {}
+Picture::Picture(flow::SkiaGPUObject<SkPicture> picture)
+    : picture_(std::move(picture)) {}
 
-Picture::~Picture() {
-  // Skia objects must be deleted on the IO thread so that any associated GL
-  // objects will be cleaned up through the IO thread's GL context.
-  SkiaUnrefOnIOThread(&picture_);
-}
+Picture::~Picture() = default;
 
 fxl::RefPtr<CanvasImage> Picture::toImage(int width, int height) {
   fxl::RefPtr<CanvasImage> image = CanvasImage::Create();
-  // TODO(abarth): We should pass in an SkColorSpace at some point.
-  image->set_image(SkImage::MakeFromPicture(
-      picture_, SkISize::Make(width, height), nullptr, nullptr,
-      SkImage::BitDepth::kU8, SkColorSpace::MakeSRGB()));
+  image->set_image(UIDartState::CreateGPUObject(SkImage::MakeFromPicture(
+      picture_.get(), SkISize::Make(width, height), nullptr, nullptr,
+      SkImage::BitDepth::kU8, SkColorSpace::MakeSRGB())));
   return image;
 }
 
@@ -49,8 +44,8 @@ void Picture::dispose() {
 }
 
 size_t Picture::GetAllocationSize() {
-  if (picture_) {
-    return picture_->approximateBytesUsed();
+  if (auto picture = picture_.get()) {
+    return picture->approximateBytesUsed();
   } else {
     return sizeof(Picture);
   }

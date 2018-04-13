@@ -5,25 +5,17 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_H_
 
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
-#include "flutter/shell/common/platform_view.h"
-#include "lib/fxl/macros.h"
+#include <memory>
 
-@class CALayer;
+#include "flutter/fml/platform/darwin/scoped_nsobject.h"
+#include "flutter/shell/common/surface.h"
+#include "lib/fxl/macros.h"
 
 namespace shell {
 
 class IOSSurface {
  public:
-  static std::unique_ptr<IOSSurface> Create(
-      PlatformView::SurfaceConfig surface_config,
-      CALayer* layer);
-
-  IOSSurface(PlatformView::SurfaceConfig surface_config, CALayer* layer);
-
-  CALayer* GetLayer() const;
-
-  PlatformView::SurfaceConfig GetSurfaceConfig() const;
+  IOSSurface();
 
   virtual ~IOSSurface();
 
@@ -36,9 +28,6 @@ class IOSSurface {
   virtual std::unique_ptr<Surface> CreateGPUSurface() = 0;
 
  public:
-  PlatformView::SurfaceConfig surface_config_;
-  fml::scoped_nsobject<CALayer> layer_;
-
   FXL_DISALLOW_COPY_AND_ASSIGN(IOSSurface);
 };
 

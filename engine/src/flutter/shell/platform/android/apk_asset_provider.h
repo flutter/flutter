@@ -5,28 +5,35 @@
 #ifndef FLUTTER_ASSETS_APK_ASSET_PROVIDER_H_
 #define FLUTTER_ASSETS_APK_ASSET_PROVIDER_H_
 
-#include <jni.h>
 #include <android/asset_manager_jni.h>
+#include <jni.h>
 
-#include "flutter/assets/asset_provider.h"
+#include "flutter/assets/asset_resolver.h"
 #include "lib/fxl/memory/ref_counted.h"
 
 namespace blink {
 
-class APKAssetProvider
-    : public AssetProvider {
+class APKAssetProvider final : public AssetResolver {
  public:
-  explicit APKAssetProvider(JNIEnv* env, jobject assetManager, std::string directory);
+  explicit APKAssetProvider(JNIEnv* env,
+                            jobject assetManager,
+                            std::string directory);
   virtual ~APKAssetProvider();
 
-  virtual bool GetAsBuffer(const std::string& asset_name,
-                           std::vector<uint8_t>* data);
-
  private:
- AAssetManager* assetManager_;
- const std::string directory_;
+  AAssetManager* assetManager_;
+  const std::string directory_;
+
+  // |blink::AssetResolver|
+  bool IsValid() const override;
+
+  // |blink::AssetResolver|
+  virtual bool GetAsBuffer(const std::string& asset_name,
+                           std::vector<uint8_t>* data) const override;
+
+  FXL_DISALLOW_COPY_AND_ASSIGN(APKAssetProvider);
 };
 
 }  // namespace blink
 
-#endif // FLUTTER_ASSETS_APK_ASSET_PROVIDER_H
+#endif  // FLUTTER_ASSETS_APK_ASSET_PROVIDER_H

@@ -232,6 +232,10 @@ def main(argv):
     # On the Mac, also generate Xcode projects for ease of editing.
     command.append('--ide=xcode')
 
+  if sys.platform.startswith('win'):
+    # On Windows, also generate Visual Studio project for ease of editing.
+    command.append('--ide=vs')
+
   gn_args = to_command_line(to_gn_args(args))
   out_dir = get_out_dir(args)
   print "gn gen --check in %s" % out_dir
