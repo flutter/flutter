@@ -101,7 +101,7 @@ class Drawer extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  /// The semantic label of the drawer used by accessibility frameworks
+  /// The semantic label of the drawer used by accessibility frameworks.
   /// 
   /// See also:
   /// 
@@ -118,7 +118,8 @@ class Drawer extends StatelessWidget {
         child: new Semantics(
           routeName: true,
           route: true,
-          value: semanticLabel,
+          explicitChildNodes: true,
+          label: semanticLabel,
           child: child,
         ),
       ),

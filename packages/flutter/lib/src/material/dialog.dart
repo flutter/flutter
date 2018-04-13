@@ -61,7 +61,7 @@ class Dialog extends StatelessWidget {
   /// Defaults to [Curves.fastOutSlowIn].
   final Curve insetAnimationCurve;
 
-  /// The semantic label of the dialog used by accessibility frameworks
+  /// The semantic label of the dialog used by accessibility frameworks.
   /// 
   /// See also:
   /// 

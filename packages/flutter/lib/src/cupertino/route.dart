@@ -239,7 +239,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     final Widget result = new Semantics(
       route: true,
-      child: builder(context)
+      child: builder(context),
     );
     assert(() {
       if (result == null) {

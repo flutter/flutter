@@ -1,3 +1,7 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -11,7 +15,6 @@ import 'package:flutter/widgets.dart';
 ///  * [SemanticsProperties.routeName], for a description of how route name
 ///    semantics work.
 class RouteName extends StatelessWidget  {
-
   /// Creates a widget which provides a semantic route name.
   ///
   /// [child] and [routeName] are required arguments.
@@ -33,15 +36,22 @@ class RouteName extends StatelessWidget  {
 
   @override
   Widget build(BuildContext context) {
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      return child;
+    Widget result;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        result = child;
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        result = new Semantics(
+          routeName: true,
+          explicitChildNodes: true,
+          label: routeName,
+          child: child,
+        );
+        break;
     }
-    return new Semantics(
-      routeName: true,
-      explicitChildNodes: true,
-      value: routeName,
-      child: child,
-    );
+    return result;
   }
 
   @override
