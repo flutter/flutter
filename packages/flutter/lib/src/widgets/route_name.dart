@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 /// A widget which provides a semantic name for a route.
 ///
 /// On Android, TalkBack uses [routeName] as the text value for an edge 
-/// triggered semantics  update. On iOS, no additional semantic information
+/// triggered semantics update. On iOS, no additional semantic information
 /// is inserted since by convention VoiceOver uses a standard chime sound 
 /// effect for most navigation events.
 ///
