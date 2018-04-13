@@ -343,7 +343,7 @@ DartVM::DartVM(const Settings& settings,
       platform_kernel_ != nullptr || isolate_snapshot_is_dart_2;
 
   FXL_DLOG(INFO) << "Dart 2 " << (is_preview_dart2 ? " is" : "is NOT")
-                 << "enabled. Platform kernel: "
+                 << " enabled. Platform kernel: "
                  << static_cast<bool>(platform_kernel_)
                  << " Isolate Snapshot is Dart 2: "
                  << isolate_snapshot_is_dart_2;
