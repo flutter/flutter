@@ -29,7 +29,7 @@ void main() {
           id: 1,
           value: 'login',
           textDirection: TextDirection.ltr,
-          flags: <SemanticsFlag>[SemanticsFlag.isRoute],
+          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
           children: <TestSemantics>[
             new TestSemantics(
               id: 2,

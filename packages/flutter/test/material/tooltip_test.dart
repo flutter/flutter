@@ -622,7 +622,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          flags: <SemanticsFlag>[SemanticsFlag.isRoute],
+          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
           children: <TestSemantics>[
             new TestSemantics(
               label: 'Foo\nBar',
@@ -654,7 +654,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          flags: <SemanticsFlag>[SemanticsFlag.isRoute],
+          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
           children: <TestSemantics>[
             new TestSemantics(
               label: 'Bar',

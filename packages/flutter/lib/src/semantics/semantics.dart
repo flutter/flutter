@@ -320,8 +320,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.focused,
     this.inMutuallyExclusiveGroup,
     this.obscured,
-    this.route,
-    this.routeName,
+    this.scopesRoute,
+    this.namesRoute,
     this.label,
     this.value,
     this.increasedValue,
@@ -419,7 +419,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// See also:
   ///
   ///  * [routeName] for a description of how the announced value is selected.
-  final bool route;
+  final bool scopesRoute;
 
   /// If non-null, whether the node contains the semantic name for a route.
   ///
@@ -431,7 +431,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// See also:
   /// 
   ///  * [route] for a description of how the route is selected.
-  final bool routeName;
+  final bool namesRoute;
 
   /// Provides a textual description of the widget.
   ///
@@ -2368,18 +2368,18 @@ class SemanticsConfiguration {
   /// announcement when enabled.  On iOS this produces a
   /// `UIAccessibilityScreenChangedNotification` and on Android a
   /// `TYPE_WINDOW_STATE_CHANGED`.
-  bool get isRoute => _hasFlag(SemanticsFlag.isRoute);
-  set isRoute(bool value) {
-    _setFlag(SemanticsFlag.isRoute, value);
+  bool get scopesRoute => _hasFlag(SemanticsFlag.scopesRoute);
+  set scopesRoute(bool value) {
+    _setFlag(SemanticsFlag.scopesRoute, value);
   }
 
   /// Whether this node contains the semantic value of a route.
   ///
   /// On iOS routes frequently do not have names given. On Android, the route 
-  /// name is produced from [label] [text] [hint].
-  bool get isRouteName => _hasFlag(SemanticsFlag.isRouteName);
-  set isRouteName(bool value) {
-    _setFlag(SemanticsFlag.isRouteName, value);
+  /// name is produced from the [label] property.
+  bool get namesRoute => _hasFlag(SemanticsFlag.namesRoute);
+  set namesRoute(bool value) {
+    _setFlag(SemanticsFlag.namesRoute, value);
   }
 
   /// The reading direction for the text in [label], [value], [hint],

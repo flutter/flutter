@@ -4896,8 +4896,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
-    bool route,
-    bool routeName,
+    bool scopesRoute,
+    bool namesRoute,
     String label,
     String value,
     String increasedValue,
@@ -4936,8 +4936,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       focused: focused,
       inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
       obscured: obscured,
-      route: route,
-      routeName: routeName,
+      scopesRoute: scopesRoute,
+      namesRoute: namesRoute,
       label: label,
       value: value,
       increasedValue: increasedValue,
@@ -5019,8 +5019,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       focused: properties.focused,
       inMutuallyExclusiveGroup: properties.inMutuallyExclusiveGroup,
       obscured: properties.obscured,
-      route: properties.route,
-      routeName: properties.routeName,
+      scopesRoute: properties.scopesRoute,
+      namesRoute: properties.namesRoute,
       label: properties.label,
       value: properties.value,
       increasedValue: properties.increasedValue,
@@ -5072,8 +5072,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..increasedValue = properties.increasedValue
       ..decreasedValue = properties.decreasedValue
       ..hint = properties.hint
-      ..route = properties.route
-      ..routeName = properties.routeName
+      ..scopesRoute = properties.scopesRoute
+      ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
       ..sortKey = properties.sortKey
       ..onTap = properties.onTap

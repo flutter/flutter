@@ -310,7 +310,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isRoute]));
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.scopesRoute]));
 
     semantics.dispose();
   });

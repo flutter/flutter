@@ -366,7 +366,7 @@ void main() {
     );
 
     expect(semantics, isNot(includesNodeWith(
-        flags: <SemanticsFlag>[SemanticsFlag.isRoute]
+        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute]
     )));
 
     await tester.tap(find.text('X'));
@@ -374,7 +374,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(semantics, includesNodeWith(
-      flags: <SemanticsFlag>[SemanticsFlag.isRoute],
+      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
     ));
 
     semantics.dispose();

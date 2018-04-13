@@ -3019,9 +3019,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
-    bool edge,
-    bool route,
-    bool routeName,
+    bool scopesRoute,
+    bool namesRoute,
     String label,
     String value,
     String increasedValue,
@@ -3057,8 +3056,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _focused = focused,
        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _obscured = obscured,
-       _route = route,
-       _routeName = routeName,
+       _scopesRoute = scopesRoute,
+       _namesRoute = namesRoute,
        _label = label,
        _value = value,
        _increasedValue = increasedValue,
@@ -3218,23 +3217,23 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.route] semantic to the give value.
-  bool get route => _route;
-  bool _route;
-  set route(bool value) {
-    if (route == value)
+  /// If non-null, sets the [SemanticsNode.scopesRoute] semantic to the give value.
+  bool get scopesRoute => _scopesRoute;
+  bool _scopesRoute;
+  set scopesRoute(bool value) {
+    if (scopesRoute == value)
       return;
-    _route = value;
+    _scopesRoute = value;
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.routeName] semantic to the give value.
-  bool get routeName => _routeName;
-  bool _routeName;
-  set routeName(bool value) {
-    if (routeName == value)
+  /// If non-null, sets the [SemanticsNode.namesRoute] semantic to the give value.
+  bool get namesRoute => _namesRoute;
+  bool _namesRoute;
+  set namesRoute(bool value) {
+    if (_namesRoute == value)
       return;
-    _routeName = value;
+    _namesRoute = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3687,10 +3686,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.decreasedValue = decreasedValue;
     if (hint != null)
       config.hint = hint;
-    if (route != null)
-      config.isRoute = route;
-    if (routeName != null)
-      config.isRouteName = routeName;
+    if (scopesRoute != null)
+      config.scopesRoute = scopesRoute;
+    if (namesRoute != null)
+      config.namesRoute = namesRoute;
     if (textDirection != null)
       config.textDirection = textDirection;
     if (sortKey != null)

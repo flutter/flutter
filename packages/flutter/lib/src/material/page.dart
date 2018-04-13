@@ -152,7 +152,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     final Widget result = new Semantics(
-      route: true,
+      scopesRoute: true,
       explicitChildNodes: true,
       child: builder(context),
     );

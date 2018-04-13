@@ -93,8 +93,8 @@ class Dialog extends StatelessWidget {
               color: _getColor(context),
               type: MaterialType.card,
               child: new Semantics(
-                route: true,
-                routeName: true,
+                scopesRoute: true,
+                namesRoute: true,
                 value: semanticLabel,
                 explicitChildNodes: true,
                 child: child,
@@ -249,7 +249,7 @@ class AlertDialog extends StatelessWidget {
         padding: titlePadding ?? new EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
-          child: new Semantics(child: title, routeName: true),
+          child: new Semantics(child: title, namesRoute: true),
         ),
       ));
     }
@@ -277,8 +277,8 @@ class AlertDialog extends StatelessWidget {
     return new Dialog(
       child: new IntrinsicWidth(
         child: new Semantics(
-          route: true,
-          routeName: semanticLabel != null,
+          scopesRoute: true,
+          namesRoute: semanticLabel != null,
           explicitChildNodes: true,
           value: semanticLabel,
           child: new Column(
@@ -491,7 +491,7 @@ class SimpleDialog extends StatelessWidget {
         padding: titlePadding,
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
-          child: new Semantics(routeName: true, child: title),
+          child: new Semantics(namesRoute: true, child: title),
         )
       ));
     }
@@ -511,8 +511,8 @@ class SimpleDialog extends StatelessWidget {
         child: new ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 280.0),
           child: new Semantics(
-            route: true,
-            routeName: semanticLabel != null,
+            scopesRoute: true,
+            namesRoute: semanticLabel != null,
             value: semanticLabel,
             explicitChildNodes: true,
             child: new Column(

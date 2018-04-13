@@ -335,7 +335,7 @@ void main() {
         new TestSemantics(
           children: <TestSemantics>[
             new TestSemantics(
-              flags: <SemanticsFlag>[SemanticsFlag.isRoute],
+              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
               children: <TestSemantics>[
                 new TestSemantics(
                   label: 'Signed in\nname\nemail',
@@ -387,7 +387,7 @@ void main() {
         new TestSemantics(
           children: <TestSemantics>[
             new TestSemantics(
-              flags: <SemanticsFlag>[SemanticsFlag.isRoute],
+              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
               children: <TestSemantics>[
                 new TestSemantics(
                   label: 'Signed in',

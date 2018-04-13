@@ -790,7 +790,7 @@ void main() {
 
     expect(semantics, includesNodeWith(
       value: '/',
-      flags: <SemanticsFlag>[SemanticsFlag.isRoute],
+      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
     ));
 
     await tester.tap(find.text('/')); // pushNamed('/A')
@@ -799,7 +799,7 @@ void main() {
 
     expect(semantics, includesNodeWith(
       value: 'A',
-      flags: <SemanticsFlag>[SemanticsFlag.isRoute],
+      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
     ));
 
     await tester.tap(find.text('A')); // pushNamed('/B/C')
@@ -808,7 +808,7 @@ void main() {
 
     expect(semantics, includesNodeWith(
       value: 'B',
-      flags: <SemanticsFlag>[SemanticsFlag.isRoute],
+      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
     ));
 
     semantics.dispose();

@@ -44,7 +44,7 @@ class RouteName extends StatelessWidget  {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         result = new Semantics(
-          routeName: true,
+          namesRoute: true,
           explicitChildNodes: true,
           label: routeName,
           child: child,

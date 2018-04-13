@@ -471,7 +471,8 @@ void main() {
           inMutuallyExclusiveGroup: true,
           header: true,
           obscured: true,
-          route: true,
+          scopesRoute: true,
+          namesRoute: true,
         )
     );
 
