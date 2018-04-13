@@ -41,7 +41,7 @@ class Dialog extends StatelessWidget {
     this.child,
     this.insetAnimationDuration: const Duration(milliseconds: 100),
     this.insetAnimationCurve: Curves.decelerate,
-    this.semanticName,
+    this.semanticLabel,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -61,13 +61,13 @@ class Dialog extends StatelessWidget {
   /// Defaults to [Curves.fastOutSlowIn].
   final Curve insetAnimationCurve;
 
-  /// The semantic name of the dialog used by accessibility frameworks
+  /// The semantic label of the dialog used by accessibility frameworks
   /// 
   /// See also:
   /// 
   ///  * [SemanticsConfiguration.isRouteName], for a description of how this
   ///    value is used.
-  final String semanticName;
+  final String semanticLabel;
 
   Color _getColor(BuildContext context) {
     return Theme.of(context).dialogBackgroundColor;
@@ -95,7 +95,7 @@ class Dialog extends StatelessWidget {
               child: new Semantics(
                 route: true,
                 routeName: true,
-                value: semanticName,
+                value: semanticLabel,
                 explicitChildNodes: true,
                 child: child,
               )
@@ -181,7 +181,7 @@ class AlertDialog extends StatelessWidget {
     this.content,
     this.contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
     this.actions,
-    this.semanticName,
+    this.semanticLabel,
   }) : assert(contentPadding != null),
        super(key: key);
 
@@ -232,7 +232,13 @@ class AlertDialog extends StatelessWidget {
   /// from the [actions].
   final List<Widget> actions;
 
-  final String semanticName;
+  /// The semantic label of the dialog used by accessibility frameworks.
+  /// 
+  /// See also:
+  /// 
+  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
+  ///    value is used.
+  final String semanticLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -272,9 +278,9 @@ class AlertDialog extends StatelessWidget {
       child: new IntrinsicWidth(
         child: new Semantics(
           route: true,
-          routeName: semanticName != null,
+          routeName: semanticLabel != null,
           explicitChildNodes: true,
-          value: semanticName,
+          value: semanticLabel,
           child: new Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -426,7 +432,7 @@ class SimpleDialog extends StatelessWidget {
     this.titlePadding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
     this.children,
     this.contentPadding: const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
-    this.semanticName,
+    this.semanticLabel,
   }) : assert(titlePadding != null),
        assert(contentPadding != null),
        super(key: key);
@@ -468,13 +474,13 @@ class SimpleDialog extends StatelessWidget {
   /// the top padding ends up being 24 pixels.
   final EdgeInsetsGeometry contentPadding;
 
-  /// The semantic name of the dialog used by accessibility frameworks.
+  /// The semantic label of the dialog used by accessibility frameworks.
   /// 
   /// See also:
   /// 
   ///  * [SemanticsConfiguration.isRouteName], for a description of how this
   ///    value is used.
-  final String semanticName;
+  final String semanticLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -506,8 +512,8 @@ class SimpleDialog extends StatelessWidget {
           constraints: const BoxConstraints(minWidth: 280.0),
           child: new Semantics(
             route: true,
-            routeName: semanticName != null,
-            value: semanticName,
+            routeName: semanticLabel != null,
+            value: semanticLabel,
             explicitChildNodes: true,
             child: new Column(
               mainAxisSize: MainAxisSize.min,

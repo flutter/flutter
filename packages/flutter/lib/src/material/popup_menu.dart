@@ -418,11 +418,11 @@ class _PopupMenu<T> extends StatelessWidget {
   const _PopupMenu({
     Key key,
     this.route,
-    this.semanticName,
+    this.semanticLabel,
   }) : super(key: key);
 
   final _PopupMenuRoute<T> route;
-  final String semanticName;
+  final String semanticLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -484,7 +484,7 @@ class _PopupMenu<T> extends StatelessWidget {
               child: new Semantics(
                 route: true,
                 routeName: true,
-                value: semanticName,
+                value: semanticLabel,
                 child: child,
               ),
             ),
@@ -584,7 +584,6 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.elevation,
     this.theme,
     this.barrierLabel,
-    this.semanticName,
   });
 
   final RelativeRect position;
@@ -592,7 +591,6 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final dynamic initialValue;
   final double elevation;
   final ThemeData theme;
-  final String semanticName;
 
   @override
   Animation<double> createAnimation() {
@@ -690,7 +688,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// the menu. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the popup menu is closed.
 /// 
-/// The `semanticName` argument overrides the default semantic value used by
+/// The `semanticLabel` argument overrides the default semantic label used by
 /// accessibility frameworks.
 ///
 /// See also:
@@ -701,14 +699,14 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///  * [PopupMenuButton], which provides an [IconButton] that shows a menu by
 ///    calling this method automatically.
 ///  * [SemanticsConfiguration.isRouteName], for a description of how the
-///    `semanticName` is used.
+///    `semanticLabel` is used.
 Future<T> showMenu<T>({
   @required BuildContext context,
   RelativeRect position,
   @required List<PopupMenuEntry<T>> items,
   T initialValue,
   double elevation: 8.0,
-  String semanticName,
+  String semanticLabel,
 }) {
   assert(context != null);
   assert(items != null && items.isNotEmpty);
@@ -717,7 +715,7 @@ Future<T> showMenu<T>({
     items: items,
     initialValue: initialValue,
     elevation: elevation,
-    semanticName: semanticName,
+    semanticLabel: semanticLabel,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   ));
