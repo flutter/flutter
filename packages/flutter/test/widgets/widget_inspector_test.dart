@@ -18,10 +18,6 @@ void main() {
 }
 
 class TestWidgetInspectorService extends Object with WidgetInspectorService {
-  TestWidgetInspectorService() {
-    initServiceExtensions();
-  }
-
   final Map<String, InspectorServiceExtensionCallback> extensions = <String, InspectorServiceExtensionCallback>{};
 
   @override
@@ -29,7 +25,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     @required String name,
     @required FutureOr<Map<String, Object>> callback(Map<String, String> parameters),
   }) {
-    expect(extensions.containsKey(name), isFalse);
+    assert(!extensions.containsKey(name));
     extensions[name] = callback;
   }
 
@@ -58,6 +54,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
   // These tests need access to protected members of WidgetInspectorService.
   static void runTests() {
+    final TestWidgetInspectorService service = new TestWidgetInspectorService();
+    WidgetInspectorService.instance = service;
+
     testWidgets('WidgetInspector smoke test', (WidgetTester tester) async {
       // This is a smoke test to verify that adding the inspector doesn't crash.
       await tester.pumpWidget(
@@ -332,14 +331,12 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     });
 
     test('WidgetInspectorService null id', () {
-      final WidgetInspectorService service = WidgetInspectorService.instance;
       service.disposeAllGroups();
       expect(service.toObject(null), isNull);
       expect(service.toId(null, 'test-group'), isNull);
     });
 
     test('WidgetInspectorService dispose group', () {
-      final WidgetInspectorService service = WidgetInspectorService.instance;
       service.disposeAllGroups();
       final Object a = new Object();
       const String group1 = 'group-1';
@@ -356,7 +353,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     });
 
     test('WidgetInspectorService dispose id', () {
-      final WidgetInspectorService service = WidgetInspectorService.instance;
       service.disposeAllGroups();
       final Object a = new Object();
       final Object b = new Object();
@@ -376,7 +372,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     test('WidgetInspectorService toObjectForSourceLocation', () {
       const String group = 'test-group';
       const Text widget = const Text('a', textDirection: TextDirection.ltr);
-      final WidgetInspectorService service = WidgetInspectorService.instance;
       service.disposeAllGroups();
       final String id = service.toId(widget, group);
       expect(service.toObjectForSourceLocation(id), equals(widget));
@@ -397,7 +392,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       const String group1 = 'group-1';
       const String group2 = 'group-2';
       const String group3 = 'group-3';
-      final WidgetInspectorService service = WidgetInspectorService.instance;
       service.disposeAllGroups();
 
       final String aId = service.toId(a, group1);
@@ -437,7 +431,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final Element elementA = find.text('a').evaluate().first;
       final Element elementB = find.text('b').evaluate().first;
 
-      final WidgetInspectorService service = WidgetInspectorService.instance;
       service.disposeAllGroups();
       service.selection.clear();
       int selectionChangedCount = 0;
@@ -485,7 +478,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         ),
       );
 
-      final WidgetInspectorService service = WidgetInspectorService.instance;
       service.disposeAllGroups();
       final Element elementB = find.text('b').evaluate().first;
       final String bId = service.toId(elementB, group);
@@ -528,7 +520,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     test('WidgetInspectorService getProperties', () {
       final DiagnosticsNode diagnostic = const Text('a', textDirection: TextDirection.ltr).toDiagnosticsNode();
       const String group = 'group';
-      final WidgetInspectorService service = WidgetInspectorService.instance;
       service.disposeAllGroups();
       final String id = service.toId(diagnostic, group);
       final List<Object> propertiesJson = json.decode(service.getProperties(id, group));
@@ -558,7 +549,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         ),
       );
       final DiagnosticsNode diagnostic = find.byType(Stack).evaluate().first.toDiagnosticsNode();
-      final WidgetInspectorService service = WidgetInspectorService.instance;
       service.disposeAllGroups();
       final String id = service.toId(diagnostic, group);
       final List<Object> propertiesJson = json.decode(service.getChildren(id, group));
@@ -573,8 +563,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     });
 
     testWidgets('WidgetInspectorService creationLocation', (WidgetTester tester) async {
-      final WidgetInspectorService service = WidgetInspectorService.instance;
-
       await tester.pumpWidget(
         new Directionality(
           textDirection: TextDirection.ltr,
@@ -615,28 +603,26 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // would make this test fragile.
       expect(lineA + 1, equals(lineB));
       // Column numbers are more stable than line numbers.
-      expect(columnA, equals(19));
+      expect(columnA, equals(21));
       expect(columnA, equals(columnB));
       expect(parameterLocationsA.length, equals(1));
       final Map<String, Object> paramA = parameterLocationsA[0];
       expect(paramA['name'], equals('data'));
       expect(paramA['line'], equals(lineA));
-      expect(paramA['column'], equals(24));
+      expect(paramA['column'], equals(26));
 
       expect(parameterLocationsB.length, equals(2));
       final Map<String, Object> paramB1 = parameterLocationsB[0];
       expect(paramB1['name'], equals('data'));
       expect(paramB1['line'], equals(lineB));
-      expect(paramB1['column'], equals(24));
+      expect(paramB1['column'], equals(26));
       final Map<String, Object> paramB2 = parameterLocationsB[1];
       expect(paramB2['name'], equals('textDirection'));
       expect(paramB2['line'], equals(lineB));
-      expect(paramB2['column'], equals(29));
+      expect(paramB2['column'], equals(31));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('WidgetInspectorService setPubRootDirectories', (WidgetTester tester) async {
-      final WidgetInspectorService service = WidgetInspectorService.instance;
-
       await tester.pumpWidget(
         new Directionality(
           textDirection: TextDirection.ltr,
@@ -716,7 +702,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     test('ext.flutter.inspector.disposeGroup', () async {
-      final TestWidgetInspectorService service = new TestWidgetInspectorService();
       final Object a = new Object();
       const String group1 = 'group-1';
       const String group2 = 'group-2';
@@ -732,7 +717,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     });
 
     test('ext.flutter.inspector.disposeId', () async {
-      final TestWidgetInspectorService service = new TestWidgetInspectorService();
       final Object a = new Object();
       final Object b = new Object();
       const String group1 = 'group-1';
@@ -764,7 +748,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final Element elementA = find.text('a').evaluate().first;
       final Element elementB = find.text('b').evaluate().first;
 
-      final TestWidgetInspectorService service = new TestWidgetInspectorService();
       service.disposeAllGroups();
       service.selection.clear();
       int selectionChangedCount = 0;
@@ -812,7 +795,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         ),
       );
 
-      final TestWidgetInspectorService service = new TestWidgetInspectorService();
       final Element elementB = find.text('b').evaluate().first;
       final String bId = service.toId(elementB, group);
       final Object jsonList = await service.testExtension('getParentChain', <String, String>{'arg': bId, 'objectGroup': group});
@@ -854,7 +836,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     test('ext.flutter.inspector.getProperties', () async {
       final DiagnosticsNode diagnostic = const Text('a', textDirection: TextDirection.ltr).toDiagnosticsNode();
       const String group = 'group';
-      final TestWidgetInspectorService service = new TestWidgetInspectorService();
       final String id = service.toId(diagnostic, group);
       final List<Object> propertiesJson = await service.testExtension('getProperties', <String, String>{'arg': id, 'objectGroup': group});
       final List<DiagnosticsNode> properties = diagnostic.getProperties();
@@ -883,7 +864,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         ),
       );
       final DiagnosticsNode diagnostic = find.byType(Stack).evaluate().first.toDiagnosticsNode();
-      final TestWidgetInspectorService service = new TestWidgetInspectorService();
       final String id = service.toId(diagnostic, group);
       final List<Object> propertiesJson = await service.testExtension('getChildren', <String, String>{'arg': id, 'objectGroup': group});
       final List<DiagnosticsNode> children = diagnostic.getChildren();
@@ -897,8 +877,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     });
 
     testWidgets('ext.flutter.inspector creationLocation', (WidgetTester tester) async {
-      final TestWidgetInspectorService service = new TestWidgetInspectorService();
-
       await tester.pumpWidget(
         new Directionality(
           textDirection: TextDirection.ltr,
@@ -939,28 +917,26 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // would make this test fragile.
       expect(lineA + 1, equals(lineB));
       // Column numbers are more stable than line numbers.
-      expect(columnA, equals(19));
+      expect(columnA, equals(21));
       expect(columnA, equals(columnB));
       expect(parameterLocationsA.length, equals(1));
       final Map<String, Object> paramA = parameterLocationsA[0];
       expect(paramA['name'], equals('data'));
       expect(paramA['line'], equals(lineA));
-      expect(paramA['column'], equals(24));
+      expect(paramA['column'], equals(26));
 
       expect(parameterLocationsB.length, equals(2));
       final Map<String, Object> paramB1 = parameterLocationsB[0];
       expect(paramB1['name'], equals('data'));
       expect(paramB1['line'], equals(lineB));
-      expect(paramB1['column'], equals(24));
+      expect(paramB1['column'], equals(26));
       final Map<String, Object> paramB2 = parameterLocationsB[1];
       expect(paramB2['name'], equals('textDirection'));
       expect(paramB2['line'], equals(lineB));
-      expect(paramB2['column'], equals(29));
+      expect(paramB2['column'], equals(31));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.setPubRootDirectories', (WidgetTester tester) async {
-      final TestWidgetInspectorService service = new TestWidgetInspectorService();
-
       await tester.pumpWidget(
         new Directionality(
           textDirection: TextDirection.ltr,
@@ -1040,8 +1016,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.show', (WidgetTester tester) async {
-      final TestWidgetInspectorService service = new TestWidgetInspectorService();
-      expect(service.rebuildCount, equals(0));
+      service.rebuildCount = 0;
       expect(await service.testBoolExtension('show', <String, String>{'enabled': 'true'}), equals('true'));
       expect(service.rebuildCount, equals(1));
       expect(await service.testBoolExtension('show', <String, String>{}), equals('true'));

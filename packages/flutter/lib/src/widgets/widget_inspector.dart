@@ -1,8 +1,8 @@
-import 'dart:async';
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer' as developer;
@@ -122,15 +122,19 @@ class _WidgetInspectorService extends Object with WidgetInspectorService {
 ///
 /// All methods returning String values return JSON.
 class WidgetInspectorService {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory WidgetInspectorService._() => null;
+  // This class is usable as a mixin for test purposes and as a singleton
+  // [instance] for production purposes.
+  factory WidgetInspectorService._() => new _WidgetInspectorService();
 
   /// The current [WidgetInspectorService].
   static WidgetInspectorService get instance => _instance;
-  static final WidgetInspectorService _instance = new _WidgetInspectorService();
+  static WidgetInspectorService _instance = new WidgetInspectorService._();
+  @protected
+  static set instance(WidgetInspectorService instance) {
+    _instance = instance;
+  }
 
-  bool _debugServiceExtensionsRegistered = false;
+  static bool _debugServiceExtensionsRegistered = false;
 
   /// Ground truth tracking what object(s) are currently selected used by both
   /// GUI tools such as the Flutter IntelliJ Plugin and the [WidgetInspector]
@@ -166,42 +170,12 @@ class WidgetInspectorService {
   @protected
   void registerServiceExtension({
     @required String name,
-    @required FutureOr<Map<String, Object>> callback(Map<String, String> parameters),
+    @required ServiceExtensionCallback callback,
   }) {
-    assert(name != null);
-    assert(callback != null);
-    final String methodName = 'ext.flutter.inspector.$name';
-    developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
-      assert(method == methodName);
-      dynamic caughtException;
-      StackTrace caughtStack;
-      Map<String, dynamic> result;
-      try {
-        result = await callback(parameters);
-      } catch (exception, stack) {
-        caughtException = exception;
-        caughtStack = stack;
-      }
-      if (caughtException == null) {
-        result['type'] = '_extensionType';
-        result['method'] = method;
-        return new developer.ServiceExtensionResponse.result(json.encode(result));
-      } else {
-        FlutterError.reportError(new FlutterErrorDetails(
-            exception: caughtException,
-            stack: caughtStack,
-            context: 'during a service extension callback for "$method"'
-        ));
-        return new developer.ServiceExtensionResponse.error(
-            developer.ServiceExtensionResponse.extensionError,
-            json.encode(<String, String>{
-              'exception': caughtException.toString(),
-              'stack': caughtStack.toString(),
-              'method': method,
-            })
-        );
-      }
-    });
+    registerFlutterServiceExtension(
+      name: 'inspector.$name',
+      callback: callback,
+    );
   }
 
   /// Registers a service extension method with the given name (full
@@ -214,7 +188,7 @@ class WidgetInspectorService {
       name: name,
       callback: (Map<String, String> parameters) async {
         return <String, Object>{'result': await callback()};
-      }
+      },
     );
   }
 
@@ -261,7 +235,7 @@ class WidgetInspectorService {
         if (parameters.containsKey('enabled'))
           await setter(parameters['enabled'] == 'true');
         return <String, dynamic>{ 'enabled': await getter() ? 'true' : 'false' };
-      }
+      },
     );
   }
 
@@ -331,7 +305,7 @@ class WidgetInspectorService {
   ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
   void initServiceExtensions() {
     assert(!_debugServiceExtensionsRegistered);
-    _debugServiceExtensionsRegistered = true;
+    assert(() { _debugServiceExtensionsRegistered = true; return true; }());
 
     _registerBoolServiceExtension(
       name: 'show',
@@ -355,7 +329,7 @@ class WidgetInspectorService {
     );
     _registerSignalServiceExtension(
       name: 'isWidgetTreeReady',
-      callback: isWidgetTreeReady
+      callback: isWidgetTreeReady,
     );
     _registerServiceExtensionWithArg(
       name: 'disposeId',
