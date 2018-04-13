@@ -115,11 +115,8 @@ class Drawer extends StatelessWidget {
       constraints: const BoxConstraints.expand(width: _kWidth),
       child: new Material(
         elevation: elevation,
-        child: new Semantics(
-          namesRoute: semanticLabel != null,
-          scopesRoute: true,
-          explicitChildNodes: true,
-          label: semanticLabel,
+        child: new RouteName(
+          routeName: semanticLabel,
           child: child,
         ),
       ),

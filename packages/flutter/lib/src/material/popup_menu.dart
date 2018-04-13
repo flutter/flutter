@@ -481,11 +481,8 @@ class _PopupMenu<T> extends StatelessWidget {
               alignment: AlignmentDirectional.topEnd,
               widthFactor: width.evaluate(route.animation),
               heightFactor: height.evaluate(route.animation),
-              child: new Semantics(
-                scopesRoute: true,
-                namesRoute: true,
-                explicitChildNodes: true,
-                label: semanticLabel,
+              child: new RouteName(
+                routeName: semanticLabel,
                 child: child,
               ),
             ),
@@ -593,6 +590,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final dynamic initialValue;
   final double elevation;
   final ThemeData theme;
+  final String semanticLabel;
 
   @override
   Animation<double> createAnimation() {
@@ -614,8 +612,6 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
   @override
   final String barrierLabel;
-
-  final String semanticLabel;
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
@@ -693,7 +689,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// widget can be safely removed from the tree before the popup menu is closed.
 /// 
 /// The `semanticLabel` argument overrides the default semantic label used by
-/// accessibility frameworks.
+/// accessibility frameworks for edge triggered semantic updates.
 ///
 /// See also:
 ///
@@ -702,8 +698,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///  * [CheckedPopupMenuItem], a popup menu item with a checkmark.
 ///  * [PopupMenuButton], which provides an [IconButton] that shows a menu by
 ///    calling this method automatically.
-///  * [SemanticsConfiguration.isRouteName], for a description of how the
-///    `semanticLabel` is used.
+///  * [SemanticsConfiguration.namesRoute], for a description of edge triggered
+///    semantics.
 Future<T> showMenu<T>({
   @required BuildContext context,
   RelativeRect position,

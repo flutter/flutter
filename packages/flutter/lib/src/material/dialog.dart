@@ -92,13 +92,10 @@ class Dialog extends StatelessWidget {
               elevation: 24.0,
               color: _getColor(context),
               type: MaterialType.card,
-              child: new Semantics(
-                scopesRoute: true,
-                namesRoute: true,
-                value: semanticLabel,
-                explicitChildNodes: true,
+              child: new RouteName(
+                routeName: semanticLabel,
                 child: child,
-              )
+              ),
             ),
           ),
         ),
@@ -276,11 +273,8 @@ class AlertDialog extends StatelessWidget {
 
     return new Dialog(
       child: new IntrinsicWidth(
-        child: new Semantics(
-          scopesRoute: true,
-          namesRoute: semanticLabel != null,
-          explicitChildNodes: true,
-          label: semanticLabel,
+        child: new RouteName(
+          routeName: semanticLabel,
           child: new Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -510,11 +504,8 @@ class SimpleDialog extends StatelessWidget {
         stepWidth: 56.0,
         child: new ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 280.0),
-          child: new Semantics(
-            scopesRoute: true,
-            namesRoute: semanticLabel != null,
-            label: semanticLabel,
-            explicitChildNodes: true,
+          child: new RouteName(
+            routeName: semanticLabel,
             child: new Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
