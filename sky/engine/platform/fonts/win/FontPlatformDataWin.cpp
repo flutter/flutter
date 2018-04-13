@@ -54,8 +54,7 @@ void FontPlatformData::setupPaint(SkPaint* paint,
   uint32_t textFlags = paintTextFlags();
   uint32_t flags = paint->getFlags();
   static const uint32_t textFlagsMask = SkPaint::kAntiAlias_Flag |
-                                        SkPaint::kLCDRenderText_Flag |
-                                        SkPaint::kGenA8FromLCD_Flag;
+                                        SkPaint::kLCDRenderText_Flag;
   flags &= ~textFlagsMask;
 
   if (ts <= kMaxSizeForEmbeddedBitmap)
