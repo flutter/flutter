@@ -25,6 +25,11 @@ import 'gesture_detector.dart';
 /// [WidgetInspector.selectButtonBuilder].
 typedef Widget InspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed);
 
+typedef void _RegisterServiceExtensionCallback({
+  @required String name,
+  @required ServiceExtensionCallback callback
+});
+
 /// A class describing a step along a path through a tree of [DiagnosticsNode]
 /// objects.
 ///
@@ -159,6 +164,7 @@ class WidgetInspectorService {
 
   List<String> _pubRootDirectories;
 
+  _RegisterServiceExtensionCallback _registerServiceExtensionCallback;
   /// Registers a service extension method with the given name (full
   /// name "ext.flutter.inspector.name").
   ///
@@ -172,7 +178,7 @@ class WidgetInspectorService {
     @required String name,
     @required ServiceExtensionCallback callback,
   }) {
-    registerFlutterServiceExtension(
+    _registerServiceExtensionCallback(
       name: 'inspector.$name',
       callback: callback,
     );
@@ -303,7 +309,9 @@ class WidgetInspectorService {
   /// See also:
   ///
   ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
-  void initServiceExtensions() {
+  void initServiceExtensions(
+      _RegisterServiceExtensionCallback registerServiceExtensionCallback) {
+    _registerServiceExtensionCallback = registerServiceExtensionCallback;
     assert(!_debugServiceExtensionsRegistered);
     assert(() { _debugServiceExtensionsRegistered = true; return true; }());
 

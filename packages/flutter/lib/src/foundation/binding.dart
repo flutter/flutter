@@ -358,7 +358,40 @@ abstract class BindingBase {
     @required String name,
     @required ServiceExtensionCallback callback
   }) {
-    registerFlutterServiceExtension(name: name, callback: callback);
+    assert(name != null);
+    assert(callback != null);
+    final String methodName = 'ext.flutter.$name';
+    developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
+      assert(method == methodName);
+      dynamic caughtException;
+      StackTrace caughtStack;
+      Map<String, dynamic> result;
+      try {
+        result = await callback(parameters);
+      } catch (exception, stack) {
+        caughtException = exception;
+        caughtStack = stack;
+      }
+      if (caughtException == null) {
+        result['type'] = '_extensionType';
+        result['method'] = method;
+        return new developer.ServiceExtensionResponse.result(json.encode(result));
+      } else {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: caughtException,
+          stack: caughtStack,
+          context: 'during a service extension callback for "$method"'
+        ));
+        return new developer.ServiceExtensionResponse.error(
+          developer.ServiceExtensionResponse.extensionError,
+          json.encode(<String, String>{
+            'exception': caughtException.toString(),
+            'stack': caughtStack.toString(),
+            'method': method,
+          })
+        );
+      }
+    });
   }
 
   @override
@@ -368,55 +401,4 @@ abstract class BindingBase {
 /// Terminate the Flutter application.
 Future<Null> _exitApplication() async {
   exit(0);
-}
-
-/// Registers a service extension method with the given name (full
-/// name "ext.flutter.name"). The given callback is called when the
-/// extension method is called. The callback must return a [Future]
-/// that either eventually completes to a return value in the form
-/// of a name/value map where the values can all be converted to
-/// JSON using `json.encode()` (see [JsonEncoder]), or fails. In case of failure, the
-/// failure is reported to the remote caller and is dumped to the
-/// logs.
-///
-/// The returned map will be mutated.
-@protected
-void registerFlutterServiceExtension({
-  @required String name,
-  @required ServiceExtensionCallback callback
-}) {
-  assert(name != null);
-  assert(callback != null);
-  final String methodName = 'ext.flutter.$name';
-  developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
-    assert(method == methodName);
-    dynamic caughtException;
-    StackTrace caughtStack;
-    Map<String, dynamic> result;
-    try {
-      result = await callback(parameters);
-    } catch (exception, stack) {
-      caughtException = exception;
-      caughtStack = stack;
-    }
-    if (caughtException == null) {
-      result['type'] = '_extensionType';
-      result['method'] = method;
-      return new developer.ServiceExtensionResponse.result(json.encode(result));
-    } else {
-      FlutterError.reportError(new FlutterErrorDetails(
-        exception: caughtException,
-        stack: caughtStack,
-        context: 'during a service extension callback for "$method"'
-      ));
-      return new developer.ServiceExtensionResponse.error(
-        developer.ServiceExtensionResponse.extensionError,
-        json.encode(<String, String>{
-          'exception': caughtException.toString(),
-          'stack': caughtStack.toString(),
-          'method': method,
-        })
-      );
-    }
-  });
 }
