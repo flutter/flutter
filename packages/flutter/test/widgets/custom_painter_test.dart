@@ -417,6 +417,7 @@ void _defineTests() {
             header: true,
             obscured: true,
             route: true,
+            routeName: true,
           ),
         ),
       ),
