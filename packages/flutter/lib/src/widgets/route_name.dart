@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// A widget which provides a semantic name route name.
+/// A widget which provides a semantic name for a route.
 ///
 /// On iOS, no additional semantic information is inserted.
 ///
