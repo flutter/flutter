@@ -755,7 +755,7 @@ class VM extends ServiceObjectOwner {
     } on rpc.RpcException catch (error) {
       printError('Error ${error.code} received from application: ${error.message}');
       printTrace('${error.data}');
-      return null;
+      rethrow;
     }
   }
 
