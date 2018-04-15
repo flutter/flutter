@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import '../../widgets.dart';
 
 /// Identifiers for the supported Cupertino icons.
 ///
@@ -44,6 +44,8 @@ class CupertinoIcons {
   static const IconData right_chevron = const IconData(0xf3f2, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
   /// iOS style share icon with an arrow pointing up from a box.
+  ///
+  /// For an old (pre-iOS 7) version of this icon, see [share_old].
   static const IconData share = const IconData(0xf4ca, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A book silhouette spread open.
@@ -53,6 +55,8 @@ class CupertinoIcons {
   static const IconData info = const IconData(0xf44c, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A curved up and left pointing arrow.
+  ///
+  /// For a filled version of this icon, see [reply_filled].
   static const IconData reply = const IconData(0xf4c6, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A chat bubble.
@@ -99,4 +103,41 @@ class CupertinoIcons {
 
   /// A solid down arrow.
   static const IconData down_arrow = const IconData(0xf35d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A charging battery.
+  static const IconData battery_charging = const IconData(0xf111, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// An empty battery.
+  static const IconData battery_empty = const IconData(0xf112, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A full battery.
+  static const IconData battery_full = const IconData(0xf113, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A 75% charged battery.
+  static const IconData battery_75_percent = const IconData(0xf114, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A 25% charged battery.
+  static const IconData battery_25_percent = const IconData(0xf115, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// The bluetooth logo.
+  static const IconData bluetooth = const IconData(0xf116, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A rewind arrow, pointing downwards.
+  static const IconData rewind_arrow = const IconData(0xf21c, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Two curved up and left pointing arrows.
+  static const IconData reply_all = const IconData(0xf21d, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A curved up and left pointing arrow.
+  ///
+  /// For an outlined version of this icon, see [reply].
+  static const IconData reply_filled = const IconData(0xf21e, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Old (pre-iOS 7) iOS style share icon with an arrow pointing to the right from a box.
+  ///
+  /// For a newer version of this icon (introduced in iOS 7), see [share].
+  static const IconData share_old = const IconData(0xf220, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Two right-facing intertwined arrows.
+  static const IconData merge_arrow = const IconData(0xf221, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
