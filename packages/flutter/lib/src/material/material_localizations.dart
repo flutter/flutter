@@ -147,18 +147,15 @@ abstract class MaterialLocalizations {
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a 
   /// drawer widget is opened.
   String get drawerLabel;
-
  
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a 
   /// popup menu widget is opened.
   String get popupMenuLabel;
 
-  
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when a 
   /// dialog widget is opened.
   String get dialogLabel;
 
-  
   /// Label read out by accessibility tools (TalkBack or VoiceOver) when an 
   /// alert dialog widget is opened.
   String get alertDialogLabel;
