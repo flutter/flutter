@@ -562,7 +562,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
   /// Create a slider thumb that draws a circle.
   const RoundSliderThumbShape();
 
-  static const double _thumbRadius = 10.0;
+  static const double _thumbRadius = 6.0;
   static const double _disabledThumbRadius = 4.0;
 
   @override

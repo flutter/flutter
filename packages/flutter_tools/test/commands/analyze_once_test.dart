@@ -33,7 +33,12 @@ void main() {
     });
 
     tearDownAll(() {
-      tempDir?.deleteSync(recursive: true);
+      try {
+        tempDir?.deleteSync(recursive: true);
+      } on FileSystemException catch (e) {
+        // ignore errors deleting the temporary directory
+        print('Ignored exception during tearDown: $e');
+      }
     });
 
     // Create a project to be analyzed
