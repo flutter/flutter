@@ -31,7 +31,7 @@ class CanvasImage final : public fxl::RefCountedThreadSafe<CanvasImage>,
 
   int height() { return image_.get()->height(); }
 
-  Dart_Handle toByteData(int format, int quality, Dart_Handle callback);
+  Dart_Handle toByteData(Dart_Handle callback);
 
   void dispose();
 

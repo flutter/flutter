@@ -32,10 +32,8 @@ CanvasImage::CanvasImage() = default;
 
 CanvasImage::~CanvasImage() = default;
 
-Dart_Handle CanvasImage::toByteData(int format,
-                                    int quality,
-                                    Dart_Handle callback) {
-  return EncodeImage(this, format, quality, callback);
+Dart_Handle CanvasImage::toByteData(Dart_Handle callback) {
+  return GetImageBytes(this, callback);
 }
 
 void CanvasImage::dispose() {
