@@ -5,6 +5,7 @@
 .DS_Store
 .classpath
 .cproject
+.dart_tool
 .gdb_history
 .checkstyle
 .gdbinit
