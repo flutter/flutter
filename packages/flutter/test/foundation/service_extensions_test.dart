@@ -506,6 +506,9 @@ void main() {
   });
 
   test('Service extensions - posttest', () async {
+    // See widget_inspector_test.dart for tests of the 15 ext.flutter.inspector
+    // service extensions included in this count.
+
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
     expect(binding.extensions.length, 32);
