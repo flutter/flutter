@@ -14,14 +14,21 @@ namespace shell {
 
 IOSGLContext::IOSGLContext(fml::scoped_nsobject<CAEAGLLayer> layer)
     : layer_(std::move(layer)),
-      context_([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2]),
-      resource_context_([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2
-                                              sharegroup:context_.get().sharegroup]),
       framebuffer_(GL_NONE),
       colorbuffer_(GL_NONE),
       storage_size_width_(0),
       storage_size_height_(0),
       valid_(false) {
+  context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3]);
+  if (context_ != nullptr) {
+    resource_context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3
+                                                  sharegroup:context_.get().sharegroup]);
+  } else {
+    context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2]);
+    resource_context_.reset([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2
+                                                  sharegroup:context_.get().sharegroup]);
+  }
+
   FXL_DCHECK(layer_ != nullptr);
   FXL_DCHECK(context_ != nullptr);
   FXL_DCHECK(resource_context_ != nullptr);
