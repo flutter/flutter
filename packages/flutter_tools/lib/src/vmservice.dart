@@ -1183,7 +1183,7 @@ class Isolate extends ServiceObjectOwner {
 
   Future<Map<String, dynamic>> flutterTogglePerformanceOverlayOverride() => _flutterToggle('showPerformanceOverlay');
 
-  Future<Map<String, dynamic>> flutterToggleWidgetInspector() => _flutterToggle('debugWidgetInspector');
+  Future<Map<String, dynamic>> flutterToggleWidgetInspector() => _flutterToggle('inspector.show');
 
   Future<Null> flutterDebugAllowBanner(bool show) async {
     await invokeFlutterExtensionRpcRaw(
