@@ -643,7 +643,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         height: widget.isDense ? _denseButtonHeight : null,
         child: new Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             // If value is null (then _selectedIndex is null) then we display
             // the hint or nothing at all.
