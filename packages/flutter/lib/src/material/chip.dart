@@ -1399,12 +1399,12 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                     style: widget.labelStyle ?? chipTheme.labelStyle,
                     child: widget.label,
                   ),
-                  avatar: new AnimatedChildSwitcher(
+                  avatar: new AnimatedSwitcher(
                     child: widget.avatar,
                     duration: _kDrawerDuration,
                     switchInCurve: Curves.fastOutSlowIn,
                   ),
-                  deleteIcon: new AnimatedChildSwitcher(
+                  deleteIcon: new AnimatedSwitcher(
                     child: _buildDeleteIcon(context, theme, chipTheme),
                     duration: _kDrawerDuration,
                     switchInCurve: Curves.fastOutSlowIn,
