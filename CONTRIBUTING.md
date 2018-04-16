@@ -207,7 +207,8 @@ find . -mindepth 1 -maxdepth 1 -type d | xargs -n 1 sh -c 'ninja -C $0 || exit 2
 Contributing code
 -----------------
 
-We gladly accept contributions via GitHub pull requests.
+We gladly accept contributions via GitHub pull requests. See [the wiki](https://github.com/flutter/engine/wiki) for
+information about the engine's architecture.
 
 To start working on a patch:
 
