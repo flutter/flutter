@@ -35,5 +35,9 @@
   "signedInLabel": "Sesión iniciada",
   "hideAccountsLabel": "Ocultar cuentas",
   "showAccountsLabel": "Mostrar cuentas",
-  "modalBarrierDismissLabel": "Ignorar"
+  "modalBarrierDismissLabel": "Ignorar",
+  "drawerLabel": "Menú de Navegación",
+  "popupMenuLabel": "Menú emergente",
+  "dialogLabel": "Diálogo",
+  "alertDialogLabel": "Alerta"
 }

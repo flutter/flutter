@@ -144,6 +144,22 @@ abstract class MaterialLocalizations {
   /// user interaction with elements behind it.
   String get modalBarrierDismissLabel;
 
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a 
+  /// drawer widget is opened.
+  String get drawerLabel;
+ 
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a 
+  /// popup menu widget is opened.
+  String get popupMenuLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a 
+  /// dialog widget is opened.
+  String get dialogLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when an 
+  /// alert dialog widget is opened.
+  String get alertDialogLabel;
+
   /// The format used to lay out the time picker.
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
@@ -508,6 +524,18 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get showMenuTooltip => 'Show menu';
+
+  @override
+  String get drawerLabel => 'Navigation menu';
+
+  @override
+  String get popupMenuLabel => 'Popup menu';
+
+  @override
+  String get dialogLabel => 'Dialog';
+
+  @override
+  String get alertDialogLabel => 'Alert';
 
   @override
   String aboutListTileTitle(String applicationName) => 'About $applicationName';
