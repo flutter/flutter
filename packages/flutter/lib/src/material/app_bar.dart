@@ -191,18 +191,19 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// ## Sample code
   ///
   /// ```dart
-  /// return new Scaffold(
+  /// new Scaffold(
   ///   appBar: new AppBar(
   ///     title: new Text('Hello World'),
   ///     actions: <Widget>[
   ///       new IconButton(
   ///         icon: new Icon(Icons.shopping_cart),
   ///         tooltip: 'Open shopping cart',
-  ///         onPressed: _openCart,
+  ///         onPressed: () {
+  ///           // ...
+  ///         },
   ///       ),
   ///     ],
   ///   ),
-  ///   body: _buildBody(),
   /// );
   /// ```
   final List<Widget> actions;
@@ -770,7 +771,7 @@ class SliverAppBar extends StatefulWidget {
   /// ## Sample code
   ///
   /// ```dart
-  /// return new Scaffold(
+  /// new Scaffold(
   ///   body: new CustomScrollView(
   ///     primary: true,
   ///     slivers: <Widget>[
