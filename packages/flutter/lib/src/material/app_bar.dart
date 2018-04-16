@@ -204,7 +204,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///       ),
   ///     ],
   ///   ),
-  /// );
+  /// )
   /// ```
   final List<Widget> actions;
 
@@ -790,7 +790,7 @@ class SliverAppBar extends StatefulWidget {
   ///       // ...rest of body...
   ///     ],
   ///   ),
-  /// );
+  /// )
   /// ```
   final List<Widget> actions;
 
