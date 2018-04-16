@@ -11,11 +11,11 @@ import 'ticker_provider.dart';
 import 'transitions.dart';
 
 // Internal representation of a child that, now or in the past, was set on the
-// AnimatedChildSwitcher.child field, but is now in the process of
+// AnimatedSwitcher.child field, but is now in the process of
 // transitioning. The internal representation includes fields that we don't want
 // to expose to the public API (like the controller).
-class _AnimatedChildSwitcherChildEntry {
-  _AnimatedChildSwitcherChildEntry({
+class _AnimatedSwitcherChildEntry {
+  _AnimatedSwitcherChildEntry({
     @required this.animation,
     @required this.transition,
     @required this.controller,
@@ -37,31 +37,31 @@ class _AnimatedChildSwitcherChildEntry {
 }
 
 /// Signature for builders used to generate custom transitions for
-/// [AnimatedChildSwitcher].
+/// [AnimatedSwitcher].
 ///
 /// The [child] should be transitioning in when the [animation] is running in
 /// the forward direction.
 ///
 /// The function should return a widget which wraps the given [child]. It may
 /// also use the [animation] to inform its transition. It must not return null.
-typedef Widget AnimatedChildSwitcherTransitionBuilder(Widget child, Animation<double> animation);
+typedef Widget AnimatedSwitcherTransitionBuilder(Widget child, Animation<double> animation);
 
 /// Signature for builders used to generate custom layouts for
-/// [AnimatedChildSwitcher].
+/// [AnimatedSwitcher].
 ///
 /// The function should return a widget which contains the given children, laid
 /// out as desired. It must not return null.
-typedef Widget AnimatedChildSwitcherLayoutBuilder(List<Widget> children);
+typedef Widget AnimatedSwitcherLayoutBuilder(List<Widget> children);
 
 /// A widget that by default does a [FadeTransition] between a new widget and
-/// the widget previously set on the [AnimatedChildSwitcher] as a child.
+/// the widget previously set on the [AnimatedSwitcher] as a child.
 ///
 /// If they are swapped fast enough (i.e. before [duration] elapses), more than
 /// one previous child can exist and be transitioning out while the newest one
 /// is transitioning in.
 ///
 /// If the "new" child is the same widget type as the "old" child, but with
-/// different parameters, then [AnimatedChildSwitcher] will *not* do a
+/// different parameters, then [AnimatedSwitcher] will *not* do a
 /// transition between them, since as far as the framework is concerned, they
 /// are the same widget, and the existing widget can be updated with the new
 /// parameters. If you wish to force the transition to occur, set a [Key]
@@ -88,7 +88,7 @@ typedef Widget AnimatedChildSwitcherLayoutBuilder(List<Widget> children);
 ///       child: Column(
 ///         mainAxisAlignment: MainAxisAlignment.center,
 ///         children: <Widget>[
-///           new AnimatedChildSwitcher(
+///           new AnimatedSwitcher(
 ///             duration: const Duration(milliseconds: 200),
 ///             transitionBuilder: (Widget child, Animation<double> animation) {
 ///               return new ScaleTransition(child: child, scale: animation);
@@ -119,20 +119,20 @@ typedef Widget AnimatedChildSwitcherLayoutBuilder(List<Widget> children);
 ///
 ///  * [AnimatedCrossFade], which only fades between two children, but also
 ///    interpolates their sizes, and is reversible.
-///  * [FadeTransition] which [AnimatedChildSwitcher] uses to perform the transition.
-class AnimatedChildSwitcher extends StatefulWidget {
-  /// Creates an [AnimatedChildSwitcher].
+///  * [FadeTransition] which [AnimatedSwitcher] uses to perform the transition.
+class AnimatedSwitcher extends StatefulWidget {
+  /// Creates an [AnimatedSwitcher].
   ///
   /// The [duration], [transitionBuilder], [layoutBuilder], [switchInCurve], and
   /// [switchOutCurve] parameters must not be null.
-  const AnimatedChildSwitcher({
+  const AnimatedSwitcher({
     Key key,
     this.child,
     @required this.duration,
     this.switchInCurve: Curves.linear,
     this.switchOutCurve: Curves.linear,
-    this.transitionBuilder: AnimatedChildSwitcher.defaultTransitionBuilder,
-    this.layoutBuilder: AnimatedChildSwitcher.defaultLayoutBuilder,
+    this.transitionBuilder: AnimatedSwitcher.defaultTransitionBuilder,
+    this.layoutBuilder: AnimatedSwitcher.defaultLayoutBuilder,
   })  : assert(duration != null),
         assert(switchInCurve != null),
         assert(switchOutCurve != null),
@@ -161,37 +161,37 @@ class AnimatedChildSwitcher extends StatefulWidget {
   /// the [child] in when the animation runs in the forward direction and out
   /// when the animation runs in the reverse direction.
   ///
-  /// The default is [AnimatedChildSwitcher.defaultTransitionBuilder].
+  /// The default is [AnimatedSwitcher.defaultTransitionBuilder].
   ///
   /// See also:
   ///
-  ///  * [AnimatedChildSwitcherTransitionBuilder] for more information about
+  ///  * [AnimatedSwitcherTransitionBuilder] for more information about
   ///    how a transition builder should function.
-  final AnimatedChildSwitcherTransitionBuilder transitionBuilder;
+  final AnimatedSwitcherTransitionBuilder transitionBuilder;
 
   /// A function that wraps all of the children that are transitioning out, and
   /// the [child] that's transitioning in, with a widget that lays all of them
   /// out.
   ///
-  /// The default is [AnimatedChildSwitcher.defaultLayoutBuilder].
+  /// The default is [AnimatedSwitcher.defaultLayoutBuilder].
   ///
   /// See also:
   ///
-  ///  * [AnimatedChildSwitcherLayoutBuilder] for more information about
+  ///  * [AnimatedSwitcherLayoutBuilder] for more information about
   ///    how a layout builder should function.
-  final AnimatedChildSwitcherLayoutBuilder layoutBuilder;
+  final AnimatedSwitcherLayoutBuilder layoutBuilder;
 
   @override
-  _AnimatedChildSwitcherState createState() => new _AnimatedChildSwitcherState();
+  _AnimatedSwitcherState createState() => new _AnimatedSwitcherState();
 
-  /// The default transition algorithm used by [AnimatedChildSwitcher].
+  /// The default transition algorithm used by [AnimatedSwitcher].
   ///
   /// The new child is given a [FadeTransition] which increases opacity as
   /// the animation goes from 0.0 to 1.0, and decreases when the animation is
   /// reversed.
   ///
   /// The default value for the [transitionBuilder], an
-  /// [AnimatedChildSwitcherTransitionBuilder] function.
+  /// [AnimatedSwitcherTransitionBuilder] function.
   static Widget defaultTransitionBuilder(Widget child, Animation<double> animation) {
     return new FadeTransition(
       opacity: animation,
@@ -199,14 +199,14 @@ class AnimatedChildSwitcher extends StatefulWidget {
     );
   }
 
-  /// The default layout algorithm used by [AnimatedChildSwitcher].
+  /// The default layout algorithm used by [AnimatedSwitcher].
   ///
   /// The new child is placed in a [Stack] that sizes itself to match the
   /// largest of the child or a previous child. The children are centered on
   /// each other.
   ///
   /// This is the default value for [layoutBuilder]. It implements
-  /// [AnimatedChildSwitcherLayoutBuilder].
+  /// [AnimatedSwitcherLayoutBuilder].
   static Widget defaultLayoutBuilder(List<Widget> children) {
     return new Stack(
       children: children,
@@ -215,9 +215,9 @@ class AnimatedChildSwitcher extends StatefulWidget {
   }
 }
 
-class _AnimatedChildSwitcherState extends State<AnimatedChildSwitcher> with TickerProviderStateMixin {
-  final Set<_AnimatedChildSwitcherChildEntry> _children = new Set<_AnimatedChildSwitcherChildEntry>();
-  _AnimatedChildSwitcherChildEntry _currentChild;
+class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProviderStateMixin {
+  final Set<_AnimatedSwitcherChildEntry> _children = new Set<_AnimatedSwitcherChildEntry>();
+  _AnimatedSwitcherChildEntry _currentChild;
 
   @override
   void initState() {
@@ -232,11 +232,11 @@ class _AnimatedChildSwitcherState extends State<AnimatedChildSwitcher> with Tick
     );
   }
 
-  _AnimatedChildSwitcherChildEntry _newEntry({
+  _AnimatedSwitcherChildEntry _newEntry({
     @required AnimationController controller,
     @required Animation<double> animation,
   }) {
-    final _AnimatedChildSwitcherChildEntry entry = new _AnimatedChildSwitcherChildEntry(
+    final _AnimatedSwitcherChildEntry entry = new _AnimatedSwitcherChildEntry(
       widgetChild: widget.child,
       transition: _generateTransition(animation),
       animation: animation,
@@ -293,7 +293,7 @@ class _AnimatedChildSwitcherState extends State<AnimatedChildSwitcher> with Tick
     if (_currentChild != null) {
       _currentChild.controller.dispose();
     }
-    for (_AnimatedChildSwitcherChildEntry child in _children) {
+    for (_AnimatedSwitcherChildEntry child in _children) {
       child.controller.dispose();
     }
     super.dispose();
@@ -303,7 +303,7 @@ class _AnimatedChildSwitcherState extends State<AnimatedChildSwitcher> with Tick
   bool get hasOldChild => _currentChild != null;
 
   @override
-  void didUpdateWidget(AnimatedChildSwitcher oldWidget) {
+  void didUpdateWidget(AnimatedSwitcher oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (hasNewChild != hasOldChild || hasNewChild &&
         !Widget.canUpdate(widget.child, _currentChild.widgetChild)) {
@@ -319,7 +319,7 @@ class _AnimatedChildSwitcherState extends State<AnimatedChildSwitcher> with Tick
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = _children.map<Widget>(
-      (_AnimatedChildSwitcherChildEntry entry) {
+      (_AnimatedSwitcherChildEntry entry) {
         return entry.transition;
       },
     ).toList();
