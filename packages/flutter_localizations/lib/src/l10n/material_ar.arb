@@ -38,5 +38,9 @@
   "signedInLabel": "تم تسجيل الدخول",
   "hideAccountsLabel": "إخفاء الحسابات",
   "showAccountsLabel": "إظهار الحسابات",
-  "modalBarrierDismissLabel": "رفض"
+  "modalBarrierDismissLabel": "رفض",
+  "drawerLabel": "قائمة الإبحار",
+  "popupMenuLabel": "القائمة المنبثقة",
+  "dialogLabel": "الحوار",
+  "alertDialogLabel": "مربع حوار التنبيه"
 }
