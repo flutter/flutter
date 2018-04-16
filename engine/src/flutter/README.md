@@ -28,6 +28,9 @@ us [feedback](mailto:flutter-dev@googlegroups.com).
 
  - For information about contributing code to the engine itself, please see
    [CONTRIBUTING.md](CONTRIBUTING.md).
+   
+ - For information about the engine's architecture, please see
+   [the wiki](https://github.com/flutter/engine/wiki).
 
 Community
 ---------
