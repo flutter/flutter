@@ -770,7 +770,7 @@ class SliverAppBar extends StatefulWidget {
   /// For example:
   ///
   /// ```dart
-  /// return new Scaffold(
+  /// new Scaffold(
   ///   body: new CustomScrollView(
   ///     primary: true,
   ///     slivers: <Widget>[
