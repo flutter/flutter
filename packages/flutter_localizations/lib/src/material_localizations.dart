@@ -50,6 +50,7 @@ import 'widgets_localizations.dart';
 ///   * it - Italian
 ///   * ja - Japanese
 ///   * ko - Korean
+///   * ms - Malay
 ///   * nl - Dutch
 ///   * no - Norwegian
 ///   * pl - Polish
@@ -513,6 +514,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'it', // Italian
     'ja', // Japanese
     'ko', // Korean
+    'ms', // Malay
     'nl', // Dutch
     'no', // Norwegian
     'pl', // Polish
