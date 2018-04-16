@@ -486,15 +486,9 @@ bool VulkanSwapchain::Submit() {
 
   // ---------------------------------------------------------------------------
   // Step 0:
-  // Notify to Skia that we will read from its backend object.
+  // Make sure Skia has flushed all work for the surface to the gpu.
   // ---------------------------------------------------------------------------
-  GrVkImageInfo* image_info = nullptr;
-  if (!surface->getRenderTargetHandle(
-          reinterpret_cast<GrBackendObject*>(&image_info),
-          SkSurface::kFlushRead_BackendHandleAccess)) {
-    FXL_DLOG(INFO) << "Could not get render target handle.";
-    return false;
-  }
+  surface->flush();
 
   // ---------------------------------------------------------------------------
   // Step 1:
