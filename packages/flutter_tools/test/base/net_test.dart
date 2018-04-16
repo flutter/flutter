@@ -17,8 +17,8 @@ void main() {
     new FakeAsync().run((FakeAsync time) {
       fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
         error = 'test completed unexpectedly';
-      }, onError: (dynamic error) {
-        error = 'test failed unexpectedly';
+      }, onError: (dynamic exception) {
+        error = 'test failed unexpectedly: $exception';
       });
       expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 10000));
@@ -40,8 +40,8 @@ void main() {
     new FakeAsync().run((FakeAsync time) {
       fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
         error = 'test completed unexpectedly';
-      }, onError: (dynamic error) {
-        error = 'test failed unexpectedly';
+      }, onError: (dynamic exception) {
+        error = 'test failed unexpectedly: $exception';
       });
       expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 10000));
@@ -57,6 +57,68 @@ void main() {
   }, overrides: <Type, Generator>{
     HttpClientFactory: () => () => new MockHttpClient(200),
   });
+
+  testUsingContext('retry from SocketException', () async {
+    String error;
+    new FakeAsync().run((FakeAsync time) {
+      fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic exception) {
+        error = 'test failed unexpectedly: $exception';
+      });
+      expect(testLogger.statusText, '');
+      time.elapse(const Duration(milliseconds: 10000));
+      expect(testLogger.statusText,
+        'Download failed -- attempting retry 1 in 1 second...\n'
+        'Download failed -- attempting retry 2 in 2 seconds...\n'
+        'Download failed -- attempting retry 3 in 4 seconds...\n'
+        'Download failed -- attempting retry 4 in 8 seconds...\n'
+      );
+    });
+    expect(testLogger.errorText, isEmpty);
+    expect(error, isNull);
+    expect(testLogger.traceText, contains('Download error: SocketException'));
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () => () => new MockHttpClientThrowing(
+      const io.SocketException('test exception handling'),
+    ),
+  });
+
+  testUsingContext('no retry from HandshakeException', () async {
+    String error;
+    new FakeAsync().run((FakeAsync time) {
+      fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic exception) {
+        error = 'test failed: $exception';
+      });
+      expect(testLogger.statusText, '');
+      time.elapse(const Duration(milliseconds: 10000));
+      expect(testLogger.statusText, '');
+    });
+    expect(error, startsWith('test failed'));
+    expect(testLogger.traceText, contains('HandshakeException'));
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () => () => new MockHttpClientThrowing(
+      const io.HandshakeException('test exception handling'),
+    ),
+  });
+}
+
+class MockHttpClientThrowing implements io.HttpClient {
+  MockHttpClientThrowing(this.exception);
+
+  final Exception exception;
+
+  @override
+  Future<io.HttpClientRequest> getUrl(Uri url) async {
+    throw exception;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw 'io.HttpClient - $invocation';
+  }
 }
 
 class MockHttpClient implements io.HttpClient {
