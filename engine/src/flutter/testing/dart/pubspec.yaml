@@ -1,8 +1,4 @@
 name: engine_tests
 dependencies:
-  flutter:
-    sdk: flutter
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
+  test: any
   path: any

@@ -7,8 +7,8 @@ import 'dart:ui';
 import 'dart:typed_data';
 import 'dart:io';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
+import 'package:test/test.dart';
 
 const int _kWidth = 10;
 const int _kRadius = 2;
@@ -24,8 +24,9 @@ void main() {
       expect(new Uint8List.view(data.buffer), getExpectedBytes());
     });
 
-    test('Handles greyscale images', () async {
-      Uint8List png = await new File('../resources/4x4.png').readAsBytes();
+    test('Handles grayscale images', () async {
+      File grayscaleImage = new File(path.join('flutter', 'testing', 'resources', '4x4.png'));
+      Uint8List png = await grayscaleImage.readAsBytes();
       Completer<Image> completer = new Completer<Image>();
       decodeImageFromList(png, (Image image) => completer.complete(image));
       Image image = await completer.future;
