@@ -34,5 +34,9 @@
   "signedInLabel": "ลงชื่อเข้าใช้",
   "hideAccountsLabel": "ซ่อนบัญชี",
   "showAccountsLabel": "แสดงบัญชี",
-  "modalBarrierDismissLabel": "ปิด"
+  "modalBarrierDismissLabel": "ปิด",
+  "drawerLabel": "เมนูนำทาง",
+  "popupMenuLabel": "เมนูป๊อปอัพ",
+  "dialogLabel": "โต้ตอบ",
+  "alertDialogLabel": "เตือนภัย"
 }
