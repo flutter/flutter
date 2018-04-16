@@ -79,7 +79,6 @@ sk_sp<SkData> GetImageBytesAsRGBA(sk_sp<SkImage> image) {
       FXL_LOG(ERROR) << "Pixel address is not available.";
       return nullptr;
     }
-    ASSERT(pixmap.colorType() == kRGBA_8888_SkColorType);
 
     const size_t pixmap_size = pixmap.computeByteSize();
     return SkData::MakeWithCopy(pixmap.addr32(), pixmap_size);
