@@ -710,12 +710,22 @@ Future<T> showMenu<T>({
 }) {
   assert(context != null);
   assert(items != null && items.isNotEmpty);
+  String label = semanticLabel;
+  switch (defaultTargetPlatform) {
+    case TargetPlatform.iOS:
+      label = semanticLabel;
+      break;
+    case TargetPlatform.android:
+    case TargetPlatform.fuchsia:
+      label = semanticLabel ?? MaterialLocalizations.of(context)?.popupMenuLabel;
+  }
+
   return Navigator.push(context, new _PopupMenuRoute<T>(
     position: position,
     items: items,
     initialValue: initialValue,
     elevation: elevation,
-    semanticLabel: semanticLabel,
+    semanticLabel: label,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   ));

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -112,8 +113,17 @@ class Drawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String label = semanticLabel;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        label = semanticLabel;
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        label = semanticLabel ?? MaterialLocalizations.of(context)?.drawerLabel;
+    }
     return new RouteName(
-      routeName: semanticLabel,
+      routeName: label,
       child: new ConstrainedBox(
         constraints: const BoxConstraints.expand(width: _kWidth),
         child: new Material(

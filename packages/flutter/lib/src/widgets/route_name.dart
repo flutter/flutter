@@ -56,7 +56,6 @@ class RouteName extends StatelessWidget  {
         );
         break;
     }
-    assert(result != null);
     return result;
   }
 

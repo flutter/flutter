@@ -9,7 +9,7 @@ dependencies:
   string_scanner: 1.0.2
   url_launcher: 3.0.0
   cupertino_icons: 0.1.2
-  video_player: 0.4.1
+  video_player: 0.4.0
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets:
@@ -166,5 +166,12 @@ flutter:
     - family: AbrilFatface
       fonts:
         - asset: packages/flutter_gallery_assets/shrine/fonts/abrilfatface/AbrilFatface-Regular.ttf
+
+
+dependency_overrides:
+  sky_engine:
+    path: /usr/local/google/home/jonahwilliams/Documents/engine/src/out/android_debug_unopt/gen/dart-pkg/sky_engine
+  sky_services:
+    path: /usr/local/google/home/jonahwilliams/Documents/engine/src/out/android_debug_unopt/gen/dart-pkg/sky_services
 
 # PUBSPEC CHECKSUM: 50c7

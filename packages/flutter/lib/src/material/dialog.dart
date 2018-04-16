@@ -76,6 +76,15 @@ class Dialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String label = semanticLabel;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        label = semanticLabel;
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        label = semanticLabel ?? MaterialLocalizations.of(context)?.dialogLabel;
+    }
     return new AnimatedPadding(
       padding: MediaQuery.of(context).viewInsets + const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
       duration: insetAnimationDuration,
@@ -94,7 +103,7 @@ class Dialog extends StatelessWidget {
               color: _getColor(context),
               type: MaterialType.card,
               child: new RouteName(
-                routeName: semanticLabel,
+                routeName: label,
                 child: child,
               ),
             ),
@@ -233,6 +242,10 @@ class AlertDialog extends StatelessWidget {
   /// The semantic label of the dialog used by accessibility frameworks to 
   /// announce screen transitions when the dialog is opened and closed.
   /// 
+  /// If this value is not provided, a semantic label will be infered from the
+  /// [title] if it is not null.  If there is no title, the label will be taken
+  /// from [MaterialLocalizations.alertDialogName].
+  /// 
   /// See also:
   /// 
   ///  * [SemanticsConfiguration.isRouteName], for a description of how this
@@ -242,6 +255,7 @@ class AlertDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
+    String label = semanticLabel;
 
     if (title != null) {
       children.add(new Padding(
@@ -251,6 +265,15 @@ class AlertDialog extends StatelessWidget {
           child: new Semantics(child: title, namesRoute: true),
         ),
       ));
+    } else {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          label = semanticLabel;
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          label = semanticLabel ?? MaterialLocalizations.of(context)?.alertDialogLabel;
+      }
     }
 
     if (content != null) {
@@ -276,7 +299,7 @@ class AlertDialog extends StatelessWidget {
     return new Dialog(
       child: new IntrinsicWidth(
         child: new RouteName(
-          routeName: semanticLabel,
+          routeName: label,
           child: new Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -473,6 +496,10 @@ class SimpleDialog extends StatelessWidget {
   /// The semantic label of the dialog used by accessibility frameworks to 
   /// announce screen transitions when the dialog is opened and closed.
   /// 
+  /// If this value is not provided, a semantic label will be infered from the
+  /// [title] if it is not null.  If there is no title, the label will be taken
+  /// from [MaterialLocalizations.alertDialogName].
+  /// 
   /// See also:
   /// 
   ///  * [SemanticsConfiguration.isRouteName], for a description of how this
@@ -482,6 +509,7 @@ class SimpleDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> body = <Widget>[];
+    String label = semanticLabel;
 
     if (title != null) {
       body.add(new Padding(
@@ -491,6 +519,15 @@ class SimpleDialog extends StatelessWidget {
           child: new Semantics(namesRoute: true, child: title),
         )
       ));
+    } else {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          label = semanticLabel;
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          label = semanticLabel ?? MaterialLocalizations.of(context).dialogLabel;
+      }
     }
 
     if (children != null) {
