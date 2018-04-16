@@ -256,6 +256,18 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get showMenuTooltip => _translationBundle.showMenuTooltip;
 
   @override
+  String get drawerLabel => _translationBundle.alertDialogLabel;
+
+  @override
+  String get popupMenuLabel => _translationBundle.popupMenuLabel;
+
+  @override
+  String get dialogLabel => _translationBundle.dialogLabel;
+
+  @override
+  String get alertDialogLabel => _translationBundle.alertDialogLabel;
+
+  @override
   String aboutListTileTitle(String applicationName) {
     final String text = _translationBundle.aboutListTileTitle;
     return text.replaceFirst(r'$applicationName', applicationName);
