@@ -60,6 +60,10 @@ class TranslationBundle {
   String get hideAccountsLabel => parent?.hideAccountsLabel;
   String get showAccountsLabel => parent?.showAccountsLabel;
   String get modalBarrierDismissLabel => parent?.modalBarrierDismissLabel;
+  String get drawerLabel => parent?.drawerLabel;
+  String get popupMenuLabel => parent?.popupMenuLabel;
+  String get dialogLabel => parent?.dialogLabel;
+  String get alertDialogLabel => parent?.alertDialogLabel;
 }
 
 // ignore: camel_case_types
@@ -105,6 +109,10 @@ class _Bundle_ar extends TranslationBundle {
   @override String get hideAccountsLabel => r'إخفاء الحسابات';
   @override String get showAccountsLabel => r'إظهار الحسابات';
   @override String get modalBarrierDismissLabel => r'رفض';
+  @override String get drawerLabel => r'قائمة الإبحار';
+  @override String get popupMenuLabel => r'القائمة المنبثقة';
+  @override String get dialogLabel => r'الحوار';
+  @override String get alertDialogLabel => r'مربع حوار التنبيه';
 }
 
 // ignore: camel_case_types
@@ -147,6 +155,10 @@ class _Bundle_de extends TranslationBundle {
   @override String get hideAccountsLabel => r'Konten ausblenden';
   @override String get showAccountsLabel => r'Konten anzeigen';
   @override String get modalBarrierDismissLabel => r'Schließen';
+  @override String get drawerLabel => r'Navigationsmenü';
+  @override String get popupMenuLabel => r'Popup-Menü';
+  @override String get dialogLabel => r'Dialog';
+  @override String get alertDialogLabel => r'Aufmerksam';
 }
 
 // ignore: camel_case_types
@@ -189,6 +201,10 @@ class _Bundle_en extends TranslationBundle {
   @override String get signedInLabel => r'Signed in';
   @override String get hideAccountsLabel => r'Hide accounts';
   @override String get showAccountsLabel => r'Show accounts';
+  @override String get drawerLabel => r'Navigation menu';
+  @override String get popupMenuLabel => r'Popup menu';
+  @override String get dialogLabel => r'Dialog';
+  @override String get alertDialogLabel => r'Alert';
 }
 
 // ignore: camel_case_types
@@ -231,6 +247,10 @@ class _Bundle_es extends TranslationBundle {
   @override String get hideAccountsLabel => r'Ocultar cuentas';
   @override String get showAccountsLabel => r'Mostrar cuentas';
   @override String get modalBarrierDismissLabel => r'Ignorar';
+  @override String get drawerLabel => r'Menú de Navegación';
+  @override String get popupMenuLabel => r'Menú emergente';
+  @override String get dialogLabel => r'Diálogo';
+  @override String get alertDialogLabel => r'Alerta';
 }
 
 // ignore: camel_case_types
@@ -272,6 +292,10 @@ class _Bundle_fa extends TranslationBundle {
   @override String get hideAccountsLabel => r'پنهان کردن حساب‌ها';
   @override String get showAccountsLabel => r'نشان دادن حساب‌ها';
   @override String get modalBarrierDismissLabel => r'نپذیرفتن';
+  @override String get drawerLabel => r'منوی هدایت';
+  @override String get popupMenuLabel => r'منوی پنجره';
+  @override String get dialogLabel => r'گفتگو';
+  @override String get alertDialogLabel => r'هشدار';
 }
 
 // ignore: camel_case_types
@@ -314,6 +338,10 @@ class _Bundle_fr extends TranslationBundle {
   @override String get hideAccountsLabel => r'Masquer les comptes';
   @override String get showAccountsLabel => r'Afficher les comptes';
   @override String get modalBarrierDismissLabel => r'Ignorer';
+  @override String get drawerLabel => r'le menu de navigation';
+  @override String get popupMenuLabel => r'Menu contextuel';
+  @override String get dialogLabel => r'Dialogue';
+  @override String get alertDialogLabel => r'Alerte';
 }
 
 // ignore: camel_case_types
@@ -355,6 +383,10 @@ class _Bundle_gsw extends TranslationBundle {
   @override String get anteMeridiemAbbreviation => r'VORM.';
   @override String get postMeridiemAbbreviation => r'NACHM.';
   @override String get modalBarrierDismissLabel => r'Schließen';
+  @override String get drawerLabel => r'Navigationsmenü';
+  @override String get popupMenuLabel => r'Popup-Menü';
+  @override String get dialogLabel => r'Dialog';
+  @override String get alertDialogLabel => r'Aufmerksam';
 }
 
 // ignore: camel_case_types
@@ -398,6 +430,10 @@ class _Bundle_he extends TranslationBundle {
   @override String get hideAccountsLabel => r'הסתרת החשבונות';
   @override String get showAccountsLabel => r'הצגת החשבונות';
   @override String get modalBarrierDismissLabel => r'סגירה';
+  @override String get drawerLabel => r'תפריט ניווט';
+  @override String get popupMenuLabel => r'תפריט קופץ';
+  @override String get dialogLabel => r'דיאלוג';
+  @override String get alertDialogLabel => r'עֵרָנִי';
 }
 
 // ignore: camel_case_types
@@ -439,6 +475,10 @@ class _Bundle_id extends TranslationBundle {
   @override String get signedInLabel => r'Telah login';
   @override String get hideAccountsLabel => r'Sembunyikan akun';
   @override String get showAccountsLabel => r'Tampilkan akun';
+  @override String get drawerLabel => r'Menu navigasi';
+  @override String get popupMenuLabel => r'Menu popup';
+  @override String get dialogLabel => r'Dialog';
+  @override String get alertDialogLabel => r'Waspada';
 }
 
 // ignore: camel_case_types
@@ -480,6 +520,10 @@ class _Bundle_it extends TranslationBundle {
   @override String get hideAccountsLabel => r'Nascondi account';
   @override String get showAccountsLabel => r'Mostra account';
   @override String get modalBarrierDismissLabel => r'Ignora';
+  @override String get drawerLabel => r'Menu di navigazione';
+  @override String get popupMenuLabel => r'Menù popup';
+  @override String get dialogLabel => r'Dialogo';
+  @override String get alertDialogLabel => r'Mettere in guardia';
 }
 
 // ignore: camel_case_types
@@ -521,6 +565,10 @@ class _Bundle_ja extends TranslationBundle {
   @override String get hideAccountsLabel => r'アカウントを非表示';
   @override String get showAccountsLabel => r'アカウントを表示';
   @override String get modalBarrierDismissLabel => r'閉じる';
+  @override String get drawerLabel => r'ナビゲーションメニュー';
+  @override String get popupMenuLabel => r'ポップアップメニュー';
+  @override String get dialogLabel => r'ダイアログ';
+  @override String get alertDialogLabel => r'アラート';
 }
 
 // ignore: camel_case_types
@@ -562,6 +610,10 @@ class _Bundle_ko extends TranslationBundle {
   @override String get hideAccountsLabel => r'계정 숨기기';
   @override String get showAccountsLabel => r'계정 표시';
   @override String get modalBarrierDismissLabel => r'닫기';
+  @override String get drawerLabel => r'탐색 메뉴';
+  @override String get popupMenuLabel => r'팝업 메뉴';
+  @override String get dialogLabel => r'대화';
+  @override String get alertDialogLabel => r'경보';
 }
 
 // ignore: camel_case_types
@@ -603,6 +655,10 @@ class _Bundle_nl extends TranslationBundle {
   @override String get hideAccountsLabel => r'Accounts verbergen';
   @override String get showAccountsLabel => r'Accounts weergeven';
   @override String get modalBarrierDismissLabel => r'Sluiten';
+  @override String get drawerLabel => r'Navigatie menu';
+  @override String get popupMenuLabel => r'Popup menu';
+  @override String get dialogLabel => r'Dialoog';
+  @override String get alertDialogLabel => r'Alarm';
 }
 
 // ignore: camel_case_types
@@ -644,6 +700,10 @@ class _Bundle_no extends TranslationBundle {
   @override String get signedInLabel => r'Pålogget';
   @override String get hideAccountsLabel => r'Skjul kontoer';
   @override String get showAccountsLabel => r'Vis kontoer';
+  @override String get drawerLabel => r'Navigasjonsmeny';
+  @override String get popupMenuLabel => r'Popup meny';
+  @override String get dialogLabel => r'Dialog';
+  @override String get alertDialogLabel => r'Varsling';
 }
 
 // ignore: camel_case_types
@@ -687,6 +747,10 @@ class _Bundle_pl extends TranslationBundle {
   @override String get hideAccountsLabel => r'Ukryj konta';
   @override String get showAccountsLabel => r'Pokaż konta';
   @override String get modalBarrierDismissLabel => r'Zamknij';
+  @override String get drawerLabel => r'Menu nawigacji';
+  @override String get popupMenuLabel => r'Menu podręczne';
+  @override String get dialogLabel => r'Dialog';
+  @override String get alertDialogLabel => r'Alarm';
 }
 
 // ignore: camel_case_types
@@ -725,6 +789,10 @@ class _Bundle_ps extends TranslationBundle {
   @override String get hideAccountsLabel => r'حسابونه پټ کړئ';
   @override String get showAccountsLabel => r'حسابونه ښکاره کړئ';
   @override String get modalBarrierDismissLabel => r'رد کړه';
+  @override String get drawerLabel => r'د نیویگیشن مینو';
+  @override String get popupMenuLabel => r'د پاپ اپ مینو';
+  @override String get dialogLabel => r'خبرې اترې';
+  @override String get alertDialogLabel => r'خبرتیا';
 }
 
 // ignore: camel_case_types
@@ -766,6 +834,10 @@ class _Bundle_pt extends TranslationBundle {
   @override String get hideAccountsLabel => r'Ocultar contas';
   @override String get showAccountsLabel => r'Mostrar contas';
   @override String get modalBarrierDismissLabel => r'Dispensar';
+  @override String get drawerLabel => r'Menu de navegação';
+  @override String get popupMenuLabel => r'Menu popup';
+  @override String get dialogLabel => r'Diálogo';
+  @override String get alertDialogLabel => r'Alerta';
 }
 
 // ignore: camel_case_types
@@ -809,6 +881,10 @@ class _Bundle_ro extends TranslationBundle {
   @override String get hideAccountsLabel => r'Ascundeți conturile';
   @override String get showAccountsLabel => r'Afișați conturile';
   @override String get modalBarrierDismissLabel => r'Închideți';
+  @override String get drawerLabel => r'Meniu de navigatie';
+  @override String get popupMenuLabel => r'Meniu pop-up';
+  @override String get dialogLabel => r'Dialog';
+  @override String get alertDialogLabel => r'Alerta';
 }
 
 // ignore: camel_case_types
@@ -853,6 +929,10 @@ class _Bundle_ru extends TranslationBundle {
   @override String get hideAccountsLabel => r'Скрыть аккаунты';
   @override String get showAccountsLabel => r'Показать аккаунты';
   @override String get modalBarrierDismissLabel => r'Закрыть';
+  @override String get drawerLabel => r'Меню навигации';
+  @override String get popupMenuLabel => r'Всплывающее меню';
+  @override String get dialogLabel => r'диалог';
+  @override String get alertDialogLabel => r'бдительный';
 }
 
 // ignore: camel_case_types
@@ -894,6 +974,10 @@ class _Bundle_th extends TranslationBundle {
   @override String get hideAccountsLabel => r'ซ่อนบัญชี';
   @override String get showAccountsLabel => r'แสดงบัญชี';
   @override String get modalBarrierDismissLabel => r'ปิด';
+  @override String get drawerLabel => r'เมนูนำทาง';
+  @override String get popupMenuLabel => r'เมนูป๊อปอัพ';
+  @override String get dialogLabel => r'โต้ตอบ';
+  @override String get alertDialogLabel => r'เตือนภัย';
 }
 
 // ignore: camel_case_types
@@ -935,6 +1019,10 @@ class _Bundle_tr extends TranslationBundle {
   @override String get hideAccountsLabel => r'Hesapları gizle';
   @override String get showAccountsLabel => r'Hesapları göster';
   @override String get modalBarrierDismissLabel => r'Kapat';
+  @override String get drawerLabel => r'Gezinme menüsü';
+  @override String get popupMenuLabel => r'Açılır menü';
+  @override String get dialogLabel => r'Diyalog';
+  @override String get alertDialogLabel => r'Alarm';
 }
 
 // ignore: camel_case_types
@@ -976,6 +1064,10 @@ class _Bundle_ur extends TranslationBundle {
   @override String get hideAccountsLabel => r'اکاؤنٹس چھپائیں';
   @override String get showAccountsLabel => r'اکاؤنٹس دکھائیں';
   @override String get modalBarrierDismissLabel => r'برخاست کریں';
+  @override String get drawerLabel => r'نیویگیشن مینو';
+  @override String get popupMenuLabel => r'پاپ اپ مینو';
+  @override String get dialogLabel => r'ڈائیلاگ';
+  @override String get alertDialogLabel => r'انتباہ';
 }
 
 // ignore: camel_case_types
@@ -1017,6 +1109,10 @@ class _Bundle_zh extends TranslationBundle {
   @override String get hideAccountsLabel => r'隐藏帐号';
   @override String get showAccountsLabel => r'显示帐号';
   @override String get modalBarrierDismissLabel => r'关闭';
+  @override String get drawerLabel => r'导航菜单';
+  @override String get popupMenuLabel => r'弹出菜单';
+  @override String get dialogLabel => r'对话';
+  @override String get alertDialogLabel => r'警报';
 }
 
 // ignore: camel_case_types
