@@ -194,7 +194,7 @@ void main() {
 
   testWidgets('SizeTransition clamps negative size factors - vertical axis', (WidgetTester tester) async {
     final AnimationController controller = new AnimationController(vsync: const TestVSync());
-    final Animation<double> animation = new Tween(begin: -1.0, end: 1.0).animate(controller);
+    final Animation<double> animation = new Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
     final Widget widget =  new Directionality(
         textDirection: TextDirection.ltr,
@@ -225,7 +225,7 @@ void main() {
 
   testWidgets('SizeTransition clamps negative size factors - horizontal axis', (WidgetTester tester) async {
     final AnimationController controller = new AnimationController(vsync: const TestVSync());
-    final Animation<double> animation = new Tween(begin: -1.0, end: 1.0).animate(controller);
+    final Animation<double> animation = new Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
     final Widget widget =  new Directionality(
         textDirection: TextDirection.ltr,
