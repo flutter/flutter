@@ -789,8 +789,8 @@ void main() {
     await tester.pumpWidget(new MaterialApp(routes: routes));
 
     expect(semantics, includesNodeWith(
-      value: '/',
-      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+      label: '/',
+      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
     ));
 
     await tester.tap(find.text('/')); // pushNamed('/A')
@@ -798,8 +798,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(semantics, includesNodeWith(
-      value: 'A',
-      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+      label: 'A',
+      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
     ));
 
     await tester.tap(find.text('A')); // pushNamed('/B/C')
@@ -807,8 +807,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(semantics, includesNodeWith(
-      value: 'B',
-      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+      label: 'B',
+      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
     ));
 
     semantics.dispose();

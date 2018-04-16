@@ -23,9 +23,10 @@ class RouteName extends StatelessWidget  {
   /// [child] and [routeName] are required arguments.
   const RouteName({
     Key key,
-    this.child,
+    @required this.child,
     @required this.routeName,
-  }) : super(key: key);
+  }) : assert(child != null),
+       super(key: key);
 
   /// A semantic label for the route.
   /// 
@@ -55,6 +56,7 @@ class RouteName extends StatelessWidget  {
         );
         break;
     }
+    assert(result != null);
     return result;
   }
 

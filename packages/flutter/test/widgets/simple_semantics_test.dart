@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -53,12 +55,19 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
+          rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
           id: 2,
-          label: 'Hello!',
-          textDirection: TextDirection.ltr,
-          rect: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
-          transform: new Matrix4.translationValues(395.0, 295.0, 0.0),
-        )
+          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+          children: <TestSemantics>[
+            new TestSemantics(
+              id: 3,
+              label: 'Hello!',
+              textDirection: TextDirection.ltr,
+              rect: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+              transform: new Matrix4.translationValues(395.0, 295.0, 0.0),
+            )
+          ],
+        ),
       ],
     )));
 

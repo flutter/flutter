@@ -335,7 +335,7 @@ void main() {
     );
   });
 
-  testWidgets('Dialog widget contains route semantics flag', (WidgetTester tester) async {
+  testWidgets('Dialog widget contains namesRoute semantics flag', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(
       new MaterialApp(
@@ -366,7 +366,7 @@ void main() {
     );
 
     expect(semantics, isNot(includesNodeWith(
-        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute]
+        flags: <SemanticsFlag>[SemanticsFlag.namesRoute]
     )));
 
     await tester.tap(find.text('X'));
@@ -374,7 +374,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(semantics, includesNodeWith(
-      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+      label: 'Title',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     ));
 
     semantics.dispose();

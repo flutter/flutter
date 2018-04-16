@@ -387,7 +387,10 @@ void _tests() {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await preparePicker(tester, (Future<DateTime> date) async {
       final TestSemantics expected = new TestSemantics(
-        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+        flags: <SemanticsFlag>[
+          SemanticsFlag.scopesRoute,
+          SemanticsFlag.namesRoute,
+        ],
         children: <TestSemantics>[
           new TestSemantics(
             actions: <SemanticsAction>[SemanticsAction.tap],

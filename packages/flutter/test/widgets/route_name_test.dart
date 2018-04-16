@@ -27,9 +27,12 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
           id: 1,
-          value: 'login',
+          label: 'login',
           textDirection: TextDirection.ltr,
-          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.scopesRoute,
+            SemanticsFlag.namesRoute
+          ],
           children: <TestSemantics>[
             new TestSemantics(
               id: 2,
