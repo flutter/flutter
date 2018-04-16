@@ -11,10 +11,8 @@ namespace blink {
 
 class CanvasImage;
 
-Dart_Handle EncodeImage(CanvasImage* canvas_image,
-                        int format,
-                        int quality,
-                        Dart_Handle callback_handle);
+Dart_Handle GetImageBytes(CanvasImage* canvas_image,
+                          Dart_Handle callback_handle);
 
 }  // namespace blink
 
