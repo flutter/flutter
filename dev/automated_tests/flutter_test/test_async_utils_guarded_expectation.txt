@@ -18,10 +18,6 @@ When the exception was thrown, this was the stack:
 The test description was:
 TestAsyncUtils - custom guarded sections
 ════════════════════════════════════════════════════════════════════════════════════════════════════
-══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
-The following message was thrown:
-Multiple exceptions \(2\) were detected during the running of the current test, and at least one was unexpected.
-════════════════════════════════════════════════════════════════════════════════════════════════════
 .*(this line has more of the test framework's output)?
   Test failed\. See exception logs above\.
   The test description was: TestAsyncUtils - custom guarded sections
