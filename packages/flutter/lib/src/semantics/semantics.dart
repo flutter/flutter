@@ -965,9 +965,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Visits the immediate children of this node.
   ///
-  /// This function calls visitor for each child in a pre-order traversal
-  /// until visitor returns false. Returns true if all the visitor calls
-  /// returned true, otherwise returns false.
+  /// This function calls visitor for each immediate child until visitor returns
+  /// false. Returns true if all the visitor calls returned true, otherwise
+  /// returns false.
   void visitChildren(SemanticsNodeVisitor visitor) {
     if (_children != null) {
       for (SemanticsNode child in _children) {
@@ -1393,7 +1393,20 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Builds a new list made of [_children] sorted in semantic traversal order.
   List<SemanticsNode> _childrenInTraversalOrder() {
-    final List<SemanticsNode> childrenInDefaultOrder = _childrenInDefaultOrder(_children);
+    TextDirection inheritedTextDirection = textDirection;
+    SemanticsNode ancestor = parent;
+    while (inheritedTextDirection == null && ancestor != null) {
+      inheritedTextDirection = ancestor.textDirection;
+      ancestor = ancestor.parent;
+    }
+
+    List<SemanticsNode> childrenInDefaultOrder = _childrenInDefaultOrder(_children, inheritedTextDirection);
+    if (inheritedTextDirection != null) {
+      childrenInDefaultOrder = _childrenInDefaultOrder(_children, inheritedTextDirection);
+    } else {
+      // In the absence of text direction default to paint order.
+      childrenInDefaultOrder = _children;
+    }
 
     // List.sort does not guarantee stable sort order. Therefore, children are
     // first partitioned into groups that have compatible sort keys, i.e. keys
@@ -1551,6 +1564,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         return new List<SemanticsNode>.from(_children)..sort(_geometryComparator);
       case DebugSemanticsDumpOrder.inverseHitTest:
         return _children;
+      case DebugSemanticsDumpOrder.traversalOrder:
+        return _childrenInTraversalOrder();
     }
     assert(false);
     return null;
@@ -1606,6 +1621,7 @@ class _BoxEdge implements Comparable<_BoxEdge> {
 class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
   _SemanticsSortGroup({
     @required this.startOffset,
+    @required this.textDirection,
   }) : assert(startOffset != null);
 
   /// The offset from the start edge of the parent [SemanticsNode] in the
@@ -1614,6 +1630,8 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
   /// This value is equal to the [_BoxEdge.offset] of the first node in the
   /// [nodes] list being considered.
   final double startOffset;
+
+  final TextDirection textDirection;
 
   /// The nodes that are sorted among each other.
   final List<SemanticsNode> nodes = <SemanticsNode>[];
@@ -1643,7 +1661,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
     }
     edges.sort();
 
-    final List<_SemanticsSortGroup> horizontalGroups = <_SemanticsSortGroup>[];
+    List<_SemanticsSortGroup> horizontalGroups = <_SemanticsSortGroup>[];
     _SemanticsSortGroup group;
     int depth = 0;
     for (_BoxEdge edge in edges) {
@@ -1651,6 +1669,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
         depth += 1;
         group ??= new _SemanticsSortGroup(
           startOffset: edge.offset,
+          textDirection: textDirection,
         );
         group.nodes.add(edge.node);
       } else {
@@ -1662,6 +1681,10 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
       }
     }
     horizontalGroups.sort();
+
+    if (textDirection == TextDirection.rtl) {
+      horizontalGroups = horizontalGroups.reversed.toList();
+    }
 
     final List<SemanticsNode> result = <SemanticsNode>[];
     for (_SemanticsSortGroup group in horizontalGroups) {
@@ -1685,6 +1708,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
   /// vector is said to be traversed after.
   List<SemanticsNode> sortedWithinKnot() {
     if (nodes.length <= 1) {
+      // Trivial node. Nothing to do.
       return nodes;
     }
     final Map<int, SemanticsNode> nodeMap = <int, SemanticsNode>{};
@@ -1693,15 +1717,21 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
       nodeMap[node.id] = node;
       final Offset center = _pointInParentCoordinates(node, node.rect.center);
       for (SemanticsNode nextNode in nodes) {
-        if (identical(node, nextNode)) {
-          // Skip self.
+        if (identical(node, nextNode) || edges[nextNode.id] == node.id) {
+          // Skip self or when we've already established that the next node
+          // points to current node.
           continue;
         }
+
         final Offset nextCenter = _pointInParentCoordinates(nextNode, nextNode.rect.center);
         final Offset centerDelta = nextCenter - center;
+        // When centers coincide, direction is 0.0.
         final double direction = centerDelta.direction;
-        if (-math.pi / 4 < direction && direction < 3 * math.pi / 4 &&
-            edges[nextNode.id] != node.id) {
+        final bool isLtrAndForward = textDirection == TextDirection.ltr &&
+            -math.pi / 4 < direction && direction < 3 * math.pi / 4;
+        final bool isRtlAndForward = textDirection == TextDirection.rtl &&
+            (direction < -3 * math.pi / 4 || direction > 3 * math.pi / 4);
+        if (isLtrAndForward || isRtlAndForward) {
           edges[node.id] = nextNode.id;
         }
       }
@@ -1731,8 +1761,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
     }
 
     startNodes.map((SemanticsNode node) => node.id).forEach(search);
-    final List<SemanticsNode> result = sortedIds.map<SemanticsNode>((int id) => nodeMap[id]).toList().reversed.toList();
-    return result;
+    return sortedIds.map<SemanticsNode>((int id) => nodeMap[id]).toList().reversed.toList();
   }
 }
 
@@ -1755,7 +1784,7 @@ Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
 ///
 /// Within each group, the nodes are sorted using
 /// [_SemanticsSortGroup.sortedWithinVerticalGroup].
-List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children) {
+List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDirection textDirection) {
   final List<_BoxEdge> edges = <_BoxEdge>[];
   for (SemanticsNode child in children) {
     edges.add(new _BoxEdge(
@@ -1779,6 +1808,7 @@ List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children) {
       depth += 1;
       group ??= new _SemanticsSortGroup(
         startOffset: edge.offset,
+        textDirection: textDirection,
       );
       group.nodes.add(edge.node);
     } else {
@@ -1807,7 +1837,11 @@ List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children) {
 /// This implementation considers a [node]'s [sortKey] and its position within
 /// the list of its siblings. [sortKey] takes precedence over position.
 class _TraversalSortNode implements Comparable<_TraversalSortNode> {
-  _TraversalSortNode({@required this.node, this.sortKey, @required this.position})
+  _TraversalSortNode({
+    @required this.node,
+    this.sortKey,
+    @required this.position,
+  })
     : assert(node != null),
       assert(position != null);
 
@@ -2859,9 +2893,11 @@ enum DebugSemanticsDumpOrder {
   /// a node's children, and the semantics system sorts nodes globally.
   geometricOrder,
 
-  // TODO(gspencer): Add support to toStringDeep (and others) to print the tree in
-  // the actual traversal order that the user will experience.  This requires sorting
-  // nodes globally before printing, not just the children.
+  /// Print nodes in semantic traversal order.
+  ///
+  /// This is the order in which a user would navigate the UI using the "next"
+  /// and "previous" gestures.
+  traversalOrder,
 }
 
 String _concatStrings({
