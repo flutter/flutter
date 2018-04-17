@@ -923,16 +923,12 @@ class WidgetInspectorService {
     if (value is! Diagnosticable) {
       return true;
     }
-    return _shouldShowDiagnosticable(value);
-  }
-
-  bool _shouldShowDiagnosticable(Diagnosticable diagnosticable) {
-    if (diagnosticable is! Element) {
-      // We only have a good way of filtering the Widget tree and not the
-      // RenderObject tree.
+    if (value is! Element || !isWidgetCreationTracked()) {
+      // Creation locations are not availabe so include all nodes in the
+      // summary tree.
       return true;
     }
-    return _isValueCreatedByLocalProject(diagnosticable);
+    return _isValueCreatedByLocalProject(value);
   }
 
   List<DiagnosticsNode> _getChildrenFiltered(
