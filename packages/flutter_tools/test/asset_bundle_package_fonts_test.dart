@@ -123,8 +123,8 @@ $fontsSection
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
-      expect(bundle.entries.length, 2); // LICENSE, AssetManifest
-      expect(bundle.entries.containsKey('FontManifest.json'), false);
+      expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
+      expect(bundle.entries.containsKey('FontManifest.json'), isTrue);
     });
 
     testUsingContext('App font uses font file from package', () async {
