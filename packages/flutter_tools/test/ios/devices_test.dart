@@ -59,10 +59,14 @@ void main() {
 98206e7a4afd4aedaff06e687594e089dede3c44
 f577a7903cc54959be2e34bc4f7f80b7009efcf4
 '''));
-      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName')).thenReturn('La tele me regarde');
-      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'ProductVersion')).thenReturn('10.3.2');
-      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName')).thenReturn('Puits sans fond');
-      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'ProductVersion')).thenReturn('11.0');
+      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
+          .thenAnswer((_) => new Future<String>.value('La tele me regarde'));
+      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'ProductVersion'))
+          .thenAnswer((_) => new Future<String>.value('10.3.2'));
+      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
+          .thenAnswer((_) => new Future<String>.value('Puits sans fond'));
+      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'ProductVersion'))
+          .thenAnswer((_) => new Future<String>.value('11.0'));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, hasLength(2));
       expect(devices[0].id, '98206e7a4afd4aedaff06e687594e089dede3c44');
@@ -107,7 +111,7 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
             .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
         // Delay return of exitCode until after stdout stream data, since it terminates the logger.
         when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => new Future<int>.delayed(Duration.ZERO, () => 0));
+            .thenAnswer((Invocation invocation) => new Future<int>.delayed(Duration.zero, () => 0));
         return new Future<Process>.value(mockProcess);
       });
 

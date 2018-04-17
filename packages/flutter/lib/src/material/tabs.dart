@@ -121,10 +121,10 @@ class Tab extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new StringProperty('text', text, defaultValue: null));
-    description.add(new DiagnosticsProperty<Widget>('icon', icon, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new StringProperty('text', text, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Widget>('icon', icon, defaultValue: null));
   }
 }
 
@@ -446,7 +446,7 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
   }
 }
 
-// This class, and TabBarScrollController, only exist to handle the the case
+// This class, and TabBarScrollController, only exist to handle the case
 // where a scrollable TabBar has a non-zero initialIndex. In that case we can
 // only compute the scroll position's initial scroll offset (the "correct"
 // pixels value) after the TabBar viewport width and scroll limits are known.
@@ -476,7 +476,7 @@ class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
   }
 }
 
-// This class, and TabBarScrollPosition, only exist to handle the the case
+// This class, and TabBarScrollPosition, only exist to handle the case
 // where a scrollable TabBar has a non-zero initialIndex.
 class _TabBarScrollController extends ScrollController {
   _TabBarScrollController(this.tabBar);
@@ -499,9 +499,9 @@ class _TabBarScrollController extends ScrollController {
 /// Typically created as the [AppBar.bottom] part of an [AppBar] and in
 /// conjunction with a [TabBarView].
 ///
-/// If a [TabController] is not provided, then there must be a
-/// [DefaultTabController] ancestor. The tab controller's [TabController.length]
-/// must equal the length of the [tabs] list.
+/// If a [TabController] is not provided, then a [DefaultTabController] ancestor
+/// must be provided instead. The tab controller's [TabController.length] must
+/// equal the length of the [tabs] list.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -691,7 +691,7 @@ class _TabBarState extends State<TabBar> {
     // When that happens, automatic transitions of the theme will likely look
     // ugly as the indicator color suddenly snaps to white at one end, but it's
     // not clear how to avoid that any further.
-    if (color == Material.of(context).color)
+    if (color.value == Material.of(context).color.value)
       color = Colors.white;
 
     return new UnderlineTabIndicator(

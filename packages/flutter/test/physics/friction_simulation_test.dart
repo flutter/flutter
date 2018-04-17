@@ -25,8 +25,8 @@ void main() {
     expect(friction.timeAtX(friction.x(0.5)), closeTo(0.5, _kEpsilon));
     expect(friction.timeAtX(friction.x(2.0)), closeTo(2.0, _kEpsilon));
 
-    expect(friction.timeAtX(-1.0), double.INFINITY);
-    expect(friction.timeAtX(200.0), double.INFINITY);
+    expect(friction.timeAtX(-1.0), double.infinity);
+    expect(friction.timeAtX(200.0), double.infinity);
   });
 
   test('Friction simulation negative velocity', () {
@@ -46,7 +46,7 @@ void main() {
     expect(friction.timeAtX(friction.x(0.5)), closeTo(0.5, _kEpsilon));
     expect(friction.timeAtX(friction.x(2.0)), closeTo(2.0, _kEpsilon));
 
-    expect(friction.timeAtX(101.0), double.INFINITY);
-    expect(friction.timeAtX(40.0), double.INFINITY);
+    expect(friction.timeAtX(101.0), double.infinity);
+    expect(friction.timeAtX(40.0), double.infinity);
   });
 }

@@ -8,10 +8,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
+import 'chip_theme.dart';
 import 'colors.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
+import 'slider_theme.dart';
 import 'typography.dart';
 
 /// Describes the contrast needs of a color.
@@ -52,8 +54,8 @@ const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 ///
 /// To obtain the current theme, use [Theme.of].
 @immutable
-class ThemeData {
-  /// Create a ThemeData given a set of preferred values.
+class ThemeData extends Diagnosticable {
+  /// Create a [ThemeData] given a set of preferred values.
   ///
   /// Default values will be derived for arguments that are omitted.
   ///
@@ -78,6 +80,8 @@ class ThemeData {
     MaterialColor primarySwatch,
     Color primaryColor,
     Brightness primaryColorBrightness,
+    Color primaryColorLight,
+    Color primaryColorDark,
     Color accentColor,
     Brightness accentColorBrightness,
     Color canvasColor,
@@ -109,13 +113,17 @@ class ThemeData {
     IconThemeData iconTheme,
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
-    TargetPlatform platform
+    SliderThemeData sliderTheme,
+    ChipThemeData chipTheme,
+    TargetPlatform platform,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
     primarySwatch ??= Colors.blue;
-    primaryColor ??= isDark ? Colors.grey[900] : primarySwatch[500];
+    primaryColor ??= isDark ? Colors.grey[900] : primarySwatch;
     primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
+    primaryColorLight ??= isDark ? Colors.grey[500] : primarySwatch[100];
+    primaryColorDark ??= isDark ? Colors.black : primarySwatch[700];
     final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
     accentColor ??= isDark ? Colors.tealAccent[200] : primarySwatch[500];
     accentColorBrightness ??= estimateBrightnessForColor(accentColor);
@@ -140,7 +148,7 @@ class ThemeData {
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     dialogBackgroundColor ??= isDark ? Colors.grey[800] : Colors.white;
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
-    hintColor ??= isDark ? const Color(0x42FFFFFF) : const Color(0x4C000000);
+    hintColor ??= isDark ?  const Color(0x80FFFFFF) : const Color(0x8A000000);
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
@@ -156,10 +164,23 @@ class ThemeData {
       primaryTextTheme = primaryTextTheme.apply(fontFamily: fontFamily);
       accentTextTheme = accentTextTheme.apply(fontFamily: fontFamily);
     }
+    sliderTheme ??= new SliderThemeData.fromPrimaryColors(
+      primaryColor: primaryColor,
+      primaryColorLight: primaryColorLight,
+      primaryColorDark: primaryColorDark,
+      valueIndicatorTextStyle: accentTextTheme.body2,
+    );
+    chipTheme ??= new ChipThemeData.fromDefaults(
+      secondaryColor: primaryColor,
+      brightness: brightness,
+      labelStyle: textTheme.body2,
+    );
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
       primaryColorBrightness: primaryColorBrightness,
+      primaryColorLight: primaryColorLight,
+      primaryColorDark: primaryColorDark,
       accentColor: accentColor,
       accentColorBrightness: accentColorBrightness,
       canvasColor: canvasColor,
@@ -190,11 +211,13 @@ class ThemeData {
       iconTheme: iconTheme,
       primaryIconTheme: primaryIconTheme,
       accentIconTheme: accentIconTheme,
-      platform: platform
+      sliderTheme: sliderTheme,
+      chipTheme: chipTheme,
+      platform: platform,
     );
   }
 
-  /// Create a ThemeData given a set of exact values. All the values
+  /// Create a [ThemeData] given a set of exact values. All the values
   /// must be specified.
   ///
   /// This will rarely be used directly. It is used by [lerp] to
@@ -204,6 +227,8 @@ class ThemeData {
     @required this.brightness,
     @required this.primaryColor,
     @required this.primaryColorBrightness,
+    @required this.primaryColorLight,
+    @required this.primaryColorDark,
     @required this.accentColor,
     @required this.accentColorBrightness,
     @required this.canvasColor,
@@ -234,10 +259,14 @@ class ThemeData {
     @required this.iconTheme,
     @required this.primaryIconTheme,
     @required this.accentIconTheme,
-    @required this.platform
+    @required this.sliderTheme,
+    @required this.chipTheme,
+    @required this.platform,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
+       assert(primaryColorLight != null),
+       assert(primaryColorDark != null),
        assert(accentColor != null),
        assert(accentColorBrightness != null),
        assert(canvasColor != null),
@@ -267,6 +296,8 @@ class ThemeData {
        assert(iconTheme != null),
        assert(primaryIconTheme != null),
        assert(accentIconTheme != null),
+       assert(sliderTheme != null), 
+       assert(chipTheme != null),
        assert(platform != null);
 
   /// A default light blue theme.
@@ -311,6 +342,12 @@ class ThemeData {
   /// icons placed on top of the primary color (e.g. toolbar text).
   final Brightness primaryColorBrightness;
 
+  /// A lighter version of the [primaryColor].
+  final Color primaryColorLight;
+
+  /// A darker version of the [primaryColor].
+  final Color primaryColorDark;
+
   /// The foreground color for widgets (knobs, text, overscroll edge effect, etc).
   final Color accentColor;
 
@@ -328,7 +365,7 @@ class ThemeData {
 
   /// The default color of the [BottomAppBar].
   ///
-  /// This can be overriden by specifying [BottomAppBar.color].
+  /// This can be overridden by specifying [BottomAppBar.color].
   final Color bottomAppBarColor;
 
   /// The color of [Material] when it is used as a [Card].
@@ -336,6 +373,9 @@ class ThemeData {
 
   /// The color of [Divider]s and [PopupMenuDivider]s, also used
   /// between [ListTile]s, between rows in [DataTable]s, and so forth.
+  ///
+  /// To create an appropriate [BorderSide] that uses this color, consider
+  /// [Divider.createBorderSide].
   final Color dividerColor;
 
   /// The highlight color used during ink splash animations or to
@@ -352,7 +392,7 @@ class ThemeData {
   ///
   ///  * [InkSplash.splashFactory], which defines the default splash.
   ///  * [InkRipple.splashFactory], which defines a splash that spreads out
-  ///    more aggresively than the default.
+  ///    more aggressively than the default.
   final InteractiveInkFeatureFactory splashFactory;
 
   /// The color used to highlight selected rows.
@@ -428,6 +468,16 @@ class ThemeData {
   /// An icon theme that contrasts with the accent color.
   final IconThemeData accentIconTheme;
 
+  /// The colors and shapes used to render [Slider].
+  ///
+  /// This is the value returned from [SliderTheme.of].
+  final SliderThemeData sliderTheme;
+
+  /// The colors and styles used to render [Chip], [
+  ///
+  /// This is the value returned from [ChipTheme.of].
+  final ChipThemeData chipTheme;
+
   /// The platform the material widgets should adapt to target.
   ///
   /// Defaults to the current platform.
@@ -438,6 +488,8 @@ class ThemeData {
     Brightness brightness,
     Color primaryColor,
     Brightness primaryColorBrightness,
+    Color primaryColorLight,
+    Color primaryColorDark,
     Color accentColor,
     Brightness accentColorBrightness,
     Color canvasColor,
@@ -452,7 +504,7 @@ class ThemeData {
     Color unselectedWidgetColor,
     Color disabledColor,
     Color buttonColor,
-    Color buttonTheme,
+    ButtonThemeData buttonTheme,
     Color secondaryHeaderColor,
     Color textSelectionColor,
     Color textSelectionHandleColor,
@@ -468,12 +520,16 @@ class ThemeData {
     IconThemeData iconTheme,
     IconThemeData primaryIconTheme,
     IconThemeData accentIconTheme,
+    SliderThemeData sliderTheme,
+    ChipThemeData chipTheme,
     TargetPlatform platform,
   }) {
     return new ThemeData.raw(
       brightness: brightness ?? this.brightness,
       primaryColor: primaryColor ?? this.primaryColor,
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
+      primaryColorLight: primaryColorLight ?? this.primaryColorLight,
+      primaryColorDark: primaryColorDark ?? this.primaryColorDark,
       accentColor: accentColor ?? this.accentColor,
       accentColorBrightness: accentColorBrightness ?? this.accentColorBrightness,
       canvasColor: canvasColor ?? this.canvasColor,
@@ -504,6 +560,8 @@ class ThemeData {
       iconTheme: iconTheme ?? this.iconTheme,
       primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
       accentIconTheme: accentIconTheme ?? this.accentIconTheme,
+      sliderTheme: sliderTheme ?? this.sliderTheme,
+      chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
     );
   }
@@ -515,7 +573,8 @@ class ThemeData {
   static const int _localizedThemeDataCacheSize = 5;
 
   /// Caches localized themes to speed up the [localize] method.
-  static final _FifoCache<_IdentityThemeDataCacheKey, ThemeData> _localizedThemeDataCache = new _FifoCache<_IdentityThemeDataCacheKey, ThemeData>(_localizedThemeDataCacheSize);
+  static final _FifoCache<_IdentityThemeDataCacheKey, ThemeData> _localizedThemeDataCache =
+      new _FifoCache<_IdentityThemeDataCacheKey, ThemeData>(_localizedThemeDataCacheSize);
 
   /// Returns a new theme built by merging the text geometry provided by the
   /// [localTextGeometry] theme with the [baseTheme].
@@ -567,7 +626,7 @@ class ThemeData {
     // Design spec shows for its color palette on
     // <https://material.io/guidelines/style/color.html#color-color-palette>.
     const double kThreshold = 0.15;
-    if ((relativeLuminance + 0.05) * (relativeLuminance + 0.05) > kThreshold )
+    if ((relativeLuminance + 0.05) * (relativeLuminance + 0.05) > kThreshold)
       return Brightness.light;
     return Brightness.dark;
   }
@@ -595,6 +654,8 @@ class ThemeData {
       brightness: t < 0.5 ? a.brightness : b.brightness,
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t),
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
+      primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t),
+      primaryColorDark: Color.lerp(a.primaryColorDark, b.primaryColorDark, t),
       canvasColor: Color.lerp(a.canvasColor, b.canvasColor, t),
       scaffoldBackgroundColor: Color.lerp(a.scaffoldBackgroundColor, b.scaffoldBackgroundColor, t),
       bottomAppBarColor: Color.lerp(a.bottomAppBarColor, b.bottomAppBarColor, t),
@@ -625,6 +686,8 @@ class ThemeData {
       iconTheme: IconThemeData.lerp(a.iconTheme, b.iconTheme, t),
       primaryIconTheme: IconThemeData.lerp(a.primaryIconTheme, b.primaryIconTheme, t),
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
+      sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
+      chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
     );
   }
@@ -667,6 +730,8 @@ class ThemeData {
            (otherData.iconTheme == iconTheme) &&
            (otherData.primaryIconTheme == primaryIconTheme) &&
            (otherData.accentIconTheme == accentIconTheme) &&
+           (otherData.sliderTheme == sliderTheme) &&
+           (otherData.chipTheme == chipTheme) &&
            (otherData.platform == platform);
   }
 
@@ -692,7 +757,7 @@ class ThemeData {
       secondaryHeaderColor,
       textSelectionColor,
       textSelectionHandleColor,
-      hashValues( // Too many values.
+      hashValues(  // Too many values.
         backgroundColor,
         accentColor,
         accentColorBrightness,
@@ -707,13 +772,53 @@ class ThemeData {
         inputDecorationTheme,
         primaryIconTheme,
         accentIconTheme,
+        sliderTheme,
+        chipTheme,
         platform,
-      )
+      ),
     );
   }
 
   @override
-  String toString() => '$runtimeType(${ platform != defaultTargetPlatform ? "$platform " : ''}$brightness $primaryColor etc...)';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    final ThemeData defaultData = new ThemeData.fallback();
+    properties.add(new EnumProperty<TargetPlatform>('platform', platform, defaultValue: defaultTargetPlatform));
+    properties.add(new EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
+    properties.add(new DiagnosticsProperty<Color>('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
+    properties.add(new EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness));
+    properties.add(new DiagnosticsProperty<Color>('accentColor', accentColor, defaultValue: defaultData.accentColor));
+    properties.add(new EnumProperty<Brightness>('accentColorBrightness', accentColorBrightness, defaultValue: defaultData.accentColorBrightness));
+    properties.add(new DiagnosticsProperty<Color>('canvasColor', canvasColor, defaultValue: defaultData.canvasColor));
+    properties.add(new DiagnosticsProperty<Color>('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
+    properties.add(new DiagnosticsProperty<Color>('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor));
+    properties.add(new DiagnosticsProperty<Color>('cardColor', cardColor, defaultValue: defaultData.cardColor));
+    properties.add(new DiagnosticsProperty<Color>('dividerColor', dividerColor, defaultValue: defaultData.dividerColor));
+    properties.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: defaultData.highlightColor));
+    properties.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: defaultData.splashColor));
+    properties.add(new DiagnosticsProperty<Color>('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor));
+    properties.add(new DiagnosticsProperty<Color>('unselectedWidgetColor', unselectedWidgetColor, defaultValue: defaultData.unselectedWidgetColor));
+    properties.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: defaultData.disabledColor));
+    properties.add(new DiagnosticsProperty<Color>('buttonColor', buttonColor, defaultValue: defaultData.buttonColor));
+    properties.add(new DiagnosticsProperty<Color>('secondaryHeaderColor', secondaryHeaderColor, defaultValue: defaultData.secondaryHeaderColor));
+    properties.add(new DiagnosticsProperty<Color>('textSelectionColor', textSelectionColor, defaultValue: defaultData.textSelectionColor));
+    properties.add(new DiagnosticsProperty<Color>('textSelectionHandleColor', textSelectionHandleColor, defaultValue: defaultData.textSelectionHandleColor));
+    properties.add(new DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
+    properties.add(new DiagnosticsProperty<Color>('dialogBackgroundColor', dialogBackgroundColor, defaultValue: defaultData.dialogBackgroundColor));
+    properties.add(new DiagnosticsProperty<Color>('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor));
+    properties.add(new DiagnosticsProperty<Color>('hintColor', hintColor, defaultValue: defaultData.hintColor));
+    properties.add(new DiagnosticsProperty<Color>('errorColor', errorColor, defaultValue: defaultData.errorColor));
+    properties.add(new DiagnosticsProperty<ButtonThemeData>('buttonTheme', buttonTheme));
+    properties.add(new DiagnosticsProperty<TextTheme>('textTheme', textTheme));
+    properties.add(new DiagnosticsProperty<TextTheme>('primaryTextTheme', primaryTextTheme));
+    properties.add(new DiagnosticsProperty<TextTheme>('accentTextTheme', accentTextTheme));
+    properties.add(new DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme));
+    properties.add(new DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme));
+    properties.add(new DiagnosticsProperty<IconThemeData>('primaryIconTheme', primaryIconTheme));
+    properties.add(new DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
+    properties.add(new DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
+    properties.add(new DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
+  }
 }
 
 class _IdentityThemeDataCacheKey {
@@ -742,8 +847,7 @@ class _IdentityThemeDataCacheKey {
 /// The key that was inserted before all other keys is evicted first, i.e. the
 /// one inserted least recently.
 class _FifoCache<K, V> {
-  _FifoCache(this._maximumSize)
-    : assert(_maximumSize != null && _maximumSize > 0);
+  _FifoCache(this._maximumSize) : assert(_maximumSize != null && _maximumSize > 0);
 
   /// In Dart the map literal uses a linked hash-map implementation, whose keys
   /// are stored such that [Map.keys] returns them in the order they were

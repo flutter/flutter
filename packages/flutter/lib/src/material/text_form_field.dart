@@ -19,9 +19,15 @@ import 'theme.dart';
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.
 ///
-/// When a [controller] is specified, it can be used to control the text being
-/// edited. Its content will be overwritten by [initialValue] (which defaults
-/// to the empty string) on creation and when [reset] is called.
+/// When a [controller] is specified, its [TextEditingController.text]
+/// defines the [initialValue]. If this [FormField] is part of a scrolling
+/// container that lazily constructs its children, like a [ListView] or a
+/// [CustomScrollView], then a [controller] should be specified.
+/// The controller's lifetime should be managed by a stateful widget ancestor
+/// of the scrolling container.
+///
+/// If a [controller] is not specified, [initialValue] can be used to give
+/// the automatically generated controller an initial value.
 ///
 /// For a documentation about the various parameters, see [TextField].
 ///
@@ -35,16 +41,17 @@ import 'theme.dart';
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
   ///
-  /// When a [controller] is specified, it can be used to control the text
-  /// being edited. Its content will be overwritten by [initialValue] (which
-  /// defaults to the empty string) on creation and when [reset] is called.
+  /// When a [controller] is specified, [initialValue] must be null (the
+  /// default). If [controller] is null, then a [TextEditingController]
+  /// will be constructed automatically and its `text` will be initialized
+  /// to [initalValue] or the empty string.
   ///
   /// For documentation about the various parameters, see the [TextField] class
   /// and [new TextField], the constructor.
   TextFormField({
     Key key,
     this.controller,
-    String initialValue: '',
+    String initialValue,
     FocusNode focusNode,
     InputDecoration decoration: const InputDecoration(),
     TextInputType keyboardType: TextInputType.text,
@@ -53,23 +60,31 @@ class TextFormField extends FormField<String> {
     bool autofocus: false,
     bool obscureText: false,
     bool autocorrect: true,
+    bool autovalidate: false,
+    bool maxLengthEnforced: true,
     int maxLines: 1,
+    int maxLength,
     ValueChanged<String> onFieldSubmitted,
     FormFieldSetter<String> onSaved,
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
-  }) : assert(initialValue != null),
+    bool enabled,
+  }) : assert(initialValue == null || controller == null),
        assert(keyboardType != null),
        assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(autovalidate != null),
+       assert(maxLengthEnforced != null),
        assert(maxLines == null || maxLines > 0),
+       assert(maxLength == null || maxLength > 0),
        super(
     key: key,
-    initialValue: initialValue,
+    initialValue: controller != null ? controller.text : (initialValue ?? ''),
     onSaved: onSaved,
     validator: validator,
+    autovalidate: autovalidate,
     builder: (FormFieldState<String> field) {
       final _TextFormFieldState state = field;
       final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
@@ -84,17 +99,21 @@ class TextFormField extends FormField<String> {
         autofocus: autofocus,
         obscureText: obscureText,
         autocorrect: autocorrect,
+        maxLengthEnforced: maxLengthEnforced,
         maxLines: maxLines,
-        onChanged: field.onChanged,
+        maxLength: maxLength,
+        onChanged: field.didChange,
         onSubmitted: onFieldSubmitted,
         inputFormatters: inputFormatters,
+        enabled: enabled,
       );
     },
   );
 
   /// Controls the text being edited.
   ///
-  /// If null, this widget will create its own [TextEditingController].
+  /// If null, this widget will create its own [TextEditingController] and
+  /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController controller;
 
   @override
@@ -115,7 +134,6 @@ class _TextFormFieldState extends FormFieldState<String> {
     if (widget.controller == null) {
       _controller = new TextEditingController(text: widget.initialValue);
     } else {
-      widget.controller.text = widget.initialValue;
       widget.controller.addListener(_handleControllerChanged);
     }
   }
@@ -160,6 +178,6 @@ class _TextFormFieldState extends FormFieldState<String> {
     // example, the reset() method. In such cases, the FormField value will
     // already have been set.
     if (_effectiveController.text != value)
-      onChanged(_effectiveController.text);
+      didChange(_effectiveController.text);
   }
 }

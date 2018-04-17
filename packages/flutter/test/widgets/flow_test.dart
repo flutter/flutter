@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 
 class TestFlowDelegate extends FlowDelegate {
   TestFlowDelegate({this.startOffset}) : super(repaint: startOffset);
@@ -26,6 +27,22 @@ class TestFlowDelegate extends FlowDelegate {
 
   @override
   bool shouldRepaint(TestFlowDelegate oldDelegate) => startOffset == oldDelegate.startOffset;
+}
+
+class OpacityFlowDelegate extends FlowDelegate {
+  OpacityFlowDelegate(this.opacity);
+
+  double opacity;
+
+  @override
+  void paintChildren(FlowPaintingContext context) {
+    for (int i = 0; i < context.childCount; ++i) {
+      context.paintChild(i, opacity: opacity);
+    }
+  }
+
+  @override
+  bool shouldRepaint(OpacityFlowDelegate oldDelegate) => opacity != oldDelegate.opacity;
 }
 
 void main() {
@@ -81,5 +98,24 @@ void main() {
     log.clear();
     await tester.tapAt(const Offset(20.0, 90.0));
     expect(log, equals(<int>[0]));
+  });
+
+  testWidgets('Flow opacity layer', (WidgetTester tester) async {
+    const double opacity = 0.2;
+    await tester.pumpWidget(
+      new Flow(
+        delegate: new OpacityFlowDelegate(opacity),
+        children: <Widget>[
+          new Container(width: 100.0, height: 100.0),
+        ]
+      )
+    );
+    ContainerLayer layer = RendererBinding.instance.renderView.debugLayer;
+    while (layer != null && !(layer is OpacityLayer))
+      layer = layer.firstChild;
+    expect(layer, const isInstanceOf<OpacityLayer>());
+    final OpacityLayer opacityLayer = layer;
+    expect(opacityLayer.alpha, equals(opacity * 255));
+    expect(layer.firstChild, const isInstanceOf<TransformLayer>());
   });
 }

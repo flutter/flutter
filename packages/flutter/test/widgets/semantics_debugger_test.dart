@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show window;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -292,13 +294,16 @@ void main() {
         child: new SemanticsDebugger(
           child: new Directionality(
             textDirection: TextDirection.ltr,
-            child: new Material(
-              child: new Center(
-                child: new Slider(
-                  value: value,
-                  onChanged: (double newValue) {
-                    value = newValue;
-                  },
+            child: new MediaQuery(
+              data: new MediaQueryData.fromWindow(window),
+              child: new Material(
+                child: new Center(
+                  child: new Slider(
+                    value: value,
+                    onChanged: (double newValue) {
+                      value = newValue;
+                    },
+                  ),
                 ),
               ),
             ),
@@ -321,7 +326,7 @@ void main() {
     final Key keyBottom = new UniqueKey();
 
     bool valueTop = false;
-    final bool valueBottom = true;
+    const bool valueBottom = true;
 
     await tester.pumpWidget(
       new Directionality(

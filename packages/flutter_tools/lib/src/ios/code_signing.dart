@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:async';
-import 'dart:convert' show UTF8;
+import 'dart:convert' show utf8;
 
 import 'package:quiver/strings.dart';
 
@@ -83,9 +83,15 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = new RegExp(r'OU=(
 /// signing identities in the user's keychain prompting a choice if multiple
 /// are found.
 ///
+/// Returns a set of build configuration settings that uses the selected
+/// signing identities.
+///
 /// Will return null if none are found, if the user cancels or if the Xcode
 /// project has a development team set in the project's build settings.
-Future<String> getCodeSigningIdentityDevelopmentTeam({BuildableIOSApp iosApp, bool usesTerminalUi: true}) async{
+Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
+  BuildableIOSApp iosApp,
+  bool usesTerminalUi: true
+}) async{
   if (iosApp.buildSettings == null)
     return null;
 
@@ -146,7 +152,7 @@ Future<String> getCodeSigningIdentityDevelopmentTeam({BuildableIOSApp iosApp, bo
       ..write(signingCertificate)
       ..close();
 
-  final String opensslOutput = await UTF8.decodeStream(opensslProcess.stdout);
+  final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);
   // Fire and forget discard of the stderr stream so we don't hold onto resources.
   // Don't care about the result.
   opensslProcess.stderr.drain<String>(); // ignore: unawaited_futures
@@ -154,9 +160,19 @@ Future<String> getCodeSigningIdentityDevelopmentTeam({BuildableIOSApp iosApp, bo
   if (await opensslProcess.exitCode != 0)
     return null;
 
-  return _certificateOrganizationalUnitExtractionPattern
+  final Map<String, String> signingConfigs = <String, String> {
+    'DEVELOPMENT_TEAM': _certificateOrganizationalUnitExtractionPattern
       .firstMatch(opensslOutput)
-      ?.group(1);
+      ?.group(1),
+  };
+
+  if (opensslOutput.contains('iPhone Developer: Google Development')) {
+    signingConfigs['PROVISIONING_PROFILE_SPECIFIER'] = 'Google Development';
+    signingConfigs['CODE_SIGN_STYLE'] = 'Manual';
+    printStatus("Manually selecting Google's mobile provisioning profile (see go/google-flutter-signing).");
+  }
+
+  return signingConfigs;
 }
 
 Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, bool usesTerminalUi) async {

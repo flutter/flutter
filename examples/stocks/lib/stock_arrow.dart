@@ -46,9 +46,9 @@ class StockArrowPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(StockArrowPainter oldPainter) {
-    return oldPainter.color != color
-        || oldPainter.percentChange != percentChange;
+  bool shouldRepaint(StockArrowPainter oldDelegate) {
+    return oldDelegate.color != color
+        || oldDelegate.percentChange != percentChange;
   }
 }
 

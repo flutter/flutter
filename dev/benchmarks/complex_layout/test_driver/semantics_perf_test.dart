@@ -36,8 +36,8 @@ void main() {
         fail('Expected exactly one semantics event, got ${semanticsEvents.length}');
       final Duration semanticsTreeCreation = semanticsEvents.first.duration;
 
-      final String json = JSON.encode(<String, dynamic>{'initialSemanticsTreeCreation': semanticsTreeCreation.inMilliseconds});
-      new File(p.join(testOutputsDirectory, 'complex_layout_semantics_perf.json')).writeAsStringSync(json);
+      final String jsonEncoded = json.encode(<String, dynamic>{'initialSemanticsTreeCreation': semanticsTreeCreation.inMilliseconds});
+      new File(p.join(testOutputsDirectory, 'complex_layout_semantics_perf.json')).writeAsStringSync(jsonEncoded);
     });
   });
 }

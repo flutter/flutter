@@ -47,7 +47,7 @@ void main() {
       <String>['pod', 'install', '--verbose'],
       workingDirectory: 'project/ios',
       environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
-    )).thenReturn(exitsHappy);
+    )).thenAnswer((_) => new Future<ProcessResult>.value(exitsHappy));
   });
 
   group('Setup Podfile', () {
@@ -70,7 +70,7 @@ void main() {
     });
 
     testUsingContext('creates swift Podfile if swift', () {
-      when(mockXcodeProjectInterpreter.canInterpretXcodeProjects).thenReturn(true);
+      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
       when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenReturn(<String, String>{
         'SWIFT_VERSION': '4.0',
       });
@@ -94,7 +94,7 @@ void main() {
     });
 
     testUsingContext('does not create Podfile when we cannot interpret Xcode projects', () {
-      when(mockXcodeProjectInterpreter.canInterpretXcodeProjects).thenReturn(false);
+      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
       cocoaPodsUnderTest.setupPodfile('project');
 
@@ -177,7 +177,7 @@ void main() {
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
         },
-      )).thenReturn(new ProcessResult(
+      )).thenAnswer((_) => new Future<ProcessResult>.value(new ProcessResult(
         1,
         1,
         '''
@@ -195,7 +195,7 @@ You have either:
 
 Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by default.''',
         '',
-      ));
+      )));
       try {
         await cocoaPodsUnderTest.processPods(
           appIosDirectory: projectUnderTest,
@@ -360,7 +360,11 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
         },
-      )).thenReturn(new ProcessResult(1, 1, 'fails for some reason', ''));
+      )).thenAnswer(
+        (_) => new Future<ProcessResult>.value(
+          new ProcessResult(1, 1, 'fails for some reason', '')
+        )
+      );
 
       try {
         await cocoaPodsUnderTest.processPods(

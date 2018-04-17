@@ -15,8 +15,8 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../bundle.dart' as bundle;
 import '../device.dart';
-import '../flx.dart' as flx;
 import '../globals.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
@@ -87,7 +87,7 @@ class SimControl {
       return <String, Map<String, dynamic>>{};
     }
 
-    return JSON.decode(results.stdout)[section.name];
+    return json.decode(results.stdout)[section.name];
   }
 
   /// Returns a list of all available devices, both potential and connected.
@@ -292,7 +292,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage app, {
+    ApplicationPackage package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -303,16 +303,16 @@ class IOSSimulator extends Device {
     bool ipv6: false,
   }) async {
     if (!prebuiltApplication) {
-      printTrace('Building ${app.name} for $id.');
+      printTrace('Building ${package.name} for $id.');
 
       try {
-        await _setupUpdatedApplicationBundle(app, debuggingOptions.buildInfo);
+        await _setupUpdatedApplicationBundle(package, debuggingOptions.buildInfo);
       } on ToolExit catch (e) {
         printError(e.message);
         return new LaunchResult.failed();
       }
     } else {
-      if (!await installApp(app))
+      if (!await installApp(package))
         return new LaunchResult.failed();
     }
 
@@ -344,11 +344,11 @@ class IOSSimulator extends Device {
     ProtocolDiscovery observatoryDiscovery;
     if (debuggingOptions.debuggingEnabled)
       observatoryDiscovery = new ProtocolDiscovery.observatory(
-          getLogReader(app: app), ipv6: ipv6);
+          getLogReader(app: package), ipv6: ipv6);
 
     // Launch the updated application in the simulator.
     try {
-      await SimControl.instance.launch(id, app.id, args);
+      await SimControl.instance.launch(id, package.id, args);
     } catch (error) {
       printError('$error');
       return new LaunchResult.failed();
@@ -416,7 +416,7 @@ class IOSSimulator extends Device {
   Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo) {
     // When running in previewDart2 mode, we still need to run compiler to
     // produce kernel file for the application.
-    return flx.build(
+    return bundle.build(
       precompiledSnapshot: !buildInfo.previewDart2,
       previewDart2: buildInfo.previewDart2,
       trackWidgetCreation: buildInfo.trackWidgetCreation,
@@ -441,11 +441,11 @@ class IOSSimulator extends Device {
   @override
   Future<String> get sdkNameAndVersion async => category;
 
-  final RegExp _iosSdkRegExp = new RegExp(r'iOS (\d+)');
+  final RegExp _iosSdkRegExp = new RegExp(r'iOS( |-)(\d+)');
 
   Future<int> get sdkMajorVersion async {
     final Match sdkMatch = _iosSdkRegExp.firstMatch(await sdkNameAndVersion);
-    return int.parse(sdkMatch.group(1) ?? 11);
+    return int.parse(sdkMatch?.group(2) ?? 11);
   }
 
   @override
@@ -477,7 +477,7 @@ class IOSSimulator extends Device {
   }
 
   bool get _xcodeVersionSupportsScreenshot {
-    return xcode.xcodeMajorVersion > 8 || (xcode.xcodeMajorVersion == 8 && xcode.xcodeMinorVersion >= 2);
+    return xcode.majorVersion > 8 || (xcode.majorVersion == 8 && xcode.minorVersion >= 2);
   }
 
   @override
@@ -540,15 +540,15 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     // Device log.
     await device.ensureLogsExists();
     _deviceProcess = await launchDeviceLogTool(device);
-    _deviceProcess.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
-    _deviceProcess.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
+    _deviceProcess.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
+    _deviceProcess.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
 
     // Track system.log crashes.
     // ReportCrash[37965]: Saved crash report for FlutterRunner[37941]...
     _systemProcess = await launchSystemLogTool(device);
     if (_systemProcess != null) {
-      _systemProcess.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
-      _systemProcess.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
+      _systemProcess.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
+      _systemProcess.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
     }
 
     // We don't want to wait for the process or its callback. Best effort

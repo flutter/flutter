@@ -34,7 +34,8 @@ import 'theme.dart';
 /// trying to change the button's [color] and it is not having any effect, check
 /// that you are passing a non-null [onPressed] handler.
 ///
-/// Flat buttons will expand to fit the child widget, if necessary.
+/// Flat buttons have a minimum size of 88.0 by 36.0 which can be overidden
+/// with [ButtonTheme].
 ///
 /// See also:
 ///
@@ -43,13 +44,14 @@ import 'theme.dart';
 ///  * [SimpleDialogOption], which is used in [SimpleDialog]s.
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
-//// * [RawMaterialButton], the widget this widget is based on.
+///  * [RawMaterialButton], the widget this widget is based on.
 ///  * <https://material.google.com/components/buttons.html>
 class FlatButton extends StatelessWidget {
   /// Create a simple text button.
   const FlatButton({
     Key key,
     @required this.onPressed,
+    this.onHighlightChanged,
     this.textTheme,
     this.textColor,
     this.disabledTextColor,
@@ -73,6 +75,7 @@ class FlatButton extends StatelessWidget {
   FlatButton.icon({
     Key key,
     @required this.onPressed,
+    this.onHighlightChanged,
     this.textTheme,
     this.textColor,
     this.disabledTextColor,
@@ -101,6 +104,10 @@ class FlatButton extends StatelessWidget {
   ///
   /// If this is set to null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
+
+  /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
+  /// callback.
+  final ValueChanged<bool> onHighlightChanged;
 
   /// Defines the button's base colors, and the defaults for the button's minimum
   /// size, internal padding, and shape.
@@ -276,6 +283,7 @@ class FlatButton extends StatelessWidget {
 
     return new RawMaterialButton(
       onPressed: onPressed,
+      onHighlightChanged: onHighlightChanged,
       fillColor: fillColor,
       textStyle: theme.textTheme.button.copyWith(color: textColor),
       highlightColor: _getHighlightColor(theme, buttonTheme),
@@ -290,18 +298,18 @@ class FlatButton extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    description.add(new DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(new DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }

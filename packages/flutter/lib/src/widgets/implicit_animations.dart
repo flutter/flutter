@@ -213,9 +213,9 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   AnimatedWidgetBaseState<ImplicitlyAnimatedWidget> createState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
   }
 }
 
@@ -441,15 +441,15 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   _AnimatedContainerState createState() => new _AnimatedContainerState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    description.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
-    description.add(new DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
-    description.add(new DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null, showName: false));
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
-    description.add(new ObjectFlagProperty<Matrix4>.has('transform', transform));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
+    properties.add(new DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null, showName: false));
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
+    properties.add(new ObjectFlagProperty<Matrix4>.has('transform', transform));
   }
 }
 
@@ -533,9 +533,9 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
   _AnimatedPaddingState createState() => new _AnimatedPaddingState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
   }
 }
 
@@ -609,9 +609,9 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
   _AnimatedAlignState createState() => new _AnimatedAlignState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
   }
 }
 
@@ -722,14 +722,14 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   _AnimatedPositionedState createState() => new _AnimatedPositionedState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('left', left, defaultValue: null));
-    description.add(new DoubleProperty('top', top, defaultValue: null));
-    description.add(new DoubleProperty('right', right, defaultValue: null));
-    description.add(new DoubleProperty('bottom', bottom, defaultValue: null));
-    description.add(new DoubleProperty('width', width, defaultValue: null));
-    description.add(new DoubleProperty('height', height, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('left', left, defaultValue: null));
+    properties.add(new DoubleProperty('top', top, defaultValue: null));
+    properties.add(new DoubleProperty('right', right, defaultValue: null));
+    properties.add(new DoubleProperty('bottom', bottom, defaultValue: null));
+    properties.add(new DoubleProperty('width', width, defaultValue: null));
+    properties.add(new DoubleProperty('height', height, defaultValue: null));
   }
 }
 
@@ -845,14 +845,14 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
   _AnimatedPositionedDirectionalState createState() => new _AnimatedPositionedDirectionalState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('start', start, defaultValue: null));
-    description.add(new DoubleProperty('top', top, defaultValue: null));
-    description.add(new DoubleProperty('end', end, defaultValue: null));
-    description.add(new DoubleProperty('bottom', bottom, defaultValue: null));
-    description.add(new DoubleProperty('width', width, defaultValue: null));
-    description.add(new DoubleProperty('height', height, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('start', start, defaultValue: null));
+    properties.add(new DoubleProperty('top', top, defaultValue: null));
+    properties.add(new DoubleProperty('end', end, defaultValue: null));
+    properties.add(new DoubleProperty('bottom', bottom, defaultValue: null));
+    properties.add(new DoubleProperty('width', width, defaultValue: null));
+    properties.add(new DoubleProperty('height', height, defaultValue: null));
   }
 }
 
@@ -917,7 +917,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///
 /// class LogoFadeState extends State<LogoFade> {
 ///   double opacityLevel = 1.0;
-/// 
+///
 ///   _changeOpacity() {
 ///     setState(() => opacityLevel = opacityLevel == 0 ? 1.0 : 0.0);
 ///   }
@@ -972,9 +972,9 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   _AnimatedOpacityState createState() => new _AnimatedOpacityState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DoubleProperty('opacity', opacity));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DoubleProperty('opacity', opacity));
   }
 }
 
@@ -1064,13 +1064,13 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   _AnimatedDefaultTextStyleState createState() => new _AnimatedDefaultTextStyleState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    style?.debugFillProperties(description);
-    description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-    description.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
-    description.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
-    description.add(new IntProperty('maxLines', maxLines, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    style?.debugFillProperties(properties);
+    properties.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    properties.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    properties.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    properties.add(new IntProperty('maxLines', maxLines, defaultValue: null));
   }
 }
 
@@ -1168,15 +1168,15 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   _AnimatedPhysicalModelState createState() => new _AnimatedPhysicalModelState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<BoxShape>('shape', shape));
-    description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
-    description.add(new DoubleProperty('elevation', elevation));
-    description.add(new DiagnosticsProperty<Color>('color', color));
-    description.add(new DiagnosticsProperty<bool>('animateColor', animateColor));
-    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
-    description.add(new DiagnosticsProperty<bool>('animateShadowColor', animateShadowColor));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<BoxShape>('shape', shape));
+    properties.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
+    properties.add(new DoubleProperty('elevation', elevation));
+    properties.add(new DiagnosticsProperty<Color>('color', color));
+    properties.add(new DiagnosticsProperty<bool>('animateColor', animateColor));
+    properties.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
+    properties.add(new DiagnosticsProperty<bool>('animateShadowColor', animateShadowColor));
   }
 }
 

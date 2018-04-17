@@ -31,13 +31,15 @@ const String cocoaPodsUpgradeInstructions = '''
   brew upgrade cocoapods
   pod setup''';
 
-CocoaPods get cocoaPods => context.putIfAbsent(CocoaPods, () => const CocoaPods());
+CocoaPods get cocoaPods => context[CocoaPods];
 
 class CocoaPods {
   const CocoaPods();
 
   Future<bool> get hasCocoaPods => exitsHappyAsync(<String>['pod', '--version']);
 
+  // TODO(mravn): Insist on 1.5.0 once build bots have that installed.
+  // Earlier versions do not work with Swift and static libraries.
   String get cocoaPodsMinimumVersion => '1.0.0';
 
   Future<String> get cocoaPodsVersionText async => (await runAsync(<String>['pod', '--version'])).processResult.stdout.trim();
@@ -105,7 +107,7 @@ class CocoaPods {
   /// contains a suitable `Podfile` and that its `Flutter/Xxx.xcconfig` files
   /// include pods configuration.
   void setupPodfile(String appDirectory) {
-    if (!xcodeProjectInterpreter.canInterpretXcodeProjects) {
+    if (!xcodeProjectInterpreter.isInstalled) {
       // Don't do anything for iOS when host platform doesn't support it.
       return;
     }

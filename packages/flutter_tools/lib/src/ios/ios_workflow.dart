@@ -13,17 +13,17 @@ import '../doctor.dart';
 import 'cocoapods.dart';
 import 'mac.dart';
 
-IOSWorkflow get iosWorkflow => context.putIfAbsent(IOSWorkflow, () => new IOSWorkflow());
+IOSWorkflow get iosWorkflow => context[IOSWorkflow];
 
 class IOSWorkflow extends DoctorValidator implements Workflow {
-  IOSWorkflow() : super('iOS toolchain - develop for iOS devices');
+  const IOSWorkflow() : super('iOS toolchain - develop for iOS devices');
 
   @override
   bool get appliesToHostPlatform => platform.isMacOS;
 
   // We need xcode (+simctl) to list simulator devices, and libimobiledevice to list real devices.
   @override
-  bool get canListDevices => xcode.isInstalledAndMeetsVersionCheck;
+  bool get canListDevices => xcode.isInstalledAndMeetsVersionCheck && xcode.isSimctlInstalled;
 
   // We need xcode to launch simulator devices, and ideviceinstaller and ios-deploy
   // for real devices.
@@ -68,10 +68,10 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
       messages.add(new ValidationMessage('Xcode at ${xcode.xcodeSelectPath}'));
 
-      xcodeVersionInfo = xcode.xcodeVersionText;
+      xcodeVersionInfo = xcode.versionText;
       if (xcodeVersionInfo.contains(','))
         xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
-      messages.add(new ValidationMessage(xcode.xcodeVersionText));
+      messages.add(new ValidationMessage(xcode.versionText));
 
       if (!xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
@@ -87,11 +87,11 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
           'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.'
         ));
       }
-      if ((await macDevMode).contains('disabled')) {
+      if (!xcode.isSimctlInstalled) {
         xcodeStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
-          'Your Mac needs to enabled for developer mode before using Xcode for the first time.\n'
-          'Run \'sudo DevToolsSecurity -enable\' to enable developer mode.'
+          'Xcode requires additional components to be installed in order to run.\n'
+          'Launch Xcode and install additional required components when prompted.'
         ));
       }
 

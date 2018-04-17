@@ -83,7 +83,10 @@ import 'bottom_tab_bar.dart';
 class CupertinoTabScaffold extends StatefulWidget {
   /// Creates a layout for applications with a tab bar at the bottom.
   ///
-  /// The [tabBar] and [tabBuilder] arguments must not be null.
+  /// The [tabBar], [tabBuilder] and [currentTabIndex] arguments must not be null.
+  ///
+  /// The [currentTabIndex] argument can be used to programmatically change the
+  /// currently selected tab.
   const CupertinoTabScaffold({
     Key key,
     @required this.tabBar,
@@ -96,16 +99,20 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// that lets the user switch between different tabs in the main content area
   /// when present.
   ///
-  /// When provided, [CupertinoTabBar.currentIndex] will be ignored and will
-  /// be managed by the [CupertinoTabScaffold] to show the currently selected page
-  /// as the active item index. If [CupertinoTabBar.onTap] is provided, it will
-  /// still be called. [CupertinoTabScaffold] automatically also listen to the
+  /// Setting and changing [CupertinoTabBar.currentIndex] programmatically will
+  /// change the currently selected tab item in the [tabBar] as well as change
+  /// the currently focused tab from the [tabBuilder].
+
+  /// If [CupertinoTabBar.onTap] is provided, it will still be called.
+  /// [CupertinoTabScaffold] automatically also listen to the
   /// [CupertinoTabBar]'s `onTap` to change the [CupertinoTabBar]'s `currentIndex`
   /// and change the actively displayed tab in [CupertinoTabScaffold]'s own
   /// main content area.
   ///
   /// If translucent, the main content may slide behind it.
   /// Otherwise, the main content's bottom margin will be offset by its height.
+  ///
+  /// Must not be null.
   final CupertinoTabBar tabBar;
 
   /// An [IndexedWidgetBuilder] that's called when tabs become active.
@@ -121,6 +128,8 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// In that case, the child's [BuildContext]'s [MediaQuery] will have a
   /// bottom padding indicating the area of obstructing overlap from the
   /// [tabBar].
+  ///
+  /// Must not be null.
   final IndexedWidgetBuilder tabBuilder;
 
   @override
@@ -128,7 +137,21 @@ class CupertinoTabScaffold extends StatefulWidget {
 }
 
 class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
-  int _currentPage = 0;
+  int _currentPage;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPage = widget.tabBar.currentIndex;
+  }
+
+  @override
+  void didUpdateWidget(CupertinoTabScaffold oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.tabBar.currentIndex != oldWidget.tabBar.currentIndex) {
+      _currentPage = widget.tabBar.currentIndex;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

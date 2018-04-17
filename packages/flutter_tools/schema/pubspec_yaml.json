@@ -6,7 +6,10 @@
     "properties": {
         "name": { "type": "string" },
         "flutter": {
-            "type": "object",
+            "oneOf": [
+                { "type": "object" },
+                { "type": "null" }
+            ],
             "additionalProperties": false,
             "properties": {
                 "uses-material-design": { "type": "boolean" },

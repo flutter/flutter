@@ -42,7 +42,12 @@ void main() {
     });
 
     tearDown(() {
-      temp.deleteSync(recursive: true);
+      try {
+        temp.deleteSync(recursive: true);
+      } on FileSystemException catch (e) {
+        // ignore errors deleting the temporary directory
+        print('Ignored exception during tearDown: $e');
+      }
     });
 
     // Verify that we create a project that is well-formed.
@@ -207,7 +212,7 @@ void main() {
             <String>[file.path],
             workingDirectory: projectDir.path,
           );
-          final String formatted = await process.stdout.transform(UTF8.decoder).join();
+          final String formatted = await process.stdout.transform(utf8.decoder).join();
 
           expect(original, formatted, reason: file.path);
         }
@@ -380,9 +385,8 @@ void main() {
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
-      final List<String> commands = loggingProcessManager.commands;
-      expect(commands, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
-      expect(commands, contains('--offline'));
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(loggingProcessManager.commands.first, contains('--offline'));
     },
       timeout: allowForCreateFlutterProject,
       overrides: <Type, Generator>{
@@ -397,9 +401,8 @@ void main() {
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--pub', projectDir.path]);
-      final List<String> commands = loggingProcessManager.commands;
-      expect(commands, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
-      expect(commands, isNot(contains('--offline')));
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(loggingProcessManager.commands.first, isNot(contains('--offline')));
     },
       timeout: allowForCreateFlutterProject,
       overrides: <Type, Generator>{
@@ -494,9 +497,9 @@ Future<Null> _runFlutterTest(Directory workingDir, {String target}) async {
 class MockFlutterVersion extends Mock implements FlutterVersion {}
 
 /// A ProcessManager that invokes a real process manager, but keeps
-/// the last commands sent to it.
+/// track of all commands sent to it.
 class LoggingProcessManager extends LocalProcessManager {
-  List<String> commands;
+  List<List<String>> commands = <List<String>>[];
 
   @override
   Future<Process> start(
@@ -507,7 +510,7 @@ class LoggingProcessManager extends LocalProcessManager {
       bool runInShell: false,
       ProcessStartMode mode: ProcessStartMode.NORMAL,
     }) {
-    commands = command;
+    commands.add(command);
     return super.start(
       command,
       workingDirectory: workingDirectory,

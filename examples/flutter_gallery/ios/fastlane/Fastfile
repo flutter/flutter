@@ -21,7 +21,7 @@ end
 # 2- xcodebuild with archive option
 platform :ios do
   desc 'Push a new release to TestFlight'
-  lane :build_and_deploy_testflight do
+  lane :build_and_deploy_testflight do |options|
     # Doesn't do anything when not on Travis.
     setup_travis
 
@@ -73,6 +73,8 @@ platform :ios do
       codesigning_identity: 'iPhone Distribution: Store Ladd (S8QB4VV633)',
     )
 
-    upload_to_testflight
+    if options[:upload]
+      upload_to_testflight
+    end
   end
 end

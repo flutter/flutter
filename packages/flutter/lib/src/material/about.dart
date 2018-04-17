@@ -149,17 +149,19 @@ void showAboutDialog({
   String applicationVersion,
   Widget applicationIcon,
   String applicationLegalese,
-  List<Widget> children
+  List<Widget> children,
 }) {
-  showDialog<Null>(
+  showDialog<void>(
     context: context,
-    child: new AboutDialog(
-      applicationName: applicationName,
-      applicationVersion: applicationVersion,
-      applicationIcon: applicationIcon,
-      applicationLegalese: applicationLegalese,
-      children: children
-    )
+    builder: (BuildContext context) {
+      return new AboutDialog(
+        applicationName: applicationName,
+        applicationVersion: applicationVersion,
+        applicationIcon: applicationIcon,
+        applicationLegalese: applicationLegalese,
+        children: children,
+      );
+    }
   );
 }
 
@@ -183,9 +185,7 @@ void showLicensePage({
   Widget applicationIcon,
   String applicationLegalese
 }) {
-  // TODO(ianh): remove pop once https://github.com/flutter/flutter/issues/4667 is fixed
-  Navigator.pop(context);
-  Navigator.push(context, new MaterialPageRoute<Null>(
+  Navigator.push(context, new MaterialPageRoute<void>(
     builder: (BuildContext context) => new LicensePage(
       applicationName: applicationName,
       applicationVersion: applicationVersion,

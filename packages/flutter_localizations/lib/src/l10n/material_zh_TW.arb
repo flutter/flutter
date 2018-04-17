@@ -1,4 +1,9 @@
 {
+  "tabLabel": "第 $tabIndex 個分頁 (共 $tabCount 個)",
+  "showAccountsLabel": "顯示帳戶",
+  "modalBarrierDismissLabel": "關閉",
+  "hideAccountsLabel": "隱藏帳戶",
+  "signedInLabel": "已登入帳戶",
   "scriptCategory": "dense",
   "timeOfDayFormat": "ah:mm",
   "openAppDrawerTooltip": "開啟導覽選單",
@@ -29,5 +34,9 @@
   "anteMeridiemAbbreviation": "上午",
   "postMeridiemAbbreviation": "下午",
   "timePickerHourModeAnnouncement": "選取小時數",
-  "timePickerMinuteModeAnnouncement": "選取分鐘數"
+  "timePickerMinuteModeAnnouncement": "選取分鐘數",
+  "drawerLabel": "导航菜单",
+  "popupMenuLabel": "弹出菜单",
+  "dialogLabel": "对话",
+  "alertDialogLabel": "警报"
 }

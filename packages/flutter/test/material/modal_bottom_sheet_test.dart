@@ -27,7 +27,7 @@ void main() {
     showModalBottomSheet<Null>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet')
-    ).then<Null>((Null result) {
+    ).then<void>((Null result) {
       expectSync(result, isNull);
       showBottomSheetThenCalled = true;
     });
@@ -37,7 +37,7 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
-    // Tap on the the bottom sheet itself to dismiss it
+    // Tap on the bottom sheet itself to dismiss it
     await tester.tap(find.text('BottomSheet'));
     await tester.pump(); // bottom sheet dismiss animation starts
     expect(showBottomSheetThenCalled, isTrue);
@@ -49,7 +49,7 @@ void main() {
     showModalBottomSheet<Null>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet'),
-    ).then<Null>((Null result) {
+    ).then<void>((Null result) {
       expectSync(result, isNull);
       showBottomSheetThenCalled = true;
     });
@@ -58,7 +58,7 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
-    // Tap above the the bottom sheet to dismiss it
+    // Tap above the bottom sheet to dismiss it
     await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump(); // bottom sheet dismiss animation starts
     expect(showBottomSheetThenCalled, isTrue);
@@ -160,7 +160,7 @@ void main() {
 
     await tester.pumpWidget(new Localizations(
       locale: const Locale('en', 'US'),
-      delegates: <LocalizationsDelegate<dynamic>>[
+      delegates: const <LocalizationsDelegate<dynamic>>[
         DefaultWidgetsLocalizations.delegate,
         DefaultMaterialLocalizations.delegate,
       ],
@@ -172,7 +172,7 @@ void main() {
           ),
           child: new Navigator(
             onGenerateRoute: (_) {
-              return new PageRouteBuilder<Null>(
+              return new PageRouteBuilder<void>(
                 pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
                   outerContext = context;
                   return new Container();
@@ -184,7 +184,7 @@ void main() {
       ),
     ));
 
-    showModalBottomSheet<Null>(
+    showModalBottomSheet<void>(
       context: outerContext,
       builder: (BuildContext context) {
         innerContext = context;

@@ -93,9 +93,9 @@ class StockHomeState extends State<StockHome> {
         });
         break;
       case _StockMenuItem.refresh:
-        showDialog<Null>(
+        showDialog<void>(
           context: context,
-          child: new _NotImplementedDialog()
+          builder: (BuildContext context) => new _NotImplementedDialog(),
         );
         break;
       case _StockMenuItem.speedUp:
@@ -297,7 +297,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleCreateCompany() {
-    showModalBottomSheet<Null>(
+    showModalBottomSheet<void>(
       context: context,
       builder: (BuildContext context) => new _CreateCompanySheet(),
     );
@@ -307,7 +307,7 @@ class StockHomeState extends State<StockHome> {
     return new FloatingActionButton(
       tooltip: 'Create company',
       child: const Icon(Icons.add),
-      backgroundColor: Colors.redAccent,
+      backgroundColor: Theme.of(context).accentColor,
       onPressed: _handleCreateCompany,
     );
   }

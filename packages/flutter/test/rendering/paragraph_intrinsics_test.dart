@@ -20,10 +20,10 @@ void main() {
       ],
     );
 
-    final double textWidth = paragraph.getMaxIntrinsicWidth(double.INFINITY);
-    final double oneLineTextHeight = paragraph.getMinIntrinsicHeight(double.INFINITY);
+    final double textWidth = paragraph.getMaxIntrinsicWidth(double.infinity);
+    final double oneLineTextHeight = paragraph.getMinIntrinsicHeight(double.infinity);
     final double constrainedWidth = textWidth * 0.9;
-    final double wrappedTextWidth = paragraph.getMinIntrinsicWidth(double.INFINITY);
+    final double wrappedTextWidth = paragraph.getMinIntrinsicWidth(double.infinity);
     final double twoLinesTextHeight = paragraph.getMinIntrinsicHeight(constrainedWidth);
     final double manyLinesTextHeight = paragraph.getMinIntrinsicHeight(0.0);
 
@@ -33,16 +33,16 @@ void main() {
     expect(oneLineTextHeight, lessThan(twoLinesTextHeight));
     expect(twoLinesTextHeight, lessThan(oneLineTextHeight * 3.0));
     expect(manyLinesTextHeight, greaterThan(twoLinesTextHeight));
-    expect(paragraph.getMaxIntrinsicHeight(double.INFINITY), equals(oneLineTextHeight));
+    expect(paragraph.getMaxIntrinsicHeight(double.infinity), equals(oneLineTextHeight));
     expect(paragraph.getMaxIntrinsicHeight(constrainedWidth), equals(twoLinesTextHeight));
     expect(paragraph.getMaxIntrinsicHeight(0.0), equals(manyLinesTextHeight));
 
     // vertical block (same expectations)
-    expect(testBlock.getMinIntrinsicWidth(double.INFINITY), equals(wrappedTextWidth));
-    expect(testBlock.getMaxIntrinsicWidth(double.INFINITY), equals(textWidth));
-    expect(testBlock.getMinIntrinsicHeight(double.INFINITY), equals(oneLineTextHeight));
+    expect(testBlock.getMinIntrinsicWidth(double.infinity), equals(wrappedTextWidth));
+    expect(testBlock.getMaxIntrinsicWidth(double.infinity), equals(textWidth));
+    expect(testBlock.getMinIntrinsicHeight(double.infinity), equals(oneLineTextHeight));
     expect(testBlock.getMinIntrinsicHeight(constrainedWidth), equals(twoLinesTextHeight));
-    expect(testBlock.getMaxIntrinsicHeight(double.INFINITY), equals(oneLineTextHeight));
+    expect(testBlock.getMaxIntrinsicHeight(double.infinity), equals(oneLineTextHeight));
     expect(testBlock.getMaxIntrinsicHeight(constrainedWidth), equals(twoLinesTextHeight));
     expect(testBlock.getMinIntrinsicWidth(0.0), equals(wrappedTextWidth));
     expect(testBlock.getMaxIntrinsicWidth(0.0), equals(textWidth));
@@ -53,11 +53,11 @@ void main() {
 
     // horizontal block (same expectations again)
     testBlock.axisDirection = AxisDirection.right;
-    expect(testBlock.getMinIntrinsicWidth(double.INFINITY), equals(wrappedTextWidth));
-    expect(testBlock.getMaxIntrinsicWidth(double.INFINITY), equals(textWidth));
-    expect(testBlock.getMinIntrinsicHeight(double.INFINITY), equals(oneLineTextHeight));
+    expect(testBlock.getMinIntrinsicWidth(double.infinity), equals(wrappedTextWidth));
+    expect(testBlock.getMaxIntrinsicWidth(double.infinity), equals(textWidth));
+    expect(testBlock.getMinIntrinsicHeight(double.infinity), equals(oneLineTextHeight));
     expect(testBlock.getMinIntrinsicHeight(constrainedWidth), equals(twoLinesTextHeight));
-    expect(testBlock.getMaxIntrinsicHeight(double.INFINITY), equals(oneLineTextHeight));
+    expect(testBlock.getMaxIntrinsicHeight(double.infinity), equals(oneLineTextHeight));
     expect(testBlock.getMaxIntrinsicHeight(constrainedWidth), equals(twoLinesTextHeight));
     expect(testBlock.getMinIntrinsicWidth(0.0), equals(wrappedTextWidth));
     expect(testBlock.getMaxIntrinsicWidth(0.0), equals(textWidth));

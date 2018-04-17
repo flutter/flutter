@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, lerpDouble;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, lerpDouble, Locale;
 
 import 'package:flutter/foundation.dart';
 
@@ -229,6 +229,7 @@ class TextStyle extends Diagnosticable {
     this.wordSpacing,
     this.textBaseline,
     this.height,
+    this.locale,
     this.decoration,
     this.decorationColor,
     this.decorationStyle,
@@ -296,6 +297,9 @@ class TextStyle extends Diagnosticable {
   /// the font size.
   final double height;
 
+  /// The locale used to select region-specific glyphs.
+  final ui.Locale locale;
+
   /// The decorations to paint near the text (e.g., an underline).
   final TextDecoration decoration;
 
@@ -330,6 +334,7 @@ class TextStyle extends Diagnosticable {
     double wordSpacing,
     TextBaseline textBaseline,
     double height,
+    ui.Locale locale,
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,
@@ -352,6 +357,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing: wordSpacing ?? this.wordSpacing,
       textBaseline: textBaseline ?? this.textBaseline,
       height: height ?? this.height,
+      locale: locale ?? this.locale,
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
@@ -429,6 +435,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing: wordSpacing == null ? null : wordSpacing * wordSpacingFactor + wordSpacingDelta,
       textBaseline: textBaseline,
       height: height == null ? null : height * heightFactor + heightDelta,
+      locale: locale,
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
@@ -473,6 +480,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing: other.wordSpacing,
       textBaseline: other.textBaseline,
       height: other.height,
+      locale: other.locale,
       decoration: other.decoration,
       decorationColor: other.decorationColor,
       decorationStyle: other.decorationStyle,
@@ -496,16 +504,57 @@ class TextStyle extends Diagnosticable {
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
   static TextStyle lerp(TextStyle a, TextStyle b, double t) {
-    assert(a != null);
-    assert(b != null);
     assert(t != null);
-    assert(a.inherit == b.inherit);
+    assert(a == null || b == null || a.inherit == b.inherit);
+    if (a == null && b == null) {
+      return null;
+    }
 
     String lerpDebugLabel;
     assert(() {
-      lerpDebugLabel = 'lerp(${a.debugLabel ?? _kDefaultDebugLabel} ⎯${t.toStringAsFixed(1)}→ ${b.debugLabel ?? _kDefaultDebugLabel})';
+      lerpDebugLabel = 'lerp(${a?.debugLabel ?? _kDefaultDebugLabel} ⎯${t.toStringAsFixed(1)}→ ${b?.debugLabel ?? _kDefaultDebugLabel})';
       return true;
     }());
+
+    if (a == null) {
+      return new TextStyle(
+        inherit: b.inherit,
+        color: Color.lerp(null, b.color, t),
+        fontFamily: t < 0.5 ? null : b.fontFamily,
+        fontSize: t < 0.5 ? null : b.fontSize,
+        fontWeight: FontWeight.lerp(null, b.fontWeight, t),
+        fontStyle: t < 0.5 ? null : b.fontStyle,
+        letterSpacing: t < 0.5 ? null : b.letterSpacing,
+        wordSpacing: t < 0.5 ? null : b.wordSpacing,
+        textBaseline: t < 0.5 ? null : b.textBaseline,
+        height: t < 0.5 ? null : b.height,
+        locale: t < 0.5 ? null : b.locale,
+        decoration: t < 0.5 ? null : b.decoration,
+        decorationColor: Color.lerp(null, b.decorationColor, t),
+        decorationStyle: t < 0.5 ? null : b.decorationStyle,
+        debugLabel: lerpDebugLabel,
+      );
+    }
+
+    if (b == null) {
+      return new TextStyle(
+        inherit: a.inherit,
+        color: Color.lerp(a.color, null, t),
+        fontFamily: t < 0.5 ? a.fontFamily : null,
+        fontSize: t < 0.5 ? a.fontSize : null,
+        fontWeight: FontWeight.lerp(a.fontWeight, null, t),
+        fontStyle: t < 0.5 ? a.fontStyle : null,
+        letterSpacing: t < 0.5 ? a.letterSpacing : null,
+        wordSpacing: t < 0.5 ? a.wordSpacing : null,
+        textBaseline: t < 0.5 ? a.textBaseline : null,
+        height: t < 0.5 ? a.height : null,
+        locale: t < 0.5 ? a.locale : null,
+        decoration: t < 0.5 ? a.decoration : null,
+        decorationColor: Color.lerp(a.decorationColor, null, t),
+        decorationStyle: t < 0.5 ? a.decorationStyle : null,
+        debugLabel: lerpDebugLabel,
+      );
+    }
 
     return new TextStyle(
       inherit: b.inherit,
@@ -518,6 +567,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing: ui.lerpDouble(a.wordSpacing ?? b.wordSpacing, b.wordSpacing ?? a.wordSpacing, t),
       textBaseline: t < 0.5 ? a.textBaseline : b.textBaseline,
       height: ui.lerpDouble(a.height ?? b.height, b.height ?? a.height, t),
+      locale: t < 0.5 ? a.locale : b.locale,
       decoration: t < 0.5 ? a.decoration : b.decoration,
       decorationColor: Color.lerp(a.decorationColor, b.decorationColor, t),
       decorationStyle: t < 0.5 ? a.decorationStyle : b.decorationStyle,
@@ -539,7 +589,8 @@ class TextStyle extends Diagnosticable {
       fontSize: fontSize == null ? null : fontSize * textScaleFactor,
       letterSpacing: letterSpacing,
       wordSpacing: wordSpacing,
-      height: height
+      height: height,
+      locale: locale,
     );
   }
 
@@ -557,6 +608,7 @@ class TextStyle extends Diagnosticable {
       double textScaleFactor: 1.0,
       String ellipsis,
       int maxLines,
+      ui.Locale locale,
   }) {
     assert(textScaleFactor != null);
     assert(maxLines == null || maxLines > 0);
@@ -570,6 +622,7 @@ class TextStyle extends Diagnosticable {
       lineHeight: height,
       maxLines: maxLines,
       ellipsis: ellipsis,
+      locale: locale,
     );
   }
 
@@ -590,7 +643,8 @@ class TextStyle extends Diagnosticable {
         letterSpacing != other.letterSpacing ||
         wordSpacing != other.wordSpacing ||
         textBaseline != other.textBaseline ||
-        height != other.height)
+        height != other.height ||
+        locale != other.locale)
       return RenderComparison.layout;
     if (color != other.color ||
         decoration != other.decoration ||
@@ -617,6 +671,7 @@ class TextStyle extends Diagnosticable {
            wordSpacing == typedOther.wordSpacing &&
            textBaseline == typedOther.textBaseline &&
            height == typedOther.height &&
+           locale == typedOther.locale &&
            decoration == typedOther.decoration &&
            decorationColor == typedOther.decorationColor &&
            decorationStyle == typedOther.decorationStyle;
@@ -635,6 +690,7 @@ class TextStyle extends Diagnosticable {
       wordSpacing,
       textBaseline,
       height,
+      locale,
       decoration,
       decorationColor,
       decorationStyle
@@ -700,6 +756,7 @@ class TextStyle extends Diagnosticable {
     styles.add(new DoubleProperty('${prefix}wordSpacing', wordSpacing, defaultValue: null));
     styles.add(new EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
     styles.add(new DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
+    styles.add(new StringProperty('${prefix}locale', locale?.toString(), defaultValue: null, quoted: false));
     if (decoration != null || decorationColor != null || decorationStyle != null) {
       final List<String> decorationDescription = <String>[];
       if (decorationStyle != null)

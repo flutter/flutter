@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'button_theme.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'theme.dart';
 
 /// A material design "raised button".
@@ -27,7 +28,8 @@ import 'theme.dart';
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
 ///
-/// Raised buttons will expand to fit the child widget, if necessary.
+/// Raised buttons have a minimum size of 88.0 by 36.0 which can be overidden
+/// with [ButtonTheme].
 ///
 /// See also:
 ///
@@ -36,7 +38,7 @@ import 'theme.dart';
 ///  * [FloatingActionButton], the round button in material applications.
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
-//// * [RawMaterialButton], the widget this widget is based on.
+///  * [RawMaterialButton], the widget this widget is based on.
 ///  * <https://material.google.com/components/buttons.html>
 class RaisedButton extends StatelessWidget {
   /// Create a filled button.
@@ -46,6 +48,7 @@ class RaisedButton extends StatelessWidget {
   const RaisedButton({
     Key key,
     @required this.onPressed,
+    this.onHighlightChanged,
     this.textTheme,
     this.textColor,
     this.disabledTextColor,
@@ -59,10 +62,12 @@ class RaisedButton extends StatelessWidget {
     this.disabledElevation: 0.0,
     this.padding,
     this.shape,
+    this.animationDuration: kThemeChangeDuration,
     this.child,
   }) : assert(elevation != null),
        assert(highlightElevation != null),
        assert(disabledElevation != null),
+       assert(animationDuration != null),
        super(key: key);
 
   /// Create a filled button from a pair of widgets that serve as the button's
@@ -76,6 +81,7 @@ class RaisedButton extends StatelessWidget {
   RaisedButton.icon({
     Key key,
     @required this.onPressed,
+    this.onHighlightChanged,
     this.textTheme,
     this.textColor,
     this.disabledTextColor,
@@ -88,6 +94,7 @@ class RaisedButton extends StatelessWidget {
     this.highlightElevation: 8.0,
     this.disabledElevation: 0.0,
     this.shape,
+    this.animationDuration: kThemeChangeDuration,
     @required Widget icon,
     @required Widget label,
   }) : assert(elevation != null),
@@ -95,6 +102,7 @@ class RaisedButton extends StatelessWidget {
        assert(disabledElevation != null),
        assert(icon != null),
        assert(label != null),
+       assert(animationDuration != null),
        padding = const EdgeInsetsDirectional.only(start: 12.0, end: 16.0),
        child = new Row(
          mainAxisSize: MainAxisSize.min,
@@ -110,6 +118,10 @@ class RaisedButton extends StatelessWidget {
   ///
   /// If this is set to null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
+
+  /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
+  /// callback.
+  final ValueChanged<bool> onHighlightChanged;
 
   /// Defines the button's base colors, and the defaults for the button's minimum
   /// size, internal padding, and shape.
@@ -272,6 +284,11 @@ class RaisedButton extends StatelessWidget {
   /// shape as well.
   final ShapeBorder shape;
 
+  /// Defines the duration of animated changes for [shape] and [elevation].
+  ///
+  /// The default value is [kThemeChangeDuration].
+  final Duration animationDuration;
+
   Brightness _getBrightness(ThemeData theme) {
     return colorBrightness ?? theme.brightness;
   }
@@ -350,6 +367,7 @@ class RaisedButton extends StatelessWidget {
 
     return new RawMaterialButton(
       onPressed: onPressed,
+      onHighlightChanged: onHighlightChanged,
       fillColor: fillColor,
       textStyle: theme.textTheme.button.copyWith(color: textColor),
       highlightColor: _getHighlightColor(theme, buttonTheme),
@@ -360,25 +378,26 @@ class RaisedButton extends StatelessWidget {
       padding: padding ?? buttonTheme.padding,
       constraints: buttonTheme.constraints,
       shape: shape ?? buttonTheme.shape,
+      animationDuration: animationDuration,
       child: child,
     );
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    description.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
-    description.add(new DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
-    description.add(new DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: null));
-    description.add(new DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: null));
-    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
+    properties.add(new DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    properties.add(new DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: null));
+    properties.add(new DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: null));
+    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(new DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }

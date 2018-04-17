@@ -30,7 +30,7 @@ import 'typography.dart';
 //    same directory), including a best guess as to the translation, e.g.
 //    obtained by optimistic use of Google Translate
 //    (https://translate.google.com/). After that you have to re-generate
-//    lib/src/l10n/localizaions.dart by running
+//    lib/src/l10n/localizations.dart by running
 //    `dart dev/tools/gen_localizations.dart --overwrite`. There is a README
 //    file with further information in the lib/src/l10n/ directory.
 //
@@ -137,12 +137,28 @@ abstract class MaterialLocalizations {
   /// [showTimePicker] is set to the minute picker mode.
   String get timePickerMinuteModeAnnouncement;
 
-  /// Label read out by accessibility tools (TalkBack or VocieOver) for a modal
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) for a modal
   /// barrier to indicate that a tap dismisses the barrier.
   ///
   /// A modal barrier can for example be found behind a alert or popup to block
   /// user interaction with elements behind it.
   String get modalBarrierDismissLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a 
+  /// drawer widget is opened.
+  String get drawerLabel;
+ 
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a 
+  /// popup menu widget is opened.
+  String get popupMenuLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when a 
+  /// dialog widget is opened.
+  String get dialogLabel;
+
+  /// Label read out by accessibility tools (TalkBack or VoiceOver) when an 
+  /// alert dialog widget is opened.
+  String get alertDialogLabel;
 
   /// The format used to lay out the time picker.
   ///
@@ -305,7 +321,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// function, rather than constructing this class directly.
   const DefaultMaterialLocalizations();
 
-  // Ordered to match DateTime.MONDAY=1, DateTime.SUNDAY=6
+  // Ordered to match DateTime.monday=1, DateTime.sunday=6
   static const List<String> _shortWeekdays = const <String>[
     'Mon',
     'Tue',
@@ -316,7 +332,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'Sun',
   ];
 
-  // Ordered to match DateTime.MONDAY=1, DateTime.SUNDAY=6
+  // Ordered to match DateTime.monday=1, DateTime.sunday=6
   static const List<String> _weekdays = const <String>[
     'Monday',
     'Tuesday',
@@ -402,21 +418,21 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String formatMediumDate(DateTime date) {
-    final String day = _shortWeekdays[date.weekday - DateTime.MONDAY];
-    final String month = _shortMonths[date.month - DateTime.JANUARY];
+    final String day = _shortWeekdays[date.weekday - DateTime.monday];
+    final String month = _shortMonths[date.month - DateTime.january];
     return '$day, $month ${date.day}';
   }
 
   @override
   String formatFullDate(DateTime date) {
-    final String month = _months[date.month - DateTime.JANUARY];
-    return '${_weekdays[date.weekday - DateTime.MONDAY]}, $month ${date.day}, ${date.year}';
+    final String month = _months[date.month - DateTime.january];
+    return '${_weekdays[date.weekday - DateTime.monday]}, $month ${date.day}, ${date.year}';
   }
 
   @override
   String formatMonthYear(DateTime date) {
     final String year = formatYear(date);
-    final String month = _months[date.month - DateTime.JANUARY];
+    final String month = _months[date.month - DateTime.january];
     return '$month $year';
   }
 
@@ -508,6 +524,18 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get showMenuTooltip => 'Show menu';
+
+  @override
+  String get drawerLabel => 'Navigation menu';
+
+  @override
+  String get popupMenuLabel => 'Popup menu';
+
+  @override
+  String get dialogLabel => 'Dialog';
+
+  @override
+  String get alertDialogLabel => 'Alert';
 
   @override
   String aboutListTileTitle(String applicationName) => 'About $applicationName';

@@ -30,13 +30,11 @@ void main() {
 
     setUp(() async {
       tools.crashFileSystem = new MemoryFileSystem();
-      tools.writelnStderr = ([_]) { };
       setExitFunctionForTests((_) { });
     });
 
     tearDown(() {
       tools.crashFileSystem = const LocalFileSystem();
-      tools.writelnStderr = stderr.writeln;
       restoreExitFunction();
     });
 
@@ -53,7 +51,7 @@ void main() {
         String boundary = request.headers['Content-Type'];
         boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
         fields = new Map<String, String>.fromIterable(
-          UTF8.decode(request.bodyBytes)
+          utf8.decode(request.bodyBytes)
               .split('--$boundary')
               .map<List<String>>((String part) {
                 final Match nameMatch = new RegExp(r'name="(.*)"').firstMatch(part);
@@ -119,6 +117,8 @@ void main() {
             .map((FileSystemEntity e) => e.path).toList();
       expect(writtenFiles, hasLength(1));
       expect(writtenFiles, contains('flutter_01.log'));
+    }, overrides: <Type, Generator>{
+      Stdio: () => const _NoStderr(),
     });
   });
 }
@@ -148,4 +148,51 @@ class _CrashCommand extends FlutterCommand {
 
     fn3();
   }
+}
+
+class _NoStderr extends Stdio {
+  const _NoStderr();
+
+  @override
+  IOSink get stderr => const _NoopIOSink();
+}
+
+class _NoopIOSink implements IOSink {
+  const _NoopIOSink();
+
+  @override
+  Encoding get encoding => utf8;
+
+  @override
+  set encoding(_) => throw new UnsupportedError('');
+
+  @override
+  void add(_) {}
+
+  @override
+  void write(_) {}
+
+  @override
+  void writeAll(_, [__]) {}
+
+  @override
+  void writeln([_]) {}
+
+  @override
+  void writeCharCode(_) {}
+
+  @override
+  void addError(_, [__]) {}
+
+  @override
+  Future<dynamic> addStream(_) async {}
+
+  @override
+  Future<dynamic> flush() async {}
+
+  @override
+  Future<dynamic> close() async {}
+
+  @override
+  Future<dynamic> get done async {}
 }

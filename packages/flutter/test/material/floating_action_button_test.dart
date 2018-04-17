@@ -65,8 +65,67 @@ void main() {
 
     expect(find.byType(Text), findsNothing);
     await tester.longPress(find.byType(FloatingActionButton));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.byType(Text), findsOneWidget);
+  });
+
+  testWidgets('FloatingActionButton.isExtended', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Scaffold(
+          floatingActionButton: const FloatingActionButton(onPressed: null),
+        ),
+      ),
+    );
+
+    final Finder fabFinder = find.byType(FloatingActionButton);
+
+    FloatingActionButton getFabWidget() {
+      return tester.widget<FloatingActionButton>(fabFinder);
+    }
+
+    expect(getFabWidget().isExtended, false);
+    expect(getFabWidget().shape, const CircleBorder());
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          floatingActionButton: new FloatingActionButton.extended(
+            label: const SizedBox(
+              width: 100.0,
+              child: const Text('label'),
+            ),
+            icon: const Icon(Icons.android),
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(getFabWidget().isExtended, true);
+    expect(getFabWidget().shape, const StadiumBorder());
+    expect(find.text('label'), findsOneWidget);
+    expect(find.byType(Icon), findsOneWidget);
+
+    // Verify that the widget's height is 48 and that its internal
+    /// horizontal layout is: 16 icon 8 label 20
+    expect(tester.getSize(fabFinder).height, 48.0);
+
+    final double fabLeft = tester.getTopLeft(fabFinder).dx;
+    final double fabRight = tester.getTopRight(fabFinder).dx;
+    final double iconLeft = tester.getTopLeft(find.byType(Icon)).dx;
+    final double iconRight = tester.getTopRight(find.byType(Icon)).dx;
+    final double labelLeft = tester.getTopLeft(find.text('label')).dx;
+    final double labelRight = tester.getTopRight(find.text('label')).dx;
+    expect(iconLeft - fabLeft, 16.0);
+    expect(labelLeft - iconRight, 8.0);
+    expect(fabRight - labelRight, 20.0);
+
+    // The overall width of the button is:
+    // 168 = 16 + 24(icon) + 8 + 100(label) + 20
+    expect(tester.getSize(find.byType(Icon)).width, 24.0);
+    expect(tester.getSize(find.text('label')).width, 100.0);
+    expect(tester.getSize(fabFinder).width, 168);
   });
 
   testWidgets('Floating Action Button heroTag', (WidgetTester tester) async {
@@ -84,7 +143,7 @@ void main() {
         ),
       ),
     );
-    Navigator.push(theContext, new PageRouteBuilder<Null>(
+    Navigator.push(theContext, new PageRouteBuilder<void>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         return const Placeholder();
       },
@@ -107,7 +166,7 @@ void main() {
         ),
       ),
     );
-    Navigator.push(theContext, new PageRouteBuilder<Null>(
+    Navigator.push(theContext, new PageRouteBuilder<void>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         return const Placeholder();
       },
@@ -131,7 +190,7 @@ void main() {
         ),
       ),
     );
-    Navigator.push(theContext, new PageRouteBuilder<Null>(
+    Navigator.push(theContext, new PageRouteBuilder<void>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         return const Placeholder();
       },
@@ -204,13 +263,47 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Tooltip is used as semantics label', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          floatingActionButton: new FloatingActionButton(
+            onPressed: () { },
+            tooltip: 'Add Photo',
+            child: const Icon(Icons.add_a_photo),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'Add Photo',
+          actions: <SemanticsAction>[
+            SemanticsAction.tap
+          ],
+          flags: <SemanticsFlag>[
+            SemanticsFlag.isButton,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
+          ],
+        ),
+      ],
+    ), ignoreTransform: true, ignoreId: true, ignoreRect: true));
+
+    semantics.dispose();
+  });
+
   group('ComputeNotch', () {
     testWidgets('host and guest must intersect', (WidgetTester tester) async {
       final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null));
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTWH(50.0, 50.0, 10.0, 10.0);
-      final Offset start = const Offset(10.0, 100.0);
-      final Offset end = const Offset(60.0, 100.0);
+      const Offset start = const Offset(10.0, 100.0);
+      const Offset end = const Offset(60.0, 100.0);
       expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
     });
 
@@ -233,8 +326,8 @@ void main() {
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
 
-      final Offset start = const Offset(191.0, 100.0);
-      final Offset end = const Offset(220.0, 100.0);
+      const Offset start = const Offset(191.0, 100.0);
+      const Offset end = const Offset(220.0, 100.0);
       expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
     });
 
@@ -243,8 +336,8 @@ void main() {
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
 
-      final Offset start = const Offset(180.0, 100.0);
-      final Offset end = const Offset(209.0, 100.0);
+      const Offset start = const Offset(180.0, 100.0);
+      const Offset end = const Offset(209.0, 100.0);
       expect(() {computeNotch(host, guest, start, end);}, throwsFlutterError);
     });
 
@@ -252,8 +345,8 @@ void main() {
       final ComputeNotch computeNotch = await fetchComputeNotch(tester, const FloatingActionButton(onPressed: null, notchMargin: 0.0));
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
-      final Offset start = const Offset(180.0, 100.0);
-      final Offset end = const Offset(220.0, 100.0);
+      const Offset start = const Offset(180.0, 100.0);
+      const Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
       final Path notchedRectangle =
@@ -268,8 +361,8 @@ void main() {
       );
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 90.0, 210.0, 110.0);
-      final Offset start = const Offset(180.0, 100.0);
-      final Offset end = const Offset(220.0, 100.0);
+      const Offset start = const Offset(180.0, 100.0);
+      const Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
       final Path notchedRectangle =
@@ -283,8 +376,8 @@ void main() {
       );
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 85.0, 210.0, 105.0);
-      final Offset start = const Offset(180.0, 100.0);
-      final Offset end = const Offset(220.0, 100.0);
+      const Offset start = const Offset(180.0, 100.0);
+      const Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
       final Path notchedRectangle =
@@ -298,8 +391,8 @@ void main() {
       );
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 95.0, 210.0, 115.0);
-      final Offset start = const Offset(180.0, 100.0);
-      final Offset end = const Offset(220.0, 100.0);
+      const Offset start = const Offset(180.0, 100.0);
+      const Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
       final Path notchedRectangle =
@@ -313,8 +406,8 @@ void main() {
       );
       final Rect host = new Rect.fromLTRB(0.0, 100.0, 300.0, 300.0);
       final Rect guest = new Rect.fromLTRB(190.0, 40.0, 210.0, 60.0);
-      final Offset start = const Offset(180.0, 100.0);
-      final Offset end = const Offset(220.0, 100.0);
+      const Offset start = const Offset(180.0, 100.0);
+      const Offset end = const Offset(220.0, 100.0);
 
       final Path actualNotch = computeNotch(host, guest, start, end);
       final Path notchedRectangle =
@@ -372,7 +465,7 @@ class GeometryListenerState extends State<GeometryListener> {
     final ValueListenable<ScaffoldGeometry> newListenable = Scaffold.geometryOf(context);
     if (geometryListenable == newListenable)
       return;
-    
+
     geometryListenable = newListenable;
     cache = new GeometryCachePainter(geometryListenable);
   }
@@ -403,7 +496,7 @@ bool pathDoesNotContainCircle(Path path, Rect circleBounds) {
   assert(circleBounds.width == circleBounds.height);
   final double radius = circleBounds.width / 2.0;
 
-  for (double theta = 0.0; theta <= 2.0 * math.PI; theta += math.PI / 20.0) {
+  for (double theta = 0.0; theta <= 2.0 * math.pi; theta += math.pi / 20.0) {
     for (double i = 0.0; i < 1; i += 0.01) {
       final double x = i * radius * math.cos(theta);
       final double y = i * radius * math.sin(theta);

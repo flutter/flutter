@@ -94,13 +94,13 @@ abstract class _Message implements Comparable<_Message> {
 /// A VM service JSON-rpc request (sent to the VM).
 class _Request extends _Message {
   _Request(Map<String, dynamic> data) : super(_kRequest, data);
-  _Request.fromString(String data) : this(JSON.decoder.convert(data));
+  _Request.fromString(String data) : this(json.decoder.convert(data));
 }
 
 /// A VM service JSON-rpc response (from the VM).
 class _Response extends _Message {
   _Response(Map<String, dynamic> data) : super(_kResponse, data);
-  _Response.fromString(String data) : this(JSON.decoder.convert(data));
+  _Response.fromString(String data) : this(json.decoder.convert(data));
 }
 
 /// A matching request/response pair.
@@ -203,8 +203,8 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
 
   static Map<int, _Transaction> _loadTransactions(Directory location) {
     final File file = _getManifest(location);
-    final String json = file.readAsStringSync();
-    final Iterable<_Message> messages = JSON.decoder.convert(json).map<_Message>(_toMessage);
+    final String jsonData = file.readAsStringSync();
+    final Iterable<_Message> messages = json.decoder.convert(jsonData).map<_Message>(_toMessage);
     final Map<int, _Transaction> transactions = <int, _Transaction>{};
     for (_Message message in messages) {
       final _Transaction transaction =
@@ -236,7 +236,7 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
       printStatus('Exiting due to dangling request');
       exit(0);
     } else {
-      _controller.add(JSON.encoder.convert(transaction.response.data));
+      _controller.add(json.encoder.convert(transaction.response.data));
       if (_transactions.isEmpty)
         _controller.close();
     }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show JSON;
+import 'dart:convert' show json;
 
 import '../base/io.dart' show stdout;
 import 'watcher.dart';
@@ -28,7 +28,7 @@ class EventPrinter extends TestWatcher {
   }
 
   void _send(Map<String, dynamic> command) {
-    final String encoded = JSON.encode(command, toEncodable: _jsonEncodeObject);
+    final String encoded = json.encode(command, toEncodable: _jsonEncodeObject);
     _out.writeln('\n[$encoded]');
   }
 

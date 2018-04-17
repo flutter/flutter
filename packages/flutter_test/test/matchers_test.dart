@@ -199,6 +199,12 @@ void main() {
     expect(const Offset(1.0, 0.0), within(distance: 1.0, from: const Offset(0.0, 0.0)));
     expect(const Offset(1.0, 0.0), isNot(within(distance: 1.0, from: const Offset(-1.0, 0.0))));
 
+    expect(new Rect.fromLTRB(0.0, 1.0, 2.0, 3.0), within<Rect>(distance: 4.0, from: new Rect.fromLTRB(1.0, 3.0, 5.0, 7.0)));
+    expect(new Rect.fromLTRB(0.0, 1.0, 2.0, 3.0), isNot(within<Rect>(distance: 3.9, from: new Rect.fromLTRB(1.0, 3.0, 5.0, 7.0))));
+
+    expect(const Size(1.0, 1.0), within<Size>(distance: 1.415, from: const Size(2.0, 2.0)));
+    expect(const Size(1.0, 1.0), isNot(within<Size>(distance: 1.414, from: const Size(2.0, 2.0))));
+
     expect(
       () => within<bool>(distance: 1, from: false),
       throwsArgumentError,

@@ -17,8 +17,8 @@ import 'constants.dart';
 /// a [TabController] and share it directly.
 ///
 /// When the [TabBar] and [TabBarView] don't have a convenient stateful
-/// ancestor, a [TabController] can be shared with the [DefaultTabController]
-/// inherited widget.
+/// ancestor, a [TabController] can be shared by providing a
+/// [DefaultTabController] inherited widget.
 ///
 /// ## Sample code
 ///
@@ -205,13 +205,14 @@ class _TabControllerScope extends InheritedWidget {
   }
 }
 
-/// The [TabController] for descendant widgets that don't specify one explicitly.
+/// The [TabController] for descendant widgets that don't specify one
+/// explicitly.
 ///
-/// DefaultTabController is an inherited widget that is used to share a
-/// TabController with a [TabBar] or a [TabBarView]. It's used when
-/// sharing an explicitly created TabController isn't convenient because
-/// the tab bar widgets are created by a stateless parent widget or by
-/// different parent widgets.
+/// [DefaultTabController] is an inherited widget that is used to share a
+/// [TabController] with a [TabBar] or a [TabBarView]. It's used when sharing an
+/// explicitly created [TabController] isn't convenient because the tab bar
+/// widgets are created by a stateless parent widget or by different parent
+/// widgets.
 ///
 /// ```dart
 /// class MyDemo extends StatelessWidget {

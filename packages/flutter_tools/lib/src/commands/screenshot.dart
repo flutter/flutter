@@ -85,7 +85,7 @@ class ScreenshotCommand extends FlutterCommand {
 
     outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
     final IOSink sink = outputFile.openWrite();
-    sink.add(BASE64.decode(skp['skp']));
+    sink.add(base64.decode(skp['skp']));
     await sink.close();
     await showOutputFileInfo(outputFile);
     if (await outputFile.length() < 1000) {

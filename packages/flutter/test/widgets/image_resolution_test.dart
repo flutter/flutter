@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui' as ui show Image;
+import 'dart:ui' as ui show EncodingFormat, Image;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -24,6 +24,11 @@ class TestImage implements ui.Image {
 
   @override
   void dispose() { }
+
+  @override
+  Future<ByteData> toByteData({ui.EncodingFormat format}) async {
+    throw new UnsupportedError('Cannot encode test image');
+  }
 }
 
 class TestByteData implements ByteData {
@@ -151,7 +156,7 @@ TestImage getTestImage(WidgetTester tester, Key key) {
 
 Future<Null> pumpTreeToLayout(WidgetTester tester, Widget widget) {
   const Duration pumpDuration = const Duration(milliseconds: 0);
-  final EnginePhase pumpPhase = EnginePhase.layout;
+  const EnginePhase pumpPhase = EnginePhase.layout;
   return tester.pumpWidget(widget, pumpDuration, pumpPhase);
 }
 

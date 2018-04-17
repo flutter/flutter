@@ -772,8 +772,8 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   }
 
   Duration _firstRawTimeStampInEpoch;
-  Duration _epochStart = Duration.ZERO;
-  Duration _lastRawTimeStamp = Duration.ZERO;
+  Duration _epochStart = Duration.zero;
+  Duration _lastRawTimeStamp = Duration.zero;
 
   /// Prepares the scheduler for a non-monotonic change to how time stamps are
   /// calculated.
@@ -806,7 +806,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   /// These mechanisms together combine to ensure that the durations we give
   /// during frame callbacks are monotonically increasing.
   Duration _adjustForEpoch(Duration rawTimeStamp) {
-    final Duration rawDurationSinceEpoch = _firstRawTimeStampInEpoch == null ? Duration.ZERO : rawTimeStamp - _firstRawTimeStampInEpoch;
+    final Duration rawDurationSinceEpoch = _firstRawTimeStampInEpoch == null ? Duration.zero : rawTimeStamp - _firstRawTimeStampInEpoch;
     return new Duration(microseconds: (rawDurationSinceEpoch.inMicroseconds / timeDilation).round() + _epochStart.inMicroseconds);
   }
 
@@ -965,13 +965,13 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
     if (timeStamp.inDays > 0)
       buffer.write('${timeStamp.inDays}d ');
     if (timeStamp.inHours > 0)
-      buffer.write('${timeStamp.inHours - timeStamp.inDays * Duration.HOURS_PER_DAY}h ');
+      buffer.write('${timeStamp.inHours - timeStamp.inDays * Duration.hoursPerDay}h ');
     if (timeStamp.inMinutes > 0)
-      buffer.write('${timeStamp.inMinutes - timeStamp.inHours * Duration.MINUTES_PER_HOUR}m ');
+      buffer.write('${timeStamp.inMinutes - timeStamp.inHours * Duration.minutesPerHour}m ');
     if (timeStamp.inSeconds > 0)
-      buffer.write('${timeStamp.inSeconds - timeStamp.inMinutes * Duration.SECONDS_PER_MINUTE}s ');
-    buffer.write('${timeStamp.inMilliseconds - timeStamp.inSeconds * Duration.MILLISECONDS_PER_SECOND}');
-    final int microseconds = timeStamp.inMicroseconds - timeStamp.inMilliseconds * Duration.MICROSECONDS_PER_MILLISECOND;
+      buffer.write('${timeStamp.inSeconds - timeStamp.inMinutes * Duration.secondsPerMinute}s ');
+    buffer.write('${timeStamp.inMilliseconds - timeStamp.inSeconds * Duration.millisecondsPerSecond}');
+    final int microseconds = timeStamp.inMicroseconds - timeStamp.inMilliseconds * Duration.microsecondsPerMillisecond;
     if (microseconds > 0)
       buffer.write('.${microseconds.toString().padLeft(3, "0")}');
     buffer.write('ms');

@@ -49,6 +49,17 @@ void main() {
     expect(green.size.height, equals(100.0));
   });
 
+  test('Stack can layout with no children', () {
+    final RenderBox stack = new RenderStack(
+      textDirection: TextDirection.ltr,
+      children: <RenderBox>[],
+    );
+
+    layout(stack, constraints: new BoxConstraints.tight(const Size(100.0, 100.0)));
+
+    expect(stack.size.width, equals(100.0));
+    expect(stack.size.height, equals(100.0));
+  });
 
   group('RenderIndexedStack', () {
     test('visitChildrenForSemantics only visits displayed child', () {
@@ -67,15 +78,15 @@ void main() {
           children: <RenderBox>[child1, child2, child3],
       );
 
-      final List<RenderObject> vistedChildren = <RenderObject>[];
+      final List<RenderObject> visitedChildren = <RenderObject>[];
       final RenderObjectVisitor visitor = (RenderObject child) {
-        vistedChildren.add(child);
+        visitedChildren.add(child);
       };
 
       stack.visitChildrenForSemantics(visitor);
 
-      expect(vistedChildren, hasLength(1));
-      expect(vistedChildren.first, child2);
+      expect(visitedChildren, hasLength(1));
+      expect(visitedChildren.first, child2);
     });
 
   });

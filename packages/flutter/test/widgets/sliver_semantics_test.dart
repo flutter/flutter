@@ -55,24 +55,31 @@ void main() {
             children: <TestSemantics>[
               new TestSemantics(
                 id: 5,
-                actions: SemanticsAction.scrollUp.index,
+                actions: <SemanticsAction>[SemanticsAction.scrollUp],
                 children: <TestSemantics>[
                   new TestSemantics(
                     id: 2,
-                    label: 'Item 0',
+                    label: r'Item 0',
+                    textDirection: TextDirection.ltr,
+                    nextNodeId: 3,
+                    previousNodeId: 4,
                   ),
                   new TestSemantics(
                     id: 3,
-                    label: 'Item 1',
+                    label: r'Item 1',
+                    textDirection: TextDirection.ltr,
+                    previousNodeId: 2,
                   ),
                   new TestSemantics(
                     id: 4,
-                    label: 'Semantics Test with Slivers',
+                    label: r'Semantics Test with Slivers',
+                    textDirection: TextDirection.ltr,
+                    nextNodeId: 2,
                   ),
                 ],
               ),
             ],
-          )
+          ),
         ],
       ),
       ignoreRect: true,
@@ -93,29 +100,38 @@ void main() {
             children: <TestSemantics>[
               new TestSemantics(
                 id: 5,
-                actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
+                actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
+                nextNodeId: 4,
                 children: <TestSemantics>[
                   new TestSemantics(
                     id: 2,
-                    label: 'Item 0',
+                    label: r'Item 0',
+                    textDirection: TextDirection.ltr,
+                    nextNodeId: 3,
                   ),
                   new TestSemantics(
                     id: 3,
-                    label: 'Item 1',
+                    label: r'Item 1',
+                    textDirection: TextDirection.ltr,
+                    nextNodeId: 6,
+                    previousNodeId: 2,
                   ),
                   new TestSemantics(
                     id: 6,
-                    label: 'Item 2',
+                    label: r'Item 2',
+                    textDirection: TextDirection.ltr,
+                    previousNodeId: 3,
                   ),
                 ],
               ),
               new TestSemantics(
                 id: 4,
-                label: 'Semantics Test with Slivers',
-                tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
+                label: r'Semantics Test with Slivers',
+                textDirection: TextDirection.ltr,
+                previousNodeId: 5,
               ),
             ],
-          )
+          ),
         ],
       ),
       ignoreRect: true,
@@ -136,28 +152,38 @@ void main() {
             children: <TestSemantics>[
               new TestSemantics(
                 id: 5,
-                actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
+                actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
                 children: <TestSemantics>[
                   new TestSemantics(
                     id: 2,
-                    label: 'Item 0',
+                    label: r'Item 0',
+                    textDirection: TextDirection.ltr,
+                    nextNodeId: 3,
+                    previousNodeId: 4,
                   ),
                   new TestSemantics(
                     id: 3,
-                    label: 'Item 1',
+                    label: r'Item 1',
+                    textDirection: TextDirection.ltr,
+                    nextNodeId: 6,
+                    previousNodeId: 2,
                   ),
                   new TestSemantics(
                     id: 6,
-                    label: 'Item 2',
+                    label: r'Item 2',
+                    textDirection: TextDirection.ltr,
+                    previousNodeId: 3,
                   ),
                   new TestSemantics(
                     id: 4,
-                    label: 'Semantics Test with Slivers',
+                    label: r'Semantics Test with Slivers',
+                    textDirection: TextDirection.ltr,
+                    nextNodeId: 2,
                   ),
                 ],
               ),
             ],
-          )
+          ),
         ],
       ),
       ignoreRect: true,
@@ -207,22 +233,24 @@ void main() {
             children: <TestSemantics>[
               new TestSemantics(
                 id: 10,
-                actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
+                actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
                 children: <TestSemantics>[
                   new TestSemantics(
                     id: 8,
                     label: 'Item 2',
                     textDirection: TextDirection.ltr,
+                    previousNodeId: 9,
                   ),
                   new TestSemantics(
                     id: 9,
                     label: 'Item 1',
                     textDirection: TextDirection.ltr,
+                    nextNodeId: 8,
                   ),
                 ],
               ),
             ],
-          )
+          ),
         ],
       ),
       ignoreRect: true,
@@ -266,31 +294,39 @@ void main() {
                     id: 12,
                     label: 'Item 4',
                     textDirection: TextDirection.ltr,
+                    previousNodeId: 13,
                   ),
                   new TestSemantics(
                     id: 13,
                     label: 'Item 3',
                     textDirection: TextDirection.ltr,
+                    nextNodeId: 12,
+                    previousNodeId: 14,
                   ),
                   new TestSemantics(
                     id: 14,
                     label: 'Item 2',
                     textDirection: TextDirection.ltr,
+                    nextNodeId: 13,
+                    previousNodeId: 15,
                   ),
                   new TestSemantics(
                     id: 15,
                     label: 'Item 1',
                     textDirection: TextDirection.ltr,
+                    nextNodeId: 14,
+                    previousNodeId: 16,
                   ),
                   new TestSemantics(
                     id: 16,
                     label: 'Item 0',
                     textDirection: TextDirection.ltr,
+                    nextNodeId: 15,
                   ),
                 ],
               ),
             ],
-          )
+          ),
         ],
       ),
       ignoreRect: true,
@@ -343,12 +379,14 @@ void main() {
             children: <TestSemantics>[
               new TestSemantics(
                 id: 23,
+                nextNodeId: 22,
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 rect: TestSemantics.fullScreen,
                 children: <TestSemantics>[
                   // Item 0 is missing because its covered by the app bar.
                   new TestSemantics(
                     id: 19,
+                    nextNodeId: 20,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     // Item 1 starts 20.0dp below edge, so there would be room for Item 0.
                     transform: new Matrix4.translation(new Vector3(0.0, 20.0, 0.0)),
@@ -356,6 +394,8 @@ void main() {
                   ),
                   new TestSemantics(
                     id: 20,
+                    nextNodeId: 21,
+                    previousNodeId: 19,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 220.0, 0.0)),
                     label: 'Item 2',
@@ -365,6 +405,7 @@ void main() {
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 420.0, 0.0)),
                     label: 'Item 3',
+                    previousNodeId: 20,
                   ),
                 ],
               ),
@@ -373,6 +414,7 @@ void main() {
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                 label: 'AppBar',
+                previousNodeId: 23,
               ),
             ],
           )
@@ -426,23 +468,28 @@ void main() {
             children: <TestSemantics>[
               new TestSemantics(
                 id: 29,
+                nextNodeId: 28,
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 rect: TestSemantics.fullScreen,
                 children: <TestSemantics>[
                   new TestSemantics(
                     id: 25,
+                    previousNodeId: 26,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 420.0, 0.0)),
                     label: 'Item 3',
                   ),
                   new TestSemantics(
                     id: 26,
+                    nextNodeId: 25,
+                    previousNodeId: 27,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 220.0, 0.0)),
                     label: 'Item 2',
                   ),
                   new TestSemantics(
                     id: 27,
+                    nextNodeId: 26,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     // Item 1 starts 20.0dp below edge, so there would be room for Item 0.
                     transform: new Matrix4.translation(new Vector3(0.0, 20.0, 0.0)),
@@ -453,6 +500,7 @@ void main() {
               ),
               new TestSemantics(
                 id: 28,
+                previousNodeId: 29,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                 label: 'AppBar'
@@ -511,12 +559,14 @@ void main() {
             children: <TestSemantics>[
               new TestSemantics(
                 id: 35,
+                nextNodeId: 34,
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 rect: TestSemantics.fullScreen,
                 children: <TestSemantics>[
                   // Item 0 is missing because its covered by the app bar.
                   new TestSemantics(
                     id: 31,
+                    previousNodeId: 32,
                     // Item 1 ends at 580dp, so there would be 20dp space for Item 0.
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 380.0, 0.0)),
@@ -524,12 +574,15 @@ void main() {
                   ),
                   new TestSemantics(
                     id: 32,
+                    nextNodeId: 31,
+                    previousNodeId: 33,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 180.0, 0.0)),
                     label: 'Item 2',
                   ),
                   new TestSemantics(
                     id: 33,
+                    nextNodeId: 32,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, -20.0, 0.0)),
                     label: 'Item 3',
@@ -538,6 +591,7 @@ void main() {
               ),
               new TestSemantics(
                 id: 34,
+                previousNodeId: 35,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 transform: new Matrix4.translation(new Vector3(0.0, 544.0, 0.0)),
                 tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
@@ -596,23 +650,28 @@ void main() {
             children: <TestSemantics>[
               new TestSemantics(
                 id: 41,
+                nextNodeId: 40,
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 rect: TestSemantics.fullScreen,
                 children: <TestSemantics>[
                   new TestSemantics(
                     id: 37,
+                    nextNodeId: 38,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, -20.0, 0.0)),
                     label: 'Item 3',
                   ),
                   new TestSemantics(
                     id: 38,
+                    nextNodeId: 39,
+                    previousNodeId: 37,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 180.0, 0.0)),
                     label: 'Item 2',
                   ),
                   new TestSemantics(
                     id: 39,
+                    previousNodeId: 38,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     // Item 1 ends at 580dp, so there would be 20dp space for Item 0.
                     transform: new Matrix4.translation(new Vector3(0.0, 380.0, 0.0)),
@@ -623,6 +682,7 @@ void main() {
               ),
               new TestSemantics(
                 id: 40,
+                previousNodeId: 41,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 transform: new Matrix4.translation(new Vector3(0.0, 544.0, 0.0)),
                 tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],

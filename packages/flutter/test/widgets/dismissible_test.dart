@@ -123,7 +123,7 @@ Future<Null> flingElement(WidgetTester tester, Finder finder, { @required AxisDi
 Future<Null> flingElementFromZero(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection }) async {
   // This is a special case where we drag in one direction, then fling back so
   // that at the point of release, we're at exactly the point at which we
-  // started, but with velocity. This is needed to check a boundary coundition
+  // started, but with velocity. This is needed to check a boundary condition
   // in the flinging behavior.
   await flingElement(tester, finder, gestureDirection: gestureDirection, initialOffsetFactor: -1.0);
 }

@@ -52,9 +52,9 @@ void main() {
     vsync: const NonStopVSync(),
   )..repeat();
   // The animation will produce a value between 0.0 and 1.0 each frame, but we
-  // want to rotate the square using a value between 0.0 and math.PI. To change
+  // want to rotate the square using a value between 0.0 and math.pi. To change
   // the range of the animation, we use a Tween.
-  final Tween<double> tween = new Tween<double>(begin: 0.0, end: math.PI);
+  final Tween<double> tween = new Tween<double>(begin: 0.0, end: math.pi);
   // We add a listener to the animation, which will be called every time the
   // animation ticks.
   animation.addListener(() {

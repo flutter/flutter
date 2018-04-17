@@ -9,7 +9,12 @@ dependencies:
     sdk: flutter
 
 dev_dependencies:
-  test: ^0.12.0
+  flutter_test:
+    sdk: flutter
+  {{#withDriverTest}}
+  flutter_driver:
+    sdk: flutter
+  {{/withDriverTest}}
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec

@@ -47,12 +47,13 @@ final List<TravelDestination> destinations = <TravelDestination>[
 ];
 
 class TravelDestinationItem extends StatelessWidget {
-  TravelDestinationItem({ Key key, @required this.destination })
+  TravelDestinationItem({ Key key, @required this.destination, this.shape })
     : assert(destination != null && destination.isValid),
       super(key: key);
 
   static const double height = 366.0;
   final TravelDestination destination;
+  final ShapeBorder shape;
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +68,7 @@ class TravelDestinationItem extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         height: height,
         child: new Card(
+          shape: shape,
           child: new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -97,7 +99,7 @@ class TravelDestinationItem extends StatelessWidget {
                   ],
                 ),
               ),
-              // description and share/expore buttons
+              // description and share/explore buttons
               new Expanded(
                 child: new Padding(
                   padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
@@ -149,14 +151,39 @@ class TravelDestinationItem extends StatelessWidget {
   }
 }
 
-class CardsDemo extends StatelessWidget {
+
+class CardsDemo extends StatefulWidget {
   static const String routeName = '/material/cards';
+
+  @override
+  _CardsDemoState createState() => new _CardsDemoState();
+}
+
+class _CardsDemoState extends State<CardsDemo> {
+  ShapeBorder _shape;
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: const Text('Travel stream')
+        title: const Text('Travel stream'),
+        actions: <Widget>[
+          new IconButton(
+            icon: const Icon(Icons.sentiment_very_satisfied),
+            onPressed: () {
+              setState(() {
+                _shape = _shape != null ? null : const RoundedRectangleBorder(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: const Radius.circular(16.0),
+                    topRight: const Radius.circular(16.0),
+                    bottomLeft: const Radius.circular(2.0),
+                    bottomRight: const Radius.circular(2.0),
+                  ),
+                );
+              });
+            },
+          ),
+        ],
       ),
       body: new ListView(
         itemExtent: TravelDestinationItem.height,
@@ -164,7 +191,10 @@ class CardsDemo extends StatelessWidget {
         children: destinations.map((TravelDestination destination) {
           return new Container(
             margin: const EdgeInsets.only(bottom: 8.0),
-            child: new TravelDestinationItem(destination: destination)
+            child: new TravelDestinationItem(
+              destination: destination,
+              shape: _shape,
+            ),
           );
         }).toList()
       )

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
+import 'divider.dart';
 import 'theme.dart';
 
 const double _kDrawerHeaderHeight = 160.0 + 1.0; // bottom edge
@@ -82,10 +83,7 @@ class DrawerHeader extends StatelessWidget {
       margin: margin,
       decoration: new BoxDecoration(
         border: new Border(
-          bottom: new BorderSide(
-            color: theme.dividerColor,
-            width: 0.0,
-          ),
+          bottom: Divider.createBorderSide(context),
         ),
       ),
       child: new AnimatedContainer(

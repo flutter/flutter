@@ -20,7 +20,7 @@ const double _kDragContainerExtentPercentage = 0.25;
 const double _kDragSizeFactorLimit = 1.5;
 
 // When the scroll ends, the duration of the refresh indicator's animation
-// to the RefreshIndicator's displacment.
+// to the RefreshIndicator's displacement.
 const Duration _kIndicatorSnapDuration = const Duration(milliseconds: 150);
 
 // The duration of the ScaleTransition that starts when the refresh action
@@ -74,7 +74,12 @@ enum _RefreshIndicatorMode {
 ///
 ///  * <https://material.google.com/patterns/swipe-to-refresh.html>
 ///  * [RefreshIndicatorState], can be used to programmatically show the refresh indicator.
-///  * [RefreshProgressIndicator].
+///  * [RefreshProgressIndicator], widget used by [RefreshIndicator] to show
+///    the inner circular progress spinner during refreshes.
+///  * [CupertinoRefreshControl], an iOS equivalent of the pull-to-refresh pattern.
+///    Must be used as a sliver inside a [CustomScrollView] instead of wrapping
+///    around a [ScrollView] because it's a part of the scrollable instead of
+///    being overlaid on top of it.
 class RefreshIndicator extends StatefulWidget {
   /// Creates a refresh indicator.
   ///

@@ -75,11 +75,12 @@ Future<Null> _verifyInternationalizations() async {
 
   final String localizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'localizations.dart');
 
-  final EvalResult sourceContents = await _evalCommand(
-    'cat',
-    <String>[localizationsFile],
-    workingDirectory: flutterRoot,
-  );
+  final String executable = Platform.isWindows ? 'powershell' : 'cat';
+  final List<String> args = Platform.isWindows ?
+      <String>['\$PSDefaultParameterValues["*:Encoding"]="utf8";(gc $localizationsFile) -join "`n"']:
+      <String>[localizationsFile];
+
+  final EvalResult sourceContents = await _evalCommand(executable, args, workingDirectory: flutterRoot);
 
   if (genResult.stdout.trim() != sourceContents.stdout.trim()) {
     stderr
@@ -107,6 +108,11 @@ Future<Null> _analyzeRepo() async {
     options: <String>['--flutter-repo'],
   );
 
+  // Ensure that all package dependencies are in sync.
+  await _runCommand(flutter, <String>['update-packages', '--verify-only'], 
+    workingDirectory: flutterRoot,
+  );
+
   // Analyze all the sample code in the repo
   await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
     workingDirectory: flutterRoot,
@@ -129,39 +135,48 @@ Future<Null> _analyzeRepo() async {
   print('${bold}DONE: Analysis successful.$reset');
 }
 
-Future<Null> _runTests() async {
+Future<Null> _runTests({List<String> options: const <String>[]}) async {
   // Verify that the tests actually return failure on failure and success on success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'fail_test.dart'),
+    options: options,
     expectFailure: true,
     printOutput: false,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'pass_test.dart'),
+    options: options,
     printOutput: false,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'crash1_test.dart'),
+    options: options,
     expectFailure: true,
     printOutput: false,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'crash2_test.dart'),
+    options: options,
     expectFailure: true,
     printOutput: false,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
+    options: options,
     expectFailure: true,
     printOutput: false,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
+    options: options,
     expectFailure: true,
     printOutput: false,
   );
-  await _runCommand(flutter, <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
+  await _runCommand(flutter,
+    <String>['drive', '--use-existing-app']
+        ..addAll(options)
+        ..addAll(<String>[ '-t', path.join('test_driver', 'failure.dart')]),
     workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
     expectFailure: true,
     printOutput: false,
@@ -171,21 +186,23 @@ Future<Null> _runTests() async {
   await _verifyVersion(path.join(flutterRoot, 'version'));
 
   // Run tests.
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'packages',
+        'fuchsia_remote_debug_protocol'), options: options);
   await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
   await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
 
-  await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'));
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'));
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'));
+  await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: options);
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), options: options);
 
   print('${bold}DONE: All tests successful.$reset');
 }
@@ -271,8 +288,8 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   final Future<List<List<int>>> savedStderr = process.stderr.toList();
   final int exitCode = await process.exitCode;
   final EvalResult result = new EvalResult(
-    stdout: UTF8.decode((await savedStdout).expand((List<int> ints) => ints).toList()),
-    stderr: UTF8.decode((await savedStderr).expand((List<int> ints) => ints).toList()),
+    stdout: utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()),
+    stderr: utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()),
   );
 
   if (exitCode != 0) {
@@ -322,8 +339,8 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
   final int exitCode = await process.exitCode;
   if ((exitCode == 0) == expectFailure) {
     if (!printOutput) {
-      print(UTF8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
-      print(UTF8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
+      print(utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
+      print(utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
     }
     print(
       '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
@@ -356,8 +373,13 @@ Future<Null> _runFlutterTest(String workingDirectory, {
 
 Future<Null> _runAllDartTests(String workingDirectory, {
   Map<String, String> environment,
+  List<String> options,
 }) {
-  final List<String> args = <String>['--checked', path.join('test', 'all.dart')];
+  final List<String> args = <String>['--checked'];
+  if (options != null) {
+    args.addAll(options);
+  }
+  args.add(path.join('test', 'all.dart'));
   return _runCommand(dart, args,
     workingDirectory: workingDirectory,
     environment: environment,

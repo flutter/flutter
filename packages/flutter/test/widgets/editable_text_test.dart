@@ -62,8 +62,7 @@ void main() {
         tester.firstWidget(find.byType(EditableText));
     expect(editableText.maxLines, equals(1));
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType'],
-        equals('TextInputType.text'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs['inputAction'],
         equals('TextInputAction.done'));
   });
@@ -88,7 +87,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType'], equals('TextInputType.multiline'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.multiline'));
     expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.newline'));
   });
 
@@ -113,7 +112,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType'], equals('TextInputType.phone'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.phone'));
     expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.done'));
   });
 
@@ -137,7 +136,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType'], equals('TextInputType.multiline'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.multiline'));
     expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.newline'));
   });
 
@@ -161,7 +160,7 @@ void main() {
     controller.text = 'test';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType'], equals('TextInputType.text'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'], equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.done'));
   });
 
@@ -289,6 +288,8 @@ void main() {
     await tester.pump();
 
     expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isFocused]));
+
+    semantics.dispose();
   });
 
   testWidgets('EditableText includes text as value in semantics', (WidgetTester tester) async {
@@ -327,6 +328,8 @@ void main() {
       flags: <SemanticsFlag>[SemanticsFlag.isTextField],
       value: value2,
     ));
+
+    semantics.dispose();
   });
 
   testWidgets('changing selection with keyboard does not show handles', (WidgetTester tester) async {
@@ -571,6 +574,38 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('password fields have correct semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    controller.text = 'super-secret-password!!1';
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new EditableText(
+        obscureText: true,
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    final String expectedValue = '•' * controller.text.length;
+
+    expect(semantics, hasSemantics(new TestSemantics(
+      children: <TestSemantics>[
+        new TestSemantics(
+          flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isObscured],
+          value: expectedValue,
+          textDirection: TextDirection.ltr,
+          nextNodeId: -1,
+          previousNodeId: -1,
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+
+    semantics.dispose();
+  });
+
   group('a11y copy/cut/paste', () {
     Future<Null> _buildApp(MockTextSelectionControls controls, WidgetTester tester) {
       return tester.pumpWidget(new MaterialApp(
@@ -678,7 +713,7 @@ void main() {
       await tester.pump();
 
       final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner;
-      const int expectedNodeId = 3;
+      const int expectedNodeId = 2;
 
       expect(semantics, hasSemantics(new TestSemantics.root(
         children: <TestSemantics>[

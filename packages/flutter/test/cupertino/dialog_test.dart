@@ -17,25 +17,27 @@ void main() {
             builder: (BuildContext context) {
               return new RaisedButton(
                 onPressed: () {
-                  showDialog<Null>(
+                  showDialog<void>(
                     context: context,
-                    child: new CupertinoAlertDialog(
-                      title: const Text('The title'),
-                      content: const Text('The content'),
-                      actions: <Widget>[
-                        const CupertinoDialogAction(
-                          child: const Text('Cancel'),
-                        ),
-                        new CupertinoDialogAction(
-                          isDestructiveAction: true,
-                          onPressed: () {
-                            didDelete = true;
-                            Navigator.pop(context);
-                          },
-                          child: const Text('Delete'),
-                        ),
-                      ],
-                    ),
+                    builder: (BuildContext context) {
+                      return new CupertinoAlertDialog(
+                        title: const Text('The title'),
+                        content: const Text('The content'),
+                        actions: <Widget>[
+                          const CupertinoDialogAction(
+                            child: const Text('Cancel'),
+                          ),
+                          new CupertinoDialogAction(
+                            isDestructiveAction: true,
+                            onPressed: () {
+                              didDelete = true;
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      );
+                    },
                   );
                 },
                 child: const Text('Go'),
@@ -108,15 +110,15 @@ void main() {
           child: new Builder(builder: (BuildContext context) {
             return new RaisedButton(
               onPressed: () {
-                showDialog<Null>(
+                showDialog<void>(
                   context: context,
-                  child: new Builder(builder: (BuildContext context) {
+                  builder: (BuildContext context) {
                     return new MediaQuery(
                       data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
                       child: new CupertinoAlertDialog(
                         title: const Text('The Title'),
                         content: new Text('Very long content ' * 20),
-                        actions: <Widget>[
+                        actions: const <Widget>[
                           const CupertinoDialogAction(
                             child: const Text('Cancel'),
                           ),
@@ -128,7 +130,7 @@ void main() {
                         scrollController: scrollController,
                       ),
                     );
-                  }),
+                  },
                 );
               },
               child: const Text('Go'),

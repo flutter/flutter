@@ -96,7 +96,7 @@ void main() {
 
     testUsingContext('flutter commands send timing events', () async {
       mockTimes = <int>[1000, 2000];
-      when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenReturn(true);
+      when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => true);
       final DoctorCommand command = new DoctorCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
@@ -115,7 +115,7 @@ void main() {
 
     testUsingContext('doctor fail sends warning', () async {
       mockTimes = <int>[1000, 2000];
-      when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenReturn(false);
+      when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => false);
       final DoctorCommand command = new DoctorCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);

@@ -204,7 +204,7 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
 
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
-    final int columnCount = DateTime.DAYS_PER_WEEK;
+    const int columnCount = DateTime.daysPerWeek;
     final double tileWidth = constraints.crossAxisExtent / columnCount;
     final double tileHeight = math.min(_kDayPickerRowHeight, constraints.viewportMainAxisExtent / (_kMaxDayPickerRowCount + 1));
     return new SliverGridRegularTileLayout(
@@ -319,7 +319,7 @@ class DayPicker extends StatelessWidget {
   /// This applies the leap year logic introduced by the Gregorian reforms of
   /// 1582. It will not give valid results for dates prior to that time.
   static int getDaysInMonth(int year, int month) {
-    if (month == DateTime.FEBRUARY) {
+    if (month == DateTime.february) {
       final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
       if (isLeapYear)
         return 29;
@@ -896,6 +896,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     final Widget picker = new Flexible(
       child: new SizedBox(
         height: _kMaxDayPickerHeight,
@@ -916,7 +917,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         ],
       ),
     );
-    return new Dialog(
+    final Dialog dialog = new Dialog(
       child: new OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
           assert(orientation != null);
@@ -933,7 +934,20 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                 child: new Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[header, picker, actions],
+                  children: <Widget>[
+                    header,
+                    new Container(
+                      color: theme.dialogBackgroundColor,
+                      child: new Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          picker,
+                          actions,
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               );
             case Orientation.landscape:
@@ -945,8 +959,9 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                   children: <Widget>[
                     header,
                     new Flexible(
-                      child: new SizedBox(
+                      child: new Container(
                         width: _kMonthPickerLandscapeWidth,
+                        color: theme.dialogBackgroundColor,
                         child: new Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -961,6 +976,13 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           return null;
         }
       )
+    );
+
+    return new Theme(
+      data: theme.copyWith(
+        dialogBackgroundColor: Colors.transparent,
+      ),
+      child: dialog,
     );
   }
 }
@@ -1042,6 +1064,6 @@ Future<DateTime> showDatePicker({
 
   return await showDialog<DateTime>(
     context: context,
-    child: child,
+    builder: (BuildContext context) => child,
   );
 }

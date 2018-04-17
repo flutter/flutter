@@ -29,7 +29,7 @@ class ProcessRunnerException implements Exception {
 
   final String message;
   final ProcessResult result;
-  int get exitCode => result.exitCode ?? -1;
+  int get exitCode => result?.exitCode ?? -1;
 
   @override
   String toString() {
@@ -39,7 +39,7 @@ class ProcessRunnerException implements Exception {
     }
     final String stderr = result?.stderr ?? '';
     if (stderr.isNotEmpty) {
-      output += ':\n${result.stderr}';
+      output += ':\n$stderr';
     }
     return output;
   }
@@ -157,16 +157,21 @@ class ProcessRunner {
       final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
           'failed with:\n${e.toString()}';
       throw new ProcessRunnerException(message);
+    } on ArgumentError catch (e) {
+      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} '
+          'failed with:\n${e.toString()}';
+      throw new ProcessRunnerException(message);
     }
 
     final int exitCode = await allComplete();
     if (exitCode != 0 && !failOk) {
-      final String message =
-          'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
+      final String message = 'Running "${commandLine.join(' ')}" in ${workingDirectory.path} failed';
       throw new ProcessRunnerException(
-          message, new ProcessResult(0, exitCode, null, 'returned $exitCode'));
+        message,
+        new ProcessResult(0, exitCode, null, 'returned $exitCode'),
+      );
     }
-    return UTF8.decoder.convert(output).trim();
+    return utf8.decoder.convert(output).trim();
   }
 }
 
@@ -294,8 +299,7 @@ class ArchiveCreator {
     await _runGit(<String>['reset', '--hard', revision]);
 
     // Make the origin point to github instead of the chromium mirror.
-    await _runGit(<String>['remote', 'remove', 'origin']);
-    await _runGit(<String>['remote', 'add', 'origin', githubRepo]);
+    await _runGit(<String>['remote', 'set-url', 'origin', githubRepo]);
   }
 
   /// Retrieve the MinGit executable from storage and unpack it.
@@ -347,29 +351,40 @@ class ArchiveCreator {
   }
 
   Future<String> _runFlutter(List<String> args, {Directory workingDirectory}) {
-    return _processRunner.runProcess(<String>[_flutter]..addAll(args),
-        workingDirectory: workingDirectory ?? flutterRoot);
+    return _processRunner.runProcess(
+      <String>[_flutter]..addAll(args),
+      workingDirectory: workingDirectory ?? flutterRoot,
+    );
   }
 
   Future<String> _runGit(List<String> args, {Directory workingDirectory}) {
-    return _processRunner.runProcess(<String>['git']..addAll(args),
-        workingDirectory: workingDirectory ?? flutterRoot);
+    return _processRunner.runProcess(
+      <String>['git']..addAll(args),
+      workingDirectory: workingDirectory ?? flutterRoot,
+    );
   }
 
   /// Unpacks the given zip file into the currentDirectory (if set), or the
   /// same directory as the archive.
-  ///
-  /// May only be run on Windows (since 7Zip is not available on other platforms).
   Future<String> _unzipArchive(File archive, {Directory workingDirectory}) {
-    assert(platform.isWindows); // 7Zip is only available on Windows.
     workingDirectory ??= new Directory(path.dirname(archive.absolute.path));
-    final List<String> commandLine = <String>['7za', 'x', archive.absolute.path];
+    List<String> commandLine;
+    if (platform.isWindows) {
+      commandLine = <String>[
+        '7za',
+        'x',
+        archive.absolute.path,
+      ];
+    } else {
+      commandLine = <String>[
+        'unzip',
+        archive.absolute.path,
+      ];
+    }
     return _processRunner.runProcess(commandLine, workingDirectory: workingDirectory);
   }
 
   /// Create a zip archive from the directory source.
-  ///
-  /// May only be run on Windows (since 7Zip is not available on other platforms).
   Future<String> _createZipArchive(File output, Directory source) {
     List<String> commandLine;
     if (platform.isWindows) {
@@ -390,8 +405,10 @@ class ArchiveCreator {
         path.basename(source.path),
       ];
     }
-    return _processRunner.runProcess(commandLine,
-        workingDirectory: new Directory(path.dirname(source.absolute.path)));
+    return _processRunner.runProcess(
+      commandLine,
+      workingDirectory: new Directory(path.dirname(source.absolute.path)),
+    );
   }
 
   /// Create a tar archive from the directory source.
@@ -417,7 +434,7 @@ class ArchivePublisher {
     this.platform: const LocalPlatform(),
   }) : assert(revision.length == 40),
        platformName = platform.operatingSystem.toLowerCase(),
-       metadataGsPath = '$gsReleaseFolder/releases_${platform.operatingSystem.toLowerCase()}.json',
+       metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}',
        _processRunner = new ProcessRunner(
          processManager: processManager,
          subprocessOutput: subprocessOutput,
@@ -433,19 +450,63 @@ class ArchivePublisher {
   final File outputFile;
   final ProcessRunner _processRunner;
   String get branchName => getBranchName(branch);
-  String get destinationArchivePath =>
-      '$branchName/$platformName/${path.basename(outputFile.path)}';
+  String get destinationArchivePath => '$branchName/$platformName/${path.basename(outputFile.path)}';
+  static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
 
   /// Publish the archive to Google Storage.
   Future<Null> publishArchive() async {
     final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
     await _cloudCopy(outputFile.absolute.path, destGsPath);
     assert(tempDir.existsSync());
-    return _updateMetadata();
+    await _updateMetadata();
+  }
+
+  Map<String, dynamic> _addRelease(Map<String, dynamic> jsonData) {
+    jsonData['base_url'] = '$baseUrl$releaseFolder';
+    if (!jsonData.containsKey('current_release')) {
+      jsonData['current_release'] = <String, String>{};
+    }
+    jsonData['current_release'][branchName] = revision;
+    if (!jsonData.containsKey('releases')) {
+      jsonData['releases'] = <Map<String, dynamic>>[];
+    }
+
+    final Map<String, dynamic> newEntry = <String, dynamic>{};
+    newEntry['hash'] = revision;
+    newEntry['channel'] = branchName;
+    newEntry['version'] = version;
+    newEntry['release_date'] = new DateTime.now().toUtc().toIso8601String();
+    newEntry['archive'] = destinationArchivePath;
+
+    // Search for any entries with the same hash and channel and remove them.
+    final List<dynamic> releases = jsonData['releases'];
+    final List<Map<String, dynamic>> prunedReleases = <Map<String, dynamic>>[];
+    for (Map<String, dynamic> entry in releases) {
+      if (entry['hash'] != newEntry['hash'] || entry['channel'] != newEntry['channel']) {
+        prunedReleases.add(entry);
+      }
+    }
+
+    prunedReleases.add(newEntry);
+    prunedReleases.sort((Map<String, dynamic> a, Map<String, dynamic> b) {
+      final DateTime aDate = DateTime.parse(a['release_date']);
+      final DateTime bDate = DateTime.parse(b['release_date']);
+      return bDate.compareTo(aDate);
+    });
+    jsonData['releases'] = prunedReleases;
+    return jsonData;
   }
 
   Future<Null> _updateMetadata() async {
-    final String currentMetadata = await _runGsUtil(<String>['cat', metadataGsPath]);
+    // We can't just cat the metadata from the server with 'gsutil cat', because
+    // Windows wants to echo the commands that execute in gsutil.bat to the
+    // stdout when we do that. So, we copy the file locally and then read it
+    // back in.
+    final File metadataFile = new File(
+      path.join(tempDir.absolute.path, getMetadataFilename(platform)),
+    );
+    await _runGsUtil(<String>['cp', metadataGsPath, metadataFile.absolute.path]);
+    final String currentMetadata = metadataFile.readAsStringSync();
     if (currentMetadata.isEmpty) {
       throw new ProcessRunnerException('Empty metadata received from server');
     }
@@ -457,32 +518,18 @@ class ArchivePublisher {
       throw new ProcessRunnerException('Unable to parse JSON metadata received from cloud: $e');
     }
 
-    // Update the metadata file with the data for this package.
-    jsonData['base_url'] = '$baseUrl$releaseFolder';
-    if (!jsonData.containsKey('current_release')) {
-      jsonData['current_release'] = <String, String>{};
-    }
-    jsonData['current_release'][branchName] = revision;
-    if (!jsonData.containsKey('releases')) {
-      jsonData['releases'] = <String, dynamic>{};
-    }
-    if (!jsonData['releases'].containsKey(revision)) {
-      jsonData['releases'][revision] = <String, Map<String, String>>{};
-    }
-    final Map<String, String> metadata = <String, String>{};
-    metadata['${platformName}_archive'] = destinationArchivePath;
-    metadata['release_date'] = new DateTime.now().toUtc().toIso8601String();
-    metadata['version'] = version;
-    jsonData['releases'][revision][branchName] = metadata;
+    jsonData = _addRelease(jsonData);
 
-    final File tempFile = new File(path.join(tempDir.absolute.path, 'releases_$platformName.json'));
-    final JsonEncoder encoder = const JsonEncoder.withIndent('  ');
-    tempFile.writeAsStringSync(encoder.convert(jsonData));
-    await _cloudCopy(tempFile.absolute.path, metadataGsPath);
+    const JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+    metadataFile.writeAsStringSync(encoder.convert(jsonData));
+    await _cloudCopy(metadataFile.absolute.path, metadataGsPath);
   }
 
-  Future<String> _runGsUtil(List<String> args,
-      {Directory workingDirectory, bool failOk: false}) async {
+  Future<String> _runGsUtil(
+    List<String> args, {
+    Directory workingDirectory,
+    bool failOk: false,
+  }) async {
     return _processRunner.runProcess(
       <String>['gsutil']..addAll(args),
       workingDirectory: workingDirectory,
@@ -632,6 +679,9 @@ Future<Null> main(List<String> argList) async {
   } on ProcessRunnerException catch (e) {
     exitCode = e.exitCode;
     message = e.message;
+  } catch (e) {
+    exitCode = -1;
+    message = e.toString();
   } finally {
     if (removeTempDir) {
       tempDir.deleteSync(recursive: true);

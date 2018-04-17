@@ -390,7 +390,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
     int childCount = 0;
     RenderBox child = firstChild;
     while (child != null) {
-      final double childWidth = child.getMaxIntrinsicWidth(double.INFINITY);
+      final double childWidth = child.getMaxIntrinsicWidth(double.infinity);
       final double childHeight = child.getMaxIntrinsicHeight(childWidth);
       if (runWidth + childWidth > width) {
         height += runHeight;
@@ -422,7 +422,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
     int childCount = 0;
     RenderBox child = firstChild;
     while (child != null) {
-      final double childHeight = child.getMaxIntrinsicHeight(double.INFINITY);
+      final double childHeight = child.getMaxIntrinsicHeight(double.infinity);
       final double childWidth = child.getMaxIntrinsicWidth(childHeight);
       if (runHeight + childHeight > height) {
         width += runWidth;
@@ -452,7 +452,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
         double width = 0.0;
         RenderBox child = firstChild;
         while (child != null) {
-          width = math.max(width, child.getMinIntrinsicWidth(double.INFINITY));
+          width = math.max(width, child.getMinIntrinsicWidth(double.infinity));
           child = childAfter(child);
         }
         return width;
@@ -469,7 +469,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
         double width = 0.0;
         RenderBox child = firstChild;
         while (child != null) {
-          width += child.getMaxIntrinsicWidth(double.INFINITY);
+          width += child.getMaxIntrinsicWidth(double.infinity);
           child = childAfter(child);
         }
         return width;
@@ -488,7 +488,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
         double height = 0.0;
         RenderBox child = firstChild;
         while (child != null) {
-          height = math.max(height, child.getMinIntrinsicHeight(double.INFINITY));
+          height = math.max(height, child.getMinIntrinsicHeight(double.infinity));
           child = childAfter(child);
         }
         return height;
@@ -505,7 +505,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
         double height = 0.0;
         RenderBox child = firstChild;
         while (child != null) {
-          height += child.getMaxIntrinsicHeight(double.INFINITY);
+          height += child.getMaxIntrinsicHeight(double.infinity);
           child = childAfter(child);
         }
         return height;
@@ -608,8 +608,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
       child.layout(childConstraints, parentUsesSize: true);
       final double childMainAxisExtent = _getMainAxisExtent(child);
       final double childCrossAxisExtent = _getCrossAxisExtent(child);
-      if (runMainAxisExtent + childMainAxisExtent > mainAxisLimit) {
-        assert(childCount > 0);
+      if (childCount > 0 && runMainAxisExtent + spacing + childMainAxisExtent > mainAxisLimit) {
         mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
         crossAxisExtent += runCrossAxisExtent;
         if (runMetrics.isNotEmpty)
@@ -630,7 +629,9 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
     }
     if (childCount > 0) {
       mainAxisExtent = math.max(mainAxisExtent, runMainAxisExtent);
-      crossAxisExtent += runCrossAxisExtent + runSpacing;
+      crossAxisExtent += runCrossAxisExtent;
+      if (runMetrics.isNotEmpty)
+        crossAxisExtent += runSpacing;
       runMetrics.add(new _RunMetrics(runMainAxisExtent, runCrossAxisExtent, childCount));
     }
 
@@ -762,15 +763,15 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<Axis>('direction', direction));
-    description.add(new EnumProperty<WrapAlignment>('alignment', alignment));
-    description.add(new DoubleProperty('spacing', spacing));
-    description.add(new EnumProperty<WrapAlignment>('runAlignment', runAlignment));
-    description.add(new DoubleProperty('runSpacing', runSpacing));
-    description.add(new DoubleProperty('crossAxisAlignment', runSpacing));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    description.add(new EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<Axis>('direction', direction));
+    properties.add(new EnumProperty<WrapAlignment>('alignment', alignment));
+    properties.add(new DoubleProperty('spacing', spacing));
+    properties.add(new EnumProperty<WrapAlignment>('runAlignment', runAlignment));
+    properties.add(new DoubleProperty('runSpacing', runSpacing));
+    properties.add(new DoubleProperty('crossAxisAlignment', runSpacing));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
   }
 }

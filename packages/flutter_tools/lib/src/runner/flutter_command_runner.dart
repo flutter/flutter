@@ -7,8 +7,10 @@ import 'dart:convert';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:file/file.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
-import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -24,6 +26,7 @@ import '../cache.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../tester/flutter_tester.dart';
 import '../usage.dart';
 import '../version.dart';
 import '../vmservice.dart';
@@ -77,6 +80,11 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         help:
             'Captures a bug report file to submit to the Flutter team '
             '(contains local paths, device\nidentifiers, and log snippets).');
+    argParser.addFlag('show-test-device',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'List the special \'flutter-tester\' device in device listings. '
+              'This headless device is used to\ntest Flutter tooling.');
 
     String packagesHelp;
     if (fs.isFileSync(kPackagesFileName))
@@ -167,19 +175,26 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   }
 
   @override
-  Future<Null> runCommand(ArgResults globalResults) async {
-    context.setVariable(Flags, new Flags(globalResults));
+  Future<Null> runCommand(ArgResults topLevelResults) async {
+    final Map<Type, dynamic> contextOverrides = <Type, dynamic>{
+      Flags: new Flags(topLevelResults),
+    };
 
     // Check for verbose.
-    if (globalResults['verbose']) {
+    if (topLevelResults['verbose']) {
       // Override the logger.
-      context.setVariable(Logger, new VerboseLogger(context[Logger]));
+      contextOverrides[Logger] = new VerboseLogger(logger);
     }
 
-    String recordTo = globalResults['record-to'];
-    String replayFrom = globalResults['replay-from'];
+    if (topLevelResults['show-test-device'] ||
+        topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
+      FlutterTesterDevices.showFlutterTesterDevice = true;
+    }
 
-    if (globalResults['bug-report']) {
+    String recordTo = topLevelResults['record-to'];
+    String replayFrom = topLevelResults['replay-from'];
+
+    if (topLevelResults['bug-report']) {
       // --bug-report implies --record-to=<tmp_path>
       final Directory tmp = await const LocalFileSystem()
           .systemTempDirectory
@@ -190,10 +205,10 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       final File manifest = tmp.childFile('MANIFEST.txt');
       final StringBuffer buffer = new StringBuffer()
         ..writeln('# arguments')
-        ..writeln(globalResults.arguments)
+        ..writeln(topLevelResults.arguments)
         ..writeln()
         ..writeln('# rest')
-        ..writeln(globalResults.rest);
+        ..writeln(topLevelResults.rest);
       await manifest.writeAsString(buffer.toString(), flush: true);
 
       // ZIP the recording up once the recording has been serialized.
@@ -214,9 +229,11 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       recordTo = recordTo.trim();
       if (recordTo.isEmpty)
         throwToolExit('record-to location not specified');
-      enableRecordingProcessManager(recordTo);
-      enableRecordingFileSystem(recordTo);
-      await enableRecordingPlatform(recordTo);
+      contextOverrides.addAll(<Type, dynamic>{
+        ProcessManager: getRecordingProcessManager(recordTo),
+        FileSystem: getRecordingFileSystem(recordTo),
+        Platform: await getRecordingPlatform(recordTo),
+      });
       VMService.enableRecordingConnection(recordTo);
     }
 
@@ -224,66 +241,74 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       replayFrom = replayFrom.trim();
       if (replayFrom.isEmpty)
         throwToolExit('replay-from location not specified');
-      await enableReplayProcessManager(replayFrom);
-      enableReplayFileSystem(replayFrom);
-      await enableReplayPlatform(replayFrom);
+      contextOverrides.addAll(<Type, dynamic>{
+        ProcessManager: await getReplayProcessManager(replayFrom),
+        FileSystem: getReplayFileSystem(replayFrom),
+        Platform: await getReplayPlatform(replayFrom),
+      });
       VMService.enableReplayConnection(replayFrom);
     }
 
-    logger.quiet = globalResults['quiet'];
-
-    if (globalResults.wasParsed('color'))
-      logger.supportsColor = globalResults['color'];
-
     // We must set Cache.flutterRoot early because other features use it (e.g.
     // enginePath's initializer uses it).
-    final String flutterRoot = globalResults['flutter-root'] ?? _defaultFlutterRoot;
+    final String flutterRoot = topLevelResults['flutter-root'] ?? _defaultFlutterRoot;
     Cache.flutterRoot = fs.path.normalize(fs.path.absolute(flutterRoot));
 
-    if (platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true')
-      await Cache.lock();
-
-    if (globalResults['suppress-analytics'])
-      flutterUsage.suppressAnalytics = true;
-
-    _checkFlutterCopy();
-    await FlutterVersion.instance.ensureVersionFile();
-    if (globalResults.command?.name != 'upgrade') {
-      await FlutterVersion.instance.checkFlutterVersionFreshness();
-    }
-
-    if (globalResults.wasParsed('packages'))
-      PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(globalResults['packages']));
-
-    // See if the user specified a specific device.
-    deviceManager.specifiedDeviceId = globalResults['device-id'];
-
     // Set up the tooling configuration.
-    final String enginePath = _findEnginePath(globalResults);
+    final String enginePath = _findEnginePath(topLevelResults);
     if (enginePath != null) {
-      Artifacts.useLocalEngine(enginePath, _findEngineBuildPath(globalResults, enginePath));
+      contextOverrides.addAll(<Type, dynamic>{
+        Artifacts: Artifacts.getLocalEngine(enginePath, _findEngineBuildPath(topLevelResults, enginePath)),
+      });
     }
 
-    // The Android SDK could already have been set by tests.
-    context.putIfAbsent(AndroidSdk, AndroidSdk.locateAndroidSdk);
+    await context.run<Null>(
+      overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
+        return new MapEntry<Type, Generator>(type, () => value);
+      }),
+      body: () async {
+        logger.quiet = topLevelResults['quiet'];
 
-    if (globalResults['version']) {
-      flutterUsage.sendCommand('version');
-      String status;
-      if (globalResults['machine']) {
-        status = const JsonEncoder.withIndent('  ').convert(FlutterVersion.instance.toJson());
-      } else {
-        status = FlutterVersion.instance.toString();
-      }
-      printStatus(status);
-      return;
-    }
+        if (topLevelResults.wasParsed('color'))
+          logger.supportsColor = topLevelResults['color'];
 
-    if (globalResults['machine']) {
-      throwToolExit('The --machine flag is only valid with the --version flag.', exitCode: 2);
-    }
+        if (platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true')
+          await Cache.lock();
 
-    await super.runCommand(globalResults);
+        if (topLevelResults['suppress-analytics'])
+          flutterUsage.suppressAnalytics = true;
+
+        _checkFlutterCopy();
+        await FlutterVersion.instance.ensureVersionFile();
+        if (topLevelResults.command?.name != 'upgrade') {
+          await FlutterVersion.instance.checkFlutterVersionFreshness();
+        }
+
+        if (topLevelResults.wasParsed('packages'))
+          PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(topLevelResults['packages']));
+
+        // See if the user specified a specific device.
+        deviceManager.specifiedDeviceId = topLevelResults['device-id'];
+
+        if (topLevelResults['version']) {
+          flutterUsage.sendCommand('version');
+          String status;
+          if (topLevelResults['machine']) {
+            status = const JsonEncoder.withIndent('  ').convert(FlutterVersion.instance.toJson());
+          } else {
+            status = FlutterVersion.instance.toString();
+          }
+          printStatus(status);
+          return;
+        }
+
+        if (topLevelResults['machine']) {
+          throwToolExit('The --machine flag is only valid with the --version flag.', exitCode: 2);
+        }
+
+        await super.runCommand(topLevelResults);
+      },
+    );
   }
 
   String _tryEnginePath(String enginePath) {

@@ -11,7 +11,6 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 final math.Random _rng = new math.Random();
@@ -42,7 +41,7 @@ class Stock {
 class StockData extends ChangeNotifier {
   StockData() {
     if (actuallyFetchData) {
-      _httpClient = createHttpClient();
+      _httpClient = new http.Client();
       _fetchNextChunk();
     }
   }
@@ -56,9 +55,9 @@ class StockData extends ChangeNotifier {
 
   bool get loading => _httpClient != null;
 
-  void add(List<List<String>> data) {
-    for (List<String> fields in data) {
-      final Stock stock = new Stock.fromFields(fields);
+  void add(List<dynamic> data) {
+    for (List<dynamic> fields in data) {
+      final Stock stock = new Stock.fromFields(fields.cast<String>());
       _symbols.add(stock.symbol);
       _stocks[stock.symbol] = stock;
     }

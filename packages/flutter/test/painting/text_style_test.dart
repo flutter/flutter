@@ -23,7 +23,6 @@ void main() {
       fontWeight: FontWeight.w800,
       height: 123.0,
     );
-    expect(() { s1.fontFamily = 'test'; }, throwsA(const isInstanceOf<Error>())); // ignore: ASSIGNMENT_TO_FINAL
     expect(s1.fontFamily, isNull);
     expect(s1.fontSize, 10.0);
     expect(s1.fontWeight, FontWeight.w800);
@@ -108,39 +107,93 @@ void main() {
     expect(s5.height, 123.0);
     expect(s5.color, isNull);
 
+    expect(TextStyle.lerp(null, null, 0.5), isNull);
+
+    final TextStyle s6 = TextStyle.lerp(null, s3, 0.25);
+    expect(s3.fontFamily, isNull);
+    expect(s3.fontSize, 18.0);
+    expect(s3.fontWeight, FontWeight.w400);
+    expect(s3.height, 123.0);
+    expect(s3.color, isNull);
+    expect(s3, isNot(equals(s6)));
+    expect(s6.fontFamily, isNull);
+    expect(s6.fontSize, isNull);
+    expect(s6.fontWeight, FontWeight.w400);
+    expect(s6.height, isNull);
+    expect(s6.color, isNull);
+
+    final TextStyle s7 = TextStyle.lerp(null, s3, 0.75);
+    expect(s3.fontFamily, isNull);
+    expect(s3.fontSize, 18.0);
+    expect(s3.fontWeight, FontWeight.w400);
+    expect(s3.height, 123.0);
+    expect(s3.color, isNull);
+    expect(s3, equals(s7));
+    expect(s7.fontFamily, isNull);
+    expect(s7.fontSize, 18.0);
+    expect(s7.fontWeight, FontWeight.w400);
+    expect(s7.height, 123.0);
+    expect(s7.color, isNull);
+
+    final TextStyle s8 = TextStyle.lerp(s3, null, 0.25);
+    expect(s3.fontFamily, isNull);
+    expect(s3.fontSize, 18.0);
+    expect(s3.fontWeight, FontWeight.w400);
+    expect(s3.height, 123.0);
+    expect(s3.color, isNull);
+    expect(s3, equals(s8));
+    expect(s8.fontFamily, isNull);
+    expect(s8.fontSize, 18.0);
+    expect(s8.fontWeight, FontWeight.w400);
+    expect(s8.height, 123.0);
+    expect(s8.color, isNull);
+
+    final TextStyle s9 = TextStyle.lerp(s3, null, 0.75);
+    expect(s3.fontFamily, isNull);
+    expect(s3.fontSize, 18.0);
+    expect(s3.fontWeight, FontWeight.w400);
+    expect(s3.height, 123.0);
+    expect(s3.color, isNull);
+    expect(s3, isNot(equals(s9)));
+    expect(s9.fontFamily, isNull);
+    expect(s9.fontSize, isNull);
+    expect(s9.fontWeight, FontWeight.w400);
+    expect(s9.height, isNull);
+    expect(s9.color, isNull);
+
     final ui.TextStyle ts5 = s5.getTextStyle();
     expect(ts5, equals(new ui.TextStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
-    expect(ts5.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontSize: 12.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 123.0x)');
+    expect(ts5.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontSize: 12.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 123.0x, locale: unspecified)');
     final ui.TextStyle ts2 = s2.getTextStyle();
     expect(ts2, equals(new ui.TextStyle(color: const Color(0xFF00FF00), fontWeight: FontWeight.w800, fontSize: 10.0, height: 100.0)));
-    expect(ts2.toString(), 'TextStyle(color: Color(0xff00ff00), decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontSize: 10.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 100.0x)');
+    expect(ts2.toString(), 'TextStyle(color: Color(0xff00ff00), decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, textBaseline: unspecified, fontFamily: unspecified, fontSize: 10.0, letterSpacing: unspecified, wordSpacing: unspecified, height: 100.0x, locale: unspecified)');
 
     final ui.ParagraphStyle ps2 = s2.getParagraphStyle(textAlign: TextAlign.center);
     expect(ps2, equals(new ui.ParagraphStyle(textAlign: TextAlign.center, fontWeight: FontWeight.w800, fontSize: 10.0, lineHeight: 100.0)));
-    expect(ps2.toString(), 'ParagraphStyle(textAlign: TextAlign.center, textDirection: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 10.0, lineHeight: 100.0x, ellipsis: unspecified)');
+    expect(ps2.toString(), 'ParagraphStyle(textAlign: TextAlign.center, textDirection: unspecified, fontWeight: FontWeight.w800, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 10.0, lineHeight: 100.0x, ellipsis: unspecified, locale: unspecified)');
     final ui.ParagraphStyle ps5 = s5.getParagraphStyle();
     expect(ps5, equals(new ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, lineHeight: 123.0)));
-    expect(ps5.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 12.0, lineHeight: 123.0x, ellipsis: unspecified)');
+    expect(ps5.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 12.0, lineHeight: 123.0x, ellipsis: unspecified, locale: unspecified)');
   });
 
   test('TextStyle with text direction', () {
     final ui.ParagraphStyle ps6 = const TextStyle().getParagraphStyle(textDirection: TextDirection.ltr);
     expect(ps6, equals(new ui.ParagraphStyle(textDirection: TextDirection.ltr, fontSize: 14.0)));
-    expect(ps6.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.ltr, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 14.0, lineHeight: unspecified, ellipsis: unspecified)');
+    expect(ps6.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.ltr, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 14.0, lineHeight: unspecified, ellipsis: unspecified, locale: unspecified)');
 
     final ui.ParagraphStyle ps7 = const TextStyle().getParagraphStyle(textDirection: TextDirection.rtl);
     expect(ps7, equals(new ui.ParagraphStyle(textDirection: TextDirection.rtl, fontSize: 14.0)));
-    expect(ps7.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.rtl, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 14.0, lineHeight: unspecified, ellipsis: unspecified)');
+    expect(ps7.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.rtl, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 14.0, lineHeight: unspecified, ellipsis: unspecified, locale: unspecified)');
   });
 
   test('TextStyle using package font', () {
     const TextStyle s6 = const TextStyle(fontFamily: 'test');
     expect(s6.fontFamily, 'test');
-    expect(s6.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified)');
+    expect(s6.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified)');
 
     const TextStyle s7 = const TextStyle(fontFamily: 'test', package: 'p');
     expect(s7.fontFamily, 'packages/p/test');
-    expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified)');
+    expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified)');
   });
 
   test('TextStyle.debugLabel', () {

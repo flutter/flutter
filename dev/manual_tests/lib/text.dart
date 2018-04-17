@@ -47,37 +47,37 @@ class _HomeState extends State<Home> {
                   child: const Text('Test Underlines'),
                   color: Colors.red.shade800,
                   textColor: Colors.white,
-                  onPressed: () { Navigator.of(context).pushNamed('underlines'); },
+                  onPressed: () { Navigator.pushNamed(context, 'underlines'); },
                 ),
                 new FlatButton(
                   child: const Text('Test Font Fallback'),
                   color: Colors.orange.shade700,
                   textColor: Colors.white,
-                  onPressed: () { Navigator.of(context).pushNamed('fallback'); },
+                  onPressed: () { Navigator.pushNamed(context, 'fallback'); },
                 ),
                 new FlatButton(
                   child: const Text('Test Bidi Formatting'),
                   color: Colors.yellow.shade700,
                   textColor: Colors.black,
-                  onPressed: () { Navigator.of(context).pushNamed('bidi'); },
+                  onPressed: () { Navigator.pushNamed(context, 'bidi'); },
                 ),
                 new FlatButton(
                   child: const Text('TextSpan Fuzzer'),
                   color: Colors.green.shade400,
                   textColor: Colors.black,
-                  onPressed: () { Navigator.of(context).pushNamed('fuzzer'); },
+                  onPressed: () { Navigator.pushNamed(context, 'fuzzer'); },
                 ),
                 new FlatButton(
                   child: const Text('Diacritics Fuzzer'),
                   color: Colors.blue.shade400,
                   textColor: Colors.white,
-                  onPressed: () { Navigator.of(context).pushNamed('zalgo'); },
+                  onPressed: () { Navigator.pushNamed(context, 'zalgo'); },
                 ),
                 new FlatButton(
                   child: const Text('Painting Fuzzer'),
                   color: Colors.purple.shade200,
                   textColor: Colors.black,
-                  onPressed: () { Navigator.of(context).pushNamed('painting'); },
+                  onPressed: () { Navigator.pushNamed(context, 'painting'); },
                 ),
               ],
             ),
@@ -124,7 +124,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _random = new math.Random(widget.seed); // providing a seed is important for reproducability
+    _random = new math.Random(widget.seed); // providing a seed is important for reproducibility
     _ticker = createTicker(_updateTextSpan)..start();
     _updateTextSpan(null);
   }
@@ -798,7 +798,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _random = new math.Random(widget.seed); // providing a seed is important for reproducability
+    _random = new math.Random(widget.seed); // providing a seed is important for reproducibility
     _ticker = createTicker(_update)..start();
     _update(null);
   }
@@ -865,7 +865,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
                   onChanged: (bool value) {
                     setState(() {
                       _allowSpacing = value;
-                      _random = new math.Random(widget.seed); // reset for reproducability
+                      _random = new math.Random(widget.seed); // reset for reproducibility
                     });
                   },
                 ),
@@ -875,7 +875,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
                   onChanged: (bool value) {
                     setState(() {
                       _varyBase = value;
-                      _random = new math.Random(widget.seed); // reset for reproducability
+                      _random = new math.Random(widget.seed); // reset for reproducibility
                     });
                   },
                 ),
@@ -905,7 +905,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _random = new math.Random(widget.seed); // providing a seed is important for reproducability
+    _random = new math.Random(widget.seed); // providing a seed is important for reproducibility
     _ticker = createTicker(_update)..start();
     _update(null);
   }
@@ -1027,7 +1027,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                   onChanged: (bool value) {
                     setState(() {
                       _ellipsize = value;
-                      _random = new math.Random(widget.seed); // reset for reproducability
+                      _random = new math.Random(widget.seed); // reset for reproducibility
                       if (!_ticker.isActive)
                         _update(null);
                     });

@@ -11,7 +11,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
@@ -82,7 +82,7 @@ void main() {
         ],
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
@@ -151,7 +151,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               return const Center(child: const Text('Page 1'));
@@ -163,7 +163,7 @@ void main() {
 
     final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
 
-    tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<Null>(
+    tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<void>(
       builder: (BuildContext context) {
         return const Center(child: const Text('Page 2'));
       },
@@ -219,7 +219,7 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';
@@ -284,7 +284,7 @@ void main() {
         ],
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          return new CupertinoPageRoute<Null>(
+          return new CupertinoPageRoute<void>(
             settings: settings,
             builder: (BuildContext context) {
               final String pageNumber = settings.name == '/' ? '1' : '2';

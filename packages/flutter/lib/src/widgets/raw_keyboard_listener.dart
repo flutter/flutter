@@ -9,6 +9,8 @@ import 'basic.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 
+export 'package:flutter/services.dart' show RawKeyEvent;
+
 /// A widget that calls a callback whenever the user presses or releases a key
 /// on a keyboard.
 ///
@@ -52,9 +54,9 @@ class RawKeyboardListener extends StatefulWidget {
   _RawKeyboardListenerState createState() => new _RawKeyboardListenerState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode));
   }
 }
 

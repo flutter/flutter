@@ -100,6 +100,8 @@ typedef Widget AnimatedCrossFadeBuilder(Widget topChild, Key topChildKey, Widget
 ///
 ///  * [AnimatedSize], the lower-level widget which [AnimatedCrossFade] uses to
 ///    automatically change size.
+///  * [AnimatedSwitcher], which switches out a child for a new one with a
+///    customizable transition.
 class AnimatedCrossFade extends StatefulWidget {
   /// Creates a cross-fade animation widget.
   ///
@@ -222,10 +224,10 @@ class AnimatedCrossFade extends StatefulWidget {
   _AnimatedCrossFadeState createState() => new _AnimatedCrossFadeState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<CrossFadeState>('crossFadeState', crossFadeState));
-    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: Alignment.topCenter));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<CrossFadeState>('crossFadeState', crossFadeState));
+    properties.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: Alignment.topCenter));
   }
 }
 
@@ -247,13 +249,13 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   Animation<double> _initAnimation(Curve curve, bool inverted) {
     Animation<double> animation = new CurvedAnimation(
       parent: _controller,
-      curve: curve
+      curve: curve,
     );
 
     if (inverted) {
       animation = new Tween<double>(
-          begin: 1.0,
-          end: 0.0
+        begin: 1.0,
+        end: 0.0,
       ).animate(animation);
     }
 

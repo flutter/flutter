@@ -17,8 +17,8 @@ void main() {
       applyMocksToCommand(command);
 
       final MockAndroidDevice device = new MockAndroidDevice();
-      when(device.isAppInstalled(any)).thenReturn(false);
-      when(device.installApp(any)).thenReturn(true);
+      when(device.isAppInstalled(any)).thenAnswer((_) async => false);
+      when(device.installApp(any)).thenAnswer((_) async => true);
       testDeviceManager.addDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install']);
@@ -29,8 +29,8 @@ void main() {
       applyMocksToCommand(command);
 
       final MockIOSDevice device = new MockIOSDevice();
-      when(device.isAppInstalled(any)).thenReturn(false);
-      when(device.installApp(any)).thenReturn(true);
+      when(device.isAppInstalled(any)).thenAnswer((_) async => false);
+      when(device.installApp(any)).thenAnswer((_) async => true);
       testDeviceManager.addDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install']);

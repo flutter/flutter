@@ -14,9 +14,9 @@ void main() {
   DateTime initialDate;
 
   setUp(() {
-    firstDate = new DateTime(2001, DateTime.JANUARY, 1);
-    lastDate = new DateTime(2031, DateTime.DECEMBER, 31);
-    initialDate = new DateTime(2016, DateTime.JANUARY, 15);
+    firstDate = new DateTime(2001, DateTime.january, 1);
+    lastDate = new DateTime(2031, DateTime.december, 31);
+    initialDate = new DateTime(2016, DateTime.january, 15);
   });
 
   group(DayPicker, () {
@@ -178,7 +178,7 @@ void main() {
     await tester.tap(find.text('CANCEL'));
   });
 
-  testWidgets('textDirection parameter takes precendence over locale parameter', (WidgetTester tester) async {
+  testWidgets('textDirection parameter takes precedence over locale parameter', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
       locale: const Locale('en', 'US'),
       supportedLocales: const <Locale>[

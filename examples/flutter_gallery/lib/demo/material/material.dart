@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+export 'backdrop_demo.dart';
+export 'bottom_app_bar_demo.dart';
 export 'bottom_navigation_demo.dart';
 export 'buttons_demo.dart';
 export 'cards_demo.dart';

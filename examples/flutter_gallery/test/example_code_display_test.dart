@@ -20,12 +20,11 @@ void main() {
 
 
     // Scroll the Buttons demo into view so that a tap will succeed
-    final Offset allDemosOrigin = tester.getTopRight(find.text('Demos'));
+    final Offset allDemosOrigin = tester.getTopRight(find.text('Vignettes'));
     final Finder button = find.text('Buttons');
     while (button.evaluate().isEmpty) {
-      await tester.dragFrom(allDemosOrigin, const Offset(0.0, -100.0));
-      await tester.pump(); // start the scroll
-      await tester.pump(const Duration(seconds: 1));
+      await tester.dragFrom(allDemosOrigin, const Offset(0.0, -200.0));
+      await tester.pumpAndSettle();
     }
 
     // Launch the buttons demo and then prove that showing the example

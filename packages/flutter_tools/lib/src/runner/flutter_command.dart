@@ -15,11 +15,11 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../bundle.dart' as bundle;
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../doctor.dart';
-import '../flx.dart' as flx;
 import '../globals.dart';
 import '../project.dart';
 import '../usage.dart';
@@ -61,6 +61,8 @@ class FlutterCommandResult {
 class FlutterOptions {
   static const String kExtraFrontEndOptions = 'extra-front-end-options';
   static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
+  static const String kFileSystemRoot = 'filesystem-root';
+  static const String kFileSystemScheme = 'filesystem-scheme';
 }
 
 abstract class FlutterCommand extends Command<Null> {
@@ -96,7 +98,7 @@ abstract class FlutterCommand extends Command<Null> {
   void usesTargetOption() {
     argParser.addOption('target',
       abbr: 't',
-      defaultsTo: flx.defaultMainPath,
+      defaultsTo: bundle.defaultMainPath,
       help: 'The main entry-point file of the application, as run on the device.\n'
             'If the --target option is omitted, but a file name is provided on\n'
             'the command line, then that is used instead.',
@@ -110,7 +112,7 @@ abstract class FlutterCommand extends Command<Null> {
     else if (argResults.rest.isNotEmpty)
       return argResults.rest.first;
     else
-      return flx.defaultMainPath;
+      return bundle.defaultMainPath;
   }
 
   void usesPubOption() {
@@ -120,7 +122,26 @@ abstract class FlutterCommand extends Command<Null> {
     _usesPubOption = true;
   }
 
-  void addBuildModeFlags({ bool defaultToRelease: true }) {
+  void usesBuildNumberOption() {
+    argParser.addOption('build-number',
+        help: 'An integer used as an internal version number.\n'
+              'Each build must have a unique number to differentiate it from previous builds.\n'
+              'It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.\n'
+              'On Android it is used as \'versionCode\'.\n'
+              'On Xcode builds it is used as \'CFBundleVersion\'',
+        valueHelp: 'int');
+  }
+
+  void usesBuildNameOption() {
+    argParser.addOption('build-name',
+        help: 'A "x.y.z" string used as the version number shown to users.\n'
+              'For each new version of your app, you will provide a version number to differentiate it from previous versions.\n'
+              'On Android it is used as \'versionName\'.\n'
+              'On Xcode builds it is used as \'CFBundleShortVersionString\'',
+        valueHelp: 'x.y.z');
+  }
+
+  void addBuildModeFlags({bool defaultToRelease: true}) {
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
 
     argParser.addFlag('debug',
@@ -163,7 +184,7 @@ abstract class FlutterCommand extends Command<Null> {
   BuildInfo getBuildInfo() {
     final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
         ? argResults['preview-dart-2']
-        : false;
+        : true;
 
     TargetPlatform targetPlatform;
     if (argParser.options.containsKey('target-platform') &&
@@ -177,6 +198,16 @@ abstract class FlutterCommand extends Command<Null> {
     if (trackWidgetCreation == true && previewDart2 == false) {
       throw new UsageException(
           '--track-widget-creation is valid only when --preview-dart-2 is specified.', null);
+    }
+
+    int buildNumber;
+    try {
+      buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
+          ? int.parse(argResults['build-number'])
+          : null;
+    } catch (e) {
+      throw new UsageException(
+          '--build-number (${argResults['build-number']}) must be an int.', null);
     }
 
     return new BuildInfo(getBuildMode(),
@@ -194,7 +225,16 @@ abstract class FlutterCommand extends Command<Null> {
       preferSharedLibrary: argParser.options.containsKey('prefer-shared-library')
         ? argResults['prefer-shared-library']
         : false,
-      targetPlatform: targetPlatform);
+      targetPlatform: targetPlatform,
+      fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
+          ? argResults[FlutterOptions.kFileSystemRoot] : null,
+      fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
+          ? argResults[FlutterOptions.kFileSystemScheme] : null,
+      buildNumber: buildNumber,
+      buildName: argParser.options.containsKey('build-name')
+          ? argResults['build-name']
+          : null,
+    );
   }
 
   void setupApplicationPackages() {
@@ -215,46 +255,49 @@ abstract class FlutterCommand extends Command<Null> {
   /// and [runCommand] to execute the command
   /// so that this method can record and report the overall time to analytics.
   @override
-  Future<Null> run() async {
+  Future<Null> run() {
     final DateTime startTime = clock.now();
 
-    context.setVariable(FlutterCommand, this);
+    return context.run<Null>(
+      name: 'command',
+      overrides: <Type, Generator>{FlutterCommand: () => this},
+      body: () async {
+        if (flutterUsage.isFirstRun)
+          flutterUsage.printWelcome();
 
-    if (flutterUsage.isFirstRun)
-      flutterUsage.printWelcome();
+        FlutterCommandResult commandResult;
+        try {
+          commandResult = await verifyThenRunCommand();
+        } on ToolExit {
+          commandResult = const FlutterCommandResult(ExitStatus.fail);
+          rethrow;
+        } finally {
+          final DateTime endTime = clock.now();
+          printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
+          if (usagePath != null) {
+            final List<String> labels = <String>[];
+            if (commandResult?.exitStatus != null)
+              labels.add(getEnumName(commandResult.exitStatus));
+            if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
+              labels.addAll(commandResult.timingLabelParts);
 
-    FlutterCommandResult commandResult;
-    try {
-      commandResult = await verifyThenRunCommand();
-    } on ToolExit {
-      commandResult = const FlutterCommandResult(ExitStatus.fail);
-      rethrow;
-    } finally {
-      final DateTime endTime = clock.now();
-      printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
-      if (usagePath != null) {
-        final List<String> labels = <String>[];
-        if (commandResult?.exitStatus != null)
-          labels.add(getEnumName(commandResult.exitStatus));
-        if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
-          labels.addAll(commandResult.timingLabelParts);
-
-        final String label = labels
-            .where((String label) => !isBlank(label))
-            .join('-');
-        flutterUsage.sendTiming(
-          'flutter',
-          name,
-          // If the command provides its own end time, use it. Otherwise report
-          // the duration of the entire execution.
-          (commandResult?.endTimeOverride ?? endTime).difference(startTime),
-          // Report in the form of `success-[parameter1-parameter2]`, all of which
-          // can be null if the command doesn't provide a FlutterCommandResult.
-          label: label == '' ? null : label,
-        );
-      }
-    }
-
+            final String label = labels
+                .where((String label) => !isBlank(label))
+                .join('-');
+            flutterUsage.sendTiming(
+              'flutter',
+              name,
+              // If the command provides its own end time, use it. Otherwise report
+              // the duration of the entire execution.
+              (commandResult?.endTimeOverride ?? endTime).difference(startTime),
+              // Report in the form of `success-[parameter1-parameter2]`, all of which
+              // can be null if the command doesn't provide a FlutterCommandResult.
+              label: label == '' ? null : label,
+            );
+          }
+        }
+      },
+    );
   }
 
   /// Perform validation then call [runCommand] to execute the command.

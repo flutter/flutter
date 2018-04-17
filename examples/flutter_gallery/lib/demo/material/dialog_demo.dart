@@ -16,7 +16,7 @@ enum DialogDemoAction {
 const String _alertWithoutTitleText = 'Discard draft?';
 
 const String _alertWithTitleText =
-  'Let Google help apps determine location. This means sending anyonmous location '
+  'Let Google help apps determine location. This means sending anonymous location '
   'data to Google, even when no apps are running.';
 
 class DialogDemoItem extends StatelessWidget {
@@ -68,9 +68,9 @@ class DialogDemoState extends State<DialogDemo> {
   void showDemoDialog<T>({ BuildContext context, Widget child }) {
     showDialog<T>(
       context: context,
-      child: child,
+      builder: (BuildContext context) => child,
     )
-    .then<Null>((T value) { // The value passed to Navigator.pop() or null.
+    .then<void>((T value) { // The value passed to Navigator.pop() or null.
       if (value != null) {
         _scaffoldKey.currentState.showSnackBar(new SnackBar(
           content: new Text('You selected: $value')

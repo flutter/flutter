@@ -12,6 +12,8 @@ build/
 GeneratedPluginRegistrant.h
 GeneratedPluginRegistrant.m
 
+.generated/
+
 *.pbxuser
 *.mode1v3
 *.mode2v3

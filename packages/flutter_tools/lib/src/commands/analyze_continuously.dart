@@ -174,6 +174,8 @@ class AnalysisServer {
 
     if (previewDart2) {
       command.add('--preview-dart-2');
+    } else {
+      command.add('--no-preview-dart-2');
     }
 
     printTrace('dart ${command.skip(1).join(' ')}');
@@ -181,10 +183,10 @@ class AnalysisServer {
     // This callback hookup can't throw.
     _process.exitCode.whenComplete(() => _process = null); // ignore: unawaited_futures
 
-    final Stream<String> errorStream = _process.stderr.transform(UTF8.decoder).transform(const LineSplitter());
+    final Stream<String> errorStream = _process.stderr.transform(utf8.decoder).transform(const LineSplitter());
     errorStream.listen(printError);
 
-    final Stream<String> inStream = _process.stdout.transform(UTF8.decoder).transform(const LineSplitter());
+    final Stream<String> inStream = _process.stdout.transform(utf8.decoder).transform(const LineSplitter());
     inStream.listen(_handleServerResponse);
 
     // Available options (many of these are obsolete):
@@ -212,7 +214,7 @@ class AnalysisServer {
   Future<int> get onExit => _process.exitCode;
 
   void _sendCommand(String method, Map<String, dynamic> params) {
-    final String message = JSON.encode(<String, dynamic> {
+    final String message = json.encode(<String, dynamic> {
       'id': (++_id).toString(),
       'method': method,
       'params': params
@@ -224,7 +226,7 @@ class AnalysisServer {
   void _handleServerResponse(String line) {
     printTrace('<== $line');
 
-    final dynamic response = JSON.decode(line);
+    final dynamic response = json.decode(line);
 
     if (response is Map<dynamic, dynamic>) {
       if (response['event'] != null) {

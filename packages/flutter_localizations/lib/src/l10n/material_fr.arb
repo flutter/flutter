@@ -15,7 +15,7 @@
   "pageRowsInfoTitle": "$firstRow – $lastRow sur $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow – $lastRow sur environ $rowCount",
   "rowsPerPageTitle": "Lignes par page :",
-  "tabLabel": "$tabIndex sur $tabCount",
+  "tabLabel": "Onglet $tabIndex sur $tabCount",
   "selectedRowCountTitleZero": "Aucun élément sélectionné",
   "selectedRowCountTitleOne": "1 élément sélectionné",
   "selectedRowCountTitleOther": "$selectedRowCount éléments sélectionnés",
@@ -35,5 +35,9 @@
   "signedInLabel": "Connecté",
   "hideAccountsLabel": "Masquer les comptes",
   "showAccountsLabel": "Afficher les comptes",
-  "modalBarrierDismissLabel": "Ignorer"
+  "modalBarrierDismissLabel": "Ignorer",
+  "drawerLabel": "le menu de navigation",
+  "popupMenuLabel": "Menu contextuel",
+  "dialogLabel": "Dialogue",
+  "alertDialogLabel": "Alerte"
 }

@@ -103,4 +103,35 @@ void main() {
 
     ticker.stop();
   });
+
+  testWidgets('Ticker can be created before application unpauses', (WidgetTester tester) async {
+    final ByteData pausedMessage = const StringCodec().encodeMessage('AppLifecycleState.paused');
+    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', pausedMessage, (_) {});
+    
+    int tickCount = 0;
+    void handleTick(Duration duration) {
+      tickCount += 1;
+    }
+
+    final Ticker ticker = new Ticker(handleTick);
+    ticker.start();
+
+    expect(tickCount, equals(0));
+    expect(ticker.isTicking, isFalse);
+
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(tickCount, equals(0));
+    expect(ticker.isTicking, isFalse);
+
+    final ByteData resumedMessage = const StringCodec().encodeMessage('AppLifecycleState.resumed');
+    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', resumedMessage, (_) {});
+    
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(tickCount, equals(1));
+    expect(ticker.isTicking, isTrue);
+
+    ticker.stop();
+  });
 }

@@ -7,15 +7,17 @@ import("//build/dart/dart_library.gni")
 dart_library("flutter") {
   package_name = "flutter"
 
+  # Can be left empty as analysis is disabled.
+  sources = []
+
   disable_analysis = true
 
   deps = [
     "//third_party/dart/third_party/pkg/intl",
     "//third_party/dart-pkg/pub/async",
     "//third_party/dart-pkg/pub/collection",
-    "//third_party/dart-pkg/pub/http",
-    "//third_party/dart-pkg/pub/http_parser",
     "//third_party/dart-pkg/pub/meta",
+    "//third_party/dart-pkg/pub/typed_data",
     "//third_party/dart-pkg/pub/vector_math",
   ]
 

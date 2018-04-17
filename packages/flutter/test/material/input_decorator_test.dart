@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 Widget buildInputDecorator({
   InputDecoration decoration: const InputDecoration(),
   InputDecorationTheme inputDecorationTheme,
@@ -58,16 +60,20 @@ double getBorderBottom(WidgetTester tester) {
   return box.size.height;
 }
 
-double getBorderWeight(WidgetTester tester) {
+BorderSide getBorderSide(WidgetTester tester) {
   if (!tester.any(findBorderPainter()))
-    return 0.0;
+    return null;
   final CustomPaint customPaint = tester.widget(findBorderPainter());
   final dynamic/* _InputBorderPainter */ inputBorderPainter = customPaint.foregroundPainter;
   final dynamic/*_InputBorderTween */ inputBorderTween = inputBorderPainter.border;
   final Animation<double> animation = inputBorderPainter.borderAnimation;
   final dynamic/*_InputBorder */ border = inputBorderTween.evaluate(animation);
-  return border.borderSide.width;
+  return border.borderSide;
 }
+
+double getBorderWeight(WidgetTester tester) => getBorderSide(tester)?.width;
+
+Color getBorderColor(WidgetTester tester) => getBorderSide(tester)?.color;
 
 double getHintOpacity(WidgetTester tester) {
   final Opacity opacityWidget = tester.widget<Opacity>(
@@ -188,7 +194,8 @@ void main() {
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
 
-    // enabled: false causes the border to disappear
+    // enabled: false produces a hairline border if filled: false (the default)
+    // The widget's size and layout is the same as for enabled: true.
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
@@ -206,6 +213,27 @@ void main() {
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderWeight(tester), 0.0);
+
+    // enabled: false produces a transparent border if filled: true.
+    // The widget's size and layout is the same as for enabled: true.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        isFocused: false,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          enabled: false,
+          filled: true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+    expect(tester.getTopLeft(find.text('text')).dy, 28.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
+    expect(getBorderColor(tester), Colors.transparent);
   });
 
   // Overall height for this InputDecorator is 40.0dps
@@ -1187,5 +1215,77 @@ void main() {
     expect(decoration.filled, false);
     expect(decoration.fillColor, Colors.blue);
     expect(decoration.border, const OutlineInputBorder());
+  });
+
+  testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/15742
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: new InputDecoration(
+          filled: true,
+          fillColor: const Color(0xFF00FF00),
+          border: new OutlineInputBorder(
+            borderRadius: new BorderRadius.circular(12.0),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(InputDecorator));
+
+    // Fill is the border's outer path, a rounded rectangle
+    expect(box, paints..path(
+      style: PaintingStyle.fill,
+      color: const Color(0xFF00FF00),
+      includes: <Offset>[const Offset(800.0/2.0, 56/2.0)],
+      excludes: <Offset>[
+        const Offset(1.0, 6.0), // outside the rounded corner, top left
+        const Offset(800.0 - 1.0, 6.0), // top right
+        const Offset(1.0, 56.0 - 6.0), // bottom left
+        const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
+      ],
+    ));
+
+    // Border outline. The rrect is the -center- of the 1.0 stroked outline.
+    expect(box, paints..rrect(
+      style: PaintingStyle.stroke,
+      strokeWidth: 1.0,
+      rrect: new RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
+    ));
+  });
+
+  testWidgets('InputDecorator UnderlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        // isEmpty: false (default)
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: const Color(0xFF00FF00),
+          border: const UnderlineInputBorder(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: const Radius.circular(12.0),
+              bottomRight: const Radius.circular(12.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(InputDecorator));
+
+    // Fill is the border's outer path, a rounded rectangle
+    expect(box, paints..path(
+      style: PaintingStyle.fill,
+      color: const Color(0xFF00FF00),
+      includes: <Offset>[const Offset(800.0/2.0, 56/2.0)],
+      excludes: <Offset>[
+        const Offset(1.0, 56.0 - 6.0), // bottom left
+        const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
+      ],
+    ));
   });
 }

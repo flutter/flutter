@@ -21,23 +21,25 @@ void main() {
                 child: new RaisedButton(
                   child: const Text('X'),
                   onPressed: () {
-                    showDialog<Null>(
+                    showDialog<void>(
                       context: context,
-                      child: new AlertDialog(
-                        content: new Container(
-                          height: 5000.0,
-                          width: 300.0,
-                          color: Colors.green[500],
-                        ),
-                        actions: <Widget>[
-                          new FlatButton(
-                            onPressed: () {
-                              didPressOk = true;
-                            },
-                            child: const Text('OK')
-                          )
-                        ]
-                      )
+                      builder: (BuildContext context) {
+                        return new AlertDialog(
+                          content: new Container(
+                            height: 5000.0,
+                            width: 300.0,
+                            color: Colors.green[500],
+                          ),
+                          actions: <Widget>[
+                            new FlatButton(
+                              onPressed: () {
+                                didPressOk = true;
+                              },
+                              child: const Text('OK')
+                            )
+                          ],
+                        );
+                      },
                     );
                   }
                 )
@@ -69,13 +71,15 @@ void main() {
                 child: new RaisedButton(
                   child: const Text('X'),
                   onPressed: () {
-                    showDialog<Null>(
+                    showDialog<void>(
                       context: context,
-                      child: const AlertDialog(
-                        title: const Text('Title'),
-                        content: const Text('Y'),
-                        actions: const <Widget>[ ],
-                      ),
+                      builder: (BuildContext context) {
+                        return const AlertDialog(
+                          title: const Text('Title'),
+                          content: const Text('Y'),
+                          actions: const <Widget>[ ],
+                        );
+                      },
                     );
                   },
                 ),
@@ -114,22 +118,24 @@ void main() {
 
     final BuildContext context = tester.element(find.text('Go'));
 
-    final Future<int> result = showDialog(
+    final Future<int> result = showDialog<int>(
       context: context,
-      child: new SimpleDialog(
-        title: const Text('Title'),
-        children: <Widget>[
-          new SimpleDialogOption(
-            onPressed: () {
-              Navigator.pop(context, 42);
-            },
-            child: const Text('First option'),
-          ),
-          const SimpleDialogOption(
-            child: const Text('Second option'),
-          ),
-        ],
-      ),
+      builder: (BuildContext context) {
+        return new SimpleDialog(
+          title: const Text('Title'),
+          children: <Widget>[
+            new SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, 42);
+              },
+              child: const Text('First option'),
+            ),
+            const SimpleDialogOption(
+              child: const Text('Second option'),
+            ),
+          ],
+        );
+      },
     );
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -155,14 +161,16 @@ void main() {
 
     final BuildContext context = tester.element(find.text('Go'));
 
-    showDialog<Null>(
+    showDialog<void>(
       context: context,
-      child: new Container(
-        width: 100.0,
-        height: 100.0,
-        alignment: Alignment.center,
-        child: const Text('Dialog1'),
-      ),
+      builder: (BuildContext context) {
+        return new Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog1'),
+        );
+      },
     );
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -174,15 +182,17 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog1'), findsNothing);
 
-    showDialog<Null>(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
-      child: new Container(
-        width: 100.0,
-        height: 100.0,
-        alignment: Alignment.center,
-        child: const Text('Dialog2'),
-      ),
+      builder: (BuildContext context) {
+        return new Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog2'),
+        );
+      },
     );
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -217,9 +227,11 @@ void main() {
     final BuildContext context = tester.element(find.text(buttonText));
 
     const String alertText = 'A button in an overlay alert';
-    showDialog<Null>(
+    showDialog<void>(
       context: context,
-      child: const AlertDialog(title: const Text(alertText)),
+      builder: (BuildContext context) {
+        return const AlertDialog(title: const Text(alertText));
+      },
     );
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -230,23 +242,25 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Dialogs removes MediaQuery padding', (WidgetTester tester) async {
+  testWidgets('Dialogs removes MediaQuery padding and view insets', (WidgetTester tester) async {
     BuildContext outerContext;
+    BuildContext routeContext;
     BuildContext dialogContext;
 
     await tester.pumpWidget(new Localizations(
       locale: const Locale('en', 'US'),
-      delegates: <LocalizationsDelegate<dynamic>>[
+      delegates: const <LocalizationsDelegate<dynamic>>[
         DefaultWidgetsLocalizations.delegate,
         DefaultMaterialLocalizations.delegate,
       ],
       child: new MediaQuery(
         data: const MediaQueryData(
           padding: const EdgeInsets.all(50.0),
+          viewInsets: const EdgeInsets.only(left: 25.0, bottom: 75.0),
         ),
         child: new Navigator(
           onGenerateRoute: (_) {
-            return new PageRouteBuilder<Null>(
+            return new PageRouteBuilder<void>(
               pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
                 outerContext = context;
                 return new Container();
@@ -257,20 +271,65 @@ void main() {
       ),
     ));
 
-    showDialog<Null>(
+    showDialog<void>(
       context: outerContext,
       barrierDismissible: false,
-      child: new Builder(
-        builder: (BuildContext context) {
-          dialogContext = context;
-          return new Container();
-        },
-      ),
+      builder: (BuildContext context) {
+        routeContext = context;
+        return new Dialog(
+          child: new Builder(
+            builder: (BuildContext context) {
+              dialogContext = context;
+              return const Placeholder();
+            },
+          ),
+        );
+      },
     );
 
     await tester.pump();
 
     expect(MediaQuery.of(outerContext).padding, const EdgeInsets.all(50.0));
+    expect(MediaQuery.of(routeContext).padding, EdgeInsets.zero);
     expect(MediaQuery.of(dialogContext).padding, EdgeInsets.zero);
+    expect(MediaQuery.of(outerContext).viewInsets, const EdgeInsets.only(left: 25.0, bottom: 75.0));
+    expect(MediaQuery.of(routeContext).viewInsets, const EdgeInsets.only(left: 25.0, bottom: 75.0));
+    expect(MediaQuery.of(dialogContext).viewInsets, EdgeInsets.zero);
+  });
+
+  testWidgets('Dialog widget insets by viewInsets', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: const MediaQueryData(
+          viewInsets: const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0),
+        ),
+        child: const Dialog(
+          child: const Placeholder(),
+        ),
+      ),
+    );
+    expect(
+      tester.getRect(find.byType(Placeholder)),
+      new Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
+    );
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: const MediaQueryData(
+          viewInsets: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+        ),
+        child: const Dialog(
+          child: const Placeholder(),
+        ),
+      ),
+    );
+    expect( // no change because this is an animation
+      tester.getRect(find.byType(Placeholder)),
+      new Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect( // animation finished
+      tester.getRect(find.byType(Placeholder)),
+      new Rect.fromLTRB(40.0, 24.0, 800.0 - 40.0, 600.0 - 24.0),
+    );
   });
 }

@@ -37,14 +37,14 @@ class StringCodec implements MessageCodec<String> {
   String decodeMessage(ByteData message) {
     if (message == null)
       return null;
-    return UTF8.decoder.convert(message.buffer.asUint8List());
+    return utf8.decoder.convert(message.buffer.asUint8List());
   }
 
   @override
   ByteData encodeMessage(String message) {
     if (message == null)
       return null;
-    final Uint8List encoded = UTF8.encoder.convert(message);
+    final Uint8List encoded = utf8.encoder.convert(message);
     return encoded.buffer.asByteData();
   }
 }
@@ -79,14 +79,14 @@ class JSONMessageCodec implements MessageCodec<dynamic> {
   ByteData encodeMessage(dynamic message) {
     if (message == null)
       return null;
-    return const StringCodec().encodeMessage(JSON.encode(message));
+    return const StringCodec().encodeMessage(json.encode(message));
   }
 
   @override
   dynamic decodeMessage(ByteData message) {
     if (message == null)
       return message;
-    return JSON.decode(const StringCodec().decodeMessage(message));
+    return json.decode(const StringCodec().decodeMessage(message));
   }
 }
 
@@ -174,6 +174,9 @@ class JSONMethodCodec implements MethodCodec {
 ///  * [List]s of supported values
 ///  * [Map]s from supported values to supported values
 ///
+/// Decoded values will use `List<dynamic>` and `Map<dynamic, dynamic>`
+/// irrespective of content.
+///
 /// On Android, messages are represented as follows:
 ///
 ///  * null: null
@@ -201,6 +204,9 @@ class JSONMethodCodec implements MethodCodec {
 ///    `FlutterStandardTypedData`
 ///  * [List]\: `NSArray`
 ///  * [Map]\: `NSDictionary`
+///
+/// The codec is extensible by subclasses overriding [writeValue] and
+/// [readValueOfType].
 class StandardMessageCodec implements MessageCodec<dynamic> {
   // The codec serializes messages as outlined below. This format must
   // match the Android and iOS counterparts.
@@ -262,7 +268,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
     if (message == null)
       return null;
     final WriteBuffer buffer = new WriteBuffer();
-    _writeValue(buffer, message);
+    writeValue(buffer, message);
     return buffer.done();
   }
 
@@ -271,26 +277,25 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
     if (message == null)
       return null;
     final ReadBuffer buffer = new ReadBuffer(message);
-    final dynamic result = _readValue(buffer);
+    final dynamic result = readValue(buffer);
     if (buffer.hasRemaining)
       throw const FormatException('Message corrupted');
     return result;
   }
 
-  static void _writeSize(WriteBuffer buffer, int value) {
-    assert(0 <= value && value <= 0xffffffff);
-    if (value < 254) {
-      buffer.putUint8(value);
-    } else if (value <= 0xffff) {
-      buffer.putUint8(254);
-      buffer.putUint16(value);
-    } else {
-      buffer.putUint8(255);
-      buffer.putUint32(value);
-    }
-  }
-
-  static void _writeValue(WriteBuffer buffer, dynamic value) {
+  /// Writes [value] to [buffer] by first writing a type discriminator
+  /// byte, then the value itself.
+  ///
+  /// This method may be called recursively to serialize container values.
+  ///
+  /// Type discriminators 0 through 127 inclusive are reserved for use by the
+  /// base class.
+  ///
+  /// The codec can be extended by overriding this method, calling super
+  /// for values that the extension does not handle. Type discriminators
+  /// used by extensions must be greater than or equal to 128 in order to avoid
+  /// clashes with any later extensions to the base class.
+  void writeValue(WriteBuffer buffer, dynamic value) {
     if (value == null) {
       buffer.putUint8(_kNull);
     } else if (value is bool) {
@@ -308,58 +313,61 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
       buffer.putFloat64(value);
     } else if (value is String) {
       buffer.putUint8(_kString);
-      final List<int> bytes = UTF8.encoder.convert(value);
-      _writeSize(buffer, bytes.length);
+      final List<int> bytes = utf8.encoder.convert(value);
+      writeSize(buffer, bytes.length);
       buffer.putUint8List(bytes);
     } else if (value is Uint8List) {
       buffer.putUint8(_kUint8List);
-      _writeSize(buffer, value.length);
+      writeSize(buffer, value.length);
       buffer.putUint8List(value);
     } else if (value is Int32List) {
       buffer.putUint8(_kInt32List);
-      _writeSize(buffer, value.length);
+      writeSize(buffer, value.length);
       buffer.putInt32List(value);
     } else if (value is Int64List) {
       buffer.putUint8(_kInt64List);
-      _writeSize(buffer, value.length);
+      writeSize(buffer, value.length);
       buffer.putInt64List(value);
     } else if (value is Float64List) {
       buffer.putUint8(_kFloat64List);
-      _writeSize(buffer, value.length);
+      writeSize(buffer, value.length);
       buffer.putFloat64List(value);
     } else if (value is List) {
       buffer.putUint8(_kList);
-      _writeSize(buffer, value.length);
+      writeSize(buffer, value.length);
       for (final dynamic item in value) {
-        _writeValue(buffer, item);
+        writeValue(buffer, item);
       }
     } else if (value is Map) {
       buffer.putUint8(_kMap);
-      _writeSize(buffer, value.length);
+      writeSize(buffer, value.length);
       value.forEach((dynamic key, dynamic value) {
-        _writeValue(buffer, key);
-        _writeValue(buffer, value);
+        writeValue(buffer, key);
+        writeValue(buffer, value);
       });
     } else {
       throw new ArgumentError.value(value);
     }
   }
 
-  static int _readSize(ReadBuffer buffer) {
-    final int value = buffer.getUint8();
-    if (value < 254)
-      return value;
-    else if (value == 254)
-      return buffer.getUint16();
-    else
-      return buffer.getUint32();
-  }
-
-  static dynamic _readValue(ReadBuffer buffer) {
+  /// Reads a value from [buffer] as written by [writeValue].
+  ///
+  /// This method is intended for use by subclasses overriding
+  /// [readValueOfType].
+  dynamic readValue(ReadBuffer buffer) {
     if (!buffer.hasRemaining)
       throw const FormatException('Message corrupted');
+    final int type = buffer.getUint8();
+    return readValueOfType(type, buffer);
+  }
+
+  /// Reads a value of the indicated [type] from [buffer].
+  ///
+  /// The codec can be extended by overriding this method, calling super
+  /// for types that the extension does not handle.
+  dynamic readValueOfType(int type, ReadBuffer buffer) {
     dynamic result;
-    switch (buffer.getUint8()) {
+    switch (type) {
       case _kNull:
         result = null;
         break;
@@ -379,50 +387,84 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         // Flutter Engine APIs to use large ints have been deprecated on
         // 2018-01-09 and will be made unavailable.
         // TODO(mravn): remove this case once the APIs are unavailable.
-        final int length = _readSize(buffer);
-        final String hex = UTF8.decoder.convert(buffer.getUint8List(length));
+        final int length = readSize(buffer);
+        final String hex = utf8.decoder.convert(buffer.getUint8List(length));
         result = int.parse(hex, radix: 16);
         break;
       case _kFloat64:
         result = buffer.getFloat64();
         break;
       case _kString:
-        final int length = _readSize(buffer);
-        result = UTF8.decoder.convert(buffer.getUint8List(length));
+        final int length = readSize(buffer);
+        result = utf8.decoder.convert(buffer.getUint8List(length));
         break;
       case _kUint8List:
-        final int length = _readSize(buffer);
+        final int length = readSize(buffer);
         result = buffer.getUint8List(length);
         break;
       case _kInt32List:
-        final int length = _readSize(buffer);
+        final int length = readSize(buffer);
         result = buffer.getInt32List(length);
         break;
       case _kInt64List:
-        final int length = _readSize(buffer);
+        final int length = readSize(buffer);
         result = buffer.getInt64List(length);
         break;
       case _kFloat64List:
-        final int length = _readSize(buffer);
+        final int length = readSize(buffer);
         result = buffer.getFloat64List(length);
         break;
       case _kList:
-        final int length = _readSize(buffer);
+        final int length = readSize(buffer);
         result = new List<dynamic>(length);
         for (int i = 0; i < length; i++) {
-          result[i] = _readValue(buffer);
+          result[i] = readValue(buffer);
         }
         break;
       case _kMap:
-        final int length = _readSize(buffer);
+        final int length = readSize(buffer);
         result = <dynamic, dynamic>{};
         for (int i = 0; i < length; i++) {
-          result[_readValue(buffer)] = _readValue(buffer);
+          result[readValue(buffer)] = readValue(buffer);
         }
         break;
       default: throw const FormatException('Message corrupted');
     }
     return result;
+  }
+
+  /// Writes a non-negative 32-bit integer [value] to [buffer]
+  /// using an expanding 1-5 byte encoding that optimizes for small values.
+  ///
+  /// This method is intended for use by subclasses overriding
+  /// [writeValue].
+  void writeSize(WriteBuffer buffer, int value) {
+    assert(0 <= value && value <= 0xffffffff);
+    if (value < 254) {
+      buffer.putUint8(value);
+    } else if (value <= 0xffff) {
+      buffer.putUint8(254);
+      buffer.putUint16(value);
+    } else {
+      buffer.putUint8(255);
+      buffer.putUint32(value);
+    }
+  }
+
+  /// Reads a non-negative int from [buffer] as written by [writeSize].
+  ///
+  /// This method is intended for use by subclasses overriding
+  /// [readValueOfType].
+  int readSize(ReadBuffer buffer) {
+    final int value = buffer.getUint8();
+    switch (value) {
+      case 254:
+        return buffer.getUint16();
+      case 255:
+        return buffer.getUint32();
+      default:
+        return value;
+    }
   }
 }
 
@@ -448,21 +490,24 @@ class StandardMethodCodec implements MethodCodec {
   //     string, the error message string, and the error details value.
 
   /// Creates a [MethodCodec] using the Flutter standard binary encoding.
-  const StandardMethodCodec();
+  const StandardMethodCodec([this.messageCodec = const StandardMessageCodec()]);
+
+  /// The message codec that this method codec uses for encoding values.
+  final StandardMessageCodec messageCodec;
 
   @override
   ByteData encodeMethodCall(MethodCall call) {
     final WriteBuffer buffer = new WriteBuffer();
-    StandardMessageCodec._writeValue(buffer, call.method);
-    StandardMessageCodec._writeValue(buffer, call.arguments);
+    messageCodec.writeValue(buffer, call.method);
+    messageCodec.writeValue(buffer, call.arguments);
     return buffer.done();
   }
 
   @override
   MethodCall decodeMethodCall(ByteData methodCall) {
     final ReadBuffer buffer = new ReadBuffer(methodCall);
-    final dynamic method = StandardMessageCodec._readValue(buffer);
-    final dynamic arguments = StandardMessageCodec._readValue(buffer);
+    final dynamic method = messageCodec.readValue(buffer);
+    final dynamic arguments = messageCodec.readValue(buffer);
     if (method is String && !buffer.hasRemaining)
       return new MethodCall(method, arguments);
     else
@@ -473,7 +518,7 @@ class StandardMethodCodec implements MethodCodec {
   ByteData encodeSuccessEnvelope(dynamic result) {
     final WriteBuffer buffer = new WriteBuffer();
     buffer.putUint8(0);
-    StandardMessageCodec._writeValue(buffer, result);
+    messageCodec.writeValue(buffer, result);
     return buffer.done();
   }
 
@@ -481,9 +526,9 @@ class StandardMethodCodec implements MethodCodec {
   ByteData encodeErrorEnvelope({@required String code, String message, dynamic details}) {
     final WriteBuffer buffer = new WriteBuffer();
     buffer.putUint8(1);
-    StandardMessageCodec._writeValue(buffer, code);
-    StandardMessageCodec._writeValue(buffer, message);
-    StandardMessageCodec._writeValue(buffer, details);
+    messageCodec.writeValue(buffer, code);
+    messageCodec.writeValue(buffer, message);
+    messageCodec.writeValue(buffer, details);
     return buffer.done();
   }
 
@@ -494,10 +539,10 @@ class StandardMethodCodec implements MethodCodec {
       throw const FormatException('Expected envelope, got nothing');
     final ReadBuffer buffer = new ReadBuffer(envelope);
     if (buffer.getUint8() == 0)
-      return StandardMessageCodec._readValue(buffer);
-    final dynamic errorCode = StandardMessageCodec._readValue(buffer);
-    final dynamic errorMessage = StandardMessageCodec._readValue(buffer);
-    final dynamic errorDetails = StandardMessageCodec._readValue(buffer);
+      return messageCodec.readValue(buffer);
+    final dynamic errorCode = messageCodec.readValue(buffer);
+    final dynamic errorMessage = messageCodec.readValue(buffer);
+    final dynamic errorDetails = messageCodec.readValue(buffer);
     if (errorCode is String && (errorMessage == null || errorMessage is String) && !buffer.hasRemaining)
       throw new PlatformException(code: errorCode, message: errorMessage, details: errorDetails);
     else

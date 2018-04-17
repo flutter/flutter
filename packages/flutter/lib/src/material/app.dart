@@ -511,7 +511,7 @@ class MaterialApp extends StatefulWidget {
   /// reported by the framework.
   final bool showSemanticsDebugger;
 
-  /// Turns on a little "SLOW MODE" banner in checked mode to indicate
+  /// Turns on a little "DEBUG" banner in checked mode to indicate
   /// that the app is in checked mode. This is on by default (in
   /// checked mode), to turn it off, set the constructor argument to
   /// false. In release mode this has no effect.
@@ -607,10 +607,11 @@ class _MaterialAppState extends State<MaterialApp> {
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
     final String name = settings.name;
     WidgetBuilder builder;
-    if (name == Navigator.defaultRouteName && widget.home != null)
+    if (name == Navigator.defaultRouteName && widget.home != null) {
       builder = (BuildContext context) => widget.home;
-    else
+    } else {
       builder = widget.routes[name];
+    }
     if (builder != null) {
       return new MaterialPageRoute<dynamic>(
         builder: builder,

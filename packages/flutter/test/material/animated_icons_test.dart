@@ -141,6 +141,8 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(label: 'a label'));
+
+    semantics.dispose();
   });
 
   testWidgets('Inherited text direction rtl', (WidgetTester tester) async {

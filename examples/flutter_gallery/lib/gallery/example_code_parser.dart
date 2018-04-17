@@ -33,7 +33,7 @@ Future<Null> _parseExampleCode(AssetBundle bundle) async {
       if (line.startsWith(_kStartTag)) {
         // Starting a new code block.
         codeBlock = <String>[];
-        codeTag = line.substring(_kStartTag.length);
+        codeTag = line.substring(_kStartTag.length).trim();
       } else {
         // Just skipping the line.
       }
@@ -46,7 +46,9 @@ Future<Null> _parseExampleCode(AssetBundle bundle) async {
         codeTag = null;
       } else {
         // Add to the current block
-        codeBlock.add(line);
+        // trimRight() to remove any \r on Windows
+        // without removing any useful indentation
+        codeBlock.add(line.trimRight());
       }
     }
   }

@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
@@ -29,6 +30,7 @@ class RawMaterialButton extends StatefulWidget {
   const RawMaterialButton({
     Key key,
     @required this.onPressed,
+    this.onHighlightChanged,
     this.textStyle,
     this.fillColor,
     this.highlightColor,
@@ -39,6 +41,7 @@ class RawMaterialButton extends StatefulWidget {
     this.padding: EdgeInsets.zero,
     this.constraints: const BoxConstraints(minWidth: 88.0, minHeight: 36.0),
     this.shape: const RoundedRectangleBorder(),
+    this.animationDuration: kThemeChangeDuration,
     this.child,
   }) : assert(shape != null),
        assert(elevation != null),
@@ -46,12 +49,17 @@ class RawMaterialButton extends StatefulWidget {
        assert(disabledElevation != null),
        assert(padding != null),
        assert(constraints != null),
+       assert(animationDuration != null),
        super(key: key);
 
   /// Called when the button is tapped or otherwise activated.
   ///
   /// If this is set to null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
+
+  /// Called by the underlying [InkWell] widget's [InkWell.onHighlightChanged]
+  /// callback.
+  final ValueChanged<bool> onHighlightChanged;
 
   /// Defines the default text style, with [Material.textStyle], for the
   /// button's [child].
@@ -111,6 +119,11 @@ class RawMaterialButton extends StatefulWidget {
   /// button has an elevation, then its drop shadow is defined by this shape.
   final ShapeBorder shape;
 
+  /// Defines the duration of animated changes for [shape] and [elevation].
+  ///
+  /// The default value is [kThemeChangeDuration].
+  final Duration animationDuration;
+
   /// Typically the button's label.
   final Widget child;
 
@@ -129,6 +142,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   void _handleHighlightChanged(bool value) {
     setState(() {
       _highlight = value;
+      if (widget.onHighlightChanged != null)
+        widget.onHighlightChanged(value);
     });
   }
 
@@ -150,6 +165,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           shape: widget.shape,
           color: widget.fillColor,
           type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
+          animationDuration: widget.animationDuration,
           child: new InkWell(
             onHighlightChanged: _handleHighlightChanged,
             splashColor: widget.splashColor,
@@ -229,7 +245,7 @@ class MaterialButton extends StatelessWidget {
   /// The color to use for this button's text.
   final Color textColor;
 
-  /// The the button's fill color, displayed by its [Material], while the button
+  /// The button's fill color, displayed by its [Material], while the button
   /// is in its default (unpressed, enabled) state.
   ///
   /// Defaults to null, meaning that the color is automatically derived from the [Theme].
@@ -381,8 +397,8 @@ class MaterialButton extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }
 }

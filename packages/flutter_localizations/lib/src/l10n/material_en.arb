@@ -168,16 +168,36 @@
 
   "signedInLabel": "Signed in",
   "@signedInLabel": {
-    "description": "The semantics label used to indicate which account is signed in in UserAccountsDrawerHeader when an accessibility user navigates the UI."
+    "description": "The accessibility label used to indicate which account is signed in, in a UserAccountsDrawerHeader, when the accessibility user navigates the UI. This phrase serves as an adjective with respect to the user. The phrase indicates that the user is currently signed in."
   },
 
   "hideAccountsLabel": "Hide accounts",
   "@hideAccountsLabel": {
-    "description": "The semantics label used for the button on UserAccountsDrawerHeader that hides the list of accounts."
+    "description": "The accessibility label used for the button on a UserAccountsDrawerHeader that hides the list of accounts."
   },
 
   "showAccountsLabel": "Show accounts",
   "@showAccountsLabel": {
-    "description": "The semantics label used for the button on UserAccountsDrawerHeader that shows the list of accounts."
+    "description": "The accessibility label used for the button on a UserAccountsDrawerHeader that shows the list of accounts."
+  },
+
+  "drawerLabel": "Navigation menu",
+  "@drawerLabel": {
+    "description": "The audio announcement made when the Drawer is opened."
+  },
+
+  "popupMenuLabel": "Popup menu",
+  "@popupMenuLabel": {
+    "description": "The audio announcement made when a PopupMenu is opened."
+  },
+
+  "dialogLabel": "Dialog",
+  "@dialogLabel": {
+    "description": "The audio announcement made when a Dialog is opened."
+  },
+
+  "alertDialogLabel": "Alert",
+  "@dialogLabel": {
+    "description": "The audio announcement made when an AlertDialog is opened."
   }
 }

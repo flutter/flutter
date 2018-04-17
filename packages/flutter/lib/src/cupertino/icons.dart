@@ -90,4 +90,13 @@ class CupertinoIcons {
 
   /// Three solid dots.
   static const IconData ellipsis = const IconData(0xf46a, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A phone handset outline.
+  static const IconData phone = const IconData(0xf4b8, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A phone handset.
+  static const IconData phone_solid = const IconData(0xf4b9, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A solid down arrow.
+  static const IconData down_arrow = const IconData(0xf35d, fontFamily: iconFont, fontPackage: iconFontPackage);
 }

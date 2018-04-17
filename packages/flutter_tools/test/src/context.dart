@@ -3,33 +3,31 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
-import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/port_scanner.dart';
-import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
-import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 import 'package:quiver/time.dart';
 import 'package:test/test.dart';
 
 import 'common.dart';
+
+export 'package:flutter_tools/src/base/context.dart' show Generator;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
 BufferLogger get testLogger => context[Logger];
@@ -37,42 +35,15 @@ BufferLogger get testLogger => context[Logger];
 MockDeviceManager get testDeviceManager => context[DeviceManager];
 MockDoctor get testDoctor => context[Doctor];
 
-typedef dynamic Generator();
-
 typedef void ContextInitializer(AppContext testContext);
-
-void _defaultInitializeContext(AppContext testContext) {
-  testContext
-    ..putIfAbsent(DeviceManager, () => new MockDeviceManager())
-    ..putIfAbsent(DevFSConfig, () => new DevFSConfig())
-    ..putIfAbsent(Doctor, () => new MockDoctor())
-    ..putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig())
-    ..putIfAbsent(Cache, () => new Cache())
-    ..putIfAbsent(Artifacts, () => new CachedArtifacts())
-    ..putIfAbsent(OperatingSystemUtils, () => new MockOperatingSystemUtils())
-    ..putIfAbsent(PortScanner, () => new MockPortScanner())
-    ..putIfAbsent(Xcode, () => new Xcode())
-    ..putIfAbsent(XcodeProjectInterpreter, () => new MockXcodeProjectInterpreter())
-    ..putIfAbsent(IOSSimulatorUtils, () {
-      final MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
-      when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
-      return mock;
-    })
-    ..putIfAbsent(SimControl, () => new MockSimControl())
-    ..putIfAbsent(Usage, () => new MockUsage())
-    ..putIfAbsent(FlutterVersion, () => new MockFlutterVersion())
-    ..putIfAbsent(Clock, () => const Clock())
-    ..putIfAbsent(HttpClient, () => new MockHttpClient());
-}
 
 void testUsingContext(String description, dynamic testMethod(), {
   Timeout timeout,
   Map<Type, Generator> overrides: const <Type, Generator>{},
-  ContextInitializer initializeContext: _defaultInitializeContext,
+  bool initializeFlutterRoot: true,
   String testOn,
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
-
   // Ensure we don't rely on the default [Config] constructor which will
   // leak a sticky $HOME/.flutter_settings behind!
   Directory configDir;
@@ -88,45 +59,60 @@ void testUsingContext(String description, dynamic testMethod(), {
   }
 
   test(description, () async {
-    final AppContext testContext = new AppContext();
+    await runInContext<dynamic>(() {
+      return context.run<dynamic>(
+        name: 'mocks',
+        overrides: <Type, Generator>{
+          Config: () => buildConfig(fs),
+          DeviceManager: () => new MockDeviceManager(),
+          Doctor: () => new MockDoctor(),
+          FlutterVersion: () => new MockFlutterVersion(),
+          HttpClient: () => new MockHttpClient(),
+          IOSSimulatorUtils: () {
+            final MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
+            when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
+            return mock;
+          },
+          Logger: () => new BufferLogger(),
+          OperatingSystemUtils: () => new MockOperatingSystemUtils(),
+          PortScanner: () => new MockPortScanner(),
+          SimControl: () => new MockSimControl(),
+          Usage: () => new MockUsage(),
+          XcodeProjectInterpreter: () => new MockXcodeProjectInterpreter(),
+        },
+        body: () {
+          final String flutterRoot = getFlutterRoot();
 
-    // The context always starts with these value since others depend on them.
-    testContext
-      ..putIfAbsent(BotDetector, () => const BotDetector())
-      ..putIfAbsent(Stdio, () => const Stdio())
-      ..putIfAbsent(Platform, () => const LocalPlatform())
-      ..putIfAbsent(FileSystem, () => const LocalFileSystem())
-      ..putIfAbsent(ProcessManager, () => const LocalProcessManager())
-      ..putIfAbsent(Logger, () => new BufferLogger())
-      ..putIfAbsent(Config, () => buildConfig(testContext[FileSystem]));
+          return runZoned(() {
+            try {
+              return context.run<dynamic>(
+                // Apply the overrides to the test context in the zone since their
+                // instantiation may reference items already stored on the context.
+                overrides: overrides,
+                name: 'test-specific overrides',
+                body: () async {
+                  if (initializeFlutterRoot) {
+                    // Provide a sane default for the flutterRoot directory. Individual
+                    // tests can override this either in the test or during setup.
+                    Cache.flutterRoot ??= flutterRoot;
+                  }
 
-    // Apply the initializer after seeding the base value above.
-    initializeContext(testContext);
-
-    final String flutterRoot = getFlutterRoot();
-
-    try {
-      return await testContext.runInZone(() async {
-        // Apply the overrides to the test context in the zone since their
-        // instantiation may reference items already stored on the context.
-        overrides.forEach((Type type, dynamic value()) {
-          context.setVariable(type, value());
-        });
-
-        // Provide a sane default for the flutterRoot directory. Individual
-        // tests can override this either in the test or during setup.
-        Cache.flutterRoot ??= flutterRoot;
-
-        return await testMethod();
-      }, onError: (dynamic error, StackTrace stackTrace) {
-        _printBufferedErrors(testContext);
-        throw error;
-      });
-    } catch (error) {
-      _printBufferedErrors(testContext);
-      rethrow;
-    }
-
+                  return await testMethod();
+                },
+              );
+            } catch (error) {
+              _printBufferedErrors(context);
+              rethrow;
+            }
+          }, onError: (dynamic error, StackTrace stackTrace) {
+            io.stdout.writeln(error);
+            io.stdout.writeln(stackTrace);
+            _printBufferedErrors(context);
+            throw error;
+          });
+        },
+      );
+    });
   }, timeout: timeout, testOn: testOn, skip: skip);
 }
 
@@ -199,6 +185,11 @@ class MockDeviceManager implements DeviceManager {
   Future<List<String>> getDeviceDiagnostics() async => <String>[];
 }
 
+class MockAndroidWorkflowValidator extends AndroidWorkflow {
+  @override
+  Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
+}
+
 class MockDoctor extends Doctor {
   // True for testing.
   @override
@@ -207,6 +198,20 @@ class MockDoctor extends Doctor {
   // True for testing.
   @override
   bool get canLaunchAnything => true;
+
+  @override
+  /// Replaces the android workflow with a version that overrides licensesAccepted,
+  /// to prevent individual tests from having to mock out the process for
+  /// the Doctor.
+  List<DoctorValidator> get validators {
+    final List<DoctorValidator> superValidators = super.validators;
+    return superValidators.map((DoctorValidator v) {
+      if (v is AndroidWorkflow) {
+        return new MockAndroidWorkflowValidator();
+      }
+      return v;
+    }).toList();
+  }
 }
 
 class MockSimControl extends Mock implements SimControl {
@@ -221,6 +226,9 @@ class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
 
   @override
   String get name => 'fake OS name and version';
+
+  @override
+  String get pathVarSeparator => ';';
 }
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
@@ -268,7 +276,16 @@ class MockUsage implements Usage {
 
 class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
-  bool get canInterpretXcodeProjects => true;
+  bool get isInstalled => true;
+
+  @override
+  String get versionText => 'Xcode 9.2';
+
+  @override
+  int get majorVersion => 9;
+
+  @override
+  int get minorVersion => 2;
 
   @override
   Map<String, String> getBuildSettings(String projectPath, String target) {

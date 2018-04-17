@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer' as developer;
@@ -14,6 +15,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'app.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
@@ -22,6 +24,11 @@ import 'gesture_detector.dart';
 /// Signature for the builder callback used by
 /// [WidgetInspector.selectButtonBuilder].
 typedef Widget InspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed);
+
+typedef void _RegisterServiceExtensionCallback({
+  @required String name,
+  @required ServiceExtensionCallback callback
+});
 
 /// A class describing a step along a path through a tree of [DiagnosticsNode]
 /// objects.
@@ -96,6 +103,9 @@ class _InspectorReferenceData {
   int count = 1;
 }
 
+class _WidgetInspectorService extends Object with WidgetInspectorService {
+}
+
 /// Service used by GUI tools to interact with the [WidgetInspector].
 ///
 /// Calls to this object are typically made from GUI tools such as the [Flutter
@@ -117,11 +127,19 @@ class _InspectorReferenceData {
 ///
 /// All methods returning String values return JSON.
 class WidgetInspectorService {
-  WidgetInspectorService._();
+  // This class is usable as a mixin for test purposes and as a singleton
+  // [instance] for production purposes.
+  factory WidgetInspectorService._() => new _WidgetInspectorService();
 
   /// The current [WidgetInspectorService].
   static WidgetInspectorService get instance => _instance;
-  static final WidgetInspectorService _instance = new WidgetInspectorService._();
+  static WidgetInspectorService _instance = new WidgetInspectorService._();
+  @protected
+  static set instance(WidgetInspectorService instance) {
+    _instance = instance;
+  }
+
+  static bool _debugServiceExtensionsRegistered = false;
 
   /// Ground truth tracking what object(s) are currently selected used by both
   /// GUI tools such as the Flutter IntelliJ Plugin and the [WidgetInspector]
@@ -144,10 +162,234 @@ class WidgetInspectorService {
   final Map<Object, String> _objectToId = new Map<Object, String>.identity();
   int _nextId = 0;
 
+  List<String> _pubRootDirectories;
+
+  _RegisterServiceExtensionCallback _registerServiceExtensionCallback;
+  /// Registers a service extension method with the given name (full
+  /// name "ext.flutter.inspector.name").
+  ///
+  /// The given callback is called when the extension method is called. The
+  /// callback must return a value that can be converted to JSON using
+  /// `json.encode()` (see [JsonEncoder]). The return value is stored as a
+  /// property named `result` in the JSON. In case of failure, the failure is
+  /// reported to the remote caller and is dumped to the logs.
+  @protected
+  void registerServiceExtension({
+    @required String name,
+    @required ServiceExtensionCallback callback,
+  }) {
+    _registerServiceExtensionCallback(
+      name: 'inspector.$name',
+      callback: callback,
+    );
+  }
+
+  /// Registers a service extension method with the given name (full
+  /// name "ext.flutter.inspector.name"), which takes no arguments.
+  void _registerSignalServiceExtension({
+    @required String name,
+    @required FutureOr<Object> callback(),
+  }) {
+    registerServiceExtension(
+      name: name,
+      callback: (Map<String, String> parameters) async {
+        return <String, Object>{'result': await callback()};
+      },
+    );
+  }
+
+  /// Registers a service extension method with the given name (full
+  /// name "ext.flutter.inspector.name"), which takes a single required argument
+  /// "objectGroup" specifying what group is used to manage lifetimes of
+  /// object references in the returned JSON (see [disposeGroup]).
+  void _registerObjectGroupServiceExtension({
+    @required String name,
+    @required FutureOr<Object> callback(String objectGroup),
+  }) {
+    registerServiceExtension(
+      name: name,
+      callback: (Map<String, String> parameters) async {
+        assert(parameters.containsKey('objectGroup'));
+        return <String, Object>{'result': await callback(parameters['objectGroup'])};
+      },
+    );
+  }
+
+  /// Registers a service extension method with the given name (full
+  /// name "ext.flutter.inspector.name"), which takes a single argument
+  /// "enabled" which can have the value "true" or the value "false"
+  /// or can be omitted to read the current value. (Any value other
+  /// than "true" is considered equivalent to "false". Other arguments
+  /// are ignored.)
+  ///
+  /// Calls the `getter` callback to obtain the value when
+  /// responding to the service extension method being called.
+  ///
+  /// Calls the `setter` callback with the new value when the
+  /// service extension method is called with a new value.
+  void _registerBoolServiceExtension({
+    @required String name,
+    @required AsyncValueGetter<bool> getter,
+    @required AsyncValueSetter<bool> setter
+  }) {
+    assert(name != null);
+    assert(getter != null);
+    assert(setter != null);
+    registerServiceExtension(
+      name: name,
+      callback: (Map<String, String> parameters) async {
+        if (parameters.containsKey('enabled'))
+          await setter(parameters['enabled'] == 'true');
+        return <String, dynamic>{ 'enabled': await getter() ? 'true' : 'false' };
+      },
+    );
+  }
+
+  /// Registers a service extension method with the given name (full
+  /// name "ext.flutter.inspector.name") which takes an optional parameter named
+  /// "arg" and a required parameter named "objectGroup" used to control the
+  /// lifetimes of object references in the returned JSON (see [disposeGroup]).
+  void _registerServiceExtensionWithArg({
+    @required String name,
+    @required FutureOr<Object> callback(String objectId, String objectGroup),
+  }) {
+    registerServiceExtension(
+      name: name,
+      callback: (Map<String, String> parameters) async {
+        assert(parameters.containsKey('objectGroup'));
+        return <String, Object>{
+          'result': await callback(parameters['arg'], parameters['objectGroup']),
+        };
+      },
+    );
+  }
+
+  /// Registers a service extension method with the given name (full
+  /// name "ext.flutter.inspector.name"), that takes arguments
+  /// "arg0", "arg1", "arg2", ..., "argn".
+  void _registerServiceExtensionVarArgs({
+    @required String name,
+    @required FutureOr<Object> callback(List<String> args),
+  }) {
+    registerServiceExtension(
+      name: name,
+      callback: (Map<String, String> parameters) async {
+        const String argPrefix = 'arg';
+        final List<String> args = <String>[];
+        parameters.forEach((String name, String value) {
+          if (name.startsWith(argPrefix)) {
+            final int index = int.parse(name.substring(argPrefix.length));
+            if (index >= args.length) {
+              args.length = index + 1;
+            }
+            args[index] = value;
+          }
+        });
+        return <String, Object>{'result': await callback(args)};
+      },
+    );
+  }
+
+  @protected
+  Future<Null> forceRebuild() {
+    final WidgetsBinding binding = WidgetsBinding.instance;
+    if (binding.renderViewElement != null) {
+      binding.buildOwner.reassemble(binding.renderViewElement);
+      return binding.endOfFrame;
+    }
+    return new Future<Null>.value();
+  }
+
+  /// Called to register service extensions.
+  ///
+  /// Service extensions are only exposed when the observatory is
+  /// included in the build, which should only happen in checked mode
+  /// and in profile mode.
+  ///
+  /// See also:
+  ///
+  ///  * <https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#rpcs-requests-and-responses>
+  void initServiceExtensions(
+      _RegisterServiceExtensionCallback registerServiceExtensionCallback) {
+    _registerServiceExtensionCallback = registerServiceExtensionCallback;
+    assert(!_debugServiceExtensionsRegistered);
+    assert(() { _debugServiceExtensionsRegistered = true; return true; }());
+
+    _registerBoolServiceExtension(
+      name: 'show',
+      getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
+      setter: (bool value) {
+        if (WidgetsApp.debugShowWidgetInspectorOverride == value) {
+          return new Future<Null>.value();
+        }
+        WidgetsApp.debugShowWidgetInspectorOverride = value;
+        return forceRebuild();
+      },
+    );
+
+    _registerSignalServiceExtension(
+      name: 'disposeAllGroups',
+      callback: disposeAllGroups,
+    );
+    _registerObjectGroupServiceExtension(
+      name: 'disposeGroup',
+      callback: disposeGroup,
+    );
+    _registerSignalServiceExtension(
+      name: 'isWidgetTreeReady',
+      callback: isWidgetTreeReady,
+    );
+    _registerServiceExtensionWithArg(
+      name: 'disposeId',
+      callback: disposeId,
+    );
+    _registerServiceExtensionVarArgs(
+      name: 'setPubRootDirectories',
+      callback: setPubRootDirectories,
+    );
+    _registerServiceExtensionWithArg(
+      name: 'setSelectionById',
+      callback: setSelectionById,
+    );
+    _registerServiceExtensionWithArg(
+      name: 'getParentChain',
+      callback: _getParentChain,
+    );
+    _registerServiceExtensionWithArg(
+      name: 'getProperties',
+      callback: _getProperties,
+    );
+    _registerServiceExtensionWithArg(
+      name: 'getChildren',
+      callback: _getChildren,
+    );
+    _registerObjectGroupServiceExtension(
+      name: 'getRootWidget',
+      callback: _getRootWidget,
+    );
+    _registerObjectGroupServiceExtension(
+      name: 'getRootRenderObject',
+      callback: _getRootRenderObject,
+    );
+    _registerServiceExtensionWithArg(
+      name: 'getSelectedRenderObject',
+      callback: _getSelectedRenderObject,
+    );
+    _registerServiceExtensionWithArg(
+      name: 'getSelectedWidget',
+      callback: _getSelectedWidget,
+    );
+    _registerSignalServiceExtension(
+      name: 'isWidgetCreationTracked',
+      callback: isWidgetCreationTracked,
+    );
+  }
+
   /// Clear all InspectorService object references.
   ///
   /// Use this method only for testing to ensure that object references from one
   /// test case do not impact other test cases.
+  @protected
   void disposeAllGroups() {
     _groups.clear();
     _idToReferenceData.clear();
@@ -159,6 +401,7 @@ class WidgetInspectorService {
   ///
   /// Objects and their associated ids in the group may be kept alive by
   /// references from a different group.
+  @protected
   void disposeGroup(String name) {
     final Set<_InspectorReferenceData> references = _groups.remove(name);
     if (references == null)
@@ -179,6 +422,7 @@ class WidgetInspectorService {
   /// Returns a unique id for [object] that will remain live at least until
   /// [disposeGroup] is called on [groupName] or [dispose] is called on the id
   /// returned by this method.
+  @protected
   String toId(Object object, String groupName) {
     if (object == null)
       return null;
@@ -203,6 +447,7 @@ class WidgetInspectorService {
 
   /// Returns whether the application has rendered its first frame and it is
   /// appropriate to display the Widget tree in the inspector.
+  @protected
   bool isWidgetTreeReady([String groupName]) {
     return WidgetsBinding.instance != null &&
            WidgetsBinding.instance.debugDidSendFirstFrameEvent;
@@ -213,6 +458,7 @@ class WidgetInspectorService {
   /// The `groupName` parameter is not required by is added to regularize the
   /// API surface of the methods in this class called from the Flutter IntelliJ
   /// Plugin.
+  @protected
   Object toObject(String id, [String groupName]) {
     if (id == null)
       return null;
@@ -233,6 +479,7 @@ class WidgetInspectorService {
   ///
   /// The `groupName` parameter is not required by is added to regularize the
   /// API surface of methods called from the Flutter IntelliJ Plugin.
+  @protected
   Object toObjectForSourceLocation(String id, [String groupName]) {
     final Object object = toObject(id);
     if (object is Element) {
@@ -246,6 +493,7 @@ class WidgetInspectorService {
   ///
   /// If the object exists in other groups it will remain alive and the object
   /// id will remain valid.
+  @protected
   void disposeId(String id, String groupName) {
     if (id == null)
       return;
@@ -258,6 +506,18 @@ class WidgetInspectorService {
     _decrementReferenceCount(referenceData);
   }
 
+  /// Set the list of directories that should be considered part of the local
+  /// project.
+  ///
+  /// The local project directories are used to distinguish widgets created by
+  /// the local project over widgets created from inside the framework.
+  @protected
+  void setPubRootDirectories(List<Object> pubRootDirectories) {
+    _pubRootDirectories = pubRootDirectories.map<String>(
+      (Object directory) => Uri.parse(directory).path,
+    ).toList();
+  }
+
   /// Set the [WidgetInspector] selection to the object matching the specified
   /// id if the object is valid object to set as the inspector selection.
   ///
@@ -265,6 +525,7 @@ class WidgetInspectorService {
   ///
   /// The `groupName` parameter is not required by is added to regularize the
   /// API surface of methods called from the Flutter IntelliJ Plugin.
+  @protected
   bool setSelectionById(String id, [String groupName]) {
     return setSelection(toObject(id), groupName);
   }
@@ -276,6 +537,7 @@ class WidgetInspectorService {
   ///
   /// The `groupName` parameter is not needed but is specified to regularize the
   /// API surface of methods called from the Flutter IntelliJ Plugin.
+  @protected
   bool setSelection(Object object, [String groupName]) {
     if (object is Element || object is RenderObject) {
       if (object is Element) {
@@ -311,7 +573,12 @@ class WidgetInspectorService {
   ///
   /// The JSON contains all information required to display a tree view with
   /// all nodes other than nodes along the path collapsed.
+  @protected
   String getParentChain(String id, String groupName) {
+    return json.encode(_getParentChain(id, groupName));
+  }
+
+  List<Object> _getParentChain(String id, String groupName) {
     final Object value = toObject(id);
     List<_DiagnosticsPathNode> path;
     if (value is RenderObject)
@@ -321,7 +588,7 @@ class WidgetInspectorService {
     else
       throw new FlutterError('Cannot get parent chain for node of type ${value.runtimeType}');
 
-    return JSON.encode(path.map((_DiagnosticsPathNode node) => _pathNodeToJson(node, groupName)).toList());
+    return path.map((_DiagnosticsPathNode node) => _pathNodeToJson(node, groupName)).toList();
   }
 
   Map<String, Object> _pathNodeToJson(_DiagnosticsPathNode pathNode, String groupName) {
@@ -359,12 +626,28 @@ class WidgetInspectorService {
     final _Location creationLocation = _getCreationLocation(value);
     if (creationLocation != null) {
       json['creationLocation'] = creationLocation.toJsonMap();
+      if (_isLocalCreationLocation(creationLocation)) {
+        json['createdByLocalProject'] = true;
+      }
     }
     return json;
   }
 
-  String _serialize(DiagnosticsNode node, String groupName) {
-    return JSON.encode(_nodeToJson(node, groupName));
+  bool _isLocalCreationLocation(_Location location) {
+    if (_pubRootDirectories == null || location == null || location.file == null) {
+      return false;
+    }
+    final String file = Uri.parse(location.file).path;
+    for (String directory in _pubRootDirectories) {
+      if (file.startsWith(directory)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Map<String, Object> _serializeToJson(DiagnosticsNode node, String groupName) {
+    return _nodeToJson(node, groupName);
   }
 
   List<Map<String, Object>> _nodesToJson(Iterable<DiagnosticsNode> nodes, String groupName) {
@@ -375,28 +658,46 @@ class WidgetInspectorService {
 
   /// Returns a JSON representation of the properties of the [DiagnosticsNode]
   /// object that `diagnosticsNodeId` references.
+  @protected
   String getProperties(String diagnosticsNodeId, String groupName) {
+    return json.encode(_getProperties(diagnosticsNodeId, groupName));
+  }
+
+  List<Object> _getProperties(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
-    return JSON.encode(_nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), groupName));
+    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), groupName);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
   /// object that `diagnosticsNodeId` references.
   String getChildren(String diagnosticsNodeId, String groupName) {
+    return json.encode(_getChildren(diagnosticsNodeId, groupName));
+  }
+
+  List<Object> _getChildren(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
-    return JSON.encode(_nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getChildren(), groupName));
+    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getChildren(), groupName);
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
   /// [Element].
   String getRootWidget(String groupName) {
-    return _serialize(WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(), groupName);
+    return json.encode(_getRootWidget(groupName));
+  }
+
+  Map<String, Object> _getRootWidget(String groupName) {
+    return _serializeToJson(WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(), groupName);
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
   /// [RenderObject].
+  @protected
   String getRootRenderObject(String groupName) {
-    return _serialize(RendererBinding.instance?.renderView?.toDiagnosticsNode(), groupName);
+    return json.encode(_getRootRenderObject(groupName));
+  }
+
+  Map<String, Object> _getRootRenderObject(String groupName) {
+    return _serializeToJson(RendererBinding.instance?.renderView?.toDiagnosticsNode(), groupName);
   }
 
   /// Returns a [DiagnosticsNode] representing the currently selected
@@ -405,10 +706,15 @@ class WidgetInspectorService {
   /// If the currently selected [RenderObject] is identical to the
   /// [RenderObject] referenced by `previousSelectionId` then the previous
   /// [DiagnosticNode] is reused.
+  @protected
   String getSelectedRenderObject(String previousSelectionId, String groupName) {
+    return json.encode(_getSelectedRenderObject(previousSelectionId, groupName));
+  }
+
+  Map<String, Object> _getSelectedRenderObject(String previousSelectionId, String groupName) {
     final DiagnosticsNode previousSelection = toObject(previousSelectionId);
     final RenderObject current = selection?.current;
-    return _serialize(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), groupName);
+    return _serializeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), groupName);
   }
 
   /// Returns a [DiagnosticsNode] representing the currently selected [Element].
@@ -416,18 +722,24 @@ class WidgetInspectorService {
   /// If the currently selected [Element] is identical to the [Element]
   /// referenced by `previousSelectionId` then the previous [DiagnosticNode] is
   /// reused.
+  @protected
   String getSelectedWidget(String previousSelectionId, String groupName) {
+    return json.encode(_getSelectedWidget(previousSelectionId, groupName));
+  }
+
+  Map<String, Object> _getSelectedWidget(String previousSelectionId, String groupName) {
     final DiagnosticsNode previousSelection = toObject(previousSelectionId);
     final Element current = selection?.currentElement;
-    return _serialize(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), groupName);
+    return _serializeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), groupName);
   }
 
   /// Returns whether [Widget] creation locations are available.
   ///
-  /// [Widget] creation locations are only available for slow mode builds when
+  /// [Widget] creation locations are only available for debug mode builds when
   /// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0
   /// is required as injecting creation locations requires a
   /// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+  @protected
   bool isWidgetCreationTracked() => new _WidgetForTypeTests() is _HasCreationLocation;
 }
 
@@ -535,7 +847,12 @@ class _WidgetInspectorState extends State<WidgetInspector>
     Matrix4 transform,
   ) {
     bool hit = false;
-    final Matrix4 inverse = new Matrix4.inverted(transform);
+    final Matrix4 inverse = Matrix4.tryInvert(transform);
+    if (inverse == null) {
+      // We cannot invert the transform. That means the object doesn't appear on
+      // screen and cannot be hit.
+      return false;
+    }
     final Offset localPosition = MatrixUtils.transformPoint(inverse, position);
 
     final List<DiagnosticsNode> children = object.debugDescribeChildren();
@@ -585,7 +902,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     // Order matches by the size of the hit area.
     double _area(RenderObject object) {
       final Size size = object.semanticBounds?.size;
-      return size == null ? double.MAX_FINITE : size.width * size.height;
+      return size == null ? double.maxFinite : size.width * size.height;
     }
     regularHits.sort((RenderObject a, RenderObject b) => _area(a).compareTo(_area(b)));
     final Set<RenderObject> hits = new LinkedHashSet<RenderObject>();
@@ -794,7 +1111,7 @@ class _RenderInspectorOverlay extends RenderBox {
 
   @override
   void performResize() {
-    size = constraints.constrain(const Size(double.INFINITY, double.INFINITY));
+    size = constraints.constrain(const Size(double.infinity, double.infinity));
   }
 
   @override
@@ -1029,7 +1346,7 @@ class _InspectorOverlayLayer extends Layer {
     if (!tooltipBelow)
       wedgeY += tooltipSize.height;
 
-    final double wedgeSize = _kTooltipPadding * 2;
+    const double wedgeSize = _kTooltipPadding * 2;
     double wedgeX = math.max(tipOffset.dx, target.dx) + wedgeSize * 2;
     wedgeX = math.min(wedgeX, tipOffset.dx + tooltipSize.width - wedgeSize * 2);
     final List<Offset> wedge = <Offset>[
@@ -1061,7 +1378,7 @@ const TextStyle _messageStyle = const TextStyle(
 /// constructor was called from.
 ///
 /// A [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
-/// adds this interface to the [Widget] class when the the
+/// adds this interface to the [Widget] class when the
 /// `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
 /// required as injecting creation locations requires a
 /// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
@@ -1101,6 +1418,9 @@ class _Location {
       'line': line,
       'column': column,
     };
+    if (name != null) {
+      json['name'] = name;
+    }
     if (parameterLocations != null) {
       json['parameterLocations'] = parameterLocations.map<Map<String, Object>>(
           (_Location location) => location.toJsonMap()).toList();
@@ -1124,7 +1444,7 @@ class _Location {
 
 /// Returns the creation location of an object if one is available.
 ///
-/// Creation locations are only available for slow mode builds when
+/// Creation locations are only available for debug mode builds when
 /// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
 /// required as injecting creation locations requires a
 /// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).

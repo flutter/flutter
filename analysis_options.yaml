@@ -55,6 +55,7 @@ linter:
     - annotate_overrides
     # - avoid_annotating_with_dynamic # conflicts with always_specify_types
     - avoid_as
+    # - avoid_bool_literals_in_conditional_expressions # not yet tested
     # - avoid_catches_without_on_clauses # we do this commonly
     # - avoid_catching_errors # we do this commonly
     - avoid_classes_with_only_static_members
@@ -63,11 +64,16 @@ linter:
     - avoid_init_to_null
     - avoid_null_checks_in_equality_operators
     # - avoid_positional_boolean_parameters # not yet tested
+    # - avoid_private_typedef_functions # we prefer having typedef (discussion in https://github.com/flutter/flutter/pull/16356)
+    - avoid_relative_lib_imports
+    - avoid_renaming_method_parameters
     - avoid_return_types_on_setters
     # - avoid_returning_null # we do this commonly
     # - avoid_returning_this # https://github.com/dart-lang/linter/issues/842
     # - avoid_setters_without_getters # not yet tested
+    # - avoid_single_cascade_in_expression_statements # not yet tested
     - avoid_slow_async_io
+    # - avoid_types_as_parameter_names # https://github.com/dart-lang/linter/pull/954/files
     # - avoid_types_on_closure_parameters # conflicts with always_specify_types
     # - avoid_unused_constructor_parameters # https://github.com/dart-lang/linter/pull/847
     - await_only_futures
@@ -109,10 +115,11 @@ linter:
     - prefer_conditional_assignment
     - prefer_const_constructors
     - prefer_const_constructors_in_immutables
-    # - prefer_const_declarations # not yet tested
-    # - prefer_const_literals_to_create_immutables # not yet tested
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
     # - prefer_constructors_over_static_methods # not yet tested
     - prefer_contains
+    # - prefer_equal_for_default_values # not yet tested
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
     - prefer_final_fields
     - prefer_final_locals
@@ -141,6 +148,7 @@ linter:
     - unnecessary_null_aware_assignments
     - unnecessary_null_in_if_null_operators
     - unnecessary_overrides
+    - unnecessary_parenthesis
     # - unnecessary_statements # not yet tested
     - unnecessary_this
     - unrelated_type_equality_checks

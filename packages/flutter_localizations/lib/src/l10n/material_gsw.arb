@@ -1,4 +1,8 @@
 {
+  "tabLabel": "Tab $tabIndex von $tabCount",
+  "showAccountsLabel": "Konten anzeigen",
+  "hideAccountsLabel": "Konten ausblenden",
+  "signedInLabel": "Angemeldet",
   "timePickerMinuteModeAnnouncement": "Minuten auswählen",
   "timePickerHourModeAnnouncement": "Stunden auswählen",
   "scriptCategory": "English-like",
@@ -30,5 +34,9 @@
   "viewLicensesButtonLabel": "LIZENZEN ANZEIGEN",
   "anteMeridiemAbbreviation": "VORM.",
   "postMeridiemAbbreviation": "NACHM.",
-  "modalBarrierDismissLabel": "Schließen"
+  "modalBarrierDismissLabel": "Schließen",
+  "drawerLabel": "Navigationsmenü",
+  "popupMenuLabel": "Popup-Menü",
+  "dialogLabel": "Dialog",
+  "alertDialogLabel": "Aufmerksam"
 }

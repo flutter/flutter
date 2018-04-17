@@ -16,7 +16,6 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'page.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
 import 'theme.dart';
@@ -162,12 +161,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// A widget to display before the [title].
   ///
-  /// If this is null and [automaticallyImplyLeading] is set to true, the [AppBar] will
-  /// imply an appropriate widget. For example, if the [AppBar] is in a [Scaffold]
-  /// that also has a [Drawer], the [Scaffold] will fill this widget with an
-  /// [IconButton] that opens the drawer. If there's no [Drawer] and the parent
-  /// [Navigator] can go back, the [AppBar] will use a [BackButton] that calls
-  /// [Navigator.maybePop].
+  /// If this is null and [automaticallyImplyLeading] is set to true, the
+  /// [AppBar] will imply an appropriate widget. For example, if the [AppBar] is
+  /// in a [Scaffold] that also has a [Drawer], the [Scaffold] will fill this
+  /// widget with an [IconButton] that opens the drawer (using [Icons.menu]). If
+  /// there's no [Drawer] and the parent [Navigator] can go back, the [AppBar]
+  /// will use a [BackButton] that calls [Navigator.maybePop].
   final Widget leading;
 
   /// Controls whether we should try to imply the leading widget if null.
@@ -189,27 +188,28 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// For example:
+  /// ## Sample code
   ///
   /// ```dart
-  /// return new Scaffold(
+  /// new Scaffold(
   ///   appBar: new AppBar(
   ///     title: new Text('Hello World'),
   ///     actions: <Widget>[
   ///       new IconButton(
   ///         icon: new Icon(Icons.shopping_cart),
   ///         tooltip: 'Open shopping cart',
-  ///         onPressed: _openCart,
+  ///         onPressed: () {
+  ///           // ...
+  ///         },
   ///       ),
   ///     ],
   ///   ),
-  ///   body: _buildBody(),
-  /// );
+  /// )
   /// ```
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will
-  /// be the same as the the app bar's overall height.
+  /// be the same as the app bar's overall height.
   ///
   /// A flexible space isn't actually flexible unless the [AppBar]'s container
   /// changes the [AppBar]'s size. A [SliverAppBar] in a [CustomScrollView]
@@ -339,7 +339,7 @@ class _AppBarState extends State<AppBar> {
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
     final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
     final bool canPop = parentRoute?.canPop ?? false;
-    final bool useCloseButton = parentRoute is MaterialPageRoute<dynamic> && parentRoute.fullscreenDialog;
+    final bool useCloseButton = parentRoute is PageRoute<dynamic> && parentRoute.fullscreenDialog;
 
     IconThemeData appBarIconTheme = widget.iconTheme ?? themeData.primaryIconTheme;
     TextStyle centerStyle = widget.textTheme?.title ?? themeData.primaryTextTheme.title;
@@ -768,11 +768,11 @@ class SliverAppBar extends StatefulWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// For example:
+  /// ## Sample code
   ///
   /// ```dart
-  /// return new Scaffold(
-  ///   body: new CustomView(
+  /// new Scaffold(
+  ///   body: new CustomScrollView(
   ///     primary: true,
   ///     slivers: <Widget>[
   ///       new SliverAppBar(
@@ -790,12 +790,12 @@ class SliverAppBar extends StatefulWidget {
   ///       // ...rest of body...
   ///     ],
   ///   ),
-  /// );
+  /// )
   /// ```
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tabbar. It's height will
-  /// be the same as the the app bar's overall height.
+  /// be the same as the app bar's overall height.
   ///
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
   final Widget flexibleSpace;

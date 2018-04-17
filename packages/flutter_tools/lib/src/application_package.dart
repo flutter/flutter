@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 
-import 'package:meta/meta.dart' show required;
+import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 
 import 'android/android_sdk.dart';
@@ -16,6 +17,7 @@ import 'build_info.dart';
 import 'globals.dart';
 import 'ios/plist_utils.dart' as plist;
 import 'ios/xcodeproj.dart';
+import 'tester/flutter_tester.dart';
 
 abstract class ApplicationPackage {
   /// Package ID from the Android Manifest or equivalent.
@@ -178,7 +180,7 @@ abstract class IOSApp extends ApplicationPackage {
 
     final String plistPath = fs.path.join('ios', 'Runner', 'Info.plist');
     String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
-    if (id == null)
+    if (id == null || !xcodeProjectInterpreter.isInstalled)
       return null;
     final String projectPath = fs.path.join('ios', 'Runner.xcodeproj');
     final Map<String, String> buildSettings = xcodeProjectInterpreter.getBuildSettings(projectPath, 'Runner');
@@ -273,6 +275,8 @@ Future<ApplicationPackage> getApplicationPackageForPlatform(TargetPlatform platf
       return applicationBinary == null
           ? new IOSApp.fromCurrentDirectory()
           : new IOSApp.fromIpa(applicationBinary);
+    case TargetPlatform.tester:
+      return new FlutterTesterApp.fromCurrentDirectory();
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
     case TargetPlatform.windows_x64:
@@ -304,6 +308,7 @@ class ApplicationPackageStore {
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.tester:
         return null;
     }
     return null;
@@ -321,6 +326,8 @@ class ApkManifestData {
     // launchable-activity: name='io.flutter.app.FlutterActivity'  label='' icon=''
     final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
 
+    final RegExp keyValueRegex = new RegExp(r"(\S+?)='(.*?)'");
+
     for (String line in data.split('\n')) {
       final int index = line.indexOf(':');
       if (index != -1) {
@@ -330,16 +337,8 @@ class ApkManifestData {
         final Map<String, String> entries = <String, String>{};
         map[name] = entries;
 
-        for (String entry in line.split(' ')) {
-          entry = entry.trim();
-          if (entry.isNotEmpty && entry.contains('=')) {
-            final int split = entry.indexOf('=');
-            final String key = entry.substring(0, split);
-            String value = entry.substring(split + 1);
-            if (value.startsWith("'") && value.endsWith("'"))
-              value = value.substring(1, value.length - 1);
-            entries[key] = value;
-          }
+        for (Match m in keyValueRegex.allMatches(line)) {
+          entries[m.group(1)] = m.group(2);
         }
       }
     }
@@ -348,6 +347,10 @@ class ApkManifestData {
   }
 
   final Map<String, Map<String, String>> _data;
+
+  @visibleForTesting
+  Map<String, Map<String, String>> get data =>
+      new UnmodifiableMapView<String, Map<String, String>>(_data);
 
   String get packageName => _data['package'] == null ? null : _data['package']['name'];
 

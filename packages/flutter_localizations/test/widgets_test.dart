@@ -153,7 +153,7 @@ Widget buildFrame({
     localeResolutionCallback: localeResolutionCallback,
     supportedLocales: supportedLocales,
     onGenerateRoute: (RouteSettings settings) {
-      return new PageRouteBuilder<Null>(
+      return new PageRouteBuilder<void>(
         pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
           return buildContent(context);
         }
@@ -302,7 +302,7 @@ void main() {
       )
     );
 
-    // All localizations were loaded synchonously
+    // All localizations were loaded synchronously
     expect(find.text('A: en_US'), findsOneWidget);
     expect(find.text('B: en_US'), findsOneWidget);
   });
@@ -337,7 +337,7 @@ void main() {
     expect(find.text('B: en_US'), findsOneWidget);
   });
 
-  testWidgets('Muliple Localizations', (WidgetTester tester) async {
+  testWidgets('Multiple Localizations', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildFrame(
         delegates: <LocalizationsDelegate<dynamic>>[

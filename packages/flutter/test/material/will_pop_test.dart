@@ -13,7 +13,7 @@ class SamplePage extends StatefulWidget {
 }
 
 class SamplePageState extends State<SamplePage> {
-  ModalRoute<Null> _route;
+  ModalRoute<void> _route;
 
   Future<bool> _callback() async => willPopValue;
 
@@ -66,7 +66,7 @@ class SampleForm extends StatelessWidget {
 // Expose the protected hasScopedWillPopCallback getter
 class TestPageRoute<T> extends MaterialPageRoute<T> {
   TestPageRoute({ WidgetBuilder builder })
-    : super(builder: builder, maintainState: true, settings: const RouteSettings());
+    : super(builder: builder, maintainState: true);
 
   bool get hasCallback => super.hasScopedWillPopCallback;
 }
@@ -84,9 +84,9 @@ void main() {
                 child: new FlatButton(
                   child: const Text('X'),
                   onPressed: () {
-                    showDialog<Null>(
+                    showDialog<void>(
                       context: context,
-                      child: new SamplePage(),
+                      builder: (BuildContext context) => new SamplePage(),
                     );
                   },
                 ),
@@ -138,7 +138,7 @@ void main() {
                 child: new FlatButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context).push(new MaterialPageRoute<Null>(
+                    Navigator.of(context).push(new MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return new SampleForm(
                           callback: () => new Future<bool>.value(willPopValue),
@@ -185,18 +185,20 @@ void main() {
     Future<bool> showYesNoAlert(BuildContext context) {
       return showDialog<bool>(
         context: context,
-        child: new AlertDialog(
-          actions: <Widget> [
-            new FlatButton(
-              child: const Text('YES'),
-              onPressed: () { Navigator.of(context).pop(true); },
-            ),
-            new FlatButton(
-              child: const Text('NO'),
-              onPressed: () { Navigator.of(context).pop(false); },
-            ),
-          ],
-        ),
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            actions: <Widget> [
+              new FlatButton(
+                child: const Text('YES'),
+                onPressed: () { Navigator.of(context).pop(true); },
+              ),
+              new FlatButton(
+                child: const Text('NO'),
+                onPressed: () { Navigator.of(context).pop(false); },
+              ),
+            ],
+          );
+        },
       );
     }
 
@@ -210,7 +212,7 @@ void main() {
                 child: new FlatButton(
                   child: const Text('X'),
                   onPressed: () {
-                    Navigator.of(context).push(new MaterialPageRoute<Null>(
+                    Navigator.of(context).push(new MaterialPageRoute<void>(
                       builder: (BuildContext context) {
                         return new SampleForm(
                           callback: () => showYesNoAlert(context),

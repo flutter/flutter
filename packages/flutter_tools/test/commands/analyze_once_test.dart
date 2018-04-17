@@ -33,7 +33,12 @@ void main() {
     });
 
     tearDownAll(() {
-      tempDir?.deleteSync(recursive: true);
+      try {
+        tempDir?.deleteSync(recursive: true);
+      } on FileSystemException catch (e) {
+        // ignore errors deleting the temporary directory
+        print('Ignored exception during tearDown: $e');
+      }
     });
 
     // Create a project to be analyzed
@@ -194,7 +199,7 @@ void bar() {
     });
 
     testUsingContext('--preview-dart-2', () async {
-      final String contents = '''
+      const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
 
@@ -213,7 +218,7 @@ StringBuffer bar = StringBuffer('baz');
     });
 
     testUsingContext('no --preview-dart-2 shows errors', () async {
-      final String contents = '''
+      const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
 
@@ -223,7 +228,7 @@ StringBuffer bar = StringBuffer('baz');
       try {
         await runCommand(
           command: new AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
-          arguments: <String>['analyze'],
+          arguments: <String>['analyze', '--no-preview-dart-2'],
           statusTextContains: <String>['1 issue found.'],
           toolExit: true,
         );

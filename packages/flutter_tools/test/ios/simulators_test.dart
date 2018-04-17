@@ -94,6 +94,21 @@ void main() {
     });
   });
 
+  group('sdkMajorVersion', () {
+    // This new version string appears in SimulatorApp-850 CoreSimulator-518.16 beta.
+    test('can be parsed from iOS-11-3', () async {
+      final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3');
+
+      expect(await device.sdkMajorVersion, 11);
+    });
+
+    test('can be parsed from iOS 11.2', () async {
+      final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.2');
+
+      expect(await device.sdkMajorVersion, 11);
+    });
+  });
+
   group('IOSSimulator.isSupported', () {
     testUsingContext('Apple TV is unsupported', () {
       expect(new IOSSimulator('x', name: 'Apple TV').isSupported(), false);
@@ -165,8 +180,8 @@ void main() {
     testUsingContext(
       'old Xcode doesn\'t support screenshot',
       () {
-        when(mockXcode.xcodeMajorVersion).thenReturn(7);
-        when(mockXcode.xcodeMinorVersion).thenReturn(1);
+        when(mockXcode.majorVersion).thenReturn(7);
+        when(mockXcode.minorVersion).thenReturn(1);
         expect(deviceUnderTest.supportsScreenshot, false);
       },
       overrides: <Type, Generator>{Xcode: () => mockXcode}
@@ -175,8 +190,8 @@ void main() {
     testUsingContext(
       'Xcode 8.2+ supports screenshots',
       () async {
-        when(mockXcode.xcodeMajorVersion).thenReturn(8);
-        when(mockXcode.xcodeMinorVersion).thenReturn(2);
+        when(mockXcode.majorVersion).thenReturn(8);
+        when(mockXcode.minorVersion).thenReturn(2);
         expect(deviceUnderTest.supportsScreenshot, true);
         final MockFile mockFile = new MockFile();
         when(mockFile.path).thenReturn(fs.path.join('some', 'path', 'to', 'screenshot.png'));
@@ -289,10 +304,9 @@ void main() {
             .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
         // Delay return of exitCode until after stdout stream data, since it terminates the logger.
         when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => new Future<int>.delayed(Duration.ZERO, () => 0));
+            .thenAnswer((Invocation invocation) => new Future<int>.delayed(Duration.zero, () => 0));
         return new Future<Process>.value(mockProcess);
-      })
-          .thenThrow(new TestFailure('Should start one process only'));
+      });
 
       final IOSSimulator device = new IOSSimulator('123456', category: 'iOS 11.0');
       final DeviceLogReader logReader = device.getLogReader(

@@ -35,17 +35,24 @@ class FlutterDevice {
   DevFS devFS;
   ApplicationPackage package;
   ResidentCompiler generator;
+  String dillOutputPath;
+  List<String> fileSystemRoots;
+  String fileSystemScheme;
 
   StreamSubscription<String> _loggingSubscription;
 
   FlutterDevice(this.device, {
-    bool previewDart2: false,
-    bool trackWidgetCreation: false,
+    @required bool previewDart2,
+    @required bool trackWidgetCreation,
+    this.dillOutputPath,
+    this.fileSystemRoots,
+    this.fileSystemScheme,
   }) {
     if (previewDart2) {
       generator = new ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
         trackWidgetCreation: trackWidgetCreation,
+        fileSystemRoots: fileSystemRoots, fileSystemScheme: fileSystemScheme
       );
     }
   }
@@ -369,7 +376,8 @@ class FlutterDevice {
     bool bundleFirstUpload: false,
     bool bundleDirty: false,
     Set<String> fileFilter,
-    bool fullRestart: false
+    bool fullRestart: false,
+    String projectRootPath,
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
@@ -386,7 +394,9 @@ class FlutterDevice {
         bundleDirty: bundleDirty,
         fileFilter: fileFilter,
         generator: generator,
-        fullRestart: fullRestart
+        fullRestart: fullRestart,
+        dillOutputPath: dillOutputPath,
+        projectRootPath: projectRootPath,
       );
     } on DevFSException {
       devFSStatus.cancel();

@@ -17,15 +17,19 @@ typedef String StringConverter(String string);
 typedef Future<dynamic> ShutdownHook();
 
 // TODO(ianh): We have way too many ways to run subprocesses in this project.
+// Convert most of these into one or more lightweight wrappers around the
+// [ProcessManager] API using named parameters for the various options.
+// See [here](https://github.com/flutter/flutter/pull/14535#discussion_r167041161)
+// for more details.
 
 /// The stage in which a [ShutdownHook] will be run. All shutdown hooks within
 /// a given stage will be started in parallel and will be guaranteed to run to
 /// completion before shutdown hooks in the next stage are started.
 class ShutdownStage implements Comparable<ShutdownStage> {
-  const ShutdownStage._(this._priority);
+  const ShutdownStage._(this.priority);
 
   /// The stage priority. Smaller values will be run before larger values.
-  final int _priority;
+  final int priority;
 
   /// The stage before the invocation recording (if one exists) is serialized
   /// to disk. Tasks performed during this stage *will* be recorded.
@@ -44,7 +48,7 @@ class ShutdownStage implements Comparable<ShutdownStage> {
   static const ShutdownStage CLEANUP = const ShutdownStage._(4);
 
   @override
-  int compareTo(ShutdownStage other) => _priority.compareTo(other._priority);
+  int compareTo(ShutdownStage other) => priority.compareTo(other.priority);
 }
 
 Map<ShutdownStage, List<ShutdownHook>> _shutdownHooks = <ShutdownStage, List<ShutdownHook>>{};
@@ -71,9 +75,11 @@ void addShutdownHook(
 /// guaranteed to run to completion before shutdown hooks in the next stage are
 /// started.
 Future<Null> runShutdownHooks() async {
+  printTrace('Running shutdown hooks');
   _shutdownHooksRunning = true;
   try {
     for (ShutdownStage stage in _shutdownHooks.keys.toList()..sort()) {
+      printTrace('Shutdown hook priority ${stage.priority}');
       final List<ShutdownHook> hooks = _shutdownHooks.remove(stage);
       final List<Future<dynamic>> futures = <Future<dynamic>>[];
       for (ShutdownHook shutdownHook in hooks)
@@ -84,6 +90,7 @@ Future<Null> runShutdownHooks() async {
     _shutdownHooksRunning = false;
   }
   assert(_shutdownHooks.isEmpty);
+  printTrace('Shutdown hooks complete');
 }
 
 Map<String, String> _environment(bool allowReentrantFlutter, [Map<String, String> environment]) {
@@ -130,7 +137,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
     environment: environment
   );
   final StreamSubscription<String> stdoutSubscription = process.stdout
-    .transform(UTF8.decoder)
+    .transform(utf8.decoder)
     .transform(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
@@ -145,7 +152,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
       }
     });
   final StreamSubscription<String> stderrSubscription = process.stderr
-    .transform(UTF8.decoder)
+    .transform(utf8.decoder)
     .transform(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
@@ -187,7 +194,7 @@ Future<int> runInteractively(List<String> command, {
   process.stdin.addStream(stdin);
   // Wait for stdout and stderr to be fully processed, because process.exitCode
   // may complete first.
-  Future.wait<dynamic>(<Future<dynamic>>[
+  await Future.wait<dynamic>(<Future<dynamic>>[
     stdout.addStream(process.stdout),
     stderr.addStream(process.stderr),
   ]);

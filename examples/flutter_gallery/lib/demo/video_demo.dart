@@ -9,10 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:device_info/device_info.dart';
 
-// TODO(sigurdm): These should not be stored here.
-const String butterflyUri =
-    'https://flutter.github.io/assets-for-api-docs/videos/butterfly.mp4';
-
+// TODO(sigurdm): This should not be stored here.
 const String beeUri =
     'https://flutter.github.io/assets-for-api-docs/videos/bee.mp4';
 
@@ -64,12 +61,12 @@ class VideoCard extends StatelessWidget {
     }
 
     void pushFullScreenWidget() {
-      final TransitionRoute<Null> route = new PageRouteBuilder<Null>(
+      final TransitionRoute<void> route = new PageRouteBuilder<void>(
         settings: new RouteSettings(name: title, isInitialRoute: false),
         pageBuilder: fullScreenRoutePageBuilder,
       );
 
-      route.completed.then((Null _) {
+      route.completed.then((void result) {
         controller.setVolume(0.0);
       });
 
@@ -185,13 +182,13 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
               return;
             }
             if (controller.value.isPlaying) {
-              imageFadeAnimation = new FadeAnimation(
-                child: new Icon(Icons.pause, size: 100.0),
+              imageFadeAnimation = const FadeAnimation(
+                child: const Icon(Icons.pause, size: 100.0),
               );
               controller.pause();
             } else {
-              imageFadeAnimation = new FadeAnimation(
-                child: new Icon(Icons.play_arrow, size: 100.0),
+              imageFadeAnimation = const FadeAnimation(
+                child: const Icon(Icons.play_arrow, size: 100.0),
               );
               controller.play();
             }
@@ -354,10 +351,12 @@ Future<bool> isIOSSimulator() async {
 
 class _VideoDemoState extends State<VideoDemo>
     with SingleTickerProviderStateMixin {
-  final VideoPlayerController butterflyController = new VideoPlayerController(
-    butterflyUri,
-  );
-  final VideoPlayerController beeController = new VideoPlayerController(
+  final VideoPlayerController butterflyController =
+      new VideoPlayerController.asset(
+        'videos/butterfly.mp4',
+        package: 'flutter_gallery_assets',
+      );
+  final VideoPlayerController beeController = new VideoPlayerController.network(
     beeUri,
   );
 

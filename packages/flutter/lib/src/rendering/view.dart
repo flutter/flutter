@@ -24,7 +24,6 @@ class ViewConfiguration {
   const ViewConfiguration({
     this.size: Size.zero,
     this.devicePixelRatio: 1.0,
-    this.orientation
   });
 
   /// The size of the output surface.
@@ -32,9 +31,6 @@ class ViewConfiguration {
 
   /// The pixel density of the output surface.
   final double devicePixelRatio;
-
-  /// The orientation of the output surface (aspirational).
-  final int orientation;
 
   /// Creates a transformation matrix that applies the [devicePixelRatio].
   Matrix4 toMatrix() {
@@ -58,23 +54,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// The [configuration] must not be null.
   RenderView({
     RenderBox child,
-    this.timeForRotation: const Duration(microseconds: 83333),
     @required ViewConfiguration configuration,
   }) : assert(configuration != null),
        _configuration = configuration {
     this.child = child;
   }
 
-  /// The amount of time the screen rotation animation should last (aspirational).
-  Duration timeForRotation;
-
   /// The current layout size of the view.
   Size get size => _size;
   Size _size = Size.zero;
-
-  /// The current orientation of the view (aspirational).
-  int get orientation => _orientation;
-  int _orientation; // 0..3
 
   /// The constraints used for the root layout.
   ViewConfiguration get configuration => _configuration;
@@ -130,11 +118,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   @override
   void performLayout() {
     assert(_rootTransform != null);
-    if (configuration.orientation != _orientation) {
-      if (_orientation != null && child != null)
-        child.rotate(oldAngle: _orientation, newAngle: configuration.orientation, time: timeForRotation);
-      _orientation = configuration.orientation;
-    }
     _size = configuration.size;
     assert(_size.isFinite);
 
@@ -211,18 +194,18 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     // call to ${super.debugFillProperties(description)} is omitted because the
     // root superclasses don't include any interesting information for this
     // class
     assert(() {
-      description.add(new DiagnosticsNode.message('debug mode enabled - ${Platform.operatingSystem}'));
+      properties.add(new DiagnosticsNode.message('debug mode enabled - ${Platform.operatingSystem}'));
       return true;
     }());
-    description.add(new DiagnosticsProperty<Size>('window size', ui.window.physicalSize, tooltip: 'in physical pixels'));
-    description.add(new DoubleProperty('device pixel ratio', ui.window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
-    description.add(new DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
+    properties.add(new DiagnosticsProperty<Size>('window size', ui.window.physicalSize, tooltip: 'in physical pixels'));
+    properties.add(new DoubleProperty('device pixel ratio', ui.window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
+    properties.add(new DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));
     if (ui.window.semanticsEnabled)
-      description.add(new DiagnosticsNode.message('semantics enabled'));
+      properties.add(new DiagnosticsNode.message('semantics enabled'));
   }
 }

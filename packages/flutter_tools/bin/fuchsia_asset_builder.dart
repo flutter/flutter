@@ -5,29 +5,32 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
-
-import '../lib/src/asset.dart';
-import '../lib/src/base/file_system.dart' as libfs;
-import '../lib/src/base/io.dart';
-import '../lib/src/base/platform.dart';
-import '../lib/src/cache.dart';
-import '../lib/src/context_runner.dart';
-import '../lib/src/devfs.dart';
-import '../lib/src/flx.dart';
-import '../lib/src/globals.dart';
+import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/file_system.dart' as libfs;
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/disabled_usage.dart';
+import 'package:flutter_tools/src/bundle.dart';
+import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/usage.dart';
 
 const String _kOptionPackages = 'packages';
-const String _kOptionWorking = 'working-dir';
+const String _kOptionAsset = 'asset-dir';
 const String _kOptionManifest = 'manifest';
 const String _kOptionAssetManifestOut = 'asset-manifest-out';
 const List<String> _kRequiredOptions = const <String>[
   _kOptionPackages,
-  _kOptionWorking,
+  _kOptionAsset,
   _kOptionAssetManifestOut,
 ];
 
-Future<Null> main(List<String> args) async {
-  await runInContext(args, run);
+Future<Null> main(List<String> args) {
+  return runInContext<Null>(() => run(args), overrides: <Type, dynamic>{
+    Usage: new DisabledUsage(),
+  });
 }
 
 Future<Null> writeFile(libfs.File outputFile, DevFSContent content) async {
@@ -40,7 +43,7 @@ Future<Null> writeFile(libfs.File outputFile, DevFSContent content) async {
 Future<Null> run(List<String> args) async {
   final ArgParser parser = new ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
-    ..addOption(_kOptionWorking,
+    ..addOption(_kOptionAsset,
         help: 'The directory where to put temporary files')
     ..addOption(_kOptionManifest, help: 'The manifest file')
     ..addOption(_kOptionAssetManifestOut);
@@ -52,10 +55,10 @@ Future<Null> run(List<String> args) async {
   }
   Cache.flutterRoot = platform.environment['FLUTTER_ROOT'];
 
-  final String workingDir = argResults[_kOptionWorking];
+  final String assetDir = argResults[_kOptionAsset];
   final AssetBundle assets = await buildAssets(
     manifestPath: argResults[_kOptionManifest] ?? defaultManifestPath,
-    workingDirPath: workingDir,
+    assetDirPath: assetDir,
     packagesPath: argResults[_kOptionPackages],
     includeDefaultFonts: false,
   );
@@ -67,13 +70,13 @@ Future<Null> run(List<String> args) async {
 
   final List<Future<Null>> calls = <Future<Null>>[];
   assets.entries.forEach((String fileName, DevFSContent content) {
-    final libfs.File outputFile = libfs.fs.file(libfs.fs.path.join(workingDir, fileName));
+    final libfs.File outputFile = libfs.fs.file(libfs.fs.path.join(assetDir, fileName));
     calls.add(writeFile(outputFile, content));
   });
   await Future.wait(calls);
 
   final String outputMan = argResults[_kOptionAssetManifestOut];
-  await writeFuchsiaManifest(assets, argResults[_kOptionWorking], outputMan);
+  await writeFuchsiaManifest(assets, argResults[_kOptionAsset], outputMan);
 }
 
 Future<Null> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest) async {

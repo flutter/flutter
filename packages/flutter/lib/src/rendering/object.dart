@@ -502,7 +502,7 @@ abstract class Constraints {
   /// This might involve checks more detailed than [isNormalized].
   ///
   /// For example, the [BoxConstraints] subclass verifies that the constraints
-  /// are not [double.NAN].
+  /// are not [double.nan].
   ///
   /// If the `isAppliedConstraint` argument is true, then even stricter rules
   /// are enforced. This argument is set to true when checking constraints that
@@ -1854,7 +1854,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Mark this render object as having changed its visual appearance.
   ///
   /// Rather than eagerly updating this render object's display list
-  /// in response to writes, we instead mark the the render object as needing to
+  /// in response to writes, we instead mark the render object as needing to
   /// paint, which schedules a visual update. As part of the visual update, the
   /// rendering pipeline will give this render object an opportunity to update
   /// its display list.
@@ -2222,8 +2222,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// any way to update the semantics tree.
   void markNeedsSemanticsUpdate() {
     assert(!attached || !owner._debugDoingSemantics);
-    if (attached && owner._semanticsOwner == null)
+    if (!attached || owner._semanticsOwner == null) {
+      _cachedSemanticsConfiguration = null;
       return;
+    }
 
     // Dirty the semantics tree starting at `this` until we have reached a
     // RenderObject that is a semantics boundary. All semantics past this
@@ -2502,19 +2504,19 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   @protected
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
-    description.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
-    description.add(new DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
+    properties.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
+    properties.add(new DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));
     // don't access it via the "layer" getter since that's only valid when we don't need paint
-    description.add(new DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
-    description.add(new DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));
-    description.add(new FlagProperty(
+    properties.add(new DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
+    properties.add(new DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));
+    properties.add(new FlagProperty(
       'isBlockingSemanticsOfPreviouslyPaintedNodes',
       value: _semanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes,
       ifTrue: 'blocks semantics of earlier render objects below the common boundary',
     ));
-    description.add(new FlagProperty('isSemanticBoundary', value: _semanticsConfiguration.isSemanticBoundary, ifTrue: 'semantic boundary'));
+    properties.add(new FlagProperty('isSemanticBoundary', value: _semanticsConfiguration.isSemanticBoundary, ifTrue: 'semantic boundary'));
   }
 
   @override

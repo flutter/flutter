@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show UTF8;
-
-import 'package:archive/archive.dart';
 
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
@@ -13,6 +10,7 @@ import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
@@ -20,12 +18,19 @@ import 'base/version.dart';
 import 'cache.dart';
 import 'device.dart';
 import 'globals.dart';
+import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
 
 Doctor get doctor => context[Doctor];
+
+class ValidatorTask {
+  ValidatorTask(this.validator, this.result);
+  final DoctorValidator validator;
+  final Future<ValidationResult> result;
+}
 
 class Doctor {
   List<DoctorValidator> _validators;
@@ -54,6 +59,16 @@ class Doctor {
         _validators.add(new DeviceValidator());
     }
     return _validators;
+  }
+
+  /// Return a list of [ValidatorTask] objects and starts validation on all
+  /// objects in [validators].
+  List<ValidatorTask> startValidatorTasks() {
+    final List<ValidatorTask> tasks = <ValidatorTask>[];
+    for (DoctorValidator validator in validators) {
+      tasks.add(new ValidatorTask(validator, validator.validate()));
+    }
+    return tasks;
   }
 
   List<Workflow> get workflows {
@@ -108,9 +123,14 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
-    for (DoctorValidator validator in validators) {
-      final ValidationResult result = await validator.validate();
+    for (ValidatorTask validatorTask in startValidatorTasks()) {
+      final DoctorValidator validator = validatorTask.validator;
+      final Status status = new Status.withSpinner();
+      await (validatorTask.result).then<void>((_) {
+        status.stop();
+      }).whenComplete(status.cancel);
 
+      final ValidationResult result = await validatorTask.result;
       if (result.type == ValidationType.missing) {
         doctorResult = false;
       }
@@ -175,7 +195,7 @@ enum ValidationType {
 }
 
 abstract class DoctorValidator {
-  DoctorValidator(this.title);
+  const DoctorValidator(this.title);
 
   final String title;
 
@@ -242,10 +262,15 @@ class _FlutterValidator extends DoctorValidator {
 
     // Check that the binaries we downloaded for this platform actually run on it.
     if (!_genSnapshotRuns(genSnapshotPath)) {
-      messages.add(new ValidationMessage.error(
-        'Downloaded executables cannot execute '
-        'on host (see https://github.com/flutter/flutter/issues/6207 for more information)'
-      ));
+      final StringBuffer buf = new StringBuffer();
+      buf.writeln('Downloaded executables cannot execute on host.');
+      buf.writeln('See https://github.com/flutter/flutter/issues/6207 for more information');
+      if (platform.isLinux) {
+        buf.writeln('On Debian/Ubuntu/Mint: sudo apt-get install lib32stdc++6');
+        buf.writeln('On Fedora: dnf install libstdc++.i686');
+        buf.writeln('On Arch: pacman -S lib32-libstdc++5');
+      }
+      messages.add(new ValidationMessage.error(buf.toString()));
       valid = ValidationType.partial;
     }
 
@@ -289,7 +314,6 @@ abstract class IntelliJValidator extends DoctorValidator {
   };
 
   static final Version kMinIdeaVersion = new Version(2017, 1, 0);
-  static final Version kMinFlutterPluginVersion = new Version(16, 0, 0);
 
   static Iterable<DoctorValidator> get installedValidators {
     if (platform.isLinux || platform.isWindows)
@@ -305,9 +329,10 @@ abstract class IntelliJValidator extends DoctorValidator {
 
     messages.add(new ValidationMessage('IntelliJ at $installPath'));
 
-    _validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
-        'Flutter', minVersion: kMinFlutterPluginVersion);
-    _validatePackage(messages, <String>['Dart'], 'Dart');
+    final IntelliJPlugins plugins = new IntelliJPlugins(pluginsPath);
+    plugins.validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
+        'Flutter', minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
+    plugins.validatePackage(messages, <String>['Dart'], 'Dart');
 
     if (_hasIssues(messages)) {
       messages.add(new ValidationMessage(
@@ -344,70 +369,16 @@ abstract class IntelliJValidator extends DoctorValidator {
       ));
     }
   }
-
-  void _validatePackage(List<ValidationMessage> messages, List<String> packageNames, String title, {
-    Version minVersion
-  }) {
-    for (String packageName in packageNames) {
-      if (!hasPackage(packageName)) {
-        continue;
-      }
-
-      final String versionText = _readPackageVersion(packageName);
-      final Version version = new Version.parse(versionText);
-      if (version != null && minVersion != null && version < minVersion) {
-        messages.add(new ValidationMessage.error(
-          '$title plugin version $versionText - the recommended minimum version is $minVersion'
-        ));
-      } else {
-        messages.add(new ValidationMessage(
-          '$title plugin ${version != null ? "version $version" : "installed"}'
-        ));
-      }
-
-      return;
-    }
-
-    messages.add(new ValidationMessage.error(
-      '$title plugin not installed; this adds $title specific functionality.'
-    ));
-  }
-
-  String _readPackageVersion(String packageName) {
-    final String jarPath = packageName.endsWith('.jar')
-        ? fs.path.join(pluginsPath, packageName)
-        : fs.path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
-    // TODO(danrubel) look for a better way to extract a single 2K file from the zip
-    // rather than reading the entire file into memory.
-    try {
-      final Archive archive = new ZipDecoder().decodeBytes(fs.file(jarPath).readAsBytesSync());
-      final ArchiveFile file = archive.findFile('META-INF/plugin.xml');
-      final String content = UTF8.decode(file.content);
-      const String versionStartTag = '<version>';
-      final int start = content.indexOf(versionStartTag);
-      final int end = content.indexOf('</version>', start);
-      return content.substring(start + versionStartTag.length, end);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  bool hasPackage(String packageName) {
-    final String packagePath = fs.path.join(pluginsPath, packageName);
-    if (packageName.endsWith('.jar'))
-      return fs.isFileSync(packagePath);
-    return fs.isDirectorySync(packagePath);
-  }
 }
 
 class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
   IntelliJValidatorOnLinuxAndWindows(String title, this.version, String installPath, this.pluginsPath) : super(title, installPath);
 
   @override
-  String version;
+  final String version;
 
   @override
-  String pluginsPath;
+  final String pluginsPath;
 
   static Iterable<DoctorValidator> get installed {
     final List<DoctorValidator> validators = <DoctorValidator>[];

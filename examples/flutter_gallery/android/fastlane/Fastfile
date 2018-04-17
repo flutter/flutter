@@ -11,7 +11,7 @@ platform :android do
   lane :deploy_play_store do
     begin
       upload_to_play_store(
-        track: ENV['TRAVIS_BRANCH'] == 'beta' ? 'beta' : 'alpha',
+        track: 'alpha',
         apk: '../build/app/outputs/apk/release/app-release.apk',
         json_key_data: ENV['GOOGLE_DEVELOPER_SERVICE_ACCOUNT_ACTOR_FASTLANE'],
         skip_upload_screenshots: true,

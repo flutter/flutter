@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui show Image;
+import 'dart:typed_data';
+import 'dart:ui' as ui show EncodingFormat, Image;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -34,6 +35,11 @@ class TestImage implements ui.Image {
 
   @override
   void dispose() { }
+
+  @override
+  Future<ByteData> toByteData({ui.EncodingFormat format}) async {
+    throw new UnsupportedError('Cannot encode test image');
+  }
 }
 
 void main() {
@@ -56,7 +62,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -95,7 +101,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -130,7 +136,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -165,7 +171,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -200,7 +206,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -231,7 +237,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -259,7 +265,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -287,7 +293,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -314,7 +320,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -351,7 +357,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -384,7 +390,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -417,7 +423,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -450,7 +456,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -479,7 +485,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -505,7 +511,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -531,7 +537,7 @@ void main() {
           ),
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     expect(find.byType(Container), paints
@@ -551,7 +557,7 @@ void main() {
           matchTextDirection: false,
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     await tester.pumpWidget(
@@ -563,7 +569,7 @@ void main() {
           matchTextDirection: true,
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
     await tester.pumpWidget(
@@ -575,7 +581,7 @@ void main() {
           matchTextDirection: false,
         ),
       ),
-      Duration.ZERO,
+      Duration.zero,
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
   });

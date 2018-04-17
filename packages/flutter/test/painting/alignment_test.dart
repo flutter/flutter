@@ -25,8 +25,8 @@ void main() {
   });
 
   test('Alignment.lerp()', () {
-    final Alignment a = Alignment.topLeft;
-    final Alignment b = Alignment.topCenter;
+    const Alignment a = Alignment.topLeft;
+    const Alignment b = Alignment.topCenter;
     expect(Alignment.lerp(a, b, 0.25), equals(const Alignment(-0.75, -1.0)));
 
     expect(Alignment.lerp(null, null, 0.25), isNull);
@@ -35,11 +35,11 @@ void main() {
   });
 
   test('AlignmentGeometry invariants', () {
-    final AlignmentDirectional topStart = AlignmentDirectional.topStart;
-    final AlignmentDirectional topEnd = AlignmentDirectional.topEnd;
-    final Alignment center = Alignment.center;
-    final Alignment topLeft = Alignment.topLeft;
-    final Alignment topRight = Alignment.topRight;
+    const AlignmentDirectional topStart = AlignmentDirectional.topStart;
+    const AlignmentDirectional topEnd = AlignmentDirectional.topEnd;
+    const Alignment center = Alignment.center;
+    const Alignment topLeft = Alignment.topLeft;
+    const Alignment topRight = Alignment.topRight;
     final List<double> numbers = <double>[0.0, 1.0, -1.0, 2.0, 0.25, 0.5, 100.0, -999.75];
 
     expect((topEnd * 0.0).add(topRight * 0.0), center);

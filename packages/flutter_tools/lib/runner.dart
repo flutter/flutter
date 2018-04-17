@@ -7,26 +7,18 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:intl/intl_standalone.dart' as intl;
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
-import 'src/artifacts.dart';
 import 'src/base/common.dart';
-import 'src/base/config.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
-import 'src/base/platform.dart';
 import 'src/base/process.dart';
 import 'src/base/utils.dart';
-import 'src/cache.dart';
+import 'src/context_runner.dart';
 import 'src/crash_reporting.dart';
-import 'src/devfs.dart';
-import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
-import 'src/ios/simulators.dart';
-import 'src/run_hot.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 import 'src/usage.dart';
@@ -41,7 +33,7 @@ Future<int> run(
   bool verboseHelp: false,
   bool reportCrashes,
   String flutterVersion,
-}) async {
+}) {
   reportCrashes ??= !isRunningOnBot;
 
   if (muteCommandLogging) {
@@ -54,35 +46,7 @@ Future<int> run(
   final FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp);
   commands.forEach(runner.addCommand);
 
-  // Construct a context.
-  final AppContext _executableContext = new AppContext();
-
-  // Make the context current.
-  return await _executableContext.runInZone(() async {
-    // Initialize the context with some defaults.
-    // NOTE: Similar lists also exist in `bin/fuchsia_builder.dart` and
-    // `test/src/context.dart`. If you update this list of defaults, look
-    // in those locations as well to see if you need a similar update there.
-
-    // Seed these context entries first since others depend on them
-    context.putIfAbsent(Stdio, () => const Stdio());
-    context.putIfAbsent(Platform, () => const LocalPlatform());
-    context.putIfAbsent(FileSystem, () => const LocalFileSystem());
-    context.putIfAbsent(ProcessManager, () => const LocalProcessManager());
-    context.putIfAbsent(Logger, () => platform.isWindows ? new WindowsStdoutLogger() : new StdoutLogger());
-    context.putIfAbsent(Config, () => new Config());
-
-    // Order-independent context entries
-    context.putIfAbsent(BotDetector, () => const BotDetector());
-    context.putIfAbsent(DeviceManager, () => new DeviceManager());
-    context.putIfAbsent(DevFSConfig, () => new DevFSConfig());
-    context.putIfAbsent(Doctor, () => new Doctor());
-    context.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
-    context.putIfAbsent(Cache, () => new Cache());
-    context.putIfAbsent(Artifacts, () => new CachedArtifacts());
-    context.putIfAbsent(IOSSimulatorUtils, () => new IOSSimulatorUtils());
-    context.putIfAbsent(SimControl, () => new SimControl());
-
+  return runInContext<int>(() async {
     // Initialize the system locale.
     await intl.findSystemLocale();
 
@@ -97,16 +61,6 @@ Future<int> run(
   });
 }
 
-/// Writes the [string] to one of the standard output streams.
-@visibleForTesting
-typedef void WriteCallback([String string]);
-
-/// Writes a line to STDERR.
-///
-/// Overwrite this in tests to avoid spurious test output.
-@visibleForTesting
-WriteCallback writelnStderr = stderr.writeln;
-
 Future<int> _handleToolError(
     dynamic error,
     StackTrace stackTrace,
@@ -116,9 +70,9 @@ Future<int> _handleToolError(
     String getFlutterVersion(),
     ) async {
   if (error is UsageException) {
-    writelnStderr(error.message);
-    writelnStderr();
-    writelnStderr(
+    stderr.writeln(error.message);
+    stderr.writeln();
+    stderr.writeln(
         "Run 'flutter -h' (or 'flutter <command> -h') for available "
             'flutter commands and options.'
     );
@@ -126,11 +80,11 @@ Future<int> _handleToolError(
     return _exit(64);
   } else if (error is ToolExit) {
     if (error.message != null)
-      writelnStderr(error.message);
+      stderr.writeln(error.message);
     if (verbose) {
-      writelnStderr();
-      writelnStderr(stackTrace.toString());
-      writelnStderr();
+      stderr.writeln();
+      stderr.writeln(stackTrace.toString());
+      stderr.writeln();
     }
     return _exit(error.exitCode ?? 1);
   } else if (error is ProcessExit) {
@@ -143,20 +97,20 @@ Future<int> _handleToolError(
     }
   } else {
     // We've crashed; emit a log report.
-    writelnStderr();
+    stderr.writeln();
 
     if (!reportCrashes) {
       // Print the stack trace on the bots - don't write a crash report.
-      writelnStderr('$error');
-      writelnStderr(stackTrace.toString());
+      stderr.writeln('$error');
+      stderr.writeln(stackTrace.toString());
       return _exit(1);
     } else {
       flutterUsage.sendException(error, stackTrace);
 
       if (error is String)
-        writelnStderr('Oops; flutter has exited unexpectedly: "$error".');
+        stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
       else
-        writelnStderr('Oops; flutter has exited unexpectedly.');
+        stderr.writeln('Oops; flutter has exited unexpectedly.');
 
       await CrashReportSender.instance.sendReport(
         error: error,
@@ -165,13 +119,13 @@ Future<int> _handleToolError(
       );
       try {
         final File file = await _createLocalCrashReport(args, error, stackTrace);
-        writelnStderr(
+        stderr.writeln(
           'Crash report written to ${file.path};\n'
               'please let us know at https://github.com/flutter/flutter/issues.',
         );
         return _exit(1);
       } catch (error) {
-        writelnStderr(
+        stderr.writeln(
           'Unable to generate crash report due to secondary error: $error\n'
               'please let us know at https://github.com/flutter/flutter/issues.',
         );
@@ -230,11 +184,13 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrac
 Future<String> _doctorText() async {
   try {
     final BufferLogger logger = new BufferLogger();
-    final AppContext appContext = new AppContext();
 
-    appContext.setVariable(Logger, logger);
-
-    await appContext.runInZone(() => doctor.diagnose());
+    await context.run<bool>(
+      body: () => doctor.diagnose(verbose: true),
+      overrides: <Type, Generator>{
+        Logger: () => logger,
+      },
+    );
 
     return logger.statusText;
   } catch (error, trace) {

@@ -15,6 +15,8 @@ import 'globals.dart';
 enum Artifact {
   dartIoEntriesTxt,
   dartVmEntryPointsTxt,
+  entryPointsJson,
+  entryPointsExtraJson,
   genSnapshot,
   flutterTester,
   snapshotDart,
@@ -26,17 +28,25 @@ enum Artifact {
   flutterPatchedSdkPath,
   frontendServerSnapshotForEngineDartSdk,
   engineDartSdkPath,
+  engineDartBinary,
 }
 
-String _artifactToFileName(Artifact artifact) {
+String _artifactToFileName(Artifact artifact, [TargetPlatform platform]) {
   switch (artifact) {
     case Artifact.dartIoEntriesTxt:
       return 'dart_io_entries.txt';
     case Artifact.dartVmEntryPointsTxt:
       return 'dart_vm_entry_points.txt';
+    case Artifact.entryPointsJson:
+      return 'entry_points.json';
+    case Artifact.entryPointsExtraJson:
+      return 'entry_points_extra.json';
     case Artifact.genSnapshot:
       return 'gen_snapshot';
     case Artifact.flutterTester:
+      if (platform == TargetPlatform.windows_x64) {
+        return 'flutter_tester.exe';
+      }
       return 'flutter_tester';
     case Artifact.snapshotDart:
       return 'snapshot.dart';
@@ -57,6 +67,8 @@ String _artifactToFileName(Artifact artifact) {
       return 'dart-sdk';
     case Artifact.frontendServerSnapshotForEngineDartSdk:
       return 'frontend_server.dart.snapshot';
+    case Artifact.engineDartBinary:
+      return 'dart';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -75,8 +87,8 @@ class EngineBuildPaths {
 abstract class Artifacts {
   static Artifacts get instance => context[Artifacts];
 
-  static void useLocalEngine(String engineSrcPath, EngineBuildPaths engineBuildPaths) {
-    context.setVariable(Artifacts, new LocalEngineArtifacts(engineSrcPath, engineBuildPaths.targetEngine, engineBuildPaths.hostEngine));
+  static LocalEngineArtifacts getLocalEngine(String engineSrcPath, EngineBuildPaths engineBuildPaths) {
+    return new LocalEngineArtifacts(engineSrcPath, engineBuildPaths.targetEngine, engineBuildPaths.hostEngine);
   }
 
   // Returns the requested [artifact] for the [platform] and [mode] combination.
@@ -105,6 +117,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.tester:
         return _getHostArtifactPath(artifact, platform);
     }
     assert(false, 'Invalid platform $platform.');
@@ -121,6 +134,8 @@ class CachedArtifacts extends Artifacts {
     switch (artifact) {
       case Artifact.dartIoEntriesTxt:
       case Artifact.dartVmEntryPointsTxt:
+      case Artifact.entryPointsJson:
+      case Artifact.entryPointsExtraJson:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
         return fs.path.join(engineDir, _artifactToFileName(artifact));
@@ -139,6 +154,8 @@ class CachedArtifacts extends Artifacts {
     switch (artifact) {
       case Artifact.dartIoEntriesTxt:
       case Artifact.dartVmEntryPointsTxt:
+      case Artifact.entryPointsJson:
+      case Artifact.entryPointsExtraJson:
       case Artifact.genSnapshot:
       case Artifact.snapshotDart:
       case Artifact.flutterFramework:
@@ -167,9 +184,11 @@ class CachedArtifacts extends Artifacts {
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
         final String platformDirName = getNameForTargetPlatform(platform);
-        return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
+        return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform));
       case Artifact.engineDartSdkPath:
         return dartSdkPath;
+      case Artifact.engineDartBinary:
+        return fs.path.join(dartSdkPath,'bin', _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
         return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
@@ -190,6 +209,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.darwin_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.tester:
         assert(mode == null, 'Platform $platform does not support different build modes.');
         return fs.path.join(engineDir, platformName);
       case TargetPlatform.ios:
@@ -231,6 +251,9 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_engineSrcPath, 'third_party', 'dart', 'runtime', 'bin', _artifactToFileName(artifact));
       case Artifact.dartVmEntryPointsTxt:
         return fs.path.join(_engineSrcPath, 'flutter', 'runtime', _artifactToFileName(artifact));
+      case Artifact.entryPointsJson:
+      case Artifact.entryPointsExtraJson:
+        return fs.path.join(engineOutPath, 'dart_entry_points', _artifactToFileName(artifact));
       case Artifact.snapshotDart:
         return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
       case Artifact.genSnapshot:
@@ -252,6 +275,8 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_hostEngineOutPath, 'gen', _artifactToFileName(artifact));
       case Artifact.engineDartSdkPath:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk');
+      case Artifact.engineDartBinary:
+        return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', _artifactToFileName(artifact));
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

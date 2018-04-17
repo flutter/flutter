@@ -39,19 +39,22 @@ class BuildAotCommand extends BuildSubCommand {
       )
       ..addFlag('interpreter')
       ..addFlag('quiet', defaultsTo: false)
-      ..addFlag('preview-dart-2', negatable: false, hide: !verboseHelp)
-      ..addOption(FlutterOptions.kExtraFrontEndOptions,
-        allowMultiple: true,
+      ..addFlag('preview-dart-2',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help: 'Preview Dart 2.0 functionality.',
+      )
+      ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
         hide: true,
       )
-      ..addOption(FlutterOptions.kExtraGenSnapshotOptions,
-        allowMultiple: true,
+      ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
         splitCommas: true,
         hide: true,
       )
-      ..addFlag('prefer-shared-library', negatable: false,
-          help: 'Whether to prefer compiling to a *.so file (android only).');
+      ..addFlag('prefer-shared-library',
+        negatable: false,
+        help: 'Whether to prefer compiling to a *.so file (android only).');
   }
 
   @override
@@ -188,6 +191,14 @@ Future<String> _buildAotSnapshot(
   );
   final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
 
+  final List<String> entryPointsJsonFiles = <String>[];
+  if (previewDart2 && !interpreter) {
+    entryPointsJsonFiles.addAll(<String>[
+      artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode),
+      artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode),
+    ]);
+  }
+
   final PackageMap packageMap = new PackageMap(PackageMap.globalPackagesPath);
   final String packageMapError = packageMap.checkValid();
   if (packageMapError != null) {
@@ -206,6 +217,8 @@ Future<String> _buildAotSnapshot(
     vmServicePath,
     mainPath,
   ];
+
+  inputPaths.addAll(entryPointsJsonFiles);
 
   final Set<String> outputPaths = new Set<String>();
 
@@ -234,6 +247,7 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.linux_x64:
     case TargetPlatform.windows_x64:
     case TargetPlatform.fuchsia:
+    case TargetPlatform.tester:
       assert(false);
   }
 
@@ -247,7 +261,16 @@ Future<String> _buildAotSnapshot(
     return null;
   }
 
-  final List<String> genSnapshotCmd = <String>[
+  final List<String> genSnapshotCmd = <String>[];
+  // iOS gen_snapshot is a multi-arch binary. Running as an i386 binary will
+  // generate armv7 code. Running as an x86_64 binary will generate arm64
+  // code. /usr/bin/arch can be used to run binaries with the specified
+  // architecture.
+  //
+  // TODO(cbracken): update the GenSnapshot class to handle AOT builds.
+  if (platform == TargetPlatform.ios)
+    genSnapshotCmd.addAll(<String>['arch', '-x86_64']);
+  genSnapshotCmd.addAll(<String>[
     genSnapshot,
     '--await_is_keyword',
     '--vm_snapshot_data=$vmSnapshotData',
@@ -258,7 +281,7 @@ Future<String> _buildAotSnapshot(
     '--print_snapshot_sizes',
     '--dependencies=$dependencies',
     '--causal_async_stacks',
-  ];
+  ]);
 
   if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
     printTrace('Extra front-end options: $extraFrontEndOptions');
@@ -325,6 +348,7 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.linux_x64:
     case TargetPlatform.windows_x64:
     case TargetPlatform.fuchsia:
+    case TargetPlatform.tester:
       assert(false);
   }
 
@@ -363,19 +387,26 @@ Future<String> _buildAotSnapshot(
   }
 
   if (previewDart2) {
-    mainPath = await compile(
+    final CompilerOutput compilerOutput = await compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
       outputFilePath: kApplicationKernelPath,
+      depFilePath: dependencies,
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn : true,
-      aot : true,
+      aot : !interpreter,
+      entryPointsJsonFiles: entryPointsJsonFiles,
       trackWidgetCreation: false,
     );
+    mainPath = compilerOutput?.outputFilename;
     if (mainPath == null) {
       printError('Compiler terminated unexpectedly.');
       return null;
     }
+    // Write path to frontend_server, since things need to be re-generated when
+    // that changes.
+    await outputDir.childFile('frontend_server.d')
+        .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
 
     genSnapshotCmd.addAll(<String>[
       '--reify-generic-functions',

@@ -524,11 +524,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
         if (flex == 0) {
           switch (_direction) {
               case Axis.horizontal:
-                mainSize = child.getMaxIntrinsicWidth(double.INFINITY);
+                mainSize = child.getMaxIntrinsicWidth(double.infinity);
                 crossSize = childSize(child, mainSize);
                 break;
               case Axis.vertical:
-                mainSize = child.getMaxIntrinsicHeight(double.INFINITY);
+                mainSize = child.getMaxIntrinsicHeight(double.infinity);
                 crossSize = childSize(child, mainSize);
                 break;
           }
@@ -639,10 +639,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     int totalChildren = 0;
     assert(constraints != null);
     final double maxMainSize = _direction == Axis.horizontal ? constraints.maxWidth : constraints.maxHeight;
-    final bool canFlex = maxMainSize < double.INFINITY;
+    final bool canFlex = maxMainSize < double.infinity;
 
     double crossSize = 0.0;
-    double allocatedSize = 0.0; // Sum of the sizes of the the non-flexible children.
+    double allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
     RenderBox child = firstChild;
     RenderBox lastFlexChild;
     while (child != null) {
@@ -681,7 +681,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             if (node != null) {
               information.writeln('The nearest ancestor providing an unbounded width constraint is:');
               information.write('  ');
-              information.write(node.toStringShallow(joiner: '\n  '));
+              information.writeln(node.toStringShallow(joiner: '\n  '));
             }
             information.writeln('See also: https://flutter.io/layout/');
             addendum = information.toString();
@@ -748,16 +748,16 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     double allocatedFlexSpace = 0.0;
     double maxBaselineDistance = 0.0;
     if (totalFlex > 0 || crossAxisAlignment == CrossAxisAlignment.baseline) {
-      final double spacePerFlex = canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.NAN;
+      final double spacePerFlex = canFlex && totalFlex > 0 ? (freeSpace / totalFlex) : double.nan;
       child = firstChild;
       while (child != null) {
         final int flex = _getFlex(child);
         if (flex > 0) {
-          final double maxChildExtent = canFlex ? (child == lastFlexChild ? (freeSpace - allocatedFlexSpace) : spacePerFlex * flex) : double.INFINITY;
+          final double maxChildExtent = canFlex ? (child == lastFlexChild ? (freeSpace - allocatedFlexSpace) : spacePerFlex * flex) : double.infinity;
           double minChildExtent;
           switch (_getFit(child)) {
             case FlexFit.tight:
-              assert(maxChildExtent < double.INFINITY);
+              assert(maxChildExtent < double.infinity);
               minChildExtent = maxChildExtent;
               break;
             case FlexFit.loose:
@@ -985,14 +985,14 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<Axis>('direction', direction));
-    description.add(new EnumProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
-    description.add(new EnumProperty<MainAxisSize>('mainAxisSize', mainAxisSize));
-    description.add(new EnumProperty<CrossAxisAlignment>('crossAxisAlignment', crossAxisAlignment));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    description.add(new EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: null));
-    description.add(new EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<Axis>('direction', direction));
+    properties.add(new EnumProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
+    properties.add(new EnumProperty<MainAxisSize>('mainAxisSize', mainAxisSize));
+    properties.add(new EnumProperty<CrossAxisAlignment>('crossAxisAlignment', crossAxisAlignment));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(new EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: null));
+    properties.add(new EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
   }
 }

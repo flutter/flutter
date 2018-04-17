@@ -29,8 +29,45 @@ const RaisedButton(
   child: const Text('BUTTON TITLE'),
   onPressed: null
 );
+
+// Create a button with an icon and a
+// title.
+new RaisedButton.icon(
+  icon: const Icon(Icons.add, size: 18.0),
+  label: const Text('BUTTON TITLE'),
+  onPressed: () {
+    // Perform some action
+  },
+);
 // END
 
+// START buttons_outline
+// Create an outline button.
+new OutlineButton(
+  child: const Text('BUTTON TITLE'),
+  onPressed: () {
+    // Perform some action
+  }
+);
+
+// Create a disabled button.
+// Buttons are disabled when onPressed isn't
+// specified or is null.
+const OutlineButton(
+  child: const Text('BUTTON TITLE'),
+  onPressed: null
+);
+
+// Create a button with an icon and a
+// title.
+new OutlineButton.icon(
+  icon: const Icon(Icons.add, size: 18.0),
+  label: const Text('BUTTON TITLE'),
+  onPressed: () {
+    // Perform some action
+  },
+);
+// END
 
 // START buttons_flat
 // Create a flat button.
@@ -123,9 +160,20 @@ new Checkbox(
   onChanged: (bool value) {
     setState(() {
       checkboxValue = value;
-    }
-  );
-});
+    });
+  },
+);
+
+// Create a tristate checkbox.
+new Checkbox(
+  tristate: true,
+  value: checkboxValue,
+  onChanged: (bool value) {
+    setState(() {
+      checkboxValue = value;
+    });
+  },
+);
 
 // Create a disabled checkbox.
 // Checkboxes are disabled when onChanged isn't

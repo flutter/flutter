@@ -110,9 +110,9 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   _GlowingOverscrollIndicatorState createState() => new _GlowingOverscrollIndicatorState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
     String showDescription;
     if (showLeading && showTrailing) {
       showDescription = 'both sides';
@@ -123,8 +123,8 @@ class GlowingOverscrollIndicator extends StatefulWidget {
     } else {
       showDescription = 'neither side (!)';
     }
-    description.add(new MessageProperty('show', showDescription));
-    description.add(new DiagnosticsProperty<Color>('color', color, showName: false));
+    properties.add(new MessageProperty('show', showDescription));
+    properties.add(new DiagnosticsProperty<Color>('color', color, showName: false));
   }
 }
 
@@ -308,7 +308,7 @@ class _GlowController extends ChangeNotifier {
   static const Duration _pullTime = const Duration(milliseconds: 167);
   static const Duration _pullHoldTime = const Duration(milliseconds: 167);
   static const Duration _pullDecayTime = const Duration(milliseconds: 2000);
-  static final Duration _crossAxisHalfTime = new Duration(microseconds: (Duration.MICROSECONDS_PER_SECOND / 60.0).round());
+  static final Duration _crossAxisHalfTime = new Duration(microseconds: (Duration.microsecondsPerSecond / 60.0).round());
 
   static const double _maxOpacity = 0.5;
   static const double _pullOpacityGlowFactor = 0.8;
@@ -479,7 +479,7 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
   /// The direction of the viewport.
   final AxisDirection axisDirection;
 
-  static const double piOver2 = math.PI / 2.0;
+  static const double piOver2 = math.pi / 2.0;
 
   void _paintSide(Canvas canvas, Size size, _GlowController controller, AxisDirection axisDirection, GrowthDirection growthDirection) {
     if (controller == null)

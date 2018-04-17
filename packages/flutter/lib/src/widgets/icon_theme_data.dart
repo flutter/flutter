@@ -5,6 +5,8 @@
 import 'dart:ui' show Color, hashValues;
 import 'dart:ui' as ui show lerpDouble;
 
+import 'package:flutter/foundation.dart';
+
 /// Defines the color, opacity, and size of icons.
 ///
 /// Used by [IconTheme] to control the color, opacity, and size of icons in a
@@ -13,28 +15,28 @@ import 'dart:ui' as ui show lerpDouble;
 /// To obtain the current icon theme, use [IconTheme.of]. To convert an icon
 /// theme to a version with all the fields filled in, use [new
 /// IconThemeData.fallback].
-class IconThemeData {
+class IconThemeData extends Diagnosticable {
   /// Creates an icon theme data.
   ///
   /// The opacity applies to both explicit and default icon colors. The value
   /// is clamped between 0.0 and 1.0.
-  const IconThemeData({ this.color, double opacity, this.size }) : _opacity = opacity;
+  const IconThemeData({this.color, double opacity, this.size}) : _opacity = opacity;
 
   /// Creates an icon them with some reasonable default values.
   ///
   /// The [color] is black, the [opacity] is 1.0, and the [size] is 24.0.
   const IconThemeData.fallback()
-    : color = const Color(0xFF000000),
-      _opacity = 1.0,
-      size = 24.0;
+      : color = const Color(0xFF000000),
+        _opacity = 1.0,
+        size = 24.0;
 
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
-  IconThemeData copyWith({ Color color, double opacity, double size }) {
+  IconThemeData copyWith({Color color, double opacity, double size}) {
     return new IconThemeData(
       color: color ?? this.color,
       opacity: opacity ?? this.opacity,
-      size: size ?? this.size
+      size: size ?? this.size,
     );
   }
 
@@ -47,7 +49,7 @@ class IconThemeData {
     return copyWith(
       color: other.color,
       opacity: other.opacity,
-      size: other.size
+      size: other.size,
     );
   }
 
@@ -100,16 +102,10 @@ class IconThemeData {
   int get hashCode => hashValues(color, opacity, size);
 
   @override
-  String toString() {
-    final List<String> result = <String>[];
-    if (color != null)
-      result.add('color: $color');
-    if (_opacity != null)
-      result.add('opacity: $_opacity');
-    if (size != null)
-      result.add('size: $size');
-    if (result.isEmpty)
-      return '<no theme>';
-    return result.join(', ');
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(new DoubleProperty('opacity', opacity, defaultValue: null));
+    properties.add(new DoubleProperty('size', size, defaultValue: null));
   }
 }

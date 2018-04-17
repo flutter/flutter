@@ -102,13 +102,19 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 400));
 
+  // This demo's back button isn't initially visible.
+  if (routeName == '/material/backdrop') {
+    await tester.tap(find.byTooltip('Tap to dismiss'));
+    await tester.pumpAndSettle();
+  }
+
   // Go back
-  final Finder backButton = find.byTooltip('Back');
-  expect(backButton, findsOneWidget);
-  await tester.tap(backButton);
+  await tester.pageBack();
+  await tester.pumpAndSettle();
   await tester.pump(); // Start the pop "back" operation.
   await tester.pump(); // Complete the willPop() Future.
   await tester.pump(const Duration(milliseconds: 400)); // Wait until it has finished.
+
   return null;
 }
 

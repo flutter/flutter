@@ -161,7 +161,7 @@ void main() {
                 builder: (BuildContext context) {
                   return new RaisedButton(
                     onPressed: () {
-                      showModalBottomSheet<Null>(
+                      showModalBottomSheet<void>(
                         context: context,
                         builder: (BuildContext context) => const Text('bottomSheet'),
                       );
@@ -198,9 +198,9 @@ void main() {
                 builder: (BuildContext context) {
                   return new RaisedButton(
                     onPressed: () {
-                      showDialog<Null>(
+                      showDialog<void>(
                         context: context,
-                        child: const Text('dialog'),
+                        builder: (BuildContext context) => const Text('dialog'),
                       );
                     },
                     child: const Text('SHOW'),
@@ -230,14 +230,16 @@ void main() {
               builder: (BuildContext context) {
                 return new GestureDetector(
                   onTap: () {
-                    showDialog<Null>(
+                    showDialog<void>(
                       context: context,
-                      child: const Scaffold(
-                        body: const SizedBox(
-                          width: 200.0,
-                          height: 200.0,
-                        ),
-                      )
+                      builder: (BuildContext context) {
+                        return const Scaffold(
+                          body: const SizedBox(
+                            width: 200.0,
+                            height: 200.0,
+                          ),
+                        );
+                      },
                     );
                   },
                   child: const Text('SHOW'),
@@ -460,6 +462,7 @@ class _TextStyleProxy implements TextStyle {
   @override FontStyle get fontStyle => _delegate.fontStyle;
   @override FontWeight get fontWeight => _delegate.fontWeight;
   @override double get height => _delegate.height;
+  @override ui.Locale get locale => _delegate.locale;
   @override bool get inherit => _delegate.inherit;
   @override double get letterSpacing => _delegate.letterSpacing;
   @override TextBaseline get textBaseline => _delegate.textBaseline;
@@ -486,7 +489,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
+  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, ui.Locale locale, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
     throw new UnimplementedError();
   }
 
@@ -496,7 +499,7 @@ class _TextStyleProxy implements TextStyle {
   }
 
   @override
-  ui.ParagraphStyle getParagraphStyle({TextAlign textAlign, TextDirection textDirection, double textScaleFactor: 1.0, String ellipsis, int maxLines}) {
+  ui.ParagraphStyle getParagraphStyle({TextAlign textAlign, TextDirection textDirection, double textScaleFactor: 1.0, String ellipsis, int maxLines, ui.Locale locale}) {
     throw new UnimplementedError();
   }
 

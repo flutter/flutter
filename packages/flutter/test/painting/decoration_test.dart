@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui show Image, ColorFilter;
+import 'dart:typed_data';
+import 'dart:ui' as ui show EncodingFormat, Image, ColorFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -87,6 +88,11 @@ class TestImage implements ui.Image {
 
   @override
   void dispose() { }
+
+  @override
+  Future<ByteData> toByteData({ui.EncodingFormat format}) async {
+    throw new UnsupportedError('Cannot encode test image');
+  }
 }
 
 void main() {
@@ -182,11 +188,11 @@ void main() {
         expect(onChangedCalled, isTrue);
         boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
-        // We expect a clip to preceed the drawImageRect call.
+        // We expect a clip to precede the drawImageRect call.
         final List<Invocation> commands = canvas.invocations.where((Invocation invocation) {
           return invocation.memberName == #clipPath || invocation.memberName == #drawImageRect;
         }).toList();
-        if (expectClip) { // We expect a clip to preceed the drawImageRect call.
+        if (expectClip) { // We expect a clip to precede the drawImageRect call.
           expect(commands.length, 2);
           expect(commands[0].memberName, equals(#clipPath));
           expect(commands[1].memberName, equals(#drawImageRect));

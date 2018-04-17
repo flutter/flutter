@@ -69,17 +69,17 @@ $assetsSection
 
     for (String packageName in packages) {
       for (String asset in assets) {
-        final String entryKey = 'packages/$packageName/$asset';
+        final String entryKey = Uri.encodeFull('packages/$packageName/$asset');
         expect(bundle.entries.containsKey(entryKey), true);
         expect(
-          UTF8.decode(await bundle.entries[entryKey].contentsAsBytes()),
+          utf8.decode(await bundle.entries[entryKey].contentsAsBytes()),
           asset,
         );
       }
     }
 
     expect(
-      UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+      utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
       expectedAssetManifest,
     );
   }
@@ -127,7 +127,7 @@ $assetsSection
       expect(bundle.entries.length, 2); // LICENSE, AssetManifest
       const String expectedAssetManifest = '{}';
       expect(
-        UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,
       );
     });
@@ -147,7 +147,7 @@ $assetsSection
       expect(bundle.entries.length, 2); // LICENSE, AssetManifest
       const String expectedAssetManifest = '{}';
       expect(
-        UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,
       );
 
@@ -168,7 +168,7 @@ $assetsSection
 
       writeAssets('p/p/', assets);
 
-      final String expectedAssetManifest = '{"packages/test_package/a/foo":'
+      const String expectedAssetManifest = '{"packages/test_package/a/foo":'
           '["packages/test_package/a/foo"]}';
       await buildAndVerifyAssets(
         assets,
@@ -192,7 +192,7 @@ $assetsSection
       final List<String> assets = <String>['a/foo'];
       writeAssets('p/p/lib/', assets);
 
-      final String expectedAssetManifest = '{"packages/test_package/a/foo":'
+      const String expectedAssetManifest = '{"packages/test_package/a/foo":'
           '["packages/test_package/a/foo"]}';
       await buildAndVerifyAssets(
         assets,
@@ -215,7 +215,7 @@ $assetsSection
       final List<String> assets = <String>['a/foo', 'a/v/foo'];
       writeAssets('p/p/', assets);
 
-      final String expectedManifest = '{"packages/test_package/a/foo":'
+      const String expectedManifest = '{"packages/test_package/a/foo":'
           '["packages/test_package/a/foo","packages/test_package/a/v/foo"]}';
 
       await buildAndVerifyAssets(
@@ -242,7 +242,7 @@ $assetsSection
       final List<String> assets = <String>['a/foo', 'a/v/foo'];
       writeAssets('p/p/lib/', assets);
 
-      final String expectedManifest = '{"packages/test_package/a/foo":'
+      const String expectedManifest = '{"packages/test_package/a/foo":'
           '["packages/test_package/a/foo","packages/test_package/a/v/foo"]}';
 
       await buildAndVerifyAssets(
@@ -266,7 +266,7 @@ $assetsSection
       );
 
       writeAssets('p/p/', assets);
-      final String expectedAssetManifest =
+      const String expectedAssetManifest =
           '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
           '"packages/test_package/a/bar":["packages/test_package/a/bar"]}';
 
@@ -298,7 +298,7 @@ $assetsSection
       );
 
       writeAssets('p/p/lib/', assets);
-      final String expectedAssetManifest =
+      const String expectedAssetManifest =
           '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
           '"packages/test_package/a/bar":["packages/test_package/a/bar"]}';
 
@@ -332,7 +332,7 @@ $assetsSection
       writeAssets('p/p/', assets);
       writeAssets('p2/p/', assets);
 
-      final String expectedAssetManifest =
+      const String expectedAssetManifest =
           '{"packages/test_package/a/foo":'
           '["packages/test_package/a/foo","packages/test_package/a/v/foo"],'
           '"packages/test_package2/a/foo":'
@@ -371,7 +371,7 @@ $assetsSection
       writeAssets('p/p/lib/', assets);
       writeAssets('p2/p/lib/', assets);
 
-      final String expectedAssetManifest =
+      const String expectedAssetManifest =
           '{"packages/test_package/a/foo":'
           '["packages/test_package/a/foo","packages/test_package/a/v/foo"],'
           '"packages/test_package2/a/foo":'
@@ -404,7 +404,7 @@ $assetsSection
       final List<String> assets = <String>['a/foo', 'a/v/foo'];
       writeAssets('p2/p/lib/', assets);
 
-      final String expectedAssetManifest =
+      const String expectedAssetManifest =
           '{"packages/test_package2/a/foo":'
           '["packages/test_package2/a/foo","packages/test_package2/a/v/foo"]}';
 
@@ -414,5 +414,30 @@ $assetsSection
         expectedAssetManifest,
       );
     });
+  });
+
+  testUsingContext('Asset paths can contain URL reserved characters', () async {
+    establishFlutterRoot();
+
+    writePubspecFile('pubspec.yaml', 'test');
+    writePackagesFile('test_package:p/p/lib/');
+
+    final List<String> assets = <String>['a/foo', 'a/foo[x]'];
+    writePubspecFile(
+      'p/p/pubspec.yaml',
+      'test_package',
+      assets: assets,
+    );
+
+    writeAssets('p/p/', assets);
+    const String expectedAssetManifest =
+        '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
+        '"packages/test_package/a/foo%5Bx%5D":["packages/test_package/a/foo%5Bx%5D"]}';
+
+    await buildAndVerifyAssets(
+      assets,
+      <String>['test_package'],
+      expectedAssetManifest,
+    );
   });
 }

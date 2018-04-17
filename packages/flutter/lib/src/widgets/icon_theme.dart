@@ -68,11 +68,11 @@ class IconTheme extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(IconTheme old) => data != old.data;
+  bool updateShouldNotify(IconTheme oldWidget) => data != oldWidget.data;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<IconThemeData>('data', data, showName: false));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<IconThemeData>('data', data, showName: false));
   }
 }

@@ -30,7 +30,6 @@ target 'Runner' do
   # Prepare symlinks folder. We use symlinks to avoid having Podfile.lock
   # referring to absolute paths on developers' machines.
   system('rm -rf Pods/.symlinks')
-  system('mkdir -p Pods/.symlinks/flutter')
   system('mkdir -p Pods/.symlinks/plugins')
 
   # Flutter Pods
@@ -40,16 +39,16 @@ target 'Runner' do
   end
   generated_xcode_build_settings.map { |p|
     if p[:name] == 'FLUTTER_FRAMEWORK_DIR'
-      symlink = File.join('Pods', '.symlinks', 'flutter', File.basename(p[:path]))
-      File.symlink(p[:path], symlink)
-      pod 'Flutter', :path => symlink
+      symlink = File.join('Pods', '.symlinks', 'flutter')
+      File.symlink(File.dirname(p[:path]), symlink)
+      pod 'Flutter', :path => File.join(symlink, File.basename(p[:path]))
     end
   }
 
   # Plugin Pods
   plugin_pods = parse_KV_file('../.flutter-plugins')
   plugin_pods.map { |p|
-    symlink = File.join('Pods', '.symlinks', 'plugins', File.basename(p[:path]))
+    symlink = File.join('Pods', '.symlinks', 'plugins', p[:name])
     File.symlink(p[:path], symlink)
     pod p[:name], :path => File.join(symlink, 'ios')
   }

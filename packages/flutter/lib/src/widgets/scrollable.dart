@@ -171,10 +171,10 @@ class Scrollable extends StatefulWidget {
   ScrollableState createState() => new ScrollableState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
-    description.add(new DiagnosticsProperty<ScrollPhysics>('physics', physics));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
+    properties.add(new DiagnosticsProperty<ScrollPhysics>('physics', physics));
   }
 
   /// The state from the closest instance of this class that encloses the given context.
@@ -193,7 +193,7 @@ class Scrollable extends StatefulWidget {
   /// given context visible.
   static Future<Null> ensureVisible(BuildContext context, {
     double alignment: 0.0,
-    Duration duration: Duration.ZERO,
+    Duration duration: Duration.zero,
     Curve curve: Curves.ease,
   }) {
     final List<Future<Null>> futures = <Future<Null>>[];
@@ -210,7 +210,7 @@ class Scrollable extends StatefulWidget {
       scrollable = Scrollable.of(context);
     }
 
-    if (futures.isEmpty || duration == Duration.ZERO)
+    if (futures.isEmpty || duration == Duration.zero)
       return new Future<Null>.value();
     if (futures.length == 1)
       return futures.single;
@@ -516,9 +516,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<ScrollPosition>('position', position));
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<ScrollPosition>('position', position));
   }
 }
 

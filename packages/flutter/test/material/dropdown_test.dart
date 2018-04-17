@@ -65,7 +65,7 @@ class _TestAppState extends State<TestApp> {
   Widget build(BuildContext context) {
     return new Localizations(
       locale: const Locale('en', 'US'),
-      delegates: <LocalizationsDelegate<dynamic>>[
+      delegates: const <LocalizationsDelegate<dynamic>>[
         DefaultWidgetsLocalizations.delegate,
         DefaultMaterialLocalizations.delegate,
       ],
@@ -76,7 +76,7 @@ class _TestAppState extends State<TestApp> {
           child: new Navigator(
             onGenerateRoute: (RouteSettings settings) {
               assert(settings.name == '/');
-              return new MaterialPageRoute<dynamic>(
+              return new MaterialPageRoute<void>(
                 settings: settings,
                 builder: (BuildContext context) => widget.child,
               );
@@ -159,7 +159,7 @@ void main() {
         child: new Navigator(
           initialRoute: '/',
           onGenerateRoute: (RouteSettings settings) {
-            return new MaterialPageRoute<Null>(
+            return new MaterialPageRoute<void>(
               settings: settings,
               builder: (BuildContext context) {
                 return new Material(
@@ -450,7 +450,7 @@ void main() {
 
   testWidgets('Dropdown menus must fit within the screen', (WidgetTester tester) async {
 
-    // The dropdown menu isn't readaily accessible. To find it we're assuming that it
+    // The dropdown menu isn't readily accessible. To find it we're assuming that it
     // contains a ListView and that it's an instance of _DropdownMenu.
     Rect getMenuRect() {
       Rect menuRect;
