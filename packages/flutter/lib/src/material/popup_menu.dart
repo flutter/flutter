@@ -689,7 +689,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// widget can be safely removed from the tree before the popup menu is closed.
 /// 
 /// The `semanticLabel` argument is used by accessibility frameworks to 
-/// announce screen transitions when the menu is opened and closed.
+/// announce screen transitions when the menu is opened and closed. If this 
+/// label is not provided, it will default to 
+/// [MaterialLocalizations.popupMenuLabel].
 /// 
 /// See also:
 ///

@@ -409,35 +409,23 @@ class SemanticsProperties extends DiagnosticableTree {
   /// Doing so instructs screen readers to not read out the [value].
   final bool obscured;
 
-  /// If non-null, whether the node corresponds to a route subtree.
-  ///
-  /// When a node with [scopesRoute] set to true is added or removed from the 
-  /// semantics tree, an edge triggered semantic update may occur. Either the
-  /// last node added or the last node remaining, in preorder inverse hit test
-  /// order, determines the node used to search for a semantic node with a 
-  /// [namesRoute] property.
+  /// If non-null, whether the node corresponds to the root of a subtree for
+  /// which values should be announced.
   /// 
-  /// Nodes with a [scopesRoute] property set to true are not considered 
-  /// focusable by Android or iOS.
+  /// Generally, this is set in combination with [explicitChildNodes], since 
+  /// nodes with this flag are not considered focusable by Android or iOS.
   ///
   /// See also:
   ///
-  ///  * [namesRoute] for a description of how the announced value is selected.
+  ///  * [SemanticsFlag.scopesRoute] for a description of how the announced
+  ///    value is selected.
   final bool scopesRoute;
 
-  /// If non-null, whether the node contains the semantic name for a route.
-  ///
-  /// When a node with the [scopesRoute] property set to true is selected, a
-  /// preorder traversal from this node is performed. The first node with a 
-  /// [scopesRoute] property set to true and a non-null and non-empty semantic
-  /// [label] provides the value for the edge triggered semantic updated. 
-  /// If there are no non-null or non-empty labels, TalkBack will not make an
-  /// announcement, but VoiceOver will produce a chime sound.
+  /// If non-null, whether the node contains the semantic label for a route.
   ///
   /// See also:
   /// 
-  ///  * [scopesRoute] for a description of how the initial subtree is
-  ///    selected.
+  ///  * [SemanticsFlag.namesRoute] for a description of how the name is used.
   final bool namesRoute;
 
   /// Provides a textual description of the widget.

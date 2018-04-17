@@ -105,6 +105,9 @@ class Drawer extends StatelessWidget {
   /// The semantic label of the dialog used by accessibility frameworks to 
   /// announce screen transitions when the drawer is opened and closed.
   /// 
+  /// If this label is not provided, it will default to
+  /// [MaterialLocalizations.drawerLabel].
+  /// 
   /// See also:
   /// 
   ///  * [SemanticsConfiguration.namesRoute], for a description of how this
