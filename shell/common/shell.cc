@@ -23,6 +23,7 @@
 #include "lib/fxl/files/path.h"
 #include "lib/fxl/files/unique_fd.h"
 #include "lib/fxl/functional/make_copyable.h"
+#include "lib/fxl/log_settings.h"
 #include "lib/fxl/logging.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/skia/include/core/SkGraphics.h"
@@ -149,6 +150,11 @@ std::unique_ptr<Shell> Shell::Create(
     blink::Settings settings,
     Shell::CreateCallback<PlatformView> on_create_platform_view,
     Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
+  fxl::LogSettings log_settings;
+  log_settings.min_log_level =
+      settings.verbose_logging ? fxl::LOG_INFO : fxl::LOG_ERROR;
+  fxl::SetLogSettings(log_settings);
+
   if (!task_runners.IsValid() || !on_create_platform_view ||
       !on_create_rasterizer) {
     return nullptr;

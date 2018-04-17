@@ -155,6 +155,9 @@ blink::Settings SettingsFromCommandLine(const fxl::CommandLine& command_line) {
   settings.skia_deterministic_rendering_on_cpu =
       command_line.HasOption(FlagForSwitch(Switch::SkiaDeterministicRendering));
 
+  settings.verbose_logging =
+      command_line.HasOption(FlagForSwitch(Switch::VerboseLogging));
+
   command_line.GetOptionValue(FlagForSwitch(Switch::FLX), &settings.flx_path);
 
   command_line.GetOptionValue(FlagForSwitch(Switch::FlutterAssetsDir),

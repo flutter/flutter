@@ -47,7 +47,7 @@ bool AssetManager::GetAsBuffer(const std::string& asset_name,
       return true;
     }
   }
-  FXL_DLOG(ERROR) << "Could not find asset: " << asset_name;
+  FXL_DLOG(WARNING) << "Could not find asset: " << asset_name;
   return false;
 }
 

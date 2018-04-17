@@ -113,6 +113,11 @@ DEF_SWITCH(UseTestFonts,
            "will make font resolution default to the Ahem test font on all "
            "platforms (See https://www.w3.org/Style/CSS/Test/Fonts/Ahem/). "
            "This option is only available on the desktop test shells.")
+DEF_SWITCH(VerboseLogging,
+           "verbose-logging",
+           "By default, only errors are logged. This flag enabled logging at "
+           "all severity levels. This is NOT a per shell flag and affect log "
+           "levels for all shells in the process.")
 DEF_SWITCH(RunForever,
            "run-forever",
            "In non-interactive mode, keep the shell running after the Dart "
