@@ -68,8 +68,6 @@ dependency_overrides:
     path: ../../third_party/dart/third_party/pkg/http_multi_server
   http_parser:
     path: ../../third_party/dart/third_party/pkg/http_parser
-  isolate:
-    path: ../../third_party/dart/third_party/pkg/isolate
   matcher:
     path: ../../third_party/dart/third_party/pkg/matcher
   mime:
