@@ -745,7 +745,7 @@ void main() {
               ),
             ],
           ),
-        ]
+        ],
       ), ignoreRect: true, ignoreTransform: true));
 
       owner.performAction(expectedNodeId, SemanticsAction.copy);

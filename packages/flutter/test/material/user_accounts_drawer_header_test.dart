@@ -409,7 +409,7 @@ void main() {
                 ),
               ],
             ),
-          ]
+          ],
         ),
         ignoreId: true, ignoreTransform: true, ignoreRect: true,
       ),

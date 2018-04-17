@@ -335,7 +335,7 @@ void main() {
     );
   });
 
-  testWidgets('Dialog widget contains namesRoute semantics flag', (WidgetTester tester) async {
+  testWidgets('Dialog widget contains route semantics from title', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(
       new MaterialApp(
@@ -366,6 +366,7 @@ void main() {
     );
 
     expect(semantics, isNot(includesNodeWith(
+        label: 'Title',
         flags: <SemanticsFlag>[SemanticsFlag.namesRoute]
     )));
 
