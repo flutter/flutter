@@ -275,7 +275,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
     dynamic outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
-    final List<_Finalizer> finalizers = <_Finalizer>[];
+    final List<_Finalizer> finalizers = <_Finalizer>[];  // Note: will be run in reverse order.
     bool subprocessActive = false;
     bool controllerSinkClosed = false;
     try {
@@ -511,7 +511,7 @@ class _FlutterPlatform extends PlatformPlugin {
       }
     } finally {
       printTrace('test $ourTestCount: cleaning up...');
-      for (_Finalizer finalizer in finalizers) {
+      for (_Finalizer finalizer in finalizers.reversed) {
         try {
           await finalizer();
         } catch (error, stack) {
