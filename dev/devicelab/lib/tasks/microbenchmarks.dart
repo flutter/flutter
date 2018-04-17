@@ -127,7 +127,12 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       jsonStarted = false;
       processWasKilledIntentionally = true;
       process.kill(ProcessSignal.SIGINT); // flutter run doesn't quit automatically
-      completer.complete(json.decode(jsonBuf.toString()));
+      final String jsonOutput = jsonBuf.toString();
+      try {
+        completer.complete(json.decode(jsonOutput));
+      } catch (ex) {
+        completer.completeError('Decoding JSON failed ($ex). JSON string was: $jsonOutput');
+      }
       return;
     }
 
