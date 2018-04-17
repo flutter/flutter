@@ -109,7 +109,7 @@ Future<Null> _analyzeRepo() async {
   );
 
   // Ensure that all package dependencies are in sync.
-  await _runCommand(flutter, <String>['update-packages', '--verify-only'], 
+  await _runCommand(flutter, <String>['update-packages', '--verify-only'],
     workingDirectory: flutterRoot,
   );
 
@@ -138,40 +138,41 @@ Future<Null> _analyzeRepo() async {
 Future<Null> _runTests({List<String> options: const <String>[]}) async {
   // Verify that the tests actually return failure on failure and success on success.
   final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
+  final List<String> verboseOptions = <String>['-v']..addAll(options);
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'fail_test.dart'),
-    options: options,
+    options: verboseOptions,
     expectFailure: true,
-    printOutput: false,
+    printOutput: true,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'pass_test.dart'),
-    options: options,
-    printOutput: false,
+    options: verboseOptions,
+    printOutput: true,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'crash1_test.dart'),
-    options: options,
+    options: verboseOptions,
     expectFailure: true,
-    printOutput: false,
+    printOutput: true,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'crash2_test.dart'),
-    options: options,
+    options: verboseOptions,
     expectFailure: true,
-    printOutput: false,
+    printOutput: true,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
-    options: options,
+    options: verboseOptions,
     expectFailure: true,
-    printOutput: false,
+    printOutput: true,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
-    options: options,
+    options: verboseOptions,
     expectFailure: true,
-    printOutput: false,
+    printOutput: true,
   );
   await _runCommand(flutter,
     <String>['drive', '--use-existing-app']
