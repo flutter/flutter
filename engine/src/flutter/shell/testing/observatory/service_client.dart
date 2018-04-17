@@ -4,60 +4,100 @@
 
 library observatory_sky_shell_service_client;
 
-
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+
 
 class ServiceClient {
-  ServiceClient(this.client) {
+  Completer<dynamic> isolateStartedId;
+  Completer<dynamic> isolatePausedId;
+  Completer<dynamic> isolateResumeId;
+
+  ServiceClient(this.client, {this.isolateStartedId, this.isolatePausedId,
+      this.isolateResumeId}) {
     client.listen(_onData,
                   onError: _onError,
                   cancelOnError: true);
   }
 
-  Future<Map> invokeRPC(String method, [Map params]) async {
-    var key = _createKey();
-    var request = JSON.encode({
+  Future<Map<String, dynamic>> invokeRPC(String method, [Map<String, dynamic> params]) async {
+    final String key = _createKey();
+    final String request = json.encode(<String, dynamic>{
       'jsonrpc': '2.0',
       'method': method,
-      'params': params == null ? {} : params,
+      'params': params == null ? <String, dynamic>{} : params,
       'id': key,
     });
     client.add(request);
-    var completer = new Completer();
-    _outstanding_requests[key] = completer;
+    final Completer<Map<String, dynamic>> completer = new Completer<Map<String, dynamic>>();
+    _outstandingRequests[key] = completer;
     print('-> $key ($method)');
     return completer.future;
   }
 
   String _createKey() {
-    var key = '$_id';
+    final String key = '$_id';
     _id++;
     return key;
   }
 
-  void _onData(String message) {
-    var response = JSON.decode(message);
-    var key = response['id'];
-    print('<- $key');
-    var completer = _outstanding_requests.remove(key);
-    assert(completer != null);
-    var result = response['result'];
-    var error = response['error'];
-    if (error != null) {
-      assert(result == null);
-      completer.completeError(error);
+  void _onData(dynamic message) {
+    final Map<String, dynamic> response = json.decode(message);
+    final dynamic key = response['id'];
+    if (key != null) {
+      print('<- $key');
+      final dynamic completer = _outstandingRequests.remove(key);
+      assert(completer != null);
+      final dynamic result = response['result'];
+      final dynamic error = response['error'];
+      if (error != null) {
+        assert(result == null);
+        completer.completeError(error);
+      } else {
+        assert(result != null);
+        completer.complete(result);
+      }
     } else {
-      assert(result != null);
-      completer.complete(result);
+      if (response['method'] == 'streamNotify') {
+        _onServiceEvent(response['params']);
+      }
     }
   }
 
-  void _onError(error) {
+  void _onServiceEvent(Map<String, dynamic> params) {
+    if (params == null) {
+      return;
+    }
+    final Map<String, dynamic> event = params['event'];
+    if (event == null || event['type'] != 'Event') {
+      return;
+    }
+    final dynamic isolateId = event['isolate']['id'];
+    switch (params['streamId']) {
+      case 'Isolate':
+        if (event['kind'] == 'IsolateStarted') {
+          isolateStartedId?.complete(isolateId);
+        }
+        break;
+      case 'Debug':
+        switch (event['kind']) {
+          case 'Resume':
+            isolateResumeId?.complete(isolateId);
+            break;
+          case 'PauseStart':
+            isolatePausedId?.complete(isolateId);
+            break;
+        }
+        break;
+    }
+  }
+
+  void _onError(dynamic error) {
     print('WebSocket error: $error');
   }
 
   final WebSocket client;
-  final Map<String, Completer> _outstanding_requests = <String, Completer>{};
-  var _id = 1;
+  final Map<String, Completer<dynamic>> _outstandingRequests = <String, Completer<dynamic>>{};
+  int _id = 1;
 }
