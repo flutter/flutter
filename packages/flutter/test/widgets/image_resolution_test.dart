@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui' as ui show EncodingFormat, Image;
+import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -26,7 +26,7 @@ class TestImage implements ui.Image {
   void dispose() { }
 
   @override
-  Future<ByteData> toByteData({ui.EncodingFormat format}) async {
+  Future<ByteData> toByteData() async {
     throw new UnsupportedError('Cannot encode test image');
   }
 }
