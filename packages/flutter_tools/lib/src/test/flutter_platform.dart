@@ -329,7 +329,7 @@ class _FlutterPlatform extends PlatformPlugin {
         }
       }
 
-      Process process = await _startProcess(
+      final Process process = await _startProcess(
         shellPath,
         mainDart,
         packages: PackageMap.globalPackagesPath,
