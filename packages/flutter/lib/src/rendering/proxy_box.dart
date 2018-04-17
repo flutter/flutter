@@ -3657,8 +3657,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
-    assert(scopesRoute == true && explicitChildNodes == true,
-      'Semantics with scopesRoute:true must have explicitChildNodes: true');
+    assert((scopesRoute == true && explicitChildNodes == true) || scopesRoute != true);
 
     if (enabled != null)
       config.isEnabled = enabled;

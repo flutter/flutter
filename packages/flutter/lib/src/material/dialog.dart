@@ -41,7 +41,6 @@ class Dialog extends StatelessWidget {
     this.child,
     this.insetAnimationDuration: const Duration(milliseconds: 100),
     this.insetAnimationCurve: Curves.decelerate,
-    this.semanticLabel,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -61,33 +60,12 @@ class Dialog extends StatelessWidget {
   /// Defaults to [Curves.fastOutSlowIn].
   final Curve insetAnimationCurve;
 
-  /// The semantic label of the dialog used by accessibility frameworks to 
-  /// announce screen transitions when the dialog is opened and closed.
-  /// 
-  /// If this label is not provided, it will default to
-  /// [MaterialLocalizations.dialogLabel].
-  /// 
-  /// See also:
-  /// 
-  ///  * [SemanticsConfiguration.isRouteName], for a description of how this
-  ///    value is used.
-  final String semanticLabel;
-
   Color _getColor(BuildContext context) {
     return Theme.of(context).dialogBackgroundColor;
   }
 
   @override
   Widget build(BuildContext context) {
-    String label = semanticLabel;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        label = semanticLabel;
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        label = semanticLabel ?? MaterialLocalizations.of(context)?.dialogLabel;
-    }
     return new AnimatedPadding(
       padding: MediaQuery.of(context).viewInsets + const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
       duration: insetAnimationDuration,
@@ -105,10 +83,7 @@ class Dialog extends StatelessWidget {
               elevation: 24.0,
               color: _getColor(context),
               type: MaterialType.card,
-              child: new RouteName(
-                routeName: label,
-                child: child,
-              ),
+              child: child,
             ),
           ),
         ),
@@ -299,18 +274,22 @@ class AlertDialog extends StatelessWidget {
       ));
     }
 
-    return new Dialog(
-      child: new IntrinsicWidth(
-        child: new RouteName(
-          routeName: label,
-          child: new Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: children,
-          ),
-        ),
+    Widget dialogChild = new IntrinsicWidth(
+      child: new Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
       ),
     );
+
+    if (label != null)
+      dialogChild = new Semantics(
+        namesRoute: true,
+        label: label,
+        child: dialogChild
+      );
+
+    return new Dialog(child: dialogChild);
   }
 }
 
@@ -529,7 +508,7 @@ class SimpleDialog extends StatelessWidget {
           break;
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
-          label = semanticLabel ?? MaterialLocalizations.of(context).dialogLabel;
+          label = semanticLabel ?? MaterialLocalizations.of(context)?.dialogLabel;
       }
     }
 
@@ -542,22 +521,25 @@ class SimpleDialog extends StatelessWidget {
       ));
     }
 
-    return new Dialog(
-      child: new IntrinsicWidth(
-        stepWidth: 56.0,
-        child: new ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 280.0),
-          child: new RouteName(
-            routeName: label,
-            child: new Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: body,
-            )
-          )
-        )
-      )
+    Widget dialogChild = new IntrinsicWidth(
+      stepWidth: 56.0,
+      child: new ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 280.0),
+        child: new Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: body,
+        ),
+      ),
     );
+
+    if (label != null)
+      dialogChild = new Semantics(
+        namesRoute: true,
+        label: label,
+        child: dialogChild,
+      );
+    return new Dialog(child: dialogChild);
   }
 }
 
@@ -593,7 +575,14 @@ class _DialogRoute<T> extends PopupRoute<T> {
     return new SafeArea(
       child: new Builder(
         builder: (BuildContext context) {
-          return theme != null ? new Theme(data: theme, child: child) : child;
+          final Widget annotatedChild = new Semantics(
+            child: child,
+            scopesRoute: true,
+            explicitChildNodes: true,
+          );
+          return theme != null
+            ? new Theme(data: theme, child: annotatedChild)
+            : annotatedChild;
         }
       ),
     );

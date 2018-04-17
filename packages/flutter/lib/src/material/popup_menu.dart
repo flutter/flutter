@@ -481,8 +481,11 @@ class _PopupMenu<T> extends StatelessWidget {
               alignment: AlignmentDirectional.topEnd,
               widthFactor: width.evaluate(route.animation),
               heightFactor: height.evaluate(route.animation),
-              child: new RouteName(
-                routeName: semanticLabel,
+              child: new Semantics(
+                scopesRoute: true,
+                namesRoute: true,
+                explicitChildNodes: true,
+                label: semanticLabel,
                 child: child,
               ),
             ),

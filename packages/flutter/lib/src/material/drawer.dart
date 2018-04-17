@@ -125,8 +125,11 @@ class Drawer extends StatelessWidget {
       case TargetPlatform.fuchsia:
         label = semanticLabel ?? MaterialLocalizations.of(context)?.drawerLabel;
     }
-    return new RouteName(
-      routeName: label,
+    return new Semantics(
+      scopesRoute: true,
+      namesRoute: true,
+      explicitChildNodes: true,
+      label: label,
       child: new ConstrainedBox(
         constraints: const BoxConstraints.expand(width: _kWidth),
         child: new Material(
