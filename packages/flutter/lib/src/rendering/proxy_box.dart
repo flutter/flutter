@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ImageFilter, Gradient;
+import 'dart:async';
+
+import 'dart:ui' as ui show ImageFilter, Gradient, SceneBuilder, Scene, Image;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -2452,6 +2454,45 @@ class RenderRepaintBoundary extends RenderProxyBox {
 
   @override
   bool get isRepaintBoundary => true;
+
+  /// Capture an image of the current state of this render object and its
+  /// children.
+  ///
+  /// The returned [ui.Image] has uncompressed raw RGBA bytes in the dimensions
+  /// of the render object, multiplied by the [pixelRatio].
+  ///
+  /// To use [toImage], the render object must have gone through the paint phase
+  /// (i.e. [debugNeedsPaint] must be false).
+  ///
+  /// The [pixelRatio] describes the scale between the logical pixels and the
+  /// size of the output image. It is independent of the
+  /// [window.devicePixelRatio] for the device, so specifying 1.0 (the default)
+  /// will give you a 1:1 mapping between logical pixels and the output pixels
+  /// in the image.
+  ///
+  /// See also:
+  ///
+  ///  * [dart:ui.Scene.toImage] for more information about the image returned.
+  Future<ui.Image> toImage({double pixelRatio: 1.0}) async {
+    assert(!debugNeedsPaint);
+    final ui.SceneBuilder builder = new ui.SceneBuilder();
+    final Matrix4 transform = new Matrix4.diagonal3Values(pixelRatio, pixelRatio, 1.0);
+    transform.translate(-layer.offset.dx, -layer.offset.dy, 0.0);
+    builder.pushTransform(transform.storage);
+    layer.addToScene(builder, Offset.zero);
+    final ui.Scene scene = builder.build();
+    try {
+      // Size is rounded up to the next pixel to make sure we don't clip off
+      // anything.
+      return await scene.toImage(
+        (pixelRatio * size.width).ceil(),
+        (pixelRatio * size.height).ceil(),
+      );
+    } finally {
+      scene.dispose();
+    }
+  }
+
 
   /// The number of times that this render object repainted at the same time as
   /// its parent. Repaint boundaries are only useful when the parent and child
