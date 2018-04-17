@@ -23,8 +23,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: true }) {
     final File benchmarkFile = file(path.join(_editedFlutterGalleryDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
     final List<String> options = <String>[
-      '--hot', '-d', device.deviceId, '--benchmark', '--verbose', '--resident',
-      '--local-engine', 'android_debug_unopt',
+      '--hot', '-d', device.deviceId, '--benchmark', '--verbose', '--resident'
     ];
     if (isPreviewDart2)
       options.add('--preview-dart-2');
