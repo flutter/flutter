@@ -307,6 +307,8 @@ class LocalEngineArtifacts extends Artifacts {
       return fs.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
     } else if (getCurrentHostPlatform() == HostPlatform.darwin_x64) {
       return fs.path.join(engineOutPath, 'flutter_tester');
+    } else if (getCurrentHostPlatform() == HostPlatform.windows_x64) {
+      return fs.path.join(engineOutPath, 'flutter_tester.exe');
     }
     throw new Exception('Unsupported platform $platform.');
   }
