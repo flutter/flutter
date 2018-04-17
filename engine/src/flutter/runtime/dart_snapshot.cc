@@ -9,6 +9,7 @@
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/lib/snapshot/snapshot.h"
 #include "flutter/runtime/dart_snapshot_buffer.h"
 #include "flutter/runtime/dart_vm.h"
 
@@ -20,8 +21,7 @@ const char* DartSnapshot::kIsolateDataSymbol = "kDartIsolateSnapshotData";
 const char* DartSnapshot::kIsolateInstructionsSymbol =
     "kDartIsolateSnapshotInstructions";
 
-static std::unique_ptr<DartSnapshotBuffer> ResolveVMData(
-    const Settings& settings) {
+std::unique_ptr<DartSnapshotBuffer> ResolveVMData(const Settings& settings) {
   if (settings.aot_snapshot_path.size() > 0) {
     auto path = fml::paths::JoinPaths(
         {settings.aot_snapshot_path, settings.aot_vm_snapshot_data_filename});
@@ -36,7 +36,7 @@ static std::unique_ptr<DartSnapshotBuffer> ResolveVMData(
       loaded_process, DartSnapshot::kVMDataSymbol);
 }
 
-static std::unique_ptr<DartSnapshotBuffer> ResolveVMInstructions(
+std::unique_ptr<DartSnapshotBuffer> ResolveVMInstructions(
     const Settings& settings) {
   if (settings.aot_snapshot_path.size() > 0) {
     auto path = fml::paths::JoinPaths(
@@ -61,7 +61,7 @@ static std::unique_ptr<DartSnapshotBuffer> ResolveVMInstructions(
       loaded_process, DartSnapshot::kVMInstructionsSymbol);
 }
 
-static std::unique_ptr<DartSnapshotBuffer> ResolveIsolateData(
+std::unique_ptr<DartSnapshotBuffer> ResolveIsolateData(
     const Settings& settings) {
   if (settings.aot_snapshot_path.size() > 0) {
     auto path =
@@ -78,7 +78,7 @@ static std::unique_ptr<DartSnapshotBuffer> ResolveIsolateData(
       loaded_process, DartSnapshot::kIsolateDataSymbol);
 }
 
-static std::unique_ptr<DartSnapshotBuffer> ResolveIsolateInstructions(
+std::unique_ptr<DartSnapshotBuffer> ResolveIsolateInstructions(
     const Settings& settings) {
   if (settings.aot_snapshot_path.size() > 0) {
     auto path =
@@ -107,6 +107,12 @@ static std::unique_ptr<DartSnapshotBuffer> ResolveIsolateInstructions(
 fxl::RefPtr<DartSnapshot> DartSnapshot::VMSnapshotFromSettings(
     const Settings& settings) {
   TRACE_EVENT0("flutter", "DartSnapshot::VMSnapshotFromSettings");
+#if OS_WIN
+  return fxl::MakeRefCounted<DartSnapshot>(
+      DartSnapshotBuffer::CreateWithUnmanagedAllocation(kDartVmSnapshotData),
+      DartSnapshotBuffer::CreateWithUnmanagedAllocation(
+          kDartVmSnapshotInstructions));
+#else   // OS_WIN
   auto snapshot =
       fxl::MakeRefCounted<DartSnapshot>(ResolveVMData(settings),         //
                                         ResolveVMInstructions(settings)  //
@@ -115,11 +121,19 @@ fxl::RefPtr<DartSnapshot> DartSnapshot::VMSnapshotFromSettings(
     return snapshot;
   }
   return nullptr;
+#endif  // OS_WIN
 }
 
 fxl::RefPtr<DartSnapshot> DartSnapshot::IsolateSnapshotFromSettings(
     const Settings& settings) {
   TRACE_EVENT0("flutter", "DartSnapshot::IsolateSnapshotFromSettings");
+#if OS_WIN
+  return fxl::MakeRefCounted<DartSnapshot>(
+      DartSnapshotBuffer::CreateWithUnmanagedAllocation(
+          kDartIsolateSnapshotData),
+      DartSnapshotBuffer::CreateWithUnmanagedAllocation(
+          kDartIsolateSnapshotInstructions));
+#else  // OS_WIN
   auto snapshot =
       fxl::MakeRefCounted<DartSnapshot>(ResolveIsolateData(settings),         //
                                         ResolveIsolateInstructions(settings)  //
@@ -128,6 +142,7 @@ fxl::RefPtr<DartSnapshot> DartSnapshot::IsolateSnapshotFromSettings(
     return snapshot;
   }
   return nullptr;
+#endif
 }
 
 DartSnapshot::DartSnapshot(std::unique_ptr<DartSnapshotBuffer> data,
