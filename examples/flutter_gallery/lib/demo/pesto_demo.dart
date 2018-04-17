@@ -216,7 +216,6 @@ class _PestoLogoState extends State<PestoLogo> {
   @override
   Widget build(BuildContext context) {
     return new Semantics(
-      label: 'pesto',
       namesRoute: true,
       child: Transform(
         transform: new Matrix4.identity()..scale(widget.height / kLogoHeight),

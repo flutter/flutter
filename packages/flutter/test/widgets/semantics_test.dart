@@ -473,6 +473,7 @@ void main() {
           obscured: true,
           scopesRoute: true,
           namesRoute: true,
+          explicitChildNodes: true,
         )
     );
 

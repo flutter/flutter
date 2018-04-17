@@ -962,15 +962,6 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     final double topPadding = widget.primary ? MediaQuery.of(context).padding.top : 0.0;
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
       ? widget.bottom.preferredSize.height + topPadding : null;
-    Widget title;
-    switch(defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        title = widget.title;
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        title = new Semantics(child: widget.title, namesRoute: true);
-    }
 
     return new MediaQuery.removePadding(
       context: context,
@@ -981,7 +972,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
         delegate: new _SliverAppBarDelegate(
           leading: widget.leading,
           automaticallyImplyLeading: widget.automaticallyImplyLeading,
-          title: title,
+          title: widget.title,
           actions: widget.actions,
           flexibleSpace: widget.flexibleSpace,
           bottom: widget.bottom,
