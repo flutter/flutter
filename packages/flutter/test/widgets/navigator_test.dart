@@ -74,17 +74,14 @@ class OnTapPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new RouteName(
-      routeName: id,
-      child: new Scaffold(
-        appBar: new AppBar(title: new Text('Page $id')),
-        body: new GestureDetector(
-          onTap: onTap,
-          behavior: HitTestBehavior.opaque,
-          child: new Container(
-            child: new Center(
-              child: new Text(id, style: Theme.of(context).textTheme.display2),
-            ),
+    return new Scaffold(
+      appBar: new AppBar(title: new Text('Page $id')),
+      body: new GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: new Container(
+          child: new Center(
+            child: new Text(id, style: Theme.of(context).textTheme.display2),
           ),
         ),
       ),
@@ -777,39 +774,48 @@ void main() {
     expect(log, <String>['building B', 'building C', 'found C', 'building D', 'building C', 'found C']);
   });
 
-
   testWidgets('route semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
-      '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.pushNamed(context, '/B/C'); }),
-      '/B/C': (BuildContext context) => const OnTapPage(id: 'B'),
+      '/': (BuildContext context) => new OnTapPage(id: '1', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/A': (BuildContext context) => new OnTapPage(id: '2', onTap: () { Navigator.pushNamed(context, '/B/C'); }),
+      '/B/C': (BuildContext context) => const OnTapPage(id: '3'),
     };
 
     await tester.pumpWidget(new MaterialApp(routes: routes));
 
     expect(semantics, includesNodeWith(
-      label: '/',
-      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
+      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+    ));
+    expect(semantics, includesNodeWith(
+      label: 'Page 1',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     ));
 
-    await tester.tap(find.text('/')); // pushNamed('/A')
+    await tester.tap(find.text('1')); // pushNamed('/A')
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
     expect(semantics, includesNodeWith(
-      label: 'A',
-      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
+      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+    ));
+    expect(semantics, includesNodeWith(
+      label: 'Page 2',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     ));
 
-    await tester.tap(find.text('A')); // pushNamed('/B/C')
+    await tester.tap(find.text('2')); // pushNamed('/B/C')
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
     expect(semantics, includesNodeWith(
-      label: 'B',
-      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute, SemanticsFlag.namesRoute],
+      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
     ));
+    expect(semantics, includesNodeWith(
+      label: 'Page 3',
+      flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+    ));
+
 
     semantics.dispose();
   });
