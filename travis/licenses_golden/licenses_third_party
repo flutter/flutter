@@ -1,4 +1,4 @@
-Signature: 11eed2d794a665c2ed961ab41d6006b7
+Signature: 8f19b1dfcd43f6f21408c4a70e0d6eaf
 
 UNUSED LICENSES:
 
@@ -17262,6 +17262,7 @@ FILE: ../../../third_party/skia/src/core/SkRectPriv.h
 FILE: ../../../third_party/skia/src/core/SkRemoteGlyphCache.cpp
 FILE: ../../../third_party/skia/src/core/SkRemoteGlyphCache.h
 FILE: ../../../third_party/skia/src/core/SkSafeRange.h
+FILE: ../../../third_party/skia/src/core/SkStrikeCache.cpp
 FILE: ../../../third_party/skia/src/core/SkSurfaceCharacterization.cpp
 FILE: ../../../third_party/skia/src/core/SkTypeface_remote.cpp
 FILE: ../../../third_party/skia/src/core/SkTypeface_remote.h
@@ -17346,6 +17347,7 @@ FILE: ../../../third_party/skia/third_party/skcms/src/LinearAlgebra.h
 FILE: ../../../third_party/skia/third_party/skcms/src/Macros.h
 FILE: ../../../third_party/skia/third_party/skcms/src/PortableMath.c
 FILE: ../../../third_party/skia/third_party/skcms/src/PortableMath.h
+FILE: ../../../third_party/skia/third_party/skcms/src/RandomBytes.h
 FILE: ../../../third_party/skia/third_party/skcms/src/TF13.c
 FILE: ../../../third_party/skia/third_party/skcms/src/TransferFunction.c
 FILE: ../../../third_party/skia/third_party/skcms/src/TransferFunction.h
@@ -17404,6 +17406,8 @@ FILE: ../../../third_party/skia/bench/skpbench.json
 FILE: ../../../third_party/skia/docs/SkAutoCanvasRestore_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkBitmap_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkCanvas_Reference.bmh
+FILE: ../../../third_party/skia/docs/SkColor4f_Reference.bmh
+FILE: ../../../third_party/skia/docs/SkColor_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkIPoint_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkIRect_Reference.bmh
 FILE: ../../../third_party/skia/docs/SkImageInfo_Reference.bmh
@@ -20434,10 +20438,10 @@ FILE: ../../../third_party/skia/include/gpu/GrConfig.h
 FILE: ../../../third_party/skia/include/gpu/GrContext.h
 FILE: ../../../third_party/skia/include/gpu/GrTypes.h
 FILE: ../../../third_party/skia/include/private/GrColor.h
-FILE: ../../../third_party/skia/src/core/SkGlyphCache_Globals.h
 FILE: ../../../third_party/skia/src/core/SkImageInfo.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterClip.cpp
 FILE: ../../../third_party/skia/src/core/SkRasterClip.h
+FILE: ../../../third_party/skia/src/core/SkStrikeCache.h
 FILE: ../../../third_party/skia/src/gpu/GrAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrBufferAllocPool.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBufferAllocPool.h
