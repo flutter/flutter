@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// A widget which provides a semantic name for a route.
+/// A widget which scopes and names a route.
 ///
 /// On Android, TalkBack uses [routeName] as the text value for an edge 
 /// triggered semantics update. On iOS, no additional semantic information
