@@ -51,6 +51,20 @@ class FileSnapshotBuffer final : public DartSnapshotBuffer {
   FXL_DISALLOW_COPY_AND_ASSIGN(FileSnapshotBuffer);
 };
 
+class UnmanagedAllocation final : public DartSnapshotBuffer {
+ public:
+  UnmanagedAllocation(const uint8_t* allocation) : allocation_(allocation) {}
+
+  const uint8_t* GetSnapshotPointer() const override { return allocation_; }
+
+  size_t GetSnapshotSize() const override { return 0; }
+
+ private:
+  const uint8_t* allocation_;
+
+  FXL_DISALLOW_COPY_AND_ASSIGN(UnmanagedAllocation);
+};
+
 std::unique_ptr<DartSnapshotBuffer>
 DartSnapshotBuffer::CreateWithSymbolInLibrary(
     fxl::RefPtr<fml::NativeLibrary> library,
@@ -65,6 +79,14 @@ DartSnapshotBuffer::CreateWithContentsOfFile(const char* file_path,
                                              bool executable) {
   auto source = std::make_unique<FileSnapshotBuffer>(file_path, executable);
   return source->GetSnapshotPointer() == nullptr ? nullptr : std::move(source);
+}
+
+std::unique_ptr<DartSnapshotBuffer>
+DartSnapshotBuffer::CreateWithUnmanagedAllocation(const uint8_t* allocation) {
+  if (allocation == nullptr) {
+    return nullptr;
+  }
+  return std::make_unique<UnmanagedAllocation>(allocation);
 }
 
 DartSnapshotBuffer::~DartSnapshotBuffer() = default;

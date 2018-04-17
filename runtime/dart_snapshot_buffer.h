@@ -22,6 +22,9 @@ class DartSnapshotBuffer {
       const char* file_path,
       bool executable);
 
+  static std::unique_ptr<DartSnapshotBuffer> CreateWithUnmanagedAllocation(
+      const uint8_t* allocation);
+
   virtual ~DartSnapshotBuffer();
 
   virtual const uint8_t* GetSnapshotPointer() const = 0;
