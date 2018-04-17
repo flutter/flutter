@@ -378,7 +378,7 @@ Future<Null> _runAllDartTests(String workingDirectory, {
   Map<String, String> environment,
   List<String> options,
 }) {
-  final List<String> args = <String>['--checked', '--preview-dart-2'];
+  final List<String> args = <String>['--preview-dart-2'];
   if (options != null) {
     args.addAll(options);
   }
