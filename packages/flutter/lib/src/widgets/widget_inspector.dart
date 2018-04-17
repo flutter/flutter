@@ -290,6 +290,11 @@ class WidgetInspectorService {
     );
   }
 
+  /// Cause the entire tree to be rebuilt. This is used by development tools
+  /// when the application code has changed and is being hot-reloaded, to cause
+  /// the widget tree to pick up any changed implementations.
+  ///
+  /// This is expensive and should not be called except during development.
   @protected
   Future<Null> forceRebuild() {
     final WidgetsBinding binding = WidgetsBinding.instance;
