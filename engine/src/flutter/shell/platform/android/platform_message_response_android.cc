@@ -35,13 +35,6 @@ void PlatformMessageResponseAndroid::Complete(std::vector<uint8_t> data) {
           return;
         }
 
-        if (data.size() == 0) {
-          // If the data is empty, there is no reason to create a Java byte
-          // array. Make the response now with a nullptr now.
-          FlutterViewHandlePlatformMessageResponse(env, java_object.obj(),
-                                                   response, nullptr);
-        }
-
         // Convert the vector to a Java byte array.
         fml::jni::ScopedJavaLocalRef<jbyteArray> data_array(
             env, env->NewByteArray(data.size()));
@@ -56,7 +49,23 @@ void PlatformMessageResponseAndroid::Complete(std::vector<uint8_t> data) {
 
 // |blink::PlatformMessageResponse|
 void PlatformMessageResponseAndroid::CompleteEmpty() {
-  Complete(std::vector<uint8_t>{});
-}
+  platform_task_runner_->PostTask(
+      fxl::MakeCopyable([response = response_id_,               //
+                         weak_java_object = weak_java_object_   //
+  ]() {
+        // We are on the platform thread. Attempt to get the strong reference to
+        // the Java object.
+        auto env = fml::jni::AttachCurrentThread();
+        auto java_object = weak_java_object.get(env);
 
+        if (java_object.is_null()) {
+          // The Java object was collected before this message response got to
+          // it. Drop the response on the floor.
+          return;
+        }
+        // Make the response call into Java.
+        FlutterViewHandlePlatformMessageResponse(env, java_object.obj(),
+                                                 response, nullptr);
+      }));
+}
 }  // namespace shell
