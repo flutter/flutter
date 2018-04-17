@@ -136,7 +136,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       return;
     }
 
-    if (jsonStarted)
+    if (jsonStarted && line.contains(jsonPrefix))
       jsonBuf.writeln(line.substring(line.indexOf(jsonPrefix) + jsonPrefix.length));
   });
 
