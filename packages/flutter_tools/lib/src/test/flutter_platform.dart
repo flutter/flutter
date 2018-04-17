@@ -511,7 +511,7 @@ class _FlutterPlatform extends PlatformPlugin {
       }
     } finally {
       printTrace('test $ourTestCount: cleaning up...');
-      for (_Finalizer finalizer in finalizers.reversed()) {
+      for (_Finalizer finalizer in finalizers.reversed) {
         try {
           await finalizer();
         } catch (error, stack) {
