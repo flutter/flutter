@@ -16,6 +16,7 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/runtime/dart_vm.h"
+#include "flutter/runtime/start_up.h"
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/skia_event_tracer_impl.h"
 #include "flutter/shell/common/switches.h"
@@ -145,11 +146,19 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   return shell;
 }
 
+static void RecordStartupTimestamp() {
+  if (blink::engine_main_enter_ts == 0) {
+    blink::engine_main_enter_ts = Dart_TimelineGetMicros();
+  }
+}
+
 std::unique_ptr<Shell> Shell::Create(
     blink::TaskRunners task_runners,
     blink::Settings settings,
     Shell::CreateCallback<PlatformView> on_create_platform_view,
     Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
+  RecordStartupTimestamp();
+
   fxl::LogSettings log_settings;
   log_settings.min_log_level =
       settings.verbose_logging ? fxl::LOG_INFO : fxl::LOG_ERROR;
