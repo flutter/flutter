@@ -1549,12 +1549,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren({ DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.inverseHitTest }) {
-    return _getChildrenInOrder(childOrder)
+    return debugListChildrenInOrder(childOrder)
       .map<DiagnosticsNode>((SemanticsNode node) => node.toDiagnosticsNode(childOrder: childOrder))
       .toList();
   }
 
-  Iterable<SemanticsNode> _getChildrenInOrder(DebugSemanticsDumpOrder childOrder) {
+  /// Returns the list of direct children of this node in the specified order.
+  List<SemanticsNode> debugListChildrenInOrder(DebugSemanticsDumpOrder childOrder) {
     assert(childOrder != null);
     if (_children == null)
       return const <SemanticsNode>[];

@@ -224,7 +224,16 @@ class TestSemantics {
   /// The tags of this node.
   final Set<SemanticsTag> tags;
 
-  bool _matches(SemanticsNode node, Map<dynamic, dynamic> matchState, { bool ignoreRect: false, bool ignoreTransform: false, bool ignoreId: false }) {
+  bool _matches(
+    SemanticsNode node,
+    Map<dynamic, dynamic> matchState,
+    {
+      bool ignoreRect: false,
+      bool ignoreTransform: false,
+      bool ignoreId: false,
+      DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.inverseHitTest,
+    }
+  ) {
     final SemanticsData nodeData = node.getSemanticsData();
 
     bool fail(String message) {
@@ -278,14 +287,22 @@ class TestSemantics {
       return true;
     bool result = true;
     final Iterator<TestSemantics> it = children.iterator;
-    node.visitChildren((SemanticsNode node) {
+    for (final SemanticsNode node in node.debugListChildrenInOrder(childOrder)) {
       it.moveNext();
-      if (!it.current._matches(node, matchState, ignoreRect: ignoreRect, ignoreTransform: ignoreTransform, ignoreId: ignoreId)) {
+      final bool childMatches = it.current._matches(
+        node,
+        matchState,
+        ignoreRect: ignoreRect,
+        ignoreTransform: ignoreTransform,
+        ignoreId: ignoreId,
+        childOrder: childOrder,
+      );
+      if (!childMatches) {
         result = false;
         return false;
       }
       return true;
-    });
+    }
     return result;
   }
 
@@ -475,9 +492,9 @@ class SemanticsTester {
   /// every time and ignore potential regressions. Make sure you do not
   /// over-test. Prefer breaking your widgets into smaller widgets and test them
   /// individually.
-  String generateTestSemanticsExpressionForCurrentSemanticsTree() {
+  String generateTestSemanticsExpressionForCurrentSemanticsTree(DebugSemanticsDumpOrder childOrder) {
     final SemanticsNode node = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
-    return _generateSemanticsTestForNode(node, 0);
+    return _generateSemanticsTestForNode(node, 0, childOrder);
   }
 
   static String _flagsToSemanticsFlagExpression(dynamic flags) {
@@ -508,7 +525,7 @@ class SemanticsTester {
 
   /// Recursively generates [TestSemantics] code for [node] and its children,
   /// indenting the expression by `indentAmount`.
-  static String _generateSemanticsTestForNode(SemanticsNode node, int indentAmount) {
+  static String _generateSemanticsTestForNode(SemanticsNode node, int indentAmount, DebugSemanticsDumpOrder childOrder) {
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = new StringBuffer();
     final SemanticsData nodeData = node.getSemanticsData();
@@ -547,12 +564,11 @@ class SemanticsTester {
 
     if (node.hasChildren) {
       buf.writeln('  children: <TestSemantics>[');
-      node.visitChildren((SemanticsNode child) {
+      for (final SemanticsNode child in node.debugListChildrenInOrder(childOrder)) {
         buf
-          ..write(_generateSemanticsTestForNode(child, 2))
+          ..write(_generateSemanticsTestForNode(child, 2, childOrder))
           ..writeln(',');
-        return true;
-      });
+      }
       buf.writeln('  ],');
     }
 
@@ -562,18 +578,37 @@ class SemanticsTester {
 }
 
 class _HasSemantics extends Matcher {
-  const _HasSemantics(this._semantics, { this.ignoreRect: false, this.ignoreTransform: false, this.ignoreId: false }) : assert(_semantics != null), assert(ignoreRect != null), assert(ignoreId != null), assert(ignoreTransform != null);
+  const _HasSemantics(
+    this._semantics,
+    {
+      @required this.ignoreRect,
+      @required this.ignoreTransform,
+      @required this.ignoreId,
+      @required this.childOrder,
+    }) : assert(_semantics != null),
+         assert(ignoreRect != null),
+         assert(ignoreId != null),
+         assert(ignoreTransform != null),
+         assert(childOrder != null);
 
   final TestSemantics _semantics;
   final bool ignoreRect;
   final bool ignoreTransform;
   final bool ignoreId;
+  final DebugSemanticsDumpOrder childOrder;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
-    final bool doesMatch = _semantics._matches(item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode, matchState, ignoreTransform: ignoreTransform, ignoreRect: ignoreRect, ignoreId: ignoreId);
+    final bool doesMatch = _semantics._matches(
+      item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode,
+      matchState,
+      ignoreTransform: ignoreTransform,
+      ignoreRect: ignoreRect,
+      ignoreId: ignoreId,
+      childOrder: childOrder,
+    );
     if (!doesMatch) {
-      matchState['would-match'] = item.generateTestSemanticsExpressionForCurrentSemanticsTree();
+      matchState['would-match'] = item.generateTestSemanticsExpressionForCurrentSemanticsTree(childOrder);
     }
     return doesMatch;
   }
@@ -588,7 +623,7 @@ class _HasSemantics extends Matcher {
     return mismatchDescription
         .add('${matchState[TestSemantics]}\n')
         .add('Current SemanticsNode tree:\n')
-        .add(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest))
+        .add(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: childOrder))
         .add('The semantics tree would have matched the following configuration:\n')
         .add(matchState['would-match']);
   }
@@ -599,7 +634,16 @@ Matcher hasSemantics(TestSemantics semantics, {
   bool ignoreRect: false,
   bool ignoreTransform: false,
   bool ignoreId: false,
-}) => new _HasSemantics(semantics, ignoreRect: ignoreRect, ignoreTransform: ignoreTransform, ignoreId: ignoreId);
+  DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.inverseHitTest,
+}) {
+  return new _HasSemantics(
+    semantics,
+    ignoreRect: ignoreRect,
+    ignoreTransform: ignoreTransform,
+    ignoreId: ignoreId,
+    childOrder: childOrder,
+  );
+}
 
 class _IncludesNodeWith extends Matcher {
   const _IncludesNodeWith({
