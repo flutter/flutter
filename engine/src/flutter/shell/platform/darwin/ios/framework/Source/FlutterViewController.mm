@@ -272,8 +272,18 @@
                object:nil];
 
   [center addObserver:self
-             selector:@selector(onVoiceOverChanged:)
+             selector:@selector(onAccessibilityStatusChanged:)
                  name:UIAccessibilityVoiceOverStatusChanged
+               object:nil];
+
+  [center addObserver:self
+             selector:@selector(onAccessibilityStatusChanged:)
+                 name:UIAccessibilitySwitchControlStatusDidChangeNotification
+               object:nil];
+
+  [center addObserver:self
+             selector:@selector(onAccessibilityStatusChanged:)
+                 name:UIAccessibilitySpeakScreenStatusDidChangeNotification
                object:nil];
 
   [center addObserver:self
@@ -393,7 +403,7 @@
   TRACE_EVENT0("flutter", "viewDidAppear");
   [self onLocaleUpdated:nil];
   [self onUserSettingsChanged:nil];
-  [self onVoiceOverChanged:nil];
+  [self onAccessibilityStatusChanged:nil];
   [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.resumed"];
 
   [super viewDidAppear:animated];
@@ -739,14 +749,15 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
 
 #pragma mark - Accessibility
 
-- (void)onVoiceOverChanged:(NSNotification*)notification {
+- (void)onAccessibilityStatusChanged:(NSNotification*)notification {
 #if TARGET_OS_SIMULATOR
   // There doesn't appear to be any way to determine whether the accessibility
   // inspector is enabled on the simulator. We conservatively always turn on the
   // accessibility bridge in the simulator.
   bool enabled = true;
 #else
-  bool enabled = UIAccessibilityIsVoiceOverRunning();
+  bool enabled = UIAccessibilityIsVoiceOverRunning() || UIAccessibilityIsSwitchControlRunning() ||
+                 UIAccessibilityIsSpeakScreenEnabled();
 #endif
   _shell->GetPlatformView()->SetSemanticsEnabled(enabled);
 }
