@@ -24,8 +24,8 @@ class GalleryOptions {
   final TextDirection textDirection;
   final double timeDilation;
   final bool showPerformanceOverlay;
-  final showRasterCacheImagesCheckerboard;
-  final showOffscreenLayersCheckerboard;
+  final bool showRasterCacheImagesCheckerboard;
+  final bool showOffscreenLayersCheckerboard;
 
   GalleryOptions copyWith({
     GalleryTheme theme,
@@ -173,7 +173,10 @@ class _Heading extends StatelessWidget {
       header: true,
       child: new _OptionsItem(
         child: new DefaultTextStyle(
-          style: Theme.of(context).textTheme.body1.copyWith(color: const Color(0xFF84EDFE)),
+          style: Theme.of(context).textTheme.body1.copyWith(
+            fontFamily: 'GoogleSans',
+            color: const Color(0xFF84EDFE)
+          ),
           child: new Text(text),
         ),
       ),
@@ -188,7 +191,7 @@ class _ThemeItem extends StatelessWidget {
   final ValueChanged<GalleryOptions> onOptionsChanged;
 
   void _handleTap() {
-    int index = kAllGalleryThemes.indexOf(options.theme);
+    final int index = kAllGalleryThemes.indexOf(options.theme);
     onOptionsChanged(
       options.copyWith(
         theme: kAllGalleryThemes[(index + 1) % kAllGalleryThemes.length],
@@ -329,7 +332,7 @@ class GalleryOptionsPage extends StatelessWidget {
              ?? options.showPerformanceOverlay)
       return const <Widget>[];
 
-    List<Widget> items = <Widget>[
+    final List<Widget> items = <Widget>[
       const Divider(),
       const _Heading('Diagnostics'),
     ];

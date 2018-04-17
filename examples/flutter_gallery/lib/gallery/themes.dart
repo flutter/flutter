@@ -36,7 +36,7 @@ final List<GalleryTheme> kAllGalleryThemes = <GalleryTheme>[
       backgroundColor: Colors.white,
       dividerColor: const Color(0xFFAAF7FE),
       buttonColor: Colors.blue[500],
-      buttonTheme: new ButtonThemeData(
+      buttonTheme: const ButtonThemeData(
         textTheme: ButtonTextTheme.primary,
       ),
       errorColor: const Color(0xFFFF1744),

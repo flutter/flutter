@@ -46,13 +46,13 @@ class _GalleryAppState extends State<GalleryApp> {
 
     return new Map<String, WidgetBuilder>.fromIterable(
       kAllGalleryDemos,
-      key: (demo) => '${demo.routeName}',
-      value: (demo) => demo.buildRoute,
+      key: (dynamic demo) => '${demo.routeName}',
+      value: (dynamic demo) => demo.buildRoute,
     )..addAll(
       new Map<String, WidgetBuilder>.fromIterable(
         kAllGalleryDemoCategories,
-        key: (category) => '/${category.name}',
-        value: (category) {
+        key: (dynamic category) => '/${category.name}',
+        value: (dynamic category) {
           return (BuildContext context) {
             return new DemosPage(
               category: category,

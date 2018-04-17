@@ -13,11 +13,11 @@ const double _kBackAppBarHeight = 56.0; // back layer (options) appbar height
 
 // The size of the front layer heading's left and right beveled corners.
 final Tween<BorderRadius> _kFrontHeadingBevelRadius = new BorderRadiusTween(
-  begin: new BorderRadius.only(
+  begin: const BorderRadius.only(
     topLeft: const Radius.circular(12.0),
     topRight: const Radius.circular(12.0),
   ),
-  end: new BorderRadius.only(
+  end: const BorderRadius.only(
     topLeft: const Radius.circular(_kFrontHeadingHeight),
     topRight: const Radius.circular(_kFrontHeadingHeight),
   ),
@@ -162,7 +162,7 @@ class _BackAppBar extends StatelessWidget {
   const _BackAppBar({
     Key key,
     this.leading: const SizedBox(width: 56.0),
-    this.title,
+    @required this.title,
     this.trailing,
   }) : assert(leading != null), assert(title != null), super(key: key);
 
@@ -324,7 +324,7 @@ class Backdrop extends StatefulWidget {
 
 class _BackdropState extends State<Backdrop> {
   ScrollController _scrollController;
-  _ScrollProgressAnimation _scrollProgress = new _ScrollProgressAnimation();
+  final _ScrollProgressAnimation _scrollProgress = new _ScrollProgressAnimation();
   double _frontOpenOffset;
   bool _frontIsOpen = true;
 
@@ -416,7 +416,7 @@ class _BackdropState extends State<Backdrop> {
                   progress: _scrollProgress,
                   child0: widget.frontAction,
                   child1: new IconButton(
-                    icon: new BackButtonIcon(),
+                    icon: const BackButtonIcon(),
                     onPressed: _openFrontPanel,
                   ),
                 ),
@@ -432,7 +432,7 @@ class _BackdropState extends State<Backdrop> {
                     icon: const Icon(Icons.menu),
                     onPressed: _closeFrontPanel,
                   ),
-                  child1: new SizedBox()
+                  child1: const SizedBox()
                 )
               ),
               new Expanded(
