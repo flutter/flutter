@@ -329,17 +329,11 @@ class _FlutterPlatform extends PlatformPlugin {
         }
       }
 
-      final Process process = await _startProcess(
-        shellPath,
-        mainDart,
-        packages: PackageMap.globalPackagesPath,
-        enableObservatory: enableObservatory,
-        startPaused: startPaused,
-        bundlePath: _getBundlePath(finalizers, ourTestCount),
-        observatoryPort: explicitObservatoryPort,
-        serverPort: server.port,
-      );
-      subprocessActive = true;
+      Process process = null;
+      // Important: must shutdown the shell before trying to delete any temporary
+      // files or directories because on Windows that would cause Access Denied
+      // error. That's why we register this finalizer ahead of any other
+      // finalizers that would be created by _getBundlePath below.
       finalizers.add(() async {
         if (subprocessActive) {
           printTrace('test $ourTestCount: ensuring end-of-process for shell');
@@ -354,6 +348,18 @@ class _FlutterPlatform extends PlatformPlugin {
           }
         }
       });
+      process = await _startProcess(
+        shellPath,
+        mainDart,
+        packages: PackageMap.globalPackagesPath,
+        enableObservatory: enableObservatory,
+        startPaused: startPaused,
+        bundlePath: _getBundlePath(finalizers, ourTestCount),
+        observatoryPort: explicitObservatoryPort,
+        serverPort: server.port,
+      );
+      subprocessActive = true;
+
 
       final Completer<Null> timeout = new Completer<Null>();
 
