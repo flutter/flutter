@@ -476,7 +476,7 @@ class _MaterialTextColorThemes {
     subhead : const TextStyle(debugLabel: 'blackCupertino subhead',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
     body2   : const TextStyle(debugLabel: 'blackCupertino body2',    fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
     body1   : const TextStyle(debugLabel: 'blackCupertino body1',    fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
-    caption : const TextStyle(debugLabel: 'blackCupertino caption',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.black54, decoration: TextDecoration.none),
+    caption : const TextStyle(debugLabel: 'blackCupertino caption',  fontFamily: '.SF UI Text',    inherit: true, color: _grey700,       decoration: TextDecoration.none),
     button  : const TextStyle(debugLabel: 'blackCupertino button',   fontFamily: '.SF UI Text',    inherit: true, color: Colors.black87, decoration: TextDecoration.none),
   );
 
@@ -493,6 +493,9 @@ class _MaterialTextColorThemes {
     caption : const TextStyle(debugLabel: 'whiteCupertino caption',  fontFamily: '.SF UI Text',    inherit: true, color: Colors.white70, decoration: TextDecoration.none),
     button  : const TextStyle(debugLabel: 'whiteCupertino button',   fontFamily: '.SF UI Text',    inherit: true, color: Colors.white,   decoration: TextDecoration.none),
   );
+
+  /// Duplicate of [Colors.grey.shade700] to allow const declaration.
+  static const Color _grey700 = const Color(0xFF616161);
 }
 
 /// Defines text geometries for the three language categories defined in
