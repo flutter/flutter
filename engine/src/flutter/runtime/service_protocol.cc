@@ -189,7 +189,8 @@ bool ServiceProtocol::HandleMessage(fxl::StringView method,
   // TODO(chinmaygarde): Deprecate these calls in the tools and remove these
   // fallbacks.
   if (method == kScreenshotExtensionName ||
-      method == kScreenshotSkpExtensionName) {
+      method == kScreenshotSkpExtensionName ||
+      method == kFlushUIThreadTasksExtensionName) {
     return HandleMessageOnHandler(*handlers_.begin(), method, params, response);
   }
 
