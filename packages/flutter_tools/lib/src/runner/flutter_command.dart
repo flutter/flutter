@@ -247,7 +247,8 @@ abstract class FlutterCommand extends Command<Null> {
     if (parent is FlutterCommand) {
       final FlutterCommand commandParent = parent;
       final String path = await commandParent.usagePath;
-      return '$path/$name';
+      // Don't report for parents that return null for usagePath.
+      return path == null ? null : '$path/$name';
     } else {
       return name;
     }
@@ -282,8 +283,9 @@ abstract class FlutterCommand extends Command<Null> {
         } finally {
           final DateTime endTime = clock.now();
           printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
-          final Future<String> usagePathResult = usagePath;
-          if (usagePathResult != null) {
+          // Note that this is checking the result of the call to 'usagePath'
+          // (a Future<String>), and not the result of evaluating the Future.
+          if (usagePath != null) {
             final List<String> labels = <String>[];
             if (commandResult?.exitStatus != null)
               labels.add(getEnumName(commandResult.exitStatus));
