@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'android/android_emulator.dart';
 import 'base/context.dart';
 import 'globals.dart';
+import 'ios/ios_emulators.dart';
 
 EmulatorManager get emulatorManager => context[EmulatorManager];
 
@@ -18,6 +19,7 @@ class EmulatorManager {
   EmulatorManager() {
     // Register the known discoverers.
     _emulatorDiscoverers.add(new AndroidEmulators());
+    _emulatorDiscoverers.add(new IOSEmulators());
   }
 
   final List<EmulatorDiscovery> _emulatorDiscoverers = <EmulatorDiscovery>[];
