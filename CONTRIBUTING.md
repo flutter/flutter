@@ -97,7 +97,7 @@ Run the following steps, from the `src` directory created in the steps above:
 * `gclient sync` to update your dependencies.
 * `./flutter/tools/gn --android --unoptimized` to prepare your build files for device-side executables (or `--android --android-cpu [x86|x64] --unoptimized` for x86/x64 emulators) .
 * `./flutter/tools/gn --unoptimized` to prepare the build files for host-side executables.
-* `ninja -C out/android_debug_unopt -C out/host_debug_unopt` to build all executables (use `out/android_debug_unopt_x64` for x86/x64 emulators).
+* `ninja -C out/android_debug_unopt && ninja -C out/host_debug_unopt` to build all executables (use `out/android_debug_unopt_x64` for x86/x64 emulators).
     * For Googlers, consider also using the option `-j 1000` to parallelize the build using Goma.
 
 This builds a debug-enabled ("unoptimized") binary configured to run Dart in
@@ -143,7 +143,7 @@ to test the engine.
   * For a discussion on the various flags and modes, [read this discussion](https://github.com/flutter/flutter/wiki/Flutter's-modes).
   * This also produces an Xcode project for working with the engine source code at `out/ios_debug_unopt`
 * `./flutter/tools/gn --unoptimized` to prepare the build files for host-side executables.
-* `ninja -C out/ios_debug_unopt -C out/host_debug_unopt` to build all artifacts (use `out/ios_debug_sim_unopt` for Simulator).
+* `ninja -C out/ios_debug_unopt && ninja -C out/host_debug_unopt` to build all artifacts (use `out/ios_debug_sim_unopt` for Simulator).
     * For Googlers, consider also using the option `-j 1000` to parallelize the build using Goma.
 
 Once the artifacts are built, you can start using them in your application by following these steps:
