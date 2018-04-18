@@ -100,8 +100,14 @@ bool Rasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
   // for instrumentation.
   compositor_context_.engine_time().SetLapTime(layer_tree.construction_time());
 
-  auto compositor_frame = compositor_context_.AcquireFrame(
-      surface_->GetContext(), frame->SkiaCanvas(), true);
+  auto canvas = frame->SkiaCanvas();
+
+  auto compositor_frame =
+      compositor_context_.AcquireFrame(surface_->GetContext(), canvas, true);
+
+  if (canvas) {
+    canvas->clear(SK_ColorBLACK);
+  }
 
   if (compositor_frame && compositor_frame->Raster(layer_tree, false)) {
     frame->Submit();
