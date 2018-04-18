@@ -72,7 +72,7 @@ List<AndroidEmulator> getEmulatorAvds() {
 /// Parse the given `emulator -list-avds` output in [text], and fill out the given list
 /// of emulators by reading information from the relevant ini files.
 void extractEmulatorAvdInfo(String text, List<AndroidEmulator> emulators) {
-  for (String id in text.trim().split('\n')) {
+  for (String id in text.trim().split('\n').where((String l) => l != '')) {
     emulators.add(_createEmulator(id));
   }
 }
