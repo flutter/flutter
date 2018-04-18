@@ -19,9 +19,9 @@ void main() {
     });
 
     testUsingContext('getEmulatorsById', () async {
-      final _MockEmulator emulator1 = new _MockEmulator('Nexus_5');
-      final _MockEmulator emulator2 = new _MockEmulator('Nexus_5X_API_27_x86');
-      final _MockEmulator emulator3 = new _MockEmulator('iOS Simulator');
+      final _MockEmulator emulator1 = new _MockEmulator('Nexus_5', 'Nexus 5', 'Google', '');
+      final _MockEmulator emulator2 = new _MockEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google', '');
+      final _MockEmulator emulator3 = new _MockEmulator('iOS Simulator', 'iOS Simulator', 'Apple', '');
       final List<Emulator> emulators = <Emulator>[emulator1, emulator2, emulator3];
       final EmulatorManager emulatorManager = new TestEmulatorManager(emulators);
 
@@ -50,8 +50,15 @@ class TestEmulatorManager extends EmulatorManager {
 }
 
 class _MockEmulator extends Emulator {
-  _MockEmulator(String id) : super(id);
+  _MockEmulator(String id, this.name, this.manufacturer, this.label) : super(id, true);
 
   @override
-  void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  final String name;
+ 
+  @override
+  final String manufacturer;
+ 
+  @override
+  final String label;
+
 }
