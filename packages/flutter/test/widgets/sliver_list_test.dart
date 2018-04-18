@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart';
 // Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
@@ -12,7 +12,7 @@ void main() {
     const double itemHeight = 300.0;
     const double viewportHeight = 500.0;
 
-    final double scrollPosition = 18 * itemHeight;
+    const double scrollPosition = 18 * itemHeight;
     final ScrollController controller = new ScrollController(initialScrollOffset: scrollPosition);
 
     Widget _buildSliverList(List<int> items) {
