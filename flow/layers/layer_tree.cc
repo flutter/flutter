@@ -6,6 +6,7 @@
 
 #include "flutter/flow/layers/layer.h"
 #include "flutter/glue/trace_event.h"
+#include "third_party/skia/include/core/SkPictureRecorder.h"
 
 namespace flow {
 
@@ -60,6 +61,7 @@ void LayerTree::UpdateScene(SceneUpdateContext& context,
 #endif
 
 void LayerTree::Paint(CompositorContext::ScopedFrame& frame) const {
+  TRACE_EVENT0("flutter", "LayerTree::Paint");
   Layer::PaintContext context = {
       *frame.canvas(),                     //
       frame.context().frame_time(),        //
@@ -67,10 +69,50 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame) const {
       frame.context().texture_registry(),  //
       checkerboard_offscreen_layers_       //
   };
-  TRACE_EVENT0("flutter", "LayerTree::Paint");
 
   if (root_layer_->needs_painting())
     root_layer_->Paint(context);
+}
+
+sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
+  TRACE_EVENT0("flutter", "LayerTree::Flatten");
+
+  SkPictureRecorder recorder;
+  auto canvas = recorder.beginRecording(bounds);
+
+  if (!canvas) {
+    return nullptr;
+  }
+
+  Layer::PrerollContext preroll_context{
+      nullptr,              // raster_cache (don't consult the cache)
+      nullptr,              // gr_context  (used for the raster cache)
+      nullptr,              // SkColorSpace* dst_color_space
+      SkRect::MakeEmpty(),  // SkRect child_paint_bounds
+  };
+
+  const Stopwatch unused_stopwatch;
+  TextureRegistry unused_texture_registry;
+
+  Layer::PaintContext paint_context = {
+      *canvas,                  // canvas
+      unused_stopwatch,         // frame time (dont care)
+      unused_stopwatch,         // engine time (dont care)
+      unused_texture_registry,  // texture registry (not supported)
+      false                     // checkerboard offscreen layers
+  };
+
+  // Even if we don't have a root layer, we still need to create an empty
+  // picture.
+  if (root_layer_) {
+    root_layer_->Preroll(&preroll_context, SkMatrix::I());
+    // The needs painting flag may be set after the preroll. So check it after.
+    if (root_layer_->needs_painting()) {
+      root_layer_->Paint(paint_context);
+    }
+  }
+
+  return recorder.finishRecordingAsPicture();
 }
 
 }  // namespace flow
