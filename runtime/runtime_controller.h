@@ -46,6 +46,8 @@ class RuntimeController final : public WindowClient {
 
   bool NotifyIdle(int64_t deadline);
 
+  bool IsRootIsolateRunning() const;
+
   bool DispatchPlatformMessage(fxl::RefPtr<PlatformMessage> message);
 
   bool DispatchPointerDataPacket(const PointerDataPacket& packet);

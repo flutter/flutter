@@ -259,7 +259,8 @@ void Engine::DispatchPlatformMessage(
     return;
   }
 
-  if (runtime_controller_->DispatchPlatformMessage(std::move(message))) {
+  if (runtime_controller_->IsRootIsolateRunning() &&
+      runtime_controller_->DispatchPlatformMessage(std::move(message))) {
     return;
   }
 

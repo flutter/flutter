@@ -78,6 +78,13 @@ RuntimeController::~RuntimeController() {
   }
 }
 
+bool RuntimeController::IsRootIsolateRunning() const {
+  if (root_isolate_) {
+    return root_isolate_->GetPhase() == DartIsolate::Phase::Running;
+  }
+  return false;
+}
+
 std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
   return std::unique_ptr<RuntimeController>(new RuntimeController(
       client_,            //
