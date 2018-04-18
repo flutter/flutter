@@ -1320,30 +1320,17 @@ class FlutterView extends ServiceObject {
     _uiIsolate = map['isolate'];
   }
 
-  // TODO(johnmccutchan): Report errors when running failed.
   Future<Null> runFromSource(Uri entryUri,
                              Uri packagesUri,
                              Uri assetsDirectoryUri) async {
-    final String viewId = id;
-    // When this completer completes the isolate is running.
-    final Completer<Null> completer = new Completer<Null>();
-    final StreamSubscription<ServiceEvent> subscription =
-      owner.vm.vmService.onIsolateEvent.listen((ServiceEvent event) {
-      // TODO(johnmccutchan): Listen to the debug stream and catch initial
-      // launch errors.
-      if (event.kind == ServiceEvent.kIsolateRunnable) {
-        printTrace('Isolate is runnable.');
-        if (!completer.isCompleted)
-          completer.complete(null);
-      }
-    });
-    await owner.vm.runInView(viewId,
-                             entryUri,
-                             packagesUri,
-                             assetsDirectoryUri);
-    await completer.future;
-    await owner.vm.refreshViews();
-    await subscription.cancel();
+    ServiceMap result = await owner.vm.runInView(id, entryUri, packagesUri, assetsDirectoryUri);
+    if (result['type'] == 'Success') {
+      await owner.vm.refreshViews();
+    } else {
+      // TODO(chinmaygarde): Modify this method to handle error conditions
+      // from the engine.
+      print('ERROR: Could not re-run application from source');
+    }
   }
 
   Future<Null> setAssetDirectory(Uri assetsDirectory) async {
