@@ -93,9 +93,6 @@ class SemanticsData extends Diagnosticable {
     @required this.decreasedValue,
     @required this.hint,
     @required this.textDirection,
-    // TODO(yjbanov): remove nextNodeId and previousNodeId
-    @required this.nextNodeId,
-    @required this.previousNodeId,
     @required this.rect,
     @required this.textSelection,
     @required this.scrollPosition,
@@ -153,16 +150,6 @@ class SemanticsData extends Diagnosticable {
   /// The reading direction for the text in [label], [value], [hint],
   /// [increasedValue], and [decreasedValue].
   final TextDirection textDirection;
-
-  /// The index indicating the ID of the next node in the traversal order after
-  /// this node for the platform's accessibility services.
-  // TODO(yjbanov): remove nextNodeId and previousNodeId
-  final int nextNodeId;
-
-  /// The index indicating the ID of the previous node in the traversal order before
-  /// this node for the platform's accessibility services.
-  // TODO(yjbanov): remove nextNodeId and previousNodeId
-  final int previousNodeId;
 
   /// The currently selected text (or the position of the cursor) within [value]
   /// if this node represents a text field.
@@ -246,10 +233,6 @@ class SemanticsData extends Diagnosticable {
     properties.add(new StringProperty('decreasedValue', decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-    // TODO(yjbanov): remove nextNodeId and previousNodeId
-    properties.add(new IntProperty('nextNodeId', nextNodeId, defaultValue: null));
-    // TODO(yjbanov): remove nextNodeId and previousNodeId
-    properties.add(new IntProperty('previousNodeId', previousNodeId, defaultValue: null));
     if (textSelection?.isValid == true)
       properties.add(new MessageProperty('textSelection', '[${textSelection.start}, ${textSelection.end}]'));
     properties.add(new DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
@@ -270,9 +253,6 @@ class SemanticsData extends Diagnosticable {
         && typedOther.decreasedValue == decreasedValue
         && typedOther.hint == hint
         && typedOther.textDirection == textDirection
-        // TODO(yjbanov): remove nextNodeId and previousNodeId
-        && typedOther.nextNodeId == nextNodeId
-        && typedOther.previousNodeId == previousNodeId
         && typedOther.rect == rect
         && setEquals(typedOther.tags, tags)
         && typedOther.textSelection == textSelection
@@ -283,7 +263,7 @@ class SemanticsData extends Diagnosticable {
   }
 
   @override
-  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, nextNodeId, previousNodeId, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform);
+  int get hashCode => ui.hashValues(flags, actions, label, value, increasedValue, decreasedValue, hint, textDirection, rect, tags, textSelection, scrollPosition, scrollExtentMax, scrollExtentMin, transform);
 }
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
@@ -1141,39 +1121,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// This is used to describe the order in which the semantic node should be
   /// traversed by the accessibility services on the platform (e.g. VoiceOver
   /// on iOS and TalkBack on Android).
-  ///
-  /// This is used to determine the [nextNodeId] and [previousNodeId] during a
-  /// semantics update.
   SemanticsSortKey get sortKey => _sortKey;
   SemanticsSortKey _sortKey;
-
-  /// The ID of the next node in the traversal order after this node.
-  ///
-  /// Only valid after at least one semantics update has been built.
-  ///
-  /// This is the value passed to the engine to tell it what the order
-  /// should be for traversing semantics nodes.
-  ///
-  /// If this is set to -1, it will indicate that there is no next node to
-  /// the engine (i.e. this is the last node in the sort order). When it is
-  /// null, it means that no semantics update has been built yet.
-  // TODO(yjbanov): remove nextNodeId and previousNodeId
-  int get nextNodeId => _nextNodeId;
-  int _nextNodeId;
-
-  /// The ID of the previous node in the traversal order before this node.
-  ///
-  /// Only valid after at least one semantics update has been built.
-  ///
-  /// This is the value passed to the engine to tell it what the order
-  /// should be for traversing semantics nodes.
-  ///
-  /// If this is set to -1, it will indicate that there is no previous node to
-  /// the engine (i.e. this is the first node in the sort order). When it is
-  /// null, it means that no semantics update has been built yet.
-  // TODO(yjbanov): remove nextNodeId and previousNodeId
-  int get previousNodeId => _previousNodeId;
-  int _previousNodeId;
 
   /// The currently selected text (or the position of the cursor) within [value]
   /// if this node represents a text field.
@@ -1279,8 +1228,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     String increasedValue = _increasedValue;
     String decreasedValue = _decreasedValue;
     TextDirection textDirection = _textDirection;
-    int nextNodeId = _nextNodeId;
-    int previousNodeId = _previousNodeId;
     Set<SemanticsTag> mergedTags = tags == null ? null : new Set<SemanticsTag>.from(tags);
     TextSelection textSelection = _textSelection;
     double scrollPosition = _scrollPosition;
@@ -1293,8 +1240,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         flags |= node._flags;
         actions |= node._actionsAsBits;
         textDirection ??= node._textDirection;
-        nextNodeId ??= node._nextNodeId;
-        previousNodeId ??= node._previousNodeId;
         textSelection ??= node._textSelection;
         scrollPosition ??= node._scrollPosition;
         scrollExtentMax ??= node._scrollExtentMax;
@@ -1334,8 +1279,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       decreasedValue: decreasedValue,
       hint: hint,
       textDirection: textDirection,
-      nextNodeId: nextNodeId,
-      previousNodeId: previousNodeId,
       rect: rect,
       transform: transform,
       tags: mergedTags,
@@ -1378,8 +1321,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       increasedValue: data.increasedValue,
       hint: data.hint,
       textDirection: data.textDirection,
-      nextNodeId: data.nextNodeId,
-      previousNodeId: data.previousNodeId,
       textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
       scrollPosition: data.scrollPosition != null ? data.scrollPosition : double.nan,
@@ -1393,64 +1334,83 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Builds a new list made of [_children] sorted in semantic traversal order.
   List<SemanticsNode> _childrenInTraversalOrder() {
-    TextDirection inheritedTextDirection = textDirection;
-    SemanticsNode ancestor = parent;
-    while (inheritedTextDirection == null && ancestor != null) {
-      inheritedTextDirection = ancestor.textDirection;
-      ancestor = ancestor.parent;
-    }
-
-    List<SemanticsNode> childrenInDefaultOrder = _childrenInDefaultOrder(_children, inheritedTextDirection);
-    if (inheritedTextDirection != null) {
-      childrenInDefaultOrder = _childrenInDefaultOrder(_children, inheritedTextDirection);
-    } else {
-      // In the absence of text direction default to paint order.
-      childrenInDefaultOrder = _children;
-    }
-
-    // List.sort does not guarantee stable sort order. Therefore, children are
-    // first partitioned into groups that have compatible sort keys, i.e. keys
-    // in the same group can be compared to each other. These groups stay in
-    // the same place. Only children within the same group are sorted.
-    final List<_TraversalSortNode> everythingSorted = <_TraversalSortNode>[];
-    final List<_TraversalSortNode> sortNodes = <_TraversalSortNode>[];
-    SemanticsSortKey lastSortKey;
-    for (int position = 0; position < childrenInDefaultOrder.length; position += 1) {
-      final SemanticsNode child = childrenInDefaultOrder[position];
-      final SemanticsSortKey sortKey = child.sortKey;
-      lastSortKey = position > 0
-          ? childrenInDefaultOrder[position - 1].sortKey
-          : null;
-      final bool isCompatibleWithPreviousSortKey = position == 0 ||
-          sortKey.runtimeType == lastSortKey.runtimeType &&
-          (sortKey == null || sortKey.name == lastSortKey.name);
-      if (!isCompatibleWithPreviousSortKey && sortNodes.isNotEmpty) {
-        // Do not sort groups with null sort keys. List.sort does not guarantee
-        // a stable sort order.
-        if (lastSortKey != null) {
-          sortNodes.sort();
-        }
-        everythingSorted.addAll(sortNodes);
-        sortNodes.clear();
+    final Stopwatch sw = new Stopwatch()..start();
+    try {
+      TextDirection inheritedTextDirection = textDirection;
+      SemanticsNode ancestor = parent;
+      while (inheritedTextDirection == null && ancestor != null) {
+        inheritedTextDirection = ancestor.textDirection;
+        ancestor = ancestor.parent;
       }
 
-      sortNodes.add(new _TraversalSortNode(
-        node: child,
-        sortKey: sortKey,
-        position: position,
-      ));
-    }
+      List<SemanticsNode> childrenInDefaultOrder = _childrenInDefaultOrder(_children, inheritedTextDirection);
+      if (inheritedTextDirection != null) {
+        childrenInDefaultOrder = _childrenInDefaultOrder(_children, inheritedTextDirection);
+      } else {
+        // In the absence of text direction default to paint order.
+        childrenInDefaultOrder = _children;
+      }
 
-    // Do not sort groups with null sort keys. List.sort does not guarantee
-    // a stable sort order.
-    if (lastSortKey != null) {
-      sortNodes.sort();
-    }
-    everythingSorted.addAll(sortNodes);
+      // List.sort does not guarantee stable sort order. Therefore, children are
+      // first partitioned into groups that have compatible sort keys, i.e. keys
+      // in the same group can be compared to each other. These groups stay in
+      // the same place. Only children within the same group are sorted.
+      final List<_TraversalSortNode> everythingSorted = <_TraversalSortNode>[];
+      final List<_TraversalSortNode> sortNodes = <_TraversalSortNode>[];
+      SemanticsSortKey lastSortKey;
+      for (int position = 0; position < childrenInDefaultOrder.length; position += 1) {
+        final SemanticsNode child = childrenInDefaultOrder[position];
+        final SemanticsSortKey sortKey = child.sortKey;
+        lastSortKey = position > 0
+            ? childrenInDefaultOrder[position - 1].sortKey
+            : null;
+        final bool isCompatibleWithPreviousSortKey = position == 0 ||
+            sortKey.runtimeType == lastSortKey.runtimeType &&
+            (sortKey == null || sortKey.name == lastSortKey.name);
+        if (!isCompatibleWithPreviousSortKey && sortNodes.isNotEmpty) {
+          // Do not sort groups with null sort keys. List.sort does not guarantee
+          // a stable sort order.
+          if (lastSortKey != null) {
+            sortNodes.sort();
+          }
+          everythingSorted.addAll(sortNodes);
+          sortNodes.clear();
+        }
 
-    return everythingSorted
-      .map<SemanticsNode>((_TraversalSortNode sortNode) => sortNode.node)
-      .toList();
+        sortNodes.add(new _TraversalSortNode(
+          node: child,
+          sortKey: sortKey,
+          position: position,
+        ));
+      }
+
+      // Do not sort groups with null sort keys. List.sort does not guarantee
+      // a stable sort order.
+      if (lastSortKey != null) {
+        sortNodes.sort();
+      }
+      everythingSorted.addAll(sortNodes);
+
+      return everythingSorted
+        .map<SemanticsNode>((_TraversalSortNode sortNode) => sortNode.node)
+        .toList();
+    } finally {
+      if (sw.elapsedMilliseconds > 100) {
+        print(
+          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
+          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
+          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
+          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
+          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
+          '<<<<<<<<<<<<<<<<<<<<<<<<<<<< !!!ALERT!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
+          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
+          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
+          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
+          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
+          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
+        );
+      }
+    }
   }
 
   /// Sends a [SemanticsEvent] associated with this [SemanticsNode].
@@ -1508,8 +1468,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(new StringProperty('decreasedValue', _decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', _hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
-    properties.add(new IntProperty('nextNodeId', _nextNodeId, defaultValue: null));
-    properties.add(new IntProperty('previousNodeId', _previousNodeId, defaultValue: null));
     properties.add(new DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     if (_textSelection?.isValid == true)
       properties.add(new MessageProperty('text selection', '[${_textSelection.start}, ${_textSelection.end}]'));

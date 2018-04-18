@@ -43,9 +43,6 @@ class TestSemantics {
     this.decreasedValue: '',
     this.hint: '',
     this.textDirection,
-    // TODO(yjbanov): remove nextNodeId and previousNodeId.
-    int nextNodeId: -1,
-    int previousNodeId: -1,
     this.rect,
     this.transform,
     this.textSelection,
@@ -59,8 +56,6 @@ class TestSemantics {
        assert(decreasedValue != null),
        assert(hint != null),
        assert(children != null),
-       assert(nextNodeId != null),
-       assert(previousNodeId != null),
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
@@ -109,9 +104,6 @@ class TestSemantics {
     this.increasedValue: '',
     this.decreasedValue: '',
     this.textDirection,
-    // TODO(yjbanov): remove nextNodeId and previousNodeId.
-    int nextNodeId: -1,
-    int previousNodeId: -1,
     this.rect,
     Matrix4 transform,
     this.textSelection,
@@ -126,8 +118,6 @@ class TestSemantics {
        assert(hint != null),
        transform = _applyRootChildScale(transform),
        assert(children != null),
-       assert(nextNodeId != null),
-       assert(previousNodeId != null),
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
 
   /// The unique identifier for this node.
@@ -557,10 +547,6 @@ class SemanticsTester {
       buf.writeln('  hint: \'${node.hint}\',');
     if (node.textDirection != null)
       buf.writeln('  textDirection: ${node.textDirection},');
-    if (node.nextNodeId != null && node.nextNodeId != -1)
-      buf.writeln('  nextNodeId: ${node.nextNodeId},');
-    if (node.previousNodeId != null && node.previousNodeId != -1)
-      buf.writeln('  previousNodeId: ${node.previousNodeId},');
 
     if (node.hasChildren) {
       buf.writeln('  children: <TestSemantics>[');

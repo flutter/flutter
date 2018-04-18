@@ -345,8 +345,6 @@ void main() {
       '   decreasedValue: ""\n'
       '   hint: ""\n'
       '   textDirection: null\n'
-      '   nextNodeId: null\n'
-      '   previousNodeId: null\n'
       '   sortKey: null\n'
       '   scrollExtentMin: null\n'
       '   scrollPosition: null\n'

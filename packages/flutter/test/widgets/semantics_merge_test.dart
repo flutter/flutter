@@ -44,12 +44,10 @@ void main() {
           new TestSemantics.rootChild(
             id: 1,
             label: 'test1',
-            nextNodeId: 2,
           ),
           new TestSemantics.rootChild(
             id: 2,
             label: 'test2',
-            previousNodeId: 1,
           ),
         ],
       ),
@@ -113,8 +111,8 @@ void main() {
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(id: 6, label: 'test1', nextNodeId: 7),
-          new TestSemantics.rootChild(id: 7, label: 'test2', previousNodeId: 6),
+          new TestSemantics.rootChild(id: 6, label: 'test1'),
+          new TestSemantics.rootChild(id: 7, label: 'test2'),
         ],
       ),
       ignoreRect: true,

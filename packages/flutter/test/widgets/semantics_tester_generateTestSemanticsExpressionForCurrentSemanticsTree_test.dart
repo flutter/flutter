@@ -55,7 +55,7 @@ void _tests() {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await pumpTestWidget(tester);
     final String code = semantics
-      .generateTestSemanticsExpressionForCurrentSemanticsTree()
+      .generateTestSemanticsExpressionForCurrentSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest)
       .split('\n')
       .map((String line) => line.trim())
       .join('\n')

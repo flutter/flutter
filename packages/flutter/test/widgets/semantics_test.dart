@@ -664,37 +664,29 @@ void main() {
                 id: 2,
                 label: r'Label 1',
                 textDirection: TextDirection.ltr,
-                previousNodeId: 3,
               ),
               new TestSemantics(
                 id: 3,
                 label: r'Label 2',
                 textDirection: TextDirection.ltr,
-                nextNodeId: 2,
-                previousNodeId: 4,
               ),
               new TestSemantics(
                 id: 4,
-                nextNodeId: 3,
                 children: <TestSemantics>[
                   new TestSemantics(
                     id: 5,
                     label: r'Label 3',
                     textDirection: TextDirection.ltr,
-                    previousNodeId: 6,
                   ),
                   new TestSemantics(
                     id: 6,
                     label: r'Label 4',
                     textDirection: TextDirection.ltr,
-                    nextNodeId: 5,
-                    previousNodeId: 7,
                   ),
                   new TestSemantics(
                     id: 7,
                     label: r'Label 5',
                     textDirection: TextDirection.ltr,
-                    nextNodeId: 6,
                   ),
                 ],
               ),
@@ -745,20 +737,16 @@ void main() {
             id: 1,
             label: r'Label 1',
             textDirection: TextDirection.ltr,
-            previousNodeId: 3,
           ),
           new TestSemantics(
             id: 2,
             label: r'Label 2',
             textDirection: TextDirection.ltr,
-            nextNodeId: 3,
           ),
           new TestSemantics(
             id: 3,
             label: r'Label 3',
             textDirection: TextDirection.ltr,
-            nextNodeId: 1,
-            previousNodeId: 2,
           ),
         ],
       ), ignoreTransform: true, ignoreRect: true));
@@ -804,22 +792,18 @@ void main() {
           new TestSemantics(
             label: r'Label 2',
             textDirection: TextDirection.ltr,
-            previousNodeId: 1,
           ),
           new TestSemantics(
             label: r'Label 3',
             textDirection: TextDirection.ltr,
-            previousNodeId: 2,
           ),
           new TestSemantics(
             label: r'Label 4',
             textDirection: TextDirection.ltr,
-            previousNodeId: 3,
           ),
           new TestSemantics(
             label: r'Label 5',
             textDirection: TextDirection.ltr,
-            previousNodeId: 4,
           ),
         ],
       ), ignoreTransform: true, ignoreRect: true, ignoreId: true),
@@ -865,12 +849,10 @@ void main() {
           new TestSemantics(
             label: r'Label 1',
             textDirection: TextDirection.ltr,
-            previousNodeId: 5,
           ),
           new TestSemantics(
             label: r'Label 2',
             textDirection: TextDirection.ltr,
-            previousNodeId: 1,
           ),
           new TestSemantics(
             label: r'Label 3',
@@ -879,12 +861,10 @@ void main() {
           new TestSemantics(
             label: r'Label 4',
             textDirection: TextDirection.ltr,
-            previousNodeId: 3,
           ),
           new TestSemantics(
             label: r'Label 5',
             textDirection: TextDirection.ltr,
-            previousNodeId: 4,
           ),
         ],
       ), ignoreTransform: true, ignoreRect: true, ignoreId: true),
@@ -972,23 +952,18 @@ void main() {
             ),
             new TestSemantics(
               flags: <SemanticsFlag>[SemanticsFlag.isButton],
-              previousNodeId: 5,
             ),
             new TestSemantics(
               flags: <SemanticsFlag>[SemanticsFlag.isButton],
-              previousNodeId: 6,
             ),
             new TestSemantics(
               flags: <SemanticsFlag>[SemanticsFlag.isButton],
-              previousNodeId: 3,
             ),
             new TestSemantics(
               flags: <SemanticsFlag>[SemanticsFlag.isButton],
-              previousNodeId: 4,
             ),
             new TestSemantics(
               flags: <SemanticsFlag>[SemanticsFlag.isButton],
-              previousNodeId: 1,
             ),
           ],
         ),

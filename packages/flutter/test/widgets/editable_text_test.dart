@@ -600,8 +600,6 @@ void main() {
               flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isObscured],
               value: expectedValue,
               textDirection: TextDirection.ltr,
-              nextNodeId: -1,
-              previousNodeId: -1,
             ),
           ],
         ),
