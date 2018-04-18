@@ -48,11 +48,11 @@ class EmulatorManager {
     final List<Emulator> emulators = await getAllAvailableEmulators().toList();
     emulatorId = emulatorId.toLowerCase();
     bool exactlyMatchesEmulatorId(Emulator emulator) =>
-        emulator.id.toLowerCase() == emulatorId ||
-        emulator.name.toLowerCase() == emulatorId;
+        emulator.id?.toLowerCase() == emulatorId ||
+        emulator.name?.toLowerCase() == emulatorId;
     bool startsWithEmulatorId(Emulator emulator) =>
-        emulator.id.toLowerCase().startsWith(emulatorId) ||
-        emulator.name.toLowerCase().startsWith(emulatorId);
+        emulator.id?.toLowerCase()?.startsWith(emulatorId) == true ||
+        emulator.name?.toLowerCase()?.startsWith(emulatorId) == true;
 
     final Emulator exactMatch = emulators.firstWhere(
         exactlyMatchesEmulatorId, orElse: () => null);
@@ -150,10 +150,10 @@ abstract class Emulator {
     final List<List<String>> table = <List<String>>[];
     for (Emulator emulator in emulators) {
       table.add(<String>[
-        emulator.name,
-        emulator.manufacturer,
-        emulator.label,
-        emulator.id,
+        emulator.name ?? emulator.id ?? '',
+        emulator.manufacturer ?? '',
+        emulator.label ?? '',
+        emulator.id ?? '',
       ]);
     }
 
