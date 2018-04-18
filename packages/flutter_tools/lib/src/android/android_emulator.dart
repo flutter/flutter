@@ -43,10 +43,8 @@ class AndroidEmulator extends Emulator {
 
   @override
   Future<bool> launch() async {
-    final Status status = logger.startProgress('Launching $id...');
     final RunResult launchResult =
         await runAsync(<String>[getEmulatorPath(), '-avd', id]);
-    status.stop();
     if (launchResult.exitCode != 0) {
       printError(
           'Error: emulator exited with exit code ${launchResult.exitCode}');

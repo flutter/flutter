@@ -39,10 +39,8 @@ class IOSEmulator extends Emulator {
 
   @override
   Future<bool> launch() async {
-    final Status status = logger.startProgress('Launching $id...');
     final RunResult launchResult =
         await runAsync(<String>['open', '-a', getSimulatorPath()]);
-    status.stop();
     if (launchResult.exitCode != 0) {
       printError(
           'Error: iOS simulator failed to launch with exit code ${launchResult.exitCode}');
