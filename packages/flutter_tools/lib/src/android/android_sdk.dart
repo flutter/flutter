@@ -59,6 +59,23 @@ String getAdbPath([AndroidSdk existingSdk]) {
   }
 }
 
+/// Locate ADB. Prefer to use one from an Android SDK, if we can locate that.
+/// This should be used over accessing androidSdk.adbPath directly because it
+/// will work for those users who have Android Platform Tools installed but
+/// not the full SDK.
+String getEmulatorPath([AndroidSdk existingSdk]) {
+  if (existingSdk?.emulatorPath != null)
+    return existingSdk.emulatorPath;
+
+  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+
+  if (sdk?.latestVersion == null) {
+    return os.which('emulator')?.path;
+  } else {
+    return sdk.emulatorPath;
+  }
+}
+
 class AndroidSdk {
   AndroidSdk(this.directory, [this.ndkDirectory, this.ndkCompiler,
       this.ndkCompilerArgs]) {
@@ -200,6 +217,8 @@ class AndroidSdk {
 
   String get adbPath => getPlatformToolsPath('adb');
 
+  String get emulatorPath => getToolsPath('emulator');
+
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
   List<String> validateSdkWellFormed() {
@@ -214,6 +233,10 @@ class AndroidSdk {
 
   String getPlatformToolsPath(String binaryName) {
     return fs.path.join(directory, 'platform-tools', binaryName);
+  }
+
+  String getToolsPath(String binaryName) {
+    return fs.path.join(directory, 'tools', binaryName);
   }
 
   void _init() {

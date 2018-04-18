@@ -26,6 +26,7 @@ import 'compile.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'doctor.dart';
+import 'emulator.dart';
 import 'ios/cocoapods.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
@@ -58,6 +59,7 @@ Future<T> runInContext<T>(
       DeviceManager: () => new DeviceManager(),
       Doctor: () => const Doctor(),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
+      EmulatorManager: () => new EmulatorManager(),
       Flags: () => const EmptyFlags(),
       FlutterVersion: () => new FlutterVersion(const Clock()),
       GenSnapshot: () => const GenSnapshot(),
