@@ -506,7 +506,7 @@ class _FlutterPlatform extends PlatformPlugin {
       if (!controllerSinkClosed) {
         controller.sink.addError(error, stack);
       } else {
-        printError('unhandled error during test:\n$testPath\n$error');
+        printError('unhandled error during test:\n$testPath\n$error\n$stack');
         outOfBandError ??= error;
       }
     } finally {
@@ -520,7 +520,7 @@ class _FlutterPlatform extends PlatformPlugin {
           if (!controllerSinkClosed) {
             controller.sink.addError(error, stack);
           } else {
-            printError('unhandled error during finalization of test:\n$testPath\n$error');
+            printError('unhandled error during finalization of test:\n$testPath\n$error\n$stack');
             outOfBandError ??= error;
           }
         }
