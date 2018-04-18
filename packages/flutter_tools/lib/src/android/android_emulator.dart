@@ -17,7 +17,7 @@ class AndroidEmulators extends EmulatorDiscovery {
   bool get supportsPlatform => true;
 
   @override
-  bool get canListAnything => androidWorkflow.canListDevices;
+  bool get canListAnything => androidWorkflow.canListEmulators;
 
   @override
   Future<List<Emulator>> get emulators async => getEmulatorAvds();
@@ -44,9 +44,9 @@ List<AndroidEmulator> getEmulatorAvds() {
   if (emulatorPath == null)
     return <AndroidEmulator>[];
   final String text = runSync(<String>[emulatorPath, '-list-avds']);
-  final List<AndroidEmulator> devices = <AndroidEmulator>[];
-  parseEmulatorAvdOutput(text, devices);
-  return devices;
+  final List<AndroidEmulator> emulators = <AndroidEmulator>[];
+  parseEmulatorAvdOutput(text, emulators);
+  return emulators;
 }
 
 /// Parse the given `emulator -list-avds` output in [text], and fill out the given list

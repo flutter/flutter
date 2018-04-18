@@ -45,9 +45,6 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
   @override
   bool get canListEmulators => getEmulatorPath(androidSdk) != null;
 
-  @override
-  bool get canLaunchEmulators => androidSdk != null && androidSdk.validateSdkWellFormed().isEmpty;
-
   static const String _kJdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';
 
   /// Returns false if we cannot determine the Java version or if the version
