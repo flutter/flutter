@@ -45,8 +45,6 @@ class Surface {
  public:
   Surface();
 
-  Surface(std::unique_ptr<flow::CompositorContext> compositor_context);
-
   virtual ~Surface();
 
   virtual bool IsValid() = 0;
@@ -55,11 +53,7 @@ class Surface {
 
   virtual GrContext* GetContext() = 0;
 
-  flow::CompositorContext& GetCompositorContext();
-
  private:
-  std::unique_ptr<flow::CompositorContext> compositor_context_;
-
   FXL_DISALLOW_COPY_AND_ASSIGN(Surface);
 };
 
