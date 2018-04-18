@@ -739,6 +739,20 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
+  Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
+    final SliverMultiBoxAdaptorParentData oldParentData = child?.renderObject?.parentData;
+    final Element newChild = super.updateChild(child, newWidget, newSlot);
+    final SliverMultiBoxAdaptorParentData newParentData = newChild?.renderObject?.parentData;
+
+    // Preserve the old layoutOffset if the renderObject was swapped out.
+    if (oldParentData != newParentData && oldParentData != null && newParentData != null) {
+      newParentData.layoutOffset = oldParentData.layoutOffset;
+    }
+
+    return newChild;
+  }
+
+  @override
   void forgetChild(Element child) {
     assert(child != null);
     assert(child.slot != null);
