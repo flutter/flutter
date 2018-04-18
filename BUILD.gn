@@ -10,9 +10,12 @@ group("flutter") {
   public_deps = [
     "$flutter_root/lib/snapshot:generate_snapshot_bin",
     "$flutter_root/lib/snapshot:kernel_platform_files",
-    "$flutter_root/shell/testing",
     "$flutter_root/sky",
   ]
+
+  if (current_toolchain == host_toolchain) {
+    public_deps += [ "$flutter_root/shell/testing" ]
+  }
 
   if (flutter_runtime_mode != "debug") {
     public_deps += [ "$flutter_root/lib/snapshot:entry_points_json_files" ]
