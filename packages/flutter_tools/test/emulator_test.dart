@@ -61,4 +61,10 @@ class _MockEmulator extends Emulator {
   @override
   final String label;
 
+  @override
+  void launch() {
+    throw new UnimplementedError('Not implemented in Mock');
+  }
+
+  
 }

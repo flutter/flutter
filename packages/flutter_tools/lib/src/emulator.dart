@@ -135,6 +135,8 @@ abstract class Emulator {
     return id == other.id;
   }
 
+  void launch();
+
   @override
   String toString() => name;
 
