@@ -273,6 +273,10 @@ class ScrollDragController implements Drag {
   static const Duration motionStoppedDurationThreshold =
       const Duration(milliseconds: 50);
 
+  /// The drag distance past which, a [motionStartDistanceThreshold] breaking
+  /// drag is considered a deliberate fling.
+  static const double _kBigThresholdBreakDistance = 24.0;
+
   bool get _reversed => axisDirectionIsReversed(delegate.axisDirection);
 
   /// Updates the controller's link to the [ScrollActivityDelegate].
@@ -328,7 +332,7 @@ class ScrollDragController implements Drag {
         if (_offsetSinceLastStop.abs() > motionStartDistanceThreshold) {
           // Threshold broken.
           _offsetSinceLastStop = null;
-          if (offset.abs() > motionStartDistanceThreshold * 3.0) {
+          if (offset.abs() > _kBigThresholdBreakDistance) {
             // This is heuristically a very deliberate fling. Leave the motion
             // unaffected.
             return offset;
