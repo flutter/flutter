@@ -185,7 +185,7 @@ class VMService {
   // Listen for a specific event name.
   Future<Stream<ServiceEvent>> onEvent(String streamId) async {
     _streamListen(streamId);
-    return new Future.value(_getEventController(streamId).stream);
+    return new Future<Stream<ServiceEvent>>.value(_getEventController(streamId).stream);
   }
 
   Future<Map<String, dynamic>> _sendRequest(
