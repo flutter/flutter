@@ -115,11 +115,13 @@ abstract class EmulatorDiscovery {
 }
 
 abstract class Emulator {
-  Emulator(this.id);
+  Emulator(this.id, this.hasConfig);
 
   final String id;
-
-  String get name => id;
+  final bool hasConfig;
+  String get name;
+  String get manufacturer;
+  String get label;
 
   @override
   int get hashCode => id.hashCode;
@@ -145,6 +147,8 @@ abstract class Emulator {
     for (Emulator emulator in emulators) {
       table.add(<String>[
         emulator.name,
+        emulator.manufacturer,
+        emulator.label,
         emulator.id,
       ]);
     }

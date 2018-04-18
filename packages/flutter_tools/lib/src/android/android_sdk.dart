@@ -59,9 +59,9 @@ String getAdbPath([AndroidSdk existingSdk]) {
   }
 }
 
-/// Locate ADB. Prefer to use one from an Android SDK, if we can locate that.
-/// This should be used over accessing androidSdk.adbPath directly because it
-/// will work for those users who have Android Platform Tools installed but
+/// Locate 'emulator'. Prefer to use one from an Android SDK, if we can locate that.
+/// This should be used over accessing androidSdk.emulatorPath directly because it
+/// will work for those users who have Android Tools installed but
 /// not the full SDK.
 String getEmulatorPath([AndroidSdk existingSdk]) {
   if (existingSdk?.emulatorPath != null)
@@ -74,6 +74,18 @@ String getEmulatorPath([AndroidSdk existingSdk]) {
   } else {
     return sdk.emulatorPath;
   }
+}
+
+/// Locate the path for storing AVD emulator images. Returns null if none found.
+String getAvdPath() {
+  final List<String> searchPaths = <String>[
+    platform.environment['ANDROID_AVD_HOME'],
+    fs.path.join(platform.environment['HOME'], '.android', 'avd'),
+  ];
+  return searchPaths.where((String p) => p != null).firstWhere(
+    (String p) => fs.directory(p).existsSync(),
+    orElse: () => null,
+  );
 }
 
 class AndroidSdk {

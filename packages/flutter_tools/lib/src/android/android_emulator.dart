@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
+import '../base/file_system.dart';
 import '../base/process.dart';
 import '../emulator.dart';
 import 'android_sdk.dart';
@@ -24,12 +25,19 @@ class AndroidEmulators extends EmulatorDiscovery {
 }
 
 class AndroidEmulator extends Emulator {
-  AndroidEmulator(
-    String id
-  ) : super(id);
+  AndroidEmulator(String id, [this._properties])
+  : super(id, _properties != null && _properties.isNotEmpty);
+
+  Map<String, String> _properties;
 
   @override
-  String get name => id;
+  String get name => _properties['hw.device.name'];
+
+  @override
+  String get manufacturer => _properties['hw.device.manufacturer'];
+
+  @override
+  String get label => _properties['avd.ini.displayname'];
 
   // @override
   // Future<bool> launch() async {
@@ -41,20 +49,57 @@ class AndroidEmulator extends Emulator {
 /// Return the list of available emulator AVDs.
 List<AndroidEmulator> getEmulatorAvds() {
   final String emulatorPath = getEmulatorPath(androidSdk);
-  if (emulatorPath == null)
+  if (emulatorPath == null) {
     return <AndroidEmulator>[];
-  final String text = runSync(<String>[emulatorPath, '-list-avds']);
+  }
+  
+  final String listAvdsOutput = runSync(<String>[emulatorPath, '-list-avds']);
+
   final List<AndroidEmulator> emulators = <AndroidEmulator>[];
-  parseEmulatorAvdOutput(text, emulators);
+  extractEmulatorAvdInfo(listAvdsOutput, emulators);
   return emulators;
 }
 
 /// Parse the given `emulator -list-avds` output in [text], and fill out the given list
-/// of emulators.
-@visibleForTesting
-void parseEmulatorAvdOutput(String text,
-  List<AndroidEmulator> emulators) {
-  for (String line in text.trim().split('\n')) {
-    emulators.add(new AndroidEmulator(line));
+/// of emulators by reading information from the relevant ini files.
+void extractEmulatorAvdInfo(String text, List<AndroidEmulator> emulators) {
+  for (String id in text.trim().split('\n')) {
+    emulators.add(_createEmulator(id));
   }
+}
+
+AndroidEmulator _createEmulator(String id) {
+  id = id.trim();
+  final File iniFile = fs.file(fs.path.join(getAvdPath(), '$id.ini'));
+  final Map<String, String> ini = _parseIniLines(iniFile.readAsLinesSync());
+
+  if (ini['path'] != null) {
+    final File configFile = fs.file(fs.path.join(ini['path'], 'config.ini'));
+    if (configFile.existsSync()) {
+      final Map<String, String> properties = _parseIniLines(configFile.readAsLinesSync());
+      return new AndroidEmulator(id, properties);
+    }
+  }
+
+  return new AndroidEmulator(id);
+}
+
+// TODO: Tests
+@visibleForTesting
+Map<String, String> _parseIniLines(List<String> contents) {
+  final Map<String, String> results = <String, String>{};
+
+  final Iterable<List<String>> properties = contents
+      .map((String l) => l.trim())
+      .where((String l) =>
+          l != '' && !l.startsWith('#')) // Strip blank lines/comments
+      .where((String l) =>
+          l.contains('=')) // Discard anything that isn't simple name=value
+      .map((String l) => l.split('=')); // Split into name/value
+
+  for (List<String> property in properties) {
+    results[property[0].trim()] = property[1].trim();
+  }
+
+  return results;
 }
