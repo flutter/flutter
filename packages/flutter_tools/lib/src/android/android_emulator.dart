@@ -28,7 +28,7 @@ class AndroidEmulators extends EmulatorDiscovery {
 
 class AndroidEmulator extends Emulator {
   AndroidEmulator(String id, [this._properties])
-  : super(id, _properties != null && _properties.isNotEmpty);
+      : super(id, _properties != null && _properties.isNotEmpty);
 
   Map<String, String> _properties;
 
@@ -44,10 +44,12 @@ class AndroidEmulator extends Emulator {
   @override
   Future<bool> launch() async {
     final Status status = logger.startProgress('Launching $id...');
-    final RunResult launchResult = await runAsync(<String>[getEmulatorPath(), '-avd', id]);
+    final RunResult launchResult =
+        await runAsync(<String>[getEmulatorPath(), '-avd', id]);
     status.stop();
     if (launchResult.exitCode != 0) {
-      printError('Error: emulator exited with exit code ${launchResult.exitCode}');
+      printError(
+          'Error: emulator exited with exit code ${launchResult.exitCode}');
       printError('$launchResult');
       return false;
     }
@@ -62,7 +64,7 @@ List<AndroidEmulator> getEmulatorAvds() {
   if (emulatorPath == null) {
     return <AndroidEmulator>[];
   }
-  
+
   final String listAvdsOutput = runSync(<String>[emulatorPath, '-list-avds']);
 
   final List<AndroidEmulator> emulators = <AndroidEmulator>[];
@@ -86,7 +88,8 @@ AndroidEmulator _createEmulator(String id) {
   if (ini['path'] != null) {
     final File configFile = fs.file(fs.path.join(ini['path'], 'config.ini'));
     if (configFile.existsSync()) {
-      final Map<String, String> properties = parseIniLines(configFile.readAsLinesSync());
+      final Map<String, String> properties =
+          parseIniLines(configFile.readAsLinesSync());
       return new AndroidEmulator(id, properties);
     }
   }
@@ -100,11 +103,12 @@ Map<String, String> parseIniLines(List<String> contents) {
 
   final Iterable<List<String>> properties = contents
       .map((String l) => l.trim())
-      .where((String l) =>
-          l != '' && !l.startsWith('#')) // Strip blank lines/comments
-      .where((String l) =>
-          l.contains('=')) // Discard anything that isn't simple name=value
-      .map((String l) => l.split('=')); // Split into name/value
+      // Strip blank lines/comments
+      .where((String l) => l != '' && !l.startsWith('#'))
+      // Discard anything that isn't simple name=value
+      .where((String l) => l.contains('='))
+      // Split into name/value
+      .map((String l) => l.split('='));
 
   for (List<String> property in properties) {
     results[property[0].trim()] = property[1].trim();
