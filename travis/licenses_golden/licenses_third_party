@@ -1,4 +1,4 @@
-Signature: 8f19b1dfcd43f6f21408c4a70e0d6eaf
+Signature: 41215836c65ba6b747e9e86edafa51cb
 
 UNUSED LICENSES:
 
@@ -6069,6 +6069,8 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/compiler_pass.h
 FILE: ../../../third_party/dart/runtime/vm/datastream.cc
 FILE: ../../../third_party/dart/runtime/vm/finalizable_data.h
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.cc
+FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs.h
 FILE: ../../../third_party/dart/sdk/lib/js/_js.dart
 FILE: ../../../third_party/dart/sdk/lib/js/_js_client.dart
 FILE: ../../../third_party/dart/sdk/lib/js/_js_server.dart
