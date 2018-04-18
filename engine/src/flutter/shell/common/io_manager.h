@@ -35,7 +35,6 @@ class IOManager {
  private:
   // Resource context management.
   sk_sp<GrContext> resource_context_;
-  fml::WeakPtr<GrContext> resource_context_weak_prototype_;
   std::unique_ptr<fml::WeakPtrFactory<GrContext>>
       resource_context_weak_factory_;
 

@@ -65,7 +65,6 @@ class Rasterizer final {
   flow::CompositorContext compositor_context_;
   std::unique_ptr<flow::LayerTree> last_layer_tree_;
   fxl::Closure next_frame_callback_;
-  fml::WeakPtr<Rasterizer> weak_prototype_;
   fml::WeakPtrFactory<Rasterizer> weak_factory_;
 
   void DoDraw(std::unique_ptr<flow::LayerTree> layer_tree);

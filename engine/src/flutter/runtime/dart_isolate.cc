@@ -107,7 +107,6 @@ DartIsolate::DartIsolate(const DartVM* vm,
       isolate_snapshot_(std::move(isolate_snapshot)),
       weak_factory_(this) {
   FXL_DCHECK(isolate_snapshot_) << "Must contain a valid isolate snapshot.";
-  weak_prototype_ = weak_factory_.GetWeakPtr();
 
   if (vm_ == nullptr) {
     return;
@@ -679,7 +678,7 @@ fxl::RefPtr<DartSnapshot> DartIsolate::GetIsolateSnapshot() const {
 }
 
 fml::WeakPtr<DartIsolate> DartIsolate::GetWeakIsolatePtr() const {
-  return weak_prototype_;
+  return weak_factory_.GetWeakPtr();
 }
 
 void DartIsolate::AddIsolateShutdownCallback(fxl::Closure closure) {
