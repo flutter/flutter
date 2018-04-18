@@ -661,21 +661,11 @@ void main() {
             id: 1,
             children: <TestSemantics>[
               new TestSemantics(
-                id: 2,
-                label: r'Label 1',
-                textDirection: TextDirection.ltr,
-              ),
-              new TestSemantics(
-                id: 3,
-                label: r'Label 2',
-                textDirection: TextDirection.ltr,
-              ),
-              new TestSemantics(
                 id: 4,
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 5,
-                    label: r'Label 3',
+                    id: 7,
+                    label: r'Label 5',
                     textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
@@ -684,11 +674,21 @@ void main() {
                     textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
-                    id: 7,
-                    label: r'Label 5',
+                    id: 5,
+                    label: r'Label 3',
                     textDirection: TextDirection.ltr,
                   ),
                 ],
+              ),
+              new TestSemantics(
+                id: 3,
+                label: r'Label 2',
+                textDirection: TextDirection.ltr,
+              ),
+              new TestSemantics(
+                id: 2,
+                label: r'Label 1',
+                textDirection: TextDirection.ltr,
               ),
             ],
           ),
@@ -734,11 +734,6 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics(
-            id: 1,
-            label: r'Label 1',
-            textDirection: TextDirection.ltr,
-          ),
-          new TestSemantics(
             id: 2,
             label: r'Label 2',
             textDirection: TextDirection.ltr,
@@ -746,6 +741,11 @@ void main() {
           new TestSemantics(
             id: 3,
             label: r'Label 3',
+            textDirection: TextDirection.ltr,
+          ),
+          new TestSemantics(
+            id: 1,
+            label: r'Label 1',
             textDirection: TextDirection.ltr,
           ),
         ],

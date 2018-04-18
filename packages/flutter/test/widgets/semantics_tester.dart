@@ -620,7 +620,7 @@ Matcher hasSemantics(TestSemantics semantics, {
   bool ignoreRect: false,
   bool ignoreTransform: false,
   bool ignoreId: false,
-  DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.inverseHitTest,
+  DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.traversalOrder,
 }) {
   return new _HasSemantics(
     semantics,
