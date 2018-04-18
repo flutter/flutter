@@ -71,6 +71,7 @@ Future<Null> _verifyInternationalizations() async {
   final EvalResult genResult = await _evalCommand(
     dart,
     <String>[
+      '--preview-dart-2',
       path.join('dev', 'tools', 'gen_localizations.dart'),
     ],
     workingDirectory: flutterRoot,
@@ -117,7 +118,8 @@ Future<Null> _analyzeRepo() async {
   );
 
   // Analyze all the sample code in the repo
-  await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
+  await _runCommand(dart,
+    <String>['--preview-dart-2', path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
     workingDirectory: flutterRoot,
   );
 
@@ -128,7 +130,8 @@ Future<Null> _analyzeRepo() async {
   );
 
   // Try an analysis against a big version of the gallery.
-  await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
+  await _runCommand(dart,
+    <String>['--preview-dart-2', path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
     workingDirectory: flutterRoot,
   );
   await _runFlutterAnalyze(path.join(flutterRoot, 'dev', 'benchmarks', 'mega_gallery'),
@@ -391,7 +394,7 @@ Future<Null> _runAllDartTests(String workingDirectory, {
   Map<String, String> environment,
   List<String> options,
 }) {
-  final List<String> args = <String>['--checked'];
+  final List<String> args = <String>['--preview-dart-2'];
   if (options != null) {
     args.addAll(options);
   }
