@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/platform.dart';
 import '../base/utils.dart';
 import '../doctor.dart';
 import '../emulator.dart';
@@ -27,8 +28,9 @@ class EmulatorsCommand extends FlutterCommand {
   Future<Null> runCommand() async {
     if (doctor.workflows.every((Workflow w) => !w.canListEmulators)) {
       throwToolExit(
-          "Unable to query emulators; please run 'flutter doctor' for "
-          'information about installing additional components.',
+          'Unable to find any emulator sources. Please ensure you have some\n'
+          'Android AVD images ' + (platform.isMacOS ? 'or an iOS Simulator ' : '')
+          + 'available.',
           exitCode: 1);
     }
 
