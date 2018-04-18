@@ -1,4 +1,4 @@
-Signature: 41215836c65ba6b747e9e86edafa51cb
+Signature: 4b8007d0bcd3ca7de71293354c6ebc9b
 
 UNUSED LICENSES:
 
@@ -17619,7 +17619,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.exp
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Perf-Chromecast-GCC-Chorizo-CPU-Cortex_A7-arm-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Perf-Debian9-Clang-GCE-CPU-AVX2-x86_64-Release-All-ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Perf-Ubuntu14-GCC-GCE-CPU-AVX2-x86_64-Release-All-CT_BENCH_1k_SKPs.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Upload-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-Coverage-All.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/Upload-Test-Ubuntu17-Clang-Golo-GPU-QuadroP400-x86_64-Debug-All-Coverage.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/vars/examples/full.expected/win_test.json
 FILE: ../../../third_party/skia/infra/bots/recipes/android_compile.expected/android_compile_nontrybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/android_compile.expected/android_compile_trybot.json
