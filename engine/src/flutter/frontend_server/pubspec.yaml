@@ -35,7 +35,6 @@ dev_dependencies:
   http: any
   http_multi_server: any
   http_parser: any
-  isolate: any
   matcher: any
   mime: any
   mockito: any
@@ -117,8 +116,6 @@ dependency_overrides:
     path: ../../third_party/dart/third_party/pkg/http_multi_server
   http_parser:
     path: ../../third_party/dart/third_party/pkg/http_parser
-  isolate:
-    path: ../../third_party/dart/third_party/pkg/isolate
   matcher:
     path: ../../third_party/dart/third_party/pkg/matcher
   mime:
