@@ -78,10 +78,28 @@ String getEmulatorPath([AndroidSdk existingSdk]) {
 
 /// Locate the path for storing AVD emulator images. Returns null if none found.
 String getAvdPath() {
+  
   final List<String> searchPaths = <String>[
-    platform.environment['ANDROID_AVD_HOME'],
-    fs.path.join(platform.environment['HOME'], '.android', 'avd'),
+    platform.environment['ANDROID_AVD_HOME']
   ];
+
+  if (platform.environment['HOME'] != null)
+    searchPaths.add(fs.path.join(platform.environment['HOME'], '.android', 'avd'));
+
+  if (platform.isWindows) {
+    final String homeDrive = platform.environment['HOMEDRIVE'];
+    final String homePath = platform.environment['HOMEPATH'];
+
+    if (homeDrive != null && homePath != null) {
+      // Can't use path.join for HOMEDRIVE/HOMEPATH
+      // https://github.com/dart-lang/path/issues/37
+      final String home = homeDrive + homePath;
+      searchPaths.add(fs.path.join(home, '.android', 'avd'));
+    }
+  }
+
+  print(searchPaths);
+
   return searchPaths.where((String p) => p != null).firstWhere(
     (String p) => fs.directory(p).existsSync(),
     orElse: () => null,
