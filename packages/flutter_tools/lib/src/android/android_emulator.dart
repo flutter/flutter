@@ -9,8 +9,10 @@ import 'package:meta/meta.dart';
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/process.dart';
 import '../emulator.dart';
+import '../globals.dart';
 import 'android_sdk.dart';
 
 class AndroidEmulators extends EmulatorDiscovery {
@@ -39,11 +41,19 @@ class AndroidEmulator extends Emulator {
   @override
   String get label => _properties['avd.ini.displayname'];
 
-  // @override
-  // Future<bool> launch() async {
-  //   // TODO: ...
-  //   return null;Í
-  // }
+  @override
+  Future<bool> launch() async {
+    final Status status = logger.startProgress('Launching $id...');
+    final RunResult launchResult = await runAsync(<String>[getEmulatorPath(), '-avd', id]);
+    status.stop();
+    if (launchResult.exitCode != 0) {
+      printError('Error: emulator exited with exit code ${launchResult.exitCode}');
+      printError('$launchResult');
+      return false;
+    }
+
+    return true;
+  }
 }
 
 /// Return the list of available emulator AVDs.
