@@ -9,6 +9,7 @@ import 'package:analyzer/file_system/file_system.dart' as file_system;
 import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:analyzer/source/analysis_options_provider.dart';
 import 'package:analyzer/source/error_processor.dart';
+import 'package:analyzer/source/line_info.dart';
 import 'package:analyzer/source/package_map_resolver.dart';
 import 'package:analyzer/src/context/builder.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/dart/sdk/sdk.dart'; // ignore: implementation_imports
@@ -187,7 +188,7 @@ class AnalysisErrorDescription {
     return severity.displayName;
   }
 
-  LineInfo_Location get location => line.getLocation(error.offset);
+  CharacterLocation get location => line.getLocation(error.offset);
 
   String get path => _shorten(cwd.path, error.source.fullName);
 
