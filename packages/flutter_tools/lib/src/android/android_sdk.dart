@@ -98,8 +98,6 @@ String getAvdPath() {
     }
   }
 
-  print(searchPaths);
-
   return searchPaths.where((String p) => p != null).firstWhere(
     (String p) => fs.directory(p).existsSync(),
     orElse: () => null,

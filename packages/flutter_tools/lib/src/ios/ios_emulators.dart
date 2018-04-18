@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../emulator.dart';
@@ -68,7 +67,7 @@ String getSimulatorPath() {
     '/Applications/Xcode.app/Contents/Developer/Applications/Simulator.app',
   ];
   return searchPaths.where((String p) => p != null).firstWhere(
-    (String p) => fs.directory(p).existsSync(),
-    orElse: () => null,
-  );
+        (String p) => fs.directory(p).existsSync(),
+        orElse: () => null,
+      );
 }
