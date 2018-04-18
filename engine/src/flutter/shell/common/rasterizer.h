@@ -62,7 +62,7 @@ class Rasterizer final {
  private:
   blink::TaskRunners task_runners_;
   std::unique_ptr<Surface> surface_;
-  std::unique_ptr<flow::CompositorContext> compositor_context_;
+  flow::CompositorContext compositor_context_;
   std::unique_ptr<flow::LayerTree> last_layer_tree_;
   fxl::Closure next_frame_callback_;
   fml::WeakPtr<Rasterizer> weak_prototype_;

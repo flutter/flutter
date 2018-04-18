@@ -60,22 +60,8 @@ bool SurfaceFrame::PerformSubmit() {
   return false;
 }
 
-Surface::Surface() : Surface(std::make_unique<flow::CompositorContext>()) {}
+Surface::Surface() = default;
 
-Surface::Surface(std::unique_ptr<flow::CompositorContext> compositor_context)
-    : compositor_context_(std::move(compositor_context)) {
-  FXL_DCHECK(compositor_context_);
-  // TODO: Get rid of these explicit calls and move the logic to the c/dtors of
-  // the compositor context.
-  compositor_context_->OnGrContextCreated();
-}
-
-Surface::~Surface() {
-  compositor_context_->OnGrContextDestroyed();
-}
-
-flow::CompositorContext& Surface::GetCompositorContext() {
-  return *compositor_context_;
-}
+Surface::~Surface() = default;
 
 }  // namespace shell
