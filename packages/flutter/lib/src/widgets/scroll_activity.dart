@@ -300,8 +300,8 @@ class ScrollDragController implements Drag {
   /// to be broken to scroll. Also possibly apply an offset adjustment when
   /// threshold is first broken.
   ///
-  /// Returns `0.0` when not moving or within threshold. Returns `offset`
-  /// transparently when not stationary.
+  /// Returns `0.0` when stationary or within threshold. Returns `offset`
+  /// transparently when already in motion.
   double _adjustForScrollStartThreshold(double offset, Duration timestamp) {
     if (timestamp == null) {
       // If we can't track time, we can't apply thresholds.
