@@ -16,14 +16,12 @@
 namespace shell {
 
 Rasterizer::Rasterizer(blink::TaskRunners task_runners)
-    : task_runners_(std::move(task_runners)), weak_factory_(this) {
-  weak_prototype_ = weak_factory_.GetWeakPtr();
-}
+    : task_runners_(std::move(task_runners)), weak_factory_(this) {}
 
 Rasterizer::~Rasterizer() = default;
 
 fml::WeakPtr<Rasterizer> Rasterizer::GetWeakPtr() const {
-  return weak_prototype_;
+  return weak_factory_.GetWeakPtr();
 }
 
 void Rasterizer::Setup(std::unique_ptr<Surface> surface) {

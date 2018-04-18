@@ -103,7 +103,6 @@ class DartIsolate : public UIDartState {
   Phase phase_ = Phase::Unknown;
   const fxl::RefPtr<DartSnapshot> isolate_snapshot_;
   std::vector<std::unique_ptr<AutoFireClosure>> shutdown_callbacks_;
-  fml::WeakPtr<DartIsolate> weak_prototype_;
   fml::WeakPtrFactory<DartIsolate> weak_factory_;
 
   FXL_WARN_UNUSED_RESULT

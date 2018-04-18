@@ -120,7 +120,6 @@ class PlatformView {
   std::unique_ptr<VsyncWaiter> vsync_waiter_;
 
   SkISize size_;
-  fml::WeakPtr<PlatformView> weak_prototype_;
   fml::WeakPtrFactory<PlatformView> weak_factory_;
 
   virtual std::unique_ptr<Surface> CreateRenderingSurface();

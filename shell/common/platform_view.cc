@@ -20,9 +20,7 @@ PlatformView::PlatformView(Delegate& delegate, blink::TaskRunners task_runners)
     : delegate_(delegate),
       task_runners_(std::move(task_runners)),
       size_(SkISize::Make(0, 0)),
-      weak_factory_(this) {
-  weak_prototype_ = weak_factory_.GetWeakPtr();
-}
+      weak_factory_(this) {}
 
 PlatformView::~PlatformView() = default;
 
@@ -73,7 +71,7 @@ sk_sp<GrContext> PlatformView::CreateResourceContext() const {
 }
 
 fml::WeakPtr<PlatformView> PlatformView::GetWeakPtr() const {
-  return weak_prototype_;
+  return weak_factory_.GetWeakPtr();
 }
 
 void PlatformView::UpdateSemantics(blink::SemanticsNodeUpdates update) {}

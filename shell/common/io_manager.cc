@@ -49,11 +49,6 @@ IOManager::IOManager(sk_sp<GrContext> resource_context,
                          "context. Async texture uploads will be disabled. "
                          "Expect performance degradation.";
   }
-
-  if (resource_context_weak_factory_) {
-    resource_context_weak_prototype_ =
-        resource_context_weak_factory_->GetWeakPtr();
-  }
 }
 
 IOManager::~IOManager() {
@@ -63,7 +58,9 @@ IOManager::~IOManager() {
 }
 
 fml::WeakPtr<GrContext> IOManager::GetResourceContext() const {
-  return resource_context_weak_prototype_;
+  return resource_context_weak_factory_
+             ? resource_context_weak_factory_->GetWeakPtr()
+             : fml::WeakPtr<GrContext>();
 }
 
 fxl::RefPtr<flow::SkiaUnrefQueue> IOManager::GetSkiaUnrefQueue() const {

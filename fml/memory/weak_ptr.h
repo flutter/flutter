@@ -159,35 +159,20 @@ class WeakPtr {
 template <typename T>
 class WeakPtrFactory {
  public:
-  explicit WeakPtrFactory(T* ptr) : ptr_(ptr) { FXL_DCHECK(ptr_); }
+  explicit WeakPtrFactory(T* ptr)
+      : ptr_(ptr), flag_(fxl::MakeRefCounted<fml::internal::WeakPtrFlag>()) {
+    FXL_DCHECK(ptr_);
+  }
 
-  ~WeakPtrFactory() { InvalidateWeakPtrs(); }
+  ~WeakPtrFactory() {
+    FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
+    flag_->Invalidate();
+  }
 
   // Gets a new weak pointer, which will be valid until either
   // |InvalidateWeakPtrs()| is called or this object is destroyed.
-  WeakPtr<T> GetWeakPtr() {
-    FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
-    if (!flag_)
-      flag_ = fxl::MakeRefCounted<fml::internal::WeakPtrFlag>();
+  WeakPtr<T> GetWeakPtr() const {
     return WeakPtr<T>(ptr_, flag_.Clone(), checker_);
-  }
-
-  // Call this method to invalidate all existing weak pointers. (Note that
-  // additional weak pointers can be produced even after this is called.)
-  void InvalidateWeakPtrs() {
-    FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
-    if (!flag_)
-      return;
-    flag_->Invalidate();
-    flag_ = nullptr;
-  }
-
-  // Call this method to determine if any weak pointers exist. (Note that a
-  // "false" result is definitive, but a "true" result may not be if weak
-  // pointers are held/reset/destroyed/reassigned on other threads.)
-  bool HasWeakPtrs() const {
-    FML_DCHECK_CREATION_THREAD_IS_CURRENT(checker_.checker);
-    return flag_ && !flag_->HasOneRef();
   }
 
  private:

@@ -109,7 +109,6 @@ class Engine final : public blink::RuntimeDelegate {
   fxl::RefPtr<blink::AssetManager> asset_manager_;
   bool activity_running_;
   bool have_surface_;
-  fml::WeakPtr<Engine> weak_prototype_;
   fml::WeakPtrFactory<Engine> weak_factory_;
 
   // |blink::RuntimeDelegate|
