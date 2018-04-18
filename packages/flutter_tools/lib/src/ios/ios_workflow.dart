@@ -33,9 +33,6 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   @override
   bool get canListEmulators => false;
 
-  @override
-  bool get canLaunchEmulators => false;
-
   Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
 
   Future<bool> get hasIosDeploy => exitsHappyAsync(<String>['ios-deploy', '--version']);
