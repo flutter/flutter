@@ -182,7 +182,14 @@ class VMService {
   Future<Stream<ServiceEvent>> get onTimelineEvent => onEvent('Timeline');
   // TODO(johnmccutchan): Add FlutterView events.
 
-  // Listen for a specific event name.
+  /// Returns a stream of VM service events.
+  ///
+  /// This purposely returns a `Future<Stream<T>>` rather than a `Stream<T>`
+  /// because it first registers with the VM to receive events on the stream,
+  /// and only once the VM has acknowledged that the stream has started will
+  /// we return the associated stream. Any attempt to streamline this API into
+  /// returning `Stream<T>` should take that into account to avoid race
+  /// conditions.
   Future<Stream<ServiceEvent>> onEvent(String streamId) async {
     await _streamListen(streamId);
     return _getEventController(streamId).stream;
