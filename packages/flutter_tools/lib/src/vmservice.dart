@@ -188,6 +188,10 @@ class VMService {
     return _getEventController(streamId).stream;
   }
 
+  Future<void> subscribedToIsolateEvents() async {
+    await _streamListen('Isolate');
+  }
+
   Future<Map<String, dynamic>> _sendRequest(
     String method,
     Map<String, dynamic> params,
@@ -1327,6 +1331,7 @@ class FlutterView extends ServiceObject {
     final String viewId = id;
     // When this completer completes the isolate is running.
     final Completer<Null> completer = new Completer<Null>();
+    await owner.vm.vmService.subscribedToIsolateEvents();
     final StreamSubscription<ServiceEvent> subscription =
       owner.vm.vmService.onIsolateEvent.listen((ServiceEvent event) {
       // TODO(johnmccutchan): Listen to the debug stream and catch initial
