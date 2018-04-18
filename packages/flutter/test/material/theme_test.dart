@@ -299,10 +299,12 @@ void main() {
       testBuildCalled = 0;
       ThemeData themeData = new ThemeData(primaryColor: const Color(0xFF000000));
 
+      final Test child = const Test();
+
       await tester.pumpWidget(
         new Theme(
           data: themeData,
-          child: const Test(),
+          child: child,
         ),
       );
       expect(testBuildCalled, 1);
@@ -311,7 +313,7 @@ void main() {
       await tester.pumpWidget(
         new Theme(
           data: themeData,
-          child: const Test(),
+          child: child,
         ),
       );
       // No repeated build calls to the child since it's the same theme data.
@@ -322,7 +324,7 @@ void main() {
       await tester.pumpWidget(
         new Theme(
           data: themeData,
-          child: const Test(),
+          child: child,
         ),
       );
       // Still no repeated calls.
@@ -333,7 +335,7 @@ void main() {
       await tester.pumpWidget(
         new Theme(
           data: themeData,
-          child: const Test(),
+          child: child,
         ),
       );
       // Should call build again.
