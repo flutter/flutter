@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/process.dart';
 import '../emulator.dart';
 import '../globals.dart';
