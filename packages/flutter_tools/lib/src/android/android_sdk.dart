@@ -245,7 +245,7 @@ class AndroidSdk {
 
   String get adbPath => getPlatformToolsPath('adb');
 
-  String get emulatorPath => getToolsPath('emulator');
+  String get emulatorPath => getEmulatorPath();
 
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
@@ -263,8 +263,17 @@ class AndroidSdk {
     return fs.path.join(directory, 'platform-tools', binaryName);
   }
 
-  String getToolsPath(String binaryName) {
-    return fs.path.join(directory, 'tools', binaryName);
+  String getEmulatorPath() {
+    final String binaryName = platform.isWindows ? 'emulator.exe' : 'emulator';
+    // Emulator now lives inside "emulator" but used to live inside "tools" so
+    // try both.
+    final List<String> searchFolders = <String>['emulator', 'tools'];
+    for (final String folder in searchFolders) {
+      final String path = fs.path.join(directory, folder, binaryName);
+      if (fs.file(path).existsSync())
+        return path;
+    }
+    return null;
   }
 
   void _init() {
