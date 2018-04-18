@@ -175,16 +175,16 @@ class VMService {
   Future<Null> get done => _peer.done;
 
   // Events
-  Stream<ServiceEvent> get onDebugEvent => onEvent('Debug');
-  Stream<ServiceEvent> get onExtensionEvent => onEvent('Extension');
+  Future<Stream<ServiceEvent>> get onDebugEvent => onEvent('Debug');
+  Future<Stream<ServiceEvent>> get onExtensionEvent => onEvent('Extension');
   // IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate, ServiceExtensionAdded
-  Stream<ServiceEvent> get onIsolateEvent => onEvent('Isolate');
-  Stream<ServiceEvent> get onTimelineEvent => onEvent('Timeline');
+  Future<Stream<ServiceEvent>> get onIsolateEvent => onEvent('Isolate');
+  Future<Stream<ServiceEvent>> get onTimelineEvent => onEvent('Timeline');
   // TODO(johnmccutchan): Add FlutterView events.
 
   // Listen for a specific event name.
-  Stream<ServiceEvent> onEvent(String streamId) {
-    _streamListen(streamId);
+  Future<Stream<ServiceEvent>> onEvent(String streamId) async {
+    await _streamListen(streamId);
     return _getEventController(streamId).stream;
   }
 
@@ -1328,7 +1328,7 @@ class FlutterView extends ServiceObject {
     // When this completer completes the isolate is running.
     final Completer<Null> completer = new Completer<Null>();
     final StreamSubscription<ServiceEvent> subscription =
-      owner.vm.vmService.onIsolateEvent.listen((ServiceEvent event) {
+      (await owner.vm.vmService.onIsolateEvent).listen((ServiceEvent event) {
       // TODO(johnmccutchan): Listen to the debug stream and catch initial
       // launch errors.
       if (event.kind == ServiceEvent.kIsolateRunnable) {
