@@ -20,12 +20,14 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/paths.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 #include "lib/fxl/command_line.h"
+#include "lib/fxl/files/file.h"
 #include "lib/fxl/functional/make_copyable.h"
 
 #define SAFE_ACCESS(pointer, member, default_value)                      \
@@ -144,9 +146,25 @@ FlutterResult FlutterEngineRun(size_t version,
 
   blink::Settings settings = shell::SettingsFromCommandLine(command_line);
   settings.icu_data_path = icu_data_path;
-  settings.main_dart_file_path = args->main_path;
-  settings.packages_file_path = args->packages_path;
   settings.assets_path = args->assets_path;
+
+  // Check whether the assets path contains Dart 2 kernel assets.
+  const std::string kApplicationKernelSnapshotFileName = "kernel_blob.bin";
+  std::string platform_kernel_path =
+      fml::paths::JoinPaths({settings.assets_path, "platform.dill"});
+  std::string application_kernel_path = fml::paths::JoinPaths(
+      {settings.assets_path, kApplicationKernelSnapshotFileName});
+  if (files::IsFile(platform_kernel_path) &&
+      files::IsFile(application_kernel_path)) {
+    // Run from a kernel snapshot.
+    settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
+    settings.kernel_snapshot_path = platform_kernel_path;
+  } else {
+    // Run from a main Dart file.
+    settings.main_dart_file_path = args->main_path;
+    settings.packages_file_path = args->packages_path;
+  }
+
   settings.task_observer_add = [](intptr_t key, fxl::Closure callback) {
     fml::MessageLoop::GetCurrent().AddTaskObserver(key, std::move(callback));
   };
