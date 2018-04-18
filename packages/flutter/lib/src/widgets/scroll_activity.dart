@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -295,15 +296,17 @@ class ScrollDragController implements Drag {
     }
   }
 
-  /// If a motion start threshold exists, determine whether the threshold is
-  /// reached to start applying position offset.
+  /// If a motion start threshold exists, determine whether the threshold needs
+  /// to be broken to scroll. Also possibly apply an offset adjustment when
+  /// threshold is first broken.
   ///
-  /// Returns false either way if there's no offset.
-  bool _breakMotionStartThreshold(double offset, Duration timestamp) {
+  /// Returns `0.0` when not moving or within threshold. Returns `offset`
+  /// transparently when not stationary.
+  double _adjustForScrollStartThreshold(double offset, Duration timestamp) {
     if (timestamp == null) {
       // If we can't track time, we can't apply thresholds.
       // May be null for proxied drags like via accessibility.
-      return true;
+      return offset;
     }
 
     if (offset == 0.0) {
@@ -314,19 +317,32 @@ class ScrollDragController implements Drag {
         _offsetSinceLastStop = 0.0;
       }
       // Not moving can't break threshold.
-      return false;
+      return 0.0;
     } else {
       if (_offsetSinceLastStop == null) {
-        // Already in motion. Allow transparent offset transmission.
-        return true;
+        // Already in motion or no threshold behavior configured.
+        // Allow transparent offset transmission.
+        return offset;
       } else {
         _offsetSinceLastStop += offset;
         if (_offsetSinceLastStop.abs() > motionStartDistanceThreshold) {
           // Threshold broken.
           _offsetSinceLastStop = null;
-          return true;
+          if (offset.abs() > motionStartDistanceThreshold * 3.0) {
+            // This is heuristically a very deliberate fling. Leave the motion
+            // unaffected.
+            return offset;
+          } else {
+            // This is a normal speed threshold break.
+            return math.min(
+              // Ease into the motion when the threshold is initially broken
+              // to avoid a visible jump.
+              motionStartDistanceThreshold / 3.0,
+              offset.abs()
+            ) * offset.sign;
+          }
         } else {
-          return false;
+          return 0.0;
         }
       }
     }
@@ -337,11 +353,12 @@ class ScrollDragController implements Drag {
     assert(details.primaryDelta != null);
     _lastDetails = details;
     double offset = details.primaryDelta;
-    if (offset != 0) {
+    if (offset != 0.0) {
       _lastNonStationaryTimestamp = details.sourceTimeStamp;
     }
     _maybeLoseMomentum(offset, details.sourceTimeStamp);
-    if (!_breakMotionStartThreshold(offset, details.sourceTimeStamp)) {
+    offset = _adjustForScrollStartThreshold(offset, details.sourceTimeStamp);
+    if (offset == 0.0) {
       return;
     }
     if (_reversed) // e.g. an AxisDirection.up scrollable

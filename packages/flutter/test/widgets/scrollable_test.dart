@@ -55,9 +55,10 @@ void main() {
 
     await pumpTest(tester, TargetPlatform.iOS);
     await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
-    expect(getScrollOffset(tester), dragOffset);
+    // Scroll starts ease into the scroll on iOS.
+    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
     await tester.pump(); // trigger fling
-    expect(getScrollOffset(tester), dragOffset);
+    expect(getScrollOffset(tester), moreOrLessEquals(197.16666666666669));
     await tester.pump(const Duration(seconds: 5));
     final double result2 = getScrollOffset(tester);
 
@@ -72,11 +73,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(getScrollOffset(tester), greaterThan(-200.0));
     expect(getScrollOffset(tester), lessThan(0.0));
-    final double position = getScrollOffset(tester);
+    final double heldPosition = getScrollOffset(tester);
+    // Hold and let go while in overscroll.
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
     expect(await tester.pumpAndSettle(), 1);
-    expect(getScrollOffset(tester), position);
+    expect(getScrollOffset(tester), heldPosition);
     await gesture.up();
+    // Once the hold is let go, it should still snap back to origin.
     expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
     expect(getScrollOffset(tester), 0.0);
   });
@@ -171,6 +174,17 @@ void main() {
     await gesture.moveBy(const Offset(0.0, -20.0));
     // No offset lost from threshold.
     expect(getScrollOffset(tester), 20.0);
+  });
+
+  testWidgets('Slow threshold breaks are attenuated on iOS', (WidgetTester tester) async {
+    await pumpTest(tester, TargetPlatform.iOS);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    // This is a typical 'hesitant' iOS scroll start.
+    await gesture.moveBy(const Offset(0.0, -10.0));
+    expect(getScrollOffset(tester), moreOrLessEquals(1.1666666666666667));
+    await gesture.moveBy(const Offset(0.0, -10.0), timeStamp: const Duration(milliseconds: 20));
+    // Subsequent motions unaffected.
+    expect(getScrollOffset(tester), moreOrLessEquals(11.16666666666666673));
   });
 
   testWidgets('Small continuing motion preserved on iOS', (WidgetTester tester) async {
