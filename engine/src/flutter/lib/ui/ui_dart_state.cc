@@ -28,8 +28,7 @@ UIDartState::UIDartState(TaskRunners task_runners,
       advisory_script_uri_(std::move(advisory_script_uri)),
       advisory_script_entrypoint_(std::move(advisory_script_entrypoint)),
       logger_prefix_(std::move(logger_prefix)),
-      skia_unref_queue_(std::move(skia_unref_queue)),
-      weak_factory_(this) {
+      skia_unref_queue_(std::move(skia_unref_queue)) {
   AddOrRemoveTaskObserver(true /* add */);
 }
 

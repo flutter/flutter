@@ -103,7 +103,7 @@ class DartIsolate : public UIDartState {
   Phase phase_ = Phase::Unknown;
   const fxl::RefPtr<DartSnapshot> isolate_snapshot_;
   std::vector<std::unique_ptr<AutoFireClosure>> shutdown_callbacks_;
-  fml::WeakPtrFactory<DartIsolate> weak_factory_;
+  std::unique_ptr<fml::WeakPtrFactory<DartIsolate>> weak_factory_;
 
   FXL_WARN_UNUSED_RESULT
   bool Initialize(Dart_Isolate isolate, bool is_root_isolate);
@@ -116,6 +116,8 @@ class DartIsolate : public UIDartState {
   FXL_WARN_UNUSED_RESULT
   bool MarkIsolateRunnable();
 
+  void ResetWeakPtrFactory();
+
   // |Dart_IsolateCreateCallback|
   static Dart_Isolate DartIsolateCreateCallback(
       const char* advisory_script_uri,
@@ -124,6 +126,14 @@ class DartIsolate : public UIDartState {
       const char* package_config,
       Dart_IsolateFlags* flags,
       DartIsolate* embedder_isolate,
+      char** error);
+
+  static Dart_Isolate DartCreateAndStartServiceIsolate(
+      const char* advisory_script_uri,
+      const char* advisory_script_entrypoint,
+      const char* package_root,
+      const char* package_config,
+      Dart_IsolateFlags* flags,
       char** error);
 
   static std::pair<Dart_Isolate /* vm */,

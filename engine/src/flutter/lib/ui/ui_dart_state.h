@@ -100,7 +100,6 @@ class UIDartState : public tonic::DartState {
   RefPtr<FontSelector> font_selector_;
   fxl::RefPtr<flow::SkiaUnrefQueue> skia_unref_queue_;
   tonic::DartMicrotaskQueue microtask_queue_;
-  fml::WeakPtrFactory<UIDartState> weak_factory_;
 
   void AddOrRemoveTaskObserver(bool add);
 

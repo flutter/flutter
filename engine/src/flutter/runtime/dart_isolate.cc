@@ -105,7 +105,7 @@ DartIsolate::DartIsolate(const DartVM* vm,
                   vm->GetSettings().log_tag),
       vm_(vm),
       isolate_snapshot_(std::move(isolate_snapshot)),
-      weak_factory_(this) {
+      weak_factory_(std::make_unique<fml::WeakPtrFactory<DartIsolate>>(this)) {
   FXL_DCHECK(isolate_snapshot_) << "Must contain a valid isolate snapshot.";
 
   if (vm_ == nullptr) {
@@ -464,7 +464,7 @@ bool DartIsolate::Shutdown() {
   return true;
 }
 
-static Dart_Isolate DartCreateAndStartServiceIsolate(
+Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
     const char* advisory_script_uri,
     const char* advisory_script_entrypoint,
     const char* package_root,
@@ -493,21 +493,23 @@ static Dart_Isolate DartCreateAndStartServiceIsolate(
 
   flags->load_vmservice_library = true;
 
-  auto service_isolate = DartIsolate::CreateRootIsolate(
-      vm.get(),                  // vm
-      vm->GetIsolateSnapshot(),  // isolate snapshot
-      null_task_runners,         // task runners
-      nullptr,                   // window
-      {},                        // resource context
-      {},                        // unref queue
-      advisory_script_uri == nullptr ? "" : advisory_script_uri,  // script uri
-      advisory_script_entrypoint == nullptr
-          ? ""
-          : advisory_script_entrypoint,  // script entrypoint
-      flags                              // flags
-  );
+  fml::WeakPtr<DartIsolate> weak_service_isolate =
+      DartIsolate::CreateRootIsolate(
+          vm.get(),                  // vm
+          vm->GetIsolateSnapshot(),  // isolate snapshot
+          null_task_runners,         // task runners
+          nullptr,                   // window
+          {},                        // resource context
+          {},                        // unref queue
+          advisory_script_uri == nullptr ? ""
+                                         : advisory_script_uri,  // script uri
+          advisory_script_entrypoint == nullptr
+              ? ""
+              : advisory_script_entrypoint,  // script entrypoint
+          flags                              // flags
+      );
 
-  if (!service_isolate) {
+  if (!weak_service_isolate) {
     *error = strdup("Could not create the service isolate.");
     FXL_DLOG(ERROR) << *error;
     return nullptr;
@@ -516,11 +518,17 @@ static Dart_Isolate DartCreateAndStartServiceIsolate(
   // The engine never holds a strong reference to the VM service isolate. Since
   // we are about to lose our last weak reference to it, start the VM service
   // while we have this reference.
+  DartIsolate* service_isolate = weak_service_isolate.get();
+
+  // The service isolate is created and destroyed on arbitrary Dart pool threads
+  // and can not support a weak pointer factory that must be bound to a specific
+  // thread.
+  service_isolate->ResetWeakPtrFactory();
 
   const bool running_from_sources =
       !DartVM::IsRunningPrecompiledCode() && vm->GetPlatformKernel() == nullptr;
 
-  tonic::DartState::Scope scope(service_isolate.get());
+  tonic::DartState::Scope scope(service_isolate);
   if (!DartServiceIsolate::Startup(
           settings.ipv6 ? "::1" : "127.0.0.1",  // server IP address
           settings.observatory_port,            // server observatory port
@@ -678,7 +686,13 @@ fxl::RefPtr<DartSnapshot> DartIsolate::GetIsolateSnapshot() const {
 }
 
 fml::WeakPtr<DartIsolate> DartIsolate::GetWeakIsolatePtr() const {
-  return weak_factory_.GetWeakPtr();
+  return weak_factory_ ? weak_factory_->GetWeakPtr()
+                       : fml::WeakPtr<DartIsolate>();
+}
+
+void DartIsolate::ResetWeakPtrFactory() {
+  FXL_CHECK(weak_factory_);
+  weak_factory_.reset();
 }
 
 void DartIsolate::AddIsolateShutdownCallback(fxl::Closure closure) {
