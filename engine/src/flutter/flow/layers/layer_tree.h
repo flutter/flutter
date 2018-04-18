@@ -13,6 +13,7 @@
 #include "flutter/flow/layers/layer.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/time/time_delta.h"
+#include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace flow {
@@ -32,6 +33,8 @@ class LayerTree {
 #endif
 
   void Paint(CompositorContext::ScopedFrame& frame) const;
+
+  sk_sp<SkPicture> Flatten(const SkRect& bounds);
 
   Layer* root_layer() const { return root_layer_.get(); }
 
