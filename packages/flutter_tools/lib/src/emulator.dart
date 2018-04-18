@@ -119,7 +119,7 @@ abstract class Emulator {
 
   final String id;
 
-  String get name;
+  String get name => id;
 
   @override
   int get hashCode => id.hashCode;
