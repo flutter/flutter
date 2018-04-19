@@ -43,12 +43,12 @@ const GalleryDemoCategory _kStyle = const GalleryDemoCategory(
 );
 
 const GalleryDemoCategory _kMaterialComponents = const GalleryDemoCategory(
-  name: 'Material components',
+  name: 'Material',
   icon: GalleryIcons.category_mdc,
 );
 
 const GalleryDemoCategory _kCupertinoComponents = const GalleryDemoCategory(
-  name: 'Cupertino components',
+  name: 'Cupertino',
   icon: GalleryIcons.phone_iphone,
 );
 

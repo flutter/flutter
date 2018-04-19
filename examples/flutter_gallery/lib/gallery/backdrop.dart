@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
@@ -22,6 +23,50 @@ final Tween<BorderRadius> _kFrontHeadingBevelRadius = new BorderRadiusTween(
     topRight: const Radius.circular(_kFrontHeadingHeight),
   ),
 );
+
+class _IgnorePointerWhileIncomplete extends StatefulWidget {
+  const _IgnorePointerWhileIncomplete({ Key key, this.controller, this.child }) : super(key: key);
+
+  final AnimationController controller;
+  final Widget child;
+
+  @override
+  _IgnorePointerWhileIncompleteState createState() => new _IgnorePointerWhileIncompleteState();
+}
+
+class _IgnorePointerWhileIncompleteState extends State<_IgnorePointerWhileIncomplete> {
+  bool _ignoring;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addStatusListener(_handleStatusChange);
+    _ignoring = widget.controller.status != AnimationStatus.completed;
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeStatusListener(_handleStatusChange);
+    super.dispose();
+  }
+
+  void _handleStatusChange(AnimationStatus status) {
+    bool value = widget.controller.status != AnimationStatus.completed;
+    if (_ignoring != value) {
+      setState(() {
+        _ignoring = value;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new IgnorePointer(
+      ignoring: _ignoring,
+      child: widget.child,
+    );
+  }
+}
 
 class _CrossFadeTransition extends AnimatedWidget {
   const _CrossFadeTransition({
@@ -69,92 +114,6 @@ class _CrossFadeTransition extends AnimatedWidget {
         ),
       ],
     );
-  }
-}
-
-class _RenderIgnorePointer extends RenderIgnorePointer {
-  _RenderIgnorePointer({
-    RenderBox child,
-    bool ignoring: true,
-    bool ignoringSemantics,
-    ScrollController scrollController,
-    double offsetThreshold,
-  }) : _scrollController = scrollController,
-       _offsetThreshold = offsetThreshold,
-  super(
-    child: child,
-    ignoring: ignoring,
-    ignoringSemantics: ignoringSemantics,
-  );
-
-  ScrollController get scrollController => _scrollController;
-  ScrollController _scrollController;
-  set scrollController(ScrollController value) {
-    assert(value != null);
-    if (value == _scrollController)
-      return;
-    _scrollController = value;
-    if (ignoringSemantics == null)
-      markNeedsSemanticsUpdate();
-  }
-
-  double get offsetThreshold => _offsetThreshold;
-  double _offsetThreshold;
-  set offsetThreshold(double value) {
-    assert(value != null);
-    if (value == _offsetThreshold)
-      return;
-    _offsetThreshold = value;
-    if (ignoringSemantics == null)
-      markNeedsSemanticsUpdate();
-  }
-
-  @override
-  bool hitTest(HitTestResult result, { Offset position }) {
-    // True  if position is within the scrollable's top padding, rather than
-    // in the scrollable content below the padding. So: if the user taps in
-    // the front layer's padding, the scrollable ignores the hit and the
-    // back layer gets the tap.
-    final bool isScrollablePadding = offsetThreshold - position.dy > scrollController.offset;
-    return isScrollablePadding ? false : super.hitTest(result, position: position);
-  }
-}
-
-class _IgnorePointer extends IgnorePointer {
-  const _IgnorePointer({
-    Key key,
-    bool ignoring: true,
-    bool ignoringSemantics,
-    this.scrollController,
-    this.offsetThreshold,
-    Widget child,
-  }) : super(
-    key: key,
-    ignoring: ignoring,
-    ignoringSemantics: ignoringSemantics,
-    child: child,
-  );
-
-  final ScrollController scrollController;
-  final double offsetThreshold;
-
-  @override
-  _RenderIgnorePointer createRenderObject(BuildContext context) {
-    return new _RenderIgnorePointer(
-      ignoring: ignoring,
-      ignoringSemantics: ignoringSemantics,
-      scrollController: scrollController,
-      offsetThreshold: offsetThreshold,
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderIgnorePointer renderObject) {
-    renderObject
-      ..ignoring = ignoring
-      ..ignoringSemantics = ignoringSemantics
-      ..scrollController = scrollController
-      ..offsetThreshold = offsetThreshold;
   }
 }
 
@@ -208,105 +167,11 @@ class _BackAppBar extends StatelessWidget {
   }
 }
 
-class _LayerViewportLayout extends SingleChildLayoutDelegate {
-  const _LayerViewportLayout({ Listenable relayout, this.offset }) : super(relayout: relayout);
-
-  final double offset;
-
-  @override
-  Size getSize(BoxConstraints constraints) {
-    return constraints.biggest;
-  }
-
-  @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    assert(constraints.hasBoundedHeight);
-    return constraints.copyWith(
-      minWidth: constraints.maxWidth,
-      maxHeight: constraints.maxHeight - offset,
-    );
-  }
-
-  @override
-  Offset getPositionForChild(Size size, Size childSize) {
-    return new Offset(0.0, offset);
-  }
-
-  @override
-  bool shouldRelayout(_LayerViewportLayout oldDelegate) {
-    return offset != oldDelegate.offset;
-  }
-}
-
-class _LayerViewport extends StatelessWidget {
-  const _LayerViewport({ Key key, this.offset, this.child }) : super(key: key);
-
-  final Widget child;
-  final double offset;
-
-  @override
-  Widget build(BuildContext context) {
-    return new ClipRect(
-      child: new CustomSingleChildLayout(
-        delegate: new _LayerViewportLayout(offset: offset),
-        child: child,
-      ),
-    );
-  }
-}
-
-class _ScrollProgressAnimation extends Animation<double> with
-    AnimationLazyListenerMixin,
-    AnimationLocalListenersMixin,
-    AnimationLocalStatusListenersMixin
-{
-  @override
-  double get value => _value;
-  double _value = 1.0;
-  set value(double newValue) {
-    assert(value >= 0.0 && value <= 1.0);
-    if (_value == newValue)
-      return;
-
-    AnimationStatus newStatus;
-    if (newValue == 0.0)
-      newStatus = AnimationStatus.dismissed;
-    else if (newValue == 1.0)
-      newStatus = AnimationStatus.completed;
-    else if (newValue > _value)
-      newStatus = AnimationStatus.forward;
-    else
-      newStatus = AnimationStatus.reverse;
-
-    _value = newValue;
-    final bool statusChanged = _status != newStatus;
-    _status = newStatus;
-
-    notifyListeners();
-    if (statusChanged)
-      notifyStatusListeners(_status);
-  }
-
-  @override
-  AnimationStatus get status => _status;
-  AnimationStatus _status = AnimationStatus.completed;
-
-  @override
-  void didStartListening() { }
-
-  @override
-  void didStopListening() { }
-
-  @override
-  String toStringDetails() {
-    return '${super.toStringDetails()} ${value.toStringAsFixed(3)}';
-  }
-}
-
 class Backdrop extends StatefulWidget {
   const Backdrop({
     this.frontAction,
     this.frontTitle,
+    this.frontHeading,
     this.frontLayer,
     this.backTitle,
     this.backLayer,
@@ -315,6 +180,7 @@ class Backdrop extends StatefulWidget {
   final Widget frontAction;
   final Widget frontTitle;
   final Widget frontLayer;
+  final Widget frontHeading;
   final Widget backTitle;
   final Widget backLayer;
 
@@ -322,127 +188,131 @@ class Backdrop extends StatefulWidget {
   _BackdropState createState() => new _BackdropState();
 }
 
-class _BackdropState extends State<Backdrop> {
-  ScrollController _scrollController;
-  final _ScrollProgressAnimation _scrollProgress = new _ScrollProgressAnimation();
-  double _frontOpenOffset;
-  bool _frontIsOpen = true;
+class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin {
+  final GlobalKey _backdropKey = new GlobalKey(debugLabel: 'Backdrop');
+  AnimationController _controller;
 
-  void _openFrontPanel() {
-    setState(() {
-      _frontIsOpen = true;
-    });
-    _scrollController.animateTo(
-      _frontOpenOffset,
+  @override
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(
       duration: const Duration(milliseconds: 300),
-      curve: Curves.fastOutSlowIn,
+      value: 1.0,
+      vsync: this,
     );
   }
 
-  void _closeFrontPanel() {
-    setState(() {
-      _frontIsOpen = false;
-    });
-    _scrollController.animateTo(
-      0.0,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.fastOutSlowIn,
-    );
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
-  double get _frontOpenProgress {
-    return (_scrollController.offset / _frontOpenOffset).clamp(0.0, 1.0);
+  double get _backdropHeight {
+    final RenderBox renderBox = _backdropKey.currentContext.findRenderObject();
+    return renderBox.size.height;
   }
 
-  bool _handleScrollNotification(ScrollNotification notification) {
-    _scrollProgress.value = _frontOpenProgress;
-    return false;
+  void _handleDragUpdate(DragUpdateDetails details) {
+    _controller.value -= details.primaryDelta / (_backdropHeight ?? details.primaryDelta);
   }
 
-  Widget _buildFrontLayer(BuildContext context, BoxConstraints constraints) {
-    final Size size = constraints.biggest;
+  void _handleDragEnd(DragEndDetails details) {
+    if (_controller.isAnimating || _controller.status == AnimationStatus.completed)
+      return;
 
-    _frontOpenOffset = size.height - _kBackAppBarHeight - _kFrontClosedHeight;
-    _scrollController ??= new ScrollController(initialScrollOffset: _frontOpenOffset);
+    final double flingVelocity = details.velocity.pixelsPerSecond.dy / _backdropHeight;
+    if (flingVelocity < 0.0)
+      _controller.fling(velocity: math.max(2.0, -flingVelocity));
+    else if (flingVelocity > 0.0)
+      _controller.fling(velocity: math.min(-2.0, -flingVelocity));
+    else
+      _controller.fling(velocity: _controller.value < 0.5 ? -2.0 : 2.0);
+  }
 
-    return new _LayerViewport(
-      offset: -_kFrontHeadingHeight,
-      child: new _IgnorePointer(
-        ignoring: !_frontIsOpen,
-        scrollController: _scrollController,
-        offsetThreshold: size.height - _kFrontClosedHeight + _kFrontHeadingHeight,
-        child: new NotificationListener<ScrollNotification>(
-          onNotification: _handleScrollNotification,
-          child: new SingleChildScrollView(
-            controller: _scrollController,
-            padding: new EdgeInsets.only(
-              top: _kFrontHeadingHeight + size.height - _kFrontClosedHeight,
+  void _toggleFrontLayer() {
+    final AnimationStatus status = _controller.status;
+    final bool isOpen = status == AnimationStatus.completed || status == AnimationStatus.forward;
+    _controller.fling(velocity: isOpen ? -2.0 : 2.0);
+  }
+
+  Widget _buildStack(BuildContext context, BoxConstraints constraints) {
+    final Animation<RelativeRect> frontRelativeRect = new RelativeRectTween(
+      begin: new RelativeRect.fromLTRB(0.0, constraints.biggest.height - _kFrontClosedHeight, 0.0, 0.0),
+      end: new RelativeRect.fromLTRB(0.0, _kBackAppBarHeight, 0.0, 0.0),
+    ).animate(_controller);
+
+    return new Stack(
+      key: _backdropKey,
+      children: <Widget>[
+        new Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            // Back layer
+            new _BackAppBar(
+              leading: widget.frontAction,
+              title: new _CrossFadeTransition(
+                progress: _controller,
+                alignment: AlignmentDirectional.centerStart,
+                child0: widget.frontTitle,
+                child1: widget.backTitle,
+              ),
+              trailing: new IconButton(
+                onPressed: _toggleFrontLayer,
+                icon: new AnimatedIcon(
+                  icon: AnimatedIcons.close_menu,
+                  progress: _controller,
+                ),
+              ),
             ),
-            child: new AnimatedBuilder(
-              animation: _scrollController,
-              builder: (BuildContext context, Widget child) {
-                return new Container(
-                  constraints: constraints.copyWith(
-                    minHeight: math.max(0.0, size.height - _kBackAppBarHeight),
-                    maxHeight: double.infinity,
+            new Expanded(
+              child: widget.backLayer,
+            ),
+          ],
+        ),
+        // Front layer
+        new PositionedTransition(
+          rect: frontRelativeRect,
+          child: new AnimatedBuilder(
+            animation: _controller,
+            builder: (BuildContext context, Widget child) {
+              return new PhysicalShape(
+                elevation: 12.0,
+                color: Colors.white, // TBD color from theme
+                clipper: new ShapeBorderClipper(
+                  shape: new BeveledRectangleBorder(
+                    borderRadius: _kFrontHeadingBevelRadius.lerp(_controller.value),
                   ),
-                  decoration: new ShapeDecoration(
-                    color: Colors.white,
-                    shape: new BeveledRectangleBorder(
-                      borderRadius: _kFrontHeadingBevelRadius.lerp(_frontOpenProgress),
-                    ),
+                ),
+                child: child,
+              );
+            },
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                new GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: _toggleFrontLayer,
+                  onVerticalDragUpdate: _handleDragUpdate,
+                  onVerticalDragEnd: _handleDragEnd,
+                  child: widget.frontHeading,
+                ),
+                new Expanded(
+                  child: new _IgnorePointerWhileIncomplete(
+                    controller: _controller,
+                    child: widget.frontLayer,
                   ),
-                  child: child,
-                );
-              },
-              child: widget.frontLayer,
+                ),
+              ],
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return new SizedBox.expand(
-      child: new Stack(
-        children: <Widget>[
-          new Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              new _BackAppBar(
-                leading: new _CrossFadeTransition(
-                  progress: _scrollProgress,
-                  child0: widget.frontAction,
-                  child1: new IconButton(
-                    icon: const BackButtonIcon(),
-                    onPressed: _openFrontPanel,
-                  ),
-                ),
-                title: new _CrossFadeTransition(
-                  progress: _scrollProgress,
-                  alignment: AlignmentDirectional.centerStart,
-                  child0: widget.frontTitle,
-                  child1: widget.backTitle,
-                ),
-                trailing: new _CrossFadeTransition(
-                  progress: _scrollProgress,
-                  child0: new IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: _closeFrontPanel,
-                  ),
-                  child1: const SizedBox()
-                )
-              ),
-              new Expanded(
-                child: widget.backLayer,
-              ),
-            ],
-          ),
-          new LayoutBuilder(builder: _buildFrontLayer),
-        ],
-      ),
-    );
+    return new LayoutBuilder(builder: _buildStack);
   }
 }
