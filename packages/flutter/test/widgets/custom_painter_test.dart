@@ -421,6 +421,10 @@ void _defineTests() {
       ),
     ));
 
+    // TODO(jonahwilliams): remove when rolling edge semantic support for framework.
+    final List<SemanticsFlag> flags = SemanticsFlag.values.values
+     .where((SemanticsFlag flag) => flag != SemanticsFlag.scopesRoute && flag != SemanticsFlag.namesRoute)
+     .toList();
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
@@ -429,7 +433,7 @@ void _defineTests() {
               new TestSemantics.rootChild(
                 id: 2,
                 rect: TestSemantics.fullScreen,
-                flags: SemanticsFlag.values.values.toList(),
+                flags: flags,
               ),
             ]
         ),
