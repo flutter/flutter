@@ -50,6 +50,10 @@ executable("embedder_unittests") {
     ":fixtures",
     "$flutter_root/testing",
   ]
+
+  if (is_linux) {
+    ldflags = [ "-rdynamic" ]
+  }
 }
 
 shared_library("flutter_engine") {
