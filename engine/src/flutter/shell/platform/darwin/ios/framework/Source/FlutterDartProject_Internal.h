@@ -15,6 +15,8 @@
 
 - (shell::RunConfiguration)runConfiguration;
 
++ (NSString*)flutterAssetsName:(NSBundle*)bundle;
+
 @end
 
 #endif  // SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERDARTPROJECT_INTERNAL_H_
