@@ -41,8 +41,6 @@ class IOSEmulator extends Emulator {
     final RunResult launchResult =
         await runAsync(<String>['open', '-a', getSimulatorPath()]);
     if (launchResult.exitCode != 0) {
-      printError(
-          'Error: iOS simulator failed to launch with exit code ${launchResult.exitCode}');
       printError('$launchResult');
       return false;
     }
