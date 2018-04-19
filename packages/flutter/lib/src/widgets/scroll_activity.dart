@@ -324,8 +324,8 @@ class ScrollDragController implements Drag {
       return 0.0;
     } else {
       if (_offsetSinceLastStop == null) {
-        // Already in motion or no threshold behavior configured.
-        // Allow transparent offset transmission.
+        // Already in motion or no threshold behavior configured such as for
+        // Android. Allow transparent offset transmission.
         return offset;
       } else {
         _offsetSinceLastStop += offset;
@@ -360,6 +360,9 @@ class ScrollDragController implements Drag {
     if (offset != 0.0) {
       _lastNonStationaryTimestamp = details.sourceTimeStamp;
     }
+    // By default, iOS platforms carries momentum and has a start threshold
+    // (configured in [BouncingScrollPhysics]). The 2 operations below are
+    // no-ops on Android.
     _maybeLoseMomentum(offset, details.sourceTimeStamp);
     offset = _adjustForScrollStartThreshold(offset, details.sourceTimeStamp);
     if (offset == 0.0) {
