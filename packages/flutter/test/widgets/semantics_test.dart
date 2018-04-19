@@ -474,7 +474,7 @@ void main() {
         )
     );
     // TODO(jonahwilliams): remove when adding engine support for edge semantics
-    final flags = SemanticsFlag.values.values
+    final List<SemanticsFlag> flags = SemanticsFlag.values.values
      .where((SemanticsFlag flag) => flag != SemanticsFlag.scopesRoute && flag != SemanticsFlag.namesRoute)
      .toList();
     final TestSemantics expectedSemantics = new TestSemantics.root(
