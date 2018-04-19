@@ -11,6 +11,7 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 import 'demos.dart';
 import 'home.dart';
 import 'options.dart';
+import 'scale.dart';
 import 'themes.dart';
 import 'updater.dart';
 
@@ -72,8 +73,9 @@ class _GalleryAppState extends State<GalleryApp> {
   void initState() {
     super.initState();
     _options = new GalleryOptions(
-      theme: kAllGalleryThemes[0],
+      theme: kLightGalleryTheme,
       timeDilation: timeDilation,
+      platform: defaultTargetPlatform,
     );
   }
 
@@ -110,7 +112,7 @@ class _GalleryAppState extends State<GalleryApp> {
       builder: (BuildContext context) {
         return new MediaQuery(
           data: MediaQuery.of(context).copyWith(
-            textScaleFactor: _options.textScaleFactor,
+            textScaleFactor: _options.textScaleFactor.scale,
           ),
           child: child,
         );
@@ -136,7 +138,7 @@ class _GalleryAppState extends State<GalleryApp> {
     }
 
     return new MaterialApp(
-      theme: _options.theme.data,
+      theme: _options.theme.data.copyWith(platform: _options.platform),
       title: 'Flutter Gallery',
       color: Colors.grey,
       showPerformanceOverlay: _options.showPerformanceOverlay,
@@ -153,17 +155,3 @@ class _GalleryAppState extends State<GalleryApp> {
     );
   }
 }
-
-
-  /*
-
-  @override
-  Widget build(BuildContext context) {
-    Widget home = new GalleryHome(
-      onPlatformChanged: (TargetPlatform value) {
-        setState(() {
-          _platform = value == defaultTargetPlatform ? null : value;
-        });
-      },
-
-  */

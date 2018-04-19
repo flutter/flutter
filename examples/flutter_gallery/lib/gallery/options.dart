@@ -2,36 +2,39 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'scale.dart';
 import 'themes.dart';
 
-// TBD restore platform option
-
 class GalleryOptions {
-  const GalleryOptions({
+  GalleryOptions({
     this.theme,
-    this.textScaleFactor,
+    this.textScaleFactor: kAllGalleryTextScaleValues[0],
     this.textDirection: TextDirection.ltr,
     this.timeDilation: 1.0,
+    this.platform,
     this.showOffscreenLayersCheckerboard: false,
     this.showRasterCacheImagesCheckerboard: false,
     this.showPerformanceOverlay: false,
   });
 
   final GalleryTheme theme;
-  final double textScaleFactor;
+  final GalleryTextScaleValue textScaleFactor;
   final TextDirection textDirection;
   final double timeDilation;
+  final TargetPlatform platform;
   final bool showPerformanceOverlay;
   final bool showRasterCacheImagesCheckerboard;
   final bool showOffscreenLayersCheckerboard;
 
   GalleryOptions copyWith({
     GalleryTheme theme,
-    double textScaleFactor,
+    GalleryTextScaleValue textScaleFactor,
     TextDirection textDirection,
     double timeDilation,
+    TargetPlatform platform,
     bool showPerformanceOverlay,
     bool showRasterCacheImagesCheckerboard,
     bool showOffscreenLayersCheckerboard,
@@ -41,6 +44,7 @@ class GalleryOptions {
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       textDirection: textDirection ?? this.textDirection,
       timeDilation: timeDilation ?? this.timeDilation,
+      platform: platform ?? this.platform,
       showPerformanceOverlay: showPerformanceOverlay ?? this.showPerformanceOverlay,
       showOffscreenLayersCheckerboard: showOffscreenLayersCheckerboard ?? this.showOffscreenLayersCheckerboard,
       showRasterCacheImagesCheckerboard: showRasterCacheImagesCheckerboard ?? this.showRasterCacheImagesCheckerboard,
@@ -55,6 +59,7 @@ class GalleryOptions {
     return theme == typedOther.theme
         && textScaleFactor == typedOther.textScaleFactor
         && textDirection == typedOther.textDirection
+        && platform == typedOther.platform
         && showPerformanceOverlay == typedOther.showPerformanceOverlay
         && showRasterCacheImagesCheckerboard == typedOther.showRasterCacheImagesCheckerboard
         && showOffscreenLayersCheckerboard == typedOther.showRasterCacheImagesCheckerboard;
@@ -66,6 +71,7 @@ class GalleryOptions {
     textScaleFactor,
     textDirection,
     timeDilation,
+    platform,
     showPerformanceOverlay,
     showRasterCacheImagesCheckerboard,
     showOffscreenLayersCheckerboard,
@@ -90,14 +96,17 @@ class _OptionsItem extends StatelessWidget {
     final double textScaleFactor = MediaQuery.of(context)?.textScaleFactor ?? 1.0;
 
     return new Container(
-      height: _kItemHeight * textScaleFactor,
+      constraints: new BoxConstraints(minHeight: _kItemHeight * textScaleFactor),
       padding: _kItemPadding,
       alignment: AlignmentDirectional.centerStart,
       child: new DefaultTextStyle(
         style: DefaultTextStyle.of(context).style,
         maxLines: 2,
         overflow: TextOverflow.fade,
-        child: child,
+        child: new IconTheme(
+          data: Theme.of(context).primaryIconTheme,
+          child: child,
+        ),
       ),
     );
   }
@@ -190,68 +199,53 @@ class _ThemeItem extends StatelessWidget {
   final GalleryOptions options;
   final ValueChanged<GalleryOptions> onOptionsChanged;
 
-  void _handleTap() {
-    final int index = kAllGalleryThemes.indexOf(options.theme);
-    onOptionsChanged(
-      options.copyWith(
-        theme: kAllGalleryThemes[(index + 1) % kAllGalleryThemes.length],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return new _OptionsItem(
-      child: new _FlatButton(
-        onPressed: _handleTap,
-        child: new Text(options.theme.name),
-      ),
+    return new _BooleanItem(
+      'Dark Theme',
+      options.theme == kDarkGalleryTheme,
+      (bool value) {
+        onOptionsChanged(
+          options.copyWith(
+            theme: value ? kDarkGalleryTheme : kLightGalleryTheme,
+          ),
+        );
+      },
     );
   }
 }
 
 class _TextScaleFactorItem extends StatelessWidget {
-  static final Map<double, String> textSizes = <double, String>{
-    null: 'System Default',
-    0.8: 'Small',
-    1.0: 'Normal',
-    1.3: 'Large',
-    2.0: 'Huge',
-  };
-
-  static final Map<double, double> nextTextSizes = <double, double>{
-    null: 0.8,
-    0.8: 1.0,
-    1.0: 1.3,
-    1.3: 2.0,
-    2.0: null,
-  };
-
   const _TextScaleFactorItem(this.options, this.onOptionsChanged);
 
   final GalleryOptions options;
   final ValueChanged<GalleryOptions> onOptionsChanged;
 
-  void _handleTap() {
-    onOptionsChanged(
-      options.copyWith(
-        textScaleFactor: nextTextSizes[options.textScaleFactor] ?? 1.0,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return new _OptionsItem(
-      child: new _FlatButton(
-        onPressed: _handleTap,
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const Text('Text scale factor'),
-            new Text(textSizes[options.textScaleFactor] ?? '${options.textScaleFactor}X'),
-          ],
-        ),
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            child: new Text('Text size: ${options.textScaleFactor.label}'),
+          ),
+          new PopupMenuButton<GalleryTextScaleValue>(
+            padding: const EdgeInsets.only(right: 16.0),
+            itemBuilder: (BuildContext context) {
+              return kAllGalleryTextScaleValues.map((GalleryTextScaleValue scaleValue) {
+                return new PopupMenuItem<GalleryTextScaleValue>(
+                  value: scaleValue,
+                  child: new Text(scaleValue.label),
+                );
+              }).toList();
+            },
+            onSelected: (GalleryTextScaleValue scaleValue) {
+              onOptionsChanged(
+                options.copyWith(textScaleFactor: scaleValue),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -285,26 +279,64 @@ class _TimeDilationItem extends StatelessWidget {
   final GalleryOptions options;
   final ValueChanged<GalleryOptions> onOptionsChanged;
 
-  void _handleTap() {
-    onOptionsChanged(
-      options.copyWith(
-        timeDilation: options.timeDilation == 1.0 ? 20.0 : 1.0,
-      ),
+  @override
+  Widget build(BuildContext context) {
+    return new _BooleanItem(
+      'Slow motion',
+      options.timeDilation != 1.0,
+      (bool value) {
+        onOptionsChanged(
+          options.copyWith(
+            timeDilation: value ? 20.0 : 1.0,
+          ),
+        );
+      },
     );
+  }
+}
+
+class _PlatformItem extends StatelessWidget {
+  const _PlatformItem(this.options, this.onOptionsChanged);
+
+  final GalleryOptions options;
+  final ValueChanged<GalleryOptions> onOptionsChanged;
+
+  String _platformLabel(TargetPlatform platform) {
+    switch(platform) {
+      case TargetPlatform.android:
+        return 'Android';
+      case TargetPlatform.fuchsia:
+        return 'Fuchsia';
+      case TargetPlatform.iOS:
+        return 'iOS';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return new _OptionsItem(
-      child: new _FlatButton(
-        onPressed: _handleTap,
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            const Text('Slow motion'),
-            new Text(options.timeDilation == 1.0 ? 'Animate at normal speed' : 'Animate slowly'),
-          ],
-        ),
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            child: new Text('Platform: ${_platformLabel(options.platform)}'),
+          ),
+          new PopupMenuButton<TargetPlatform>(
+            padding: const EdgeInsets.only(right: 16.0),
+            itemBuilder: (BuildContext context) {
+              return TargetPlatform.values.map((TargetPlatform platform) {
+                return new PopupMenuItem<TargetPlatform>(
+                  value: platform,
+                  child: new Text(_platformLabel(platform)),
+                );
+              }).toList();
+            },
+            onSelected: (TargetPlatform platform) {
+              onOptionsChanged(
+                options.copyWith(platform: platform),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -388,6 +420,9 @@ class GalleryOptionsPage extends StatelessWidget {
           new _TextScaleFactorItem(options, onOptionsChanged),
           new _TextDirectionItem(options, onOptionsChanged),
           new _TimeDilationItem(options, onOptionsChanged),
+          const Divider(),
+          const _Heading('Platform mechanics'),
+          new _PlatformItem(options, onOptionsChanged),
         ]..addAll(
           _enabledDiagnosticItems(),
         )..addAll(

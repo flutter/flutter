@@ -64,7 +64,11 @@ class _CategoryItem extends StatelessWidget {
             child: new Icon(
               category.icon,
               size: 60.0,
+<<<<<<< HEAD
               color: isDark ? Colors.white : _kFlutterBlue,
+=======
+              color: const Color(0xFF003D75),
+>>>>>>> checkpoint
             ),
           ),
           const SizedBox(height: 10.0),
@@ -307,7 +311,11 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
           backTitle: const Text('Options'),
           backLayer: widget.optionsPage,
           frontAction: const _FlutterLogo(),
+<<<<<<< HEAD
           frontTitle: const Text('Flutter gallery'),
+=======
+          frontTitle: new Text('Flutter gallery', style: titleStyle),
+>>>>>>> checkpoint
           frontHeading: const SizedBox(height: 16.0),
           frontLayer: new _CategoriesPage(
             categories: kAllGalleryDemoCategories,
