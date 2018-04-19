@@ -156,7 +156,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.text('Z')), equals(const Size(20.0, 20.0)));
+    expect(tester.getSize(find.text('Z')), equals(const Size(16.0, 16.0)));
 
     await tester.pumpWidget(
       wrap(
@@ -185,7 +185,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSize(find.text('Z')), equals(const Size(20.0, 20.0)));
+    expect(tester.getSize(find.text('Z')), equals(const Size(16.0, 16.0)));
   });
 
   testWidgets('CircleAvatar respects minRadius', (WidgetTester tester) async {
