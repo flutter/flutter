@@ -110,10 +110,10 @@ abstract class Emulator {
     final List<List<String>> table = <List<String>>[];
     for (Emulator emulator in emulators) {
       table.add(<String>[
-        emulator.name ?? emulator.id ?? '',
+        emulator.id ?? '',
+        emulator.name ?? '',
         emulator.manufacturer ?? '',
         emulator.label ?? '',
-        emulator.id ?? '',
       ]);
     }
 
