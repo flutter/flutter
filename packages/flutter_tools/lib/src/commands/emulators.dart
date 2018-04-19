@@ -22,7 +22,7 @@ class EmulatorsCommand extends FlutterCommand {
   final String name = 'emulators';
 
   @override
-  final String description = 'List all available emulators.';
+  final String description = 'List and start available emulators.';
 
   @override
   Future<Null> runCommand() async {
