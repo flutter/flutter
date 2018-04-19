@@ -217,7 +217,7 @@ class _PestoLogoState extends State<PestoLogo> {
   Widget build(BuildContext context) {
     return new Semantics(
       namesRoute: true,
-      child: Transform(
+      child: new Transform(
         transform: new Matrix4.identity()..scale(widget.height / kLogoHeight),
         alignment: Alignment.topCenter,
         child: new SizedBox(

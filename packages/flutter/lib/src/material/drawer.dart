@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/src/material/material_localizations.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'list_tile.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 
 /// The possible alignments of a [Drawer].
 enum DrawerAlignment {
