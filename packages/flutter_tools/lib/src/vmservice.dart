@@ -175,16 +175,23 @@ class VMService {
   Future<Null> get done => _peer.done;
 
   // Events
-  Stream<ServiceEvent> get onDebugEvent => onEvent('Debug');
-  Stream<ServiceEvent> get onExtensionEvent => onEvent('Extension');
+  Future<Stream<ServiceEvent>> get onDebugEvent => onEvent('Debug');
+  Future<Stream<ServiceEvent>> get onExtensionEvent => onEvent('Extension');
   // IsolateStart, IsolateRunnable, IsolateExit, IsolateUpdate, ServiceExtensionAdded
-  Stream<ServiceEvent> get onIsolateEvent => onEvent('Isolate');
-  Stream<ServiceEvent> get onTimelineEvent => onEvent('Timeline');
+  Future<Stream<ServiceEvent>> get onIsolateEvent => onEvent('Isolate');
+  Future<Stream<ServiceEvent>> get onTimelineEvent => onEvent('Timeline');
   // TODO(johnmccutchan): Add FlutterView events.
 
-  // Listen for a specific event name.
-  Stream<ServiceEvent> onEvent(String streamId) {
-    _streamListen(streamId);
+  /// Returns a stream of VM service events.
+  ///
+  /// This purposely returns a `Future<Stream<T>>` rather than a `Stream<T>`
+  /// because it first registers with the VM to receive events on the stream,
+  /// and only once the VM has acknowledged that the stream has started will
+  /// we return the associated stream. Any attempt to streamline this API into
+  /// returning `Stream<T>` should take that into account to avoid race
+  /// conditions.
+  Future<Stream<ServiceEvent>> onEvent(String streamId) async {
+    await _streamListen(streamId);
     return _getEventController(streamId).stream;
   }
 
@@ -1328,7 +1335,7 @@ class FlutterView extends ServiceObject {
     // When this completer completes the isolate is running.
     final Completer<Null> completer = new Completer<Null>();
     final StreamSubscription<ServiceEvent> subscription =
-      owner.vm.vmService.onIsolateEvent.listen((ServiceEvent event) {
+      (await owner.vm.vmService.onIsolateEvent).listen((ServiceEvent event) {
       // TODO(johnmccutchan): Listen to the debug stream and catch initial
       // launch errors.
       if (event.kind == ServiceEvent.kIsolateRunnable) {

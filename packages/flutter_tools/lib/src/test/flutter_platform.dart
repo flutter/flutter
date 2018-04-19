@@ -275,7 +275,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
     dynamic outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
-    final List<_Finalizer> finalizers = <_Finalizer>[];
+    final List<_Finalizer> finalizers = <_Finalizer>[]; // Will be run in reverse order.
     bool subprocessActive = false;
     bool controllerSinkClosed = false;
     try {
@@ -506,12 +506,13 @@ class _FlutterPlatform extends PlatformPlugin {
       if (!controllerSinkClosed) {
         controller.sink.addError(error, stack);
       } else {
-        printError('unhandled error during test:\n$testPath\n$error');
+        printError('unhandled error during test:\n$testPath\n$error\n$stack');
         outOfBandError ??= error;
       }
     } finally {
       printTrace('test $ourTestCount: cleaning up...');
-      for (_Finalizer finalizer in finalizers) {
+      // Finalizers are treated like a stack; run them in reverse order.
+      for (_Finalizer finalizer in finalizers.reversed) {
         try {
           await finalizer();
         } catch (error, stack) {
@@ -519,7 +520,7 @@ class _FlutterPlatform extends PlatformPlugin {
           if (!controllerSinkClosed) {
             controller.sink.addError(error, stack);
           } else {
-            printError('unhandled error during finalization of test:\n$testPath\n$error');
+            printError('unhandled error during finalization of test:\n$testPath\n$error\n$stack');
             outOfBandError ??= error;
           }
         }
