@@ -319,14 +319,6 @@ class IOSSimulator extends Device {
     // Prepare launch arguments.
     final List<String> args = <String>['--enable-dart-profiling'];
 
-    if (!prebuiltApplication) {
-      args.addAll(<String>[
-        '--flutter-assets-dir=${fs.path.absolute(getAssetBuildDirectory())}',
-        '--dart-main=${fs.path.absolute(mainPath)}${debuggingOptions.buildInfo.previewDart2?".dill":""}',
-        '--packages=${fs.path.absolute('.packages')}',
-      ]);
-    }
-
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildInfo.isDebug)
         args.add('--enable-checked-mode');
