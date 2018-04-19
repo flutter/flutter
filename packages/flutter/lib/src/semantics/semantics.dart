@@ -1334,83 +1334,64 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Builds a new list made of [_children] sorted in semantic traversal order.
   List<SemanticsNode> _childrenInTraversalOrder() {
-    final Stopwatch sw = new Stopwatch()..start();
-    try {
-      TextDirection inheritedTextDirection = textDirection;
-      SemanticsNode ancestor = parent;
-      while (inheritedTextDirection == null && ancestor != null) {
-        inheritedTextDirection = ancestor.textDirection;
-        ancestor = ancestor.parent;
-      }
-
-      List<SemanticsNode> childrenInDefaultOrder = _childrenInDefaultOrder(_children, inheritedTextDirection);
-      if (inheritedTextDirection != null) {
-        childrenInDefaultOrder = _childrenInDefaultOrder(_children, inheritedTextDirection);
-      } else {
-        // In the absence of text direction default to paint order.
-        childrenInDefaultOrder = _children;
-      }
-
-      // List.sort does not guarantee stable sort order. Therefore, children are
-      // first partitioned into groups that have compatible sort keys, i.e. keys
-      // in the same group can be compared to each other. These groups stay in
-      // the same place. Only children within the same group are sorted.
-      final List<_TraversalSortNode> everythingSorted = <_TraversalSortNode>[];
-      final List<_TraversalSortNode> sortNodes = <_TraversalSortNode>[];
-      SemanticsSortKey lastSortKey;
-      for (int position = 0; position < childrenInDefaultOrder.length; position += 1) {
-        final SemanticsNode child = childrenInDefaultOrder[position];
-        final SemanticsSortKey sortKey = child.sortKey;
-        lastSortKey = position > 0
-            ? childrenInDefaultOrder[position - 1].sortKey
-            : null;
-        final bool isCompatibleWithPreviousSortKey = position == 0 ||
-            sortKey.runtimeType == lastSortKey.runtimeType &&
-            (sortKey == null || sortKey.name == lastSortKey.name);
-        if (!isCompatibleWithPreviousSortKey && sortNodes.isNotEmpty) {
-          // Do not sort groups with null sort keys. List.sort does not guarantee
-          // a stable sort order.
-          if (lastSortKey != null) {
-            sortNodes.sort();
-          }
-          everythingSorted.addAll(sortNodes);
-          sortNodes.clear();
-        }
-
-        sortNodes.add(new _TraversalSortNode(
-          node: child,
-          sortKey: sortKey,
-          position: position,
-        ));
-      }
-
-      // Do not sort groups with null sort keys. List.sort does not guarantee
-      // a stable sort order.
-      if (lastSortKey != null) {
-        sortNodes.sort();
-      }
-      everythingSorted.addAll(sortNodes);
-
-      return everythingSorted
-        .map<SemanticsNode>((_TraversalSortNode sortNode) => sortNode.node)
-        .toList();
-    } finally {
-      if (sw.elapsedMilliseconds > 100) {
-        print(
-          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
-          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
-          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
-          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
-          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
-          '<<<<<<<<<<<<<<<<<<<<<<<<<<<< !!!ALERT!!! >>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
-          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
-          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
-          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
-          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
-          '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n'
-        );
-      }
+    TextDirection inheritedTextDirection = textDirection;
+    SemanticsNode ancestor = parent;
+    while (inheritedTextDirection == null && ancestor != null) {
+      inheritedTextDirection = ancestor.textDirection;
+      ancestor = ancestor.parent;
     }
+
+    List<SemanticsNode> childrenInDefaultOrder = _childrenInDefaultOrder(_children, inheritedTextDirection);
+    if (inheritedTextDirection != null) {
+      childrenInDefaultOrder = _childrenInDefaultOrder(_children, inheritedTextDirection);
+    } else {
+      // In the absence of text direction default to paint order.
+      childrenInDefaultOrder = _children;
+    }
+
+    // List.sort does not guarantee stable sort order. Therefore, children are
+    // first partitioned into groups that have compatible sort keys, i.e. keys
+    // in the same group can be compared to each other. These groups stay in
+    // the same place. Only children within the same group are sorted.
+    final List<_TraversalSortNode> everythingSorted = <_TraversalSortNode>[];
+    final List<_TraversalSortNode> sortNodes = <_TraversalSortNode>[];
+    SemanticsSortKey lastSortKey;
+    for (int position = 0; position < childrenInDefaultOrder.length; position += 1) {
+      final SemanticsNode child = childrenInDefaultOrder[position];
+      final SemanticsSortKey sortKey = child.sortKey;
+      lastSortKey = position > 0
+          ? childrenInDefaultOrder[position - 1].sortKey
+          : null;
+      final bool isCompatibleWithPreviousSortKey = position == 0 ||
+          sortKey.runtimeType == lastSortKey.runtimeType &&
+          (sortKey == null || sortKey.name == lastSortKey.name);
+      if (!isCompatibleWithPreviousSortKey && sortNodes.isNotEmpty) {
+        // Do not sort groups with null sort keys. List.sort does not guarantee
+        // a stable sort order.
+        if (lastSortKey != null) {
+          sortNodes.sort();
+        }
+        everythingSorted.addAll(sortNodes);
+        sortNodes.clear();
+      }
+
+      sortNodes.add(new _TraversalSortNode(
+        node: child,
+        sortKey: sortKey,
+        position: position,
+      ));
+    }
+
+    // Do not sort groups with null sort keys. List.sort does not guarantee
+    // a stable sort order.
+    if (lastSortKey != null) {
+      sortNodes.sort();
+    }
+    everythingSorted.addAll(sortNodes);
+
+    return everythingSorted
+      .map<SemanticsNode>((_TraversalSortNode sortNode) => sortNode.node)
+      .toList();
   }
 
   /// Sends a [SemanticsEvent] associated with this [SemanticsNode].
@@ -1540,12 +1521,18 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
 /// An edge of a box, such as top, bottom, left or right, used to compute
 /// [SemanticsNode]s that overlap vertically or horizontally.
+///
+/// For computing horizontal overlap in an LTR setting we create two [_BoxEdge]
+/// objects for each [SemanticsNode]: one representing the left edge (marked
+/// with [isLeadingEdge] equal to true) and one for the right edge (with [isLeadingEdge]
+/// equal to false). Similarly, for vertical overlap we also create two objects
+/// for each [SemanticsNode], one for the top and one for the bottom edge.
 class _BoxEdge implements Comparable<_BoxEdge> {
   _BoxEdge({
-    @required this.isStart,
+    @required this.isLeadingEdge,
     @required this.offset,
     @required this.node,
-  }) : assert(isStart != null),
+  }) : assert(isLeadingEdge != null),
        assert(offset != null),
        assert(node != null);
 
@@ -1554,11 +1541,11 @@ class _BoxEdge implements Comparable<_BoxEdge> {
   ///
   /// This field is never null.
   ///
-  /// For example, in LTR traversal the left edge's [isStart] is set to true,
-  /// the right edge's [isStart] is set to false. When considering vertical
+  /// For example, in LTR traversal the left edge's [isLeadingEdge] is set to true,
+  /// the right edge's [isLeadingEdge] is set to false. When considering vertical
   /// ordering of boxes, the top edge is the start edge, and the bottom edge is
   /// the end edge.
-  final bool isStart;
+  final bool isLeadingEdge;
 
   /// The offset from the start edge of the parent [SemanticsNode] in the
   /// direction of the traversal.
@@ -1608,12 +1595,12 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
     final List<_BoxEdge> edges = <_BoxEdge>[];
     for (SemanticsNode child in nodes) {
       edges.add(new _BoxEdge(
-        isStart: true,
+        isLeadingEdge: true,
         offset: _pointInParentCoordinates(child, child.rect.topLeft).dx,
         node: child,
       ));
       edges.add(new _BoxEdge(
-        isStart: false,
+        isLeadingEdge: false,
         offset: _pointInParentCoordinates(child, child.rect.bottomRight).dx,
         node: child,
       ));
@@ -1624,7 +1611,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
     _SemanticsSortGroup group;
     int depth = 0;
     for (_BoxEdge edge in edges) {
-      if (edge.isStart) {
+      if (edge.isLeadingEdge) {
         depth += 1;
         group ??= new _SemanticsSortGroup(
           startOffset: edge.offset,
@@ -1655,6 +1642,9 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
 
   /// Sorts [nodes] where nodes intersect both vertically and horizontally.
   ///
+  /// In the special case when [nodes] contains one or less nodes, this method
+  /// returns [nodes] unchanged.
+  ///
   /// This method constructs a graph, where vertices are [SemanticsNode]s and
   /// edges are "traversed before" relation between pairs of nodes. The sort
   /// order is the topological sorting of the graph, with the original order of
@@ -1667,7 +1657,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
   /// vector is said to be traversed after.
   List<SemanticsNode> sortedWithinKnot() {
     if (nodes.length <= 1) {
-      // Trivial node. Nothing to do.
+      // Trivial knot. Nothing to do.
       return nodes;
     }
     final Map<int, SemanticsNode> nodeMap = <int, SemanticsNode>{};
@@ -1743,16 +1733,18 @@ Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
 ///
 /// Within each group, the nodes are sorted using
 /// [_SemanticsSortGroup.sortedWithinVerticalGroup].
+///
+/// For an illustration of the algorithm see http://bit.ly/flutter-default-traversal.
 List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDirection textDirection) {
   final List<_BoxEdge> edges = <_BoxEdge>[];
   for (SemanticsNode child in children) {
     edges.add(new _BoxEdge(
-      isStart: true,
+      isLeadingEdge: true,
       offset: _pointInParentCoordinates(child, child.rect.topLeft).dy,
       node: child,
     ));
     edges.add(new _BoxEdge(
-      isStart: false,
+      isLeadingEdge: false,
       offset: _pointInParentCoordinates(child, child.rect.bottomRight).dy,
       node: child,
     ));
@@ -1763,7 +1755,7 @@ List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDi
   _SemanticsSortGroup group;
   int depth = 0;
   for (_BoxEdge edge in edges) {
-    if (edge.isStart) {
+    if (edge.isLeadingEdge) {
       depth += 1;
       group ??= new _SemanticsSortGroup(
         startOffset: edge.offset,
@@ -1813,7 +1805,8 @@ class _TraversalSortNode implements Comparable<_TraversalSortNode> {
   /// [position].
   final SemanticsSortKey sortKey;
 
-  /// Position within the list of siblings.
+  /// Position within the list of siblings as determined by the default sort
+  /// order.
   final int position;
 
   @override
