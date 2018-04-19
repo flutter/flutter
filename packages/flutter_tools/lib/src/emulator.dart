@@ -102,9 +102,9 @@ abstract class Emulator {
   @override
   String toString() => name;
 
-  static Stream<String> descriptions(List<Emulator> emulators) async* {
+  static List<String> descriptions(List<Emulator> emulators) {
     if (emulators.isEmpty)
-      return;
+      return <String>[];
 
     // Extract emulators information
     final List<List<String>> table = <List<String>>[];
@@ -125,12 +125,14 @@ abstract class Emulator {
     }
 
     // Join columns into lines of text
-    for (List<String> row in table) {
-      yield indices.map((int i) => row[i].padRight(widths[i])).join(' • ') + ' • ${row.last}';
-    }
+    return table.map((List<String> row) {
+      return indices
+        .map((int i) => row[i].padRight(widths[i]))
+        .join(' • ') + ' • ${row.last}';
+    }).toList();
   }
 
-  static Future<Null> printEmulators(List<Emulator> emulators) async {
-    await descriptions(emulators).forEach(printStatus);
+  static void printEmulators(List<Emulator> emulators) {
+    descriptions(emulators).forEach(printStatus);
   }
 }
