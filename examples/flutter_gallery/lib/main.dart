@@ -14,6 +14,6 @@ void main() {
   // visual effect at the cost of performance.
   MaterialPageRoute.debugEnableFadingRoutes = true; // ignore: deprecated_member_use
   // Used by travis_script.sh to remove the banner before pushing to stores.
-  // <uncomment for publish> WidgetsApp.debugAllowBannerOverride = false; // </uncomment for publish>
+  // <uncomment for publish> GalleryApp.showPreviewBanner = false; // </uncomment for publish>
   runApp(const GalleryApp());
 }

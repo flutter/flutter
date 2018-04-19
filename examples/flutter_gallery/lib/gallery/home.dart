@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'app.dart';
 import 'drawer.dart';
 import 'item.dart';
 import 'theme.dart';
@@ -206,15 +207,12 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
       )
     );
 
-    // In checked mode our MaterialApp will show the default "debug" banner.
-    // Otherwise show the "preview" banner.
-    bool showPreviewBanner = true;
     assert(() {
-      showPreviewBanner = false;
+      GalleryApp.showPreviewBanner = false;
       return true;
     }());
 
-    if (showPreviewBanner) {
+    if (GalleryApp.showPreviewBanner) {
       home = new Stack(
         fit: StackFit.expand,
         children: <Widget>[
