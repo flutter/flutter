@@ -26,6 +26,9 @@ class SnapshotType {
 
   final TargetPlatform platform;
   final BuildMode mode;
+
+  @override
+  String toString() => '$platform $mode';
 }
 
 /// Interface to the gen_snapshot command-line tool.
@@ -38,13 +41,9 @@ class GenSnapshot {
     @required String depfilePath,
     Iterable<String> additionalArgs: const <String>[],
   }) {
-    final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
-    final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
     final List<String> args = <String>[
       '--await_is_keyword',
       '--causal_async_stacks',
-      '--vm_snapshot_data=$vmSnapshotData',
-      '--isolate_snapshot_data=$isolateSnapshotData',
       '--packages=$packagesPath',
       '--dependencies=$depfilePath',
       '--print_snapshot_sizes',
@@ -172,9 +171,13 @@ class Snapshotter {
     @required String packagesPath
   }) async {
     final SnapshotType snapshotType = new SnapshotType(null, BuildMode.debug);
+    final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
+    final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
     final List<String> args = <String>[
       '--snapshot_kind=script',
       '--script_snapshot=$snapshotPath',
+      '--vm_snapshot_data=$vmSnapshotData',
+      '--isolate_snapshot_data=$isolateSnapshotData',
       '--enable-mirrors=false',
       mainPath,
     ];
