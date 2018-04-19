@@ -85,6 +85,10 @@ class GalleryHome extends StatefulWidget {
        assert(onTimeDilationChanged != null),
        super(key: key);
 
+  // In checked mode our MaterialApp will show the default "debug" banner.
+  // Otherwise show the "preview" banner.
+  static bool showPreviewBanner = true;
+
   final GalleryTheme galleryTheme;
   final ValueChanged<GalleryTheme> onThemeChanged;
 
@@ -206,15 +210,12 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
       )
     );
 
-    // In checked mode our MaterialApp will show the default "debug" banner.
-    // Otherwise show the "preview" banner.
-    bool showPreviewBanner = true;
     assert(() {
-      showPreviewBanner = false;
+      GalleryHome.showPreviewBanner = false;
       return true;
     }());
 
-    if (showPreviewBanner) {
+    if (GalleryHome.showPreviewBanner) {
       home = new Stack(
         fit: StackFit.expand,
         children: <Widget>[
