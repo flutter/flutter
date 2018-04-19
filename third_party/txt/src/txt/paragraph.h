@@ -63,8 +63,8 @@ class Paragraph {
   };
 
   struct TextBox {
-    const SkRect rect;
-    const TextDirection direction;
+    SkRect rect;
+    TextDirection direction;
 
     TextBox(SkRect r, TextDirection d) : rect(r), direction(d) {}
   };
@@ -187,8 +187,10 @@ class Paragraph {
   mutable std::unique_ptr<icu::BreakIterator> word_breaker_;
 
   struct LineRange {
-    LineRange(size_t s, size_t e, bool h) : start(s), end(e), hard_break(h) {}
+    LineRange(size_t s, size_t e, size_t ewn, bool h)
+        : start(s), end(e), end_including_newline(ewn), hard_break(h) {}
     size_t start, end;
+    size_t end_including_newline;
     bool hard_break;
   };
   std::vector<LineRange> line_ranges_;
