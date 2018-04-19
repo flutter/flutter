@@ -295,7 +295,7 @@ class TraversalTester {
     assert(children is LinkedHashMap);
     await tester.pumpWidget(
         new Container(
-            child: Directionality(
+            child: new Directionality(
               textDirection: textDirection,
               child: new Semantics(
                 textDirection: textDirection,

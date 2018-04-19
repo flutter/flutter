@@ -157,7 +157,7 @@ class GalleryAppState extends State<GalleryApp> {
       };
     }
 
-    return Semantics(
+    return new Semantics(
       textDirection: _overrideDirection,
       child: new MaterialApp(
         title: 'Flutter Gallery',
@@ -169,7 +169,7 @@ class GalleryAppState extends State<GalleryApp> {
         routes: _kRoutes,
         home: home,
         builder: (BuildContext context, Widget child) {
-          return Semantics(
+          return new Semantics(
             textDirection: _overrideDirection,
             child: new Directionality(
               textDirection: _overrideDirection,
