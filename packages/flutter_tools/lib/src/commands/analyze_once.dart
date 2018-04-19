@@ -13,6 +13,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
+import '../dart/sdk.dart' as sdk;
 import '../globals.dart';
 import 'analyze.dart';
 import 'analyze_base.dart';
@@ -93,7 +94,9 @@ class AnalyzeOnce extends AnalyzeBase {
         arguments.add('--no-preview-dart-2');
       }
 
-      final String dartanalyzer = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartanalyzer');
+      final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
+
+      final String dartanalyzer = fs.path.join(sdkPath, 'bin', 'dartanalyzer');
       arguments.insert(0, dartanalyzer);
       bool noErrors = false;
       final Set<String> issues = new Set<String>();
