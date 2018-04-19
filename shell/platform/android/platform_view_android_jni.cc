@@ -351,10 +351,14 @@ static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
   const SkISize& frame_size = screenshot.frame_size;
   jsize pixels_size = frame_size.width() * frame_size.height();
   jintArray pixels_array = env->NewIntArray(pixels_size);
-  FXL_CHECK(pixels_array);
+  if (pixels_array == nullptr) {
+    return nullptr;
+  }
 
   jint* pixels = env->GetIntArrayElements(pixels_array, nullptr);
-  FXL_CHECK(pixels);
+  if (pixels == nullptr) {
+    return nullptr;
+  }
 
   auto pixels_src = static_cast<const int32_t*>(screenshot.data->data());
 
@@ -371,27 +375,39 @@ static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
   env->ReleaseIntArrayElements(pixels_array, pixels, 0);
 
   jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
-  FXL_CHECK(bitmap_class);
+  if (bitmap_class == nullptr) {
+    return nullptr;
+  }
 
   jmethodID create_bitmap = env->GetStaticMethodID(
       bitmap_class, "createBitmap",
       "([IIILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;");
-  FXL_CHECK(create_bitmap);
+  if (create_bitmap == nullptr) {
+    return nullptr;
+  }
 
   jclass bitmap_config_class = env->FindClass("android/graphics/Bitmap$Config");
-  FXL_CHECK(bitmap_config_class);
+  if (bitmap_config_class == nullptr) {
+    return nullptr;
+  }
 
   jmethodID bitmap_config_value_of = env->GetStaticMethodID(
       bitmap_config_class, "valueOf",
       "(Ljava/lang/String;)Landroid/graphics/Bitmap$Config;");
-  FXL_CHECK(bitmap_config_value_of);
+  if (bitmap_config_value_of == nullptr) {
+    return nullptr;
+  }
 
   jstring argb = env->NewStringUTF("ARGB_8888");
-  FXL_CHECK(argb);
+  if (argb == nullptr) {
+    return nullptr;
+  }
 
   jobject bitmap_config = env->CallStaticObjectMethod(
       bitmap_config_class, bitmap_config_value_of, argb);
-  FXL_CHECK(bitmap_config);
+  if (bitmap_config == nullptr) {
+    return nullptr;
+  }
 
   return env->CallStaticObjectMethod(bitmap_class, create_bitmap, pixels_array,
                                      frame_size.width(), frame_size.height(),
