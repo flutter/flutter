@@ -24,26 +24,6 @@ class EmulatorManager {
 
   final List<EmulatorDiscovery> _emulatorDiscoverers = <EmulatorDiscovery>[];
 
-  String _specifiedEmulatorId;
-
-  /// A user-specified emulator ID.
-  String get specifiedEmulatorId {
-    if (_specifiedEmulatorId == null || _specifiedEmulatorId == 'all')
-      return null;
-    return _specifiedEmulatorId;
-  }
-
-  set specifiedEmulatorId(String id) {
-    _specifiedEmulatorId = id;
-  }
-
-  /// True when the user has specified a single specific emulator.
-  bool get hasSpecifiedEmulatorId => specifiedEmulatorId != null;
-
-  /// True when the user has specified all emulators by setting
-  /// specifiedEmulatorId = 'all'.
-  bool get hasSpecifiedAllEmulators => _specifiedEmulatorId == 'all';
-
   Stream<Emulator> getEmulatorsById(String emulatorId) async* {
     final List<Emulator> emulators = await getAllAvailableEmulators().toList();
     emulatorId = emulatorId.toLowerCase();
@@ -64,13 +44,6 @@ class EmulatorManager {
     // Match on a id or name starting with [emulatorId].
     for (Emulator emulator in emulators.where(startsWithEmulatorId))
       yield emulator;
-  }
-
-  /// Return the list of available emulators, filtered by any user-specified emulator id.
-  Stream<Emulator> getEmulators() {
-    return hasSpecifiedEmulatorId
-        ? getEmulatorsById(specifiedEmulatorId)
-        : getAllAvailableEmulators();
   }
 
   Iterable<EmulatorDiscovery> get _platformDiscoverers {
