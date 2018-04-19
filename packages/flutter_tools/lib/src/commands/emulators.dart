@@ -63,7 +63,7 @@ class EmulatorsCommand extends FlutterCommand {
       printStatus('No emulators available.\n\n'
           // TODO: Change these when we support creation
           // 'You may need to create images using "flutter emulators --create"\n'
-          'You may need to create one using Android Studio\n'
+          'You may need to create one using Android Studio '
           'or visit https://flutter.io/setup/ for troubleshooting tips.');
       final List<String> diagnostics =
           await emulatorManager.getEmulatorDiagnostics();
