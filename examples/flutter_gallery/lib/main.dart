@@ -13,5 +13,7 @@ void main() {
   // Overriding https://github.com/flutter/flutter/issues/13736 for better
   // visual effect at the cost of performance.
   MaterialPageRoute.debugEnableFadingRoutes = true; // ignore: deprecated_member_use
+  // Used by travis_script.sh to remove the banner before pushing to stores.
+  // <uncomment for publish> WidgetsApp.debugAllowBannerOverride = false; // </uncomment for publish>
   runApp(const GalleryApp());
 }
