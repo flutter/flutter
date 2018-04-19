@@ -11,7 +11,7 @@ import '../emulator.dart';
 import '../globals.dart';
 import 'ios_workflow.dart';
 
-// TODO: Is there a better name for this? We already have IOSSimulator classes
+// TODO(dantup): Is there a better name for this? We already have IOSSimulator classes
 // that represent *running* simulators, but this is about "unlaunched images"...
 class IOSEmulators extends EmulatorDiscovery {
   @override
@@ -61,7 +61,7 @@ List<IOSEmulator> getEmulators() {
 
 String getSimulatorPath() {
   final List<String> searchPaths = <String>[
-    // TODO: Could this be anywhere else?
+    // TODO(dantup): Could this be anywhere else?
     '/Applications/Xcode.app/Contents/Developer/Applications/Simulator.app',
   ];
   return searchPaths.where((String p) => p != null).firstWhere(
