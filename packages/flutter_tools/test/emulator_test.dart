@@ -26,7 +26,7 @@ void main() {
       final EmulatorManager emulatorManager = new TestEmulatorManager(emulators);
 
       Future<Null> expectEmulator(String id, List<Emulator> expected) async {
-        expect(await emulatorManager.getEmulatorsById(id).toList(), expected);
+        expect(await emulatorManager.getEmulatorsMatching(id).toList(), expected);
       }
       expectEmulator('Nexus_5', <Emulator>[emulator1]);
       expectEmulator('Nexus_5X', <Emulator>[emulator2]);

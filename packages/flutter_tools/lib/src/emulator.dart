@@ -24,15 +24,15 @@ class EmulatorManager {
 
   final List<EmulatorDiscovery> _emulatorDiscoverers = <EmulatorDiscovery>[];
 
-  Stream<Emulator> getEmulatorsById(String emulatorId) async* {
+  Stream<Emulator> getEmulatorsMatching(String searchText) async* {
     final List<Emulator> emulators = await getAllAvailableEmulators().toList();
-    emulatorId = emulatorId.toLowerCase();
+    searchText = searchText.toLowerCase();
     bool exactlyMatchesEmulatorId(Emulator emulator) =>
-        emulator.id?.toLowerCase() == emulatorId ||
-        emulator.name?.toLowerCase() == emulatorId;
+        emulator.id?.toLowerCase() == searchText ||
+        emulator.name?.toLowerCase() == searchText;
     bool startsWithEmulatorId(Emulator emulator) =>
-        emulator.id?.toLowerCase()?.startsWith(emulatorId) == true ||
-        emulator.name?.toLowerCase()?.startsWith(emulatorId) == true;
+        emulator.id?.toLowerCase()?.startsWith(searchText) == true ||
+        emulator.name?.toLowerCase()?.startsWith(searchText) == true;
 
     final Emulator exactMatch = emulators.firstWhere(
         exactlyMatchesEmulatorId, orElse: () => null);
