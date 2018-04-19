@@ -34,8 +34,20 @@ class _FakeGenSnapshot implements GenSnapshot {
   final String snapshotContent;
   final String depfileContent;
   int _callCount = 0;
+  SnapshotType _snapshotType;
+  String _packagesPath;
+  String _depfilePath;
+  List<String> _additionalArgs;
 
   int get callCount => _callCount;
+
+  SnapshotType get snapshotType => _snapshotType;
+
+  String get packagesPath => _packagesPath;
+
+  String get depfilePath => _depfilePath;
+
+  List<String> get additionalArgs => _additionalArgs;
 
   @override
   Future<int> run({
@@ -45,6 +57,10 @@ class _FakeGenSnapshot implements GenSnapshot {
     Iterable<String> additionalArgs,
   }) async {
     _callCount += 1;
+    _snapshotType = snapshotType;
+    _packagesPath = packagesPath;
+    _depfilePath = depfilePath;
+    _additionalArgs = additionalArgs.toList();
 
     if (!succeed)
       return 1;
@@ -388,6 +404,18 @@ void main() {
       await buildSnapshot();
 
       expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, isNull);
+      expect(genSnapshot.snapshotType.mode, BuildMode.debug);
+      expect(genSnapshot.packagesPath, '.packages');
+      expect(genSnapshot.depfilePath, 'output.snapshot.d');
+      expect(genSnapshot.additionalArgs, <String>[
+        '--snapshot_kind=script',
+        '--script_snapshot=output.snapshot',
+        '--vm_snapshot_data=vm_isolate_snapshot.bin',
+        '--isolate_snapshot_data=isolate_snapshot.bin',
+        '--enable-mirrors=false',
+        'main.dart',
+      ]);
       expectFingerprintHas(checksums: <String, String>{
         'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
         'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
