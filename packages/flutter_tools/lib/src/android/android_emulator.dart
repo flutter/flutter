@@ -45,8 +45,6 @@ class AndroidEmulator extends Emulator {
     final RunResult launchResult =
         await runAsync(<String>[getEmulatorPath(), '-avd', id]);
     if (launchResult.exitCode != 0) {
-      printError(
-          'Error: emulator exited with exit code ${launchResult.exitCode}');
       printError('$launchResult');
       return false;
     }
