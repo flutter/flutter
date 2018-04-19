@@ -142,4 +142,8 @@ executable("runtime_unittests") {
     "//third_party/skia",
     "//topaz/lib/tonic",
   ]
+
+  if (is_linux) {
+    ldflags = [ "-rdynamic" ]
+  }
 }
