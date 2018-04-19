@@ -90,15 +90,6 @@ class EmulatorManager {
   bool get canListAnything {
     return _platformDiscoverers.any((EmulatorDiscovery discoverer) => discoverer.canListAnything);
   }
-
-  /// Get diagnostics about issues with any emulators.
-  Future<List<String>> getEmulatorDiagnostics() async {
-    final List<String> diagnostics = <String>[];
-    for (EmulatorDiscovery discoverer in _platformDiscoverers) {
-      diagnostics.addAll(await discoverer.getDiagnostics());
-    }
-    return diagnostics;
-  }
 }
 
 /// An abstract class to discover and enumerate a specific type of emulators.
@@ -110,10 +101,6 @@ abstract class EmulatorDiscovery {
   bool get canListAnything;
 
   Future<List<Emulator>> get emulators;
-
-  /// Gets a list of diagnostic messages pertaining to issues with any available
-  /// emulators (will be an empty list if there are no issues).
-  Future<List<String>> getDiagnostics() => new Future<List<String>>.value(<String>[]);
 }
 
 abstract class Emulator {
