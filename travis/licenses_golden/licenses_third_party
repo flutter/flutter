@@ -1,4 +1,4 @@
-Signature: 4b8007d0bcd3ca7de71293354c6ebc9b
+Signature: a3b93d6693661a99bccda168147b2ae6
 
 UNUSED LICENSES:
 
@@ -17196,8 +17196,9 @@ Exhibit B - “Incompatible With Secondary Licenses” Notice
 ====================================================================================================
 LIBRARY: skcms
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/experimental/skottie/SkottieAdapter.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/bench/ShaderMaskFilterBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/bench/ShaderMaskFilterBench.cpp
 FILE: ../../../third_party/skia/experimental/skottie/SkottieAdapter.cpp
 FILE: ../../../third_party/skia/experimental/skottie/SkottieAdapter.h
 FILE: ../../../third_party/skia/experimental/skottie/SkottieParser.cpp
@@ -17280,6 +17281,8 @@ FILE: ../../../third_party/skia/src/gpu/GrResourceProviderPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrSurfaceProxyRef.cpp
 FILE: ../../../third_party/skia/src/gpu/GrUninstantiateProxyTracker.cpp
 FILE: ../../../third_party/skia/src/gpu/GrUninstantiateProxyTracker.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCConicShader.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCConicShader.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.h
@@ -17467,34 +17470,18 @@ FILE: ../../../third_party/skia/infra/bots/assets/win_ninja/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_toolchain/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_toolchain_2015/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_vulkan_sdk/VERSION
-FILE: ../../../third_party/skia/infra/bots/bundle_recipes.isolate
 FILE: ../../../third_party/skia/infra/bots/calmbench.isolate
 FILE: ../../../third_party/skia/infra/bots/cfg.json
-FILE: ../../../third_party/skia/infra/bots/compile_skia.isolate
-FILE: ../../../third_party/skia/infra/bots/coverage_skia.isolate
 FILE: ../../../third_party/skia/infra/bots/ct/blacklists/get_images_from_skps_100k_c37e844a6f8708-eee762104c75bd.json
 FILE: ../../../third_party/skia/infra/bots/ct/blacklists/get_images_from_skps_100k_fad657e-276e633.json
-FILE: ../../../third_party/skia/infra/bots/ct_skps_skia.isolate
-FILE: ../../../third_party/skia/infra/bots/housekeeper_skia.isolate
-FILE: ../../../third_party/skia/infra/bots/infra_skia.isolate
+FILE: ../../../third_party/skia/infra/bots/empty.isolate
 FILE: ../../../third_party/skia/infra/bots/infrabots.isolate
 FILE: ../../../third_party/skia/infra/bots/ios_bin.isolate
 FILE: ../../../third_party/skia/infra/bots/isolate_android_sdk_linux.isolate
 FILE: ../../../third_party/skia/infra/bots/isolate_gcloud_linux.isolate
-FILE: ../../../third_party/skia/infra/bots/isolate_go_linux.isolate
-FILE: ../../../third_party/skia/infra/bots/isolate_ndk_linux.isolate
-FILE: ../../../third_party/skia/infra/bots/isolate_skimage.isolate
-FILE: ../../../third_party/skia/infra/bots/isolate_skp.isolate
-FILE: ../../../third_party/skia/infra/bots/isolate_svg.isolate
-FILE: ../../../third_party/skia/infra/bots/isolate_win_toolchain.isolate
-FILE: ../../../third_party/skia/infra/bots/isolate_win_vulkan_sdk.isolate
+FILE: ../../../third_party/skia/infra/bots/isolate_go.isolate
 FILE: ../../../third_party/skia/infra/bots/jobs.json
-FILE: ../../../third_party/skia/infra/bots/meta_config.isolate
-FILE: ../../../third_party/skia/infra/bots/perf_skia.isolate
 FILE: ../../../third_party/skia/infra/bots/perf_skia_bundled.isolate
-FILE: ../../../third_party/skia/infra/bots/perf_skia_bundled_unix.isolate
-FILE: ../../../third_party/skia/infra/bots/perf_skia_bundled_win.isolate
-FILE: ../../../third_party/skia/infra/bots/presubmit_skia.isolate
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/builder_name_schema/builder_name_schema.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/builder_name_schema/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.expected/Build-Debian9-Clang-x86_64-Release-NoDEPS.json
@@ -17630,7 +17617,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/bookmaker.expected/nightly_fa
 FILE: ../../../third_party/skia/infra/bots/recipes/bookmaker.expected/nightly_failed_upload.json
 FILE: ../../../third_party/skia/infra/bots/recipes/bookmaker.expected/percommit_bookmaker.json
 FILE: ../../../third_party/skia/infra/bots/recipes/bookmaker.expected/percommit_failed_validation.json
-FILE: ../../../third_party/skia/infra/bots/recipes/bundle_recipes.expected/BundleRecipes.json
 FILE: ../../../third_party/skia/infra/bots/recipes/calmbench.expected/Calmbench-Debian9-Clang-GCE-CPU-AVX2-x86_64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/calmbench.expected/Calmbench-Ubuntu17-Clang-Golo-GPU-QuadroP400-x86_64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/check_generated_files.expected/Housekeeper-PerCommit-CheckGeneratedFiles.json
@@ -17820,24 +17806,13 @@ FILE: ../../../third_party/skia/infra/bots/recipes/upload_skiaserve.expected/nor
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_skiaserve.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/resources.isolate
 FILE: ../../../third_party/skia/infra/bots/skia_repo.isolate
-FILE: ../../../third_party/skia/infra/bots/skpbench_skia.isolate
 FILE: ../../../third_party/skia/infra/bots/skpbench_skia_bundled.isolate
-FILE: ../../../third_party/skia/infra/bots/skpbench_skia_bundled_unix.isolate
-FILE: ../../../third_party/skia/infra/bots/skpbench_skia_bundled_win.isolate
 FILE: ../../../third_party/skia/infra/bots/swarm_recipe.isolate
-FILE: ../../../third_party/skia/infra/bots/swarm_recipe_bundled_unix.isolate
-FILE: ../../../third_party/skia/infra/bots/swarm_recipe_bundled_win.isolate
 FILE: ../../../third_party/skia/infra/bots/tasks.json
-FILE: ../../../third_party/skia/infra/bots/test_skia.isolate
 FILE: ../../../third_party/skia/infra/bots/test_skia_bundled.isolate
-FILE: ../../../third_party/skia/infra/bots/test_skia_bundled_unix.isolate
-FILE: ../../../third_party/skia/infra/bots/test_skia_bundled_win.isolate
 FILE: ../../../third_party/skia/infra/bots/tools/luci-go/linux64/isolate.sha1
 FILE: ../../../third_party/skia/infra/bots/tools/luci-go/mac64/isolate.sha1
 FILE: ../../../third_party/skia/infra/bots/tools/luci-go/win64/isolate.exe.sha1
-FILE: ../../../third_party/skia/infra/bots/upload_coverage_results.isolate
-FILE: ../../../third_party/skia/infra/bots/upload_dm_results.isolate
-FILE: ../../../third_party/skia/infra/bots/upload_nano_results.isolate
 FILE: ../../../third_party/skia/infra/branch-config/cq.cfg
 FILE: ../../../third_party/skia/infra/config/recipes.cfg
 FILE: ../../../third_party/skia/infra/cts/whitelist_devices.json
