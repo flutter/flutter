@@ -419,7 +419,7 @@ class _VideoDemoState extends State<VideoDemo>
             )
           : const Center(
               child: const Text(
-                'The video demo is not supported on the iOS Simulator.',
+                'Video playback not supported on the iOS Simulator.',
               ),
             ),
     );
