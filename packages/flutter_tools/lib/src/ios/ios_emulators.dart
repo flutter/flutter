@@ -34,7 +34,7 @@ class IOSEmulator extends Emulator {
   String get manufacturer => 'Apple';
 
   @override
-  String get label => '';
+  String get label => null;
 
   @override
   Future<bool> launch() async {
