@@ -46,9 +46,9 @@ class EmulatorsCommand extends FlutterCommand {
         await emulatorManager.getEmulatorsById(id).toList();
 
     if (emulators.isEmpty) {
-      printStatus("No emulator found that matches the ID '$id'.");
+      printStatus("No emulator found that matches '$id'.");
     } else if (emulators.length > 1) {
-      printStatus("More than one emulator matches the ID '$id':\n");
+      printStatus("More than one emulator matches '$id':\n");
       Emulator.printEmulators(emulators);
     } else {
       emulators.first.launch();
