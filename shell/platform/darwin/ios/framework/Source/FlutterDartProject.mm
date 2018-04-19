@@ -70,7 +70,11 @@ static blink::Settings DefaultSettingsForProcess() {
 
   // Checks to see if the flutter assets directory is already present.
   if (settings.assets_path.size() == 0) {
-    NSString* assetsPath = [[NSBundle mainBundle] pathForResource:@"flutter_assets" ofType:@""];
+    // The kernel assets will not be present in the Flutter frameworks bundle since it is not user
+    // editable. Instead, look inside the main bundle.
+    NSBundle* bundle = [NSBundle mainBundle];
+    NSString* assets_directory_name = [FlutterDartProject flutterAssetsName:bundle];
+    NSString* assetsPath = [bundle pathForResource:assets_directory_name ofType:@""];
 
     if (assetsPath.length > 0) {
       settings.assets_path = assetsPath.UTF8String;
