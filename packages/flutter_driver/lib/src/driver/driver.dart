@@ -145,9 +145,19 @@ class FlutterDriver {
   ///
   /// [logCommunicationToFile] determines whether the command communication
   /// between the test and the app should be logged to `flutter_driver_commands.log`.
-  static Future<FlutterDriver> connect({ String dartVmServiceUrl,
-                                         bool printCommunication: false,
-                                         bool logCommunicationToFile: true }) async {
+  ///
+  /// [vmServiceConnectTimeout] determines how long we will wait to connect to
+  /// the VM service.
+  ///
+  /// [isolateReadyTimeout] determines how long after we connect to the VM
+  /// service we will wait for the first isolate to become runnable.
+  static Future<FlutterDriver> connect({
+    String dartVmServiceUrl,
+    bool printCommunication: false,
+    bool logCommunicationToFile: true,
+    Duration vmServiceConnectTimeout: const Duration(minutes: 1),
+    Duration isolateReadyTimeout: const Duration(minutes: 1),
+  }) async {
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
 
     if (dartVmServiceUrl == null) {
@@ -160,11 +170,17 @@ class FlutterDriver {
 
     // Connect to Dart VM services
     _log.info('Connecting to Flutter application at $dartVmServiceUrl');
-    final VMServiceClientConnection connection = await vmServiceConnectFunction(dartVmServiceUrl);
+    final VMServiceClientConnection connection = await vmServiceConnectFunction(dartVmServiceUrl)
+        .timeout(vmServiceConnectTimeout, onTimeout: () {
+          throw new TimeoutException('Timeout while waiting to connect to the VM service');
+        });
     final VMServiceClient client = connection.client;
     final VM vm = await client.getVM();
     _log.trace('Looking for the isolate');
-    VMIsolate isolate = await vm.isolates.first.loadRunnable();
+    VMIsolate isolate = await vm.isolates.first.loadRunnable()
+        .timeout(isolateReadyTimeout, onTimeout: () {
+          throw new TimeoutException('Timeout while waiting for the isolate to become runnable');
+        });
 
     // TODO(yjbanov): vm_service_client does not support "None" pause event yet.
     // It is currently reported as null, but we cannot rely on it because
