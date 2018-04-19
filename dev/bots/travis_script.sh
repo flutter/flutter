@@ -12,8 +12,7 @@ if [ "$SHARD" = "build_and_deploy_gallery" ]; then
     export ANDROID_HOME=`pwd`/android-sdk
     (
       cd examples/flutter_gallery;
-      sed -i -e 's/\/\/ <uncomment for publish> //' lib/main.dart; \
-      flutter build apk --release
+      flutter build apk --release -t lib/main_publish.dart
     )
     echo "Android Flutter Gallery built"
     if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "dev" && $version != *"pre"* ]]; then
@@ -30,8 +29,7 @@ if [ "$SHARD" = "build_and_deploy_gallery" ]; then
     echo "Building Flutter Gallery for iOS..."
     (
       cd examples/flutter_gallery; \
-      sed -i -e 's/\/\/ <uncomment for publish> //' lib/main.dart; \
-      flutter build ios --release --no-codesign
+      flutter build ios --release --no-codesign -t lib/main_publish.dart
     )
     echo "iOS Flutter Gallery built"
     if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then

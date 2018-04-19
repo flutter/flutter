@@ -23,10 +23,6 @@ class GalleryApp extends StatefulWidget {
     Key key}
   ) : super(key: key);
 
-  // In checked mode our MaterialApp will show the default "debug" banner.
-  // Otherwise show the "preview" banner.
-  static bool showPreviewBanner = true;
-
   final UpdateUrlFetcher updateUrlFetcher;
 
   final bool enablePerformanceOverlay;
