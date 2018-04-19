@@ -146,16 +146,12 @@ class FlutterDriver {
   /// [logCommunicationToFile] determines whether the command communication
   /// between the test and the app should be logged to `flutter_driver_commands.log`.
   ///
-  /// [vmServiceConnectTimeout] determines how long we will wait to connect to
-  /// the VM service.
-  ///
   /// [isolateReadyTimeout] determines how long after we connect to the VM
   /// service we will wait for the first isolate to become runnable.
   static Future<FlutterDriver> connect({
     String dartVmServiceUrl,
     bool printCommunication: false,
     bool logCommunicationToFile: true,
-    Duration vmServiceConnectTimeout: const Duration(minutes: 1),
     Duration isolateReadyTimeout: const Duration(minutes: 1),
   }) async {
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
@@ -170,10 +166,7 @@ class FlutterDriver {
 
     // Connect to Dart VM services
     _log.info('Connecting to Flutter application at $dartVmServiceUrl');
-    final VMServiceClientConnection connection = await vmServiceConnectFunction(dartVmServiceUrl)
-        .timeout(vmServiceConnectTimeout, onTimeout: () {
-          throw new TimeoutException('Timeout while waiting to connect to the VM service');
-        });
+    final VMServiceClientConnection connection = await vmServiceConnectFunction(dartVmServiceUrl);
     final VMServiceClient client = connection.client;
     final VM vm = await client.getVM();
     _log.trace('Looking for the isolate');
@@ -794,8 +787,8 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
     WebSocket ws1;
     WebSocket ws2;
     try {
-      ws1 = await WebSocket.connect(uri.toString());
-      ws2 = await WebSocket.connect(uri.toString());
+      ws1 = await WebSocket.connect(uri.toString()).timeout(_kShortTimeout);
+      ws2 = await WebSocket.connect(uri.toString()).timeout(_kShortTimeout);
       return new VMServiceClientConnection(
         new VMServiceClient(new IOWebSocketChannel(ws1).cast()),
         new rpc.Peer(new IOWebSocketChannel(ws2).cast())..listen()
