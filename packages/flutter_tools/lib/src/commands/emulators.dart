@@ -74,7 +74,7 @@ class EmulatorsCommand extends FlutterCommand {
     } else {
       printStatus(
           '${emulators.length} available ${pluralize('emulator', emulators.length)}:\n');
-      await Emulator.printEmulators(emulators);
+      Emulator.printEmulators(emulators);
     }
   }
 }
