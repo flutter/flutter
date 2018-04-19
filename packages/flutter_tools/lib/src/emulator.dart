@@ -50,7 +50,7 @@ class EmulatorManager {
     return _emulatorDiscoverers.where((EmulatorDiscovery discoverer) => discoverer.supportsPlatform);
   }
 
-  /// Return the list of all connected emulators.
+  /// Return the list of all available emulators.
   Stream<Emulator> getAllAvailableEmulators() async* {
     for (EmulatorDiscovery discoverer in _platformDiscoverers) {
       for (Emulator emulator in await discoverer.emulators) {
