@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -154,6 +155,14 @@ public class FlutterMain {
      * @param settings Configuration settings.
      */
     public static void startInitialization(Context applicationContext, Settings settings) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+          throw new IllegalStateException("startInitialization must be called on the main thread");
+        }
+        // Do not run startInitialization more than once.
+        if (sSettings != null) {
+          return;
+        }
+
         sSettings = settings;
 
         long initStartTimestampMillis = SystemClock.uptimeMillis();
@@ -177,6 +186,9 @@ public class FlutterMain {
      * @param args Flags sent to the Flutter runtime.
      */
     public static void ensureInitializationComplete(Context applicationContext, String[] args) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+          throw new IllegalStateException("ensureInitializationComplete must be called on the main thread");
+        }
         if (sInitialized) {
             return;
         }
