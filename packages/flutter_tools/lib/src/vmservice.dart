@@ -16,11 +16,12 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/io.dart' as io;
 import 'globals.dart';
 import 'vmservice_record_replay.dart';
 
 /// A function that opens a two-way communication channel to the specified [uri].
-typedef StreamChannel<String> _OpenChannel(Uri uri);
+typedef Future<StreamChannel<String>> _OpenChannel(Uri uri);
 
 _OpenChannel _openChannel = _defaultOpenChannel;
 
@@ -43,8 +44,32 @@ typedef Future<Null> ReloadSources(
 
 const String _kRecordingType = 'vmservice';
 
-StreamChannel<String> _defaultOpenChannel(Uri uri) =>
-    new IOWebSocketChannel.connect(uri.toString()).cast();
+Future<StreamChannel<String>> _defaultOpenChannel(Uri uri) async {
+  const int _kMaxAttempts = 5;
+  Duration delay = const Duration(milliseconds: 100);
+  int attempts = 0;
+  io.WebSocket socket;
+  while (attempts < _kMaxAttempts && socket == null) {
+    attempts += 1;
+    try {
+      socket = await io.WebSocket.connect(uri.toString());
+    } on io.WebSocketException catch(e) {
+      printTrace('Exception attempting to connect to observatory: $e');
+      printTrace('This was attempt #$attempts. Will retry in $delay.');
+      await new Future<Null>.delayed(delay);
+      delay *= 2;
+    }
+  }
+
+  if (socket == null) {
+    throw new ToolExit(
+      'Attempted to connect to Dart observatory $_kMaxAttempts times, and '
+      'all attempts failed. Giving up. The URL was $uri'
+    );
+  }
+
+  return new IOWebSocketChannel(socket).cast<String>();
+}
 
 /// The default VM service request timeout.
 const Duration kDefaultRequestTimeout = const Duration(seconds: 30);
@@ -113,8 +138,8 @@ class VMService {
   /// `"vmservice"` subdirectory.
   static void enableRecordingConnection(String location) {
     final Directory dir = getRecordingSink(location, _kRecordingType);
-    _openChannel = (Uri uri) {
-      final StreamChannel<String> delegate = _defaultOpenChannel(uri);
+    _openChannel = (Uri uri) async {
+      final StreamChannel<String> delegate = await _defaultOpenChannel(uri);
       return new RecordingVMServiceChannel(delegate, dir);
     };
   }
@@ -126,7 +151,7 @@ class VMService {
   /// passed to [enableRecordingConnection]), or a [ToolExit] will be thrown.
   static void enableReplayConnection(String location) {
     final Directory dir = getReplaySource(location, _kRecordingType);
-    _openChannel = (Uri uri) => new ReplayVMServiceChannel(dir);
+    _openChannel = (Uri uri) async => new ReplayVMServiceChannel(dir);
   }
 
   /// Connect to a Dart VM Service at [httpUri].
@@ -146,7 +171,7 @@ class VMService {
     ReloadSources reloadSources,
   }) async {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
-    final StreamChannel<String> channel = _openChannel(wsUri);
+    final StreamChannel<String> channel = await _openChannel(wsUri);
     final rpc.Peer peer = new rpc.Peer.withoutJson(jsonDocument.bind(channel));
     final VMService service = new VMService._(peer, httpUri, wsUri, requestTimeout, reloadSources);
     // This call is to ensure we are able to establish a connection instead of
