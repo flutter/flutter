@@ -486,7 +486,6 @@ void _tests() {
               ),
               new TestSemantics(
                 id: 5,
-                previousNodeId: 29,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
                 tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
@@ -669,7 +668,6 @@ void _tests() {
               ),
               new TestSemantics(
                 id: 5,
-                previousNodeId: 41,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 transform: new Matrix4.translation(new Vector3(0.0, 544.0, 0.0)),
                 flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
