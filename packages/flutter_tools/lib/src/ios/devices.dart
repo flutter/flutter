@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -486,16 +487,75 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
       hostPort = await portScanner.findAvailablePort();
     }
 
-    // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
-    final Process process = await runCommand(<String>[
-      device._iproxyPath,
-      hostPort.toString(),
-      devicePort.toString(),
-      device.id,
-    ]);
+    const int _kMaxAttempts = 5;
+    Duration delayBetweenIproxyAndConnection = const Duration(milliseconds: 100);
+    int attempts = 0;
+    ForwardedPort forwardedPort;
+    dynamic lastError;
 
-    final ForwardedPort forwardedPort = new ForwardedPort.withContext(hostPort,
-        devicePort, process);
+    while (attempts < _kMaxAttempts && forwardedPort == null) {
+      attempts += 1;
+      Process process;
+
+      void onError(dynamic e) {
+        lastError = e;
+        if (!processManager.killPid(process.pid)) {
+          printTrace(
+              'Process kill signal was not delivered to iproxy. Perhaps the '
+                  'process was gone by the time we attempted to kill it.'
+          );
+        }
+        printTrace(
+            'Exception attempting to forward local port $hostPort to device-side '
+                'observatory port $devicePort: $e'
+        );
+        printTrace('This was attempt #$attempts.');
+      }
+
+      try {
+        // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
+        process = await runCommand(<String>[
+          device._iproxyPath,
+          hostPort.toString(),
+          devicePort.toString(),
+          device.id,
+        ]);
+
+        // iproxy may not have established the connection yet, but also it does
+        // not produce a reliable machine-readable signal when it's established.
+        // This delay reduces the change that we will be attempting to connect
+        // prematurely.
+        await new Future<Null>.delayed(delayBetweenIproxyAndConnection);
+
+        // If at this point we are still unable to connect, we will try
+        // forwarding again, but this time we will give iproxy twice as much
+        // time as on the previous attempt.
+        delayBetweenIproxyAndConnection *= 2;
+
+        // Smoke-test the connection.
+        await (await WebSocket.connect('http://localhost:$hostPort')).close(
+          WebSocketStatus.NORMAL_CLOSURE,
+          'Connection smoke test successful'
+        );
+
+        // Connection is good.
+        forwardedPort = new ForwardedPort.withContext(hostPort,
+            devicePort, process);
+      } on WebSocketException catch (e) {
+        onError(e);
+      } on SocketException catch (e) {
+        onError(e);
+      }
+    }
+
+    if (forwardedPort == null) {
+      throw new ToolExit(
+        'Failed to forward local port $hostPort to device-side Dart '
+        'observatory port $devicePort. Attempted to use '
+        '"${device._iproxyPath}" $_kMaxAttempts times, but all attempts '
+        'failed. Giving up. The latest error was: $lastError'
+      );
+    }
 
     printTrace('Forwarded port $forwardedPort');
 

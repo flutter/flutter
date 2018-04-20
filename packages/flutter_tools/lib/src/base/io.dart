@@ -74,6 +74,7 @@ export 'dart:io'
         SYSTEM_ENCODING,
         WebSocket,
         WebSocketException,
+        WebSocketStatus,
         WebSocketTransformer;
 
 /// Exits the process with the given [exitCode].
