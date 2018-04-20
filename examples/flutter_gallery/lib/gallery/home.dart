@@ -258,6 +258,10 @@ class DemosPage extends StatelessWidget {
 }
 
 class GalleryHome extends StatefulWidget {
+  // In checked mode our MaterialApp will show the default "debug" banner.
+  // Otherwise show the "preview" banner.
+  static bool showPreviewBanner = true;
+
   const GalleryHome({
     Key key,
     this.optionsPage,
@@ -271,11 +275,6 @@ class GalleryHome extends StatefulWidget {
 
 class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStateMixin {
   static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
-  // In checked mode our MaterialApp will show the default "debug" banner.
-  // Otherwise show the "preview" banner.
-  static bool showPreviewBanner = true;
-
   AnimationController _controller;
 
   @override
