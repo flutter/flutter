@@ -90,7 +90,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         IS_HEADER(1 << 9),
         IS_OBSCURED(1 << 10),
         SCOPES_ROUTE(1 << 11),
-        NAMES_ROUTE(1 << 12);
+        NAMES_ROUTE(1 << 12),
         IS_HIDDEN(1 << 13);
 
         Flag(int value) {
