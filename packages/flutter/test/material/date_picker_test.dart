@@ -387,6 +387,9 @@ void _tests() {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await preparePicker(tester, (Future<DateTime> date) async {
       final TestSemantics expected = new TestSemantics(
+        flags: <SemanticsFlag>[
+          SemanticsFlag.scopesRoute,
+        ],
         children: <TestSemantics>[
           new TestSemantics(
             actions: <SemanticsAction>[SemanticsAction.tap],
@@ -616,7 +619,7 @@ void _tests() {
       );
 
       expect(semantics, hasSemantics(
-        expected,
+        new TestSemantics.root(children: <TestSemantics>[expected]),
         ignoreId: true,
         ignoreTransform: true,
         ignoreRect: true,
