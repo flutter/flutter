@@ -53,7 +53,7 @@ Future<StreamChannel<String>> _defaultOpenChannel(Uri uri) async {
     attempts += 1;
     try {
       socket = await io.WebSocket.connect(uri.toString());
-    } on io.WebSocketException catch(e) {
+    } catch (e) {
       printTrace('Exception attempting to connect to observatory: $e');
       printTrace('This was attempt #$attempts. Will retry in $delay.');
       await new Future<Null>.delayed(delay);
