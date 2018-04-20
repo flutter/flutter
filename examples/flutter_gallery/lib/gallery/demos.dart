@@ -375,7 +375,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     new GalleryDemo(
       title: 'Activity Indicator',
       subtitle: 'Cupertino styled activity indicator',
-      icon: GalleryIcons.progress_activity,
+      icon: GalleryIcons.cupertino_progress,
       category: _kCupertinoComponents,
       routeName: CupertinoProgressIndicatorDemo.routeName,
       buildRoute: (BuildContext context) => new CupertinoProgressIndicatorDemo(),
@@ -431,7 +431,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     new GalleryDemo(
       title: 'Switches',
       subtitle: 'Cupertino styled switches',
-      icon: GalleryIcons.switches,
+      icon: GalleryIcons.cupertino_switch,
       category: _kCupertinoComponents,
       routeName: CupertinoSwitchDemo.routeName,
       buildRoute: (BuildContext context) => new CupertinoSwitchDemo(),
