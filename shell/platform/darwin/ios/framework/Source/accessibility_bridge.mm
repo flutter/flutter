@@ -168,8 +168,8 @@ NSComparisonResult IntToComparisonResult(int32_t value) {
   //  We enforce in the framework that no other useful semantics are merged with these nodes.
   if ([self node].HasFlag(blink::SemanticsFlags::kScopesRoute))
     return false;
-  return [self node].flags != 0 || ![self node].label.empty() || ![self node].value.empty() ||
-         ![self node].hint.empty() ||
+  return ([self node].flags != 0 && [self node].flags != static_cast<int32_t>(blink::SemanticsFlags::kIsHidden)) ||
+         ![self node].label.empty() || ![self node].value.empty() || ![self node].hint.empty() ||
          ([self node].actions & ~blink::kScrollableSemanticsActions) != 0;
 }
 
@@ -222,6 +222,13 @@ NSComparisonResult IntToComparisonResult(int32_t value) {
 }
 
 - (CGRect)accessibilityFrame {
+  if ([self node].HasFlag(blink::SemanticsFlags::kIsHidden)) {
+    return [super accessibilityFrame];
+  }
+  return [self globalRect];
+}
+
+- (CGRect) globalRect {
   SkMatrix44 globalTransform = [self node].transform;
   for (SemanticsObject* parent = [self parent]; parent; parent = parent.parent) {
     globalTransform = parent.node.transform * globalTransform;
@@ -298,6 +305,9 @@ NSComparisonResult IntToComparisonResult(int32_t value) {
 #pragma mark UIAccessibilityFocus overrides
 
 - (void)accessibilityElementDidBecomeFocused {
+  if ([self node].HasFlag(blink::SemanticsFlags::kIsHidden)) {
+    [self bridge] -> DispatchSemanticsAction([self uid], blink::SemanticsAction::kShowOnScreen);
+  }
   if ([self node].HasAction(blink::SemanticsAction::kDidGainAccessibilityFocus)) {
     [self bridge] -> DispatchSemanticsAction([self uid],
                                              blink::SemanticsAction::kDidGainAccessibilityFocus);
@@ -515,8 +525,8 @@ void AccessibilityBridge::UpdateSemantics(blink::SemanticsNodeUpdates nodes) {
   for (SemanticsObject* object in childOrdersToUpdate) {
     [object.children sortUsingComparator:^(SemanticsObject* a, SemanticsObject* b) {
       // Should a go before b?
-      CGRect rectA = [a accessibilityFrame];
-      CGRect rectB = [b accessibilityFrame];
+      CGRect rectA = [a globalRect];
+      CGRect rectB = [b globalRect];
       CGFloat top = rectA.origin.y - rectB.origin.y;
       if (top == 0.0)
         return IntToComparisonResult(rectA.origin.x - rectB.origin.x < 0.0);

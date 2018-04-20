@@ -58,6 +58,7 @@ enum class SemanticsFlags : int32_t {
   kIsObscured = 1 << 10,
   kScopesRoute = 1 << 11,
   kNamesRoute = 1 << 12,
+  kIsHidden = 1 << 13,
 };
 
 struct SemanticsNode {
