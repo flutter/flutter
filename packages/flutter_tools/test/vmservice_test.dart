@@ -4,7 +4,6 @@
 
 import 'package:test/test.dart';
 
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/port_scanner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 
