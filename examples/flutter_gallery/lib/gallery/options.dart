@@ -121,6 +121,7 @@ class _BooleanItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return new _OptionsItem(
       child: new Row(
         children: <Widget>[
@@ -128,6 +129,8 @@ class _BooleanItem extends StatelessWidget {
           new Switch(
             value: value,
             onChanged: onChanged,
+            activeColor: const Color(0xFF39CEFD),
+            activeTrackColor: isDark ? Colors.white30 : Colors.black26,
           ),
         ],
       ),
@@ -178,13 +181,14 @@ class _Heading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return new Semantics(
       header: true,
       child: new _OptionsItem(
         child: new DefaultTextStyle(
-          style: Theme.of(context).textTheme.body1.copyWith(
+          style: theme.textTheme.body1.copyWith(
             fontFamily: 'GoogleSans',
-            color: const Color(0xFF84EDFE)
+            color: theme.accentColor,
           ),
           child: new Text(text),
         ),
@@ -227,10 +231,20 @@ class _TextScaleFactorItem extends StatelessWidget {
       child: new Row(
         children: <Widget>[
           new Expanded(
-            child: new Text('Text size: ${options.textScaleFactor.label}'),
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text('Text size'),
+                 new Text(
+                   '${options.textScaleFactor.label}',
+                   style: Theme.of(context).primaryTextTheme.body1,
+                 ),
+              ],
+            ),
           ),
           new PopupMenuButton<GalleryTextScaleValue>(
             padding: const EdgeInsets.only(right: 16.0),
+            icon: const Icon(Icons.arrow_drop_down),
             itemBuilder: (BuildContext context) {
               return kAllGalleryTextScaleValues.map((GalleryTextScaleValue scaleValue) {
                 return new PopupMenuItem<GalleryTextScaleValue>(
@@ -318,10 +332,20 @@ class _PlatformItem extends StatelessWidget {
       child: new Row(
         children: <Widget>[
           new Expanded(
-            child: new Text('Platform: ${_platformLabel(options.platform)}'),
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text('Platform mechanics'),
+                 new Text(
+                   '${_platformLabel(options.platform)}',
+                   style: Theme.of(context).primaryTextTheme.body1,
+                 ),
+              ],
+            ),
           ),
           new PopupMenuButton<TargetPlatform>(
             padding: const EdgeInsets.only(right: 16.0),
+            icon: const Icon(Icons.arrow_drop_down),
             itemBuilder: (BuildContext context) {
               return TargetPlatform.values.map((TargetPlatform platform) {
                 return new PopupMenuItem<TargetPlatform>(

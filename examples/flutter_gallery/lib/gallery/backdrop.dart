@@ -24,17 +24,23 @@ final Tween<BorderRadius> _kFrontHeadingBevelRadius = new BorderRadiusTween(
   ),
 );
 
-class _IgnorePointerWhileIncomplete extends StatefulWidget {
-  const _IgnorePointerWhileIncomplete({ Key key, this.controller, this.child }) : super(key: key);
+class _IgnorePointerWhileStatusIsNot extends StatefulWidget {
+  const _IgnorePointerWhileStatusIsNot({
+    Key key,
+    this.controller,
+    this.status,
+    this.child,
+  }) : super(key: key);
 
   final AnimationController controller;
+  final AnimationStatus status;
   final Widget child;
 
   @override
-  _IgnorePointerWhileIncompleteState createState() => new _IgnorePointerWhileIncompleteState();
+  _IgnorePointerWhileStatusIsNotState createState() => new _IgnorePointerWhileStatusIsNotState();
 }
 
-class _IgnorePointerWhileIncompleteState extends State<_IgnorePointerWhileIncomplete> {
+class _IgnorePointerWhileStatusIsNotState extends State<_IgnorePointerWhileStatusIsNot> {
   bool _ignoring;
 
   @override
@@ -50,8 +56,8 @@ class _IgnorePointerWhileIncompleteState extends State<_IgnorePointerWhileIncomp
     super.dispose();
   }
 
-  void _handleStatusChange(AnimationStatus status) {
-    bool value = widget.controller.status != AnimationStatus.completed;
+  void _handleStatusChange(AnimationStatus _) {
+    bool value = widget.controller.status != widget.status;
     if (_ignoring != value) {
       setState(() {
         _ignoring = value;
@@ -266,7 +272,11 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               ),
             ),
             new Expanded(
-              child: widget.backLayer,
+              child: new _IgnorePointerWhileStatusIsNot(
+                controller: _controller,
+                status: AnimationStatus.dismissed,
+                child: widget.backLayer,
+              ),
             ),
           ],
         ),
@@ -278,7 +288,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
             builder: (BuildContext context, Widget child) {
               return new PhysicalShape(
                 elevation: 12.0,
-                color: Colors.white, // TBD color from theme
+                color: Theme.of(context).canvasColor,
                 clipper: new ShapeBorderClipper(
                   shape: new BeveledRectangleBorder(
                     borderRadius: _kFrontHeadingBevelRadius.lerp(_controller.value),
@@ -298,8 +308,9 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
                   child: widget.frontHeading,
                 ),
                 new Expanded(
-                  child: new _IgnorePointerWhileIncomplete(
+                  child: new _IgnorePointerWhileStatusIsNot(
                     controller: _controller,
+                    status: AnimationStatus.completed,
                     child: widget.frontLayer,
                   ),
                 ),

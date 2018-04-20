@@ -9,7 +9,7 @@ import '../demo/all.dart';
 import 'icons.dart';
 
 class GalleryDemoCategory {
-  const GalleryDemoCategory({ this.name, this.icon });
+  const GalleryDemoCategory._({ this.name, this.icon });
   @required final String name;
   @required final IconData icon;
 
@@ -32,27 +32,27 @@ class GalleryDemoCategory {
   }
 }
 
-const GalleryDemoCategory _kDemos = const GalleryDemoCategory(
+const GalleryDemoCategory _kDemos = const GalleryDemoCategory._(
   name: 'Demos',
   icon: GalleryIcons.animation,
 );
 
-const GalleryDemoCategory _kStyle = const GalleryDemoCategory(
+const GalleryDemoCategory _kStyle = const GalleryDemoCategory._(
   name: 'Style',
   icon: GalleryIcons.custom_typography,
 );
 
-const GalleryDemoCategory _kMaterialComponents = const GalleryDemoCategory(
+const GalleryDemoCategory _kMaterialComponents = const GalleryDemoCategory._(
   name: 'Material',
   icon: GalleryIcons.category_mdc,
 );
 
-const GalleryDemoCategory _kCupertinoComponents = const GalleryDemoCategory(
+const GalleryDemoCategory _kCupertinoComponents = const GalleryDemoCategory._(
   name: 'Cupertino',
   icon: GalleryIcons.phone_iphone,
 );
 
-const GalleryDemoCategory _kMedia = const GalleryDemoCategory(
+const GalleryDemoCategory _kMedia = const GalleryDemoCategory._(
   name: 'Media',
   icon: GalleryIcons.drive_video,
 );
