@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -72,6 +74,7 @@ void main() {
                   ),
                   new TestSemantics(
                     id: 4,
+                    flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
                     label: r'Semantics Test with Slivers',
                     textDirection: TextDirection.ltr,
                     nextNodeId: 2,
@@ -126,6 +129,7 @@ void main() {
               ),
               new TestSemantics(
                 id: 4,
+                flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
                 label: r'Semantics Test with Slivers',
                 textDirection: TextDirection.ltr,
                 previousNodeId: 5,
@@ -176,6 +180,7 @@ void main() {
                   ),
                   new TestSemantics(
                     id: 4,
+                    flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
                     label: r'Semantics Test with Slivers',
                     textDirection: TextDirection.ltr,
                     nextNodeId: 2,
@@ -412,6 +417,7 @@ void main() {
               new TestSemantics(
                 id: 22,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
+                flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
                 tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                 label: 'AppBar',
                 previousNodeId: 23,
@@ -502,6 +508,7 @@ void main() {
                 id: 28,
                 previousNodeId: 29,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
+                flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
                 tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                 label: 'AppBar'
               ),
@@ -594,6 +601,7 @@ void main() {
                 previousNodeId: 35,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 transform: new Matrix4.translation(new Vector3(0.0, 544.0, 0.0)),
+                flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
                 tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                 label: 'AppBar'
               ),
@@ -685,6 +693,7 @@ void main() {
                 previousNodeId: 41,
                 rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 transform: new Matrix4.translation(new Vector3(0.0, 544.0, 0.0)),
+                flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
                 tags: <SemanticsTag>[RenderViewport.excludeFromScrolling],
                 label: 'AppBar'
               ),
