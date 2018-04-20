@@ -11,6 +11,21 @@ void main() {
   Widget snapshotText(BuildContext context, AsyncSnapshot<String> snapshot) {
     return new Text(snapshot.toString(), textDirection: TextDirection.ltr);
   }
+  group('Dart semantics', () {
+    String greeting = 'hello';
+    Future<void> changeGreeting() async {
+      greeting += ' 1';
+      await null;
+      greeting += ' 2';
+    };
+    test('execution of async method starts synchronously', () async {
+      expect(greeting, 'hello');
+      Future<void> future = changeGreeting();
+      expect(greeting, 'hello 1');
+      await future;
+      expect(greeting, 'hello 1 2');
+    });
+  });
   group('AsyncSnapshot', () {
     test('requiring data succeeds if data is present', () {
       expect(
