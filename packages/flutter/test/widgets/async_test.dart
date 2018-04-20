@@ -15,12 +15,12 @@ void main() {
     String greeting = 'hello';
     Future<void> changeGreeting() async {
       greeting += ' 1';
-      await null;
+      await new Future<void>.value(null);
       greeting += ' 2';
     };
     test('execution of async method starts synchronously', () async {
       expect(greeting, 'hello');
-      Future<void> future = changeGreeting();
+      final Future<void> future = changeGreeting();
       expect(greeting, 'hello 1');
       await future;
       expect(greeting, 'hello 1 2');
