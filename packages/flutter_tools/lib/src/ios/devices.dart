@@ -492,9 +492,26 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     int attempts = 0;
     ForwardedPort forwardedPort;
     dynamic lastError;
+
     while (attempts < _kMaxAttempts && forwardedPort == null) {
       attempts += 1;
       Process process;
+
+      void onError(dynamic e) {
+        lastError = e;
+        if (!processManager.killPid(process.pid)) {
+          printTrace(
+              'Process kill signal was not delivered to iproxy. Perhaps the '
+                  'process was gone by the time we attempted to kill it.'
+          );
+        }
+        printTrace(
+            'Exception attempting to forward local port $hostPort to device-side '
+                'observatory port $devicePort: $e'
+        );
+        printTrace('This was attempt #$attempts.');
+      }
+
       try {
         // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
         process = await runCommand(<String>[
@@ -524,19 +541,10 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
         // Connection is good.
         forwardedPort = new ForwardedPort.withContext(hostPort,
             devicePort, process);
-      } catch (e) {
-        lastError = e;
-        if (!processManager.killPid(process.pid)) {
-          printTrace(
-            'Process kill signal was not delivered to iproxy. Perhaps the '
-            'process was gone by the time we attempted to kill it.'
-          );
-        }
-        printTrace(
-          'Exception attempting to forward local port $hostPort to device-side '
-          'observatory port $devicePort: $e'
-        );
-        printTrace('This was attempt #$attempts.');
+      } on WebSocketException catch (e) {
+        onError(e);
+      } on SocketException catch (e) {
+        onError(e);
       }
     }
 
