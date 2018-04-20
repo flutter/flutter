@@ -1764,8 +1764,11 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, covariant RenderUnconstrainedBox renderObject) {
     renderObject
       ..textDirection = textDirection ?? Directionality.of(context)
-      ..alignment = alignment
-      ..constrainedAxis = constrainedAxis;
+      ..alignment = alignment;
+
+    if (constrainedAxis != null) {
+      renderObject.constrainedAxis = constrainedAxis;
+    }
   }
 
   @override
