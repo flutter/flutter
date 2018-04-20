@@ -461,6 +461,7 @@ void main() {
     await tester.pumpWidget(
         new Semantics(
           container: true,
+          explicitChildNodes: true,
           // flags
           enabled: true,
           hidden: true,
@@ -474,7 +475,6 @@ void main() {
           obscured: true,
           scopesRoute: true,
           namesRoute: true,
-          explicitChildNodes: true,
         )
     );
 
