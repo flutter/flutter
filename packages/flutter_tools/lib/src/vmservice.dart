@@ -49,15 +49,26 @@ Future<StreamChannel<String>> _defaultOpenChannel(Uri uri) async {
   Duration delay = const Duration(milliseconds: 100);
   int attempts = 0;
   io.WebSocket socket;
+
+  Future<void> onError(dynamic e) async {
+    printTrace('Exception attempting to connect to observatory: $e');
+    printTrace('This was attempt #$attempts. Will retry in $delay.');
+
+    // Delay next attempt.
+    await new Future<Null>.delayed(delay);
+
+    // Back off exponentially.
+    delay *= 2;
+  }
+
   while (attempts < _kMaxAttempts && socket == null) {
     attempts += 1;
     try {
       socket = await io.WebSocket.connect(uri.toString());
-    } catch (e) {
-      printTrace('Exception attempting to connect to observatory: $e');
-      printTrace('This was attempt #$attempts. Will retry in $delay.');
-      await new Future<Null>.delayed(delay);
-      delay *= 2;
+    } on io.WebSocketException catch (e) {
+      await onError(e);
+    } on io.SocketException catch (e) {
+      await onError(e);
     }
   }
 
