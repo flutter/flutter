@@ -834,6 +834,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.obscured != null) {
       config.isObscured = properties.obscured;
     }
+    if (properties.hidden != null) {
+      config.isHidden = properties.hidden;
+    }
     if (properties.header != null) {
       config.isHeader = properties.header;
     }

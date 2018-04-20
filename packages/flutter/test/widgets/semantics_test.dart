@@ -463,6 +463,7 @@ void main() {
           container: true,
           // flags
           enabled: true,
+          hidden: true,
           checked: true,
           selected: true,
           button: true,
@@ -477,11 +478,28 @@ void main() {
         )
     );
 
-    final TestSemantics expectedSemantics = new TestSemantics.root(
+    // TODO(jonahwilliams): remove when adding engine support for edge semantics
+    final List<SemanticsFlag> flags = SemanticsFlag.values.values
+     .where((SemanticsFlag flag) => flag != SemanticsFlag.scopesRoute && flag != SemanticsFlag.namesRoute)
+     .toList();
+    TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
           rect: TestSemantics.fullScreen,
           flags: SemanticsFlag.values.values.toList(),
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
+
+    await tester.pumpWidget(new Semantics(
+      container: true,
+    ));
+    expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          rect: TestSemantics.fullScreen,
+          flags: <SemanticsFlag>[],
         ),
       ],
     );
