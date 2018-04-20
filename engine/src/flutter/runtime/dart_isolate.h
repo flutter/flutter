@@ -33,6 +33,8 @@ class DartIsolate : public UIDartState {
     Shutdown,
   };
 
+  using ChildIsolatePreparer = std::function<bool(DartIsolate*)>;
+
   // The root isolate of a Flutter application is special because it gets Window
   // bindings. From the VM's perspective, this isolate is not special in any
   // way.
@@ -53,7 +55,8 @@ class DartIsolate : public UIDartState {
               fml::WeakPtr<GrContext> resource_context,
               fxl::RefPtr<flow::SkiaUnrefQueue> unref_queue,
               std::string advisory_script_uri,
-              std::string advisory_script_entrypoint);
+              std::string advisory_script_entrypoint,
+              ChildIsolatePreparer child_isolate_preparer);
 
   ~DartIsolate() override;
 
@@ -63,7 +66,8 @@ class DartIsolate : public UIDartState {
   bool PrepareForRunningFromPrecompiledCode();
 
   FXL_WARN_UNUSED_RESULT
-  bool PrepareForRunningFromSnapshot(std::unique_ptr<fml::Mapping> snapshot);
+  bool PrepareForRunningFromSnapshot(
+      std::shared_ptr<const fml::Mapping> snapshot);
 
   FXL_WARN_UNUSED_RESULT
   bool PrepareForRunningFromSource(const std::string& main_source_file,
@@ -103,6 +107,7 @@ class DartIsolate : public UIDartState {
   Phase phase_ = Phase::Unknown;
   const fxl::RefPtr<DartSnapshot> isolate_snapshot_;
   std::vector<std::unique_ptr<AutoFireClosure>> shutdown_callbacks_;
+  ChildIsolatePreparer child_isolate_preparer_;
   std::unique_ptr<fml::WeakPtrFactory<DartIsolate>> weak_factory_;
 
   FXL_WARN_UNUSED_RESULT
