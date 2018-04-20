@@ -15,7 +15,7 @@ import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
-import '../dart/sdk.dart';
+import '../dart/sdk.dart' as sdk;
 import '../globals.dart';
 import 'analyze_base.dart';
 
@@ -53,7 +53,9 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisTarget = fs.currentDirectory.path;
     }
 
-    final AnalysisServer server = new AnalysisServer(dartSdkPath, directories, previewDart2: previewDart2);
+    final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
+
+    final AnalysisServer server = new AnalysisServer(sdkPath, directories, previewDart2: previewDart2);
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
 
@@ -151,9 +153,9 @@ class AnalyzeContinuously extends AnalyzeBase {
 }
 
 class AnalysisServer {
-  AnalysisServer(this.sdk, this.directories, { this.previewDart2: false });
+  AnalysisServer(this.sdkPath, this.directories, { this.previewDart2: false });
 
-  final String sdk;
+  final String sdkPath;
   final List<String> directories;
   final bool previewDart2;
 
@@ -164,12 +166,12 @@ class AnalysisServer {
   int _id = 0;
 
   Future<Null> start() async {
-    final String snapshot = fs.path.join(sdk, 'bin/snapshots/analysis_server.dart.snapshot');
+    final String snapshot = fs.path.join(sdkPath, 'bin/snapshots/analysis_server.dart.snapshot');
     final List<String> command = <String>[
-      fs.path.join(dartSdkPath, 'bin', 'dart'),
+      fs.path.join(sdkPath, 'bin', 'dart'),
       snapshot,
       '--sdk',
-      sdk,
+      sdkPath,
     ];
 
     if (previewDart2) {
