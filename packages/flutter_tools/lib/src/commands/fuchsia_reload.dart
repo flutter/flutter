@@ -186,6 +186,8 @@ class FuchsiaReloadCommand extends FlutterCommand {
       if (v.uiIsolate == null)
         continue;
       final Uri addr = v.owner.vmService.httpAddress;
+      if (v.uiIsolate == null)
+        continue;
       printTrace('At $addr, found view: ${v.uiIsolate.name}');
       if (v.uiIsolate.name.contains(viewFilter))
         result.add(addr.port);
