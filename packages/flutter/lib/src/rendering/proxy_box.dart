@@ -3236,6 +3236,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_namesRoute == value)
       return;
     _namesRoute = value;
+    markNeedsSemanticsUpdate();
+  }
 
   /// If non-null, sets the [SemanticsNode.isHidden] semantic to the given
   /// value.
