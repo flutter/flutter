@@ -5,9 +5,8 @@
 import 'dart:async';
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/process.dart';
-import '../cache.dart';
+import '../dart/sdk.dart';
 import '../runner/flutter_command.dart';
 
 class FormatCommand extends FlutterCommand {
@@ -36,7 +35,7 @@ class FormatCommand extends FlutterCommand {
       );
     }
 
-    final String dartfmt = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartfmt');
+    final String dartfmt = sdkBinaryName('dartfmt');
     final List<String> cmd = <String>[dartfmt, '-w']..addAll(argResults.rest);
     final int result = await runCommandAndStreamOutput(cmd);
     if (result != 0)
