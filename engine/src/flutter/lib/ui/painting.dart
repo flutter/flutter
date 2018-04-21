@@ -1196,6 +1196,38 @@ class Paint {
   }
 }
 
+/// The format in which image bytes should be returned when using
+/// [Image.toByteData].
+enum ImageByteFormat {
+  /// Raw RGBA format.
+  ///
+  /// Unencoded bytes, in RGBA row-primary form, 8 bits per channel.
+  rawRgba,
+
+  /// Raw unmodified format.
+  ///
+  /// Unencoded bytes, in the image's existing format. For example, a grayscale
+  /// image may use a single 8-bit channel for each pixel.
+  rawUnmodified,
+
+  /// PNG format.
+  ///
+  /// A loss-less compression format for images. This format is well suited for
+  /// images with hard edges, such as screenshots or sprites, and images with
+  /// text. Transparency is supported. The PNG format supports images up to
+  /// 2,147,483,647 pixels in either dimension, though in practice available
+  /// memory provides a more immediate limitation on maximum image size.
+  ///
+  /// PNG images normally use the `.png` file extension and the `image/png` MIME
+  /// type.
+  ///
+  /// See also:
+  ///
+  ///  * <https://en.wikipedia.org/wiki/Portable_Network_Graphics>, the Wikipedia page on PNG.
+  ///  * <https://tools.ietf.org/rfc/rfc2083.txt>, the PNG standard.
+  png,
+}
+
 /// Opaque handle to raw decoded image data (pixels).
 ///
 /// To obtain an [Image] object, use [instantiateImageCodec].
@@ -1217,20 +1249,21 @@ class Image extends NativeFieldWrapperClass2 {
 
   /// Converts the [Image] object into a byte array.
   ///
-  /// The image bytes will be RGBA form, 8 bits per channel, row-primary.
+  /// The [format] argument specifies the format in which the bytes will be
+  /// returned.
   ///
   /// Returns a future that completes with the binary image data or an error
   /// if encoding fails.
-  Future<ByteData> toByteData() {
+  Future<ByteData> toByteData({ImageByteFormat format: ImageByteFormat.rawRgba}) {
     return _futurize((_Callback<ByteData> callback) {
-      return _toByteData((Uint8List encoded) {
+      return _toByteData(format.index, (Uint8List encoded) {
         callback(encoded?.buffer?.asByteData());
       });
     });
   }
 
   /// Returns an error message on failure, null on success.
-  String _toByteData(_Callback<Uint8List> callback) native 'Image_toByteData';
+  String _toByteData(int format, _Callback<Uint8List> callback) native 'Image_toByteData';
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
@@ -1530,8 +1563,8 @@ class Path extends NativeFieldWrapperClass2 {
 
   /// Adds a new subpath that consists of a curve that forms the
   /// ellipse that fills the given rectangle.
-  /// 
-  /// To add a circle, pass an appropriate rectangle as `oval`. [Rect.fromCircle] 
+  ///
+  /// To add a circle, pass an appropriate rectangle as `oval`. [Rect.fromCircle]
   /// can be used to easily describe the circle's center [Offset] and radius.
   void addOval(Rect oval) {
     assert(_rectIsValid(oval));
@@ -1938,8 +1971,8 @@ class Gradient extends Shader {
   /// If `center`, `radius`, `colors`, or `tileMode` are null, or if `colors` or
   /// `colorStops` contain null values, this constructor will throw a
   /// [NoSuchMethodError].
-  /// 
-  /// If `matrix4` is provided, the gradient fill will be transformed by the 
+  ///
+  /// If `matrix4` is provided, the gradient fill will be transformed by the
   /// specified 4x4 matrix relative to the local coordinate system. `matrix4` must
   /// be a column-major matrix packed into a list of 16 values.
   Gradient.radial(
@@ -2917,11 +2950,11 @@ typedef String _Callbacker<T>(_Callback<T> callback);
 ///
 /// ```dart
 /// typedef void IntCallback(int result);
-/// 
+///
 /// String _doSomethingAndCallback(IntCallback callback) {
 ///   new Timer(new Duration(seconds: 1), () { callback(1); });
 /// }
-/// 
+///
 /// Future<int> doSomething() {
 ///   return _futurize(_doSomethingAndCallback);
 /// }
