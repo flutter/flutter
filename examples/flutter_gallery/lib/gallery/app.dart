@@ -42,7 +42,7 @@ class GalleryAppState extends State<GalleryApp> {
   bool _showPerformanceOverlay = false;
   bool _checkerboardRasterCacheImages = false;
   bool _checkerboardOffscreenLayers = false;
-  TextDirection _overrideDirection = TextDirection.rtl;
+  TextDirection _overrideDirection = TextDirection.ltr;
   double _timeDilation = 1.0;
   TargetPlatform _platform;
 
@@ -157,27 +157,21 @@ class GalleryAppState extends State<GalleryApp> {
       };
     }
 
-    return new Semantics(
-      textDirection: _overrideDirection,
-      child: new MaterialApp(
-        title: 'Flutter Gallery',
-        color: Colors.grey,
-        theme: _galleryTheme.theme.copyWith(platform: _platform ?? defaultTargetPlatform),
-        showPerformanceOverlay: _showPerformanceOverlay,
-        checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: _checkerboardOffscreenLayers,
-        routes: _kRoutes,
-        home: home,
-        builder: (BuildContext context, Widget child) {
-          return new Semantics(
-            textDirection: _overrideDirection,
-            child: new Directionality(
-              textDirection: _overrideDirection,
-              child: _applyScaleFactor(child),
-            ),
-          );
-        },
-      ),
+    return new MaterialApp(
+      title: 'Flutter Gallery',
+      color: Colors.grey,
+      theme: _galleryTheme.theme.copyWith(platform: _platform ?? defaultTargetPlatform),
+      showPerformanceOverlay: _showPerformanceOverlay,
+      checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
+      checkerboardOffscreenLayers: _checkerboardOffscreenLayers,
+      routes: _kRoutes,
+      home: home,
+      builder: (BuildContext context, Widget child) {
+        return new Directionality(
+          textDirection: _overrideDirection,
+          child: _applyScaleFactor(child),
+        );
+      },
     );
   }
 }

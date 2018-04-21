@@ -6,7 +6,6 @@
 // Like what you see? Tweet us @flutterio
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gallery/demo/material/date_and_time_picker_demo.dart';
 
 import 'gallery/app.dart';
 
@@ -15,10 +14,4 @@ void main() {
   // visual effect at the cost of performance.
   MaterialPageRoute.debugEnableFadingRoutes = true; // ignore: deprecated_member_use
   runApp(const GalleryApp());
-//  runApp(new MaterialApp(
-//    home: new Directionality(
-//      textDirection: TextDirection.rtl,
-//      child: new DateAndTimePickerDemo(),
-//    ),
-//  ));
 }
