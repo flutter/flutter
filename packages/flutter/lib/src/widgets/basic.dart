@@ -4898,6 +4898,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool obscured,
     bool scopesRoute,
     bool namesRoute,
+    bool hidden,
     String label,
     String value,
     String increasedValue,
@@ -4938,6 +4939,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       obscured: obscured,
       scopesRoute: scopesRoute,
       namesRoute: namesRoute,
+      hidden: hidden,
       label: label,
       value: value,
       increasedValue: increasedValue,
@@ -5023,6 +5025,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       obscured: properties.obscured,
       scopesRoute: properties.scopesRoute,
       namesRoute: properties.namesRoute,
+      hidden: properties.hidden,
       label: properties.label,
       value: properties.value,
       increasedValue: properties.increasedValue,
@@ -5065,16 +5068,23 @@ class Semantics extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSemanticsAnnotations renderObject) {
     renderObject
       ..container = container
+      ..scopesRoute = properties.scopesRoute
       ..explicitChildNodes = explicitChildNodes
       ..enabled = properties.enabled
       ..checked = properties.checked
       ..selected = properties.selected
+      ..button = properties.button
+      ..header = properties.header
+      ..textField = properties.textField
+      ..focused = properties.focused
+      ..inMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup
+      ..obscured = properties.obscured
+      ..hidden = properties.hidden
       ..label = properties.label
       ..value = properties.value
       ..increasedValue = properties.increasedValue
       ..decreasedValue = properties.decreasedValue
       ..hint = properties.hint
-      ..scopesRoute = properties.scopesRoute
       ..namesRoute = properties.namesRoute
       ..textDirection = _getTextDirection(context)
       ..sortKey = properties.sortKey
