@@ -125,6 +125,30 @@ void main() {
   //
   // Cannot test this before https://github.com/flutter/flutter/pull/14368
   // as there is no way to make the FAB and BAB overlap.
+
+  testWidgets('observes safe area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const MediaQuery(
+          data: const MediaQueryData(
+            padding: const EdgeInsets.all(50.0),
+          ),
+          child: const Scaffold(
+            bottomNavigationBar: const BottomAppBar(
+              child: const Center(
+                child: const Text('safe'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getBottomLeft(find.widgetWithText(Center, 'safe')),
+      const Offset(50.0, 550.0),
+    );
+  });
 }
 
 // The bottom app bar clip path computation is only available at paint time.
