@@ -506,8 +506,10 @@ class _FlutterPlatform extends PlatformPlugin {
             await watcher.onTestTimedOut(new ProcessEvent(ourTestCount, process));
             break;
           case _InitialResult.connected:
-            await watcher.onFinishedTest(
-                new ProcessEvent(ourTestCount, process, processObservatoryUri));
+            if (subprocessActive) {
+              await watcher.onFinishedTest(
+                  new ProcessEvent(ourTestCount, process, processObservatoryUri));
+            }
             break;
         }
       }
