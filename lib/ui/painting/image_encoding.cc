@@ -31,6 +31,13 @@ using tonic::ToDart;
 namespace blink {
 namespace {
 
+// This must be kept in sync with the enum in painting.dart
+enum ImageByteFormat {
+  kRawRGBA,
+  kRawUnmodified,
+  kPNG,
+};
+
 void InvokeDataCallback(std::unique_ptr<DartPersistentValue> callback,
                         sk_sp<SkData> buffer) {
   tonic::DartState* dart_state = callback->dart_state().get();
@@ -47,11 +54,15 @@ void InvokeDataCallback(std::unique_ptr<DartPersistentValue> callback,
   }
 }
 
-sk_sp<SkData> GetImageBytesAsRGBA(sk_sp<SkImage> image) {
+sk_sp<SkData> EncodeImage(sk_sp<SkImage> image, ImageByteFormat format) {
   TRACE_EVENT0("flutter", __FUNCTION__);
 
   if (image == nullptr) {
     return nullptr;
+  }
+
+  if (format == kPNG) {
+    return image->encodeToData(SkEncodedImageFormat::kPNG, 0);
   }
 
   // Copy the GPU image snapshot into CPU memory.
@@ -67,6 +78,11 @@ sk_sp<SkData> GetImageBytesAsRGBA(sk_sp<SkImage> image) {
     return nullptr;
   }
 
+  if (format == kRawUnmodified) {
+    return SkData::MakeWithCopy(pixmap.addr(), pixmap.computeByteSize());
+  }
+
+  ASSERT(format == kRawRGBA);
   if (pixmap.colorType() != kRGBA_8888_SkColorType) {
     TRACE_EVENT0("flutter", "ConvertToRGBA");
 
@@ -80,35 +96,37 @@ sk_sp<SkData> GetImageBytesAsRGBA(sk_sp<SkImage> image) {
       return nullptr;
     }
 
-    const size_t pixmap_size = pixmap.computeByteSize();
-    return SkData::MakeWithCopy(pixmap.addr32(), pixmap_size);
+    return SkData::MakeWithCopy(pixmap.addr32(), pixmap.computeByteSize());
   } else {
-    const size_t pixmap_size = pixmap.computeByteSize();
-    return SkData::MakeWithCopy(pixmap.addr32(), pixmap_size);
+    return SkData::MakeWithCopy(pixmap.addr32(), pixmap.computeByteSize());
   }
 }
 
-void GetImageBytesAndInvokeDataCallback(
+void EncodeImageAndInvokeDataCallback(
     std::unique_ptr<DartPersistentValue> callback,
     sk_sp<SkImage> image,
-    fxl::RefPtr<fxl::TaskRunner> ui_task_runner) {
-  sk_sp<SkData> buffer = GetImageBytesAsRGBA(std::move(image));
+    fxl::RefPtr<fxl::TaskRunner> ui_task_runner,
+    ImageByteFormat format) {
+  sk_sp<SkData> encoded = EncodeImage(std::move(image), format);
 
   ui_task_runner->PostTask(
-      fxl::MakeCopyable([callback = std::move(callback), buffer]() mutable {
-        InvokeDataCallback(std::move(callback), std::move(buffer));
+      fxl::MakeCopyable([callback = std::move(callback), encoded]() mutable {
+        InvokeDataCallback(std::move(callback), std::move(encoded));
       }));
 }
 
 }  // namespace
 
-Dart_Handle GetImageBytes(CanvasImage* canvas_image,
-                          Dart_Handle callback_handle) {
+Dart_Handle EncodeImage(CanvasImage* canvas_image,
+                        int format,
+                        Dart_Handle callback_handle) {
   if (!canvas_image)
     return ToDart("encode called with non-genuine Image.");
 
   if (!Dart_IsClosure(callback_handle))
     return ToDart("Callback must be a function.");
+
+  ImageByteFormat image_format = static_cast<ImageByteFormat>(format);
 
   auto callback = std::make_unique<DartPersistentValue>(
       tonic::DartState::Current(), callback_handle);
@@ -118,10 +136,12 @@ Dart_Handle GetImageBytes(CanvasImage* canvas_image,
 
   task_runners.GetIOTaskRunner()->PostTask(fxl::MakeCopyable(
       [callback = std::move(callback), image,
-       ui_task_runner = task_runners.GetUITaskRunner()]() mutable {
-        GetImageBytesAndInvokeDataCallback(std::move(callback),
-                                           std::move(image),
-                                           std::move(ui_task_runner));
+       ui_task_runner = task_runners.GetUITaskRunner(),
+       image_format]() mutable {
+        EncodeImageAndInvokeDataCallback(std::move(callback),
+                                         std::move(image),
+                                         std::move(ui_task_runner),
+                                         image_format);
       }));
 
   return Dart_Null();
