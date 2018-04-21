@@ -461,8 +461,10 @@ void main() {
     await tester.pumpWidget(
         new Semantics(
           container: true,
+          explicitChildNodes: true,
           // flags
           enabled: true,
+          hidden: true,
           checked: true,
           selected: true,
           button: true,
@@ -473,15 +475,27 @@ void main() {
           obscured: true,
           scopesRoute: true,
           namesRoute: true,
-          explicitChildNodes: true,
         )
     );
 
-    final TestSemantics expectedSemantics = new TestSemantics.root(
+    TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
           rect: TestSemantics.fullScreen,
           flags: SemanticsFlag.values.values.toList(),
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
+
+    await tester.pumpWidget(new Semantics(
+      container: true,
+    ));
+    expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          rect: TestSemantics.fullScreen,
+          flags: <SemanticsFlag>[],
         ),
       ],
     );

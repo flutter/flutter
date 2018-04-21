@@ -361,6 +361,7 @@ void main() {
       '   actions: []\n'
       '   flags: []\n'
       '   invisible\n'
+      '   isHidden: false\n'
       '   label: ""\n'
       '   value: ""\n'
       '   increasedValue: ""\n'

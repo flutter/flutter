@@ -410,6 +410,7 @@ void _defineTests() {
             enabled: true,
             checked: true,
             selected: true,
+            hidden: true,
             button: true,
             textField: true,
             focused: true,

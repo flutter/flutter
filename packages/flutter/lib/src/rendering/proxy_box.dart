@@ -3021,6 +3021,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool obscured,
     bool scopesRoute,
     bool namesRoute,
+    bool hidden,
     String label,
     String value,
     String increasedValue,
@@ -3058,6 +3059,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _obscured = obscured,
        _scopesRoute = scopesRoute,
        _namesRoute = namesRoute,
+       _hidden = hidden,
        _label = label,
        _value = value,
        _increasedValue = increasedValue,
@@ -3234,6 +3236,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_namesRoute == value)
       return;
     _namesRoute = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isHidden] semantic to the given
+  /// value.
+  bool get hidden => _hidden;
+  bool _hidden;
+  set hidden(bool value) {
+    if (hidden == value)
+      return;
+    _hidden = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3678,6 +3691,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup;
     if (obscured != null)
       config.isObscured = obscured;
+    if (hidden != null)
+      config.isHidden = hidden;
     if (label != null)
       config.label = label;
     if (value != null)
