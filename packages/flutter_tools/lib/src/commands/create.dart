@@ -289,11 +289,11 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
 
     if (argResults['pub']) {
       await pubGet(context: PubContext.create, directory: appPath, offline: argResults['offline']);
-      new FlutterProject(fs.directory(appPath)).ensureReadyForPlatformSpecificTooling();
+      await new FlutterProject(fs.directory(appPath)).ensureReadyForPlatformSpecificTooling();
     }
 
     if (android_sdk.androidSdk != null)
-      gradle.updateLocalProperties(projectPath: appPath);
+      await gradle.updateLocalProperties(projectPath: appPath);
 
     return generatedCount;
   }
