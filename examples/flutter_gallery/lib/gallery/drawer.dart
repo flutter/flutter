@@ -31,7 +31,7 @@ class LinkTextSpan extends TextSpan {
     style: style,
     text: text ?? url,
     recognizer: new TapGestureRecognizer()..onTap = () {
-      launch(url);
+      launch(url, forceSafariVC: false);
     }
   );
 }
