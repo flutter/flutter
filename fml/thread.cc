@@ -6,7 +6,7 @@
 
 #include "flutter/fml/thread.h"
 
-#include "lib/fxl/build_config.h"
+#include "flutter/fml/build_config.h"
 
 #if defined(OS_WIN)
 #include <windows.h>

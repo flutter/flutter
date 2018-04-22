@@ -11,9 +11,9 @@
 
 #include <type_traits>
 
+#include "flutter/fml/build_config.h"
+#include "flutter/fml/eintr_wrapper.h"
 #include "flutter/fml/unique_fd.h"
-#include "lib/fxl/build_config.h"
-#include "lib/fxl/files/eintr_wrapper.h"
 
 #if OS_MACOSX
 
@@ -41,8 +41,9 @@ std::unique_ptr<Mapping> GetResourceMapping(const std::string& resource_name) {
 }
 
 FileMapping::FileMapping(const std::string& path, bool executable)
-    : FileMapping(fml::UniqueFD{HANDLE_EINTR(::open(path.c_str(), O_RDONLY))},
-                  executable) {}
+    : FileMapping(
+          fml::UniqueFD{FML_HANDLE_EINTR(::open(path.c_str(), O_RDONLY))},
+          executable) {}
 
 FileMapping::FileMapping(const fml::UniqueFD& handle, bool executable)
     : size_(0), mapping_(nullptr) {

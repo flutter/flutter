@@ -9,9 +9,9 @@
 
 #include <atomic>
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
-#include "lib/fxl/macros.h"
 
 namespace fml {
 
@@ -35,7 +35,7 @@ class MessageLoopDarwin : public MessageLoopImpl {
 
   FRIEND_MAKE_REF_COUNTED(MessageLoopDarwin);
   FRIEND_REF_COUNTED_THREAD_SAFE(MessageLoopDarwin);
-  FXL_DISALLOW_COPY_AND_ASSIGN(MessageLoopDarwin);
+  FML_DISALLOW_COPY_AND_ASSIGN(MessageLoopDarwin);
 };
 
 }  // namespace fml

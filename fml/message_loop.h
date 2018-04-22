@@ -6,7 +6,6 @@
 #define FLUTTER_FML_MESSAGE_LOOP_H_
 
 #include "flutter/fml/macros.h"
-#include "lib/fxl/macros.h"
 #include "lib/fxl/tasks/task_runner.h"
 
 namespace fml {
@@ -52,7 +51,7 @@ class MessageLoop {
 
   fxl::RefPtr<MessageLoopImpl> GetLoopImpl() const;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(MessageLoop);
+  FML_DISALLOW_COPY_AND_ASSIGN(MessageLoop);
 };
 
 }  // namespace fml

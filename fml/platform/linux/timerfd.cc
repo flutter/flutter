@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "lib/fxl/files/eintr_wrapper.h"
+#include "flutter/fml/eintr_wrapper.h"
 
 #if FML_TIMERFD_AVAILABLE == 0
 
@@ -48,7 +48,7 @@ bool TimerRearm(int fd, fxl::TimePoint time_point) {
 bool TimerDrain(int fd) {
   // 8 bytes must be read from a signalled timer file descriptor when signalled.
   uint64_t fire_count = 0;
-  ssize_t size = HANDLE_EINTR(::read(fd, &fire_count, sizeof(uint64_t)));
+  ssize_t size = FML_HANDLE_EINTR(::read(fd, &fire_count, sizeof(uint64_t)));
   if (size != sizeof(uint64_t)) {
     return false;
   }

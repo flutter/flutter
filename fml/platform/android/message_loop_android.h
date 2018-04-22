@@ -9,9 +9,9 @@
 
 #include <atomic>
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/unique_fd.h"
-#include "lib/fxl/macros.h"
 #include "lib/fxl/memory/unique_object.h"
 
 namespace fml {
@@ -42,7 +42,7 @@ class MessageLoopAndroid : public MessageLoopImpl {
 
   FRIEND_MAKE_REF_COUNTED(MessageLoopAndroid);
   FRIEND_REF_COUNTED_THREAD_SAFE(MessageLoopAndroid);
-  FXL_DISALLOW_COPY_AND_ASSIGN(MessageLoopAndroid);
+  FML_DISALLOW_COPY_AND_ASSIGN(MessageLoopAndroid);
 };
 
 }  // namespace fml

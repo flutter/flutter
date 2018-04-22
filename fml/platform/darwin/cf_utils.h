@@ -7,7 +7,7 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 
-#include "lib/fxl/macros.h"
+#include "flutter/fml/macros.h"
 
 namespace fml {
 
@@ -43,7 +43,7 @@ class CFRef {
  private:
   T instance_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(CFRef);
+  FML_DISALLOW_COPY_AND_ASSIGN(CFRef);
 };
 
 }  // namespace fml

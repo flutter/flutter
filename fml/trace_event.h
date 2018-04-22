@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <string>
 
-#include "lib/fxl/macros.h"
+#include "flutter/fml/macros.h"
 
 #ifndef TRACE_EVENT_HIDE_MACROS
 
@@ -115,7 +115,7 @@ class ScopedInstantEnd {
  private:
   const std::string label_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(ScopedInstantEnd);
+  FML_DISALLOW_COPY_AND_ASSIGN(ScopedInstantEnd);
 };
 
 }  // namespace tracing

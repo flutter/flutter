@@ -7,9 +7,9 @@
 #include <memory>
 #include <mutex>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/paths.h"
-#include "lib/fxl/build_config.h"
 #include "lib/fxl/logging.h"
 #include "third_party/icu/source/common/unicode/udata.h"
 
@@ -87,7 +87,7 @@ class ICUContext {
   bool valid_;
   std::unique_ptr<Mapping> mapping_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(ICUContext);
+  FML_DISALLOW_COPY_AND_ASSIGN(ICUContext);
 };
 
 void InitializeICUOnce(const std::string& icu_data_path) {

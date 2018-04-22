@@ -10054,6 +10054,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: engine
 ORIGIN: ../../../topaz/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/fml/build_config.h
+FILE: ../../../flutter/fml/compiler_specific.h
+FILE: ../../../flutter/fml/eintr_wrapper.h
+FILE: ../../../flutter/fml/memory/ref_counted.h
+FILE: ../../../flutter/fml/memory/ref_counted_internal.h
+FILE: ../../../flutter/fml/memory/ref_counted_unittest.cc
+FILE: ../../../flutter/fml/memory/ref_ptr.h
+FILE: ../../../flutter/fml/memory/ref_ptr_internal.h
 FILE: ../../../flutter/fml/memory/thread_checker.h
 FILE: ../../../flutter/fml/memory/weak_ptr.h
 FILE: ../../../flutter/fml/memory/weak_ptr_internal.cc
