@@ -8,7 +8,6 @@
 #include <unistd.h>
 
 #include "flutter/fml/platform/linux/timerfd.h"
-#include "lib/fxl/files/eintr_wrapper.h"
 
 namespace fml {
 

@@ -9,8 +9,8 @@
 #include <algorithm>
 #include <vector>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/trace_event.h"
-#include "lib/fxl/build_config.h"
 
 #if OS_MACOSX
 #include "flutter/fml/platform/darwin/message_loop_darwin.h"

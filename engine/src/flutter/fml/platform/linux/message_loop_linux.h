@@ -7,9 +7,9 @@
 
 #include <atomic>
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/unique_fd.h"
-#include "lib/fxl/macros.h"
 
 namespace fml {
 
@@ -35,7 +35,7 @@ class MessageLoopLinux : public MessageLoopImpl {
 
   FRIEND_MAKE_REF_COUNTED(MessageLoopLinux);
   FRIEND_REF_COUNTED_THREAD_SAFE(MessageLoopLinux);
-  FXL_DISALLOW_COPY_AND_ASSIGN(MessageLoopLinux);
+  FML_DISALLOW_COPY_AND_ASSIGN(MessageLoopLinux);
 };
 
 }  // namespace fml

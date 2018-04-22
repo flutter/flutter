@@ -9,8 +9,8 @@
 #include <memory>
 #include <thread>
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/task_runner.h"
-#include "lib/fxl/macros.h"
 
 namespace fml {
 
@@ -31,7 +31,7 @@ class Thread {
 
   static void SetCurrentThreadName(const std::string& name);
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(Thread);
+  FML_DISALLOW_COPY_AND_ASSIGN(Thread);
 };
 
 }  // namespace fml

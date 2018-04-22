@@ -8,7 +8,7 @@
 #include <jni.h>
 #include <stddef.h>
 
-#include "lib/fxl/macros.h"
+#include "flutter/fml/macros.h"
 
 namespace fml {
 namespace jni {
@@ -27,7 +27,7 @@ class ScopedJavaLocalFrame {
   // it's safe to cache the non-threadsafe JNIEnv* inside this object.
   JNIEnv* env_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(ScopedJavaLocalFrame);
+  FML_DISALLOW_COPY_AND_ASSIGN(ScopedJavaLocalFrame);
 };
 
 // Forward declare the generic java reference template class.
@@ -65,7 +65,7 @@ class JavaRef<jobject> {
  private:
   jobject obj_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(JavaRef);
+  FML_DISALLOW_COPY_AND_ASSIGN(JavaRef);
 };
 
 // Generic base class for ScopedJavaLocalRef and ScopedJavaGlobalRef. Useful
@@ -83,7 +83,7 @@ class JavaRef : public JavaRef<jobject> {
   JavaRef(JNIEnv* env, T obj) : JavaRef<jobject>(env, obj) {}
 
  private:
-  FXL_DISALLOW_COPY_AND_ASSIGN(JavaRef);
+  FML_DISALLOW_COPY_AND_ASSIGN(JavaRef);
 };
 
 // Holds a local reference to a Java object. The local reference is scoped

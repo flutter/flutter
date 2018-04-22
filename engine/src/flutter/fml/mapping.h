@@ -10,8 +10,8 @@
 #include <vector>
 
 #include "flutter/fml//unique_fd.h"
-#include "lib/fxl/build_config.h"
-#include "lib/fxl/macros.h"
+#include "flutter/fml/build_config.h"
+#include "flutter/fml/macros.h"
 
 namespace fml {
 
@@ -26,7 +26,7 @@ class Mapping {
   virtual const uint8_t* GetMapping() const = 0;
 
  private:
-  FXL_DISALLOW_COPY_AND_ASSIGN(Mapping);
+  FML_DISALLOW_COPY_AND_ASSIGN(Mapping);
 };
 
 bool PlatformHasResourcesBundle();
@@ -53,7 +53,7 @@ class FileMapping : public Mapping {
   fml::UniqueFD mapping_handle_;
 #endif
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(FileMapping);
+  FML_DISALLOW_COPY_AND_ASSIGN(FileMapping);
 };
 
 class DataMapping : public Mapping {
@@ -69,7 +69,7 @@ class DataMapping : public Mapping {
  private:
   std::vector<uint8_t> data_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(DataMapping);
+  FML_DISALLOW_COPY_AND_ASSIGN(DataMapping);
 };
 
 }  // namespace fml

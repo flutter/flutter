@@ -9,8 +9,8 @@
 
 #include <windows.h>
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop_impl.h"
-#include "lib/fxl/macros.h"
 #include "lib/fxl/memory/unique_object.h"
 
 namespace fml {
@@ -38,7 +38,7 @@ class MessageLoopWin : public MessageLoopImpl {
 
   FRIEND_MAKE_REF_COUNTED(MessageLoopWin);
   FRIEND_REF_COUNTED_THREAD_SAFE(MessageLoopWin);
-  FXL_DISALLOW_COPY_AND_ASSIGN(MessageLoopWin);
+  FML_DISALLOW_COPY_AND_ASSIGN(MessageLoopWin);
 };
 
 }  // namespace fml

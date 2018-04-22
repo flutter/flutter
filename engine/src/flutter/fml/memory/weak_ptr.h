@@ -10,10 +10,10 @@
 
 #include <utility>
 
+#include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/memory/thread_checker.h"
 #include "flutter/fml/memory/weak_ptr_internal.h"
 #include "lib/fxl/logging.h"
-#include "lib/fxl/memory/ref_counted.h"
 
 namespace fml {
 
@@ -103,12 +103,12 @@ class WeakPtr {
   friend class WeakPtrFactory<T>;
 
   explicit WeakPtr(T* ptr,
-                   fxl::RefPtr<fml::internal::WeakPtrFlag>&& flag,
+                   fml::RefPtr<fml::internal::WeakPtrFlag>&& flag,
                    DebugThreadChecker checker)
       : ptr_(ptr), flag_(std::move(flag)), checker_(checker) {}
 
   T* ptr_;
-  fxl::RefPtr<fml::internal::WeakPtrFlag> flag_;
+  fml::RefPtr<fml::internal::WeakPtrFlag> flag_;
   DebugThreadChecker checker_;
 
   // Copy/move construction/assignment supported.
@@ -160,7 +160,7 @@ template <typename T>
 class WeakPtrFactory {
  public:
   explicit WeakPtrFactory(T* ptr)
-      : ptr_(ptr), flag_(fxl::MakeRefCounted<fml::internal::WeakPtrFlag>()) {
+      : ptr_(ptr), flag_(fml::MakeRefCounted<fml::internal::WeakPtrFlag>()) {
     FXL_DCHECK(ptr_);
   }
 
@@ -179,10 +179,10 @@ class WeakPtrFactory {
   // Note: See weak_ptr_internal.h for an explanation of why we store the
   // pointer here, instead of in the "flag".
   T* const ptr_;
-  fxl::RefPtr<fml::internal::WeakPtrFlag> flag_;
+  fml::RefPtr<fml::internal::WeakPtrFlag> flag_;
   DebugThreadChecker checker_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(WeakPtrFactory);
+  FML_DISALLOW_COPY_AND_ASSIGN(WeakPtrFactory);
 };
 
 }  // namespace fml

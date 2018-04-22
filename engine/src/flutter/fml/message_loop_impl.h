@@ -12,9 +12,9 @@
 #include <queue>
 #include <utility>
 
+#include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop.h"
 #include "lib/fxl/functional/closure.h"
-#include "lib/fxl/macros.h"
 #include "lib/fxl/memory/ref_counted.h"
 #include "lib/fxl/time/time_point.h"
 
@@ -81,7 +81,7 @@ class MessageLoopImpl : public fxl::RefCountedThreadSafe<MessageLoopImpl> {
 
   void RunExpiredTasks();
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(MessageLoopImpl);
+  FML_DISALLOW_COPY_AND_ASSIGN(MessageLoopImpl);
 };
 
 }  // namespace fml

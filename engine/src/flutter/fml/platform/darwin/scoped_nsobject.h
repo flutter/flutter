@@ -10,8 +10,8 @@
 // singled out because it is most typically included from other header files.
 #import <Foundation/NSObject.h>
 
-#include "lib/fxl/compiler_specific.h"
-#include "lib/fxl/macros.h"
+#include "flutter/fml/compiler_specific.h"
+#include "flutter/fml/macros.h"
 
 @class NSAutoreleasePool;
 
@@ -81,7 +81,7 @@ class scoped_nsprotocol {
   // scoped_nsprotocol<>::release() is like scoped_ptr<>::release.  It is NOT a
   // wrapper for [object_ release].  To force a scoped_nsprotocol<> to call
   // [object_ release], use scoped_nsprotocol<>::reset().
-  NST release() FXL_WARN_UNUSED_RESULT {
+  NST release() FML_WARN_UNUSED_RESULT {
     NST temp = object_;
     object_ = nil;
     return temp;
@@ -155,7 +155,7 @@ template <>
 class scoped_nsobject<NSAutoreleasePool> {
  private:
   explicit scoped_nsobject(NSAutoreleasePool* object = nil);
-  FXL_DISALLOW_COPY_AND_ASSIGN(scoped_nsobject);
+  FML_DISALLOW_COPY_AND_ASSIGN(scoped_nsobject);
 };
 
 }  // namespace fml

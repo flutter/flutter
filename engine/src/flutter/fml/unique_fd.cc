@@ -4,7 +4,7 @@
 
 #include "flutter/fml/unique_fd.h"
 
-#include "lib/fxl/files/eintr_wrapper.h"
+#include "flutter/fml/eintr_wrapper.h"
 
 namespace fml {
 namespace internal {
@@ -24,7 +24,7 @@ void UniqueFDTraits::Free(HANDLE fd) {
 namespace unix {
 
 void UniqueFDTraits::Free(int fd) {
-  IGNORE_EINTR(fd);
+  FML_IGNORE_EINTR(fd);
 }
 
 }  // namespace unix

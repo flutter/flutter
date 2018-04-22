@@ -5,8 +5,8 @@
 #ifndef FLUTTER_FML_UNIQUE_FD_H_
 #define FLUTTER_FML_UNIQUE_FD_H_
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/unique_object.h"
-#include "lib/fxl/build_config.h"
 
 #if OS_WIN
 

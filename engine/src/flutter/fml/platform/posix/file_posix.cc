@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "lib/fxl/files/eintr_wrapper.h"
+#include "flutter/fml/eintr_wrapper.h"
 
 namespace fml {
 
@@ -47,11 +47,11 @@ fml::UniqueFD OpenFile(const fml::UniqueFD& base_directory,
   }
 
   return fml::UniqueFD{
-      HANDLE_EINTR(::openat(base_directory.get(), path, flags))};
+      FML_HANDLE_EINTR(::openat(base_directory.get(), path, flags))};
 }
 
 fml::UniqueFD Duplicate(fml::UniqueFD::element_type descriptor) {
-  return fml::UniqueFD{HANDLE_EINTR(::dup(descriptor))};
+  return fml::UniqueFD{FML_HANDLE_EINTR(::dup(descriptor))};
 }
 
 bool IsDirectory(const fml::UniqueFD& directory) {

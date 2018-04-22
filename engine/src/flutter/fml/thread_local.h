@@ -7,9 +7,9 @@
 
 #include <functional>
 
-#include "lib/fxl/build_config.h"
+#include "flutter/fml/build_config.h"
+#include "flutter/fml/macros.h"
 #include "lib/fxl/logging.h"
-#include "lib/fxl/macros.h"
 
 #define FML_THREAD_LOCAL_PTHREADS OS_MACOSX || OS_LINUX || OS_ANDROID
 
@@ -55,7 +55,7 @@ class ThreadLocal {
     ThreadLocalDestroyCallback destroy_;
     intptr_t value_;
 
-    FXL_DISALLOW_COPY_AND_ASSIGN(Box);
+    FML_DISALLOW_COPY_AND_ASSIGN(Box);
   };
 
   static inline void ThreadLocalDestroy(void* value) {
@@ -106,7 +106,7 @@ class ThreadLocal {
   pthread_key_t _key;
   ThreadLocalDestroyCallback destroy_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(ThreadLocal);
+  FML_DISALLOW_COPY_AND_ASSIGN(ThreadLocal);
 };
 
 #else  // FML_THREAD_LOCAL_PTHREADS
@@ -144,7 +144,7 @@ class ThreadLocal {
   ThreadLocalDestroyCallback destroy_;
   intptr_t value_;
 
-  FXL_DISALLOW_COPY_AND_ASSIGN(ThreadLocal);
+  FML_DISALLOW_COPY_AND_ASSIGN(ThreadLocal);
 };
 
 #endif  // FML_THREAD_LOCAL_PTHREADS
