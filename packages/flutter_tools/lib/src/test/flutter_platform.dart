@@ -497,9 +497,21 @@ class _FlutterPlatform extends PlatformPlugin {
           break;
       }
 
-      if (subprocessActive && watcher != null) {
-        await watcher.onFinishedTests(
-            new ProcessEvent(ourTestCount, process, processObservatoryUri));
+      if (watcher != null) {
+        switch (initialResult) {
+          case _InitialResult.crashed:
+            await watcher.onTestCrashed(new ProcessEvent(ourTestCount, process));
+            break;
+          case _InitialResult.timedOut:
+            await watcher.onTestTimedOut(new ProcessEvent(ourTestCount, process));
+            break;
+          case _InitialResult.connected:
+            if (subprocessActive) {
+              await watcher.onFinishedTest(
+                  new ProcessEvent(ourTestCount, process, processObservatoryUri));
+            }
+            break;
+        }
       }
     } catch (error, stack) {
       printTrace('test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
