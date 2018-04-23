@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
+
 Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap: false }) {
   return new Localizations(
     locale: const Locale('en', 'US'),
@@ -65,6 +67,10 @@ double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(App
 double tabBarHeight(WidgetTester tester) => tester.getSize(find.byType(TabBar)).height;
 
 void main() {
+  setUp(() {
+    debugResetSemanticsIdCounter();
+  });
+
   testWidgets('AppBar centers title on iOS', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
@@ -1181,5 +1187,156 @@ void main() {
     expect(tester.getRect(find.byType(AppBar)), new Rect.fromLTRB(0.0, 0.0, 800.00, 100.0 + 56.0));
     expect(tester.getRect(find.byKey(leadingKey)), new Rect.fromLTRB(800.0 - 56.0, 100.0, 800.0, 100.0 + 56.0));
     expect(tester.getRect(find.byKey(trailingKey)), new Rect.fromLTRB(4.0, 100.0, 400.0 + 4.0, 100.0 + 56.0));
+  });
+
+  testWidgets('SliverAppBar provides correct semantics in LTR', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Center(
+          child: new AppBar(
+            leading: const Text('Leading'),
+            title: const Text('Title'),
+            actions: const <Widget>[
+              const Text('Action 1'),
+              const Text('Action 2'),
+              const Text('Action 3'),
+            ],
+            bottom: const PreferredSize(
+              preferredSize: const Size(0.0, kToolbarHeight),
+              child: const Text('Bottom'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics(
+            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+            children: <TestSemantics>[
+              new TestSemantics(
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    label: 'Leading',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                    label: 'Title',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    label: 'Action 1',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    label: 'Action 2',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    label: 'Action 3',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    label: 'Bottom',
+                    textDirection: TextDirection.ltr,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+      ignoreId: true,
+    ));
+
+    semantics.dispose();
+  });
+
+  testWidgets('SliverAppBar provides correct semantics in RTL', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Semantics(
+          textDirection: TextDirection.rtl,
+          child: new Directionality(
+            textDirection: TextDirection.rtl,
+            child: new Center(
+              child: new AppBar(
+                leading: const Text('Leading'),
+                title: const Text('Title'),
+                actions: const <Widget>[
+                  const Text('Action 1'),
+                  const Text('Action 2'),
+                  const Text('Action 3'),
+                ],
+                bottom: const PreferredSize(
+                  preferredSize: const Size(0.0, kToolbarHeight),
+                  child: const Text('Bottom'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics(
+            flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+            children: <TestSemantics>[
+              new TestSemantics(
+                textDirection: TextDirection.rtl,
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    children: <TestSemantics>[
+                      new TestSemantics(
+                        label: 'Leading',
+                        textDirection: TextDirection.rtl,
+                      ),
+                      new TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
+                        label: 'Title',
+                        textDirection: TextDirection.rtl,
+                      ),
+                      new TestSemantics(
+                        label: 'Action 1',
+                        textDirection: TextDirection.rtl,
+                      ),
+                      new TestSemantics(
+                        label: 'Action 2',
+                        textDirection: TextDirection.rtl,
+                      ),
+                      new TestSemantics(
+                        label: 'Action 3',
+                        textDirection: TextDirection.rtl,
+                      ),
+                      new TestSemantics(
+                        label: 'Bottom',
+                        textDirection: TextDirection.rtl,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+      ignoreId: true,
+    ));
+
+    semantics.dispose();
   });
 }

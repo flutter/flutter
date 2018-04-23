@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui' show SemanticsFlag;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -55,7 +54,7 @@ void _tests() {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await pumpTestWidget(tester);
     final String code = semantics
-      .generateTestSemanticsExpressionForCurrentSemanticsTree()
+      .generateTestSemanticsExpressionForCurrentSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest)
       .split('\n')
       .map((String line) => line.trim())
       .join('\n')
@@ -119,7 +118,6 @@ void _tests() {
                           tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
                           label: 'Plain text',
                           textDirection: TextDirection.ltr,
-                          nextNodeId: 4,
                         ),
                         new TestSemantics(
                           id: 4,
@@ -132,7 +130,6 @@ void _tests() {
                           decreasedValue: 'test-decreasedValue',
                           hint: 'test-hint',
                           textDirection: TextDirection.rtl,
-                          previousNodeId: 3,
                         ),
                       ],
                     ),

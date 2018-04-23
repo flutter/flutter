@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlag;
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -600,8 +598,6 @@ void main() {
               flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isObscured],
               value: expectedValue,
               textDirection: TextDirection.ltr,
-              nextNodeId: -1,
-              previousNodeId: -1,
             ),
           ],
         ),
