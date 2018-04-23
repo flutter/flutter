@@ -216,7 +216,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
 
   double get _backdropHeight {
     final RenderBox renderBox = _backdropKey.currentContext.findRenderObject();
-    return renderBox.size.height;
+    return math.max(0.0, renderBox.size.height - _kBackAppBarHeight - _kFrontClosedHeight);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -297,24 +297,23 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
                 child: child,
               );
             },
-            child: new Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                new GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: _toggleFrontLayer,
-                  onVerticalDragUpdate: _handleDragUpdate,
-                  onVerticalDragEnd: _handleDragEnd,
-                  child: widget.frontHeading,
-                ),
-                new Expanded(
-                  child: new _IgnorePointerWhileStatusIsNot(
-                    controller: _controller,
-                    status: AnimationStatus.completed,
-                    child: widget.frontLayer,
-                  ),
-                ),
-              ],
+            child: new _IgnorePointerWhileStatusIsNot(
+              controller: _controller,
+              status: AnimationStatus.completed,
+              child: widget.frontLayer,
+            ),
+          ),
+        ),
+        new PositionedTransition(
+          rect: frontRelativeRect,
+          child: new Container(
+            alignment: Alignment.topLeft,
+            child: new GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _toggleFrontLayer,
+              onVerticalDragUpdate: _handleDragUpdate,
+              onVerticalDragEnd: _handleDragEnd,
+              child: widget.frontHeading,
             ),
           ),
         ),

@@ -163,7 +163,6 @@ class _DemoItem extends StatelessWidget {
     final bool isDark = theme.brightness == Brightness.dark;
 
     return new RawMaterialButton(
-      key: new ValueKey<GalleryDemo>(demo),
       padding: EdgeInsets.zero,
       splashColor: theme.primaryColor.withOpacity(0.12),
       highlightColor: Colors.transparent,
@@ -244,11 +243,14 @@ class DemosPage extends StatelessWidget {
                 height: 1.0
               ),
             ),
-            frontLayer: new ListView(
-              padding: const EdgeInsets.only(top: 8.0),
-              children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
-                return new _DemoItem(demo: demo);
-              }).toList(),
+            frontLayer: new Padding(
+              padding: const EdgeInsets.only(top: 40.0),
+              child: new ListView(
+                padding: const EdgeInsets.only(top: 8.0),
+                children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
+                  return new _DemoItem(demo: demo);
+                }).toList(),
+              ),
             ),
           ),
         ),
@@ -302,12 +304,13 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
       key: _scaffoldKey,
       backgroundColor: isDark ? _kFlutterBlue : theme.primaryColor,
       body: new SafeArea(
+        bottom: false,
         child: new Backdrop(
           backTitle: const Text('Options'),
           backLayer: widget.optionsPage,
           frontAction: const _FlutterLogo(),
           frontTitle: const Text('Flutter gallery'),
-          frontHeading: const SizedBox(height: 16.0),
+          frontHeading: new Container(height: 24.0),
           frontLayer: new _CategoriesPage(
             categories: kAllGalleryDemoCategories,
           ),
