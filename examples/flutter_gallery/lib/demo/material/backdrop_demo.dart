@@ -386,11 +386,11 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
         ),
         actions: <Widget>[
           new IconButton(
-          onPressed: _toggleBackdropPanelVisibility,
-          icon: new AnimatedIcon(
-            icon: AnimatedIcons.close_menu,
-            progress: _controller.view,
-          ),
+            onPressed: _toggleBackdropPanelVisibility,
+            icon: new AnimatedIcon(
+              icon: AnimatedIcons.close_menu,
+              progress: _controller.view,
+            ),
           ),
         ],
       ),
