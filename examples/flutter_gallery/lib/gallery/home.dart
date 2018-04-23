@@ -12,6 +12,7 @@ import 'demos.dart';
 
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 const Color _kFlutterBlue = const Color(0xFF003D75);
+const double _kDemoItemHeight = 64.0;
 
 class _FlutterLogo extends StatelessWidget {
   const _FlutterLogo({ Key key }) : super(key: key);
@@ -161,6 +162,7 @@ class _DemoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
+    final double textScaleFactor = MediaQuery.of(context)?.textScaleFactor ?? 1.0;
 
     return new RawMaterialButton(
       padding: EdgeInsets.zero,
@@ -169,8 +171,8 @@ class _DemoItem extends StatelessWidget {
       onPressed: () {
         _launchDemo(context);
       },
-      child: new SizedBox(
-        height: 64.0,
+      child: new Container(
+        constraints: new BoxConstraints(minHeight: _kDemoItemHeight * textScaleFactor),
         child: new Row(
           children: <Widget>[
             new Container(
