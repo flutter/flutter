@@ -56,6 +56,15 @@ class PackagesGetCommand extends FlutterCommand {
     return '${runner.executableName} packages $name [<target directory>]';
   }
 
+  Future<void> _runPubGet (String directory) async {
+    await pubGet(context: PubContext.pubGet,
+      directory: directory,
+      upgrade: upgrade ,
+      offline: argResults['offline'],
+      checkLastModified: false,
+    );
+  }
+
   @override
   Future<Null> runCommand() async {
     if (argResults.rest.length > 1)
@@ -71,13 +80,16 @@ class PackagesGetCommand extends FlutterCommand {
       );
     }
 
-    await pubGet(context: PubContext.pubGet,
-      directory: target,
-      upgrade: upgrade,
-      offline: argResults['offline'],
-      checkLastModified: false,
-    );
-    new FlutterProject(fs.directory(target)).ensureReadyForPlatformSpecificTooling();
+    await _runPubGet(target);
+    final FlutterProject rootProject = new FlutterProject(fs.directory(target));
+    rootProject.ensureReadyForPlatformSpecificTooling();
+
+    // Get/upgrade packages in example app as well
+    if (rootProject.hasExampleApp) {
+      final FlutterProject exampleProject = rootProject.example;
+      await _runPubGet(exampleProject.directory.path);
+      exampleProject.ensureReadyForPlatformSpecificTooling();
+    }
   }
 }
 
