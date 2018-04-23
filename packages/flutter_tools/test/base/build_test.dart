@@ -374,7 +374,7 @@ void main() {
       }));
     }
 
-    Future<Null> buildSnapshot({ String mainPath = 'main.dart' }) {
+    Future<Null> buildScriptSnapshot({ String mainPath = 'main.dart' }) {
       return snapshotter.buildScriptSnapshot(
         mainPath: mainPath,
         snapshotPath: 'output.snapshot',
@@ -401,7 +401,7 @@ void main() {
       await fs.file('main.dart').writeAsString('void main() {}');
       await fs.file('output.snapshot').create();
       await fs.file('output.snapshot.d').writeAsString('snapshot : main.dart');
-      await buildSnapshot();
+      await buildScriptSnapshot();
 
       expect(genSnapshot.callCount, 1);
       expect(genSnapshot.snapshotType.platform, isNull);
@@ -430,7 +430,7 @@ void main() {
         'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
         'output.snapshot': 'deadbeef000b204e9800998ecaaaaa',
       });
-      await buildSnapshot();
+      await buildScriptSnapshot();
 
       expect(genSnapshot.callCount, 1);
       expectFingerprintHas(checksums: <String, String>{
@@ -446,7 +446,7 @@ void main() {
         'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
         'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
       });
-      await buildSnapshot();
+      await buildScriptSnapshot();
 
       expect(genSnapshot.callCount, 1);
       expectFingerprintHas(checksums: <String, String>{
@@ -473,7 +473,7 @@ void main() {
             'other.dart': 'e0c35f083f0ad76b2d87100ec678b516',
             'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
           });
-          await buildSnapshot(mainPath: 'other.dart');
+          await buildScriptSnapshot(mainPath: 'other.dart');
 
           expect(genSnapshot.callCount, 1);
           expectFingerprintHas(
@@ -496,7 +496,7 @@ void main() {
         'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
         'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
       });
-      await buildSnapshot();
+      await buildScriptSnapshot();
 
       expect(genSnapshot.callCount, 0);
       expectFingerprintHas(checksums: <String, String>{
