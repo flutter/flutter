@@ -5,8 +5,6 @@
 #ifndef FLUTTER_FML_MACROS_H_
 #define FLUTTER_FML_MACROS_H_
 
-#include "flutter/fml/macros.h"
-
 #ifndef FML_USED_ON_EMBEDDER
 
 #define FML_EMBEDDER_ONLY [[deprecated]]
