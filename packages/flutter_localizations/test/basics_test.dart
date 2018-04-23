@@ -50,16 +50,16 @@ void main() {
 
   testWidgets('Locale without coutryCode', (WidgetTester tester) async {
     await tester.pumpWidget(
-        new MaterialApp(
-          localizationsDelegates: <LocalizationsDelegate<dynamic>>[
-            GlobalMaterialLocalizations.delegate,
-          ],
-          supportedLocales: const <Locale>[
-            const Locale('es', 'ES'),
-            const Locale('zh'),
-          ],
-          home: new Container(),
-        )
+      new MaterialApp(
+        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+          GlobalMaterialLocalizations.delegate,
+        ],
+        supportedLocales: const <Locale>[
+          const Locale('es', 'ES'),
+          const Locale('zh'),
+        ],
+        home: new Container(),
+      )
     );
 
     await tester.binding.setLocale('zh', null);
