@@ -62,8 +62,7 @@ static Dart_Handle GetClosure(Dart_Handle builtin_library, const char* name) {
   return closure;
 }
 
-static void InitDartInternal(Dart_Handle builtin_library,
-                             DartRuntimeHooks::IsolateType isolate_type) {
+static void InitDartInternal(Dart_Handle builtin_library, bool is_ui_isolate) {
   Dart_Handle print = GetClosure(builtin_library, "_getPrintClosure");
 
   Dart_Handle internal_library = Dart_LookupLibrary(ToDart("dart:_internal"));
@@ -71,7 +70,7 @@ static void InitDartInternal(Dart_Handle builtin_library,
   DART_CHECK_VALID(
       Dart_SetField(internal_library, ToDart("_printClosure"), print));
 
-  if (isolate_type == DartRuntimeHooks::MainIsolate) {
+  if (is_ui_isolate) {
     // Call |_setupHooks| to configure |VMLibraryHooks|.
     Dart_Handle method_name = Dart_NewStringFromCString("_setupHooks");
     DART_CHECK_VALID(Dart_Invoke(builtin_library, method_name, 0, NULL))
@@ -97,14 +96,12 @@ static void InitDartCore(Dart_Handle builtin, const std::string& script_uri) {
       Dart_SetField(core_library, ToDart("_uriBaseClosure"), get_base_url));
 }
 
-static void InitDartAsync(Dart_Handle builtin_library,
-                          DartRuntimeHooks::IsolateType isolate_type) {
+static void InitDartAsync(Dart_Handle builtin_library, bool is_ui_isolate) {
   Dart_Handle schedule_microtask;
-  if (isolate_type == DartRuntimeHooks::MainIsolate) {
+  if (is_ui_isolate) {
     schedule_microtask =
         GetClosure(builtin_library, "_getScheduleMicrotaskClosure");
   } else {
-    FXL_CHECK(isolate_type == DartRuntimeHooks::SecondaryIsolate);
     Dart_Handle isolate_lib = Dart_LookupLibrary(ToDart("dart:isolate"));
     Dart_Handle method_name =
         Dart_NewStringFromCString("_getIsolateScheduleImmediateClosure");
@@ -132,13 +129,13 @@ static void InitDartIO(Dart_Handle builtin_library,
       Dart_SetField(platform_type, ToDart("_localeClosure"), locale_closure));
 }
 
-void DartRuntimeHooks::Install(IsolateType isolate_type,
+void DartRuntimeHooks::Install(bool is_ui_isolate,
                                const std::string& script_uri) {
   Dart_Handle builtin = Dart_LookupLibrary(ToDart("dart:ui"));
   DART_CHECK_VALID(builtin);
-  InitDartInternal(builtin, isolate_type);
+  InitDartInternal(builtin, is_ui_isolate);
   InitDartCore(builtin, script_uri);
-  InitDartAsync(builtin, isolate_type);
+  InitDartAsync(builtin, is_ui_isolate);
   InitDartIO(builtin, script_uri);
 }
 

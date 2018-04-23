@@ -220,7 +220,7 @@ bool DartIsolate::UpdateThreadPoolNames() const {
   return true;
 }
 
-bool DartIsolate::LoadLibraries() {
+bool DartIsolate::LoadLibraries(bool is_root_isolate) {
   TRACE_EVENT0("flutter", "DartIsolate::LoadLibraries");
   if (phase_ != Phase::Initialized) {
     return false;
@@ -234,9 +234,7 @@ bool DartIsolate::LoadLibraries() {
 
   const bool is_service_isolate = Dart_IsServiceIsolate(isolate());
 
-  DartRuntimeHooks::Install(is_service_isolate
-                                ? DartRuntimeHooks::SecondaryIsolate
-                                : DartRuntimeHooks::MainIsolate,
+  DartRuntimeHooks::Install(is_root_isolate && !is_service_isolate,
                             GetAdvisoryScriptURI());
 
   if (!is_service_isolate) {
@@ -675,7 +673,7 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
     return {nullptr, {}};
   }
 
-  if (!embedder_isolate->LoadLibraries()) {
+  if (!embedder_isolate->LoadLibraries(is_root_isolate)) {
     *error =
         strdup("Embedder could not load libraries in the new Dart isolate.");
     FXL_DLOG(ERROR) << *error;
