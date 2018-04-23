@@ -114,7 +114,7 @@ class DartIsolate : public UIDartState {
   bool Initialize(Dart_Isolate isolate, bool is_root_isolate);
 
   FXL_WARN_UNUSED_RESULT
-  bool LoadLibraries();
+  bool LoadLibraries(bool is_root_isolate);
 
   bool UpdateThreadPoolNames() const;
 
