@@ -27,13 +27,13 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     // This configuration uses a custom FloatingActionButtonLocation.
     const _FabLocationConfiguration('Start, docked to the top app bar', _BabMode.CENTER_FAB, const _StartTopFloatingActionButtonLocation()),
   ];
-  
+
   // The index of the currently-selected _FabShapeConfiguration.
   int fabShapeIndex = 1;
 
   static const List<_FabShapeConfiguration> _fabShapeConfigurations = const <_FabShapeConfiguration>[
       const _FabShapeConfiguration('None', null),
-      const _FabShapeConfiguration('Circular', 
+      const _FabShapeConfiguration('Circular',
         const FloatingActionButton(
           onPressed: _showSnackbar,
           child: const Icon(Icons.add),
@@ -75,18 +75,21 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: const Text('Bottom App Bar with FAB location'), 
+        title: const Text('Bottom app bar'),
         // Add 48dp of space onto the bottom of the appbar.
         // This gives space for the top-start location to attach to without
         // blocking the 'back' button.
         bottom: const PreferredSize(
-          preferredSize: const Size.fromHeight(48.0), 
+          preferredSize: const Size.fromHeight(48.0),
           child: const SizedBox(),
         ),
       ),
       body: new SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: buildControls(context),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16.0,
+          vertical: 24.0,
+        ),
+        child: new SafeArea(child: buildControls(context)),
       ),
       bottomNavigationBar: new _DemoBottomAppBar(_fabLocationConfigurations[fabLocationIndex].babMode, babColor, notchEnabled),
       floatingActionButton: _fabShapeConfigurations[fabShapeIndex].fab,
@@ -101,24 +104,22 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
           'Floating action button',
           style: Theme.of(context).textTheme.title,
         ),
+        const Padding(padding: const EdgeInsets.only(top: 24.0)),
         buildFabShapePicker(),
+        const Padding(padding: const EdgeInsets.only(top: 4.0)),
         buildFabLocationPicker(),
-        const Divider(),
+        const Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          child: const Divider(),
+        ),
         new Text(
           'Bottom app bar options',
           style: Theme.of(context).textTheme.title,
         ),
+        const Padding(padding: const EdgeInsets.only(top: 24.0)),
         buildBabColorPicker(),
-        new CheckboxListTile(
-          title: const Text('Enable notch'),
-          value: notchEnabled,
-          onChanged: (bool value) {
-            setState(() {
-              notchEnabled = value;
-            });
-          },
-          controlAffinity: ListTileControlAffinity.leading,
-        ),
+        const Padding(padding: const EdgeInsets.only(top: 4.0)),
+        buildBabNotchToggle(),
       ],
     );
   }
@@ -132,7 +133,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         ),
         new Expanded(
           child: new Padding(
-            padding: const EdgeInsets.all(8.0), 
+            padding: const EdgeInsets.all(8.0),
             child: new RaisedButton(
               child: const Text('Change shape'),
               onPressed: () {
@@ -157,7 +158,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
         ),
         new Expanded(
           child: new Padding(
-            padding: const EdgeInsets.all(8.0), 
+            padding: const EdgeInsets.all(8.0),
             child: new RaisedButton(
               child: const Text('Move'),
               onPressed: () {
@@ -173,42 +174,69 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   }
 
   Widget buildBabColorPicker() {
-    final List<Widget> colors = <Widget> [
-      const Text('Color:'),
-    ];
+    final List<Widget> colors = <Widget>[];
     for (Color color in babColors) {
       colors.add(
         new Semantics(
           label: 'Set Bottom App Bar color to ${colorToName[color]}',
           container: true,
-          child: new Row(children: <Widget> [
-            new Radio<Color>(
-              value: color,
-              groupValue: babColor,
-              onChanged: (Color color) {
-                setState(() {
-                  babColor = color;
-                });
-              },
-            ),
-            new Container(
-              decoration: new BoxDecoration(
-                color: color,
-                border: new Border.all(width:2.0, color: Colors.black),
+          child: new Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget> [
+              new Radio<Color>(
+                value: color,
+                groupValue: babColor,
+                onChanged: (Color color) {
+                  setState(() {
+                    babColor = color;
+                  });
+                },
               ),
-              child: const SizedBox(width: 20.0, height: 20.0),
-            ),
-            const Padding(padding: const EdgeInsets.only(left: 12.0)),
-          ]),
+              new Container(
+                decoration: new BoxDecoration(
+                  color: color,
+                  border: new Border.all(width:2.0, color: Colors.black),
+                ),
+                child: const SizedBox(width: 20.0, height: 20.0),
+              ),
+            ],
+          ),
         ),
       );
     }
-    return new SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: new Row(
-        children: colors,
-        mainAxisAlignment: MainAxisAlignment.center,
-      ),
+    return new Row(
+      children: <Widget>[
+        const SizedBox(
+          width: 86.0,
+          child: const Text('Color:'),
+        ),
+        new Expanded(
+          child: new Wrap(
+            spacing: 18.0,
+            runSpacing: 4.0,
+            children: colors,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildBabNotchToggle() {
+    return new Row(
+      children: <Widget>[
+        const SizedBox(
+          width: 86.0,
+          child: const Text('Notch:'),
+        ),
+        new Switch(
+          value: notchEnabled,
+          onChanged: (bool value) {
+            setState(() {
+              notchEnabled = value;
+            });
+          },
+        )
+      ],
     );
   }
 
@@ -227,7 +255,7 @@ const String _explanatoryText =
 // Whether the Bottom App Bar's menu should keep icons away from the center or from the end of the screen.
 //
 // When the Floating Action Button is positioned at the end of the screen,
-// it would cover icons at the end of the screen, so the END_FAB mode tells 
+// it would cover icons at the end of the screen, so the END_FAB mode tells
 // the MyBottomAppBar to place icons away from the end.
 //
 // Similar logic applies to the CENTER_FAB mode.
@@ -276,7 +304,7 @@ class _DemoBottomAppBar extends StatelessWidget {
       hasNotch: enableNotch,
       // TODO: Use an AnimatedCrossFade to build contents for centered FAB performantly.
       // Using AnimatedCrossFade here previously was causing https://github.com/flutter/flutter/issues/16377.
-      child: buildBabContents(context, _BabMode.END_FAB),  
+      child: buildBabContents(context, _BabMode.END_FAB),
     );
   }
 
@@ -500,7 +528,7 @@ class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation
         fabX = startPadding;
         break;
     }
-    // Finally, we'll place the Y coordinate for the Floating Action Button 
+    // Finally, we'll place the Y coordinate for the Floating Action Button
     // at the top of the content body.
     //
     // We want to place the middle of the Floating Action Button on the
