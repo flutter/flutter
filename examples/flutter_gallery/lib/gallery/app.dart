@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
+import 'package:url_launcher/url_launcher.dart';
+
 import 'demos.dart';
 import 'home.dart';
 import 'options.dart';
@@ -60,7 +62,9 @@ class _GalleryAppState extends State<GalleryApp> {
               optionsPage: new GalleryOptionsPage(
                 options: _options,
                 onOptionsChanged: _handleOptionsChanged,
-                onSendFeedback: widget.onSendFeedback,
+                onSendFeedback: widget.onSendFeedback ?? () {
+                  launch('https://github.com/flutter/flutter/issues/new');
+                },
               ),
             );
           };
@@ -126,7 +130,9 @@ class _GalleryAppState extends State<GalleryApp> {
       optionsPage: new GalleryOptionsPage(
         options: _options,
         onOptionsChanged: _handleOptionsChanged,
-        onSendFeedback: widget.onSendFeedback,
+        onSendFeedback: widget.onSendFeedback ?? () {
+          launch('https://github.com/flutter/flutter/issues/new');
+        },
       ),
     );
 
