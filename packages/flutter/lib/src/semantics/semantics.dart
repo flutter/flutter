@@ -1466,7 +1466,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     String prefixLineOne: '',
     String prefixOtherLines,
     DiagnosticLevel minLevel: DiagnosticLevel.debug,
-    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.geometricOrder,
+    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.traversalOrder,
   }) {
     assert(childOrder != null);
     return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
@@ -1476,7 +1476,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   DiagnosticsNode toDiagnosticsNode({
     String name,
     DiagnosticsTreeStyle style: DiagnosticsTreeStyle.sparse,
-    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.geometricOrder,
+    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.traversalOrder,
   }) {
     return new _SemanticsDiagnosticableNode(
       name: name,
@@ -1500,8 +1500,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       return const <SemanticsNode>[];
 
     switch (childOrder) {
-      case DebugSemanticsDumpOrder.geometricOrder:
-        return new List<SemanticsNode>.from(_children)..sort(_geometryComparator);
       case DebugSemanticsDumpOrder.inverseHitTest:
         return _children;
       case DebugSemanticsDumpOrder.traversalOrder:
@@ -1509,13 +1507,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     assert(false);
     return null;
-  }
-
-  static int _geometryComparator(SemanticsNode a, SemanticsNode b) {
-    final Rect rectA = a.transform == null ? a.rect : MatrixUtils.transformRect(a.transform, a.rect);
-    final Rect rectB = b.transform == null ? b.rect : MatrixUtils.transformRect(b.transform, b.rect);
-    final int top = rectA.top.compareTo(rectB.top);
-    return top == 0 ? rectA.left.compareTo(rectB.left) : top;
   }
 }
 
@@ -2836,14 +2827,6 @@ enum DebugSemanticsDumpOrder {
   /// asked first if it wants to respond to a user's interaction, followed by
   /// the second last, etc. until a taker is found.
   inverseHitTest,
-
-  /// Print nodes in geometric traversal order.
-  ///
-  /// Geometric traversal order is the default traversal order for semantics nodes which
-  /// don't have [SemanticsNode.sortOrder] set.  This traversal order ignores the node
-  /// sort order, since the diagnostics system follows the widget tree and can only sort
-  /// a node's children, and the semantics system sorts nodes globally.
-  geometricOrder,
 
   /// Print nodes in semantic traversal order.
   ///

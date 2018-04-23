@@ -125,7 +125,7 @@ void main() {
     expect(child2.transform, isNull);
 
     expect(
-      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.geometricOrder),
+      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder),
       'SemanticsNode#3\n'
       ' │ STALE\n'
       ' │ owner: null\n'
@@ -199,21 +199,21 @@ void main() {
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
     );
     expect(
-      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.geometricOrder),
+      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder),
       'SemanticsNode#3\n'
       ' │ STALE\n'
       ' │ owner: null\n'
       ' │ Rect.fromLTRB(0.0, 0.0, 20.0, 5.0)\n'
       ' │\n'
-      ' ├─SemanticsNode#2\n'
+      ' ├─SemanticsNode#1\n'
       ' │   STALE\n'
       ' │   owner: null\n'
-      ' │   Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
+      ' │   Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
       ' │\n'
-      ' └─SemanticsNode#1\n'
+      ' └─SemanticsNode#2\n'
       '     STALE\n'
       '     owner: null\n'
-      '     Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
+      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
     );
 
     expect(
@@ -254,36 +254,36 @@ void main() {
     );
 
     expect(
-      rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.geometricOrder),
+      rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversalOrder),
       'SemanticsNode#7\n'
       ' │ STALE\n'
       ' │ owner: null\n'
       ' │ Rect.fromLTRB(0.0, 0.0, 25.0, 5.0)\n'
       ' │\n'
-      ' ├─SemanticsNode#4\n'
-      ' │ │ STALE\n'
-      ' │ │ owner: null\n'
-      ' │ │ Rect.fromLTRB(0.0, 0.0, 10.0, 5.0)\n'
-      ' │ │\n'
-      ' │ ├─SemanticsNode#6\n'
-      ' │ │   STALE\n'
-      ' │ │   owner: null\n'
-      ' │ │   Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
-      ' │ │\n'
-      ' │ └─SemanticsNode#5\n'
-      ' │     STALE\n'
-      ' │     owner: null\n'
-      ' │     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
+      ' ├─SemanticsNode#1\n'
+      ' │   STALE\n'
+      ' │   owner: null\n'
+      ' │   Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
       ' │\n'
       ' ├─SemanticsNode#2\n'
       ' │   STALE\n'
       ' │   owner: null\n'
       ' │   Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
       ' │\n'
-      ' └─SemanticsNode#1\n'
-      '     STALE\n'
-      '     owner: null\n'
-      '     Rect.fromLTRB(15.0, 0.0, 20.0, 5.0)\n'
+      ' └─SemanticsNode#4\n'
+      '   │ STALE\n'
+      '   │ owner: null\n'
+      '   │ Rect.fromLTRB(0.0, 0.0, 10.0, 5.0)\n'
+      '   │\n'
+      '   ├─SemanticsNode#5\n'
+      '   │   STALE\n'
+      '   │   owner: null\n'
+      '   │   Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
+      '   │\n'
+      '   └─SemanticsNode#6\n'
+      '       STALE\n'
+      '       owner: null\n'
+      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
     );
 
     expect(
