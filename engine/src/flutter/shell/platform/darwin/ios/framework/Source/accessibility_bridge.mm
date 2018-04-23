@@ -40,15 +40,6 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   return blink::SemanticsAction::kScrollUp;
 }
 
-NSComparisonResult IntToComparisonResult(int32_t value) {
-  if (value > 0)
-    return (NSComparisonResult)NSOrderedDescending;
-  if (value < 0)
-    return (NSComparisonResult)NSOrderedAscending;
-
-  return (NSComparisonResult)NSOrderedSame;
-}
-
 }  // namespace
 
 /**
@@ -490,9 +481,6 @@ UIView<UITextInput>* AccessibilityBridge::textInputView() {
 }
 
 void AccessibilityBridge::UpdateSemantics(blink::SemanticsNodeUpdates nodes) {
-  // Children are received in paint order (inverse hit testing order). We need to bring them into
-  // traversal order (top left to bottom right, with hit testing order as tie breaker).
-  NSMutableSet<SemanticsObject*>* childOrdersToUpdate = [[NSMutableSet alloc] init];
   BOOL layoutChanged = NO;
   BOOL scrollOccured = NO;
 
@@ -505,36 +493,13 @@ void AccessibilityBridge::UpdateSemantics(blink::SemanticsNodeUpdates nodes) {
     const NSUInteger newChildCount = node.children.size();
     NSMutableArray* newChildren =
         [[[NSMutableArray alloc] initWithCapacity:newChildCount] autorelease];
-    for (NSUInteger i = 0; i < newChildCount; i++) {
-      [newChildren addObject:[NSNull null]];
-    }
-    object.children = newChildren;
     for (NSUInteger i = 0; i < newChildCount; ++i) {
       SemanticsObject* child = GetOrCreateObject(node.children[i], nodes);
       child.parent = object;
-      // Reverting to get hit testing order (as tie breaker for sorting below).
-      newChildren[newChildCount - i - 1] = child;
+      [newChildren addObject:child];
     }
-
-    [childOrdersToUpdate addObject:object];
-    if (object.parent)
-      [childOrdersToUpdate addObject:object.parent];
+    object.children = newChildren;
   }
-
-  // Bring children into traversal order.
-  for (SemanticsObject* object in childOrdersToUpdate) {
-    [object.children sortUsingComparator:^(SemanticsObject* a, SemanticsObject* b) {
-      // Should a go before b?
-      CGRect rectA = [a globalRect];
-      CGRect rectB = [b globalRect];
-      CGFloat top = rectA.origin.y - rectB.origin.y;
-      if (top == 0.0)
-        return IntToComparisonResult(rectA.origin.x - rectB.origin.x < 0.0);
-      return IntToComparisonResult(top);
-    }];
-  }
-
-  [childOrdersToUpdate release];
 
   SemanticsObject* root = objects_.get()[@(kRootNodeId)];
 
