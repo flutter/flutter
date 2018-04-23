@@ -60,6 +60,7 @@ import 'widgets_localizations.dart';
 ///   * th - Thai
 ///   * tr - Turkish
 ///   * ur - Urdu
+///   * vi - Vietnamese
 ///   * zh - Simplified Chinese
 ///
 /// See also:
@@ -534,6 +535,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'th', // Thai
     'tr', // Turkish
     'ur', // Urdu
+    'vi', // Vietnamese
     'zh', // Chinese (simplified)
   ];
 

@@ -36,7 +36,7 @@
   "showAccountsLabel": "Hesapları göster",
   "modalBarrierDismissLabel": "Kapat",
   "drawerLabel": "Gezinme menüsü",
-  "popupMenuLabel": "Açılır menü",
-  "dialogLabel": "Diyalog",
+  "popupMenuLabel": "Popup menü",
+  "dialogLabel": "İletişim kutusu",
   "alertDialogLabel": "Alarm"
 }
