@@ -290,8 +290,8 @@ class SizeTransition extends AnimatedWidget {
     return new ClipRect(
       child: new Align(
         alignment: alignment,
-        heightFactor: axis == Axis.vertical ? sizeFactor.value : null,
-        widthFactor: axis == Axis.horizontal ? sizeFactor.value : null,
+        heightFactor: axis == Axis.vertical ? math.max(sizeFactor.value, 0.0) : null,
+        widthFactor: axis == Axis.horizontal ? math.max(sizeFactor.value, 0.0) : null,
         child: child,
       )
     );
