@@ -11,7 +11,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../compile.dart';
@@ -164,8 +163,6 @@ Future<String> _buildAotSnapshot(
     return null;
   }
 
-  final String genSnapshot = artifacts.getArtifactPath(Artifact.genSnapshot, platform, buildMode);
-
   final Directory outputDir = fs.directory(outputPath);
   outputDir.createSync(recursive: true);
   final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
@@ -256,44 +253,26 @@ Future<String> _buildAotSnapshot(
     printError('Missing input files: $missingInputs');
     return null;
   }
-  if (!processManager.canRun(genSnapshot)) {
-    printError('Cannot locate the genSnapshot executable');
-    return null;
-  }
 
-  final List<String> genSnapshotCmd = <String>[];
-  // iOS gen_snapshot is a multi-arch binary. Running as an i386 binary will
-  // generate armv7 code. Running as an x86_64 binary will generate arm64
-  // code. /usr/bin/arch can be used to run binaries with the specified
-  // architecture.
-  //
-  // TODO(cbracken): update the GenSnapshot class to handle AOT builds.
-  if (platform == TargetPlatform.ios)
-    genSnapshotCmd.addAll(<String>['arch', '-x86_64']);
-  genSnapshotCmd.addAll(<String>[
-    genSnapshot,
-    '--await_is_keyword',
+  final List<String> genSnapshotArgs = <String>[
     '--vm_snapshot_data=$vmSnapshotData',
     '--isolate_snapshot_data=$isolateSnapshotData',
-    '--packages=${packageMap.packagesPath}',
     '--url_mapping=dart:ui,$uiPath',
     '--url_mapping=dart:vmservice_io,$vmServicePath',
-    '--print_snapshot_sizes',
     '--dependencies=$dependencies',
-    '--causal_async_stacks',
-  ]);
+  ];
 
   if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
     printTrace('Extra front-end options: $extraFrontEndOptions');
 
   if ((extraGenSnapshotOptions != null) && extraGenSnapshotOptions.isNotEmpty) {
     printTrace('Extra gen-snapshot options: $extraGenSnapshotOptions');
-    genSnapshotCmd.addAll(extraGenSnapshotOptions);
+    genSnapshotArgs.addAll(extraGenSnapshotOptions);
   }
 
   if (!interpreter) {
-    genSnapshotCmd.add('--embedder_entry_points_manifest=$vmEntryPoints');
-    genSnapshotCmd.add('--embedder_entry_points_manifest=$ioEntryPoints');
+    genSnapshotArgs.add('--embedder_entry_points_manifest=$vmEntryPoints');
+    genSnapshotArgs.add('--embedder_entry_points_manifest=$ioEntryPoints');
   }
 
   // iOS symbols used to load snapshot data in the engine.
@@ -313,18 +292,18 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       if (compileToSharedLibrary) {
-        genSnapshotCmd.add('--snapshot_kind=app-aot-assembly');
-        genSnapshotCmd.add('--assembly=$assembly');
+        genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
+        genSnapshotArgs.add('--assembly=$assembly');
         outputPaths.add(assemblySo);
       } else {
-        genSnapshotCmd.addAll(<String>[
+        genSnapshotArgs.addAll(<String>[
           '--snapshot_kind=app-aot-blobs',
           '--vm_snapshot_instructions=$vmSnapshotInstructions',
           '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
         ]);
       }
       if (platform == TargetPlatform.android_arm) {
-        genSnapshotCmd.addAll(<String>[
+        genSnapshotArgs.addAll(<String>[
           '--no-sim-use-hardfp', // Android uses the softfloat ABI.
           '--no-use-integer-division', // Not supported by the Pixel in 32-bit mode.
         ]);
@@ -332,15 +311,15 @@ Future<String> _buildAotSnapshot(
       break;
     case TargetPlatform.ios:
       if (interpreter) {
-        genSnapshotCmd.add('--snapshot_kind=core');
-        genSnapshotCmd.add(snapshotDartIOS);
+        genSnapshotArgs.add('--snapshot_kind=core');
+        genSnapshotArgs.add(snapshotDartIOS);
         outputPaths.addAll(<String>[
           kVmSnapshotDataO,
           kIsolateSnapshotDataO,
         ]);
       } else {
-        genSnapshotCmd.add('--snapshot_kind=app-aot-assembly');
-        genSnapshotCmd.add('--assembly=$assembly');
+        genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
+        genSnapshotArgs.add('--assembly=$assembly');
         outputPaths.add(assemblyO);
       }
       break;
@@ -353,7 +332,7 @@ Future<String> _buildAotSnapshot(
   }
 
   if (buildMode != BuildMode.release) {
-    genSnapshotCmd.addAll(<String>[
+    genSnapshotArgs.addAll(<String>[
       '--no-checked',
       '--conditional_directives',
     ]);
@@ -408,18 +387,22 @@ Future<String> _buildAotSnapshot(
     await outputDir.childFile('frontend_server.d')
         .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
 
-    genSnapshotCmd.addAll(<String>[
+    genSnapshotArgs.addAll(<String>[
       '--reify-generic-functions',
       '--strong',
     ]);
   }
 
-  genSnapshotCmd.add(mainPath);
+  genSnapshotArgs.add(mainPath);
 
-  final RunResult results = await runAsync(genSnapshotCmd);
-  if (results.exitCode != 0) {
-    printError('Dart snapshot generator failed with exit code ${results.exitCode}');
-    printError(results.toString());
+  final int genSnapshotExitCode = await genSnapshot.run(
+    snapshotType: new SnapshotType(platform, buildMode),
+    packagesPath: packageMap.packagesPath,
+    depfilePath: dependencies,
+    additionalArgs: genSnapshotArgs,
+  );
+  if (genSnapshotExitCode != 0) {
+    printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
     return null;
   }
 
