@@ -251,10 +251,6 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
 
         result.setSelected(object.hasFlag(Flag.IS_SELECTED));
         result.setText(object.getValueLabelHint());
-        if (object.previousNodeId != -1
-            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            result.setTraversalAfter(mOwner, object.previousNodeId);
-        }
 
         // Accessibility Focus
         if (mA11yFocusedObject != null && mA11yFocusedObject.id == virtualViewId) {
@@ -744,7 +740,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         String decreasedValue;
         String hint;
         TextDirection textDirection;
-        int previousNodeId;
+        int hitTestPosition;
 
         boolean hadPreviousConfig = false;
         int previousFlags;
@@ -797,7 +793,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         void log(String indent, boolean recursive) {
           Log.i(TAG, indent + "SemanticsObject id=" + id + " label=" + label + " actions=" +  actions + " flags=" + flags + "\n" +
                      indent + "  +-- textDirection=" + textDirection  + "\n"+
-                     indent + "  +-- previousNodeId=" + previousNodeId  + "\n"+
+                     indent + "  +-- hitTestPosition=" + hitTestPosition  + "\n"+
                      indent + "  +-- rect.ltrb=(" + left + ", " + top + ", " + right + ", " + bottom + ")\n" +
                      indent + "  +-- transform=" + Arrays.toString(transform) + "\n");
           if (children != null && recursive) {
@@ -844,7 +840,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
 
             textDirection = TextDirection.fromInt(buffer.getInt());
 
-            previousNodeId = buffer.getInt();
+            hitTestPosition = buffer.getInt();
 
             left = buffer.getFloat();
             top = buffer.getFloat();
