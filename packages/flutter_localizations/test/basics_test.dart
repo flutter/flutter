@@ -49,6 +49,7 @@ void main() {
   });
 
   testWidgets('Locale without coutryCode', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/16782
     await tester.pumpWidget(
       new MaterialApp(
         localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
