@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'about.dart';
 import 'scale.dart';
 import 'themes.dart';
 
@@ -371,13 +372,11 @@ class GalleryOptionsPage extends StatelessWidget {
     Key key,
     this.options,
     this.onOptionsChanged,
-    this.onAboutFlutterGallery,
     this.onSendFeedback,
   }) : super(key: key);
 
   final GalleryOptions options;
   final ValueChanged<GalleryOptions> onOptionsChanged;
-  final VoidCallback onAboutFlutterGallery;
   final VoidCallback onSendFeedback;
 
   List<Widget> _enabledDiagnosticItems() {
@@ -453,7 +452,9 @@ class GalleryOptionsPage extends StatelessWidget {
           <Widget>[
             const Divider(),
             const _Heading('Flutter gallery'),
-            new _ActionItem('About Flutter gallery', onAboutFlutterGallery),
+            new _ActionItem('About Flutter Gallery', () {
+              showGalleryAboutDialog(context);
+            }),
             new _ActionItem('Send feedback', onSendFeedback),
           ],
         ),
