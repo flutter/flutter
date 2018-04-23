@@ -512,32 +512,31 @@ void main() {
       ),
     );
 
-    // TODO(goderbauer): traversal order is incorrect, https://github.com/flutter/flutter/issues/14375
     final TestSemantics expected = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics(
           id: 1,
-          flags: <SemanticsFlag>[SemanticsFlag.isSelected],
-          actions: <SemanticsAction>[SemanticsAction.tap],
-          label: 'AC\nTab 1 of 3',
-          textDirection: TextDirection.ltr,
-          previousNodeId: 3, // Should be 2
-        ),
-        new TestSemantics(
-          id: 2,
-          actions: <SemanticsAction>[SemanticsAction.tap],
-          label: 'Alarm\nTab 2 of 3',
-          textDirection: TextDirection.ltr,
-          nextNodeId: 3,
-          previousNodeId: -1, // Should be 1
-        ),
-        new TestSemantics(
-          id: 3,
-          actions: <SemanticsAction>[SemanticsAction.tap],
-          label: 'Hot Tub\nTab 3 of 3',
-          textDirection: TextDirection.ltr,
-          nextNodeId: 1, // Should be -1
-          previousNodeId: 2,
+          children: <TestSemantics>[
+            new TestSemantics(
+              id: 2,
+              flags: <SemanticsFlag>[SemanticsFlag.isSelected],
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              label: 'AC\nTab 1 of 3',
+              textDirection: TextDirection.ltr,
+            ),
+            new TestSemantics(
+              id: 3,
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              label: 'Alarm\nTab 2 of 3',
+              textDirection: TextDirection.ltr,
+            ),
+            new TestSemantics(
+              id: 4,
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              label: 'Hot Tub\nTab 3 of 3',
+              textDirection: TextDirection.ltr,
+            ),
+          ],
         ),
       ],
     );
