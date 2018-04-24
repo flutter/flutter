@@ -62,7 +62,7 @@ class _GalleryAppState extends State<GalleryApp> {
                 options: _options,
                 onOptionsChanged: _handleOptionsChanged,
                 onSendFeedback: widget.onSendFeedback ?? () {
-                  launch('https://github.com/flutter/flutter/issues/new');
+                  launch('https://github.com/flutter/flutter/issues/new', forceSafariVC: false);
                 },
               ),
             );
