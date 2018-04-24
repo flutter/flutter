@@ -24,15 +24,14 @@ class MockArtifacts extends Mock implements Artifacts {}
 class _FakeGenSnapshot implements GenSnapshot {
   _FakeGenSnapshot({
     this.succeed: true,
-    this.snapshotPath: 'output.snapshot',
-    this.snapshotContent: '',
-    this.depfileContent: 'output.snapshot.d : main.dart',
+    this.outputs: const <String, String>{
+      'output.snapshot': '',
+      'output.snapshot.d': 'output.snapshot.d : main.dart',
+    },
   });
 
   final bool succeed;
-  final String snapshotPath;
-  final String snapshotContent;
-  final String depfileContent;
+  final Map<String, String> outputs;
   int _callCount = 0;
   SnapshotType _snapshotType;
   String _packagesPath;
@@ -64,8 +63,9 @@ class _FakeGenSnapshot implements GenSnapshot {
 
     if (!succeed)
       return 1;
-    await fs.file(snapshotPath).writeAsString(snapshotContent);
-    await fs.file(depfilePath).writeAsString(depfileContent);
+    outputs.forEach((String filePath, String fileContent) {
+      fs.file(filePath).writeAsString(fileContent);
+    });
     return 0;
   }
 }
@@ -82,6 +82,7 @@ void main() {
       expect(new SnapshotType(null, BuildMode.release), isNotNull);
     });
   });
+
   group('Fingerprint', () {
     MockFlutterVersion mockVersion;
     const String kVersion = '123456abcdef';
@@ -457,8 +458,10 @@ void main() {
 
     testUsingContext('builds snapshot and fingerprint when main entry point changes to other dependency', () async {
       final _FakeGenSnapshot genSnapshot = new _FakeGenSnapshot(
-        snapshotPath: 'output.snapshot',
-        depfileContent: 'output.snapshot : main.dart other.dart',
+        outputs: <String, String>{
+          'output.snapshot': '',
+          'output.snapshot.d': 'output.snapshot : main.dart other.dart',
+        },
       );
 
       await context.run<void>(
