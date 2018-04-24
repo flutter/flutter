@@ -258,7 +258,7 @@ class FlutterPlugin implements Plugin<Project> {
 
         Boolean previewDart2Value = false
         if (project.hasProperty('preview-dart-2')) {
-            previewDart2Value = project.property('preview-dart-2')
+            previewDart2Value = project.property('preview-dart-2').toBoolean()
         }
         String[] fileSystemRootsValue = null
         if (project.hasProperty('filesystem-roots')) {
@@ -270,8 +270,9 @@ class FlutterPlugin implements Plugin<Project> {
         }
         Boolean trackWidgetCreationValue = false
         if (project.hasProperty('track-widget-creation')) {
-            trackWidgetCreationValue = project.property('track-widget-creation')
+            trackWidgetCreationValue = project.property('track-widget-creation').toBoolean()
         }
+
         String extraFrontEndOptionsValue = null
         if (project.hasProperty('extra-front-end-options')) {
             extraFrontEndOptionsValue = project.property('extra-front-end-options')
@@ -282,7 +283,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
         Boolean preferSharedLibraryValue = false
         if (project.hasProperty('prefer-shared-library')) {
-            preferSharedLibraryValue = project.property('prefer-shared-library')
+            preferSharedLibraryValue = project.property('prefer-shared-library').toBoolean()
         }
         String targetPlatformValue = null
         if (project.hasProperty('target-platform')) {

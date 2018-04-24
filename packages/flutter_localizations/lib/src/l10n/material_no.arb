@@ -36,7 +36,7 @@
   "hideAccountsLabel": "Skjul kontoer",
   "showAccountsLabel": "Vis kontoer",
   "drawerLabel": "Navigasjonsmeny",
-  "popupMenuLabel": "Popup meny",
-  "dialogLabel": "Dialog",
+  "popupMenuLabel": "Forgrunnsmeny",
+  "dialogLabel": "Dialogboks",
   "alertDialogLabel": "Varsling"
 }

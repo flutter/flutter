@@ -47,6 +47,28 @@ void main() {
     await tester.pump();
     await tester.pumpWidget(new Container());
   });
+
+  testWidgets('Locale without coutryCode', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/pull/16782
+    await tester.pumpWidget(
+      new MaterialApp(
+        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+          GlobalMaterialLocalizations.delegate,
+        ],
+        supportedLocales: const <Locale>[
+          const Locale('es', 'ES'),
+          const Locale('zh'),
+        ],
+        home: new Container(),
+      )
+    );
+
+    await tester.binding.setLocale('zh', null);
+    await tester.pump();
+    await tester.binding.setLocale('es', 'US');
+    await tester.pump();
+
+  });
 }
 
 /// A localizations delegate that does not contain any useful data, and is only

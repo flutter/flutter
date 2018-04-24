@@ -102,8 +102,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///    create scroll positions and initialize this property.
   final bool keepScrollOffset;
 
-  /// A label that is used in the [toString] output. Intended to aid with
-  /// identifying animation controller instances in debug output.
+  /// A label that is used in the [toString] output.
+  ///
+  /// Intended to aid with identifying animation controller instances in debug
+  /// output.
   final String debugLabel;
 
   @override
@@ -123,10 +125,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   double _viewportDimension;
 
   /// Whether [viewportDimension], [minScrollExtent], [maxScrollExtent],
-  /// [outOfRange], and [atEdge] are available yet.
+  /// [outOfRange], and [atEdge] are available.
   ///
-  /// Set to true just before the first time that [applyNewDimensions] is
-  /// called.
+  /// Set to true just before the first time [applyNewDimensions] is called.
   bool get haveDimensions => _haveDimensions;
   bool _haveDimensions = false;
 
