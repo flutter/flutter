@@ -4,11 +4,12 @@
 
 #pragma once
 
-#include "lib/app/fidl/application_environment.fidl.h"
+#include <fuchsia/cpp/component.h>
+#include <fuchsia/cpp/ui.h>
+#include <fuchsia/cpp/views_v1.h>
+
 #include "lib/fxl/macros.h"
 #include "lib/ui/flutter/sdk_ext/src/natives.h"
-#include "lib/ui/views/fidl/view_containers.fidl.h"
-#include "lib/ui/views/fidl/views.fidl.h"
 #include "unique_fdio_ns.h"
 
 namespace flutter {
@@ -20,9 +21,9 @@ class IsolateConfigurator final : mozart::NativesDelegate {
  public:
   IsolateConfigurator(
       const UniqueFDIONS& fdio_ns,
-      mozart::ViewPtr& view,
+      views_v1::ViewPtr& view,
       component::ApplicationEnvironmentPtr application_environment,
-      f1dl::InterfaceRequest<component::ServiceProvider>
+      fidl::InterfaceRequest<component::ServiceProvider>
           outgoing_services_request);
 
   ~IsolateConfigurator();
@@ -34,12 +35,12 @@ class IsolateConfigurator final : mozart::NativesDelegate {
  private:
   bool used_ = false;
   const UniqueFDIONS& fdio_ns_;
-  mozart::ViewPtr& view_;
+  views_v1::ViewPtr& view_;
   component::ApplicationEnvironmentPtr application_environment_;
-  f1dl::InterfaceRequest<component::ServiceProvider> outgoing_services_request_;
+  fidl::InterfaceRequest<component::ServiceProvider> outgoing_services_request_;
 
   // |mozart::NativesDelegate|
-  mozart::View* GetMozartView() override;
+  views_v1::View* GetMozartView() override;
 
   void BindFuchsia();
 

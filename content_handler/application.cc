@@ -21,9 +21,9 @@ namespace flutter {
 std::pair<std::unique_ptr<fsl::Thread>, std::unique_ptr<Application>>
 Application::Create(
     Application::Delegate& delegate,
-    component::ApplicationPackagePtr package,
-    component::ApplicationStartupInfoPtr startup_info,
-    f1dl::InterfaceRequest<component::ApplicationController> controller) {
+    component::ApplicationPackage package,
+    component::ApplicationStartupInfo startup_info,
+    fidl::InterfaceRequest<component::ApplicationController> controller) {
   auto thread = std::make_unique<fsl::Thread>();
   std::unique_ptr<Application> application;
 
@@ -52,52 +52,48 @@ static std::string DebugLabelForURL(const std::string url) {
 
 Application::Application(
     Application::Delegate& delegate,
-    component::ApplicationPackagePtr package,
-    component::ApplicationStartupInfoPtr startup_info,
-    f1dl::InterfaceRequest<component::ApplicationController>
+    component::ApplicationPackage,
+    component::ApplicationStartupInfo startup_info,
+    fidl::InterfaceRequest<component::ApplicationController>
         application_controller_request)
     : delegate_(delegate),
-      debug_label_(DebugLabelForURL(startup_info->launch_info->url)),
+      debug_label_(DebugLabelForURL(startup_info.launch_info.url)),
       application_controller_(this) {
   application_controller_.set_error_handler([this]() { Kill(); });
 
   FXL_DCHECK(fdio_ns_.is_valid());
   // ApplicationLaunchInfo::url non-optional.
-  auto& launch_info = startup_info->launch_info;
+  auto& launch_info = startup_info.launch_info;
 
   // ApplicationLaunchInfo::arguments optional.
-  if (auto& arguments = launch_info->arguments) {
+  if (auto& arguments = launch_info.arguments) {
     settings_ = shell::SettingsFromCommandLine(
         fxl::CommandLineFromIterators(arguments->begin(), arguments->end()));
   }
 
-  // TODO: ApplicationLaunchInfo::out optional.
+  // TODO: ApplicationLaunchInfo::out.
 
-  // TODO: ApplicationLaunchInfo::err optional.
+  // TODO: ApplicationLaunchInfo::err.
 
   // ApplicationLaunchInfo::service_request optional.
-  if (launch_info->directory_request) {
+  if (launch_info.directory_request) {
     service_provider_bridge_.ServeDirectory(
-        std::move(launch_info->directory_request));
+        std::move(launch_info.directory_request));
   }
 
   // ApplicationLaunchInfo::flat_namespace optional.
-  if (auto& flat_namespace = startup_info->flat_namespace) {
-    for (size_t i = 0; i < flat_namespace->paths->size(); ++i) {
-      const auto& path = flat_namespace->paths->at(i);
-      if (path == "/svc") {
-        continue;
-      }
-
-      zx::channel dir = std::move(flat_namespace->directories->at(i));
-      zx_handle_t dir_handle = dir.release();
-      if (fdio_ns_bind(fdio_ns_.get(), path->data(), dir_handle) != ZX_OK) {
-        FXL_DLOG(ERROR) << "Could not bind path to namespace: " << path;
-        zx_handle_close(dir_handle);
-      }
+  for (size_t i = 0; i < startup_info.flat_namespace.paths->size(); ++i) {
+    const auto& path = startup_info.flat_namespace.paths->at(i);
+    if (path == "/svc") {
+      continue;
     }
-  } else {
-    FXL_DLOG(ERROR) << "There was no flat namespace.";
+
+    zx::channel dir = std::move(startup_info.flat_namespace.directories->at(i));
+    zx_handle_t dir_handle = dir.release();
+    if (fdio_ns_bind(fdio_ns_.get(), path->data(), dir_handle) != ZX_OK) {
+      FXL_DLOG(ERROR) << "Could not bind path to namespace: " << path;
+      zx_handle_close(dir_handle);
+    }
   }
 
   application_directory_.reset(fdio_ns_opendir(fdio_ns_.get()));
@@ -108,15 +104,11 @@ Application::Application(
 
   // TODO: ApplicationLaunchInfo::additional_services optional.
 
-  // ApplicationPackage::data: This is legacy FLX data. Ensure that we dont have
-  // any.
-  FXL_DCHECK(!package->data) << "Legacy FLX data must not be supplied.";
-
   // All launch arguments have been read. Perform service binding and
   // final settings configuration. The next call will be to create a view
   // for this application.
 
-  service_provider_bridge_.AddService<mozart::ViewProvider>(
+  service_provider_bridge_.AddService<views_v1::ViewProvider>(
       std::bind(&Application::CreateShellForView, this, std::placeholders::_1));
 
   component::ServiceProviderPtr outgoing_services;
@@ -193,10 +185,10 @@ void Application::AttemptVMLaunchWithCurrentSettings(
     return;
   }
 
-  auto lib = fxl::MakeRefCounted<fml::NativeLibrary>(
-      library_handle,  // library handle
-      true             // close the handle when done
-  );
+  auto lib =
+      fml::NativeLibrary::CreateWithHandle(library_handle,  // library handle
+                                           true  // close the handle when done
+      );
 
   auto symbol = [](const char* str) {
     return std::string{"_"} + std::string{str};
@@ -248,7 +240,7 @@ void Application::Detach() {
 }
 
 // |component::ApplicationController|
-void Application::Wait(const WaitCallback& callback) {
+void Application::Wait(WaitCallback callback) {
   wait_callbacks_.emplace_back(std::move(callback));
 }
 
@@ -281,14 +273,14 @@ void Application::OnEngineTerminate(const Engine* shell_holder) {
 }
 
 void Application::CreateShellForView(
-    f1dl::InterfaceRequest<mozart::ViewProvider> view_provider_request) {
+    fidl::InterfaceRequest<views_v1::ViewProvider> view_provider_request) {
   shells_bindings_.AddBinding(this, std::move(view_provider_request));
 }
 
-// |mozart::ViewProvider|
+// |views_v1::ViewProvider|
 void Application::CreateView(
-    f1dl::InterfaceRequest<mozart::ViewOwner> view_owner,
-    f1dl::InterfaceRequest<component::ServiceProvider>) {
+    fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner,
+    fidl::InterfaceRequest<component::ServiceProvider>) {
   if (!application_context_) {
     FXL_DLOG(ERROR) << "Application context was invalid when attempting to "
                        "create a shell for a view provider request.";

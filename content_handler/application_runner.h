@@ -7,10 +7,11 @@
 #include <memory>
 #include <unordered_map>
 
+#include <fuchsia/cpp/component.h>
+
 #include "application.h"
 #include "lib/app/cpp/application_context.h"
-#include "lib/app/fidl/application_runner.fidl.h"
-#include "lib/fidl/cpp/bindings/binding_set.h"
+#include "lib/fidl/cpp/binding_set.h"
 #include "lib/fsl/tasks/message_loop.h"
 #include "lib/fxl/functional/make_copyable.h"
 #include "lib/fxl/macros.h"
@@ -49,18 +50,18 @@ class ApplicationRunner final : public Application::Delegate,
 
   fxl::Closure on_termination_callback_;
   std::unique_ptr<component::ApplicationContext> host_context_;
-  f1dl::BindingSet<component::ApplicationRunner> active_applications_bindings_;
+  fidl::BindingSet<component::ApplicationRunner> active_applications_bindings_;
   std::unordered_map<const Application*, ActiveApplication>
       active_applications_;
 
   // |component::ApplicationRunner|
-  void StartApplication(component::ApplicationPackagePtr application,
-                        component::ApplicationStartupInfoPtr startup_info,
-                        f1dl::InterfaceRequest<component::ApplicationController>
+  void StartApplication(component::ApplicationPackage application,
+                        component::ApplicationStartupInfo startup_info,
+                        fidl::InterfaceRequest<component::ApplicationController>
                             controller) override;
 
   void RegisterApplication(
-      f1dl::InterfaceRequest<component::ApplicationRunner> request);
+      fidl::InterfaceRequest<component::ApplicationRunner> request);
 
   void UnregisterApplication(const Application* application);
 

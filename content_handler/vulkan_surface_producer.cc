@@ -151,13 +151,14 @@ bool VulkanSurfaceProducer::TransitionSurfacesToExternal(
     if (!command_buffer->Begin())
       return false;
 
-    GrBackendRenderTarget backendRT = vk_surface->GetSkiaSurface()->getBackendRenderTarget(
-        SkSurface::kFlushRead_BackendHandleAccess);
+    GrBackendRenderTarget backendRT =
+        vk_surface->GetSkiaSurface()->getBackendRenderTarget(
+            SkSurface::kFlushRead_BackendHandleAccess);
     if (!backendRT.isValid()) {
       return false;
     }
     GrVkImageInfo imageInfo;
-    if(!backendRT.getVkImageInfo(&imageInfo)) {
+    if (!backendRT.getVkImageInfo(&imageInfo)) {
       return false;
     }
 

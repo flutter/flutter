@@ -8,7 +8,7 @@
 
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/scene_update_context.h"
-#include "lib/fidl/cpp/bindings/interface_handle.h"
+#include "lib/fidl/cpp/interface_handle.h"
 #include "lib/fxl/functional/closure.h"
 #include "lib/fxl/macros.h"
 #include "lib/ui/scenic/client/resources.h"
@@ -33,7 +33,7 @@ class SessionConnection final {
 
   bool has_metrics() const { return scene_update_context_.has_metrics(); }
 
-  const ui::gfx::MetricsPtr& metrics() const {
+  const gfx::MetricsPtr& metrics() const {
     return scene_update_context_.metrics();
   }
 
@@ -53,7 +53,7 @@ class SessionConnection final {
   flow::SceneUpdateContext scene_update_context_;
   OnMetricsUpdate metrics_changed_callback_;
 
-  void OnSessionEvents(f1dl::Array<ui::EventPtr> events);
+  void OnSessionEvents(fidl::VectorPtr<ui::Event> events);
 
   void EnqueueClearOps();
 

@@ -8,16 +8,19 @@
 #include <memory>
 #include <set>
 
+#include <fuchsia/cpp/component.h>
+#include <fuchsia/cpp/views_v1.h>
+#include <fuchsia/cpp/views_v1_token.h>
+
 #include "engine.h"
 #include "flutter/common/settings.h"
 #include "lib/app/cpp/application_context.h"
-#include "lib/app/fidl/application_controller.fidl.h"
-#include "lib/fidl/cpp/bindings/binding_set.h"
+#include "lib/fidl/cpp/binding_set.h"
+#include "lib/fidl/cpp/interface_request.h"
 #include "lib/fsl/threading/thread.h"
 #include "lib/fxl/files/unique_fd.h"
 #include "lib/fxl/macros.h"
 #include "lib/svc/cpp/service_provider_bridge.h"
-#include "lib/ui/views/fidl/view_provider.fidl.h"
 #include "unique_fdio_ns.h"
 
 namespace flutter {
@@ -26,7 +29,7 @@ namespace flutter {
 // Flutter engine instances.
 class Application final : public Engine::Delegate,
                           public component::ApplicationController,
-                          public mozart::ViewProvider {
+                          public views_v1::ViewProvider {
  public:
   class Delegate {
    public:
@@ -38,9 +41,9 @@ class Application final : public Engine::Delegate,
   // This is a synchronous operation.
   static std::pair<std::unique_ptr<fsl::Thread>, std::unique_ptr<Application>>
   Create(Application::Delegate& delegate,
-         component::ApplicationPackagePtr package,
-         component::ApplicationStartupInfoPtr startup_info,
-         f1dl::InterfaceRequest<component::ApplicationController> controller);
+         component::ApplicationPackage package,
+         component::ApplicationStartupInfo startup_info,
+         fidl::InterfaceRequest<component::ApplicationController> controller);
 
   // Must be called on the same thread returned from the create call. The thread
   // may be collected after.
@@ -53,20 +56,20 @@ class Application final : public Engine::Delegate,
   UniqueFDIONS fdio_ns_ = UniqueFDIONSCreate();
   fxl::UniqueFD application_directory_;
   fxl::UniqueFD application_assets_directory_;
-  f1dl::Binding<component::ApplicationController> application_controller_;
-  f1dl::InterfaceRequest<component::ServiceProvider> outgoing_services_request_;
+  fidl::Binding<component::ApplicationController> application_controller_;
+  fidl::InterfaceRequest<component::ServiceProvider> outgoing_services_request_;
   component::ServiceProviderBridge service_provider_bridge_;
   std::unique_ptr<component::ApplicationContext> application_context_;
-  f1dl::BindingSet<mozart::ViewProvider> shells_bindings_;
+  fidl::BindingSet<views_v1::ViewProvider> shells_bindings_;
   std::set<std::unique_ptr<Engine>> shell_holders_;
   std::vector<WaitCallback> wait_callbacks_;
   std::pair<bool, uint32_t> last_return_code_;
 
   Application(
       Application::Delegate& delegate,
-      component::ApplicationPackagePtr package,
-      component::ApplicationStartupInfoPtr startup_info,
-      f1dl::InterfaceRequest<component::ApplicationController> controller);
+      component::ApplicationPackage package,
+      component::ApplicationStartupInfo startup_info,
+      fidl::InterfaceRequest<component::ApplicationController> controller);
 
   // |component::ApplicationController|
   void Kill() override;
@@ -75,18 +78,18 @@ class Application final : public Engine::Delegate,
   void Detach() override;
 
   // |component::ApplicationController|
-  void Wait(const WaitCallback& callback) override;
+  void Wait(WaitCallback callback) override;
 
-  // |mozart::ViewProvider|
+  // |views_v1::ViewProvider|
   void CreateView(
-      f1dl::InterfaceRequest<mozart::ViewOwner> view_owner,
-      f1dl::InterfaceRequest<component::ServiceProvider> services) override;
+      fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner,
+      fidl::InterfaceRequest<component::ServiceProvider> services) override;
 
   // |flutter::Engine::Delegate|
   void OnEngineTerminate(const Engine* holder) override;
 
   void CreateShellForView(
-      f1dl::InterfaceRequest<mozart::ViewProvider> view_provider_request);
+      fidl::InterfaceRequest<views_v1::ViewProvider> view_provider_request);
 
   void AttemptVMLaunchWithCurrentSettings(
       const blink::Settings& settings) const;

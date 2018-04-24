@@ -13,18 +13,8 @@
 
 namespace flutter {
 
-Surface::Surface(const ui::ScenicPtr& scenic,
-                 std::string debug_label,
-                 zx::eventpair import_token,
-                 OnMetricsUpdate session_metrics_did_change_callback,
-                 fxl::Closure session_error_callback)
-    : shell::Surface(std::make_unique<CompositorContext>(
-          scenic,
-          debug_label,
-          std::move(import_token),
-          std::move(session_metrics_did_change_callback),
-          std::move(session_error_callback))),
-      debug_label_(debug_label) {}
+Surface::Surface(std::string debug_label)
+    : debug_label_(std::move(debug_label)) {}
 
 Surface::~Surface() = default;
 
@@ -58,15 +48,15 @@ static zx_status_t DriverWatcher(int dirfd,
 }
 
 bool Surface::CanConnectToDisplay() {
-  constexpr char kDisplayDriverClass[] = "/dev/class/display";
-  fxl::UniqueFD fd(open(kDisplayDriverClass, O_DIRECTORY | O_RDONLY));
+  constexpr char kGpuDriverClass[] = "/dev/class/gpu";
+  fxl::UniqueFD fd(open(kGpuDriverClass, O_DIRECTORY | O_RDONLY));
   if (fd.get() < 0) {
-    FXL_DLOG(ERROR) << "Failed to open " << kDisplayDriverClass;
+    FXL_DLOG(ERROR) << "Failed to open " << kGpuDriverClass;
     return false;
   }
 
   zx_status_t status = fdio_watch_directory(
-      fd.get(), DriverWatcher, zx_deadline_after(ZX_SEC(1)), nullptr);
+      fd.get(), DriverWatcher, zx_deadline_after(ZX_SEC(5)), nullptr);
   return status == ZX_ERR_STOP;
 }
 

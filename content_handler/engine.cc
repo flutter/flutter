@@ -15,19 +15,15 @@
 #include "lib/fxl/synchronization/waitable_event.h"
 #include "platform_view.h"
 
-#ifdef ERROR
-#undef ERROR
-#endif
-
 namespace flutter {
 
 Engine::Engine(Delegate& delegate,
                std::string thread_label,
                component::ApplicationContext& application_context,
                blink::Settings settings,
-               f1dl::InterfaceRequest<mozart::ViewOwner> view_owner,
+               fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner,
                const UniqueFDIONS& fdio_ns,
-               f1dl::InterfaceRequest<component::ServiceProvider>
+               fidl::InterfaceRequest<component::ServiceProvider>
                    outgoing_services_request)
     : delegate_(delegate),
       thread_label_(std::move(thread_label)),
@@ -39,7 +35,7 @@ Engine::Engine(Delegate& delegate,
     thread.Run();
   }
 
-  mozart::ViewManagerPtr view_manager;
+  views_v1::ViewManagerPtr view_manager;
   application_context.ConnectToEnvironmentService(view_manager.NewRequest());
 
   zx::eventpair import_token, export_token;
@@ -66,9 +62,20 @@ Engine::Engine(Delegate& delegate,
 
   // Grab the accessibilty context writer that can understand the semtics tree
   // on the platform view.
-  maxwell::ContextWriterPtr accessibility_context_writer;
+  modular::ContextWriterPtr accessibility_context_writer;
   application_context.ConnectToEnvironmentService(
       accessibility_context_writer.NewRequest());
+
+  // Create the compositor context from the scenic pointer to create the
+  // rasterizer.
+  std::unique_ptr<flow::CompositorContext> compositor_context =
+      std::make_unique<flutter::CompositorContext>(
+          scenic,                              // scenic
+          thread_label_,                       // debug label
+          std::move(import_token),             // import token
+          on_session_metrics_change_callback,  // session metrics did change
+          on_session_error_callback            // session did encounter error
+      );
 
   // Setup the callback that will instantiate the platform view.
   shell::Shell::CreateCallback<shell::PlatformView> on_create_platform_view =
@@ -80,10 +87,8 @@ Engine::Engine(Delegate& delegate,
                          scenic = std::move(scenic),                          //
                          accessibility_context_writer =
                              std::move(accessibility_context_writer),  //
-                         export_token = std::move(export_token),       //
-                         import_token = std::move(import_token),       //
-                         on_session_metrics_change_callback,           //
-                         on_session_error_callback                     //
+                         export_token = std::move(export_token)        //
+
   ](shell::Shell& shell) mutable {
         return std::make_unique<flutter::PlatformView>(
             shell,                                           // delegate
@@ -94,21 +99,20 @@ Engine::Engine(Delegate& delegate,
             std::move(view_owner),                           // view owner
             std::move(scenic),                               // scenic
             std::move(export_token),                         // export token
-            std::move(import_token),                         // import token
             std::move(
-                accessibility_context_writer),  // accessibility context writer
-            std::move(on_session_metrics_change_callback),  // metrics change
-            std::move(on_session_error_callback)            // session_error
+                accessibility_context_writer)  // accessibility context writer
         );
       });
 
   // Setup the callback that will instantiate the rasterizer.
   shell::Shell::CreateCallback<shell::Rasterizer> on_create_rasterizer =
-      [](shell::Shell& shell) {
+      fxl::MakeCopyable([compositor_context = std::move(compositor_context)](
+                            shell::Shell& shell) mutable {
         return std::make_unique<shell::Rasterizer>(
-            shell.GetTaskRunners()  // task runners
+            shell.GetTaskRunners(),        // task runners
+            std::move(compositor_context)  // compositor context
         );
-      };
+      });
 
   // Get the task runners from the managed threads. The current thread will be
   // used as the "platform" thread.

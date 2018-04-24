@@ -4,13 +4,15 @@
 
 #pragma once
 
+#include <fuchsia/cpp/views_v1.h>
+#include <fuchsia/cpp/views_v1_token.h>
+
 #include "flutter/shell/common/shell.h"
 #include "isolate_configurator.h"
 #include "lib/app/cpp/application_context.h"
 #include "lib/fsl/threading/thread.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/weak_ptr.h"
-#include "lib/ui/views/fidl/view_manager.fidl.h"
 
 namespace flutter {
 
@@ -27,9 +29,9 @@ class Engine final {
          std::string thread_label,
          component::ApplicationContext& application_context,
          blink::Settings settings,
-         f1dl::InterfaceRequest<mozart::ViewOwner> view_owner,
+         fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner,
          const UniqueFDIONS& fdio_ns,
-         f1dl::InterfaceRequest<component::ServiceProvider>
+         fidl::InterfaceRequest<component::ServiceProvider>
              outgoing_services_request);
 
   ~Engine();

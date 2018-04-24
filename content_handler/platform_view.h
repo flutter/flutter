@@ -7,15 +7,16 @@
 #include <map>
 #include <set>
 
+#include <fuchsia/cpp/input.h>
+#include <fuchsia/cpp/modular.h>
+#include <fuchsia/cpp/views_v1.h>
+#include <fuchsia/cpp/views_v1_token.h>
+
 #include "accessibility_bridge.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/shell/common/platform_view.h"
-#include "lib/clipboard/fidl/clipboard.fidl.h"
-#include "lib/fidl/cpp/bindings/binding.h"
+#include "lib/fidl/cpp/binding.h"
 #include "lib/fxl/macros.h"
-#include "lib/ui/input/fidl/input_connection.fidl.h"
-#include "lib/ui/views/fidl/view_manager.fidl.h"
-#include "lib/ui/views/fidl/views.fidl.h"
 #include "surface.h"
 
 namespace flutter {
@@ -23,39 +24,36 @@ namespace flutter {
 // The per engine component residing on the platform thread is responsible for
 // all platform specific integrations.
 class PlatformView final : public shell::PlatformView,
-                           public mozart::ViewListener,
-                           public mozart::InputMethodEditorClient,
-                           public mozart::InputListener {
+                           public views_v1::ViewListener,
+                           public input::InputMethodEditorClient,
+                           public input::InputListener {
  public:
   PlatformView(
       PlatformView::Delegate& delegate,
       std::string debug_label,
       blink::TaskRunners task_runners,
       component::ServiceProviderPtr parent_environment_service_provider,
-      mozart::ViewManagerPtr& view_manager,
-      f1dl::InterfaceRequest<mozart::ViewOwner> view_owner,
+      views_v1::ViewManagerPtr& view_manager,
+      fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner,
       ui::ScenicPtr scenic,
       zx::eventpair export_token,
-      zx::eventpair import_token,
-      maxwell::ContextWriterPtr accessibility_context_writer,
-      OnMetricsUpdate on_session_metrics_did_change,
-      fxl::Closure session_error_callback);
+      modular::ContextWriterPtr accessibility_context_writer);
 
   ~PlatformView();
 
   void UpdateViewportMetrics(double pixel_ratio);
 
-  mozart::ViewPtr& GetMozartView();
+  views_v1::ViewPtr& GetMozartView();
 
  private:
   const std::string debug_label_;
-  mozart::ViewPtr view_;
-  f1dl::Binding<mozart::ViewListener> view_listener_;
-  mozart::InputConnectionPtr input_connection_;
-  f1dl::Binding<mozart::InputListener> input_listener_;
+  views_v1::ViewPtr view_;
+  fidl::Binding<views_v1::ViewListener> view_listener_;
+  input::InputConnectionPtr input_connection_;
+  fidl::Binding<input::InputListener> input_listener_;
   int current_text_input_client_ = 0;
-  f1dl::Binding<mozart::InputMethodEditorClient> ime_client_;
-  mozart::InputMethodEditorPtr ime_;
+  fidl::Binding<input::InputMethodEditorClient> ime_client_;
+  input::InputMethodEditorPtr ime_;
   modular::ClipboardPtr clipboard_;
   ui::ScenicPtr scenic_;
   AccessibilityBridge accessibility_bridge_;
@@ -70,31 +68,29 @@ class PlatformView final : public shell::PlatformView,
 
   void RegisterPlatformMessageHandlers();
 
-  void UpdateViewportMetrics(const mozart::ViewLayoutPtr& layout);
+  void UpdateViewportMetrics(const views_v1::ViewLayout& layout);
 
   void FlushViewportMetrics();
 
-  // |mozart::ViewListener|
-  void OnPropertiesChanged(
-      mozart::ViewPropertiesPtr properties,
-      const OnPropertiesChangedCallback& callback) override;
+  // |views_v1::ViewListener|
+  void OnPropertiesChanged(views_v1::ViewProperties properties,
+                           OnPropertiesChangedCallback callback) override;
 
-  // |mozart::InputMethodEditorClient|
-  void DidUpdateState(mozart::TextInputStatePtr state,
-                      mozart::InputEventPtr event) override;
+  // |input::InputMethodEditorClient|
+  void DidUpdateState(input::TextInputState state,
+                      std::unique_ptr<input::InputEvent> event) override;
 
-  // |mozart::InputMethodEditorClient|
-  void OnAction(mozart::InputMethodAction action) override;
+  // |input::InputMethodEditorClient|
+  void OnAction(input::InputMethodAction action) override;
 
-  // |mozart::InputListener|
-  void OnEvent(mozart::InputEventPtr event,
-               const OnEventCallback& callback) override;
+  // |input::InputListener|
+  void OnEvent(input::InputEvent event, OnEventCallback callback) override;
 
-  bool OnHandlePointerEvent(const mozart::PointerEventPtr& pointer);
+  bool OnHandlePointerEvent(const input::PointerEvent& pointer);
 
-  bool OnHandleKeyboardEvent(const mozart::KeyboardEventPtr& keyboard);
+  bool OnHandleKeyboardEvent(const input::KeyboardEvent& keyboard);
 
-  bool OnHandleFocusEvent(const mozart::FocusEventPtr& focus);
+  bool OnHandleFocusEvent(const input::FocusEvent& focus);
 
   // |shell::PlatformView|
   std::unique_ptr<shell::Surface> CreateRenderingSurface() override;

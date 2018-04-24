@@ -16,9 +16,9 @@ namespace flutter {
 
 IsolateConfigurator::IsolateConfigurator(
     const UniqueFDIONS& fdio_ns,
-    mozart::ViewPtr& view,
+    views_v1::ViewPtr& view,
     component::ApplicationEnvironmentPtr application_environment,
-    f1dl::InterfaceRequest<component::ServiceProvider>
+    fidl::InterfaceRequest<component::ServiceProvider>
         outgoing_services_request)
     : fdio_ns_(fdio_ns),
       view_(view),
@@ -42,7 +42,7 @@ bool IsolateConfigurator::ConfigureCurrentIsolate() {
 }
 
 // |mozart::NativesDelegate|
-mozart::View* IsolateConfigurator::GetMozartView() {
+views_v1::View* IsolateConfigurator::GetMozartView() {
   return view_.get();
 }
 
@@ -102,7 +102,7 @@ void IsolateConfigurator::BindScenic() {
       tonic::ToDart("_context"),  //
       tonic::DartConverter<uint64_t>::ToDart(reinterpret_cast<intptr_t>(
           static_cast<mozart::NativesDelegate*>(this)))));
-  mozart::ViewContainerPtr view_container;
+  views_v1::ViewContainerPtr view_container;
   view_->GetContainer(view_container.NewRequest());
   DART_CHECK_VALID(
       Dart_SetField(mozart_internal,                  //

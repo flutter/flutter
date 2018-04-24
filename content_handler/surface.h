@@ -16,18 +16,13 @@ namespace flutter {
 // thread.
 class Surface final : public shell::Surface {
  public:
-  Surface(const ui::ScenicPtr& scenic,
-          std::string debug_label,
-          zx::eventpair import_token,
-          OnMetricsUpdate session_metrics_did_change_callback,
-          fxl::Closure session_error_callback);
+  Surface(std::string debug_label);
 
   ~Surface() override;
 
  private:
   const bool valid_ = CanConnectToDisplay();
   const std::string debug_label_;
-  std::unique_ptr<CompositorContext> compositor_context_;
 
   // |shell::Surface|
   bool IsValid() override;

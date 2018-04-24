@@ -6,8 +6,9 @@
 
 #include <map>
 
+#include <fuchsia/cpp/modular.h>
+
 #include "flutter/lib/ui/semantics/semantics_node.h"
-#include "lib/context/fidl/context_writer.fidl.h"
 #include "lib/fxl/macros.h"
 
 namespace flutter {
@@ -16,7 +17,7 @@ namespace flutter {
 // with the Context Service.
 class AccessibilityBridge final {
  public:
-  AccessibilityBridge(maxwell::ContextWriterPtr writer);
+  AccessibilityBridge(modular::ContextWriterPtr writer);
 
   ~AccessibilityBridge();
 
@@ -25,7 +26,7 @@ class AccessibilityBridge final {
   void UpdateSemantics(const blink::SemanticsNodeUpdates& update);
 
  private:
-  maxwell::ContextWriterPtr writer_;
+  modular::ContextWriterPtr writer_;
   std::map<int, blink::SemanticsNode> semantics_nodes_;
 
   // Walk the semantics node tree starting at |id|, and store the id of each

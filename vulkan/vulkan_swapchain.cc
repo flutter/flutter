@@ -223,12 +223,12 @@ sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(
   }
 
   const GrVkImageInfo image_info = {
-      image,                     // image
-      GrVkAlloc(),               // alloc
-      VK_IMAGE_TILING_OPTIMAL,   // tiling
-      VK_IMAGE_LAYOUT_UNDEFINED, // layout
-      surface_format_.format,    // format
-      1,                         // level count
+      image,                      // image
+      GrVkAlloc(),                // alloc
+      VK_IMAGE_TILING_OPTIMAL,    // tiling
+      VK_IMAGE_LAYOUT_UNDEFINED,  // layout
+      surface_format_.format,     // format
+      1,                          // level count
   };
 
   // TODO(chinmaygarde): Setup the stencil buffer and the sampleCnt.
@@ -460,7 +460,7 @@ VulkanSwapchain::AcquireResult VulkanSwapchain::AcquireSurface() {
     FXL_DLOG(INFO) << "Could not access surface at the image index.";
     return error;
   }
-  
+
   GrBackendRenderTarget backendRT = surface->getBackendRenderTarget(
       SkSurface::kFlushRead_BackendHandleAccess);
   if (!backendRT.isValid()) {

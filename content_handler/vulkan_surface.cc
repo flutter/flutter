@@ -48,11 +48,8 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
 }
 
 VulkanSurface::~VulkanSurface() {
-  if (async_) {
-    wait_.Cancel(async_);
-    wait_.set_object(ZX_HANDLE_INVALID);
-    async_ = nullptr;
-  }
+  wait_.Cancel();
+  wait_.set_object(ZX_HANDLE_INVALID);
 }
 
 bool VulkanSurface::IsValid() const {
@@ -192,10 +189,12 @@ bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrContext> context,
       break;
     }
   }
+
   VkExportMemoryAllocateInfoKHR export_allocate_info = {
       .sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO_KHR,
       .pNext = nullptr,
       .handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_FUCHSIA_VMO_BIT_KHR};
+
   const VkMemoryAllocateInfo alloc_info = {
       .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
       .pNext = &export_allocate_info,
@@ -262,12 +261,12 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrContext> context,
   }
 
   const GrVkImageInfo image_info = {
-      vk_image_,                            // image
-      {vk_memory_, 0, memory_reqs.size, 0}, // alloc
-      image_create_info.tiling,             // tiling
-      image_create_info.initialLayout,      // layout
-      image_create_info.format,             // format
-      image_create_info.mipLevels,          // level count
+      vk_image_,                             // image
+      {vk_memory_, 0, memory_reqs.size, 0},  // alloc
+      image_create_info.tiling,              // tiling
+      image_create_info.initialLayout,       // layout
+      image_create_info.format,              // format
+      image_create_info.mipLevels,           // level count
   };
 
   GrBackendRenderTarget sk_render_target(size.width(), size.height(), 0,
@@ -399,10 +398,10 @@ void VulkanSurface::Reset() {
   }
 }
 
-async_wait_result_t VulkanSurface::OnHandleReady(
-    async_t* async,
-    zx_status_t status,
-    const zx_packet_signal_t* signal) {
+void VulkanSurface::OnHandleReady(async_t* async,
+                                  async::WaitBase* wait,
+                                  zx_status_t status,
+                                  const zx_packet_signal_t* signal) {
   if (status != ZX_OK)
     return;
   FXL_DCHECK(signal->observed & ZX_EVENT_SIGNALED);

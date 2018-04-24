@@ -4,8 +4,9 @@
 
 #pragma once
 
+#include <fuchsia/cpp/ui.h>
+
 #include "flutter/flow/compositor_context.h"
-#include "garnet/public/lib/ui/scenic/fidl/scenic.fidl-common.h"
 #include "lib/fxl/macros.h"
 #include "session_connection.h"
 

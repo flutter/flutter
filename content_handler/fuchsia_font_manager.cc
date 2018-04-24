@@ -32,14 +32,14 @@ void UnmapMemory(const void* buffer, void* context) {
   zx::vmar::root_self().unmap(reinterpret_cast<uintptr_t>(buffer), size);
 }
 
-sk_sp<SkData> MakeSkDataFromVMO(const fsl::SizedVmoTransportPtr& vmo) {
-  if (!fsl::SizedVmo::IsSizeValid(vmo->vmo, vmo->size) ||
-      vmo->size > std::numeric_limits<size_t>::max()) {
+sk_sp<SkData> MakeSkDataFromBuffer(const mem::Buffer& data) {
+  if (!fsl::SizedVmo::IsSizeValid(data.vmo, data.size) ||
+      data.size > std::numeric_limits<size_t>::max()) {
     return nullptr;
   }
-  uint64_t size = vmo->size;
+  uint64_t size = data.size;
   uintptr_t buffer = 0;
-  zx_status_t status = zx::vmar::root_self().map(0, vmo->vmo, 0, size,
+  zx_status_t status = zx::vmar::root_self().map(0, data.vmo, 0, size,
                                                  ZX_VM_FLAG_PERM_READ, &buffer);
   if (status != ZX_OK)
     return nullptr;
@@ -90,11 +90,11 @@ SkFontStyleSet* FuchsiaFontManager::onMatchFamily(
 SkTypeface* FuchsiaFontManager::onMatchFamilyStyle(
     const char family_name[],
     const SkFontStyle& style) const {
-  auto request = fonts::FontRequest::New();
-  request->family = family_name;
-  request->weight = style.weight();
-  request->width = style.width();
-  request->slant = ToFontSlant(style.slant());
+  fonts::FontRequest request;
+  request.family = family_name;
+  request.weight = style.weight();
+  request.width = style.width();
+  request.slant = ToFontSlant(style.slant());
 
   fonts::FontResponsePtr response;
   font_provider_->GetFont(
@@ -108,7 +108,7 @@ SkTypeface* FuchsiaFontManager::onMatchFamilyStyle(
     return nullptr;
   }
 
-  sk_sp<SkData> data = MakeSkDataFromVMO(response->data->vmo);
+  sk_sp<SkData> data = MakeSkDataFromBuffer(response->data.buffer);
   if (!data)
     return nullptr;
 

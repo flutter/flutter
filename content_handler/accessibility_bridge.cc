@@ -7,14 +7,13 @@
 #include <unordered_set>
 
 #include "lib/app/cpp/application_context.h"
-#include "lib/context/fidl/context_writer.fidl.h"
 #include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/rapidjson/rapidjson/stringbuffer.h"
 #include "third_party/rapidjson/rapidjson/writer.h"
 
 namespace flutter {
 
-AccessibilityBridge::AccessibilityBridge(maxwell::ContextWriterPtr writer)
+AccessibilityBridge::AccessibilityBridge(modular::ContextWriterPtr writer)
     : writer_(std::move(writer)) {}
 
 AccessibilityBridge::~AccessibilityBridge() = default;
