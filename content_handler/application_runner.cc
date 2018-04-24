@@ -8,6 +8,7 @@
 
 #include "flutter/lib/ui/text/font_collection.h"
 #include "fuchsia_font_manager.h"
+#include "third_party/skia/include/core/SkGraphics.h"
 #include "lib/icu_data/cpp/icu_data.h"
 
 namespace flutter {
@@ -15,6 +16,9 @@ namespace flutter {
 ApplicationRunner::ApplicationRunner(fxl::Closure on_termination_callback)
     : on_termination_callback_(std::move(on_termination_callback)),
       host_context_(component::ApplicationContext::CreateFromStartupInfo()) {
+
+  SkGraphics::Init();
+
   SetupICU();
 
   SetupGlobalFonts();
