@@ -93,3 +93,20 @@ TEST(MatrixDecomposition, Combination) {
   ASSERT_FLOAT_EQ(sine, decomposition.rotation().fData[2]);
   ASSERT_FLOAT_EQ(cos(rotation * 0.5), decomposition.rotation().fData[3]);
 }
+
+TEST(MatrixDecomposition, DISABLED_ScaleFloatError) {
+  SkMatrix44 matrix = SkMatrix44::I();
+
+  const auto scale = 1.7734375f;
+  matrix.setScale(scale, scale, 1.f);
+
+  flow::MatrixDecomposition decomposition(matrix);
+  ASSERT_TRUE(decomposition.IsValid());
+
+  ASSERT_FLOAT_EQ(scale, decomposition.scale().fX);
+  ASSERT_FLOAT_EQ(scale, decomposition.scale().fY);
+  ASSERT_FLOAT_EQ(1.f, decomposition.scale().fZ);
+  ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[0]);
+  ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[1]);
+  ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[2]);
+}
