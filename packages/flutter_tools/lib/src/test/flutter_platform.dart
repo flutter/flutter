@@ -63,6 +63,7 @@ void installHook({
   int port: 0,
   String precompiledDillPath,
   bool trackWidgetCreation: false,
+  bool updateGoldens: false,
   int observatoryPort,
   InternetAddressType serverType: InternetAddressType.IP_V4,
 }) {
@@ -81,6 +82,7 @@ void installHook({
       port: port,
       precompiledDillPath: precompiledDillPath,
       trackWidgetCreation: trackWidgetCreation,
+      updateGoldens: updateGoldens,
     ),
   );
 }
@@ -211,6 +213,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.port,
     this.precompiledDillPath,
     this.trackWidgetCreation,
+    this.updateGoldens,
   }) : assert(shellPath != null);
 
   final String shellPath;
@@ -224,6 +227,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final int port;
   final String precompiledDillPath;
   final bool trackWidgetCreation;
+  final bool updateGoldens;
 
   _Compiler compiler;
 
@@ -568,7 +572,7 @@ class _FlutterPlatform extends PlatformPlugin {
     final File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
     listenerFile.createSync();
     listenerFile.writeAsStringSync(_generateTestMain(
-      testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
+      testUrl: fs.path.toUri(fs.path.absolute(testPath)),
       encodedWebsocketUrl: Uri.encodeComponent(_getWebSocketUrl()),
     ));
     return listenerFile.path;
@@ -616,7 +620,7 @@ class _FlutterPlatform extends PlatformPlugin {
   }
 
   String _generateTestMain({
-    String testUrl,
+    Uri testUrl,
     String encodedWebsocketUrl,
   }) {
     return '''
@@ -628,6 +632,7 @@ import 'dart:io';  // ignore: dart_io_import
 // to add a dependency on package:test.
 import 'package:test/src/runner/plugin/remote_platform_helpers.dart';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/src/runner/vm/catch_isolate_errors.dart';
 
@@ -639,6 +644,8 @@ void main() {
   String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
   StreamChannel channel = serializeSuite(() {
     catchIsolateErrors();
+    goldenFileComparator = new LocalFileComparator(Uri.parse('$testUrl'));
+    autoUpdateGoldenFiles = $updateGoldens;
     return test.main;
   });
   WebSocket.connect(server).then((WebSocket socket) {

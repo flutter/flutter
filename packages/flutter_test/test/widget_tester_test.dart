@@ -20,7 +20,7 @@ void main() {
   group('expectLater', () {
     testWidgets('completes when matcher completes', (WidgetTester tester) async {
       final Completer<void> completer = new Completer<void>();
-      final Future<Null> future = expectLater(null, new FakeMatcher(completer));
+      final Future<void> future = expectLater(null, new FakeMatcher(completer));
       String value;
       future.then((void _) {
         value = '123';
@@ -31,19 +31,6 @@ void main() {
       await future;
       await tester.pump();
       test_package.expect(value, '123');
-    });
-
-    testWidgets('Prevents re-entrant calls', (WidgetTester tester) async {
-      final Completer<void> completer = new Completer<void>();
-      final Future<Null> future = expectLater(null, new FakeMatcher(completer));
-      try {
-        expectLater(null, new FakeMatcher(completer));
-        fail('FlutterError expected but not thrown');
-      } on FlutterError catch (error) {
-        completer.complete();
-        await future;
-        expect(error.message, contains('Guarded function conflict'));
-      }
     });
   });
 
