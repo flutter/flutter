@@ -151,11 +151,11 @@ class _Compiler {
               request.path);
           final String outputPath = compilerOutput?.outputFilename;
 
-          // Check if the compiler produced the output. If it failed then
-          // outputPath would be null. In this case pass null upwards to the
-          // consumer and shutdown the compiler to avoid reusing compiler
-          // that might have gotten into a weird state.
-          if (outputPath == null) {
+          // In case compiler didn't produce output or reported compilation
+          // errors, pass [null] upwards to the consumer and shutdown the
+          // compiler to avoid reusing compiler that might have gotten into
+          // a weird state.
+          if (outputPath == null || compilerOutput.errorCount > 0) {
             request.result.complete(null);
             await shutdown();
           } else {
