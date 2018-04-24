@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection' show LinkedHashSet;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -97,9 +96,7 @@ Future<Null> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
 }
 
 Future<Null> smokeOptionsPage(WidgetTester tester) async {
-  final Finder showOptionsPageButton = find.byWidgetPredicate((Widget widget) {
-    return widget is AnimatedIcon && widget.semanticLabel == 'Show options page';
-  });
+  final Finder showOptionsPageButton = find.byTooltip('Show options page');
 
   // Show the options page
   await tester.tap(showOptionsPageButton);

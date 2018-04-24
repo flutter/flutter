@@ -12,7 +12,7 @@ import 'themes.dart';
 class GalleryOptions {
   GalleryOptions({
     this.theme,
-    this.textScaleFactor: kAllGalleryTextScaleValues[0],
+    this.textScaleFactor,
     this.textDirection: TextDirection.ltr,
     this.timeDilation: 1.0,
     this.platform,
@@ -325,6 +325,8 @@ class _PlatformItem extends StatelessWidget {
       case TargetPlatform.iOS:
         return 'iOS';
     }
+    assert(false);
+    return null;
   }
 
   @override

@@ -16,9 +16,7 @@ void main() {
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
-    final Finder showOptionsPageButton = find.byWidgetPredicate((Widget widget) {
-      return widget is AnimatedIcon && widget.semanticLabel == 'Show options page';
-    });
+    final Finder showOptionsPageButton = find.byTooltip('Show options page');
 
     // Show the options page
     await tester.tap(showOptionsPageButton);
