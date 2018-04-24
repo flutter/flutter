@@ -9,6 +9,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../buildconfig_generator.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -272,6 +273,7 @@ class RunCommand extends RunCommandBase {
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
+    generateBuildConfigClass(buildInfo: getBuildInfo());
 
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.

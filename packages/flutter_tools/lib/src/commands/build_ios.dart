@@ -52,6 +52,9 @@ class BuildIOSCommand extends BuildSubCommand {
   final String description = 'Build an iOS application bundle (Mac OS X host only).';
 
   @override
+  bool get shouldGenerateBuildConfigClass => true;
+
+  @override
   Future<Null> runCommand() async {
     final bool forSimulator = argResults['simulator'];
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
