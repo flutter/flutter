@@ -280,11 +280,14 @@ class _SshPortForwarder implements PortForwarder {
     }
     final String targetAddress =
         isIpV6 && interface.isNotEmpty ? '$address%$interface' : address;
+    const String dummyRemoteCommand = 'date';
     command.addAll(<String>[
       '-nNT',
+      '-f',
       '-L',
       formattedForwardingUrl,
       targetAddress,
+      dummyRemoteCommand,
     ]);
     _log.fine("_SshPortForwarder running '${command.join(' ')}'");
     final Process process = await _processManager.start(command);
