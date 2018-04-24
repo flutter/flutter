@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "flutter/common/task_runners.h"
+#include "flutter/flow/compositor_context.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/surface.h"
@@ -20,6 +21,9 @@ namespace shell {
 class Rasterizer final {
  public:
   Rasterizer(blink::TaskRunners task_runners);
+
+  Rasterizer(blink::TaskRunners task_runners,
+             std::unique_ptr<flow::CompositorContext> compositor_context);
 
   ~Rasterizer();
 
@@ -62,7 +66,7 @@ class Rasterizer final {
  private:
   blink::TaskRunners task_runners_;
   std::unique_ptr<Surface> surface_;
-  flow::CompositorContext compositor_context_;
+  std::unique_ptr<flow::CompositorContext> compositor_context_;
   std::unique_ptr<flow::LayerTree> last_layer_tree_;
   fxl::Closure next_frame_callback_;
   fml::WeakPtrFactory<Rasterizer> weak_factory_;

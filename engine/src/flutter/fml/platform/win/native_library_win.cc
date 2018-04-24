@@ -37,6 +37,14 @@ fxl::RefPtr<NativeLibrary> NativeLibrary::Create(const char* path) {
   return library->GetHandle() != nullptr ? library : nullptr;
 }
 
+fxl::RefPtr<NativeLibrary> NativeLibrary::CreateWithHandle(
+    Handle handle,
+    bool close_handle_when_done) {
+  auto library =
+      fxl::AdoptRef(new NativeLibrary(handle, close_handle_when_done));
+  return library->GetHandle() != nullptr ? library : nullptr;
+}
+
 fxl::RefPtr<NativeLibrary> NativeLibrary::CreateForCurrentProcess() {
   return fxl::AdoptRef(new NativeLibrary(::GetModuleHandle(nullptr), false));
 }
