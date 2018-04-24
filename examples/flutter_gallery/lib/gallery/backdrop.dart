@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
 const double _kFrontHeadingHeight = 32.0; // front layer beveled rectangle
-const double _kFrontClosedHeight = 72.0; // front layer height when closed
+const double _kFrontClosedHeight = 92.0; // front layer height when closed
 const double _kBackAppBarHeight = 56.0; // back layer (options) appbar height
 
 // The size of the front layer heading's left and right beveled corners.
@@ -245,9 +245,19 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
     final Animation<RelativeRect> frontRelativeRect = new RelativeRectTween(
-      begin: new RelativeRect.fromLTRB(0.0, constraints.biggest.height - _kFrontClosedHeight, 0.0, 0.0),
+      begin: new RelativeRect.fromLTRB(
+        0.0,
+        constraints.biggest.height - _kFrontClosedHeight,
+        0.0,
+        0.0
+      ),
       end: const RelativeRect.fromLTRB(0.0, _kBackAppBarHeight, 0.0, 0.0),
     ).animate(_controller);
+
+    final Animation<double> frontOpacity = new CurvedAnimation(
+      parent: new Tween<double>(begin: 0.5, end: 1.0).animate(_controller),
+      curve: Curves.easeIn,
+    );
 
     return new Stack(
       key: _backdropKey,
@@ -302,7 +312,10 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
             child: new _IgnorePointerWhileStatusIsNot(
               AnimationStatus.completed,
               controller: _controller,
-              child: widget.frontLayer,
+              child: new FadeTransition(
+                opacity: frontOpacity,
+                child: widget.frontLayer,
+              ),
             ),
           ),
         ),
