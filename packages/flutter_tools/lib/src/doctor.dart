@@ -30,8 +30,7 @@ abstract class DoctorValidatorsProvider {
   /// The singleton instance, pulled from the [AppContext].
   static DoctorValidatorsProvider get instance => context[DoctorValidatorsProvider];
 
-  static final DoctorValidatorsProvider _defaultInstance = new _DefaultDoctorValidatorsProvider();
-  static DoctorValidatorsProvider get defaultInstance => _defaultInstance;
+  static final DoctorValidatorsProvider defaultInstance = new _DefaultDoctorValidatorsProvider();
 
   List<DoctorValidator> get validators;
 }
