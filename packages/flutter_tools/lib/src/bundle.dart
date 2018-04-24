@@ -85,6 +85,7 @@ Future<void> build({
         ..add(mainPath);
       final Map<String, String> properties = <String, String>{
         'entryPoint': mainPath,
+        'trackWidgetCreation': trackWidgetCreation.toString(),
       };
       return new Fingerprint.fromBuildInputs(properties, compilerInputPaths);
     }
