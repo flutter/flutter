@@ -17,7 +17,7 @@ void main() {
       // The bug only manifests itself when the screen's orientation is portrait
       const Center(
         child: const SizedBox(
-          width: 400.0,
+          width: 450.0,
           height: 800.0,
           child: const GalleryApp()
         )
@@ -42,11 +42,13 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  /*
   testWidgets('Pesto can be scrolled all the way down', (WidgetTester tester) async {
     await tester.pumpWidget(const GalleryApp());
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
+
+    await tester.tap(find.text('Demos'));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Pesto'));
     await tester.pumpAndSettle();
@@ -55,5 +57,4 @@ void main() {
     await tester.pumpAndSettle(); // start and finish fling
     expect(find.text('Sicilian-Style sardines'), findsOneWidget);
   });
-  */
 }
