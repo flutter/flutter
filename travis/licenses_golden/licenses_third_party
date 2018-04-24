@@ -1,4 +1,4 @@
-Signature: ae48a97662b0948430ef3a0e95bf3730
+Signature: f189cf14d77aade905e2e7bf9a892c1b
 
 UNUSED LICENSES:
 
@@ -17196,6 +17196,7 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionSetPath.cpp
 FILE: ../../../third_party/skia/gm/hugepath.cpp
 FILE: ../../../third_party/skia/gm/localmatrixshader.cpp
 FILE: ../../../third_party/skia/gm/makeRasterImage.cpp
+FILE: ../../../third_party/skia/gm/mandoline.cpp
 FILE: ../../../third_party/skia/gm/orientation.cpp
 FILE: ../../../third_party/skia/gm/pathmeasure.cpp
 FILE: ../../../third_party/skia/gm/polygonoffset.cpp
@@ -17317,10 +17318,10 @@ FILE: ../../../third_party/skia/third_party/skcms/src/ICCProfile.c
 FILE: ../../../third_party/skia/third_party/skcms/src/LinearAlgebra.c
 FILE: ../../../third_party/skia/third_party/skcms/src/LinearAlgebra.h
 FILE: ../../../third_party/skia/third_party/skcms/src/Macros.h
+FILE: ../../../third_party/skia/third_party/skcms/src/PolyTF.c
 FILE: ../../../third_party/skia/third_party/skcms/src/PortableMath.c
 FILE: ../../../third_party/skia/third_party/skcms/src/PortableMath.h
 FILE: ../../../third_party/skia/third_party/skcms/src/RandomBytes.h
-FILE: ../../../third_party/skia/third_party/skcms/src/TF13.c
 FILE: ../../../third_party/skia/third_party/skcms/src/TransferFunction.c
 FILE: ../../../third_party/skia/third_party/skcms/src/TransferFunction.h
 FILE: ../../../third_party/skia/third_party/skcms/src/Transform.c
