@@ -366,7 +366,7 @@ Future<String> _buildAotSnapshot(
   }
 
   if (previewDart2) {
-    final CompilerOutput compilerOutput = await compile(
+    final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
       outputFilePath: kApplicationKernelPath,

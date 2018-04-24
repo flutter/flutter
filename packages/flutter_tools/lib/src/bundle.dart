@@ -106,7 +106,7 @@ Future<void> build({
     String kernelBinaryFilename;
     if (needBuild) {
       ensureDirectoryExists(applicationKernelFilePath);
-      final CompilerOutput compilerOutput = await compile(
+      final CompilerOutput compilerOutput = await kernelCompiler.compile(
         sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
         incrementalCompilerByteStorePath: fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
         mainPath: fs.file(mainPath).absolute.path,
