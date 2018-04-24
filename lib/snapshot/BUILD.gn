@@ -24,22 +24,6 @@ copy("generate_dart_ui") {
   ]
 }
 
-if (is_fuchsia) {
-  dart_library("generate_package_map") {
-    # The sole purpose of this target is to generate a .packages file.
-    sources = []
-
-    infer_package_name = true
-
-    disable_analysis = true
-
-    deps = [
-      "//topaz/public/dart/fuchsia",
-      "//topaz/public/dart/zircon",
-    ]
-  }
-}
-
 action("generate_snapshot_bin") {
   if (is_fuchsia) {
     snapshot_dart = "snapshot_fuchsia.dart"
@@ -68,7 +52,6 @@ action("generate_snapshot_bin") {
              snapshot_dart,
            ] + dart_ui_files
   if (is_fuchsia) {
-    deps += [ ":generate_package_map" ]
     inputs += [ "fuchsia_compilation_trace.txt" ]
   }
 
@@ -129,11 +112,7 @@ action("generate_snapshot_bin") {
   }
 
   if (is_fuchsia) {
-    package_gen_dir =
-        get_label_info(":bogus($dart_toolchain)", "target_gen_dir")
-    package_file = "$package_gen_dir/generate_package_map.packages"
-    inputs +=
-        zircon_sdk_ext_files + mozart_dart_sdk_ext_files + [ package_file ]
+    inputs += zircon_sdk_ext_files + mozart_dart_sdk_ext_files
     zircon_path = rebase_path(zircon_sdk_ext_lib)
     fuchsia_path = rebase_path(fuchsia_sdk_ext_lib)
     mozart_internal_path = rebase_path(mozart_dart_sdk_ext_lib)
@@ -141,8 +120,6 @@ action("generate_snapshot_bin") {
       "--url_mapping=dart:zircon,$zircon_path",
       "--url_mapping=dart:fuchsia,$fuchsia_path",
       "--url_mapping=dart:mozart.internal,$mozart_internal_path",
-      "--packages",
-      rebase_path(package_file),
       "--load_compilation_trace",
       rebase_path("fuchsia_compilation_trace.txt"),
     ]
