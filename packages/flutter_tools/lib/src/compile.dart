@@ -19,10 +19,10 @@ KernelCompiler get kernelCompiler => context[KernelCompiler];
 typedef void CompilerMessageConsumer(String message);
 
 class CompilerOutput {
-  String outputFilename;
-  int errorCount;
+  final String outputFilename;
+  final int errorCount;
 
-  CompilerOutput(this.outputFilename, this.errorCount);
+  const CompilerOutput(this.outputFilename, this.errorCount);
 }
 
 class _StdoutHandler {
@@ -65,8 +65,8 @@ class _StdoutHandler {
 class KernelCompiler {
   const KernelCompiler();
 
-  Future<CompilerOutput> compile(
-    {String sdkRoot,
+  Future<CompilerOutput> compile({
+    String sdkRoot,
     String mainPath,
     String outputFilePath,
     String depFilePath,
@@ -78,7 +78,8 @@ class KernelCompiler {
     String incrementalCompilerByteStorePath,
     String packagesPath,
     List<String> fileSystemRoots,
-    String fileSystemScheme}) async {
+    String fileSystemScheme,
+  }) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
