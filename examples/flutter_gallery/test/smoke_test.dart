@@ -114,14 +114,16 @@ Future<Null> smokeOptionsPage(WidgetTester tester) async {
   await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
   await tester.pumpAndSettle();
   await tester.tap(find.text('Small'));
+  await tester.pumpAndSettle();
 
   // Popup the text size menu: first menu button, choose 'Normal'
   await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
   await tester.pumpAndSettle();
-  await tester.tap(find.text('Small'));
+  await tester.tap(find.text('Normal'));
+  await tester.pumpAndSettle();
 
   // Scroll the 'Send feedback' item into view
-  await tester.drag(find.text('Small'), const Offset(0.0, -1000.0));
+  await tester.drag(find.text('Normal'), const Offset(0.0, -1000.0));
   await tester.pumpAndSettle();
   await tester.tap(find.text('Send feedback'));
   await tester.pumpAndSettle();
