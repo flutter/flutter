@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'about.dart';
-import 'scale.dart';
+import 'scales.dart';
 import 'themes.dart';
 
 class GalleryOptions {

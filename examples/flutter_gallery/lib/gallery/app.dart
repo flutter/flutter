@@ -13,7 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'demos.dart';
 import 'home.dart';
 import 'options.dart';
-import 'scale.dart';
+import 'scales.dart';
 import 'themes.dart';
 import 'updater.dart';
 
