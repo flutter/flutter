@@ -139,7 +139,6 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
     await driver.scrollUntilVisible(demoList, demoItem, dyScroll: -48.0,  alignment: 0.5);
 
     for (int i = 0; i < 2; i += 1) {
-      print("> $demo");
       await driver.tap(demoItem); // Launch the demo
 
       if (kUnsynchronizedDemos.contains(demo)) {
