@@ -113,13 +113,13 @@ class FuchsiaRemoteConnection {
   /// those objects) will subsequently have its connection closed as well, so
   /// behavior for them will be undefined.
   Future<Null> stop() async {
-    for (PortForwarder fp in _forwardedVmServicePorts) {
+    for (PortForwarder pf in _forwardedVmServicePorts) {
       // Closes VM service first to ensure that the connection is closed cleanly
       // on the target before shutting down the forwarding itself.
-      final DartVm vmService = _dartVmCache[fp.port];
-      _dartVmCache[fp.port] = null;
+      final DartVm vmService = _dartVmCache[pf.port];
+      _dartVmCache[pf.port] = null;
       await vmService?.stop();
-      await fp.stop();
+      await pf.stop();
     }
     _dartVmCache.clear();
     _forwardedVmServicePorts.clear();
@@ -134,9 +134,13 @@ class FuchsiaRemoteConnection {
     if (_forwardedVmServicePorts.isEmpty) {
       return views;
     }
-    for (PortForwarder fp in _forwardedVmServicePorts) {
-      final DartVm vmService = await _getDartVm(fp.port);
-      views.addAll(await vmService.getAllFlutterViews());
+    for (PortForwarder pf in _forwardedVmServicePorts) {
+      try {
+        final DartVm vmService = await _getDartVm(pf.port);
+        views.addAll(await vmService.getAllFlutterViews());
+      } on HttpException {
+        // Ignore. Stale port.
+      }
     }
     return new List<FlutterView>.unmodifiable(views);
   }
@@ -291,13 +295,14 @@ class _SshPortForwarder implements PortForwarder {
     ]);
     _log.fine("_SshPortForwarder running '${command.join(' ')}'");
     final Process process = await _processManager.start(command);
+    final _SshPortForwarder result = new _SshPortForwarder._(address,
+        remotePort, localSocket, process, interface, sshConfigPath, isIpV6);
     process.exitCode.then((int c) {
       _log.fine("'${command.join(' ')}' exited with exit code $c");
     });
-    _log.fine(
-        'Set up forwarding from ${localSocket.port} to $address port $remotePort');
-    return new _SshPortForwarder._(address, remotePort, localSocket, process,
-        interface, sshConfigPath, isIpV6);
+    _log.fine('Set up forwarding from ${localSocket.port} '
+        'to $address port $remotePort');
+    return result;
   }
 
   /// Kills the SSH forwarding command, then to ensure no ports are forwarded,
@@ -328,8 +333,8 @@ class _SshPortForwarder implements PortForwarder {
         'Shutting down SSH forwarding with command: ${command.join(' ')}');
     final ProcessResult result = await _processManager.run(command);
     if (result.exitCode != 0) {
-      _log.warning(
-          'Command failed:\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
+      _log.warning('Command failed:\nstdout: ${result.stdout}'
+          '\nstderr: ${result.stderr}');
     }
     _localSocket.close();
   }
