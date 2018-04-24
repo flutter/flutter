@@ -40,7 +40,6 @@ class GalleryApp extends StatefulWidget {
 class _GalleryAppState extends State<GalleryApp> {
   GalleryOptions _options;
   Timer _timeDilationTimer;
-  TargetPlatform _platform;
 
   Map<String, WidgetBuilder> _buildRoutes() {
     // For a different example of how to set up an application routing table
@@ -78,6 +77,7 @@ class _GalleryAppState extends State<GalleryApp> {
     super.initState();
     _options = new GalleryOptions(
       theme: kLightGalleryTheme,
+      textScaleFactor: kAllGalleryTextScaleValues[0],
       timeDilation: timeDilation,
       platform: defaultTargetPlatform,
     );

@@ -57,7 +57,7 @@ class _IgnorePointerWhileStatusIsNotState extends State<_IgnorePointerWhileStatu
   }
 
   void _handleStatusChange(AnimationStatus _) {
-    bool value = widget.controller.status != widget.status;
+    final bool value = widget.controller.status != widget.status;
     if (_ignoring != value) {
       setState(() {
         _ignoring = value;
@@ -245,7 +245,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
     final Animation<RelativeRect> frontRelativeRect = new RelativeRectTween(
       begin: new RelativeRect.fromLTRB(0.0, constraints.biggest.height - _kFrontClosedHeight, 0.0, 0.0),
-      end: new RelativeRect.fromLTRB(0.0, _kBackAppBarHeight, 0.0, 0.0),
+      end: const RelativeRect.fromLTRB(0.0, _kBackAppBarHeight, 0.0, 0.0),
     ).animate(_controller);
 
     return new Stack(
@@ -265,6 +265,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               ),
               trailing: new IconButton(
                 onPressed: _toggleFrontLayer,
+                tooltip: 'Show options page',
                 icon: new AnimatedIcon(
                   icon: AnimatedIcons.close_menu,
                   progress: _controller,

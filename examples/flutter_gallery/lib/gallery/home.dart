@@ -235,7 +235,7 @@ class DemosPage extends StatelessWidget {
             backTitle: const Text('Options'),
             backLayer: optionsPage,
             frontAction: const BackButton(),
-            frontTitle: Text(category.name),
+            frontTitle: new Text(category.name),
             frontHeading: new Container(
               height: 40.0,
               alignment: Alignment.bottomCenter,
@@ -248,6 +248,7 @@ class DemosPage extends StatelessWidget {
             frontLayer: new Padding(
               padding: const EdgeInsets.only(top: 40.0),
               child: new ListView(
+                key: const ValueKey<String>('GalleryDemoList'),
                 padding: const EdgeInsets.only(top: 8.0),
                 children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
                   return new _DemoItem(demo: demo);
