@@ -248,7 +248,7 @@ class DemosPage extends StatelessWidget {
             frontLayer: new Padding(
               padding: const EdgeInsets.only(top: 40.0),
               child: new ListView(
-                key: const ValueKey<String>('GalleryDemoList'),
+                key: const ValueKey<String>('GalleryDemoList'), // So tests can find it.
                 padding: const EdgeInsets.only(top: 8.0),
                 children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
                   return new _DemoItem(demo: demo);
