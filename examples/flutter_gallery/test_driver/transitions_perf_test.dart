@@ -127,19 +127,15 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
     final String demoAtCategory = _allDemos.firstWhere((String s) => s.startsWith(demo));
     final String demoCategory = demoAtCategory.substring(demoAtCategory.indexOf('@') + 1);
 
-    print(demoAtCategory);
     if (currentDemoCategory == null) {
-      print("> GOTO $demoCategory");
       await driver.tap(find.text(demoCategory));
     } else if (currentDemoCategory != demoCategory) {
-      print("> CHANGETO $demoCategory");
       await driver.tap(find.byTooltip('Back'));
       await driver.tap(find.text(demoCategory));
     }
     currentDemoCategory = demoCategory;
 
     final SerializableFinder demoItem = find.text(demo);
-    print("> SCROLL");
     await driver.scrollUntilVisible(demoList, demoItem, dyScroll: -48.0,  alignment: 0.5);
 
     for (int i = 0; i < 2; i += 1) {
@@ -207,9 +203,7 @@ void main([List<String> args = const <String>[]]) {
 
       // Execute the remaining tests.
       final List<String> allDemoNames = _allDemos.map((String s) => s.substring(0, s.indexOf('@')));
-      print(allDemoNames);
       final Set<String> unprofiledDemos = new Set<String>.from(allDemoNames)..removeAll(kProfiledDemos);
-      print(unprofiledDemos);
       await runDemos(unprofiledDemos.toList(), driver);
 
     }, timeout: const Timeout(const Duration(minutes: 5)));
