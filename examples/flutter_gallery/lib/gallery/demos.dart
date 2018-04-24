@@ -463,7 +463,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       new GalleryDemo(
         title: 'Pesto',
         subtitle: 'Simple recipe browser',
-        icon: Icons.adjust, // TBD GalleryIcons
+        icon: Icons.adjust,
         category: _kDemos,
         routeName: PestoDemo.routeName,
         buildRoute: (BuildContext context) => const PestoDemo(),
