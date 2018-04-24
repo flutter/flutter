@@ -432,9 +432,10 @@ class _PortForwarder {
           '_PortForwarder failed to find a local port for $address:$remotePort');
       return new _PortForwarder._(null, 0, 0, null, null);
     }
+    const String dummyRemoteCommand = 'date';
     final List<String> command = <String>[
-        'ssh', '-F', sshConfig, '-nNT', '-vvv',
-        '-L', '$localPort:$ipv4Loopback:$remotePort', address];
+        'ssh', '-F', sshConfig, '-nNT', '-vvv', '-f',
+        '-L', '$localPort:$ipv4Loopback:$remotePort', address, dummyRemoteCommand];
     printTrace("_PortForwarder running '${command.join(' ')}'");
     final Process process = await processManager.start(command);
     process.stderr
