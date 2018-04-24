@@ -46,7 +46,7 @@ class _IgnorePointerWhileStatusIsNotState extends State<_IgnorePointerWhileStatu
   void initState() {
     super.initState();
     widget.controller.addStatusListener(_handleStatusChange);
-    _ignoring = widget.controller.status != AnimationStatus.completed;
+    _ignoring = widget.status != AnimationStatus.completed;
   }
 
   @override
@@ -274,7 +274,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               ),
               trailing: new IconButton(
                 onPressed: _toggleFrontLayer,
-                tooltip: 'Show options page',
+                tooltip: 'Toggle options page',
                 icon: new AnimatedIcon(
                   icon: AnimatedIcons.close_menu,
                   progress: _controller,
@@ -316,14 +316,16 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
         ),
         new PositionedTransition(
           rect: frontRelativeRect,
-          child: new Container(
-            alignment: Alignment.topLeft,
-            child: new GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: _toggleFrontLayer,
-              onVerticalDragUpdate: _handleDragUpdate,
-              onVerticalDragEnd: _handleDragEnd,
-              child: widget.frontHeading,
+          child: new ExcludeSemantics(
+            child: new Container(
+              alignment: Alignment.topLeft,
+              child: new GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _toggleFrontLayer,
+                onVerticalDragUpdate: _handleDragUpdate,
+                onVerticalDragEnd: _handleDragEnd,
+                child: widget.frontHeading,
+              ),
             ),
           ),
         ),
