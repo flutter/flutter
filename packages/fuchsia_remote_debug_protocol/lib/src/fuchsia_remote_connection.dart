@@ -133,14 +133,19 @@ class FuchsiaRemoteConnection {
     if (_forwardedVmServicePorts.isEmpty) {
       return <FlutterView>[];
     }
-    return new List<FlutterView>.unmodifiable(
-      await _invokeForAllVms<FlutterView>((DartVm vmService) async {
-        return await vmService.getAllFlutterViews();
-      }),
-    );
+    List<List<FlutterView>> flutterViewLists =
+        await _invokeForAllVms<FlutterView>((DartVm vmService) async {
+      return await vmService.getAllFlutterViews();
+    });
+    List<FlutterView> results = flutterViewLists.fold<List<FlutterView>>(
+        <FlutterView>[], (List<FlutterView> acc, List<FlutterView> element) {
+      acc.addAll(element);
+      return acc;
+    });
+    return new List<FlutterView>.unmodifiable(results);
   }
 
-  // Calls all Dart VM's, returning a flattened list of results.
+  // Calls all Dart VM's, returning a list of results.
   //
   // A side effect of this function is that internally tracked port forwarding
   // will be updated in the event that ports are found to be broken/stale: they
@@ -152,7 +157,7 @@ class FuchsiaRemoteConnection {
     for (PortForwarder pf in _forwardedVmServicePorts) {
       try {
         final DartVm service = await _getDartVm(pf.port);
-        result.addAll(await vmFunction(service));
+        result.add(await vmFunction(service));
       } on HttpException {
         await pf.stop();
         stalePorts.add(pf.port);
@@ -195,6 +200,13 @@ class FuchsiaRemoteConnection {
           _sshCommandRunner.interface,
           _sshCommandRunner.sshConfigPath);
     })));
+
+    // Filters out stale ports after connecting. Ignores results.
+    await _invokeForAllVms<Map<String, dynamic>>((DartVm vmService) async {
+      Map<String, dynamic> res = await vmService.invokeRpc('getVersion');
+      _log.fine('DartVM version check result: $res');
+      return res;
+    });
   }
 
   /// Gets the open Dart VM service ports on a remote Fuchsia device.
