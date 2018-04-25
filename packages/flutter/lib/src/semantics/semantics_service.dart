@@ -7,7 +7,7 @@ import 'dart:ui' show TextDirection;
 
 import 'package:flutter/services.dart' show SystemChannels;
 
-import 'semantics_event.dart' show AnnounceSemanticsEvent;
+import 'semantics_event.dart' show AnnounceSemanticsEvent, LongPressSemanticsEvent;
 
 
 /// Allows access to the platform's accessibility services.
@@ -29,6 +29,14 @@ class SemanticsService {
   /// announcements regarding objects in the viewfinder.
   static Future<Null> announce(String message, TextDirection textDirection) async {
     final AnnounceSemanticsEvent event = new AnnounceSemanticsEvent(message, textDirection);
+    await SystemChannels.accessibility.send(event.toMap());
+  }
+
+   /// Send a semantic long-press event.
+   /// 
+   /// This is only used by Android.
+  static Future<Null> longPress() async {
+    const LongPressSemanticsEvent event = const LongPressSemanticsEvent();
     await SystemChannels.accessibility.send(event.toMap());
   }
 }

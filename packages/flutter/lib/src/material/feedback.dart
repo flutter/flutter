@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -127,7 +128,10 @@ class Feedback {
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        return HapticFeedback.vibrate();
+        return Future.wait(<Future<Null>>[
+          HapticFeedback.vibrate(),
+          SemanticsService.longPress(),
+        ]).then((List<Future<Null>> _) => null);
       default:
         return new Future<Null>.value();
     }

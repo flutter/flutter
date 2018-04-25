@@ -197,7 +197,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       onLongPress: _handleLongPress,
       excludeFromSemantics: true,
       child: new Semantics(
-        label: widget.excludeFromSemantics ? null : widget.message,
+        namesRoute: true,
+        label: widget.message,
         child: widget.child,
       ),
     );

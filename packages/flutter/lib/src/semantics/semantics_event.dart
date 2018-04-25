@@ -88,3 +88,15 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
     };
   }
 }
+
+/// An event for a long-press semantic event.
+/// 
+/// Only used on android.
+class LongPressSemanticsEvent extends SemanticsEvent {
+
+  /// Constructs an event that triggers a long-press semantic event by the platform.
+  const LongPressSemanticsEvent() : super('longPress');
+
+  @override
+  Map<String, dynamic> getDataMap() => const <String, dynamic>{};
+}
