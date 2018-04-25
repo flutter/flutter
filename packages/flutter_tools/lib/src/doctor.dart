@@ -26,15 +26,19 @@ import 'vscode/vscode_validator.dart';
 
 Doctor get doctor => context[Doctor];
 
-class ValidatorTask {
-  ValidatorTask(this.validator, this.result);
-  final DoctorValidator validator;
-  final Future<ValidationResult> result;
+abstract class DoctorValidatorsProvider {
+  /// The singleton instance, pulled from the [AppContext].
+  static DoctorValidatorsProvider get instance => context[DoctorValidatorsProvider];
+
+  static final DoctorValidatorsProvider defaultInstance = new _DefaultDoctorValidatorsProvider();
+
+  List<DoctorValidator> get validators;
 }
 
-class Doctor {
+class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> _validators;
 
+  @override
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
@@ -59,6 +63,20 @@ class Doctor {
         _validators.add(new DeviceValidator());
     }
     return _validators;
+  }
+}
+
+class ValidatorTask {
+  ValidatorTask(this.validator, this.result);
+  final DoctorValidator validator;
+  final Future<ValidationResult> result;
+}
+
+class Doctor {
+  const Doctor();
+
+  List<DoctorValidator> get validators {
+    return DoctorValidatorsProvider.instance.validators;
   }
 
   /// Return a list of [ValidatorTask] objects and starts validation on all
