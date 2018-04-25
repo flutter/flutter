@@ -94,12 +94,13 @@ class _CategoriesPage extends StatelessWidget {
     this.onCategoryTap,
   }) : super(key: key);
 
-  final List<GalleryDemoCategory> categories;
+  final Iterable<GalleryDemoCategory> categories;
   final ValueChanged<GalleryDemoCategory> onCategoryTap;
 
   @override
   Widget build(BuildContext context) {
     const double aspectRatio = 160.0 / 180.0;
+    final List<GalleryDemoCategory> categoriesList = categories.toList();
     final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3;
 
     return new SingleChildScrollView(
@@ -121,7 +122,7 @@ class _CategoriesPage extends StatelessWidget {
               return new Row(
                 children: new List<Widget>.generate(columnCountForRow, (int columnIndex) {
                   final int index = rowIndex * columnCount + columnIndex;
-                  final GalleryDemoCategory category = categories[index];
+                  final GalleryDemoCategory category = categoriesList[index];
 
                   return new SizedBox(
                     width: columnWidth,
@@ -133,9 +134,9 @@ class _CategoriesPage extends StatelessWidget {
                       },
                     ),
                   );
-                }).toList(),
+                }),
               );
-            }).toList(),
+            }),
           );
         },
       ),

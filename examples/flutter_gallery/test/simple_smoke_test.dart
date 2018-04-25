@@ -32,7 +32,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Show the vignettes
-    await tester.tap(find.text('Demos'));
+    await tester.tap(find.text('Vignettes'));
     await tester.pumpAndSettle();
 
     // Show the Contact profile demo and scroll it upwards

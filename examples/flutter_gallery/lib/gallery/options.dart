@@ -236,15 +236,15 @@ class _TextScaleFactorItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 const Text('Text size'),
-                 new Text(
-                   '${options.textScaleFactor.label}',
-                   style: Theme.of(context).primaryTextTheme.body1,
-                 ),
+                new Text(
+                  '${options.textScaleFactor.label}',
+                  style: Theme.of(context).primaryTextTheme.body1,
+                ),
               ],
             ),
           ),
           new PopupMenuButton<GalleryTextScaleValue>(
-            padding: const EdgeInsets.only(right: 16.0),
+            padding: const EdgeInsetsDirectional.only(end: 16.0),
             icon: const Icon(Icons.arrow_drop_down),
             itemBuilder: (BuildContext context) {
               return kAllGalleryTextScaleValues.map((GalleryTextScaleValue scaleValue) {
@@ -347,7 +347,7 @@ class _PlatformItem extends StatelessWidget {
             ),
           ),
           new PopupMenuButton<TargetPlatform>(
-            padding: const EdgeInsets.only(right: 16.0),
+            padding: const EdgeInsetsDirectional.only(end: 16.0),
             icon: const Icon(Icons.arrow_drop_down),
             itemBuilder: (BuildContext context) {
               return TargetPlatform.values.map((TargetPlatform platform) {

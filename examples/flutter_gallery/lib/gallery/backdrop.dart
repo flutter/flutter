@@ -25,10 +25,9 @@ final Tween<BorderRadius> _kFrontHeadingBevelRadius = new BorderRadiusTween(
 );
 
 class _IgnorePointerWhileStatusIsNot extends StatefulWidget {
-  const _IgnorePointerWhileStatusIsNot({
+  const _IgnorePointerWhileStatusIsNot(this.status, {
     Key key,
     this.controller,
-    this.status,
     this.child,
   }) : super(key: key);
 
@@ -215,6 +214,8 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   double get _backdropHeight {
+    // Warning: this can be safely called from the event handlers but it may
+    // not be called at build time.
     final RenderBox renderBox = _backdropKey.currentContext.findRenderObject();
     return math.max(0.0, renderBox.size.height - _kBackAppBarHeight - _kFrontClosedHeight);
   }
@@ -274,8 +275,8 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
             ),
             new Expanded(
               child: new _IgnorePointerWhileStatusIsNot(
+                AnimationStatus.dismissed,
                 controller: _controller,
-                status: AnimationStatus.dismissed,
                 child: widget.backLayer,
               ),
             ),
@@ -299,8 +300,8 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               );
             },
             child: new _IgnorePointerWhileStatusIsNot(
+              AnimationStatus.completed,
               controller: _controller,
-              status: AnimationStatus.completed,
               child: widget.frontLayer,
             ),
           ),
