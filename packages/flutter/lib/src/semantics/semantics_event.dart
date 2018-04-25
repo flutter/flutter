@@ -89,12 +89,12 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
   }
 }
 
-/// An event for a long-press semantic event.
+/// An event which triggers long press semantic feedback.
 /// 
 /// Only used on android.
 class LongPressSemanticsEvent extends SemanticsEvent {
 
-  /// Constructs an event that triggers a long-press semantic event by the platform.
+  /// Constructs an event that triggers a long-press semantic feedback by the platform.
   const LongPressSemanticsEvent() : super('longPress');
 
   @override
