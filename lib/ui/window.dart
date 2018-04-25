@@ -681,11 +681,14 @@ class Window {
   void sendPlatformMessage(String name,
                            ByteData data,
                            PlatformMessageResponseCallback callback) {
-    _sendPlatformMessage(name, _zonedPlatformMessageResponseCallback(callback), data);
+    final String error =
+        _sendPlatformMessage(name, _zonedPlatformMessageResponseCallback(callback), data);
+    if (error != null)
+      throw new Exception(error);
   }
-  void _sendPlatformMessage(String name,
-                            PlatformMessageResponseCallback callback,
-                            ByteData data) native 'Window_sendPlatformMessage';
+  String _sendPlatformMessage(String name,
+                              PlatformMessageResponseCallback callback,
+                              ByteData data) native 'Window_sendPlatformMessage';
 
   /// Called whenever this window receives a message from a platform-specific
   /// plugin.
