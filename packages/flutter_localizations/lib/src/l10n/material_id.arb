@@ -34,5 +34,9 @@
   "modalBarrierDismissLabel": "Tutup",
   "signedInLabel": "Telah login",
   "hideAccountsLabel": "Sembunyikan akun",
-  "showAccountsLabel": "Tampilkan akun"
+  "showAccountsLabel": "Tampilkan akun",
+  "drawerLabel": "Menu navigasi",
+  "popupMenuLabel": "Menu pop-up",
+  "dialogLabel": "Dialog",
+  "alertDialogLabel": "Waspada"
 }

@@ -30,6 +30,7 @@ export 'src/material/card.dart';
 export 'src/material/checkbox.dart';
 export 'src/material/checkbox_list_tile.dart';
 export 'src/material/chip.dart';
+export 'src/material/chip_theme.dart';
 export 'src/material/circle_avatar.dart';
 export 'src/material/colors.dart';
 export 'src/material/constants.dart';

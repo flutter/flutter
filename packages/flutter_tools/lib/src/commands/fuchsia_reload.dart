@@ -11,9 +11,9 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
+import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../device.dart';
-import '../flx.dart' as flx;
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../resident_runner.dart';
@@ -59,7 +59,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
       help: 'Preview Dart 2.0 functionality.');
     argParser.addOption('target',
       abbr: 't',
-      defaultsTo: flx.defaultMainPath,
+      defaultsTo: bundle.defaultMainPath,
       help: 'Target app path / main entry-point file. '
             'Relative to --gn-target path, e.g. lib/main.dart.');
   }
@@ -384,6 +384,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
         final int lastSpace = trimmed.lastIndexOf(' ');
         final String lastWord = trimmed.substring(lastSpace + 1);
         if ((lastWord != '.') && (lastWord != '..')) {
+          // ignore: deprecated_member_use
           final int value = int.parse(lastWord, onError: (_) => null);
           if (value != null)
             ports.add(value);
@@ -431,9 +432,10 @@ class _PortForwarder {
           '_PortForwarder failed to find a local port for $address:$remotePort');
       return new _PortForwarder._(null, 0, 0, null, null);
     }
+    const String dummyRemoteCommand = 'date';
     final List<String> command = <String>[
-        'ssh', '-F', sshConfig, '-nNT', '-vvv',
-        '-L', '$localPort:$ipv4Loopback:$remotePort', address];
+        'ssh', '-F', sshConfig, '-nNT', '-vvv', '-f',
+        '-L', '$localPort:$ipv4Loopback:$remotePort', address, dummyRemoteCommand];
     printTrace("_PortForwarder running '${command.join(' ')}'");
     final Process process = await processManager.start(command);
     process.stderr

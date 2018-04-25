@@ -15,11 +15,11 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../bundle.dart' as bundle;
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../doctor.dart';
-import '../flx.dart' as flx;
 import '../globals.dart';
 import '../project.dart';
 import '../usage.dart';
@@ -98,7 +98,7 @@ abstract class FlutterCommand extends Command<Null> {
   void usesTargetOption() {
     argParser.addOption('target',
       abbr: 't',
-      defaultsTo: flx.defaultMainPath,
+      defaultsTo: bundle.defaultMainPath,
       help: 'The main entry-point file of the application, as run on the device.\n'
             'If the --target option is omitted, but a file name is provided on\n'
             'the command line, then that is used instead.',
@@ -112,7 +112,7 @@ abstract class FlutterCommand extends Command<Null> {
     else if (argResults.rest.isNotEmpty)
       return argResults.rest.first;
     else
-      return flx.defaultMainPath;
+      return bundle.defaultMainPath;
   }
 
   void usesPubOption() {
@@ -243,7 +243,16 @@ abstract class FlutterCommand extends Command<Null> {
 
   /// The path to send to Google Analytics. Return null here to disable
   /// tracking of the command.
-  Future<String> get usagePath async => name;
+  Future<String> get usagePath async {
+    if (parent is FlutterCommand) {
+      final FlutterCommand commandParent = parent;
+      final String path = await commandParent.usagePath;
+      // Don't report for parents that return null for usagePath.
+      return path == null ? null : '$path/$name';
+    } else {
+      return name;
+    }
+  }
 
   /// Additional usage values to be sent with the usage ping.
   Future<Map<String, String>> get usageValues async => const <String, String>{};
@@ -274,6 +283,8 @@ abstract class FlutterCommand extends Command<Null> {
         } finally {
           final DateTime endTime = clock.now();
           printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
+          // Note that this is checking the result of the call to 'usagePath'
+          // (a Future<String>), and not the result of evaluating the Future.
           if (usagePath != null) {
             final List<String> labels = <String>[];
             if (commandResult?.exitStatus != null)

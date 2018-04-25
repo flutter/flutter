@@ -1,4 +1,4 @@
-# Flutter tools
+# Flutter Tools
 
 Tools for building Flutter applications.
 

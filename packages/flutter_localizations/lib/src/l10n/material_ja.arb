@@ -34,5 +34,9 @@
   "signedInLabel": "ログイン中",
   "hideAccountsLabel": "アカウントを非表示",
   "showAccountsLabel": "アカウントを表示",
-  "modalBarrierDismissLabel": "閉じる"
+  "modalBarrierDismissLabel": "閉じる",
+  "drawerLabel": "ナビゲーション メニュー",
+  "popupMenuLabel": "ポップアップ メニュー",
+  "dialogLabel": "ダイアログ",
+  "alertDialogLabel": "アラート"
 }

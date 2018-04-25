@@ -34,5 +34,9 @@
   "scriptCategory": "English-like",
   "timeOfDayFormat": "h:mm a",
   "anteMeridiemAbbreviation": "a.m.",
-  "postMeridiemAbbreviation": "p.m."
+  "postMeridiemAbbreviation": "p.m.",
+  "drawerLabel": "Menú de navegación",
+  "popupMenuLabel": "Menú emergente",
+  "dialogLabel": "Diálogo",
+  "alertDialogLabel": "Alerta"
 }

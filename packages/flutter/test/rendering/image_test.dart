@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui' as ui show EncodingFormat, Image;
+import 'dart:ui' as ui show Image, ImageByteFormat;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,7 +19,7 @@ class SquareImage implements ui.Image {
   int get height => 10;
 
   @override
-  Future<ByteData> toByteData({ui.EncodingFormat format}) async {
+  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
     throw new UnsupportedError('Cannot encode test image');
   }
 
@@ -38,7 +38,7 @@ class WideImage implements ui.Image {
   int get height => 10;
 
   @override
-  Future<ByteData> toByteData({ui.EncodingFormat format}) async {
+  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
     throw new UnsupportedError('Cannot encode test image');
   }
 
@@ -57,7 +57,7 @@ class TallImage implements ui.Image {
   int get height => 20;
 
   @override
-  Future<ByteData> toByteData({ui.EncodingFormat format}) async {
+  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
     throw new UnsupportedError('Cannot encode test image');
   }
 

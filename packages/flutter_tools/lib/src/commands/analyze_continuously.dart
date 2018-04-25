@@ -14,7 +14,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
-import '../dart/sdk.dart';
+import '../dart/sdk.dart' as sdk;
 import '../globals.dart';
 import 'analyze_base.dart';
 
@@ -58,7 +58,9 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisTarget = fs.currentDirectory.path;
     }
 
-    final AnalysisServer server = new AnalysisServer(dartSdkPath, directories, previewDart2: previewDart2);
+    final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
+
+    final AnalysisServer server = new AnalysisServer(sdkPath, directories, previewDart2: previewDart2);
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
 

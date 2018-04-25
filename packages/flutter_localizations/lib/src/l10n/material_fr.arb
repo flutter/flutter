@@ -35,5 +35,9 @@
   "signedInLabel": "Connecté",
   "hideAccountsLabel": "Masquer les comptes",
   "showAccountsLabel": "Afficher les comptes",
-  "modalBarrierDismissLabel": "Ignorer"
+  "modalBarrierDismissLabel": "Ignorer",
+  "drawerLabel": "Menu de navigation",
+  "popupMenuLabel": "Menu contextuel",
+  "dialogLabel": "Boîte de dialogue",
+  "alertDialogLabel": "Alerte"
 }

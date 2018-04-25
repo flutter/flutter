@@ -485,41 +485,45 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         backgroundColor = _backgroundColor;
         break;
     }
-    return new Stack(
-      children: <Widget>[
-        new Positioned.fill(
-          child: new Material( // Casts shadow.
-            elevation: 8.0,
-            color: backgroundColor,
+    return new Semantics(
+      container: true,
+      explicitChildNodes: true,
+      child: new Stack(
+        children: <Widget>[
+          new Positioned.fill(
+            child: new Material( // Casts shadow.
+              elevation: 8.0,
+              color: backgroundColor,
+            ),
           ),
-        ),
-        new ConstrainedBox(
-          constraints: new BoxConstraints(minHeight: kBottomNavigationBarHeight + additionalBottomPadding),
-          child: new Stack(
-            children: <Widget>[
-              new Positioned.fill(
-                child: new CustomPaint(
-                  painter: new _RadialPainter(
-                    circles: _circles.toList(),
-                    textDirection: Directionality.of(context),
+          new ConstrainedBox(
+            constraints: new BoxConstraints(minHeight: kBottomNavigationBarHeight + additionalBottomPadding),
+            child: new Stack(
+              children: <Widget>[
+                new Positioned.fill(
+                  child: new CustomPaint(
+                    painter: new _RadialPainter(
+                      circles: _circles.toList(),
+                      textDirection: Directionality.of(context),
+                    ),
                   ),
                 ),
-              ),
-              new Material( // Splashes.
-                type: MaterialType.transparency,
-                child: new Padding(
-                  padding: new EdgeInsets.only(bottom: additionalBottomPadding),
-                  child: new MediaQuery.removePadding(
-                    context: context,
-                    removeBottom: true,
-                    child: _createContainer(_createTiles()),
+                new Material( // Splashes.
+                  type: MaterialType.transparency,
+                  child: new Padding(
+                    padding: new EdgeInsets.only(bottom: additionalBottomPadding),
+                    child: new MediaQuery.removePadding(
+                      context: context,
+                      removeBottom: true,
+                      child: _createContainer(_createTiles()),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

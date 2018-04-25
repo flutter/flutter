@@ -143,16 +143,19 @@ class _Compiler {
           printTrace('Compiling ${request.path}');
           compiler ??= createCompiler();
           suppressOutput = false;
-          final String outputPath = await handleTimeout(compiler.recompile(request.path,
-            <String>[request.path],
-            outputPath: outputDill.path,
-          ), request.path);
+          final CompilerOutput compilerOutput = await handleTimeout<CompilerOutput>(
+              compiler.recompile(
+                  request.path,
+                  <String>[request.path],
+                  outputPath: outputDill.path),
+              request.path);
+          final String outputPath = compilerOutput?.outputFilename;
 
-          // Check if the compiler produced the output. If it failed then
-          // outputPath would be null. In this case pass null upwards to the
-          // consumer and shutdown the compiler to avoid reusing compiler
-          // that might have gotten into a weird state.
-          if (outputPath == null) {
+          // In case compiler didn't produce output or reported compilation
+          // errors, pass [null] upwards to the consumer and shutdown the
+          // compiler to avoid reusing compiler that might have gotten into
+          // a weird state.
+          if (outputPath == null || compilerOutput.errorCount > 0) {
             request.result.complete(null);
             await shutdown();
           } else {
@@ -179,7 +182,7 @@ class _Compiler {
   Future<String> compile(String mainDart) {
     final Completer<String> completer = new Completer<String>();
     compilerController.add(new _CompilationRequest(mainDart, completer));
-    return handleTimeout(completer.future, mainDart);
+    return handleTimeout<String>(completer.future, mainDart);
   }
 
   Future<dynamic> shutdown() async {
@@ -187,7 +190,7 @@ class _Compiler {
     compiler = null;
   }
 
-  static Future<String> handleTimeout(Future<String> value, String path) {
+  static Future<T> handleTimeout<T>(Future<T> value, String path) {
     return value.timeout(const Duration(minutes: 5), onTimeout: () {
       printError('Compilation of $path timed out after 5 minutes.');
       return null;
@@ -272,7 +275,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
     dynamic outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
-    final List<_Finalizer> finalizers = <_Finalizer>[];
+    final List<_Finalizer> finalizers = <_Finalizer>[]; // Will be run in reverse order.
     bool subprocessActive = false;
     bool controllerSinkClosed = false;
     try {
@@ -494,21 +497,34 @@ class _FlutterPlatform extends PlatformPlugin {
           break;
       }
 
-      if (subprocessActive && watcher != null) {
-        await watcher.onFinishedTests(
-            new ProcessEvent(ourTestCount, process, processObservatoryUri));
+      if (watcher != null) {
+        switch (initialResult) {
+          case _InitialResult.crashed:
+            await watcher.onTestCrashed(new ProcessEvent(ourTestCount, process));
+            break;
+          case _InitialResult.timedOut:
+            await watcher.onTestTimedOut(new ProcessEvent(ourTestCount, process));
+            break;
+          case _InitialResult.connected:
+            if (subprocessActive) {
+              await watcher.onFinishedTest(
+                  new ProcessEvent(ourTestCount, process, processObservatoryUri));
+            }
+            break;
+        }
       }
     } catch (error, stack) {
       printTrace('test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
       if (!controllerSinkClosed) {
         controller.sink.addError(error, stack);
       } else {
-        printError('unhandled error during test:\n$testPath\n$error');
+        printError('unhandled error during test:\n$testPath\n$error\n$stack');
         outOfBandError ??= error;
       }
     } finally {
       printTrace('test $ourTestCount: cleaning up...');
-      for (_Finalizer finalizer in finalizers) {
+      // Finalizers are treated like a stack; run them in reverse order.
+      for (_Finalizer finalizer in finalizers.reversed) {
         try {
           await finalizer();
         } catch (error, stack) {
@@ -516,7 +532,7 @@ class _FlutterPlatform extends PlatformPlugin {
           if (!controllerSinkClosed) {
             controller.sink.addError(error, stack);
           } else {
-            printError('unhandled error during finalization of test:\n$testPath\n$error');
+            printError('unhandled error during finalization of test:\n$testPath\n$error\n$stack');
             outOfBandError ??= error;
           }
         }

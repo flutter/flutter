@@ -60,6 +60,7 @@ import 'widgets_localizations.dart';
 ///   * th - Thai
 ///   * tr - Turkish
 ///   * ur - Urdu
+///   * vi - Vietnamese
 ///   * zh - Simplified Chinese
 ///
 /// See also:
@@ -133,8 +134,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   intl.DateFormat _yearMonthFormat;
 
   static String _computeLocaleName(Locale locale) {
-    final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
-    return intl.Intl.canonicalizedLocale(localeName);
+    return intl.Intl.canonicalizedLocale(locale.toString());
   }
 
   @override
@@ -254,6 +254,18 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get showMenuTooltip => _translationBundle.showMenuTooltip;
+
+  @override
+  String get drawerLabel => _translationBundle.alertDialogLabel;
+
+  @override
+  String get popupMenuLabel => _translationBundle.popupMenuLabel;
+
+  @override
+  String get dialogLabel => _translationBundle.dialogLabel;
+
+  @override
+  String get alertDialogLabel => _translationBundle.alertDialogLabel;
 
   @override
   String aboutListTileTitle(String applicationName) {
@@ -523,6 +535,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'th', // Thai
     'tr', // Turkish
     'ur', // Urdu
+    'vi', // Vietnamese
     'zh', // Chinese (simplified)
   ];
 

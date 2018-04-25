@@ -28,7 +28,8 @@ String validateEnglishLocalizations(File file) {
       continue;
 
     final dynamic atResourceValue = bundle[atResourceId];
-    final Map<String, String> atResource = atResourceValue is Map ? atResourceValue : null;
+    final Map<String, dynamic> atResource =
+        atResourceValue is Map<String, dynamic> ? atResourceValue : null;
     if (atResource == null) {
       errorMessages.writeln('A map value was not specified for $atResourceId');
       continue;

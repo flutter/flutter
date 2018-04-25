@@ -130,7 +130,7 @@ class StockHomeState extends State<StockHome> {
                 debugDumpApp();
                 debugDumpRenderTree();
                 debugDumpLayerTree();
-                debugDumpSemanticsTree(DebugSemanticsDumpOrder.geometricOrder);
+                debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversalOrder);
               } catch (e, stack) {
                 debugPrint('Exception while dumping app:\n$e\n$stack');
               }

@@ -12,7 +12,7 @@ import '../base/logger.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
-import '../dart/sdk.dart';
+import '../dart/sdk.dart' as sdk;
 import '../globals.dart';
 import 'analyze.dart';
 import 'analyze_base.dart';
@@ -37,11 +37,12 @@ class AnalyzeOnce extends AnalyzeBase {
 
   @override
   Future<Null> analyze() async {
-    final String currentDirectory = (workingDirectory ?? fs.currentDirectory).path;
+    final String currentDirectory =
+        (workingDirectory ?? fs.currentDirectory).path;
 
     // find directories from argResults.rest
-    final Set<String> directories = new Set<String>.from(
-        argResults.rest.map<String>((String path) => fs.path.canonicalize(path)));
+    final Set<String> directories = new Set<String>.from(argResults.rest
+        .map<String>((String path) => fs.path.canonicalize(path)));
     if (directories.isNotEmpty) {
       for (String directory in directories) {
         final FileSystemEntityType type = fs.typeSync(directory);
@@ -56,12 +57,14 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (argResults['flutter-repo']) {
       // check for conflicting dependencies
-      final PackageDependencyTracker dependencies = new PackageDependencyTracker();
+      final PackageDependencyTracker dependencies =
+          new PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
 
       directories.addAll(repoRoots);
 
-      if (argResults.wasParsed('current-package') && argResults['current-package']) {
+      if (argResults.wasParsed('current-package') &&
+          argResults['current-package']) {
         directories.add(currentDirectory);
       }
     } else {
@@ -71,7 +74,8 @@ class AnalyzeOnce extends AnalyzeBase {
     }
 
     if (argResults['dartdocs'] && !argResults['flutter-repo']) {
-      throwToolExit('The --dartdocs option is currently only supported with --flutter-repo.');
+      throwToolExit(
+          'The --dartdocs option is currently only supported with --flutter-repo.');
     }
 
     if (directories.isEmpty) {
@@ -82,8 +86,10 @@ class AnalyzeOnce extends AnalyzeBase {
     final Completer<Null> analysisCompleter = new Completer<Null>();
     final List<AnalysisError> errors = <AnalysisError>[];
 
+    final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
+
     final AnalysisServer server = new AnalysisServer(
-      dartSdkPath,
+      sdkPath,
       directories.toList(),
       previewDart2: previewDart2,
     );
@@ -97,7 +103,8 @@ class AnalyzeOnce extends AnalyzeBase {
       }
     });
     server.onErrors.listen((FileAnalysisErrors fileErrors) {
-      fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
+      fileErrors.errors
+          .removeWhere((AnalysisError error) => error.type == 'TODO');
       errors.addAll(fileErrors.errors);
     });
 
@@ -115,8 +122,9 @@ class AnalyzeOnce extends AnalyzeBase {
     final String message = directories.length > 1
         ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
         : fs.path.basename(directories.first);
-    final Status progress =
-        argResults['preamble'] ? logger.startProgress('Analyzing $message...') : null;
+    final Status progress = argResults['preamble']
+        ? logger.startProgress('Analyzing $message...')
+        : null;
 
     await analysisCompleter.future;
     progress?.cancel();
@@ -142,7 +150,8 @@ class AnalyzeOnce extends AnalyzeBase {
     }
 
     // report results
-    dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
+    dumpErrors(
+        errors.map<String>((AnalysisError error) => error.toLegacyString()));
 
     if (errors.isNotEmpty && argResults['preamble']) {
       printStatus('');
@@ -159,7 +168,8 @@ class AnalyzeOnce extends AnalyzeBase {
     if (errors.isNotEmpty) {
       printStatus('');
 
-      printStatus('${errors.length} ${pluralize('issue', errors.length)} found. (ran in ${seconds}s)');
+      printStatus(
+          '${errors.length} ${pluralize('issue', errors.length)} found. (ran in ${seconds}s)');
 
       if (undocumentedMembers > 0) {
         throwToolExit('[lint] $undocumentedMembers public '

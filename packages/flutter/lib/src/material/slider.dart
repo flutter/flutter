@@ -32,7 +32,7 @@ import 'theme.dart';
 ///
 ///  * The "thumb", which is a shape that slides horizontally when the user
 ///    drags it.
-///  * The "rail", which is the line that the slider thumb slides along.
+///  * The "track", which is the line that the slider thumb slides along.
 ///  * The "value indicator", which is a shape that pops up when the user
 ///    is dragging the thumb to indicate the value being selected.
 ///  * The "active" side of the slider is the side between the thumb and the
@@ -50,7 +50,7 @@ import 'theme.dart';
 /// slider.
 ///
 /// By default, a slider will be as wide as possible, centered vertically. When
-/// given unbounded constraints, it will attempt to make the rail 144 pixels
+/// given unbounded constraints, it will attempt to make the track 144 pixels
 /// wide (with margins on each side) and will shrink-wrap vertically.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
@@ -177,23 +177,23 @@ class Slider extends StatefulWidget {
   ///    shape.
   final String label;
 
-  /// The color to use for the portion of the slider rail that is active.
+  /// The color to use for the portion of the slider track that is active.
   ///
   /// The "active" side of the slider is the side between the thumb and the
   /// minimum value.
   ///
-  /// Defaults to [SliderTheme.activeRailColor] of the current [SliderTheme].
+  /// Defaults to [SliderTheme.activeTrackColor] of the current [SliderTheme].
   ///
   /// Using a [SliderTheme] gives much more fine-grained control over the
   /// appearance of various components of the slider.
   final Color activeColor;
 
-  /// The color for the inactive portion of the slider rail.
+  /// The color for the inactive portion of the slider track.
   ///
   /// The "inactive" side of the slider is the side between the thumb and the
   /// maximum value.
   ///
-  /// Defaults to the [SliderTheme.inactiveRailColor] of the current
+  /// Defaults to the [SliderTheme.inactiveTrackColor] of the current
   /// [SliderTheme].
   ///
   /// Using a [SliderTheme] gives much more fine-grained control over the
@@ -297,8 +297,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // control than that, then they need to use a SliderTheme.
     if (widget.activeColor != null || widget.inactiveColor != null) {
       sliderTheme = sliderTheme.copyWith(
-        activeRailColor: widget.activeColor,
-        inactiveRailColor: widget.inactiveColor,
+        activeTrackColor: widget.activeColor,
+        inactiveTrackColor: widget.inactiveColor,
         activeTickMarkColor: widget.inactiveColor,
         inactiveTickMarkColor: widget.activeColor,
         thumbColor: widget.activeColor,
@@ -423,9 +423,9 @@ class _RenderSlider extends RenderBox {
   static const Duration _positionAnimationDuration = const Duration(milliseconds: 75);
   static const double _overlayRadius = 16.0;
   static const double _overlayDiameter = _overlayRadius * 2.0;
-  static const double _railHeight = 2.0;
-  static const double _preferredRailWidth = 144.0;
-  static const double _preferredTotalWidth = _preferredRailWidth + _overlayDiameter;
+  static const double _trackHeight = 2.0;
+  static const double _preferredTrackWidth = 144.0;
+  static const double _preferredTotalWidth = _preferredTrackWidth + _overlayDiameter;
   static const Duration _minimumInteractionTime = const Duration(milliseconds: 500);
   static const double _adjustmentUnit = 0.1; // Matches iOS implementation of material slider.
   static final Tween<double> _overlayRadiusTween = new Tween<double>(begin: 0.0, end: _overlayRadius);
@@ -440,7 +440,7 @@ class _RenderSlider extends RenderBox {
   bool _active = false;
   double _currentDragValue = 0.0;
 
-  double get _railLength => size.width - _overlayDiameter;
+  double get _trackLength => size.width - _overlayDiameter;
 
   bool get isInteractive => onChanged != null;
 
@@ -619,7 +619,7 @@ class _RenderSlider extends RenderBox {
   }
 
   double _getValueFromGlobalPosition(Offset globalPosition) {
-    final double visualPosition = (globalToLocal(globalPosition).dx - _overlayRadius) / _railLength;
+    final double visualPosition = (globalToLocal(globalPosition).dx - _overlayRadius) / _trackLength;
     return _getValueFromVisualPosition(visualPosition);
   }
 
@@ -666,7 +666,7 @@ class _RenderSlider extends RenderBox {
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (isInteractive) {
-      final double valueDelta = details.primaryDelta / _railLength;
+      final double valueDelta = details.primaryDelta / _trackLength;
       switch (textDirection) {
         case TextDirection.rtl:
           _currentDragValue -= valueDelta;
@@ -732,24 +732,24 @@ class _RenderSlider extends RenderBox {
 
   void _paintTickMarks(
     Canvas canvas,
-    Rect railLeft,
-    Rect railRight,
+    Rect trackLeft,
+    Rect trackRight,
     Paint leftPaint,
     Paint rightPaint,
   ) {
     if (isDiscrete) {
-      // The ticks are tiny circles that are the same height as the rail.
-      const double tickRadius = _railHeight / 2.0;
-      final double railWidth = railRight.right - railLeft.left;
-      final double dx = (railWidth - _railHeight) / divisions;
+      // The ticks are tiny circles that are the same height as the track.
+      const double tickRadius = _trackHeight / 2.0;
+      final double trackWidth = trackRight.right - trackLeft.left;
+      final double dx = (trackWidth - _trackHeight) / divisions;
       // If the ticks would be too dense, don't bother painting them.
-      if (dx >= 3.0 * _railHeight) {
+      if (dx >= 3.0 * _trackHeight) {
         for (int i = 0; i <= divisions; i += 1) {
-          final double left = railLeft.left + i * dx;
-          final Offset center = new Offset(left + tickRadius, railLeft.top + tickRadius);
-          if (railLeft.contains(center)) {
+          final double left = trackLeft.left + i * dx;
+          final Offset center = new Offset(left + tickRadius, trackLeft.top + tickRadius);
+          if (trackLeft.contains(center)) {
             canvas.drawCircle(center, tickRadius, leftPaint);
-          } else if (railRight.contains(center)) {
+          } else if (trackRight.contains(center)) {
             canvas.drawCircle(center, tickRadius, rightPaint);
           }
         }
@@ -774,71 +774,71 @@ class _RenderSlider extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
 
-    final double railLength = size.width - 2 * _overlayRadius;
+    final double trackLength = size.width - 2 * _overlayRadius;
     final double value = _state.positionController.value;
-    final ColorTween activeRailEnableColor = new ColorTween(begin: _sliderTheme.disabledActiveRailColor, end: _sliderTheme.activeRailColor);
-    final ColorTween inactiveRailEnableColor = new ColorTween(begin: _sliderTheme.disabledInactiveRailColor, end: _sliderTheme.inactiveRailColor);
+    final ColorTween activeTrackEnableColor = new ColorTween(begin: _sliderTheme.disabledActiveTrackColor, end: _sliderTheme.activeTrackColor);
+    final ColorTween inactiveTrackEnableColor = new ColorTween(begin: _sliderTheme.disabledInactiveTrackColor, end: _sliderTheme.inactiveTrackColor);
     final ColorTween activeTickMarkEnableColor = new ColorTween(begin: _sliderTheme.disabledActiveTickMarkColor, end: _sliderTheme.activeTickMarkColor);
     final ColorTween inactiveTickMarkEnableColor = new ColorTween(begin: _sliderTheme.disabledInactiveTickMarkColor, end: _sliderTheme.inactiveTickMarkColor);
 
-    final Paint activeRailPaint = new Paint()..color = activeRailEnableColor.evaluate(_enableAnimation);
-    final Paint inactiveRailPaint = new Paint()..color = inactiveRailEnableColor.evaluate(_enableAnimation);
+    final Paint activeTrackPaint = new Paint()..color = activeTrackEnableColor.evaluate(_enableAnimation);
+    final Paint inactiveTrackPaint = new Paint()..color = inactiveTrackEnableColor.evaluate(_enableAnimation);
     final Paint activeTickMarkPaint = new Paint()..color = activeTickMarkEnableColor.evaluate(_enableAnimation);
     final Paint inactiveTickMarkPaint = new Paint()..color = inactiveTickMarkEnableColor.evaluate(_enableAnimation);
 
     double visualPosition;
-    Paint leftRailPaint;
-    Paint rightRailPaint;
+    Paint leftTrackPaint;
+    Paint rightTrackPaint;
     Paint leftTickMarkPaint;
     Paint rightTickMarkPaint;
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - value;
-        leftRailPaint = inactiveRailPaint;
-        rightRailPaint = activeRailPaint;
+        leftTrackPaint = inactiveTrackPaint;
+        rightTrackPaint = activeTrackPaint;
         leftTickMarkPaint = inactiveTickMarkPaint;
         rightTickMarkPaint = activeTickMarkPaint;
         break;
       case TextDirection.ltr:
         visualPosition = value;
-        leftRailPaint = activeRailPaint;
-        rightRailPaint = inactiveRailPaint;
+        leftTrackPaint = activeTrackPaint;
+        rightTrackPaint = inactiveTrackPaint;
         leftTickMarkPaint = activeTickMarkPaint;
         rightTickMarkPaint = inactiveTickMarkPaint;
         break;
     }
 
-    const double railRadius = _railHeight / 2.0;
+    const double trackRadius = _trackHeight / 2.0;
     const double thumbGap = 2.0;
 
-    final double railVerticalCenter = offset.dy + (size.height) / 2.0;
-    final double railLeft = offset.dx + _overlayRadius;
-    final double railTop = railVerticalCenter - railRadius;
-    final double railBottom = railVerticalCenter + railRadius;
-    final double railRight = railLeft + railLength;
-    final double railActive = railLeft + railLength * visualPosition;
+    final double trackVerticalCenter = offset.dy + (size.height) / 2.0;
+    final double trackLeft = offset.dx + _overlayRadius;
+    final double trackTop = trackVerticalCenter - trackRadius;
+    final double trackBottom = trackVerticalCenter + trackRadius;
+    final double trackRight = trackLeft + trackLength;
+    final double trackActive = trackLeft + trackLength * visualPosition;
     final double thumbRadius = _sliderTheme.thumbShape.getPreferredSize(isInteractive, isDiscrete).width / 2.0;
-    final double railActiveLeft = math.max(0.0, railActive - thumbRadius - thumbGap * (1.0 - _enableAnimation.value));
-    final double railActiveRight = math.min(railActive + thumbRadius + thumbGap * (1.0 - _enableAnimation.value), railRight);
-    final Rect railLeftRect = new Rect.fromLTRB(railLeft, railTop, railActiveLeft, railBottom);
-    final Rect railRightRect = new Rect.fromLTRB(railActiveRight, railTop, railRight, railBottom);
+    final double trackActiveLeft = math.max(0.0, trackActive - thumbRadius - thumbGap * (1.0 - _enableAnimation.value));
+    final double trackActiveRight = math.min(trackActive + thumbRadius + thumbGap * (1.0 - _enableAnimation.value), trackRight);
+    final Rect trackLeftRect = new Rect.fromLTRB(trackLeft, trackTop, trackActiveLeft, trackBottom);
+    final Rect trackRightRect = new Rect.fromLTRB(trackActiveRight, trackTop, trackRight, trackBottom);
 
-    final Offset thumbCenter = new Offset(railActive, railVerticalCenter);
+    final Offset thumbCenter = new Offset(trackActive, trackVerticalCenter);
 
-    // Paint the rail.
+    // Paint the track.
     if (visualPosition > 0.0) {
-      canvas.drawRect(railLeftRect, leftRailPaint);
+      canvas.drawRect(trackLeftRect, leftTrackPaint);
     }
     if (visualPosition < 1.0) {
-      canvas.drawRect(railRightRect, rightRailPaint);
+      canvas.drawRect(trackRightRect, rightTrackPaint);
     }
 
     _paintOverlay(canvas, thumbCenter);
 
     _paintTickMarks(
       canvas,
-      railLeftRect,
-      railRightRect,
+      trackLeftRect,
+      trackRightRect,
       leftTickMarkPaint,
       rightTickMarkPaint,
     );

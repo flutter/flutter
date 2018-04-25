@@ -14,20 +14,23 @@ import '../globals.dart';
 import 'sdk.dart';
 
 class AnalysisServer {
-  AnalysisServer(this.sdk, this.directories, { this.previewDart2: false });
+  AnalysisServer(this.sdk, this.directories, {this.previewDart2: false});
 
   final String sdk;
   final List<String> directories;
   final bool previewDart2;
 
   Process _process;
-  final StreamController<bool> _analyzingController = new StreamController<bool>.broadcast();
-  final StreamController<FileAnalysisErrors> _errorsController = new StreamController<FileAnalysisErrors>.broadcast();
+  final StreamController<bool> _analyzingController =
+      new StreamController<bool>.broadcast();
+  final StreamController<FileAnalysisErrors> _errorsController =
+      new StreamController<FileAnalysisErrors>.broadcast();
 
   int _id = 0;
 
   Future<Null> start() async {
-    final String snapshot = fs.path.join(sdk, 'bin/snapshots/analysis_server.dart.snapshot');
+    final String snapshot =
+        fs.path.join(sdk, 'bin/snapshots/analysis_server.dart.snapshot');
     final List<String> command = <String>[
       fs.path.join(dartSdkPath, 'bin', 'dart'),
       snapshot,
@@ -44,31 +47,30 @@ class AnalysisServer {
     printTrace('dart ${command.skip(1).join(' ')}');
     _process = await processManager.start(command);
     // This callback hookup can't throw.
-    _process.exitCode.whenComplete(() => _process = null); // ignore: unawaited_futures
+    _process.exitCode
+        .whenComplete(() => _process = null); // ignore: unawaited_futures
 
-    final Stream<String> errorStream = _process.stderr.transform(utf8.decoder).transform(const LineSplitter());
+    final Stream<String> errorStream =
+        _process.stderr.transform(utf8.decoder).transform(const LineSplitter());
     errorStream.listen(printError);
 
-    final Stream<String> inStream = _process.stdout.transform(utf8.decoder).transform(const LineSplitter());
+    final Stream<String> inStream =
+        _process.stdout.transform(utf8.decoder).transform(const LineSplitter());
     inStream.listen(_handleServerResponse);
 
     // Available options (many of these are obsolete):
     //   enableAsync, enableDeferredLoading, enableEnums, enableNullAwareOperators,
     //   enableSuperMixins, generateDart2jsHints, generateHints, generateLints
     _sendCommand('analysis.updateOptions', <String, dynamic>{
-      'options': <String, dynamic>{
-        'enableSuperMixins': true
-      }
+      'options': <String, dynamic>{'enableSuperMixins': true}
     });
 
     _sendCommand('server.setSubscriptions', <String, dynamic>{
       'subscriptions': <String>['STATUS']
     });
 
-    _sendCommand('analysis.setAnalysisRoots', <String, dynamic>{
-      'included': directories,
-      'excluded': <String>[]
-    });
+    _sendCommand('analysis.setAnalysisRoots',
+        <String, dynamic>{'included': directories, 'excluded': <String>[]});
   }
 
   Stream<bool> get onAnalyzing => _analyzingController.stream;
@@ -77,7 +79,7 @@ class AnalysisServer {
   Future<int> get onExit => _process.exitCode;
 
   void _sendCommand(String method, Map<String, dynamic> params) {
-    final String message = json.encode(<String, dynamic> {
+    final String message = json.encode(<String, dynamic>{
       'id': (++_id).toString(),
       'method': method,
       'params': params
@@ -107,9 +109,9 @@ class AnalysisServer {
       } else if (response['error'] != null) {
         // Fields are 'code', 'message', and 'stackTrace'.
         final Map<String, dynamic> error = response['error'];
-        printError('Error response from the server: ${error['code']} ${error['message']}');
-        if (error['stackTrace'] != null)
-          printError(error['stackTrace']);
+        printError(
+            'Error response from the server: ${error['code']} ${error['message']}');
+        if (error['stackTrace'] != null) printError(error['stackTrace']);
       }
     }
   }
@@ -125,14 +127,15 @@ class AnalysisServer {
   void _handleServerError(Map<String, dynamic> error) {
     // Fields are 'isFatal', 'message', and 'stackTrace'.
     printError('Error from the analysis server: ${error['message']}');
-    if (error['stackTrace'] != null)
-      printError(error['stackTrace']);
+    if (error['stackTrace'] != null) printError(error['stackTrace']);
   }
 
   void _handleAnalysisIssues(Map<String, dynamic> issueInfo) {
     // {"event":"analysis.errors","params":{"file":"/Users/.../lib/main.dart","errors":[]}}
     final String file = issueInfo['file'];
-    final List<AnalysisError> errors = issueInfo['errors'].map((Map<String, dynamic> json) => new AnalysisError(json)).toList();
+    final List<AnalysisError> errors = issueInfo['errors']
+        .map((Map<String, dynamic> json) => new AnalysisError(json))
+        .toList();
     if (!_errorsController.isClosed)
       _errorsController.add(new FileAnalysisErrors(file, errors));
   }
@@ -147,7 +150,7 @@ class AnalysisServer {
 class AnalysisError implements Comparable<AnalysisError> {
   AnalysisError(this.json);
 
-  static final Map<String, int> _severityMap = <String, int> {
+  static final Map<String, int> _severityMap = <String, int>{
     'ERROR': 3,
     'WARNING': 2,
     'INFO': 1
@@ -182,25 +185,21 @@ class AnalysisError implements Comparable<AnalysisError> {
   @override
   int compareTo(AnalysisError other) {
     // Sort in order of file path, error location, severity, and message.
-    if (file != other.file)
-      return file.compareTo(other.file);
+    if (file != other.file) return file.compareTo(other.file);
 
-    if (offset != other.offset)
-      return offset - other.offset;
+    if (offset != other.offset) return offset - other.offset;
 
     final int diff = other.severityLevel - severityLevel;
-    if (diff != 0)
-      return diff;
+    if (diff != 0) return diff;
 
     return message.compareTo(other.message);
   }
 
   @override
   String toString() {
-    return
-      '${severity.toLowerCase().padLeft(7)} $_separator '
-      '$messageSentenceFragment $_separator '
-      '${fs.path.relative(file)}:$startLine:$startColumn';
+    return '${severity.toLowerCase().padLeft(7)} $_separator '
+        '$messageSentenceFragment $_separator '
+        '${fs.path.relative(file)}:$startLine:$startColumn';
   }
 
   String toLegacyString() {
