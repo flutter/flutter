@@ -11,7 +11,7 @@
 @property(readonly, nonatomic) NSMutableDictionary* pluginPublications;
 @end
 
-@interface FlutterAppDelegateRegistrar : NSObject<FlutterPluginRegistrar>
+@interface FlutterAppDelegateRegistrar : NSObject <FlutterPluginRegistrar>
 - (instancetype)initWithPlugin:(NSString*)pluginKey appDelegate:(FlutterAppDelegate*)delegate;
 @end
 
@@ -210,6 +210,31 @@
   }
 }
 
+- (void)application:(UIApplication*)application
+    handleEventsForBackgroundURLSession:(nonnull NSString*)identifier
+                      completionHandler:(nonnull void (^)())completionHandler {
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      if ([plugin application:application
+              handleEventsForBackgroundURLSession:identifier
+                                completionHandler:completionHandler]) {
+        return;
+      }
+    }
+  }
+}
+
+- (void)application:(UIApplication*)application
+    performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler {
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      if ([plugin application:application performFetchWithCompletionHandler:completionHandler]) {
+        return;
+      }
+    }
+  }
+}
+
 // TODO(xster): move when doing https://github.com/flutter/flutter/issues/3671.
 - (NSObject<FlutterBinaryMessenger>*)binaryMessenger {
   UIViewController* rootViewController = _window.rootViewController;
@@ -286,11 +311,11 @@
 }
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset {
-   return [FlutterDartProject lookupKeyForAsset:asset];
+  return [FlutterDartProject lookupKeyForAsset:asset];
 }
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package {
-   return [FlutterDartProject lookupKeyForAsset:asset fromPackage:package];
+  return [FlutterDartProject lookupKeyForAsset:asset fromPackage:package];
 }
 
 @end
