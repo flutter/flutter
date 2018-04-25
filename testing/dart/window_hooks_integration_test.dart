@@ -9,6 +9,9 @@ import 'dart:developer' as developer;
 import 'dart:math' as math;
 import 'dart:nativewrappers';
 
+// this needs to be imported because painting.dart expects it this way
+import 'dart:collection' as collection;
+
 import 'package:test/test.dart';
 
 // HACK: these parts are to get access to private functions tested here.

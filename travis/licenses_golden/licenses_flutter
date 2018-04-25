@@ -9947,6 +9947,8 @@ FILE: ../../../flutter/lib/ui/painting/paint.cc
 FILE: ../../../flutter/lib/ui/painting/paint.h
 FILE: ../../../flutter/lib/ui/painting/path.cc
 FILE: ../../../flutter/lib/ui/painting/path.h
+FILE: ../../../flutter/lib/ui/painting/path_measure.cc
+FILE: ../../../flutter/lib/ui/painting/path_measure.h
 FILE: ../../../flutter/lib/ui/painting/picture.cc
 FILE: ../../../flutter/lib/ui/painting/picture.h
 FILE: ../../../flutter/lib/ui/painting/picture_recorder.cc
