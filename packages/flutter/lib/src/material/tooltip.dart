@@ -282,12 +282,21 @@ class _TooltipOverlay extends StatelessWidget {
       textTheme: theme.brightness == Brightness.dark ? theme.textTheme : theme.primaryTextTheme,
       platform: theme.platform,
     );
+    String label;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        label = '';
+        break;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        label = message;
+    }
     return new Positioned.fill(
       child: new Semantics(
         scopesRoute: true,
         namesRoute: true,
         explicitChildNodes: true,
-        label: message,
+        label: label,
         child: new IgnorePointer(
           child: new CustomSingleChildLayout(
             delegate: new _TooltipPositionDelegate(
