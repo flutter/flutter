@@ -140,10 +140,11 @@ class FuchsiaRemoteConnection {
     );
   }
 
-  // Runs a flattened list of results run against all Dart VMs.
+  // Calls all Dart VM's, returning a flattened list of results.
   //
   // A side effect of this function is that internally tracked port forwarding
-  // will be updated in the event that ports are found to be broken/stale.
+  // will be updated in the event that ports are found to be broken/stale: they
+  // will be shut down and removed from tracking.
   Future<List<E>> _invokeForAllVms<E>(
       Future<List<E>> vmFunction(DartVm vmService)) async {
     List<E> result = <E>[];
