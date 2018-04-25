@@ -33,7 +33,7 @@ class GalleryDemoCategory {
 }
 
 const GalleryDemoCategory _kDemos = const GalleryDemoCategory._(
-  name: 'Demos',
+  name: 'Vignettes',
   icon: GalleryIcons.animation,
 );
 
@@ -477,9 +477,8 @@ List<GalleryDemo> _buildGalleryDemos() {
 
 final List<GalleryDemo> kAllGalleryDemos = _buildGalleryDemos();
 
-final List<GalleryDemoCategory> kAllGalleryDemoCategories = new Set<GalleryDemoCategory>.from(
-    kAllGalleryDemos.map<GalleryDemoCategory>((GalleryDemo demo) => demo.category)
-).toList();
+final Set<GalleryDemoCategory> kAllGalleryDemoCategories =
+  kAllGalleryDemos.map<GalleryDemoCategory>((GalleryDemo demo) => demo.category).toSet();
 
 final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
   new Map<GalleryDemoCategory, List<GalleryDemo>>.fromIterable(
