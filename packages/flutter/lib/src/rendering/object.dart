@@ -1051,7 +1051,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///    calling [setupParentData] on the future parent node.
   ///  * The conventions for using the parent data depend on the layout protocol
   ///    used between the parent and child. For example, in box layout, the
-  ///    parent data is completely opaque but in sector layout the child is
+  ///    parent data is completely opaque but in sliver layout the child is
   ///    permitted to read some fields of the parent data.
   ParentData parentData;
 
