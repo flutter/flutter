@@ -22,11 +22,9 @@ const char* DartSnapshot::kIsolateInstructionsSymbol =
     "kDartIsolateSnapshotInstructions";
 
 std::unique_ptr<DartSnapshotBuffer> ResolveVMData(const Settings& settings) {
-  if (settings.aot_snapshot_path.size() > 0) {
-    auto path = fml::paths::JoinPaths(
-        {settings.aot_snapshot_path, settings.aot_vm_snapshot_data_filename});
+  if (settings.vm_snapshot_data_path.size() > 0) {
     if (auto source = DartSnapshotBuffer::CreateWithContentsOfFile(
-            path.c_str(), false /* executable */)) {
+            settings.vm_snapshot_data_path.c_str(), false /* executable */)) {
       return source;
     }
   }
@@ -38,11 +36,9 @@ std::unique_ptr<DartSnapshotBuffer> ResolveVMData(const Settings& settings) {
 
 std::unique_ptr<DartSnapshotBuffer> ResolveVMInstructions(
     const Settings& settings) {
-  if (settings.aot_snapshot_path.size() > 0) {
-    auto path = fml::paths::JoinPaths(
-        {settings.aot_snapshot_path, settings.aot_vm_snapshot_instr_filename});
+  if (settings.vm_snapshot_instr_path.size() > 0) {
     if (auto source = DartSnapshotBuffer::CreateWithContentsOfFile(
-            path.c_str(), true /* executable */)) {
+            settings.vm_snapshot_instr_path.c_str(), true /* executable */)) {
       return source;
     }
   }
@@ -63,12 +59,10 @@ std::unique_ptr<DartSnapshotBuffer> ResolveVMInstructions(
 
 std::unique_ptr<DartSnapshotBuffer> ResolveIsolateData(
     const Settings& settings) {
-  if (settings.aot_snapshot_path.size() > 0) {
-    auto path =
-        fml::paths::JoinPaths({settings.aot_snapshot_path,
-                               settings.aot_isolate_snapshot_data_filename});
+  if (settings.isolate_snapshot_data_path.size() > 0) {
     if (auto source = DartSnapshotBuffer::CreateWithContentsOfFile(
-            path.c_str(), false /* executable */)) {
+            settings.isolate_snapshot_data_path.c_str(),
+            false /* executable */)) {
       return source;
     }
   }
@@ -80,12 +74,10 @@ std::unique_ptr<DartSnapshotBuffer> ResolveIsolateData(
 
 std::unique_ptr<DartSnapshotBuffer> ResolveIsolateInstructions(
     const Settings& settings) {
-  if (settings.aot_snapshot_path.size() > 0) {
-    auto path =
-        fml::paths::JoinPaths({settings.aot_snapshot_path,
-                               settings.aot_isolate_snapshot_instr_filename});
+  if (settings.isolate_snapshot_instr_path.size() > 0) {
     if (auto source = DartSnapshotBuffer::CreateWithContentsOfFile(
-            path.c_str(), true /* executable */)) {
+            settings.isolate_snapshot_instr_path.c_str(),
+            true /* executable */)) {
       return source;
     }
   }

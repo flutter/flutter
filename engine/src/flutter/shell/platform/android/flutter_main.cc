@@ -64,10 +64,11 @@ void FlutterMain::Init(JNIEnv* env,
     auto application_kernel_path =
         fml::paths::JoinPaths({settings.assets_path, "kernel_blob.bin"});
 
-    if (files::IsFile(platform_kernel_path) &&
-        files::IsFile(application_kernel_path)) {
-      settings.kernel_snapshot_path = platform_kernel_path;
+    if (files::IsFile(application_kernel_path)) {
       settings.application_kernel_asset = application_kernel_path;
+      if (files::IsFile(platform_kernel_path)) {
+        settings.platform_kernel_path = platform_kernel_path;
+      }
     }
   }
 

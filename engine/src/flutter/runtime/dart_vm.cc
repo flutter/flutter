@@ -266,7 +266,7 @@ DartVM::DartVM(const Settings& settings,
       vm_snapshot_(std::move(vm_snapshot)),
       isolate_snapshot_(std::move(isolate_snapshot)),
       platform_kernel_mapping_(
-          std::make_unique<fml::FileMapping>(settings.kernel_snapshot_path)),
+          std::make_unique<fml::FileMapping>(settings.platform_kernel_path)),
       weak_factory_(this) {
   TRACE_EVENT0("flutter", "DartVMInitializer");
   FXL_DLOG(INFO) << "Attempting Dart VM launch for mode: "
@@ -342,7 +342,7 @@ DartVM::DartVM(const Settings& settings,
   const bool is_preview_dart2 =
       platform_kernel_ != nullptr || isolate_snapshot_is_dart_2;
 
-  FXL_DLOG(INFO) << "Dart 2 " << (is_preview_dart2 ? " is" : "is NOT")
+  FXL_DLOG(INFO) << "Dart 2 " << (is_preview_dart2 ? "is" : "is NOT")
                  << " enabled. Platform kernel: "
                  << static_cast<bool>(platform_kernel_)
                  << " Isolate Snapshot is Dart 2: "

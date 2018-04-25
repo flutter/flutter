@@ -23,6 +23,7 @@
 #include "lib/tonic/file_loader/file_loader.h"
 #include "lib/tonic/scopes/dart_api_scope.h"
 #include "lib/tonic/scopes/dart_isolate_scope.h"
+#include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/dart/runtime/include/dart_tools_api.h"
 
 #ifdef ERROR
@@ -290,9 +291,8 @@ static bool LoadKernelSnapshot(std::shared_ptr<const fml::Mapping> mapping) {
   return true;
 }
 
-static bool LoadSnapshot(std::shared_ptr<const fml::Mapping> mapping,
-                         bool is_kernel) {
-  if (is_kernel) {
+static bool LoadSnapshot(std::shared_ptr<const fml::Mapping> mapping) {
+  if (Dart_IsKernel(mapping->GetMapping(), mapping->GetSize())) {
     return LoadKernelSnapshot(std::move(mapping));
   } else {
     return LoadScriptSnapshot(std::move(mapping));
@@ -322,7 +322,7 @@ bool DartIsolate::PrepareForRunningFromSnapshot(
     return false;
   }
 
-  if (!LoadSnapshot(mapping, vm_->GetPlatformKernel() != nullptr)) {
+  if (!LoadSnapshot(mapping)) {
     return false;
   }
 
@@ -539,8 +539,12 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
   // thread.
   service_isolate->ResetWeakPtrFactory();
 
+  const bool isolate_snapshot_is_dart_2 =
+      Dart_IsDart2Snapshot(vm->GetIsolateSnapshot()->GetData()->GetSnapshotPointer());
+  const bool is_preview_dart2 =
+      vm->GetPlatformKernel() != nullptr || isolate_snapshot_is_dart_2;
   const bool running_from_sources =
-      !DartVM::IsRunningPrecompiledCode() && vm->GetPlatformKernel() == nullptr;
+      !DartVM::IsRunningPrecompiledCode() && !is_preview_dart2;
 
   tonic::DartState::Scope scope(service_isolate);
   if (!DartServiceIsolate::Startup(

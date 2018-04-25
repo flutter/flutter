@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 
+#include "flutter/fml/paths.h"
 #include "lib/fxl/strings/string_view.h"
 
 // Include once for the default enum definition.
@@ -172,21 +173,37 @@ blink::Settings SettingsFromCommandLine(const fxl::CommandLine& command_line) {
   command_line.GetOptionValue(FlagForSwitch(Switch::Packages),
                               &settings.packages_file_path);
 
+  std::string aot_snapshot_path;
   command_line.GetOptionValue(FlagForSwitch(Switch::AotSnapshotPath),
-                              &settings.aot_snapshot_path);
+                              &aot_snapshot_path);
 
+  std::string aot_vm_snapshot_data_filename;
   command_line.GetOptionValue(FlagForSwitch(Switch::AotVmSnapshotData),
-                              &settings.aot_vm_snapshot_data_filename);
+                              &aot_vm_snapshot_data_filename);
 
+  std::string aot_vm_snapshot_instr_filename;
   command_line.GetOptionValue(FlagForSwitch(Switch::AotVmSnapshotInstructions),
-                              &settings.aot_vm_snapshot_instr_filename);
+                              &aot_vm_snapshot_instr_filename);
 
+  std::string aot_isolate_snapshot_data_filename;
   command_line.GetOptionValue(FlagForSwitch(Switch::AotIsolateSnapshotData),
-                              &settings.aot_isolate_snapshot_data_filename);
+                              &aot_isolate_snapshot_data_filename);
 
+  std::string aot_isolate_snapshot_instr_filename;
   command_line.GetOptionValue(
       FlagForSwitch(Switch::AotIsolateSnapshotInstructions),
-      &settings.aot_isolate_snapshot_instr_filename);
+      &aot_isolate_snapshot_instr_filename);
+
+  if (aot_snapshot_path.size() > 0) {
+    settings.vm_snapshot_data_path = fml::paths::JoinPaths(
+        {aot_snapshot_path, aot_vm_snapshot_data_filename});
+    settings.vm_snapshot_instr_path = fml::paths::JoinPaths(
+        {aot_snapshot_path, aot_vm_snapshot_instr_filename});
+    settings.isolate_snapshot_data_path = fml::paths::JoinPaths(
+        {aot_snapshot_path, aot_isolate_snapshot_data_filename});
+    settings.isolate_snapshot_instr_path = fml::paths::JoinPaths(
+        {aot_snapshot_path, aot_isolate_snapshot_instr_filename});
+  }
 
   command_line.GetOptionValue(FlagForSwitch(Switch::CacheDirPath),
                               &settings.temp_directory_path);

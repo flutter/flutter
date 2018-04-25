@@ -154,11 +154,12 @@ FlutterResult FlutterEngineRun(size_t version,
       fml::paths::JoinPaths({settings.assets_path, "platform.dill"});
   std::string application_kernel_path = fml::paths::JoinPaths(
       {settings.assets_path, kApplicationKernelSnapshotFileName});
-  if (files::IsFile(platform_kernel_path) &&
-      files::IsFile(application_kernel_path)) {
+  if (files::IsFile(application_kernel_path)) {
     // Run from a kernel snapshot.
-    settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
-    settings.kernel_snapshot_path = platform_kernel_path;
+    settings.platform_kernel_path = platform_kernel_path;
+    if (files::IsFile(platform_kernel_path)) {
+      settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
+    }
   } else {
     // Run from a main Dart file.
     settings.main_dart_file_path = args->main_path;
