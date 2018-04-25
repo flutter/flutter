@@ -1,4 +1,4 @@
-Signature: 93f68aa0f203ef531ba8a7c96b225e9d
+Signature: 0f3ad8fb5fdbb7e3515d3139f5201dd0
 
 UNUSED LICENSES:
 
@@ -14261,7 +14261,6 @@ FILE: ../../../third_party/skia/src/gpu/gl/glfw/GrGLMakeNativeInterface_glfw.cpp
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLColorSpaceXformHelper.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLProgramDataManager.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearStencilClipOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrMSAAPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrPathStencilSettings.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrRegionOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrRegionOp.h
@@ -18190,7 +18189,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrAAHairLinePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrAAHairLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDefaultPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDefaultPathRenderer.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrMSAAPathRenderer.h
 FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts_none.cpp
 FILE: ../../../third_party/skia/src/opts/SkBlitRow_opts_none.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFConvertType1FontStream.cpp
