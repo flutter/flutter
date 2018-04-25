@@ -622,12 +622,16 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
           children: <TestSemantics>[
             new TestSemantics(
-              label: 'Foo\nBar',
-              textDirection: TextDirection.ltr,
-            )
+              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+              children: <TestSemantics>[
+                new TestSemantics(
+                  label: 'Foo\nBar',
+                  textDirection: TextDirection.ltr,
+                )
+              ],
+            ),
           ],
         ),
       ],
@@ -654,12 +658,16 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
           children: <TestSemantics>[
             new TestSemantics(
-              label: 'Bar',
-              textDirection: TextDirection.ltr,
-            )
+              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+              children: <TestSemantics>[
+                new TestSemantics(
+                  label: 'Bar',
+                  textDirection: TextDirection.ltr,
+                )
+              ],
+            ),
           ],
         ),
       ],
