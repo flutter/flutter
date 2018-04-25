@@ -60,6 +60,25 @@ class CommonFinders {
     );
   }
 
+  /// Looks for widgets that contain an [Icon] descendant with [IconData]
+  /// in it.
+  ///
+  /// Example:
+  ///
+  ///     // Suppose you have an IconButton with some icon data 'Icons.arrow_upward':
+  ///     new IconButton(
+  ///       icon: new Icon(Icons.arrow_upward)
+  ///     )
+  ///
+  ///     // You can find and tap on it like this:
+  ///     tester.tap(find.widgetWithText(IconButton, Icons.arrow_upward));
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder widgetWithIcon(Type widgetType, IconData icon, { bool skipOffstage: true }) {
+    return new _WidgetWithIconFinder(widgetType, icon, skipOffstage: skipOffstage);
+  }
+
   /// Finds widgets by searching for one with a particular [Key].
   ///
   /// ## Sample code
@@ -482,6 +501,40 @@ class _TextFinder extends MatchFinder {
       return editable.controller.text == text;
     }
     return false;
+  }
+}
+
+class _WidgetWithIconFinder extends Finder {
+  WidgetWithIconFinder(this.widgetType, this.icon, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+
+  final Type widgetType;
+  final IconData icon;
+
+  @override
+  String get description => 'type $widgetType with icon "$icon"';
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) {
+    return candidates
+      .map((Element iconElement) {
+        if (iconElement.widget is !Icon)
+          return null;
+
+        final Icon iconWidget = iconElement.widget;
+        if (iconWidget.icon == icon) {
+          try {
+            iconElement.visitAncestorElements((Element element) {
+              if (element.widget.runtimeType == widgetType)
+                throw element;
+              return true;
+            });
+          } on Element catch (result) {
+            return result;
+          }
+        }
+        return null;
+      })
+      .where((Element element) => element != null);
   }
 }
 
