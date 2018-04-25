@@ -90,7 +90,10 @@ class Feedback {
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        return SystemSound.play(SystemSoundType.click);
+        return Future.wait(<Future<Null>>[
+          SystemSound.play(SystemSoundType.click),
+          SemanticsService.tap(),
+        ]).then((List<Future<Null>> _) => null);
       default:
         return new Future<Null>.value();
     }

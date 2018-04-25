@@ -7,7 +7,7 @@ import 'dart:ui' show TextDirection;
 
 import 'package:flutter/services.dart' show SystemChannels;
 
-import 'semantics_event.dart' show AnnounceSemanticsEvent, LongPressSemanticsEvent;
+import 'semantics_event.dart' show AnnounceSemanticsEvent, LongPressSemanticsEvent, TapSemanticEvent;
 
 
 /// Allows access to the platform's accessibility services.
@@ -37,6 +37,14 @@ class SemanticsService {
    /// This is only used by Android.
   static Future<Null> longPress() async {
     const LongPressSemanticsEvent event = const LongPressSemanticsEvent();
+    await SystemChannels.accessibility.send(event.toMap());
+  }
+
+  /// Send a semantic tap event.;
+  /// 
+  /// This is only used by Android.
+  static Future<Null> tap() async {
+    const TapSemanticEvent event = const TapSemanticEvent();
     await SystemChannels.accessibility.send(event.toMap());
   }
 }

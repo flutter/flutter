@@ -91,11 +91,23 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
 
 /// An event which triggers long press semantic feedback.
 /// 
-/// Only used on android.
+/// Only used on Android.
 class LongPressSemanticsEvent extends SemanticsEvent {
 
   /// Constructs an event that triggers a long-press semantic feedback by the platform.
   const LongPressSemanticsEvent() : super('longPress');
+
+  @override
+  Map<String, dynamic> getDataMap() => const <String, dynamic>{};
+}
+
+/// An event which triggers tap semantic feedback.
+/// 
+/// Only used on Android.
+class TapSemanticEvent extends SemanticsEvent {
+
+  /// Constructs an event that triggers a long-press semantic feedback by the platform.
+  const TapSemanticEvent() : super('tap');
 
   @override
   Map<String, dynamic> getDataMap() => const <String, dynamic>{};
