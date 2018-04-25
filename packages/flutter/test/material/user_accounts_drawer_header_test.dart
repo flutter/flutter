@@ -333,29 +333,33 @@ void main() {
         new TestSemantics(
           children: <TestSemantics>[
             new TestSemantics(
-              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
               children: <TestSemantics>[
                 new TestSemantics(
-                  label: 'Signed in\nname\nemail',
-                  textDirection: TextDirection.ltr,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     new TestSemantics(
-                      label: r'B',
+                      label: 'Signed in\nname\nemail',
                       textDirection: TextDirection.ltr,
-                    ),
-                    new TestSemantics(
-                      label: r'C',
-                      textDirection: TextDirection.ltr,
-                    ),
-                    new TestSemantics(
-                      label: r'D',
-                      textDirection: TextDirection.ltr,
-                    ),
-                    new TestSemantics(
-                      flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                      actions: <SemanticsAction>[SemanticsAction.tap],
-                      label: r'Show accounts',
-                      textDirection: TextDirection.ltr,
+                      children: <TestSemantics>[
+                        new TestSemantics(
+                          label: r'B',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        new TestSemantics(
+                          label: r'C',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        new TestSemantics(
+                          label: r'D',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        new TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.isButton],
+                          actions: <SemanticsAction>[SemanticsAction.tap],
+                          label: r'Show accounts',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -385,23 +389,27 @@ void main() {
         new TestSemantics(
           children: <TestSemantics>[
             new TestSemantics(
-              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
               children: <TestSemantics>[
                 new TestSemantics(
-                  label: 'Signed in',
-                  textDirection: TextDirection.ltr,
+                  flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                   children: <TestSemantics>[
                     new TestSemantics(
-                      label: r'B',
+                      label: 'Signed in',
                       textDirection: TextDirection.ltr,
-                    ),
-                    new TestSemantics(
-                      label: r'C',
-                      textDirection: TextDirection.ltr,
-                    ),
-                    new TestSemantics(
-                      label: r'D',
-                      textDirection: TextDirection.ltr,
+                      children: <TestSemantics>[
+                        new TestSemantics(
+                          label: r'B',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        new TestSemantics(
+                          label: r'C',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        new TestSemantics(
+                          label: r'D',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
                     ),
                   ],
                 ),
