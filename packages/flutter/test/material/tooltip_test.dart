@@ -487,7 +487,7 @@ void main() {
       ),
     );
 
-    final TestSemantics expected = new TestSemantics.root(
+    expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
           id: 1,
@@ -495,16 +495,31 @@ void main() {
           textDirection: TextDirection.ltr,
         ),
       ]
-    );
-
-    expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
+    ), ignoreTransform: true, ignoreRect: true));
 
     // before using "as dynamic" in your code, see note top of file
     (key.currentState as dynamic).ensureTooltipVisible(); // this triggers a rebuild of the semantics because the tree changes
 
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 1,
+          label: 'TIP',
+          textDirection: TextDirection.ltr,
+        ),
+        new TestSemantics.rootChild(
+          id: 2,
+          label: 'TIP',
+          textDirection: TextDirection.ltr,
+          flags: <SemanticsFlag>[
+            SemanticsFlag.scopesRoute,
+            SemanticsFlag.namesRoute,
+          ],
+        )
+      ]
+    ), ignoreTransform: true, ignoreRect: true));
 
     semantics.dispose();
   });
@@ -627,7 +642,7 @@ void main() {
             new TestSemantics(
               label: 'Foo\nBar',
               textDirection: TextDirection.ltr,
-            )
+            ),
           ],
         ),
       ],
@@ -659,7 +674,7 @@ void main() {
             new TestSemantics(
               label: 'Bar',
               textDirection: TextDirection.ltr,
-            )
+            ),
           ],
         ),
       ],
