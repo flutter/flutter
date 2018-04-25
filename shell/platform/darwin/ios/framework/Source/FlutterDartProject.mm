@@ -97,7 +97,7 @@ static blink::Settings DefaultSettingsForProcess() {
           NSURL* vmKernelSnapshotURL = [NSURL URLWithString:@(kVMKernelSnapshotFileName)
                                               relativeToURL:[NSURL fileURLWithPath:assetsPath]];
           if ([[NSFileManager defaultManager] fileExistsAtPath:vmKernelSnapshotURL.path]) {
-            settings.kernel_snapshot_path = vmKernelSnapshotURL.path.UTF8String;
+            settings.platform_kernel_path = vmKernelSnapshotURL.path.UTF8String;
           }
         }
 

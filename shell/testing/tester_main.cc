@@ -254,7 +254,7 @@ int main(int argc, char* argv[]) {
 
   settings.icu_data_path = "icudtl.dat";
 
-  settings.kernel_snapshot_path =
+  settings.platform_kernel_path =
       fml::paths::JoinPaths({settings.assets_path, "platform.dill"});
 
   // The tools that read logs get confused if there is a log tag specified.

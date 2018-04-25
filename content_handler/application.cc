@@ -123,6 +123,13 @@ Application::Application(
   application_context_ =
       component::ApplicationContext::CreateFrom(std::move(startup_info));
 
+  settings_.vm_snapshot_data_path = "pkg/data/vm_snapshot_data.bin";
+  settings_.vm_snapshot_instr_path = "pkg/data/vm_snapshot_instructions.bin";
+  settings_.isolate_snapshot_data_path =
+      "pkg/data/isolate_core_snapshot_data.bin";
+  settings_.isolate_snapshot_instr_path =
+      "pkg/data/isolate_core_snapshot_instructions.bin";
+
   settings_.enable_observatory = true;
 
   settings_.icu_data_path = "";
@@ -132,6 +139,7 @@ Application::Application(
   settings_.assets_dir = application_assets_directory_.get();
 
   settings_.script_snapshot_path = "snapshot_blob.bin";
+  settings_.application_kernel_asset = "kernel_blob.dill";
 
   settings_.log_tag = debug_label_ + std::string{"(flutter)"};
 

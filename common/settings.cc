@@ -11,16 +11,13 @@ namespace blink {
 std::string Settings::ToString() const {
   std::stringstream stream;
   stream << "Settings: " << std::endl;
-  stream << "aot_snapshot_path: " << aot_snapshot_path << std::endl;
   stream << "script_snapshot_path: " << script_snapshot_path << std::endl;
-  stream << "aot_vm_snapshot_data_filename: " << aot_vm_snapshot_data_filename
+  stream << "vm_snapshot_data_path: " << vm_snapshot_data_path << std::endl;
+  stream << "vm_snapshot_instr_path: " << vm_snapshot_instr_path << std::endl;
+  stream << "isolate_snapshot_data_path: " << isolate_snapshot_data_path
          << std::endl;
-  stream << "aot_vm_snapshot_instr_filename: " << aot_vm_snapshot_instr_filename
+  stream << "isolate_snapshot_instr_path: " << isolate_snapshot_instr_path
          << std::endl;
-  stream << "aot_isolate_snapshot_data_filename: "
-         << aot_isolate_snapshot_data_filename << std::endl;
-  stream << "aot_isolate_snapshot_instr_filename: "
-         << aot_isolate_snapshot_instr_filename << std::endl;
   stream << "application_library_path: " << application_library_path
          << std::endl;
   stream << "main_dart_file_path: " << main_dart_file_path << std::endl;
