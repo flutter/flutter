@@ -133,11 +133,11 @@ class FuchsiaRemoteConnection {
     if (_forwardedVmServicePorts.isEmpty) {
       return <FlutterView>[];
     }
-    List<List<FlutterView>> flutterViewLists =
-        await _invokeForAllVms<FlutterView>((DartVm vmService) async {
+    final List<List<FlutterView>> flutterViewLists =
+        await _invokeForAllVms<List<FlutterView>>((DartVm vmService) async {
       return await vmService.getAllFlutterViews();
     });
-    List<FlutterView> results = flutterViewLists.fold<List<FlutterView>>(
+    final List<FlutterView> results = flutterViewLists.fold<List<FlutterView>>(
         <FlutterView>[], (List<FlutterView> acc, List<FlutterView> element) {
       acc.addAll(element);
       return acc;
@@ -151,7 +151,7 @@ class FuchsiaRemoteConnection {
   // will be updated in the event that ports are found to be broken/stale: they
   // will be shut down and removed from tracking.
   Future<List<E>> _invokeForAllVms<E>(
-      Future<List<E>> vmFunction(DartVm vmService)) async {
+      Future<E> vmFunction(DartVm vmService)) async {
     final List<E> result = <E>[];
     final Set<int> stalePorts = new Set<int>();
     for (PortForwarder pf in _forwardedVmServicePorts) {
@@ -202,11 +202,14 @@ class FuchsiaRemoteConnection {
     })));
 
     // Filters out stale ports after connecting. Ignores results.
-    await _invokeForAllVms<Map<String, dynamic>>((DartVm vmService) async {
-      Map<String, dynamic> res = await vmService.invokeRpc('getVersion');
-      _log.fine('DartVM version check result: $res');
-      return res;
-    });
+    await _invokeForAllVms<Map<String, dynamic>>(
+      (DartVm vmService) async {
+        final Map<String, dynamic> res =
+            await vmService.invokeRpc('getVersion');
+        _log.fine('DartVM version check result: $res');
+        return res;
+      },
+    );
   }
 
   /// Gets the open Dart VM service ports on a remote Fuchsia device.
