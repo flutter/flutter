@@ -1346,15 +1346,21 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   void _addToUpdate(ui.SemanticsUpdateBuilder builder) {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
-    Int32List children;
+    Int32List childrenInTraversalOrder;
+    Int32List childrenInHitTestOrder;
     if (!hasChildren || mergeAllDescendantsIntoThisNode) {
-      children = _kEmptyChildList;
+      childrenInTraversalOrder = _kEmptyChildList;
+      childrenInHitTestOrder = _kEmptyChildList;
     } else {
+      final int childCount = _children.length;
       final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
-      final int childCount = sortedChildren.length;
-      children = new Int32List(childCount);
-      for (int i = 0; i < childCount; ++i) {
-        children[i] = sortedChildren[i].id;
+      childrenInTraversalOrder = new Int32List(childCount);
+      for (int i = 0; i < childCount; i += 1) {
+        childrenInTraversalOrder[i] = sortedChildren[i].id;
+      }
+      childrenInHitTestOrder = new Int32List(childCount);
+      for (int i = childCount - 1; i >= 0; i -= 1) {
+        childrenInHitTestOrder[i] = _children[i].id;
       }
     }
     builder.updateNode(
@@ -1374,7 +1380,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       scrollExtentMax: data.scrollExtentMax != null ? data.scrollExtentMax : double.nan,
       scrollExtentMin: data.scrollExtentMin != null ? data.scrollExtentMin : double.nan,
       transform: data.transform?.storage ?? _kIdentityTransform,
-      children: children,
+      childrenInTraversalOrder: childrenInTraversalOrder,
+      childrenInHitTestOrder: childrenInHitTestOrder,
     );
     _dirty = false;
   }
