@@ -11,12 +11,11 @@ import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../globals.dart';
-import 'sdk.dart';
 
 class AnalysisServer {
-  AnalysisServer(this.sdk, this.directories, {this.previewDart2: false});
+  AnalysisServer(this.sdkPath, this.directories, {this.previewDart2: false});
 
-  final String sdk;
+  final String sdkPath;
   final List<String> directories;
   final bool previewDart2;
 
@@ -30,12 +29,12 @@ class AnalysisServer {
 
   Future<Null> start() async {
     final String snapshot =
-        fs.path.join(sdk, 'bin/snapshots/analysis_server.dart.snapshot');
+        fs.path.join(sdkPath, 'bin/snapshots/analysis_server.dart.snapshot');
     final List<String> command = <String>[
-      fs.path.join(dartSdkPath, 'bin', 'dart'),
+      fs.path.join(sdkPath, 'bin', 'dart'),
       snapshot,
       '--sdk',
-      sdk,
+      sdkPath,
     ];
 
     if (previewDart2) {
@@ -111,7 +110,9 @@ class AnalysisServer {
         final Map<String, dynamic> error = response['error'];
         printError(
             'Error response from the server: ${error['code']} ${error['message']}');
-        if (error['stackTrace'] != null) printError(error['stackTrace']);
+        if (error['stackTrace'] != null) {
+          printError(error['stackTrace']);
+        }
       }
     }
   }
@@ -127,7 +128,9 @@ class AnalysisServer {
   void _handleServerError(Map<String, dynamic> error) {
     // Fields are 'isFatal', 'message', and 'stackTrace'.
     printError('Error from the analysis server: ${error['message']}');
-    if (error['stackTrace'] != null) printError(error['stackTrace']);
+    if (error['stackTrace'] != null) {
+      printError(error['stackTrace']);
+    }
   }
 
   void _handleAnalysisIssues(Map<String, dynamic> issueInfo) {
@@ -185,12 +188,15 @@ class AnalysisError implements Comparable<AnalysisError> {
   @override
   int compareTo(AnalysisError other) {
     // Sort in order of file path, error location, severity, and message.
-    if (file != other.file) return file.compareTo(other.file);
+    if (file != other.file)
+      return file.compareTo(other.file);
 
-    if (offset != other.offset) return offset - other.offset;
+    if (offset != other.offset)
+      return offset - other.offset;
 
     final int diff = other.severityLevel - severityLevel;
-    if (diff != 0) return diff;
+    if (diff != 0)
+      return diff;
 
     return message.compareTo(other.message);
   }
