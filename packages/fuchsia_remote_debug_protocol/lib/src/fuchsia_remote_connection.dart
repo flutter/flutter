@@ -127,22 +127,40 @@ class FuchsiaRemoteConnection {
 
   /// Returns a list of [FlutterView] objects.
   ///
-  /// This is run across all connected DartVM connections that this class is
+  /// This is run across all connected Dart VM connections that this class is
   /// managing.
   Future<List<FlutterView>> getFlutterViews() async {
-    final List<FlutterView> views = <FlutterView>[];
     if (_forwardedVmServicePorts.isEmpty) {
-      return views;
+      return <FlutterView>[];
     }
+    return new List<FlutterView>.unmodifiable(
+      await _invokeForAllVms<FlutterView>((DartVm vmService) async {
+        return await vmService.getAllFlutterViews();
+      }),
+    );
+  }
+
+  // Runs a flattened list of results run against all Dart VMs.
+  //
+  // A side effect of this function is that internally tracked port forwarding
+  // will be updated in the event that ports are found to be broken/stale.
+  Future<List<E>> _invokeForAllVms<E>(
+      Future<List<E>> vmFunction(DartVm vmService)) async {
+    List<E> result = <E>[];
+    Set<int> stalePorts = new Set<int>();
     for (PortForwarder pf in _forwardedVmServicePorts) {
       try {
-        final DartVm vmService = await _getDartVm(pf.port);
-        views.addAll(await vmService.getAllFlutterViews());
+        final DartVm service = await _getDartVm(pf.port);
+        result.addAll(await vmFunction(service));
       } on HttpException {
-        // Ignore. Stale port.
+        await pf.stop();
+        stalePorts.add(pf.port);
       }
     }
-    return new List<FlutterView>.unmodifiable(views);
+    // Clean up the ports after finished with iterating.
+    _forwardedVmServicePorts
+        .removeWhere((PortForwarder pf) => stalePorts.contains(pf.port));
+    return result;
   }
 
   Future<DartVm> _getDartVm(int port) async {
