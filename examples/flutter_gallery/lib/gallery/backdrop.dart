@@ -196,6 +196,7 @@ class Backdrop extends StatefulWidget {
 class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin {
   final GlobalKey _backdropKey = new GlobalKey(debugLabel: 'Backdrop');
   AnimationController _controller;
+  Animation<double> _frontOpacity;
 
   @override
   void initState() {
@@ -205,6 +206,14 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
       value: 1.0,
       vsync: this,
     );
+
+    _frontOpacity =
+      new Tween<double>(begin: 0.2, end: 1.0).animate(
+        new CurvedAnimation(
+          parent: _controller,
+          curve: const Interval(0.0, 0.4, curve: Curves.easeInOut),
+        ),
+      );
   }
 
   @override
@@ -253,11 +262,6 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
       ),
       end: const RelativeRect.fromLTRB(0.0, _kBackAppBarHeight, 0.0, 0.0),
     ).animate(_controller);
-
-    final Animation<double> frontOpacity = new CurvedAnimation(
-      parent: new Tween<double>(begin: 0.5, end: 1.0).animate(_controller),
-      curve: Curves.easeIn,
-    );
 
     return new Stack(
       key: _backdropKey,
@@ -313,7 +317,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               AnimationStatus.completed,
               controller: _controller,
               child: new FadeTransition(
-                opacity: frontOpacity,
+                opacity: _frontOpacity,
                 child: widget.frontLayer,
               ),
             ),
