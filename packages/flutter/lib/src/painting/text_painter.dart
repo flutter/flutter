@@ -300,29 +300,6 @@ class TextPainter {
     return new Size(width, height);
   }
 
-  // Workaround for https://github.com/flutter/flutter/issues/13303
-  double _workaroundBaselineBug(double value, TextBaseline baseline) {
-    if (value >= 0.0)
-      return value;
-
-    final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
-      _createParagraphStyle(TextDirection.ltr),
-    );
-    if (text?.style != null)
-      builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
-    builder.addText(_kZeroWidthSpace);
-    final ui.Paragraph paragraph = builder.build()
-      ..layout(new ui.ParagraphConstraints(width: double.infinity));
-
-    switch (baseline) {
-      case TextBaseline.alphabetic:
-        return paragraph.alphabeticBaseline;
-      case TextBaseline.ideographic:
-       return paragraph.ideographicBaseline;
-    }
-    return null;
-  }
-
   /// Returns the distance from the top of the text to the first baseline of the
   /// given type.
   ///
@@ -332,9 +309,9 @@ class TextPainter {
     assert(baseline != null);
     switch (baseline) {
       case TextBaseline.alphabetic:
-        return _workaroundBaselineBug(_paragraph.alphabeticBaseline, baseline);
+        return _paragraph.alphabeticBaseline;
       case TextBaseline.ideographic:
-       return _workaroundBaselineBug(_paragraph.ideographicBaseline, baseline);
+        return _paragraph.ideographicBaseline;
     }
     return null;
   }
