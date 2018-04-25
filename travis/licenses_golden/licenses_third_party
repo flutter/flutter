@@ -1,4 +1,4 @@
-Signature: 79fed6bd28e4f174af857f8916603d49
+Signature: f189cf14d77aade905e2e7bf9a892c1b
 
 UNUSED LICENSES:
 
@@ -4359,7 +4359,6 @@ FILE: ../../../third_party/dart/client/idea/.idea/inspectionProfiles/Project_Def
 FILE: ../../../third_party/dart/client/idea/.idea/vcs.xml
 FILE: ../../../third_party/dart/runtime/CPPLINT.cfg
 FILE: ../../../third_party/dart/runtime/observatory/.analysis_options
-FILE: ../../../third_party/dart/runtime/observatory/dart2js.packages
 FILE: ../../../third_party/dart/runtime/observatory/lib/elements.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/img/chromium_icon.png
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/img/dart_icon.png
