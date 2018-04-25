@@ -7,16 +7,16 @@ import 'dart:collection';
 import 'package:analyzer/error/error.dart';
 import 'package:analyzer/file_system/file_system.dart' as file_system;
 import 'package:analyzer/file_system/physical_file_system.dart';
-import 'package:analyzer/source/analysis_options_provider.dart';
 import 'package:analyzer/source/error_processor.dart';
 import 'package:analyzer/source/line_info.dart';
-import 'package:analyzer/source/package_map_resolver.dart';
+import 'package:analyzer/src/analysis_options/analysis_options_provider.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/context/builder.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/dart/sdk/sdk.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/engine.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/java_io.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/source.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/generated/source_io.dart'; // ignore: implementation_imports
+import 'package:analyzer/src/source/package_map_resolver.dart'; // ignore: implementation_imports
 import 'package:analyzer/src/task/options.dart'; // ignore: implementation_imports
 import 'package:linter/src/rules.dart' as linter; // ignore: implementation_imports
 import 'package:cli_util/cli_util.dart' as cli_util;
