@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/physics.dart' as physics;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'basic_types.dart';
@@ -13,6 +14,12 @@ import 'basic_types.dart';
 /// Utility functions for working with matrices.
 class MatrixUtils {
   MatrixUtils._();
+
+  /// Extremely small epsilon to minimize the risk of self positives.
+  static const double _matrixEpsilon = 0.000000001;
+
+  static bool _nearEqual(double a, double b) => physics.nearEqual(a, b, _matrixEpsilon);
+  static bool _nearZero(double value) => physics.nearZero(value, _matrixEpsilon);
 
   /// Returns the given [transform] matrix as an [Offset], if the matrix is
   /// nothing but a 2D translation.
@@ -22,20 +29,20 @@ class MatrixUtils {
     assert(transform != null);
     final Float64List values = transform.storage;
     // Values are stored in column-major order.
-    if (values[0] == 1.0 && // col 1
-        values[1] == 0.0 &&
-        values[2] == 0.0 &&
-        values[3] == 0.0 &&
-        values[4] == 0.0 && // col 2
-        values[5] == 1.0 &&
-        values[6] == 0.0 &&
-        values[7] == 0.0 &&
-        values[8] == 0.0 && // col 3
-        values[9] == 0.0 &&
-        values[10] == 1.0 &&
-        values[11] == 0.0 &&
-        values[14] == 0.0 && // bottom of col 4 (values 12 and 13 are the x and y offsets)
-        values[15] == 1.0) {
+    if (_nearEqual(values[0], 1.0) && // col 1
+        _nearZero(values[1]) &&
+        _nearZero(values[2]) &&
+        _nearZero(values[3]) &&
+        _nearZero(values[4]) && // col 2
+        _nearEqual(values[5], 1.0) &&
+        _nearZero(values[6]) &&
+        _nearZero(values[7]) &&
+        _nearZero(values[8]) && // col 3
+        _nearZero(values[9]) &&
+        _nearEqual(values[10], 1.0) &&
+        _nearZero(values[11]) &&
+        _nearZero(values[14]) && // bottom of col 4 (values 12 and 13 are the x and y offsets)
+        _nearEqual(values[15], 1.0)) {
       return new Offset(values[12], values[13]);
     }
     return null;
@@ -49,21 +56,21 @@ class MatrixUtils {
     assert(transform != null);
     final Float64List values = transform.storage;
     // Values are stored in column-major order.
-    if (values[1] == 0.0 && // col 1 (value 0 is the scale)
-        values[2] == 0.0 &&
-        values[3] == 0.0 &&
-        values[4] == 0.0 && // col 2 (value 5 is the scale)
-        values[6] == 0.0 &&
-        values[7] == 0.0 &&
-        values[8] == 0.0 && // col 3
-        values[9] == 0.0 &&
-        values[10] == 1.0 &&
-        values[11] == 0.0 &&
-        values[12] == 0.0 && // col 4
-        values[13] == 0.0 &&
-        values[14] == 0.0 &&
-        values[15] == 1.0 &&
-        values[0] == values[5]) { // uniform scale
+    if (_nearZero(values[1]) && // col 1 (value 0 is the scale)
+        _nearZero(values[2]) &&
+        _nearZero(values[3]) &&
+        _nearZero(values[4]) && // col 2 (value 5 is the scale)
+        _nearZero(values[6]) &&
+        _nearZero(values[7]) &&
+        _nearZero(values[8]) && // col 3
+        _nearZero(values[9]) &&
+        _nearEqual(values[10], 1.0) &&
+        _nearZero(values[11]) &&
+        _nearZero(values[12]) && // col 4
+        _nearZero(values[13]) &&
+        _nearZero(values[14]) &&
+        _nearEqual(values[15], 1.0) &&
+        _nearEqual(values[0], values[5])) { // uniform scale
       return values[0];
     }
     return null;
@@ -101,22 +108,22 @@ class MatrixUtils {
   /// Whether the given matrix is the identity matrix.
   static bool isIdentity(Matrix4 a) {
     assert(a != null);
-    return a.storage[0] == 1.0 // col 1
-        && a.storage[1] == 0.0
-        && a.storage[2] == 0.0
-        && a.storage[3] == 0.0
-        && a.storage[4] == 0.0 // col 2
-        && a.storage[5] == 1.0
-        && a.storage[6] == 0.0
-        && a.storage[7] == 0.0
-        && a.storage[8] == 0.0 // col 3
-        && a.storage[9] == 0.0
-        && a.storage[10] == 1.0
-        && a.storage[11] == 0.0
-        && a.storage[12] == 0.0 // col 4
-        && a.storage[13] == 0.0
-        && a.storage[14] == 0.0
-        && a.storage[15] == 1.0;
+    return _nearEqual(a.storage[0], 1.0) // col 1
+        && _nearZero(a.storage[1])
+        && _nearZero(a.storage[2])
+        && _nearZero(a.storage[3])
+        && _nearZero(a.storage[4]) // col 2
+        && _nearEqual(a.storage[5], 1.0)
+        && _nearZero(a.storage[6])
+        && _nearZero(a.storage[7])
+        && _nearZero(a.storage[8]) // col 3
+        && _nearZero(a.storage[9])
+        && _nearEqual(a.storage[10], 1.0)
+        && _nearZero(a.storage[11])
+        && _nearZero(a.storage[12]) // col 4
+        && _nearZero(a.storage[13])
+        && _nearZero(a.storage[14])
+        && _nearEqual(a.storage[15], 1.0);
   }
 
   /// Applies the given matrix as a perspective transform to the given point.
@@ -281,6 +288,20 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
 
   @override
   String valueToString({ TextTreeConfiguration parentConfiguration }) {
+    if (value != null) {
+      if (MatrixUtils.isIdentity(value)) {
+        return 'identity';
+      }
+      final double scale = MatrixUtils.getAsScale(value);
+      if (scale != null) {
+        return 'scale(${scale.toStringAsFixed(1)})';
+      }
+      final Offset offset = MatrixUtils.getAsTranslation(value);
+      if (offset != null) {
+        return 'translate(${offset.dx.toStringAsFixed(1)}, ${offset.dy.toStringAsFixed(1)})';
+      }
+    }
+
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Format the value on a single line to be compatible with the parent's
       // style.
