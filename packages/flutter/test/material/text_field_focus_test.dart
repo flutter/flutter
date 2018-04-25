@@ -206,4 +206,25 @@ void main() {
     await tester.pump(); // in case the AutomaticKeepAlive widget thinks it needs a cleanup frame
     expect(find.byType(TextField), findsOneWidget);
   });
+
+  testWidgets('TextField with decoration:null', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/16880
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Material(
+          child: const Center(
+            child: const TextField(
+              decoration: null
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    await tester.tap(find.byType(TextField));
+    await tester.idle();
+    expect(tester.testTextInput.isVisible, isTrue);
+  });
 }
