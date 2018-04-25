@@ -147,8 +147,8 @@ class FuchsiaRemoteConnection {
   // will be shut down and removed from tracking.
   Future<List<E>> _invokeForAllVms<E>(
       Future<List<E>> vmFunction(DartVm vmService)) async {
-    List<E> result = <E>[];
-    Set<int> stalePorts = new Set<int>();
+    final List<E> result = <E>[];
+    final Set<int> stalePorts = new Set<int>();
     for (PortForwarder pf in _forwardedVmServicePorts) {
       try {
         final DartVm service = await _getDartVm(pf.port);
