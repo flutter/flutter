@@ -141,6 +141,7 @@ class CocoaPods {
       );
       return false;
     }
+    
     return true;
   }
 
