@@ -319,11 +319,11 @@ class _PlatformItem extends StatelessWidget {
   String _platformLabel(TargetPlatform platform) {
     switch(platform) {
       case TargetPlatform.android:
-        return 'Android';
+        return 'Mountain View';
       case TargetPlatform.fuchsia:
         return 'Fuchsia';
       case TargetPlatform.iOS:
-        return 'iOS';
+        return 'Cupertino';
     }
     assert(false);
     return null;

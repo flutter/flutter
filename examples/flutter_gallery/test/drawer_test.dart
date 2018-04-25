@@ -39,10 +39,10 @@ void main() {
     expect(app.theme.brightness, equals(Brightness.dark));
     expect(app.theme.platform, equals(TargetPlatform.android));
 
-    // Popup the platform menu: second menu button, choose 'iOS'
+    // Popup the platform menu: second menu button, choose 'Cupertino'
     await tester.tap(find.byIcon(Icons.arrow_drop_down).at(1));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('iOS'));
+    await tester.tap(find.text('Cupertino'));
     await tester.pumpAndSettle();
     app = find.byType(MaterialApp).evaluate().first.widget;
     expect(app.theme.platform, equals(TargetPlatform.iOS));
