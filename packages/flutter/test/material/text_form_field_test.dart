@@ -49,7 +49,7 @@ void main() {
     await tester.pump();
     expect(_called, true);
   });
-  
+
   testWidgets('autovalidate is passed to super', (WidgetTester tester) async {
     int _validateCalled = 0;
 
@@ -71,5 +71,44 @@ void main() {
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
     expect(_validateCalled, 2);
+  });
+
+  testWidgets('InitialValue is set to controller value', (WidgetTester tester) async {
+    const String controllerValue = 'controllerValue';
+    final TextEditingController controller = new TextEditingController(text: controllerValue);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new TextFormField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(controllerValue), findsOneWidget);
+    expect(find.text(''), findsNothing);
+  });
+
+  testWidgets('InitialValue is set to initialValue when controller is null', (WidgetTester tester) async {
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new TextFormField(
+              initialValue: 'initValue',
+            ),
+          ),
+        ),
+      ),
+    );
+
+
+    expect(find.text(''), findsNothing);
+    expect(find.text('initValue'), findsOneWidget);
   });
 }
