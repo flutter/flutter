@@ -17,7 +17,7 @@ void main() {
       // The bug only manifests itself when the screen's orientation is portrait
       const Center(
         child: const SizedBox(
-          width: 450.0,
+          width: 400.0,
           height: 800.0,
           child: const GalleryApp()
         )
@@ -26,32 +26,29 @@ void main() {
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
-    await tester.tap(find.text('Vignettes'));
-    await tester.pumpAndSettle();
-
     await tester.tap(find.text('Pesto'));
-    await tester.pumpAndSettle();
+    await tester.pump(); // Launch pesto
+    await tester.pump(const Duration(seconds: 1)); // transition is complete
 
     await tester.tap(find.text('Pesto Bruschetta'));
-    await tester.pumpAndSettle();
+    await tester.pump(); // Launch the recipe page
+    await tester.pump(const Duration(seconds: 1)); // transition is complete
 
     await tester.drag(find.text('Pesto Bruschetta'), const Offset(0.0, -300.0));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     Navigator.pop(find.byType(Scaffold).evaluate().single);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // transition is complete
   });
 
   testWidgets('Pesto can be scrolled all the way down', (WidgetTester tester) async {
     await tester.pumpWidget(const GalleryApp());
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
-    await tester.pump(); // triggers a frame
-
-    await tester.tap(find.text('Vignettes'));
-    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Pesto'));
-    await tester.pumpAndSettle();
+    await tester.pump(); // Launch pesto
+    await tester.pump(const Duration(seconds: 1)); // transition is complete
 
     await tester.fling(find.text('Pesto Bruschetta'), const Offset(0.0, -200.0), 10000.0);
     await tester.pumpAndSettle(); // start and finish fling

@@ -1,286 +1,126 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer';
-import 'dart:math' as math;
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'backdrop.dart';
-import 'demos.dart';
+import 'drawer.dart';
+import 'item.dart';
+import 'theme.dart';
 
+const double _kFlexibleSpaceMaxHeight = 256.0;
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
-const Color _kFlutterBlue = const Color(0xFF003D75);
-const double _kDemoItemHeight = 64.0;
 
-class _FlutterLogo extends StatelessWidget {
-  const _FlutterLogo({ Key key }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return new Center(
-      child: new Container(
-        width: 34.0,
-        height: 34.0,
-        decoration: const BoxDecoration(
-          image: const DecorationImage(
-            image: const AssetImage(
-              'white_logo/logo.png',
-              package: _kGalleryAssetsPackage,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+class _BackgroundLayer {
+  _BackgroundLayer({ int level, double parallax })
+    : assetName = 'appbar/appbar_background_layer$level.png',
+      assetPackage = _kGalleryAssetsPackage,
+      parallaxTween = new Tween<double>(begin: 0.0, end: parallax);
+  final String assetName;
+  final String assetPackage;
+  final Tween<double> parallaxTween;
 }
 
-class _CategoryItem extends StatelessWidget {
-  const _CategoryItem({
-    Key key,
-    this.category,
-    this.onTap,
-  }) : super (key: key);
+final List<_BackgroundLayer> _kBackgroundLayers = <_BackgroundLayer>[
+  new _BackgroundLayer(level: 0, parallax: _kFlexibleSpaceMaxHeight),
+  new _BackgroundLayer(level: 1, parallax: _kFlexibleSpaceMaxHeight),
+  new _BackgroundLayer(level: 2, parallax: _kFlexibleSpaceMaxHeight / 2.0),
+  new _BackgroundLayer(level: 3, parallax: _kFlexibleSpaceMaxHeight / 4.0),
+  new _BackgroundLayer(level: 4, parallax: _kFlexibleSpaceMaxHeight / 2.0),
+  new _BackgroundLayer(level: 5, parallax: _kFlexibleSpaceMaxHeight)
+];
 
-  final GalleryDemoCategory category;
-  final VoidCallback onTap;
+class _AppBarBackground extends StatelessWidget {
+  const _AppBarBackground({ Key key, this.animation }) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
-
-    return new RawMaterialButton(
-      padding: EdgeInsets.zero,
-      splashColor: theme.primaryColor.withOpacity(0.12),
-      highlightColor: Colors.transparent,
-      onPressed: onTap,
-      child: new Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          new Padding(
-            padding: const EdgeInsets.all(6.0),
-            child: new Icon(
-              category.icon,
-              size: 60.0,
-              color: isDark ? Colors.white : _kFlutterBlue,
-            ),
-          ),
-          const SizedBox(height: 10.0),
-          new Container(
-            height: 48.0,
-            alignment: Alignment.center,
-            child: new Text(
-              category.name,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.subhead.copyWith(
-                fontFamily: 'GoogleSans',
-                color: isDark ? Colors.white : _kFlutterBlue,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CategoriesPage extends StatelessWidget {
-  const _CategoriesPage({
-    Key key,
-    this.categories,
-    this.onCategoryTap,
-  }) : super(key: key);
-
-  final Iterable<GalleryDemoCategory> categories;
-  final ValueChanged<GalleryDemoCategory> onCategoryTap;
+  final Animation<double> animation;
 
   @override
   Widget build(BuildContext context) {
-    const double aspectRatio = 160.0 / 180.0;
-    final List<GalleryDemoCategory> categoriesList = categories.toList();
-    final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3;
-
-    return new SingleChildScrollView(
-      child: new LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          final double columnWidth = constraints.biggest.width / columnCount.toDouble();
-          final double rowHeight = columnWidth * aspectRatio;
-          final int rowCount = (categories.length + columnCount - 1) ~/ columnCount;
-
-          return new Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: new List<Widget>.generate(rowCount, (int rowIndex) {
-              final int columnCountForRow = rowIndex == rowCount - 1
-                ? categories.length - columnCount * math.max(0, rowCount - 1)
-                : columnCount;
-
-              return new Row(
-                children: new List<Widget>.generate(columnCountForRow, (int columnIndex) {
-                  final int index = rowIndex * columnCount + columnIndex;
-                  final GalleryDemoCategory category = categoriesList[index];
-
-                  return new SizedBox(
-                    width: columnWidth,
-                    height: rowHeight,
-                    child: new _CategoryItem(
-                      category: category,
-                      onTap: () {
-                        Navigator.pushNamed(context, '/${category.name}');
-                      },
-                    ),
-                  );
-                }),
-              );
-            }),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _DemoItem extends StatelessWidget {
-  const _DemoItem({ Key key, this.demo }) : super(key: key);
-
-  final GalleryDemo demo;
-
-  void _launchDemo(BuildContext context) {
-    if (demo.routeName != null) {
-      Timeline.instantSync('Start Transition', arguments: <String, String>{
-        'from': '/',
-        'to': demo.routeName,
-      });
-      Navigator.pushNamed(context, demo.routeName);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
-    final double textScaleFactor = MediaQuery.of(context)?.textScaleFactor ?? 1.0;
-
-    return new RawMaterialButton(
-      padding: EdgeInsets.zero,
-      splashColor: theme.primaryColor.withOpacity(0.12),
-      highlightColor: Colors.transparent,
-      onPressed: () {
-        _launchDemo(context);
-      },
-      child: new Container(
-        constraints: new BoxConstraints(minHeight: _kDemoItemHeight * textScaleFactor),
-        child: new Row(
-          children: <Widget>[
-            new Container(
-              width: 56.0,
-              height: 56.0,
-              alignment: Alignment.center,
-              child: new Icon(
-                demo.icon,
-                size: 24.0,
-                color: isDark ? Colors.white : _kFlutterBlue,
-              ),
-            ),
-            new Expanded(
-              child: new Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  new Text(
-                    demo.title,
-                    style: theme.textTheme.subhead.copyWith(
-                      color: isDark ? Colors.white : const Color(0xFF202124),
-                    ),
-                  ),
-                  new Text(
-                    demo.subtitle,
-                    style: theme.textTheme.body1.copyWith(
-                      color: isDark ? Colors.white : const Color(0xFF60646B)),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 44.0),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class DemosPage extends StatelessWidget {
-  const DemosPage({
-    Key key,
-    this.category,
-    this.optionsPage,
-  }) : super(key: key);
-
-  final GalleryDemoCategory category;
-  final Widget optionsPage;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
-
-    return new Scaffold(
-      backgroundColor: isDark ? _kFlutterBlue : theme.primaryColor,
-      body: new SafeArea(
-        child: new SizedBox.expand(
-          child: new Backdrop(
-            backTitle: const Text('Options'),
-            backLayer: optionsPage,
-            frontAction: const BackButton(),
-            frontTitle: new Text(category.name),
-            frontHeading: new Container(
-              height: 40.0,
-              alignment: Alignment.bottomCenter,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: const Divider(
-                color: const Color(0xFFD5D7DA),
-                height: 1.0
-              ),
-            ),
-            frontLayer: new Padding(
-              padding: const EdgeInsets.only(top: 40.0),
-              child: new ListView(
-                key: const ValueKey<String>('GalleryDemoList'), // So tests can find it.
-                padding: const EdgeInsets.only(top: 8.0),
-                children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
-                  return new _DemoItem(demo: demo);
-                }).toList(),
-              ),
-            ),
-          ),
-        ),
-      ),
+    return new AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget child) {
+        return new Stack(
+          children: _kBackgroundLayers.map((_BackgroundLayer layer) {
+            return new Positioned(
+              top: -layer.parallaxTween.evaluate(animation),
+              left: 0.0,
+              right: 0.0,
+              bottom: 0.0,
+              child: new Image.asset(
+                layer.assetName,
+                package: layer.assetPackage,
+                fit: BoxFit.cover,
+                height: _kFlexibleSpaceMaxHeight
+              )
+            );
+          }).toList()
+        );
+      }
     );
   }
 }
 
 class GalleryHome extends StatefulWidget {
+  const GalleryHome({
+    Key key,
+    this.galleryTheme,
+    @required this.onThemeChanged,
+    this.timeDilation,
+    @required this.onTimeDilationChanged,
+    this.textScaleFactor,
+    this.onTextScaleFactorChanged,
+    this.showPerformanceOverlay,
+    this.onShowPerformanceOverlayChanged,
+    this.checkerboardRasterCacheImages,
+    this.onCheckerboardRasterCacheImagesChanged,
+    this.checkerboardOffscreenLayers,
+    this.onCheckerboardOffscreenLayersChanged,
+    this.onPlatformChanged,
+    this.overrideDirection: TextDirection.ltr,
+    this.onOverrideDirectionChanged,
+    this.onSendFeedback,
+  }) : assert(onThemeChanged != null),
+       assert(onTimeDilationChanged != null),
+       super(key: key);
+
   // In checked mode our MaterialApp will show the default "debug" banner.
   // Otherwise show the "preview" banner.
   static bool showPreviewBanner = true;
 
-  const GalleryHome({
-    Key key,
-    this.optionsPage,
-  }) : super(key: key);
+  final GalleryTheme galleryTheme;
+  final ValueChanged<GalleryTheme> onThemeChanged;
 
-  final Widget optionsPage;
+  final double timeDilation;
+  final ValueChanged<double> onTimeDilationChanged;
+
+  final double textScaleFactor;
+  final ValueChanged<double> onTextScaleFactorChanged;
+
+  final bool showPerformanceOverlay;
+  final ValueChanged<bool> onShowPerformanceOverlayChanged;
+
+  final bool checkerboardRasterCacheImages;
+  final ValueChanged<bool> onCheckerboardRasterCacheImagesChanged;
+
+  final bool checkerboardOffscreenLayers;
+  final ValueChanged<bool> onCheckerboardOffscreenLayersChanged;
+
+  final ValueChanged<TargetPlatform> onPlatformChanged;
+
+  final TextDirection overrideDirection;
+  final ValueChanged<TextDirection> onOverrideDirectionChanged;
+
+  final VoidCallback onSendFeedback;
 
   @override
-  _GalleryHomeState createState() => new _GalleryHomeState();
+  GalleryHomeState createState() => new GalleryHomeState();
 }
 
-class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStateMixin {
+class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStateMixin {
   static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   AnimationController _controller;
 
   @override
@@ -299,27 +139,75 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
     super.dispose();
   }
 
+  List<Widget> _galleryListItems() {
+    final List<Widget> listItems = <Widget>[];
+    final ThemeData themeData = Theme.of(context);
+    final TextStyle headerStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
+    String category;
+    for (GalleryItem galleryItem in kAllGalleryItems) {
+      if (category != galleryItem.category) {
+        if (category != null)
+          listItems.add(const Divider());
+        listItems.add(
+          new MergeSemantics(
+            child: new Container(
+              height: 48.0,
+              padding: const EdgeInsetsDirectional.only(start: 16.0),
+              alignment: AlignmentDirectional.centerStart,
+              child: new SafeArea(
+                top: false,
+                bottom: false,
+                child: new Semantics(
+                  header: true,
+                  child: new Text(galleryItem.category, style: headerStyle),
+                ),
+              ),
+            ),
+          )
+        );
+        category = galleryItem.category;
+      }
+      listItems.add(galleryItem);
+    }
+    return listItems;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
-
     Widget home = new Scaffold(
       key: _scaffoldKey,
-      backgroundColor: isDark ? _kFlutterBlue : theme.primaryColor,
-      body: new SafeArea(
-        bottom: false,
-        child: new Backdrop(
-          backTitle: const Text('Options'),
-          backLayer: widget.optionsPage,
-          frontAction: const _FlutterLogo(),
-          frontTitle: const Text('Flutter gallery'),
-          frontHeading: new Container(height: 24.0),
-          frontLayer: new _CategoriesPage(
-            categories: kAllGalleryDemoCategories,
-          ),
-        ),
+      drawer: new GalleryDrawer(
+        galleryTheme: widget.galleryTheme,
+        onThemeChanged: widget.onThemeChanged,
+        timeDilation: widget.timeDilation,
+        onTimeDilationChanged: widget.onTimeDilationChanged,
+        textScaleFactor: widget.textScaleFactor,
+        onTextScaleFactorChanged: widget.onTextScaleFactorChanged,
+        showPerformanceOverlay: widget.showPerformanceOverlay,
+        onShowPerformanceOverlayChanged: widget.onShowPerformanceOverlayChanged,
+        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+        onCheckerboardRasterCacheImagesChanged: widget.onCheckerboardRasterCacheImagesChanged,
+        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+        onCheckerboardOffscreenLayersChanged: widget.onCheckerboardOffscreenLayersChanged,
+        onPlatformChanged: widget.onPlatformChanged,
+        overrideDirection: widget.overrideDirection,
+        onOverrideDirectionChanged: widget.onOverrideDirectionChanged,
+        onSendFeedback: widget.onSendFeedback,
       ),
+      body: new CustomScrollView(
+        slivers: <Widget>[
+          const SliverAppBar(
+            pinned: true,
+            expandedHeight: _kFlexibleSpaceMaxHeight,
+            flexibleSpace: const FlexibleSpaceBar(
+              title: const Text('Flutter Gallery'),
+              // TODO(abarth): Wire up to the parallax in a way that doesn't pop during hero transition.
+              background: const _AppBarBackground(animation: kAlwaysDismissedAnimation),
+            ),
+          ),
+          new SliverList(delegate: new SliverChildListDelegate(_galleryListItems())),
+        ],
+      )
     );
 
     assert(() {
