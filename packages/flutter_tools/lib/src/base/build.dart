@@ -20,7 +20,6 @@ import '../version.dart';
 import 'context.dart';
 import 'file_system.dart';
 import 'process.dart';
-import 'utils.dart' show toTitleCase;
 
 GenSnapshot get genSnapshot => context[GenSnapshot];
 
@@ -215,17 +214,11 @@ class Snapshotter {
     @required String depfilePath,
     @required String packagesPath,
     @required String outputPath,
-    @required bool interpreter,
     @required bool previewDart2,
     @required bool preferSharedLibrary,
     List<String> extraFrontEndOptions: const <String>[],
     List<String> extraGenSnapshotOptions: const <String>[],
   }) async {
-    if (!isAotBuildMode(buildMode) && !interpreter) {
-      printError('${toTitleCase(getModeName(buildMode))} mode does not support AOT compilation.');
-      return -1;
-    }
-
     if (!(platform == TargetPlatform.android_arm ||
           platform == TargetPlatform.android_arm64 ||
           platform == TargetPlatform.ios)) {
@@ -257,6 +250,7 @@ class Snapshotter {
     final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
     assert(ioEntryPoints != null);
 
+    final bool interpreter = platform == TargetPlatform.ios && buildMode == BuildMode.debug;
     final List<String> entryPointsJsonFiles = <String>[];
     if (previewDart2 && !interpreter) {
       entryPointsJsonFiles.addAll(<String>[
