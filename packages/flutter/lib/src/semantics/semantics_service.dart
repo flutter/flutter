@@ -40,7 +40,7 @@ class SemanticsService {
     await SystemChannels.accessibility.send(event.toMap());
   }
 
-  /// Send a semantic tap event.;
+  /// Send a semantic tap event.
   /// 
   /// This is only used by Android.
   static Future<Null> tap() async {

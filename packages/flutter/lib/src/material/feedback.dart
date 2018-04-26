@@ -87,13 +87,11 @@ class Feedback {
   ///  * [wrapForTap] to trigger platform-specific feedback before executing a
   ///    [GestureTapCallback].
   static Future<Null> forTap(BuildContext context) async {
+    SemanticsService.tap();
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        return Future.wait(<Future<Null>>[
-          SystemSound.play(SystemSoundType.click),
-          SemanticsService.tap(),
-        ]).then((List<Future<Null>> _) => null);
+        return SystemSound.play(SystemSoundType.click);
       default:
         return new Future<Null>.value();
     }
@@ -128,13 +126,11 @@ class Feedback {
   ///  * [wrapForLongPress] to trigger platform-specific feedback before
   ///    executing a [GestureLongPressCallback].
   static Future<Null> forLongPress(BuildContext context) {
+    SemanticsService.longPress();
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        return Future.wait(<Future<Null>>[
-          HapticFeedback.vibrate(),
-          SemanticsService.longPress(),
-        ]).then((List<Future<Null>> _) => null);
+          return HapticFeedback.vibrate();
       default:
         return new Future<Null>.value();
     }
