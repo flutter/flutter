@@ -147,6 +147,13 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _entry = new OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        SemanticsService.tooltip(widget.message);
+        break;
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+    }
     _controller.forward();
     return true;
   }
@@ -282,45 +289,30 @@ class _TooltipOverlay extends StatelessWidget {
       textTheme: theme.brightness == Brightness.dark ? theme.textTheme : theme.primaryTextTheme,
       platform: theme.platform,
     );
-    String label;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        label = '';
-        break;
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        label = message;
-    }
     return new Positioned.fill(
-      child: new Semantics(
-        scopesRoute: true,
-        namesRoute: true,
-        explicitChildNodes: true,
-        label: label,
-        child: new IgnorePointer(
-          child: new CustomSingleChildLayout(
-            delegate: new _TooltipPositionDelegate(
-              target: target,
-              verticalOffset: verticalOffset,
-              preferBelow: preferBelow,
-            ),
-            child: new FadeTransition(
-              opacity: animation,
-              child: new Opacity(
-                opacity: 0.9,
-                child: new ConstrainedBox(
-                  constraints: new BoxConstraints(minHeight: height),
-                  child: new Container(
-                    decoration: new BoxDecoration(
-                      color: darkTheme.backgroundColor,
-                      borderRadius: new BorderRadius.circular(2.0),
-                    ),
-                    padding: padding,
-                    child: new Center(
-                      widthFactor: 1.0,
-                      heightFactor: 1.0,
-                      child: new Text(message, style: darkTheme.textTheme.body1),
-                    ),
+      child: new IgnorePointer(
+        child: new CustomSingleChildLayout(
+          delegate: new _TooltipPositionDelegate(
+            target: target,
+            verticalOffset: verticalOffset,
+            preferBelow: preferBelow,
+          ),
+          child: new FadeTransition(
+            opacity: animation,
+            child: new Opacity(
+              opacity: 0.9,
+              child: new ConstrainedBox(
+                constraints: new BoxConstraints(minHeight: height),
+                child: new Container(
+                  decoration: new BoxDecoration(
+                    color: darkTheme.backgroundColor,
+                    borderRadius: new BorderRadius.circular(2.0),
+                  ),
+                  padding: padding,
+                  child: new Center(
+                    widthFactor: 1.0,
+                    heightFactor: 1.0,
+                    child: new Text(message, style: darkTheme.textTheme.body1),
                   ),
                 ),
               ),
