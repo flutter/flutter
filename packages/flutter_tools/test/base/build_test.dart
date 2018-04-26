@@ -24,14 +24,10 @@ class MockArtifacts extends Mock implements Artifacts {}
 class _FakeGenSnapshot implements GenSnapshot {
   _FakeGenSnapshot({
     this.succeed: true,
-    this.outputs: const <String, String>{
-      'output.snapshot': '',
-      'output.snapshot.d': 'output.snapshot.d : main.dart',
-    },
   });
 
   final bool succeed;
-  final Map<String, String> outputs;
+  Map<String, String> outputs = <String, String>{};
   int _callCount = 0;
   SnapshotType _snapshotType;
   String _packagesPath;
@@ -345,6 +341,10 @@ void main() {
       fs.file(kIsolateSnapshotData).writeAsStringSync('snapshot data');
       fs.file(kVmSnapshotData).writeAsStringSync('vm data');
       genSnapshot = new _FakeGenSnapshot();
+      genSnapshot.outputs = <String, String>{
+        'output.snapshot': '',
+        'output.snapshot.d': 'output.snapshot.d : main.dart',
+      };
       mockVersion = new MockFlutterVersion();
       when(mockVersion.frameworkRevision).thenReturn(kVersion);
       snapshotter = new Snapshotter();
@@ -463,41 +463,34 @@ void main() {
     }, overrides: contextOverrides);
 
     testUsingContext('builds snapshot and fingerprint when main entry point changes to other dependency', () async {
-      final _FakeGenSnapshot genSnapshot = new _FakeGenSnapshot(
-        outputs: <String, String>{
-          'output.snapshot': '',
-          'output.snapshot.d': 'output.snapshot : main.dart other.dart',
-        },
+      await fs.file('main.dart').writeAsString('import "other.dart";\nvoid main() {}');
+      await fs.file('other.dart').writeAsString('import "main.dart";\nvoid main() {}');
+      await fs.file('output.snapshot').create();
+      await fs.file('output.snapshot.d').writeAsString('output.snapshot : main.dart');
+      await writeFingerprint(files: <String, String>{
+        'main.dart': 'bc096b33f14dde5e0ffaf93a1d03395c',
+        'other.dart': 'e0c35f083f0ad76b2d87100ec678b516',
+        'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
+      });
+      genSnapshot.outputs = <String, String>{
+        'output.snapshot': '',
+        'output.snapshot.d': 'output.snapshot : main.dart other.dart',
+      };
+
+      await snapshotter.buildScriptSnapshot(
+        mainPath: 'other.dart',
+        snapshotPath: 'output.snapshot',
+        depfilePath: 'output.snapshot.d',
+        packagesPath: '.packages',
       );
 
-      await context.run<void>(
-        overrides: <Type, Generator>{GenSnapshot: () => genSnapshot},
-        body: () async {
-          await fs.file('main.dart').writeAsString('import "other.dart";\nvoid main() {}');
-          await fs.file('other.dart').writeAsString('import "main.dart";\nvoid main() {}');
-          await fs.file('output.snapshot').create();
-          await fs.file('output.snapshot.d').writeAsString('output.snapshot : main.dart');
-          await writeFingerprint(files: <String, String>{
-            'main.dart': 'bc096b33f14dde5e0ffaf93a1d03395c',
-            'other.dart': 'e0c35f083f0ad76b2d87100ec678b516',
-            'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
-          });
-          await snapshotter.buildScriptSnapshot(
-            mainPath: 'other.dart',
-            snapshotPath: 'output.snapshot',
-            depfilePath: 'output.snapshot.d',
-            packagesPath: '.packages',
-          );
-
-          expect(genSnapshot.callCount, 1);
-          expectFingerprintHas(
-            entryPoint: 'other.dart',
-            checksums: <String, String>{
-              'main.dart': 'bc096b33f14dde5e0ffaf93a1d03395c',
-              'other.dart': 'e0c35f083f0ad76b2d87100ec678b516',
-              'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
-            },
-          );
+      expect(genSnapshot.callCount, 1);
+      expectFingerprintHas(
+        entryPoint: 'other.dart',
+        checksums: <String, String>{
+          'main.dart': 'bc096b33f14dde5e0ffaf93a1d03395c',
+          'other.dart': 'e0c35f083f0ad76b2d87100ec678b516',
+          'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
         },
       );
     }, overrides: contextOverrides);
