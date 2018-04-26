@@ -386,7 +386,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       projectUnderTest.childFile('Pods/Manifest.lock')
         ..createSync(recursive: true)
         ..writeAsString('Existing lock file.');
-      await new Future<void>.delayed(const Duration(milliseconds: 1));
+      await new Future<void>.delayed(const Duration(milliseconds: 10));
       projectUnderTest.childFile('Podfile')
         ..writeAsString('Updated Podfile');
       await cocoaPodsUnderTest.processPods(
