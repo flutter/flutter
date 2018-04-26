@@ -387,6 +387,8 @@ DartVM::DartVM(const Settings& settings,
 
   DartUI::InitForGlobal();
 
+  Dart_SetFileModifiedCallback(&DartFileModifiedCallback);
+
   {
     TRACE_EVENT0("flutter", "Dart_Initialize");
     Dart_InitializeParams params = {};
