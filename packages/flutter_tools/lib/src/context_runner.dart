@@ -56,7 +56,8 @@ Future<T> runInContext<T>(
       Config: () => new Config(),
       DevFSConfig: () => new DevFSConfig(),
       DeviceManager: () => new DeviceManager(),
-      Doctor: () => new Doctor(),
+      Doctor: () => const Doctor(),
+      DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       Flags: () => const EmptyFlags(),
       FlutterVersion: () => new FlutterVersion(const Clock()),
       GenSnapshot: () => const GenSnapshot(),
@@ -73,6 +74,7 @@ Future<T> runInContext<T>(
       Usage: () => new Usage(),
       Xcode: () => new Xcode(),
       XcodeProjectInterpreter: () => new XcodeProjectInterpreter(),
+      Xxd: () => new Xxd(),
     },
   );
 }

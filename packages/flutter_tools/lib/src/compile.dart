@@ -216,7 +216,7 @@ class ResidentCompiler {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
-    final List<String> args = <String>[
+    final List<String> command = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary),
       frontendServer,
       '--sdk-root',
@@ -226,26 +226,27 @@ class ResidentCompiler {
       '--target=flutter',
     ];
     if (outputPath != null) {
-      args.addAll(<String>['--output-dill', outputPath]);
+      command.addAll(<String>['--output-dill', outputPath]);
     }
     if (packagesFilePath != null) {
-      args.addAll(<String>['--packages', packagesFilePath]);
+      command.addAll(<String>['--packages', packagesFilePath]);
     }
     if (_trackWidgetCreation) {
-      args.add('--track-widget-creation');
+      command.add('--track-widget-creation');
     }
     if (_packagesPath != null) {
-      args.addAll(<String>['--packages', _packagesPath]);
+      command.addAll(<String>['--packages', _packagesPath]);
     }
     if (_fileSystemRoots != null) {
       for (String root in _fileSystemRoots) {
-        args.addAll(<String>['--filesystem-root', root]);
+        command.addAll(<String>['--filesystem-root', root]);
       }
     }
     if (_fileSystemScheme != null) {
-      args.addAll(<String>['--filesystem-scheme', _fileSystemScheme]);
+      command.addAll(<String>['--filesystem-scheme', _fileSystemScheme]);
     }
-    _server = await processManager.start(args);
+    printTrace(command.join(' '));
+    _server = await processManager.start(command);
     _server.stdout
       .transform(utf8.decoder)
       .transform(const LineSplitter())

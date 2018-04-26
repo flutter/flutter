@@ -1360,22 +1360,28 @@ void main() {
               rect: TestSemantics.fullScreen,
               children: <TestSemantics>[
                 new TestSemantics(
-                  id: 3,
-                  actions: SemanticsAction.tap.index,
-                  flags: SemanticsFlag.isSelected.index,
-                  label: 'TAB #0\nTab 1 of 2',
-                  rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
-                  transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
-                ),
-                new TestSemantics(
-                  id: 4,
-                  actions: SemanticsAction.tap.index,
-                  label: 'TAB #1\nTab 2 of 2',
-                  rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
-                  transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
-                ),
-              ]
-            )
+                    id: 3,
+                    rect: TestSemantics.fullScreen,
+                    children: <TestSemantics>[
+                      new TestSemantics(
+                        id: 4,
+                        actions: SemanticsAction.tap.index,
+                        flags: SemanticsFlag.isSelected.index,
+                        label: 'TAB #0\nTab 1 of 2',
+                        rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
+                        transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
+                      ),
+                      new TestSemantics(
+                        id: 5,
+                        actions: SemanticsAction.tap.index,
+                        label: 'TAB #1\nTab 2 of 2',
+                        rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
+                        transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
+                      ),
+                    ]
+                )
+              ],
+            ),
           ],
         ),
       ],
@@ -1617,22 +1623,28 @@ void main() {
               rect: TestSemantics.fullScreen,
               children: <TestSemantics>[
                 new TestSemantics(
-                  id: 3,
-                  actions: SemanticsAction.tap.index,
-                  flags: SemanticsFlag.isSelected.index,
-                  label: 'Semantics override 0\nTab 1 of 2',
-                  rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
-                  transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
-                ),
-                new TestSemantics(
-                  id: 4,
-                  actions: SemanticsAction.tap.index,
-                  label: 'Semantics override 1\nTab 2 of 2',
-                  rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
-                  transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
-                ),
-              ]
-            )
+                    id: 3,
+                    rect: TestSemantics.fullScreen,
+                    children: <TestSemantics>[
+                      new TestSemantics(
+                        id: 4,
+                        actions: SemanticsAction.tap.index,
+                        flags: SemanticsFlag.isSelected.index,
+                        label: 'Semantics override 0\nTab 1 of 2',
+                        rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
+                        transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
+                      ),
+                      new TestSemantics(
+                        id: 5,
+                        actions: SemanticsAction.tap.index,
+                        label: 'Semantics override 1\nTab 2 of 2',
+                        rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
+                        transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
+                      ),
+                    ]
+                )
+              ],
+            ),
           ],
         ),
       ],
