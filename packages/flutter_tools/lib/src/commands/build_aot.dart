@@ -419,8 +419,8 @@ Future<String> _buildAotSnapshot(
     const List<String> commonBuildOptions = const <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
 
     if (interpreter) {
-      await runCheckedAsync(<String>['mv', vmSnapshotData, fs.path.join(outputDir.path, kVmSnapshotData)]);
-      await runCheckedAsync(<String>['mv', isolateSnapshotData, fs.path.join(outputDir.path, kIsolateSnapshotData)]);
+      await fs.file(vmSnapshotData).rename(fs.path.join(outputDir.path, kVmSnapshotData));
+      await fs.file(isolateSnapshotData).rename(fs.path.join(outputDir.path, kIsolateSnapshotData));
 
       await runCheckedAsync(<String>[
         'xxd', '--include', kVmSnapshotData, fs.path.basename(kVmSnapshotDataC)
