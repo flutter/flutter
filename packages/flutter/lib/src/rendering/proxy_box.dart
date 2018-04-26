@@ -2073,7 +2073,7 @@ class RenderTransform extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     if (transformHitTests) {
       final Matrix4 inverse = Matrix4.tryInvert(_effectiveTransform);
       if (inverse == null) {
@@ -2083,7 +2083,7 @@ class RenderTransform extends RenderProxyBox {
       }
       position = MatrixUtils.transformPoint(inverse, position);
     }
-    return hitTestChildren(result, position: position) ||super.hitTest(result, position: position);
+    return super.hitTestChildren(result, position: position);
   }
 
   @override
@@ -2254,7 +2254,7 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     if (size.isEmpty)
       return false;
     _updatePaintData();
@@ -2265,7 +2265,7 @@ class RenderFittedBox extends RenderProxyBox {
       return false;
     }
     position = MatrixUtils.transformPoint(inverse, position);
-    return hitTestChildren(result, position: position) || super.hitTest(result, position: position);
+    return super.hitTestChildren(result, position: position);
   }
 
   @override
@@ -2331,7 +2331,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
   bool transformHitTests;
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     assert(!debugNeedsLayout);
     if (transformHitTests) {
       position = new Offset(
@@ -2339,7 +2339,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
         position.dy - translation.dy * size.height,
       );
     }
-    return hitTestChildren(result, position: position) || super.hitTest(result, position: position);
+    return super.hitTestChildren(result, position: position);
   }
 
   @override
@@ -4173,7 +4173,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     final Matrix4 inverse = Matrix4.tryInvert(getCurrentTransform());
     if (inverse == null) {
       // We cannot invert the effective transform. That means the child
@@ -4181,7 +4181,7 @@ class RenderFollowerLayer extends RenderProxyBox {
       return false;
     }
     position = MatrixUtils.transformPoint(inverse, position);
-    return hitTestChildren(result, position: position) || super.hitTest(result, position: position);
+    return super.hitTestChildren(result, position: position);
   }
 
   @override
