@@ -163,6 +163,10 @@ Application::Application(
 
 Application::~Application() = default;
 
+const std::string& Application::GetDebugLabel() const {
+  return debug_label_;
+}
+
 void Application::AttemptVMLaunchWithCurrentSettings(
     const blink::Settings& settings) const {
   if (blink::DartVM::ForProcessIfInitialized()) {

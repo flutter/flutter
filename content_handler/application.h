@@ -49,6 +49,8 @@ class Application final : public Engine::Delegate,
   // may be collected after.
   ~Application();
 
+  const std::string& GetDebugLabel() const;
+
  private:
   blink::Settings settings_;
   Delegate& delegate_;
