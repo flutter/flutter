@@ -107,14 +107,22 @@ class _CrossFadeTransition extends AnimatedWidget {
           ignoring: opacity1 < 1.0,
           child: new Opacity(
             opacity: opacity1,
-            child: child1,
+            child: new Semantics(
+              scopesRoute: true,
+              explicitChildNodes: true,
+              child: child1,
+            ),
           ),
         ),
         new IgnorePointer(
           ignoring: opacity2 <1.0,
           child: new Opacity(
             opacity: opacity2,
-            child: child0,
+            child: new Semantics(
+              scopesRoute: true,
+              explicitChildNodes: true,
+              child: child0,
+            ),
           ),
         ),
       ],
@@ -261,8 +269,8 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               title: new _CrossFadeTransition(
                 progress: _controller,
                 alignment: AlignmentDirectional.centerStart,
-                child0: widget.frontTitle,
-                child1: widget.backTitle,
+                child0: new Semantics(namesRoute: true, child: widget.frontTitle),
+                child1: new Semantics(namesRoute: true, child: widget.backTitle),
               ),
               trailing: new IconButton(
                 onPressed: _toggleFrontLayer,
