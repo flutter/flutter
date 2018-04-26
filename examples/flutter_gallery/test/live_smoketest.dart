@@ -10,15 +10,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:flutter_gallery/gallery/demos.dart';
-import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
+import 'package:flutter_gallery/gallery/app.dart';
+import 'package:flutter_gallery/gallery/item.dart';
 
 // Reports success or failure to the native code.
 const MethodChannel _kTestChannel = const MethodChannel('io.flutter.demo.gallery/TestLifecycleListener');
 
+// The titles for all of the Gallery demos.
+final List<String> _kAllDemos = kAllGalleryItems.map((GalleryItem item) => item.title).toList();
+
 // We don't want to wait for animations to complete before tapping the
 // back button in the demos with these titles.
-const List<String> _kUnsynchronizedDemoTitles = const <String>[
+const List<String> _kUnsynchronizedDemos = const <String>[
   'Progress indicators',
   'Activity Indicator',
   'Video',
@@ -26,45 +29,38 @@ const List<String> _kUnsynchronizedDemoTitles = const <String>[
 
 // These demos can't be backed out of by tapping a button whose
 // tooltip is 'Back'.
-const List<String> _kSkippedDemoTitles = const <String>[
+const List<String> _kSkippedDemos = const <String>[
   'Pull to refresh',
-  'Progress indicators',
-  'Activity Indicator',
-  'Video',
 ];
 
 Future<Null> main() async {
   try {
     // Verify that _kUnsynchronizedDemos and _kSkippedDemos identify
     // demos that actually exist.
-    final List<String> allDemoTitles = kAllGalleryDemos.map((GalleryDemo demo) => demo.title).toList();
-    if (!new Set<String>.from(allDemoTitles).containsAll(_kUnsynchronizedDemoTitles))
-      fail('Unrecognized demo titles in _kUnsynchronizedDemosTitles: $_kUnsynchronizedDemoTitles');
-    if (!new Set<String>.from(allDemoTitles).containsAll(_kSkippedDemoTitles))
-      fail('Unrecognized demo names in _kSkippedDemoTitles: $_kSkippedDemoTitles');
+    if (!new Set<String>.from(_kAllDemos).containsAll(_kUnsynchronizedDemos))
+      fail('Unrecognized demo names in _kUnsynchronizedDemos: $_kUnsynchronizedDemos');
+    if (!new Set<String>.from(_kAllDemos).containsAll(_kSkippedDemos))
+      fail('Unrecognized demo names in _kSkippedDemos: $_kSkippedDemos');
 
     runApp(const GalleryApp());
     final _LiveWidgetController controller = new _LiveWidgetController();
-    for (GalleryDemoCategory category in kAllGalleryDemoCategories) {
-      await controller.tap(find.text(category.name));
-      for (GalleryDemo demo in kGalleryCategoryToDemos[category]) {
-        final Finder demoItem = find.text(demo.title);
-        await controller.scrollIntoView(demoItem, alignment: 0.5);
+    for (String demo in _kAllDemos) {
+      print('Testing "$demo" demo');
+      final Finder menuItem = find.text(demo);
+      await controller.scrollIntoView(menuItem, alignment: 0.5);
 
-        if (_kSkippedDemoTitles.contains(demo.title)) {
-          print('> skipped $demo');
-          continue;
-        }
-
-        for (int i = 0; i < 2; i += 1) {
-          await controller.tap(demoItem); // Launch the demo
-          controller.frameSync = !_kUnsynchronizedDemoTitles.contains(demo.title);
-          await controller.tap(find.byTooltip('Back'));
-          controller.frameSync = true;
-        }
-        print('Success');
+      if (_kSkippedDemos.contains(demo)) {
+        print('> skipped $demo');
+        continue;
       }
-      await controller.tap(find.byTooltip('Back'));
+
+      for (int i = 0; i < 2; i += 1) {
+        await controller.tap(menuItem); // Launch the demo
+        controller.frameSync = !_kUnsynchronizedDemos.contains(demo);
+        await controller.tap(find.byTooltip('Back'));
+        controller.frameSync = true;
+      }
+      print('Success');
     }
 
     _kTestChannel.invokeMethod('success');

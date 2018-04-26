@@ -16,29 +16,37 @@ void main() {
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
-    final Finder showOptionsPageButton = find.byTooltip('Show options page');
+    final Finder finder = find.byWidgetPredicate((Widget widget) {
+      return widget is Tooltip && widget.message == 'Open navigation menu';
+    });
+    expect(finder, findsOneWidget);
 
-    // Show the options page
-    await tester.tap(showOptionsPageButton);
-    await tester.pumpAndSettle();
+    // Open drawer
+    await tester.tap(finder);
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1)); // end animation
 
-    // Switch to the dark theme: the first switch control
-    await tester.tap(find.byType(Switch).first);
-    await tester.pumpAndSettle();
+    // Change theme
+    await tester.tap(find.text('Dark'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1)); // end animation
 
-    // Close the options page
-    expect(showOptionsPageButton, findsOneWidget);
-    await tester.tap(showOptionsPageButton);
-    await tester.pumpAndSettle();
+    // Close drawer
+    await tester.tap(find.byType(DrawerController));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1)); // end animation
 
-    // Show the vignettes
+    // Open Demos
     await tester.tap(find.text('Vignettes'));
-    await tester.pumpAndSettle();
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1)); // end animation
 
-    // Show the Contact profile demo and scroll it upwards
+    // Open Flexible space toolbar
     await tester.tap(find.text('Contact profile'));
-    await tester.pumpAndSettle();
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1)); // end animation
 
+    // Scroll it up
     await tester.drag(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.drag(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
