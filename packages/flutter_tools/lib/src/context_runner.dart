@@ -74,6 +74,7 @@ Future<T> runInContext<T>(
       Usage: () => new Usage(),
       Xcode: () => new Xcode(),
       XcodeProjectInterpreter: () => new XcodeProjectInterpreter(),
+      Xxd: () => new Xxd(),
     },
   );
 }
