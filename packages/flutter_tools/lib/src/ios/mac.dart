@@ -39,6 +39,8 @@ IMobileDevice get iMobileDevice => context[IMobileDevice];
 
 Xcode get xcode => context[Xcode];
 
+Xxd get xxd => context[Xxd];
+
 class PythonModule {
   const PythonModule(this.name);
 
@@ -100,6 +102,12 @@ class IMobileDevice {
   /// Captures a screenshot to the specified outputFile.
   Future<Null> takeScreenshot(File outputFile) {
     return runCheckedAsync(<String>['idevicescreenshot', outputFile.path]);
+  }
+}
+
+class Xxd {
+  Future<RunResult> run(List<String> args, {String workingDirectory}) {
+    return runCheckedAsync(<String>['xxd']..addAll(args), workingDirectory: workingDirectory);
   }
 }
 
