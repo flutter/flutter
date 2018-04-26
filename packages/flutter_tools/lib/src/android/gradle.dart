@@ -330,8 +330,7 @@ Future<Null> _buildGradleProjectV1(String gradle) async {
   if (exitCode != 0)
     throwToolExit('Gradle build failed: $exitCode', exitCode: exitCode);
 
-  final File apkFile = fs.file(gradleAppOutV1);
-  printStatus('Built $gradleAppOutV1 (${getSizeAsMB(apkFile.lengthSync())}).');
+  printStatus('Built $gradleAppOutV1.');
 }
 
 Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String target) async {
@@ -409,7 +408,13 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   final File apkShaFile = fs.file(fs.path.join(project.apkDirectory, 'app.apk.sha1'));
   apkShaFile.writeAsStringSync(calculateSha(apkFile));
 
-  printStatus('Built ${fs.path.relative(apkFile.path)} (${getSizeAsMB(apkFile.lengthSync())}).');
+  String appSize;
+  if (buildInfo.mode == BuildMode.debug) {
+    appSize = '';
+  } else {
+    appSize = ' (${getSizeAsMB(apkFile.lengthSync())})';
+  }
+  printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.');
 }
 
 File _findApkFile(GradleProject project, BuildInfo buildInfo) {
