@@ -228,6 +228,8 @@ class Paragraph {
                   double x_advance,
                   size_t code_unit_index,
                   size_t code_unit_width);
+
+    void Shift(double delta);
   };
 
   struct GlyphLine {
@@ -298,7 +300,7 @@ class Paragraph {
 
   // Calculate the starting X offset of a line based on the line's width and
   // alignment.
-  double GetLineXOffset(size_t line);
+  double GetLineXOffset(size_t line_number, double line_total_advance);
 
   // Creates and draws the decorations onto the canvas.
   void PaintDecorations(SkCanvas* canvas, const PaintRecord& record);

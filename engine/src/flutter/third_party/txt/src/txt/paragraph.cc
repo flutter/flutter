@@ -197,6 +197,11 @@ Paragraph::GlyphPosition::GlyphPosition(double x_start,
     : code_units(code_unit_index, code_unit_index + code_unit_width),
       x_pos(x_start, x_start + x_advance) {}
 
+void Paragraph::GlyphPosition::Shift(double delta) {
+  x_pos.start += delta;
+  x_pos.end += delta;
+}
+
 Paragraph::GlyphLine::GlyphLine(std::vector<GlyphPosition>&& p, size_t tcu)
     : positions(std::move(p)), total_code_units(tcu) {}
 
@@ -465,7 +470,8 @@ void Paragraph::Layout(double width, bool force) {
     }
 
     std::vector<GlyphPosition> line_glyph_positions;
-    double run_x_offset = GetLineXOffset(line_number);
+    std::vector<CodeUnitRun> line_code_unit_runs;
+    double run_x_offset = 0;
     double justify_x_offset = 0;
     std::vector<PaintRecord> paint_records;
 
@@ -665,7 +671,7 @@ void Paragraph::Layout(double width, bool force) {
                   [](const GlyphPosition& a, const GlyphPosition& b) {
                     return a.code_units.start < b.code_units.start;
                   });
-        code_unit_runs_.emplace_back(
+        line_code_unit_runs.emplace_back(
             std::move(code_unit_positions),
             Range<size_t>(run.start(), run.end()),
             Range<double>(glyph_positions.front().x_pos.start,
@@ -675,6 +681,27 @@ void Paragraph::Layout(double width, bool force) {
 
       run_x_offset += layout.getAdvance();
     }
+
+    // Adjust the glyph positions based on the alignment of the line.
+    double line_x_offset = GetLineXOffset(line_number, run_x_offset);
+    if (line_x_offset) {
+      for (CodeUnitRun& code_unit_run : line_code_unit_runs) {
+        for (GlyphPosition& position : code_unit_run.positions) {
+          position.Shift(line_x_offset);
+        }
+      }
+      for (GlyphPosition& position : line_glyph_positions) {
+        position.Shift(line_x_offset);
+      }
+    }
+
+    size_t next_line_start = (line_number < line_ranges_.size() - 1)
+                                 ? line_ranges_[line_number + 1].start
+                                 : text_.size();
+    glyph_lines_.emplace_back(std::move(line_glyph_positions),
+                              next_line_start - line_range.start);
+    code_unit_runs_.insert(code_unit_runs_.end(), line_code_unit_runs.begin(),
+                           line_code_unit_runs.end());
 
     double max_line_spacing = 0;
     double max_descent = 0;
@@ -720,15 +747,9 @@ void Paragraph::Layout(double width, bool force) {
 
     for (PaintRecord& paint_record : paint_records) {
       paint_record.SetOffset(
-          SkPoint::Make(paint_record.offset().x(), y_offset));
+          SkPoint::Make(paint_record.offset().x() + line_x_offset, y_offset));
       records_.emplace_back(std::move(paint_record));
     }
-
-    size_t next_line_start = (line_number < line_ranges_.size() - 1)
-                                 ? line_ranges_[line_number + 1].start
-                                 : text_.size();
-    glyph_lines_.emplace_back(std::move(line_glyph_positions),
-                              next_line_start - line_range.start);
   }
 
   max_intrinsic_width_ = 0;
@@ -755,8 +776,9 @@ void Paragraph::Layout(double width, bool force) {
             });
 }
 
-double Paragraph::GetLineXOffset(size_t line) {
-  if (line >= line_widths_.size() || isinf(width_))
+double Paragraph::GetLineXOffset(size_t line_number,
+                                 double line_total_advance) {
+  if (line_number >= line_widths_.size() || isinf(width_))
     return 0;
 
   TextAlign align = paragraph_style_.text_align;
@@ -765,9 +787,9 @@ double Paragraph::GetLineXOffset(size_t line) {
   if (align == TextAlign::right ||
       (align == TextAlign::start && direction == TextDirection::rtl) ||
       (align == TextAlign::end && direction == TextDirection::ltr)) {
-    return width_ - line_widths_[line];
+    return width_ - line_total_advance;
   } else if (paragraph_style_.text_align == TextAlign::center) {
-    return (width_ - line_widths_[line]) / 2;
+    return (width_ - line_widths_[line_number]) / 2;
   } else {
     return 0;
   }
