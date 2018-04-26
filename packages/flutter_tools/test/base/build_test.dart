@@ -676,6 +676,7 @@ void main() {
         depfilePath: fs.path.join(outputPath, 'snapshot.d'),
         packagesPath: '.packages',
         outputPath: outputPath,
+        interpreter: true,
         preferSharedLibrary: false,
         previewDart2: true,
       );
@@ -721,6 +722,7 @@ void main() {
         depfilePath: fs.path.join(outputPath, 'snapshot.d'),
         packagesPath: '.packages',
         outputPath: outputPath,
+        interpreter: false,
         preferSharedLibrary: false,
         previewDart2: true,
       );
@@ -768,6 +770,7 @@ void main() {
         depfilePath: fs.path.join(outputPath, 'snapshot.d'),
         packagesPath: '.packages',
         outputPath: outputPath,
+        interpreter: false,
         preferSharedLibrary: false,
         previewDart2: true,
       );
