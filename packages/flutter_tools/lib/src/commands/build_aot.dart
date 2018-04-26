@@ -16,6 +16,7 @@ import '../build_info.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../ios/mac.dart' show xcode;
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
@@ -415,7 +416,7 @@ Future<String> _buildAotSnapshot(
   if (platform == TargetPlatform.ios) {
     printStatus('Building App.framework...');
 
-    final List<String> commonBuildOptions = <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
+    const List<String> commonBuildOptions = const <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
 
     if (interpreter) {
       await runCheckedAsync(<String>['mv', vmSnapshotData, fs.path.join(outputDir.path, kVmSnapshotData)]);
@@ -428,37 +429,29 @@ Future<String> _buildAotSnapshot(
         'xxd', '--include', kIsolateSnapshotData, fs.path.basename(kIsolateSnapshotDataC)
       ], workingDirectory: outputDir.path);
 
-      await runCheckedAsync(<String>['xcrun', 'cc']
-        ..addAll(commonBuildOptions)
-        ..addAll(<String>['-c', kVmSnapshotDataC, '-o', kVmSnapshotDataO]));
-      await runCheckedAsync(<String>['xcrun', 'cc']
-        ..addAll(commonBuildOptions)
-        ..addAll(<String>['-c', kIsolateSnapshotDataC, '-o', kIsolateSnapshotDataO]));
+      await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', kVmSnapshotDataC, '-o', kVmSnapshotDataO]));
+      await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', kIsolateSnapshotDataC, '-o', kIsolateSnapshotDataO]));
     } else {
-      await runCheckedAsync(<String>['xcrun', 'cc']
-        ..addAll(commonBuildOptions)
-        ..addAll(<String>['-c', assembly, '-o', assemblyO]));
+      await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assembly, '-o', assemblyO]));
     }
 
     final String frameworkDir = fs.path.join(outputDir.path, 'App.framework');
     fs.directory(frameworkDir).createSync(recursive: true);
     final String appLib = fs.path.join(frameworkDir, 'App');
-    final List<String> linkCommand = <String>['xcrun', 'clang']
-      ..addAll(commonBuildOptions)
-      ..addAll(<String>[
-        '-dynamiclib',
-        '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
-        '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
-        '-install_name', '@rpath/App.framework/App',
-        '-o', appLib,
+    final List<String> linkArgs = commonBuildOptions.toList()..addAll(<String>[
+      '-dynamiclib',
+      '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
+      '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+      '-install_name', '@rpath/App.framework/App',
+      '-o', appLib,
     ]);
     if (interpreter) {
-      linkCommand.add(kVmSnapshotDataO);
-      linkCommand.add(kIsolateSnapshotDataO);
+      linkArgs.add(kVmSnapshotDataO);
+      linkArgs.add(kIsolateSnapshotDataO);
     } else {
-      linkCommand.add(assemblyO);
+      linkArgs.add(assemblyO);
     }
-    await runCheckedAsync(linkCommand);
+    await xcode.clang(linkArgs);
   } else {
     if (compileToSharedLibrary) {
       // A word of warning: Instead of compiling via two steps, to a .o file and
