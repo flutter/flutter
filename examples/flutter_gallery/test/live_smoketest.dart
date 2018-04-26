@@ -30,7 +30,6 @@ const List<String> _kUnsynchronizedDemos = const <String>[
 // These demos can't be backed out of by tapping a button whose
 // tooltip is 'Back'.
 const List<String> _kSkippedDemos = const <String>[
-  'Backdrop',
   'Pull to refresh',
 ];
 

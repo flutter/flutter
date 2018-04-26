@@ -36,5 +36,9 @@
   "signedInLabel": "V-ați conectat",
   "hideAccountsLabel": "Ascundeți conturile",
   "showAccountsLabel": "Afișați conturile",
-  "modalBarrierDismissLabel": "Închideți"
+  "modalBarrierDismissLabel": "Închideți",
+  "drawerLabel": "Meniu de navigare",
+  "popupMenuLabel": "Meniu pop-up",
+  "dialogLabel": "Casetă de dialog",
+  "alertDialogLabel": "Alerta"
 }

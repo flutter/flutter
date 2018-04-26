@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlag;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -122,14 +120,12 @@ void main() {
           children: <TestSemantics>[
             new TestSemantics(
               id: 2,
-              nextNodeId: 3,
               label: 'child1',
               rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
               flags: SemanticsFlag.isSelected.index,
             ),
             new TestSemantics(
               id: 3,
-              previousNodeId: 2,
               label: 'child2',
               rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
               flags: SemanticsFlag.isSelected.index,
@@ -220,14 +216,12 @@ void main() {
           children: <TestSemantics>[
             new TestSemantics(
               id: 4,
-              nextNodeId: 3,
               label: 'child1',
               rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
               flags: SemanticsFlag.isSelected.index,
             ),
             new TestSemantics(
               id: 3,
-              previousNodeId: 4,
               label: 'child2',
               rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
               flags: SemanticsFlag.isSelected.index,

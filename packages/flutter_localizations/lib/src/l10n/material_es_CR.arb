@@ -34,5 +34,9 @@
   "anteMeridiemAbbreviation": "a.m.",
   "postMeridiemAbbreviation": "p.m.",
   "timePickerHourModeAnnouncement": "Seleccionar horas",
-  "timePickerMinuteModeAnnouncement": "Seleccionar minutos"
+  "timePickerMinuteModeAnnouncement": "Seleccionar minutos",
+  "drawerLabel": "Menú de navegación",
+  "popupMenuLabel": "Menú emergente",
+  "dialogLabel": "Diálogo",
+  "alertDialogLabel": "Alerta"
 }

@@ -36,5 +36,9 @@
   "signedInLabel": "Zalogowani użytkownicy",
   "hideAccountsLabel": "Ukryj konta",
   "showAccountsLabel": "Pokaż konta",
-  "modalBarrierDismissLabel": "Zamknij"
+  "modalBarrierDismissLabel": "Zamknij",
+  "drawerLabel": "Menu nawigacyjne",
+  "popupMenuLabel": "Wyskakujące menu",
+  "dialogLabel": "Okno dialogowe",
+  "alertDialogLabel": "Alarm"
 }

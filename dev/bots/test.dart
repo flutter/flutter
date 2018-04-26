@@ -32,6 +32,9 @@ const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
   'coverage': _runCoverage,
 };
 
+const Duration _kLongTimeout = const Duration(minutes: 45);
+const Duration _kShortTimeout = const Duration(minutes: 5);
+
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
 /// script with the parameter --local-engine=host_debug_unopt to
@@ -68,6 +71,7 @@ Future<Null> _verifyInternationalizations() async {
   final EvalResult genResult = await _evalCommand(
     dart,
     <String>[
+      '--preview-dart-2',
       path.join('dev', 'tools', 'gen_localizations.dart'),
     ],
     workingDirectory: flutterRoot,
@@ -114,7 +118,8 @@ Future<Null> _analyzeRepo() async {
   );
 
   // Analyze all the sample code in the repo
-  await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
+  await _runCommand(dart,
+    <String>['--preview-dart-2', path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
     workingDirectory: flutterRoot,
   );
 
@@ -125,7 +130,8 @@ Future<Null> _analyzeRepo() async {
   );
 
   // Try an analysis against a big version of the gallery.
-  await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
+  await _runCommand(dart,
+    <String>['--preview-dart-2', path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
     workingDirectory: flutterRoot,
   );
   await _runFlutterAnalyze(path.join(flutterRoot, 'dev', 'benchmarks', 'mega_gallery'),
@@ -143,35 +149,41 @@ Future<Null> _runTests({List<String> options: const <String>[]}) async {
     options: options,
     expectFailure: true,
     printOutput: false,
+    timeout: _kShortTimeout,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'pass_test.dart'),
     options: options,
     printOutput: false,
+    timeout: _kShortTimeout,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'crash1_test.dart'),
     options: options,
     expectFailure: true,
     printOutput: false,
+    timeout: _kShortTimeout,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'crash2_test.dart'),
     options: options,
     expectFailure: true,
     printOutput: false,
+    timeout: _kShortTimeout,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
     options: options,
     expectFailure: true,
     printOutput: false,
+    timeout: _kShortTimeout,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
     options: options,
     expectFailure: true,
     printOutput: false,
+    timeout: _kShortTimeout,
   );
   await _runCommand(flutter,
     <String>['drive', '--use-existing-app']
@@ -180,6 +192,7 @@ Future<Null> _runTests({List<String> options: const <String>[]}) async {
     workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
     expectFailure: true,
     printOutput: false,
+    timeout: _kShortTimeout,
   );
 
   // Verify that we correctly generated the version file.
@@ -313,6 +326,7 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
   bool expectFailure: false,
   bool printOutput: true,
   bool skip: false,
+  Duration timeout: _kLongTimeout,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
@@ -336,11 +350,14 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
     savedStderr = process.stderr.toList();
   }
 
-  final int exitCode = await process.exitCode;
+  final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
+    stderr.writeln('Process timed out after $timeout');
+    return expectFailure ? 0 : 1;
+  });
   if ((exitCode == 0) == expectFailure) {
     if (!printOutput) {
-      print(utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
-      print(utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
+      stdout.writeln(utf8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
+      stderr.writeln(utf8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
     }
     print(
       '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
@@ -352,11 +369,12 @@ Future<Null> _runCommand(String executable, List<String> arguments, {
 }
 
 Future<Null> _runFlutterTest(String workingDirectory, {
-    String script,
-    bool expectFailure: false,
-    bool printOutput: true,
-    List<String> options: const <String>[],
-    bool skip: false,
+  String script,
+  bool expectFailure: false,
+  bool printOutput: true,
+  List<String> options: const <String>[],
+  bool skip: false,
+  Duration timeout: _kLongTimeout,
 }) {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
@@ -368,6 +386,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
     expectFailure: expectFailure,
     printOutput: printOutput,
     skip: skip,
+    timeout: timeout,
   );
 }
 
@@ -375,7 +394,7 @@ Future<Null> _runAllDartTests(String workingDirectory, {
   Map<String, String> environment,
   List<String> options,
 }) {
-  final List<String> args = <String>['--checked'];
+  final List<String> args = <String>['--preview-dart-2'];
   if (options != null) {
     args.addAll(options);
   }

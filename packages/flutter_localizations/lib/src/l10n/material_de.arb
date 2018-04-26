@@ -35,5 +35,9 @@
   "signedInLabel": "Angemeldet",
   "hideAccountsLabel": "Konten ausblenden",
   "showAccountsLabel": "Konten anzeigen",
-  "modalBarrierDismissLabel": "Schließen"
+  "modalBarrierDismissLabel": "Schließen",
+  "drawerLabel": "Navigationsmenü",
+  "popupMenuLabel": "Pop-up-Menü",
+  "dialogLabel": "Dialogfeld",
+  "alertDialogLabel": "Aufmerksam"
 }

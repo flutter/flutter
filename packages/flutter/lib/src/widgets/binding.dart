@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'app.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
+import 'widget_inspector.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
 
@@ -285,6 +286,8 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       }
     );
 
+    // This service extension is deprecated and will be removed by 7/1/2018.
+    // Use ext.flutter.inspector.show instead.
     registerBoolServiceExtension(
         name: 'debugWidgetInspector',
         getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
@@ -295,6 +298,8 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
           return _forceRebuild();
         }
     );
+
+    WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
   }
 
   Future<Null> _forceRebuild() {

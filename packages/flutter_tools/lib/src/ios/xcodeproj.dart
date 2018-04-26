@@ -13,8 +13,8 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../bundle.dart' as bundle;
 import '../cache.dart';
-import '../flx.dart' as flx;
 import '../globals.dart';
 
 final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(.*)$');
@@ -28,17 +28,19 @@ String _generatedXcodePropertiesPath(String projectPath) {
   return fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig');
 }
 
-/// Writes default Xcode properties files in the Flutter project at
-/// [projectPath], if such files do not already exist.
+/// Writes default Xcode properties files in the Flutter project at [projectPath],
+/// if project is an iOS project and such files do not already exist.
 void generateXcodeProperties(String projectPath) {
-  if (fs.file(_generatedXcodePropertiesPath(projectPath)).existsSync())
-    return;
-  updateGeneratedXcodeProperties(
+  if (fs.isDirectorySync(fs.path.join(projectPath, 'ios'))) {
+    if (fs.file(_generatedXcodePropertiesPath(projectPath)).existsSync())
+      return;
+    updateGeneratedXcodeProperties(
       projectPath: projectPath,
       buildInfo: BuildInfo.debug,
-      target: flx.defaultMainPath,
+      target: bundle.defaultMainPath,
       previewDart2: false,
-  );
+    );
+  }
 }
 
 /// Writes or rewrites Xcode property files with the specified information.

@@ -34,5 +34,9 @@
   "signedInLabel": "واردشده به سیستم",
   "hideAccountsLabel": "پنهان کردن حساب‌ها",
   "showAccountsLabel": "نشان دادن حساب‌ها",
-  "modalBarrierDismissLabel": "نپذیرفتن"
+  "modalBarrierDismissLabel": "نپذیرفتن",
+  "drawerLabel": "منوی پیمایش",
+  "popupMenuLabel": "منوی بازشو",
+  "dialogLabel": "کادر گفتگو",
+  "alertDialogLabel": "هشدار"
 }

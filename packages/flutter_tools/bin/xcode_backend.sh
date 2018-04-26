@@ -85,12 +85,16 @@ BuildApp() {
 
   RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
   RunCommand rm -rf -- "${derived_dir}/App.framework"
-  RunCommand rm -f -- "${derived_dir}/app.flx"
   RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
   RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
   RunCommand pushd "${project_path}" > /dev/null
 
   AssertExists "${target_path}"
+
+  local verbose_flag=""
+  if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
+    verbose_flag="--verbose"
+  fi
 
   local build_dir="${FLUTTER_BUILD_DIR:-build}"
   local local_engine_flag=""
@@ -114,7 +118,9 @@ BuildApp() {
     fi
 
     StreamOutput " ├─Building Dart code..."
-    RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build aot \
+    RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
+      ${verbose_flag}                                                       \
+      build aot                                                             \
       --output-dir="${build_dir}/aot"                                       \
       --target-platform=ios                                                 \
       --target="${target_path}"                                             \
@@ -146,14 +152,15 @@ BuildApp() {
   fi
 
   StreamOutput " ├─Assembling Flutter resources..."
-  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build flx \
-    --target="${target_path}"                                             \
-    --output-file="${derived_dir}/app.flx"                                \
-    --snapshot="${build_dir}/snapshot_blob.bin"                           \
-    --depfile="${build_dir}/snapshot_blob.bin.d"                          \
-    --working-dir="${derived_dir}/flutter_assets"                         \
-    ${precompilation_flag}                                                \
-    ${local_engine_flag}                                                  \
+  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics             \
+    ${verbose_flag}                                                         \
+    build bundle                                                            \
+    --target="${target_path}"                                               \
+    --snapshot="${build_dir}/snapshot_blob.bin"                             \
+    --depfile="${build_dir}/snapshot_blob.bin.d"                            \
+    --asset-dir="${derived_dir}/flutter_assets"                             \
+    ${precompilation_flag}                                                  \
+    ${local_engine_flag}                                                    \
     ${preview_dart_2_flag}
 
   if [[ $? -ne 0 ]]; then

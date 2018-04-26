@@ -145,9 +145,15 @@ class FlutterDriver {
   ///
   /// [logCommunicationToFile] determines whether the command communication
   /// between the test and the app should be logged to `flutter_driver_commands.log`.
-  static Future<FlutterDriver> connect({ String dartVmServiceUrl,
-                                         bool printCommunication: false,
-                                         bool logCommunicationToFile: true }) async {
+  ///
+  /// [isolateReadyTimeout] determines how long after we connect to the VM
+  /// service we will wait for the first isolate to become runnable.
+  static Future<FlutterDriver> connect({
+    String dartVmServiceUrl,
+    bool printCommunication: false,
+    bool logCommunicationToFile: true,
+    Duration isolateReadyTimeout: const Duration(minutes: 1),
+  }) async {
     dartVmServiceUrl ??= Platform.environment['VM_SERVICE_URL'];
 
     if (dartVmServiceUrl == null) {
@@ -164,7 +170,10 @@ class FlutterDriver {
     final VMServiceClient client = connection.client;
     final VM vm = await client.getVM();
     _log.trace('Looking for the isolate');
-    VMIsolate isolate = await vm.isolates.first.loadRunnable();
+    VMIsolate isolate = await vm.isolates.first.loadRunnable()
+        .timeout(isolateReadyTimeout, onTimeout: () {
+          throw new TimeoutException('Timeout while waiting for the isolate to become runnable');
+        });
 
     // TODO(yjbanov): vm_service_client does not support "None" pause event yet.
     // It is currently reported as null, but we cannot rely on it because
@@ -778,8 +787,8 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
     WebSocket ws1;
     WebSocket ws2;
     try {
-      ws1 = await WebSocket.connect(uri.toString());
-      ws2 = await WebSocket.connect(uri.toString());
+      ws1 = await WebSocket.connect(uri.toString()).timeout(_kShortTimeout);
+      ws2 = await WebSocket.connect(uri.toString()).timeout(_kShortTimeout);
       return new VMServiceClientConnection(
         new VMServiceClient(new IOWebSocketChannel(ws1).cast()),
         new rpc.Peer(new IOWebSocketChannel(ws2).cast())..listen()

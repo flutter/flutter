@@ -102,12 +102,6 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 400));
 
-  // This demo's back button isn't initially visible.
-  if (routeName == '/material/backdrop') {
-    await tester.tap(find.byTooltip('Tap to dismiss'));
-    await tester.pumpAndSettle();
-  }
-
   // Go back
   await tester.pageBack();
   await tester.pumpAndSettle();

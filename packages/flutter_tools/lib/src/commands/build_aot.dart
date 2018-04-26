@@ -11,12 +11,12 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../ios/mac.dart' show xcode, xxd;
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
@@ -164,8 +164,6 @@ Future<String> _buildAotSnapshot(
     return null;
   }
 
-  final String genSnapshot = artifacts.getArtifactPath(Artifact.genSnapshot, platform, buildMode);
-
   final Directory outputDir = fs.directory(outputPath);
   outputDir.createSync(recursive: true);
   final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
@@ -256,44 +254,26 @@ Future<String> _buildAotSnapshot(
     printError('Missing input files: $missingInputs');
     return null;
   }
-  if (!processManager.canRun(genSnapshot)) {
-    printError('Cannot locate the genSnapshot executable');
-    return null;
-  }
 
-  final List<String> genSnapshotCmd = <String>[];
-  // iOS gen_snapshot is a multi-arch binary. Running as an i386 binary will
-  // generate armv7 code. Running as an x86_64 binary will generate arm64
-  // code. /usr/bin/arch can be used to run binaries with the specified
-  // architecture.
-  //
-  // TODO(cbracken): update the GenSnapshot class to handle AOT builds.
-  if (platform == TargetPlatform.ios)
-    genSnapshotCmd.addAll(<String>['arch', '-x86_64']);
-  genSnapshotCmd.addAll(<String>[
-    genSnapshot,
-    '--await_is_keyword',
+  final List<String> genSnapshotArgs = <String>[
     '--vm_snapshot_data=$vmSnapshotData',
     '--isolate_snapshot_data=$isolateSnapshotData',
-    '--packages=${packageMap.packagesPath}',
     '--url_mapping=dart:ui,$uiPath',
     '--url_mapping=dart:vmservice_io,$vmServicePath',
-    '--print_snapshot_sizes',
     '--dependencies=$dependencies',
-    '--causal_async_stacks',
-  ]);
+  ];
 
   if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
     printTrace('Extra front-end options: $extraFrontEndOptions');
 
   if ((extraGenSnapshotOptions != null) && extraGenSnapshotOptions.isNotEmpty) {
     printTrace('Extra gen-snapshot options: $extraGenSnapshotOptions');
-    genSnapshotCmd.addAll(extraGenSnapshotOptions);
+    genSnapshotArgs.addAll(extraGenSnapshotOptions);
   }
 
   if (!interpreter) {
-    genSnapshotCmd.add('--embedder_entry_points_manifest=$vmEntryPoints');
-    genSnapshotCmd.add('--embedder_entry_points_manifest=$ioEntryPoints');
+    genSnapshotArgs.add('--embedder_entry_points_manifest=$vmEntryPoints');
+    genSnapshotArgs.add('--embedder_entry_points_manifest=$ioEntryPoints');
   }
 
   // iOS symbols used to load snapshot data in the engine.
@@ -313,18 +293,18 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       if (compileToSharedLibrary) {
-        genSnapshotCmd.add('--snapshot_kind=app-aot-assembly');
-        genSnapshotCmd.add('--assembly=$assembly');
+        genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
+        genSnapshotArgs.add('--assembly=$assembly');
         outputPaths.add(assemblySo);
       } else {
-        genSnapshotCmd.addAll(<String>[
+        genSnapshotArgs.addAll(<String>[
           '--snapshot_kind=app-aot-blobs',
           '--vm_snapshot_instructions=$vmSnapshotInstructions',
           '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
         ]);
       }
       if (platform == TargetPlatform.android_arm) {
-        genSnapshotCmd.addAll(<String>[
+        genSnapshotArgs.addAll(<String>[
           '--no-sim-use-hardfp', // Android uses the softfloat ABI.
           '--no-use-integer-division', // Not supported by the Pixel in 32-bit mode.
         ]);
@@ -332,15 +312,15 @@ Future<String> _buildAotSnapshot(
       break;
     case TargetPlatform.ios:
       if (interpreter) {
-        genSnapshotCmd.add('--snapshot_kind=core');
-        genSnapshotCmd.add(snapshotDartIOS);
+        genSnapshotArgs.add('--snapshot_kind=core');
+        genSnapshotArgs.add(snapshotDartIOS);
         outputPaths.addAll(<String>[
           kVmSnapshotDataO,
           kIsolateSnapshotDataO,
         ]);
       } else {
-        genSnapshotCmd.add('--snapshot_kind=app-aot-assembly');
-        genSnapshotCmd.add('--assembly=$assembly');
+        genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
+        genSnapshotArgs.add('--assembly=$assembly');
         outputPaths.add(assemblyO);
       }
       break;
@@ -353,7 +333,7 @@ Future<String> _buildAotSnapshot(
   }
 
   if (buildMode != BuildMode.release) {
-    genSnapshotCmd.addAll(<String>[
+    genSnapshotArgs.addAll(<String>[
       '--no-checked',
       '--conditional_directives',
     ]);
@@ -387,7 +367,7 @@ Future<String> _buildAotSnapshot(
   }
 
   if (previewDart2) {
-    mainPath = await compile(
+    final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
       outputFilePath: kApplicationKernelPath,
@@ -398,6 +378,7 @@ Future<String> _buildAotSnapshot(
       entryPointsJsonFiles: entryPointsJsonFiles,
       trackWidgetCreation: false,
     );
+    mainPath = compilerOutput?.outputFilename;
     if (mainPath == null) {
       printError('Compiler terminated unexpectedly.');
       return null;
@@ -407,18 +388,22 @@ Future<String> _buildAotSnapshot(
     await outputDir.childFile('frontend_server.d')
         .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
 
-    genSnapshotCmd.addAll(<String>[
+    genSnapshotArgs.addAll(<String>[
       '--reify-generic-functions',
       '--strong',
     ]);
   }
 
-  genSnapshotCmd.add(mainPath);
+  genSnapshotArgs.add(mainPath);
 
-  final RunResult results = await runAsync(genSnapshotCmd);
-  if (results.exitCode != 0) {
-    printError('Dart snapshot generator failed with exit code ${results.exitCode}');
-    printError(results.toString());
+  final int genSnapshotExitCode = await genSnapshot.run(
+    snapshotType: new SnapshotType(platform, buildMode),
+    packagesPath: packageMap.packagesPath,
+    depfilePath: dependencies,
+    additionalArgs: genSnapshotArgs,
+  );
+  if (genSnapshotExitCode != 0) {
+    printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
     return null;
   }
 
@@ -431,50 +416,44 @@ Future<String> _buildAotSnapshot(
   if (platform == TargetPlatform.ios) {
     printStatus('Building App.framework...');
 
-    final List<String> commonBuildOptions = <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
+    const List<String> commonBuildOptions = const <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
 
     if (interpreter) {
-      await runCheckedAsync(<String>['mv', vmSnapshotData, fs.path.join(outputDir.path, kVmSnapshotData)]);
-      await runCheckedAsync(<String>['mv', isolateSnapshotData, fs.path.join(outputDir.path, kIsolateSnapshotData)]);
+      await fs.file(vmSnapshotData).rename(fs.path.join(outputDir.path, kVmSnapshotData));
+      await fs.file(isolateSnapshotData).rename(fs.path.join(outputDir.path, kIsolateSnapshotData));
 
-      await runCheckedAsync(<String>[
-        'xxd', '--include', kVmSnapshotData, fs.path.basename(kVmSnapshotDataC)
-      ], workingDirectory: outputDir.path);
-      await runCheckedAsync(<String>[
-        'xxd', '--include', kIsolateSnapshotData, fs.path.basename(kIsolateSnapshotDataC)
-      ], workingDirectory: outputDir.path);
+      await xxd.run(
+        <String>['--include', kVmSnapshotData, fs.path.basename(kVmSnapshotDataC)],
+        workingDirectory: outputDir.path,
+      );
+      await xxd.run(
+        <String>['--include', kIsolateSnapshotData, fs.path.basename(kIsolateSnapshotDataC)],
+        workingDirectory: outputDir.path,
+      );
 
-      await runCheckedAsync(<String>['xcrun', 'cc']
-        ..addAll(commonBuildOptions)
-        ..addAll(<String>['-c', kVmSnapshotDataC, '-o', kVmSnapshotDataO]));
-      await runCheckedAsync(<String>['xcrun', 'cc']
-        ..addAll(commonBuildOptions)
-        ..addAll(<String>['-c', kIsolateSnapshotDataC, '-o', kIsolateSnapshotDataO]));
+      await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', kVmSnapshotDataC, '-o', kVmSnapshotDataO]));
+      await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', kIsolateSnapshotDataC, '-o', kIsolateSnapshotDataO]));
     } else {
-      await runCheckedAsync(<String>['xcrun', 'cc']
-        ..addAll(commonBuildOptions)
-        ..addAll(<String>['-c', assembly, '-o', assemblyO]));
+      await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assembly, '-o', assemblyO]));
     }
 
     final String frameworkDir = fs.path.join(outputDir.path, 'App.framework');
     fs.directory(frameworkDir).createSync(recursive: true);
     final String appLib = fs.path.join(frameworkDir, 'App');
-    final List<String> linkCommand = <String>['xcrun', 'clang']
-      ..addAll(commonBuildOptions)
-      ..addAll(<String>[
-        '-dynamiclib',
-        '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
-        '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
-        '-install_name', '@rpath/App.framework/App',
-        '-o', appLib,
+    final List<String> linkArgs = commonBuildOptions.toList()..addAll(<String>[
+      '-dynamiclib',
+      '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
+      '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+      '-install_name', '@rpath/App.framework/App',
+      '-o', appLib,
     ]);
     if (interpreter) {
-      linkCommand.add(kVmSnapshotDataO);
-      linkCommand.add(kIsolateSnapshotDataO);
+      linkArgs.add(kVmSnapshotDataO);
+      linkArgs.add(kIsolateSnapshotDataO);
     } else {
-      linkCommand.add(assemblyO);
+      linkArgs.add(assemblyO);
     }
-    await runCheckedAsync(linkCommand);
+    await xcode.clang(linkArgs);
   } else {
     if (compileToSharedLibrary) {
       // A word of warning: Instead of compiling via two steps, to a .o file and

@@ -24,18 +24,25 @@ class MockArtifacts extends Mock implements Artifacts {}
 class _FakeGenSnapshot implements GenSnapshot {
   _FakeGenSnapshot({
     this.succeed: true,
-    this.snapshotPath: 'output.snapshot',
-    this.snapshotContent: '',
-    this.depfileContent: 'output.snapshot.d : main.dart',
   });
 
   final bool succeed;
-  final String snapshotPath;
-  final String snapshotContent;
-  final String depfileContent;
+  Map<String, String> outputs = <String, String>{};
   int _callCount = 0;
+  SnapshotType _snapshotType;
+  String _packagesPath;
+  String _depfilePath;
+  List<String> _additionalArgs;
 
   int get callCount => _callCount;
+
+  SnapshotType get snapshotType => _snapshotType;
+
+  String get packagesPath => _packagesPath;
+
+  String get depfilePath => _depfilePath;
+
+  List<String> get additionalArgs => _additionalArgs;
 
   @override
   Future<int> run({
@@ -45,11 +52,16 @@ class _FakeGenSnapshot implements GenSnapshot {
     Iterable<String> additionalArgs,
   }) async {
     _callCount += 1;
+    _snapshotType = snapshotType;
+    _packagesPath = packagesPath;
+    _depfilePath = depfilePath;
+    _additionalArgs = additionalArgs.toList();
 
     if (!succeed)
       return 1;
-    await fs.file(snapshotPath).writeAsString(snapshotContent);
-    await fs.file(depfilePath).writeAsString(depfileContent);
+    outputs.forEach((String filePath, String fileContent) {
+      fs.file(filePath).writeAsString(fileContent);
+    });
     return 0;
   }
 }
@@ -66,6 +78,7 @@ void main() {
       expect(new SnapshotType(null, BuildMode.release), isNotNull);
     });
   });
+
   group('Fingerprint', () {
     MockFlutterVersion mockVersion;
     const String kVersion = '123456abcdef';
@@ -328,6 +341,10 @@ void main() {
       fs.file(kIsolateSnapshotData).writeAsStringSync('snapshot data');
       fs.file(kVmSnapshotData).writeAsStringSync('vm data');
       genSnapshot = new _FakeGenSnapshot();
+      genSnapshot.outputs = <String, String>{
+        'output.snapshot': '',
+        'output.snapshot.d': 'output.snapshot.d : main.dart',
+      };
       mockVersion = new MockFlutterVersion();
       when(mockVersion.frameworkRevision).thenReturn(kVersion);
       snapshotter = new Snapshotter();
@@ -358,15 +375,6 @@ void main() {
       }));
     }
 
-    Future<Null> buildSnapshot({ String mainPath = 'main.dart' }) {
-      return snapshotter.buildScriptSnapshot(
-        mainPath: mainPath,
-        snapshotPath: 'output.snapshot',
-        depfilePath: 'output.snapshot.d',
-        packagesPath: '.packages',
-      );
-    }
-
     void expectFingerprintHas({
       String entryPoint: 'main.dart',
       Map<String, String> checksums = const <String, String>{},
@@ -385,9 +393,26 @@ void main() {
       await fs.file('main.dart').writeAsString('void main() {}');
       await fs.file('output.snapshot').create();
       await fs.file('output.snapshot.d').writeAsString('snapshot : main.dart');
-      await buildSnapshot();
+      await snapshotter.buildScriptSnapshot(
+        mainPath: 'main.dart',
+        snapshotPath: 'output.snapshot',
+        depfilePath: 'output.snapshot.d',
+        packagesPath: '.packages',
+      );
 
       expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, isNull);
+      expect(genSnapshot.snapshotType.mode, BuildMode.debug);
+      expect(genSnapshot.packagesPath, '.packages');
+      expect(genSnapshot.depfilePath, 'output.snapshot.d');
+      expect(genSnapshot.additionalArgs, <String>[
+        '--snapshot_kind=script',
+        '--script_snapshot=output.snapshot',
+        '--vm_snapshot_data=vm_isolate_snapshot.bin',
+        '--isolate_snapshot_data=isolate_snapshot.bin',
+        '--enable-mirrors=false',
+        'main.dart',
+      ]);
       expectFingerprintHas(checksums: <String, String>{
         'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
         'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
@@ -402,7 +427,12 @@ void main() {
         'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
         'output.snapshot': 'deadbeef000b204e9800998ecaaaaa',
       });
-      await buildSnapshot();
+      await snapshotter.buildScriptSnapshot(
+        mainPath: 'main.dart',
+        snapshotPath: 'output.snapshot',
+        depfilePath: 'output.snapshot.d',
+        packagesPath: '.packages',
+      );
 
       expect(genSnapshot.callCount, 1);
       expectFingerprintHas(checksums: <String, String>{
@@ -418,7 +448,12 @@ void main() {
         'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
         'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
       });
-      await buildSnapshot();
+      await snapshotter.buildScriptSnapshot(
+        mainPath: 'main.dart',
+        snapshotPath: 'output.snapshot',
+        depfilePath: 'output.snapshot.d',
+        packagesPath: '.packages',
+      );
 
       expect(genSnapshot.callCount, 1);
       expectFingerprintHas(checksums: <String, String>{
@@ -428,34 +463,34 @@ void main() {
     }, overrides: contextOverrides);
 
     testUsingContext('builds snapshot and fingerprint when main entry point changes to other dependency', () async {
-      final _FakeGenSnapshot genSnapshot = new _FakeGenSnapshot(
+      await fs.file('main.dart').writeAsString('import "other.dart";\nvoid main() {}');
+      await fs.file('other.dart').writeAsString('import "main.dart";\nvoid main() {}');
+      await fs.file('output.snapshot').create();
+      await fs.file('output.snapshot.d').writeAsString('output.snapshot : main.dart');
+      await writeFingerprint(files: <String, String>{
+        'main.dart': 'bc096b33f14dde5e0ffaf93a1d03395c',
+        'other.dart': 'e0c35f083f0ad76b2d87100ec678b516',
+        'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
+      });
+      genSnapshot.outputs = <String, String>{
+        'output.snapshot': '',
+        'output.snapshot.d': 'output.snapshot : main.dart other.dart',
+      };
+
+      await snapshotter.buildScriptSnapshot(
+        mainPath: 'other.dart',
         snapshotPath: 'output.snapshot',
-        depfileContent: 'output.snapshot : main.dart other.dart',
+        depfilePath: 'output.snapshot.d',
+        packagesPath: '.packages',
       );
 
-      await context.run<void>(
-        overrides: <Type, Generator>{GenSnapshot: () => genSnapshot},
-        body: () async {
-          await fs.file('main.dart').writeAsString('import "other.dart";\nvoid main() {}');
-          await fs.file('other.dart').writeAsString('import "main.dart";\nvoid main() {}');
-          await fs.file('output.snapshot').create();
-          await fs.file('output.snapshot.d').writeAsString('output.snapshot : main.dart');
-          await writeFingerprint(files: <String, String>{
-            'main.dart': 'bc096b33f14dde5e0ffaf93a1d03395c',
-            'other.dart': 'e0c35f083f0ad76b2d87100ec678b516',
-            'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
-          });
-          await buildSnapshot(mainPath: 'other.dart');
-
-          expect(genSnapshot.callCount, 1);
-          expectFingerprintHas(
-            entryPoint: 'other.dart',
-            checksums: <String, String>{
-              'main.dart': 'bc096b33f14dde5e0ffaf93a1d03395c',
-              'other.dart': 'e0c35f083f0ad76b2d87100ec678b516',
-              'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
-            },
-          );
+      expect(genSnapshot.callCount, 1);
+      expectFingerprintHas(
+        entryPoint: 'other.dart',
+        checksums: <String, String>{
+          'main.dart': 'bc096b33f14dde5e0ffaf93a1d03395c',
+          'other.dart': 'e0c35f083f0ad76b2d87100ec678b516',
+          'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
         },
       );
     }, overrides: contextOverrides);
@@ -468,7 +503,12 @@ void main() {
         'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
         'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
       });
-      await buildSnapshot();
+      await snapshotter.buildScriptSnapshot(
+        mainPath: 'main.dart',
+        snapshotPath: 'output.snapshot',
+        depfilePath: 'output.snapshot.d',
+        packagesPath: '.packages',
+      );
 
       expect(genSnapshot.callCount, 0);
       expectFingerprintHas(checksums: <String, String>{
