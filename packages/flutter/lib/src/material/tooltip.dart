@@ -147,13 +147,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _entry = new OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        SemanticsService.tooltip(widget.message);
-        break;
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-    }
+    SemanticsService.tooltip(widget.message)
     _controller.forward();
     return true;
   }
