@@ -402,7 +402,90 @@ void main() {
       ignoreTransform: true,
       ignoreRect: true,
     ));
+  }, skip: true); // TODO(goderbauer): enable when traversal order is correct (currently item 18 and 19 are switched), https://github.com/flutter/flutter/issues/17023
+
+  testWidgets('Traversal Order of in a SingleChildScrollView', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final List<Widget> listChildren = new List<Widget>.generate(30, (int i) {
+      return new Container(
+        height: 200.0,
+        child: new Text('Item $i'),
+      );
+    });
+    await tester.pumpWidget(
+      new Semantics(
+        textDirection: TextDirection.ltr,
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: const MediaQueryData(),
+            child: new SingleChildScrollView(
+              controller: new ScrollController(initialScrollOffset: 3000.0),
+              child: new Column(
+                children: listChildren,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics(
+            children: <TestSemantics>[
+              new TestSemantics(
+                actions: <SemanticsAction>[
+                  SemanticsAction.scrollUp,
+                  SemanticsAction.scrollDown,
+                ],
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    label: 'Item 13',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    label: 'Item 14',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    label: 'Item 15',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    label: 'Item 16',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    label: 'Item 17',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    label: 'Item 18',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  new TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                    label: 'Item 19',
+                    textDirection: TextDirection.ltr,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      childOrder: DebugSemanticsDumpOrder.traversalOrder,
+      ignoreId: true,
+      ignoreTransform: true,
+      ignoreRect: true,
+    ));
 
     semantics.dispose();
-  }, skip: true); // TODO(goderbauer): enable when traversal order is correct (currently item 18 and 19 are switched).
+  });
 }
