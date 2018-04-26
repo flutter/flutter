@@ -124,6 +124,8 @@ Engine::Engine(Delegate& delegate,
       host_threads_[2].TaskRunner()                   // io
   );
 
+  settings_.verbose_logging = true;
+
   settings_.root_isolate_create_callback =
       std::bind(&Engine::OnMainIsolateStart, this);
 
