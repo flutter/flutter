@@ -271,6 +271,18 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }).then<int>((Null _) => count);
   }
 
+  /// Runs a [callback] that performs real asynchronous work.
+  ///
+  /// This is intended for callers who need to call asynchronous methods, where
+  /// the methods may spawn isolates or OS threads and thus cannot be executed
+  /// synchronously by manually flushing microtasks.
+  ///
+  /// If callers were to run these types of asynchronous tasks directly in
+  /// their test methods, they run the possibility of encountering deadlock.
+  ///
+  /// This will return the future returned by [callback].
+  Future<T> runAsync<T>(Future<T> callback()) => binding.runAsync(callback);
+
   /// Whether there are any any transient callbacks scheduled.
   ///
   /// This essentially checks whether all animations have completed.

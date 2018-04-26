@@ -182,6 +182,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// this method works when the test is run with `flutter run`.
   Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]);
 
+  /// Runs a [callback] that performs real asynchronous work.
+  ///
+  /// This is intended for callers who need to call asynchronous methods, where
+  /// the methods may spawn isolates or OS threads and thus cannot be executed
+  /// synchronously by manually flushing microtasks.
+  Future<T> runAsync<T>(Future<T> callback());
+
   /// Artificially calls dispatchLocaleChanged on the Widget binding,
   /// then flushes microtasks.
   Future<Null> setLocale(String languageCode, String countryCode) {
@@ -541,6 +548,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   FakeAsync _fakeAsync;
+  Completer<void> _pendingAsyncTasks;
 
   @override
   Clock get clock => _clock;
@@ -579,6 +587,27 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       }
       _fakeAsync.flushMicrotasks();
       return new Future<Null>.value();
+    });
+  }
+
+  @override
+  Future<T> runAsync<T>(Future<T> callback()) {
+    assert(() {
+      if (_pendingAsyncTasks == null)
+        return true;
+      throw new test_package.TestFailure(
+          'runAsync() was called, then before its future completed, it\n'
+          'was called again. You must wait for the first returned future\n'
+          'to complete before calling runAsync() again.'
+      );
+    }());
+    return Zone.root.run(() {
+      _pendingAsyncTasks = new Completer<void>();
+      return callback().then((T value) {
+        _pendingAsyncTasks.complete();
+        _pendingAsyncTasks = null;
+        return value;
+      });
     });
   }
 
@@ -646,12 +675,20 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       testBodyResult = _runTest(testBody, invariantTester, description);
       assert(inTest);
     });
-    // testBodyResult is a Future that was created in the Zone of the fakeAsync.
-    // This means that if we call .then() on it (as the test framework is about to),
-    // it will register a microtask to handle the future _in the fake async zone_.
-    // To avoid this, we wrap it in a Future that we've created _outside_ the fake
-    // async zone.
-    return new Future<Null>.value(testBodyResult);
+
+    return new Future<Null>.microtask(() async {
+      while (_pendingAsyncTasks != null) {
+        await _pendingAsyncTasks.future;
+        _fakeAsync.flushMicrotasks();
+      }
+
+      // testBodyResult is a Future that was created in the Zone of the
+      // fakeAsync. This means that if we await it here, it will register a
+      // microtask to handle the future _in the fake async zone_. We avoid this
+      // by returning the wrapped microtask future that we've created _outside_
+      // the fake async zone.
+      return testBodyResult;
+    });
   }
 
   @override
@@ -948,6 +985,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       return _pendingFrame.future;
     });
   }
+
+  @override
+  Future<T> runAsync<T>(Future<T> callback()) => callback();
 
   @override
   Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description: '' }) async {
