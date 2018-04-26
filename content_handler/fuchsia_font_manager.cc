@@ -54,7 +54,7 @@ fonts::FontSlant ToFontSlant(SkFontStyle::Slant slant) {
 
 }  // anonymous namespace
 
-FuchsiaFontManager::FuchsiaFontManager(fonts::FontProviderPtr provider)
+FuchsiaFontManager::FuchsiaFontManager(fonts::FontProviderSyncPtr provider)
     : font_provider_(std::move(provider)) {}
 
 FuchsiaFontManager::~FuchsiaFontManager() = default;
@@ -97,12 +97,7 @@ SkTypeface* FuchsiaFontManager::onMatchFamilyStyle(
   request.slant = ToFontSlant(style.slant());
 
   fonts::FontResponsePtr response;
-  font_provider_->GetFont(
-      std::move(request),
-      [&response](fonts::FontResponsePtr r) { response = std::move(r); });
-  font_provider_.WaitForResponse();
-
-  if (!response) {
+  if (!font_provider_->GetFont(std::move(request), &response)) {
     FXL_DLOG(ERROR) << "Unable to contact the font provider. Did you run "
                        "Flutter in an environment that has a font manager?";
     return nullptr;

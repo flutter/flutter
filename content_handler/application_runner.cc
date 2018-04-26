@@ -108,13 +108,18 @@ void ApplicationRunner::SetupICU() {
 }
 
 void ApplicationRunner::SetupGlobalFonts() {
-  fonts::FontProviderPtr font_provider(
-      host_context_->ConnectToEnvironmentService<fonts::FontProvider>());
-  auto font_manager =
-      sk_make_sp<txt::FuchsiaFontManager>(std::move(font_provider));
-  blink::FontCollection::ForProcess()
-      .GetFontCollection()
-      ->SetDefaultFontManager(std::move(font_manager));
+  // Fuchsia does not have per application (shell) fonts. Instead, all fonts
+  // must be obtained from the font provider.
+  auto process_font_collection =
+      blink::FontCollection::ForProcess().GetFontCollection();
+
+  // Connect to the system font provider.
+  fonts::FontProviderSyncPtr sync_font_provider;
+  host_context_->ConnectToEnvironmentService(sync_font_provider.NewRequest());
+
+  // Set the default font manager.
+  process_font_collection->SetDefaultFontManager(
+      sk_make_sp<txt::FuchsiaFontManager>(std::move(sync_font_provider)));
 }
 
 void ApplicationRunner::FireTerminationCallbackIfNecessary() {
