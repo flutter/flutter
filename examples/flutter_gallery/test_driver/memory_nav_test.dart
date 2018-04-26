@@ -14,17 +14,14 @@ void main() {
     });
 
     test('navigation', () async {
-      await driver.tap(find.text('Material'));
-
-      final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
-      final SerializableFinder demoItem = find.text('Text fields');
-      await driver.scrollUntilVisible(demoList, demoItem,
+      final SerializableFinder menuItem = find.text('Text fields');
+      await driver.scrollUntilVisible(find.byType('CustomScrollView'), menuItem,
         dyScroll: -300.0,
         alignment: 0.5,
         timeout: const Duration(minutes: 1),
       );
       for (int i = 0; i < 15; i++) {
-        await driver.tap(demoItem);
+        await driver.tap(menuItem);
         await driver.tap(find.byTooltip('Back'));
       }
     });
