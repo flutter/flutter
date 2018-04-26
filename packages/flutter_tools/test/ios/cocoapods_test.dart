@@ -225,7 +225,7 @@ void main() {
     testUsingContext('throws, if specs repo is outdated.', () async {
       fs.file(fs.path.join('project', 'ios', 'Podfile'))
         ..createSync()
-        ..writeAsString('Existing Podfile');
+        ..writeAsStringSync('Existing Podfile');
 
       when(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
@@ -271,10 +271,10 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     testUsingContext('run pod install, if Podfile.lock is missing', () async {
       projectUnderTest.childFile('Podfile')
         ..createSync()
-        ..writeAsString('Existing Podfile');
+        ..writeAsStringSync('Existing Podfile');
       projectUnderTest.childFile('Pods/Manifest.lock')
         ..createSync(recursive: true)
-        ..writeAsString('Existing lock file.');
+        ..writeAsStringSync('Existing lock file.');
       await cocoaPodsUnderTest.processPods(
         appIosDirectory: projectUnderTest,
         iosEngineDir: 'engine/path',
@@ -293,10 +293,10 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     testUsingContext('runs pod install, if Manifest.lock is missing', () async {
       projectUnderTest.childFile('Podfile')
         ..createSync()
-        ..writeAsString('Existing Podfile');
+        ..writeAsStringSync('Existing Podfile');
       projectUnderTest.childFile('Podfile.lock')
         ..createSync()
-        ..writeAsString('Existing lock file.');
+        ..writeAsStringSync('Existing lock file.');
       await cocoaPodsUnderTest.processPods(
         appIosDirectory: projectUnderTest,
         iosEngineDir: 'engine/path',
@@ -318,13 +318,13 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     testUsingContext('runs pod install, if Manifest.lock different from Podspec.lock', () async {
       projectUnderTest.childFile('Podfile')
         ..createSync()
-        ..writeAsString('Existing Podfile');
+        ..writeAsStringSync('Existing Podfile');
       projectUnderTest.childFile('Podfile.lock')
         ..createSync()
-        ..writeAsString('Existing lock file.');
+        ..writeAsStringSync('Existing lock file.');
       projectUnderTest.childFile('Pods/Manifest.lock')
         ..createSync(recursive: true)
-        ..writeAsString('Different lock file.');
+        ..writeAsStringSync('Different lock file.');
       await cocoaPodsUnderTest.processPods(
         appIosDirectory: projectUnderTest,
         iosEngineDir: 'engine/path',
@@ -346,13 +346,13 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     testUsingContext('runs pod install, if flutter framework changed', () async {
       projectUnderTest.childFile('Podfile')
         ..createSync()
-        ..writeAsString('Existing Podfile');
+        ..writeAsStringSync('Existing Podfile');
       projectUnderTest.childFile('Podfile.lock')
         ..createSync()
-        ..writeAsString('Existing lock file.');
+        ..writeAsStringSync('Existing lock file.');
       projectUnderTest.childFile('Pods/Manifest.lock')
         ..createSync(recursive: true)
-        ..writeAsString('Existing lock file.');
+        ..writeAsStringSync('Existing lock file.');
       await cocoaPodsUnderTest.processPods(
         appIosDirectory: projectUnderTest,
         iosEngineDir: 'engine/path',
@@ -374,16 +374,16 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     testUsingContext('runs pod install, if Podfile.lock is older than Podfile', () async {
       projectUnderTest.childFile('Podfile')
         ..createSync()
-        ..writeAsString('Existing Podfile');
+        ..writeAsStringSync('Existing Podfile');
       projectUnderTest.childFile('Podfile.lock')
         ..createSync()
-        ..writeAsString('Existing lock file.');
+        ..writeAsStringSync('Existing lock file.');
       projectUnderTest.childFile('Pods/Manifest.lock')
         ..createSync(recursive: true)
-        ..writeAsString('Existing lock file.');
+        ..writeAsStringSync('Existing lock file.');
       await new Future<void>.delayed(const Duration(milliseconds: 10));
       projectUnderTest.childFile('Podfile')
-        ..writeAsString('Updated Podfile');
+        ..writeAsStringSync('Updated Podfile');
       await cocoaPodsUnderTest.processPods(
         appIosDirectory: projectUnderTest,
         iosEngineDir: 'engine/path',
@@ -405,13 +405,13 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     testUsingContext('skips pod install, if nothing changed', () async {
       projectUnderTest.childFile('Podfile')
         ..createSync()
-        ..writeAsString('Existing Podfile');
+        ..writeAsStringSync('Existing Podfile');
       projectUnderTest.childFile('Podfile.lock')
         ..createSync()
-        ..writeAsString('Existing lock file.');
+        ..writeAsStringSync('Existing lock file.');
       projectUnderTest.childFile('Pods/Manifest.lock')
         ..createSync(recursive: true)
-        ..writeAsString('Existing lock file.');
+        ..writeAsStringSync('Existing lock file.');
       await cocoaPodsUnderTest.processPods(
         appIosDirectory: projectUnderTest,
         iosEngineDir: 'engine/path',
@@ -430,13 +430,13 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     testUsingContext('a failed pod install deletes Pods/Manifest.lock', () async {
       projectUnderTest.childFile('Podfile')
         ..createSync()
-        ..writeAsString('Existing Podfile');
+        ..writeAsStringSync('Existing Podfile');
       projectUnderTest.childFile('Podfile.lock')
         ..createSync()
-        ..writeAsString('Existing lock file.');
+        ..writeAsStringSync('Existing lock file.');
       projectUnderTest.childFile('Pods/Manifest.lock')
         ..createSync(recursive: true)
-        ..writeAsString('Existing lock file.');
+        ..writeAsStringSync('Existing lock file.');
 
       when(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
