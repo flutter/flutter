@@ -596,6 +596,7 @@ class _FlutterPlatform extends PlatformPlugin {
     final File vmPlatformStrongDill = fs.file(
       artifacts.getArtifactPath(Artifact.platformKernelDill),
     );
+    printTrace('Copying platform.dill file from ${vmPlatformStrongDill.path}');
     final File platformDill = vmPlatformStrongDill.copySync(
       tempBundleDirectory
           .childFile('platform.dill')
