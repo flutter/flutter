@@ -16,7 +16,7 @@ import '../build_info.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
-import '../ios/mac.dart' show xcode, xxd;
+import '../ios/mac.dart' show xcode;
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
@@ -422,14 +422,12 @@ Future<String> _buildAotSnapshot(
       await fs.file(vmSnapshotData).rename(fs.path.join(outputDir.path, kVmSnapshotData));
       await fs.file(isolateSnapshotData).rename(fs.path.join(outputDir.path, kIsolateSnapshotData));
 
-      await xxd.run(
-        <String>['--include', kVmSnapshotData, fs.path.basename(kVmSnapshotDataC)],
-        workingDirectory: outputDir.path,
-      );
-      await xxd.run(
-        <String>['--include', kIsolateSnapshotData, fs.path.basename(kIsolateSnapshotDataC)],
-        workingDirectory: outputDir.path,
-      );
+      await runCheckedAsync(<String>[
+        'xxd', '--include', kVmSnapshotData, fs.path.basename(kVmSnapshotDataC)
+      ], workingDirectory: outputDir.path);
+      await runCheckedAsync(<String>[
+        'xxd', '--include', kIsolateSnapshotData, fs.path.basename(kIsolateSnapshotDataC)
+      ], workingDirectory: outputDir.path);
 
       await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', kVmSnapshotDataC, '-o', kVmSnapshotDataO]));
       await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', kIsolateSnapshotDataC, '-o', kIsolateSnapshotDataO]));
