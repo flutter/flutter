@@ -26,6 +26,7 @@ class BuildAotCommand extends BuildSubCommand {
         defaultsTo: 'android-arm',
         allowed: <String>['android-arm', 'android-arm64', 'ios']
       )
+      ..addFlag('interpreter')
       ..addFlag('quiet', defaultsTo: false)
       ..addFlag('preview-dart-2',
         defaultsTo: true,
@@ -70,6 +71,7 @@ class BuildAotCommand extends BuildSubCommand {
       platform,
       getBuildMode(),
       outputPath: argResults['output-dir'],
+      interpreter: argResults['interpreter'],
       previewDart2: argResults['preview-dart-2'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
@@ -96,6 +98,7 @@ Future<String> buildAotSnapshot(
   TargetPlatform platform,
   BuildMode buildMode, {
   String outputPath,
+  bool interpreter: false,
   bool previewDart2: false,
   List<String> extraFrontEndOptions,
   List<String> extraGenSnapshotOptions,
@@ -111,6 +114,7 @@ Future<String> buildAotSnapshot(
       depfilePath: 'depFilePathGoesHere',
       packagesPath: PackageMap.globalPackagesPath,
       outputPath: outputPath,
+      interpreter: interpreter,
       previewDart2: previewDart2,
       preferSharedLibrary: preferSharedLibrary,
       extraFrontEndOptions: extraFrontEndOptions,
