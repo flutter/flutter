@@ -550,7 +550,7 @@ class Snapshotter {
   }
 
   String _getPackagePath(PackageMap packageMap, String package) {
-    return fs.path.dirname(packageMap.map[package].toFilePath());
+    return fs.path.dirname(fs.path.fromUri(packageMap.map[package]));
   }
 
   Future<bool> _isBuildRequired(SnapshotType type, String outputSnapshotPath, String depfilePath, String mainPath, String fingerprintPath) async {

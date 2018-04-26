@@ -409,8 +409,8 @@ void main() {
       final Map<String, dynamic> jsonObject = json.decode(fs.file('output.snapshot.d.fingerprint').readAsStringSync());
       expect(jsonObject['properties']['entryPoint'], entryPoint);
       expect(jsonObject['files'], hasLength(checksums.length + 2));
-      checksums.forEach((String path, String checksum) {
-        expect(jsonObject['files'][path], checksum);
+      checksums.forEach((String filePath, String checksum) {
+        expect(jsonObject['files'][filePath], checksum);
       });
       expect(jsonObject['files'][kVmSnapshotData], '2ec34912477a46c03ddef07e8b909b46');
       expect(jsonObject['files'][kIsolateSnapshotData], '621b3844bb7d4d17d2cfc5edf9a91c4c');
@@ -603,6 +603,7 @@ void main() {
     const String kSnapshotDart = 'snapshot.dart';
     const String kEntrypointsJson = 'entry_points.json';
     const String kEntrypointsExtraJson = 'entry_points_extra.json';
+    String skyEnginePath;
 
     _FakeGenSnapshot genSnapshot;
     _FakeKernelCompiler kernelCompiler;
@@ -620,11 +621,13 @@ void main() {
       fs.file(kEntrypointsJson).createSync();
       fs.file(kEntrypointsExtraJson).createSync();
       fs.file('.packages').writeAsStringSync('sky_engine:file:///flutter/bin/cache/pkg/sky_engine/lib/');
-      fs.directory('/flutter/bin/cache/pkg/sky_engine/lib/ui').createSync(recursive: true);
-      fs.directory('/flutter/bin/cache/pkg/sky_engine/sdk_ext').createSync(recursive: true);
-      fs.file('/flutter/bin/cache/pkg/sky_engine/.packages').createSync();
-      fs.file('/flutter/bin/cache/pkg/sky_engine/lib/ui/ui.dart').createSync();
-      fs.file('/flutter/bin/cache/pkg/sky_engine/sdk_ext/vmservice_io.dart').createSync();
+
+      skyEnginePath = fs.path.fromUri(new Uri.file('/flutter/bin/cache/pkg/sky_engine'));
+      fs.directory(fs.path.join(skyEnginePath, 'lib', 'ui')).createSync(recursive: true);
+      fs.directory(fs.path.join(skyEnginePath, 'sdk_ext')).createSync(recursive: true);
+      fs.file(fs.path.join(skyEnginePath, '.packages')).createSync();
+      fs.file(fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')).createSync();
+      fs.file(fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')).createSync();
 
       genSnapshot = new _FakeGenSnapshot();
       kernelCompiler = new _FakeKernelCompiler();
@@ -652,25 +655,27 @@ void main() {
 
     testUsingContext('builds iOS debug AOT snapshot', () async {
       fs.file('main.dart').writeAsStringSync('void main() {}');
-      fs.directory('build/foo').createSync(recursive: true);
+
+      final String outputPath = fs.path.join('build', 'foo');
+      fs.directory(outputPath).createSync(recursive: true);
 
       kernelCompiler.output = const CompilerOutput('main.dill', 0);
       genSnapshot.outputs = <String, String>{
-        'build/foo/vm_snapshot_data': '',
-        'build/foo/vm_snapshot_instr': '',
-        'build/foo/isolate_snapshot_data': '',
-        'build/foo/isolate_snapshot_instr': '',
-        'build/foo/snapshot.d': '',
-        'build/foo/snapshot_assembly.S': '',
+        fs.path.join(outputPath, 'vm_snapshot_data'): '',
+        fs.path.join(outputPath, 'vm_snapshot_instr'): '',
+        fs.path.join(outputPath, 'isolate_snapshot_data'): '',
+        fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
+        fs.path.join(outputPath, 'snapshot.d'): '',
+        fs.path.join(outputPath, 'snapshot_assembly.S'): '',
       };
 
       final int genSnapshotExitCode = await snapshotter.buildAotSnapshot(
         platform: TargetPlatform.ios,
         buildMode: BuildMode.debug,
         mainPath: 'main.dart',
-        depfilePath: 'build/foo/snapshot.d',
+        depfilePath: fs.path.join(outputPath, 'snapshot.d'),
         packagesPath: '.packages',
-        outputPath: 'build/foo',
+        outputPath: outputPath,
         interpreter: true,
         preferSharedLibrary: false,
         previewDart2: true,
@@ -681,13 +686,13 @@ void main() {
       expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
       expect(genSnapshot.snapshotType.mode, BuildMode.debug);
       expect(genSnapshot.packagesPath, '.packages');
-      expect(genSnapshot.depfilePath, 'build/foo/snapshot.d');
+      expect(genSnapshot.depfilePath, fs.path.join(outputPath, 'snapshot.d'));
       expect(genSnapshot.additionalArgs, <String>[
-        '--vm_snapshot_data=build/foo/vm_snapshot_data',
-        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
-        '--url_mapping=dart:ui,/flutter/bin/cache/pkg/sky_engine/lib/ui/ui.dart',
-        '--url_mapping=dart:vmservice_io,/flutter/bin/cache/pkg/sky_engine/sdk_ext/vmservice_io.dart',
-        '--dependencies=build/foo/snapshot.d',
+        '--vm_snapshot_data=${fs.path.join(outputPath, 'vm_snapshot_data')}',
+        '--isolate_snapshot_data=${fs.path.join(outputPath, 'isolate_snapshot_data')}',
+        '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
+        '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
+        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--snapshot_kind=core',
         'snapshot.dart',
         '--no-checked',
@@ -700,21 +705,23 @@ void main() {
 
     testUsingContext('builds iOS profile AOT snapshot', () async {
       fs.file('main.dart').writeAsStringSync('void main() {}');
-      fs.directory('build/foo').createSync(recursive: true);
+
+      final String outputPath = fs.path.join('build', 'foo');
+      fs.directory(outputPath).createSync(recursive: true);
 
       kernelCompiler.output = const CompilerOutput('main.dill', 0);
       genSnapshot.outputs = <String, String>{
-        'build/foo/snapshot_assembly.S': '',
-        'build/foo/snapshot.d': '',
+        fs.path.join(outputPath, 'snapshot_assembly.S'): '',
+        fs.path.join(outputPath, 'snapshot.d'): '',
       };
 
       final int genSnapshotExitCode = await snapshotter.buildAotSnapshot(
         platform: TargetPlatform.ios,
         buildMode: BuildMode.profile,
         mainPath: 'main.dart',
-        depfilePath: 'build/foo/snapshot.d',
+        depfilePath: fs.path.join(outputPath, 'snapshot.d'),
         packagesPath: '.packages',
-        outputPath: 'build/foo',
+        outputPath: outputPath,
         interpreter: false,
         preferSharedLibrary: false,
         previewDart2: true,
@@ -725,17 +732,17 @@ void main() {
       expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
       expect(genSnapshot.packagesPath, '.packages');
-      expect(genSnapshot.depfilePath, 'build/foo/snapshot.d');
+      expect(genSnapshot.depfilePath, fs.path.join(outputPath, 'snapshot.d'));
       expect(genSnapshot.additionalArgs, <String>[
-        '--vm_snapshot_data=build/foo/vm_snapshot_data',
-        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
-        '--url_mapping=dart:ui,/flutter/bin/cache/pkg/sky_engine/lib/ui/ui.dart',
-        '--url_mapping=dart:vmservice_io,/flutter/bin/cache/pkg/sky_engine/sdk_ext/vmservice_io.dart',
-        '--dependencies=build/foo/snapshot.d',
+        '--vm_snapshot_data=${fs.path.join(outputPath, 'vm_snapshot_data')}',
+        '--isolate_snapshot_data=${fs.path.join(outputPath, 'isolate_snapshot_data')}',
+        '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
+        '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
+        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
         '--embedder_entry_points_manifest=$kIoEntries',
         '--snapshot_kind=app-aot-assembly',
-        '--assembly=build/foo/snapshot_assembly.S',
+        '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         '--no-checked',
         '--conditional_directives',
         '--reify-generic-functions',
@@ -746,21 +753,23 @@ void main() {
 
     testUsingContext('builds iOS release AOT snapshot', () async {
       fs.file('main.dart').writeAsStringSync('void main() {}');
-      fs.directory('build/foo').createSync(recursive: true);
+
+      final String outputPath = fs.path.join('build', 'foo');
+      fs.directory(outputPath).createSync(recursive: true);
 
       kernelCompiler.output = const CompilerOutput('main.dill', 0);
       genSnapshot.outputs = <String, String>{
-        'build/foo/snapshot_assembly.S': '',
-        'build/foo/snapshot.d': '',
+        fs.path.join(outputPath, 'snapshot_assembly.S'): '',
+        fs.path.join(outputPath, 'snapshot.d'): '',
       };
 
       final int genSnapshotExitCode = await snapshotter.buildAotSnapshot(
         platform: TargetPlatform.ios,
         buildMode: BuildMode.release,
         mainPath: 'main.dart',
-        depfilePath: 'build/foo/snapshot.d',
+        depfilePath: fs.path.join(outputPath, 'snapshot.d'),
         packagesPath: '.packages',
-        outputPath: 'build/foo',
+        outputPath: outputPath,
         interpreter: false,
         preferSharedLibrary: false,
         previewDart2: true,
@@ -771,17 +780,17 @@ void main() {
       expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
       expect(genSnapshot.packagesPath, '.packages');
-      expect(genSnapshot.depfilePath, 'build/foo/snapshot.d');
+      expect(genSnapshot.depfilePath, fs.path.join(outputPath, 'snapshot.d'));
       expect(genSnapshot.additionalArgs, <String>[
-        '--vm_snapshot_data=build/foo/vm_snapshot_data',
-        '--isolate_snapshot_data=build/foo/isolate_snapshot_data',
-        '--url_mapping=dart:ui,/flutter/bin/cache/pkg/sky_engine/lib/ui/ui.dart',
-        '--url_mapping=dart:vmservice_io,/flutter/bin/cache/pkg/sky_engine/sdk_ext/vmservice_io.dart',
-        '--dependencies=build/foo/snapshot.d',
+        '--vm_snapshot_data=${fs.path.join(outputPath, 'vm_snapshot_data')}',
+        '--isolate_snapshot_data=${fs.path.join(outputPath, 'isolate_snapshot_data')}',
+        '--url_mapping=dart:ui,${fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')}',
+        '--url_mapping=dart:vmservice_io,${fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')}',
+        '--dependencies=${fs.path.join(outputPath, 'snapshot.d')}',
         '--embedder_entry_points_manifest=$kVmEntrypoints',
         '--embedder_entry_points_manifest=$kIoEntries',
         '--snapshot_kind=app-aot-assembly',
-        '--assembly=build/foo/snapshot_assembly.S',
+        '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
         '--reify-generic-functions',
         '--strong',
         'main.dill',
