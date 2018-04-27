@@ -2476,18 +2476,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   /// `RepaintBoundary` to a PNG:
   ///
   /// ```dart
-  /// import 'dart:async';
-  /// import 'dart:typed_data';
-  /// import 'dart:ui' as ui;
-  ///
-  /// import 'package:flutter/rendering.dart';
-  /// import 'package:flutter/material.dart';
-  ///
-  /// void main() {
-  ///   runApp(new MyApp());
-  /// }
-  ///
-  /// class MyApp extends StatelessWidget {
+  /// class PngApp extends StatelessWidget {
   ///   @override
   ///   Widget build(BuildContext context) {
   ///     return new MaterialApp(
@@ -2495,21 +2484,21 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///       theme: new ThemeData(
   ///         primarySwatch: Colors.blue,
   ///       ),
-  ///       home: new MyHome(title: 'PNG Demo'),
+  ///       home: new PngHome(title: 'PNG Demo'),
   ///     );
   ///   }
   /// }
   ///
-  /// class MyHome extends StatefulWidget {
-  ///   MyHome({Key key, this.title}) : super(key: key);
+  /// class PngHome extends StatefulWidget {
+  ///   PngHome({Key key, this.title}) : super(key: key);
   ///
   ///   final String title;
   ///
   ///   @override
-  ///   _MyHomeState createState() => new _MyHomeState();
+  ///   _PngHomeState createState() => new _PngHomeState();
   /// }
   ///
-  /// class _MyHomeState extends State<MyHome> {
+  /// class _PngHomeState extends State<PngHome> {
   ///   GlobalKey globalKey = new GlobalKey();
   ///
   ///   Future<void> _capturePng() async {
