@@ -21,6 +21,7 @@ import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
+import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
 
@@ -191,7 +192,11 @@ class Doctor {
 
   bool get canListAnything => workflows.any((Workflow workflow) => workflow.canListDevices);
 
-  bool get canLaunchAnything => workflows.any((Workflow workflow) => workflow.canLaunchDevices);
+  bool get canLaunchAnything {
+    if (FlutterTesterDevices.showFlutterTesterDevice)
+      return true;
+    return workflows.any((Workflow workflow) => workflow.canLaunchDevices);
+  }
 }
 
 /// A series of tools and required install steps for a target platform (iOS or Android).
