@@ -1011,7 +1011,19 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<T> runAsync<T>(Future<T> callback()) => callback();
+  Future<T> runAsync<T>(Future<T> callback()) async {
+    try {
+      return await callback();
+    } catch (error, stack) {
+      FlutterError.reportError(new FlutterErrorDetails(
+        exception: error,
+        stack: stack,
+        library: 'Flutter test framework',
+        context: 'while running async test code',
+      ));
+      return null;
+    }
+  }
 
   @override
   Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description: '' }) async {
