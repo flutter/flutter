@@ -187,8 +187,9 @@ class Snapshotter {
     ];
 
     final String fingerprintPath = '$depfilePath.fingerprint';
-    if (!await _isBuildRequired(snapshotType, snapshotPath, depfilePath, mainPath, fingerprintPath)) {
-      printTrace('Skipping snapshot build. Fingerprints match.');
+    final Set<String> outputPaths = <String>[snapshotPath].toSet();
+    if (!await _isBuildRequired(snapshotType, outputPaths, depfilePath, mainPath, fingerprintPath)) {
+      printTrace('Skipping script snapshot build. Fingerprints match.');
       return 0;
     }
 
@@ -202,7 +203,7 @@ class Snapshotter {
 
     if (exitCode != 0)
       return exitCode;
-    await _writeFingerprint(snapshotType, snapshotPath, depfilePath, mainPath, fingerprintPath);
+    await _writeFingerprint(snapshotType, outputPaths, depfilePath, mainPath, fingerprintPath);
     return exitCode;
   }
 
@@ -401,33 +402,14 @@ class Snapshotter {
       ]);
     }
 
-    final String entryPoint = mainPath;
+    final String fingerprintPath = '$dependencies.fingerprint';
     final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
-    Future<Fingerprint> makeFingerprint() async {
-      final Set<String> snapshotInputPaths = await readDepfile(dependencies)
-        ..add(entryPoint)
-        ..addAll(outputPaths);
-      return Snapshotter.createFingerprint(snapshotType, entryPoint, snapshotInputPaths);
+    if (!await _isBuildRequired(snapshotType, outputPaths, depfilePath, mainPath, fingerprintPath)) {
+      printTrace('Skipping AOT snapshot build. Fingerprint match.');
+      return 0;
     }
 
-    final File fingerprintFile = fs.file('$dependencies.fingerprint');
-    final List<File> fingerprintFiles = <File>[fingerprintFile, fs.file(dependencies)]
-      ..addAll(inputPaths.map(fs.file))
-      ..addAll(outputPaths.map(fs.file));
-    if (fingerprintFiles.every((File file) => file.existsSync())) {
-      try {
-        final String json = await fingerprintFile.readAsString();
-        final Fingerprint oldFingerprint = new Fingerprint.fromJson(json);
-        if (oldFingerprint == await makeFingerprint()) {
-          printStatus('Skipping AOT snapshot build. Fingerprint match.');
-          return 0;
-        }
-      } catch (e) {
-        // Log exception and continue, this step is a performance improvement only.
-        printTrace('Rebuilding snapshot due to fingerprint check error: $e');
-      }
-    }
-
+    String entrypointPath = mainPath;
     if (previewDart2) {
       final CompilerOutput compilerOutput = await kernelCompiler.compile(
         sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
@@ -440,8 +422,8 @@ class Snapshotter {
         entryPointsJsonFiles: entryPointsJsonFiles,
         trackWidgetCreation: false,
       );
-      mainPath = compilerOutput?.outputFilename;
-      if (mainPath == null) {
+      entrypointPath = compilerOutput?.outputFilename;
+      if (entrypointPath == null) {
         printError('Compiler terminated unexpectedly.');
         return -5;
       }
@@ -456,7 +438,7 @@ class Snapshotter {
       ]);
     }
 
-    genSnapshotArgs.add(mainPath);
+    genSnapshotArgs.add(entrypointPath);
 
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: new SnapshotType(platform, buildMode),
@@ -532,14 +514,7 @@ class Snapshotter {
     }
 
     // Compute and record build fingerprint.
-    try {
-      final Fingerprint fingerprint = await makeFingerprint();
-      await fingerprintFile.writeAsString(fingerprint.toJson());
-    } catch (e, s) {
-      // Log exception and continue, this step is a performance improvement only.
-      printStatus('Error during AOT snapshot fingerprinting: $e\n$s');
-    }
-
+    await _writeFingerprint(snapshotType, outputPaths, depfilePath, mainPath, fingerprintPath);
     return 0;
   }
 
@@ -547,17 +522,16 @@ class Snapshotter {
     return fs.path.dirname(fs.path.fromUri(packageMap.map[package]));
   }
 
-  Future<bool> _isBuildRequired(SnapshotType type, String outputSnapshotPath, String depfilePath, String mainPath, String fingerprintPath) async {
+  Future<bool> _isBuildRequired(SnapshotType type, Set<String> outputPaths, String depfilePath, String mainPath, String fingerprintPath) async {
     final File fingerprintFile = fs.file(fingerprintPath);
-    final File outputSnapshotFile = fs.file(outputSnapshotPath);
-    final File depfile = fs.file(depfilePath);
-    if (!outputSnapshotFile.existsSync() || !depfile.existsSync() || !fingerprintFile.existsSync())
+    final List<String> requiredFiles = <String>[fingerprintPath, depfilePath]..addAll(outputPaths);
+    if (!requiredFiles.every(fs.isFileSync))
       return true;
 
     try {
       if (fingerprintFile.existsSync()) {
         final Fingerprint oldFingerprint = new Fingerprint.fromJson(await fingerprintFile.readAsString());
-        final Set<String> inputFilePaths = await readDepfile(depfilePath)..addAll(<String>[outputSnapshotPath, mainPath]);
+        final Set<String> inputFilePaths = await readDepfile(depfilePath)..add(mainPath)..addAll(outputPaths);
         final Fingerprint newFingerprint = createFingerprint(type, mainPath, inputFilePaths);
         return oldFingerprint != newFingerprint;
       }
@@ -568,10 +542,11 @@ class Snapshotter {
     return true;
   }
 
-  Future<Null> _writeFingerprint(SnapshotType type, String outputSnapshotPath, String depfilePath, String mainPath, String fingerprintPath) async {
+  Future<Null> _writeFingerprint(SnapshotType type, Set<String> outputPaths, String depfilePath, String mainPath, String fingerprintPath) async {
     try {
       final Set<String> inputFilePaths = await readDepfile(depfilePath)
-        ..addAll(<String>[outputSnapshotPath, mainPath]);
+        ..add(mainPath)
+        ..addAll(outputPaths);
       final Fingerprint fingerprint = createFingerprint(type, mainPath, inputFilePaths);
       await fs.file(fingerprintPath).writeAsString(fingerprint.toJson());
     } catch (e, s) {
