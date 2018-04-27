@@ -708,12 +708,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         const TextStyle(decoration: TextDecoration.underline),
       );
 
-      return new TextSpan(style: widget.style, children: <TextSpan>[
-        new TextSpan(text: _value.composing.textBefore(_value.text)),
-        new TextSpan(
+      return new TextSpan(
+        style: widget.style,
+        children: <TextSpan>[
+          new TextSpan(text: _value.composing.textBefore(_value.text)),
+          new TextSpan(
             style: composingStyle,
-            text: _value.composing.textInside(_value.text)),
-        new TextSpan(text: _value.composing.textAfter(_value.text))
+            text: _value.composing.textInside(_value.text),
+          ),
+          new TextSpan(text: _value.composing.textAfter(_value.text)),
       ]);
     }
 
