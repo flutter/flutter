@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'dart:ui' as ui show ImageFilter, Gradient, SceneBuilder, Scene, Image;
+import 'dart:ui' as ui show ImageFilter, Gradient, Image;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -2473,24 +2473,9 @@ class RenderRepaintBoundary extends RenderProxyBox {
   /// See also:
   ///
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
-  Future<ui.Image> toImage({double pixelRatio: 1.0}) async {
+  Future<ui.Image> toImage({double pixelRatio: 1.0}) {
     assert(!debugNeedsPaint);
-    final ui.SceneBuilder builder = new ui.SceneBuilder();
-    final Matrix4 transform = new Matrix4.diagonal3Values(pixelRatio, pixelRatio, 1.0);
-    transform.translate(-layer.offset.dx, -layer.offset.dy, 0.0);
-    builder.pushTransform(transform.storage);
-    layer.addToScene(builder, Offset.zero);
-    final ui.Scene scene = builder.build();
-    try {
-      // Size is rounded up to the next pixel to make sure we don't clip off
-      // anything.
-      return await scene.toImage(
-        (pixelRatio * size.width).ceil(),
-        (pixelRatio * size.height).ceil(),
-      );
-    } finally {
-      scene.dispose();
-    }
+    return layer.toImage(size, pixelRatio: pixelRatio);
   }
 
 
