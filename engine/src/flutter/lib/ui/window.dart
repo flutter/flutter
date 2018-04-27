@@ -729,7 +729,7 @@ class Window {
     final Zone registrationZone = Zone.current;
 
     return (Uint8List data) {
-      registrationZone.runUnaryGuarded(callback, data.buffer.asByteData());
+      registrationZone.runUnaryGuarded(callback, data?.buffer?.asByteData());
     };
   }
 }
