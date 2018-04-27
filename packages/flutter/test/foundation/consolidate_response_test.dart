@@ -10,12 +10,9 @@ void main() {
     final List<int> chunkOne = <int>[0, 1, 2, 3, 4, 5];
     final List<int> chunkTwo = <int>[6, 7, 8, 9, 10];
     MockHttpClientResponse response;
-    MockHttpHeaders headers;
-
+    
     setUp(() {
       response = new MockHttpClientResponse();
-      headers = new MockHttpHeaders();
-      when(response.headers).thenReturn(headers);
       when(response.listen(typed(any),
               onDone: typed(any, named: 'onDone'),
               onError: typed(any, named: 'onError'),
@@ -39,7 +36,6 @@ void main() {
         () async {
       when(response.contentLength)
           .thenReturn(chunkOne.length + chunkTwo.length);
-      headers._headers[HttpHeaders.CONTENT_ENCODING] = 'TEXT';
       final List<int> bytes =
           await consolidateHttpClientResponseBytes(response);
 
@@ -50,7 +46,6 @@ void main() {
         'Converts an compressed HttpClientResponse with contentLength to bytes',
         () async {
       when(response.contentLength).thenReturn(chunkOne.length);
-      headers._headers[HttpHeaders.CONTENT_ENCODING] = 'GZIP';
       final List<int> bytes =
           await consolidateHttpClientResponseBytes(response);
 
@@ -93,20 +88,3 @@ void main() {
 }
 
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
-
-class MockHttpHeaders extends Mock implements HttpHeaders {
-  Map<String, String> _headers;
-  MockHttpHeaders([Map<String, String> headers])
-      : _headers = headers ?? <String, String>{};
-
-  @override
-  List<String> operator [](String name) {
-    return _headers.containsKey(name) ? <String>[_headers[name]] : null;
-  }
-
-  @override
-  String value(String name) {
-    // TODO: for multi-value headers (when supported) this should throw an exception
-    return _headers.containsKey(name) ? _headers[name] : null;
-  }
-}
