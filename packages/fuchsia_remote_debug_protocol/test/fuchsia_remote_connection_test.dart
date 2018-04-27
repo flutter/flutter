@@ -49,7 +49,6 @@ void main() {
         });
       }
 
-      int flutterViewIndex = 0;
       final List<Map<String, dynamic>> flutterViewCannedResponses =
           <Map<String, dynamic>>[
         <String, dynamic>{
