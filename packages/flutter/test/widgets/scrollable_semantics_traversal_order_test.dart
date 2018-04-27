@@ -352,44 +352,49 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics(
+            textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               new TestSemantics(
-                actions: <SemanticsAction>[
-                  SemanticsAction.scrollUp,
-                  SemanticsAction.scrollDown,
-                ],
                 children: <TestSemantics>[
                   new TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                    label: 'Item 13',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  new TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                    label: 'Item 14',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  new TestSemantics(
-                    label: 'Item 15',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  new TestSemantics(
-                    label: 'Item 16',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  new TestSemantics(
-                    label: 'Item 17',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  new TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                    label: 'Item 18',
-                    textDirection: TextDirection.ltr,
-                  ),
-                  new TestSemantics(
-                    flags: <SemanticsFlag>[SemanticsFlag.isHidden],
-                    label: 'Item 19',
-                    textDirection: TextDirection.ltr,
+                    actions: <SemanticsAction>[
+                      SemanticsAction.scrollUp,
+                      SemanticsAction.scrollDown,
+                    ],
+                    children: <TestSemantics>[
+                      new TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 13',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 14',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        label: 'Item 15',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        label: 'Item 16',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        label: 'Item 17',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 18',
+                        textDirection: TextDirection.ltr,
+                      ),
+                      new TestSemantics(
+                        flags: <SemanticsFlag>[SemanticsFlag.isHidden],
+                        label: 'Item 19',
+                        textDirection: TextDirection.ltr,
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -402,7 +407,9 @@ void main() {
       ignoreTransform: true,
       ignoreRect: true,
     ));
-  }, skip: true); // TODO(goderbauer): enable when traversal order is correct (currently item 18 and 19 are switched), https://github.com/flutter/flutter/issues/17023
+
+    semantics.dispose();
+  });
 
   testWidgets('Traversal Order of in a SingleChildScrollView', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
@@ -489,3 +496,6 @@ void main() {
     semantics.dispose();
   });
 }
+
+// TODO(goderbauer): Add tests with center child
+// TODO(goderbauer): Add test with scrolling within scrolling

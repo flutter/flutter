@@ -333,7 +333,7 @@ void main() {
         ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
         ' │   crossAxisDirection: AxisDirection.right,\n'
         ' │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0\n'
-        ' │   cacheOrigin: -0.0 )\n'
+        ' │   cacheOrigin: 0.0 )\n'
         ' │ geometry: SliverGeometry(scrollExtent: 300.0, paintExtent: 300.0,\n'
         ' │   maxPaintExtent: 300.0, cacheExtent: 300.0, includedInSemantics)\n'
         ' │ currently live children: 0 to 2\n'

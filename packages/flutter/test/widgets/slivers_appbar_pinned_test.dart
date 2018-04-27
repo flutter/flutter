@@ -91,7 +91,7 @@ void main() {
         ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
         ' │   crossAxisDirection: AxisDirection.right,\n'
         ' │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0\n'
-        ' │   cacheOrigin: -0.0 )\n'
+        ' │   cacheOrigin: 0.0 )\n'
         ' │ geometry: SliverGeometry(scrollExtent: 200.0, paintExtent: 200.0,\n'
         ' │   maxPaintExtent: 200.0, hasVisualOverflow: true, cacheExtent:\n'
         ' │   200.0, includedInSemantics)\n'
@@ -142,23 +142,23 @@ void main() {
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
     verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, const Offset(0.0, 550.0), true);
-    verifyPaintPosition(key3, const Offset(0.0, 600.0), false);
-    verifyPaintPosition(key4, const Offset(0.0, 600.0), false);
-    verifyPaintPosition(key5, const Offset(0.0, 600.0), false);
+    verifyPaintPosition(key3, const Offset(0.0, 750.0), false);
+    verifyPaintPosition(key4, const Offset(0.0, 950.0), false);
+    verifyPaintPosition(key5, const Offset(0.0, 1500.0), false);
     position.animateTo(550.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
     verifyPaintPosition(key3, const Offset(0.0, 200.0), true);
     verifyPaintPosition(key4, const Offset(0.0, 400.0), true);
-    verifyPaintPosition(key5, const Offset(0.0, 600.0), false);
+    verifyPaintPosition(key5, const Offset(0.0, 950.0), false);
     position.animateTo(600.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
     verifyPaintPosition(key3, const Offset(0.0, 150.0), true);
     verifyPaintPosition(key4, const Offset(0.0, 350.0), true);
-    verifyPaintPosition(key5, const Offset(0.0, 600.0), false);
+    verifyPaintPosition(key5, const Offset(0.0, 900.0), false);
     position.animateTo(650.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 300));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
@@ -166,7 +166,7 @@ void main() {
     verifyPaintPosition(key3, const Offset(0.0, 100.0), true);
     verifyActualBoxPosition(tester, find.byType(Container), 1, new Rect.fromLTWH(0.0, 100.0, 800.0, 200.0));
     verifyPaintPosition(key4, const Offset(0.0, 300.0), true);
-    verifyPaintPosition(key5, const Offset(0.0, 600.0), false);
+    verifyPaintPosition(key5, const Offset(0.0, 850.0), false);
     position.animateTo(700.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 400));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
@@ -174,7 +174,7 @@ void main() {
     verifyPaintPosition(key3, const Offset(0.0, 100.0), true);
     verifyActualBoxPosition(tester, find.byType(Container), 1, new Rect.fromLTWH(0.0, 100.0, 800.0, 200.0));
     verifyPaintPosition(key4, const Offset(0.0, 250.0), true);
-    verifyPaintPosition(key5, const Offset(0.0, 600.0), false);
+    verifyPaintPosition(key5, const Offset(0.0, 800.0), false);
     position.animateTo(750.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 500));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
@@ -182,21 +182,21 @@ void main() {
     verifyPaintPosition(key3, const Offset(0.0, 100.0), true);
     verifyActualBoxPosition(tester, find.byType(Container), 1, new Rect.fromLTWH(0.0, 100.0, 800.0, 200.0));
     verifyPaintPosition(key4, const Offset(0.0, 200.0), true);
-    verifyPaintPosition(key5, const Offset(0.0, 600.0), false);
+    verifyPaintPosition(key5, const Offset(0.0, 750.0), false);
     position.animateTo(800.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 60));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
     verifyPaintPosition(key3, const Offset(0.0, 100.0), true);
     verifyPaintPosition(key4, const Offset(0.0, 150.0), true);
-    verifyPaintPosition(key5, const Offset(0.0, 600.0), false);
+    verifyPaintPosition(key5, const Offset(0.0, 700.0), false);
     position.animateTo(850.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 70));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
     verifyPaintPosition(key3, const Offset(0.0, 100.0), true);
     verifyPaintPosition(key4, const Offset(0.0, 100.0), true);
-    verifyPaintPosition(key5, const Offset(0.0, 600.0), false);
+    verifyPaintPosition(key5, const Offset(0.0, 650.0), false);
     position.animateTo(900.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpAndSettle(const Duration(milliseconds: 80));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);

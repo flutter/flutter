@@ -45,14 +45,14 @@ void main() {
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
       new Rect.fromLTWH(25.0, 420.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
       new Rect.fromLTWH(25.0, 220.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.ltr);
@@ -84,14 +84,14 @@ void main() {
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
       new Rect.fromLTWH(25.0, 420.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.ltr);
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
       new Rect.fromLTWH(25.0, 220.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.ltr);
@@ -123,14 +123,14 @@ void main() {
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, 0.0, 800.0, 400.0),
       new Rect.fromLTWH(15.0, 420.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 855.0, 800.0, 400.0),
     ]);
 
     await test(tester, 200.0, padding, AxisDirection.down, TextDirection.rtl);
     verify(tester, <Rect>[
       new Rect.fromLTWH(0.0, -200.0, 800.0, 400.0),
       new Rect.fromLTWH(15.0, 220.0, 760.0, 400.0),
-      new Rect.fromLTWH(0.0, 600.0, 800.0, 400.0),
+      new Rect.fromLTWH(0.0, 655.0, 800.0, 400.0),
     ]);
 
     await test(tester, 390.0, padding, AxisDirection.down, TextDirection.rtl);
