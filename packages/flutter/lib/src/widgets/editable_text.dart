@@ -703,12 +703,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// By default makes text in composing range appear as underlined.
   /// Descendants can override this method to customize appearance of text.
   TextSpan buildTextSpan() {
-    final int obscureShowCharacterAtIndex =
-        _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
-
     if (!widget.obscureText && _value.composing.isValid) {
-      final TextStyle composingStyle = widget.style
-          .merge(const TextStyle(decoration: TextDecoration.underline));
+      final TextStyle composingStyle = widget.style.merge(
+        const TextStyle(decoration: TextDecoration.underline),
+      );
 
       return new TextSpan(style: widget.style, children: <TextSpan>[
         new TextSpan(text: _value.composing.textBefore(_value.text)),
@@ -722,7 +720,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     String text = _value.text;
     if (widget.obscureText) {
       text = RenderEditable.obscuringCharacter * text.length;
-      final int o = obscureShowCharacterAtIndex;
+      final int o =
+        _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
       if (o != null && o >= 0 && o < text.length)
         text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
     }
