@@ -100,7 +100,7 @@ void main() {
           mockPeerConnections.add(mp);
           uriConnections.add(uri);
           when(mp.sendRequest(typed<String>(any), typed<String>(any)))
-              // The local ports max the desired indices for now, so get the
+              // The local ports match the desired indices for now, so get the
               // canned response from the URI port.
               .thenAnswer((_) => new Future<Map<String, dynamic>>(
                   () => flutterViewCannedResponses[uri.port]));
