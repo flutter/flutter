@@ -22,6 +22,10 @@ typedef void SemanticsActionCallback(int id, SemanticsAction action, ByteData ar
 /// [Window.onPlatformMessage].
 typedef void PlatformMessageResponseCallback(ByteData data);
 
+// The engine returns message responses as a Uint8List which is then wrapped
+// in a ByteData.
+typedef void _InternalPlatformMessageResponseCallback(Uint8List data);
+
 /// Signature for [Window.onPlatformMessage].
 typedef void PlatformMessageCallback(String name, ByteData data, PlatformMessageResponseCallback callback);
 
@@ -687,7 +691,7 @@ class Window {
       throw new Exception(error);
   }
   String _sendPlatformMessage(String name,
-                              PlatformMessageResponseCallback callback,
+                              _InternalPlatformMessageResponseCallback callback,
                               ByteData data) native 'Window_sendPlatformMessage';
 
   /// Called whenever this window receives a message from a platform-specific
@@ -717,15 +721,15 @@ class Window {
 
   /// Wraps the given [callback] in another callback that ensures that the
   /// original callback is called in the zone it was registered in.
-  static PlatformMessageResponseCallback _zonedPlatformMessageResponseCallback(PlatformMessageResponseCallback callback) {
+  static _InternalPlatformMessageResponseCallback _zonedPlatformMessageResponseCallback(PlatformMessageResponseCallback callback) {
     if (callback == null)
       return null;
 
     // Store the zone in which the callback is being registered.
     final Zone registrationZone = Zone.current;
 
-    return (ByteData data) {
-      registrationZone.runUnaryGuarded(callback, data);
+    return (Uint8List data) {
+      registrationZone.runUnaryGuarded(callback, data.buffer.asByteData());
     };
   }
 }
