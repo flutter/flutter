@@ -96,7 +96,7 @@ void main() {
 
     final RenderBox materialBox = getMaterialBox(tester);
 
-    expect(materialBox, paints..path(color: chipTheme.backgroundColor));
+    expect(materialBox, paints..path(color: const Color(0xff455a64)));
   });
 
   testWidgets('Chip overrides ThemeData theme if ChipTheme present', (WidgetTester tester) async {
@@ -146,7 +146,7 @@ void main() {
 
     final RenderBox materialBox = getMaterialBox(tester);
 
-    expect(materialBox, paints..path(color: new Color(customTheme.backgroundColor.value)));
+    expect(materialBox, paints..path(color: const Color(0xff455a64)));
   });
 
   testWidgets('ChipThemeData generates correct opacities for defaults', (WidgetTester tester) async {

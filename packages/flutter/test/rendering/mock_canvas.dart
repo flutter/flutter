@@ -116,7 +116,7 @@ abstract class PaintPattern {
   /// Calls are skipped until a call to [Canvas.save] is found. If none is
   /// found, the matcher fails.
   ///
-  /// See also: [restore], [saveRestore].
+  /// See also: [restore], [saveLayer], and [saveRestore].
   void save();
 
   /// Indicates that a restore is expected next.
@@ -124,7 +124,7 @@ abstract class PaintPattern {
   /// Calls are skipped until a call to [Canvas.restore] is found. If none is
   /// found, the matcher fails.
   ///
-  /// See also: [save], [saveRestore].
+  /// See also: [save] and [saveRestore].
   void restore();
 
   /// Indicates that a matching pair of save/restore calls is expected next.
@@ -133,8 +133,16 @@ abstract class PaintPattern {
   /// skipped until the matching [Canvas.restore] call is found. If no matching
   /// pair of calls could be found, the matcher fails.
   ///
-  /// See also: [save], [restore].
+  /// See also: [save], [restore], and [saveLayer].
   void saveRestore();
+
+  /// Indicates that a saveLayer is expected next.
+  ///
+  /// Calls are skipped until a call to [Canvas.saveLayer] is found. If none is
+  /// found, the matcher fails.
+  ///
+  /// See also: [save], [restore], and [saveRestore].
+  void saveLayer({Rect rect, Color color});
 
   /// Indicates that a rectangular clip is expected next.
   ///
@@ -645,6 +653,11 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
+  void saveLayer({Rect rect, Color color}) {
+    _predicates.add(new _SaveLayerPaintPredicate(rect: rect, color: color));
+  }
+
+  @override
   void saveRestore() {
     _predicates.add(new _SaveRestorePairPaintPredicate());
   }
@@ -974,6 +987,18 @@ class _RRectPaintPredicate extends _OneParameterPaintPredicate<RRect> {
     strokeWidth: strokeWidth,
     hasMaskFilter: hasMaskFilter,
     style: style,
+  );
+}
+
+class _SaveLayerPaintPredicate extends _OneParameterPaintPredicate<Rect> {
+  _SaveLayerPaintPredicate({ Rect rect, Color color }) : super(
+    #saveLayer,
+    'a save layer',
+    expected: rect,
+    color: color,
+    strokeWidth: null,
+    hasMaskFilter: null,
+    style: null,
   );
 }
 
