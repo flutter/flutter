@@ -12,6 +12,7 @@ import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
+import 'proxy_box.dart' show RenderRepaintBoundary;
 
 /// A composited layer.
 ///
@@ -530,8 +531,10 @@ class OffsetLayer extends ContainerLayer {
   ///
   /// See also:
   ///
+  ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage(Size logicalSize, {double pixelRatio: 1.0}) async {
+    assert(pixelRatio != null);
     final ui.SceneBuilder builder = new ui.SceneBuilder();
     final Matrix4 transform = new Matrix4.diagonal3Values(pixelRatio, pixelRatio, 1.0);
     transform.translate(-offset.dx, -offset.dy, 0.0);

@@ -2470,8 +2470,84 @@ class RenderRepaintBoundary extends RenderProxyBox {
   /// will give you a 1:1 mapping between logical pixels and the output pixels
   /// in the image.
   ///
+  /// ## Sample code
+  ///
+  /// The following is an example of how to go from a `GlobalKey` on a
+  /// `RepaintBoundary` to a PNG:
+  ///
+  /// ```dart
+  /// import 'dart:async';
+  /// import 'dart:typed_data';
+  /// import 'dart:ui' as ui;
+  ///
+  /// import 'package:flutter/rendering.dart';
+  /// import 'package:flutter/material.dart';
+  ///
+  /// void main() {
+  ///   runApp(new MyApp());
+  /// }
+  ///
+  /// class MyApp extends StatelessWidget {
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return new MaterialApp(
+  ///       title: 'Flutter Demo',
+  ///       theme: new ThemeData(
+  ///         primarySwatch: Colors.blue,
+  ///       ),
+  ///       home: new MyHome(title: 'PNG Demo'),
+  ///     );
+  ///   }
+  /// }
+  ///
+  /// class MyHome extends StatefulWidget {
+  ///   MyHome({Key key, this.title}) : super(key: key);
+  ///
+  ///   final String title;
+  ///
+  ///   @override
+  ///   _MyHomeState createState() => new _MyHomeState();
+  /// }
+  ///
+  /// class _MyHomeState extends State<MyHome> {
+  ///   GlobalKey globalKey = new GlobalKey();
+  ///
+  ///   Future<void> _capturePng() async {
+  ///     RenderRepaintBoundary boundary = globalKey.currentContext.findRenderObject();
+  ///     ui.Image image = await boundary.toImage();
+  ///     ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+  ///     Uint8List pngBytes = byteData.buffer.asUint8List();
+  ///     print(pngBytes);
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Scaffold(
+  ///       appBar: new AppBar(
+  ///         title: new Text(widget.title),
+  ///       ),
+  ///       body: RepaintBoundary(
+  ///         key: globalKey,
+  ///         child: const Center(
+  ///           child: Text(
+  ///             'Hello World',
+  ///             textDirection: TextDirection.ltr,
+  ///           ),
+  ///         ),
+  ///       ),
+  ///       floatingActionButton: FloatingActionButton(
+  ///         child: Icon(Icons.picture_in_picture),
+  ///         tooltip: 'Capture PNG',
+  ///         onPressed: _capturePng,
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
   /// See also:
   ///
+  ///  * [OffsetLayer.toImage] for a similar API at the layer level.
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage({double pixelRatio: 1.0}) {
     assert(!debugNeedsPaint);
