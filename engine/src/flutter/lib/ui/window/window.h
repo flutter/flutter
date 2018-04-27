@@ -24,6 +24,9 @@ class Scene;
 
 Dart_Handle ToByteData(const std::vector<uint8_t>& buffer);
 
+Dart_Handle ToTypedData(Dart_TypedData_Type data_type,
+                        const std::vector<uint8_t>& buffer);
+
 class WindowClient {
  public:
   virtual std::string DefaultRouteName() = 0;
