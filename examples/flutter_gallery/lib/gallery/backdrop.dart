@@ -46,7 +46,7 @@ class _IgnorePointerWhileStatusIsNotState extends State<_IgnorePointerWhileStatu
   void initState() {
     super.initState();
     widget.controller.addStatusListener(_handleStatusChange);
-    _ignoring = widget.status != AnimationStatus.completed;
+    _ignoring = widget.controller.status != widget.status;
   }
 
   @override
