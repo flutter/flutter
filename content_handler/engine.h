@@ -57,8 +57,6 @@ class Engine final {
 
   void OnSessionMetricsDidChange(double device_pixel_ratio);
 
-  void UpdateNativeThreadLabelNames() const;
-
   FXL_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
 

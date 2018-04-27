@@ -17,6 +17,23 @@
 
 namespace flutter {
 
+static void UpdateNativeThreadLabelNames(const std::string& label,
+                                         const blink::TaskRunners& runners) {
+  auto set_thread_name = [](fxl::RefPtr<fxl::TaskRunner> runner,
+                            std::string prefix, std::string suffix) {
+    if (!runner) {
+      return;
+    }
+    fml::TaskRunner::RunNowOrPostTask(runner, [name = prefix + suffix]() {
+      zx::thread::self().set_property(ZX_PROP_NAME, name.c_str(), name.size());
+    });
+  };
+  set_thread_name(runners.GetPlatformTaskRunner(), label, ".platform");
+  set_thread_name(runners.GetUITaskRunner(), label, ".ui");
+  set_thread_name(runners.GetGPUTaskRunner(), label, ".gpu");
+  set_thread_name(runners.GetIOTaskRunner(), label, ".io");
+}
+
 Engine::Engine(Delegate& delegate,
                std::string thread_label,
                component::ApplicationContext& application_context,
@@ -123,6 +140,8 @@ Engine::Engine(Delegate& delegate,
       host_threads_[2].TaskRunner()                   // io
   );
 
+  UpdateNativeThreadLabelNames(thread_label_, task_runners);
+
   settings_.verbose_logging = true;
 
   settings_.root_isolate_create_callback =
@@ -186,8 +205,6 @@ Engine::Engine(Delegate& delegate,
           FXL_LOG(ERROR) << "Could not (re)launch the engine in configuration";
         }
       }));
-
-  UpdateNativeThreadLabelNames();
 }
 
 Engine::~Engine() {
@@ -195,20 +212,6 @@ Engine::~Engine() {
     thread.TaskRunner()->PostTask(
         []() { fsl::MessageLoop::GetCurrent()->PostQuitTask(); });
   }
-}
-
-void Engine::UpdateNativeThreadLabelNames() const {
-  auto set_thread_name = [](fxl::RefPtr<fxl::TaskRunner> runner,
-                            std::string prefix, std::string suffix) {
-    runner->PostTask([name = prefix + suffix]() {
-      zx::thread::self().set_property(ZX_PROP_NAME, name.c_str(), name.size());
-    });
-  };
-  auto runners = shell_->GetTaskRunners();
-  set_thread_name(runners.GetPlatformTaskRunner(), thread_label_, ".platform");
-  set_thread_name(runners.GetUITaskRunner(), thread_label_, ".ui");
-  set_thread_name(runners.GetGPUTaskRunner(), thread_label_, ".gpu");
-  set_thread_name(runners.GetIOTaskRunner(), thread_label_, ".io");
 }
 
 std::pair<bool, uint32_t> Engine::GetEngineReturnCode() const {
@@ -235,9 +238,13 @@ void Engine::OnMainIsolateStart() {
     FXL_LOG(ERROR) << "Could not configure some native embedder bindings for a "
                       "new root isolate.";
   }
+  FXL_DLOG(INFO) << "Main isolate for engine '" << thread_label_
+                 << "' was started.";
 }
 
 void Engine::OnMainIsolateShutdown() {
+  FXL_DLOG(INFO) << "Main isolate for engine '" << thread_label_
+                 << "' shutting down.";
   Terminate();
 }
 
