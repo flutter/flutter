@@ -187,6 +187,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// This is intended for callers who need to call asynchronous methods, where
   /// the methods may spawn isolates or OS threads and thus cannot be executed
   /// synchronously by manually flushing microtasks.
+  ///
+  /// If [callback] completes successfully, this will return the future
+  /// returned by [callback].
+  ///
+  /// If [callback] completes with an error, the error will be caught by the
+  /// Flutter framework and made available via [takeException], and the future
+  /// returned by this method will complete will `null`.
   Future<T> runAsync<T>(Future<T> callback());
 
   /// Artificially calls dispatchLocaleChanged on the Widget binding,
@@ -601,12 +608,27 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           'to complete before calling runAsync() again.'
       );
     }());
+
     return Zone.root.run(() {
       _pendingAsyncTasks = new Completer<void>();
-      return callback().then((T value) {
+      return callback().then<T>((T value) {
+        return value;
+      }).catchError((dynamic exception, StackTrace stack) {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'Flutter test framework',
+          context: 'while running async test code',
+        ));
+        return null;
+      }).whenComplete(() {
+        // We complete the _pendingAsyncTasks future successfully regardless of
+        // whether an exception occurred because in the case of an exception,
+        // we already reported the exception to FlutterError. Moreover,
+        // completing the future with an error would trigger an unhandled
+        // exception due to zone error boundaries.
         _pendingAsyncTasks.complete();
         _pendingAsyncTasks = null;
-        return value;
       });
     });
   }
@@ -677,6 +699,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     });
 
     return new Future<Null>.microtask(() async {
+      // Resolve interplay between fake async and real async calls.
+      _fakeAsync.flushMicrotasks();
       while (_pendingAsyncTasks != null) {
         await _pendingAsyncTasks.future;
         _fakeAsync.flushMicrotasks();
