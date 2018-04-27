@@ -254,12 +254,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
 
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
     final Animation<RelativeRect> frontRelativeRect = new RelativeRectTween(
-      begin: new RelativeRect.fromLTRB(
-        0.0,
-        constraints.biggest.height - _kFrontClosedHeight,
-        0.0,
-        0.0
-      ),
+      begin: new RelativeRect.fromLTRB(0.0, constraints.biggest.height - _kFrontClosedHeight, 0.0, 0.0),
       end: const RelativeRect.fromLTRB(0.0, _kBackAppBarHeight, 0.0, 0.0),
     ).animate(_controller);
 
