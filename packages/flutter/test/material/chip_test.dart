@@ -6,6 +6,7 @@ import 'dart:ui' show window;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -15,11 +16,11 @@ Finder findRenderChipElement() {
   return find.byElementPredicate((Element e) => '${e.runtimeType}' == '_RenderChipElement');
 }
 
-RenderBox getMaterialBox(WidgetTester tester) {
-  return tester.firstRenderObject<RenderBox>(
+RenderPhysicalShape getMaterialShape(WidgetTester tester) {
+  return tester.firstRenderObject<RenderPhysicalShape>(
     find.descendant(
       of: find.byType(RawChip),
-      matching: find.byType(CustomPaint),
+      matching: find.byType(PhysicalShape),
     ),
   );
 }
@@ -1021,7 +1022,7 @@ void main() {
       ),
     );
 
-    expect(materialBox, paints..path(color: chipTheme.disabledColor));
+    expect(materialBox, paints..saveLayer(color: const Color(0x61ffffff)));
   });
 
   testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
@@ -1079,28 +1080,28 @@ void main() {
     }
 
     await tester.pumpWidget(buildApp());
+    RenderPhysicalShape materialShape = getMaterialShape(tester);
 
-    RenderBox materialBox = getMaterialBox(tester);
     IconThemeData iconData = getIconData(tester);
     DefaultTextStyle labelStyle = getLabelStyle(tester);
 
     // Check default theme for enabled widget.
-    expect(materialBox, paints..path(color: chipTheme.backgroundColor));
+    expect(materialShape.color, equals(const Color(0xffe0e0e0)));
     expect(iconData.color, equals(const Color(0xde000000)));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
     await tester.tap(find.byType(RawChip));
     await tester.pumpAndSettle();
-    materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..path(color: chipTheme.selectedColor));
+    materialShape = getMaterialShape(tester);
+    expect(materialShape.color, equals(const Color(0xffc2c2c2)));
     await tester.tap(find.byType(RawChip));
     await tester.pumpAndSettle();
 
     // Check default theme with disabled widget.
     await tester.pumpWidget(buildApp(isSelectable: false, isPressable: false, isDeletable: true));
     await tester.pumpAndSettle();
-    materialBox = getMaterialBox(tester);
+    materialShape = getMaterialShape(tester);
     labelStyle = getLabelStyle(tester);
-    expect(materialBox, paints..path(color: chipTheme.disabledColor));
+    expect(materialShape.color, equals(const Color(0xfff3f3f3)));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
 
     // Apply a custom theme.
@@ -1117,18 +1118,18 @@ void main() {
     );
     await tester.pumpWidget(buildApp(theme: customTheme));
     await tester.pumpAndSettle();
-    materialBox = getMaterialBox(tester);
+    materialShape = getMaterialShape(tester);
     iconData = getIconData(tester);
     labelStyle = getLabelStyle(tester);
 
     // Check custom theme for enabled widget.
-    expect(materialBox, paints..path(color: customTheme.backgroundColor));
+    expect(materialShape.color, equals(const Color(0xffc9c9bb)));
     expect(iconData.color, equals(customTheme.deleteIconColor));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
     await tester.tap(find.byType(RawChip));
     await tester.pumpAndSettle();
-    materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..path(color: customTheme.selectedColor));
+    materialShape = getMaterialShape(tester);
+    expect(materialShape.color, equals(const Color(0xffb296bd)));
     await tester.tap(find.byType(RawChip));
     await tester.pumpAndSettle();
 
@@ -1140,9 +1141,9 @@ void main() {
       isDeletable: true,
     ));
     await tester.pumpAndSettle();
-    materialBox = getMaterialBox(tester);
+    materialShape = getMaterialShape(tester);
     labelStyle = getLabelStyle(tester);
-    expect(materialBox, paints..path(color: customTheme.disabledColor));
+    expect(materialShape.color, equals(const Color(0xff96a5d0)));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
   });
 }

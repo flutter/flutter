@@ -20,7 +20,7 @@ class _ChipColumnState extends State<ChipColumn> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> chips = <Widget>[
-      ChoiceChip(
+      new ChoiceChip(
         label: const Text('ChoiceChip'),
         selected: _choiceSelected,
         onSelected: (bool value) {
@@ -41,11 +41,9 @@ class _ChipColumnState extends State<ChipColumn> {
       new ActionChip(
         label: const Text('ActionChip'),
         onPressed: () {
-          setState(() {
-            Scaffold.of(context).showSnackBar(const SnackBar(
-                  content: const Text('Activate!', textAlign: TextAlign.center),
-                ));
-          });
+          Scaffold.of(context).showSnackBar(
+            const SnackBar(content: const Text('Activate!', textAlign: TextAlign.center))
+          );
         },
       )
     ];
@@ -87,7 +85,7 @@ class _ChipColumnState extends State<ChipColumn> {
 
     return new Column(
       children: chips.map<Widget>(
-            (Widget chip) => new Padding(padding: const EdgeInsets.all(8.0), child: chip),
+        (Widget chip) => new Padding(padding: const EdgeInsets.all(8.0), child: chip),
       ).toList(),
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
