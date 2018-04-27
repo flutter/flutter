@@ -15,7 +15,7 @@ Future<Uint8List> consolidateHttpClientResponseBytes(HttpClientResponse response
   // implement the interface.
   assert(response.contentLength != null);
   final Completer<Uint8List> completer = new Completer<Uint8List>.sync();
-  if (response.contentLength == -1) {
+  if (response.contentLength == -1 || response.headers.value(HttpHeaders.CONTENT_ENCODING) == 'GZIP') {
     final List<List<int>> chunks = <List<int>>[];
     int contentLength = 0;
     response.listen((List<int> chunk) {
