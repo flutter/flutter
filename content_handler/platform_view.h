@@ -28,16 +28,16 @@ class PlatformView final : public shell::PlatformView,
                            public input::InputMethodEditorClient,
                            public input::InputListener {
  public:
-  PlatformView(
-      PlatformView::Delegate& delegate,
-      std::string debug_label,
-      blink::TaskRunners task_runners,
-      component::ServiceProviderPtr parent_environment_service_provider,
-      views_v1::ViewManagerPtr& view_manager,
-      fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner,
-      ui::ScenicPtr scenic,
-      zx::eventpair export_token,
-      modular::ContextWriterPtr accessibility_context_writer);
+  PlatformView(PlatformView::Delegate& delegate,
+               std::string debug_label,
+               blink::TaskRunners task_runners,
+               fidl::InterfaceHandle<component::ServiceProvider>
+                   parent_environment_service_provider,
+               fidl::InterfaceHandle<views_v1::ViewManager> view_manager,
+               fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner,
+               zx::eventpair export_token,
+               fidl::InterfaceHandle<modular::ContextWriter>
+                   accessibility_context_writer);
 
   ~PlatformView();
 
@@ -55,7 +55,6 @@ class PlatformView final : public shell::PlatformView,
   fidl::Binding<input::InputMethodEditorClient> ime_client_;
   input::InputMethodEditorPtr ime_;
   modular::ClipboardPtr clipboard_;
-  ui::ScenicPtr scenic_;
   AccessibilityBridge accessibility_bridge_;
   std::unique_ptr<Surface> surface_;
   blink::LogicalMetrics metrics_;

@@ -17,7 +17,7 @@ namespace flutter {
 // with the Context Service.
 class AccessibilityBridge final {
  public:
-  AccessibilityBridge(modular::ContextWriterPtr writer);
+  AccessibilityBridge(fidl::InterfaceHandle<modular::ContextWriter> writer);
 
   ~AccessibilityBridge();
 

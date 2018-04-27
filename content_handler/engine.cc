@@ -45,12 +45,13 @@ Engine::Engine(Delegate& delegate,
   }
 
   // Setup the session connection.
-  ui::ScenicPtr scenic;
+  fidl::InterfaceHandle<ui::Scenic> scenic;
   view_manager->GetScenic(scenic.NewRequest());
 
   // Grab the parent environent services. The platform view may want to access
   // some of these services.
-  component::ServiceProviderPtr parent_environment_service_provider;
+  fidl::InterfaceHandle<component::ServiceProvider>
+      parent_environment_service_provider;
   application_context.environment()->GetServices(
       parent_environment_service_provider.NewRequest());
 
@@ -62,7 +63,7 @@ Engine::Engine(Delegate& delegate,
 
   // Grab the accessibilty context writer that can understand the semtics tree
   // on the platform view.
-  modular::ContextWriterPtr accessibility_context_writer;
+  fidl::InterfaceHandle<modular::ContextWriter> accessibility_context_writer;
   application_context.ConnectToEnvironmentService(
       accessibility_context_writer.NewRequest());
 
@@ -70,7 +71,7 @@ Engine::Engine(Delegate& delegate,
   // rasterizer.
   std::unique_ptr<flow::CompositorContext> compositor_context =
       std::make_unique<flutter::CompositorContext>(
-          scenic,                              // scenic
+          std::move(scenic),                   // scenic
           thread_label_,                       // debug label
           std::move(import_token),             // import token
           on_session_metrics_change_callback,  // session metrics did change
@@ -82,9 +83,8 @@ Engine::Engine(Delegate& delegate,
       fxl::MakeCopyable([debug_label = thread_label_,  //
                          parent_environment_service_provider =
                              std::move(parent_environment_service_provider),  //
-                         view_manager = std::ref(view_manager),               //
+                         view_manager = view_manager.Unbind(),                //
                          view_owner = std::move(view_owner),                  //
-                         scenic = std::move(scenic),                          //
                          accessibility_context_writer =
                              std::move(accessibility_context_writer),  //
                          export_token = std::move(export_token)        //
@@ -95,9 +95,8 @@ Engine::Engine(Delegate& delegate,
             debug_label,                                     // debug label
             shell.GetTaskRunners(),                          // task runners
             std::move(parent_environment_service_provider),  // services
-            view_manager,                                    // view manager
+            std::move(view_manager),                         // view manager
             std::move(view_owner),                           // view owner
-            std::move(scenic),                               // scenic
             std::move(export_token),                         // export token
             std::move(
                 accessibility_context_writer)  // accessibility context writer
@@ -158,13 +157,14 @@ Engine::Engine(Delegate& delegate,
     PlatformView* platform_view =
         static_cast<PlatformView*>(shell_->GetPlatformView().get());
     auto& view = platform_view->GetMozartView();
+    fidl::InterfaceHandle<views_v1::ViewContainer> view_container;
+    view->GetContainer(view_container.NewRequest());
     component::ApplicationEnvironmentPtr application_environment;
     application_context.ConnectToEnvironmentService(
         application_environment.NewRequest());
-
     isolate_configurator_ = std::make_unique<IsolateConfigurator>(
         fdio_ns,                              //
-        view,                                 //
+        std::move(view_container),            //
         std::move(application_environment),   //
         std::move(outgoing_services_request)  //
     );

@@ -10,13 +10,14 @@
 namespace flutter {
 
 SessionConnection::SessionConnection(
-    const ui::ScenicPtr& scenic,
+    fidl::InterfaceHandle<ui::Scenic> scenic_handle,
     std::string debug_label,
     zx::eventpair import_token,
     OnMetricsUpdate session_metrics_did_change_callback,
     fxl::Closure session_error_callback)
     : debug_label_(std::move(debug_label)),
-      session_(scenic.get()),
+      scenic_(scenic_handle.Bind()),
+      session_(scenic_.get()),
       root_node_(&session_),
       surface_producer_(std::make_unique<VulkanSurfaceProducer>(&session_)),
       scene_update_context_(&session_, surface_producer_.get()),

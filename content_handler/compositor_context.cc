@@ -56,13 +56,13 @@ class ScopedFrame final : public flow::CompositorContext::ScopedFrame {
 };
 
 CompositorContext::CompositorContext(
-    const ui::ScenicPtr& scenic,
+    fidl::InterfaceHandle<ui::Scenic> scenic,
     std::string debug_label,
     zx::eventpair import_token,
     OnMetricsUpdate session_metrics_did_change_callback,
     fxl::Closure session_error_callback)
     : debug_label_(std::move(debug_label)),
-      session_connection_(scenic,
+      session_connection_(std::move(scenic),
                           debug_label_,
                           std::move(import_token),
                           std::move(session_metrics_did_change_callback),

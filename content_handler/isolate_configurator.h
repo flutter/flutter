@@ -21,7 +21,7 @@ class IsolateConfigurator final : mozart::NativesDelegate {
  public:
   IsolateConfigurator(
       const UniqueFDIONS& fdio_ns,
-      views_v1::ViewPtr& view,
+      fidl::InterfaceHandle<views_v1::ViewContainer> view_container,
       component::ApplicationEnvironmentPtr application_environment,
       fidl::InterfaceRequest<component::ServiceProvider>
           outgoing_services_request);
@@ -35,12 +35,13 @@ class IsolateConfigurator final : mozart::NativesDelegate {
  private:
   bool used_ = false;
   const UniqueFDIONS& fdio_ns_;
-  views_v1::ViewPtr& view_;
+  fidl::InterfaceHandle<views_v1::ViewContainer> view_container_;
   component::ApplicationEnvironmentPtr application_environment_;
   fidl::InterfaceRequest<component::ServiceProvider> outgoing_services_request_;
 
   // |mozart::NativesDelegate|
-  views_v1::View* GetMozartView() override;
+  void OfferServiceProvider(fidl::InterfaceHandle<component::ServiceProvider>,
+                            fidl::VectorPtr<fidl::StringPtr> services);
 
   void BindFuchsia();
 

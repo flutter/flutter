@@ -24,20 +24,21 @@ PlatformView::PlatformView(
     PlatformView::Delegate& delegate,
     std::string debug_label,
     blink::TaskRunners task_runners,
-    component::ServiceProviderPtr parent_environment_service_provider,
-    views_v1::ViewManagerPtr& view_manager,
+    fidl::InterfaceHandle<component::ServiceProvider>
+        parent_environment_service_provider_handle,
+    fidl::InterfaceHandle<views_v1::ViewManager> view_manager_handle,
     fidl::InterfaceRequest<views_v1_token::ViewOwner> view_owner,
-    ui::ScenicPtr scenic,
     zx::eventpair export_token,
-    modular::ContextWriterPtr accessibility_context_writer)
+    fidl::InterfaceHandle<modular::ContextWriter> accessibility_context_writer)
     : shell::PlatformView(delegate, std::move(task_runners)),
       debug_label_(std::move(debug_label)),
       view_listener_(this),
       input_listener_(this),
       ime_client_(this),
-      scenic_(std::move(scenic)),
       accessibility_bridge_(std::move(accessibility_context_writer)),
       surface_(std::make_unique<Surface>(debug_label_)) {
+  auto view_manager = view_manager_handle.Bind();
+
   // Create the view.
   view_manager->CreateView(view_.NewRequest(),           // view
                            std::move(view_owner),        // view owner
@@ -58,6 +59,8 @@ PlatformView::PlatformView(
   input_connection_->SetEventListener(input_listener_.NewBinding());
 
   // Access the clipboard.
+  auto parent_environment_service_provider =
+      parent_environment_service_provider_handle.Bind();
   component::ConnectToService(parent_environment_service_provider.get(),
                               clipboard_.NewRequest());
 
@@ -79,6 +82,7 @@ void PlatformView::RegisterPlatformMessageHandlers() {
 }
 
 views_v1::ViewPtr& PlatformView::GetMozartView() {
+  FXL_DCHECK(view_.is_bound());
   return view_;
 }
 

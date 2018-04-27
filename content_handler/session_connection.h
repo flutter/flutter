@@ -23,7 +23,7 @@ using OnMetricsUpdate = std::function<void(double /* device pixel ratio */)>;
 // maintaining the Scenic session connection and presenting node updates.
 class SessionConnection final {
  public:
-  SessionConnection(const ui::ScenicPtr& scenic,
+  SessionConnection(fidl::InterfaceHandle<ui::Scenic> scenic,
                     std::string debug_label,
                     zx::eventpair import_token,
                     OnMetricsUpdate session_metrics_did_change_callback,
@@ -47,6 +47,7 @@ class SessionConnection final {
 
  private:
   const std::string debug_label_;
+  ui::ScenicPtr scenic_;
   scenic_lib::Session session_;
   scenic_lib::ImportNode root_node_;
   std::unique_ptr<VulkanSurfaceProducer> surface_producer_;
