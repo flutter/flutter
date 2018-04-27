@@ -4,15 +4,14 @@
 
 import 'package:flutter/material.dart';
 
-class ChipDemo extends StatefulWidget {
-  static const String routeName = '/material/chip';
+class ChipColumn extends StatefulWidget {
+  const ChipColumn({Key key}) : super(key: key);
 
   @override
-  _ChipDemoState createState() => new _ChipDemoState();
+  _ChipColumnState createState() => new _ChipColumnState();
 }
 
-class _ChipDemoState extends State<ChipDemo> {
-  bool _showShapeBorder = false;
+class _ChipColumnState extends State<ChipColumn> {
   bool _showChip = true;
   bool _showInputChip = true;
   bool _choiceSelected = false;
@@ -21,7 +20,6 @@ class _ChipDemoState extends State<ChipDemo> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> chips = <Widget>[
-      const SizedBox(height: 8.0, width: 0.0),
       ChoiceChip(
         label: const Text('ChoiceChip'),
         selected: _choiceSelected,
@@ -42,7 +40,13 @@ class _ChipDemoState extends State<ChipDemo> {
       ),
       new ActionChip(
         label: const Text('ActionChip'),
-        onPressed: () {},
+        onPressed: () {
+          setState(() {
+            Scaffold.of(context).showSnackBar(const SnackBar(
+                  content: const Text('Activate!', textAlign: TextAlign.center),
+                ));
+          });
+        },
       )
     ];
 
@@ -64,10 +68,11 @@ class _ChipDemoState extends State<ChipDemo> {
       chips.add(
         new InputChip(
           avatar: const CircleAvatar(
-              backgroundImage: const AssetImage(
-            'shrine/vendors/sandra-adams.jpg',
-            package: 'flutter_gallery_assets',
-          )),
+            backgroundImage: const AssetImage(
+              'shrine/vendors/sandra-adams.jpg',
+              package: 'flutter_gallery_assets',
+            ),
+          ),
           label: const Text('InputChip'),
           onDeleted: () {
             setState(
@@ -80,6 +85,28 @@ class _ChipDemoState extends State<ChipDemo> {
       );
     }
 
+    return new Column(
+      children: chips.map<Widget>(
+            (Widget chip) => new Padding(padding: const EdgeInsets.all(8.0), child: chip),
+      ).toList(),
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+    );
+  }
+}
+
+class ChipDemo extends StatefulWidget {
+  static const String routeName = '/material/chip';
+
+  @override
+  _ChipDemoState createState() => new _ChipDemoState();
+}
+
+class _ChipDemoState extends State<ChipDemo> {
+  bool _showShapeBorder = false;
+
+  @override
+  Widget build(BuildContext context) {
     final ChipThemeData chipTheme = Theme.of(context).chipTheme;
 
     return new Scaffold(
@@ -92,36 +119,27 @@ class _ChipDemoState extends State<ChipDemo> {
                 _showShapeBorder = !_showShapeBorder;
               });
             },
-            icon: const Icon(Icons.vignette),
+            icon: const Icon(Icons.sentiment_very_satisfied),
           )
         ],
       ),
-      body: new ChipTheme(
-        data: _showShapeBorder
-            ? chipTheme.copyWith(
-                shape: new BeveledRectangleBorder(
-                side: const BorderSide(
-                  width: 0.66,
-                  style: BorderStyle.solid,
-                  color: Colors.grey,
-                ),
-                borderRadius: new BorderRadius.circular(10.0),
-              ))
-            : chipTheme,
-        child: new Center(
-          child: new Column(
-            children: chips
-                .map<Widget>(
-                  (Widget chip) => new Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: chip,
-                      ),
-                )
-                .toList(),
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-          ),
-        ),
+      body: new Builder(
+        builder: (BuildContext context) {
+          return new ChipTheme(
+            data: _showShapeBorder
+                ? chipTheme.copyWith(
+                    shape: const BeveledRectangleBorder(
+                    side: const BorderSide(
+                      width: 1.0,
+                      style: BorderStyle.solid,
+                      color: Colors.grey,
+                    ),
+                    borderRadius: const BorderRadius.all(const Radius.circular(10.0)),
+                  ))
+                : chipTheme,
+            child: const Center(child: const ChipColumn()),
+          );
+        },
       ),
     );
   }
