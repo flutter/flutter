@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -453,6 +454,13 @@ void main() {
       });
       expect(value, isNull);
       expect(tester.takeException(), isArgumentError);
+    });
+
+    testWidgets('disallows re-entry', (WidgetTester tester) async {
+      final Completer<void> completer = new Completer<void>();
+      tester.runAsync<void>(() => completer.future);
+      expect(() => tester.runAsync(() async {}), throwsA(const isInstanceOf<TestFailure>()));
+      completer.complete();
     });
   });
 }
