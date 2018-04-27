@@ -158,6 +158,19 @@ void expectSync(dynamic actual, dynamic matcher, {
   test_package.expect(actual, matcher, reason: reason);
 }
 
+/// Just like [expect], but returns a [Future] that completes when the matcher
+/// has finished matching.
+///
+/// If the matcher fails asynchronously, that failure is piped to the returned
+/// future where it can be handled by user code.
+Future<void> expectLater(dynamic actual, dynamic matcher, {
+  String reason,
+  dynamic skip, // true or a String
+}) {
+  TestAsyncUtils.guardSync();
+  return test_package.expectLater(actual, matcher, reason: reason, skip: skip);
+}
+
 /// Class that programmatically interacts with widgets and the test environment.
 ///
 /// For convenience, instances of this class (such as the one provided by
