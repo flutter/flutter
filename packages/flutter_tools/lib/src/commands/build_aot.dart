@@ -72,7 +72,7 @@ class BuildAotCommand extends BuildSubCommand {
         platform: platform,
         buildMode: getBuildMode(),
         mainPath: findMainDartFile(targetFile),
-        depfilePath: 'depFilePathGoesHere',
+        depfilePath: fs.path.join(outputPath, 'snapshot.d'),
         packagesPath: PackageMap.globalPackagesPath,
         outputPath: outputPath,
         previewDart2: argResults['preview-dart-2'],
