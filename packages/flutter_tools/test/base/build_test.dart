@@ -673,7 +673,6 @@ void main() {
         platform: TargetPlatform.ios,
         buildMode: BuildMode.debug,
         mainPath: 'main.dart',
-        depfilePath: fs.path.join(outputPath, 'snapshot.d'),
         packagesPath: '.packages',
         outputPath: outputPath,
         preferSharedLibrary: false,
@@ -685,7 +684,6 @@ void main() {
       expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
       expect(genSnapshot.snapshotType.mode, BuildMode.debug);
       expect(genSnapshot.packagesPath, '.packages');
-      expect(genSnapshot.depfilePath, fs.path.join(outputPath, 'snapshot.d'));
       expect(genSnapshot.additionalArgs, <String>[
         '--vm_snapshot_data=${fs.path.join(outputPath, 'vm_snapshot_data')}',
         '--isolate_snapshot_data=${fs.path.join(outputPath, 'isolate_snapshot_data')}',
@@ -718,7 +716,6 @@ void main() {
         platform: TargetPlatform.ios,
         buildMode: BuildMode.profile,
         mainPath: 'main.dart',
-        depfilePath: fs.path.join(outputPath, 'snapshot.d'),
         packagesPath: '.packages',
         outputPath: outputPath,
         preferSharedLibrary: false,
@@ -730,7 +727,6 @@ void main() {
       expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
       expect(genSnapshot.snapshotType.mode, BuildMode.profile);
       expect(genSnapshot.packagesPath, '.packages');
-      expect(genSnapshot.depfilePath, fs.path.join(outputPath, 'snapshot.d'));
       expect(genSnapshot.additionalArgs, <String>[
         '--vm_snapshot_data=${fs.path.join(outputPath, 'vm_snapshot_data')}',
         '--isolate_snapshot_data=${fs.path.join(outputPath, 'isolate_snapshot_data')}',
@@ -765,7 +761,6 @@ void main() {
         platform: TargetPlatform.ios,
         buildMode: BuildMode.release,
         mainPath: 'main.dart',
-        depfilePath: fs.path.join(outputPath, 'snapshot.d'),
         packagesPath: '.packages',
         outputPath: outputPath,
         preferSharedLibrary: false,
@@ -777,7 +772,6 @@ void main() {
       expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
       expect(genSnapshot.snapshotType.mode, BuildMode.release);
       expect(genSnapshot.packagesPath, '.packages');
-      expect(genSnapshot.depfilePath, fs.path.join(outputPath, 'snapshot.d'));
       expect(genSnapshot.additionalArgs, <String>[
         '--vm_snapshot_data=${fs.path.join(outputPath, 'vm_snapshot_data')}',
         '--isolate_snapshot_data=${fs.path.join(outputPath, 'isolate_snapshot_data')}',

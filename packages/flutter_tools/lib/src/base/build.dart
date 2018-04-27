@@ -212,7 +212,6 @@ class Snapshotter {
     @required TargetPlatform platform,
     @required BuildMode buildMode,
     @required String mainPath,
-    @required String depfilePath,
     @required String packagesPath,
     @required String outputPath,
     @required bool previewDart2,
@@ -233,7 +232,7 @@ class Snapshotter {
     final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
     final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
     final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
-    final String dependencies = fs.path.join(outputDir.path, 'snapshot.d');
+    final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final String assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
     final String assemblyO = fs.path.join(outputDir.path, 'snapshot_assembly.o');
     final String assemblySo = fs.path.join(outputDir.path, 'app.so');
@@ -323,7 +322,7 @@ class Snapshotter {
       '--isolate_snapshot_data=$isolateSnapshotData',
       '--url_mapping=dart:ui,$uiPath',
       '--url_mapping=dart:vmservice_io,$vmServicePath',
-      '--dependencies=$dependencies',
+      '--dependencies=$depfilePath',
     ];
 
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
@@ -402,7 +401,7 @@ class Snapshotter {
       ]);
     }
 
-    final String fingerprintPath = '$dependencies.fingerprint';
+    final String fingerprintPath = '$depfilePath.fingerprint';
     final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
     if (!await _isBuildRequired(snapshotType, outputPaths, depfilePath, mainPath, fingerprintPath)) {
       printTrace('Skipping AOT snapshot build. Fingerprint match.');
@@ -415,7 +414,7 @@ class Snapshotter {
         sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
         mainPath: mainPath,
         outputFilePath: kApplicationKernelPath,
-        depFilePath: dependencies,
+        depFilePath: depfilePath,
         extraFrontEndOptions: extraFrontEndOptions,
         linkPlatformKernelIn: true,
         aot: !interpreter,
@@ -443,7 +442,7 @@ class Snapshotter {
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: new SnapshotType(platform, buildMode),
       packagesPath: packageMap.packagesPath,
-      depfilePath: dependencies,
+      depfilePath: depfilePath,
       additionalArgs: genSnapshotArgs,
     );
     if (genSnapshotExitCode != 0) {
