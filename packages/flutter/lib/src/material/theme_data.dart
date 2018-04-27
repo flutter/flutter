@@ -171,7 +171,7 @@ class ThemeData extends Diagnosticable {
       valueIndicatorTextStyle: accentTextTheme.body2,
     );
     chipTheme ??= new ChipThemeData.fromDefaults(
-      secondaryColor: primaryColor,
+      secondaryColor: isDark ? primaryColorLight : primaryColor,
       brightness: brightness,
       labelStyle: textTheme.body2,
     );

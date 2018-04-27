@@ -1285,7 +1285,20 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       begin: backgroundTween.evaluate(enableController),
       end: widget.selectedColor ?? theme.selectedColor,
     );
-    return selectTween.evaluate(selectionFade);
+
+    // Combine the resulting color as if it were a transparent color over top
+    // of white or black.
+    final Color foreground = selectTween.evaluate(selectionFade);
+    final int alpha = foreground.alpha;
+    final int invAlpha = theme.brightness == Brightness.dark ? 0 : 255 - alpha;
+    // This is simpler than a normal alpha blend, because the background color
+    // is always white or black.
+    return new Color.fromARGB(
+      0xff,
+      (foreground.red * alpha / 255.0 + invAlpha).toInt(),
+      (foreground.green * alpha / 255.0 + invAlpha).toInt(),
+      (foreground.blue * alpha / 255.0 + invAlpha).toInt(),
+    );
   }
 
   @override
@@ -1369,26 +1382,19 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final TextDirection textDirection = Directionality.of(context);
     final ShapeBorder shape = widget.shape ?? chipTheme.shape;
 
-    return new Material(
-      elevation: isTapping ? _kPressElevation : 0.0,
-      animationDuration: pressedAnimationDuration,
-      shape: shape,
-      child: new InkResponse(
-        onTap: canTap ? _handleTap : null,
-        onTapDown: canTap ? _handleTapDown : null,
-        onTapCancel: canTap ? _handleTapCancel : null,
-        child: new AnimatedBuilder(
-          animation: new Listenable.merge(<Listenable>[selectController, enableController]),
-          builder: (BuildContext context, Widget child) {
-            return new Container(
-              decoration: new ShapeDecoration(
-                shape: shape,
-                color: getBackgroundColor(chipTheme),
-              ),
-              child: child,
-            );
-          },
-          child: _wrapWithTooltip(
+    return new AnimatedBuilder(
+      animation: new Listenable.merge(<Listenable>[selectController, enableController]),
+      builder: (BuildContext context, Widget child) {
+        return new Material(
+          elevation: isTapping ? _kPressElevation : 0.0,
+          animationDuration: pressedAnimationDuration,
+          shape: shape,
+          color: getBackgroundColor(chipTheme),
+          child: new InkResponse(
+            onTap: canTap ? _handleTap : null,
+            onTapDown: canTap ? _handleTapDown : null,
+            onTapCancel: canTap ? _handleTapCancel : null,
+            child: _wrapWithTooltip(
               new _ChipRenderWidget(
                 theme: new _ChipRenderTheme(
                   label: new DefaultTextStyle(
@@ -1424,9 +1430,11 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                 isEnabled: widget.isEnabled,
               ),
               widget.tooltip,
-              widget.onPressed),
-        ),
-      ),
+              widget.onPressed,
+            ),
+          ),
+        );
+      },
     );
   }
 }
