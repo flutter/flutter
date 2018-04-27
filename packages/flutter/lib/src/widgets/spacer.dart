@@ -6,10 +6,18 @@ import 'basic.dart';
 import 'framework.dart';
 
 /// Spacer creates an adjustable, empty spacer that can be used to tune the
-/// spacing between widgets in a [Flexible] container, like [Row] or [Column].
+/// spacing between widgets in a [Flex] container, like [Row] or [Column].
 ///
-/// Spacer takes an optional parameter [flex] that is used as the
-/// [Flexible.flex] value.
+/// In an situation where the container is shrink-wrapped (e.g. a [Column] with
+/// [Column.mainAxisSize] set to [MainAxisSize.min]), Spacer will shrink to be
+/// zero-sized, rather than expand.
+///
+/// The [Spacer] widget will take up any available space, so setting the
+/// [Flex.mainAxisAlignment] on a flex container that contains a [Spacer] to
+/// [MainAxisAlignment.spaceAround], [MainAxisAlignment.spaceBetween], or
+/// [MainAxisAlignment.spaceEvenly] will not have any visible effect: the
+/// [Spacer] has taken up all of the additional space, so there is none left to
+/// redistribute.
 ///
 /// ## Sample code
 ///
