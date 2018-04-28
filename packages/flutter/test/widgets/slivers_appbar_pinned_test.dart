@@ -94,7 +94,7 @@ void main() {
         ' │   cacheOrigin: 0.0 )\n'
         ' │ geometry: SliverGeometry(scrollExtent: 200.0, paintExtent: 200.0,\n'
         ' │   maxPaintExtent: 200.0, hasVisualOverflow: true, cacheExtent:\n'
-        ' │   200.0, includedInSemantics)\n'
+        ' │   200.0)\n'
         ' │ maxExtent: EXCEPTION (FlutterError)\n'
         ' │ child position: 0.0\n'
         ' │\n'

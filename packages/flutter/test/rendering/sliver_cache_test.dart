@@ -40,7 +40,6 @@ void main() {
       paintExtent: 100.0,
       cacheExtent: 100.0,
       visible: true,
-      includeInSemantics: true,
     );
 
     RenderSliver lastVisible = children[5];
@@ -56,7 +55,6 @@ void main() {
       paintExtent: 100.0,
       cacheExtent: 100.0,
       visible: true,
-      includeInSemantics: true,
     );
 
     RenderSliver firstInCache = children[6];
@@ -72,7 +70,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 100.0,
       visible: false,
-      includeInSemantics: true,
     );
 
     RenderSliver lastInCache = children[8];
@@ -88,7 +85,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 50.0,
       visible: false,
-      includeInSemantics: true,
     );
 
     RenderSliver outsideCache = children[9];
@@ -104,7 +100,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 0.0,
       visible: false,
-      includeInSemantics: false,
     );
 
     // scroll down half a sliver
@@ -124,7 +119,6 @@ void main() {
       paintExtent: 50.0,
       cacheExtent: 100.0,
       visible: true,
-      includeInSemantics: true,
     );
 
     lastVisible = children[6];
@@ -140,7 +134,6 @@ void main() {
       paintExtent: 50.0,
       cacheExtent: 100.0,
       visible: true,
-      includeInSemantics: true,
     );
 
     firstInCache = children[7];
@@ -156,7 +149,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 100.0,
       visible: false,
-      includeInSemantics: true,
     );
 
     lastInCache = children[8];
@@ -172,7 +164,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 100.0,
       visible: false,
-      includeInSemantics: true,
     );
 
     outsideCache = children[9];
@@ -188,7 +179,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 0.0,
       visible: false,
-      includeInSemantics: false,
     );
 
     // scroll down 1.5 slivers
@@ -208,7 +198,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 100.0,
       visible: false,
-      includeInSemantics: true,
     );
 
     firstVisible = children[1];
@@ -224,7 +213,6 @@ void main() {
       paintExtent: 50.0,
       cacheExtent: 100.0,
       visible: true,
-      includeInSemantics: true,
     );
 
     // scroll down 10 slivers
@@ -244,7 +232,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 0.0,
       visible: false,
-      includeInSemantics: false,
     );
 
     firstInPreCache = children[7];
@@ -260,7 +247,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 50.0,
       visible: false,
-      includeInSemantics: true,
     );
 
     final RenderSliver lastInPreCache = children[9];
@@ -276,7 +262,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 100.0,
       visible: false,
-      includeInSemantics: true,
     );
 
     firstVisible = children[10];
@@ -292,7 +277,6 @@ void main() {
       paintExtent: 100.0,
       cacheExtent: 100.0,
       visible: true,
-      includeInSemantics: true,
     );
   });
 
@@ -328,7 +312,6 @@ void main() {
       paintExtent: 600.0,
       cacheExtent: 850.0,
       visible: true,
-      includeInSemantics: true,
     );
     expect(children.sublist(0, 9).every((RenderBox r) => r.attached), true);
     expect(children.sublist(9, 30).any((RenderBox r) => r.attached), false);
@@ -349,7 +332,6 @@ void main() {
       paintExtent: 600.0,
       cacheExtent: 900.0,
       visible: true,
-      includeInSemantics: true,
     );
     expect(children.sublist(0, 9).every((RenderBox r) => r.attached), true);
     expect(children.sublist(9, 30).any((RenderBox r) => r.attached), false);
@@ -371,7 +353,6 @@ void main() {
       paintExtent: 600.0,
       cacheExtent: 1100.0,
       visible: true,
-      includeInSemantics: true,
     );
 
     expect(children.sublist(0, 12).any((RenderBox r) => r.attached), false);
@@ -394,7 +375,6 @@ void main() {
       paintExtent: 600.0,
       cacheExtent: 850.0,
       visible: true,
-      includeInSemantics: true,
     );
     expect(children.sublist(0, 21).any((RenderBox r) => r.attached), false);
     expect(children.sublist(21, 30).every((RenderBox r) => r.attached), true);
@@ -432,7 +412,6 @@ void main() {
       paintExtent: 600.0,
       cacheExtent: 850.0,
       visible: true,
-      includeInSemantics: true,
     );
     expect(children.sublist(0, 9).every((RenderBox r) => r.attached), true);
     expect(children.sublist(9, 30).any((RenderBox r) => r.attached), false);
@@ -453,7 +432,6 @@ void main() {
       paintExtent: 600.0,
       cacheExtent: 900.0,
       visible: true,
-      includeInSemantics: true,
     );
     expect(children.sublist(0, 9).every((RenderBox r) => r.attached), true);
     expect(children.sublist(9, 30).any((RenderBox r) => r.attached), false);
@@ -475,7 +453,6 @@ void main() {
       paintExtent: 600.0,
       cacheExtent: 1100.0,
       visible: true,
-      includeInSemantics: true,
     );
 
     expect(children.sublist(0, 12).any((RenderBox r) => r.attached), false);
@@ -498,7 +475,6 @@ void main() {
       paintExtent: 600.0,
       cacheExtent: 850.0,
       visible: true,
-      includeInSemantics: true,
     );
     expect(children.sublist(0, 21).any((RenderBox r) => r.attached), false);
     expect(children.sublist(21, 30).every((RenderBox r) => r.attached), true);
@@ -536,7 +512,6 @@ void main() {
       paintExtent: 600.0,
       cacheExtent: 850.0,
       visible: true,
-      includeInSemantics: true,
     );
     expect(children.sublist(0, 18).every((RenderBox r) => r.attached), true);
     expect(children.sublist(18, 60).any((RenderBox r) => r.attached), false);
@@ -557,7 +532,6 @@ void main() {
       paintExtent: 600.0,
       cacheExtent: 900.0,
       visible: true,
-      includeInSemantics: true,
     );
     expect(children.sublist(0, 18).every((RenderBox r) => r.attached), true);
     expect(children.sublist(18, 60).any((RenderBox r) => r.attached), false);
@@ -579,7 +553,6 @@ void main() {
       paintExtent: 600.0,
       cacheExtent: 1100.0,
       visible: true,
-      includeInSemantics: true,
     );
 
     expect(children.sublist(0, 24).any((RenderBox r) => r.attached), false);
@@ -602,7 +575,6 @@ void main() {
       paintExtent: 600.0,
       cacheExtent: 850.0,
       visible: true,
-      includeInSemantics: true,
     );
     expect(children.sublist(0, 42).any((RenderBox r) => r.attached), false);
     expect(children.sublist(42, 60).every((RenderBox r) => r.attached), true);
@@ -647,7 +619,6 @@ void main() {
       paintExtent: 200.0,
       cacheExtent: 200.0,
       visible: true,
-      includeInSemantics: true,
     );
     RenderSliverToBoxAdapter firstVisiblePadded = adapters[0];
     expectSliverConstraints(
@@ -662,7 +633,6 @@ void main() {
       paintExtent: 100.0,
       cacheExtent: 100.0,
       visible: true,
-      includeInSemantics: true,
     );
 
     RenderSliverPadding lastVisiblePadding = paddings[2];
@@ -678,7 +648,6 @@ void main() {
       paintExtent: 200.0,
       cacheExtent: 200.0,
       visible: true,
-      includeInSemantics: true,
     );
     RenderSliverToBoxAdapter lastVisiblePadded = adapters[2];
     expectSliverConstraints(
@@ -693,7 +662,6 @@ void main() {
       paintExtent: 100.0,
       cacheExtent: 100.0,
       visible: true,
-      includeInSemantics: true,
     );
 
     final RenderSliverPadding firstCachePadding = paddings[3];
@@ -709,7 +677,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 200.0,
       visible: false,
-      includeInSemantics: true,
     );
     final RenderSliverToBoxAdapter firstCachePadded = adapters[3];
     expectSliverConstraints(
@@ -724,7 +691,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 100.0,
       visible: false,
-      includeInSemantics: true,
     );
 
     final RenderSliverPadding lastCachePadding = paddings[4];
@@ -740,7 +706,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 50.0,
       visible: false,
-      includeInSemantics: true,
     );
     final RenderSliverToBoxAdapter lastCachePadded = adapters[4];
     expectSliverConstraints(
@@ -755,7 +720,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 0.0,
       visible: false,
-      includeInSemantics: false,
     );
 
     // scroll first padding off screen
@@ -775,7 +739,6 @@ void main() {
       paintExtent: 150.0,
       cacheExtent: 200.0,
       visible: true,
-      includeInSemantics: true,
     );
     firstVisiblePadded = adapters[0];
     expectSliverConstraints(
@@ -790,7 +753,6 @@ void main() {
       paintExtent: 100.0,
       cacheExtent: 100.0,
       visible: true,
-      includeInSemantics: true,
     );
 
     // scroll to the end
@@ -811,7 +773,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 0.0,
       visible: false,
-      includeInSemantics: false,
     );
     final RenderSliverToBoxAdapter firstPadded = adapters[0];
     expectSliverConstraints(
@@ -826,7 +787,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 0.0,
       visible: false,
-      includeInSemantics: false,
     );
 
     final RenderSliverPadding firstPreCachePadding = paddings[25];
@@ -842,7 +802,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 50.0,
       visible: false,
-      includeInSemantics: true,
     );
     final RenderSliverToBoxAdapter firstPreCachePadded = adapters[25];
     expectSliverConstraints(
@@ -857,7 +816,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 0.0,
       visible: false,
-      includeInSemantics: false,
     );
 
     final RenderSliverPadding lastPreCachePadding = paddings[26];
@@ -873,7 +831,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 200.0,
       visible: false,
-      includeInSemantics: true,
     );
     final RenderSliverToBoxAdapter lastPreCachePadded = adapters[26];
     expectSliverConstraints(
@@ -888,7 +845,6 @@ void main() {
       paintExtent: 0.0,
       cacheExtent: 100.0,
       visible: false,
-      includeInSemantics: true,
     );
 
     lastVisiblePadding = paddings[29];
@@ -904,7 +860,6 @@ void main() {
       paintExtent: 200.0,
       cacheExtent: 200.0,
       visible: true,
-      includeInSemantics: true,
     );
     lastVisiblePadded = adapters[29];
     expectSliverConstraints(
@@ -919,7 +874,6 @@ void main() {
       paintExtent: 100.0,
       cacheExtent: 100.0,
       visible: true,
-      includeInSemantics: true,
     );
   });
 }
@@ -931,11 +885,10 @@ void expectSliverConstraints({RenderSliver sliver, double cacheOrigin, double re
   expect(sliver.constraints.scrollOffset, scrollOffset, reason: 'scrollOffset');
 }
 
-void expectSliverGeometry({RenderSliver sliver, double paintExtent, double cacheExtent, bool visible, bool includeInSemantics}) {
+void expectSliverGeometry({RenderSliver sliver, double paintExtent, double cacheExtent, bool visible}) {
   expect(sliver.geometry.paintExtent, paintExtent, reason: 'paintExtent');
   expect(sliver.geometry.cacheExtent, cacheExtent, reason: 'cacheExtent');
   expect(sliver.geometry.visible, visible, reason: 'visible');
-  expect(sliver.geometry.includeInSemantics, includeInSemantics, reason: 'includeInSemantics');
 }
 
 class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {

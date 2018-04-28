@@ -89,7 +89,7 @@ void main() {
         ' │ │   viewportMainAxisExtent: 600.0, remainingCacheExtent: 850.0\n'
         ' │ │   cacheOrigin: 0.0 )\n'
         ' │ │ geometry: SliverGeometry(scrollExtent: 400.0, paintExtent: 400.0,\n'
-        ' │ │   maxPaintExtent: 400.0, cacheExtent: 400.0, includedInSemantics)\n'
+        ' │ │   maxPaintExtent: 400.0, cacheExtent: 400.0)\n'
         ' │ │\n'
         ' │ └─child: RenderSizedBox#00000 NEEDS-PAINT\n'
         ' │     parentData: paintOffset=Offset(0.0, -0.0) (can use size)\n'
@@ -106,7 +106,7 @@ void main() {
         ' │ │   cacheOrigin: 0.0 )\n'
         ' │ │ geometry: SliverGeometry(scrollExtent: 400.0, paintExtent: 200.0,\n'
         ' │ │   maxPaintExtent: 400.0, hasVisualOverflow: true, cacheExtent:\n'
-        ' │ │   400.0, includedInSemantics)\n'
+        ' │ │   400.0)\n'
         ' │ │\n'
         ' │ └─child: RenderSizedBox#00000 NEEDS-PAINT\n'
         ' │     parentData: paintOffset=Offset(0.0, -0.0) (can use size)\n'
@@ -123,7 +123,7 @@ void main() {
         ' │ │   cacheOrigin: 0.0 )\n'
         ' │ │ geometry: SliverGeometry(scrollExtent: 400.0, hidden,\n'
         ' │ │   maxPaintExtent: 400.0, hasVisualOverflow: true, cacheExtent:\n'
-        ' │ │   50.0, includedInSemantics)\n'
+        ' │ │   50.0)\n'
         ' │ │\n'
         ' │ └─child: RenderSizedBox#00000 NEEDS-PAINT\n'
         ' │     parentData: paintOffset=Offset(0.0, -0.0) (can use size)\n'
@@ -691,7 +691,7 @@ void main() {
         visible: true,
       ).toString(),
       equals(
-        'SliverGeometry(scrollExtent: 100.0, paintExtent: 50.0, layoutExtent: 20.0, maxPaintExtent: 0.0, cacheExtent: 20.0, includedInSemantics)',
+        'SliverGeometry(scrollExtent: 100.0, paintExtent: 50.0, layoutExtent: 20.0, maxPaintExtent: 0.0, cacheExtent: 20.0)',
       ),
     );
     expect(
@@ -701,7 +701,7 @@ void main() {
         layoutExtent: 20.0,
       ).toString(),
       equals(
-        'SliverGeometry(scrollExtent: 100.0, hidden, layoutExtent: 20.0, maxPaintExtent: 0.0, cacheExtent: 20.0, includedInSemantics)',
+        'SliverGeometry(scrollExtent: 100.0, hidden, layoutExtent: 20.0, maxPaintExtent: 0.0, cacheExtent: 20.0)',
       ),
     );
   });

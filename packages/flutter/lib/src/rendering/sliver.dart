@@ -498,7 +498,6 @@ class SliverGeometry extends Diagnosticable {
     this.hasVisualOverflow: false,
     this.scrollOffsetCorrection,
     double cacheExtent,
-    bool includeInSemantics,
   }) : assert(scrollExtent != null),
        assert(paintExtent != null),
        assert(paintOrigin != null),
@@ -508,8 +507,7 @@ class SliverGeometry extends Diagnosticable {
        layoutExtent = layoutExtent ?? paintExtent,
        hitTestExtent = hitTestExtent ?? paintExtent,
        cacheExtent = cacheExtent ?? layoutExtent ?? paintExtent,
-       visible = visible ?? paintExtent > 0.0,
-       includeInSemantics = includeInSemantics ?? (paintExtent > 0.0 || (cacheExtent ?? layoutExtent ?? paintExtent) > 0.0);
+       visible = visible ?? paintExtent > 0.0;
 
   /// A sliver that occupies no space at all.
   static const SliverGeometry zero = const SliverGeometry();
@@ -658,14 +656,6 @@ class SliverGeometry extends Diagnosticable {
   ///  * [RenderViewport.cacheExtent] for a description of a viewport's cache area.
   final double cacheExtent;
 
-  /// Whether this sliver wants to contribute information to the semantics
-  /// tree.
-  ///
-  /// By default, all slivers that are [visible] or have a positive
-  /// [cacheExtent] will be included. [SemanticsNode]s derived from invisible
-  /// slivers will be marked as hidden.
-  final bool includeInSemantics;
-
   /// Asserts that this geometry is internally consistent.
   ///
   /// Does nothing if asserts are disabled. Always returns true.
@@ -738,7 +728,6 @@ class SliverGeometry extends Diagnosticable {
     properties.add(new DiagnosticsProperty<bool>('hasVisualOverflow', hasVisualOverflow, defaultValue: false));
     properties.add(new DoubleProperty('scrollOffsetCorrection', scrollOffsetCorrection, defaultValue: null));
     properties.add(new DoubleProperty('cacheExtent', cacheExtent, defaultValue: 0.0));
-    properties.add(new FlagProperty('includeInSemantics', value: includeInSemantics, ifTrue: 'includedInSemantics'));
   }
 }
 

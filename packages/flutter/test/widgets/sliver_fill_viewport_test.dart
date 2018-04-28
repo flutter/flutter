@@ -74,7 +74,7 @@ void main() {
         ' │   cacheOrigin: 0.0 )\n'
         ' │ geometry: SliverGeometry(scrollExtent: 12000.0, paintExtent:\n'
         ' │   600.0, maxPaintExtent: 12000.0, hasVisualOverflow: true,\n'
-        ' │   cacheExtent: 850.0, includedInSemantics)\n'
+        ' │   cacheExtent: 850.0)\n'
         ' │ currently live children: 0 to 1\n'
         ' │\n'
         ' ├─child with index 0: RenderRepaintBoundary#00000\n'
