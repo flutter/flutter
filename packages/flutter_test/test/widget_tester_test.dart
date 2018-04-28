@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -450,6 +451,49 @@ void main() {
     controller.duration = const Duration(seconds: 1);
     controller.forward();
     expect(await tester.pumpAndSettle(const Duration(milliseconds: 300)), 5); // 0, 300, 600, 900, 1200ms
+  });
+
+  group('runAsync', () {
+    testWidgets('works with no async calls', (WidgetTester tester) async {
+      String value;
+      await tester.runAsync(() async {
+        value = '123';
+      });
+      expect(value, '123');
+    });
+
+    testWidgets('works with real async calls', (WidgetTester tester) async {
+      final StringBuffer buf = new StringBuffer('1');
+      await tester.runAsync(() async {
+        buf.write('2');
+        await Directory.current.stat();
+        buf.write('3');
+      });
+      buf.write('4');
+      expect(buf.toString(), '1234');
+    });
+
+    testWidgets('propagates return values', (WidgetTester tester) async {
+      final String value = await tester.runAsync<String>(() async {
+        return '123';
+      });
+      expect(value, '123');
+    });
+
+    testWidgets('reports errors via framework', (WidgetTester tester) async {
+      final String value = await tester.runAsync<String>(() async {
+        throw new ArgumentError();
+      });
+      expect(value, isNull);
+      expect(tester.takeException(), isArgumentError);
+    });
+
+    testWidgets('disallows re-entry', (WidgetTester tester) async {
+      final Completer<void> completer = new Completer<void>();
+      tester.runAsync<void>(() => completer.future);
+      expect(() => tester.runAsync(() async {}), throwsA(const isInstanceOf<TestFailure>()));
+      completer.complete();
+    });
   });
 }
 
