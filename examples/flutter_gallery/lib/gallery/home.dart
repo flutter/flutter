@@ -105,7 +105,7 @@ class _CategoriesPage extends StatelessWidget {
     final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3;
 
     return new SingleChildScrollView(
-      key: new PageStorageKey<String>('categories'),
+      key: const PageStorageKey<String>('categories'),
       child: new LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           final double columnWidth = constraints.biggest.width / columnCount.toDouble();
@@ -223,7 +223,7 @@ class _DemosPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new KeyedSubtree(
-      key: new ValueKey<String>('GalleryDemoList'), // So the tests can find this ListView
+      key: const ValueKey<String>('GalleryDemoList'), // So the tests can find this ListView
       child: new ListView(
         key: new PageStorageKey<String>(category.name),
         padding: const EdgeInsets.only(top: 8.0),

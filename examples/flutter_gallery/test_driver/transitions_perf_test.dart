@@ -134,7 +134,7 @@ Future<Null> runDemos(List<String> demos, FlutterDriver driver) async {
       await driver.tap(find.byTooltip('Back'));
       await driver.tap(find.text(demoCategory));
       // Scroll back to the top
-      await driver.scroll(demoList, 0.0, 10000, const Duration(milliseconds: 100));
+      await driver.scroll(demoList, 0.0, 10000.0, const Duration(milliseconds: 100));
     }
     currentDemoCategory = demoCategory;
 
