@@ -26,7 +26,7 @@ void main() {
     await tester.pump(); // triggers a frame
 
     // Show the options page
-    await tester.tap(find.byTooltip('Show options page'));
+    await tester.tap(find.byTooltip('Toggle options page'));
     await tester.pumpAndSettle();
 
     MaterialApp app = find.byType(MaterialApp).evaluate().first.widget;
@@ -89,7 +89,7 @@ void main() {
     expect(hasFeedback, true);
 
     // Hide the options page
-    await tester.tap(find.byTooltip('Show options page'));
+    await tester.tap(find.byTooltip('Toggle options page'));
     await tester.pumpAndSettle();
   });
 }
