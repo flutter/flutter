@@ -10,10 +10,9 @@ import 'dart:typed_data';
 /// 
 /// The future returned will forward all errors emitted by [response].
 Future<Uint8List> consolidateHttpClientResponseBytes(HttpClientResponse response) {
-  // dart:io guarantees that [contentLength] is -1 if the the header is missing or
-  // invalid.  This could still happen if a mocked response object does not fully
-  // implement the interface.
-  assert(response.contentLength != null);
+  // response.contentLength is not trustworthy when GZIP is involved
+  // or other cases where an intermediate transformer has been applied
+  // to the stream.
   final Completer<Uint8List> completer = new Completer<Uint8List>.sync();
 
   final List<List<int>> chunks = <List<int>>[];
