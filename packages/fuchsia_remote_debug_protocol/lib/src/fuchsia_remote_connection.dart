@@ -113,13 +113,13 @@ class FuchsiaRemoteConnection {
   /// those objects) will subsequently have its connection closed as well, so
   /// behavior for them will be undefined.
   Future<Null> stop() async {
-    for (PortForwarder fp in _forwardedVmServicePorts) {
+    for (PortForwarder pf in _forwardedVmServicePorts) {
       // Closes VM service first to ensure that the connection is closed cleanly
       // on the target before shutting down the forwarding itself.
-      final DartVm vmService = _dartVmCache[fp.port];
-      _dartVmCache[fp.port] = null;
+      final DartVm vmService = _dartVmCache[pf.port];
+      _dartVmCache[pf.port] = null;
       await vmService?.stop();
-      await fp.stop();
+      await pf.stop();
     }
     _dartVmCache.clear();
     _forwardedVmServicePorts.clear();
@@ -127,18 +127,46 @@ class FuchsiaRemoteConnection {
 
   /// Returns a list of [FlutterView] objects.
   ///
-  /// This is run across all connected DartVM connections that this class is
+  /// This is run across all connected Dart VM connections that this class is
   /// managing.
   Future<List<FlutterView>> getFlutterViews() async {
-    final List<FlutterView> views = <FlutterView>[];
     if (_forwardedVmServicePorts.isEmpty) {
-      return views;
+      return <FlutterView>[];
     }
-    for (PortForwarder fp in _forwardedVmServicePorts) {
-      final DartVm vmService = await _getDartVm(fp.port);
-      views.addAll(await vmService.getAllFlutterViews());
+    final List<List<FlutterView>> flutterViewLists =
+        await _invokeForAllVms<List<FlutterView>>((DartVm vmService) async {
+      return await vmService.getAllFlutterViews();
+    });
+    final List<FlutterView> results = flutterViewLists.fold<List<FlutterView>>(
+        <FlutterView>[], (List<FlutterView> acc, List<FlutterView> element) {
+      acc.addAll(element);
+      return acc;
+    });
+    return new List<FlutterView>.unmodifiable(results);
+  }
+
+  // Calls all Dart VM's, returning a list of results.
+  //
+  // A side effect of this function is that internally tracked port forwarding
+  // will be updated in the event that ports are found to be broken/stale: they
+  // will be shut down and removed from tracking.
+  Future<List<E>> _invokeForAllVms<E>(
+      Future<E> vmFunction(DartVm vmService)) async {
+    final List<E> result = <E>[];
+    final Set<int> stalePorts = new Set<int>();
+    for (PortForwarder pf in _forwardedVmServicePorts) {
+      try {
+        final DartVm service = await _getDartVm(pf.port);
+        result.add(await vmFunction(service));
+      } on HttpException {
+        await pf.stop();
+        stalePorts.add(pf.port);
+      }
     }
-    return new List<FlutterView>.unmodifiable(views);
+    // Clean up the ports after finished with iterating.
+    _forwardedVmServicePorts
+        .removeWhere((PortForwarder pf) => stalePorts.contains(pf.port));
+    return result;
   }
 
   Future<DartVm> _getDartVm(int port) async {
@@ -172,6 +200,16 @@ class FuchsiaRemoteConnection {
           _sshCommandRunner.interface,
           _sshCommandRunner.sshConfigPath);
     })));
+
+    // Filters out stale ports after connecting. Ignores results.
+    await _invokeForAllVms<Map<String, dynamic>>(
+      (DartVm vmService) async {
+        final Map<String, dynamic> res =
+            await vmService.invokeRpc('getVersion');
+        _log.fine('DartVM version check result: $res');
+        return res;
+      },
+    );
   }
 
   /// Gets the open Dart VM service ports on a remote Fuchsia device.
@@ -291,13 +329,14 @@ class _SshPortForwarder implements PortForwarder {
     ]);
     _log.fine("_SshPortForwarder running '${command.join(' ')}'");
     final Process process = await _processManager.start(command);
+    final _SshPortForwarder result = new _SshPortForwarder._(address,
+        remotePort, localSocket, process, interface, sshConfigPath, isIpV6);
     process.exitCode.then((int c) {
       _log.fine("'${command.join(' ')}' exited with exit code $c");
     });
-    _log.fine(
-        'Set up forwarding from ${localSocket.port} to $address port $remotePort');
-    return new _SshPortForwarder._(address, remotePort, localSocket, process,
-        interface, sshConfigPath, isIpV6);
+    _log.fine('Set up forwarding from ${localSocket.port} '
+        'to $address port $remotePort');
+    return result;
   }
 
   /// Kills the SSH forwarding command, then to ensure no ports are forwarded,
@@ -328,8 +367,8 @@ class _SshPortForwarder implements PortForwarder {
         'Shutting down SSH forwarding with command: ${command.join(' ')}');
     final ProcessResult result = await _processManager.run(command);
     if (result.exitCode != 0) {
-      _log.warning(
-          'Command failed:\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
+      _log.warning('Command failed:\nstdout: ${result.stdout}'
+          '\nstderr: ${result.stderr}');
     }
     _localSocket.close();
   }

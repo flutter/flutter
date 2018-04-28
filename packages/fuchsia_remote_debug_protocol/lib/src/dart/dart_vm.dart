@@ -10,7 +10,7 @@ import 'package:web_socket_channel/io.dart';
 
 import '../common/logging.dart';
 
-const Duration _kConnectTimeout = const Duration(seconds: 30);
+const Duration _kConnectTimeout = const Duration(seconds: 9);
 
 const Duration _kReconnectAttemptInterval = const Duration(seconds: 3);
 
@@ -41,7 +41,14 @@ Future<json_rpc.Peer> _waitAndConnect(Uri uri) async {
       socket = await WebSocket.connect(uri.toString());
       peer = new json_rpc.Peer(new IOWebSocketChannel(socket).cast())..listen();
       return peer;
+    } on HttpException catch (e) {
+      // This is a fine warning as this most likely means the port is stale.
+      _log.fine('$e: ${e.message}');
+      await peer?.close();
+      await socket?.close();
+      rethrow;
     } catch (e) {
+      // Other unknown errors will be handled with reconnects.
       await peer?.close();
       await socket?.close();
       if (timer.elapsed < _kConnectTimeout) {
