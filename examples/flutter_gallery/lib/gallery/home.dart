@@ -105,6 +105,7 @@ class _CategoriesPage extends StatelessWidget {
     final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3;
 
     return new SingleChildScrollView(
+      key: new PageStorageKey<String>('categories'),
       child: new LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           final double columnWidth = constraints.biggest.width / columnCount.toDouble();
@@ -221,12 +222,15 @@ class _DemosPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ListView(
-      key: const ValueKey<String>('GalleryDemoList'), // So tests can find it.
-      padding: const EdgeInsets.only(top: 8.0),
-      children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
-        return new _DemoItem(demo: demo);
-      }).toList(),
+    return new KeyedSubtree(
+      key: new ValueKey<String>('GalleryDemoList'), // So the tests can find this ListView
+      child: new ListView(
+        key: new PageStorageKey<String>(category.name),
+        padding: const EdgeInsets.only(top: 8.0),
+        children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
+          return new _DemoItem(demo: demo);
+        }).toList(),
+      ),
     );
   }
 }
@@ -250,8 +254,7 @@ class GalleryHome extends StatefulWidget {
 class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStateMixin {
   static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   AnimationController _controller;
-  bool _showDemosPage = false;
-  Widget _demosPage = const SizedBox();
+  GalleryDemoCategory _category;
 
   @override
   void initState() {
@@ -284,30 +287,34 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
           backLayer: widget.optionsPage,
           frontAction: new AnimatedSwitcher(
             duration: _kFrontLayerSwitchDuration,
-            child: !_showDemosPage
+            child: _category == null
               ? const _FlutterLogo()
               : new IconButton(
                 icon: const BackButtonIcon(),
+                tooltip: 'Back',
                 onPressed: () {
                   setState(() {
-                    _showDemosPage = false;
-                    _demosPage = _demosPage;
+                    _category = null;
                   });
                 },
               ),
           ),
-          frontTitle: const Text('Flutter gallery'),
+          frontTitle:  new AnimatedSwitcher(
+            duration: _kFrontLayerSwitchDuration,
+            child: _category == null
+              ? const Text('Flutter gallery')
+              : new Text(_category.name),
+          ),
           frontHeading: new Container(height: 24.0),
           frontLayer: new AnimatedSwitcher(
             duration: _kFrontLayerSwitchDuration,
-            child: _showDemosPage
-              ? _demosPage
+            child: _category != null
+              ? new _DemosPage(_category)
               : new _CategoriesPage(
                 categories: kAllGalleryDemoCategories,
                 onCategoryTap: (GalleryDemoCategory category) {
-                  _demosPage = new _DemosPage(category);
                   setState(() {
-                    _showDemosPage = true;
+                    _category = category;
                   });
                 },
               ),
