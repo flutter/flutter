@@ -286,6 +286,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// If [callback] completes with an error, the error will be caught by the
   /// Flutter framework and made available via [takeException], and this method
   /// will return a future that completes will `null`.
+  ///
+  /// This method is guarded against reentrancy; callers of this method are
+  /// required to wait for the returned future to complete before calling this
+  /// method again. Attempts to do otherwise will result in a [TestFailure]
+  /// error being thrown.
   Future<T> runAsync<T>(Future<T> callback()) => binding.runAsync(callback);
 
   /// Whether there are any any transient callbacks scheduled.

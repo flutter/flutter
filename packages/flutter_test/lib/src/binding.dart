@@ -193,7 +193,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// If [callback] completes with an error, the error will be caught by the
   /// Flutter framework and made available via [takeException], and the future
-  /// returned by this method will complete will `null`.
+  /// returned by this method will complete with `null`.
+  ///
+  /// This method is guarded against reentrancy; callers of this method are
+  /// required to wait for the returned future to complete before calling this
+  /// method again. Attempts to do otherwise will result in a [TestFailure]
+  /// error being thrown.
   Future<T> runAsync<T>(Future<T> callback());
 
   /// Artificially calls dispatchLocaleChanged on the Widget binding,
@@ -603,8 +608,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       if (_pendingAsyncTasks == null)
         return true;
       throw new test_package.TestFailure(
-          'runAsync() was called, then before its future completed, it\n'
-          'was called again. You must wait for the first returned future\n'
+          'Reentrant call to runAsync() denied.\n'
+          'runAsync() was called, then before its future completed, it '
+          'was called again. You must wait for the first returned future '
           'to complete before calling runAsync() again.'
       );
     }());
@@ -840,6 +846,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   Completer<Null> _pendingFrame;
   bool _expectingFrame = false;
   bool _viewNeedsPaint = false;
+  bool _runningAsyncTasks = false;
 
   /// Whether to have [pump] with a duration only pump a single frame
   /// (as would happen in a normal test environment using
@@ -1012,6 +1019,18 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<T> runAsync<T>(Future<T> callback()) async {
+    assert(() {
+      if (!_runningAsyncTasks)
+        return true;
+      throw new test_package.TestFailure(
+          'Reentrant call to runAsync() denied.\n'
+          'runAsync() was called, then before its future completed, it '
+          'was called again. You must wait for the first returned future '
+          'to complete before calling runAsync() again.'
+      );
+    }());
+
+    _runningAsyncTasks = true;
     try {
       return await callback();
     } catch (error, stack) {
@@ -1022,6 +1041,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         context: 'while running async test code',
       ));
       return null;
+    } finally {
+      _runningAsyncTasks = false;
     }
   }
 
