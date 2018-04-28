@@ -2476,23 +2476,8 @@ class RenderRepaintBoundary extends RenderProxyBox {
   /// `RepaintBoundary` to a PNG:
   ///
   /// ```dart
-  /// class PngApp extends StatelessWidget {
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return new MaterialApp(
-  ///       title: 'Flutter Demo',
-  ///       theme: new ThemeData(
-  ///         primarySwatch: Colors.blue,
-  ///       ),
-  ///       home: new PngHome(title: 'PNG Demo'),
-  ///     );
-  ///   }
-  /// }
-  ///
   /// class PngHome extends StatefulWidget {
-  ///   PngHome({Key key, this.title}) : super(key: key);
-  ///
-  ///   final String title;
+  ///   PngHome({Key key}) : super(key: key);
   ///
   ///   @override
   ///   _PngHomeState createState() => new _PngHomeState();
@@ -2511,23 +2496,13 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return Scaffold(
-  ///       appBar: new AppBar(
-  ///         title: new Text(widget.title),
-  ///       ),
-  ///       body: RepaintBoundary(
-  ///         key: globalKey,
-  ///         child: const Center(
-  ///           child: Text(
-  ///             'Hello World',
-  ///             textDirection: TextDirection.ltr,
-  ///           ),
+  ///     return RepaintBoundary(
+  ///       key: globalKey,
+  ///       child: Center(
+  ///         child: FlatButton(
+  ///           child: Text('Hello World', textDirection: TextDirection.ltr),
+  ///           onPressed: _capturePng,
   ///         ),
-  ///       ),
-  ///       floatingActionButton: FloatingActionButton(
-  ///         child: Icon(Icons.picture_in_picture),
-  ///         tooltip: 'Capture PNG',
-  ///         onPressed: _capturePng,
   ///       ),
   ///     );
   ///   }
