@@ -151,6 +151,7 @@ void showAboutDialog({
   String applicationLegalese,
   List<Widget> children,
 }) {
+  assert(context != null);
   showDialog<void>(
     context: context,
     builder: (BuildContext context) {
@@ -185,6 +186,7 @@ void showLicensePage({
   Widget applicationIcon,
   String applicationLegalese
 }) {
+  assert(context != null);
   Navigator.push(context, new MaterialPageRoute<void>(
     builder: (BuildContext context) => new LicensePage(
       applicationName: applicationName,
