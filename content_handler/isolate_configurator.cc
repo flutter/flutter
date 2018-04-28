@@ -17,7 +17,8 @@ namespace flutter {
 IsolateConfigurator::IsolateConfigurator(
     const UniqueFDIONS& fdio_ns,
     fidl::InterfaceHandle<views_v1::ViewContainer> view_container,
-    component::ApplicationEnvironmentPtr application_environment,
+    fidl::InterfaceHandle<component::ApplicationEnvironment>
+        application_environment,
     fidl::InterfaceRequest<component::ServiceProvider>
         outgoing_services_request)
     : fdio_ns_(fdio_ns),
@@ -51,7 +52,7 @@ void IsolateConfigurator::OfferServiceProvider(
 }
 
 void IsolateConfigurator::BindFuchsia() {
-  fuchsia::dart::Initialize(application_environment_.Unbind(),
+  fuchsia::dart::Initialize(std::move(application_environment_),
                             std::move(outgoing_services_request_));
 }
 

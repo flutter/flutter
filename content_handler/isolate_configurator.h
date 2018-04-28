@@ -22,7 +22,8 @@ class IsolateConfigurator final : mozart::NativesDelegate {
   IsolateConfigurator(
       const UniqueFDIONS& fdio_ns,
       fidl::InterfaceHandle<views_v1::ViewContainer> view_container,
-      component::ApplicationEnvironmentPtr application_environment,
+      fidl::InterfaceHandle<component::ApplicationEnvironment>
+          application_environment,
       fidl::InterfaceRequest<component::ServiceProvider>
           outgoing_services_request);
 
@@ -36,7 +37,8 @@ class IsolateConfigurator final : mozart::NativesDelegate {
   bool used_ = false;
   const UniqueFDIONS& fdio_ns_;
   fidl::InterfaceHandle<views_v1::ViewContainer> view_container_;
-  component::ApplicationEnvironmentPtr application_environment_;
+  fidl::InterfaceHandle<component::ApplicationEnvironment>
+      application_environment_;
   fidl::InterfaceRequest<component::ServiceProvider> outgoing_services_request_;
 
   // |mozart::NativesDelegate|
