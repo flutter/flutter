@@ -273,9 +273,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   /// Runs a [callback] that performs real asynchronous work.
   ///
-  /// This is intended for callers who need to call asynchronous methods, where
-  /// the methods may spawn isolates or OS threads and thus cannot be executed
-  /// synchronously by manually flushing microtasks.
+  /// This is intended for callers who need to call asynchronous methods where
+  /// the methods spawn isolates or OS threads and thus cannot be executed
+  /// synchronously by calling [pump].
   ///
   /// If callers were to run these types of asynchronous tasks directly in
   /// their test methods, they run the possibility of encountering deadlocks.
@@ -287,10 +287,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Flutter framework and made available via [takeException], and this method
   /// will return a future that completes will `null`.
   ///
-  /// This method is guarded against reentrancy; callers of this method are
-  /// required to wait for the returned future to complete before calling this
-  /// method again. Attempts to do otherwise will result in a [TestFailure]
-  /// error being thrown.
+  /// Re-entrant calls to this method are not allowed; callers of this method
+  /// are required to wait for the returned future to complete before calling
+  /// this method again. Attempts to do otherwise will result in a
+  /// [TestFailure] error being thrown.
   Future<T> runAsync<T>(Future<T> callback()) => binding.runAsync(callback);
 
   /// Whether there are any any transient callbacks scheduled.
