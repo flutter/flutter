@@ -135,6 +135,10 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
 /// See [test_package.expect] for details. This is a variant of that function
 /// that additionally verifies that there are no asynchronous APIs
 /// that have not yet resolved.
+///
+/// See also:
+///
+///  * [expectLater] for use with asynchronous matchers.
 void expect(dynamic actual, dynamic matcher, {
   String reason,
   dynamic skip, // true or a String
@@ -156,6 +160,23 @@ void expectSync(dynamic actual, dynamic matcher, {
   String reason,
 }) {
   test_package.expect(actual, matcher, reason: reason);
+}
+
+/// Just like [expect], but returns a [Future] that completes when the matcher
+/// has finished matching.
+///
+/// See [test_package.expectLater] for details.
+///
+/// If the matcher fails asynchronously, that failure is piped to the returned
+/// future where it can be handled by user code. If it is not handled by user
+/// code, the test will fail.
+Future<void> expectLater(dynamic actual, dynamic matcher, {
+  String reason,
+  dynamic skip, // true or a String
+}) {
+  return TestAsyncUtils.guard(() async {
+    await test_package.expectLater(actual, matcher, reason: reason, skip: skip);
+  });
 }
 
 /// Class that programmatically interacts with widgets and the test environment.
