@@ -617,9 +617,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
     return Zone.root.run(() {
       _pendingAsyncTasks = new Completer<void>();
-      return callback().then<T>((T value) {
-        return value;
-      }).catchError((dynamic exception, StackTrace stack) {
+      return callback().catchError((dynamic exception, StackTrace stack) {
         FlutterError.reportError(new FlutterErrorDetails(
           exception: exception,
           stack: stack,
