@@ -9,7 +9,6 @@ import 'dart:convert' show json;
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -67,29 +66,6 @@ class _FakeGenSnapshot implements GenSnapshot {
       fs.file(filePath).writeAsString(fileContent);
     });
     return 0;
-  }
-}
-
-class _FakeKernelCompiler implements KernelCompiler {
-  CompilerOutput output;
-
-  @override
-  Future<CompilerOutput> compile({
-    String sdkRoot,
-    String mainPath,
-    String outputFilePath,
-    String depFilePath,
-    bool linkPlatformKernelIn: false,
-    bool aot: false,
-    List<String> entryPointsJsonFiles,
-    bool trackWidgetCreation: false,
-    List<String> extraFrontEndOptions,
-    String incrementalCompilerByteStorePath,
-    String packagesPath,
-    List<String> fileSystemRoots,
-    String fileSystemScheme,
-  }) async {
-    return output;
   }
 }
 
@@ -606,7 +582,6 @@ void main() {
     String skyEnginePath;
 
     _FakeGenSnapshot genSnapshot;
-    _FakeKernelCompiler kernelCompiler;
     MemoryFileSystem fs;
     Snapshotter snapshotter;
     MockArtifacts mockArtifacts;
@@ -630,7 +605,6 @@ void main() {
       fs.file(fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')).createSync();
 
       genSnapshot = new _FakeGenSnapshot();
-      kernelCompiler = new _FakeKernelCompiler();
       snapshotter = new Snapshotter();
       mockArtifacts = new MockArtifacts();
       mockXcode = new MockXcode();
@@ -648,18 +622,16 @@ void main() {
       Artifacts: () => mockArtifacts,
       FileSystem: () => fs,
       GenSnapshot: () => genSnapshot,
-      KernelCompiler: () => kernelCompiler,
       Xcode: () => mockXcode,
       Xxd: () => mockXxd,
     };
 
     testUsingContext('builds iOS debug AOT snapshot', () async {
-      fs.file('main.dart').writeAsStringSync('void main() {}');
+      fs.file('main.dill').writeAsStringSync('binary magic');
 
       final String outputPath = fs.path.join('build', 'foo');
       fs.directory(outputPath).createSync(recursive: true);
 
-      kernelCompiler.output = const CompilerOutput('main.dill', 0);
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'vm_snapshot_data'): '',
         fs.path.join(outputPath, 'vm_snapshot_instr'): '',
@@ -672,7 +644,7 @@ void main() {
       final int genSnapshotExitCode = await snapshotter.buildAotSnapshot(
         platform: TargetPlatform.ios,
         buildMode: BuildMode.debug,
-        mainPath: 'main.dart',
+        mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
         preferSharedLibrary: false,
@@ -701,12 +673,11 @@ void main() {
     }, overrides: contextOverrides);
 
     testUsingContext('builds iOS profile AOT snapshot', () async {
-      fs.file('main.dart').writeAsStringSync('void main() {}');
+      fs.file('main.dill').writeAsStringSync('binary magic');
 
       final String outputPath = fs.path.join('build', 'foo');
       fs.directory(outputPath).createSync(recursive: true);
 
-      kernelCompiler.output = const CompilerOutput('main.dill', 0);
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
         fs.path.join(outputPath, 'snapshot.d'): '',
@@ -715,7 +686,7 @@ void main() {
       final int genSnapshotExitCode = await snapshotter.buildAotSnapshot(
         platform: TargetPlatform.ios,
         buildMode: BuildMode.profile,
-        mainPath: 'main.dart',
+        mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
         preferSharedLibrary: false,
@@ -746,12 +717,11 @@ void main() {
     }, overrides: contextOverrides);
 
     testUsingContext('builds iOS release AOT snapshot', () async {
-      fs.file('main.dart').writeAsStringSync('void main() {}');
+      fs.file('main.dill').writeAsStringSync('binary magic');
 
       final String outputPath = fs.path.join('build', 'foo');
       fs.directory(outputPath).createSync(recursive: true);
 
-      kernelCompiler.output = const CompilerOutput('main.dill', 0);
       genSnapshot.outputs = <String, String>{
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
         fs.path.join(outputPath, 'snapshot.d'): '',
@@ -760,7 +730,7 @@ void main() {
       final int genSnapshotExitCode = await snapshotter.buildAotSnapshot(
         platform: TargetPlatform.ios,
         buildMode: BuildMode.release,
-        mainPath: 'main.dart',
+        mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
         preferSharedLibrary: false,

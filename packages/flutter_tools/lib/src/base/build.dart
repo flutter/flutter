@@ -207,6 +207,52 @@ class Snapshotter {
     return exitCode;
   }
 
+  /// Compiles a Dart file to kernel.
+  ///
+  /// Returns the output kernel file path, or null on failure.
+  Future<String> compileKernel({
+    @required TargetPlatform platform,
+    @required BuildMode buildMode,
+    @required String mainPath,
+    @required String outputPath,
+    List<String> extraFrontEndOptions: const <String>[],
+  }) async {
+    final Directory outputDir = fs.directory(outputPath);
+    outputDir.createSync(recursive: true);
+
+    printTrace('Compiling Dart to kernel: $mainPath');
+    final bool aot = !_isInterpreted(platform, buildMode);
+    final List<String> entryPointsJsonFiles = <String>[];
+    if (aot) {
+      entryPointsJsonFiles.addAll(<String>[
+        artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode),
+        artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode),
+      ]);
+    }
+
+    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
+      printTrace('Extra front-end options: $extraFrontEndOptions');
+
+    final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
+    final CompilerOutput compilerOutput = await kernelCompiler.compile(
+      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      mainPath: mainPath,
+      outputFilePath: fs.path.join(outputPath, 'app.dill'),
+      depFilePath: depfilePath,
+      extraFrontEndOptions: extraFrontEndOptions,
+      linkPlatformKernelIn: true,
+      aot: aot,
+      entryPointsJsonFiles: entryPointsJsonFiles,
+      trackWidgetCreation: false,
+    );
+
+    // Write path to frontend_server, since things need to be re-generated when that changes.
+    final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
+    await fs.directory(outputPath).childFile('frontend_server.d').writeAsString('frontend_server.d: $frontendPath\n');
+
+    return compilerOutput?.outputFilename;
+  }
+
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
   Future<int> buildAotSnapshot({
     @required TargetPlatform platform,
@@ -216,7 +262,6 @@ class Snapshotter {
     @required String outputPath,
     @required bool previewDart2,
     @required bool preferSharedLibrary,
-    List<String> extraFrontEndOptions: const <String>[],
     List<String> extraGenSnapshotOptions: const <String>[],
   }) async {
     if (!(platform == TargetPlatform.android_arm ||
@@ -228,6 +273,7 @@ class Snapshotter {
 
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
+
     final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
     final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
     final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
@@ -250,15 +296,6 @@ class Snapshotter {
     final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
     assert(ioEntryPoints != null);
 
-    final bool interpreter = platform == TargetPlatform.ios && buildMode == BuildMode.debug;
-    final List<String> entryPointsJsonFiles = <String>[];
-    if (previewDart2 && !interpreter) {
-      entryPointsJsonFiles.addAll(<String>[
-        artifacts.getArtifactPath(Artifact.entryPointsJson, platform, buildMode),
-        artifacts.getArtifactPath(Artifact.entryPointsExtraJson, platform, buildMode),
-      ]);
-    }
-
     final PackageMap packageMap = new PackageMap(packagesPath);
     final String packageMapError = packageMap.checkValid();
     if (packageMapError != null) {
@@ -277,8 +314,6 @@ class Snapshotter {
       vmServicePath,
       mainPath,
     ];
-
-    inputPaths.addAll(entryPointsJsonFiles);
 
     final Set<String> outputPaths = new Set<String>();
 
@@ -325,14 +360,12 @@ class Snapshotter {
       '--dependencies=$depfilePath',
     ];
 
-    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
-      printTrace('Extra front-end options: $extraFrontEndOptions');
-
     if ((extraGenSnapshotOptions != null) && extraGenSnapshotOptions.isNotEmpty) {
       printTrace('Extra gen-snapshot options: $extraGenSnapshotOptions');
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
     }
 
+    final bool interpreter = _isInterpreted(platform, buildMode);
     if (!interpreter) {
       genSnapshotArgs.add('--embedder_entry_points_manifest=$vmEntryPoints');
       genSnapshotArgs.add('--embedder_entry_points_manifest=$ioEntryPoints');
@@ -347,7 +380,6 @@ class Snapshotter {
     final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
     final String kVmSnapshotDataO = fs.path.join(outputDir.path, '$kVmSnapshotData.o');
     final String kIsolateSnapshotDataO = fs.path.join(outputDir.path, '$kIsolateSnapshotData.o');
-    final String kApplicationKernelPath = fs.path.join(getBuildDirectory(), 'app.dill');
 
     switch (platform) {
       case TargetPlatform.android_arm:
@@ -408,36 +440,13 @@ class Snapshotter {
       return 0;
     }
 
-    String entrypointPath = mainPath;
     if (previewDart2) {
-      final CompilerOutput compilerOutput = await kernelCompiler.compile(
-        sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        mainPath: mainPath,
-        outputFilePath: kApplicationKernelPath,
-        depFilePath: depfilePath,
-        extraFrontEndOptions: extraFrontEndOptions,
-        linkPlatformKernelIn: true,
-        aot: !interpreter,
-        entryPointsJsonFiles: entryPointsJsonFiles,
-        trackWidgetCreation: false,
-      );
-      entrypointPath = compilerOutput?.outputFilename;
-      if (entrypointPath == null) {
-        printError('Compiler terminated unexpectedly.');
-        return -5;
-      }
-      // Write path to frontend_server, since things need to be re-generated when
-      // that changes.
-      await outputDir.childFile('frontend_server.d')
-          .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
-
       genSnapshotArgs.addAll(<String>[
         '--reify-generic-functions',
         '--strong',
       ]);
     }
-
-    genSnapshotArgs.add(entrypointPath);
+    genSnapshotArgs.add(mainPath);
 
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: new SnapshotType(platform, buildMode),
@@ -515,6 +524,11 @@ class Snapshotter {
     // Compute and record build fingerprint.
     await _writeFingerprint(snapshotType, outputPaths, depfilePath, mainPath, fingerprintPath);
     return 0;
+  }
+
+  /// Returns true if the specified platform and build mode require running in interpreted mode.
+  bool _isInterpreted(TargetPlatform platform, BuildMode buildMode) {
+    return platform == TargetPlatform.ios && buildMode == BuildMode.debug;
   }
 
   String _getPackagePath(PackageMap packageMap, String package) {
