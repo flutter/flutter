@@ -54,29 +54,50 @@ class BuildAotCommand extends BuildSubCommand {
   @override
   Future<Null> runCommand() async {
     await super.runCommand();
+
     final String targetPlatform = argResults['target-platform'];
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null)
       throwToolExit('Unknown platform: $targetPlatform');
 
-    final String typeName = artifacts.getEngineType(platform, getBuildMode());
+    final BuildMode buildMode = getBuildMode();
+
     Status status;
     if (!argResults['quiet']) {
+      final String typeName = artifacts.getEngineType(platform, buildMode);
       status = logger.startProgress('Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...',
           expectSlowOperation: true);
     }
     final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
     try {
+      final bool previewDart2 = argResults['preview-dart-2'];
+      String mainPath = findMainDartFile(targetFile);
       final Snapshotter snapshotter = new Snapshotter();
+
+      // Compile to kernel, if Dart 2.
+      if (previewDart2) {
+        mainPath = await snapshotter.compileKernel(
+          platform: platform,
+          buildMode: buildMode,
+          mainPath: mainPath,
+          outputPath: outputPath,
+          extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
+        );
+        if (mainPath == null) {
+          printError('Compiler terminated unexpectedly.');
+          return;
+        }
+      }
+
+      // Build AOT snapshot.
       final int snapshotExitCode = await snapshotter.buildAotSnapshot(
         platform: platform,
-        buildMode: getBuildMode(),
-        mainPath: findMainDartFile(targetFile),
+        buildMode: buildMode,
+        mainPath: mainPath,
         packagesPath: PackageMap.globalPackagesPath,
         outputPath: outputPath,
-        previewDart2: argResults['preview-dart-2'],
+        previewDart2: previewDart2,
         preferSharedLibrary: argResults['prefer-shared-library'],
-        extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
         extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       );
       if (snapshotExitCode != 0) {
