@@ -270,6 +270,41 @@ class Color {
     );
   }
 
+  /// Combine the foreground color as a transparent color over top
+  /// of a background color, and return the resulting combined color.
+  ///
+  /// This uses standard alpha blending ("SRC over DST") rules to produce a
+  /// blended color from two colors. This can be used as a performance
+  /// enhancement when trying to avoid needless alpha blending compositing
+  /// operations for two things that are solid colors with the same shape, but
+  /// overlay each other: instead, just paint one with the combined color.
+  static Color alphaBlend(Color foreground, Color background) {
+    final int alpha = foreground.alpha;
+    if (alpha == 0x00) { // Foreground completely transparent.
+      return background;
+    }
+    final int invAlpha = 0xff - alpha;
+    int backAlpha = background.alpha;
+    if (backAlpha == 0xff) { // Opaque background case
+      return new Color.fromARGB(
+        0xff,
+        (alpha * foreground.red + invAlpha * background.red) ~/ 0xff,
+        (alpha * foreground.green + invAlpha * background.green) ~/ 0xff,
+        (alpha * foreground.blue + invAlpha * background.blue) ~/ 0xff,
+      );
+    } else { // General case
+      backAlpha = (backAlpha * invAlpha) ~/ 0xff;
+      final int outAlpha = alpha + backAlpha;
+      assert(outAlpha != 0x00);
+      return new Color.fromARGB(
+        outAlpha,
+        (foreground.red * alpha + background.red * backAlpha) ~/ outAlpha,
+        (foreground.green * alpha + background.green * backAlpha) ~/ outAlpha,
+        (foreground.blue * alpha + background.blue * backAlpha) ~/ outAlpha,
+      );
+    }
+  }
+
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
@@ -316,7 +351,7 @@ class Color {
 /// The horizontal and vertical bars in these images show the red, green, and
 /// blue channels with varying opacity levels, then all three color channels
 /// together with those same varying opacity levels, then all three color
-/// chanels set to zero with those varying opacity levels, then two bars showing
+/// channels set to zero with those varying opacity levels, then two bars showing
 /// a red/green/blue repeating gradient, the first with full opacity and the
 /// second with partial opacity, and finally a bar with the three color channels
 /// set to zero but the opacity varying in a repeating gradient.
@@ -513,7 +548,7 @@ enum BlendMode {
   ///
   /// See also:
   ///
-  ///  * [screen], which does a similar computation but inversed.
+  ///  * [screen], which does a similar computation but inverted.
   ///  * [overlay], which combines [modulate] and [screen] to favor the
   ///    destination image.
   ///  * [hardLight], which combines [modulate] and [screen] to favor the
@@ -525,13 +560,13 @@ enum BlendMode {
   /// Multiply the inverse of the components of the source and destination
   /// images, and inverse the result.
   ///
-  /// Inversing the components means that a fully saturated channel (opaque
+  /// Inverting the components means that a fully saturated channel (opaque
   /// white) is treated as the value 0.0, and values normally treated as 0.0
   /// (black, transparent) are treated as 1.0.
   ///
   /// This is essentially the same as [modulate] blend mode, but with the values
-  /// of the colors inversed before the multiplication and the result being
-  /// inversed back before rendering.
+  /// of the colors inverted before the multiplication and the result being
+  /// inverted back before rendering.
   ///
   /// This can only result in the same or lighter colors (multiplying by black,
   /// 1.0, results in no change; multiplying by white, 0.0, results in white).
@@ -544,7 +579,7 @@ enum BlendMode {
   ///
   /// See also:
   ///
-  ///  * [modulate], which does a similar computation but without inversing the
+  ///  * [modulate], which does a similar computation but without inverting the
   ///    values.
   ///  * [overlay], which combines [modulate] and [screen] to favor the
   ///    destination image.
@@ -558,9 +593,9 @@ enum BlendMode {
   /// Specifically, if the destination value is smaller, this multiplies it with
   /// the source value, whereas is the source value is smaller, it multiplies
   /// the inverse of the source value with the inverse of the destination value,
-  /// then inverses the result.
+  /// then inverts the result.
   ///
-  /// Inversing the components means that a fully saturated channel (opaque
+  /// Inverting the components means that a fully saturated channel (opaque
   /// white) is treated as the value 0.0, and values normally treated as 0.0
   /// (black, transparent) are treated as 1.0.
   ///
@@ -594,7 +629,7 @@ enum BlendMode {
 
   /// Divide the destination by the inverse of the source.
   ///
-  /// Inversing the components means that a fully saturated channel (opaque
+  /// Inverting the components means that a fully saturated channel (opaque
   /// white) is treated as the value 0.0, and values normally treated as 0.0
   /// (black, transparent) are treated as 1.0.
   ///
@@ -603,7 +638,7 @@ enum BlendMode {
 
   /// Divide the inverse of the destination by the the source, and inverse the result.
   ///
-  /// Inversing the components means that a fully saturated channel (opaque
+  /// Inverting the components means that a fully saturated channel (opaque
   /// white) is treated as the value 0.0, and values normally treated as 0.0
   /// (black, transparent) are treated as 1.0.
   ///
@@ -616,9 +651,9 @@ enum BlendMode {
   /// Specifically, if the source value is smaller, this multiplies it with the
   /// destination value, whereas is the destination value is smaller, it
   /// multiplies the inverse of the destination value with the inverse of the
-  /// source value, then inverses the result.
+  /// source value, then inverts the result.
   ///
-  /// Inversing the components means that a fully saturated channel (opaque
+  /// Inverting the components means that a fully saturated channel (opaque
   /// white) is treated as the value 0.0, and values normally treated as 0.0
   /// (black, transparent) are treated as 1.0.
   ///
@@ -635,7 +670,7 @@ enum BlendMode {
   /// Use [colorDodge] for source values below 0.5 and [colorBurn] for source
   /// values above 0.5.
   ///
-  /// This results in a similal but softer effect than [overlay].
+  /// This results in a similar but softer effect than [overlay].
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode_softLight.png)
   ///
@@ -646,7 +681,7 @@ enum BlendMode {
 
   /// Subtract the smaller value from the bigger value for each channel.
   ///
-  /// Compositing black has no effect; compositing white inverses the colors of
+  /// Compositing black has no effect; compositing white inverts the colors of
   /// the other image.
   ///
   /// The opacity of the output image is computed in the same way as for
@@ -660,7 +695,7 @@ enum BlendMode {
   /// Subtract double the product of the two images from the sum of the two
   /// images.
   ///
-  /// Compositing black has no effect; compositing white inverses the colors of
+  /// Compositing black has no effect; compositing white inverts the colors of
   /// the other image.
   ///
   /// The opacity of the output image is computed in the same way as for
@@ -1428,7 +1463,7 @@ enum PathOperation {
   /// 
   /// For example, if the two paths are overlapping circles of equal diameter
   /// but differing centers, the result would be a figure-eight like shape 
-  /// matching the outter boundaries of both circles.
+  /// matching the outer boundaries of both circles.
   union,
   /// Create a new path that is the exclusive-or of the two paths, leaving 
   /// everything but the overlapping pieces of the path.
@@ -1448,7 +1483,7 @@ enum PathOperation {
   /// See also:
   ///
   ///  * [difference], which is the same but subtracting the second path
-  ///    from the frist.
+  ///    from the first.
   reverseDifference,
 }
 
@@ -1522,7 +1557,7 @@ class Path extends NativeFieldWrapperClass2 {
   /// (x2,y2).
   void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3) native 'Path_cubicTo';
 
-  /// Adds a cubcic bezier segment that curves from the current point
+  /// Adds a cubic bezier segment that curves from the current point
   /// to the point at the offset (x3,y3) from the current point, using
   /// the control points at the offsets (x1,y1) and (x2,y2) from the
   /// current point.
@@ -2503,7 +2538,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// ## Using saveLayer with clips
   ///
-  /// When a rectanglular clip operation (from [clipRect]) is not axis-aligned
+  /// When a rectangular clip operation (from [clipRect]) is not axis-aligned
   /// with the raster buffer, or when the clip operation is not rectalinear (e.g.
   /// because it is a rounded rectangle clip created by [clipRRect] or an
   /// arbitrarily complicated path clip created by [clipPath]), the edge of the
@@ -3227,8 +3262,8 @@ typedef String _Callbacker<T>(_Callback<T> callback);
 /// Converts a method that receives a value-returning callback to a method that
 /// returns a Future.
 ///
-/// Return a [String] to cause an [Exception] to be sychnorously thrown with that
-/// string as a message.
+/// Return a [String] to cause an [Exception] to be synchronously thrown with
+/// that string as a message.
 ///
 /// If the callback is called with null, the future completes with an error.
 ///

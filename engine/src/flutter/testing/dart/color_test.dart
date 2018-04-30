@@ -12,7 +12,7 @@ class NotAColor extends Color {
 
 void main() {
   test('color accessors should work', () {
-    Color foo = const Color(0x12345678);
+    final Color foo = const Color(0x12345678);
     expect(foo.alpha, equals(0x12));
     expect(foo.red, equals(0x34));
     expect(foo.green, equals(0x56));
@@ -20,16 +20,16 @@ void main() {
   });
 
   test('paint set to black', () {
-    Color c = const Color(0x00000000);
-    Paint p = new Paint();
+    final Color c = const Color(0x00000000);
+    final Paint p = new Paint();
     p.color = c;
     expect(c.toString(), equals('Color(0x00000000)'));
   });
 
   test('color created with out of bounds value', () {
     try {
-      Color c = const Color(0x100 << 24);
-      Paint p = new Paint();
+      final Color c = const Color(0x100 << 24);
+      final Paint p = new Paint();
       p.color = c;
     } catch (e) {
       expect(e != null, equals(true));
@@ -38,8 +38,8 @@ void main() {
 
   test('color created with wildly out of bounds value', () {
     try {
-      Color c = const Color(1 << 1000000);
-      Paint p = new Paint();
+      final Color c = const Color(1 << 1000000);
+      final Paint p = new Paint();
       p.color = c;
     } catch (e) {
       expect(e != null, equals(true));
@@ -75,6 +75,49 @@ void main() {
     expect(
       Color.lerp(const Color(0x00000000), const Color(0xFFFFFFFF), 1.1),
       const Color(0xFFFFFFFF),
+    );
+  });
+
+  test('Color.alphaBlend', () {
+    expect(
+      Color.alphaBlend(const Color(0x00000000), const Color(0x00000000)),
+      const Color(0x00000000),
+    );
+    expect(
+      Color.alphaBlend(const Color(0x00000000), const Color(0xFFFFFFFF)),
+      const Color(0xFFFFFFFF),
+    );
+    expect(
+      Color.alphaBlend(const Color(0xFFFFFFFF), const Color(0x00000000)),
+      const Color(0xFFFFFFFF),
+    );
+    expect(
+      Color.alphaBlend(const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)),
+      const Color(0xFFFFFFFF),
+    );
+    expect(
+      Color.alphaBlend(const Color(0x80FFFFFF), const Color(0xFF000000)),
+      const Color(0xFF808080),
+    );
+    expect(
+      Color.alphaBlend(const Color(0x80808080), const Color(0xFFFFFFFF)),
+      const Color(0xFFBFBFBF),
+    );
+    expect(
+      Color.alphaBlend(const Color(0x80808080), const Color(0xFF000000)),
+      const Color(0xFF404040),
+    );
+    expect(
+      Color.alphaBlend(const Color(0x01020304), const Color(0xFF000000)),
+      const Color(0xFF000000),
+    );
+    expect(
+      Color.alphaBlend(const Color(0x11223344), const Color(0xFF000000)),
+      const Color(0xFF020304),
+    );
+    expect(
+      Color.alphaBlend(const Color(0x11223344), const Color(0x80000000)),
+      const Color(0x88040608),
     );
   });
 
