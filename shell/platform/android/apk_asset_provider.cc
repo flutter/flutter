@@ -10,7 +10,8 @@ namespace blink {
 APKAssetProvider::APKAssetProvider(JNIEnv* env,
                                    jobject jassetManager,
                                    std::string directory)
-    : directory_(std::move(directory)) {
+    : java_asset_manager_(env, jassetManager),
+      directory_(std::move(directory)) {
   assetManager_ = AAssetManager_fromJava(env, jassetManager);
 }
 

@@ -9,6 +9,7 @@
 #include <jni.h>
 
 #include "flutter/assets/asset_resolver.h"
+#include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "lib/fxl/memory/ref_counted.h"
 
 namespace blink {
@@ -21,6 +22,7 @@ class APKAssetProvider final : public AssetResolver {
   virtual ~APKAssetProvider();
 
  private:
+  fml::jni::ScopedJavaGlobalRef<jobject> java_asset_manager_;
   AAssetManager* assetManager_;
   const std::string directory_;
 
