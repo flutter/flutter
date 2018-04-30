@@ -89,6 +89,25 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
   }
 }
 
+/// An event for a semantic announcement of a tooltip.
+/// 
+/// This is only used by Android to announce tooltip values.
+class TooltipSemanticsEvent extends SemanticsEvent {
+
+  /// Constructs an event that triggers a tooltip announcement by the platform.
+  const TooltipSemanticsEvent(this.message) : super('tooltip');
+
+  /// The text content of the tooltip.
+  final String message;
+
+  @override
+  Map<String, dynamic> getDataMap() {
+    return <String, dynamic>{
+      'message': message,
+    };
+  }
+}
+
 /// An event which triggers long press semantic feedback.
 /// 
 /// Only used on Android.

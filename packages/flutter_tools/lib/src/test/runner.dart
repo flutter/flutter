@@ -31,6 +31,7 @@ Future<int> runTests(
     bool machine: false,
     bool previewDart2: false,
     bool trackWidgetCreation: false,
+    bool updateGoldens: false,
     TestWatcher watcher,
     }) async {
   if (trackWidgetCreation && !previewDart2) {
@@ -87,6 +88,7 @@ Future<int> runTests(
     serverType: serverType,
     previewDart2: previewDart2,
     trackWidgetCreation: trackWidgetCreation,
+    updateGoldens: updateGoldens,
   );
 
   // Make the global packages path absolute.

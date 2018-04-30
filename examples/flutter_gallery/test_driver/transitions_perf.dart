@@ -6,13 +6,13 @@ import 'dart:async';
 import 'dart:convert' show JsonEncoder;
 
 import 'package:flutter_driver/driver_extension.dart';
-import 'package:flutter_gallery/gallery/item.dart';
+import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:flutter_gallery/main.dart' as app;
 
 Future<String> _handleMessages(String message) async {
   assert(message == 'demoNames');
   return const JsonEncoder.withIndent('  ').convert(
-    kAllGalleryItems.map((GalleryItem item) => item.title).toList(),
+    kAllGalleryDemos.map((GalleryDemo demo) => '${demo.title}@${demo.category.name}').toList(),
   );
 }
 

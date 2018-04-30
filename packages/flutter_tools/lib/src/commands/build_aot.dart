@@ -26,7 +26,6 @@ class BuildAotCommand extends BuildSubCommand {
         defaultsTo: 'android-arm',
         allowed: <String>['android-arm', 'android-arm64', 'ios']
       )
-      ..addFlag('interpreter')
       ..addFlag('quiet', defaultsTo: false)
       ..addFlag('preview-dart-2',
         defaultsTo: true,
@@ -55,28 +54,59 @@ class BuildAotCommand extends BuildSubCommand {
   @override
   Future<Null> runCommand() async {
     await super.runCommand();
+
     final String targetPlatform = argResults['target-platform'];
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null)
       throwToolExit('Unknown platform: $targetPlatform');
 
-    final String typeName = artifacts.getEngineType(platform, getBuildMode());
+    final BuildMode buildMode = getBuildMode();
+
     Status status;
     if (!argResults['quiet']) {
+      final String typeName = artifacts.getEngineType(platform, buildMode);
       status = logger.startProgress('Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...',
           expectSlowOperation: true);
     }
-    final String outputPath = await buildAotSnapshot(
-      findMainDartFile(targetFile),
-      platform,
-      getBuildMode(),
-      outputPath: argResults['output-dir'],
-      interpreter: argResults['interpreter'],
-      previewDart2: argResults['preview-dart-2'],
-      extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
-      extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
-      preferSharedLibrary: argResults['prefer-shared-library'],
-    );
+    final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
+    try {
+      final bool previewDart2 = argResults['preview-dart-2'];
+      String mainPath = findMainDartFile(targetFile);
+      final Snapshotter snapshotter = new Snapshotter();
+
+      // Compile to kernel, if Dart 2.
+      if (previewDart2) {
+        mainPath = await snapshotter.compileKernel(
+          platform: platform,
+          buildMode: buildMode,
+          mainPath: mainPath,
+          outputPath: outputPath,
+          extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
+        );
+        if (mainPath == null) {
+          printError('Compiler terminated unexpectedly.');
+          return;
+        }
+      }
+
+      // Build AOT snapshot.
+      final int snapshotExitCode = await snapshotter.buildAotSnapshot(
+        platform: platform,
+        buildMode: buildMode,
+        mainPath: mainPath,
+        packagesPath: PackageMap.globalPackagesPath,
+        outputPath: outputPath,
+        previewDart2: previewDart2,
+        preferSharedLibrary: argResults['prefer-shared-library'],
+        extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
+      );
+      if (snapshotExitCode != 0) {
+        printError('Snapshotting exited with non-zero exit code: $snapshotExitCode');
+      }
+    } on String catch (error) {
+      // Catch the String exceptions thrown from the `runCheckedSync` methods below.
+      printError(error);
+    }
     status?.stop();
 
     if (outputPath == null)
@@ -88,46 +118,5 @@ class BuildAotCommand extends BuildSubCommand {
     } else {
       printStatus(builtMessage);
     }
-  }
-}
-
-/// Build an AOT snapshot. Return null (and log to `printError`) if the method
-/// fails.
-Future<String> buildAotSnapshot(
-  String mainPath,
-  TargetPlatform platform,
-  BuildMode buildMode, {
-  String outputPath,
-  bool interpreter: false,
-  bool previewDart2: false,
-  List<String> extraFrontEndOptions,
-  List<String> extraGenSnapshotOptions,
-  bool preferSharedLibrary: false,
-}) async {
-  outputPath ??= getAotBuildDirectory();
-  try {
-    final Snapshotter snapshotter = new Snapshotter();
-    final int snapshotExitCode = await snapshotter.buildAotSnapshot(
-      platform: platform,
-      buildMode: buildMode,
-      mainPath: mainPath,
-      depfilePath: 'depFilePathGoesHere',
-      packagesPath: PackageMap.globalPackagesPath,
-      outputPath: outputPath,
-      interpreter: interpreter,
-      previewDart2: previewDart2,
-      preferSharedLibrary: preferSharedLibrary,
-      extraFrontEndOptions: extraFrontEndOptions,
-      extraGenSnapshotOptions: extraGenSnapshotOptions,
-    );
-    if (snapshotExitCode != 0) {
-      printError('Snapshotting exited with non-zero exit code: $snapshotExitCode');
-      return null;
-    }
-    return outputPath;
-  } on String catch (error) {
-    // Catch the String exceptions thrown from the `runCheckedSync` methods below.
-    printError(error);
-    return null;
   }
 }

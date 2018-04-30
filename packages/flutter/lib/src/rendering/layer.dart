@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show ImageFilter, Picture, SceneBuilder;
+import 'dart:ui' as ui show Image, ImageFilter, Picture, Scene, SceneBuilder;
 import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
@@ -514,6 +515,41 @@ class OffsetLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(new DiagnosticsProperty<Offset>('offset', offset));
+  }
+
+  /// Capture an image of the current state of this layer and its children.
+  ///
+  /// The returned [ui.Image] has uncompressed raw RGBA bytes, in the
+  /// dimensions [logicalSize] multiplied by the [pixelRatio].
+  ///
+  /// The [pixelRatio] describes the scale between the logical pixels and the
+  /// size of the output image. It is independent of the
+  /// [window.devicePixelRatio] for the device, so specifying 1.0 (the default)
+  /// will give you a 1:1 mapping between logical pixels and the output pixels
+  /// in the image.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderRepaintBoundary.toImage] for a similar API at the render object level.
+  ///  * [dart:ui.Scene.toImage] for more information about the image returned.
+  Future<ui.Image> toImage(Size logicalSize, {double pixelRatio: 1.0}) async {
+    assert(pixelRatio != null);
+    final ui.SceneBuilder builder = new ui.SceneBuilder();
+    final Matrix4 transform = new Matrix4.diagonal3Values(pixelRatio, pixelRatio, 1.0);
+    transform.translate(-offset.dx, -offset.dy, 0.0);
+    builder.pushTransform(transform.storage);
+    addToScene(builder, Offset.zero);
+    final ui.Scene scene = builder.build();
+    try {
+      // Size is rounded up to the next pixel to make sure we don't clip off
+      // anything.
+      return await scene.toImage(
+        (pixelRatio * logicalSize.width).ceil(),
+        (pixelRatio * logicalSize.height).ceil(),
+      );
+    } finally {
+      scene.dispose();
+    }
   }
 }
 

@@ -7,7 +7,7 @@ import 'dart:ui' show TextDirection;
 
 import 'package:flutter/services.dart' show SystemChannels;
 
-import 'semantics_event.dart' show AnnounceSemanticsEvent, LongPressSemanticsEvent, TapSemanticEvent;
+import 'semantics_event.dart' show AnnounceSemanticsEvent, TooltipSemanticsEvent, TapSemanticEvent, LongPressSemanticsEvent;
 
 
 /// Allows access to the platform's accessibility services.
@@ -32,9 +32,17 @@ class SemanticsService {
     await SystemChannels.accessibility.send(event.toMap());
   }
 
-   /// Send a semantic long-press event.
-   /// 
-   /// This is only used by Android.
+  /// Sends a semantic announcement of a tooltip.
+  /// 
+  /// This is only used by Android.
+  static Future<Null> tooltip(String message) async {
+    final TooltipSemanticsEvent event = new TooltipSemanticsEvent(message);
+    await SystemChannels.accessibility.send(event.toMap());
+  }
+
+  /// Send a semantic long-press event.
+  /// 
+  /// This is only used by Android.
   static Future<Null> longPress() async {
     const LongPressSemanticsEvent event = const LongPressSemanticsEvent();
     await SystemChannels.accessibility.send(event.toMap());
