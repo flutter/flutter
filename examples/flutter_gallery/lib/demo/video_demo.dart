@@ -182,13 +182,13 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
               return;
             }
             if (controller.value.isPlaying) {
-              imageFadeAnimation = new FadeAnimation(
-                child: new Icon(Icons.pause, size: 100.0),
+              imageFadeAnimation = const FadeAnimation(
+                child: const Icon(Icons.pause, size: 100.0),
               );
               controller.pause();
             } else {
-              imageFadeAnimation = new FadeAnimation(
-                child: new Icon(Icons.play_arrow, size: 100.0),
+              imageFadeAnimation = const FadeAnimation(
+                child: const Icon(Icons.play_arrow, size: 100.0),
               );
               controller.play();
             }
@@ -419,7 +419,7 @@ class _VideoDemoState extends State<VideoDemo>
             )
           : const Center(
               child: const Text(
-                'The video demo is not supported on the iOS Simulator.',
+                'Video playback not supported on the iOS Simulator.',
               ),
             ),
     );

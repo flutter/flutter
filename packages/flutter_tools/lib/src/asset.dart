@@ -39,7 +39,7 @@ abstract class AssetBundle {
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
     String manifestPath: _ManifestAssetBundle.defaultManifestPath,
-    String workingDirPath,
+    String assetDirPath,
     String packagesPath,
     bool includeDefaultFonts: true,
     bool reportLicensedPackages: false
@@ -87,12 +87,12 @@ class _ManifestAssetBundle implements AssetBundle {
   @override
   Future<int> build({
     String manifestPath: defaultManifestPath,
-    String workingDirPath,
+    String assetDirPath,
     String packagesPath,
     bool includeDefaultFonts: true,
     bool reportLicensedPackages: false
   }) async {
-    workingDirPath ??= getAssetBuildDirectory();
+    assetDirPath ??= getAssetBuildDirectory();
     packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
     FlutterManifest flutterManifest;
     try {
@@ -124,7 +124,7 @@ class _ManifestAssetBundle implements AssetBundle {
       packageMap,
       flutterManifest,
       assetBasePath,
-      excludeDirs: <String>[workingDirPath, getBuildDirectory()]
+      excludeDirs: <String>[assetDirPath, getBuildDirectory()]
     );
 
     if (assetVariants == null)
@@ -204,9 +204,7 @@ class _ManifestAssetBundle implements AssetBundle {
 
     entries[_kAssetManifestJson] = _createAssetManifest(assetVariants);
 
-
-    if (fonts.isNotEmpty)
-      entries[_kFontManifestJson] = new DevFSStringContent(json.encode(fonts));
+    entries[_kFontManifestJson] = new DevFSStringContent(json.encode(fonts));
 
     // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
     entries[_kLICENSE] = await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);

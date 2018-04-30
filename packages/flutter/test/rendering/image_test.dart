@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Image;
+import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui show Image, ImageByteFormat;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +17,11 @@ class SquareImage implements ui.Image {
 
   @override
   int get height => 10;
+
+  @override
+  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
+    throw new UnsupportedError('Cannot encode test image');
+  }
 
   @override
   String toString() => '[$width\u00D7$height]';
@@ -31,6 +38,11 @@ class WideImage implements ui.Image {
   int get height => 10;
 
   @override
+  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
+    throw new UnsupportedError('Cannot encode test image');
+  }
+
+  @override
   String toString() => '[$width\u00D7$height]';
 
   @override
@@ -43,6 +55,11 @@ class TallImage implements ui.Image {
 
   @override
   int get height => 20;
+
+  @override
+  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
+    throw new UnsupportedError('Cannot encode test image');
+  }
 
   @override
   String toString() => '[$width\u00D7$height]';

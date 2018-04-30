@@ -342,14 +342,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
           },
         ),
       );
-    }).toList()
-    ..add(const SizedBox(height: 8.0))
-    ..add(
-      new Align(
-        alignment: AlignmentDirectional.centerStart,
-        child: new BackButton(color: Colors.white.withOpacity(0.5))
-      ),
-    );
+    }).toList();
 
     return new Container(
       key: _backdropKey,
@@ -388,16 +381,18 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     return new Scaffold(
       appBar: new AppBar(
         elevation: 0.0,
-        leading: new IconButton(
-          onPressed: _toggleBackdropPanelVisibility,
-          icon: new AnimatedIcon(
-            icon: AnimatedIcons.close_menu,
-            progress: _controller.view,
-          ),
-        ),
         title: new BackdropTitle(
           listenable: _controller.view,
         ),
+        actions: <Widget>[
+          new IconButton(
+            onPressed: _toggleBackdropPanelVisibility,
+            icon: new AnimatedIcon(
+              icon: AnimatedIcons.close_menu,
+              progress: _controller.view,
+            ),
+          ),
+        ],
       ),
       body: new LayoutBuilder(
         builder: _buildStack,

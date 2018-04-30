@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -284,4 +286,40 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Drawer contains route semantics flags', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Builder(
+          builder: (BuildContext context) {
+            return new Scaffold(
+              key: scaffoldKey,
+              drawer: const Drawer(),
+              body: new Container(),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the drawer.
+    scaffoldKey.currentState.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(semantics, includesNodeWith(
+      label: 'Navigation menu',
+      flags: <SemanticsFlag>[
+        SemanticsFlag.scopesRoute,
+        SemanticsFlag.namesRoute,
+      ],
+    ));
+
+    semantics.dispose();
+  });
 }
+
+

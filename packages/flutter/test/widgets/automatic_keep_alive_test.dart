@@ -443,4 +443,58 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(5)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0)), findsNothing);
   });
+
+  testWidgets('AutomaticKeepAlive with keepAlive set to true before initState', (WidgetTester tester) async {
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new ListView.builder(
+        itemCount: 50,
+        itemBuilder: (BuildContext context, int index){
+          if (index == 0){
+            return const _AlwaysKeepAlive(
+              key: const GlobalObjectKey<_AlwaysKeepAliveState>(0),
+            );
+          }
+          return new Container(
+            height: 44.0,
+            child: new Text('FooBar $index'),
+          );
+        },
+      ),
+    ));
+
+    expect(find.text('keep me alive'), findsOneWidget);
+    expect(find.text('FooBar 1'), findsOneWidget);
+    expect(find.text('FooBar 2'), findsOneWidget);
+
+    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0)), findsOneWidget);
+    await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0)); // move to bottom
+    await tester.pump();
+    expect(find.byKey(const GlobalObjectKey<_AlwaysKeepAliveState>(0)), findsOneWidget);
+
+    expect(find.text('keep me alive'), findsOneWidget);
+    expect(find.text('FooBar 1'), findsNothing);
+    expect(find.text('FooBar 2'), findsNothing);
+  });
+}
+
+class _AlwaysKeepAlive extends StatefulWidget {
+  const _AlwaysKeepAlive({Key key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => new _AlwaysKeepAliveState();
+}
+
+class _AlwaysKeepAliveState extends State<_AlwaysKeepAlive> with AutomaticKeepAliveClientMixin<_AlwaysKeepAlive> {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return new Container(
+      height: 48.0,
+      child: const Text('keep me alive'),
+    );
+  }
 }

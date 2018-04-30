@@ -19,7 +19,7 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../flx.dart' as flx;
+import '../bundle.dart' as bundle;
 import '../globals.dart';
 import '../plugins.dart';
 import '../services.dart';
@@ -38,6 +38,8 @@ const PythonModule kPythonSix = const PythonModule('six');
 IMobileDevice get iMobileDevice => context[IMobileDevice];
 
 Xcode get xcode => context[Xcode];
+
+Xxd get xxd => context[Xxd];
 
 class PythonModule {
   const PythonModule(this.name);
@@ -100,6 +102,12 @@ class IMobileDevice {
   /// Captures a screenshot to the specified outputFile.
   Future<Null> takeScreenshot(File outputFile) {
     return runCheckedAsync(<String>['idevicescreenshot', outputFile.path]);
+  }
+}
+
+class Xxd {
+  Future<RunResult> run(List<String> args, {String workingDirectory}) {
+    return runCheckedAsync(<String>['xxd']..addAll(args), workingDirectory: workingDirectory);
   }
 }
 
@@ -175,12 +183,20 @@ class Xcode {
       return minorVersion >= kXcodeRequiredVersionMinor;
     return false;
   }
+
+  Future<RunResult> cc(List<String> args) {
+    return runCheckedAsync(<String>['xcrun', 'cc']..addAll(args));
+  }
+
+  Future<RunResult> clang(List<String> args) {
+    return runCheckedAsync(<String>['xcrun', 'clang']..addAll(args));
+  }
 }
 
 Future<XcodeBuildResult> buildXcodeProject({
   BuildableIOSApp app,
   BuildInfo buildInfo,
-  String target: flx.defaultMainPath,
+  String target: bundle.defaultMainPath,
   bool buildForDevice,
   bool codesign: true,
   bool usesTerminalUi: true,
@@ -299,28 +315,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
   }
 
-  final Status cleanStatus =
-      logger.startProgress('Running Xcode clean...', expectSlowOperation: true);
-  final RunResult cleanResult = await runAsync(
-    <String>[
-      '/usr/bin/env',
-      'xcrun',
-      'xcodebuild',
-      'clean',
-      '-configuration', configuration,
-    ],
-    workingDirectory: app.appDirectory,
-  );
-  cleanStatus.stop();
-  if (cleanResult.exitCode != 0) {
-    throwToolExit('Xcode failed to clean\n${cleanResult.stderr}');
-  }
-
   final List<String> buildCommands = <String>[
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
-    'build',
     '-configuration', configuration,
     'ONLY_ACTIVE_ARCH=YES',
   ];
@@ -516,7 +514,7 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   }
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      result.xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'].contains('com.example')) {
+      result.xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER']?.contains('com.example') == true) {
     printError('');
     printError('It appears that your application still contains the default signing identifier.');
     printError("Try replacing 'com.example' with your signing id in Xcode:");

@@ -42,8 +42,8 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
               ],
             ),
             new Column(
-              children: <Widget>[
-                new CupertinoSwitch(
+              children: const <Widget>[
+                const CupertinoSwitch(
                   value: true,
                   onChanged: null,
                 ),
@@ -53,8 +53,8 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
               ],
             ),
             new Column(
-              children: <Widget>[
-                new CupertinoSwitch(
+              children: const <Widget>[
+                const CupertinoSwitch(
                   value: false,
                   onChanged: null,
                 ),

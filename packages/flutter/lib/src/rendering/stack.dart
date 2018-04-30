@@ -480,6 +480,11 @@ class RenderStack extends RenderBox
     assert(_resolvedAlignment != null);
     _hasVisualOverflow = false;
     bool hasNonPositionedChildren = false;
+    if (childCount == 0) {
+      size = constraints.biggest;
+      assert(size.isFinite);
+      return;
+    }
 
     double width = constraints.minWidth;
     double height = constraints.minHeight;

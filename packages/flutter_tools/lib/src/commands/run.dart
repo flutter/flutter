@@ -190,13 +190,11 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<String> get usagePath async {
-    final String command = shouldUseHotMode() ? 'hotrun' : name;
+    final String command = await super.usagePath;
 
     if (devices == null)
       return command;
-
-    // Return 'run/ios'.
-    if (devices.length > 1)
+    else if (devices.length > 1)
       return '$command/all';
     else
       return '$command/${getNameForTargetPlatform(await devices[0].targetPlatform)}';

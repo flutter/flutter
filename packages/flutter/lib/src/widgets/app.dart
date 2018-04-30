@@ -602,7 +602,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     if (widget.onGenerateTitle != null) {
       title = new Builder(
         // This Builder exists to provide a context below the Localizations widget.
-        // The onGenerateCallback() can refer to Localizations via its context
+        // The onGenerateTitle callback can refer to Localizations via its context
         // parameter.
         builder: (BuildContext context) {
           final String title = widget.onGenerateTitle(context);

@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ImageFilter, Gradient;
+import 'dart:async';
+
+import 'dart:ui' as ui show ImageFilter, Gradient, Image;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -2038,10 +2040,8 @@ class RenderTransform extends RenderProxyBox {
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
     if (transformHitTests) {
-      Matrix4 inverse;
-      try {
-        inverse = new Matrix4.inverted(_effectiveTransform);
-      } on ArgumentError {
+      final Matrix4 inverse = Matrix4.tryInvert(_effectiveTransform);
+      if (inverse == null) {
         // We cannot invert the effective transform. That means the child
         // doesn't appear on screen and cannot be hit.
         return false;
@@ -2223,10 +2223,8 @@ class RenderFittedBox extends RenderProxyBox {
     if (size.isEmpty)
       return false;
     _updatePaintData();
-    Matrix4 inverse;
-    try {
-      inverse = new Matrix4.inverted(_transform);
-    } on ArgumentError {
+    final Matrix4 inverse = Matrix4.tryInvert(_transform);
+    if (inverse == null) {
       // We cannot invert the effective transform. That means the child
       // doesn't appear on screen and cannot be hit.
       return false;
@@ -2456,6 +2454,70 @@ class RenderRepaintBoundary extends RenderProxyBox {
 
   @override
   bool get isRepaintBoundary => true;
+
+  /// Capture an image of the current state of this render object and its
+  /// children.
+  ///
+  /// The returned [ui.Image] has uncompressed raw RGBA bytes in the dimensions
+  /// of the render object, multiplied by the [pixelRatio].
+  ///
+  /// To use [toImage], the render object must have gone through the paint phase
+  /// (i.e. [debugNeedsPaint] must be false).
+  ///
+  /// The [pixelRatio] describes the scale between the logical pixels and the
+  /// size of the output image. It is independent of the
+  /// [window.devicePixelRatio] for the device, so specifying 1.0 (the default)
+  /// will give you a 1:1 mapping between logical pixels and the output pixels
+  /// in the image.
+  ///
+  /// ## Sample code
+  ///
+  /// The following is an example of how to go from a `GlobalKey` on a
+  /// `RepaintBoundary` to a PNG:
+  ///
+  /// ```dart
+  /// class PngHome extends StatefulWidget {
+  ///   PngHome({Key key}) : super(key: key);
+  ///
+  ///   @override
+  ///   _PngHomeState createState() => new _PngHomeState();
+  /// }
+  ///
+  /// class _PngHomeState extends State<PngHome> {
+  ///   GlobalKey globalKey = new GlobalKey();
+  ///
+  ///   Future<void> _capturePng() async {
+  ///     RenderRepaintBoundary boundary = globalKey.currentContext.findRenderObject();
+  ///     ui.Image image = await boundary.toImage();
+  ///     ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+  ///     Uint8List pngBytes = byteData.buffer.asUint8List();
+  ///     print(pngBytes);
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return RepaintBoundary(
+  ///       key: globalKey,
+  ///       child: Center(
+  ///         child: FlatButton(
+  ///           child: Text('Hello World', textDirection: TextDirection.ltr),
+  ///           onPressed: _capturePng,
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [OffsetLayer.toImage] for a similar API at the layer level.
+  ///  * [dart:ui.Scene.toImage] for more information about the image returned.
+  Future<ui.Image> toImage({double pixelRatio: 1.0}) {
+    assert(!debugNeedsPaint);
+    return layer.toImage(size, pixelRatio: pixelRatio);
+  }
+
 
   /// The number of times that this render object repainted at the same time as
   /// its parent. Repaint boundaries are only useful when the parent and child
@@ -3023,6 +3085,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
+    bool scopesRoute,
+    bool namesRoute,
+    bool hidden,
     String label,
     String value,
     String increasedValue,
@@ -3058,6 +3123,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _focused = focused,
        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _obscured = obscured,
+       _scopesRoute = scopesRoute,
+       _namesRoute = namesRoute,
+       _hidden = hidden,
        _label = label,
        _value = value,
        _increasedValue = increasedValue,
@@ -3214,6 +3282,37 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (obscured == value)
       return;
     _obscured = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.scopesRoute] semantic to the give value.
+  bool get scopesRoute => _scopesRoute;
+  bool _scopesRoute;
+  set scopesRoute(bool value) {
+    if (scopesRoute == value)
+      return;
+    _scopesRoute = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.namesRoute] semantic to the give value.
+  bool get namesRoute => _namesRoute;
+  bool _namesRoute;
+  set namesRoute(bool value) {
+    if (_namesRoute == value)
+      return;
+    _namesRoute = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isHidden] semantic to the given
+  /// value.
+  bool get hidden => _hidden;
+  bool _hidden;
+  set hidden(bool value) {
+    if (hidden == value)
+      return;
+    _hidden = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3637,6 +3736,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
+    assert((scopesRoute == true && explicitChildNodes == true) || scopesRoute != true,
+      'explicitChildNodes must be set to true if scopes route is true');
 
     if (enabled != null)
       config.isEnabled = enabled;
@@ -3656,6 +3757,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup;
     if (obscured != null)
       config.isObscured = obscured;
+    if (hidden != null)
+      config.isHidden = hidden;
     if (label != null)
       config.label = label;
     if (value != null)
@@ -3666,6 +3769,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.decreasedValue = decreasedValue;
     if (hint != null)
       config.hint = hint;
+    if (scopesRoute != null)
+      config.scopesRoute = scopesRoute;
+    if (namesRoute != null)
+      config.namesRoute = namesRoute;
     if (textDirection != null)
       config.textDirection = textDirection;
     if (sortKey != null)
@@ -4030,10 +4137,8 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
-    Matrix4 inverse;
-    try {
-      inverse = new Matrix4.inverted(getCurrentTransform());
-    } on ArgumentError {
+    final Matrix4 inverse = Matrix4.tryInvert(getCurrentTransform());
+    if (inverse == null) {
       // We cannot invert the effective transform. That means the child
       // doesn't appear on screen and cannot be hit.
       return false;

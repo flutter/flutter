@@ -9,6 +9,7 @@
 // Code is denoted by markdown ```dart / ``` markers.
 //
 // Only code in "## Sample code" or "### Sample code" sections is examined.
+// Subheadings can also be specified, as in "## Sample code: foo".
 //
 // There are several kinds of sample code you can specify:
 //
@@ -162,7 +163,10 @@ Future<Null> main() async {
             assert(block.isEmpty);
             startLine = new Line(file.path, lineNumber + 1, 3);
             inPreamble = true;
-          } else if (trimmedLine == '/// ## Sample code' || trimmedLine == '/// ### Sample code') {
+          } else if (trimmedLine == '/// ## Sample code' ||
+                     trimmedLine.startsWith('/// ## Sample code:') ||
+                     trimmedLine == '/// ### Sample code' ||
+                     trimmedLine.startsWith('/// ### Sample code:')) {
             inSampleSection = true;
             foundDart = false;
             sampleCodeSections += 1;
@@ -238,8 +242,16 @@ dependencies:
           throw 'failed to parse error message: $error';
         }
         final String column = error.substring(colon2 + kColon.length, bullet2);
+        // ignore: deprecated_member_use
         final int lineNumber = int.parse(line, radix: 10, onError: (String source) => throw 'failed to parse error message: $error');
+        // ignore: deprecated_member_use
         final int columnNumber = int.parse(column, radix: 10, onError: (String source) => throw 'failed to parse error message: $error');
+        if (lineNumber == null) {
+          throw 'failed to parse error message: $error';
+        }
+        if (columnNumber == null) {
+          throw 'failed to parse error message: $error';
+        }
         if (lineNumber < 1 || lineNumber > lines.length) {
           keepMain = true;
           throw 'failed to parse error message (read line number as $lineNumber; total number of lines is ${lines.length}): $error';

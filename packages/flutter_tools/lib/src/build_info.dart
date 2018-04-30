@@ -157,6 +157,7 @@ enum TargetPlatform {
   linux_x64,
   windows_x64,
   fuchsia,
+  tester,
 }
 
 String getNameForTargetPlatform(TargetPlatform platform) {
@@ -179,6 +180,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'windows-x64';
     case TargetPlatform.fuchsia:
       return 'fuchsia';
+    case TargetPlatform.tester:
+      return 'flutter-tester';
   }
   assert(false);
   return null;

@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:test/test.dart';
 
 import 'package:flutter_tools/src/base/port_scanner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 
+import 'src/common.dart';
+import 'src/context.dart';
+
 void main() {
   group('VMService', () {
-    test('fails connection eagerly in the connect() method', () async {
+    testUsingContext('fails connection eagerly in the connect() method', () async {
       final int port = await const HostPortScanner().findAvailablePort();
       expect(
         VMService.connect(Uri.parse('http://localhost:$port')),
-        throwsA(const isInstanceOf<WebSocketChannelException>()),
+        throwsToolExit(),
       );
     });
   });

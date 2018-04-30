@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/painting.dart';
@@ -37,6 +38,11 @@ class FakeImage implements Image {
 
   @override
   void dispose() {}
+
+  @override
+  Future<ByteData> toByteData({ImageByteFormat format}) async {
+    throw new UnsupportedError('Cannot encode test image');
+  }
 }
 
 class MockCodec implements Codec {

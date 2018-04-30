@@ -626,7 +626,6 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
   Axis get constrainedAxis => _constrainedAxis;
   Axis _constrainedAxis;
   set constrainedAxis(Axis value) {
-    assert(value != null);
     if (_constrainedAxis == value)
       return;
     _constrainedAxis = value;

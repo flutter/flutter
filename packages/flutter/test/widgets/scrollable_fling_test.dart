@@ -46,9 +46,10 @@ void main() {
 
     await pumpTest(tester, TargetPlatform.iOS);
     await tester.fling(find.byType(ListView), const Offset(0.0, -dragOffset), 1000.0);
-    expect(getCurrentOffset(), dragOffset);
+    // Scroll starts ease into the scroll on iOS.
+    expect(getCurrentOffset(), moreOrLessEquals(210.71026666666666));
     await tester.pump(); // trigger fling
-    expect(getCurrentOffset(), dragOffset);
+    expect(getCurrentOffset(), moreOrLessEquals(210.71026666666666));
     await tester.pump(const Duration(seconds: 5));
     final double result2 = getCurrentOffset();
 

@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart' as test_package;
+import 'package:test/src/frontend/async_matcher.dart' show AsyncMatcher;
 
 const List<Widget> fooBarTexts = const <Text>[
   const Text('foo', textDirection: TextDirection.ltr),
@@ -12,6 +17,36 @@ const List<Widget> fooBarTexts = const <Text>[
 ];
 
 void main() {
+  group('expectLater', () {
+    testWidgets('completes when matcher completes', (WidgetTester tester) async {
+      final Completer<void> completer = new Completer<void>();
+      final Future<Null> future = expectLater(null, new FakeMatcher(completer));
+      String value;
+      future.then((void _) {
+        value = '123';
+      });
+      test_package.expect(value, isNull);
+      completer.complete();
+      test_package.expect(value, isNull);
+      await future;
+      await tester.pump();
+      test_package.expect(value, '123');
+    });
+
+    testWidgets('Prevents re-entrant calls', (WidgetTester tester) async {
+      final Completer<void> completer = new Completer<void>();
+      final Future<Null> future = expectLater(null, new FakeMatcher(completer));
+      try {
+        expectLater(null, new FakeMatcher(completer));
+        fail('FlutterError expected but not thrown');
+      } on FlutterError catch (error) {
+        completer.complete();
+        await future;
+        expect(error.message, contains('Guarded function conflict'));
+      }
+    });
+  });
+
   group('findsOneWidget', () {
     testWidgets('finds exactly one widget', (WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
@@ -417,4 +452,63 @@ void main() {
     controller.forward();
     expect(await tester.pumpAndSettle(const Duration(milliseconds: 300)), 5); // 0, 300, 600, 900, 1200ms
   });
+
+  group('runAsync', () {
+    testWidgets('works with no async calls', (WidgetTester tester) async {
+      String value;
+      await tester.runAsync(() async {
+        value = '123';
+      });
+      expect(value, '123');
+    });
+
+    testWidgets('works with real async calls', (WidgetTester tester) async {
+      final StringBuffer buf = new StringBuffer('1');
+      await tester.runAsync(() async {
+        buf.write('2');
+        await Directory.current.stat();
+        buf.write('3');
+      });
+      buf.write('4');
+      expect(buf.toString(), '1234');
+    });
+
+    testWidgets('propagates return values', (WidgetTester tester) async {
+      final String value = await tester.runAsync<String>(() async {
+        return '123';
+      });
+      expect(value, '123');
+    });
+
+    testWidgets('reports errors via framework', (WidgetTester tester) async {
+      final String value = await tester.runAsync<String>(() async {
+        throw new ArgumentError();
+      });
+      expect(value, isNull);
+      expect(tester.takeException(), isArgumentError);
+    });
+
+    testWidgets('disallows re-entry', (WidgetTester tester) async {
+      final Completer<void> completer = new Completer<void>();
+      tester.runAsync<void>(() => completer.future);
+      expect(() => tester.runAsync(() async {}), throwsA(const isInstanceOf<TestFailure>()));
+      completer.complete();
+    });
+  });
+}
+
+class FakeMatcher extends AsyncMatcher {
+  FakeMatcher(this.completer);
+
+  final Completer<void> completer;
+
+  @override
+  Future<String> matchAsync(dynamic object) {
+    return completer.future.then<String>((void _) {
+      return object?.toString();
+    });
+  }
+
+  @override
+  Description describe(Description description) => description.add('--fake--');
 }

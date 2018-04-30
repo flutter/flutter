@@ -34,5 +34,9 @@
   "viewLicensesButtonLabel": "VER LICENÇAS",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
-  "modalBarrierDismissLabel": "Ignorar"
+  "modalBarrierDismissLabel": "Ignorar",
+  "drawerLabel": "Menu de navegação",
+  "popupMenuLabel": "Menu pop-up",
+  "dialogLabel": "Caixa de diálogo",
+  "alertDialogLabel": "Alerta"
 }

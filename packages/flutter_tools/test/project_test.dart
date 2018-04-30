@@ -23,11 +23,11 @@ void main() {
         project.ensureReadyForPlatformSpecificTooling();
         expect(project.directory.existsSync(), isFalse);
       });
-      testInMemory('does nothing in plugin root project', () async {
+      testInMemory('does nothing in plugin or package root project', () async {
         final FlutterProject project = aPluginProject();
         project.ensureReadyForPlatformSpecificTooling();
-        expect(project.example.ios.directory.childFile('Runner/GeneratedPluginRegistrant.h').existsSync(), isFalse);
-        expect(project.example.ios.directory.childFile('Flutter/Generated.xcconfig').existsSync(), isFalse);
+        expect(project.ios.directory.childFile('Runner/GeneratedPluginRegistrant.h').existsSync(), isFalse);
+        expect(project.ios.directory.childFile('Flutter/Generated.xcconfig').existsSync(), isFalse);
       });
       testInMemory('injects plugins', () async {
         final FlutterProject project = aProjectWithIos();

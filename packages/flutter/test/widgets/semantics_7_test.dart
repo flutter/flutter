@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlag;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -56,7 +54,6 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
-            nextNodeId: 4,
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: label,
             rect: TestSemantics.fullScreen,
@@ -64,7 +61,6 @@ void main() {
           // IDs 2 and 3 are used up by the nodes that get merged in
           new TestSemantics.rootChild(
             id: 4,
-            previousNodeId: 1,
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: label,
             rect: TestSemantics.fullScreen,
@@ -114,7 +110,6 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             id: 1,
-            nextNodeId: 4,
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: label,
             rect: TestSemantics.fullScreen,
@@ -122,7 +117,6 @@ void main() {
           // IDs 2 and 3 are used up by the nodes that get merged in
           new TestSemantics.rootChild(
             id: 4,
-            previousNodeId: 1,
             flags: SemanticsFlag.hasCheckedState.index | SemanticsFlag.isChecked.index,
             label: label,
             rect: TestSemantics.fullScreen,
