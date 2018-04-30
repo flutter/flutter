@@ -33,46 +33,25 @@ const String cocoaPodsUpgradeInstructions = '''
 
 CocoaPods get cocoaPods => context[CocoaPods];
 
-/// Result of evaluating the CocoaPods installation.
-enum CocoaPodsStatus {
-  /// iOS plugins will not work, installation required.
-  notInstalled,
-  /// iOS plugins will not work, upgrade required.
-  belowMinimumVersion,
-  /// iOS plugins may not work in certain situations (Swift, static libraries),
-  /// upgrade recommended.
-  belowRecommendedVersion,
-  /// Everything should be fine.
-  recommended,
-}
-
 class CocoaPods {
-  Future<String> _versionText;
+  const CocoaPods();
 
+  Future<bool> get hasCocoaPods => exitsHappyAsync(<String>['pod', '--version']);
+
+  // TODO(mravn): Insist on 1.5.0 once build bots have that installed.
+  // Earlier versions do not work with Swift and static libraries.
   String get cocoaPodsMinimumVersion => '1.0.0';
-  String get cocoaPodsRecommendedVersion => '1.5.0';
 
-  Future<String> get cocoaPodsVersionText {
-    _versionText ??= runAsync(<String>['pod', '--version']).then<String>((RunResult result) {
-      return result.exitCode == 0 ? result.stdout.trim() : null;
-    });
-    return _versionText;
-  }
+  Future<String> get cocoaPodsVersionText async => (await runAsync(<String>['pod', '--version'])).processResult.stdout.trim();
 
-  Future<CocoaPodsStatus> get evaluateCocoaPodsInstallation async {
-    final String versionText = await cocoaPodsVersionText;
-    if (versionText == null)
-      return CocoaPodsStatus.notInstalled;
+  Future<bool> get isCocoaPodsInstalledAndMeetsVersionCheck async {
+    if (!await hasCocoaPods)
+      return false;
     try {
-      final Version installedVersion = new Version.parse(versionText);
-      if (installedVersion < new Version.parse(cocoaPodsMinimumVersion))
-        return CocoaPodsStatus.belowMinimumVersion;
-      else if (installedVersion < new Version.parse(cocoaPodsRecommendedVersion))
-        return CocoaPodsStatus.belowRecommendedVersion;
-      else
-        return CocoaPodsStatus.recommended;
+      final Version installedVersion = new Version.parse(await cocoaPodsVersionText);
+      return installedVersion >= new Version.parse(cocoaPodsMinimumVersion);
     } on FormatException {
-      return CocoaPodsStatus.notInstalled;
+      return false;
     }
   }
 
@@ -98,37 +77,16 @@ class CocoaPods {
 
   /// Make sure the CocoaPods tools are in the right states.
   Future<bool> _checkPodCondition() async {
-    final CocoaPodsStatus installation = await evaluateCocoaPodsInstallation;
-    switch (installation) {
-      case CocoaPodsStatus.notInstalled:
-        printError(
-          'Warning: CocoaPods not installed. Skipping pod install.\n'
-          '$noCocoaPodsConsequence\n'
-          'To install:\n'
-          '$cocoaPodsInstallInstructions\n',
-          emphasis: true,
-        );
-        return false;
-      case CocoaPodsStatus.belowMinimumVersion:
-        printError(
-          'Warning: CocoaPods minimum required version $cocoaPodsMinimumVersion or greater not installed. Skipping pod install.\n'
-          '$noCocoaPodsConsequence\n'
-          'To upgrade:\n'
-          '$cocoaPodsUpgradeInstructions\n',
-          emphasis: true,
-        );
-        return false;
-      case CocoaPodsStatus.belowRecommendedVersion:
-        printError(
-          'Warning: CocoaPods recommended version $cocoaPodsRecommendedVersion or greater not installed.\n'
-          'Pods handling may fail on some projects involving plugins.\n'
-          'To upgrade:\n'
-          '$cocoaPodsUpgradeInstructions\n',
-          emphasis: true,
-        );
-        break;
-      default:
-        break;
+    if (!await isCocoaPodsInstalledAndMeetsVersionCheck) {
+      final String minimumVersion = cocoaPodsMinimumVersion;
+      printError(
+        'Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.\n'
+        '$noCocoaPodsConsequence\n'
+        'To install:\n'
+        '$cocoaPodsInstallInstructions\n',
+        emphasis: true,
+      );
+      return false;
     }
     if (!await isCocoaPodsInitialized) {
       printError(
@@ -196,19 +154,18 @@ class CocoaPods {
   // Check if you need to run pod install.
   // The pod install will run if any of below is true.
   // 1. The flutter.framework has changed (debug/release/profile)
-  // 2. The Podfile.lock doesn't exist or is older than Podfile
+  // 2. The podfile.lock doesn't exist
   // 3. The Pods/Manifest.lock doesn't exist (It is deleted when plugins change)
-  // 4. The Podfile.lock doesn't match Pods/Manifest.lock.
+  // 4. The podfile.lock doesn't match Pods/Manifest.lock.
   bool _shouldRunPodInstall(Directory appIosDirectory, bool flutterPodChanged) {
     if (flutterPodChanged)
       return true;
-    final File podfileFile = appIosDirectory.childFile('Podfile');
+    // Check if podfile.lock and Pods/Manifest.lock exist and match.
     final File podfileLockFile = appIosDirectory.childFile('Podfile.lock');
     final File manifestLockFile =
         appIosDirectory.childFile(fs.path.join('Pods', 'Manifest.lock'));
     return !podfileLockFile.existsSync()
         || !manifestLockFile.existsSync()
-        || podfileLockFile.statSync().modified.isBefore(podfileFile.statSync().modified)
         || podfileLockFile.readAsStringSync() != manifestLockFile.readAsStringSync();
   }
 
