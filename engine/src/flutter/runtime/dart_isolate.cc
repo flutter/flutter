@@ -661,6 +661,8 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
                                    ->GetSnapshotPointer(),  //
                                embedder_isolate->GetIsolateSnapshot()
                                    ->GetInstructionsIfPresent(),  //
+                               nullptr,                           //
+                               nullptr,                           //
                                flags,                             //
                                embedder_isolate.get(),            //
                                error                              //
