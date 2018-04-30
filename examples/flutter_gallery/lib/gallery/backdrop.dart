@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
 const double _kFrontHeadingHeight = 32.0; // front layer beveled rectangle
-const double _kFrontClosedHeight = 72.0; // front layer height when closed
+const double _kFrontClosedHeight = 92.0; // front layer height when closed
 const double _kBackAppBarHeight = 56.0; // back layer (options) appbar height
 
 // The size of the front layer heading's left and right beveled corners.
@@ -107,14 +107,22 @@ class _CrossFadeTransition extends AnimatedWidget {
           ignoring: opacity1 < 1.0,
           child: new Opacity(
             opacity: opacity1,
-            child: child1,
+            child: new Semantics(
+              scopesRoute: true,
+              explicitChildNodes: true,
+              child: child1,
+            ),
           ),
         ),
         new IgnorePointer(
-          ignoring: opacity2 <1.0,
+          ignoring: opacity2 < 1.0,
           child: new Opacity(
             opacity: opacity2,
-            child: child0,
+            child: new Semantics(
+              scopesRoute: true,
+              explicitChildNodes: true,
+              child: child0,
+            ),
           ),
         ),
       ],
@@ -196,6 +204,7 @@ class Backdrop extends StatefulWidget {
 class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin {
   final GlobalKey _backdropKey = new GlobalKey(debugLabel: 'Backdrop');
   AnimationController _controller;
+  Animation<double> _frontOpacity;
 
   @override
   void initState() {
@@ -205,6 +214,14 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
       value: 1.0,
       vsync: this,
     );
+
+    _frontOpacity =
+      new Tween<double>(begin: 0.2, end: 1.0).animate(
+        new CurvedAnimation(
+          parent: _controller,
+          curve: const Interval(0.0, 0.4, curve: Curves.easeInOut),
+        ),
+      );
   }
 
   @override
@@ -261,8 +278,8 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               title: new _CrossFadeTransition(
                 progress: _controller,
                 alignment: AlignmentDirectional.centerStart,
-                child0: widget.frontTitle,
-                child1: widget.backTitle,
+                child0: new Semantics(namesRoute: true, child: widget.frontTitle),
+                child1: new Semantics(namesRoute: true, child: widget.backTitle),
               ),
               trailing: new IconButton(
                 onPressed: _toggleFrontLayer,
@@ -302,7 +319,10 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
             child: new _IgnorePointerWhileStatusIsNot(
               AnimationStatus.completed,
               controller: _controller,
-              child: widget.frontLayer,
+              child: new FadeTransition(
+                opacity: _frontOpacity,
+                child: widget.frontLayer,
+              ),
             ),
           ),
         ),

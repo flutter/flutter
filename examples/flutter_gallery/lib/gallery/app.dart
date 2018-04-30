@@ -45,30 +45,10 @@ class _GalleryAppState extends State<GalleryApp> {
     // For a different example of how to set up an application routing table
     // using named routes, consider the example in the Navigator class documentation:
     // https://docs.flutter.io/flutter/widgets/Navigator-class.html
-
     return new Map<String, WidgetBuilder>.fromIterable(
       kAllGalleryDemos,
       key: (dynamic demo) => '${demo.routeName}',
       value: (dynamic demo) => demo.buildRoute,
-    )..addAll(
-      new Map<String, WidgetBuilder>.fromIterable(
-        kAllGalleryDemoCategories,
-        key: (dynamic category) => '/${category.name}',
-        value: (dynamic category) {
-          return (BuildContext context) {
-            return new DemosPage(
-              category: category,
-              optionsPage: new GalleryOptionsPage(
-                options: _options,
-                onOptionsChanged: _handleOptionsChanged,
-                onSendFeedback: widget.onSendFeedback ?? () {
-                  launch('https://github.com/flutter/flutter/issues/new', forceSafariVC: false);
-                },
-              ),
-            );
-          };
-        },
-      ),
     );
   }
 
@@ -131,7 +111,7 @@ class _GalleryAppState extends State<GalleryApp> {
         options: _options,
         onOptionsChanged: _handleOptionsChanged,
         onSendFeedback: widget.onSendFeedback ?? () {
-          launch('https://github.com/flutter/flutter/issues/new');
+          launch('https://github.com/flutter/flutter/issues/new', forceSafariVC: false);
         },
       ),
     );
