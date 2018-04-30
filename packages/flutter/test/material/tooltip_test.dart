@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/services.dart';
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -603,6 +604,49 @@ void main() {
     expect(feedback.hapticCount, 1);
 
     feedback.dispose();
+  });
+
+  testWidgets('has semantic events', (WidgetTester tester) async {
+    final List<dynamic> semanticEvents = <dynamic>[];
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+      semanticEvents.add(message);
+    });
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Center(
+          child: new Tooltip(
+            message: 'Foo',
+            child: new Container(
+              width: 100.0,
+              height: 100.0,
+              color: Colors.green[500],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.longPress(find.byType(Tooltip));
+    final RenderObject object = tester.firstRenderObject(find.byType(Tooltip));
+
+    expect(semanticEvents, unorderedEquals(<dynamic>[
+      <String, dynamic>{
+        'type': 'longPress',
+        'nodeId': unsafeSemantics(object).id,
+        'data': <String, dynamic>{},
+      },
+      <String, dynamic>{
+        'type': 'tooltip',
+        'data': <String, dynamic>{
+          'message': 'Foo',
+        },
+      },
+    ]));
+
+    semantics.dispose();
+    SystemChannels.accessibility.setMockMessageHandler(null);
   });
 
   testWidgets('Semantics included', (WidgetTester tester) async {

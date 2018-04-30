@@ -90,8 +90,7 @@ class Feedback {
   static Future<Null> forTap(BuildContext context) async {
     final RenderObject object = context.findRenderObject();
     final SemanticsNode semantics = unsafeSemantics(object);
-    assert(semantics != null);
-    semantics.sendEvent(const TapSemanticEvent());
+    semantics?.sendEvent(const TapSemanticEvent());
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -132,8 +131,7 @@ class Feedback {
   static Future<Null> forLongPress(BuildContext context) {
     final RenderObject object = context.findRenderObject();
     final SemanticsNode semantics = unsafeSemantics(object);
-    assert(semantics != null);
-    semantics.sendEvent(const LongPressSemanticsEvent());
+    semantics?.sendEvent(const LongPressSemanticsEvent());
     switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
