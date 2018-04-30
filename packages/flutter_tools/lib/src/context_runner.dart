@@ -52,7 +52,7 @@ Future<T> runInContext<T>(
       BotDetector: () => const BotDetector(),
       Cache: () => new Cache(),
       Clock: () => const Clock(),
-      CocoaPods: () => new CocoaPods(),
+      CocoaPods: () => const CocoaPods(),
       Config: () => new Config(),
       DevFSConfig: () => new DevFSConfig(),
       DeviceManager: () => new DeviceManager(),

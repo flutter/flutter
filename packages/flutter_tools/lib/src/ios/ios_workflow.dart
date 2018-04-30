@@ -171,9 +171,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         }
       }
 
-      final CocoaPodsStatus cocoaPodsStatus = await cocoaPods.evaluateCocoaPodsInstallation;
-
-      if (cocoaPodsStatus == CocoaPodsStatus.recommended) {
+      if (await cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck) {
         if (await cocoaPods.isCocoaPodsInitialized) {
           messages.add(new ValidationMessage('CocoaPods version ${await cocoaPods.cocoaPodsVersionText}'));
         } else {
@@ -188,7 +186,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         }
       } else {
         brewStatus = ValidationType.partial;
-        if (cocoaPodsStatus == CocoaPodsStatus.notInstalled) {
+        if (!await cocoaPods.hasCocoaPods) {
           messages.add(new ValidationMessage.error(
             'CocoaPods not installed.\n'
             '$noCocoaPodsConsequence\n'
@@ -197,7 +195,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
           ));
         } else {
           messages.add(new ValidationMessage.error(
-            'CocoaPods out of date (${cocoaPods.cocoaPodsRecommendedVersion} is recommended).\n'
+            'CocoaPods out of date ($cocoaPods.cocoaPodsMinimumVersion is required).\n'
             '$noCocoaPodsConsequence\n'
             'To upgrade:\n'
             '$cocoaPodsUpgradeInstructions'
